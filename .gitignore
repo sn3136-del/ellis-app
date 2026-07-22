@@ -1,0 +1,54 @@
+# === Secrets & credentials (NEVER commit) ===
+.env
+*.env
+!.env.example
+backend/.env
+**/application_default_credentials.json
+*.pem
+*.key
+resources/kimi.key
+secrets/
+.secrets/
+
+# === Private / personal data (NEVER commit) ===
+private_fixtures/
+**/private_fixtures/
+*.passport
+# NOTE: real passport fixtures live OUTSIDE the repo at ~/.ellis_private_fixtures
+
+# === Python ===
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+.mypy_cache/
+
+# === Databases / generated data ===
+*.db
+*.sqlite
+*.sqlite3
+
+# === Node / Electron build output ===
+node_modules/
+out/
+dist/
+release/
+*.dmg
+*.blockmap
+
+# === OS / editor ===
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# === Temp / OCR scratch ===
+tmp/
+*.tmp
+ocr_scratch/
+
+# Local Claude settings may contain embedded keys
+.claude/settings.local.json

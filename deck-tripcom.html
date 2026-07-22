@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ellis × Trip.com — Tourist Visa Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f8fc;
+    --bg-card: #ffffff;
+    --navy: #0f294d;
+    --ink: #0f294d;
+    --muted: #5a6b85;
+    --muted-2: #8592a6;
+    --line: #e3ebf5;
+    --blue: #287dfa;
+    --blue-dark: #1c66d9;
+    --blue-soft: #eef4ff;
+    --gold: #fcaf17;
+    --font: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  @page { size: 1280px 720px; margin: 0; }
+  html, body {
+    background: var(--bg); color: var(--ink);
+    font-family: var(--font); -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .slide {
+    width: 1280px; height: 720px; margin: 0 auto;
+    background:
+      radial-gradient(900px 420px at 100% -10%, rgba(40,125,250,0.10), transparent 55%),
+      radial-gradient(700px 380px at -5% 110%, rgba(252,175,23,0.08), transparent 50%),
+      var(--bg);
+    padding: 36px 48px 24px;
+    display: flex; flex-direction: column; position: relative;
+    page-break-after: always; overflow: hidden;
+  }
+  .slide:last-child { page-break-after: auto; }
+  .slide--cover {
+    background:
+      radial-gradient(1000px 520px at 85% 0%, rgba(40,125,250,0.16), transparent 55%),
+      radial-gradient(700px 400px at 0% 100%, rgba(15,41,77,0.06), transparent 50%),
+      #fff;
+  }
+  .slide--shot {
+    padding: 12px 20px 10px;
+    background: #f6f8fb !important; /* match Trip.com portal canvas */
+  }
+
+  .logo-trip {
+    position: absolute; top: 36px; right: 48px;
+  }
+  .logo-trip img { height: 32px; width: auto; }
+
+  .kicker {
+    font-size: 12px; font-weight: 700; letter-spacing: 1.6px;
+    text-transform: uppercase; color: var(--blue); margin-bottom: 10px;
+  }
+  .title {
+    font-size: 42px; font-weight: 800; line-height: 1.1;
+    letter-spacing: -1px; color: var(--navy); margin-bottom: 12px; max-width: 980px;
+  }
+  .title em { font-style: normal; color: var(--blue); }
+  .lead {
+    font-size: 17px; line-height: 1.55; color: var(--muted);
+    max-width: 820px; margin-bottom: 18px; font-weight: 500;
+  }
+
+  .foot {
+    margin-top: auto; padding-top: 10px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: flex-end; gap: 24px;
+    font-size: 11px; color: var(--muted-2);
+  }
+  .brand { font-weight: 700; color: var(--navy); letter-spacing: 0.2px; }
+  .cite {
+    font-size: 10.5px; line-height: 1.45; color: var(--muted-2);
+    max-width: 980px; flex: 1; text-align: left;
+  }
+  .cite a { color: var(--blue); font-weight: 600; word-break: break-all; }
+  .cite b { color: var(--muted); font-weight: 700; }
+
+  .cover-center { flex: 1; display: flex; flex-direction: column; justify-content: center; padding-bottom: 20px; padding-right: 200px; }
+  .cover-center .title { font-size: 56px; margin-bottom: 18px; max-width: 900px; }
+  .cover-center .lead { font-size: 19px; max-width: 760px; }
+
+  /* Full-page step screenshots — edge-to-edge, no white card around image */
+  .shot-head {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-shrink: 0;
+  }
+  .shot-n {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--blue); color: #fff;
+    display: grid; place-items: center; font-size: 13px; font-weight: 800;
+    flex-shrink: 0;
+  }
+  .shot-title {
+    font-size: 22px; font-weight: 800; color: var(--navy); letter-spacing: -0.4px;
+  }
+  .shot-title span { color: var(--muted-2); font-weight: 700; font-size: 11px; margin-left: 10px; letter-spacing: 1px; text-transform: uppercase; }
+  .shot-wrap {
+    flex: 1; min-height: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .shot-img {
+    display: block;
+    /* Exact source aspect (1024×635) → no crop, no letterbox mat */
+    width: 966px;
+    height: 599px;
+    object-fit: fill;
+    image-rendering: auto;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background: transparent;
+    border: none; border-radius: 0; box-shadow: none;
+  }
+  .shot-cap {
+    margin-top: 8px; font-size: 14px; font-weight: 800; color: var(--navy); line-height: 1.3;
+    flex-shrink: 0;
+  }
+
+  .bullets { list-style: none; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+  .bullets li {
+    font-size: 16px; line-height: 1.35; color: var(--navy); font-weight: 700;
+    padding: 14px 16px 14px 38px; position: relative;
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 14px;
+  }
+  .bullets li::before {
+    content: ""; position: absolute; left: 16px; top: 1.15em;
+    width: 8px; height: 8px; border-radius: 50%; background: var(--blue);
+  }
+  .bullets li span {
+    color: var(--muted); display: block; font-size: 13.5px; margin-top: 4px; font-weight: 500;
+  }
+
+  .quote {
+    border-left: 3px solid var(--blue); padding: 2px 0 2px 16px;
+    font-size: 17px; line-height: 1.45; color: var(--navy); margin: 0 0 16px; max-width: 980px;
+    font-weight: 600;
+  }
+  .quote strong { color: var(--blue); }
+
+  .roles {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 22px;
+    flex: 1; align-content: center; min-height: 0; margin: 8px 0;
+  }
+  .role {
+    border-radius: 22px; padding: 32px 30px 28px;
+    border: 1px solid var(--line); background: var(--bg-card);
+    box-shadow: 0 10px 32px rgba(15,41,77,0.07);
+    display: flex; flex-direction: column; gap: 14px; min-height: 340px;
+  }
+  .role--ellis {
+    background: linear-gradient(160deg, #1c66d9 0%, #0f294d 100%);
+    border-color: transparent; color: #fff;
+  }
+  .role__tag {
+    display: inline-flex; align-self: flex-start;
+    font-size: 11px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase;
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--blue-soft); color: var(--blue);
+  }
+  .role--ellis .role__tag { background: rgba(255,255,255,0.14); color: #fff; }
+  .role h3 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+  .role--ellis h3 { color: #fff; }
+  .role ul { list-style: none; display: flex; flex-direction: column; gap: 14px; margin-top: 6px; }
+  .role li {
+    font-size: 16px; line-height: 1.4; font-weight: 600; color: var(--muted);
+    padding-left: 22px; position: relative;
+  }
+  .role--ellis li { color: rgba(255,255,255,0.88); }
+  .role li::before {
+    content: ""; position: absolute; left: 0; top: 0.55em;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--blue);
+  }
+  .role--ellis li::before { background: var(--gold); }
+
+  .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 4px; }
+  .box {
+    border: 1px solid var(--line); border-radius: 16px; padding: 18px 18px 16px;
+    background: var(--bg-card); box-shadow: 0 6px 20px rgba(15,41,77,0.04);
+  }
+  .box h4 { font-size: 15px; font-weight: 800; margin-bottom: 8px; color: var(--navy); }
+  .box p, .box li { font-size: 13.5px; color: var(--muted); line-height: 1.45; font-weight: 500; }
+  .box ul { margin: 0; padding-left: 18px; }
+  .box li { margin-bottom: 6px; }
+  .box strong { color: var(--navy); font-weight: 700; }
+  .inkbox {
+    background: linear-gradient(155deg, #287dfa, #0f294d);
+    color: #fff; border-color: transparent;
+  }
+  .inkbox h4 { color: #fff; }
+  .inkbox p, .inkbox li { color: rgba(255,255,255,0.82); }
+
+  .qa { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; flex: 1; }
+  .q {
+    border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px;
+    background: var(--bg-card);
+  }
+  .q h4 { font-size: 15px; font-weight: 800; margin-bottom: 6px; color: var(--navy); }
+  .q p { font-size: 14px; color: var(--muted); line-height: 1.45; font-weight: 500; }
+
+  .note-lg {
+    font-size: 16px; color: var(--navy); margin-top: 12px; line-height: 1.45; font-weight: 600;
+  }
+
+  .chart {
+    margin-top: 12px; background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 14px 18px 12px;
+    box-shadow: 0 4px 16px rgba(15,41,77,0.04);
+  }
+  .chart__head {
+    display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px;
+  }
+  .chart__title { font-size: 11px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; color: var(--muted-2); }
+  .chart__sub { font-size: 11px; color: var(--muted-2); font-weight: 500; }
+  .bars { display: flex; flex-direction: column; gap: 9px; }
+  .bar {
+    display: grid; grid-template-columns: 110px 1fr 72px; gap: 10px; align-items: center;
+  }
+  .bar__l { font-size: 13px; font-weight: 700; color: var(--navy); }
+  .bar__track { height: 12px; background: #eef2f8; border-radius: 999px; overflow: hidden; }
+  .bar__fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--blue), #5aa0ff); }
+  .bar__fill--gold { background: linear-gradient(90deg, #e9a00e, var(--gold)); }
+  .bar__v { font-size: 13px; font-weight: 800; color: var(--navy); text-align: right; }
+
+  .moat-hero {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+  }
+  .moat-card {
+    max-width: 860px; width: 100%;
+    background: linear-gradient(155deg, #287dfa, #0f294d);
+    color: #fff; border-radius: 24px; padding: 40px 44px;
+    box-shadow: 0 16px 40px rgba(15,41,77,0.2);
+  }
+  .moat-card h3 { font-size: 28px; font-weight: 800; margin-bottom: 14px; letter-spacing: -0.4px; }
+  .moat-card p { font-size: 17px; line-height: 1.55; color: rgba(255,255,255,0.88); font-weight: 500; }
+  .moat-card p + p { margin-top: 14px; }
+</style>
+</head>
+<body>
+<div class="deck">
+
+  <!-- 1 COVER -->
+  <section class="slide slide--cover">
+    <div class="logo-trip">
+      <img src="deck-assets/tripcom-logo.svg" alt="Trip.com">
+    </div>
+    <div class="cover-center">
+      <div class="title">Process tourist visa,<br><em>in one click.</em></div>
+      <p class="lead">Ellis is the first AI agent that processes tourist visas end-to-end — upload once, AI files and tracks everything, user only attends the in-person appointment when required, then receives the visa by email and in the Trip.com portal.</p>
+      <p class="lead" style="margin-bottom:0;font-size:16px;font-family:'Plus Jakarta Sans','Noto Sans SC',sans-serif;">Available in English and Mandarin (简体中文).</p>
+    </div>
+    <div class="foot">
+      <span class="brand">Ellis × Trip.com</span>
+      <span>Partnership brief · Tourist visa agent</span>
+    </div>
+  </section>
+
+  <!-- 2 STEP 1 -->
+  <section class="slide slide--shot">
+    <div class="shot-head">
+      <span class="shot-n">1</span>
+      <div class="shot-title">Welcome <span>Step 1</span></div>
+    </div>
+    <div class="shot-wrap">
+      <img class="shot-img" src="deck-assets/deck-01-welcome.png" alt="Step 1 Welcome — Process your visa in one click" width="1024" height="635">
+    </div>
+    <p class="shot-cap">Trip.com home — “Process your visa, in one click.” 24/7 support always on.</p>
+    <div class="foot">
+      <span></span>
+      <span>Product · Step 1 of 3</span>
+    </div>
+  </section>
+
+  <!-- 3 STEP 2 -->
+  <section class="slide slide--shot">
+    <div class="shot-head">
+      <span class="shot-n">2</span>
+      <div class="shot-title">User information <span>Step 2</span></div>
+    </div>
+    <div class="shot-wrap">
+      <img class="shot-img" src="deck-assets/deck-02-userinfo.png" alt="Step 2 User information — China to Japan" width="1024" height="639">
+    </div>
+    <p class="shot-cap">Name, email, route, dates, documents — live China → Japan route check.</p>
+    <div class="foot">
+      <span></span>
+      <span>Product · Step 2 of 3</span>
+    </div>
+  </section>
+
+  <!-- 4 STEP 3 -->
+  <section class="slide slide--shot">
+    <div class="shot-head">
+      <span class="shot-n">3</span>
+      <div class="shot-title">Confirmation <span>Step 3</span></div>
+    </div>
+    <div class="shot-wrap">
+      <img class="shot-img" src="deck-assets/deck-03-confirmation.png" alt="Step 3 Confirmation — Visa complete" width="1024" height="633">
+    </div>
+    <p class="shot-cap">Agent finishes the file. Visa confirmation in-portal — and by email.</p>
+    <div class="foot">
+      <span></span>
+      <span>Product · Step 3 of 3</span>
+    </div>
+  </section>
+
+  <!-- 5 CHINA TO JAPAN -->
+  <section class="slide">
+    <div class="kicker">Sample corridor</div>
+    <div class="title" style="font-size:34px;margin-bottom:12px;">China → Japan tourist visa</div>
+    <p class="quote">In 2025 Japan drew about <strong>9.1 million</strong> Chinese visitors (+30% YoY) — one of the largest single-country outbound corridors from mainland China.<sup>1</sup></p>
+    <ul class="bullets">
+      <li>Email notifications at every key milestone
+        <span>Submission, appointment (when required), and visa / Visit Japan Web QR delivery.</span>
+      </li>
+      <li>AI books the earliest appointment
+        <span>Instructions include location, date/time, and clear steps for the traveler.</span>
+      </li>
+      <li>AI processes the full file
+        <span>Documents → accredited Chinese travel agency / official channel → decision monitoring → delivery.<sup>2</sup></span>
+      </li>
+      <li>User effort collapses to three actions
+        <span>Upload → attend in-person only if needed → receive visa by email + Trip.com portal.</span>
+      </li>
+    </ul>
+    <div class="foot">
+      <div class="cite">
+        <b>1</b> JNTO / Nippon.com: <a href="https://www.nippon.com/en/japan-data/h02673/">nippon.com/en/japan-data/h02673</a>
+        · JNTO Dec 2025: <a href="https://www.jnto.go.jp/en/news/20260121.pdf">jnto.go.jp/en/news/20260121.pdf</a>
+        &nbsp;&nbsp;<b>2</b> MOFA China visa topics: <a href="https://www.mofa.go.jp/j_info/visit/visa/topics/china.html">mofa.go.jp/j_info/visit/visa/topics/china.html</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 VALUE -->
+  <section class="slide">
+    <div class="kicker">Value</div>
+    <div class="title" style="font-size:36px;margin-bottom:6px;">The AI saves the time.<br><em>Trip.com owns the experience.</em></div>
+    <div class="roles">
+      <div class="role role--ellis">
+        <span class="role__tag">Agent</span>
+        <h3>Ellis does</h3>
+        <ul>
+          <li>Document processing, portal submission, and form filing through the AI agent</li>
+          <li>Earliest appointment booking + traveler instructions</li>
+          <li>Status monitoring and visa / QR delivery by email</li>
+        </ul>
+      </div>
+      <div class="role">
+        <span class="role__tag">Traveler</span>
+        <h3>Traveler does</h3>
+        <ul>
+          <li>Upload passport &amp; trip details once</li>
+          <li>Attend the in-person embassy / VAC appointment only when required</li>
+          <li>Open email + Trip.com portal for the finished visa</li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot">
+      <span class="brand">Ellis</span>
+      <span>Time saved · agentic loop</span>
+    </div>
+  </section>
+
+  <!-- 7 KIMI K3 -->
+  <section class="slide">
+    <div class="kicker">Intelligence</div>
+    <div class="title" style="font-size:34px;">Powered by Kimi K3<br><em>— immigration-tailored.</em></div>
+    <p class="lead" style="margin-bottom:10px;font-size:15.5px;">Kimi K3 (Moonshot AI, China) released <strong>16 July 2026</strong> — a frontier open-weight model. Ellis runs a <strong>modified, immigration-specific</strong> profile with agent tools.<sup>3</sup></p>
+    <div class="cols2">
+      <div class="box">
+        <h4>Why Kimi K3 (not Fable 5)</h4>
+        <ul>
+          <li><strong>China-origin model</strong> — better jurisdiction fit and privacy for Chinese travelers</li>
+          <li><strong>Open / open-weight path</strong> — self-hostable; Moonshot need not see applicant files</li>
+          <li><strong>Cost</strong> — avoids expensive closed-API token burn at tourist volume</li>
+          <li><strong>Agent layer in Ellis</strong> — chatbots answer; Ellis files, books, and delivers</li>
+        </ul>
+      </div>
+      <div class="box inkbox">
+        <h4>Self-hosting = Trip.com control</h4>
+        <p>Applicant documents stay inside infrastructure controlled by Trip.com. Moonshot does not receive private case files. Only Trip.com holds traveler PII for the visa workflow.</p>
+      </div>
+    </div>
+    <p class="note-lg">Recent research has placed the K3 model above Fable 5 in performance. <a href="https://www.tomshardware.com/tech-industry/artificial-intelligence/moonshot-releases-2-8-trillion-parameter-kimi-k3">tomshardware.com/…/moonshot-releases-2-8-trillion-parameter-kimi-k3</a><sup>3</sup></p>
+    <div class="foot">
+      <div class="cite">
+        <b>3</b> Tom’s Hardware — Kimi K3 beats Claude Fable 5 on Frontend Code Arena: <a href="https://www.tomshardware.com/tech-industry/artificial-intelligence/moonshot-releases-2-8-trillion-parameter-kimi-k3">tomshardware.com/tech-industry/artificial-intelligence/moonshot-releases-2-8-trillion-parameter-kimi-k3</a>
+        · VentureBeat: <a href="https://venturebeat.com/technology/chinas-moonshot-ai-releases-kimi-k3-the-largest-open-source-model-ever-rivaling-top-u-s-systems">venturebeat.com/…/kimi-k3…</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 OBJECTIONS -->
+  <section class="slide">
+    <div class="kicker">Objections</div>
+    <div class="title" style="font-size:32px;margin-bottom:12px;">Why pay Ellis — not “just use Kimi”?</div>
+    <div class="qa">
+      <div class="q">
+        <h4>Why not use the public Kimi chatbot ourselves?</h4>
+        <p>Public chat lacks Ellis’s agentic visa pipeline — official-channel submission, earliest appointment booking, document pack assembly, monitoring, and email/portal delivery. Ellis makes “one click” real in the background.</p>
+      </div>
+      <div class="q">
+        <h4>Why not Fable 5 (Anthropic)?</h4>
+        <p>US-hosted frontier APIs raise cross-border privacy concerns for Chinese traveler documents, are token-expensive at scale, and still need an Ellis-class agent layer to file visas. Kimi’s open-weight path enables Trip.com-controlled hosting.</p>
+      </div>
+      <div class="q">
+        <h4>Why not OpenClaw alone?</h4>
+        <p>Generic agents are not designed for immigration workflows, forms, consular calendars, or destination-specific channels (e.g. Japan’s accredited-agency path for mainland China).<sup>2</sup> Ellis is purpose-built — and keeps data under Trip.com.</p>
+      </div>
+    </div>
+    <div class="foot">
+      <div class="cite">
+        <b>2</b> MOFA accredited-agency path (China): <a href="https://www.mofa.go.jp/j_info/visit/visa/topics/china.html">mofa.go.jp/j_info/visit/visa/topics/china.html</a>
+        · Embassy guidance: <a href="https://www.cn.emb-japan.go.jp/itpr_zh/visa_ippan.html">cn.emb-japan.go.jp/itpr_zh/visa_ippan.html</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 EDGE -->
+  <section class="slide">
+    <div class="kicker">Moat</div>
+    <div class="title" style="font-size:36px;">First of its kind.<br><em>An edge for Trip.com.</em></div>
+    <div class="moat-hero">
+      <div class="moat-card">
+        <h3>Category creation</h3>
+        <p>Ellis is the first AI built to process tourist visas agentically — not a chatbot bolted onto booking.</p>
+        <p>For Trip.com, that is a product wedge Booking.com does not have: visas that complete themselves after upload.</p>
+      </div>
+    </div>
+    <div class="foot">
+      <div class="cite">
+        <b>Product</b> Agentic one-click filing, emails, appointments, portal delivery, and Trip.com-controlled self-hosting are Ellis capabilities in the Trip.com portal build.
+      </div>
+      <span class="brand">Ellis</span>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

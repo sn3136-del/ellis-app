@@ -1,0 +1,50 @@
+import os
+import sys
+import tempfile
+
+# Fresh SQLite file per test session; import app AFTER setting DATABASE_URL.
+_DB_FD, _DB_PATH = tempfile.mkstemp(suffix=".db")
+os.environ["DATABASE_URL"] = f"sqlite:///{_DB_PATH}"
+os.environ["ELLIS_VAULT_PASSPHRASE"] = "test-passphrase"
+# Hermetic tests: force local fallbacks regardless of any real .env present, so
+# unit/e2e behavior is deterministic. Live-provider smoke tests are separate.
+for _k in ("MOONSHOT_API_KEY", "GOOGLE_CLOUD_PROJECT", "GOOGLE_DOCUMENT_AI_OCR_PROCESSOR_ID",
+           "BROWSERBASE_API_KEY", "STRIPE_SECRET_KEY", "CLERK_SECRET_KEY", "TEMPORAL_HOST"):
+    os.environ[_k] = ""
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+import pytest  # noqa: E402
+from app.db import create_all, SessionLocal  # noqa: E402
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _schema():
+    create_all()
+    yield
+
+
+@pytest.fixture
+def db():
+    s = SessionLocal()
+    try:
+        yield s
+    finally:
+        s.close()
+
+
+@pytest.fixture
+def client():
+    from fastapi.testclient import TestClient
+    from app.main import app
+    return TestClient(app)
+
+
+AUTH = {"Authorization": "Bearer dev-token", "X-Org-Id": "org1", "X-User-Id": "user1"}
+AUTH2 = {"Authorization": "Bearer dev-token", "X-Org-Id": "org2", "X-User-Id": "user2"}
+
+# A valid ICAO 9303 TD3 specimen (check digits correct).
+PASSPORT_MRZ = (
+    "P<UTOERIKSSON<<ANNA<MARIA<<<<<<<<<<<<<<<<<<<\n"
+    "L898902C36UTO7408122F1204159ZE184226B<<<<<10"
+)

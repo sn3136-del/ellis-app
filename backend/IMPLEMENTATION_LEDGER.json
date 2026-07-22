@@ -1,0 +1,74 @@
+{
+  "updated": "2026-07-22 checkpoint",
+  "resume": {
+    "how_to_continue": "Everything needed is in this repo + ledger + tests + commit history. Recreate venv: (cd backend && python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt). Real creds live ONLY in the git-ignored backend/.env (not committed) and host ADC at ~/.config/gcloud/application_default_credentials.json. Private passport fixtures live ONLY at ~/.ellis_private_fixtures (0600, outside repo).",
+    "next_implementation_task": "PHASE UI: wire Electron applicant screens to the backend using src/renderer/src/lib/visaBackend.js — start with the OCR-review screen (upload -> Document AI -> field review/approve).",
+    "next_file_to_modify": "src/renderer/src/screens/ (new VisaCaseScreens) OR src/renderer/src/lib/visaBackend.js to add any missing endpoints; backend endpoints already exist in backend/app/main.py.",
+    "next_command_to_run": "cd backend && . .venv/bin/activate && uvicorn app.main:app --reload   # then run the Electron app (npm run dev) and build the OCR-review screen against http://localhost:8000",
+    "verify_commands": [
+      "cd backend && . .venv/bin/activate && python -m pytest tests/test_unit.py tests/test_e2e.py tests/test_signature.py tests/test_discovery.py tests/test_tripcom.py tests/test_temporal.py -q",
+      "npm test",
+      "cd backend && . .venv/bin/activate && python -m pytest tests/test_live_providers.py -q   # needs backend/.env creds",
+      "cd backend && . .venv/bin/activate && ENABLE_PRIVATE_DOCUMENT_SMOKE_TESTS=true PRIVATE_PASSPORT_FIXTURE_US=~/.ellis_private_fixtures/fixture_us.jpg (+SG/SG_PDF/CN/CN_2/PDF) python -m pytest tests/test_private_passports.py -q"
+    ]
+  },
+  "test_status": {
+    "js_framework": {"suite": "node --test tests/portal/", "result": "26 passed"},
+    "backend_full": {"suite": "pytest test_unit+test_e2e+test_signature+test_discovery+test_tripcom+test_temporal", "result": "45 passed"},
+    "live_providers": {"suite": "pytest tests/test_live_providers.py", "result": "3 passed (kimi text, kimi vision, browserbase) — needs .env creds"},
+    "private_passport_smoke": {"suite": "pytest tests/test_private_passports.py (flag-gated)", "result": "all 6 fixtures via Document AI OCR+Form Parser; 6/6 MRZ checksum valid, high confidence"}
+  },
+  "providers": {
+    "kimi_k3":        {"status": "provider_tested",       "notes": "live text + vision; reasoning_content fallback + big token budget"},
+    "google_document_ai": {"status": "provider_tested",  "notes": "ADC via google-auth; OCR + Form Parser HTTP 200; real passport MRZ checksum VALID; quota project quiet-terminal-503221-i3; processors in project 712137185724"},
+    "browserbase":    {"status": "provider_tested",       "notes": "session create/release live; live_view_url wired"},
+    "postgres":       {"status": "integration_tested",    "notes": "compose up healthy; schema applied clean; full workflow + restart durability on Postgres; BigInteger fix for epoch-ms"},
+    "docker":         {"status": "verified",              "notes": "image builds 308MB; containerized API health/auth/create OK; ADC mounted read-only into api+worker"},
+    "stripe_issuing": {"status": "implemented_untested",  "notes": "applicant payment window is the working default"},
+    "clerk":          {"status": "implemented_untested",  "notes": "dev-token auth active; verify_clerk stubbed"},
+    "temporal":       {"status": "not_started",           "notes": "DB-persisted durable runner used + proven; Temporal cluster not wired"}
+  },
+  "ocr_hierarchy": {
+    "tier1_document_ai": "primary, provider_tested on consented passport",
+    "tier2_kimi_vision": "flag-gated ENABLE_KIMI_OCR_FALLBACK, image-only, records fallback, provider_tested reachability",
+    "tier3_local_mrz": "deterministic ICAO parse+checksum, unit_tested",
+    "conflict_policy": "checksum-valid deterministic MRZ preferred; disagreements -> applicant review (cross_document_conflicts)"
+  },
+  "features": {
+    "case_api": "unit_tested", "document_upload_ocr": "provider_tested", "applicant_review_approve": "unit_tested",
+    "durable_workflow": "integration_tested", "worker_restart_durability": "integration_tested",
+    "kimi_tool_security": "unit_tested", "tenant_isolation": "unit_tested", "secret_redaction": "unit_tested",
+    "appointment_engine": "unit_tested", "portal_adapters_mockland_vietnam": "unit_tested",
+    "applicant_payment_window": "unit_tested (descriptor)", "ocr_health_diagnostic": "provider_tested"
+  },
+  "private_fixtures": {
+    "location": "~/.ellis_private_fixtures (0700, files 0600, OUTSIDE repo, gitignored, dockerignored)",
+    "recorded": "sha256 only; no personal values anywhere",
+    "env_flags": ["ENABLE_PRIVATE_DOCUMENT_SMOKE_TESTS", "PRIVATE_PASSPORT_FIXTURE_PDF/US/SG/CN"]
+  },
+  "completed_2026_07_22b": [
+    "PHASE 1 native e-signature: app/providers/esign.py (ESignatureProvider + NativeEllisSignatureProvider) + pdfgen.py (dep-free signed PDF) + models NativeSignature/SignatureEvent + /authorization/prepare + /authorization/sign (consent+intent+step-up token gates) + tamper-evident artifact hash + material-change invalidation + cross-tenant block. tests/test_signature.py 6 pass.",
+    "PHASE 5 portal discovery: app/portal/discovery.py (query variants + official-domain classification + disabled-draft-only) + Kimi allowlist tool discover_official_visa_portal + models PortalDraft + /discovery + /discovery/drafts + review endpoint. tests/test_discovery.py 5 pass. Live Browserbase search = activation step (returns honest 'unavailable', never fabricates).",
+    "PHASE 9 Trip.com sandbox: app/integrations/tripcom.py (HMAC signing ts.nonce.body, replay protection, idempotency, typed webhook payloads, SandboxClient, deep-link) + docs/TRIPCOM_REQUIREMENTS.json (machine-readable what-Tripcom-must-provide). tests/test_tripcom.py 6 pass."
+  ],
+  "test_totals_now": {"js": "26", "backend_hermetic": "45 (incl. 2 real-temporal)", "live_providers": "3", "private_passport": "all 6 fixtures processed via Document AI, 6/6 MRZ checksum valid"},
+  "completed_2026_07_22c": [
+    "PRIVATE FIXTURES: all 6 consented passports (US/SG jpg+pdf, CN x2 jpg, PDF) processed through REAL Google Document AI (Enterprise OCR + Form Parser both ok on all 6); after MRZ parser hardening (regex search-anywhere in _find_td3_lines + _repair_numeric OCR fix for O/0/I/1 on date+checkdigit fields) all 6/6 classify as passport with deterministic ICAO MRZ checksum VALID, high confidence, 0 warnings, 0 conflicts. Structural-only reporting; no personal values. Chinese-passport MRZ (line1 'PO'+CHN, OCR noise) now validates.",
+    "PHASE 2 REAL TEMPORAL: temporalio 1.30.0 installed (py3.14); app/temporal_app.py (VisaProcessingWorkflow @workflow.defn + 8 @activity.defn wrapping mock portal; signals approve_review/sign_authorization/solve_captcha/verify_email/approve_payment/complete_payment/complete_declaration; pay/book/submit activities RECONCILE via get_application_state before acting); app/temporal_worker.py entry point for TEMPORAL_HOST; docker-compose worker -> app.temporal_worker. tests/test_temporal.py 2 pass using WorkflowEnvironment.start_time_skipping(): drives to COMPLETED via signals, asserts no dup pay/book/submit, and Replayer.replay_workflow(history) proves determinism = restart-safe. pytest.ini asyncio_mode=auto."
+  ],
+  "not_done_yet": [
+    "PHASE 3/4/5(UI)/7(UI)/8-of-second-brief: full Electron applicant UI screens (Live View modals, payment modal, appointment calendar, OCR-review UI, signature UI) wired to backend via src/renderer/src/lib/visaBackend.js",
+    "Run the FULL Temporal cluster live via `docker compose up` (temporal+temporal-ui services are wired; tests use in-process time-skipping server which is real Temporal SDK)",
+    "PHASE 7 full country-adapter build pipeline beyond discovery drafts + Vietnam config (real Playwright drivers per portal)",
+    "PHASE 9 production multi-tenant storage (S3/GCS/KMS/Secret Manager), data export/deletion endpoints",
+    "PHASE 10 monitoring (Sentry/OTel/metrics/alerting/kill-switches), load tests, staging deploy",
+    "Stripe Issuing live, synthetic passport-layout fixtures, Electron end-to-end UI tests"
+  ],
+  "next_actions": [
+    "PHASE 2: add temporalio to requirements + docker-compose temporal/temporal-ui services; create app/temporal_workflows.py mirroring workflow._step as activities behind TEMPORAL_HOST; keep DB runner for unit tests; prove kill/restart no-dup with a real worker.",
+    "PHASE 7: build Electron screens in src/renderer using src/renderer/src/lib/visaBackend.js — start with OCR-review + native-signature + Live-View-handoff + payment-modal + appointment-calendar.",
+    "PHASE 10: implement app/storage.py (S3/GCS + KMS + signed URLs) behind capability flag; add data export/delete endpoints + tests.",
+    "PHASE 11: add sentry-sdk + OpenTelemetry + /metrics + provider/adapter kill-switch flags.",
+    "Wire native-signature into the workflow AUTHORIZATION_PENDING gate (currently sign endpoint sets envelope completed; connect to workflow.sign_authorization)."
+  ]
+}

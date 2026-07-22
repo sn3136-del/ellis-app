@@ -1,0 +1,9 @@
+.venv/
+.env
+*.db
+__pycache__/
+*.pyc
+tests/
+private_fixtures/
+**/application_default_credentials.json
+.pytest_cache/

@@ -1,0 +1,95 @@
+# Local development environment for the Ellis visa backend.
+#
+# NOTE: verified locally — `docker compose up` brings up the full stack. (Docker
+# is available in this environment; the backend also runs without it on
+# brings up Postgres, Temporal + UI, the API, the worker, and the mock portal.
+# The backend also runs with zero of these (SQLite + DB workflow runner) — see
+# README; compose is for the full production-shaped stack.
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ellis
+      POSTGRES_PASSWORD: ellis
+      POSTGRES_DB: ellis
+    ports: ["5432:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ellis"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  temporal:
+    image: temporalio/auto-setup:1.24
+    depends_on: [postgres]
+    environment:
+      DB: postgres12
+      DB_PORT: 5432
+      POSTGRES_USER: ellis
+      POSTGRES_PWD: ellis
+      POSTGRES_SEEDS: postgres
+    ports: ["7233:7233"]
+
+  temporal-ui:
+    image: temporalio/ui:2.26.2
+    depends_on: [temporal]
+    environment:
+      TEMPORAL_ADDRESS: temporal:7233
+    ports: ["8080:8080"]
+
+  minio:  # optional local S3 emulator
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ellis
+      MINIO_ROOT_PASSWORD: ellis-secret
+    ports: ["9000:9000", "9001:9001"]
+
+  api:
+    build: .
+    depends_on:
+      postgres: {condition: service_healthy}
+    environment:
+      DATABASE_URL: postgresql+psycopg://ellis:ellis@postgres:5432/ellis
+      ELLIS_ENV: development
+      TEMPORAL_HOST: temporal:7233
+      # Provider creds are injected here in real deployments; absent → fallbacks.
+      # Google ADC mounted read-only (below) so Document AI works in-container.
+      GOOGLE_APPLICATION_CREDENTIALS: /var/run/secrets/google/application_default_credentials.json
+      GOOGLE_CLOUD_PROJECT: "712137185724"
+      GOOGLE_DOCUMENT_AI_LOCATION: us
+      GOOGLE_DOCUMENT_AI_OCR_PROCESSOR_ID: a3d15fa0e93981ce
+      GOOGLE_DOCUMENT_AI_FORM_PROCESSOR_ID: 49941675297a9ccc
+      GOOGLE_CLOUD_QUOTA_PROJECT: quiet-terminal-503221-i3
+    volumes:
+      # Host ADC mounted READ-ONLY into ONLY the services that call Google.
+      # Never baked into the image or build context (see .dockerignore).
+      - ${HOME}/.config/gcloud/application_default_credentials.json:/var/run/secrets/google/application_default_credentials.json:ro
+    ports: ["8000:8000"]
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+  worker:
+    build: .
+    depends_on:
+      postgres: {condition: service_healthy}
+    environment:
+      DATABASE_URL: postgresql+psycopg://ellis:ellis@postgres:5432/ellis
+      TEMPORAL_HOST: temporal:7233
+      GOOGLE_APPLICATION_CREDENTIALS: /var/run/secrets/google/application_default_credentials.json
+      GOOGLE_CLOUD_PROJECT: "712137185724"
+      GOOGLE_DOCUMENT_AI_OCR_PROCESSOR_ID: a3d15fa0e93981ce
+      GOOGLE_CLOUD_QUOTA_PROJECT: quiet-terminal-503221-i3
+    volumes:
+      - ${HOME}/.config/gcloud/application_default_credentials.json:/var/run/secrets/google/application_default_credentials.json:ro
+    command: ["python", "-m", "app.temporal_worker"]
+
+  mock-portal:
+    # The mock portal is in-process for tests; this service exposes it over HTTP
+    # for manual/staging adapter testing (activation: add app/portal/http_mock.py).
+    build: .
+    command: ["python", "-c", "print('mock portal placeholder — see app/portal/mock_portal.py')"]
+
+volumes:
+  pgdata:

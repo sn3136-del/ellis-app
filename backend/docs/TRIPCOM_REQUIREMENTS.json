@@ -1,0 +1,33 @@
+{
+  "contract_version": "tripcom-sandbox-v1",
+  "note": "Ellis implements a self-consistent SANDBOX. These are the items Trip.com must provide to finalize the production integration. Do not treat sandbox shapes as production-final.",
+  "must_provide": {
+    "sandbox_url": "Trip.com sandbox base URL",
+    "authentication_method": "OAuth2 client-credentials | mutual-TLS | signed-JWT (Trip.com to specify)",
+    "client_credentials": "sandbox client_id + client_secret (or cert)",
+    "request_signing_rules": "canonicalization + header names + algorithm (Ellis sandbox uses HMAC-SHA256 over ts.nonce.body)",
+    "api_schemas": "case create, document reference, case-status GET",
+    "webhook_schemas": "case.status, payment.status, appointment.status, submission.status field definitions + retry/backoff policy",
+    "webhook_signing": "how Trip.com signs inbound webhooks to Ellis and how Ellis signs outbound",
+    "idempotency": "idempotency-key header name + retention window",
+    "country_launch_priorities": "ordered country list for adapter rollout",
+    "supported_languages": "localization locales required",
+    "traffic_expectations": {"EXPECTED_DAILY_CASES": null, "EXPECTED_PEAK_CONCURRENT_CASES": null,
+                             "EXPECTED_DOCUMENTS_PER_CASE": null, "EXPECTED_APPOINTMENT_MONITORS": null},
+    "data_residency": "regions where applicant data must reside",
+    "retention_rules": "retention period per data class",
+    "deletion_rules": "deletion SLAs + verification",
+    "security_requirements": "pen-test / SOC2 / ISO expectations",
+    "service_level_requirements": "uptime + response SLAs",
+    "support_procedures": "escalation + incident contacts",
+    "branding": "logo/theme/localized copy for the applicant handoff"
+  },
+  "ellis_provides_now": [
+    "HMAC request signing (ts.nonce.body, SHA-256)",
+    "replay protection (nonce store + 5-min timestamp window)",
+    "idempotency keys",
+    "typed webhook payload builders (case/payment/appointment/submission)",
+    "applicant deep-link builder",
+    "sandbox client + contract tests (tests/test_tripcom.py)"
+  ]
+}
