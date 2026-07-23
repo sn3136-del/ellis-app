@@ -35,10 +35,29 @@ Run the automated suite: `./scripts/run-acceptance-tests.sh`.
 | AT-25 | Secret scanning | build present | `./scripts/scan-release-secrets.sh` | CLEAN, exit 0 | scan output | PASS | |
 | AT-26 | Clean Electron packaging | — | `./scripts/build-electron-clean.sh` | no key/.env/ADC/fixture in app.asar | build_security test | PASS | unsigned locally |
 | AT-27 | Trip.com sandbox | — | signed request + webhook verify | HMAC + replay + idempotency | test_tripcom | PASS | prod spec pending |
+| AT-28 | Execution classification | any case | GET `/cases/{id}` + complete a Mockland case | disposition present; completed mock case is NEVER presented as real; ExecutionRecord persisted | test_execution (17+) | PASS | absolute requirement |
+| AT-29 | Wrong-page rejection | AT-05 | upload a visa/stamp page | exact guidance message; no identity fields stored | test_passport_classifier (20) | PASS | incl. P-name regression |
+| AT-30 | Language toggle + translation | app open | switch EN/简/繁; POST `/i18n/translate` | static UI localized; identifiers never translated; honest `unavailable` without Kimi | test_i18n (15) + i18n.test.mjs (8) | PASS | |
+| AT-31 | Assistant identity | any | GET `/assistant/identity?lang=zh-CN` | answers as Ellis, never Kimi/Moonshot/official | test_i18n | PASS | |
+| AT-32 | First-run setup wizard | admin | POST `/setup` + tests + send-test-email | secrets vaulted, never echoed (fingerprint only); sender-alone rejected; rotation/revocation | test_setup (11) | PASS | |
+| AT-33 | Route readiness gate | admin | set gates via `/admin/routes/readiness` | all 15 required; evidence mandatory; live start blocked otherwise | test_personal_gate (9) | PASS | personal-test gate |
+| AT-34 | Route rules + coverage | admin | create/verify rules; GET `/routes/coverage` | pending never served as verified; honest status ladder | test_rules_fees (10) | PASS | |
+| AT-35 | Fee engine | admin | create/verify fee; GET `/routes/fees` | full breakdown; automated payment blocked without verified current fee; staleness alert | test_rules_fees | PASS | |
+| AT-36 | Passport validity | AT-07 | approve expired passport / start | blocked + official renewal authority + queued email + retry-after-renewal | test_emails_validity (14) | PASS | destination rule, not generic |
+| AT-37 | Email pipeline | AT-16 | queue events; `/admin/email/process-queue` | retry then dead-letter; content guard blocks passport numbers + Live View URLs | test_emails_validity | PASS | |
+| AT-38 | Document preview | AT-06 | Preview button / signed URL | expiring signed URLs; auth + tenant checks; no local paths | test_doc_preview (5) | PASS | |
+| AT-39 | Provider errors + breakers | — | GET `/diagnostics/providers` | taxonomy w/ safe messages; breakers open/half-open/close; secrets scrubbed | test_errors_observability (11) | PASS | |
+| AT-40 | Trip.com connector admin | admin | health/deliveries/replay/process | honest sandbox label; signed deliveries; replay; case.status carries execution class | test_tripcom_admin (6) | PASS | NOT production |
 
 ## Not yet covered (honest gaps)
 
-- Real government portal automation (only Mockland is end-to-end automated).
-- Sentry / OpenTelemetry live pipelines, Stripe Issuing live, cloud staging deploy.
-- Trip.com production API/webhook schemas — see `docs/TRIPCOM_REQUIREMENTS.json`.
-- Configurable load tests (Phase 9) — not yet executed; do not treat as run.
+- Real government portal automation (only Mockland is end-to-end automated); no
+  route has passed the 15-point readiness gate — live starts are hard-blocked.
+- Sentry / OpenTelemetry live pipelines (init is flag-gated and honestly
+  `disabled` without DSN/deps), Stripe Issuing live, cloud staging deploy
+  (Phase 16) — not deployed.
+- Trip.com production API/webhook schemas — see `docs/TRIPCOM_REQUIREMENTS.json`;
+  the connector reports `is_tripcom_production: false` until then.
+- Configurable load tests (Phase 9/18) — not yet executed; do not treat as run.
+- Full graphical demonstration recording (Phase 18) — pending; the flows are
+  covered by the automated acceptance tests above.

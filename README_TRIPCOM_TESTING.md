@@ -13,6 +13,15 @@ real government portal is ever contacted.
 > not claim electronic submission. See the **Coverage matrix** in the app
 > (Adapter Admin → Coverage) and `docs/PRODUCTION_BLOCKERS.md`.
 
+> **Execution classification (cross-cutting):** every external action carries an
+> exact class — `MOCK`, `LOCAL_PROVIDER`, `LIVE_SANDBOX`, `LIVE_PRODUCTION`,
+> `APPLICANT_ACTION_REQUIRED`, `MANUAL_REVIEW_REQUIRED`, `UNSUPPORTED` — persisted
+> in the DB/audit and returned by the API (`GET /cases/{id}` → `disposition`).
+> A completed case on Mockland is labelled **MOCK** everywhere, including the
+> Trip.com webhook events, and the UI refuses to present it as a real
+> submission/payment/booking/confirmation. `is_real_government_result` is `true`
+> only for an adapter-verified `LIVE_PRODUCTION` outcome.
+
 ## 1. Prerequisites
 
 | Tool | Version | Notes |
@@ -108,8 +117,41 @@ cd backend && LIVE_TEMPORAL=1 .venv/bin/python -m pytest tests/test_live_tempora
 ## 8. Expected results
 
 `run-acceptance-tests.sh` should end with `ACCEPTANCE: PASS`. Baseline at the time
-of writing: **npm test 45**, **backend hermetic 61**, **frontend→backend lifecycle
+of writing: **npm test 56**, **backend hermetic 191**, **frontend→backend lifecycle
 PASS**, **live worker-restart durability PASS** (charge/book/submit each == 1).
+
+### 8a. Newer feature areas to exercise
+
+- **First-run setup wizard** (sidebar → Setup, admin token): tenant, Kimi /
+  Google / Browserbase / email (SMTP or API — a sender address alone is
+  rejected) / Trip.com config. Secrets are vaulted backend-only; after saving,
+  only a redacted fingerprint is shown; "Send test email" reports REAL delivery
+  only. Rotation + revocation buttons included.
+- **Language toggle** (sidebar): English / 简体中文 / 繁體中文. Dynamic content is
+  translated backend-only via `/i18n/translate` (identifiers, dates, amounts,
+  URLs, and passport data are never translated; honest `unavailable` without a
+  live Kimi key). The assistant identifies as **Ellis** in every language.
+- **Wrong-page rejection**: upload a visa/stamp page instead of the passport
+  biodata page → exact guidance message; a rejected page never seeds identity.
+- **Passport validity**: an expired passport blocks start with official renewal
+  instructions + a queued email; destination-specific validity comes from the
+  VERIFIED route rule (`/routes/rules`), never a generic six-month rule.
+- **Route readiness (personal-test gate)**: `GET /routes/readiness` shows the 15
+  gates; live-class routes hard-block on `POST /cases/{id}/start` until every
+  gate passes (`/cases/{id}/live-preflight` explains the mode).
+- **Rules + fees**: `/routes/coverage` (honest status ladder), `/routes/fees`
+  (full breakdown; automated payment blocked without a verified current fee).
+- **Document preview**: per-document Preview button (signed, expiring URLs — no
+  filesystem paths).
+- **Email pipeline**: every case event templated (en/zh-CN/zh-Hant), queued with
+  retry + dead-letter (`/admin/email/dead-letters`); Mailpit shows local
+  deliveries when SMTP points at it.
+- **Trip.com connector admin**: `/admin/tripcom/health` (honest sandbox label),
+  deliveries + replay; completed cases queue `case.status` events carrying the
+  execution class.
+- **Provider diagnostics**: `/diagnostics/providers` (circuit breakers, kill
+  switches, observability status — Sentry/OTel honestly `disabled` unless
+  configured).
 
 ## 9. Troubleshooting
 
