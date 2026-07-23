@@ -32,11 +32,15 @@ def test_generated_passwords_unique_and_strong():
 
 # ---- Audit redaction ----
 def test_audit_redacts(db):
+    # Use collision-proof needles: contains_plaintext scans the WHOLE (session-
+    # global) audit table, so a short hex needle like "abc" would false-positive
+    # against UUIDs in other rows. These unique tokens test the same redaction.
     audit.record(db, org_id="o", application_id="a", action="t",
-                 detail={"password": "hunter2", "ref": "vault://x", "nested": {"token": "abc"}})
-    assert audit.contains_plaintext(db, "hunter2") is False
-    assert audit.contains_plaintext(db, "abc") is False
-    assert audit.contains_plaintext(db, "vault://x") is True
+                 detail={"password": "hunter2-UNIQUE-Z9", "ref": "vault://x-UNIQUE-Z9",
+                         "nested": {"token": "TOKENVAL-UNIQUE-Z9"}})
+    assert audit.contains_plaintext(db, "hunter2-UNIQUE-Z9") is False
+    assert audit.contains_plaintext(db, "TOKENVAL-UNIQUE-Z9") is False
+    assert audit.contains_plaintext(db, "vault://x-UNIQUE-Z9") is True
 
 
 # ---- State machine ----

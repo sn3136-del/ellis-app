@@ -304,6 +304,22 @@ class ExecutionRecord(Base):
     detail: Mapped[dict] = mapped_column(JSON, default=dict)  # non-sensitive metadata only
 
 
+class TenantSetup(Base, TimestampMixin):
+    """First-run administrator setup (Phase 7). Stores NON-SECRET configuration
+    only. Provider credentials live in the vault (backend-only); this row keeps
+    just the opaque vault ref + a redacted fingerprint per component, so a saved
+    credential is never displayed again. Electron never persists any of this."""
+    __tablename__ = "tenant_setup"
+    org_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    tenant_name: Mapped[str] = mapped_column(String(200), default="")
+    admin_email: Mapped[str] = mapped_column(String(320), default="")
+    config: Mapped[dict] = mapped_column(JSON, default=dict)                 # non-secret only
+    credential_refs: Mapped[dict] = mapped_column(JSON, default=dict)        # component -> vault ref
+    credential_fingerprints: Mapped[dict] = mapped_column(JSON, default=dict)  # component -> sha256[:12]
+    setup_complete: Mapped[bool] = mapped_column(Boolean, default=False)
+    completed_by: Mapped[str] = mapped_column(String(64), default="")
+
+
 class AdapterVersion(Base):
     """Immutable config snapshots for version history + rollback."""
     __tablename__ = "adapter_versions"

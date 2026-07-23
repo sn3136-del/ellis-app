@@ -14,7 +14,8 @@ from sqlalchemy import select
 from .config import capabilities
 from .db import get_session, create_all
 from . import models, audit, service, execution
-from .security import Principal, get_principal, require_owner, issue_action_token, verify_action_token
+from .security import (Principal, get_principal, require_owner, require_admin,
+                       issue_action_token, verify_action_token)
 from .providers import ocr as ocr_provider
 from .providers import passport_classifier
 from .providers import docusign
@@ -97,6 +98,84 @@ def assistant_identity(lang: str = "en", _: Principal = Depends(get_principal)):
     never as the underlying model or as a government official/lawyer/embassy."""
     from . import i18n
     return {"name": "Ellis", "lang": lang, "answer": i18n.assistant_identity_answer(lang)}
+
+
+# ---- Trip.com first-run administrator setup (Phase 7) ----
+class SetupBody(BaseModel):
+    tenant_name: Optional[str] = None
+    admin_email: Optional[str] = None
+    data_region: Optional[str] = None
+    retention_days: Optional[int] = None
+    base_urls: Optional[dict] = None
+    branding: Optional[dict] = None
+    email: Optional[dict] = None          # {provider, sender, reply_to, host, port, username, api_endpoint}
+    google: Optional[dict] = None         # {project, location, ocr_processor_id, form_processor_id}
+    trip: Optional[dict] = None           # {base_url, sandbox_base_url, client_id, signing_method}
+    # Secrets — vaulted backend-only, never echoed back.
+    kimi_api_key: Optional[str] = None
+    browserbase_api_key: Optional[str] = None
+    google_service_account_json: Optional[str] = None
+    email_credential: Optional[str] = None
+    trip_client_secret: Optional[str] = None
+    trip_webhook_secret: Optional[str] = None
+
+
+@app.get("/setup/status")
+def setup_status(db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from . import setup as setup_mod
+    return setup_mod.redacted_status(db, p.org_id)
+
+
+@app.post("/setup")
+def save_setup_endpoint(body: SetupBody, db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from . import setup as setup_mod
+    require_admin(p)
+    try:
+        return setup_mod.save_setup(db, org_id=p.org_id, actor=p.user_id,
+                                    payload=body.model_dump(exclude_unset=True))
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+
+@app.post("/setup/test/{component}")
+def test_setup_component(component: str, db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from . import setup as setup_mod
+    require_admin(p)
+    return setup_mod.test_component(db, org_id=p.org_id, component=component)
+
+
+class TestEmailBody(BaseModel):
+    to: str
+
+
+@app.post("/setup/email/test")
+def test_setup_email(body: TestEmailBody, db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from . import setup as setup_mod
+    require_admin(p)
+    return setup_mod.send_test_email(db, org_id=p.org_id, to=body.to)
+
+
+class RotateBody(BaseModel):
+    value: str
+
+
+@app.post("/setup/rotate/{component}")
+def rotate_setup_component(component: str, body: RotateBody, db=Depends(get_session),
+                          p: Principal = Depends(get_principal)):
+    from . import setup as setup_mod
+    require_admin(p)
+    try:
+        return setup_mod.rotate_component(db, org_id=p.org_id, component=component,
+                                          new_value=body.value, actor=p.user_id)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+
+@app.post("/setup/revoke/{component}")
+def revoke_setup_component(component: str, db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from . import setup as setup_mod
+    require_admin(p)
+    return setup_mod.revoke_component(db, org_id=p.org_id, component=component, actor=p.user_id)
 
 
 @app.get("/diagnostics/ocr")
@@ -745,13 +824,19 @@ def delete_applicant_endpoint(applicant_id: str, db=Depends(get_session), p: Pri
 # ---- Ops: readiness + metrics + kill switches (Phase 11) ----
 @app.get("/readyz")
 def readyz(db=Depends(get_session)):
-    """Readiness: the API is up AND its datastore is reachable."""
+    """Readiness: the API is up, its datastore is reachable, AND (in production)
+    no default credentials are in place — production refuses to be 'ready' while
+    running on default dev secrets."""
     try:
         from sqlalchemy import text
         db.execute(text("SELECT 1"))
-    except Exception as e:  # noqa: BLE001
+    except Exception:  # noqa: BLE001
         raise HTTPException(503, "database not ready")
-    return {"ready": True}
+    from . import setup as setup_mod
+    pre = setup_mod.production_preflight()
+    if not pre["ok"]:
+        raise HTTPException(503, "production preflight failed: default credentials in use")
+    return {"ready": True, "production_preflight": pre}
 
 
 @app.get("/metrics")

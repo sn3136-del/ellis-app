@@ -9,6 +9,7 @@ const NAV = [
   { id: 'cases', key: 'nav.cases', icon: 'cases' },
   { id: 'visa', key: 'nav.visa', icon: 'globe' },
   { id: 'admin', key: 'nav.admin', icon: 'shield' },
+  { id: 'setup', key: 'nav.setup', icon: 'gear' },
   { id: 'assistant', key: 'nav.assistant', icon: 'chat' },
   { id: 'notifications', key: 'nav.notifications', icon: 'bell' }
 ]

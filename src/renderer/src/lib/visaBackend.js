@@ -81,6 +81,21 @@ export function createVisaClient(session) {
     adminClearKill: (id) => call('POST', `/admin/adapters/${id}/clear-kill`, session, {}),
     adminRollback: (id, toVersion) => call('POST', `/admin/adapters/${id}/rollback`, session, { to_version: toVersion }),
 
+    // Internationalization (Phase 6)
+    i18nLanguages: () => call('GET', '/i18n/languages', session),
+    translate: (text, targetLang, sourceLang = 'auto') =>
+      call('POST', '/i18n/translate', session, { text, target_lang: targetLang, source_lang: sourceLang }),
+    assistantIdentity: (lang = 'en') => call('GET', `/assistant/identity?lang=${encodeURIComponent(lang)}`, session),
+
+    // First-run administrator setup (Phase 7). Secrets are sent once and never
+    // returned — status/rotate expose only redacted fingerprints.
+    setupStatus: () => call('GET', '/setup/status', session),
+    saveSetup: (payload) => call('POST', '/setup', session, payload),
+    testSetupComponent: (component) => call('POST', `/setup/test/${component}`, session, {}),
+    sendTestEmail: (to) => call('POST', '/setup/email/test', session, { to }),
+    rotateSetupComponent: (component, value) => call('POST', `/setup/rotate/${component}`, session, { value }),
+    revokeSetupComponent: (component) => call('POST', `/setup/revoke/${component}`, session, {}),
+
     // Privacy (Phase 10) + ops (Phase 11)
     exportCase: (id) => call('GET', `/cases/${id}/export`, session),
     exportOrg: () => call('GET', '/export', session),

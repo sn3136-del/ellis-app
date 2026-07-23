@@ -19,6 +19,7 @@ import Notifications from './screens/Notifications.jsx'
 import TripPortal from './screens/TripPortal.jsx'
 import VisaConsole from './screens/VisaConsole.jsx'
 import AdminConsole from './screens/AdminConsole.jsx'
+import SetupWizard from './screens/SetupWizard.jsx'
 
 export default function App() {
   // LocaleProvider wraps every branch so the language toggle + t() work on the
@@ -91,6 +92,7 @@ function AppInner() {
           {view === 'cases' && <Cases role={role} profile={profile} onOpen={openCase} />}
           {view === 'visa' && <VisaConsole role={role} profile={profile} onNotify={bumpNotif} />}
           {view === 'admin' && <AdminConsole />}
+          {view === 'setup' && <SetupWizard />}
           {view === 'case' && caseId && <CaseWorkspace caseId={caseId} role={role} profile={profile} tab={caseTab} onTab={setCaseTab} onBack={() => nav('cases')} onSettings={() => nav('settings')} onNotify={bumpNotif} />}
           {view === 'assistant' && <Assistant role={role} onSettings={() => nav('settings')} />}
           {view === 'notifications' && <Notifications role={role} onOpenCase={openCase} onChanged={bumpNotif} />}
