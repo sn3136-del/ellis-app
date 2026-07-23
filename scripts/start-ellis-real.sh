@@ -23,6 +23,9 @@ DB="$APPSUP/ellis.db"
 
 mkdir -p "$RUN" "$LOGS"
 
+# Rotate logs at each launch so stale errors are never mistaken for current ones.
+for f in backend worker frontend electron-main; do : > "$LOGS/$f.log" 2>/dev/null || true; done
+
 log() { printf '  %s\n' "$*"; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
 
@@ -159,9 +162,50 @@ if [ "${ELLIS_LAUNCHER_NO_FRONTEND:-0}" = "1" ]; then
 fi
 
 # ---- frontend (Electron/Vite) — Ctrl+C here tears everything down ----------
+# Pre-check: the Electron binary must exist and be executable. On this machine
+# macOS security has been removing unsigned Electron binaries; if it's gone we
+# report the real blocker and keep the backend + worker running (still usable
+# via the API / status) instead of failing opaquely.
+ELECTRON_BIN="$ROOT/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron"
+if [ ! -x "$ELECTRON_BIN" ]; then
+  echo ""
+  echo "Frontend cannot start: the Electron binary is missing or not executable:"
+  echo "    $ELECTRON_BIN"
+  echo "  This machine's macOS security (Gatekeeper/XProtect, macOS $(sw_vers -productVersion)) removes"
+  echo "  UNSIGNED Electron binaries. Repair the dev install with:"
+  echo "    rm -rf node_modules/electron && npm install"
+  echo "  and, if it is removed again, that is the same signing/notarization blocker"
+  echo "  documented in artifacts/production_packaging_report.md — a Developer ID"
+  echo "  signature is required for Electron to persist on this machine."
+  echo ""
+  echo "  The backend + worker are running and usable:"
+  echo "    status: npm run ellis:status   stop: npm run ellis:stop"
+  trap - EXIT   # keep backend/worker up for the user
+  exit 0
+fi
+
 echo "Launching the Ellis desktop UI (Ctrl+C to stop everything)…"
+: > "$LOGS/frontend.log"   # fresh frontend log per launch (no stale errors)
 ELLIS_RUNTIME_MODE="local_real_services" npm --prefix "$ROOT" run dev >>"$LOGS/frontend.log" 2>&1 &
-echo $! > "$RUN/frontend.pid"
-log "frontend pid : $(cat "$RUN/frontend.pid")"
-wait "$(cat "$RUN/frontend.pid")" 2>/dev/null || true
+FRONT_PID=$!
+echo "$FRONT_PID" > "$RUN/frontend.pid"
+log "frontend pid : $FRONT_PID"
+
+SECONDS=0
+wait "$FRONT_PID" 2>/dev/null || true
+elapsed=$SECONDS
+
+# Distinguish an intentional quit (user closed the window) from an unexpected
+# early crash — and NEVER shut down silently on a crash.
+if [ "$_cleaned" != "1" ] && [ "$elapsed" -lt 20 ]; then
+  echo ""
+  echo "Frontend exited unexpectedly after ${elapsed}s. Actual logs:"
+  echo "  --- frontend.log (tail) ---"; tail -12 "$LOGS/frontend.log" 2>/dev/null | sed 's/^/    /'
+  echo "  --- electron-main.log (tail) ---"; tail -12 "$LOGS/electron-main.log" 2>/dev/null | sed 's/^/    /'
+  if [ ! -x "$ELECTRON_BIN" ]; then
+    echo "  DIAGNOSIS: the Electron binary was removed during launch — macOS security"
+    echo "  is stripping the unsigned Electron executable (same root cause as the .app"
+    echo "  packaging block). Fix requires a Developer ID signature; see artifacts/."
+  fi
+fi
 cleanup

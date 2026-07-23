@@ -1,6 +1,6 @@
 import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
-import { readFileSync, writeFileSync, existsSync } from 'fs'
+import { readFileSync, writeFileSync, existsSync, appendFileSync, mkdirSync } from 'fs'
 import { execFile } from 'child_process'
 import { getState, update } from './store.js'
 import * as local from './localEngine.js'
@@ -56,7 +56,38 @@ function demoHandle(channel, handler) {
 
 let mainWindow = null
 
+// --- Main-process lifecycle logging -----------------------------------------
+// Timestamped log of every startup, window and quit/exit path, to console and
+// ~/Library/Application Support/Ellis/logs/electron-main.log. This is what makes
+// an otherwise-silent "Electron exited 0" diagnosable.
+const MAIN_LOG = (() => {
+  try {
+    // homedir-based (not app.getPath, which can depend on app-ready) so the
+    // very first module-load line is captured too.
+    const home = process.env.HOME || (app.getPath && app.getPath('home')) || ''
+    const dir = join(home, 'Library', 'Application Support', 'Ellis', 'logs')
+    mkdirSync(dir, { recursive: true })
+    return join(dir, 'electron-main.log')
+  } catch { return null }
+})()
+function mlog(...args) {
+  const line = `[${new Date().toISOString()}] [main] ${args.map(String).join(' ')}`
+  try { console.log(line) } catch {}
+  try { if (MAIN_LOG) appendFileSync(MAIN_LOG, line + '\n') } catch {}
+}
+
+process.on('uncaughtException', (err) => {
+  mlog('UNCAUGHT EXCEPTION:', err && err.stack ? err.stack : err)
+})
+process.on('unhandledRejection', (reason) => {
+  mlog('UNHANDLED REJECTION:', reason && reason.stack ? reason.stack : reason)
+})
+app.on('will-quit', () => mlog('app will-quit'))
+app.on('quit', (_e, code) => mlog('app quit; exitCode=' + code))
+mlog(`main module loaded; isPackaged=${app.isPackaged} runtimeMode=${RUNTIME_MODE} demoPipeline=${DEMO_PIPELINE_ENABLED}`)
+
 function createWindow() {
+  mlog('createWindow() called')
   mainWindow = new BrowserWindow({
     width: 1320,
     height: 880,
@@ -77,7 +108,14 @@ function createWindow() {
     }
   })
 
-  mainWindow.on('ready-to-show', () => mainWindow.show())
+  mlog('BrowserWindow created')
+  mainWindow.on('ready-to-show', () => { mlog('window ready-to-show'); mainWindow.show() })
+  mainWindow.on('closed', () => { mlog('window closed'); mainWindow = null })
+  mainWindow.webContents.on('did-finish-load', () => mlog('renderer did-finish-load'))
+  mainWindow.webContents.on('did-fail-load', (_e, code, desc, url) =>
+    mlog(`renderer DID-FAIL-LOAD code=${code} desc="${desc}" url=${url}`))
+  mainWindow.webContents.on('render-process-gone', (_e, d) =>
+    mlog('renderer render-process-gone: ' + JSON.stringify(d)))
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
@@ -85,10 +123,11 @@ function createWindow() {
   })
 
   const rendererUrl = process.env['ELECTRON_RENDERER_URL']
+  mlog('loading renderer: ' + (rendererUrl ? rendererUrl : 'file://../renderer/index.html'))
   if (rendererUrl) {
-    mainWindow.loadURL(rendererUrl)
+    mainWindow.loadURL(rendererUrl).catch((e) => mlog('loadURL error: ' + (e?.message || e)))
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    mainWindow.loadFile(join(__dirname, '../renderer/index.html')).catch((e) => mlog('loadFile error: ' + (e?.message || e)))
   }
 }
 
@@ -1374,27 +1413,33 @@ demoHandle('trips:issue', (_e, { tripId, attachmentPath, detail }) =>
   issueTrip(tripId, attachmentPath, detail || 'Authority decision recorded: approved'))
 
 app.whenReady().then(async () => {
-  // Bring up the embedded backend (or adopt one already running) before the
-  // window loads, so the renderer's first /capabilities call sees it. A slow
-  // or failed start never blocks the UI — the window still opens.
+  mlog('app ready')
+  // Bring up the embedded backend ONLY in the packaged app. In development the
+  // launcher (or the developer) runs the backend at 127.0.0.1:8000, so we never
+  // start the packaged backend lifecycle or touch process.resourcesPath here —
+  // we just adopt the already-running backend.
   try {
     const r = await startBackend()
-    console.log('[backend]', r.reused ? 'reused existing' : (r.ok ? 'started' : 'unavailable'))
+    mlog(`backend: ${r.reused ? 'reused existing' : (r.ok ? 'started' : 'unavailable (dev: use launcher-started backend)')}`)
   } catch (e) {
-    console.error('[backend] start error', e?.message || e)
+    mlog('backend start error (non-fatal): ' + (e?.message || e))
   }
   // The monitor auto-sends traveler emails — it must NEVER run outside the
   // explicitly selected local demo mode.
   if (DEMO_PIPELINE_ENABLED) startMonitor(issueTrip, refuseTrip)
   createWindow()
   app.on('activate', () => {
+    mlog('app activate')
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
-})
+}).catch((e) => mlog('whenReady handler error: ' + (e?.stack || e)))
 
-app.on('before-quit', () => stopBackend())
+app.on('before-quit', () => { mlog('app before-quit; stopping backend'); stopBackend() })
 
 app.on('window-all-closed', () => {
+  mlog(`window-all-closed (platform=${process.platform})`)
   stopBackend()
-  if (process.platform !== 'darwin') app.quit()
+  // On macOS apps normally stay alive with no windows; here the app IS the UI,
+  // so quit when the window is closed (also releases the backend it adopted).
+  app.quit()
 })
