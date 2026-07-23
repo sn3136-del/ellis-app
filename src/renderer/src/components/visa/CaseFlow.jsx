@@ -6,7 +6,7 @@
 import { useEffect, useState } from 'react'
 import { useToast, Loading, ErrorNote, KVList, Empty } from '../ui.jsx'
 import { HANDOFF_COPY } from '../../lib/visaBackend.js'
-import { handoffCopy, isTerminal, formatSlot } from '../../lib/visaSession.js'
+import { handoffCopy, isTerminal, formatSlot, resultDisposition } from '../../lib/visaSession.js'
 import OcrReview from './OcrReview.jsx'
 import Preferences from './Preferences.jsx'
 import {
@@ -100,6 +100,7 @@ export default function CaseFlow({ client, caseId, onNotify }) {
       {tab === 'journey' && (
         <div className="tabpanel">
           <Timeline state={state} />
+          <ExecutionBanner status={status} />
           {error && <ErrorNote error={error} />}
 
           {!started && (
@@ -199,9 +200,26 @@ function ReviewPanel({ answers, onApprove, busy }) {
   )
 }
 
+// A persistent, honest banner whenever the case is NOT running on an approved
+// live-production portal. The applicant always knows the realness of what they see.
+function ExecutionBanner({ status }) {
+  const d = resultDisposition(status)
+  if (d.isReal) return null
+  return (
+    <div className="card" style={{ padding: '10px 14px', marginBottom: 12,
+      background: '#fff7ed', border: '1px solid #f59e0b' }}>
+      <div style={{ fontWeight: 700, fontSize: 12, color: '#9a3412' }}>
+        {d.executionClass} — not a real government submission
+      </div>
+      <div style={{ fontSize: 12, color: '#9a3412' }}>{d.disclaimer}</div>
+    </div>
+  )
+}
+
 function ResultView({ status }) {
   const c = status.confirmation
   const a = status.appointment
+  const d = resultDisposition(status)
   if (status.state !== 'COMPLETED') {
     return <div className="card" style={{ padding: 22 }}>
       <div style={{ fontWeight: 700 }}>{status.state.replace(/_/g, ' ')}</div>
@@ -211,15 +229,28 @@ function ResultView({ status }) {
       </div>
     </div>
   }
+  // The display guard: only an adapter-verified real production result may read
+  // as a real "Application submitted". Otherwise we label the classification and
+  // never present the reference as a real government reference.
   return (
     <div className="card" style={{ padding: 22 }}>
-      <div className="sevbadge sevbadge--ok" style={{ marginBottom: 8 }}>✓</div>
-      <div style={{ fontSize: 18, fontWeight: 700 }}>Application submitted</div>
+      <div className={'sevbadge ' + (d.isReal ? 'sevbadge--ok' : 'sevbadge--warn')} style={{ marginBottom: 8 }}>
+        {d.isReal ? '✓' : '⚠'}
+      </div>
+      <div style={{ fontSize: 18, fontWeight: 700 }}>
+        {d.isReal ? 'Application submitted' : d.displayStatus}
+      </div>
+      {!d.isReal && (
+        <div style={{ fontSize: 13, color: '#9a3412', background: '#fff7ed',
+          border: '1px solid #f59e0b', borderRadius: 8, padding: '8px 10px', margin: '8px 0' }}>
+          {d.disclaimer}
+        </div>
+      )}
       <KVList fields={[
-        c && { label: 'Reference number', value: c.reference_no },
-        c && c.receipt_no && { label: 'Receipt', value: c.receipt_no },
+        c && { label: d.isReal ? 'Reference number' : 'Mock reference (not a real visa reference)', value: c.reference_no },
+        c && c.receipt_no && { label: d.isReal ? 'Receipt' : 'Mock receipt', value: c.receipt_no },
         a && { label: 'Appointment', value: a.start_utc ? formatSlot(a.start_utc) + ' · ' + a.location_id : a.confirmation_no },
-        a && { label: 'Appointment confirmation', value: a.confirmation_no }
+        a && { label: d.isReal ? 'Appointment confirmation' : 'Mock appointment confirmation', value: a.confirmation_no }
       ].filter(Boolean)} />
     </div>
   )

@@ -21,6 +21,11 @@ def _hash(s):
 
 
 class MockPortal:
+    # The driver truthfully declares what it is. execution.classify_driver reads
+    # this so a MockPortal result is ALWAYS classified MOCK — no configuration can
+    # make an in-process mock produce a "real" (LIVE_PRODUCTION) classification.
+    execution_class = "MOCK"
+
     def __init__(self, *, maintenance=False, payment_outcome="success",
                  require_captcha=True, session_ttl_ms=30 * 60_000, now=None, inventory=None):
         self.maintenance = maintenance

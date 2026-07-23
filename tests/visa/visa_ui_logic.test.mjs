@@ -4,9 +4,41 @@ import assert from 'node:assert/strict'
 
 import {
   confidenceLevel, fieldRows, documentReady, defaultPreferences, formatFee,
-  handoffCopy, formatSlot, isTerminal, dateToMs, msToDate, newSession
+  handoffCopy, formatSlot, isTerminal, dateToMs, msToDate, newSession, resultDisposition
 } from '../../src/renderer/src/lib/visaSession.js'
 import { HANDOFF_UI, HANDOFF_SIGNAL, HANDOFF_COPY } from '../../src/renderer/src/lib/visaBackend.js'
+
+test('resultDisposition never presents a MOCK completed case as real', () => {
+  const d = resultDisposition({
+    state: 'COMPLETED', execution_class: 'MOCK',
+    disposition: { is_real_government_result: false, execution_class: 'MOCK',
+      display_status: 'COMPLETED (MOCK — automated-test portal)', disclaimer: 'not real' },
+    confirmation: { reference_no: 'REF-123' }
+  })
+  assert.equal(d.isReal, false)
+  assert.equal(d.canClaimReal, false)
+  assert.match(d.displayStatus, /MOCK/)
+  assert.ok(d.disclaimer.length > 0)
+})
+
+test('resultDisposition treats a missing disposition as NOT real (fail safe)', () => {
+  const d = resultDisposition({ state: 'COMPLETED', confirmation: { reference_no: 'X' } })
+  assert.equal(d.isReal, false)
+  assert.equal(d.executionClass, 'MOCK')
+  assert.ok(d.disclaimer.length > 0)
+})
+
+test('resultDisposition presents a verified LIVE_PRODUCTION result as real', () => {
+  const d = resultDisposition({
+    state: 'COMPLETED', execution_class: 'LIVE_PRODUCTION',
+    disposition: { is_real_government_result: true, execution_class: 'LIVE_PRODUCTION',
+      display_status: 'COMPLETED', disclaimer: '' }
+  })
+  assert.equal(d.isReal, true)
+  assert.equal(d.canClaimReal, true)
+  assert.equal(d.displayStatus, 'COMPLETED')
+  assert.equal(d.disclaimer, '')
+})
 
 test('confidenceLevel buckets by threshold', () => {
   assert.equal(confidenceLevel(0.95), 'ok')

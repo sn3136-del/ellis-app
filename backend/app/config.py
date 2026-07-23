@@ -39,6 +39,9 @@ class Settings:
     def __init__(self):
         self.app_name = "ellis-visa-backend"
         self.env = os.getenv("ELLIS_ENV", "development")
+        # Production mode hardens the "never present a mock/sandbox result as a
+        # real government outcome" guard (execution.assert_not_mock_in_production).
+        self.production_mode = self.env in ("production", "staging")
         # SQLite for local/dev/test; set DATABASE_URL to a Postgres/Neon DSN in prod.
         self.database_url = os.getenv("DATABASE_URL", "sqlite:///./ellis.db")
 

@@ -13,7 +13,7 @@ from sqlalchemy import select
 
 from .config import capabilities
 from .db import get_session, create_all
-from . import models, audit, service
+from . import models, audit, service, execution
 from .security import Principal, get_principal, require_owner, issue_action_token, verify_action_token
 from .providers import ocr as ocr_provider
 from .providers import docusign
@@ -54,7 +54,18 @@ def healthz():
 
 @app.get("/capabilities")
 def get_capabilities(_: Principal = Depends(get_principal)):
-    return capabilities()
+    caps = capabilities()
+    # Every runtime today binds the MockPortal driver, so the runtime portal
+    # execution class is MOCK — surfaced honestly so no client mistakes a
+    # completed case for a real government submission.
+    from .config import settings as _s
+    caps["execution_classification"] = {
+        "legend": execution.legend(),
+        "runtime_portal_execution_class": str(execution.classify_driver(MockPortal())),
+        "real_result_class": execution.REAL_RESULT_CLASS.value,
+        "production_mode": _s().production_mode,
+    }
+    return caps
 
 
 @app.get("/diagnostics/ocr")
@@ -139,6 +150,20 @@ def _owned(db, p: Principal, application_id: str) -> models.VisaApplication:
     return app_row
 
 
+def _case_execution_class(country: str, visa_type: str):
+    """Classify what running this case's route ACTUALLY produces. The runtime
+    binds the MockPortal driver to every adapter, so this returns MOCK today and
+    will return the real class automatically once a live driver is bound to an
+    approved adapter — the classification follows the driver, never a claim."""
+    clear_registry()
+    portal = MockPortal()
+    build_mockland_adapter(portal)
+    build_vietnam_evisa_adapter(portal)
+    from .portal.contract import select_adapter
+    adapter = select_adapter(country, visa_type) or select_adapter("Mockland", "tourist")
+    return execution.classify_adapter(adapter)
+
+
 @app.get("/cases/{application_id}")
 def get_case(application_id: str, db=Depends(get_session), p: Principal = Depends(get_principal)):
     app_row = _owned(db, p, application_id)
@@ -148,13 +173,25 @@ def get_case(application_id: str, db=Depends(get_session), p: Principal = Depend
         models.Appointment.application_id == application_id)).scalar_one_or_none()
     conf = db.execute(select(models.SubmissionConfirmation).where(
         models.SubmissionConfirmation.application_id == application_id)).scalar_one_or_none()
+    ec = _case_execution_class(app_row.destination_country, app_row.visa_type)
+    # The disposition is the display guard: it refuses to present submitted/paid/
+    # booked/confirmed as REAL unless an approved LIVE_PRODUCTION adapter produced
+    # them. Clients render disposition.display_status, not raw state, for anything
+    # user-facing, and check is_real_government_result before claiming a real visa.
+    disposition = execution.result_disposition(app_row.state, ec)
     return {"id": app_row.id, "state": app_row.state, "answers": app_row.answers,
             "pending": exec_row.pending if exec_row else None,
             "portal_reference": app_row.portal_reference,
+            "execution_class": str(ec),
+            "disposition": disposition,
             "appointment": ({"slot_id": appt.slot_id, "location_id": appt.location_id,
                              "start_utc": appt.start_utc, "confirmation_no": appt.confirmation_no,
-                             "reschedule_count": appt.reschedule_count} if appt else None),
-            "confirmation": ({"reference_no": conf.reference_no, "receipt_no": conf.receipt_no}
+                             "reschedule_count": appt.reschedule_count,
+                             "execution_class": str(ec),
+                             "is_real": disposition["is_real_government_result"]} if appt else None),
+            "confirmation": ({"reference_no": conf.reference_no, "receipt_no": conf.receipt_no,
+                              "execution_class": str(ec),
+                              "is_real_government_confirmation": disposition["is_real_government_result"]}
                              if conf else None)}
 
 
@@ -200,10 +237,12 @@ def add_document(application_id: str, body: AddDocument, db=Depends(get_session)
     sha = hashlib.sha256(content or body.text.encode()).hexdigest()
     # OCR hierarchy with recorded failover: Document AI → (flagged) Kimi vision → local.
     result, ocr_meta = ocr_provider.process_with_failover(content=content, text=body.text, mime=body.mime)
+    ec = execution.classify_ocr(ocr_meta)
     doc = models.StoredDocument(org_id=p.org_id, application_id=application_id, name=body.name,
                                 mime=body.mime, size_bytes=body.size_bytes, sha256=sha,
                                 storage_ref=f"local://{sha[:16]}", doc_type=result.doc_type,
                                 ocr_status="done", quality_warnings=result.quality_warnings,
+                                execution_class=str(ec),
                                 extracted_fields={f.key: {"value": f.value, "confidence": f.confidence,
                                                           "page": f.page} for f in result.fields})
     db.add(doc)
@@ -211,8 +250,13 @@ def add_document(application_id: str, body: AddDocument, db=Depends(get_session)
     audit.record(db, org_id=p.org_id, application_id=application_id, action="document_ocr",
                  detail={"doc_type": result.doc_type, "mrz_valid": result.mrz_valid,
                          "engine": ocr_meta.get("primary"), "fallback_used": ocr_meta.get("fallback_used"),
-                         "docai_degraded": ocr_meta.get("docai_degraded")}, actor=p.user_id)
+                         "docai_degraded": ocr_meta.get("docai_degraded"),
+                         "execution_class": str(ec)}, actor=p.user_id)
+    execution.record_execution(db, org_id=p.org_id, application_id=application_id,
+                               action="document_ocr", ec=ec,
+                               detail={"doc_type": result.doc_type, "mrz_valid": result.mrz_valid})
     return {"id": doc.id, "doc_type": result.doc_type, "mrz_valid": result.mrz_valid,
+            "execution_class": str(ec),
             "extracted_fields": doc.extracted_fields, "quality_warnings": result.quality_warnings}
 
 
@@ -536,10 +580,23 @@ class SignalBody(BaseModel):
     slot_id: Optional[str] = None
 
 
+def _record_terminal_execution(db, p: Principal, application_id: str):
+    """When a case reaches COMPLETED, persist the execution classification of the
+    result so the audit trail proves whether it was a real government outcome or
+    a MOCK/sandbox run — the completed state alone must never imply 'real'."""
+    app_row = db.get(models.VisaApplication, application_id)
+    if app_row and app_row.state == "COMPLETED":
+        ec = _case_execution_class(app_row.destination_country, app_row.visa_type)
+        execution.record_execution(db, org_id=p.org_id, application_id=application_id,
+                                   action="case_completed", ec=ec,
+                                   detail={"state": app_row.state})
+
+
 @app.post("/cases/{application_id}/start")
 def start_case(application_id: str, db=Depends(get_session), p: Principal = Depends(get_principal)):
     _owned(db, p, application_id)
     status, _ = service.signal(db, application_id, "start")
+    _record_terminal_execution(db, p, application_id)
     return status
 
 
@@ -556,6 +613,7 @@ def send_signal(application_id: str, name: str, body: Optional[SignalBody] = Non
     if name == "select_appointment":
         kwargs["slot_id"] = body.slot_id
     status, _ = service.signal(db, application_id, name, **kwargs)
+    _record_terminal_execution(db, p, application_id)
     return status
 
 

@@ -147,6 +147,11 @@ class StoredDocument(Base, TimestampMixin):
     storage_ref: Mapped[str] = mapped_column(String(300), default="")  # s3:// or local ref
     doc_type: Mapped[str] = mapped_column(String(60), default="")
     ocr_status: Mapped[str] = mapped_column(String(30), default="pending")
+    # How real the OCR that produced extracted_fields was (LOCAL_PROVIDER when the
+    # deterministic parser ran; LIVE_PRODUCTION for Document AI / Kimi vision).
+    execution_class: Mapped[str] = mapped_column(String(30), default="LOCAL_PROVIDER")
+    # Passport biodata-page classification (accept | reject-with-reason).
+    page_classification: Mapped[dict] = mapped_column(JSON, default=dict)
     extracted_fields: Mapped[dict] = mapped_column(JSON, default=dict)
     approved: Mapped[bool] = mapped_column(Boolean, default=False)
     quality_warnings: Mapped[list] = mapped_column(JSON, default=list)
@@ -278,6 +283,25 @@ class AdapterRecord(Base, TimestampMixin):
     version: Mapped[int] = mapped_column(Integer, default=1)
     monitoring_status: Mapped[str] = mapped_column(String(40), default="not_monitored")
     rollback_version: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+
+
+class ExecutionRecord(Base):
+    """Persisted execution classification for every externally-facing action.
+
+    The brief requires the classification to be persisted in the database and
+    audit trail (not just returned in a response). One row per classified action
+    so a case's whole history can be replayed with an honest realness label on
+    each step — and so a report can prove no MOCK step was ever presented as a
+    real government outcome."""
+    __tablename__ = "execution_records"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    org_id: Mapped[str] = mapped_column(String(64), index=True, default="")
+    application_id: Mapped[str] = mapped_column(String(32), index=True, default="")
+    action: Mapped[str] = mapped_column(String(80))          # e.g. document_ocr | portal_submit
+    execution_class: Mapped[str] = mapped_column(String(30), index=True)
+    is_real_government_result: Mapped[bool] = mapped_column(Boolean, default=False)
+    detail: Mapped[dict] = mapped_column(JSON, default=dict)  # non-sensitive metadata only
 
 
 class AdapterVersion(Base):

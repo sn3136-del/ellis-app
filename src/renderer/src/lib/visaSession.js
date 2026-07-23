@@ -136,3 +136,27 @@ export const FAILURE_STATES = new Set(['RECOVERABLE_FAILURE', 'MANUAL_REVIEW'])
 export function isTerminal(state) {
   return TERMINAL_STATES.has(state)
 }
+
+// Client-side execution-classification display guard, mirroring the backend
+// (app/execution.py). The production UI must REFUSE to present submitted / paid /
+// booked / confirmed as real unless the backend disposition explicitly says the
+// result is a real, adapter-verified government outcome. A missing disposition is
+// treated as NOT real (fail safe) — a mock or sandbox run can never read as real.
+export function resultDisposition(status) {
+  const d = (status && status.disposition) || {}
+  const ec = (status && status.execution_class) || d.execution_class || 'MOCK'
+  const isReal = d.is_real_government_result === true
+  const state = (status && status.state) || ''
+  const displayStatus = d.display_status || (state === 'COMPLETED'
+    ? (isReal ? 'COMPLETED' : `COMPLETED (${ec} — not a real government submission)`)
+    : state)
+  return {
+    executionClass: ec,
+    isReal,
+    // The four guarded terminal claims may be shown as REAL only when isReal.
+    canClaimReal: isReal,
+    displayStatus,
+    disclaimer: isReal ? '' : (d.disclaimer
+      || 'This case ran on a non-production portal. Nothing was really submitted, paid, or booked with any government.')
+  }
+}
