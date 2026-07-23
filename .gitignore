@@ -55,3 +55,6 @@ ocr_scratch/
 
 # === Generated adapter candidate bundles (DB is authoritative) ===
 backend/app/portal_adapters/generated/
+
+# === Bundled slim Python runtime for the self-contained app (regenerate via scripts/build-runtime-venv.sh) ===
+backend/.runtime-venv/

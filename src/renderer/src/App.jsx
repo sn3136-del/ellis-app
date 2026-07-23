@@ -54,7 +54,17 @@ function AppInner() {
 
   useEffect(() => {
     let alive = true
-    fetchRuntimeMode().then((m) => { if (alive) setRuntimeMode(m) })
+    // Poll a few times: the embedded backend may still be starting when the
+    // window first loads. Stop as soon as a non-production mode is confirmed.
+    let tries = 0
+    async function probe() {
+      const m = await fetchRuntimeMode()
+      if (!alive) return
+      setRuntimeMode(m)
+      tries += 1
+      if (m === 'production' && tries < 20) setTimeout(probe, 1000)
+    }
+    probe()
     return () => { alive = false }
   }, [])
 

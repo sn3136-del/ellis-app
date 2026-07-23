@@ -42,6 +42,16 @@
       "!**/private_fixtures/**",
       "!**/*.passport"
     ],
+    "extraResources": [
+      { "from": "backend/.runtime-venv", "to": "backend-venv",
+        "filter": ["**/*", "!**/__pycache__/**", "!**/*.pyc", "!**/*.pyo"] },
+      { "from": "backend/app", "to": "backend/app",
+        "filter": ["**/*", "!**/__pycache__/**", "!**/*.pyc", "!**/*.db", "!**/*.db-*"] },
+      { "from": "backend/migrations", "to": "backend/migrations",
+        "filter": ["**/*", "!**/__pycache__/**", "!**/*.pyc"] },
+      { "from": "backend/alembic.ini", "to": "backend/alembic.ini" },
+      { "from": "data", "to": "data" }
+    ],
     "mac": {
       "category": "public.app-category.business",
       "target": [

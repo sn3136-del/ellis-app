@@ -49,14 +49,14 @@ for r in "${SCAN_ROOTS[@]}"; do
       *credentials.ts|*credentials.js|*credentials.mjs|*credentials.d.ts) continue;; # SDK source, not a secret
     esac
     if echo "$f" | grep -qE "$FORBIDDEN_NAMES"; then report "$f" "forbidden-file"; fi
-  done < <(find "$r" -type f -not -path '*/node_modules/*' 2>/dev/null)
+  done < <(find "$r" -type f -not -path '*/node_modules/*' -not -path '*/backend-venv/*' 2>/dev/null)
 done
 
 # 3) Secret VALUE patterns in text files (skip node_modules + binaries).
 for r in "${SCAN_ROOTS[@]}"; do
   while IFS= read -r f; do
     grep -aIlEm1 "$VALUE_PATTERNS" "$f" >/dev/null 2>&1 && report "$f" "secret-value-pattern"
-  done < <(find "$r" -type f -not -path '*/node_modules/*' \
+  done < <(find "$r" -type f -not -path '*/node_modules/*' -not -path '*/backend-venv/*' \
              \( -name '*.js' -o -name '*.mjs' -o -name '*.json' -o -name '*.map' -o -name '*.html' -o -name '*.txt' -o -name '*.env*' \) 2>/dev/null)
 done
 

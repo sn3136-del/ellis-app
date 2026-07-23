@@ -16,6 +16,7 @@ import { startMonitor, decisionsDir, tripRef } from './monitorService.js'
 import { discoverPortal } from './webResearch.js'
 import { OCR_LAYOUT_JXA, targetLangFor, langName, normLang, needsTranslation, translationPrompt, lookAlikeHtml, detectScriptLang } from './translate.js'
 import { visaGrantHtml } from './visaDoc.js'
+import { startBackend, stopBackend } from './backendService.js'
 
 // Ellis's intelligence stack, in priority order:
 //   1. Kimi K3 (Moonshot) — Ellis's immigration-tailored profile of the model
@@ -33,7 +34,13 @@ function engine() {
 // test) mode, selected explicitly via the ELLIS_RUNTIME_MODE environment
 // variable. Default is 'production': no demo handlers, no monitor, no
 // fabricated documents, no automatic traveler emails.
-const RUNTIME_MODE = String(process.env.ELLIS_RUNTIME_MODE || 'production').trim() || 'production'
+// The packaged app is a self-contained LOCAL app: it bundles and launches its
+// own backend and mock portal, so it defaults to local_mock_demo (with the
+// prominent SIMULATED banner). A developer running from source defaults to
+// 'production' and starts their own backend. Either can be overridden via env.
+const RUNTIME_MODE = String(
+  process.env.ELLIS_RUNTIME_MODE || (app.isPackaged ? 'local_mock_demo' : 'production')
+).trim() || 'production'
 const DEMO_PIPELINE_ENABLED = RUNTIME_MODE === 'local_mock_demo' || RUNTIME_MODE === 'test'
 
 // Register a demo-pipeline IPC channel: the real handler in demo mode, a
@@ -1362,7 +1369,16 @@ async function issueTrip(tripId, attachmentPath, sourceDetail) {
 demoHandle('trips:issue', (_e, { tripId, attachmentPath, detail }) =>
   issueTrip(tripId, attachmentPath, detail || 'Authority decision recorded: approved'))
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  // Bring up the embedded backend (or adopt one already running) before the
+  // window loads, so the renderer's first /capabilities call sees it. A slow
+  // or failed start never blocks the UI — the window still opens.
+  try {
+    const r = await startBackend()
+    console.log('[backend]', r.reused ? 'reused existing' : (r.ok ? 'started' : 'unavailable'))
+  } catch (e) {
+    console.error('[backend] start error', e?.message || e)
+  }
   // The monitor auto-sends traveler emails — it must NEVER run outside the
   // explicitly selected local demo mode.
   if (DEMO_PIPELINE_ENABLED) startMonitor(issueTrip, refuseTrip)
@@ -1372,6 +1388,9 @@ app.whenReady().then(() => {
   })
 })
 
+app.on('before-quit', () => stopBackend())
+
 app.on('window-all-closed', () => {
+  stopBackend()
   if (process.platform !== 'darwin') app.quit()
 })
