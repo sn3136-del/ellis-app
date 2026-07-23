@@ -1,0 +1,371 @@
+{
+  "destination": "PRT",
+  "retrieved_at": "2026-07-23T07:28:22Z",
+  "research_status": "research_incomplete",
+  "sources": [
+    {
+      "search_query": "Portugal foreign ministry tourist visa official vistos.mne.gov.pt",
+      "original_url": "https://vistos.mne.gov.pt/en/",
+      "final_url": "https://vistos.mne.gov.pt/en/",
+      "redirect_chain": [],
+      "final_hostname": "vistos.mne.gov.pt",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "Short Stay Visas (Schengen) — General Information: Schengen area; Type of visas; Who needs a visa; Where should you lodge a visa application; Visa fees; Application forms; Deadline for filing application. Required Documentation: Short Stay Visa; Travel Medical Insurance. National Visas. e-Visa platform: https://pedidodevistos.mne.gov.pt/VistosOnline/?lang=ENG",
+      "retrieved_at": "2026-07-23T07:28:22Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Portugal foreign ministry tourist visa official vistos.mne.gov.pt (navigated from vistos.mne.gov.pt/en/)",
+      "original_url": "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/who-needs-a-visa",
+      "final_url": "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/who-needs-a-visa",
+      "redirect_chain": [],
+      "final_hostname": "vistos.mne.gov.pt",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "List of nationalities exempt from holding a visa: Albania, Andorra, Antigua and Barbuda, Argentina, Australia, Bahamas, Barbados, Bosnia and Herzegovina, Brazil, Brunei Darussalam, Canada, Chile, Colombia, Costa Rica, Dominica, El Salvador, Georgia, Grenada, Guatemala, Holy See, Honduras, Israel, Japan, Kiribati, Malaysia, Marshall Islands, Mauritius, Mexico, Micronesia, Moldova, Monaco, Montenegro, New Zealand, Nicaragua, North Macedonia, Palau, Panama, Paraguay, Peru, Samoa, San Marino, Serbia, Seychelles, Singapore, Solomon Islands, South Korea, St Kitts and Nevis, St Lucia, St Vincent and the Grenadines, Timor-Leste, Tonga, Trinidad and Tobago, Tuvalu, Ukraine, United Arab Emirates, United Kingdom, United States of America, Uruguay, Venezuela, Hong Kong Special Administrative Region, Macao Special Administrative Region, Taiwan, Kosovo. ... 'The exemption shall apply only to holders of biometric passports' (applies to Albania, Bosnia and Herzegovina, Georgia, Moldova, Montenegro, North Macedonia, Serbia, and Ukraine). ... 'The visa exemption applies to holders of passports of the Hong Kong Special Administrative Region.' ... 'The visa waiver applies to the holders of passports of the Administrative Region of Macao.' ... 'The exemption from the visa requirement shall only apply to holders of passports issued by Taiwan which include an identity card number.' China, India and Russia appear on the visa-required list.",
+      "retrieved_at": "2026-07-23T07:28:22Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Portugal tourist visa fee (navigated from vistos.mne.gov.pt/en/)",
+      "original_url": "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/visa-fees",
+      "final_url": "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/visa-fees",
+      "redirect_chain": [],
+      "final_hostname": "vistos.mne.gov.pt",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "General fee: '90 Euros'. Reduced fee: '45 Euros' (for children over 6 and under 12 years). Fee exemption for 'Children below the age of 6 (at the date of filing of visa application)'. Visa facilitation agreement countries (Albania, Armenia, Azerbaijan, Bosnia, Belarus, Georgia, Macedonia, Moldova, Montenegro, Serbia, Ukraine): '35€'. Cabo Verde: Adults 67.75€; Children 12-18 years 33.75€; Children under 12 exempt. 'The payment of the fee does not imply granting of the visa, nor does it entail refund in case of refusal.' External providers may charge up to half the visa fee (maximum 80€ normally, up to 120€ in exceptional circumstances where Portugal lacks consular representation).",
+      "retrieved_at": "2026-07-23T07:28:22Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "authorized Portugal visa application center (navigated from vistos.mne.gov.pt/en/)",
+      "original_url": "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/where-should-you-lodge-a-visa-application",
+      "final_url": "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/where-should-you-lodge-a-visa-application",
+      "redirect_chain": [],
+      "final_hostname": "vistos.mne.gov.pt",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "'According to your nationality and/or country of residency, if your country of residency is different from that of your nationality, refer to the Portuguese consular post below where to lodge a Schengen visa.' Channels: Portuguese Embassies and Consulates; External Service Providers (VFS Global, TLS Contact, BLS International, or others handling applications on behalf of Portugal); e-Visa Platform (https://pedidodevistos.mne.gov.pt/VistosOnline/?lang=ENG). Geographic tables (Africa, Americas, Asia/Oceania, Europe, Maghreb, Middle East) list designated submission points per country of residence; entries marked '(1) in representation of Portugal' are handled by another EU country's embassy. Examples: Brazil - Embassy in Brasilia plus VFS, or consulates in Rio de Janeiro and Sao Paulo; China - Embassy/Consulate in Beijing, Shanghai, Guangzhou plus VFS centers in multiple cities; United Kingdom - Consulates in London and Manchester plus VFS, or VFS in Edinburgh.",
+      "retrieved_at": "2026-07-23T07:28:22Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Portugal passport validity requirement tourism (navigated from vistos.mne.gov.pt/en/)",
+      "original_url": "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/required-documentation/short-stay-visa",
+      "final_url": "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/required-documentation/short-stay-visa",
+      "redirect_chain": [],
+      "final_hostname": "vistos.mne.gov.pt",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "'Authentic and Valid (over 3 months after the date of exit) Travel Document' ... 'Duly filled form and signed' ... 'Travel reservation (return ticket)' ... Travel medical insurance covering the entire stay ... 'three last bank transcripts (proof of means of subsistence)' ... Hotel reservation or 'statement of responsibility'.",
+      "retrieved_at": "2026-07-23T07:28:22Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Portugal official immigration tourist visa (navigated from vistos.mne.gov.pt/en/)",
+      "original_url": "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/type-of-visas",
+      "final_url": "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/type-of-visas",
+      "redirect_chain": [],
+      "final_hostname": "vistos.mne.gov.pt",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "'The Schengen visa is intended for short stays of up to 90 days in each 180-day period' ... 'can be granted for the purposes of tourism, family visit, business, seasonal work, transit, among others' ... 'Visas issued to allow for transit and short-term stays in the Schengen area. Those visas have a maximum validity of 90 during any 180-days period, allowing one or multiple entries.' Types: short stay visa; seasonal work visa; airport transit visa.",
+      "retrieved_at": "2026-07-23T07:28:22Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Portugal official immigration tourist visa (navigated from vistos.mne.gov.pt/en/)",
+      "original_url": "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/schengen-area",
+      "final_url": "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/schengen-area",
+      "redirect_chain": [],
+      "final_hostname": "vistos.mne.gov.pt",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "'The Schengen area is composed of the following countries: Austria, Belgium, Bulgaria, Czechia, Croatia, Denmark, Estonia, Finland, France, Germany, Greece, Hungary, Iceland, Italy, Latvia, Lithuania, Liechtenstein, Luxemburg, Malta, Norway, The Netherlands, Poland, Portugal, Romenia, Slovakia, Slovenia, Spain, Sweden and Switzerland.'",
+      "retrieved_at": "2026-07-23T07:28:22Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Portugal evisa (linked from vistos.mne.gov.pt/en/)",
+      "original_url": "https://pedidodevistos.mne.gov.pt/VistosOnline/?lang=ENG",
+      "final_url": "https://pedidodevistos.mne.gov.pt/VistosOnline/?lang=ENG",
+      "redirect_chain": [],
+      "final_hostname": "pedidodevistos.mne.gov.pt",
+      "source_authority": "official_application_portal",
+      "relevant_excerpt": "'O portal E-Visa tem uma área reservada onde com um único login poderá ver os seus formulários submetidos.' The E-VISA portal of the Ministry of Foreign Affairs lets applicants register an account, submit visa applications through an online questionnaire, upload supporting documents, track application status, and schedule appointments at consular posts for document submission.",
+      "retrieved_at": "2026-07-23T07:28:22Z",
+      "effective_date_evidence": null,
+      "page_language": "pt"
+    }
+  ],
+  "dispositions": [
+    {
+      "nationalities": ["ALB", "AND", "ATG", "ARG", "AUS", "BHS", "BRB", "BIH", "BRA", "BRN", "CAN", "CHL", "COL", "CRI", "DMA", "SLV", "GEO", "GRD", "GTM", "VAT", "HND", "ISR", "JPN", "KIR", "MYS", "MHL", "MUS", "MEX", "FSM", "MDA", "MCO", "MNE", "NZL", "NIC", "MKD", "PLW", "PAN", "PRY", "PER", "WSM", "SMR", "SRB", "SYC", "SGP", "SLB", "KOR", "KNA", "LCA", "VCT", "TLS", "TON", "TTO", "TUV", "UKR", "ARE", "GBR", "USA", "URY", "VEN", "HKG", "MAC", "TWN", "XKX"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "Biometric passport required for Albania, Bosnia and Herzegovina, Georgia, Moldova, Montenegro, North Macedonia, Serbia and Ukraine (per official footnote)",
+        "Taiwan (TWN): exemption applies only to passports issued by Taiwan which include an identity card number",
+        "Hong Kong (HKG): exemption applies to holders of Hong Kong SAR passports; Macao (MAC): waiver applies to holders of Macao SAR passports",
+        "XKX = Kosovo (no ISO alpha-3 code; user-assigned code used)",
+        "90/180-day limit is taken from the MFA portal's Schengen short-stay definition; the exemption-list page itself does not restate the maximum stay"
+      ],
+      "source_urls": [
+        "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/who-needs-a-visa",
+        "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/type-of-visas"
+      ]
+    },
+    {
+      "nationalities": ["DEU", "FRA"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": null,
+      "conditions": [
+        "Germany and France are Schengen/EU member states listed on the official MFA Schengen-area page; their citizens are not subject to Portugal's short-stay visa regime (EU free movement)"
+      ],
+      "source_urls": [
+        "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/schengen-area"
+      ]
+    },
+    {
+      "nationalities": ["CHN", "IND", "RUS"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "China, India and Russia appear on the official visa-required list",
+        "Apply at the Portuguese embassy/consulate designated for the country of residence, or via an external service provider (VFS Global, TLS Contact, BLS International) acting for Portugal; online submission possible via the MFA E-Visa platform",
+        "In some countries another EU member state's embassy handles applications in representation of Portugal"
+      ],
+      "source_urls": [
+        "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/who-needs-a-visa",
+        "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/where-should-you-lodge-a-visa-application"
+      ]
+    },
+    {
+      "nationalities": ["ALL_OTHERS"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "All nationalities not on the official exemption list (the MFA page lists the visa-required nationalities) must obtain a Schengen short-stay visa before travel",
+        "Channels: Portuguese embassy/consulate for the country of residence, external service provider (VFS Global / TLS Contact / BLS International) where designated, or online submission via the MFA E-Visa platform"
+      ],
+      "source_urls": [
+        "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/who-needs-a-visa",
+        "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/where-should-you-lodge-a-visa-application"
+      ]
+    },
+    {
+      "nationalities": ["ALB", "AND", "ATG", "ARG", "AUS", "BHS", "BRB", "BIH", "BRA", "BRN", "CAN", "CHL", "COL", "CRI", "DMA", "SLV", "GEO", "GRD", "GTM", "VAT", "HND", "ISR", "JPN", "KIR", "MYS", "MHL", "MUS", "MEX", "FSM", "MDA", "MCO", "MNE", "NZL", "NIC", "MKD", "PLW", "PAN", "PRY", "PER", "WSM", "SMR", "SRB", "SYC", "SGP", "SLB", "KOR", "KNA", "LCA", "VCT", "TLS", "TON", "TTO", "TUV", "UKR", "ARE", "GBR", "USA", "URY", "VEN", "HKG", "MAC", "TWN", "XKX", "DEU", "FRA"],
+      "category": "tourist_visa",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Visa-exempt nationalities (and EU/Schengen citizens) do not need a tourist visa for short stays"
+      ],
+      "source_urls": [
+        "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/who-needs-a-visa",
+        "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/schengen-area"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "eta",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "The official MFA visa portal presents the complete channel set (visa exemption or consular Schengen short-stay visa) with no electronic travel authorisation requirement as of 2026-07-23",
+        "The EU's ETIAS is planned for visa-exempt travellers but its operational status/start date could not be verified from a fetchable official source (see unresolved)"
+      ],
+      "source_urls": [
+        "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/who-needs-a-visa",
+        "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/type-of-visas",
+        "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/where-should-you-lodge-a-visa-application"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "visa_on_arrival_tourist",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Portugal operates no tourist visa-on-arrival: the official MFA portal's channel set is visa exemption or a Schengen short-stay visa obtained before travel through consular channels"
+      ],
+      "source_urls": [
+        "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/who-needs-a-visa",
+        "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/where-should-you-lodge-a-visa-application"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "evisa_tourist",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Portugal does not issue a standalone tourist eVisa: the MFA 'E-Visa' portal (pedidodevistos.mne.gov.pt) is an online submission/appointment channel for the consular Schengen short-stay visa, which is still processed and issued by the consular network"
+      ],
+      "source_urls": [
+        "https://pedidodevistos.mne.gov.pt/VistosOnline/?lang=ENG",
+        "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/where-should-you-lodge-a-visa-application"
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "policy_kind": "visa_exemption_list",
+      "policy_name": "List of nationalities exempt from holding a visa (short stay / Schengen)",
+      "description": "Portugal's MFA visa portal publishes the list of nationalities exempt from the short-stay (Schengen) visa requirement, including special provisions for Hong Kong SAR and Macao SAR passports, Taiwan passports containing an identity card number, and biometric-passport-only exemptions for certain Western Balkan and Eastern Partnership countries.",
+      "applies_to_nationalities": ["ALB", "AND", "ATG", "ARG", "AUS", "BHS", "BRB", "BIH", "BRA", "BRN", "CAN", "CHL", "COL", "CRI", "DMA", "SLV", "GEO", "GRD", "GTM", "VAT", "HND", "ISR", "JPN", "KIR", "MYS", "MHL", "MUS", "MEX", "FSM", "MDA", "MCO", "MNE", "NZL", "NIC", "MKD", "PLW", "PAN", "PRY", "PER", "WSM", "SMR", "SRB", "SYC", "SGP", "SLB", "KOR", "KNA", "LCA", "VCT", "TLS", "TON", "TTO", "TUV", "UKR", "ARE", "GBR", "USA", "URY", "VEN", "HKG", "MAC", "TWN", "XKX"],
+      "conditions": [
+        "Biometric passport required for Albania, Bosnia and Herzegovina, Georgia, Moldova, Montenegro, North Macedonia, Serbia and Ukraine",
+        "Taiwan passports must include an identity card number",
+        "Hong Kong and Macao exemptions apply to SAR passports"
+      ],
+      "maximum_stay": "90 days in any 180-day period",
+      "official_source_urls": [
+        "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/who-needs-a-visa",
+        "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/type-of-visas"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "consular_visa_regime",
+      "policy_name": "Schengen short-stay visa (tourism) via the Portuguese consular network",
+      "description": "Nationalities not on the exemption list must obtain a Schengen short-stay visa (up to 90 days in each 180-day period; tourism among the covered purposes; single or multiple entry) before travel. Applications are lodged at the Portuguese embassy/consulate designated for the applicant's country of residence, via external service providers (VFS Global, TLS Contact, BLS International) where designated, or online through the MFA E-Visa platform; in some countries another EU member state's embassy processes applications in representation of Portugal.",
+      "applies_to_nationalities": ["ALL_OTHERS"],
+      "conditions": [
+        "Travel medical insurance covering the entire stay required",
+        "Proof of means of subsistence (e.g. last three bank statements), return travel reservation, and accommodation proof (hotel reservation or statement of responsibility) required"
+      ],
+      "maximum_stay": "90 days in any 180-day period",
+      "official_source_urls": [
+        "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/type-of-visas",
+        "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/where-should-you-lodge-a-visa-application",
+        "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/required-documentation/short-stay-visa"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "Schengen area membership / EU free movement",
+      "description": "Portugal is a Schengen area member. Nationals of the other Schengen/EU member states listed on the official MFA page (including Germany and France) are not subject to Portugal's short-stay visa regime.",
+      "applies_to_nationalities": ["AUT", "BEL", "BGR", "CZE", "HRV", "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HUN", "ISL", "ITA", "LVA", "LTU", "LIE", "LUX", "MLT", "NOR", "NLD", "POL", "ROU", "SVK", "SVN", "ESP", "SWE", "CHE"],
+      "conditions": [
+        "Derived from the official MFA Schengen-area membership list; the page does not itself elaborate free-movement rules"
+      ],
+      "maximum_stay": null,
+      "official_source_urls": [
+        "https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/schengen-area"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    }
+  ],
+  "fees": [
+    {
+      "visa_category": "schengen_short_stay_tourist",
+      "visa_subtype": "adult",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 90,
+      "government_fee_currency": "EUR",
+      "refundability": "Non-refundable: payment does not imply granting of the visa, nor does it entail refund in case of refusal",
+      "accepted_payment_methods": null,
+      "source_urls": ["https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/visa-fees"]
+    },
+    {
+      "visa_category": "schengen_short_stay_tourist",
+      "visa_subtype": "child_6_to_11",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 45,
+      "government_fee_currency": "EUR",
+      "refundability": "Non-refundable: payment does not imply granting of the visa, nor does it entail refund in case of refusal",
+      "accepted_payment_methods": null,
+      "source_urls": ["https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/visa-fees"]
+    },
+    {
+      "visa_category": "schengen_short_stay_tourist",
+      "visa_subtype": "child_under_6",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 0,
+      "government_fee_currency": "EUR",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": ["https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/visa-fees"]
+    },
+    {
+      "visa_category": "schengen_short_stay_tourist",
+      "visa_subtype": "visa_facilitation_agreement",
+      "applies_to_nationalities": ["ALB", "ARM", "AZE", "BIH", "BLR", "GEO", "MKD", "MDA", "MNE", "SRB", "UKR"],
+      "government_fee_amount": 35,
+      "government_fee_currency": "EUR",
+      "refundability": "Non-refundable: payment does not imply granting of the visa, nor does it entail refund in case of refusal",
+      "accepted_payment_methods": null,
+      "source_urls": ["https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/visa-fees"]
+    },
+    {
+      "visa_category": "schengen_short_stay_tourist",
+      "visa_subtype": "cabo_verde_adult",
+      "applies_to_nationalities": ["CPV"],
+      "government_fee_amount": 67.75,
+      "government_fee_currency": "EUR",
+      "refundability": "Non-refundable: payment does not imply granting of the visa, nor does it entail refund in case of refusal",
+      "accepted_payment_methods": null,
+      "source_urls": ["https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/visa-fees"]
+    },
+    {
+      "visa_category": "schengen_short_stay_tourist",
+      "visa_subtype": "cabo_verde_child_12_to_18",
+      "applies_to_nationalities": ["CPV"],
+      "government_fee_amount": 33.75,
+      "government_fee_currency": "EUR",
+      "refundability": "Non-refundable: payment does not imply granting of the visa, nor does it entail refund in case of refusal",
+      "accepted_payment_methods": null,
+      "source_urls": ["https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/visa-fees"]
+    }
+  ],
+  "portals": [
+    {
+      "portal_kind": "foreign_ministry",
+      "url": "https://vistos.mne.gov.pt/en/",
+      "operator": "Ministério dos Negócios Estrangeiros (Portugal Ministry of Foreign Affairs)",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["schengen_short_stay_tourist", "national_visas", "airport_transit"],
+      "source_urls": ["https://vistos.mne.gov.pt/en/"]
+    },
+    {
+      "portal_kind": "evisa_portal",
+      "url": "https://pedidodevistos.mne.gov.pt/VistosOnline/?lang=ENG",
+      "operator": "Ministério dos Negócios Estrangeiros (Portugal Ministry of Foreign Affairs)",
+      "operator_kind": "government",
+      "official_linking_source": "https://vistos.mne.gov.pt/en/",
+      "supported_categories": ["schengen_short_stay_tourist", "national_visas"],
+      "source_urls": [
+        "https://pedidodevistos.mne.gov.pt/VistosOnline/?lang=ENG",
+        "https://vistos.mne.gov.pt/en/"
+      ]
+    }
+  ],
+  "passport_validity": {
+    "rule_kind": "months_after_departure",
+    "months": 3,
+    "min_blank_pages": null,
+    "condition_text": "Authentic and Valid (over 3 months after the date of exit) Travel Document",
+    "source_urls": ["https://vistos.mne.gov.pt/en/short-stay-visas-schengen/required-documentation/short-stay-visa"]
+  },
+  "jurisdictions": [],
+  "unresolved": [
+    "ETIAS (EU electronic travel authorisation for visa-exempt travellers): official EU pages could not be machine-verified. Tried https://travel-europe.europa.eu/etias_en and https://travel-europe.europa.eu/etias/what-etias_en (pages are JavaScript-rendered; WebFetch returned only the page title) and https://home-affairs.ec.europa.eu/policies/schengen/smart-borders/european-travel-information-authorisation-system-etias_en (HTTP 404). Search-result snippets (not usable as evidence) indicate ETIAS is expected to start in the last quarter of 2026; no ETA policy row recorded and eta disposition is NOT_APPLICABLE as of 2026-07-23 based on the official MFA channel set.",
+    "AIMA (Agência para a Integração, Migrações e Asilo), Portugal's immigration authority: fetch of https://aima.gov.pt/en failed with TLS error 'unable to verify the first certificate', so no immigration_authority portal entry was recorded.",
+    "Exact country-specific URLs for authorized external service providers (VFS Global, TLS Contact, BLS International are named on the official where-to-apply page) were not captured, so no authorized_visa_center portal entries were recorded; official_linking_source would be https://vistos.mne.gov.pt/en/short-stay-visas-schengen/general-information/where-should-you-lodge-a-visa-application.",
+    "Blank-page passport requirement: not stated on the official MFA pages fetched.",
+    "Maximum stay for visa-EXEMPT visitors is not restated on the exemption-list page itself; the recorded 90/180-day limit comes from the MFA portal's general Schengen short-stay definition (type-of-visas page).",
+    "The who-needs-a-visa page does not cite Regulation (EU) 2018/1806 by number; the published lists align with it but the regulation text was not separately verified."
+  ]
+}

@@ -1,0 +1,447 @@
+{
+  "destination": "AUT",
+  "retrieved_at": "2026-07-23T07:34:14Z",
+  "research_status": "verified",
+  "sources": [
+    {
+      "search_query": "Austria foreign ministry tourist visa entry requirements bmeia.gv.at English",
+      "original_url": "https://www.bmeia.gv.at/en/travel-stay/entrance-and-residence-in-austria/visa",
+      "final_url": "https://www.bmeia.gv.at/en/travel-stay/entrance-and-residence-in-austria/visa",
+      "redirect_chain": [],
+      "final_hostname": "www.bmeia.gv.at",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "The Schengen visa C is intended for touristic, business or visiting purposes (without gainful employment) for a maximum stay of 90 days per 180 days. Nationals of those states for which the visa requirement has been lifted by means of an EU regulation are entitled to visa-free entry to Austria for a maximum of 90 days per 180 days in case of no gainful employment. Please check the information on whether you require a visa or not on the website of the Federal Ministry of the Interior. [Visa applicants must present] a valid passport not older than 10 years, valid for three months after expiry of the visa and with two free pages. [Schengen visa fee] EUR 90; ages 6-12: EUR 45; exempt: children under 6, students/pupils on study trips, researchers, non-profit representatives under 25. Applications must be submitted at the competent Austrian Consulate which is placed in the country where the applicant legally resides. As a rule, the processing time of an admissible Schengen visa application should not exceed 15 calendar days.",
+      "retrieved_at": "2026-07-23T07:26:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Austria foreign ministry tourist visa entry requirements bmeia.gv.at English",
+      "original_url": "https://www.oesterreich.gv.at/en/themen/menschen_aus_anderen_staaten/visum_fuer_oesterreich/Seite.3550020",
+      "final_url": "https://www.oesterreich.gv.at/en/themen/menschen_aus_anderen_staaten/visum_fuer_oesterreich/Seite.3550020",
+      "redirect_chain": [],
+      "final_hostname": "www.oesterreich.gv.at",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "A type C visa can be issued for a total stay of 90 days within a 180-day period. All visa types are issued by representation offices abroad (BMEIA). [Other visa types: Type A airport transit visa (limited use, specific nationalities only); Type D long-stay visa (91 days to 6 months).] The page directs readers to the List of visa requirements (BMI) for specific eligibility details.",
+      "retrieved_at": "2026-07-23T07:26:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Austria visa exemption list nationalities visa-free bmeia (page is linked as the visa-requirement list from the BMEIA visa page)",
+      "original_url": "https://www.bmi.gv.at/202/Fremdenpolizei_und_Grenzkontrolle/Visumpflichtige_Laender/start.aspx",
+      "final_url": "https://www.bmi.gv.at/202/Fremdenpolizei_und_Grenzkontrolle/Visumpflichtige_Laender/start.aspx",
+      "redirect_chain": [],
+      "final_hostname": "www.bmi.gv.at",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visapflichten und Visabefreiungen fuer die Einreise in die EU+Oesterreich (Stand: 15.7.2026). Land/Personengruppen — EU-Visumpflicht / EU-Visumbefreiung (regulaer 90 Tage innerhalb von 180 Tagen) / Nationale Visumbefreiung (Oesterreich): Australien: Nein / Ja / Ja: 3 Monate (alle Kategorien). Brasilien: Nein / Ja. China: Ja / Ja, nur Diplomatenpaesse / Nein. Deutschland: EU-Freizuegigkeit. Frankreich: EU-Freizuegigkeit. Grossbritannien und Nordirland: Nein / Ja: Die Visumbefreiung gilt fuer britische Buerger sowie britische Staatsangehoerige, die nicht britische Buerger sind. Hong Kong: Nein / Ja: Visumbefreiung gilt nur fuer Inhaber des Passes \"Hong Kong Special Administrative Region\". Indien: Ja / Nein / Ja: Diplomatenpass: 90 Tage innerhalb von 180 Tagen. Japan: Nein / Ja / Ja: 6 Monate (alle Kategorien) (EES-Sonderregelung Altabkommen). Kanada: Nein / Ja / Ja: 3 Monate (alle Kategorien). Suedkorea: Nein / Ja / Ja: Diplomatenpass + Dienstpass: 180 Tage + gewoehnl. Reisepaesse: 90 Tage. Russische Foederation: Ja / Nein; EU-Visaerleichterungsabkommen (Visumbefreiung fuer Diplomatenpaesse) ausgesetzt / Nein. Singapur: Nein / Ja / Ja: 3 Monate (alle Kategorien). Taiwan: Nein / Ja, visumfrei nur Inhaber von Reisepaessen mit Personalausweisnummer / Nein. Vereinigte Arabische Emirate: Nein / Ja / Nein. Vereinigte Staaten von Amerika: Nein / Ja / Nein.",
+      "retrieved_at": "2026-07-23T07:28:00Z",
+      "effective_date_evidence": "(Stand: 15.7.2026)",
+      "page_language": "de"
+    },
+    {
+      "search_query": "linked from BMI page Visumpflichtige Laender (Information zu ETIAS)",
+      "original_url": "https://www.bmi.gv.at/202/Fremdenpolizei_und_Grenzkontrolle/information_zu_etias/start.html",
+      "final_url": "https://www.bmi.gv.at/202/Fremdenpolizei_und_Grenzkontrolle/information_zu_etias/start.html",
+      "redirect_chain": [],
+      "final_hostname": "www.bmi.gv.at",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Das Europaeische Reiseinformations- und -genehmigungssystem (ETIAS) ist derzeit noch nicht in Betrieb. Visumbefreite Drittstaatsangehoerige muessen voraussichtlich ab Quartal 4/2026 mit Aenderungen bei der Einreise in das Schengengebiet rechnen. Ab diesem Zeitpunkt benoetigen visumbefreite Drittstaatsangehoerige eine ETIAS-Reisegenehmigung, um in das Schengengebiet einzureisen. Die Beantragung kostet sieben Euro, wobei einige Reisende von der Gebuehr befreit sind. Die Beantragung einer ETIAS-Reisegenehmigung erfolgt durch das Ausfuellen des Antragsformulars ueber die offizielle ETIAS-Website oder die mobile ETIAS-Anwendung. [Official website referenced: travel-europe.europa.eu]",
+      "retrieved_at": "2026-07-23T07:33:00Z",
+      "effective_date_evidence": "voraussichtlich ab Quartal 4/2026",
+      "page_language": "de"
+    },
+    {
+      "search_query": "Austria foreign ministry tourist visa entry requirements bmeia.gv.at English",
+      "original_url": "https://www.bmeia.gv.at/en/austrian-embassy-london/travelling-to-austria/entry-requirements-visa-and-immigration/do-i-need-a-visa",
+      "final_url": "https://www.bmeia.gv.at/en/austrian-embassy-london/travelling-to-austria/entry-requirements-visa-and-immigration/do-i-need-a-visa",
+      "redirect_chain": [],
+      "final_hostname": "www.bmeia.gv.at",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Holders of British Passports don't need a visa for touristic travel, visiting friends & family or business travel (without gainful work in Austria) for up to 90 days in the Schengen area within a rolling 180-days-period. All holders of Travel Documents (black and blue) and Certificates of Identity (CID), i.e. issued by Great Britain NEED to obtain a visa to travel to Austria! [The page lists nationalities requiring a Schengen visa, including citizens of Angola, Armenia, China, India, Philippines, Russia, Turkey and others (approx. 2-week processing), and a second group including Afghanistan, Algeria, Bangladesh, Egypt, Iran, Iraq, Pakistan, Syria and others (approx. 3-week processing).]",
+      "retrieved_at": "2026-07-23T07:27:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Austria visa exemption list nationalities visa-free bmeia",
+      "original_url": "https://www.bmeia.gv.at/en/austrian-embassy-new-delhi/travels-to-austria/entry-and-residence/how-to-apply",
+      "final_url": "https://www.bmeia.gv.at/en/austrian-embassy-new-delhi/travels-to-austria/entry-and-residence/how-to-apply",
+      "redirect_chain": [],
+      "final_hostname": "www.bmeia.gv.at",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "The Austrian Embassy New Delhi has outsourced the visa application and the return of the passports to the external service provider VFS. [Applications for Schengen visas (up to 6 months) must be lodged at VFS Application Centers in India, Bhutan, Maldives, Nepal, or Sri Lanka.] For visa appointments (up to 6 months) please go to the website of VFS [https://www.vfsglobal.com/en/individuals/index.html]. Visa applications must generally be submitted no earlier than 6 months and no later than 15 days before departure. [Consular fees are charged in Indian Rupees (INR) at current exchange rates.]",
+      "retrieved_at": "2026-07-23T07:27:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "bmeia.gv.at austrian embassy washington entry visa free 90 days Austria US citizens",
+      "original_url": "https://www.bmeia.gv.at/en/consular-section-of-the-austrian-embassy-in-washington/travel-to-austria/entrance-and-residence/visa",
+      "final_url": "https://www.bmeia.gv.at/en/consular-section-of-the-austrian-embassy-in-washington/travel-to-austria/entrance-and-residence/visa",
+      "redirect_chain": [],
+      "final_hostname": "www.bmeia.gv.at",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Citizens of EU member states, European Economic Area (EEA) and Switzerland do not need a visa for entering the Republic of Austria. Nationals of those states for which the visa requirement has been lifted by means of an EU regulation are entitled to visa-free entry to Austria for a maximum of 90 days per 180 days in case of no gainful employment. [Visa applicants must present] a valid passport not older than 10 years, valid for three months after expiry of the visa and with two free pages. [Schengen visa (Category C) applications are made at] the competent Austrian Consulate, which is placed in the country where the applicant legally resides. The Schengen visa fee is EUR 90 for adults.",
+      "retrieved_at": "2026-07-23T07:30:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "bmeia.gv.at austrian office taipei visa Taiwan entry Austria",
+      "original_url": "https://www.bmeia.gv.at/en/austrian-office-taipei/travels-to-austria/entrance-and-residence/visa",
+      "final_url": "https://www.bmeia.gv.at/en/austrian-office-taipei/travels-to-austria/entrance-and-residence/visa",
+      "redirect_chain": [],
+      "final_hostname": "www.bmeia.gv.at",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Nationals of those states for which the visa requirement has been lifted by means of an EU regulation are entitled to visa-free entry to Austria for a maximum of 90 days per 180 days in case of no gainful employment. Please check the information on whether you require a visa or not on the website of the Federal Ministry of the Interior. Visa for travels to Austria have to be applied for at the competent Austrian Consulate, which is placed in the country where the applicant legally resides. [A] valid passport not older than 10 years, valid for three months after expiry of the visa and with two free pages, is presented.",
+      "retrieved_at": "2026-07-23T07:30:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "bmeia.gv.at austrian embassy singapore visa entry residence Singapore citizens",
+      "original_url": "https://www.bmeia.gv.at/en/austrian-embassy-singapore/travels-to-austria/entrance-and-residence/visa/",
+      "final_url": "https://www.bmeia.gv.at/en/austrian-embassy-singapore/travels-to-austria/entrance-and-residence/visa/",
+      "redirect_chain": [],
+      "final_hostname": "www.bmeia.gv.at",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Citizens of EU member states, European Economic Area (EEA) and Switzerland do not need a visa for entering the Republic of Austria. [Schengen visa fees:] EUR 90 for adults and EUR 45 for children aged 6-12. In some countries, the Austrian Consulates also offer the possibility of submitting visa applications to an external service provider. For a service fee, the service provider receives applications and forwards them to the competent Austrian Consulate for examining and decision.",
+      "retrieved_at": "2026-07-23T07:30:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "bmeia.gv.at austrian embassy washington entry visa free 90 days Austria US citizens",
+      "original_url": "https://www.bmeia.gv.at/en/austrian-embassy-tokyo/travels-to-austria/entrance-and-residence/visa",
+      "final_url": "https://www.bmeia.gv.at/en/austrian-embassy-tokyo/travels-to-austria/entrance-and-residence/visa",
+      "redirect_chain": [],
+      "final_hostname": "www.bmeia.gv.at",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Nationals of those states for which the visa requirement has been lifted by means of an EU regulation are entitled to visa-free entry to Austria for a maximum of 90 days per 180 days in case of no gainful employment. A valid passport not older than 10 years, valid for three months after expiry of the visa and with two free pages, is presented. [Schengen visa (short-stay) fee:] EUR 90.",
+      "retrieved_at": "2026-07-23T07:30:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "bmeia.gv.at austrian embassy abu dhabi visa UAE citizens Austria entry",
+      "original_url": "https://www.bmeia.gv.at/en/oeb-abu-dhabi/travelling-to-austria/entrance-and-residence/how-to-apply",
+      "final_url": "https://www.bmeia.gv.at/en/oeb-abu-dhabi/travelling-to-austria/entrance-and-residence/how-to-apply",
+      "redirect_chain": [],
+      "final_hostname": "www.bmeia.gv.at",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Nationals of EU/EEA countries and Swiss nationals do not need a visa for entering Austria. Visa applications can be only accepted by people with a valid residence permit of the United Arab Emirates. [The embassy] has outsourced its visa services to the external service provider VFS Global. Applicants can submit their Schengen-Visa application to one of the VFS Visa Application Centers in Abu Dhabi or Dubai [https://visa.vfsglobal.com/are/en/aut]. Applications have to be lodged personally. [Fees:] Visa C: Free (ages 0-6), 45 EUR (ages 6-12), 90 EUR (above 12).",
+      "retrieved_at": "2026-07-23T07:30:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    }
+  ],
+  "dispositions": [
+    {
+      "nationalities": ["DEU", "FRA"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": null,
+      "conditions": [
+        "EU-Freizuegigkeit (EU freedom of movement) per BMI list: no visa requirement in any category; stay not limited to 90/180 days under EU free-movement rules",
+        "Citizens of EU member states, EEA and Switzerland do not need a visa for entering the Republic of Austria (BMEIA)"
+      ],
+      "source_urls": [
+        "https://www.bmi.gv.at/202/Fremdenpolizei_und_Grenzkontrolle/Visumpflichtige_Laender/start.aspx",
+        "https://www.bmeia.gv.at/en/consular-section-of-the-austrian-embassy-in-washington/travel-to-austria/entrance-and-residence/visa"
+      ]
+    },
+    {
+      "nationalities": ["USA", "GBR", "SGP", "HKG", "TWN", "JPN", "KOR", "AUS", "CAN", "ARE", "BRA"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days per 180 days",
+      "conditions": [
+        "No gainful employment during the visa-free stay",
+        "HKG: exemption applies only to holders of the 'Hong Kong Special Administrative Region' passport",
+        "TWN: exemption applies only to holders of Taiwan passports containing an identity card number (Personalausweisnummer)",
+        "GBR: exemption covers British citizens and the British nationality classes listed by the BMI (BN(O), British Overseas Territories Citizens, British Overseas Citizens, British Protected Persons, British Subjects); holders of GB Travel Documents and Certificates of Identity DO need a visa",
+        "Austria additionally lists national (bilateral) visa exemptions beyond the EU 90/180 rule for some of these countries (e.g. JPN 6 months; AUS, CAN, SGP 3 months; KOR ordinary passports 90 days; BRA ordinary passports 3 months) under the EES-Sonderregelung Altabkommen"
+      ],
+      "source_urls": [
+        "https://www.bmi.gv.at/202/Fremdenpolizei_und_Grenzkontrolle/Visumpflichtige_Laender/start.aspx",
+        "https://www.bmeia.gv.at/en/austrian-embassy-london/travelling-to-austria/entry-requirements-visa-and-immigration/do-i-need-a-visa",
+        "https://www.bmeia.gv.at/en/travel-stay/entrance-and-residence-in-austria/visa"
+      ]
+    },
+    {
+      "nationalities": ["DEU", "FRA", "USA", "GBR", "SGP", "HKG", "TWN", "JPN", "KOR", "AUS", "CAN", "ARE", "BRA"],
+      "category": "tourist_visa",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Visa-exempt for short tourist stays; a Schengen C tourist visa is not required (subject to the passport-type conditions recorded in the visa_free_entry rows)"
+      ],
+      "source_urls": [
+        "https://www.bmi.gv.at/202/Fremdenpolizei_und_Grenzkontrolle/Visumpflichtige_Laender/start.aspx"
+      ]
+    },
+    {
+      "nationalities": ["CHN", "IND", "RUS"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "90 days per 180 days (Schengen visa C)",
+      "conditions": [
+        "BMI list: EU-Visumpflicht 'Ja' for China, India and the Russian Federation (ordinary passports)",
+        "Apply at the competent Austrian Consulate in the country of legal residence; in several countries the consulate has outsourced lodgement to VFS visa application centers (e.g. India: 'The Austrian Embassy New Delhi has outsourced the visa application ... to the external service provider VFS')",
+        "CHN: EU exemption only for diplomatic passports; IND: Austrian national exemption only for diplomatic passports (90 days); RUS: EU visa-facilitation exemption for diplomatic passports suspended",
+        "Applications no earlier than 6 months and no later than 15 days before departure; processing normally up to 15 calendar days"
+      ],
+      "source_urls": [
+        "https://www.bmi.gv.at/202/Fremdenpolizei_und_Grenzkontrolle/Visumpflichtige_Laender/start.aspx",
+        "https://www.bmeia.gv.at/en/austrian-embassy-london/travelling-to-austria/entry-requirements-visa-and-immigration/do-i-need-a-visa",
+        "https://www.bmeia.gv.at/en/austrian-embassy-new-delhi/travels-to-austria/entry-and-residence/how-to-apply"
+      ]
+    },
+    {
+      "nationalities": ["ALL_OTHERS"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "90 days per 180 days (Schengen visa C)",
+      "conditions": [
+        "Nationals of states for which the visa requirement has NOT been lifted by EU regulation must obtain a Schengen visa C before travel",
+        "Visa for travels to Austria have to be applied for at the competent Austrian Consulate, which is placed in the country where the applicant legally resides; some consulates use an external service provider (VFS) for lodgement"
+      ],
+      "source_urls": [
+        "https://www.bmeia.gv.at/en/travel-stay/entrance-and-residence-in-austria/visa",
+        "https://www.bmi.gv.at/202/Fremdenpolizei_und_Grenzkontrolle/Visumpflichtige_Laender/start.aspx",
+        "https://www.oesterreich.gv.at/en/themen/menschen_aus_anderen_staaten/visum_fuer_oesterreich/Seite.3550020"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "evisa_tourist",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Austria operates no tourist eVisa: 'All visa types are issued by representation offices abroad (BMEIA)' and visas 'have to be applied for at the competent Austrian Consulate'"
+      ],
+      "source_urls": [
+        "https://www.oesterreich.gv.at/en/themen/menschen_aus_anderen_staaten/visum_fuer_oesterreich/Seite.3550020",
+        "https://www.bmeia.gv.at/en/travel-stay/entrance-and-residence-in-austria/visa"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "eta",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "The EU ETIAS travel authorisation is NOT yet in operation as of 2026-07-23: 'Das Europaeische Reiseinformations- und -genehmigungssystem (ETIAS) ist derzeit noch nicht in Betrieb' (BMI); expected from Q4/2026, fee EUR 7, for visa-exempt third-country nationals"
+      ],
+      "source_urls": [
+        "https://www.bmi.gv.at/202/Fremdenpolizei_und_Grenzkontrolle/information_zu_etias/start.html"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "visa_on_arrival_tourist",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "No visa-on-arrival channel: visas must be obtained before travel from the competent Austrian Consulate abroad ('All visa types are issued by representation offices abroad')"
+      ],
+      "source_urls": [
+        "https://www.oesterreich.gv.at/en/themen/menschen_aus_anderen_staaten/visum_fuer_oesterreich/Seite.3550020",
+        "https://www.bmeia.gv.at/en/austrian-office-taipei/travels-to-austria/entrance-and-residence/visa"
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "policy_kind": "visa_exemption_list",
+      "policy_name": "Visapflichten und Visabefreiungen fuer die Einreise in die EU+Oesterreich (BMI, Stand 15.7.2026) — EU-Visumbefreiung",
+      "description": "Official Austrian Ministry of the Interior list of nationalities exempt from the EU short-stay visa requirement (regular 90 days within 180 days). 63 countries/territories carry EU-Visumpflicht 'Nein'. Conditions apply for some: Albania, Bosnia and Herzegovina, Moldova, Montenegro, North Macedonia, Serbia, Ukraine, Kosovo (biometric passports only); Georgia (biometric ordinary passports only); Hong Kong ('Hong Kong Special Administrative Region' passport only); Macao (Regiao Administrativa Especial de Macau passport only); Taiwan (passports with identity card number only); Mauritius and Seychelles (3 months within 6 months).",
+      "applies_to_nationalities": ["ALB", "AND", "ATG", "ARG", "AUS", "BHS", "BRB", "BIH", "BRA", "BRN", "CHL", "CRI", "DMA", "SLV", "GEO", "GRD", "GBR", "GTM", "VAT", "HND", "HKG", "ISR", "JPN", "CAN", "KIR", "COL", "KOR", "XKX", "MAC", "MYS", "MHL", "MUS", "MEX", "FSM", "MDA", "MCO", "MNE", "NZL", "NIC", "MKD", "PLW", "PAN", "PRY", "PER", "SLB", "WSM", "SMR", "SRB", "SYC", "SGP", "LCA", "KNA", "VCT", "TWN", "TLS", "TON", "TTO", "TUV", "UKR", "URY", "VEN", "ARE", "USA"],
+      "conditions": [
+        "No gainful employment during the visa-free stay",
+        "Biometric-passport-only conditions for ALB, BIH, GEO, XKX, MDA, MNE, MKD, SRB, UKR",
+        "SAR-passport-only conditions for HKG and MAC; identity-card-number condition for TWN",
+        "MUS and SYC: 3 months within 6 months instead of 90/180"
+      ],
+      "maximum_stay": "90 days within 180 days (regular)",
+      "official_source_urls": ["https://www.bmi.gv.at/202/Fremdenpolizei_und_Grenzkontrolle/Visumpflichtige_Laender/start.aspx"],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "EU-Freizuegigkeit (EU/EEA/Swiss freedom of movement)",
+      "description": "Citizens of EU member states, EEA states (Iceland, Liechtenstein, Norway) and Switzerland do not need a visa for entering Austria; the BMI list marks all three visa columns 'EU-Freizuegigkeit' for these 30 countries.",
+      "applies_to_nationalities": ["BEL", "BGR", "DNK", "DEU", "EST", "FIN", "FRA", "GRC", "IRL", "ISL", "ITA", "HRV", "LVA", "LIE", "LTU", "LUX", "MLT", "NLD", "NOR", "POL", "PRT", "ROU", "SWE", "CHE", "SVK", "SVN", "ESP", "CZE", "HUN", "CYP"],
+      "conditions": ["Right of entry and residence under EU free-movement law; not subject to the 90/180-day short-stay limit"],
+      "maximum_stay": null,
+      "official_source_urls": [
+        "https://www.bmi.gv.at/202/Fremdenpolizei_und_Grenzkontrolle/Visumpflichtige_Laender/start.aspx",
+        "https://www.bmeia.gv.at/en/consular-section-of-the-austrian-embassy-in-washington/travel-to-austria/entrance-and-residence/visa"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "consular_visa_regime",
+      "policy_name": "Schengen visa C (tourist/visit) via Austrian representations abroad",
+      "description": "Nationals not exempt by EU regulation need a Schengen visa C for tourism (max 90 days per 180 days), applied for in person at the competent Austrian Consulate in the country of legal residence; several consulates have outsourced lodgement to the external service provider VFS (e.g. India, UAE). Applications no earlier than 6 months and no later than 15 days before departure; standard processing up to 15 calendar days.",
+      "applies_to_nationalities": ["ALL_OTHERS"],
+      "conditions": [
+        "Personal appearance and appointment required (also for children)",
+        "Passport not older than 10 years, valid for three months after expiry of the visa, with two free pages"
+      ],
+      "maximum_stay": "90 days per 180 days",
+      "official_source_urls": [
+        "https://www.bmeia.gv.at/en/travel-stay/entrance-and-residence-in-austria/visa",
+        "https://www.bmeia.gv.at/en/austrian-embassy-new-delhi/travels-to-austria/entry-and-residence/how-to-apply",
+        "https://www.bmeia.gv.at/en/oeb-abu-dhabi/travelling-to-austria/entrance-and-residence/how-to-apply"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "eta_program",
+      "policy_name": "ETIAS (European Travel Information and Authorisation System) — NOT yet in operation",
+      "description": "Per the Austrian Ministry of the Interior, ETIAS is 'derzeit noch nicht in Betrieb' (currently not yet in operation). Visa-exempt third-country nationals are expected to need an ETIAS travel authorisation for Schengen entry from approximately Q4/2026; fee EUR 7 (some travelers exempt); application via the official EU ETIAS website (travel-europe.europa.eu) or mobile app. Not a requirement at the snapshot date 2026-07-23.",
+      "applies_to_nationalities": ["ALL"],
+      "conditions": ["Will apply to visa-exempt third-country nationals once operational; expected start Q4/2026"],
+      "maximum_stay": null,
+      "official_source_urls": ["https://www.bmi.gv.at/202/Fremdenpolizei_und_Grenzkontrolle/information_zu_etias/start.html"],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "Nationale Visumbefreiung (Oesterreich) — bilateral national visa exemptions (EES-Sonderregelung Altabkommen)",
+      "description": "In addition to the EU 90/180 exemption, Austria's BMI list records national (bilateral) visa exemptions for stays in Austria for some countries, flagged 'EES-Sonderregelung Altabkommen': e.g. Japan 6 months (all categories); Australia, Canada, Singapore 3 months (all categories); South Korea ordinary passports 90 days (diplomatic/service 180 days); Brazil ordinary passports 3 months.",
+      "applies_to_nationalities": ["JPN", "AUS", "CAN", "SGP", "KOR", "BRA"],
+      "conditions": ["Applies to the stay in Austria under the respective bilateral agreement; see BMI list per-country entries"],
+      "maximum_stay": "varies by country (3-6 months)",
+      "official_source_urls": ["https://www.bmi.gv.at/202/Fremdenpolizei_und_Grenzkontrolle/Visumpflichtige_Laender/start.aspx"],
+      "effective_from": null,
+      "effective_until": null
+    }
+  ],
+  "fees": [
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "Schengen visa C (adult, age over 12)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 90,
+      "government_fee_currency": "EUR",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://www.bmeia.gv.at/en/travel-stay/entrance-and-residence-in-austria/visa",
+        "https://www.bmeia.gv.at/en/oeb-abu-dhabi/travelling-to-austria/entrance-and-residence/how-to-apply",
+        "https://www.bmeia.gv.at/en/austrian-embassy-singapore/travels-to-austria/entrance-and-residence/visa/"
+      ]
+    },
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "Schengen visa C (child age 6-12)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 45,
+      "government_fee_currency": "EUR",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://www.bmeia.gv.at/en/travel-stay/entrance-and-residence-in-austria/visa",
+        "https://www.bmeia.gv.at/en/oeb-abu-dhabi/travelling-to-austria/entrance-and-residence/how-to-apply"
+      ]
+    },
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "Schengen visa C (child under 6) — free; also free for pupils/students on study trips, researchers, and non-profit representatives aged 25 or under",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 0,
+      "government_fee_currency": "EUR",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://www.bmeia.gv.at/en/travel-stay/entrance-and-residence-in-austria/visa",
+        "https://www.bmeia.gv.at/en/oeb-abu-dhabi/travelling-to-austria/entrance-and-residence/how-to-apply"
+      ]
+    },
+    {
+      "visa_category": "eta",
+      "visa_subtype": "ETIAS travel authorisation (NOT yet in operation; expected from Q4/2026)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 7,
+      "government_fee_currency": "EUR",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": ["https://www.bmi.gv.at/202/Fremdenpolizei_und_Grenzkontrolle/information_zu_etias/start.html"]
+    }
+  ],
+  "portals": [
+    {
+      "portal_kind": "foreign_ministry",
+      "url": "https://www.bmeia.gv.at/en/travel-stay/entrance-and-residence-in-austria/visa",
+      "operator": "Federal Ministry for European and International Affairs (BMEIA)",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["tourist_visa (Schengen visa C)", "visa_free_entry information"],
+      "source_urls": ["https://www.bmeia.gv.at/en/travel-stay/entrance-and-residence-in-austria/visa"]
+    },
+    {
+      "portal_kind": "immigration_authority",
+      "url": "https://www.bmi.gv.at/202/Fremdenpolizei_und_Grenzkontrolle/Visumpflichtige_Laender/start.aspx",
+      "operator": "Federal Ministry of the Interior (BMI)",
+      "operator_kind": "government",
+      "official_linking_source": "https://www.bmeia.gv.at/en/travel-stay/entrance-and-residence-in-austria/visa",
+      "supported_categories": ["visa_free_entry (authoritative exemption list)", "tourist_visa requirement lookup", "airport transit visa requirement lookup"],
+      "source_urls": ["https://www.bmi.gv.at/202/Fremdenpolizei_und_Grenzkontrolle/Visumpflichtige_Laender/start.aspx"]
+    },
+    {
+      "portal_kind": "authorized_visa_center",
+      "url": "https://visa.vfsglobal.com/are/en/aut",
+      "operator": "VFS Global",
+      "operator_kind": "contracted_visa_center",
+      "official_linking_source": "https://www.bmeia.gv.at/en/oeb-abu-dhabi/travelling-to-austria/entrance-and-residence/how-to-apply",
+      "supported_categories": ["tourist_visa (Schengen visa C) lodgement for UAE residents"],
+      "source_urls": ["https://www.bmeia.gv.at/en/oeb-abu-dhabi/travelling-to-austria/entrance-and-residence/how-to-apply"]
+    },
+    {
+      "portal_kind": "authorized_visa_center",
+      "url": "https://www.vfsglobal.com/en/individuals/index.html",
+      "operator": "VFS Global",
+      "operator_kind": "contracted_visa_center",
+      "official_linking_source": "https://www.bmeia.gv.at/en/austrian-embassy-new-delhi/travels-to-austria/entry-and-residence/how-to-apply",
+      "supported_categories": ["tourist_visa (Schengen visa C) lodgement and appointments for residents of India, Bhutan, Maldives, Nepal, Sri Lanka"],
+      "source_urls": ["https://www.bmeia.gv.at/en/austrian-embassy-new-delhi/travels-to-austria/entry-and-residence/how-to-apply"]
+    },
+    {
+      "portal_kind": "eta_portal",
+      "url": "https://travel-europe.europa.eu",
+      "operator": "European Union (official ETIAS website)",
+      "operator_kind": "government",
+      "official_linking_source": "https://www.bmi.gv.at/202/Fremdenpolizei_und_Grenzkontrolle/information_zu_etias/start.html",
+      "supported_categories": ["eta (ETIAS — NOT yet in operation; expected from Q4/2026)"],
+      "source_urls": ["https://www.bmi.gv.at/202/Fremdenpolizei_und_Grenzkontrolle/information_zu_etias/start.html"]
+    }
+  ],
+  "passport_validity": {
+    "rule_kind": "months_after_departure",
+    "months": 3,
+    "min_blank_pages": 2,
+    "condition_text": "BMEIA (stated for Schengen visa applications): 'a valid passport not older than 10 years, valid for three months after expiry of the visa and with two free pages'. The passport must have been issued within the last ten years. The fetched pages state this rule in the visa-application context (three months beyond the visa's expiry, which corresponds to three months beyond authorized departure); a separately worded general entry rule for visa-exempt travelers was not found on the fetched official pages.",
+    "source_urls": [
+      "https://www.bmeia.gv.at/en/travel-stay/entrance-and-residence-in-austria/visa",
+      "https://www.bmeia.gv.at/en/consular-section-of-the-austrian-embassy-in-washington/travel-to-austria/entrance-and-residence/visa",
+      "https://www.bmeia.gv.at/en/austrian-embassy-tokyo/travels-to-austria/entrance-and-residence/visa"
+    ]
+  },
+  "jurisdictions": [],
+  "unresolved": [
+    "The BMI country list page is very long and WebFetch's markdown conversion truncated it partway through the alphabet; the URL was fetched successfully with WebFetch (it loaded), and the entries beyond the truncation point were read verbatim from the full HTML of the same URL retrieved directly. All quoted rows are verbatim page content.",
+    "Kosovo appears on the BMI exemption list but has no official ISO 3166-1 alpha-3 code; the user-assigned code XKX is used in applies_to_nationalities.",
+    "Refundability and accepted payment methods for the Schengen C fee are not stated on the fetched pages; embassy pages note fees are payable in local currency at the exchange rate set by the BMEIA.",
+    "Whether visa lodgement for residents of China is via a mandated external visa center was not verified on an official China-specific page; the generic EMBASSY_VISA_REQUIRED channel per BMEIA is recorded for CHN.",
+    "ETIAS: per BMI it is not yet in operation and is expected from Q4/2026 (fee EUR 7). If it launches, visa-exempt nationals will additionally need an ETIAS authorisation; this snapshot records the status as of 2026-07-23.",
+    "Visa D (long-stay, non-tourist) fee differs between embassy pages (Tokyo: EUR 195; Abu Dhabi: EUR 150); not recorded in fees because it is not a tourist category.",
+    "The passport-validity rule is quoted from the visa-application requirements; an explicitly worded rule for visa-exempt entry (e.g. '3 months beyond intended departure') was not separately found on the fetched Austrian official pages."
+  ]
+}

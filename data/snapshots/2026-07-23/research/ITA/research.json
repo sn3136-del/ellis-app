@@ -1,0 +1,434 @@
+{
+  "destination": "ITA",
+  "retrieved_at": "2026-07-23T07:25:52Z",
+  "research_status": "research_incomplete",
+  "sources": [
+    {
+      "search_query": "official Italy visa exemption list tourism Schengen esteri.it",
+      "original_url": "https://www.esteri.it/en/servizi-opportunita/ingressosoggiornoinitalia/visto_ingresso/paesi_esenti_visto/",
+      "final_url": "https://www.esteri.it/en/servizi-opportunita/ingressosoggiornoinitalia/visto_ingresso/paesi_esenti_visto/",
+      "redirect_chain": [],
+      "final_hostname": "www.esteri.it",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "Nationals of the following countries, entities and territorial authorities are exempt from the visa requirement for stays of up to 90 days within a 180-day period, for tourism, missions, business, invitations, religious reasons, transit, transport, sport competitions and study: Albania, Andorra, Antigua and Barbuda, Argentina, Australia, Bahamas, Barbados, Bosnia and Herzegovina, Brazil, Brunei, Canada, Chile, Colombia, South Korea, Costa Rica, Dominica, El Salvador, United Arab Emirates, Georgia, Japan, Grenada, Guatemala, Honduras, Hong Kong SAR, Solomon Islands, Israel, Kiribati, Kosovo, Malaysia, Macao SAR, North Macedonia, Marshall Islands, Mauritius, Mexico, Micronesia, Moldova, Monaco, Montenegro, Nauru, Nicaragua, New Zealand, Palau, Panama, Paraguay, Peru, Saint Christopher and Nevis, United Kingdom, Samoa, Saint Lucia, Serbia, Seychelles, Singapore, United States, St. Vincent and the Grenadines, Taiwan, East Timor, Tonga, Trinidad and Tobago, Tuvalu, Ukraine, Uruguay, Venezuela. [San Marino and Holy See nationals are always exempt.] Taiwan: exemption applies only to holders of passports that include an identity card number. Albania, Bosnia and Herzegovina, North Macedonia, Moldova, Montenegro, Serbia, Ukraine: biometric passports required. Serbia: citizens with passports issued by the Serbian Coordination Directorate are excluded.",
+      "retrieved_at": "2026-07-23T07:19:30Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Italy foreign ministry official tourist visa esteri.it vistoperitalia",
+      "original_url": "https://vistoperitalia.esteri.it/ees?lang=en_US",
+      "final_url": "https://vistoperitalia.esteri.it/ees?lang=en_US",
+      "redirect_chain": [],
+      "final_hostname": "vistoperitalia.esteri.it",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "The EES aims to digitally record data related to the entry, exit, and any refusal of entry of third-country nationals ... [it will] replace the manual stamping of passports with an electronic registration. [EES operational] starting October 12, 2025. Portal operated by the Ministry of Foreign Affairs and International Cooperation (Farnesina), editorial responsibility of the Directorate General for Italians Abroad and Migration Policies (DGIT). The portal is informational; it directs applicants to embassies and consulates for visa processing. Short-stay visa for tourism valid up to 90 days in any 180-day period within Schengen countries. ETIAS is not mentioned on this page.",
+      "retrieved_at": "2026-07-23T07:19:30Z",
+      "effective_date_evidence": "EES operational starting October 12, 2025",
+      "page_language": "en"
+    },
+    {
+      "search_query": "Italy foreign ministry official tourist visa esteri.it vistoperitalia (main portal page)",
+      "original_url": "https://vistoperitalia.esteri.it/?lang=en_US",
+      "final_url": "https://vistoperitalia.esteri.it/?lang=en_US",
+      "redirect_chain": [],
+      "final_hostname": "vistoperitalia.esteri.it",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "4 Questions to find out if you need a visa for Italy [nationality, country of residence, length of stay, reason for visit] ... If you need a visa for Italy, you will be provided with all the information and forms needed to submit your application. [Applicants must contact the relevant Italian Embassy or Consulate with jurisdiction over their residence; the portal does not facilitate online visa applications.] EES: the centralized system for the electronic registration of entry and exit, starting from October 12, 2025.",
+      "retrieved_at": "2026-07-23T07:21:30Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Italy visa exemption list tourism Schengen esteri.it",
+      "original_url": "https://conschicago.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/visa-categories-and-requirements/tourism-schengen-short-term-visa/",
+      "final_url": "https://conschicago.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/visa-categories-and-requirements/tourism-schengen-short-term-visa/",
+      "redirect_chain": [],
+      "final_hostname": "conschicago.esteri.it",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "The passport or travel document must be valid at least three months after the visa expiration date ... the passport is no older than 10 years and has at least two blank pages. ... All applicants must apply in person. Rush processing is not possible. Visa fee (under Consular Fees on homepage): (non refundable). [Payment:] Money Orders or Cashier's checks, payable to the Consulate General of Italy in Chicago ... Cash or Personal checks will not be accepted.",
+      "retrieved_at": "2026-07-23T07:20:30Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Italy consulate Schengen visa fee 90 euro tourism site:esteri.it",
+      "original_url": "https://ambmascate.esteri.it/en/news/dall_ambasciata/2024/06/updated-visa-fees-for-schengen-visa/",
+      "final_url": "https://ambmascate.esteri.it/en/news/dall_ambasciata/2024/06/updated-visa-fees-for-schengen-visa/",
+      "redirect_chain": [],
+      "final_hostname": "ambmascate.esteri.it",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "From 11 June 2024, the Service Fee for Schengen Visa has been increased from 80 Euro to 90 Euro for adults above 12 years of age, and from 40 to 45 Euro for minors between 6 and 12 years of age. No changes have been made for the fees related to other types of visa.",
+      "retrieved_at": "2026-07-23T07:21:30Z",
+      "effective_date_evidence": "From 11 June 2024",
+      "page_language": "en"
+    },
+    {
+      "search_query": "Italy consulate Schengen visa fee 90 euro tourism site:esteri.it",
+      "original_url": "https://consnewyork.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/visas-to-enter-italy/tourism-and-transit/",
+      "final_url": "https://consnewyork.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/visas-to-enter-italy/tourism-and-transit/",
+      "redirect_chain": [],
+      "final_hostname": "consnewyork.esteri.it",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Passport (and copy of relevant pages) or travel document 90 days beyond the intended departure date from the Schengen area. Passports issued more than 10 years before the dates of travel cannot be accepted. Passports must have at least two empty 'visa' pages.",
+      "retrieved_at": "2026-07-23T07:22:30Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Italy foreign ministry official tourist visa esteri.it vistoperitalia",
+      "original_url": "https://ambdublino.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/",
+      "final_url": "https://ambdublino.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/",
+      "redirect_chain": [],
+      "final_hostname": "ambdublino.esteri.it",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Please refer to the documents and requirements necessary for all visa applications which is indicated in detail on the web page of Italian Ministry of Foreign Affairs and International Cooperation: https://vistoperitalia.esteri.it/home/en ... It is obligatory to ensure an appointment with us (fully booked on the portal). Please click here to book an appointment https://prenotami.esteri.it/ ... The timeline between the appointment itself and your flight must be no more than 6 months and no less than 15 days before departure. ... it takes up to 15 working days to process a visa.",
+      "retrieved_at": "2026-07-23T07:22:30Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "site:esteri.it VFS Global visa application center Italy embassy outsourcing",
+      "original_url": "https://ambnewdelhi.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/",
+      "final_url": "https://ambnewdelhi.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/",
+      "redirect_chain": [],
+      "final_hostname": "ambnewdelhi.esteri.it",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Visa applications can be submitted upon appointment to the VFS Visa Application Centres [New Delhi: 1st Floor, 27 K.G.Marg, New Delhi 110001; Jalandhar; Chandigarh]. Contact: https://visa.vfsglobal.com/ind/en/ita ... Short-stay (C visa/Schengen): tourism, business, family visits. Fees: National D visas 116 euros; Schengen visas 90 euros; Children (6-12) 45 euros. Payment at Embassy: Demand draft only. VFS accepts cash, demand draft, or NEFT, plus additional service charges. Decisions on C visas are generally reached within 15 calendar days.",
+      "retrieved_at": "2026-07-23T07:24:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "\"do not need a visa\" OR \"non hanno bisogno di visto\" EU citizens Italy site:esteri.it",
+      "original_url": "https://constoronto.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/visti-domande-frequenti/",
+      "final_url": "https://constoronto.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/visti-domande-frequenti/",
+      "redirect_chain": [],
+      "final_hostname": "constoronto.esteri.it",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "In order to apply for a visa to Italy at the Consulate General of Italy in Toronto, you must be a legal resident in our jurisdiction. [Schengen Visas require appointments through the Prenot@mi portal; National Visa applications are submitted by mail. Spouses/registered partners of EU nationals receive] expedited application, which is also free of charge.",
+      "retrieved_at": "2026-07-23T07:25:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "\"do not need a visa\" OR \"non hanno bisogno di visto\" EU citizens Italy site:esteri.it",
+      "original_url": "https://ambwashingtondc.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/",
+      "final_url": "https://ambwashingtondc.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/",
+      "redirect_chain": [],
+      "final_hostname": "ambwashingtondc.esteri.it",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "U.S. CITIZENS DO NOT REQUIRE A VISA FOR SHORT STAYS IN ITALY UP TO 90 DAYS. ... [Payment:] Money Orders or Cashier's checks, payable to the Embassy of Italy in Washington D.C. ... Personal checks and credit/debit cards are not accepted. ... submit your application to the Visa Office no later than 15 days before your intended departure.",
+      "retrieved_at": "2026-07-23T07:25:30Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "\"do not need a visa\" OR \"non hanno bisogno di visto\" EU citizens Italy site:esteri.it",
+      "original_url": "https://ambberlino.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/",
+      "final_url": "https://ambberlino.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/",
+      "redirect_chain": [],
+      "final_hostname": "ambberlino.esteri.it",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Il visto, che consta di un'apposita 'vignetta' (o 'sticker') applicata sul passaporto ... La sede consolare competente (in tutto il territorio tedesco) per il rilascio del visto d'ingresso in Italia è il Consolato Generale d'Italia a Francoforte sul Meno.",
+      "retrieved_at": "2026-07-23T07:25:45Z",
+      "effective_date_evidence": null,
+      "page_language": "it"
+    }
+  ],
+  "dispositions": [
+    {
+      "nationalities": ["AND", "ATG", "ARG", "AUS", "BHS", "BRB", "BRA", "BRN", "CAN", "CHL", "COL", "KOR", "CRI", "DMA", "SLV", "ARE", "GEO", "JPN", "GRD", "GTM", "HND", "HKG", "SLB", "ISR", "KIR", "XKX", "MYS", "MAC", "MHL", "MUS", "MEX", "FSM", "MCO", "NRU", "NIC", "NZL", "PLW", "PAN", "PRY", "PER", "KNA", "GBR", "WSM", "LCA", "SYC", "SGP", "USA", "VCT", "TLS", "TON", "TTO", "TUV", "URY", "VEN", "SMR", "VAT"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days within a 180-day period",
+      "conditions": [
+        "Exemption covers tourism, missions, business, invitations, religious reasons, transit, transport, sport competitions and study",
+        "San Marino and Holy See nationals are always exempt",
+        "Kosovo recorded as XKX (user-assigned code; Kosovo has no official ISO 3166-1 alpha-3 code)",
+        "Hong Kong SAR and Macao SAR passport holders included (HKG, MAC)"
+      ],
+      "source_urls": [
+        "https://www.esteri.it/en/servizi-opportunita/ingressosoggiornoinitalia/visto_ingresso/paesi_esenti_visto/",
+        "https://ambwashingtondc.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/"
+      ]
+    },
+    {
+      "nationalities": ["ALB", "BIH", "MKD", "MDA", "MNE", "SRB", "UKR"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days within a 180-day period",
+      "conditions": [
+        "Biometric passport required for the exemption",
+        "Serbia: citizens with passports issued by the Serbian Coordination Directorate are excluded from the exemption"
+      ],
+      "source_urls": [
+        "https://www.esteri.it/en/servizi-opportunita/ingressosoggiornoinitalia/visto_ingresso/paesi_esenti_visto/"
+      ]
+    },
+    {
+      "nationalities": ["TWN"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days within a 180-day period",
+      "conditions": [
+        "Exemption applies only to holders of passports that include an identity card number"
+      ],
+      "source_urls": [
+        "https://www.esteri.it/en/servizi-opportunita/ingressosoggiornoinitalia/visto_ingresso/paesi_esenti_visto/"
+      ]
+    },
+    {
+      "nationalities": ["AND", "ATG", "ARG", "AUS", "BHS", "BRB", "BRA", "BRN", "CAN", "CHL", "COL", "KOR", "CRI", "DMA", "SLV", "ARE", "GEO", "JPN", "GRD", "GTM", "HND", "HKG", "SLB", "ISR", "KIR", "XKX", "MYS", "MAC", "MHL", "MUS", "MEX", "FSM", "MCO", "NRU", "NIC", "NZL", "PLW", "PAN", "PRY", "PER", "KNA", "GBR", "WSM", "LCA", "SYC", "SGP", "USA", "VCT", "TLS", "TON", "TTO", "TUV", "URY", "VEN", "SMR", "VAT", "ALB", "BIH", "MKD", "MDA", "MNE", "SRB", "UKR", "TWN"],
+      "category": "tourist_visa",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "No tourist visa needed for stays up to 90 days in any 180-day period (visa-exempt nationalities; subject to the passport conditions recorded in the visa_free_entry rows)"
+      ],
+      "source_urls": [
+        "https://www.esteri.it/en/servizi-opportunita/ingressosoggiornoinitalia/visto_ingresso/paesi_esenti_visto/"
+      ]
+    },
+    {
+      "nationalities": ["CHN", "RUS"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "90 days within a 180-day period",
+      "conditions": [
+        "Not on the official short-stay visa exemption list (closed list on esteri.it); a Schengen type-C visa is required for tourism",
+        "Apply at the Italian embassy/consulate with jurisdiction over the applicant's place of legal residence; appointments via the Prenot@mi portal where the mission uses it",
+        "Many Italian missions outsource application lodgement to authorized visa application centers; the competent mission's website governs the exact channel"
+      ],
+      "source_urls": [
+        "https://www.esteri.it/en/servizi-opportunita/ingressosoggiornoinitalia/visto_ingresso/paesi_esenti_visto/",
+        "https://vistoperitalia.esteri.it/?lang=en_US",
+        "https://ambdublino.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/"
+      ]
+    },
+    {
+      "nationalities": ["IND"],
+      "category": "tourist_visa",
+      "disposition": "AUTHORIZED_VISA_CENTER_REQUIRED",
+      "maximum_stay": "90 days within a 180-day period",
+      "conditions": [
+        "Not on the official short-stay visa exemption list; Schengen type-C visa required for tourism",
+        "For residents of the Embassy of Italy New Delhi jurisdiction, visa applications are submitted upon appointment at VFS Global Visa Application Centres (New Delhi, Jalandhar, Chandigarh); the mission for the applicant's residence governs the exact channel",
+        "Decisions on C visas are generally reached within 15 calendar days"
+      ],
+      "source_urls": [
+        "https://www.esteri.it/en/servizi-opportunita/ingressosoggiornoinitalia/visto_ingresso/paesi_esenti_visto/",
+        "https://ambnewdelhi.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/"
+      ]
+    },
+    {
+      "nationalities": ["ALL_OTHERS"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "90 days within a 180-day period",
+      "conditions": [
+        "Third-country nationals not listed in any row above require a Schengen type-C visa for tourism, applied for at the competent Italian embassy/consulate (or the visa application center it mandates) before travel",
+        "Applications no more than 6 months and no later than 15 days before intended travel",
+        "This row does NOT cover EU/EEA/Swiss citizens, who are outside Italy's third-country visa regime under freedom of movement; no official page confirming this was fetchable (see unresolved)"
+      ],
+      "source_urls": [
+        "https://www.esteri.it/en/servizi-opportunita/ingressosoggiornoinitalia/visto_ingresso/paesi_esenti_visto/",
+        "https://vistoperitalia.esteri.it/?lang=en_US",
+        "https://ambdublino.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "evisa_tourist",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Italy operates no tourist eVisa; the official MAECI portal 'Il visto per l'Italia' is informational only (it provides information and forms), and applications must be lodged with the competent embassy/consulate"
+      ],
+      "source_urls": [
+        "https://vistoperitalia.esteri.it/?lang=en_US",
+        "https://vistoperitalia.esteri.it/ees?lang=en_US"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "eta",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "No electronic travel authorisation is in operation for Italy as of 2026-07-23; fetched official MAECI pages describe only visa-exempt entry or consular visas",
+        "The EU Entry/Exit System (EES, operational from 12 October 2025) is a border registration system, not a travel authorisation",
+        "The EU's planned ETIAS authorisation for visa-exempt travellers could not be verified from an official page at retrieval time (see unresolved); this row reflects current operations only"
+      ],
+      "source_urls": [
+        "https://vistoperitalia.esteri.it/?lang=en_US",
+        "https://vistoperitalia.esteri.it/ees?lang=en_US"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "visa_on_arrival_tourist",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Italy operates no visa-on-arrival program for tourism; visas must be obtained before travel from the competent Italian mission (applications no later than 15 days before intended departure)"
+      ],
+      "source_urls": [
+        "https://vistoperitalia.esteri.it/?lang=en_US",
+        "https://ambwashingtondc.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/"
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "policy_kind": "visa_exemption_list",
+      "policy_name": "Countries whose nationals are exempt from the requirement of short-stay visas",
+      "description": "Official MAECI (Ministry of Foreign Affairs and International Cooperation) list of nationalities exempt from the short-stay visa requirement for stays of up to 90 days within a 180-day period, for tourism, missions, business, invitations, religious reasons, transit, transport, sport competitions and study.",
+      "applies_to_nationalities": ["AND", "ATG", "ARG", "AUS", "BHS", "BRB", "BRA", "BRN", "CAN", "CHL", "COL", "KOR", "CRI", "DMA", "SLV", "ARE", "GEO", "JPN", "GRD", "GTM", "HND", "HKG", "SLB", "ISR", "KIR", "XKX", "MYS", "MAC", "MHL", "MUS", "MEX", "FSM", "MCO", "NRU", "NIC", "NZL", "PLW", "PAN", "PRY", "PER", "KNA", "GBR", "WSM", "LCA", "SYC", "SGP", "USA", "VCT", "TLS", "TON", "TTO", "TUV", "URY", "VEN", "SMR", "VAT", "ALB", "BIH", "MKD", "MDA", "MNE", "SRB", "UKR", "TWN"],
+      "conditions": [
+        "Albania, Bosnia and Herzegovina, North Macedonia, Moldova, Montenegro, Serbia, Ukraine: biometric passports required",
+        "Taiwan: only holders of passports that include an identity card number",
+        "Serbia: passports issued by the Serbian Coordination Directorate excluded",
+        "San Marino and Holy See nationals are always exempt"
+      ],
+      "maximum_stay": "90 days within a 180-day period",
+      "official_source_urls": [
+        "https://www.esteri.it/en/servizi-opportunita/ingressosoggiornoinitalia/visto_ingresso/paesi_esenti_visto/"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "consular_visa_regime",
+      "policy_name": "Schengen short-stay visa (type C) for tourism",
+      "description": "Nationalities not on the exemption list must obtain a Schengen type-C visa before travel for tourist stays up to 90 days in any 180-day period. The official MAECI portal 'Il visto per l'Italia' determines the requirement via a guided questionnaire and provides forms; applications are lodged in person with the Italian embassy/consulate holding jurisdiction over the applicant's residence, or at a visa application center mandated by that mission. Many missions require appointments via the official Prenot@mi portal.",
+      "applies_to_nationalities": ["ALL_OTHERS"],
+      "conditions": [
+        "Apply no more than 6 months and no later than 15 days before intended travel",
+        "Applicants must apply in person at the competent mission for their place of legal residence",
+        "Decisions on C visas are generally reached within 15 calendar days (up to 15 working days cited by Embassy Dublin)"
+      ],
+      "maximum_stay": "90 days within a 180-day period",
+      "official_source_urls": [
+        "https://vistoperitalia.esteri.it/?lang=en_US",
+        "https://ambdublino.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/",
+        "https://conschicago.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/visa-categories-and-requirements/tourism-schengen-short-term-visa/"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "EU Entry/Exit System (EES)",
+      "description": "Centralized EU system for the electronic registration of entry, exit and refusal of entry of third-country nationals crossing the external Schengen border, replacing manual passport stamping. It is a border registration system, not a visa or travel authorisation.",
+      "applies_to_nationalities": ["ALL"],
+      "conditions": [
+        "Applies to third-country nationals (both visa-exempt and visa holders) crossing Schengen external borders, including Italy's"
+      ],
+      "maximum_stay": null,
+      "official_source_urls": [
+        "https://vistoperitalia.esteri.it/ees?lang=en_US"
+      ],
+      "effective_from": "2025-10-12",
+      "effective_until": null
+    }
+  ],
+  "fees": [
+    {
+      "visa_category": "tourist_schengen_c",
+      "visa_subtype": "adult (12 years and above)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 90,
+      "government_fee_currency": "EUR",
+      "refundability": "non-refundable",
+      "accepted_payment_methods": [
+        "varies by mission: money orders or cashier's checks (Chicago, Washington DC)",
+        "demand draft at Embassy New Delhi; cash, demand draft or NEFT at VFS centers in India (plus VFS service charges)"
+      ],
+      "source_urls": [
+        "https://ambmascate.esteri.it/en/news/dall_ambasciata/2024/06/updated-visa-fees-for-schengen-visa/",
+        "https://ambnewdelhi.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/",
+        "https://conschicago.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/visa-categories-and-requirements/tourism-schengen-short-term-visa/"
+      ]
+    },
+    {
+      "visa_category": "tourist_schengen_c",
+      "visa_subtype": "minor (6-12 years)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 45,
+      "government_fee_currency": "EUR",
+      "refundability": "non-refundable",
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://ambmascate.esteri.it/en/news/dall_ambasciata/2024/06/updated-visa-fees-for-schengen-visa/",
+        "https://ambnewdelhi.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/"
+      ]
+    }
+  ],
+  "portals": [
+    {
+      "portal_kind": "foreign_ministry",
+      "url": "https://www.esteri.it",
+      "operator": "Ministero degli Affari Esteri e della Cooperazione Internazionale (MAECI)",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["visa exemption list", "entry and residence visa information"],
+      "source_urls": [
+        "https://www.esteri.it/en/servizi-opportunita/ingressosoggiornoinitalia/visto_ingresso/paesi_esenti_visto/"
+      ]
+    },
+    {
+      "portal_kind": "foreign_ministry",
+      "url": "https://vistoperitalia.esteri.it",
+      "operator": "MAECI - 'Il visto per l'Italia' official visa information database (DGIT editorial responsibility); informational only, no online applications",
+      "operator_kind": "government",
+      "official_linking_source": "https://ambdublino.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/",
+      "supported_categories": ["all visa categories (requirement check, information and forms)", "tourist short-stay"],
+      "source_urls": [
+        "https://vistoperitalia.esteri.it/?lang=en_US",
+        "https://vistoperitalia.esteri.it/ees?lang=en_US"
+      ]
+    },
+    {
+      "portal_kind": "appointment_portal",
+      "url": "https://prenotami.esteri.it",
+      "operator": "MAECI (Prenot@mi consular appointment booking system)",
+      "operator_kind": "government",
+      "official_linking_source": "https://ambdublino.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/",
+      "supported_categories": ["Schengen visa appointments", "consular services"],
+      "source_urls": [
+        "https://ambdublino.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/",
+        "https://constoronto.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/visti-domande-frequenti/"
+      ]
+    },
+    {
+      "portal_kind": "authorized_visa_center",
+      "url": "https://visa.vfsglobal.com/ind/en/ita",
+      "operator": "VFS Global (for the Embassy of Italy in New Delhi jurisdiction, India)",
+      "operator_kind": "contracted_visa_center",
+      "official_linking_source": "https://ambnewdelhi.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/",
+      "supported_categories": ["short-stay Schengen C (incl. tourism)", "national D"],
+      "source_urls": [
+        "https://ambnewdelhi.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/"
+      ]
+    }
+  ],
+  "passport_validity": {
+    "rule_kind": "months_after_departure",
+    "months": 3,
+    "min_blank_pages": 2,
+    "condition_text": "Consulate General New York (tourism/transit visa applicants): 'Passport (and copy of relevant pages) or travel document 90 days beyond the intended departure date from the Schengen area. Passports issued more than 10 years before the dates of travel cannot be accepted. Passports must have at least two empty visa pages.' Consulate General Chicago phrases it as valid 'at least three months after the visa expiration date', passport 'no older than 10 years' with 'at least two blank pages'. Both statements are addressed to visa applicants; the general entry rule for visa-exempt travellers is on a central esteri.it page that was not fetchable (bot-blocked) and was not separately verified.",
+    "source_urls": [
+      "https://consnewyork.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/visas-to-enter-italy/tourism-and-transit/",
+      "https://conschicago.esteri.it/en/servizi-consolari-e-visti/servizi-per-il-cittadino-straniero/visti/visa-categories-and-requirements/tourism-schengen-short-term-visa/"
+    ]
+  },
+  "jurisdictions": [],
+  "unresolved": [
+    "Central esteri.it pages redirect to a Radware bot-manager challenge (validate.perfdrive.com) and could not be fetched (not bypassed per policy): /en/ministero/sportello_info/domandefrequenti/sezione_visti_entrare_in_italia/ (entry FAQ incl. passport validity for all travellers), /en/servizi-opportunita/ingressosoggiornoinitalia/ (entry overview), /en/servizi-consolari-e-visti/ingressosoggiornoinitalia/visto_ingresso/paesi_soggetti_visto/ (explicit visa-required-countries list). CHN/RUS visa requirement is therefore established from the closed official exemption list (absence from it) plus official consular channel pages, not from the explicit visa-required list.",
+    "DEU and FRA (and other EU/EEA/Swiss citizens): EU freedom of movement means no visa is required, but no fetched official page states this explicitly, so no disposition row was recorded for them; the ALL_OTHERS row expressly excludes EU/EEA/Swiss citizens. Official confirmation likely sits on the bot-blocked esteri.it FAQ or the interactive vistoperitalia questionnaire (not retrievable non-interactively).",
+    "ETIAS: the official EU page https://travel-europe.europa.eu/etias_en and /etias/what-etias_en render client-side only (WebFetch returned just the header 'European Union - EES / ETIAS'), and no fetched esteri.it page mentions ETIAS. The eta disposition row is NOT_APPLICABLE for current operations only; ETIAS status/start date for visa-exempt travellers to Italy remains unverified from official sources.",
+    "Passport validity verified only from consulate pages addressed to Schengen visa applicants (3 months beyond departure/visa expiry, issued within 10 years, 2 blank pages); the entry rule as applied to visa-exempt travellers at the border was not separately verified.",
+    "Fees verified from embassy pages (Muscat news item effective 11 June 2024; New Delhi fee table); the central consular-fees table on esteri.it was not fetched."
+  ]
+}

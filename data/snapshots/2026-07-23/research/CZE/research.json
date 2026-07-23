@@ -1,0 +1,363 @@
+{
+  "destination": "CZE",
+  "retrieved_at": "2026-07-23T07:31:27Z",
+  "research_status": "verified",
+  "sources": [
+    {
+      "search_query": "official Czechia visa exemption list countries whose citizens do not require visa mzv",
+      "original_url": "https://mzv.gov.cz/jnp/en/information_for_aliens/short_stay_visa/list_of_states_whose_citizens_are_exempt/index.html",
+      "final_url": "https://mzv.gov.cz/jnp/en/information_for_aliens/short_stay_visa/list_of_states_whose_citizens_are_exempt/index.html",
+      "redirect_chain": ["https://mzv.gov.cz/jnp/en/information_for_aliens/short_stay_visa/list_of_states_whose_citizens_are_exempt/index.html"],
+      "final_hostname": "mzv.gov.cz",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "ALBANIA, ANDORRA, ANTIGUA AND BARBUDA, ARGENTINA, AUSTRALIA, BAHAMAS, BARBADOS, BOSNIA AND HERZEGOVINA, BRAZIL, BRUNEI, CANADA, CHILE, COLOMBIA, COSTA RICA, DOMINICA, EAST TIMOR, GEORGIA, GRENADA, GUATEMALA, HONDURAS, ISRAEL, JAPAN, KIRIBATI, MALAYSIA, MARSHALL ISLANDS, MAURITIUS, MEXICO, MICRONESIA, MOLDOVA, MONACO, MONTENEGRO, NAURU, NEW ZEALAND, NICARAGUA, NORTH MACEDONIA, PALAU, PANAMA, PARAGUAY, PERU, SAINT KITTS AND NEVIS, SAINT LUCIA, SAINT VINCENT AND THE GRENADINES, SALVADOR, SAMOA, SAN MARINO, SERBIA, SEYCHELLES, SINGAPORE, SOLOMON ISLANDS, SOUTH KOREA, TAIWAN, TONGA, TRINIDAD AND TOBAGO, TUVALU, UKRAINE, UNITED ARAB EMIRATES, UNITED KINGDOM, UNITED STATES OF AMERICA, URUGUAY, VATICAN, VENEZUELA. [Further sections list: KOSOVO; HONG KONG (Hong Kong Special Administrative Region passports), MACAO (Regiao Administrativa Especial de Macau passports); five categories of British nationals (British Nationals (Overseas), British Overseas Territories Citizens, British Overseas Citizens, British Protected Persons, British Subjects).] Citizens of Albania, Bosnia and Herzegovina, Georgia, Moldova, Montenegro, North Macedonia, Serbia and Ukraine can travel visa-free only with biometric passports. Taiwan: visa-free access requires passport with identity card number. Visa-free regime applies only to short-term non-profit stays. If the purpose of stay is employment, Schengen visa for employment is required.",
+      "retrieved_at": "2026-07-23T07:29:10Z",
+      "effective_date_evidence": "Page shows last update 09.02.2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "Czechia foreign ministry tourist visa short stay Schengen official",
+      "original_url": "https://ipc.gov.cz/en/visa-and-residence-permit-types/third-country-nationals/short-term-and-visa-free-stays/schengen-short-term-visa/",
+      "final_url": "https://ipc.gov.cz/en/visa-and-residence-permit-types/third-country-nationals/short-term-and-visa-free-stays/schengen-short-term-visa/",
+      "redirect_chain": ["https://ipc.gov.cz/en/visa-and-residence-permit-types/third-country-nationals/short-term-and-visa-free-stays/schengen-short-term-visa/"],
+      "final_hostname": "ipc.gov.cz",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "The visa is intended for third country nationals who wish to stay in the Czech Republic on a short-term basis. A short-term stay is a stay lasting a maximum of 90 days. Applications can be submitted only at one of the Czech Republic's diplomatic missions. [Site: Official Information Portal for Foreigners of the Ministry of the Interior of the Czech Republic. Footer: (c)2026 Ministry of the interior of the Czech republic.]",
+      "retrieved_at": "2026-07-23T07:29:10Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Czechia foreign ministry tourist visa short stay Schengen official",
+      "original_url": "https://ipc.gov.cz/en/visa-and-residence-permit-types/third-country-nationals/short-term-and-visa-free-stays/visa-free-stays/",
+      "final_url": "https://ipc.gov.cz/en/visa-and-residence-permit-types/third-country-nationals/short-term-and-visa-free-stays/visa-free-stays/",
+      "redirect_chain": ["https://ipc.gov.cz/en/visa-and-residence-permit-types/third-country-nationals/short-term-and-visa-free-stays/visa-free-stays/"],
+      "final_hostname": "ipc.gov.cz",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "You can temporarily stay without a visa in the Schengen Area for 90 days in any 180-day long period. Stays cannot be extended; you must leave after 90 days. Eligible: citizens of visa-waived countries, EU citizens, holders of EU residence permits or residence cards, family members of EU citizens. Register with Foreign Police within 3 days of arrival. Stay is for non-profit purposes only - no employment or business activity. Bilateral agreements: Argentina, Chile, Israel, South Korea, Costa Rica, Malaysia, and Uruguay: additional 90 days permitted. Singapore: 30 additional days. These bilateral stays apply only within the Czech Republic - no travel to other EU/Schengen states.",
+      "retrieved_at": "2026-07-23T07:29:10Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "mzv.gov.cz Schengen visa fee EUR administrative fee short-term visa Czech Republic",
+      "original_url": "https://mzv.gov.cz/jnp/en/information_for_aliens/visa_fee_schedule/index.html",
+      "final_url": "https://mzv.gov.cz/jnp/en/information_for_aliens/visa_fee_schedule/index.html",
+      "redirect_chain": ["https://mzv.gov.cz/jnp/en/information_for_aliens/visa_fee_schedule/index.html"],
+      "final_hostname": "mzv.gov.cz",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "Schengen short-term visa (Type C, A): adults EUR 90; children 6-11 EUR 45; children under 6 free of charge. Facilitation rate of EUR 35 for Schengen visas for Albania, Armenia, Azerbaijan, Belarus, Bosnia and Herzegovina, Georgia, Moldova, Montenegro, North Macedonia, Serbia, Ukraine (Ukraine also EUR 70 for express processing). Exempt from visa fees: children younger than 6 years of age, students and teachers traveling for educational purposes, researchers conducting scientific research, family members of citizens of the EU. Visa fees are collected in cash, by card or bank transfer in EUR or in the local currency or in other currency (such as in USD), based on the exchange rate. Visa fee is not refunded in case of visa refusal.",
+      "retrieved_at": "2026-07-23T07:30:20Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "ipc.gov.cz OR mzv.gov.cz Czech Republic entry conditions travel document validity 3 months 10 years",
+      "original_url": "https://ipc.gov.cz/en/obligations-for-foreigners/arrival-in-the-czech-republic/",
+      "final_url": "https://ipc.gov.cz/en/obligations-for-foreigners/arrival-in-the-czech-republic/",
+      "redirect_chain": ["https://ipc.gov.cz/en/obligations-for-foreigners/arrival-in-the-czech-republic/"],
+      "final_hostname": "ipc.gov.cz",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "You hold a valid travel document which is valid for at least 3 months after the intended departure date from the Schengen Area and, at the same time, it was issued in the previous 10 years. You hold a valid short-term visa, if you are required to have a visa, or a valid long-term visa or a valid residence permit. You must justify the purpose and conditions of the intended stay and have sufficient funds for the duration of the intended stay as well as for the return. You must not be registered in the Schengen Information System (SIS) as a person that should be denied entry and must not be considered a threat to the peace, State security, public health or international relations.",
+      "retrieved_at": "2026-07-23T07:30:20Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "mzv.gov.cz Schengen visa fee EUR administrative fee short-term visa Czech Republic",
+      "original_url": "https://mzv.gov.cz/jnp/en/information_for_aliens/where_to_submit_application/schengen_short_term_visa.html",
+      "final_url": "https://mzv.gov.cz/jnp/en/information_for_aliens/where_to_submit_application/schengen_short_term_visa.html",
+      "redirect_chain": ["https://mzv.gov.cz/jnp/en/information_for_aliens/where_to_submit_application/schengen_short_term_visa.html"],
+      "final_hostname": "mzv.gov.cz",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "Applications are filed at consulates or visa centers located in applicants' consular districts, commonly in person, not at a border crossing nor in CZE. File in your country of citizenship or residence; if unavailable locally, apply at a facility in your consular district, often in a neighbouring state. Some other Schengen countries represent the Czech Republic in visa issuance. For multi-country travel, apply with the state that is the only or the main destination or where you will stay longest.",
+      "retrieved_at": "2026-07-23T07:30:55Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "ETIAS Czech Republic mzv.gov.cz OR ipc.gov.cz electronic travel authorization when start 2026",
+      "original_url": "https://mzv.gov.cz/washington/en/consular_information/etias_european_travel_information_and.html",
+      "final_url": "https://mzv.gov.cz/washington/en/consular_information/etias_european_travel_information_and.html",
+      "redirect_chain": ["https://mzv.gov.cz/washington/en/consular_information/etias_european_travel_information_and.html"],
+      "final_hostname": "mzv.gov.cz",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "ETIAS (European Travel Information and Authorization System) - last quarter of 2026. As of the last quarter 2026, citizens from over 60 visa-exempt /visa-free/ countries, including US will be required to have a travel authorization. Official website: https://travel-europe.europa.eu/etias_en",
+      "retrieved_at": "2026-07-23T07:31:00Z",
+      "effective_date_evidence": "Page states ETIAS begins in the last quarter of 2026; not yet operational as of retrieval",
+      "page_language": "en"
+    }
+  ],
+  "dispositions": [
+    {
+      "nationalities": ["ALB", "AND", "ATG", "ARG", "AUS", "BHS", "BRB", "BIH", "BRA", "BRN", "CAN", "CHL", "COL", "CRI", "DMA", "TLS", "GEO", "GRD", "GTM", "HND", "ISR", "JPN", "KIR", "MYS", "MHL", "MUS", "MEX", "FSM", "MDA", "MCO", "MNE", "NRU", "NZL", "NIC", "MKD", "PLW", "PAN", "PRY", "PER", "KNA", "LCA", "VCT", "SLV", "WSM", "SMR", "SRB", "SYC", "SGP", "SLB", "KOR", "TWN", "TON", "TTO", "TUV", "UKR", "ARE", "GBR", "USA", "URY", "VAT", "VEN", "XKX", "HKG", "MAC"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "Visa-free regime applies only to short-term non-profit stays; employment requires a Schengen visa for employment",
+        "Citizens of Albania, Bosnia and Herzegovina, Georgia, Kosovo, Moldova, Montenegro, North Macedonia, Serbia and Ukraine can travel visa-free only with biometric passports",
+        "Taiwan: only holders of passports containing an identity card number",
+        "Hong Kong: only holders of Hong Kong Special Administrative Region passports; Macao: only holders of Regiao Administrativa Especial de Macau passports",
+        "Bilateral agreements allow citizens of Argentina, Chile, Israel, South Korea, Costa Rica, Malaysia and Uruguay an additional 90 days, and Singapore an additional 30 days, in the Czech Republic only (no travel to other Schengen states during the bilateral extension)",
+        "Registration with the Foreign Police within 3 working days of arrival unless accommodated commercially"
+      ],
+      "source_urls": [
+        "https://mzv.gov.cz/jnp/en/information_for_aliens/short_stay_visa/list_of_states_whose_citizens_are_exempt/index.html",
+        "https://ipc.gov.cz/en/visa-and-residence-permit-types/third-country-nationals/short-term-and-visa-free-stays/visa-free-stays/"
+      ]
+    },
+    {
+      "nationalities": ["DEU", "FRA"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": null,
+      "conditions": [
+        "EU citizens enter and stay under EU free movement rules; no visa required for tourism (applies to all EU/EEA citizens, not only DEU and FRA)"
+      ],
+      "source_urls": [
+        "https://ipc.gov.cz/en/visa-and-residence-permit-types/third-country-nationals/short-term-and-visa-free-stays/visa-free-stays/"
+      ]
+    },
+    {
+      "nationalities": ["ALB", "AND", "ATG", "ARG", "AUS", "BHS", "BRB", "BIH", "BRA", "BRN", "CAN", "CHL", "COL", "CRI", "DMA", "TLS", "GEO", "GRD", "GTM", "HND", "ISR", "JPN", "KIR", "MYS", "MHL", "MUS", "MEX", "FSM", "MDA", "MCO", "MNE", "NRU", "NZL", "NIC", "MKD", "PLW", "PAN", "PRY", "PER", "KNA", "LCA", "VCT", "SLV", "WSM", "SMR", "SRB", "SYC", "SGP", "SLB", "KOR", "TWN", "TON", "TTO", "TUV", "UKR", "ARE", "GBR", "USA", "URY", "VAT", "VEN", "XKX", "HKG", "MAC", "DEU", "FRA"],
+      "category": "tourist_visa",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "No tourist visa needed: these nationalities are visa-exempt for short-term tourism (subject to passport-type conditions noted in the visa_free_entry row)"
+      ],
+      "source_urls": [
+        "https://mzv.gov.cz/jnp/en/information_for_aliens/short_stay_visa/list_of_states_whose_citizens_are_exempt/index.html"
+      ]
+    },
+    {
+      "nationalities": ["CHN", "IND", "RUS"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "Not on the Czech MFA visa-exemption list; a Schengen short-term visa (Type C) is required for tourism",
+        "Applications are filed at Czech consulates or outsourced visa centers in the applicant's consular district, commonly in person, not at a border crossing nor in the Czech Republic",
+        "Government fee EUR 90 for adults; fee not refunded in case of refusal"
+      ],
+      "source_urls": [
+        "https://mzv.gov.cz/jnp/en/information_for_aliens/short_stay_visa/list_of_states_whose_citizens_are_exempt/index.html",
+        "https://mzv.gov.cz/jnp/en/information_for_aliens/where_to_submit_application/schengen_short_term_visa.html",
+        "https://mzv.gov.cz/jnp/en/information_for_aliens/visa_fee_schedule/index.html"
+      ]
+    },
+    {
+      "nationalities": ["ALL_OTHERS"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "Nationalities not on the Czech MFA visa-exemption list require a Schengen short-term visa (Type C) for tourism, filed at a Czech consulate or visa center in the applicant's consular district (or at another Schengen state representing Czechia)"
+      ],
+      "source_urls": [
+        "https://mzv.gov.cz/jnp/en/information_for_aliens/short_stay_visa/list_of_states_whose_citizens_are_exempt/index.html",
+        "https://mzv.gov.cz/jnp/en/information_for_aliens/where_to_submit_application/schengen_short_term_visa.html"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "evisa_tourist",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Czechia operates no tourist eVisa: the MFA states short-term visa applications are filed at consulates or visa centers, commonly in person, not at a border crossing nor in the Czech Republic"
+      ],
+      "source_urls": [
+        "https://mzv.gov.cz/jnp/en/information_for_aliens/where_to_submit_application/schengen_short_term_visa.html",
+        "https://ipc.gov.cz/en/visa-and-residence-permit-types/third-country-nationals/short-term-and-visa-free-stays/schengen-short-term-visa/"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "eta",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "No ETA required as of 2026-07-23: the EU ETIAS travel authorization for visa-exempt nationals is scheduled to start in the last quarter of 2026 and is not yet operational"
+      ],
+      "source_urls": [
+        "https://mzv.gov.cz/washington/en/consular_information/etias_european_travel_information_and.html"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "visa_on_arrival_tourist",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "No visa on arrival: the MFA states applications are filed at consulates or visa centers, not at a border crossing nor in the Czech Republic"
+      ],
+      "source_urls": [
+        "https://mzv.gov.cz/jnp/en/information_for_aliens/where_to_submit_application/schengen_short_term_visa.html"
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "policy_kind": "visa_exemption_list",
+      "policy_name": "List of States Whose Citizens Are Exempt from Visa Requirement (Schengen short-stay)",
+      "description": "Czech MFA list of states and territories whose citizens may enter the Czech Republic (Schengen Area) visa-free for short-term non-profit stays of up to 90 days in any 180-day period. Includes conditional exemptions: biometric passports required for Albania, Bosnia and Herzegovina, Georgia, Kosovo, Moldova, Montenegro, North Macedonia, Serbia and Ukraine; Taiwan passports must contain an identity card number; Hong Kong SAR and Macao SAR passports only; five categories of British nationals also exempt.",
+      "applies_to_nationalities": ["ALB", "AND", "ATG", "ARG", "AUS", "BHS", "BRB", "BIH", "BRA", "BRN", "CAN", "CHL", "COL", "CRI", "DMA", "TLS", "GEO", "GRD", "GTM", "HND", "ISR", "JPN", "KIR", "MYS", "MHL", "MUS", "MEX", "FSM", "MDA", "MCO", "MNE", "NRU", "NZL", "NIC", "MKD", "PLW", "PAN", "PRY", "PER", "KNA", "LCA", "VCT", "SLV", "WSM", "SMR", "SRB", "SYC", "SGP", "SLB", "KOR", "TWN", "TON", "TTO", "TUV", "UKR", "ARE", "GBR", "USA", "URY", "VAT", "VEN", "XKX", "HKG", "MAC"],
+      "conditions": [
+        "Short-term non-profit stays only; employment requires a Schengen visa for employment",
+        "90 days in any 180-day period across the Schengen Area; stay cannot be extended",
+        "Registration with the Foreign Police within 3 working days of arrival"
+      ],
+      "maximum_stay": "90 days in any 180-day period",
+      "official_source_urls": [
+        "https://mzv.gov.cz/jnp/en/information_for_aliens/short_stay_visa/list_of_states_whose_citizens_are_exempt/index.html",
+        "https://ipc.gov.cz/en/visa-and-residence-permit-types/third-country-nationals/short-term-and-visa-free-stays/visa-free-stays/"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "Bilateral visa-waiver agreements extending stay in the Czech Republic",
+      "description": "Under bilateral agreements, citizens of Argentina, Chile, Israel, South Korea, Costa Rica, Malaysia and Uruguay may stay in the Czech Republic an additional 90 days beyond the Schengen 90/180 allowance, and citizens of Singapore an additional 30 days. The bilateral stay applies only within the Czech Republic, with no travel to other EU/Schengen states during it.",
+      "applies_to_nationalities": ["ARG", "CHL", "ISR", "KOR", "CRI", "MYS", "URY", "SGP"],
+      "conditions": [
+        "Additional stay valid in the Czech Republic only; no travel to other Schengen states",
+        "Argentina, Chile, Israel, South Korea, Costa Rica, Malaysia, Uruguay: additional 90 days; Singapore: additional 30 days"
+      ],
+      "maximum_stay": "Up to 90 additional days in the Czech Republic (30 for Singapore) after the Schengen 90/180 allowance",
+      "official_source_urls": [
+        "https://ipc.gov.cz/en/visa-and-residence-permit-types/third-country-nationals/short-term-and-visa-free-stays/visa-free-stays/"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "consular_visa_regime",
+      "policy_name": "Schengen short-term visa (Type C) for tourism",
+      "description": "Third-country nationals not on the visa-exemption list must obtain a Schengen short-term visa (Type C) for tourist stays of up to 90 days in any 180-day period. Applications are filed at Czech consulates or outsourced visa centers in the applicant's consular district, commonly in person, not at a border crossing nor inside the Czech Republic; in some countries another Schengen state represents Czechia for visa issuance.",
+      "applies_to_nationalities": ["ALL_OTHERS"],
+      "conditions": [
+        "Apply in country of citizenship or residence within the applicant's consular district",
+        "Adult fee EUR 90; children 6-11 EUR 45; under 6 free; fee not refunded on refusal",
+        "For multi-country Schengen travel, apply with the state that is the only or main destination or of longest stay"
+      ],
+      "maximum_stay": "90 days in any 180-day period",
+      "official_source_urls": [
+        "https://ipc.gov.cz/en/visa-and-residence-permit-types/third-country-nationals/short-term-and-visa-free-stays/schengen-short-term-visa/",
+        "https://mzv.gov.cz/jnp/en/information_for_aliens/where_to_submit_application/schengen_short_term_visa.html",
+        "https://mzv.gov.cz/jnp/en/information_for_aliens/visa_fee_schedule/index.html"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "eta_program",
+      "policy_name": "ETIAS (European Travel Information and Authorization System) - announced, not yet operational",
+      "description": "The EU-wide ETIAS travel authorization will apply to citizens of over 60 visa-exempt countries traveling to the Czech Republic and other Schengen states. Czech embassy pages state it starts in the last quarter of 2026; as of the 2026-07-23 snapshot date it is NOT yet in operation and no ETIAS is required.",
+      "applies_to_nationalities": ["ALB", "AND", "ATG", "ARG", "AUS", "BHS", "BRB", "BIH", "BRA", "BRN", "CAN", "CHL", "COL", "CRI", "DMA", "TLS", "GEO", "GRD", "GTM", "HND", "ISR", "JPN", "KIR", "MYS", "MHL", "MUS", "MEX", "FSM", "MDA", "MCO", "MNE", "NRU", "NZL", "NIC", "MKD", "PLW", "PAN", "PRY", "PER", "KNA", "LCA", "VCT", "SLV", "WSM", "SMR", "SRB", "SYC", "SGP", "SLB", "KOR", "TWN", "TON", "TTO", "TUV", "UKR", "ARE", "GBR", "USA", "URY", "VAT", "VEN", "XKX", "HKG", "MAC"],
+      "conditions": [
+        "Not yet in force as of 2026-07-23; scheduled for the last quarter of 2026",
+        "Official EU application site: https://travel-europe.europa.eu/etias_en"
+      ],
+      "maximum_stay": "90 days in any 180-day period",
+      "official_source_urls": [
+        "https://mzv.gov.cz/washington/en/consular_information/etias_european_travel_information_and.html"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    }
+  ],
+  "fees": [
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "Schengen short-term visa (Type C) - adult",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 90,
+      "government_fee_currency": "EUR",
+      "refundability": "Non-refundable; visa fee is not refunded in case of visa refusal",
+      "accepted_payment_methods": ["cash", "card", "bank transfer (EUR, local currency, or other currency such as USD, at exchange rate)"],
+      "source_urls": ["https://mzv.gov.cz/jnp/en/information_for_aliens/visa_fee_schedule/index.html"]
+    },
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "Schengen short-term visa (Type C) - child aged 6-11",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 45,
+      "government_fee_currency": "EUR",
+      "refundability": "Non-refundable; may be waived at consulate discretion",
+      "accepted_payment_methods": ["cash", "card", "bank transfer (EUR, local currency, or other currency such as USD, at exchange rate)"],
+      "source_urls": ["https://mzv.gov.cz/jnp/en/information_for_aliens/visa_fee_schedule/index.html"]
+    },
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "Schengen short-term visa (Type C) - child under 6",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 0,
+      "government_fee_currency": "EUR",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": ["https://mzv.gov.cz/jnp/en/information_for_aliens/visa_fee_schedule/index.html"]
+    },
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "Schengen short-term visa (Type C) - visa-facilitation rate",
+      "applies_to_nationalities": ["ALB", "ARM", "AZE", "BLR", "BIH", "GEO", "MDA", "MNE", "MKD", "SRB", "UKR"],
+      "government_fee_amount": 35,
+      "government_fee_currency": "EUR",
+      "refundability": "Non-refundable; visa fee is not refunded in case of visa refusal",
+      "accepted_payment_methods": ["cash", "card", "bank transfer (EUR, local currency, or other currency such as USD, at exchange rate)"],
+      "source_urls": ["https://mzv.gov.cz/jnp/en/information_for_aliens/visa_fee_schedule/index.html"]
+    }
+  ],
+  "portals": [
+    {
+      "portal_kind": "foreign_ministry",
+      "url": "https://mzv.gov.cz/jnp/en/information_for_aliens/index.html",
+      "operator": "Ministry of Foreign Affairs of the Czech Republic",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["tourist_visa", "visa_free_entry"],
+      "source_urls": [
+        "https://mzv.gov.cz/jnp/en/information_for_aliens/short_stay_visa/list_of_states_whose_citizens_are_exempt/index.html",
+        "https://mzv.gov.cz/jnp/en/information_for_aliens/where_to_submit_application/schengen_short_term_visa.html"
+      ]
+    },
+    {
+      "portal_kind": "immigration_authority",
+      "url": "https://ipc.gov.cz/en/",
+      "operator": "Ministry of the Interior of the Czech Republic (Official Information Portal for Foreigners)",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["tourist_visa", "visa_free_entry"],
+      "source_urls": [
+        "https://ipc.gov.cz/en/visa-and-residence-permit-types/third-country-nationals/short-term-and-visa-free-stays/schengen-short-term-visa/",
+        "https://ipc.gov.cz/en/obligations-for-foreigners/arrival-in-the-czech-republic/"
+      ]
+    },
+    {
+      "portal_kind": "eta_portal",
+      "url": "https://travel-europe.europa.eu/etias_en",
+      "operator": "European Union (ETIAS)",
+      "operator_kind": "government",
+      "official_linking_source": "https://mzv.gov.cz/washington/en/consular_information/etias_european_travel_information_and.html",
+      "supported_categories": ["eta"],
+      "source_urls": ["https://mzv.gov.cz/washington/en/consular_information/etias_european_travel_information_and.html"]
+    }
+  ],
+  "passport_validity": {
+    "rule_kind": "months_after_departure",
+    "months": 3,
+    "min_blank_pages": null,
+    "condition_text": "You hold a valid travel document which is valid for at least 3 months after the intended departure date from the Schengen Area and, at the same time, it was issued in the previous 10 years. (No blank-page rule stated for entry; 2 free pages are required only for long-term visa applications.)",
+    "source_urls": ["https://ipc.gov.cz/en/obligations-for-foreigners/arrival-in-the-czech-republic/"]
+  },
+  "jurisdictions": [],
+  "unresolved": [
+    "Outsourced visa-center (e.g. VFS-type) application URLs are country-specific; the MFA 'where to submit' page confirms visa centers are an official channel but no single global visa-center portal URL was recorded.",
+    "ETIAS exact start date has not been announced; official Czech embassy pages state 'last quarter of 2026'. Recorded eta disposition NOT_APPLICABLE reflects the 2026-07-23 snapshot date only.",
+    "The MFA exemption-list page notes five categories of British nationals (BN(O), BOTC, BOC, BPP, British Subject) are exempt; these have no distinct ISO alpha-3 codes and are captured only in conditions/excerpt text.",
+    "Kosovo recorded as XKX (no official ISO alpha-3 code exists)."
+  ]
+}

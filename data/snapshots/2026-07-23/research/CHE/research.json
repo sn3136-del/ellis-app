@@ -1,0 +1,692 @@
+{
+  "destination": "CHE",
+  "retrieved_at": "2026-07-23T07:30:38Z",
+  "research_status": "research_incomplete",
+  "sources": [
+    {
+      "search_query": "Switzerland official immigration tourist visa requirements sem.admin.ch nationality",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/themen/einreise/faq.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/themen/einreise/faq.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "The cost of submitting an application is EUR 90 for adults and EUR 45 for children between 6 and 12 years old. [Travel documents must] be valid for at least three months after the intended date of departure from the Schengen area; and have been issued within the last 10 years. [Third-country nationals may stay] a maximum of 90 days within a 180-day period [which] may be used for a single uninterrupted stay or for multiple short stays. Applications for a category C visa must be submitted online using the application form provided or directly to the Swiss representation responsible for your place of residence. [ETIAS is] a new European travel authorisation system [launching] in the final quarter of 2026. [It will] cost 20 euros and will generally be valid for 3 years.",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Switzerland official immigration tourist visa requirements sem.admin.ch nationality",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/themen/einreise/info-einreise/voraussetzungen-nach-staat.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/themen/einreise/info-einreise/voraussetzungen-nach-staat.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Whether you need a visa or not depends on your nationality. [The page links to the] Overview of ID and visa provisions according to nationality (Annex CH-1, List 1) [and to the sections] Entry with visa [and] Entry without visa.",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Switzerland official immigration tourist visa requirements sem.admin.ch nationality",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/themen/einreise/info-einreise/voraussetzungen-nach-staat/mit-visum.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/themen/einreise/info-einreise/voraussetzungen-nach-staat/mit-visum.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Third-country nationals (non-EU/EFTA) who require a visa must meet the following entry requirements in order to enter Switzerland. The SEM does not issue visas. Swiss representations abroad are responsible for issuing and refusing visas. [Applicants need] a valid C visa (Schengen visa), a valid D visa (national visa), or a valid residence permit from a Schengen country. [The travel document must be] issued less than ten years ago and is valid for at least three months after the date of their intended departure from the Schengen area (for holders of C visas). [Applicants must demonstrate] the purpose and circumstances of their stay in Switzerland [and] sufficient financial means for the duration of their intended stay and for their return. [The page links to the online application at swiss-visa.ch: 'Where and how can I apply for a visa?']",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Switzerland official immigration tourist visa requirements sem.admin.ch nationality",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/themen/einreise/info-einreise/voraussetzungen-nach-staat/ohne-visum.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/themen/einreise/info-einreise/voraussetzungen-nach-staat/ohne-visum.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "[EU/EFTA citizens] must present valid personal identification, an ID card or a passport [and] must not pose a threat to public order and security. [Visa-exempt third-country travellers must have] a recognized travel document... valid for at least three months after the date of your planned departure from the Schengen area [and must not be] listed in the Schengen Information System (SIS) for refusal of entry [nor pose] a threat to public order, internal security, public health.",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "sem.admin.ch liste1_staatsangehoerigkeit China India visa provisions ordinary passport",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Overview of ID and visa provisions according to nationality (Annex CH-1, List 1) [as of 3 April 2026; downloadable as] Overview of ID and visa provisions according to nationality (PDF, 665 kB, 03.04.2026). In case of dispute, only the HTML version is valid.",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026 (list version date shown on page and on the per-letter pages)",
+      "page_language": "en"
+    },
+    {
+      "search_query": "sem.admin.ch liste1_staatsangehoerigkeit China India visa provisions ordinary passport",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/leg_visum.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/leg_visum.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "List of visa requirements (legend of V-codes used in Annex CH-1, List 1). V: third-country nationals with valid Schengen residence permits or type D visas plus recognised travel documents are exempt from the visa requirement. V1: visa required for specific work sectors (construction, catering, cleaning, security, erotic services) and any gainful occupation exceeding 8 days within a calendar year. V2: British passport holders' requirements vary by nationality designation (British Citizen has full exemption). V12, V13, V18: visa exemption applies only to biometric passport holders. V14: visa required for passports lacking identity card numbers. V16, V17: apply specifically to Hong Kong and Macao SAR passport holders.",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Switzerland visa exemption list (navigated from Annex CH-1 List 1 A-Z index)",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/a.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/a.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa requirement for stays of up to 90 days - Afghanistan: Yes (V); Albania: No (V12); Algeria: Yes (V); Andorra: No; Angola: Yes (V); Antigua and Barbuda: No (V1); Argentina: No (V1); Armenia: Yes (V); Australia: No; Austria (Schengen): No; Azerbaijan: Yes (V).",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Switzerland visa exemption list (navigated from Annex CH-1 List 1 A-Z index)",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/b.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/b.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa requirement for stays of up to 90 days - Bahamas: No (V1); Bahrain: Yes; Bangladesh: Yes; Barbados: No (V1); Belarus: Yes; Belgium (Schengen): No; Belize: Yes; Benin: Yes; Bhutan: Yes; Bolivia: Yes; Bosnia and Herzegowina: No (V12); Botswana: Yes; Brazil: No (V1); Brunei: No; Bulgaria (Schengen): No; Burkina Faso: Yes; Burundi: Yes.",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Switzerland visa exemption list (navigated from Annex CH-1 List 1 A-Z index)",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/c.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/c.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa requirement for stays of up to 90 days - Cambodia: Yes; Cameroon: Yes; Canada: No (V1); Cape Verde: Yes; Central African Republic: Yes; Chad: Yes; Chile: No; China (People's Republic): Yes (V, M: D); Colombia: No; Comoros: Yes; Congo (Brazzaville): Yes; Congo (Democratic Republic): Yes; Costa Rica: No; Cote d'Ivoire: Yes; Croatia (Schengen): No; Cuba: Yes; Cyprus: No; Czech Republic (Schengen): No.",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Switzerland visa exemption list (navigated from Annex CH-1 List 1 A-Z index)",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/d.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/d.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa requirement for stays of up to 90 days - Denmark (Schengen): No; Djibouti: Yes (V); Dominica: No (V1); Dominican Republic: Yes (V, M: D, S, SP, OP). Version of 3 April 2026.",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Switzerland visa exemption list (navigated from Annex CH-1 List 1 A-Z index)",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/e.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/e.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa requirement for stays of up to 90 days - Ecuador: Yes (V); Egypt: Yes (V, M: D); El Salvador: No (V1); Equatorial Guinea: Yes (V); Eritrea: Yes (V); Estonia (Schengen): No; Eswatini (Swaziland): Yes (V); Ethiopia: Yes (V).",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Switzerland visa exemption list (navigated from Annex CH-1 List 1 A-Z index)",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/f.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/f.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa requirement for stays of up to 90 days - Fiji: Yes; Finland (Schengen): No; France (Schengen): No.",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Switzerland visa exemption list (navigated from Annex CH-1 List 1 A-Z index)",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/g.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/g.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa requirement for stays of up to 90 days - Gabon: Yes (V); Gambia: Yes (V); Georgia: No (V18); Germany (Schengen): No; Ghana: Yes (V); Greece (Schengen): No; Grenada: No (V1); Guatemala: No (V1); Guinea: Yes (V); Guinea-Bissau: Yes (V); Guyana: Yes (V).",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Switzerland visa exemption list (navigated from Annex CH-1 List 1 A-Z index)",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/h.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/h.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa requirement for stays of up to 90 days - Haiti: Yes (V); Honduras: No (V1); Hong Kong: No (V16); Hungary (Schengen): No.",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Switzerland visa exemption list (navigated from Annex CH-1 List 1 A-Z index)",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/i.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/i.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa requirement for stays of up to 90 days - India: Yes (V, M: D); Indonesia: Yes (V, M: D, S); Iran: Yes (V, M: D); Iraq: Yes (V); Ireland: No; Iceland (Schengen): No; Israel: No (V1); Italy (Schengen): No. For stays in Switzerland of more than 90 days, a residence permit is required.",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Switzerland visa exemption list (navigated from Annex CH-1 List 1 A-Z index)",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/j.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/j.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa requirement for stays of up to 90 days - Jamaica: Yes; Japan: No; Jordan: Yes.",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Switzerland visa exemption list (navigated from Annex CH-1 List 1 A-Z index)",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/k.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/k.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa requirement for stays of up to 90 days - Kazakhstan: Yes (V, M: D, S); Kenya: Yes (V); Kiribati: No (V1); Kosovo: No (V12); Kuwait: Yes (V, M: D, S, SP); Kyrgyzstan: Yes (V, M: D). South Korea is listed on the S page as 'South Korea'.",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Switzerland visa exemption list (navigated from Annex CH-1 List 1 A-Z index)",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/l.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/l.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa requirement for stays of up to 90 days - Laos: Yes; Latvia (Schengen): No; Lebanon: Yes; Lesotho: Yes; Liberia: Yes; Libya: Yes; Liechtenstein (Schengen): No; Lithuania (Schengen): No; Luxembourg (Schengen): No.",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Switzerland visa exemption list (navigated from Annex CH-1 List 1 A-Z index)",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/m.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/m.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa requirement for stays of up to 90 days - Macao: No (V17); Madagascar: Yes; Malawi: Yes; Malaysia: No; Maldives: Yes; Mali: Yes; Malta (Schengen): No; Marshall Islands: No (V1); Mauritania: Yes; Mauritius: No (V1); Mexico: No (V1); Micronesia: No (V1); Moldova: No (V12); Monaco (Schengen): No; Mongolia: Yes; Montenegro: No (V12); Morocco: Yes; Mozambique: Yes; Myanmar (Burma): Yes.",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Switzerland visa exemption list (navigated from Annex CH-1 List 1 A-Z index)",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/n.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/n.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa requirement for stays of up to 90 days - Namibia: Yes; Nauru: Yes; Nepal: Yes; Netherlands (Schengen): No; New Zealand: No; Nicaragua: No (V1); Niger: Yes; Nigeria: Yes; North Korea: Yes; North Macedonia: No (V9, V12); Norway (Schengen): No.",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Switzerland visa exemption list (navigated from Annex CH-1 List 1 A-Z index)",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/o.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/o.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa requirement for stays of up to 90 days - Oman: Yes.",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Switzerland visa exemption list (navigated from Annex CH-1 List 1 A-Z index)",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/p.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/p.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa requirement for stays of up to 90 days - Pakistan: Yes (V); Palau: No (V1); Palestine: Yes (V); Panama: No (V1); Papua New Guinea: Yes (V); Paraguay: No (V1); Peru: No (V1); Philippines: Yes (V, M: D, OP); Poland (Schengen): No; Portugal (Schengen): No.",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Switzerland visa exemption list (navigated from Annex CH-1 List 1 A-Z index)",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/q.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/q.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa requirement for stays of up to 90 days - Qatar: Yes.",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Switzerland visa exemption list (navigated from Annex CH-1 List 1 A-Z index)",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/r.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/r.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa requirement for stays of up to 90 days - Romania (Schengen): No; Russia: Yes (V); Rwanda: Yes (V). Current as of 3 April 2026.",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026; page last modified 31.03.2024",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Switzerland visa exemption list (navigated from Annex CH-1 List 1 A-Z index)",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/s.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/s.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa requirement for stays of up to 90 days - Saint Kitts and Nevis: No (V1); Saint Lucia: No (V1); Saint Vincent and the Grenadines: No (V1); Salomon Islands: No (V1); Samoa (West): No (V1); San Marino: No; Sao Tome and Principe: Yes; Saudi Arabia: Yes; Senegal: Yes; Serbia: No (V13); Seychelles: No (V1); Sierra Leone: Yes; Singapore: No; Slovakia (Schengen): No; Slovenia (Schengen): No; Somalia: Yes; South Africa: Yes; South Korea: No (V1); Spain (Schengen): No; Sri Lanka: Yes; Sudan: Yes; South Sudan: Yes; Surinam: Yes; Sweden (Schengen): No; Syria: Yes.",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Switzerland visa exemption list (navigated from Annex CH-1 List 1 A-Z index)",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/t.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/t.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa requirement for stays of up to 90 days - Tajikistan: Yes (V); Taiwan: No (V14); Tanzania: Yes (V); Thailand: Yes (V, M: D, S, SP, OP); Timor-Leste: No (V1); Togo: Yes (V); Tonga: No (V1); Trinidad and Tobago: No (V1); Tunisia: Yes (V, M: D, SP); Tuerkiye (Turkey): Yes (V, V9, M: D, S, SP); Turkmenistan: Yes (V, M: D, S); Tuvalu: No (V1). Taiwan is shown in italics (not recognized by Switzerland as a state).",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Switzerland visa exemption list (navigated from Annex CH-1 List 1 A-Z index)",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/u.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/u.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa requirement for stays of up to 90 days - Uganda: Yes (V); Ukraine: No (V12, M: D, S); United Arab Emirates: No (V1); United Kingdom: No (V2); United States of America: No (V1); Uruguay: No (V1); Uzbekistan: Yes (V). A recognised travel document is required that 'is valid for at least three months after the intended date of departure from the Schengen Area; and it was issued within the last 10 years.'",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Switzerland visa exemption list (navigated from Annex CH-1 List 1 A-Z index)",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/v.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/v.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa requirement for stays of up to 90 days - Vanuatu: Yes; Vatican City: No; Venezuela: No (V1); Vietnam: Yes. 'The maximum duration of short stays within the Schengen Area is 90 days in any 180-day period.'",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Switzerland visa exemption list (navigated from Annex CH-1 List 1 A-Z index)",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/y.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/y.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa requirement for stays of up to 90 days - Yemen: Yes.",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Switzerland visa exemption list (navigated from Annex CH-1 List 1 A-Z index)",
+      "original_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/z.html",
+      "final_url": "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/z.html",
+      "redirect_chain": [],
+      "final_hostname": "www.sem.admin.ch",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa requirement for stays of up to 90 days - Zambia: Yes; Zimbabwe: Yes.",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": "Version of 3 April 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "linked from SEM 'Entry with visa' page (Where and how can I apply for a visa?)",
+      "original_url": "https://www.swiss-visa.ch/ivis2/#/i-select-country",
+      "final_url": "https://www.swiss-visa.ch/ivis2/#/i-select-country",
+      "redirect_chain": [],
+      "final_hostname": "www.swiss-visa.ch",
+      "source_authority": "official_application_portal",
+      "relevant_excerpt": "Online visa system",
+      "retrieved_at": "2026-07-23T07:30:38Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    }
+  ],
+  "dispositions": [
+    {
+      "nationalities": ["AUT", "BEL", "BGR", "HRV", "CYP", "CZE", "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HUN", "ISL", "IRL", "ITA", "LVA", "LIE", "LTU", "LUX", "MLT", "NLD", "NOR", "POL", "PRT", "ROU", "SVK", "SVN", "ESP", "SWE"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "No visa for any length of stay; stays over 90 days require registration/residence permit under EU/EFTA free-movement rules",
+      "conditions": [
+        "Must present valid personal identification: an ID card or a passport",
+        "Must not pose a threat to public order and security"
+      ],
+      "source_urls": [
+        "https://www.sem.admin.ch/sem/en/home/themen/einreise/info-einreise/voraussetzungen-nach-staat/ohne-visum.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit.html"
+      ]
+    },
+    {
+      "nationalities": ["ALB", "AND", "ATG", "ARG", "AUS", "BHS", "BRB", "BIH", "BRA", "BRN", "CAN", "CHL", "COL", "CRI", "DMA", "SLV", "GEO", "GRD", "GTM", "HND", "HKG", "ISR", "JPN", "KIR", "XKX", "MAC", "MYS", "MHL", "MUS", "MEX", "FSM", "MDA", "MCO", "MNE", "NZL", "NIC", "MKD", "PLW", "PAN", "PRY", "PER", "KNA", "LCA", "VCT", "SLB", "WSM", "SMR", "SRB", "SYC", "SGP", "KOR", "TWN", "TLS", "TON", "TTO", "TUV", "UKR", "ARE", "GBR", "USA", "URY", "VAT", "VEN"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "Travel document must be valid for at least three months after the intended date of departure from the Schengen area and issued within the last 10 years",
+        "Visa exemption is for stays without gainful occupation; for nationalities marked V1 in SEM Annex CH-1 List 1 a visa is required for certain work sectors and for any gainful occupation exceeding 8 days within a calendar year",
+        "ALB, BIH, GEO, MDA, MNE, MKD, SRB, UKR: exemption applies only to holders of biometric passports (SEM footnotes V12/V13/V18)",
+        "TWN: exemption applies only to Taiwan passports that include an identity card number (SEM footnote V14)",
+        "HKG: Hong Kong SAR passport (SEM footnote V16); MAC: Macao SAR passport (SEM footnote V17)",
+        "GBR: applies to British Citizen passport holders (SEM footnote V2); other British nationality categories may differ",
+        "Must not be listed in the Schengen Information System (SIS) for refusal of entry and must not pose a threat to public order, internal security or public health"
+      ],
+      "source_urls": [
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/leg_visum.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/a.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/b.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/c.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/d.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/e.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/g.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/h.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/i.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/j.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/k.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/m.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/n.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/p.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/s.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/t.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/u.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/v.html"
+      ]
+    },
+    {
+      "nationalities": ["CHN", "IND", "RUS"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "Schengen visa type C required for tourist stays of up to 90 days",
+        "The SEM does not issue visas; Swiss representations abroad are responsible for issuing and refusing visas",
+        "Applications for a category C visa must be submitted online using the application form provided (swiss-visa.ch) or directly to the Swiss representation responsible for the place of residence",
+        "Applicant must demonstrate the purpose and circumstances of the stay and sufficient financial means for the stay and return",
+        "Travel document issued less than ten years ago and valid for at least three months after intended departure from the Schengen area"
+      ],
+      "source_urls": [
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/c.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/i.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/r.html",
+        "https://www.sem.admin.ch/sem/en/home/themen/einreise/info-einreise/voraussetzungen-nach-staat/mit-visum.html",
+        "https://www.sem.admin.ch/sem/en/home/themen/einreise/faq.html"
+      ]
+    },
+    {
+      "nationalities": ["USA", "GBR", "SGP", "HKG", "TWN", "JPN", "KOR", "DEU", "FRA", "AUS", "CAN", "ARE", "BRA"],
+      "category": "tourist_visa",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Visa-exempt for tourist stays of up to 90 days in any 180-day period (DEU and FRA under EU/EFTA free-movement rules); no tourist visa needed"
+      ],
+      "source_urls": [
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit.html",
+        "https://www.sem.admin.ch/sem/en/home/themen/einreise/info-einreise/voraussetzungen-nach-staat/ohne-visum.html"
+      ]
+    },
+    {
+      "nationalities": ["ALL_OTHERS"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "Every nationality not covered by the exemption rows above requires a Schengen visa type C per SEM Annex CH-1 List 1 (complete published list, version of 3 April 2026)",
+        "Apply online via swiss-visa.ch or directly to the Swiss representation responsible for the place of residence; visas are issued by Swiss representations abroad"
+      ],
+      "source_urls": [
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit.html",
+        "https://www.sem.admin.ch/sem/en/home/themen/einreise/info-einreise/voraussetzungen-nach-staat/mit-visum.html"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "evisa_tourist",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Switzerland operates no tourist eVisa. Applications can be started online (swiss-visa.ch) but visas are issued or refused only by Swiss representations abroad; the channels are visa-free entry or a consular Schengen C visa"
+      ],
+      "source_urls": [
+        "https://www.sem.admin.ch/sem/en/home/themen/einreise/info-einreise/voraussetzungen-nach-staat/mit-visum.html",
+        "https://www.sem.admin.ch/sem/en/home/themen/einreise/faq.html"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "eta",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "As of 2026-07-23 no travel authorisation is required. SEM states ETIAS, a new European travel authorisation system covering Switzerland, launches in the final quarter of 2026 (EUR 20, generally valid 3 years); it is not yet in operation at this snapshot date"
+      ],
+      "source_urls": [
+        "https://www.sem.admin.ch/sem/en/home/themen/einreise/faq.html"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "visa_on_arrival_tourist",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "No visa-on-arrival channel exists: visa-required travellers must hold a C visa, D visa or Schengen residence permit before entry, and visas are issued only by Swiss representations abroad"
+      ],
+      "source_urls": [
+        "https://www.sem.admin.ch/sem/en/home/themen/einreise/info-einreise/voraussetzungen-nach-staat/mit-visum.html"
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "policy_kind": "visa_exemption_list",
+      "policy_name": "Overview of ID and visa provisions according to nationality (Annex CH-1, List 1)",
+      "description": "Switzerland's authoritative nationality-by-nationality list of ID and visa provisions, published by the State Secretariat for Migration (SEM). Nationalities marked 'No' for stays up to 90 days enter visa-free for tourism for up to 90 days in any 180-day period. Footnotes: V1 (visa still required for certain gainful occupation), V2 (British Citizen exemption), V12/V13/V18 (biometric passports only), V14 (Taiwan passport must contain identity card number), V16/V17 (Hong Kong/Macao SAR passports). Complete exempt set recorded in applies_to_nationalities.",
+      "applies_to_nationalities": ["AUT", "BEL", "BGR", "HRV", "CYP", "CZE", "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HUN", "ISL", "IRL", "ITA", "LVA", "LIE", "LTU", "LUX", "MLT", "NLD", "NOR", "POL", "PRT", "ROU", "SVK", "SVN", "ESP", "SWE", "ALB", "AND", "ATG", "ARG", "AUS", "BHS", "BRB", "BIH", "BRA", "BRN", "CAN", "CHL", "COL", "CRI", "DMA", "SLV", "GEO", "GRD", "GTM", "HND", "HKG", "ISR", "JPN", "KIR", "XKX", "MAC", "MYS", "MHL", "MUS", "MEX", "FSM", "MDA", "MCO", "MNE", "NZL", "NIC", "MKD", "PLW", "PAN", "PRY", "PER", "KNA", "LCA", "VCT", "SLB", "WSM", "SMR", "SRB", "SYC", "SGP", "KOR", "TWN", "TLS", "TON", "TTO", "TUV", "UKR", "ARE", "GBR", "USA", "URY", "VAT", "VEN"],
+      "conditions": [
+        "Maximum stay 90 days in any 180-day period for visa-exempt third-country nationals",
+        "Travel document valid at least three months after intended departure from the Schengen area and issued within the last 10 years",
+        "Exemption does not cover gainful occupation for V1-marked nationalities (visa required for listed work sectors or any employment exceeding 8 days per calendar year)"
+      ],
+      "maximum_stay": "90 days in any 180-day period",
+      "official_source_urls": [
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/leg_visum.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/a.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/b.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/c.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/d.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/e.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/f.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/g.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/h.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/i.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/j.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/k.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/l.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/m.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/n.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/o.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/p.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/q.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/r.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/s.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/t.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/u.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/v.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/y.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/z.html"
+      ],
+      "effective_from": "2026-04-03",
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "EU/EFTA free movement entry",
+      "description": "Citizens of EU and EFTA states do not require a visa to enter Switzerland; they enter with a valid ID card or passport under the free-movement rules and need only a registration/residence permit for stays exceeding 90 days.",
+      "applies_to_nationalities": ["AUT", "BEL", "BGR", "HRV", "CYP", "CZE", "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HUN", "ISL", "IRL", "ITA", "LVA", "LIE", "LTU", "LUX", "MLT", "NLD", "NOR", "POL", "PRT", "ROU", "SVK", "SVN", "ESP", "SWE"],
+      "conditions": [
+        "Must present valid personal identification, an ID card or a passport",
+        "Must not pose a threat to public order and security"
+      ],
+      "maximum_stay": null,
+      "official_source_urls": [
+        "https://www.sem.admin.ch/sem/en/home/themen/einreise/info-einreise/voraussetzungen-nach-staat/ohne-visum.html"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "consular_visa_regime",
+      "policy_name": "Schengen visa type C (short stay, incl. tourism)",
+      "description": "Visa-required nationalities must obtain a Schengen visa type C for tourist stays of up to 90 days in any 180-day period. The SEM does not issue visas; Swiss representations abroad issue or refuse them. Applications are submitted online via the official swiss-visa.ch online visa system or directly to the competent Swiss representation. Fee EUR 90 (adults) / EUR 45 (children 6-12).",
+      "applies_to_nationalities": ["ALL_OTHERS"],
+      "conditions": [
+        "Demonstrate purpose and circumstances of the stay",
+        "Demonstrate sufficient financial means for the stay and the return",
+        "Travel document issued less than ten years ago and valid at least three months after intended departure from the Schengen area",
+        "Not listed in the Schengen Information System (SIS) for refusal of entry; no threat to public order, internal security or public health"
+      ],
+      "maximum_stay": "90 days in any 180-day period",
+      "official_source_urls": [
+        "https://www.sem.admin.ch/sem/en/home/themen/einreise/info-einreise/voraussetzungen-nach-staat/mit-visum.html",
+        "https://www.sem.admin.ch/sem/en/home/themen/einreise/faq.html"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "eta_program",
+      "policy_name": "ETIAS (European Travel Information and Authorisation System) - announced, not yet in operation",
+      "description": "SEM states that ETIAS, a new European travel authorisation system that will cover visa-exempt travellers to the Schengen area including Switzerland, launches in the final quarter of 2026, will cost 20 euros and will generally be valid for 3 years. As of the snapshot date 2026-07-23 it is not in operation and no travel authorisation is required.",
+      "applies_to_nationalities": ["ALL"],
+      "conditions": [
+        "Not yet in operation as of 2026-07-23"
+      ],
+      "maximum_stay": null,
+      "official_source_urls": [
+        "https://www.sem.admin.ch/sem/en/home/themen/einreise/faq.html"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    }
+  ],
+  "fees": [
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "Schengen visa type C, adult",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 90,
+      "government_fee_currency": "EUR",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://www.sem.admin.ch/sem/en/home/themen/einreise/faq.html"
+      ]
+    },
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "Schengen visa type C, child aged 6-12",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 45,
+      "government_fee_currency": "EUR",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://www.sem.admin.ch/sem/en/home/themen/einreise/faq.html"
+      ]
+    }
+  ],
+  "portals": [
+    {
+      "portal_kind": "immigration_authority",
+      "url": "https://www.sem.admin.ch/sem/en/home.html",
+      "operator": "State Secretariat for Migration (SEM), Swiss Confederation",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["visa policy and entry-requirement information", "Annex CH-1 visa provisions lists"],
+      "source_urls": [
+        "https://www.sem.admin.ch/sem/en/home/themen/einreise/faq.html",
+        "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit.html"
+      ]
+    },
+    {
+      "portal_kind": "appointment_portal",
+      "url": "https://www.swiss-visa.ch/ivis2/#/i-select-country",
+      "operator": "Swiss federal administration - official online visa system (application submission and competent-representation lookup; not an eVisa issuance portal)",
+      "operator_kind": "government",
+      "official_linking_source": "https://www.sem.admin.ch/sem/en/home/themen/einreise/info-einreise/voraussetzungen-nach-staat/mit-visum.html",
+      "supported_categories": ["Schengen visa type C (tourist) online application"],
+      "source_urls": [
+        "https://www.swiss-visa.ch/ivis2/#/i-select-country",
+        "https://www.sem.admin.ch/sem/en/home/themen/einreise/info-einreise/voraussetzungen-nach-staat/mit-visum.html"
+      ]
+    },
+    {
+      "portal_kind": "foreign_ministry",
+      "url": "https://www.eda.admin.ch/",
+      "operator": "Federal Department of Foreign Affairs (FDFA/EDA), Swiss Confederation",
+      "operator_kind": "government",
+      "official_linking_source": "https://www.sem.admin.ch/sem/en/home/themen/einreise/faq.html",
+      "supported_categories": ["Swiss representations abroad (visa issuance)", "visa information for applicants abroad"],
+      "source_urls": [
+        "https://www.sem.admin.ch/sem/en/home/themen/einreise/faq.html"
+      ]
+    }
+  ],
+  "passport_validity": {
+    "rule_kind": "months_after_departure",
+    "months": 3,
+    "min_blank_pages": null,
+    "condition_text": "The travel document must be valid for at least three months after the intended date of departure from the Schengen area and must have been issued within the last 10 years. No minimum blank-page requirement is stated on the fetched official pages.",
+    "source_urls": [
+      "https://www.sem.admin.ch/sem/en/home/themen/einreise/faq.html",
+      "https://www.sem.admin.ch/sem/en/home/themen/einreise/info-einreise/voraussetzungen-nach-staat/mit-visum.html",
+      "https://www.sem.admin.ch/sem/en/home/publiservice/weisungen-kreisschreiben/visa/liste1_staatsangehoerigkeit/u.html"
+    ]
+  },
+  "jurisdictions": [],
+  "unresolved": [
+    "Foreign ministry (FDFA/EDA) pages could not be fetched: https://www.eda.admin.ch/eda/en/fdfa/entry-switzerland-residence/visa-requirements-application-form.html, https://www.eda.admin.ch/en/visa-requirements-for-entry-into-switzerland and the embassy subdomain https://www.schweiz-vereinigteskoenigreich.eda.admin.ch/en/visa-entry-to-and-residence-in-switzerland all returned HTTP 403 to automated fetches. FDFA-hosted visa content is therefore evidenced only indirectly via SEM links.",
+    "Authorized visa application centers: search-result snippets of FDFA embassy pages state that as of 1 October 2025 visa applications (at least in some countries) are processed by the external service provider VFS Global, but no official page confirming this could be fetched (HTTP 403), so no authorized_visa_center portal entry is recorded. Which countries of residence use an external provider remains unverified.",
+    "ETIAS: SEM states launch in the final quarter of 2026 (EUR 20, generally valid 3 years); not yet in operation at snapshot date 2026-07-23, so eta is recorded as NOT_APPLICABLE for this snapshot.",
+    "Blank-page rule: no minimum blank-page requirement stated on the fetched SEM pages.",
+    "Fees are published by SEM in EUR (EUR 90 adult, EUR 45 child 6-12); the CHF equivalent charged by Swiss representations and fee-waiver categories (e.g. children under 6) were not published on the fetched pages.",
+    "Kosovo is recorded as XKX (user-assigned ISO alpha-3 code, as Kosovo has no official ISO code); Vatican City recorded as VAT."
+  ]
+}

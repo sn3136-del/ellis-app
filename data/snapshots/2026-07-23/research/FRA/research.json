@@ -1,0 +1,490 @@
+{
+  "destination": "FRA",
+  "retrieved_at": "2026-07-23T07:18:09Z",
+  "research_status": "research_incomplete",
+  "sources": [
+    {
+      "search_query": "France official foreign ministry tourist visa France-Visas official portal",
+      "original_url": "https://us.diplomatie.gouv.fr/en/applying-for-a-visa",
+      "final_url": "https://us.diplomatie.gouv.fr/en/applying-for-a-visa",
+      "redirect_chain": [],
+      "final_hostname": "us.diplomatie.gouv.fr",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "FRANCE-VISAS is the official website for submitting and tracking your visa application. [...] Waiting times for appointments and for processing applications will vary depending on your country and the time of year. [...] You can submit your visa application up to six months before your departure date.",
+      "retrieved_at": "2026-07-23T07:18:09Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "official France visa exemption list short stay site:service-public.gouv.fr OR site:diplomatie.gouv.fr",
+      "original_url": "https://www.diplomatie.gouv.fr/en/services-to-foreigners/visiting-france/requesting-a-visa/",
+      "final_url": "http://www.diplomatie.gouv.fr/en/services-to-foreigners/visiting-france/requesting-a-visa",
+      "redirect_chain": [
+        "https://www.diplomatie.gouv.fr/en/services-to-foreigners/visiting-france/requesting-a-visa/",
+        "http://www.diplomatie.gouv.fr/en/services-to-foreigners/visiting-france/requesting-a-visa"
+      ],
+      "final_hostname": "www.diplomatie.gouv.fr",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "All foreign nationals wishing to enter France must be able to submit statutory documents at the border concerning the reasons for their stay, their means of support and accommodation arrangements. A visa is generally required, in the absence of a waiver. [France-Visas is] a single portal with all the information you need to guide you through the process and help you every step of the way. Users are therefore asked to submit their visa applications well in advance of their departure date.",
+      "retrieved_at": "2026-07-23T07:18:09Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "France tourist visa fee 90 euros short-stay Schengen site:service-public.gouv.fr",
+      "original_url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F16146?lang=en",
+      "final_url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F16146?lang=en",
+      "redirect_chain": [],
+      "final_hostname": "www.service-public.gouv.fr",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "The short-stay visa allows you to stay up to 90 days for a continuous stay or for several stays in the countries of the space Schengen over a period of 180 days. [...] Depending on your nationality and the type of your passport, you may be exempt from a visa. [...] Your passport must be valid at least 3 months after the end date of your visa. It must also have been issued since under 10 years [...] and contain at least two blank pages for entry stamps. [...] To know the cost of the visa, you can consult the section Rates from the pages of the France-Visas Assistant.",
+      "retrieved_at": "2026-07-23T07:18:09Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "\"90 euros\" OR \"90 €\" visa court séjour Schengen site:service-public.gouv.fr",
+      "original_url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F16146",
+      "final_url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F16146",
+      "redirect_chain": [],
+      "final_hostname": "www.service-public.gouv.fr",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Le visa de court séjour vous permet de séjourner 90 jours maximum pour un séjour continu ou pour plusieurs séjours dans les pays de l'espace Schengen sur une période de 180 jours. [...] Selon votre nationalité et le type de votre passeport, vous pouvez être dispensé de visa. Vous pouvez vérifier si vous avez besoin d'un visa en utilisant le service Assistant visa. [...] Votre passeport doit être valide au moins 3 mois après la date de fin de votre visa. Il doit également avoir été délivré depuis moins de 10 ans et contenir au moins deux pages vierges. [...] Pour connaître le coût du visa, vous pouvez consulter la rubrique Tarifs des pages de l'assistant France-Visas. Le montant des droits de visa doit être réglé au service des visas au moment du dépôt de la demande.",
+      "retrieved_at": "2026-07-23T07:18:09Z",
+      "effective_date_evidence": null,
+      "page_language": "fr"
+    },
+    {
+      "search_query": "official France visa exemption list short stay site:service-public.gouv.fr OR site:diplomatie.gouv.fr",
+      "original_url": "https://www.diplomatie.gouv.fr/en/services-to-foreigners/visiting-france/ees-the-new-european-border-entryexit-system-goes-live-on-10-april-2026",
+      "final_url": "https://www.diplomatie.gouv.fr/en/services-to-foreigners/visiting-france/ees-the-new-european-border-entryexit-system-goes-live-on-10-april-2026",
+      "redirect_chain": [],
+      "final_hostname": "www.diplomatie.gouv.fr",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "EES: A European database in which the Member States record the data of nationals of non-EU and non-Schengen Area countries who cross the external borders. [Gradual implementation began 12 October 2025; fully operational 10 April 2026. Applies to all third-country nationals entering for short stays (maximum 90 days per 180-day period), whether subject to visa requirements or not.] ETIAS: a travel authorization, distinct from a visa, comparable to the USA's ESTA or the UK's ETA; applies to nationals of the 59 visa-exempt countries entering the Schengen zone; fee EUR 20, waived for under-18s and over-70s; valid for multiple entries over 3 years, maximum stay 90 days per 180-day period. Expected to come on line in the last quarter of 2026. No websites currently issue ETIAS travel authorizations. BEWARE FRAUDULENT WEBSITES. Official resource: travel-europe.europa.eu",
+      "retrieved_at": "2026-07-23T07:18:09Z",
+      "effective_date_evidence": "EES gradual rollout from 12 October 2025, fully operational 10 April 2026; ETIAS expected to come on line in the last quarter of 2026 (not in force as of 2026-07-23)",
+      "page_language": "en"
+    },
+    {
+      "search_query": "us.diplomatie.gouv.fr US citizens visa waiver 90 days short stay France",
+      "original_url": "https://us.diplomatie.gouv.fr/en/gradual-implementation-entryexit-system-ees",
+      "final_url": "https://us.diplomatie.gouv.fr/en/gradual-implementation-entryexit-system-ees",
+      "redirect_chain": [],
+      "final_hostname": "us.diplomatie.gouv.fr",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Since April 1, 1949, France and the United States have had a bilateral agreement [allowing] U.S. citizens to spend 90 days in metropolitan France without requiring a visa, regardless of any previous stays in the Schengen zone. [This is] a 90-day stay under the Schengen visa exception covering U.S. citizens, in addition to 90 more days in metropolitan France. The bilateral agreement stay must take place after the Schengen visa exception stay. U.S. citizens must state their desire to invoke the bilateral agreement when they cross the border into France. A French border guard will then manually update their EES file so that the bilateral agreement is applied to their stay.",
+      "retrieved_at": "2026-07-23T07:18:09Z",
+      "effective_date_evidence": "Bilateral agreement in force since 1 April 1949",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official France visa exemption list short stay site:service-public.gouv.fr OR site:diplomatie.gouv.fr",
+      "original_url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F13512?lang=en",
+      "final_url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F13512?lang=en",
+      "redirect_chain": [],
+      "final_hostname": "www.service-public.gouv.fr",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "[European (EU/EEA/Swiss) citizens:] You can enter and be present for up to 3 months in France without special formalities. You simply need to have a valid passport or identity document, in case of identity check in the territory. If you wish to work as an employed or self-employed person in France, you do not need a residence permit or work authorization.",
+      "retrieved_at": "2026-07-23T07:18:09Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "official France visa exemption list short stay site:service-public.gouv.fr OR site:diplomatie.gouv.fr",
+      "original_url": "https://www.service-public.gouv.fr/particuliers/actualites/A17574?lang=en",
+      "final_url": "https://www.service-public.gouv.fr/particuliers/actualites/A17574?lang=en",
+      "redirect_chain": [],
+      "final_hostname": "www.service-public.gouv.fr",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "[News article announcing] the full deployment of the France-Visas digital portal, which enables foreigners to apply for French visas online [covering] complete digitization of visa application procedures; how to use the portal to apply for visas, track applications, and access visa information; available languages (French, English, Arabic, Chinese, Spanish, Russian).",
+      "retrieved_at": "2026-07-23T07:18:09Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "\"visa fees\" increase site:et.diplomatie.gouv.fr OR site:ng.diplomatie.gouv.fr OR site:in.diplomatie.gouv.fr OR site:cn.diplomatie.gouv.fr",
+      "original_url": "https://cn.diplomatie.gouv.fr/fr/demander-un-visa",
+      "final_url": "https://cn.diplomatie.gouv.fr/fr/demander-un-visa",
+      "redirect_chain": [],
+      "final_hostname": "cn.diplomatie.gouv.fr",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "France-Visas est le site officiel pour le dépôt et le suivi de votre demande de visa [...] un portail unique contenant toute l'information nécessaire. [...] l'assistant visa, France-visas vous permet de déterminer, en fonction de votre situation, si vous avez besoin d'un visa [...] déposer votre dossier au centre des visas dont vous dépendez. [...] L'assistant visa vous indiquera aussi quels justificatifs il faudra joindre à votre demande et le tarif appliqué. [Les demandes peuvent être déposées] jusqu'à six mois avant la date de départ.",
+      "retrieved_at": "2026-07-23T07:18:09Z",
+      "effective_date_evidence": null,
+      "page_language": "fr"
+    },
+    {
+      "search_query": "in.diplomatie.gouv.fr France visa India VFS Global short stay apply visa application center",
+      "original_url": "https://in.diplomatie.gouv.fr/en/applying-for-a-visa",
+      "final_url": "https://in.diplomatie.gouv.fr/en/applying-for-a-visa",
+      "redirect_chain": [],
+      "final_hostname": "in.diplomatie.gouv.fr",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Use the 'Visa wizard' on the France-Visas website to check, based on your situation, whether you need a visa and if so, what type. [Then] create an account and complete your application online on the portal [and] submit it to your local visa centre. You can submit your visa application up to six months before your departure date.",
+      "retrieved_at": "2026-07-23T07:18:09Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "\"90 euros\" OR \"90 €\" visa court séjour Schengen site:diplomatie.gouv.fr OR site:service-public.gouv.fr",
+      "original_url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F21921?lang=fr",
+      "final_url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F21921?lang=fr",
+      "redirect_chain": [],
+      "final_hostname": "www.service-public.gouv.fr",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Un étranger a-t-il besoin d'un visa pour venir en France ? Tout dépend de votre nationalité et de la durée de votre séjour. [...] Vous pouvez vérifier si vous avez besoin d'un visa en utilisant le service Assistant visa. [Pour les ressortissants de pays tiers soumis à visa,] un visa valide délivré par un pays Schengen [est requis].",
+      "retrieved_at": "2026-07-23T07:18:09Z",
+      "effective_date_evidence": null,
+      "page_language": "fr"
+    },
+    {
+      "search_query": "in.diplomatie.gouv.fr OR cn.diplomatie.gouv.fr OR uk.diplomatie.gouv.fr short-stay Schengen visa apply France",
+      "original_url": "https://uk.diplomatie.gouv.fr/en/applying-for-a-visa",
+      "final_url": "https://uk.diplomatie.gouv.fr/en/applying-for-a-visa",
+      "redirect_chain": [],
+      "final_hostname": "uk.diplomatie.gouv.fr",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "First, use the 'Visa wizard' on the France-Visas website to check, based on your situation, whether you need a visa and if so, what type. [Page lists French consulates in the UK: London, Edinburgh, Glasgow; it does not state nationality-specific exemptions and defers to the France-Visas wizard.]",
+      "retrieved_at": "2026-07-23T07:18:09Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "France short stay visa fee \"90\" euros site:diplomatie.gouv.fr visa fees",
+      "original_url": "https://www.diplomatie.gouv.fr/en/coming-to-france/visiting-france",
+      "final_url": "https://www.diplomatie.gouv.fr/en/coming-to-france/visiting-france",
+      "redirect_chain": [],
+      "final_hostname": "www.diplomatie.gouv.fr",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "Entering the Schengen Area: implementing the future EES and ETIAS systems [...] the new European border entry/exit system goes live on 10 April 2026. [France is described as] the world's leading tourist destination [with] more than 90 million foreign visitors recorded in 2018. [The page links 'Requesting a visa' and recommends France.fr for] practical organisation of your trip (visas, transport, climate, etc.).",
+      "retrieved_at": "2026-07-23T07:18:09Z",
+      "effective_date_evidence": "EES fully operational 10 April 2026",
+      "page_language": "en"
+    }
+  ],
+  "dispositions": [
+    {
+      "nationalities": ["DEU", "FRA"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "Up to 3 months without special formalities (EU free movement); longer stays possible under EU free-movement rules",
+      "conditions": [
+        "EU/EEA/Swiss citizens: valid passport or national identity card only",
+        "No visa, residence permit, or work authorization required for short stays",
+        "Not subject to EES registration (EU/Schengen citizens excluded)"
+      ],
+      "source_urls": [
+        "https://www.service-public.gouv.fr/particuliers/vosdroits/F13512?lang=en"
+      ]
+    },
+    {
+      "nationalities": ["USA"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days in any 180-day period in the Schengen Area; plus up to 90 additional days in metropolitan France under the 1949 France-USA bilateral agreement (must be invoked at the border, after the Schengen visa-exception stay)",
+      "conditions": [
+        "Schengen short-stay visa exception applies to U.S. citizens",
+        "Bilateral agreement of 1 April 1949 allows 90 further days in metropolitan France only; traveler must state the intent to invoke it at border crossing so the EES file is manually updated",
+        "Tourism/short visits only; no paid work for a French employer, long-term study, or residence",
+        "EES biometric registration at the external border applies"
+      ],
+      "source_urls": [
+        "https://us.diplomatie.gouv.fr/en/gradual-implementation-entryexit-system-ees",
+        "https://www.diplomatie.gouv.fr/en/services-to-foreigners/visiting-france/ees-the-new-european-border-entryexit-system-goes-live-on-10-april-2026"
+      ]
+    },
+    {
+      "nationalities": ["USA", "DEU", "FRA"],
+      "category": "tourist_visa",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Visa-exempt for short tourist stays; no consular tourist visa needed"
+      ],
+      "source_urls": [
+        "https://us.diplomatie.gouv.fr/en/gradual-implementation-entryexit-system-ees",
+        "https://www.service-public.gouv.fr/particuliers/vosdroits/F13512?lang=en"
+      ]
+    },
+    {
+      "nationalities": ["ALL_OTHERS"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "90 days per 180-day period in the Schengen Area (uniform short-stay visa)",
+      "conditions": [
+        "'A visa is generally required, in the absence of a waiver' (MEAE); the Schengen visa waiver covers 59 visa-exempt nationalities whose complete official list could not be retrieved (France-Visas wizard blocked to automated access) — nationals covered by the waiver do NOT need this visa",
+        "Application is made online on the official France-Visas portal (france-visas.gouv.fr), then submitted in person at the applicant's local visa centre or French consulate in the country of residence",
+        "Passport must be valid at least 3 months after the visa end date, issued within the last 10 years, with at least 2 blank pages",
+        "Applications may be lodged up to 6 months before the departure date"
+      ],
+      "source_urls": [
+        "http://www.diplomatie.gouv.fr/en/services-to-foreigners/visiting-france/requesting-a-visa",
+        "https://www.service-public.gouv.fr/particuliers/vosdroits/F16146?lang=en",
+        "https://www.service-public.gouv.fr/particuliers/vosdroits/F21921?lang=fr"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "eta",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "ETIAS is NOT yet in force as of 2026-07-23: 'Expected to come on line in the last quarter of 2026'",
+        "'No websites currently issue ETIAS travel authorizations. BEWARE FRAUDULENT WEBSITES' (MEAE)",
+        "Once live, ETIAS will apply to nationals of the 59 visa-exempt countries entering the Schengen zone: EUR 20 fee (waived under 18 / over 70), valid for multiple entries over 3 years, max stay 90 days per 180-day period"
+      ],
+      "source_urls": [
+        "https://www.diplomatie.gouv.fr/en/services-to-foreigners/visiting-france/ees-the-new-european-border-entryexit-system-goes-live-on-10-april-2026"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "evisa_tourist",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "France does not operate a tourist eVisa: the official channel described by the MEAE is an online application on France-Visas followed by in-person submission at the local visa centre/consulate, with the visa issued as a Schengen sticker visa"
+      ],
+      "source_urls": [
+        "http://www.diplomatie.gouv.fr/en/services-to-foreigners/visiting-france/requesting-a-visa",
+        "https://www.service-public.gouv.fr/particuliers/vosdroits/F16146?lang=en"
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "policy_kind": "visa_exemption_list",
+      "policy_name": "Schengen short-stay visa waiver (59 visa-exempt nationalities)",
+      "description": "France applies the common Schengen short-stay visa policy. Per the MEAE, 59 nationalities are exempt from the short-stay visa for stays of up to 90 days in any 180-day period ('Depending on your nationality and the type of your passport, you may be exempt from a visa'). The complete official list is served by the France-Visas 'Visa wizard', which was inaccessible to automated retrieval (HTTP 403); only USA membership was individually verified from an official French page. Visa-exempt travelers are subject to EES biometric registration at the external border and, from ETIAS go-live (expected Q4 2026), will need an ETIAS travel authorization.",
+      "applies_to_nationalities": ["USA"],
+      "conditions": [
+        "Stay limited to 90 days in any 180-day period across the Schengen Area",
+        "Complete nationality list not retrievable from reachable official pages; verify per nationality via the official France-Visas Visa wizard (france-visas.gouv.fr)"
+      ],
+      "maximum_stay": "90 days per 180-day period",
+      "official_source_urls": [
+        "https://www.service-public.gouv.fr/particuliers/vosdroits/F16146?lang=en",
+        "https://www.diplomatie.gouv.fr/en/services-to-foreigners/visiting-france/ees-the-new-european-border-entryexit-system-goes-live-on-10-april-2026",
+        "https://us.diplomatie.gouv.fr/en/gradual-implementation-entryexit-system-ees"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "EU/EEA/Swiss free movement",
+      "description": "European citizens can enter and be present for up to 3 months in France without special formalities, needing only a valid passport or identity document; no residence permit or work authorization is required. They are excluded from EES registration.",
+      "applies_to_nationalities": ["DEU", "FRA"],
+      "conditions": [
+        "Applies to all EU, EEA and Swiss citizens (DEU and FRA listed here as the requested nationalities covered)",
+        "Valid passport or national identity card required for identity checks"
+      ],
+      "maximum_stay": "3 months without formalities; longer under free-movement rules",
+      "official_source_urls": [
+        "https://www.service-public.gouv.fr/particuliers/vosdroits/F13512?lang=en"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "France-USA bilateral agreement of 1 April 1949",
+      "description": "U.S. citizens may spend 90 days in metropolitan France without a visa regardless of previous Schengen stays, in addition to the standard 90-day Schengen visa exception. The bilateral-agreement stay must take place after the Schengen visa-exception stay, and the traveler must state the desire to invoke the agreement at the French border so the EES file is manually updated. Tourism/short visits only.",
+      "applies_to_nationalities": ["USA"],
+      "conditions": [
+        "Metropolitan France only",
+        "Must be invoked at border crossing into France",
+        "No paid work for a French employer, long-term study, or taking up residence"
+      ],
+      "maximum_stay": "90 days under Schengen exception + 90 days in metropolitan France under the bilateral agreement",
+      "official_source_urls": [
+        "https://us.diplomatie.gouv.fr/en/gradual-implementation-entryexit-system-ees"
+      ],
+      "effective_from": "1949-04-01",
+      "effective_until": null
+    },
+    {
+      "policy_kind": "consular_visa_regime",
+      "policy_name": "Schengen short-stay (uniform) visa via France-Visas and local visa centre",
+      "description": "Non-exempt nationalities must obtain a Schengen short-stay visa before travel. The application is completed online on the official France-Visas portal, then submitted in person to the applicant's local visa centre or the French consulate in the country of residence; the portal also handles tracking. Applications may be lodged up to six months before departure. The visa allows up to 90 days (continuous or cumulative) in the Schengen Area per 180-day period.",
+      "applies_to_nationalities": ["ALL_OTHERS"],
+      "conditions": [
+        "Passport valid at least 3 months after the visa end date, issued within the last 10 years, at least 2 blank pages",
+        "Visa fee payable at lodging; amount published in the France-Visas 'Tarifs' section (not retrievable — see unresolved)",
+        "Statutory documents on purpose of stay, means of support and accommodation must be presentable at the border"
+      ],
+      "maximum_stay": "90 days per 180-day period",
+      "official_source_urls": [
+        "http://www.diplomatie.gouv.fr/en/services-to-foreigners/visiting-france/requesting-a-visa",
+        "https://www.service-public.gouv.fr/particuliers/vosdroits/F16146?lang=en",
+        "https://www.service-public.gouv.fr/particuliers/actualites/A17574?lang=en"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "eta_program",
+      "policy_name": "ETIAS (European Travel Information and Authorisation System) — not yet in force",
+      "description": "ETIAS is a travel authorization distinct from a visa, comparable to the USA's ESTA or the UK's ETA. It will apply to nationals of the 59 visa-exempt countries entering the Schengen zone. Fee EUR 20 (waived for under-18s, over-70s and certain family members); valid for multiple entries over 3 years; maximum stay 90 days per 180-day period. As of the retrieval date it is not operational: 'Expected to come on line in the last quarter of 2026' and 'No websites currently issue ETIAS travel authorizations.' Official EU resource: travel-europe.europa.eu.",
+      "applies_to_nationalities": ["ALL"],
+      "conditions": [
+        "Not in force as of 2026-07-23",
+        "Will apply only to visa-exempt (59-country list) short-stay travelers once live"
+      ],
+      "maximum_stay": "90 days per 180-day period",
+      "official_source_urls": [
+        "https://www.diplomatie.gouv.fr/en/services-to-foreigners/visiting-france/ees-the-new-european-border-entryexit-system-goes-live-on-10-april-2026"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "EES (Entry/Exit System) border registration",
+      "description": "EES is a European database in which Member States record the data of nationals of non-EU and non-Schengen Area countries who cross the external borders. It applies to all third-country nationals entering for short stays (max 90 days per 180-day period), whether visa-required or visa-exempt, and replaces passport stamping. Biometric data collected: facial image and, for travelers 12+, fingerprints. Gradual implementation began 12 October 2025; fully operational since 10 April 2026. Registration is free. EU/Schengen citizens and nationals of Andorra, San Marino, Monaco and the Holy See are excluded.",
+      "applies_to_nationalities": ["ALL"],
+      "conditions": [
+        "Not a visa or authorization — a border registration system",
+        "Applies at the external borders of the 29 Schengen Area countries"
+      ],
+      "maximum_stay": null,
+      "official_source_urls": [
+        "https://www.diplomatie.gouv.fr/en/services-to-foreigners/visiting-france/ees-the-new-european-border-entryexit-system-goes-live-on-10-april-2026",
+        "https://us.diplomatie.gouv.fr/en/gradual-implementation-entryexit-system-ees"
+      ],
+      "effective_from": "2025-10-12",
+      "effective_until": null
+    }
+  ],
+  "fees": [
+    {
+      "visa_category": "eta",
+      "visa_subtype": "ETIAS travel authorisation — NOT YET IN FORCE (expected to come on line in the last quarter of 2026)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 20,
+      "government_fee_currency": "EUR",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://www.diplomatie.gouv.fr/en/services-to-foreigners/visiting-france/ees-the-new-european-border-entryexit-system-goes-live-on-10-april-2026"
+      ]
+    },
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "Schengen short-stay (uniform) visa — amount NOT verified: official pages defer to the France-Visas 'Tarifs' section, which is inaccessible to automated retrieval (HTTP 403)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": null,
+      "government_fee_currency": null,
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://www.service-public.gouv.fr/particuliers/vosdroits/F16146?lang=en",
+        "https://www.service-public.gouv.fr/particuliers/vosdroits/F16146"
+      ]
+    }
+  ],
+  "portals": [
+    {
+      "portal_kind": "foreign_ministry",
+      "url": "https://www.diplomatie.gouv.fr/en/",
+      "operator": "Ministère de l'Europe et des Affaires étrangères (MEAE)",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["visa_information", "entry_requirements", "ees_etias_information"],
+      "source_urls": [
+        "http://www.diplomatie.gouv.fr/en/services-to-foreigners/visiting-france/requesting-a-visa",
+        "https://www.diplomatie.gouv.fr/en/services-to-foreigners/visiting-france/ees-the-new-european-border-entryexit-system-goes-live-on-10-april-2026"
+      ]
+    },
+    {
+      "portal_kind": "appointment_portal",
+      "url": "https://france-visas.gouv.fr/",
+      "operator": "French Government (MEAE) — France-Visas, 'the official website for submitting and tracking your visa application'",
+      "operator_kind": "government",
+      "official_linking_source": "http://www.diplomatie.gouv.fr/en/services-to-foreigners/visiting-france/requesting-a-visa",
+      "supported_categories": ["short_stay_tourist_visa_application", "long_stay_visa_application", "visa_wizard_eligibility_check", "application_tracking", "fee_schedule"],
+      "source_urls": [
+        "https://us.diplomatie.gouv.fr/en/applying-for-a-visa",
+        "https://www.service-public.gouv.fr/particuliers/actualites/A17574?lang=en",
+        "https://cn.diplomatie.gouv.fr/fr/demander-un-visa"
+      ]
+    },
+    {
+      "portal_kind": "eta_portal",
+      "url": "https://travel-europe.europa.eu",
+      "operator": "European Union (official EU travel resource; ETIAS not yet issuing authorizations)",
+      "operator_kind": "government",
+      "official_linking_source": "https://www.diplomatie.gouv.fr/en/services-to-foreigners/visiting-france/ees-the-new-european-border-entryexit-system-goes-live-on-10-april-2026",
+      "supported_categories": ["eta_etias_information_future_program"],
+      "source_urls": [
+        "https://www.diplomatie.gouv.fr/en/services-to-foreigners/visiting-france/ees-the-new-european-border-entryexit-system-goes-live-on-10-april-2026"
+      ]
+    },
+    {
+      "portal_kind": "embassy_site",
+      "url": "https://us.diplomatie.gouv.fr/",
+      "operator": "Embassy of France in the United States",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["visa_information", "us_bilateral_agreement_information"],
+      "source_urls": [
+        "https://us.diplomatie.gouv.fr/en/applying-for-a-visa",
+        "https://us.diplomatie.gouv.fr/en/gradual-implementation-entryexit-system-ees"
+      ]
+    },
+    {
+      "portal_kind": "embassy_site",
+      "url": "https://uk.diplomatie.gouv.fr/",
+      "operator": "Embassy of France in the United Kingdom",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["visa_information"],
+      "source_urls": [
+        "https://uk.diplomatie.gouv.fr/en/applying-for-a-visa"
+      ]
+    },
+    {
+      "portal_kind": "embassy_site",
+      "url": "https://cn.diplomatie.gouv.fr/",
+      "operator": "Embassy of France in China",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["visa_information"],
+      "source_urls": [
+        "https://cn.diplomatie.gouv.fr/fr/demander-un-visa"
+      ]
+    },
+    {
+      "portal_kind": "embassy_site",
+      "url": "https://in.diplomatie.gouv.fr/",
+      "operator": "Embassy of France in India",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["visa_information"],
+      "source_urls": [
+        "https://in.diplomatie.gouv.fr/en/applying-for-a-visa"
+      ]
+    }
+  ],
+  "passport_validity": {
+    "rule_kind": "months_after_departure",
+    "months": 3,
+    "min_blank_pages": 2,
+    "condition_text": "For Schengen short-stay visa applicants (service-public.gouv.fr F16146): 'Votre passeport doit être valide au moins 3 mois après la date de fin de votre visa. Il doit également avoir été délivré depuis moins de 10 ans et contenir au moins deux pages vierges.' (Passport valid at least 3 months after the visa end date, issued within the last 10 years, with at least two blank pages.) Stated in the context of visa applications; the generally applicable Schengen entry formulation for visa-exempt travelers could not be confirmed from a reachable official French page.",
+    "source_urls": [
+      "https://www.service-public.gouv.fr/particuliers/vosdroits/F16146",
+      "https://www.service-public.gouv.fr/particuliers/vosdroits/F16146?lang=en"
+    ]
+  },
+  "jurisdictions": [],
+  "unresolved": [
+    "france-visas.gouv.fr (official application portal, Visa wizard, 'Tarifs' fee pages, and per-country pages) returns HTTP 403 Forbidden to automated fetching (tried /en/accueil, /en/short-stay-visa, /en/la-demarche, /en/royaume-uni, /en/web/france-visas/india). Anti-bot protection was not bypassed. Consequence: the complete official visa-exemption list and the short-stay visa fee schedule could not be evidenced.",
+    "Per-nationality dispositions for CHN, GBR, IND, SGP, HKG, TWN, JPN, KOR, AUS, CAN, RUS, ARE, BRA could NOT be individually verified from reachable official pages: all reachable embassy pages (uk./cn./in.diplomatie.gouv.fr) defer to the blocked France-Visas Visa wizard. These nationalities therefore fall under the generic ALL_OTHERS row only, which itself carries the waiver caveat.",
+    "Short-stay Schengen visa fee: search-result snippets attributed to French embassy pages indicate EUR 90 adult / EUR 45 child (6-12) effective 11 June 2024 per Commission Delegated Regulation (EU) 2024/1415, but no official page stating the amount could be fetched (https://et.ambafrance.org/Visas-Increase-in-Visa-Fees now redirects to the et.diplomatie.gouv.fr homepage; the MEAE 'application fees' article URL resolves to a hub page without fee content). Amount left null — UNVERIFIED.",
+    "Authorized visa-center contractors (e.g. VFS Global in India, TLScontact in the UK, the Beijing visa application centre) could not be confirmed with operator URLs from a fetched official page; embassy pages only reference 'your local visa centre' via France-Visas.",
+    "https://ca.diplomatie.gouv.fr/en/extended-stay-europe-rules-applicable-canadian-citizens (Canadian bilateral-stay rules) returned HTTP 403; https://uk.diplomatie.gouv.fr/en/gradual-implementation-entryexit-system-ees returned HTTP 404.",
+    "Visa-on-arrival: no official France source addressing a tourist visa-on-arrival channel was found; the row is omitted rather than asserted as NOT_APPLICABLE.",
+    "ETIAS is not in force as of 2026-07-23 (MEAE: expected last quarter of 2026); re-check near go-live, since visa-exempt dispositions will then additionally require an ETIAS authorization."
+  ]
+}
