@@ -7,7 +7,7 @@ writes an immutable audit event.
 """
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel
 from datetime import datetime, timezone
 
@@ -153,7 +153,8 @@ def update_intake(intake_id: str, body: IntakeBody, db=Depends(get_session),
 
 
 @router.post("/intake/{intake_id}/resolve")
-def resolve_intake(intake_id: str, db=Depends(get_session), p: Principal = Depends(get_principal)):
+def resolve_intake(intake_id: str, background: BackgroundTasks,
+                   db=Depends(get_session), p: Principal = Depends(get_principal)):
     r = _owned_intake(db, p, intake_id)
     missing = [f["key"] for f in INTAKE_FIELDS
                if f["required"] and not (r.answers or {}).get(f["key"])
@@ -167,7 +168,80 @@ def resolve_intake(intake_id: str, db=Depends(get_session), p: Principal = Depen
     audit.record(db, org_id=p.org_id, application_id="", action="route_intake_resolved",
                  detail={"intake_id": r.id, "readiness": result["readiness_status"],
                          "route_key": result.get("route_key")}, actor=p.user_id)
+
+    # Strategy: cached on-demand research. When the exact route is missing/
+    # incomplete (NOT a material conflict awaiting human review), start a
+    # focused research job for THIS route only and report it to the UI.
+    checks = result.get("checks", {})
+    sr = checks.get("snapshot_resolution", {})
+    needs_research = (result["readiness_status"] == "NOT_READY"
+                      and result.get("route_key")
+                      and sr.get("disposition") in ("RESEARCH_INCOMPLETE", None)
+                      and not checks.get("conflicts", {}).get("route_conflicted"))
+    if needs_research:
+        from . import ondemand
+        norm = checks.get("normalization", {}).get("normalized") or {}
+        job = ondemand.create_job(
+            db, org_id=p.org_id, user_id=p.user_id, intake_id=r.id, case_id=r.case_id,
+            answers=r.answers, normalized=norm, key=result["route_key"],
+            language=r.preferred_language or "en")
+        result["research_job"] = {"id": job.id, "status": job.status, "stage": job.stage}
+        if job.status == "queued":
+            background.add_task(_run_research_job_bg, job.id)
     return result
+
+
+def _run_research_job_bg(job_id: str) -> None:  # pragma: no cover - thin wrapper
+    from ..db import SessionLocal
+    from . import ondemand
+    db = SessionLocal()
+    try:
+        ondemand.run_job(db, job_id)
+    finally:
+        db.close()
+
+
+@router.get("/research-jobs/{job_id}")
+def get_research_job(job_id: str, db=Depends(get_session),
+                     p: Principal = Depends(get_principal)):
+    from .models import OnDemandRouteResearchJob
+    job = db.get(OnDemandRouteResearchJob, job_id)
+    if not job or job.org_id != p.org_id:
+        raise HTTPException(404, "research job not found")
+    return {"id": job.id, "status": job.status, "stage": job.stage,
+            "route_key": job.route_key, "progress": job.progress,
+            "counters": {k: v for k, v in (job.counters or {}).items()
+                         if k in ("queries_used", "pages_fetched", "gov_candidates",
+                                  "extraction_fields", "extraction_rejected",
+                                  "disposition", "material_conflict")},
+            "result": job.result, "researched_at": job.researched_at_date,
+            "error": job.error or None}
+
+
+@router.post("/research-jobs/{job_id}/resume")
+def resume_research_job(job_id: str, background: BackgroundTasks,
+                        db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from .models import OnDemandRouteResearchJob
+    job = db.get(OnDemandRouteResearchJob, job_id)
+    if not job or job.org_id != p.org_id:
+        raise HTTPException(404, "research job not found")
+    if job.status in ("complete", "failed", "conflicted"):
+        return {"id": job.id, "status": job.status, "note": "job already finished"}
+    background.add_task(_run_research_job_bg, job.id)
+    return {"id": job.id, "status": "running", "stage": job.stage}
+
+
+@router.get("/admin/snapshot/research-jobs")
+def admin_research_jobs(db=Depends(get_session), p: Principal = Depends(get_principal)):
+    require_admin(p)
+    from .models import OnDemandRouteResearchJob
+    rows = db.execute(select(OnDemandRouteResearchJob)
+                      .order_by(OnDemandRouteResearchJob.created_at.desc())).scalars().all()
+    return {"jobs": [{"id": j.id, "org_id": j.org_id, "route_key": j.route_key,
+                      "status": j.status, "stage": j.stage, "attempts": j.attempts,
+                      "researched_at": j.researched_at_date,
+                      "kimi_model": j.kimi_model or None,
+                      "created_at": str(j.created_at)} for j in rows[:200]]}
 
 
 @router.get("/snapshot/route-evidence/{resolution_id}")

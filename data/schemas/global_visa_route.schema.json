@@ -86,6 +86,8 @@
     "adapter_status": { "type": "string", "enum": ["none", "development_queued", "in_development", "mock_tested", "staging_tested", "production_approved", "paused", "killed"] },
     "conflict_status": { "type": "string", "enum": ["none", "open", "resolved"] },
     "content_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "researched_on_demand_at": { "type": ["string", "null"], "format": "date", "description": "Actual retrieval date for records researched on demand AFTER the snapshot date; null when the record genuinely reflects the 2026-07-23 snapshot." },
+    "machine_verification_status": { "type": ["string", "null"], "enum": ["kimi_grounded_extraction", "no_extraction", "deterministic_only", null] },
     "notes": { "type": ["string", "null"] }
   }
 }

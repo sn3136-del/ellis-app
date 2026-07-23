@@ -352,6 +352,36 @@ class RouteIntake(Base, TimestampMixin):
     case_id: Mapped[str | None] = mapped_column(String(32), nullable=True)
 
 
+class OnDemandRouteResearchJob(Base, TimestampMixin):
+    """Focused research for ONE exact applicant route (strategy: cached
+    on-demand research, no global fleet). Durable + resumable: the stage
+    checkpoint persists after every transition; limits are enforced; partial
+    results are saved honestly. Tenant-scoped."""
+    __tablename__ = "on_demand_route_research_jobs"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    org_id: Mapped[str] = mapped_column(String(64), index=True)
+    user_id: Mapped[str] = mapped_column(String(64), default="")
+    case_id: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    intake_id: Mapped[str | None] = mapped_column(String(32), nullable=True, index=True)
+    route_key: Mapped[str] = mapped_column(String(400), index=True)
+    route: Mapped[dict] = mapped_column(JSON, default=dict)       # normalized route components
+    requested_language: Mapped[str] = mapped_column(String(16), default="en")
+    status: Mapped[str] = mapped_column(String(24), default="queued", index=True)
+    # queued|running|complete|research_incomplete|conflicted|timed_out|failed
+    stage: Mapped[str] = mapped_column(String(48), default="RECEIVE_ROUTE", index=True)
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    started_at: Mapped[str] = mapped_column(String(40), default="")
+    finished_at: Mapped[str] = mapped_column(String(40), default="")
+    researched_at_date: Mapped[str] = mapped_column(String(10), default="")   # actual date (date honesty)
+    limits: Mapped[dict] = mapped_column(JSON, default=dict)
+    progress: Mapped[list] = mapped_column(JSON, default=list)    # [{stage, at, note}]
+    counters: Mapped[dict] = mapped_column(JSON, default=dict)    # queries/pages/kimi calls used
+    result: Mapped[dict] = mapped_column(JSON, default=dict)      # readiness + statuses (redacted)
+    kimi_model: Mapped[str] = mapped_column(String(64), default="")
+    extraction_version: Mapped[str] = mapped_column(String(24), default="")
+    error: Mapped[str] = mapped_column(Text, default="")
+
+
 class RouteReadinessEvaluation(Base, TimestampMixin):
     __tablename__ = "route_readiness_evaluations"
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)

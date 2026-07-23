@@ -296,3 +296,36 @@ class OneTimeSnapshotResearchWorkflow:
 
 ALL_ACTIVITIES.append(act_snapshot_resume)
 ALL_WORKFLOWS = [VisaProcessingWorkflow, OneTimeSnapshotResearchWorkflow]
+
+
+# --- Durable on-demand route research (strategy change; one job at a time) ---
+
+@activity.defn
+async def act_run_ondemand_research(job_id: str) -> dict:
+    from .db import SessionLocal
+    from .visa_snapshot.ondemand import run_job
+    db = SessionLocal()
+    try:
+        job = run_job(db, job_id)
+        return {"id": job.id, "status": job.status, "stage": job.stage}
+    finally:
+        db.close()
+
+
+@workflow.defn
+class OnDemandRouteResearchWorkflow:
+    """One-shot durable wrapper for a single focused research job. The job's
+    own stage checkpoints make the activity idempotent, so a worker restart
+    resumes exactly where it stopped. NO schedules; one route per execution."""
+
+    @workflow.run
+    async def run(self, job_id: str) -> dict:
+        return await workflow.execute_activity(
+            act_run_ondemand_research, job_id,
+            start_to_close_timeout=timedelta(minutes=15),
+            retry_policy=RetryPolicy(maximum_attempts=3),
+        )
+
+
+ALL_ACTIVITIES.append(act_run_ondemand_research)
+ALL_WORKFLOWS.append(OnDemandRouteResearchWorkflow)
