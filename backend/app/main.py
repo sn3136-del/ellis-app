@@ -578,6 +578,80 @@ def get_appointment(application_id: str, db=Depends(get_session), p: Principal =
                             "reschedule_count": appt.reschedule_count}}
 
 
+# ---- Privacy: export + deletion (Phase 10) ----
+@app.get("/cases/{application_id}/export")
+def export_case_endpoint(application_id: str, db=Depends(get_session), p: Principal = Depends(get_principal)):
+    """Applicant-controlled portable export of everything held for this case."""
+    from . import privacy
+    _owned(db, p, application_id)
+    bundle = privacy.export_case(db, application_id)
+    audit.record(db, org_id=p.org_id, application_id=application_id, action="data_exported",
+                 detail={"scope": "case"}, actor=p.user_id)
+    return bundle
+
+
+@app.get("/export")
+def export_org_endpoint(db=Depends(get_session), p: Principal = Depends(get_principal)):
+    """Tenant export: every case owned by the caller's org."""
+    from . import privacy
+    return privacy.export_org(db, p.org_id)
+
+
+@app.delete("/cases/{application_id}")
+def delete_case_endpoint(application_id: str, db=Depends(get_session), p: Principal = Depends(get_principal)):
+    """Applicant-controlled erasure of a case (right to be forgotten)."""
+    from . import privacy
+    _owned(db, p, application_id)
+    return privacy.delete_case(db, application_id, actor=p.user_id)
+
+
+@app.delete("/applicants/{applicant_id}")
+def delete_applicant_endpoint(applicant_id: str, db=Depends(get_session), p: Principal = Depends(get_principal)):
+    """Erase an applicant and all their cases. Tenant-isolated."""
+    from . import privacy
+    applicant = db.get(models.Applicant, applicant_id)
+    if not applicant:
+        raise HTTPException(404, "applicant not found")
+    require_owner(p, applicant.org_id)
+    return privacy.delete_applicant(db, applicant_id, actor=p.user_id)
+
+
+# ---- Ops: readiness + metrics + kill switches (Phase 11) ----
+@app.get("/readyz")
+def readyz(db=Depends(get_session)):
+    """Readiness: the API is up AND its datastore is reachable."""
+    try:
+        from sqlalchemy import text
+        db.execute(text("SELECT 1"))
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(503, "database not ready")
+    return {"ready": True}
+
+
+@app.get("/metrics")
+def metrics(db=Depends(get_session), p: Principal = Depends(get_principal)):
+    """Operational counters for the caller's org (no PII). Case counts by state,
+    plus payment/appointment/submission totals and provider health flags."""
+    from sqlalchemy import func
+    from .config import capabilities, killswitches
+    rows = db.execute(select(models.VisaApplication.state, func.count()).where(
+        models.VisaApplication.org_id == p.org_id).group_by(models.VisaApplication.state)).all()
+    by_state = {state: n for state, n in rows}
+    def _count(model):
+        return db.execute(select(func.count()).select_from(model).join(
+            models.VisaApplication, model.application_id == models.VisaApplication.id).where(
+            models.VisaApplication.org_id == p.org_id)).scalar() or 0
+    return {
+        "cases_total": sum(by_state.values()),
+        "cases_by_state": by_state,
+        "appointments_booked": _count(models.Appointment),
+        "submissions": _count(models.SubmissionConfirmation),
+        "signatures": _count(models.NativeSignature),
+        "capabilities": capabilities(),
+        "kill_switches": killswitches(),
+    }
+
+
 # ---- Webhooks (signature-verified, idempotent) ----
 @app.post("/webhooks/stripe")
 async def stripe_webhook(stripe_signature: str = Header(default=""), db=Depends(get_session)):

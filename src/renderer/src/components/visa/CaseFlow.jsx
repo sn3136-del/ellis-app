@@ -152,6 +152,7 @@ export default function CaseFlow({ client, caseId, onNotify }) {
       {tab === 'activity' && (
         <div className="tabpanel">
           <AuditTrail events={audit} />
+          <PrivacyPanel client={client} caseId={caseId} onDeleted={() => onNotify && onNotify()} />
         </div>
       )}
 
@@ -220,6 +221,56 @@ function ResultView({ status }) {
         a && { label: 'Appointment', value: a.start_utc ? formatSlot(a.start_utc) + ' · ' + a.location_id : a.confirmation_no },
         a && { label: 'Appointment confirmation', value: a.confirmation_no }
       ].filter(Boolean)} />
+    </div>
+  )
+}
+
+function PrivacyPanel({ client, caseId, onDeleted }) {
+  const toast = useToast()
+  const [busy, setBusy] = useState('')
+  const [confirm, setConfirm] = useState(false)
+
+  async function exportData() {
+    setBusy('export')
+    try {
+      const bundle = await client.exportCase(caseId)
+      const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url; a.download = `ellis-case-${caseId.slice(0, 8)}.json`
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url)
+      toast('Export downloaded')
+    } catch (e) { toast(e.message) }
+    setBusy('')
+  }
+
+  async function erase() {
+    setBusy('delete')
+    try { await client.deleteCase(caseId); toast('Case erased'); onDeleted && onDeleted() }
+    catch (e) { toast(e.message); setBusy('') }
+  }
+
+  return (
+    <div className="card" style={{ padding: 18, marginTop: 16 }}>
+      <div className="eyebrow">Your data</div>
+      <div style={{ fontSize: 13, color: 'var(--muted)', margin: '4px 0 12px' }}>
+        Export everything Ellis holds for this case, or permanently erase it. Erasure
+        removes your documents and personal data and keeps only a non-identifying record
+        that erasure occurred.
+      </div>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button className="btn btn--ghost btn--sm" disabled={!!busy} onClick={exportData}>
+          {busy === 'export' ? 'Exporting…' : 'Export my data (JSON)'}
+        </button>
+        {!confirm
+          ? <button className="btn btn--ghost btn--sm" onClick={() => setConfirm(true)}>Delete this case…</button>
+          : <>
+              <button className="btn btn--sm" style={{ background: 'var(--crit)' }} disabled={!!busy} onClick={erase}>
+                {busy === 'delete' ? 'Erasing…' : 'Confirm permanent erasure'}
+              </button>
+              <button className="btn btn--ghost btn--sm" onClick={() => setConfirm(false)}>Cancel</button>
+            </>}
+      </div>
     </div>
   )
 }

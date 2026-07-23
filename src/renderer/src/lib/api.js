@@ -1,7 +1,30 @@
 // Thin wrapper around the secure preload bridge (window.ellis), plus shared
 // domain metadata used across the role interfaces.
 
-export const ellis = window.ellis
+// Graceful degradation: when the Electron preload bridge is unavailable (e.g.
+// the renderer is opened in a plain browser for preview/testing), fall back to a
+// no-op stub so the app still renders instead of hard-crashing. In the real
+// Electron app window.ellis is always present, so this stub is never used —
+// production behavior is unchanged. The Visa Platform screen talks to the
+// backend over HTTP (visaBackend.js), so it works fully under the stub too.
+function makeEllisStub() {
+  const recur = () => new Proxy(async () => ({}), {
+    get: (_t, p) => (p === 'then' ? undefined : recur()),
+    apply: () => Promise.resolve({})
+  })
+  const overrides = {
+    getSettings: async () => ({ onboarded: true }),
+    saveSettings: async () => ({}),
+    getState: async () => ({}),
+    listNotifs: async () => [],
+    listCases: async () => [],
+    listTrips: async () => [],
+    markAllNotifsRead: async () => ({})
+  }
+  return new Proxy(overrides, { get: (t, p) => (p in t ? t[p] : recur()) })
+}
+
+export const ellis = (typeof window !== 'undefined' && window.ellis) ? window.ellis : makeEllisStub()
 
 export const ROLES = {
   immigrant: {

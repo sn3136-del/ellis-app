@@ -69,6 +69,12 @@ export function createVisaClient(session) {
     appointment: (id) => call('GET', `/cases/${id}/appointment`, session),
     audit: (id) => call('GET', `/cases/${id}/audit`, session),
 
+    // Privacy (Phase 10) + ops (Phase 11)
+    exportCase: (id) => call('GET', `/cases/${id}/export`, session),
+    exportOrg: () => call('GET', '/export', session),
+    deleteCase: (id) => call('DELETE', `/cases/${id}`, session),
+    metrics: () => call('GET', '/metrics', session),
+
     // Native e-signature (Phase 3): prepare returns the exact document + hash +
     // a short-lived step-up token; sign submits consent/intent/typed-or-drawn.
     prepareAuthorization: (id, payload) =>

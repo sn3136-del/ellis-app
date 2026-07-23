@@ -98,16 +98,33 @@ def settings() -> Settings:
     return Settings()
 
 
+def killswitches() -> dict:
+    """Operator kill switches (env-driven). When a provider or adapter switch is
+    on, the API refuses to use it and falls back to the safe local path. These
+    let an operator disable a provider/adapter instantly without a redeploy."""
+    def _on(name: str) -> bool:
+        return os.getenv(name, "0").lower() in ("1", "true", "yes", "on")
+    return {
+        "kimi": _on("ELLIS_KILL_KIMI"),
+        "document_ai": _on("ELLIS_KILL_DOCUMENT_AI"),
+        "browserbase": _on("ELLIS_KILL_BROWSERBASE"),
+        "stripe": _on("ELLIS_KILL_STRIPE"),
+        "adapters": [a.strip() for a in os.getenv("ELLIS_KILL_ADAPTERS", "").split(",") if a.strip()],
+        "all_submissions": _on("ELLIS_KILL_SUBMISSIONS"),
+    }
+
+
 def capabilities() -> dict:
     s = settings()
+    ks = killswitches()
     return {
         "auth": "clerk" if s.clerk_secret_key else "dev_token",
         "database": "postgres" if s.database_url.startswith("postgres") else "sqlite",
         "vault": "aws_secrets_manager" if s.aws_secrets_prefix else "local_encrypted",
-        "kimi": bool(s.moonshot_api_key) and s.kimi_enabled,
-        "ocr": bool(s.google_cloud_project and s.document_ai_ocr_processor) and s.document_ai_enabled,
-        "browserbase": bool(s.browserbase_api_key),
-        "stripe_issuing": bool(s.stripe_secret_key) and s.issuing_approved,
+        "kimi": bool(s.moonshot_api_key) and s.kimi_enabled and not ks["kimi"],
+        "ocr": bool(s.google_cloud_project and s.document_ai_ocr_processor) and s.document_ai_enabled and not ks["document_ai"],
+        "browserbase": bool(s.browserbase_api_key) and not ks["browserbase"],
+        "stripe_issuing": bool(s.stripe_secret_key) and s.issuing_approved and not ks["stripe"],
         "docusign": bool(s.docusign_integration_key and s.docusign_account_id),
         "storage": "s3_kms" if s.s3_bucket else "local_encrypted",
         "workflow_engine": "temporal" if s.temporal_host else "db_runner",
