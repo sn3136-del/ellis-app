@@ -2,13 +2,17 @@
 from __future__ import annotations
 
 import json
+import os
 from functools import lru_cache
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-REFERENCE_DIR = REPO_ROOT / "data" / "reference"
-SCHEMA_DIR = REPO_ROOT / "data" / "schemas"
-SNAPSHOT_DIR = REPO_ROOT / "data" / "snapshots"
+# In containers the repo root is not mounted; ELLIS_DATA_DIR points at the
+# mounted data directory instead (read-only in the API/worker containers).
+DATA_DIR = Path(os.getenv("ELLIS_DATA_DIR", str(REPO_ROOT / "data")))
+REFERENCE_DIR = DATA_DIR / "reference"
+SCHEMA_DIR = DATA_DIR / "schemas"
+SNAPSHOT_DIR = DATA_DIR / "snapshots"
 
 REGISTRY_FILES = [
     "countries", "territories", "nationalities", "passport_issuers",

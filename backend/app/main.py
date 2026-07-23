@@ -47,6 +47,11 @@ from .observability import RequestLogMiddleware as _ReqLog, init_sentry as _init
 
 app.add_middleware(_ReqLog)
 
+# 2026-07-23 snapshot: applicant route intake + resolution + snapshot admin.
+from .visa_snapshot.api import router as _snapshot_router  # noqa: E402
+
+app.include_router(_snapshot_router)
+
 
 @app.on_event("startup")
 def _startup():

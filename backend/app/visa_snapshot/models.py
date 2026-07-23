@@ -337,6 +337,21 @@ class AdapterDevelopmentTask(Base, TimestampMixin):
     notes: Mapped[str] = mapped_column(Text, default="")
 
 
+class RouteIntake(Base, TimestampMixin):
+    """Applicant 'Start your visa' intake: saved progress, resumable, entirely
+    UI-driven (no source edits / env vars / JSON files required)."""
+    __tablename__ = "route_intakes"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    org_id: Mapped[str] = mapped_column(String(64), index=True)
+    user_id: Mapped[str] = mapped_column(String(64), index=True)
+    status: Mapped[str] = mapped_column(String(24), default="draft", index=True)  # draft|resolved|converted
+    answers: Mapped[dict] = mapped_column(JSON, default=dict)
+    preferred_language: Mapped[str] = mapped_column(String(16), default="en")
+    email: Mapped[str] = mapped_column(String(320), default="")
+    resolution_id: Mapped[str | None] = mapped_column(ForeignKey("route_resolutions.id"), nullable=True)
+    case_id: Mapped[str | None] = mapped_column(String(32), nullable=True)
+
+
 class RouteReadinessEvaluation(Base, TimestampMixin):
     __tablename__ = "route_readiness_evaluations"
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)

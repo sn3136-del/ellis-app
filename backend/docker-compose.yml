@@ -100,6 +100,7 @@ services:
       # SIMULATED demo: MockPortal permitted, permanent banner in the UI.
       # Real deployments set tripcom_evaluation | staging | production.
       ELLIS_RUNTIME_MODE: local_mock_demo
+      ELLIS_DATA_DIR: /data
       TEMPORAL_HOST: temporal:7233
       # Object storage (MinIO / S3-compatible)
       ELLIS_S3_ENDPOINT: http://minio:9000
@@ -124,6 +125,8 @@ services:
       - ${HOME}/.config/gcloud/application_default_credentials.json:/var/run/secrets/google/application_default_credentials.json:ro
       # Dev: live-mount the app package so backend edits reflect without rebuild.
       - ./app:/app/app
+      # Snapshot reference registries + research files (read-only in-container).
+      - ../data:/data:ro
     ports: ["8000:8000"]
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     healthcheck:
@@ -142,6 +145,7 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://ellis:ellis@postgres:5432/ellis
       ELLIS_RUNTIME_MODE: local_mock_demo
+      ELLIS_DATA_DIR: /data
       TEMPORAL_HOST: temporal:7233
       ELLIS_SMTP_HOST: mailpit
       ELLIS_SMTP_PORT: "1025"
@@ -151,6 +155,8 @@ services:
       GOOGLE_CLOUD_QUOTA_PROJECT: quiet-terminal-503221-i3
     volumes:
       - ${HOME}/.config/gcloud/application_default_credentials.json:/var/run/secrets/google/application_default_credentials.json:ro
+      - ./app:/app/app
+      - ../data:/data:ro
     command: ["python", "-m", "app.temporal_worker"]
 
   mock-portal:

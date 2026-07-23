@@ -12,7 +12,7 @@ from .models import (ConsularJurisdictionRule, HumanReviewTask, OfficialPortalRe
                      SnapshotConflict, SnapshotResearchBatch, SourceEvidence,
                      VisaFeeVersion, VisaPolicy, VisaPolicyVersion, VisaRoute,
                      VisaRouteVersion)
-from .registry import REPO_ROOT, SNAPSHOT_DIR
+from .registry import DATA_DIR, SNAPSHOT_DIR
 
 
 def _w(path: Path, rows: list[dict]):
@@ -37,7 +37,7 @@ def export_all(db, *, git_commit: str = "") -> dict:
             routes.append(v.record)
     written["global_visa_routes.jsonl"] = _w(out / "global_visa_routes.jsonl", routes)
     # Operational top-level copy (validated JSONL, not a free-form txt).
-    written["data/global_visa_routes.jsonl"] = _w(REPO_ROOT / "data" / "global_visa_routes.jsonl", routes)
+    written["data/global_visa_routes.jsonl"] = _w(DATA_DIR / "global_visa_routes.jsonl", routes)
 
     policies = []
     for head in db.execute(select(VisaPolicy).where(
