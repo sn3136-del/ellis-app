@@ -171,6 +171,7 @@ export default function OcrReview({ client, caseId, onChanged }) {
   const [review, setReview] = useState(null)
   const [error, setError] = useState(null)
   const [uploading, setUploading] = useState(null) // {name, status}
+  const [rejection, setRejection] = useState(null) // {name, message} — wrong-page guard
 
   async function load() {
     try { setReview(await client.review(caseId)) }
@@ -187,10 +188,18 @@ export default function OcrReview({ client, caseId, onChanged }) {
       try {
         const b64 = await readAsBase64(f)
         setUploading({ name: f.name, status: 'Uploading + scanning…' })
-        await client.addDocument(caseId, { name: f.name, mime: f.type, size_bytes: f.size, content_b64: b64 })
+        const res = await client.addDocument(caseId, { name: f.name, mime: f.type, size_bytes: f.size, content_b64: b64 })
         setUploading({ name: f.name, status: 'Processing with Document AI…' })
         await load()
-        toast(`${f.name} processed`)
+        // Wrong-page guard: a visa/stamp/cover/ID page is never used as the
+        // passport identity source — surface the exact guidance + retry.
+        if (res && res.rejected) {
+          setRejection({ name: f.name, message: res.message })
+          toast(`${f.name}: not the passport biodata page`)
+        } else {
+          setRejection(null)
+          toast(`${f.name} processed`)
+        }
       } catch (e) { setError({ message: e.message }) }
     }
     setUploading(null)
@@ -222,6 +231,17 @@ export default function OcrReview({ client, caseId, onChanged }) {
       )}
 
       {error && <ErrorNote error={error} />}
+
+      {rejection && (
+        <div className="card" style={{ padding: 14, marginTop: 12,
+          border: '1px solid #f59e0b', background: '#fff7ed' }}>
+          <strong style={{ color: '#9a3412' }}>We couldn't use {rejection.name}</strong>
+          <div style={{ fontSize: 13, color: '#9a3412', margin: '4px 0 10px' }}>{rejection.message}</div>
+          <button className="btn btn--sm" onClick={() => inputRef.current?.click()}>
+            Upload the biodata page and try again
+          </button>
+        </div>
+      )}
 
       {review && review.missing_fields && review.missing_fields.length > 0 && (
         <MissingInfo client={client} caseId={caseId}

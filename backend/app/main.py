@@ -16,6 +16,7 @@ from .db import get_session, create_all
 from . import models, audit, service, execution
 from .security import Principal, get_principal, require_owner, issue_action_token, verify_action_token
 from .providers import ocr as ocr_provider
+from .providers import passport_classifier
 from .providers import docusign
 from .providers.kimi import run_agent
 from .portal.contract import list_adapters, clear_registry
@@ -238,25 +239,55 @@ def add_document(application_id: str, body: AddDocument, db=Depends(get_session)
     # OCR hierarchy with recorded failover: Document AI → (flagged) Kimi vision → local.
     result, ocr_meta = ocr_provider.process_with_failover(content=content, text=body.text, mime=body.mime)
     ec = execution.classify_ocr(ocr_meta)
+
+    # Phase 4 — passport biodata-page classification. Accept ONLY a validated
+    # biodata page as the passport identity source; reject visa/stamp/cover/ID
+    # pages with the required guidance. A visa sticker is never an identity source,
+    # so a rejected passport-adjacent page carries NO extracted identity fields.
+    mrz = ocr_provider.parse_mrz(result.recognized_text) if result.recognized_text else None
+    classification = passport_classifier.classify_page(
+        text=result.recognized_text, mrz=mrz, has_image=bool(content),
+        vision_hint=result.doc_type)
+    doc_type = result.doc_type
+    fields_map = {f.key: {"value": f.value, "confidence": f.confidence, "page": f.page}
+                  for f in result.fields}
+    if classification["reject"]:
+        doc_type = classification["page_type"]
+        # Never let a visa/stamp/cover/ID page seed passport identity. The
+        # 'unverified biodata' case keeps its fields for manual review only.
+        if classification["page_type"] != "passport_biodata_unverified":
+            fields_map = {}
+
     doc = models.StoredDocument(org_id=p.org_id, application_id=application_id, name=body.name,
                                 mime=body.mime, size_bytes=body.size_bytes, sha256=sha,
-                                storage_ref=f"local://{sha[:16]}", doc_type=result.doc_type,
+                                storage_ref=f"local://{sha[:16]}", doc_type=doc_type,
                                 ocr_status="done", quality_warnings=result.quality_warnings,
                                 execution_class=str(ec),
-                                extracted_fields={f.key: {"value": f.value, "confidence": f.confidence,
-                                                          "page": f.page} for f in result.fields})
+                                page_classification={
+                                    "page_type": classification["page_type"],
+                                    "accepted_as_passport_identity": classification["accepted_as_passport_identity"],
+                                    "reject": classification["reject"],
+                                    "reasons": classification["reasons"]},
+                                extracted_fields=fields_map)
     db.add(doc)
     db.commit()
     audit.record(db, org_id=p.org_id, application_id=application_id, action="document_ocr",
-                 detail={"doc_type": result.doc_type, "mrz_valid": result.mrz_valid,
+                 detail={"doc_type": doc_type, "mrz_valid": result.mrz_valid,
                          "engine": ocr_meta.get("primary"), "fallback_used": ocr_meta.get("fallback_used"),
                          "docai_degraded": ocr_meta.get("docai_degraded"),
-                         "execution_class": str(ec)}, actor=p.user_id)
+                         "execution_class": str(ec),
+                         "page_type": classification["page_type"],
+                         "rejected": classification["reject"]}, actor=p.user_id)
     execution.record_execution(db, org_id=p.org_id, application_id=application_id,
                                action="document_ocr", ec=ec,
-                               detail={"doc_type": result.doc_type, "mrz_valid": result.mrz_valid})
-    return {"id": doc.id, "doc_type": result.doc_type, "mrz_valid": result.mrz_valid,
+                               detail={"doc_type": doc_type, "mrz_valid": result.mrz_valid,
+                                       "page_type": classification["page_type"]})
+    return {"id": doc.id, "doc_type": doc_type, "mrz_valid": result.mrz_valid,
             "execution_class": str(ec),
+            "page_type": classification["page_type"],
+            "accepted_as_passport_identity": classification["accepted_as_passport_identity"],
+            "rejected": classification["reject"],
+            "message": classification["message"],
             "extracted_fields": doc.extracted_fields, "quality_warnings": result.quality_warnings}
 
 

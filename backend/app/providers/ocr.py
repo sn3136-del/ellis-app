@@ -49,6 +49,10 @@ class OcrResult:
     quality_warnings: list[str] = field(default_factory=list)
     mrz_valid: bool = False
     engine: str = ""
+    # Transient recognized text, used ONLY for in-request page classification.
+    # Deliberately excluded from as_dict() so it is never persisted or logged
+    # (OCR text is PII). Callers must not store it.
+    recognized_text: str = ""
 
     def as_dict(self) -> dict:
         return {
@@ -131,7 +135,8 @@ class LocalOcrProvider:
         warnings = []
         if not text:
             warnings.append("no extractable text layer; image OCR requires Document AI")
-            return OcrResult(ok=True, doc_type="unknown", quality_warnings=warnings, engine=self.name)
+            return OcrResult(ok=True, doc_type="unknown", quality_warnings=warnings,
+                             engine=self.name, recognized_text="")
         mrz = parse_mrz(text)
         if mrz:
             fields = [
@@ -146,14 +151,16 @@ class LocalOcrProvider:
             if not mrz["mrz_valid"]:
                 warnings.append("MRZ check digit mismatch — verify manually")
             return OcrResult(ok=True, doc_type="passport", fields=fields,
-                             quality_warnings=warnings, mrz_valid=mrz["mrz_valid"], engine=self.name)
+                             quality_warnings=warnings, mrz_valid=mrz["mrz_valid"],
+                             engine=self.name, recognized_text=text)
         # Non-passport: pull simple key: value pairs.
         fields = []
         for m in re.finditer(r"([A-Za-z ]{3,40}):\s*([^\n]{1,80})", text):
             fields.append(ExtractedField(m.group(1).strip().lower().replace(" ", "_"),
                                          m.group(2).strip(), 0.7))
         doc_type = "bank_statement" if re.search(r"balance|account", text, re.I) else "document"
-        return OcrResult(ok=True, doc_type=doc_type, fields=fields, engine=self.name)
+        return OcrResult(ok=True, doc_type=doc_type, fields=fields, engine=self.name,
+                         recognized_text=text)
 
 
 def _fields_from_mrz(mrz: dict, warnings: list[str]) -> list[ExtractedField]:
@@ -185,8 +192,12 @@ class DocumentAiProvider:
         warnings: list[str] = []
         if mrz:
             return OcrResult(ok=True, doc_type="passport", fields=_fields_from_mrz(mrz, warnings),
-                             quality_warnings=warnings, mrz_valid=mrz["mrz_valid"], engine=self.name)
-        return LocalOcrProvider().process(text=recognized, mime=mime)
+                             quality_warnings=warnings, mrz_valid=mrz["mrz_valid"],
+                             engine=self.name, recognized_text=recognized)
+        res = LocalOcrProvider().process(text=recognized, mime=mime)
+        res.engine = self.name
+        res.recognized_text = recognized
+        return res
 
 
 class KimiVisionProvider:
@@ -204,7 +215,9 @@ class KimiVisionProvider:
         if mrz:
             fields = _fields_from_mrz(mrz, warnings)
             return OcrResult(ok=True, doc_type="passport", fields=fields,
-                             quality_warnings=warnings, mrz_valid=mrz["mrz_valid"], engine=self.name)
+                             quality_warnings=warnings, mrz_valid=mrz["mrz_valid"],
+                             engine=self.name,
+                             recognized_text=(out.get("text") or out.get("mrz_text") or ""))
         # No MRZ recognized: fall back to text extraction from the vision result.
         res = LocalOcrProvider().process(text=out["text"], mime=mime)
         res.doc_type = out.get("doc_type") or res.doc_type
