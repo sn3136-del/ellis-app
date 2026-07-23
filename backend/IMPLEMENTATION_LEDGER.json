@@ -1,13 +1,16 @@
 {
-  "updated": "2026-07-23 checkpoint (security correction + live Docker/Temporal Phase 1)",
+  "updated": "2026-07-23 checkpoint (security fix + live Docker/Temporal + applicant UI + privacy/ops)",
   "resume": {
-    "how_to_continue": "Everything needed is in this repo + ledger + tests + commit history. Recreate venv: (cd backend && python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt). Real creds live ONLY in the git-ignored backend/.env (not committed) and host ADC at ~/.config/gcloud/application_default_credentials.json. Private passport fixtures live ONLY at ~/.ellis_private_fixtures (0600, outside repo).",
-    "next_implementation_task": "PHASE UI: wire Electron applicant screens to the backend using src/renderer/src/lib/visaBackend.js — start with the OCR-review screen (upload -> Document AI -> field review/approve).",
-    "next_file_to_modify": "src/renderer/src/screens/ (new VisaCaseScreens) OR src/renderer/src/lib/visaBackend.js to add any missing endpoints; backend endpoints already exist in backend/app/main.py.",
-    "next_command_to_run": "cd backend && . .venv/bin/activate && uvicorn app.main:app --reload   # then run the Electron app (npm run dev) and build the OCR-review screen against http://localhost:8000",
+    "how_to_continue": "Everything needed is in this repo + ledger + tests + commit history. Recreate venv: (cd backend && python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt). Real creds live ONLY in the git-ignored backend/.env (not committed) and host ADC at ~/.config/gcloud/application_default_credentials.json. Private passport fixtures live ONLY at ~/.ellis_private_fixtures (0600, outside repo). Bring up the full stack: (cd backend && docker compose up -d) — 8 services, all healthy. Run the app: npm run dev.",
+    "done_this_session": "SECURITY: removed the bundled Kimi key from Electron (was shipped in release app.asar → docs/SECURITY_ROTATION.md, ROTATE IT) + build-security test. PHASE 1: full compose stack live + proven Temporal worker stop/restart durability with no dup pay/book/submit. PHASE 2-7: full applicant graphical workflow (VisaConsole + CaseFlow + OcrReview + Preferences + signature/liveview/payment/appointment/declaration handoffs) wired to backend; rendered + verified. PHASE 10/11: data export + erasure + readiness + metrics + provider/adapter kill switches. Bugfix: persisted workflow._last_slots.",
+    "next_implementation_task": "PHASE 8 adapter-lifecycle admin UI (surface /adapters + /discovery drafts + approve/activate/kill behind a feature flag) and PHASE 9 Trip.com administration UI (tenant/roles/deep-links/webhooks) reusing app/integrations/tripcom.py. Then PHASE 12 monitoring/staging (Sentry/OTel wiring behind flags, structured redacted request logging, load-test harness, staging compose overlay) and the full end-to-end graphical demo (Phase 13).",
+    "next_file_to_modify": "src/renderer/src/screens/ (new AdminConsole.jsx for adapter lifecycle + Trip.com admin) + backend adapter approve/activate/kill endpoints in app/main.py (adapters currently list-only via /adapters); app/integrations/tripcom.py already has signing/webhooks/idempotency.",
+    "next_command_to_run": "cd backend && docker compose up -d && npm run dev   # stack is already healthy; iterate the AdminConsole against http://localhost:8000",
     "verify_commands": [
-      "cd backend && . .venv/bin/activate && python -m pytest tests/test_unit.py tests/test_e2e.py tests/test_signature.py tests/test_discovery.py tests/test_tripcom.py tests/test_temporal.py -q",
-      "npm test",
+      "cd backend && . .venv/bin/activate && python -m pytest tests/test_unit.py tests/test_e2e.py tests/test_signature.py tests/test_discovery.py tests/test_tripcom.py tests/test_temporal.py tests/test_privacy.py -q   # 53 pass",
+      "npm test   # 43 pass (6 security + 11 visa + 26 portal)",
+      "cd backend && docker compose up -d && LIVE_TEMPORAL=1 .venv/bin/python -m pytest tests/test_live_temporal_restart.py -s   # live worker-restart durability",
+      "node --test tests/visa/frontend_backend.test.mjs   # frontend->backend full lifecycle (needs stack up)",
       "cd backend && . .venv/bin/activate && python -m pytest tests/test_live_providers.py -q   # needs backend/.env creds",
       "cd backend && . .venv/bin/activate && ENABLE_PRIVATE_DOCUMENT_SMOKE_TESTS=true PRIVATE_PASSPORT_FIXTURE_US=~/.ellis_private_fixtures/fixture_us.jpg (+SG/SG_PDF/CN/CN_2/PDF) python -m pytest tests/test_private_passports.py -q"
     ]
