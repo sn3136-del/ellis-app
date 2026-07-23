@@ -395,6 +395,41 @@ def get_stale_fees(db=Depends(get_session), p: Principal = Depends(get_principal
     return {"stale": fees_mod.stale_fees(db)}
 
 
+# ---- Trip.com connector admin (Phase 15 partial — sandbox contract) ----
+@app.get("/admin/tripcom/health")
+def tripcom_health(db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from .integrations import tripcom_admin
+    require_admin(p)
+    return tripcom_admin.health(db, p.org_id)
+
+
+@app.get("/admin/tripcom/deliveries")
+def tripcom_deliveries(status: str = "", db=Depends(get_session),
+                       p: Principal = Depends(get_principal)):
+    from .integrations import tripcom_admin
+    require_admin(p)
+    return {"deliveries": tripcom_admin.list_deliveries(db, p.org_id, status=status)}
+
+
+@app.post("/admin/tripcom/deliveries/{delivery_id}/replay")
+def tripcom_replay(delivery_id: str, db=Depends(get_session),
+                   p: Principal = Depends(get_principal)):
+    from .integrations import tripcom_admin
+    require_admin(p)
+    try:
+        row = tripcom_admin.replay(db, org_id=p.org_id, delivery_id=delivery_id, actor=p.user_id)
+    except KeyError:
+        raise HTTPException(404, "delivery not found")
+    return {"id": row.id, "replay_of": row.replay_of, "status": row.status}
+
+
+@app.post("/admin/tripcom/process")
+def tripcom_process(db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from .integrations import tripcom_admin
+    require_admin(p)
+    return tripcom_admin.process_deliveries(db, org_id=p.org_id)
+
+
 # ---- Trip.com first-run administrator setup (Phase 7) ----
 class SetupBody(BaseModel):
     tenant_name: Optional[str] = None
@@ -1061,6 +1096,16 @@ def _record_terminal_execution(db, p: Principal, application_id: str):
         execution.record_execution(db, org_id=p.org_id, application_id=application_id,
                                    action="case_completed", ec=ec,
                                    detail={"state": app_row.state}, government_outcome=True)
+        # Phase 15 (sandbox contract): queue the typed case-status webhook, with
+        # the execution class carried so Trip.com can never mistake a mock run
+        # for a production result.
+        from .integrations import tripcom, tripcom_admin
+        event = tripcom.case_status_event(
+            tripcom_case_ref=(app_row.answers or {}).get("tripcom_case_ref", ""),
+            ellis_case_id=application_id, state=app_row.state)
+        event["execution_class"] = str(ec)
+        event["is_real_government_result"] = execution.is_real_government_result(ec)
+        tripcom_admin.queue_event(db, org_id=p.org_id, event=event)
 
 
 @app.post("/cases/{application_id}/start")

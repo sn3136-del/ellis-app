@@ -159,6 +159,23 @@ class StoredDocument(Base, TimestampMixin):
     application: Mapped[VisaApplication] = relationship(back_populates="documents")
 
 
+class WebhookDelivery(Base, TimestampMixin):
+    """Outbound Trip.com webhook deliveries (Phase 15 partial). Persisted so
+    delivery is observable, retryable, dead-letterable, and replayable from the
+    admin console. Payloads are typed sandbox-contract events — no PII beyond
+    case references."""
+    __tablename__ = "webhook_deliveries"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    org_id: Mapped[str] = mapped_column(String(64), index=True)
+    event_type: Mapped[str] = mapped_column(String(60))
+    payload: Mapped[dict] = mapped_column(JSON, default=dict)
+    endpoint: Mapped[str] = mapped_column(String(500), default="")
+    status: Mapped[str] = mapped_column(String(20), default="pending", index=True)  # pending|delivered|failed|dead|unconfigured
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    last_error: Mapped[str] = mapped_column(String(200), default="")
+    replay_of: Mapped[str] = mapped_column(String(32), default="")
+
+
 class DocumentBlob(Base):
     """Document bytes for the in-app preview (Phase 13). Served ONLY through the
     authenticated content endpoint / short-lived signed URLs — never a local
