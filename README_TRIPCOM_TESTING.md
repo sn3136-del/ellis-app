@@ -22,6 +22,24 @@ real government portal is ever contacted.
 > submission/payment/booking/confirmation. `is_real_government_result` is `true`
 > only for an adapter-verified `LIVE_PRODUCTION` outcome.
 
+> **Runtime modes (2026-07-23):** `ELLIS_RUNTIME_MODE` is one of `test`,
+> `local_mock_demo`, `tripcom_evaluation`, `staging`, `production`. MockPortal
+> and the demo pipeline exist **only** in `test`/`local_mock_demo` (the app then
+> shows a permanent "SIMULATED PORTAL — NO REAL APPLICATION, PAYMENT,
+> APPOINTMENT OR SUBMISSION" banner). In `tripcom_evaluation`/`staging`/
+> `production` a route without an individually approved live adapter **stops**
+> with `UNSUPPORTED`/`PORTAL_UNAVAILABLE` — there is no mock fallback, the
+> Temporal worker and mock-portal service refuse to start, and `/adapters`
+> honestly lists nothing. The local compose stack pins `local_mock_demo`.
+
+> **Visa requirements snapshot: July 23, 2026.** Applicant route intake
+> ("Start your visa") resolves against the frozen 2026-07-23 snapshot
+> (`data/snapshots/2026-07-23/`), shows source evidence with retrieval dates,
+> and returns exactly one readiness status. Requirements are never invented:
+> unresearched routes are NOT_READY and queue an administrator review task.
+> Updates are **manual only** (`python -m app.visa_snapshot …`; no recurring
+> refresh exists).
+
 ## 1. Prerequisites
 
 | Tool | Version | Notes |

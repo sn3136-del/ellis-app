@@ -1,0 +1,453 @@
+{
+  "destination": "VNM",
+  "retrieved_at": "2026-07-23T07:15:27Z",
+  "research_status": "research_incomplete",
+  "sources": [
+    {
+      "search_query": "official Vietnam evisa portal xuatnhapcanh.gov.vn electronic visa",
+      "original_url": "https://evisa.xuatnhapcanh.gov.vn/en_US/web/guest/khai-thi-thuc-dien-tu/cap-thi-thuc-dien-tu",
+      "final_url": "https://evisa.xuatnhapcanh.gov.vn/en_US/web/guest/khai-thi-thuc-dien-tu/cap-thi-thuc-dien-tu",
+      "redirect_chain": [],
+      "final_hostname": "evisa.xuatnhapcanh.gov.vn",
+      "source_authority": "official_application_portal",
+      "relevant_excerpt": "$25/single-entry electronic visa ... $50/multiple-entry electronic visa ... Your application will be processed in 3 working days ... foreigners' passport data page image and photograph (straight looking without glasses) ... registration code will be sent to the applicant ... Enter registration code, registration email and date of birth to check result in E-visa search menu. If being approved for E-visa, please print E-visa to enter/exit Vietnam. ... If there is any missing or incorrect/unidentified information, your application will not be accepted.",
+      "retrieved_at": "2026-07-23T07:08:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "evisa.xuatnhapcanh.gov.vn e-visa 90 days all countries eligibility introduction",
+      "original_url": "https://evisa.xuatnhapcanh.gov.vn/trang-chu-ttdt",
+      "final_url": "https://evisa.xuatnhapcanh.gov.vn/trang-chu-ttdt",
+      "redirect_chain": [],
+      "final_hostname": "evisa.xuatnhapcanh.gov.vn",
+      "source_authority": "official_application_portal",
+      "relevant_excerpt": "Vietnam E-visa is valid for maximum of 90 days, single or multiple entry. ... Outside Vietnam foreigners ... Holding valid passport ... E-visa fee is paid via electronic payment gateway ... The fee will not be refunded if the application is refused. ... From 08:00 on 11/11/2024 (GMT+7), the Vietnam Electronic Visa Portal will operate on two new domains",
+      "retrieved_at": "2026-07-23T07:09:30Z",
+      "effective_date_evidence": "Portal-domain notice effective 08:00 on 11/11/2024 (GMT+7)",
+      "page_language": "en"
+    },
+    {
+      "search_query": "Vietnam visa exemption 45 days Germany France UK Japan Korea site:vietnamembassy-usa.org OR site:en.mofa.gov.vn OR site:xuatnhapcanh.gov.vn",
+      "original_url": "https://vietnam.travel/plan-your-trip/visa-requirements",
+      "final_url": "https://vietnam.travel/plan-your-trip/visa-requirements",
+      "redirect_chain": [],
+      "final_hostname": "vietnam.travel",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Germany, France, Italy, Spain, the UK, Russia, Japan, Republic of Korea, Denmark, Sweden, Norway, Finland and Belarus. ... Vietnam's new visa policy effective from 15th August 2023 extends stay duration for 13 countries enjoying unilateral visa exemption from 15 days to 45 days ... regardless of passport type and entry purpose. [Full exemption list also includes] Brunei, Myanmar, Philippines, Cambodia, Indonesia, Kyrgyzstan, Laos, Malaysia, Singapore, Thailand, Chile, and Panama [plus Kazakhstan]. ... Vietnam grants e-visas for citizens of all countries and territories with 90-day stay duration and valid for multiple entry. [Apply at] evisa.xuatnhapcanh.gov.vn ... E-visas are accepted at 13 international airports, 16 land borders, and 13 sea border gates across Vietnam.",
+      "retrieved_at": "2026-07-23T07:10:00Z",
+      "effective_date_evidence": "45-day policy for 13 countries effective from 15 August 2023",
+      "page_language": "en"
+    },
+    {
+      "search_query": "baochinhphu.vn resolution visa exemption 12 European countries Belgium Netherlands Switzerland 45 days tourism",
+      "original_url": "https://en.baochinhphu.vn/viet-nam-waives-visas-for-citizens-of-24-countries-from-mid-august-111250815144715035.htm",
+      "final_url": "https://en.baochinhphu.vn/viet-nam-waives-visas-for-citizens-of-24-countries-from-mid-august-111250815144715035.htm",
+      "redirect_chain": [],
+      "final_hostname": "en.baochinhphu.vn",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Resolution No. 229: Belgium, Bulgaria, Croatia, Czech Republic, Hungary, Luxembourg, Netherlands, Poland, Romania, Slovakia, Slovenia, Switzerland — up to 45 days from the date of entry — August 15, 2025 - August 14, 2028 — regardless of passport type, provided they meet Viet Nam's legal entry requirements. Resolution No. 44: Germany, France, Italy, Spain, UK, Russia, Japan, Republic of Korea, Denmark, Sweden, Norway, Finland. Resolution No. 221: guests of Party and State leaders, scholars, experts, investors, those working in the cultural and artistic fields, and other special cases.",
+      "retrieved_at": "2026-07-23T07:11:00Z",
+      "effective_date_evidence": "Resolution No. 229 effective August 15, 2025 - August 14, 2028",
+      "page_language": "en"
+    },
+    {
+      "search_query": "baochinhphu.vn resolution visa exemption 12 European countries Belgium Netherlands Switzerland 45 days tourism",
+      "original_url": "https://en.baochinhphu.vn/viet-nam-waives-visas-for-citizens-from-12-countries-until-march-2028-111250308085955058.htm",
+      "final_url": "https://en.baochinhphu.vn/viet-nam-waives-visas-for-citizens-from-12-countries-until-march-2028-111250308085955058.htm",
+      "redirect_chain": [],
+      "final_hostname": "en.baochinhphu.vn",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Germany, France, Italy, Spain, the United Kingdom, Russia, Japan, South Korea, Denmark, Sweden, Norway, and Finland ... 45 days from the date of entry, regardless of passport type and purpose of entry ... from March 15, 2025 too March 14, 2028 ... fully meeting the entry conditions as prescribed by Viet Nam's laws ... The visa exemption policy will be considered for extension according to the provisions of Viet Nam's laws.",
+      "retrieved_at": "2026-07-23T07:11:00Z",
+      "effective_date_evidence": "Effective from March 15, 2025 to March 14, 2028",
+      "page_language": "en"
+    },
+    {
+      "search_query": "baochinhphu.vn resolution visa exemption 12 European countries Belgium Netherlands Switzerland 45 days tourism",
+      "original_url": "https://vietnam.travel/things-to-do/new-visa-exemption-policies-effective-15-august-2025",
+      "final_url": "https://vietnam.travel/things-to-do/new-visa-exemption-policies-effective-15-august-2025",
+      "redirect_chain": [],
+      "final_hostname": "vietnam.travel",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Resolution No. 229/NQ-CP — Effective: 15 August 2025 to 14 August 2028 — Belgium, Bulgaria, Croatia, Czech Republic, Hungary, Luxembourg, Netherlands, Poland, Romania, Slovakia, Slovenia, and Switzerland — up to 45 days from the date of entry for tourism purpose. This supersedes Government Resolution No. 11/NQ-CP (dated 15 January 2025), which had granted exemptions to Poland, Czech Republic, and Switzerland. Decree No. 221/2025/ND-CP (15 August 2025): special visa exemption card allowing multiple entries; duration will not exceed five years and must be at least 30 days shorter than the passport's remaining validity.",
+      "retrieved_at": "2026-07-23T07:13:00Z",
+      "effective_date_evidence": "Resolution 229/NQ-CP effective 15 August 2025 to 14 August 2028; Decree 221/2025/ND-CP effective 15 August 2025",
+      "page_language": "en"
+    },
+    {
+      "search_query": "vietnamembassy-usa.org apply visa tourist embassy Vietnam United States passport valid six months",
+      "original_url": "https://vietnamembassy-usa.org/page/apply-visa-person-or-mail",
+      "final_url": "https://vietnamembassy-usa.org/page/apply-visa-person-or-mail",
+      "redirect_chain": [],
+      "final_hostname": "vietnamembassy-usa.org",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "at least 06 months of validity prior to the proposed date of entry into Viet Nam ... Visa fees vary depending on type of visa, duration of stay and type of service (standard or expedite) ... Standard service without approval letter: Six - Seven (06 - 07) working days ... Expedited service: 01 (one) to 05 (five) working days ... [Fees payable by] Visa Card/Master Card for in-person application at the Embassy, or in the form of money order/cashier's check/company check payable to EMBASSY OF VIET NAM",
+      "retrieved_at": "2026-07-23T07:12:30Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "vietnamembassy-usa.org apply visa tourist embassy Vietnam United States passport valid six months",
+      "original_url": "https://vietnamembassy-usa.org/content/visa-application-process",
+      "final_url": "https://vietnamembassy-usa.org/content/visa-application-process",
+      "redirect_chain": [],
+      "final_hostname": "vietnamembassy-usa.org",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Passport (valid for at least 06 months from the date of exit from Vietnam) ... Apply in-person at the Embassy (No appointment necessary) ... Access the link administered by the Immigration Department, Ministry of Public Security of Viet Nam: evisa.xuatmhapcanh.gov.vn [sic] ... For work/study/conference visas: Letter of Approval from Viet Nam Immigration Department (Ministry of Public Security) or Viet Nam Consular Department",
+      "retrieved_at": "2026-07-23T07:12:30Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "baochinhphu.vn resolution visa exemption 12 European countries Belgium Netherlands Switzerland 45 days tourism",
+      "original_url": "https://en.baochinhphu.vn/e-visa.html",
+      "final_url": "https://en.baochinhphu.vn/e-visa.html",
+      "redirect_chain": [],
+      "final_hostname": "en.baochinhphu.vn",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "citizens of all countries and territories around the world and increased the validity duration to up to 90 days ... [December 2025:] 41 border gates to the list of ports that allow foreigners to enter and exist Viet Nam by e-visa, bringing the total ports to 83 ... August 15, 2023, all foreigners can apply for e-visa to visit Viet Nam regardless of their nationality.",
+      "retrieved_at": "2026-07-23T07:14:00Z",
+      "effective_date_evidence": "Universal e-visa from August 15, 2023; port expansion December 2025 (83 ports total)",
+      "page_language": "en"
+    },
+    {
+      "search_query": "followed link from https://en.baochinhphu.vn/e-visa.html (found via query: baochinhphu.vn resolution visa exemption 12 European countries ... 45 days tourism)",
+      "original_url": "https://en.baochinhphu.vn/understanding-viet-nams-e-visa-111250218154519057.htm",
+      "final_url": "https://en.baochinhphu.vn/understanding-viet-nams-e-visa-111250218154519057.htm",
+      "redirect_chain": [],
+      "final_hostname": "en.baochinhphu.vn",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Viet Nam has issued e-visa to citizens of all countries and territories around the world and increased the validity duration to up to 90 days. ... E-visa fee: US$25 for a single-entry visa; US$50 for a multiple-entry visa. ... Foreigners who are citizens of countries that are unilaterally exempted from visas by Viet Nam ... will be granted a 45-day temporary residence certificate. [For treaty-exempt citizens, stay is] according to the provisions of the international treaty [or] a 30-day temporary residence period [if the treaty does not specify].",
+      "retrieved_at": "2026-07-23T07:14:30Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "followed link from https://en.baochinhphu.vn/e-visa.html (found via query: baochinhphu.vn resolution visa exemption 12 European countries ... 45 days tourism)",
+      "original_url": "https://en.baochinhphu.vn/how-to-apply-for-e-visa-to-enter-viet-nam-111241111165825147.htm",
+      "final_url": "https://en.baochinhphu.vn/how-to-apply-for-e-visa-to-enter-viet-nam-111241111165825147.htm",
+      "redirect_chain": [],
+      "final_hostname": "en.baochinhphu.vn",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "https://evisa.gov.vn/ ... managed by the Immigration Department under the Ministry of Public Security ... Since August 15, 2023, all foreigners can apply for e-visa to visit Viet Nam regardless of their nationality. ... E-visa issued by Viet Nam shall be valid for maximum of 90 days, single or multiple entry. ... The website provides general information on Viet Nam's e-visa policy, instructions for e-visa application, list of border gates designed by the Government for entry and exit with e-visa, and frequently asked questions.",
+      "retrieved_at": "2026-07-23T07:15:00Z",
+      "effective_date_evidence": "Universal e-visa eligibility since August 15, 2023",
+      "page_language": "en"
+    }
+  ],
+  "dispositions": [
+    {
+      "nationalities": ["DEU", "FRA", "ITA", "ESP", "GBR", "RUS", "JPN", "KOR", "DNK", "SWE", "NOR", "FIN"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "45 days from the date of entry",
+      "conditions": [
+        "Unilateral exemption under Resolution No. 44/NQ-CP, effective 15 March 2025 to 14 March 2028",
+        "Regardless of passport type and purpose of entry",
+        "Must fully meet the entry conditions as prescribed by Viet Nam's laws"
+      ],
+      "source_urls": [
+        "https://en.baochinhphu.vn/viet-nam-waives-visas-for-citizens-from-12-countries-until-march-2028-111250308085955058.htm",
+        "https://en.baochinhphu.vn/viet-nam-waives-visas-for-citizens-of-24-countries-from-mid-august-111250815144715035.htm",
+        "https://vietnam.travel/plan-your-trip/visa-requirements"
+      ]
+    },
+    {
+      "nationalities": ["BEL", "BGR", "HRV", "CZE", "HUN", "LUX", "NLD", "POL", "ROU", "SVK", "SVN", "CHE"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "45 days from the date of entry",
+      "conditions": [
+        "Tourism Development Stimulus Program exemption under Resolution No. 229/NQ-CP, effective 15 August 2025 to 14 August 2028",
+        "For tourism purpose, regardless of passport type",
+        "Must meet Viet Nam's legal entry requirements"
+      ],
+      "source_urls": [
+        "https://en.baochinhphu.vn/viet-nam-waives-visas-for-citizens-of-24-countries-from-mid-august-111250815144715035.htm",
+        "https://vietnam.travel/things-to-do/new-visa-exemption-policies-effective-15-august-2025"
+      ]
+    },
+    {
+      "nationalities": ["BLR"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "45 days",
+      "conditions": [
+        "Listed at 45 days among the 13 unilaterally exempted countries on the official Vietnam tourism site (policy effective 15 August 2023)",
+        "Belarus is NOT listed in Resolution 44/NQ-CP (March 2025); its current legal basis (likely a bilateral agreement) could not be verified from a fetched official page — see unresolved"
+      ],
+      "source_urls": [
+        "https://vietnam.travel/plan-your-trip/visa-requirements"
+      ]
+    },
+    {
+      "nationalities": ["SGP", "THA", "MYS", "IDN", "LAO", "KHM", "PHL", "BRN", "MMR", "KGZ", "CHL", "PAN", "KAZ"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": null,
+      "conditions": [
+        "Listed as visa-exempt on the official Vietnam tourism board page (bilateral/treaty exemptions)",
+        "Per official government guidance, treaty-exempt citizens stay 'according to the provisions of the international treaty' or receive 'a 30-day temporary residence period' where the treaty does not specify",
+        "Exact per-country maximum stays (widely reported as 14-90 days depending on country) could NOT be verified from a fetched official page — see unresolved"
+      ],
+      "source_urls": [
+        "https://vietnam.travel/plan-your-trip/visa-requirements",
+        "https://en.baochinhphu.vn/understanding-viet-nams-e-visa-111250218154519057.htm"
+      ]
+    },
+    {
+      "nationalities": ["CHN", "USA", "IND", "HKG", "TWN", "AUS", "CAN", "ARE", "BRA"],
+      "category": "evisa_tourist",
+      "disposition": "EVISA_REQUIRED",
+      "maximum_stay": "up to 90 days, single or multiple entry",
+      "conditions": [
+        "Not on any fetched official visa-exemption list; e-visa is issued to citizens of all countries and territories since 15 August 2023",
+        "Apply online at the official portal (evisa.gov.vn / evisa.xuatnhapcanh.gov.vn); processed in 3 working days",
+        "A consular visa at a Vietnamese embassy/consulate is an alternative channel",
+        "Hong Kong SAR (HKG) and Taiwan (TWN) travellers are covered by the official phrase 'all countries and territories'"
+      ],
+      "source_urls": [
+        "https://en.baochinhphu.vn/how-to-apply-for-e-visa-to-enter-viet-nam-111241111165825147.htm",
+        "https://evisa.xuatnhapcanh.gov.vn/trang-chu-ttdt",
+        "https://evisa.xuatnhapcanh.gov.vn/en_US/web/guest/khai-thi-thuc-dien-tu/cap-thi-thuc-dien-tu",
+        "https://vietnam.travel/plan-your-trip/visa-requirements"
+      ]
+    },
+    {
+      "nationalities": ["ALL_OTHERS"],
+      "category": "evisa_tourist",
+      "disposition": "EVISA_REQUIRED",
+      "maximum_stay": "up to 90 days, single or multiple entry",
+      "conditions": [
+        "Since 15 August 2023 Viet Nam issues e-visas to citizens of all countries and territories",
+        "Consular visa at a Vietnamese embassy/consulate remains an alternative channel"
+      ],
+      "source_urls": [
+        "https://en.baochinhphu.vn/how-to-apply-for-e-visa-to-enter-viet-nam-111241111165825147.htm",
+        "https://evisa.xuatnhapcanh.gov.vn/trang-chu-ttdt"
+      ]
+    },
+    {
+      "nationalities": ["DEU", "FRA", "ITA", "ESP", "GBR", "RUS", "JPN", "KOR", "DNK", "SWE", "NOR", "FIN", "BEL", "BGR", "HRV", "CZE", "HUN", "LUX", "NLD", "POL", "ROU", "SVK", "SVN", "CHE", "BLR", "SGP", "THA", "MYS", "IDN", "LAO", "KHM", "PHL", "BRN", "MMR", "KGZ", "CHL", "PAN", "KAZ"],
+      "category": "tourist_visa",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "No visa needed for tourist stays within the applicable exemption period",
+        "For stays longer than the exemption allows, an e-visa (up to 90 days) or consular visa is required"
+      ],
+      "source_urls": [
+        "https://vietnam.travel/plan-your-trip/visa-requirements",
+        "https://en.baochinhphu.vn/viet-nam-waives-visas-for-citizens-of-24-countries-from-mid-august-111250815144715035.htm"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "eta",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Official channels described by the government are: visa exemption, e-visa, and consular visa; no separate electronic travel authorization program is operated"
+      ],
+      "source_urls": [
+        "https://vietnam.travel/plan-your-trip/visa-requirements",
+        "https://en.baochinhphu.vn/understanding-viet-nams-e-visa-111250218154519057.htm"
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "policy_kind": "visa_exemption_list",
+      "policy_name": "Unilateral visa exemption for 12 countries (Resolution No. 44/NQ-CP)",
+      "description": "45-day visa-free entry regardless of passport type and purpose of entry for citizens of 12 countries, extended from 15 March 2025 to 14 March 2028.",
+      "applies_to_nationalities": ["DEU", "FRA", "ITA", "ESP", "GBR", "RUS", "JPN", "KOR", "DNK", "SWE", "NOR", "FIN"],
+      "conditions": ["Regardless of passport type and purpose of entry", "Must fully meet entry conditions prescribed by Viet Nam's laws"],
+      "maximum_stay": "45 days from the date of entry",
+      "official_source_urls": [
+        "https://en.baochinhphu.vn/viet-nam-waives-visas-for-citizens-from-12-countries-until-march-2028-111250308085955058.htm",
+        "https://en.baochinhphu.vn/viet-nam-waives-visas-for-citizens-of-24-countries-from-mid-august-111250815144715035.htm"
+      ],
+      "effective_from": "2025-03-15",
+      "effective_until": "2028-03-14"
+    },
+    {
+      "policy_kind": "visa_exemption_list",
+      "policy_name": "Tourism Development Stimulus Program exemption for 12 European countries (Resolution No. 229/NQ-CP)",
+      "description": "45-day visa-free entry for tourism purpose, regardless of passport type, for citizens of 12 European countries; supersedes Resolution No. 11/NQ-CP (15 January 2025) which covered Poland, Czech Republic and Switzerland.",
+      "applies_to_nationalities": ["BEL", "BGR", "HRV", "CZE", "HUN", "LUX", "NLD", "POL", "ROU", "SVK", "SVN", "CHE"],
+      "conditions": ["Tourism purpose", "Regardless of passport type", "Must meet Viet Nam's legal entry requirements"],
+      "maximum_stay": "45 days from the date of entry",
+      "official_source_urls": [
+        "https://en.baochinhphu.vn/viet-nam-waives-visas-for-citizens-of-24-countries-from-mid-august-111250815144715035.htm",
+        "https://vietnam.travel/things-to-do/new-visa-exemption-policies-effective-15-august-2025"
+      ],
+      "effective_from": "2025-08-15",
+      "effective_until": "2028-08-14"
+    },
+    {
+      "policy_kind": "visa_exemption_list",
+      "policy_name": "Bilateral/treaty visa exemptions",
+      "description": "Visa-free entry under bilateral agreements for ASEAN members and several other states, as listed on the official Vietnam tourism board site. Stay duration follows the applicable treaty; where the treaty does not specify, a 30-day temporary residence period is granted per official government guidance. Per-country durations were not verifiable from fetched official pages.",
+      "applies_to_nationalities": ["SGP", "THA", "MYS", "IDN", "LAO", "KHM", "PHL", "BRN", "MMR", "KGZ", "CHL", "PAN", "KAZ", "BLR"],
+      "conditions": ["Stay per bilateral treaty; 30-day temporary residence period where treaty is silent"],
+      "maximum_stay": null,
+      "official_source_urls": [
+        "https://vietnam.travel/plan-your-trip/visa-requirements",
+        "https://en.baochinhphu.vn/understanding-viet-nams-e-visa-111250218154519057.htm"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "evisa_program",
+      "policy_name": "Viet Nam E-visa (universal)",
+      "description": "Electronic visa issued by the Vietnamese Immigration Department (Ministry of Public Security) to citizens of all countries and territories since 15 August 2023. Valid for a maximum of 90 days, single or multiple entry. Fee US$25 single entry / US$50 multiple entry, non-refundable. Processed in 3 working days. Usable at 83 designated border gates (expanded December 2025).",
+      "applies_to_nationalities": ["ALL"],
+      "conditions": [
+        "Applicant must be outside Vietnam and hold a valid passport",
+        "Not in visa-suspension categories under Article 21 of Vietnam's immigration law",
+        "Fee paid via electronic payment gateway; not refunded if the application is refused"
+      ],
+      "maximum_stay": "up to 90 days",
+      "official_source_urls": [
+        "https://en.baochinhphu.vn/how-to-apply-for-e-visa-to-enter-viet-nam-111241111165825147.htm",
+        "https://evisa.xuatnhapcanh.gov.vn/trang-chu-ttdt",
+        "https://en.baochinhphu.vn/understanding-viet-nams-e-visa-111250218154519057.htm"
+      ],
+      "effective_from": "2023-08-15",
+      "effective_until": null
+    },
+    {
+      "policy_kind": "consular_visa_regime",
+      "policy_name": "Consular visa at Vietnamese embassies/consulates",
+      "description": "Visas may be applied for in person or by mail at Vietnamese diplomatic missions (e.g. the Embassy in Washington DC). Fees vary by visa type, duration and service level; standard processing 6-7 working days without approval letter, faster with one.",
+      "applies_to_nationalities": ["ALL"],
+      "conditions": [
+        "Passport with at least 06 months of validity prior to the proposed date of entry",
+        "Completed application form, photo(s), and fee payment required"
+      ],
+      "maximum_stay": null,
+      "official_source_urls": [
+        "https://vietnamembassy-usa.org/page/apply-visa-person-or-mail",
+        "https://vietnamembassy-usa.org/content/visa-application-process"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "Special visa exemption card for priority visitors (Decree No. 221/2025/ND-CP)",
+      "description": "Multiple-entry special visa exemption card for designated groups (official guests, scholars/experts, investors, cultural/arts/sports figures, honorary consuls, other approved special cases). Validity up to five years and at least 30 days shorter than the passport's remaining validity. Not a general tourist channel.",
+      "applies_to_nationalities": ["ALL"],
+      "conditions": ["Eligibility limited to designated priority groups; approval by competent authorities"],
+      "maximum_stay": null,
+      "official_source_urls": [
+        "https://vietnam.travel/things-to-do/new-visa-exemption-policies-effective-15-august-2025",
+        "https://en.baochinhphu.vn/viet-nam-waives-visas-for-citizens-of-24-countries-from-mid-august-111250815144715035.htm"
+      ],
+      "effective_from": "2025-08-15",
+      "effective_until": null
+    }
+  ],
+  "fees": [
+    {
+      "visa_category": "evisa_tourist",
+      "visa_subtype": "single_entry",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 25,
+      "government_fee_currency": "USD",
+      "refundability": "non_refundable (fee not refunded if application is refused)",
+      "accepted_payment_methods": ["electronic payment gateway"],
+      "source_urls": [
+        "https://evisa.xuatnhapcanh.gov.vn/en_US/web/guest/khai-thi-thuc-dien-tu/cap-thi-thuc-dien-tu",
+        "https://en.baochinhphu.vn/understanding-viet-nams-e-visa-111250218154519057.htm",
+        "https://evisa.xuatnhapcanh.gov.vn/trang-chu-ttdt"
+      ]
+    },
+    {
+      "visa_category": "evisa_tourist",
+      "visa_subtype": "multiple_entry",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 50,
+      "government_fee_currency": "USD",
+      "refundability": "non_refundable (fee not refunded if application is refused)",
+      "accepted_payment_methods": ["electronic payment gateway"],
+      "source_urls": [
+        "https://evisa.xuatnhapcanh.gov.vn/en_US/web/guest/khai-thi-thuc-dien-tu/cap-thi-thuc-dien-tu",
+        "https://en.baochinhphu.vn/understanding-viet-nams-e-visa-111250218154519057.htm",
+        "https://evisa.xuatnhapcanh.gov.vn/trang-chu-ttdt"
+      ]
+    },
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "consular_visa",
+      "applies_to_nationalities": null,
+      "government_fee_amount": null,
+      "government_fee_currency": null,
+      "refundability": null,
+      "accepted_payment_methods": ["Visa Card/Master Card (in person)", "money order", "cashier's check", "company check payable to EMBASSY OF VIET NAM"],
+      "source_urls": [
+        "https://vietnamembassy-usa.org/page/apply-visa-person-or-mail"
+      ]
+    }
+  ],
+  "portals": [
+    {
+      "portal_kind": "evisa_portal",
+      "url": "https://evisa.gov.vn/",
+      "operator": "Immigration Department, Ministry of Public Security of Viet Nam",
+      "operator_kind": "government",
+      "official_linking_source": "https://en.baochinhphu.vn/how-to-apply-for-e-visa-to-enter-viet-nam-111241111165825147.htm",
+      "supported_categories": ["evisa_tourist"],
+      "source_urls": [
+        "https://en.baochinhphu.vn/how-to-apply-for-e-visa-to-enter-viet-nam-111241111165825147.htm"
+      ]
+    },
+    {
+      "portal_kind": "evisa_portal",
+      "url": "https://evisa.xuatnhapcanh.gov.vn/",
+      "operator": "Vietnamese Immigration Department (National portal on Immigration)",
+      "operator_kind": "government",
+      "official_linking_source": "https://vietnam.travel/plan-your-trip/visa-requirements",
+      "supported_categories": ["evisa_tourist"],
+      "source_urls": [
+        "https://evisa.xuatnhapcanh.gov.vn/trang-chu-ttdt",
+        "https://evisa.xuatnhapcanh.gov.vn/en_US/web/guest/khai-thi-thuc-dien-tu/cap-thi-thuc-dien-tu",
+        "https://vietnam.travel/plan-your-trip/visa-requirements"
+      ]
+    },
+    {
+      "portal_kind": "embassy_site",
+      "url": "https://vietnamembassy-usa.org/",
+      "operator": "Embassy of the Socialist Republic of Vietnam in the United States",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["tourist_visa"],
+      "source_urls": [
+        "https://vietnamembassy-usa.org/page/apply-visa-person-or-mail",
+        "https://vietnamembassy-usa.org/content/visa-application-process"
+      ]
+    }
+  ],
+  "passport_validity": {
+    "rule_kind": "months_after_arrival",
+    "months": 6,
+    "min_blank_pages": null,
+    "condition_text": "Embassy of Vietnam in the US requires 'a passport with at least 06 months of validity prior to the proposed date of entry into Viet Nam'; a second embassy page phrases it as 'valid for at least 06 months from the date of exit from Vietnam'. The stricter from-entry phrasing is recorded; no blank-page rule found on official pages.",
+    "source_urls": [
+      "https://vietnamembassy-usa.org/page/apply-visa-person-or-mail",
+      "https://vietnamembassy-usa.org/content/visa-application-process"
+    ]
+  },
+  "jurisdictions": [],
+  "unresolved": [
+    "TLS certificate failures ('unable to verify the first certificate' / 'unable to get local issuer certificate') blocked direct fetches of: https://evisa.gov.vn/, https://lanhsuvietnam.gov.vn/Lists/BaiViet/DispForm.aspx?ID=306, https://www.lanhsuvietnam.gov.vn/..., and https://vnembassy-jp.org/en/vietnam-extends-visa-exemption-policy. evisa.gov.vn is nevertheless recorded as a portal because the Government's official channel (en.baochinhphu.vn) names and links it.",
+    "Per-country maximum stays for treaty-based exemptions (SGP, THA, MYS, IDN, LAO, KHM, PHL, BRN, MMR, KGZ, CHL, PAN, KAZ) could not be verified from any fetched official page; third-party sources report 14-90 days (e.g. SGP 30 days, PHL 21, BRN/MMR 14, CHL/PAN 90) but were not used as evidence. Attempted official pages returned 404/ECONNRESET: vnembassy-paris.mofa.gov.vn, vnembassy-copenhagen.mofa.gov.vn, vnconsulate-khonkaen.mofa.gov.vn, vnembassy-doha.mofa.gov.vn, vnembassy-bruxelles.mofa.gov.vn, vnembassy-darussalam.mofa.gov.vn.",
+    "Belarus (BLR): the official tourism board page still lists Belarus among the 13 countries at 45 days (2023 policy), but Resolution 44/NQ-CP (March 2025) covers only 12 countries without Belarus; the current legal basis and duration for Belarus (reportedly a bilateral agreement) were not verified from a fetched official page.",
+    "Visa on arrival: Vietnamese law provides for visa issuance at border gates with prior approval, but no official page describing a tourist visa-on-arrival channel was fetched; visa_on_arrival disposition rows are omitted rather than guessed.",
+    "The second announced e-visa portal domain thithucdientu.gov.vn appeared only in search snippets and a portal notice about 'two new domains'; the domain itself was not verifiable by fetch and is omitted from portals.",
+    "Passport validity: the two fetched embassy pages phrase the 6-month rule differently (from date of entry vs from date of exit); reports of stricter enforcement from 1 March 2026 were found only on non-official sites and are not recorded.",
+    "Consular tourist visa government fee amounts are not published on the fetched embassy pages ('visa fees vary'); recorded with null amounts."
+  ]
+}

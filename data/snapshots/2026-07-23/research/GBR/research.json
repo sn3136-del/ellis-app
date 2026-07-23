@@ -1,0 +1,392 @@
+{
+  "destination": "GBR",
+  "retrieved_at": "2026-07-23T07:17:46Z",
+  "research_status": "verified",
+  "sources": [
+    {
+      "search_query": "official United Kingdom electronic travel authorisation ETA gov.uk apply",
+      "original_url": "https://www.gov.uk/eta",
+      "final_url": "https://www.gov.uk/eta",
+      "redirect_chain": ["https://www.gov.uk/eta"],
+      "final_hostname": "www.gov.uk",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "An electronic travel authorisation (ETA) lets you travel to the UK, Jersey, Guernsey or the Isle of Man for up to 6 months. ... You usually need an ETA rather than a visa if you're from Europe, the USA, Australia, Canada or certain other countries. ... Each person travelling needs an ETA, including babies and children. ... An ETA does not guarantee entry to the UK, Jersey, Guernsey or the Isle of Man.",
+      "retrieved_at": "2026-07-23T07:17:46Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "official United Kingdom electronic travel authorisation ETA gov.uk apply",
+      "original_url": "https://www.gov.uk/eta/apply",
+      "final_url": "https://www.gov.uk/eta/apply",
+      "redirect_chain": ["https://www.gov.uk/eta/apply"],
+      "final_hostname": "www.gov.uk",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "It costs £20 to apply online or through the UK ETA app. You cannot get a refund after you apply. ... An ETA lasts for 2 years or until your passport expires, whichever is sooner. ... You can travel to the UK as many times as you want while you have an ETA. ... [A decision comes] usually within a day [but allow] up to 3 working days. ... [The ETA] will be linked to the passport you applied with.",
+      "retrieved_at": "2026-07-23T07:17:46Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "none — followed on-site navigation from https://www.gov.uk/eta",
+      "original_url": "https://www.gov.uk/eta/when-you-do-not-need-an-eta",
+      "final_url": "https://www.gov.uk/eta/when-you-do-not-need-an-eta",
+      "redirect_chain": ["https://www.gov.uk/eta/when-you-do-not-need-an-eta"],
+      "final_hostname": "www.gov.uk",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "There are some people who do not need an ETA, for example if you have: a British or Irish passport; permission to live, work or study in the UK",
+      "retrieved_at": "2026-07-23T07:17:46Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "official United Kingdom electronic travel authorisation ETA gov.uk apply",
+      "original_url": "https://www.gov.uk/guidance/check-when-you-can-get-an-electronic-travel-authorisation-eta",
+      "final_url": "https://www.gov.uk/guidance/check-when-you-can-get-an-electronic-travel-authorisation-eta",
+      "redirect_chain": ["https://www.gov.uk/guidance/check-when-you-can-get-an-electronic-travel-authorisation-eta"],
+      "final_hostname": "www.gov.uk",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Eligible nationalities (as of 9 April 2026): Andorra, Antigua and Barbuda, Argentina, Australia, Austria, The Bahamas, Bahrain, Barbados, Belgium, Belize, Brazil, Brunei, Bulgaria, Canada, Chile, Costa Rica, Croatia, Cyprus, Czechia, Denmark, Estonia, Finland, France, Germany, Greece, Grenada, Guatemala, Guyana, Hong Kong SAR, Hungary, Iceland, Italy, Israel, Japan, Kiribati, Kuwait, Latvia, Liechtenstein, Lithuania, Luxembourg, Macao SAR, Malaysia, Maldives, Malta, Marshall Islands, Mauritius, Mexico, Federated States of Micronesia, Monaco, Netherlands, New Zealand, Norway, Oman, Palau, Panama, Papua New Guinea, Paraguay, Peru, Poland, Portugal, Qatar, Romania, Samoa, San Marino, Saudi Arabia, Seychelles, Singapore, Solomon Islands, South Korea, Slovakia, Slovenia, Spain, St Kitts and Nevis, St Vincent and the Grenadines, Sweden, Switzerland, Tonga, Tuvalu, United Arab Emirates, United States, Uruguay, Vatican City. Taiwan: 'if you have a passport issued by Taiwan which includes the number of the identification card issued by the competent authority in Taiwan.' 'Other nationalities cannot get an ETA. Check if you need a visa instead.'",
+      "retrieved_at": "2026-07-23T07:17:46Z",
+      "effective_date_evidence": "Page states list is current as of 9 April 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "United Kingdom Standard Visitor visa fee gov.uk",
+      "original_url": "https://www.gov.uk/standard-visitor",
+      "final_url": "https://www.gov.uk/standard-visitor",
+      "redirect_chain": ["https://www.gov.uk/standard-visitor"],
+      "final_hostname": "www.gov.uk",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "A Standard Visitor visa costs £135 for up to 6 months. ... You can usually stay in the UK for up to 6 months. ... Depending on your nationality, you'll either: have to apply for a Standard Visitor visa before you travel to the UK [or apply for] an electronic travel authorisation (ETA) [or] be able to visit the UK for up to 6 months without needing a visa or an ETA. ... You must have a passport or travel document to enter the UK. It should be valid for the whole of your stay. ... The earliest you can apply is 3 months before you travel.",
+      "retrieved_at": "2026-07-23T07:17:46Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "United Kingdom Standard Visitor visa fee gov.uk",
+      "original_url": "https://www.gov.uk/standard-visitor/apply-standard-visitor-visa",
+      "final_url": "https://www.gov.uk/standard-visitor/apply-standard-visitor-visa",
+      "redirect_chain": ["https://www.gov.uk/standard-visitor/apply-standard-visitor-visa"],
+      "final_hostname": "www.gov.uk",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Fees: Standard Visitor visa £135 (up to 6 months); visiting for medical reasons £234 (11 months); academic £234 (12 months); long-term Standard Visitor visa: 2 years £506, 5 years £903, 10 years £1,128 — each allowing stays of up to 6 months per visit. ... You must apply online before you travel to the UK. ... The earliest you can apply is 3 months before you travel. ... [At a visa application centre appointment you must] have your fingerprints and a photo (biometric information) taken. ... You'll usually get a decision on your visa within 3 weeks. ... If you're applying with family members, each person must have their own application and pay the fee.",
+      "retrieved_at": "2026-07-23T07:17:46Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "none — direct fetch of known official GOV.UK immigration rules URL",
+      "original_url": "https://www.gov.uk/guidance/immigration-rules/immigration-rules-appendix-visitor-visa-national-list",
+      "final_url": "https://www.gov.uk/guidance/immigration-rules/immigration-rules-appendix-visitor-visa-national-list",
+      "redirect_chain": ["https://www.gov.uk/guidance/immigration-rules/immigration-rules-appendix-visitor-visa-national-list"],
+      "final_hostname": "www.gov.uk",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Immigration Rules Appendix Visitor: Visa national list, VN 1.1.(a): alphabetical list of 115 countries/territories whose nationals or citizens need a visit visa (entry clearance) before travelling to the UK, running from Afghanistan through Zimbabwe. The list includes \"People's Republic of China*\", India, Russia, Turkey and \"Taiwan*\" (asterisked entries subject to exceptions in VN 2.2). VN 2.2 exceptions: nationals of China holding a Hong Kong SAR or Macao SAR passport, and nationals of Taiwan holding a passport which includes the number of the identification card issued by the competent authority in Taiwan, do not need a visit visa. Additional exemptions apply to school groups from France (ages 18 and under) and Germany (ages 19 and under), and time-limited transitional provision for certain Nicaraguan and St Lucian ETA holders (until 5 March 2026).",
+      "retrieved_at": "2026-07-23T07:17:46Z",
+      "effective_date_evidence": "Transitional provision for Nicaragua/St Lucia ETA holders expires 5 March 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "none — direct fetch of known official GOV.UK URL",
+      "original_url": "https://www.gov.uk/uk-border-control",
+      "final_url": "https://www.gov.uk/uk-border-control",
+      "redirect_chain": ["https://www.gov.uk/uk-border-control"],
+      "final_hostname": "www.gov.uk",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Your identity document (for example your passport or identity card) will be checked when you arrive at a UK port or airport to make sure you're allowed to come into the country. It should be valid for the whole of your stay.",
+      "retrieved_at": "2026-07-23T07:17:46Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "none — direct fetch of known official GOV.UK URL",
+      "original_url": "https://www.gov.uk/find-a-visa-application-centre",
+      "final_url": "https://www.gov.uk/find-a-visa-application-centre",
+      "redirect_chain": ["https://www.gov.uk/find-a-visa-application-centre"],
+      "final_hostname": "www.gov.uk",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Find the opening times, address and contact details for UK visa application centres outside the UK. ... You must apply for your visa before you can make an appointment at a visa application centre. ... If the country you live in does not have a visa application centre, you can choose a centre in a different country. [Country-by-country links on this page point to the operator VFS Global at visa.vfsglobal.com (visa.vfsglobal.by for Belarus).]",
+      "retrieved_at": "2026-07-23T07:17:46Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    }
+  ],
+  "dispositions": [
+    {
+      "nationalities": ["AND","ATG","ARG","AUS","AUT","BHS","BHR","BRB","BEL","BLZ","BRA","BRN","BGR","CAN","CHL","CRI","HRV","CYP","CZE","DNK","EST","FIN","FRA","DEU","GRC","GRD","GTM","GUY","HKG","HUN","ISL","ITA","ISR","JPN","KIR","KWT","LVA","LIE","LTU","LUX","MAC","MYS","MDV","MLT","MHL","MUS","MEX","FSM","MCO","NLD","NZL","NOR","OMN","PLW","PAN","PNG","PRY","PER","POL","PRT","QAT","ROU","WSM","SMR","SAU","SYC","SGP","SLB","KOR","SVK","SVN","ESP","KNA","VCT","SWE","CHE","TON","TUV","ARE","USA","URY","VAT","TWN"],
+      "category": "eta",
+      "disposition": "ETA_REQUIRED",
+      "maximum_stay": "up to 6 months per visit",
+      "conditions": [
+        "ETA costs £20; apply online at GOV.UK or via the UK ETA app; non-refundable",
+        "ETA lasts 2 years or until the passport it is linked to expires, whichever is sooner; unlimited entries during validity",
+        "Decision usually within a day; allow up to 3 working days",
+        "TWN: eligible only if the Taiwan passport includes the number of the identification card issued by the competent authority in Taiwan; otherwise a Standard Visitor visa is required",
+        "HKG = Hong Kong SAR passport; MAC = Macao SAR passport",
+        "An ETA is digital permission to travel, not a visa, and does not guarantee entry",
+        "Each traveller including babies and children needs their own ETA; also required to transit through UK border control"
+      ],
+      "source_urls": [
+        "https://www.gov.uk/eta",
+        "https://www.gov.uk/eta/apply",
+        "https://www.gov.uk/guidance/check-when-you-can-get-an-electronic-travel-authorisation-eta"
+      ]
+    },
+    {
+      "nationalities": ["GBR","IRL"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": null,
+      "conditions": [
+        "Holders of British or Irish passports need neither a visa nor an ETA",
+        "British citizens are not subject to UK immigration control; Irish citizens may enter under the Common Travel Area arrangements"
+      ],
+      "source_urls": ["https://www.gov.uk/eta/when-you-do-not-need-an-eta"]
+    },
+    {
+      "nationalities": ["GBR","IRL"],
+      "category": "tourist_visa",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": ["No visitor visa or ETA required for British or Irish passport holders"],
+      "source_urls": ["https://www.gov.uk/eta/when-you-do-not-need-an-eta"]
+    },
+    {
+      "nationalities": ["AND","ATG","ARG","AUS","AUT","BHS","BHR","BRB","BEL","BLZ","BRA","BRN","BGR","CAN","CHL","CRI","HRV","CYP","CZE","DNK","EST","FIN","FRA","DEU","GRC","GRD","GTM","GUY","HKG","HUN","ISL","ITA","ISR","JPN","KIR","KWT","LVA","LIE","LTU","LUX","MAC","MYS","MDV","MLT","MHL","MUS","MEX","FSM","MCO","NLD","NZL","NOR","OMN","PLW","PAN","PNG","PRY","PER","POL","PRT","QAT","ROU","WSM","SMR","SAU","SYC","SGP","SLB","KOR","SVK","SVN","ESP","KNA","VCT","SWE","CHE","TON","TUV","ARE","USA","URY","VAT"],
+      "category": "tourist_visa",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": "up to 6 months",
+      "conditions": [
+        "These non-visa nationalities do not need a Standard Visitor visa for tourist stays of up to 6 months; they must instead obtain an ETA before travel"
+      ],
+      "source_urls": [
+        "https://www.gov.uk/standard-visitor",
+        "https://www.gov.uk/guidance/check-when-you-can-get-an-electronic-travel-authorisation-eta"
+      ]
+    },
+    {
+      "nationalities": ["CHN","IND","RUS","TUR"],
+      "category": "tourist_visa",
+      "disposition": "AUTHORIZED_VISA_CENTER_REQUIRED",
+      "maximum_stay": "up to 6 months",
+      "conditions": [
+        "Listed on Immigration Rules Appendix Visitor: Visa national list — must obtain a Standard Visitor visa (entry clearance) before travelling",
+        "Apply online at GOV.UK, then attend a biometric appointment (fingerprints and photo) at a UK visa application centre operated by VFS Global",
+        "Standard Visitor visa £135 for up to 6 months; earliest application 3 months before travel; decision usually within 3 weeks",
+        "CHN exception: nationals of China holding a Hong Kong SAR or Macao SAR passport do not need a visa (ETA route instead)",
+        "TWN note: Taiwan passports WITHOUT a personal identification card number are also visa nationals; those WITH the ID number use the ETA route"
+      ],
+      "source_urls": [
+        "https://www.gov.uk/guidance/immigration-rules/immigration-rules-appendix-visitor-visa-national-list",
+        "https://www.gov.uk/standard-visitor",
+        "https://www.gov.uk/standard-visitor/apply-standard-visitor-visa",
+        "https://www.gov.uk/find-a-visa-application-centre"
+      ]
+    },
+    {
+      "nationalities": ["ALL_OTHERS"],
+      "category": "tourist_visa",
+      "disposition": "AUTHORIZED_VISA_CENTER_REQUIRED",
+      "maximum_stay": "up to 6 months",
+      "conditions": [
+        "Official guidance: 'Other nationalities cannot get an ETA. Check if you need a visa instead.' — nationalities on the Appendix Visitor: Visa national list (115 entries, Afghanistan through Zimbabwe) must obtain a Standard Visitor visa before travel",
+        "Apply online at GOV.UK then enrol biometrics at a VFS Global visa application centre"
+      ],
+      "source_urls": [
+        "https://www.gov.uk/guidance/check-when-you-can-get-an-electronic-travel-authorisation-eta",
+        "https://www.gov.uk/guidance/immigration-rules/immigration-rules-appendix-visitor-visa-national-list",
+        "https://www.gov.uk/find-a-visa-application-centre"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "visa_on_arrival_tourist",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "The UK operates no visa-on-arrival programme for tourism; GOV.UK states the only visitor channels are a Standard Visitor visa applied for before travel, an ETA, or (British/Irish passports) neither"
+      ],
+      "source_urls": ["https://www.gov.uk/standard-visitor"]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "evisa_tourist",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "The UK has no tourist eVisa programme; the term 'eVisa' in UK usage refers to a digital record of immigration status, not a tourist entry authorisation. Tourist channels are: visa-free (British/Irish), ETA, or Standard Visitor visa"
+      ],
+      "source_urls": ["https://www.gov.uk/standard-visitor", "https://www.gov.uk/eta"]
+    }
+  ],
+  "policies": [
+    {
+      "policy_kind": "eta_program",
+      "policy_name": "UK Electronic Travel Authorisation (ETA)",
+      "description": "Digital permission to travel (not a visa) required by non-visa nationals visiting the UK, Jersey, Guernsey or the Isle of Man for up to 6 months, or transiting through UK border control. Costs £20, valid 2 years or until passport expiry, unlimited entries, linked to one passport. Apply via the UK ETA app or online at GOV.UK.",
+      "applies_to_nationalities": ["AND","ATG","ARG","AUS","AUT","BHS","BHR","BRB","BEL","BLZ","BRA","BRN","BGR","CAN","CHL","CRI","HRV","CYP","CZE","DNK","EST","FIN","FRA","DEU","GRC","GRD","GTM","GUY","HKG","HUN","ISL","ITA","ISR","JPN","KIR","KWT","LVA","LIE","LTU","LUX","MAC","MYS","MDV","MLT","MHL","MUS","MEX","FSM","MCO","NLD","NZL","NOR","OMN","PLW","PAN","PNG","PRY","PER","POL","PRT","QAT","ROU","WSM","SMR","SAU","SYC","SGP","SLB","KOR","SVK","SVN","ESP","KNA","VCT","SWE","CHE","TON","TUV","ARE","USA","URY","VAT","TWN"],
+      "conditions": [
+        "TWN eligible only with a Taiwan passport that includes the personal identification card number",
+        "Not needed by holders of British or Irish passports or people with permission to live, work or study in the UK",
+        "Does not guarantee entry"
+      ],
+      "maximum_stay": "up to 6 months per visit",
+      "official_source_urls": [
+        "https://www.gov.uk/eta",
+        "https://www.gov.uk/eta/apply",
+        "https://www.gov.uk/guidance/check-when-you-can-get-an-electronic-travel-authorisation-eta",
+        "https://www.gov.uk/eta/when-you-do-not-need-an-eta"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "consular_visa_regime",
+      "policy_name": "Standard Visitor visa / Appendix Visitor: Visa national list",
+      "description": "Nationals of the 115 countries/territories on the Immigration Rules Appendix Visitor: Visa national list (including China, India, Russia, Turkey) must obtain a Standard Visitor visa (entry clearance) before travelling to the UK for tourism. Application is online via GOV.UK followed by biometric enrolment at an overseas visa application centre (operated by VFS Global). £135 for up to 6 months; long-term options 2/5/10 years.",
+      "applies_to_nationalities": ["CHN","IND","RUS","TUR","ALL_OTHERS"],
+      "conditions": [
+        "Exceptions (VN 2.2): Hong Kong SAR and Macao SAR passport holders, and Taiwan passports containing the national ID card number, are not visa nationals",
+        "Exemptions for school groups from France (18 and under) and Germany (19 and under)",
+        "Earliest application 3 months before travel; decision usually within 3 weeks"
+      ],
+      "maximum_stay": "up to 6 months",
+      "official_source_urls": [
+        "https://www.gov.uk/guidance/immigration-rules/immigration-rules-appendix-visitor-visa-national-list",
+        "https://www.gov.uk/standard-visitor",
+        "https://www.gov.uk/standard-visitor/apply-standard-visitor-visa"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "British and Irish passport holder exemption",
+      "description": "Holders of British or Irish passports need neither a visa nor an ETA to enter the UK. People who already hold permission to live, work or study in the UK also do not need an ETA.",
+      "applies_to_nationalities": ["GBR","IRL"],
+      "conditions": ["Irish citizens travel within the Common Travel Area"],
+      "maximum_stay": null,
+      "official_source_urls": ["https://www.gov.uk/eta/when-you-do-not-need-an-eta"],
+      "effective_from": null,
+      "effective_until": null
+    }
+  ],
+  "fees": [
+    {
+      "visa_category": "eta",
+      "visa_subtype": "Electronic Travel Authorisation",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 20,
+      "government_fee_currency": "GBP",
+      "refundability": "Non-refundable after applying",
+      "accepted_payment_methods": null,
+      "source_urls": ["https://www.gov.uk/eta/apply"]
+    },
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "Standard Visitor visa (up to 6 months)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 135,
+      "government_fee_currency": "GBP",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://www.gov.uk/standard-visitor",
+        "https://www.gov.uk/standard-visitor/apply-standard-visitor-visa"
+      ]
+    },
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "Long-term Standard Visitor visa — 2 years (max 6 months per visit)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 506,
+      "government_fee_currency": "GBP",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": ["https://www.gov.uk/standard-visitor/apply-standard-visitor-visa"]
+    },
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "Long-term Standard Visitor visa — 5 years (max 6 months per visit)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 903,
+      "government_fee_currency": "GBP",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": ["https://www.gov.uk/standard-visitor/apply-standard-visitor-visa"]
+    },
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "Long-term Standard Visitor visa — 10 years (max 6 months per visit)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 1128,
+      "government_fee_currency": "GBP",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": ["https://www.gov.uk/standard-visitor/apply-standard-visitor-visa"]
+    }
+  ],
+  "portals": [
+    {
+      "portal_kind": "eta_portal",
+      "url": "https://www.gov.uk/eta/apply",
+      "operator": "UK Home Office (UK Visas and Immigration)",
+      "operator_kind": "government",
+      "official_linking_source": "https://www.gov.uk/eta",
+      "supported_categories": ["eta"],
+      "source_urls": ["https://www.gov.uk/eta", "https://www.gov.uk/eta/apply"]
+    },
+    {
+      "portal_kind": "eta_portal",
+      "url": "https://apply-for-an-eta.homeoffice.gov.uk/apply/electronic-travel-authorisation",
+      "operator": "UK Home Office",
+      "operator_kind": "government",
+      "official_linking_source": "https://www.gov.uk/eta/apply",
+      "supported_categories": ["eta"],
+      "source_urls": ["https://www.gov.uk/eta/apply"]
+    },
+    {
+      "portal_kind": "immigration_authority",
+      "url": "https://www.gov.uk/browse/visas-immigration",
+      "operator": "UK Home Office (UK Visas and Immigration)",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["tourist_visa", "eta"],
+      "source_urls": ["https://www.gov.uk/standard-visitor"]
+    },
+    {
+      "portal_kind": "appointment_portal",
+      "url": "https://www.gov.uk/find-a-visa-application-centre",
+      "operator": "UK Home Office",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["tourist_visa"],
+      "source_urls": ["https://www.gov.uk/find-a-visa-application-centre"]
+    },
+    {
+      "portal_kind": "authorized_visa_center",
+      "url": "https://visa.vfsglobal.com",
+      "operator": "VFS Global",
+      "operator_kind": "contracted_visa_center",
+      "official_linking_source": "https://www.gov.uk/find-a-visa-application-centre",
+      "supported_categories": ["tourist_visa"],
+      "source_urls": ["https://www.gov.uk/find-a-visa-application-centre"]
+    }
+  ],
+  "passport_validity": {
+    "rule_kind": "valid_through_departure",
+    "months": null,
+    "min_blank_pages": null,
+    "condition_text": "You must have a passport or travel document to enter the UK. It should be valid for the whole of your stay. No minimum months-beyond-stay or blank-page requirement is stated on official GOV.UK entry guidance.",
+    "source_urls": ["https://www.gov.uk/standard-visitor", "https://www.gov.uk/uk-border-control"]
+  },
+  "jurisdictions": [],
+  "unresolved": [
+    "Blank-page requirement: not stated anywhere on official GOV.UK guidance; recorded as null rather than absent-by-evidence.",
+    "The Appendix Visitor: Visa national list (115 entries) was verified for the key nationalities (CHN, IND, RUS, TUR, TWN* and the HKG/MAC/TWN exceptions) but the full 115-country enumeration was not copied verbatim into this file; ALL_OTHERS disposition covers them via the official 'Other nationalities cannot get an ETA. Check if you need a visa instead.' rule.",
+    "Visitor in Transit visa (£74.50) appeared only in a search snippet, not on a fetched page, so it is deliberately omitted from fees.",
+    "The ETA eligibility list was extracted from the fetched official page as summarized content; ordering may differ slightly from the page but membership was taken only from that page (current as of 9 April 2026 per the page).",
+    "The UK ETA app (Apple App Store / Google Play) is an additional official application channel referenced on gov.uk/eta/apply; app-store URLs not recorded."
+  ]
+}

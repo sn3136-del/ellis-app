@@ -1,0 +1,452 @@
+{
+  "destination": "THA",
+  "retrieved_at": "2026-07-23T07:15:14Z",
+  "research_status": "verified",
+  "sources": [
+    {
+      "search_query": "Thailand official visa exemption list site:mfa.go.th",
+      "original_url": "https://mfa.go.th/en/page/issuance-of-visa",
+      "final_url": "https://mfa.go.th/en/page/issuance-of-visa",
+      "redirect_chain": [],
+      "final_hostname": "mfa.go.th",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "Tourist Visa (category TR). Visa fee: 1,000 Baht per entry (fees may change without notice). Visa validity: 3 or 6 months. Upon arrival, travellers with this type of visa will be permitted to stay in Thailand for a period of not exceeding 60 days. Passport validity: minimum 6 months. Evidence of travel from Thailand (air ticket paid in full). Financial proof: 20,000 Baht per person and 40,000 Baht per family. Nationals of certain countries are required to apply for a visa only at the Thai Embassy or Consulate-General in their home/residence country.",
+      "retrieved_at": "2026-07-23T07:15:14Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Thailand official visa exemption list site:mfa.go.th",
+      "original_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/%E0%B9%80%E0%B8%AD%E0%B8%81%E0%B8%AA%E0%B8%B2%E0%B8%A3/VOA.pdf",
+      "final_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/%E0%B9%80%E0%B8%AD%E0%B8%81%E0%B8%AA%E0%B8%B2%E0%B8%A3/VOA.pdf",
+      "redirect_chain": [],
+      "final_hostname": "image.mfa.go.th",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "Summary of Countries and Territories entitled for Visa Exemption and Visa on Arrival to Thailand ... Department of Consular Affairs, 9 May 2024. Remarks: * Passport holders of Brazil, Korea (ROK) and Peru are entitled for tourist visa exemption scheme. Meanwhile, Thailand also holds bilateral agreements on visa exemption for holders of diplomatic, official and ordinary passports for a visit of not exceeding 90 days with Brazil, Korea (ROK) and Peru. ** Passport holders of Vietnam and Hong Kong are entitled for tourist visa exemption scheme. Meanwhile, Thailand also holds bilateral agreements on visa exemption for holders of diplomatic, official and ordinary passports for a visit of not exceeding 30 days with Vietnam and Hong Kong. [NOTE: this MFA PDF predates the 15 July 2024 measures and is superseded; retained as background on bilateral 90-day agreements with BRA/KOR/PER and 30-day agreements with VNM/HKG]",
+      "retrieved_at": "2026-07-23T07:15:14Z",
+      "effective_date_evidence": "Department of Consular Affairs, 9 May 2024 (superseded by the 15 July 2024 measures)",
+      "page_language": "en/th"
+    },
+    {
+      "search_query": "\"tourist visa exemption\" site:thaiembassy.org 60 days",
+      "original_url": "https://washingtondc.thaiembassy.org/en/page/visaexempt-voajul2024",
+      "final_url": "https://washingtondc.thaiembassy.org/en/page/visaexempt-voajul2024",
+      "redirect_chain": [],
+      "final_hostname": "washingtondc.thaiembassy.org",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Nationals of 93 countries and territories are entitled to visa exemption ... up to 60 days period of stay and can be extended for another period not exceeding 30 days. Nationals of the following 31 countries and territories may apply for visa on arrival at the immigration checkpoints on arrival for tourism purpose. New Tourist Visa Exemption Scheme (60 Days) Effective Date 15 July 2024. New Visa on Arrival (VoA) Effective Date 15 July 2024. The passport must be valid for at least six months upon returning to the country of residence. Travelers must possess adequate cash of or equivalent to 20,000 Baht per person or 40,000 Baht per family. Apply for a Visa: https://thaievisa.go.th/",
+      "retrieved_at": "2026-07-23T07:15:14Z",
+      "effective_date_evidence": "New Tourist Visa Exemption Scheme (60 Days) Effective Date 15 July 2024; New Visa on Arrival (VoA) Effective Date 15 July 2024",
+      "page_language": "en"
+    },
+    {
+      "search_query": "\"tourist visa exemption\" site:thaiembassy.org 60 days",
+      "original_url": "https://london.thaiembassy.org/en/page/exemp-visa",
+      "final_url": "https://london.thaiembassy.org/en/page/exemp-visa",
+      "redirect_chain": [],
+      "final_hostname": "london.thaiembassy.org",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "UK ordinary passport holders can travel to Thailand without visa for no longer than 60 days. Foreigners entering Thailand by any means under the Visa Exemption scheme are required at the port of entry to have proof of planned travel (confirmed air, train, bus, or boat tickets) to leave Thailand within 60 days. UK travel documents classified as Refugee or Emergency documents do not qualify and require a visa.",
+      "retrieved_at": "2026-07-23T07:15:14Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "\"tourist visa exemption\" site:thaiembassy.org 60 days",
+      "original_url": "https://ankara.thaiembassy.org/en/publicservice/60-day-visa-exemption-and-visa-on-arrival?menu=5d7717d815e39c2f34004f92&page=5d7717d815e39c2f34004f91",
+      "final_url": "https://ankara.thaiembassy.org/en/publicservice/60-day-visa-exemption-and-visa-on-arrival?menu=5d7717d815e39c2f34004f92&page=5d7717d815e39c2f34004f91",
+      "redirect_chain": [],
+      "final_hostname": "ankara.thaiembassy.org",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "60-Day Visa Exemption: nationals of 93 countries and territories qualify for visa exemption, up to 60 days period of stay and can be extended for another period not exceeding 30 days. Complete list of 93: Albania, Andorra, Australia, Austria, Bahrain, Belgium, Bhutan, Brazil, Brunei, Bulgaria, Cambodia, Canada, China, Colombia, Croatia, Cuba, Cyprus, Czechia, Denmark, Dominica, Dominican Republic, Ecuador, Estonia, Fiji, Finland, France, Georgia, Germany, Greece, Guatemala, Hong Kong, Hungary, Iceland, India, Indonesia, Ireland, Israel, Italy, Jamaica, Japan, Jordan, Kazakhstan, Korea (ROK), Kosovo, Kuwait, Laos, Latvia, Liechtenstein, Lithuania, Luxembourg, Macao, Malaysia, Maldives, Malta, Mauritius, Mexico, Monaco, Mongolia, Morocco, Netherlands, New Zealand, Norway, Oman, Panama, Papua New Guinea, Peru, Philippines, Poland, Portugal, Qatar, Romania, Russia, San Marino, Saudi Arabia, Singapore, Slovakia, Slovenia, South Africa, Spain, Sri Lanka, Sweden, Switzerland, Taiwan, Tonga, Trinidad and Tobago, Turkiye, Ukraine, UAE, UK, USA, Uruguay, Uzbekistan, Vietnam. Visa on Arrival (VOA): 31 countries and territories, fee 2,000 THB, stay not exceeding 15 days, single entry: Armenia, Belarus, Bhutan, Bolivia, Bulgaria, China, Costa Rica, Cyprus, El Salvador, Ethiopia, Fiji, Georgia, India, Kazakhstan, Kyrgyzstan, Malta, Mexico, Namibia, Nauru, Papua New Guinea, Paraguay, Romania, Russia, Saudi Arabia, Serbia, Seychelles, Taiwan, Tunisia, Uzbekistan, Vanuatu, Venezuela.",
+      "retrieved_at": "2026-07-23T07:15:14Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "\"tourist visa exemption\" site:thaiembassy.org 60 days",
+      "original_url": "https://thaiconsulatela.thaiembassy.org/en/publicservice/visa-exemption-and-visa-on-arrival-to-thailand",
+      "final_url": "https://thaiconsulatela.thaiembassy.org/en/publicservice/visa-exemption-and-visa-on-arrival-to-thailand",
+      "redirect_chain": [],
+      "final_hostname": "thaiconsulatela.thaiembassy.org",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Tourist Visa Exemption (60 Days), effective date July 15, 2024. Nationals of the following 93 countries and territories are entitled to visa exemption. Duration: up to 60 days, extendable for an additional 30 days at immigration officer's discretion. Maximum stay before requiring new visa: 90 days. Purposes: tourism, business engagements, urgent work, ad-hoc work. Visa on Arrival (VoA), effective date July 15, 2024: nationals of the following 31 countries and territories may apply for visa on arrival at the immigration checkpoints on arrival for tourism purpose.",
+      "retrieved_at": "2026-07-23T07:15:14Z",
+      "effective_date_evidence": "Effective Date: July 15, 2024",
+      "page_language": "en"
+    },
+    {
+      "search_query": "Thailand visa on arrival 2000 baht site:thaiembassy.org OR site:immigration.go.th",
+      "original_url": "https://sydney.thaiembassy.org/en/content/visa-information-visa-fees",
+      "final_url": "https://sydney.thaiembassy.org/en/content/visa-information-visa-fees",
+      "redirect_chain": [],
+      "final_hostname": "sydney.thaiembassy.org",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "An applicant who currently resides in New South Wales, Australia must apply and submit his/her application through the new online e-Visa system at https://www.thaievisa.go.th/. Visa on Arrival (VoA) - up to 15 days. Visa Exemption - up to 60 days. Tourist visa and Non-Immigrant visa typically have a validity period of 3 months (90 days) from the date of issuance. Payments must be made with a Visa or a Mastercard, not an Amex or American Express Card.",
+      "retrieved_at": "2026-07-23T07:15:14Z",
+      "effective_date_evidence": "fee schedule dated 15 July 2024",
+      "page_language": "en"
+    },
+    {
+      "search_query": "\"Multiple Entry Tourist Visa\" METV fee 5,000 site:thaiembassy.org",
+      "original_url": "https://helsinki.thaiembassy.org/en/publicservice/tourist-visa-tr-metv?cate=5d80865815e39c3354007650",
+      "final_url": "https://helsinki.thaiembassy.org/en/publicservice/tourist-visa-tr-metv?cate=5d80865815e39c3354007650",
+      "redirect_chain": [],
+      "final_hostname": "helsinki.thaiembassy.org",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Tourist Visa (TR): Pay application fee online: 40 EUR. Valid for 3 months from issuance. Initial 60-day stay permitted; extensible for 30 additional days. Application via thaievisa.go.th platform. METV: Visa fee 170 EUR, valid for 6 months, stay not exceeding 60 days from the date you arrive Thailand per entry. Passport requirement for METV: validity of not less than 12 months on the arrival date in Thailand and contain at least TWO completely empty visa page. Bank statements (minimum 6,000 EUR balance for last 6 months).",
+      "retrieved_at": "2026-07-23T07:15:14Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "\"Thailand Digital Arrival Card\" TDAC site:thaiembassy.org OR site:immigration.go.th official",
+      "original_url": "https://singapore.thaiembassy.org/en/content-category/thailand-digital-arrival-card-tdac",
+      "final_url": "https://singapore.thaiembassy.org/en/content-category/thailand-digital-arrival-card-tdac",
+      "redirect_chain": [],
+      "final_hostname": "singapore.thaiembassy.org",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "All non-Thai nationals must complete the Thailand Digital Arrival Card (TDAC) at https://tdac.immigration.go.th within 3 days before arrival. The requirement began on 1 May 2025.",
+      "retrieved_at": "2026-07-23T07:15:14Z",
+      "effective_date_evidence": "requirement began on 1 May 2025",
+      "page_language": "en"
+    },
+    {
+      "search_query": "Thailand visa exemption reduced 30 days 2026 Royal Gazette announcement site:thaiembassy.org OR site:mfa.go.th OR site:consular.mfa.go.th",
+      "original_url": "https://madrid.thaiembassy.org/en/content/revision-of-visa-exemption-and-voa-schemes-2026-en?cate=6238915fb179ed21a6777373",
+      "final_url": "https://madrid.thaiembassy.org/en/content/revision-of-visa-exemption-and-voa-schemes-2026-en?cate=6238915fb179ed21a6777373",
+      "redirect_chain": [],
+      "final_hostname": "madrid.thaiembassy.org",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "On 19 May 2026 the Cabinet approved: revoking the 60-day visa exemption scheme for all 93 countries/territories; revising the 30-day visa exemption scheme for tourism purpose and reducing the list of eligible countries/territories (from 57) to 54 countries/territories; introducing the new 15-day visa exemption scheme for tourism purpose for 3 countries/territories; and revising VoA and reducing the list of eligible countries/territories (from 31) to 4 countries/territories. Details and criteria can be found in relevant Ministry of Interior announcements, which will be published in the Royal Gazette and will take effect 15 days after publication. Thereafter, visitors may enter via (1) the new visa schemes; (2) bilateral visa exemption agreements; or (3) an appropriate visa which can be conveniently applied through Thailand's e-Visa system.",
+      "retrieved_at": "2026-07-23T07:15:14Z",
+      "effective_date_evidence": "will be published in the Royal Gazette and will take effect 15 days after publication (not yet published as of the announcement)",
+      "page_language": "en"
+    },
+    {
+      "search_query": "Thailand visa exemption reduced 30 days 2026 Royal Gazette announcement site:thaiembassy.org OR site:mfa.go.th OR site:consular.mfa.go.th",
+      "original_url": "https://bsb.thaiembassy.org/en/publicservice/the-revision-of-thailand-s-visa-exemption-and-voa?page=5d830eec15e39c31b400264c&menu=5d830eec15e39c31b400264d",
+      "final_url": "https://bsb.thaiembassy.org/en/publicservice/the-revision-of-thailand-s-visa-exemption-and-voa?page=5d830eec15e39c31b400264c&menu=5d830eec15e39c31b400264d",
+      "redirect_chain": [],
+      "final_hostname": "bsb.thaiembassy.org",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "On 19 May 2026, the Cabinet approved the revision of Thailand's visa exemption and VoA schemes. Foreigners who are already in Thailand under the current visa exemption schemes and those plan to travel to Thailand prior to the effective date of this revision may stay until the expiry of their permitted period of stay. Details and criteria can be found in relevant Ministry of Interior announcements, which will be published in the Royal Gazette and will take effect 15 days after publication.",
+      "retrieved_at": "2026-07-23T07:15:14Z",
+      "effective_date_evidence": "page data entry/update date 21 May 2026; Royal Gazette publication pending",
+      "page_language": "en"
+    },
+    {
+      "search_query": "Thailand new visa exemption scheme effective date July 2026 Royal Gazette published site:thaiembassy.org",
+      "original_url": "https://www.tatnews.org/2026/05/thai-cabinet-approves-revision-of-60-day-visa-exemption-scheme-pending-royal-gazette-publication/",
+      "final_url": "https://www.tatnews.org/2026/05/thai-cabinet-approves-revision-of-60-day-visa-exemption-scheme-pending-royal-gazette-publication/",
+      "redirect_chain": [],
+      "final_hostname": "www.tatnews.org",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Following the Cabinet's earlier approval in May to replace the 60-day visa exemption measure introduced in July 2024, this latest update is intended to align entry facilitation with current conditions. Until the new measures take effect, current entry conditions remain in place. The five related Ministry of Interior announcements remain pending publication in the Royal Gazette and will take effect 15 days after publication. [Under the updated (14 July 2026 Cabinet) plan: 30-day visa exemption for 59 countries/territories including India, Croatia, Bulgaria, Cyprus, Malta, the Maldives and all 27 European Union member states; 15-day visa exemption for Mauritius and Seychelles; Visa on Arrival for Azerbaijan, Belarus, and Serbia.] Foreign nationals who enter Thailand before the new measures take effect will be permitted to remain for the duration of their existing permitted stay.",
+      "retrieved_at": "2026-07-23T07:15:14Z",
+      "effective_date_evidence": "Tourism Authority of Thailand Newsroom article dated 16 July 2026: until the new measures take effect, current entry conditions remain in place; Royal Gazette publication still pending",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Thailand evisa site:thaievisa.go.th tourist visa",
+      "original_url": "https://thaievisa.go.th/static/masterdata.json",
+      "final_url": "https://thaievisa.go.th/static/masterdata.json",
+      "redirect_chain": [],
+      "final_hostname": "thaievisa.go.th",
+      "source_authority": "official_application_portal",
+      "relevant_excerpt": "Official Thai eVisa portal application-form reference data (masterdata.json): accommodation types (Hotel, Private Property, Own Property), passport types (Ordinary Passport, Diplomatic passport, travel documents for refugees/stateless persons), travel document types (Passport, Travel Document, Seaman's Book, Certificate of Identity), port types (International Airport, Seaport, Border Checkpoint). [Portal informational pages are JavaScript-rendered and could not be captured as text; portal officialness is established by the Royal Thai Embassy pages that link to https://www.thaievisa.go.th/ as the mandatory application channel.]",
+      "retrieved_at": "2026-07-23T07:15:14Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    }
+  ],
+  "dispositions": [
+    {
+      "nationalities": ["ALB","AND","AUS","AUT","BHR","BEL","BTN","BRA","BRN","BGR","KHM","CAN","CHN","COL","HRV","CUB","CYP","CZE","DNK","DMA","DOM","ECU","EST","FJI","FIN","FRA","GEO","DEU","GRC","GTM","HKG","HUN","ISL","IND","IDN","IRL","ISR","ITA","JAM","JPN","JOR","KAZ","KOR","XKX","KWT","LAO","LVA","LIE","LTU","LUX","MAC","MYS","MDV","MLT","MUS","MEX","MCO","MNG","MAR","NLD","NZL","NOR","OMN","PAN","PNG","PER","PHL","POL","PRT","QAT","ROU","RUS","SMR","SAU","SGP","SVK","SVN","ZAF","ESP","LKA","SWE","CHE","TWN","TON","TTO","TUR","UKR","ARE","GBR","USA","URY","UZB","VNM"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "60 days per entry; extendable once by up to 30 days at the Immigration Bureau; on re-entry, cumulative stay not exceeding 90 days within 6 months from date of first entry",
+      "conditions": [
+        "Ordinary passport valid at least 6 months",
+        "Proof of onward travel out of Thailand within 60 days of arrival (confirmed air, train, bus, or boat ticket)",
+        "Funds of 20,000 THB per person / 40,000 THB per family may be required at the port of entry",
+        "Applies to tourism and short-term business purposes under the 15 July 2024 scheme",
+        "Thailand Digital Arrival Card (TDAC) must be submitted at https://tdac.immigration.go.th within 3 days before arrival (mandatory for all non-Thai nationals since 1 May 2025)",
+        "Kosovo has no official ISO 3166-1 alpha-3 code; user-assigned XKX used",
+        "IMPORTANT: the Thai Cabinet approved on 19 May 2026 (revised 14 July 2026) revoking this 60-day scheme; the change is pending Royal Gazette publication and NOT yet in effect as of 2026-07-23 — see unresolved"
+      ],
+      "source_urls": [
+        "https://ankara.thaiembassy.org/en/publicservice/60-day-visa-exemption-and-visa-on-arrival?menu=5d7717d815e39c2f34004f92&page=5d7717d815e39c2f34004f91",
+        "https://washingtondc.thaiembassy.org/en/page/visaexempt-voajul2024",
+        "https://thaiconsulatela.thaiembassy.org/en/publicservice/visa-exemption-and-visa-on-arrival-to-thailand",
+        "https://london.thaiembassy.org/en/page/exemp-visa",
+        "https://www.tatnews.org/2026/05/thai-cabinet-approves-revision-of-60-day-visa-exemption-scheme-pending-royal-gazette-publication/"
+      ]
+    },
+    {
+      "nationalities": ["ARM","BLR","BTN","BOL","BGR","CHN","CRI","CYP","SLV","ETH","FJI","GEO","IND","KAZ","KGZ","MLT","MEX","NAM","NRU","PNG","PRY","ROU","RUS","SAU","SRB","SYC","TWN","TUN","UZB","VUT","VEN"],
+      "category": "visa_on_arrival_tourist",
+      "disposition": "VISA_ON_ARRIVAL",
+      "maximum_stay": "15 days, single entry",
+      "conditions": [
+        "Tourism purpose only; fee 2,000 THB",
+        "16 of these nationalities (BTN, BGR, CHN, CYP, FJI, GEO, IND, KAZ, MLT, MEX, PNG, ROU, RUS, SAU, TWN, UZB) also appear on the 60-day visa exemption list, which supersedes VoA in practice while both schemes are in force",
+        "Thailand Digital Arrival Card (TDAC) must be submitted within 3 days before arrival",
+        "Cabinet approved on 19 May 2026 (revised 14 July 2026) reducing the VoA list; pending Royal Gazette publication, not yet in effect as of 2026-07-23"
+      ],
+      "source_urls": [
+        "https://ankara.thaiembassy.org/en/publicservice/60-day-visa-exemption-and-visa-on-arrival?menu=5d7717d815e39c2f34004f92&page=5d7717d815e39c2f34004f91",
+        "https://thaiconsulatela.thaiembassy.org/en/publicservice/visa-exemption-and-visa-on-arrival-to-thailand",
+        "https://washingtondc.thaiembassy.org/en/page/visaexempt-voajul2024"
+      ]
+    },
+    {
+      "nationalities": ["ALL_OTHERS"],
+      "category": "tourist_visa",
+      "disposition": "EVISA_REQUIRED",
+      "maximum_stay": "60 days per entry (TR, single entry, visa valid 3 months); METV: 60 days per entry, visa valid 6 months",
+      "conditions": [
+        "Nationalities not on the visa exemption or Visa on Arrival lists must obtain a tourist visa before travel",
+        "Applications are submitted through the official Thai eVisa system at https://www.thaievisa.go.th/ (the MFA electronic visa platform); Royal Thai Embassies/Consulates-General remain the issuing authorities",
+        "Nationals of certain countries are required to apply for a visa only at the Thai Embassy or Consulate-General in their home/residence country",
+        "TR fee 1,000 THB per entry; stay extendable by up to 30 days at the Immigration Bureau",
+        "Thailand Digital Arrival Card (TDAC) must be submitted within 3 days before arrival"
+      ],
+      "source_urls": [
+        "https://mfa.go.th/en/page/issuance-of-visa",
+        "https://sydney.thaiembassy.org/en/content/visa-information-visa-fees",
+        "https://helsinki.thaiembassy.org/en/publicservice/tourist-visa-tr-metv?cate=5d80865815e39c3354007650"
+      ]
+    },
+    {
+      "nationalities": ["ALB","AND","AUS","AUT","BHR","BEL","BTN","BRA","BRN","BGR","KHM","CAN","CHN","COL","HRV","CUB","CYP","CZE","DNK","DMA","DOM","ECU","EST","FJI","FIN","FRA","GEO","DEU","GRC","GTM","HKG","HUN","ISL","IND","IDN","IRL","ISR","ITA","JAM","JPN","JOR","KAZ","KOR","XKX","KWT","LAO","LVA","LIE","LTU","LUX","MAC","MYS","MDV","MLT","MUS","MEX","MCO","MNG","MAR","NLD","NZL","NOR","OMN","PAN","PNG","PER","PHL","POL","PRT","QAT","ROU","RUS","SMR","SAU","SGP","SVK","SVN","ZAF","ESP","LKA","SWE","CHE","TWN","TON","TTO","TUR","UKR","ARE","GBR","USA","URY","UZB","VNM"],
+      "category": "tourist_visa",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "No tourist visa is needed for tourist stays up to 60 days under the visa exemption scheme in force on 2026-07-23; a TR/METV visa remains optionally available via the eVisa system for longer planned stays"
+      ],
+      "source_urls": [
+        "https://ankara.thaiembassy.org/en/publicservice/60-day-visa-exemption-and-visa-on-arrival?menu=5d7717d815e39c2f34004f92&page=5d7717d815e39c2f34004f91",
+        "https://washingtondc.thaiembassy.org/en/page/visaexempt-voajul2024"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "eta",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Thailand operates no electronic travel authorization (eTA) program for tourism; official embassy pages list the entry channels as visa exemption, Visa on Arrival, bilateral visa exemption agreements, and visas applied through the e-Visa system",
+        "The Thailand Digital Arrival Card (TDAC, mandatory for all non-Thai nationals since 1 May 2025) is a digital arrival/immigration card replacing the TM.6 form, not a travel authorization"
+      ],
+      "source_urls": [
+        "https://washingtondc.thaiembassy.org/en/page/visaexempt-voajul2024",
+        "https://madrid.thaiembassy.org/en/content/revision-of-visa-exemption-and-voa-schemes-2026-en?cate=6238915fb179ed21a6777373",
+        "https://singapore.thaiembassy.org/en/content-category/thailand-digital-arrival-card-tdac"
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "policy_kind": "visa_exemption_list",
+      "policy_name": "Tourist Visa Exemption Scheme (60 days)",
+      "description": "Nationals of 93 countries and territories are entitled to visa exemption for tourism and short-term business engagements for up to 60 days per entry, extendable once by up to 30 days at the discretion of the Immigration Bureau. Re-entrants may stay a cumulative maximum of 90 days within 6 months of first entry. Effective 15 July 2024. A Cabinet decision of 19 May 2026 (revised 14 July 2026) approved replacing this scheme with 30-day and 15-day exemption lists, pending Royal Gazette publication; not yet in effect as of 2026-07-23.",
+      "applies_to_nationalities": ["ALB","AND","AUS","AUT","BHR","BEL","BTN","BRA","BRN","BGR","KHM","CAN","CHN","COL","HRV","CUB","CYP","CZE","DNK","DMA","DOM","ECU","EST","FJI","FIN","FRA","GEO","DEU","GRC","GTM","HKG","HUN","ISL","IND","IDN","IRL","ISR","ITA","JAM","JPN","JOR","KAZ","KOR","XKX","KWT","LAO","LVA","LIE","LTU","LUX","MAC","MYS","MDV","MLT","MUS","MEX","MCO","MNG","MAR","NLD","NZL","NOR","OMN","PAN","PNG","PER","PHL","POL","PRT","QAT","ROU","RUS","SMR","SAU","SGP","SVK","SVN","ZAF","ESP","LKA","SWE","CHE","TWN","TON","TTO","TUR","UKR","ARE","GBR","USA","URY","UZB","VNM"],
+      "conditions": [
+        "Passport valid at least 6 months",
+        "Proof of onward travel to leave Thailand within 60 days of arrival",
+        "Funds of 20,000 THB per person / 40,000 THB per family",
+        "TDAC submission within 3 days before arrival"
+      ],
+      "maximum_stay": "60 days, extendable by up to 30 days; cumulative 90 days within 6 months on re-entry",
+      "official_source_urls": [
+        "https://ankara.thaiembassy.org/en/publicservice/60-day-visa-exemption-and-visa-on-arrival?menu=5d7717d815e39c2f34004f92&page=5d7717d815e39c2f34004f91",
+        "https://washingtondc.thaiembassy.org/en/page/visaexempt-voajul2024",
+        "https://thaiconsulatela.thaiembassy.org/en/publicservice/visa-exemption-and-visa-on-arrival-to-thailand"
+      ],
+      "effective_from": "2024-07-15",
+      "effective_until": null
+    },
+    {
+      "policy_kind": "visa_on_arrival_program",
+      "policy_name": "Visa on Arrival (VoA) for tourism",
+      "description": "Nationals of 31 countries and territories may apply for a single-entry Visa on Arrival at immigration checkpoints for tourism, for a stay not exceeding 15 days, fee 2,000 THB. Revised list effective 15 July 2024. A Cabinet decision of 19 May 2026 (revised 14 July 2026) approved cutting the list to a handful of countries, pending Royal Gazette publication; not yet in effect as of 2026-07-23.",
+      "applies_to_nationalities": ["ARM","BLR","BTN","BOL","BGR","CHN","CRI","CYP","SLV","ETH","FJI","GEO","IND","KAZ","KGZ","MLT","MEX","NAM","NRU","PNG","PRY","ROU","RUS","SAU","SRB","SYC","TWN","TUN","UZB","VUT","VEN"],
+      "conditions": ["Tourism purpose only", "Fee 2,000 THB", "Single entry", "TDAC submission within 3 days before arrival"],
+      "maximum_stay": "15 days",
+      "official_source_urls": [
+        "https://ankara.thaiembassy.org/en/publicservice/60-day-visa-exemption-and-visa-on-arrival?menu=5d7717d815e39c2f34004f92&page=5d7717d815e39c2f34004f91",
+        "https://thaiconsulatela.thaiembassy.org/en/publicservice/visa-exemption-and-visa-on-arrival-to-thailand"
+      ],
+      "effective_from": "2024-07-15",
+      "effective_until": null
+    },
+    {
+      "policy_kind": "evisa_program",
+      "policy_name": "Thai eVisa (electronic visa application system)",
+      "description": "The Ministry of Foreign Affairs operates the official Thai eVisa platform at https://www.thaievisa.go.th/ through which visa applications (including the TR tourist visa and METV) are submitted online to Royal Thai Embassies and Consulates-General. Embassy pages (e.g. Sydney, Helsinki) direct applicants to apply through this e-Visa system; payment online by Visa or Mastercard.",
+      "applies_to_nationalities": ["ALL"],
+      "conditions": ["Application submitted online via thaievisa.go.th to the competent Royal Thai Embassy/Consulate-General", "Some nationalities must apply only in their home/residence country"],
+      "maximum_stay": null,
+      "official_source_urls": [
+        "https://sydney.thaiembassy.org/en/content/visa-information-visa-fees",
+        "https://helsinki.thaiembassy.org/en/publicservice/tourist-visa-tr-metv?cate=5d80865815e39c3354007650",
+        "https://washingtondc.thaiembassy.org/en/page/visaexempt-voajul2024"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "consular_visa_regime",
+      "policy_name": "Tourist Visa TR (single entry) and Multiple Entry Tourist Visa (METV)",
+      "description": "TR tourist visa: fee 1,000 THB per entry, visa validity 3 or 6 months, permitted stay up to 60 days per entry, extendable by up to 30 days. METV: visa validity 6 months, stay up to 60 days per entry; fee charged in local currency by the mission (e.g. 170 EUR at the Royal Thai Embassy Helsinki; TR at Helsinki 40 EUR). METV requires passport validity of not less than 12 months on arrival and at least two empty visa pages, plus financial evidence.",
+      "applies_to_nationalities": ["ALL"],
+      "conditions": [
+        "Passport minimum 6 months validity (TR); 12 months and 2 blank pages (METV)",
+        "Evidence of travel from Thailand (air ticket paid in full)",
+        "Financial proof: 20,000 THB per person / 40,000 THB per family (TR); bank statement requirements for METV set by mission"
+      ],
+      "maximum_stay": "60 days per entry",
+      "official_source_urls": [
+        "https://mfa.go.th/en/page/issuance-of-visa",
+        "https://helsinki.thaiembassy.org/en/publicservice/tourist-visa-tr-metv?cate=5d80865815e39c3354007650"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "Thailand Digital Arrival Card (TDAC)",
+      "description": "Since 1 May 2025, all non-Thai nationals must complete the Thailand Digital Arrival Card online at https://tdac.immigration.go.th within 3 days before arrival. It replaces the paper TM.6 arrival card and is required for immigration processing regardless of visa category. It is an arrival card, not a visa or travel authorization.",
+      "applies_to_nationalities": ["ALL"],
+      "conditions": ["Submit online within 3 days before arrival", "Entry will not be processed by the immigration officer without it"],
+      "maximum_stay": null,
+      "official_source_urls": ["https://singapore.thaiembassy.org/en/content-category/thailand-digital-arrival-card-tdac"],
+      "effective_from": "2025-05-01",
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "Approved 2026 revision of visa exemption and VoA schemes (PENDING, not in force)",
+      "description": "On 19 May 2026 the Thai Cabinet approved revoking the 60-day visa exemption scheme for all 93 countries/territories, moving to a 30-day tourism visa exemption list (initially 54 countries/territories; per the revised 14 July 2026 Cabinet decision reported by the Tourism Authority of Thailand, 59 countries/territories including all 27 EU member states, India, Croatia, Bulgaria, Cyprus, Malta and the Maldives), a new 15-day exemption (Mauritius and Seychelles), and a sharply reduced VoA list (Azerbaijan, Belarus, Serbia). The Ministry of Interior announcements remain pending publication in the Royal Gazette and take effect 15 days after publication. As of 2026-07-23 the changes are NOT in force; current entry conditions remain in place. Travellers entering before the effective date may stay until expiry of their permitted period of stay.",
+      "applies_to_nationalities": ["ALL"],
+      "conditions": ["Takes effect 15 days after Royal Gazette publication (not yet published)", "Transition: those entering before the effective date keep their permitted stay"],
+      "maximum_stay": null,
+      "official_source_urls": [
+        "https://madrid.thaiembassy.org/en/content/revision-of-visa-exemption-and-voa-schemes-2026-en?cate=6238915fb179ed21a6777373",
+        "https://bsb.thaiembassy.org/en/publicservice/the-revision-of-thailand-s-visa-exemption-and-voa?page=5d830eec15e39c31b400264c&menu=5d830eec15e39c31b400264d",
+        "https://www.tatnews.org/2026/05/thai-cabinet-approves-revision-of-60-day-visa-exemption-scheme-pending-royal-gazette-publication/"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    }
+  ],
+  "fees": [
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "TR single entry",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 1000,
+      "government_fee_currency": "THB",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": ["https://mfa.go.th/en/page/issuance-of-visa"]
+    },
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "TR single entry (local-currency fee charged by Royal Thai Embassy Helsinki; mission fees vary by country)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 40,
+      "government_fee_currency": "EUR",
+      "refundability": null,
+      "accepted_payment_methods": ["online payment via eVisa platform (Visa or Mastercard)"],
+      "source_urls": ["https://helsinki.thaiembassy.org/en/publicservice/tourist-visa-tr-metv?cate=5d80865815e39c3354007650"]
+    },
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "METV multiple entry (local-currency fee charged by Royal Thai Embassy Helsinki; mission fees vary by country; canonical THB amount not verified from a fetched official page)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 170,
+      "government_fee_currency": "EUR",
+      "refundability": null,
+      "accepted_payment_methods": ["online payment via eVisa platform (Visa or Mastercard)"],
+      "source_urls": ["https://helsinki.thaiembassy.org/en/publicservice/tourist-visa-tr-metv?cate=5d80865815e39c3354007650"]
+    },
+    {
+      "visa_category": "visa_on_arrival_tourist",
+      "visa_subtype": null,
+      "applies_to_nationalities": ["ARM","BLR","BTN","BOL","BGR","CHN","CRI","CYP","SLV","ETH","FJI","GEO","IND","KAZ","KGZ","MLT","MEX","NAM","NRU","PNG","PRY","ROU","RUS","SAU","SRB","SYC","TWN","TUN","UZB","VUT","VEN"],
+      "government_fee_amount": 2000,
+      "government_fee_currency": "THB",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": ["https://ankara.thaiembassy.org/en/publicservice/60-day-visa-exemption-and-visa-on-arrival?menu=5d7717d815e39c2f34004f92&page=5d7717d815e39c2f34004f91"]
+    }
+  ],
+  "portals": [
+    {
+      "portal_kind": "evisa_portal",
+      "url": "https://www.thaievisa.go.th",
+      "operator": "Ministry of Foreign Affairs of the Kingdom of Thailand",
+      "operator_kind": "government",
+      "official_linking_source": "https://sydney.thaiembassy.org/en/content/visa-information-visa-fees",
+      "supported_categories": ["tourist_visa (TR)", "METV", "Destination Thailand Visa (DTV)", "non-immigrant categories"],
+      "source_urls": [
+        "https://sydney.thaiembassy.org/en/content/visa-information-visa-fees",
+        "https://washingtondc.thaiembassy.org/en/page/visaexempt-voajul2024",
+        "https://helsinki.thaiembassy.org/en/publicservice/tourist-visa-tr-metv?cate=5d80865815e39c3354007650",
+        "https://thaievisa.go.th/static/masterdata.json"
+      ]
+    },
+    {
+      "portal_kind": "foreign_ministry",
+      "url": "https://www.mfa.go.th",
+      "operator": "Ministry of Foreign Affairs of the Kingdom of Thailand",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["visa policy information", "tourist visa (TR) requirements"],
+      "source_urls": ["https://mfa.go.th/en/page/issuance-of-visa"]
+    },
+    {
+      "portal_kind": "immigration_authority",
+      "url": "https://tdac.immigration.go.th",
+      "operator": "Immigration Bureau, Royal Thai Police",
+      "operator_kind": "government",
+      "official_linking_source": "https://singapore.thaiembassy.org/en/content-category/thailand-digital-arrival-card-tdac",
+      "supported_categories": ["Thailand Digital Arrival Card (TDAC) — mandatory for all non-Thai nationals arriving in Thailand"],
+      "source_urls": ["https://singapore.thaiembassy.org/en/content-category/thailand-digital-arrival-card-tdac"]
+    },
+    {
+      "portal_kind": "embassy_site",
+      "url": "https://washingtondc.thaiembassy.org",
+      "operator": "Royal Thai Embassy, Washington D.C. (thaiembassy.org is the official MFA embassy network domain)",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["visa exemption information", "visa on arrival information", "tourist visa applications via eVisa"],
+      "source_urls": ["https://washingtondc.thaiembassy.org/en/page/visaexempt-voajul2024"]
+    }
+  ],
+  "passport_validity": {
+    "rule_kind": "months_after_arrival",
+    "months": 6,
+    "min_blank_pages": null,
+    "condition_text": "Ordinary entries require a passport valid at least 6 months (MFA tourist-visa page: 'Passport validity: minimum 6 months'; Royal Thai Embassy Washington DC for visa-exempt entry: 'The passport must be valid for at least six months'). No general blank-page rule is stated on the fetched pages. METV applicants specifically need passport validity of not less than 12 months on the arrival date and at least two completely empty visa pages (Royal Thai Embassy Helsinki).",
+    "source_urls": [
+      "https://mfa.go.th/en/page/issuance-of-visa",
+      "https://washingtondc.thaiembassy.org/en/page/visaexempt-voajul2024",
+      "https://helsinki.thaiembassy.org/en/publicservice/tourist-visa-tr-metv?cate=5d80865815e39c3354007650"
+    ]
+  },
+  "jurisdictions": [],
+  "unresolved": [
+    "PENDING REGIME CHANGE: the Cabinet approved on 19 May 2026 (further revised 14 July 2026) revoking the 60-day visa exemption (93 countries) in favour of a 30-day exemption list (54 per the May decision; 59 incl. EU-27, India, Croatia, Bulgaria, Cyprus, Malta, Maldives per the July decision as reported by the Tourism Authority of Thailand), a 15-day exemption (Mauritius, Seychelles), and a VoA list cut to Azerbaijan, Belarus and Serbia. The Ministry of Interior announcements were still pending Royal Gazette publication per the latest official confirmation (TAT Newsroom, 16 July 2026: 'Until the new measures take effect, current entry conditions remain in place'); they take effect 15 days after publication. Embassy pages fetched 2026-07-23 still publish the 60-day scheme. This snapshot records the regime in force on 2026-07-23, but it may be superseded within weeks; monitor the Royal Gazette and MFA/embassy announcements.",
+    "The full official country lists for the pending 2026 revision (30-day / 15-day / VoA) were not published on any fetched official page; only partial names appear in the TAT Newsroom article.",
+    "https://www.immigration.go.th/en/ returned HTTP 403 to automated fetch; Immigration Bureau pages (incl. bangkok.immigration.go.th/en/fee_en/) could not be verified directly. Not bypassed.",
+    "Informational pages on https://www.thaievisa.go.th (e.g. /visa/tourist-visa) are JavaScript-rendered and returned no readable body; only the portal's static masterdata.json loaded. Portal officialness verified via embassy pages linking to it.",
+    "Canonical METV fee in THB (reported as 5,000 THB in search snippets) could not be verified from a fetched official page; only the Helsinki mission's EUR fees (TR 40 EUR, METV 170 EUR) are recorded.",
+    "VoA refundability and accepted payment methods not verified from a fetched official page.",
+    "The MFA summary PDF (image.mfa.go.th, dated 9 May 2024) predates the 15 July 2024 measures and is superseded; it is included only as background for bilateral 90-day agreements (BRA/KOR/PER) and 30-day agreements (VNM/HKG), which coexist with the exemption scheme.",
+    "Transit-without-visa rules were not researched; no transit_authorization disposition is recorded."
+  ]
+}

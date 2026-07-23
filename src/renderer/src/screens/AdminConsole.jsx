@@ -5,8 +5,10 @@
 import { useEffect, useState } from 'react'
 import { useToast, Loading, ErrorNote, Empty, KVList } from '../components/ui.jsx'
 import { Icon } from '../components/icons.jsx'
+import { useLocale } from '../lib/locale.jsx'
 import { createVisaClient } from '../lib/visaBackend.js'
 import { newAdminSession } from '../lib/visaSession.js'
+import { readinessMeta } from '../lib/intake.js'
 
 const STATE_LABELS = {
   discovered: 'Discovered', disabled_draft: 'Disabled draft', technical_review: 'Technical review',
@@ -23,8 +25,19 @@ function StateChip({ state, enabled, kill }) {
   </span>
 }
 
+// New snapshot-pipeline tabs (Trip.com snapshot admin). Labels are i18n keys;
+// the original adapter tabs keep their hardcoded labels for continuity.
+const SNAPSHOT_TABS = [
+  ['snapshot', 'admin.tab.snapshot'],
+  ['reviews', 'admin.tab.reviews'],
+  ['conflicts', 'admin.tab.conflicts'],
+  ['route queue', 'admin.tab.routeQueue'],
+  ['adapter tasks', 'admin.tab.adapterTasks']
+]
+
 export default function AdminConsole() {
   const toast = useToast()
+  const { t } = useLocale()
   const [client] = useState(() => createVisaClient(newAdminSession()))
   const [tab, setTab] = useState('adapters')
   const [adapters, setAdapters] = useState(null)
@@ -58,9 +71,14 @@ export default function AdminConsole() {
       <div className="page page--wide">
         {error && <ErrorNote error={error} />}
         <div className="tabs">
-          {['adapters', 'review queue', 'coverage'].map((t) => (
-            <button key={t} className={'tab' + (tab === t ? ' is-active' : '')} onClick={() => setTab(t)}>
-              {t[0].toUpperCase() + t.slice(1)}
+          {['adapters', 'review queue', 'coverage'].map((name) => (
+            <button key={name} className={'tab' + (tab === name ? ' is-active' : '')} onClick={() => setTab(name)}>
+              {name[0].toUpperCase() + name.slice(1)}
+            </button>
+          ))}
+          {SNAPSHOT_TABS.map(([name, key]) => (
+            <button key={name} className={'tab' + (tab === name ? ' is-active' : '')} onClick={() => setTab(name)}>
+              {t(key)}
             </button>
           ))}
         </div>
@@ -115,7 +133,223 @@ export default function AdminConsole() {
             </div>
           </div>
         )}
+
+        {tab === 'snapshot' && <SnapshotTab client={client} t={t} />}
+        {tab === 'reviews' && <ReviewsTab client={client} t={t} />}
+        {tab === 'conflicts' && <ConflictsTab client={client} t={t} />}
+        {tab === 'route queue' && <RouteQueueTab client={client} t={t} />}
+        {tab === 'adapter tasks' && <AdapterTasksTab client={client} t={t} />}
       </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Snapshot-pipeline admin tabs
+// ---------------------------------------------------------------------------
+
+function pct(v) {
+  const n = typeof v === 'number' && Number.isFinite(v) ? v : 0
+  return (n * 100).toFixed(n > 0 && n < 0.001 ? 3 : 1) + '%'
+}
+
+function SnapshotTab({ client, t }) {
+  const [cov, setCov] = useState(null)
+  const [batches, setBatches] = useState(null)
+  const [error, setError] = useState(null)
+  useEffect(() => {
+    client.adminSnapshotCoverage().then(setCov).catch((e) => setError({ message: e.message }))
+    client.adminSnapshotBatches().then((r) => setBatches(r.batches || [])).catch(() => setBatches([]))
+  }, [])
+  if (error) return <div className="tabpanel"><ErrorNote error={error} /></div>
+  if (!cov) return <div className="tabpanel"><Loading label="Loading snapshot coverage" /></div>
+  const metrics = cov.metrics || {}
+  const dispositions = cov.matrix?.dispositions || {}
+  const counts = cov.counts || {}
+  return (
+    <div className="tabpanel">
+      <div className="eyebrow">{t('admin.snapshot.metrics')} · {cov.snapshot_date}</div>
+      <div className="grid grid-4" style={{ gap: 12 }}>
+        {Object.entries(metrics).map(([k, v]) => (
+          <div key={k} className="card stat">
+            <div className="stat__num">{pct(v)}</div>
+            <div className="stat__cap" style={{ fontSize: 11.5 }}>{k.replace(/_/g, ' ').toLowerCase()}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="eyebrow" style={{ marginTop: 22 }}>{t('admin.snapshot.dispositions')}</div>
+      <div className="card" style={{ padding: 16 }}>
+        <div className="kv">
+          <div className="kv__k">expected / created</div>
+          <div className="kv__v">{cov.matrix?.expected_entries ?? '—'} / {cov.matrix?.created_entries ?? '—'}</div>
+        </div>
+        {Object.entries(dispositions).map(([k, v]) => (
+          <div className="kv" key={k}>
+            <div className="kv__k">{k.replace(/_/g, ' ')}</div>
+            <div className="kv__v">{v}</div>
+          </div>
+        ))}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
+          {Object.entries(counts).map(([k, v]) => (
+            <span key={k} className="chip" title={k}>{k.replace(/_/g, ' ')}: {v}</span>
+          ))}
+        </div>
+        {cov.notes && <div style={{ fontSize: 11, color: 'var(--muted-2)', marginTop: 10 }}>{cov.notes}</div>}
+      </div>
+
+      <div className="eyebrow" style={{ marginTop: 22 }}>{t('admin.snapshot.batches')}</div>
+      <div className="card" style={{ padding: 0, maxHeight: 380, overflowY: 'auto' }}>
+        {batches === null ? <Loading /> : batches.map((b) => (
+          <div key={b.key} className="row" style={{ border: 0, borderBottom: '1px solid var(--line)', borderRadius: 0, margin: 0 }}>
+            <div className="row__main">
+              <div className="row__title">{b.destination} <span style={{ color: 'var(--muted)', fontWeight: 400 }}>· {b.key}</span></div>
+              <div className="row__sub">
+                attempts {b.attempts} · records {b.records} · conflicts {b.conflicts} · reviews {b.reviews}
+              </div>
+            </div>
+            <span className="chip">{b.stage}{b.result ? ` · ${b.result}` : ''}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function ReviewsTab({ client, t }) {
+  const toast = useToast()
+  const [tasks, setTasks] = useState(null)
+  const [notes, setNotes] = useState({})
+  const [busy, setBusy] = useState('')
+  const [error, setError] = useState(null)
+  async function load() {
+    try { setTasks((await client.adminReviewQueue()).tasks || []) }
+    catch (e) { setError({ message: e.message }) }
+  }
+  useEffect(() => { load() }, [])
+  async function act(id, status) {
+    const note = (notes[id] || '').trim()
+    if (!note) { toast(t('admin.reviews.noteRequired')); return }
+    setBusy(id)
+    try {
+      await client.adminResolveReview(id, { resolution_note: note, status })
+      await load()
+    } catch (e) { setError({ message: e.message }) }
+    setBusy('')
+  }
+  if (error) return <div className="tabpanel"><ErrorNote error={error} /></div>
+  if (tasks === null) return <div className="tabpanel"><Loading /></div>
+  return (
+    <div className="tabpanel">
+      {tasks.length === 0 ? <Empty title={t('admin.reviews.empty')} /> : tasks.map((task) => (
+        <div key={task.id} className="card" style={{ padding: 16, marginBottom: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontSize: 14.5, fontWeight: 600 }}>{task.title || task.id}</div>
+              <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 3 }}>
+                {task.kind} · {task.subject} · {task.created_at}
+              </div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 8, marginTop: 12, alignItems: 'center' }}>
+            <input className="input" style={{ flex: 1 }} placeholder={t('admin.reviews.notePlaceholder')}
+              value={notes[task.id] || ''}
+              onChange={(e) => setNotes((p) => ({ ...p, [task.id]: e.target.value }))} />
+            <button className="btn btn--sm" disabled={busy === task.id}
+              onClick={() => act(task.id, 'resolved')}>{t('admin.reviews.resolve')}</button>
+            <button className="btn btn--sm btn--ghost" disabled={busy === task.id}
+              onClick={() => act(task.id, 'rejected')}>{t('admin.reviews.reject')}</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function ConflictsTab({ client, t }) {
+  const [conflicts, setConflicts] = useState(null)
+  const [error, setError] = useState(null)
+  useEffect(() => {
+    client.adminConflicts().then((r) => setConflicts(r.conflicts || [])).catch((e) => setError({ message: e.message }))
+  }, [])
+  if (error) return <div className="tabpanel"><ErrorNote error={error} /></div>
+  if (conflicts === null) return <div className="tabpanel"><Loading /></div>
+  if (conflicts.length === 0) return <div className="tabpanel"><Empty title={t('admin.conflicts.empty')} /></div>
+  return (
+    <div className="tabpanel">
+      {conflicts.map((c, i) => (
+        <div key={c.id || i} className="card" style={{ padding: 14, marginBottom: 10 }}>
+          <div style={{ fontSize: 14, fontWeight: 600 }}>
+            {c.kind || c.field || 'conflict'}{c.route_key ? ` · ${c.route_key}` : ''}
+          </div>
+          <pre style={{ fontSize: 11, whiteSpace: 'pre-wrap', margin: '8px 0 0', color: 'var(--muted)', maxHeight: 180, overflow: 'auto' }}>
+            {JSON.stringify(c, null, 2)}
+          </pre>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function RouteQueueTab({ client, t }) {
+  const [resolutions, setResolutions] = useState(null)
+  const [error, setError] = useState(null)
+  useEffect(() => {
+    client.adminRouteQueue().then((r) => setResolutions(r.resolutions || [])).catch((e) => setError({ message: e.message }))
+  }, [])
+  if (error) return <div className="tabpanel"><ErrorNote error={error} /></div>
+  if (resolutions === null) return <div className="tabpanel"><Loading /></div>
+  if (resolutions.length === 0) return <div className="tabpanel"><Empty title={t('admin.routeQueue.empty')} /></div>
+  return (
+    <div className="tabpanel">
+      {resolutions.map((r) => {
+        const meta = readinessMeta(r.readiness)
+        return (
+          <div key={r.id} className="row" style={{ alignItems: 'flex-start' }}>
+            <div className="row__main">
+              <div className="row__title" style={{ fontSize: 12.5, fontFamily: 'monospace', wordBreak: 'break-all' }}>{r.route_key}</div>
+              <div className="row__sub">org {r.org_id} · case {r.case_id || '—'} · {r.created_at}</div>
+            </div>
+            <span className={'chip' + (meta.tone === 'ok' ? ' chip--ink' : '')}>{t(meta.i18nKey)}</span>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function AdapterTasksTab({ client, t }) {
+  const [tasks, setTasks] = useState(null)
+  const [error, setError] = useState(null)
+  useEffect(() => {
+    client.adminAdapterTasks().then((r) => setTasks(r.tasks || [])).catch((e) => setError({ message: e.message }))
+  }, [])
+  if (error) return <div className="tabpanel"><ErrorNote error={error} /></div>
+  if (tasks === null) return <div className="tabpanel"><Loading /></div>
+  if (tasks.length === 0) return <div className="tabpanel"><Empty title={t('admin.adapterTasks.empty')} /></div>
+  return (
+    <div className="tabpanel">
+      {tasks.map((task) => (
+        <div key={task.id} className="card" style={{ padding: 14, marginBottom: 10 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+            <div style={{ fontSize: 12.5, fontFamily: 'monospace', wordBreak: 'break-all', fontWeight: 600 }}>
+              {task.route_key}
+            </div>
+            <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+              {task.priority != null && <span className="chip">P{task.priority}</span>}
+              <span className="chip chip--ink">{task.status}</span>
+            </div>
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 6 }}>
+            case {task.case_id || '—'}
+          </div>
+          {(task.portal_evidence || task.jurisdiction_evidence || task.notes) && (
+            <pre style={{ fontSize: 11, whiteSpace: 'pre-wrap', margin: '8px 0 0', color: 'var(--muted)', maxHeight: 160, overflow: 'auto' }}>
+              {JSON.stringify({ portal_evidence: task.portal_evidence, jurisdiction_evidence: task.jurisdiction_evidence, notes: task.notes }, null, 2)}
+            </pre>
+          )}
+        </div>
+      ))}
     </div>
   )
 }

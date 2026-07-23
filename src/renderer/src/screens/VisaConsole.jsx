@@ -6,9 +6,11 @@
 import { useEffect, useState } from 'react'
 import { useToast, Loading, ErrorNote, Empty } from '../components/ui.jsx'
 import { Icon } from '../components/icons.jsx'
+import { useLocale } from '../lib/locale.jsx'
 import { createVisaClient } from '../lib/visaBackend.js'
 import { newSession } from '../lib/visaSession.js'
 import CaseFlow from '../components/visa/CaseFlow.jsx'
+import StartVisa from '../components/visa/StartVisa.jsx'
 
 const LS_KEY = 'ellis.visa.cases'
 function loadCases() {
@@ -18,6 +20,7 @@ function saveCases(list) { try { localStorage.setItem(LS_KEY, JSON.stringify(lis
 
 export default function VisaConsole({ profile, onNotify }) {
   const toast = useToast()
+  const { t } = useLocale()
   const [session] = useState(() => newSession({ orgId: profile?.orgId || 'ellis-demo' }))
   const [client] = useState(() => createVisaClient(session))
   const [caps, setCaps] = useState(null)
@@ -26,6 +29,9 @@ export default function VisaConsole({ profile, onNotify }) {
   const [openId, setOpenId] = useState(null)
   const [reachable, setReachable] = useState(null)
   const [creating, setCreating] = useState(false)
+  // The route-intake wizard is the FIRST thing an applicant sees; the existing
+  // case list / session tools stay reachable behind the second tab.
+  const [tab, setTab] = useState('start')
 
   useEffect(() => {
     client.capabilities().then((c) => { setCaps(c); setReachable(true) }).catch(() => setReachable(false))
@@ -69,6 +75,22 @@ export default function VisaConsole({ profile, onNotify }) {
           <ErrorNote error={{ message: 'Cannot reach the Ellis backend at localhost:8000. Start it with `docker compose up` in backend/.' }} />
         )}
 
+        <div className="tabs">
+          <button className={'tab' + (tab === 'start' ? ' is-active' : '')} onClick={() => setTab('start')}>
+            {t('visa.tab.start')}
+          </button>
+          <button className={'tab' + (tab === 'cases' ? ' is-active' : '')} onClick={() => setTab('cases')}>
+            {t('visa.tab.cases')}
+          </button>
+        </div>
+
+        {tab === 'start' && (
+          <div className="tabpanel">
+            <StartVisa client={client} />
+          </div>
+        )}
+
+        {tab === 'cases' && (
         <div className="grid grid-2" style={{ gap: 20, alignItems: 'start' }}>
           <div>
             <div className="eyebrow">Start a case</div>
@@ -97,6 +119,7 @@ export default function VisaConsole({ profile, onNotify }) {
             <CountryMatrix adapters={adapters} />
           </div>
         </div>
+        )}
       </div>
     </div>
   )

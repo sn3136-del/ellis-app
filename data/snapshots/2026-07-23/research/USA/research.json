@@ -1,0 +1,542 @@
+{
+  "destination": "USA",
+  "retrieved_at": "2026-07-23T07:25:01Z",
+  "research_status": "research_incomplete",
+  "sources": [
+    {
+      "search_query": "United States official visa waiver program tourist ESTA",
+      "original_url": "https://www.usa.gov/visa-waiver-esta",
+      "final_url": "https://www.usa.gov/visa-waiver-esta",
+      "redirect_chain": [],
+      "final_hostname": "www.usa.gov",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "When you travel to the U.S. for tourism or business under the VWP, you may stay up to 90 days per visit. ... The total cost is $40.27 ... Each approved ESTA application is generally valid for two years. It also allows multiple visits to the U.S. within that period without having to apply for another travel approval. ... must have an electronic passport or 'e-Passport' to participate in the VWP. ... [passports must generally] be valid for six months after the date they plan to exit the U.S. [though some countries have different requirements] ... Learn about the VWP and ESTA and if your country participates in the program [via the DHS website at https://www.dhs.gov/visa-waiver-program] ... [ESTA application at] https://esta.cbp.dhs.gov/ ... up to 72 hours to find out if you are authorized to travel.",
+      "retrieved_at": "2026-07-23T07:17:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "site:usa.gov visitor visa tourism United States apply",
+      "original_url": "https://www.usa.gov/tourist-visa",
+      "final_url": "https://www.usa.gov/tourist-visa",
+      "redirect_chain": [],
+      "final_hostname": "www.usa.gov",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "B-1 for business travel ... B-2 for tourism and medical treatment ... If you qualify for a waiver, you will still need to get approval to travel to the U.S. through the Electronic System for Travel Authorization (ESTA). ... [Those ineligible for the waiver] will need a visitor visa. ... Follow the process to apply for a visitor visa from the Department of State [Form DS-160] ... your interview at your U.S. embassy or consulate ... You may renew your visitor visa before it expires. But you must renew it at a U.S. embassy or consulate in your home country. [Official URLs referenced: travel.state.gov, usembassy.gov, esta.cbp.dhs.gov/esta]",
+      "retrieved_at": "2026-07-23T07:19:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "site:usa.gov visitor visa tourism United States apply",
+      "original_url": "https://www.usa.gov/visit-united-states",
+      "final_url": "https://www.usa.gov/visit-united-states",
+      "redirect_chain": [],
+      "final_hostname": "www.usa.gov",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "The Visa Waiver Program allows citizens of participating countries to travel to the U.S. for tourism or business for up to 90 days without a visa. ... If you visit the U.S. for tourism or business, you may need a visitor visa, also known as a tourist visa. ... See what travel documents you need to enter the U.S. from Canada, Mexico, the Caribbean, or Bermuda. ... [Forms I-94 and I-94W] record the arrival and departure dates of U.S. visitors.",
+      "retrieved_at": "2026-07-23T07:19:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "site:usa.gov visitor visa tourism United States apply (linked from usa.gov/visit-united-states)",
+      "original_url": "https://www.usa.gov/from-canada-mexico-caribbean",
+      "final_url": "https://www.usa.gov/from-canada-mexico-caribbean",
+      "redirect_chain": [],
+      "final_hostname": "www.usa.gov",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "The Western Hemisphere Travel Initiative (WHTI) determines the travel documents needed to enter the U.S. It applies to U.S. citizens and citizens of: Canada, Mexico, The Caribbean, Bermuda.",
+      "retrieved_at": "2026-07-23T07:20:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "United States tourist visa fee official B-2 (direct govinfo lookup of 22 CFR 22.1, no snippet used as evidence)",
+      "original_url": "https://www.govinfo.gov/content/pkg/CFR-2025-title22-vol1/xml/CFR-2025-title22-vol1-sec22-1.xml",
+      "final_url": "https://www.govinfo.gov/content/pkg/CFR-2025-title22-vol1/xml/CFR-2025-title22-vol1-sec22-1.xml",
+      "redirect_chain": [],
+      "final_hostname": "www.govinfo.gov",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Schedule of Fees for Consular Services, Item 21: Non-petition-based nonimmigrant visa (except E category) — $185 per person. Border crossing card—age 15 and over (10 year validity) — $185 per person.",
+      "retrieved_at": "2026-07-23T07:22:00Z",
+      "effective_date_evidence": "Code of Federal Regulations annual edition, title 22 revised as of January 1, 2025",
+      "page_language": "en"
+    },
+    {
+      "search_query": "direct govinfo lookup of 8 CFR 212.1 (documentary requirements for nonimmigrants; no web search snippet used)",
+      "original_url": "https://www.govinfo.gov/content/pkg/CFR-2025-title8-vol1/xml/CFR-2025-title8-vol1-sec212-1.xml",
+      "final_url": "https://www.govinfo.gov/content/pkg/CFR-2025-title8-vol1/xml/CFR-2025-title8-vol1-sec212-1.xml",
+      "redirect_chain": [],
+      "final_hostname": "www.govinfo.gov",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "A visa is generally not required for Canadian citizens [except those in visa categories E, K, S, or V]. ... A valid unexpired passport is required for Canadian citizens arriving in the United States [unless they meet specific trusted-traveler program requirements: NEXUS, FAST, SENTRI, INAC]. ... A visa is generally not required for Citizens of the British Overseas Territory of Bermuda [except categories E, K, S, or V]. A passport is required for Citizens of the British Overseas Territory of Bermuda arriving in the United States. ... A visa and a passport are not required of a Mexican national [applying as a temporary visitor for business or pleasure from Mexico at a land port-of-entry] if the national is in possession of a Form DSP-150, B-1/B-2 Visa and Border Crossing Card ... containing a machine-readable biometric identifier.",
+      "retrieved_at": "2026-07-23T07:22:00Z",
+      "effective_date_evidence": "Code of Federal Regulations annual edition, title 8 revised as of January 1, 2025",
+      "page_language": "en"
+    },
+    {
+      "search_query": "direct govinfo lookup of 8 CFR 217.2 (Visa Waiver Program eligibility; no web search snippet used)",
+      "original_url": "https://www.govinfo.gov/content/pkg/CFR-2025-title8-vol1/xml/CFR-2025-title8-vol1-sec217-2.xml",
+      "final_url": "https://www.govinfo.gov/content/pkg/CFR-2025-title8-vol1/xml/CFR-2025-title8-vol1-sec217-2.xml",
+      "redirect_chain": [],
+      "final_hostname": "www.govinfo.gov",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Designated country refers to any country currently designated by the Secretary for participation in the Visa Waiver Program. DHS maintains a list of designated countries at https://www.dhs.gov/visa-waiver-program.",
+      "retrieved_at": "2026-07-23T07:22:00Z",
+      "effective_date_evidence": "Code of Federal Regulations annual edition, title 8 revised as of January 1, 2025",
+      "page_language": "en"
+    },
+    {
+      "search_query": "United States passport validity requirement six month rule official (direct govinfo lookup of 22 CFR 41.104)",
+      "original_url": "https://www.govinfo.gov/content/pkg/CFR-2025-title22-vol1/xml/CFR-2025-title22-vol1-sec41-104.xml",
+      "final_url": "https://www.govinfo.gov/content/pkg/CFR-2025-title22-vol1/xml/CFR-2025-title22-vol1-sec41-104.xml",
+      "redirect_chain": [],
+      "final_hostname": "www.govinfo.gov",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "every applicant for a nonimmigrant visa is required to present a passport ... which is valid for the period required by INA 212(a)(7)(B)(i)(I).",
+      "retrieved_at": "2026-07-23T07:22:00Z",
+      "effective_date_evidence": "Code of Federal Regulations annual edition, title 22 revised as of January 1, 2025",
+      "page_language": "en"
+    },
+    {
+      "search_query": "federalregister.gov API: \"visa waiver program\" designation program country",
+      "original_url": "https://www.govinfo.gov/content/pkg/FR-2024-09-26/pdf/2024-22050.pdf",
+      "final_url": "https://www.govinfo.gov/content/pkg/FR-2024-09-26/pdf/2024-22050.pdf",
+      "redirect_chain": [],
+      "final_hostname": "www.govinfo.gov",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Designation of Qatar for the Visa Waiver Program (89 FR 78783, DHS final rule, 8 CFR 217.2): 'Designated country refers to Andorra, Australia, Austria, Belgium, Brunei, Chile, Croatia, Czech Republic, Denmark, Estonia, Finland, France, Germany, Greece, Hungary, Iceland, Ireland, Israel, Italy, Japan, Latvia, Liechtenstein, Lithuania, Luxembourg, Malta, Monaco, the Netherlands, New Zealand, Norway, Poland, Portugal, Qatar, Republic of Korea, San Marino, Singapore, Slovak Republic, Slovenia, Spain, Sweden, Switzerland, Taiwan, and the United Kingdom. The United Kingdom refers only to British citizens who have the unrestricted right of permanent abode in the United Kingdom (England, Scotland, Wales, Northern Ireland, the Channel Islands, and the Isle of Man) ... Taiwan refers only to individuals who have unrestricted right of permanent abode on Taiwan and are in possession of an electronic passport bearing a personal identification (household registration) number.' ... 'Eligible citizens and nationals of VWP countries may apply for admission to the United States at U.S. ports of entry as nonimmigrant visitors for a period of ninety days or less for business or pleasure without first obtaining a nonimmigrant visa' ... conditions include: 'present a machine-readable, electronic passport'; 'possess a round-trip ticket, unless exempted'; 'obtain an approved travel authorization via the Electronic System for Travel Authorization (ESTA)'; 'has not been present, at any time on or after March 1, 2011, in Iraq, Syria, a country that is designated by the Secretary of State as a state-sponsor of terrorism, or a country or area of concern'.",
+      "retrieved_at": "2026-07-23T07:23:00Z",
+      "effective_date_evidence": "This final rule is effective on September 26, 2024. The Secretary's designation is effective on September 24, 2024. The designation will be implemented on December 1, 2024.",
+      "page_language": "en"
+    },
+    {
+      "search_query": "federalregister.gov API: \"electronic system for travel authorization\" fee",
+      "original_url": "https://www.govinfo.gov/content/pkg/FR-2025-11-19/pdf/2025-20304.pdf",
+      "final_url": "https://www.govinfo.gov/content/pkg/FR-2025-11-19/pdf/2025-20304.pdf",
+      "redirect_chain": [],
+      "final_hostname": "www.govinfo.gov",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Certain DHS Immigration Fees Required by HR-1: Fiscal Year 2026 Adjustments for Inflation (90 FR 52085): 'ESTA is the online system through which aliens intending to enter the United States under the Visa Waiver Program (VWP) must obtain an electronic travel authorization in advance of travel to the United States. Each alien intending to travel by air, sea, or land to the United States under the VWP must receive a travel authorization via ESTA prior to travel.' ... 'the inflation-adjusted FY 2026 ESTA fee will be $40.27 ($17 + $10.27 + $13) per travel authorization. In the event the ESTA application is denied, the FY 2026 fee is $10.27' ... 'EVUS is an online system currently used by nationals of the People's Republic of China (PRC) holding a 10-year B-1, B-2, or B-1/B-2 (visitor) visa to provide required information to DHS prior to travel to the United States. ... PRC nationals with an approved U.S.-issued visa of a designated category must enroll in EVUS and provide or update personal and travel information to receive a determination of travel eligibility.' ... 'the inflation-adjusted HR-1 EVUS fee for FY 2026 is $30.75 ($30 + $0.75)' ... 'the total fee to apply for a CBP Form I-94 at a land border port of entry for FY 2026 will continue to be $30, consisting of the $6 land border fee and the $24 HR-1 fee. CBP will not assess a fee for aliens arriving at an air or sea port of entry.'",
+      "retrieved_at": "2026-07-23T07:24:00Z",
+      "effective_date_evidence": "CBP will begin assessing the FY 2026 amounts for the HR-1 I-94, ESTA, and EVUS fees described in this notice on January 1, 2026. [Initial HR-1 fee rates were assessed beginning September 30, 2025 per 90 FR 42025.]",
+      "page_language": "en"
+    },
+    {
+      "search_query": "federalregister.gov API: Romania \"visa waiver\"",
+      "original_url": "https://www.govinfo.gov/content/pkg/FR-2025-12-10/pdf/2025-22461.pdf",
+      "final_url": "https://www.govinfo.gov/content/pkg/FR-2025-12-10/pdf/2025-22461.pdf",
+      "redirect_chain": [],
+      "final_hostname": "www.govinfo.gov",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "CBP notice, Arrival and Departure Record (Form I-94) and Electronic System for Travel Authorization (ESTA) (90 FR 57208): 'Romania Removal from Visa Waiver Program (VWP): Due to the removal of Romania from the approved list of countries under the VWP, CBP is updating relevant collections to reflect this removal. The public can refer to https://www.dhs.gov/visa-waiver-program for the list of approved countries under the VWP.' ... 'As an ESTA is required for any travel to the United States under the VWP, the collection is being updated to include travelers from current VWP designated countries' ... Guam-CNMI Visa Waiver (Form I-736): 'Public Law 110-229 provides for certain aliens to be exempt from the nonimmigrant visa requirement if seeking entry into Guam or the Commonwealth of the Northern Mariana Islands (CNMI) as a visitor for a maximum stay of 45 days ... At the Secretary's discretion, passport holders of the People's Republic of China who are not in possession of a visitors' visa may be allowed to enter CNMI for up to 14 days under the discretionary parole authority.'",
+      "retrieved_at": "2026-07-23T07:24:30Z",
+      "effective_date_evidence": "Notice published December 10, 2025; Romania removal described as already effected ('Due to the removal of Romania from the approved list of countries under the VWP').",
+      "page_language": "en"
+    }
+  ],
+  "dispositions": [
+    {
+      "nationalities": ["AND", "AUS", "AUT", "BEL", "BRN", "CHL", "HRV", "CZE", "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HUN", "ISL", "IRL", "ISR", "ITA", "JPN", "LVA", "LIE", "LTU", "LUX", "MLT", "MCO", "NLD", "NZL", "NOR", "POL", "PRT", "QAT", "KOR", "SMR", "SGP", "SVK", "SVN", "ESP", "SWE", "CHE", "TWN", "GBR"],
+      "category": "eta",
+      "disposition": "ETA_REQUIRED",
+      "maximum_stay": "90 days",
+      "conditions": [
+        "Visa Waiver Program: no visa required for tourism/business stays of 90 days or less",
+        "Approved ESTA electronic travel authorization required before travel by air, sea, or land (FY2026 fee USD 40.27; ESTA generally valid 2 years, multiple entries)",
+        "Machine-readable electronic passport (e-Passport) required",
+        "Round-trip ticket required unless exempted by statute or regulation",
+        "Ineligible if present in Iraq, Syria, a state sponsor of terrorism, or a designated country/area of concern on or after 2011-03-01 (statutory exemptions/waivers possible); such travelers must obtain a visa instead",
+        "GBR: applies only to British citizens with the unrestricted right of permanent abode in the United Kingdom (England, Scotland, Wales, Northern Ireland, the Channel Islands, and the Isle of Man)",
+        "TWN: applies only to individuals with unrestricted right of permanent abode on Taiwan holding an electronic passport bearing a personal identification (household registration) number",
+        "Romania was removed from the VWP (per CBP notice of 2025-12-10) and is not included",
+        "Travelers who prefer, or are ineligible for ESTA, may apply for a B-2 visitor visa instead"
+      ],
+      "source_urls": [
+        "https://www.govinfo.gov/content/pkg/FR-2024-09-26/pdf/2024-22050.pdf",
+        "https://www.govinfo.gov/content/pkg/FR-2025-12-10/pdf/2025-22461.pdf",
+        "https://www.govinfo.gov/content/pkg/FR-2025-11-19/pdf/2025-20304.pdf",
+        "https://www.usa.gov/visa-waiver-esta"
+      ]
+    },
+    {
+      "nationalities": ["AND", "AUS", "AUT", "BEL", "BRN", "CHL", "HRV", "CZE", "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HUN", "ISL", "IRL", "ISR", "ITA", "JPN", "LVA", "LIE", "LTU", "LUX", "MLT", "MCO", "NLD", "NZL", "NOR", "POL", "PRT", "QAT", "KOR", "SMR", "SGP", "SVK", "SVN", "ESP", "SWE", "CHE", "TWN", "GBR"],
+      "category": "tourist_visa",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Consular B-2 tourist visa not needed for tourism stays of 90 days or less under the Visa Waiver Program with approved ESTA",
+        "A B-2 visitor visa is required for stays over 90 days or if the traveler is ineligible for the VWP/ESTA"
+      ],
+      "source_urls": [
+        "https://www.govinfo.gov/content/pkg/FR-2024-09-26/pdf/2024-22050.pdf",
+        "https://www.usa.gov/visa-waiver-esta",
+        "https://www.usa.gov/tourist-visa"
+      ]
+    },
+    {
+      "nationalities": ["CAN", "BMU"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": null,
+      "conditions": [
+        "8 CFR 212.1: a visa is generally not required for Canadian citizens and citizens of the British Overseas Territory of Bermuda (exceptions: E, K, S, V visa categories)",
+        "A valid passport is required (Canadian citizens may instead use NEXUS/FAST/SENTRI/INAC documents in specific circumstances)",
+        "Period of admission determined by CBP at the port of entry (maximum stay not verified from a fetched official source)"
+      ],
+      "source_urls": [
+        "https://www.govinfo.gov/content/pkg/CFR-2025-title8-vol1/xml/CFR-2025-title8-vol1-sec212-1.xml",
+        "https://www.usa.gov/from-canada-mexico-caribbean"
+      ]
+    },
+    {
+      "nationalities": ["USA"],
+      "category": "tourist_visa",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "U.S. citizens and nationals are not subject to U.S. nonimmigrant visa or VWP/ESTA requirements; the VWP applies only to 'any person who is not a citizen or national of the United States'"
+      ],
+      "source_urls": [
+        "https://www.govinfo.gov/content/pkg/FR-2024-09-26/pdf/2024-22050.pdf"
+      ]
+    },
+    {
+      "nationalities": ["CHN"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": null,
+      "conditions": [
+        "Not a Visa Waiver Program designated nationality; B-2 visitor visa required for tourism",
+        "Apply via Form DS-160 and interview at a U.S. embassy or consulate; application processing fee USD 185",
+        "PRC nationals holding a 10-year B-1, B-2, or B-1/B-2 visa must additionally enroll in EVUS before travel (FY2026 enrollment fee USD 30.75)",
+        "Period of admission determined by CBP at the port of entry"
+      ],
+      "source_urls": [
+        "https://www.govinfo.gov/content/pkg/FR-2024-09-26/pdf/2024-22050.pdf",
+        "https://www.usa.gov/tourist-visa",
+        "https://www.govinfo.gov/content/pkg/CFR-2025-title22-vol1/xml/CFR-2025-title22-vol1-sec22-1.xml",
+        "https://www.govinfo.gov/content/pkg/FR-2025-11-19/pdf/2025-20304.pdf"
+      ]
+    },
+    {
+      "nationalities": ["IND", "RUS", "ARE", "BRA", "HKG"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": null,
+      "conditions": [
+        "Not Visa Waiver Program designated nationalities (Hong Kong SAR passport holders are not covered by the United Kingdom's VWP designation, which applies only to British citizens with right of abode in the UK)",
+        "B-2 visitor visa required for tourism: Form DS-160, interview at a U.S. embassy or consulate, application processing fee USD 185",
+        "Period of admission determined by CBP at the port of entry"
+      ],
+      "source_urls": [
+        "https://www.govinfo.gov/content/pkg/FR-2024-09-26/pdf/2024-22050.pdf",
+        "https://www.usa.gov/tourist-visa",
+        "https://www.govinfo.gov/content/pkg/CFR-2025-title22-vol1/xml/CFR-2025-title22-vol1-sec22-1.xml"
+      ]
+    },
+    {
+      "nationalities": ["ALL_OTHERS"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": null,
+      "conditions": [
+        "Nationalities not designated for the Visa Waiver Program and not covered by a specific exemption (e.g., Canada/Bermuda) need a B-2 visitor visa for tourism",
+        "Form DS-160, interview at a U.S. embassy or consulate, application processing fee USD 185",
+        "Mexican nationals holding a valid biometric B-1/B-2 Border Crossing Card (Form DSP-150) do not need a separate visa or passport when entering from Mexico at a land port of entry (8 CFR 212.1)"
+      ],
+      "source_urls": [
+        "https://www.usa.gov/tourist-visa",
+        "https://www.govinfo.gov/content/pkg/FR-2024-09-26/pdf/2024-22050.pdf",
+        "https://www.govinfo.gov/content/pkg/CFR-2025-title22-vol1/xml/CFR-2025-title22-vol1-sec22-1.xml",
+        "https://www.govinfo.gov/content/pkg/CFR-2025-title8-vol1/xml/CFR-2025-title8-vol1-sec212-1.xml"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "visa_on_arrival_tourist",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "The United States operates no visa-on-arrival program for tourism; official channels are visa-free/WHTI entry (e.g., Canada, Bermuda), the Visa Waiver Program with ESTA, or a consular B-2 visitor visa"
+      ],
+      "source_urls": [
+        "https://www.usa.gov/tourist-visa",
+        "https://www.usa.gov/visit-united-states"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "evisa_tourist",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "The United States issues no tourist eVisa; ESTA is an electronic travel authorization for visa-exempt VWP nationals, not a visa, and all visas are issued through embassies/consulates"
+      ],
+      "source_urls": [
+        "https://www.usa.gov/tourist-visa",
+        "https://www.usa.gov/visa-waiver-esta"
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "policy_kind": "visa_exemption_list",
+      "policy_name": "Visa Waiver Program (VWP)",
+      "description": "Citizens/nationals of designated countries may be admitted at U.S. ports of entry as nonimmigrant visitors for business or pleasure for 90 days or less without a visa, subject to eligibility conditions (e-passport, approved ESTA, round-trip ticket, travel-history restrictions for Iraq/Syria/state sponsors of terrorism since 2011-03-01, etc.). List per 8 CFR 217.2 as amended by the Qatar designation (89 FR 78783); Romania was subsequently removed from the approved list (CBP notice, 90 FR 57208, Dec 10, 2025). DHS maintains the current list at https://www.dhs.gov/visa-waiver-program (page not directly fetchable).",
+      "applies_to_nationalities": ["AND", "AUS", "AUT", "BEL", "BRN", "CHL", "HRV", "CZE", "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HUN", "ISL", "IRL", "ISR", "ITA", "JPN", "LVA", "LIE", "LTU", "LUX", "MLT", "MCO", "NLD", "NZL", "NOR", "POL", "PRT", "QAT", "KOR", "SMR", "SGP", "SVK", "SVN", "ESP", "SWE", "CHE", "TWN", "GBR"],
+      "conditions": [
+        "Machine-readable electronic passport (e-Passport)",
+        "Approved ESTA before travel (air, sea, and land)",
+        "Stay of 90 days or less for business or pleasure",
+        "Round-trip ticket unless exempted",
+        "No presence in Iraq, Syria, state sponsors of terrorism, or designated countries/areas of concern on/after 2011-03-01 (exemptions/waivers possible)",
+        "Waiver of right to review or appeal admissibility decisions (other than asylum)",
+        "UK designation limited to British citizens with right of permanent abode; Taiwan limited to e-passports with household registration number"
+      ],
+      "maximum_stay": "90 days",
+      "official_source_urls": [
+        "https://www.govinfo.gov/content/pkg/FR-2024-09-26/pdf/2024-22050.pdf",
+        "https://www.govinfo.gov/content/pkg/FR-2025-12-10/pdf/2025-22461.pdf",
+        "https://www.usa.gov/visa-waiver-esta",
+        "https://www.govinfo.gov/content/pkg/CFR-2025-title8-vol1/xml/CFR-2025-title8-vol1-sec217-2.xml"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "eta_program",
+      "policy_name": "Electronic System for Travel Authorization (ESTA)",
+      "description": "Mandatory online travel authorization for all Visa Waiver Program travelers arriving by air, sea, or land. Approval is generally valid for two years (or until passport expiry) and allows multiple visits. FY2026 fee USD 40.27 (USD 10.27 retained if the application is denied), assessed from January 1, 2026 under HR-1 (Public Law 119-21). Applications processed up to 72 hours. CBP has proposed making the ESTA Mobile application the sole application platform.",
+      "applies_to_nationalities": ["AND", "AUS", "AUT", "BEL", "BRN", "CHL", "HRV", "CZE", "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HUN", "ISL", "IRL", "ISR", "ITA", "JPN", "LVA", "LIE", "LTU", "LUX", "MLT", "MCO", "NLD", "NZL", "NOR", "POL", "PRT", "QAT", "KOR", "SMR", "SGP", "SVK", "SVN", "ESP", "SWE", "CHE", "TWN", "GBR"],
+      "conditions": [
+        "Required for every VWP traveler prior to travel",
+        "e-Passport required",
+        "ESTA validity: generally 2 years, multiple entries",
+        "Official application portal: https://esta.cbp.dhs.gov/"
+      ],
+      "maximum_stay": "90 days",
+      "official_source_urls": [
+        "https://www.usa.gov/visa-waiver-esta",
+        "https://www.govinfo.gov/content/pkg/FR-2025-11-19/pdf/2025-20304.pdf",
+        "https://www.govinfo.gov/content/pkg/FR-2025-12-10/pdf/2025-22461.pdf"
+      ],
+      "effective_from": "2026-01-01",
+      "effective_until": null
+    },
+    {
+      "policy_kind": "consular_visa_regime",
+      "policy_name": "B-2 visitor visa (tourism)",
+      "description": "Default channel for all nationalities not covered by the VWP or a specific exemption: apply to the Department of State with Form DS-160, attend an interview at a U.S. embassy or consulate, pay the USD 185 non-petition-based nonimmigrant visa application processing fee. Renewals must also be done at a U.S. embassy or consulate. Period of admission is determined by CBP at entry (B-2 admission period not verified from a fetched official source).",
+      "applies_to_nationalities": ["ALL_OTHERS"],
+      "conditions": [
+        "Form DS-160 application",
+        "Interview at a U.S. embassy or consulate",
+        "USD 185 application processing fee (22 CFR 22.1, Item 21)",
+        "Additional visa issuance (reciprocity) fee may apply for some nationalities (not verified)"
+      ],
+      "maximum_stay": null,
+      "official_source_urls": [
+        "https://www.usa.gov/tourist-visa",
+        "https://www.govinfo.gov/content/pkg/CFR-2025-title22-vol1/xml/CFR-2025-title22-vol1-sec22-1.xml"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "Canada and Bermuda visa exemption / Western Hemisphere Travel Initiative (WHTI)",
+      "description": "Under 8 CFR 212.1, a visa is generally not required for Canadian citizens or citizens of the British Overseas Territory of Bermuda (exceptions: E, K, S, V categories). Passport required, with alternative WHTI-compliant documents (NEXUS, FAST, SENTRI, INAC card; birth certificate options for Canadian children at land/sea ports). Mexican nationals with a biometric B-1/B-2 Border Crossing Card (DSP-150) may enter from Mexico at land ports without a separate visa/passport.",
+      "applies_to_nationalities": ["CAN", "BMU", "MEX"],
+      "conditions": [
+        "Exceptions for E, K, S, V nonimmigrant categories (visa required)",
+        "Passport or approved WHTI-compliant document required",
+        "BCC facility applies to Mexican nationals at land ports of entry from Mexico"
+      ],
+      "maximum_stay": null,
+      "official_source_urls": [
+        "https://www.govinfo.gov/content/pkg/CFR-2025-title8-vol1/xml/CFR-2025-title8-vol1-sec212-1.xml",
+        "https://www.usa.gov/from-canada-mexico-caribbean"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "Electronic Visa Update System (EVUS)",
+      "description": "Nationals of the People's Republic of China holding 10-year B-1, B-2, or B-1/B-2 visitor visas must enroll in EVUS and keep their information current to receive a determination of travel eligibility before traveling to the United States (8 CFR part 215, subpart B). FY2026 enrollment fee USD 30.75, assessed from January 1, 2026.",
+      "applies_to_nationalities": ["CHN"],
+      "conditions": [
+        "Applies to PRC-passport holders with 10-year B-1/B-2 category visas",
+        "Enrollment fee paid at time of enrollment"
+      ],
+      "maximum_stay": null,
+      "official_source_urls": [
+        "https://www.govinfo.gov/content/pkg/FR-2025-11-19/pdf/2025-20304.pdf"
+      ],
+      "effective_from": "2026-01-01",
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "Guam-CNMI Visa Waiver Program (Form I-736)",
+      "description": "Public Law 110-229 exempts certain nationalities from the nonimmigrant visa requirement for visits of up to 45 days limited to Guam or the Commonwealth of the Northern Mariana Islands (CNMI). At the Secretary's discretion, PRC passport holders without a visitor visa may be allowed to enter the CNMI only for up to 14 days under discretionary parole. The list of eligible countries for this territorial program was not verified from a fetched official source.",
+      "applies_to_nationalities": [],
+      "conditions": [
+        "Valid only for entry to Guam or CNMI, not the U.S. mainland",
+        "Form I-736 required (transition to mandatory electronic submission proposed)",
+        "PRC parole facility: CNMI only, up to 14 days"
+      ],
+      "maximum_stay": "45 days (Guam/CNMI); 14 days for PRC nationals paroled into CNMI",
+      "official_source_urls": [
+        "https://www.govinfo.gov/content/pkg/FR-2025-12-10/pdf/2025-22461.pdf"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    }
+  ],
+  "fees": [
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "B-1/B-2 visitor visa application processing fee (MRV, non-petition-based nonimmigrant visa)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 185,
+      "government_fee_currency": "USD",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://www.govinfo.gov/content/pkg/CFR-2025-title22-vol1/xml/CFR-2025-title22-vol1-sec22-1.xml"
+      ]
+    },
+    {
+      "visa_category": "eta",
+      "visa_subtype": "ESTA travel authorization (FY2026; USD 10.27 retained if application denied)",
+      "applies_to_nationalities": ["AND", "AUS", "AUT", "BEL", "BRN", "CHL", "HRV", "CZE", "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HUN", "ISL", "IRL", "ISR", "ITA", "JPN", "LVA", "LIE", "LTU", "LUX", "MLT", "MCO", "NLD", "NZL", "NOR", "POL", "PRT", "QAT", "KOR", "SMR", "SGP", "SVK", "SVN", "ESP", "SWE", "CHE", "TWN", "GBR"],
+      "government_fee_amount": 40.27,
+      "government_fee_currency": "USD",
+      "refundability": "USD 10.27 cost-recovery portion charged regardless of approval or denial; remainder applies per issued travel authorization",
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://www.govinfo.gov/content/pkg/FR-2025-11-19/pdf/2025-20304.pdf",
+        "https://www.usa.gov/visa-waiver-esta"
+      ]
+    },
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "EVUS enrollment (PRC nationals holding 10-year B-1/B-2 visas), FY2026",
+      "applies_to_nationalities": ["CHN"],
+      "government_fee_amount": 30.75,
+      "government_fee_currency": "USD",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://www.govinfo.gov/content/pkg/FR-2025-11-19/pdf/2025-20304.pdf"
+      ]
+    },
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "Border Crossing Card, age 15 and over (10-year validity)",
+      "applies_to_nationalities": ["MEX"],
+      "government_fee_amount": 185,
+      "government_fee_currency": "USD",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://www.govinfo.gov/content/pkg/CFR-2025-title22-vol1/xml/CFR-2025-title22-vol1-sec22-1.xml"
+      ]
+    },
+    {
+      "visa_category": "entry_record",
+      "visa_subtype": "CBP Form I-94 application at land border ports of entry (FY2026 total: USD 24 HR-1 fee + USD 6 land border fee; no fee at air/sea ports)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 30,
+      "government_fee_currency": "USD",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://www.govinfo.gov/content/pkg/FR-2025-11-19/pdf/2025-20304.pdf"
+      ]
+    }
+  ],
+  "portals": [
+    {
+      "portal_kind": "eta_portal",
+      "url": "https://esta.cbp.dhs.gov/",
+      "operator": "U.S. Customs and Border Protection (DHS)",
+      "operator_kind": "government",
+      "official_linking_source": "https://www.usa.gov/visa-waiver-esta",
+      "supported_categories": ["eta"],
+      "source_urls": [
+        "https://www.usa.gov/visa-waiver-esta"
+      ]
+    },
+    {
+      "portal_kind": "immigration_authority",
+      "url": "https://www.dhs.gov/visa-waiver-program",
+      "operator": "U.S. Department of Homeland Security",
+      "operator_kind": "government",
+      "official_linking_source": "https://www.govinfo.gov/content/pkg/CFR-2025-title8-vol1/xml/CFR-2025-title8-vol1-sec217-2.xml",
+      "supported_categories": ["visa_free_entry", "eta"],
+      "source_urls": [
+        "https://www.govinfo.gov/content/pkg/CFR-2025-title8-vol1/xml/CFR-2025-title8-vol1-sec217-2.xml",
+        "https://www.govinfo.gov/content/pkg/FR-2025-12-10/pdf/2025-22461.pdf"
+      ]
+    },
+    {
+      "portal_kind": "immigration_authority",
+      "url": "https://www.cbp.gov/",
+      "operator": "U.S. Customs and Border Protection (DHS)",
+      "operator_kind": "government",
+      "official_linking_source": "https://www.govinfo.gov/content/pkg/FR-2025-12-10/pdf/2025-22461.pdf",
+      "supported_categories": ["eta", "visa_free_entry", "entry_record"],
+      "source_urls": [
+        "https://www.govinfo.gov/content/pkg/FR-2025-12-10/pdf/2025-22461.pdf"
+      ]
+    },
+    {
+      "portal_kind": "foreign_ministry",
+      "url": "https://travel.state.gov/",
+      "operator": "U.S. Department of State, Bureau of Consular Affairs",
+      "operator_kind": "government",
+      "official_linking_source": "https://www.usa.gov/tourist-visa",
+      "supported_categories": ["tourist_visa"],
+      "source_urls": [
+        "https://www.usa.gov/tourist-visa"
+      ]
+    },
+    {
+      "portal_kind": "embassy_site",
+      "url": "https://www.usembassy.gov/",
+      "operator": "U.S. Department of State",
+      "operator_kind": "government",
+      "official_linking_source": "https://www.usa.gov/tourist-visa",
+      "supported_categories": ["tourist_visa"],
+      "source_urls": [
+        "https://www.usa.gov/tourist-visa"
+      ]
+    }
+  ],
+  "passport_validity": {
+    "rule_kind": "months_after_departure",
+    "months": 6,
+    "min_blank_pages": null,
+    "condition_text": "Per USAGov (VWP context), passports must generally be valid for six months after the date the traveler plans to exit the U.S., though some countries have different requirements under country-specific agreements (the 'Six-Month Club' exemption list maintained by CBP could not be fetched). For visa applicants, 22 CFR 41.104 requires a passport valid for the period required by INA 212(a)(7)(B)(i)(I) (six months beyond the intended period of stay, subject to bilateral agreement exceptions).",
+    "source_urls": [
+      "https://www.usa.gov/visa-waiver-esta",
+      "https://www.govinfo.gov/content/pkg/CFR-2025-title22-vol1/xml/CFR-2025-title22-vol1-sec41-104.xml"
+    ]
+  },
+  "jurisdictions": [],
+  "unresolved": [
+    "Primary official sites were unreachable via WebFetch (HTTP 403 bot protection, not bypassed): travel.state.gov (Visitor Visa, VWP, Fees pages), dhs.gov/visa-waiver-program, cbp.gov (VWP/ESTA/Six-Month-Club pages), esta.cbp.dhs.gov, evus.gov, help.cbp.gov (JS-only). ecfr.gov redirected to unblock.federalregister.gov (bot wall). fam.state.gov failed TLS verification. usembassy.gov mission pages loaded but content was not machine-readable. Evidence was instead taken from usa.gov (USAGov) and govinfo.gov (GPO: CFR annual editions and Federal Register documents).",
+    "The live DHS-maintained VWP country list at https://www.dhs.gov/visa-waiver-program could not be fetched. The 42-country list recorded here is reconstructed from the Qatar designation final rule (89 FR 78783, Sep 26, 2024, amending 8 CFR 217.2) plus CBP's Dec 10, 2025 notice (90 FR 57208) confirming Romania's removal from the approved list (Romania had been designated in early 2025 but was removed before/after implementation). Any list changes after Dec 10, 2025 are unverified.",
+    "B-2 maximum period of admission (commonly reported as up to 6 months, extendable via Form I-539) was not verified from a fetched official source; maximum_stay left null for consular-visa dispositions.",
+    "Six-Month Club country list (nationalities exempt from the 6-month passport validity rule) not verified: CBP bulletin PDFs returned HTTP 403.",
+    "HR-1 (Public Law 119-21) 'visa integrity fee' (reported USD 250 for nonimmigrant visa issuance): per USCIS notice 2025-13738 (Jul 22, 2025) implementation 'requires cross-agency coordination' and was deferred to a future publication; a Jul 17, 2026 FR document references $250 but no implementing notice setting the fee/effective date was found via the Federal Register API. Not recorded as a fee; travel.state.gov could not be checked directly.",
+    "Visa issuance (reciprocity) fees for specific nationalities not verified (travel.state.gov reciprocity tables unreachable).",
+    "ustraveldocs.com (contracted visa appointment/fee-payment service used by many posts) not recorded as a portal: no official page linking to it could be fetched.",
+    "Possible ESTA validity restrictions for Hungary (announced by DHS in 2023: single-entry/one-year for certain Hungarian nationals) could not be verified from a fetchable official source; not recorded.",
+    "Guam-CNMI Visa Waiver Program eligible-country list not verified (only the program's existence, 45-day limit, and PRC CNMI 14-day parole facility are evidenced by 90 FR 57208/57211)."
+  ]
+}

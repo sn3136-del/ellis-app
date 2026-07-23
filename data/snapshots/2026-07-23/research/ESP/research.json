@@ -1,0 +1,473 @@
+{
+  "destination": "ESP",
+  "retrieved_at": "2026-07-23T07:25:24Z",
+  "research_status": "verified",
+  "sources": [
+    {
+      "search_query": "official Spain visa exemption list countries whose nationals require visa exteriores.gob.es",
+      "original_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Condiciones-de-entrada-en-Espana.aspx",
+      "final_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Condiciones-de-entrada-en-Espana.aspx",
+      "redirect_chain": [],
+      "final_hostname": "www.exteriores.gob.es",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "The document must be valid until at least three months after the planned date of departure from the Schengen territory, and must have been issued during the ten years immediately before the date of entry. [...] US citizens and citizens from other visa-exempt countries, holders of an ordinary passport, can visit and stay in the Schengen area (including Spain) for up to 90 days in a 180-day period without the need to obtain a visa. [...] the minimum amount required is of 122€ ($150 approx.) per person per day. If the length of stay is 9 days or more, the traveller must have at least 1099€. [...] The European Travel Information and Authorization System (ETIAS) is expected to become operational in the last quarter of 2026.",
+      "retrieved_at": "2026-07-23T07:20:30Z",
+      "effective_date_evidence": "Financial-means minimums stated for 2026 (122 EUR/person/day, minimum 1,099 EUR); ETIAS 'expected to become operational in the last quarter of 2026'",
+      "page_language": "en"
+    },
+    {
+      "search_query": "Spain foreign ministry tourist visa exteriores.gob.es Schengen visa",
+      "original_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+      "final_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+      "redirect_chain": [],
+      "final_hostname": "www.exteriores.gob.es",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "The visa is required for nationals listed in Annex I of Regulation (EU) 2018 1806. [...] The visa permits stays of up to 90 days (in any 180-day period) for tourism and similar purposes. [...] Visa fees (2026): General fee (age 12+): $106; Children 6-11 years: $53; Children 5 and under: Exempt. Fees are revised quarterly according to current exchange rates. [...] Applications must be submitted in person by appointment only to the BLS Spain Visa Application Center, 1660 L Street NW, Suite 216, Washington DC 20036. [...] The passport must be valid for a minimum of 90 days after your expected departure date from the Schengen area and must have at least two blank visa pages. Passports issued more than 10 years ago are not accepted.",
+      "retrieved_at": "2026-07-23T07:20:30Z",
+      "effective_date_evidence": "Fee table headed 2026; fees revised quarterly according to current exchange rates",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Spain visa exemption list countries whose nationals require visa exteriores.gob.es (PDF linked from Condiciones-de-entrada-en-Espana page)",
+      "original_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/PublishingImages/Paginas/Consular/Condiciones-de-entrada-en-Espana/Lista%20paises%20obligados%20y%20exentos%20de%20visado%20Schengen%202025.pdf",
+      "final_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/PublishingImages/Paginas/Consular/Condiciones-de-entrada-en-Espana/Lista%20paises%20obligados%20y%20exentos%20de%20visado%20Schengen%202025.pdf",
+      "redirect_chain": [],
+      "final_hostname": "www.exteriores.gob.es",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "02018R1806 — EN — 03.02.2025 — 008.001 — ANNEX I: LIST OF THIRD COUNTRIES WHOSE NATIONALS ARE REQUIRED TO BE IN POSSESSION OF A VISA WHEN CROSSING THE EXTERNAL BORDERS OF THE MEMBER STATES: [...] China [...] India [...] Russia [...] Vanuatu [...] ANNEX II: LIST OF THIRD COUNTRIES WHOSE NATIONALS ARE EXEMPT FROM THE REQUIREMENT TO BE IN POSSESSION OF A VISA WHEN CROSSING THE EXTERNAL BORDERS OF THE MEMBER STATES FOR STAYS OF NO MORE THAN 90 DAYS IN ANY 180-DAY PERIOD: [...] United Arab Emirates (2) [...] Australia [...] Brazil [...] Canada [...] Japan [...] South Korea [...] Singapore [...] United Kingdom (excluding British nationals as referred to in Part 3) [...] United States [...] 2. SPECIAL ADMINISTRATIVE REGIONS OF THE PEOPLE'S REPUBLIC OF CHINA: Hong Kong SAR (1), Macao SAR (2). (1) The exemption from the visa requirement shall only apply to holders of a 'Hong Kong Special Administrative Region' passport. (2) The exemption from the visa requirement shall only apply to holders of a 'Regiao Administrativa Especial de Macau' passport. [...] 4. ENTITIES AND TERRITORIAL AUTHORITIES THAT ARE NOT RECOGNISED AS STATES BY AT LEAST ONE MEMBER STATE: Taiwan (4), Kosovo (5)(6)(7). (4) The exemption from the visa requirement shall only apply to holders of passports issued by Taiwan which include an identity card number.",
+      "retrieved_at": "2026-07-23T07:21:30Z",
+      "effective_date_evidence": "Consolidated-text page marker '02018R1806 — EN — 03.02.2025 — 008.001' (consolidated version of 3 February 2025); filename 'Lista paises obligados y exentos de visado Schengen 2025.pdf'",
+      "page_language": "en"
+    },
+    {
+      "search_query": "Spain foreign ministry tourist visa exteriores.gob.es Schengen visa",
+      "original_url": "https://www.exteriores.gob.es/Embajadas/dublin/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+      "final_url": "https://www.exteriores.gob.es/Embajadas/dublin/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+      "redirect_chain": [],
+      "final_hostname": "www.exteriores.gob.es",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Nationals of the countries listed in Annex I of Regulation (EU) 2018/1806 need a Schengen visa to travel to any country of the Schengen area. [...] This visa allows its holder to stay in the Schengen area for up to 90 days (in any 180-day period) for reasons of tourism, business, family visits, medical treatment, to carry out studies, non-work internships or volunteer activities. [...] Consular standard fee - €90. Children between 6-12 years - €45. Children under 6 years - €0. [...] BLS standard fee of €16.90. [...] Applications are submitted at the BLS Office in Dublin: 2A Chamberlain Court, Richmond Avenue, Dumcondra, Dublin D03DY93 (https://ireland.blsspainvisa.com).",
+      "retrieved_at": "2026-07-23T07:22:30Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Spain passport validity requirement entry tourism interior.gob.es entry requirements foreigners",
+      "original_url": "https://www.spain.info/en/travel-tips/visa-passport/",
+      "final_url": "https://www.spain.info/en/travel-tips/visa-passport/",
+      "redirect_chain": [],
+      "final_hostname": "www.spain.info",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Citizens of the European Union, Iceland, Liechtenstein, Norway and Switzerland may enter and travel within Spain with their national identity document or with their valid passport. [...] A passport or travel document is always required and must be valid for up to three months after the expected date of departure from the Schengen area, and must have been issued no more than 10 years before the date of entry. [...] The maximum stay in Spain as a tourist is 90 days. [...] Tourists of certain nationalities require a currently valid visit visa. [...] ETIAS is a new entry requirement for these 30 countries in Europe, which will be mandatory from the last quarter of 2026. [...] From October 2025, travellers from non-EU or non-Schengen countries must register with the new Entry/Exit System when arriving in or leaving Spain.",
+      "retrieved_at": "2026-07-23T07:24:30Z",
+      "effective_date_evidence": "ETIAS 'will be mandatory from the last quarter of 2026'; EES in operation 'From October 2025'",
+      "page_language": "en"
+    },
+    {
+      "search_query": "(followed official link from exteriores.gob.es Washington Schengen-visa page) authorized Spain visa application center",
+      "original_url": "https://usa.blsspainvisa.com/washington/",
+      "final_url": "https://usa.blsspainvisa.com/washington/",
+      "redirect_chain": [],
+      "final_hostname": "usa.blsspainvisa.com",
+      "source_authority": "authorized_visa_center",
+      "relevant_excerpt": "Official partner of Embassy of Spain in Washington DC [...] authorized by Ministry of Foreign Affairs, Spain. [...] Visa categories: Tourist Visa, Business Visa, Airport Transit, Transit For Seamen, Visa for Family Members of EU/EEA/CH Citizens [and national/long-term visas]. All Visas payments by Debit card only.",
+      "retrieved_at": "2026-07-23T07:23:30Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    }
+  ],
+  "dispositions": [
+    {
+      "nationalities": ["USA", "GBR", "SGP", "JPN", "KOR", "AUS", "CAN", "BRA"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "Holders of ordinary passports, listed in Annex II of Regulation (EU) 2018/1806 as applied by Spain",
+        "Stay counts across the whole Schengen area, not Spain alone",
+        "Must meet Schengen entry conditions at the border, including proof of sufficient financial means (2026: 122 EUR per person per day, minimum 1,099 EUR for stays of 9 days or more)",
+        "GBR row covers British citizens; other British nationality classes (BN(O), BOTC, BOC, BPP, BS) are separately visa-exempt under Annex II Part 3"
+      ],
+      "source_urls": [
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/PublishingImages/Paginas/Consular/Condiciones-de-entrada-en-Espana/Lista%20paises%20obligados%20y%20exentos%20de%20visado%20Schengen%202025.pdf",
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Condiciones-de-entrada-en-Espana.aspx"
+      ]
+    },
+    {
+      "nationalities": ["ARE"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "Listed in Annex II of Regulation (EU) 2018/1806 as applied by Spain",
+        "Annex II footnote: 'The exemption from the visa requirement shall apply from the date of entry into force of an agreement on visa exemption to be concluded with the European Union' (the EU-UAE short-stay visa-waiver agreement is in application; see unresolved)"
+      ],
+      "source_urls": [
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/PublishingImages/Paginas/Consular/Condiciones-de-entrada-en-Espana/Lista%20paises%20obligados%20y%20exentos%20de%20visado%20Schengen%202025.pdf"
+      ]
+    },
+    {
+      "nationalities": ["HKG"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "Exemption applies only to holders of a 'Hong Kong Special Administrative Region' passport (Annex II, Section 2)"
+      ],
+      "source_urls": [
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/PublishingImages/Paginas/Consular/Condiciones-de-entrada-en-Espana/Lista%20paises%20obligados%20y%20exentos%20de%20visado%20Schengen%202025.pdf"
+      ]
+    },
+    {
+      "nationalities": ["MAC"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "Exemption applies only to holders of a 'Regiao Administrativa Especial de Macau' passport (Annex II, Section 2)"
+      ],
+      "source_urls": [
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/PublishingImages/Paginas/Consular/Condiciones-de-entrada-en-Espana/Lista%20paises%20obligados%20y%20exentos%20de%20visado%20Schengen%202025.pdf"
+      ]
+    },
+    {
+      "nationalities": ["TWN"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "Exemption applies only to holders of passports issued by Taiwan which include an identity card number (Annex II, Section 4)"
+      ],
+      "source_urls": [
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/PublishingImages/Paginas/Consular/Condiciones-de-entrada-en-Espana/Lista%20paises%20obligados%20y%20exentos%20de%20visado%20Schengen%202025.pdf"
+      ]
+    },
+    {
+      "nationalities": ["DEU", "FRA"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": null,
+      "conditions": [
+        "EU citizens: freedom of movement. 'Citizens of the European Union, Iceland, Liechtenstein, Norway and Switzerland may enter and travel within Spain with their national identity document or with their valid passport'",
+        "No visa and no 90/180 short-stay visa-policy cap; EU residence rules apply for stays beyond 3 months"
+      ],
+      "source_urls": [
+        "https://www.spain.info/en/travel-tips/visa-passport/"
+      ]
+    },
+    {
+      "nationalities": ["CHN", "IND", "RUS"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "Listed in Annex I of Regulation (EU) 2018/1806: a Schengen short-stay (type C) visa is required for tourism",
+        "Apply through the Spanish consulate competent for the applicant's place of residence; in many jurisdictions lodgement is in person by appointment at the authorized BLS Spain Visa Application Center",
+        "Must apply from the country of residence or origin (e.g. Washington consulate: holders of US B1/B2 visas 'must apply for a visa in their country of residence or country of origin')"
+      ],
+      "source_urls": [
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/PublishingImages/Paginas/Consular/Condiciones-de-entrada-en-Espana/Lista%20paises%20obligados%20y%20exentos%20de%20visado%20Schengen%202025.pdf",
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+        "https://www.exteriores.gob.es/Embajadas/dublin/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+      ]
+    },
+    {
+      "nationalities": ["ALL_OTHERS"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "All nationalities in Annex I of Regulation (EU) 2018/1806 (including, among others, Vanuatu, whose exemption was suspended) require a Schengen short-stay visa obtained in advance from a Spanish consulate / authorized visa application center"
+      ],
+      "source_urls": [
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/PublishingImages/Paginas/Consular/Condiciones-de-entrada-en-Espana/Lista%20paises%20obligados%20y%20exentos%20de%20visado%20Schengen%202025.pdf",
+        "https://www.exteriores.gob.es/Embajadas/dublin/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+      ]
+    },
+    {
+      "nationalities": ["USA", "GBR", "SGP", "HKG", "TWN", "JPN", "KOR", "DEU", "FRA", "AUS", "CAN", "ARE", "BRA", "MAC"],
+      "category": "tourist_visa",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "No tourist visa needed for stays up to 90 days in any 180-day period (Annex II exemption or EU freedom of movement); a national (type D) visa applies only to long stays, which are out of scope for tourism"
+      ],
+      "source_urls": [
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/PublishingImages/Paginas/Consular/Condiciones-de-entrada-en-Espana/Lista%20paises%20obligados%20y%20exentos%20de%20visado%20Schengen%202025.pdf",
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Condiciones-de-entrada-en-Espana.aspx"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "evisa_tourist",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Spain operates no tourist eVisa. Official channel set per MFA/consulate pages: visa-exempt entry (Annex II) or a Schengen visa applied for in person by appointment at the consulate / authorized BLS visa application center"
+      ],
+      "source_urls": [
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+        "https://www.exteriores.gob.es/Embajadas/dublin/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "eta",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "As of 2026-07-23 no travel authorization is required: ETIAS 'is expected to become operational in the last quarter of 2026' (Spanish MFA) / 'will be mandatory from the last quarter of 2026' (spain.info). Once live it will apply to visa-exempt third-country nationals"
+      ],
+      "source_urls": [
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Condiciones-de-entrada-en-Espana.aspx",
+        "https://www.spain.info/en/travel-tips/visa-passport/"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "visa_on_arrival_tourist",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Spain operates no visa-on-arrival program for tourism. Official pages require visa-obliged nationals to obtain the Schengen visa in advance, in person by appointment, before travel"
+      ],
+      "source_urls": [
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+        "https://www.exteriores.gob.es/Embajadas/dublin/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "policy_kind": "visa_exemption_list",
+      "policy_name": "Schengen visa-exemption list applied by Spain (Annex II, Regulation (EU) 2018/1806, consolidated 03.02.2025)",
+      "description": "Nationals of Annex II states, the Chinese SARs and listed entities are exempt from the visa requirement for stays of no more than 90 days in any 180-day period across the Schengen area, for tourism among other non-gainful purposes. Published by the Spanish MFA (Washington consulate) as 'Lista paises obligados y exentos de visado Schengen 2025'. Also exempt: British nationals who are not British citizens (BN(O), BOTC, BOC, BPP, BS) under Annex II Part 3.",
+      "applies_to_nationalities": ["MKD", "AND", "ARE", "ATG", "ALB", "ARG", "AUS", "BIH", "BRB", "BRN", "BRA", "BHS", "CAN", "CHL", "COL", "CRI", "DMA", "FSM", "GRD", "GEO", "GTM", "HND", "ISR", "JPN", "KIR", "KNA", "KOR", "LCA", "MCO", "MDA", "MNE", "MHL", "MUS", "MEX", "MYS", "NIC", "NRU", "NZL", "PAN", "PER", "PLW", "PRY", "SRB", "SLB", "SYC", "SGP", "SMR", "SLV", "TLS", "TON", "TTO", "TUV", "UKR", "GBR", "USA", "URY", "VAT", "VCT", "VEN", "WSM", "HKG", "MAC", "TWN", "XKX"],
+      "conditions": [
+        "Hong Kong SAR: 'Hong Kong Special Administrative Region' passport holders only",
+        "Macao SAR: 'Regiao Administrativa Especial de Macau' passport holders only",
+        "Taiwan: passports including an identity card number only",
+        "Kosovo: biometric passports issued in line with ICAO standards only",
+        "Georgia, Moldova, Ukraine: biometric passports issued in line with ICAO standards only",
+        "North Macedonia, Albania, Bosnia and Herzegovina, Serbia, Montenegro: biometric passports only",
+        "Several states (e.g. United Arab Emirates, Dominica, Micronesia, Grenada, Kiribati, Saint Lucia, and footnote-3 states such as Peru, Palau, Marshall Islands, Nauru, Timor-Leste, Tonga, Tuvalu, Saint Vincent and the Grenadines): exemption applies from entry into force of a visa-exemption agreement with the European Union",
+        "Entry subject to Schengen Borders Code conditions, including proof of sufficient financial means (2026: 122 EUR per person per day, minimum 1,099 EUR for stays of 9 days or more)"
+      ],
+      "maximum_stay": "90 days in any 180-day period",
+      "official_source_urls": [
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/PublishingImages/Paginas/Consular/Condiciones-de-entrada-en-Espana/Lista%20paises%20obligados%20y%20exentos%20de%20visado%20Schengen%202025.pdf",
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Condiciones-de-entrada-en-Espana.aspx"
+      ],
+      "effective_from": "2025-02-03",
+      "effective_until": null
+    },
+    {
+      "policy_kind": "consular_visa_regime",
+      "policy_name": "Schengen short-stay (type C) visa via Spanish consulates and BLS visa application centers",
+      "description": "Nationals listed in Annex I of Regulation (EU) 2018/1806 need a Schengen visa to travel to Spain for tourism. Applications are lodged in person, by appointment, at the Spanish consulate competent for the applicant's residence or at its authorized BLS Spain Visa Application Center. The visa allows up to 90 days in any 180-day period in the Schengen area for tourism, business, family visits, medical treatment, studies, non-work internships or volunteer activities.",
+      "applies_to_nationalities": ["ALL_OTHERS"],
+      "conditions": [
+        "Application in person by appointment only",
+        "Apply in country of residence or origin",
+        "Passport valid at least 90 days (3 months) beyond expected departure from the Schengen area, issued within the previous 10 years, with at least two blank visa pages (application requirement at Washington consulate)"
+      ],
+      "maximum_stay": "90 days in any 180-day period",
+      "official_source_urls": [
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+        "https://www.exteriores.gob.es/Embajadas/dublin/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "eta_program",
+      "policy_name": "ETIAS (European Travel Information and Authorisation System) - announced, not yet operational",
+      "description": "EU travel authorization that will apply to visa-exempt third-country nationals travelling to Spain and the other participating European countries. Not in operation as of 2026-07-23: the Spanish MFA states it 'is expected to become operational in the last quarter of 2026'; spain.info states it 'will be mandatory from the last quarter of 2026' and cites a 20 EUR fee, multiple entries, 90 days per 180-day period.",
+      "applies_to_nationalities": ["ALL_OTHERS"],
+      "conditions": [
+        "Not yet operational; no application possible or required as of the snapshot date",
+        "Will apply to visa-exempt (Annex II) nationals when it starts"
+      ],
+      "maximum_stay": "90 days in any 180-day period",
+      "official_source_urls": [
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Condiciones-de-entrada-en-Espana.aspx",
+        "https://www.spain.info/en/travel-tips/visa-passport/"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "EU/EEA/Swiss freedom of movement",
+      "description": "Citizens of the European Union, Iceland, Liechtenstein, Norway and Switzerland may enter and travel within Spain with their national identity document or valid passport; no visa and no 90/180 visa-policy cap.",
+      "applies_to_nationalities": ["AUT", "BEL", "BGR", "HRV", "CYP", "CZE", "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HUN", "IRL", "ITA", "LVA", "LTU", "LUX", "MLT", "NLD", "POL", "PRT", "ROU", "SVK", "SVN", "SWE", "ISL", "LIE", "NOR", "CHE"],
+      "conditions": [
+        "National identity document or valid passport accepted"
+      ],
+      "maximum_stay": null,
+      "official_source_urls": [
+        "https://www.spain.info/en/travel-tips/visa-passport/"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "EU Entry/Exit System (EES) biometric registration",
+      "description": "Since October 2025, travellers from non-EU/non-Schengen countries must register with the Entry/Exit System when arriving in or leaving Spain. Not a visa; border-registration requirement.",
+      "applies_to_nationalities": ["ALL_OTHERS"],
+      "conditions": [
+        "Applies to third-country nationals crossing Schengen external borders"
+      ],
+      "maximum_stay": null,
+      "official_source_urls": [
+        "https://www.spain.info/en/travel-tips/visa-passport/"
+      ],
+      "effective_from": "2025-10-01",
+      "effective_until": null
+    }
+  ],
+  "fees": [
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "Schengen short-stay (type C) - adult (12+)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 90,
+      "government_fee_currency": "EUR",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://www.exteriores.gob.es/Embajadas/dublin/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+      ]
+    },
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "Schengen short-stay (type C) - child 6-11 years",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 45,
+      "government_fee_currency": "EUR",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://www.exteriores.gob.es/Embajadas/dublin/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+      ]
+    },
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "Schengen short-stay (type C) - child under 6 years",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 0,
+      "government_fee_currency": "EUR",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://www.exteriores.gob.es/Embajadas/dublin/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+      ]
+    },
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "Schengen short-stay (type C) - adult fee as charged in the USA (local-currency equivalent, revised quarterly; child 6-11: USD 53)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 106,
+      "government_fee_currency": "USD",
+      "refundability": null,
+      "accepted_payment_methods": ["debit card (per BLS Washington: 'All Visas payments by Debit card only')"],
+      "source_urls": [
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+        "https://usa.blsspainvisa.com/washington/"
+      ]
+    },
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "Schengen short-stay (type C) - reduced rate under visa-facilitation arrangements (amount not stated on fetched page)",
+      "applies_to_nationalities": ["AZE", "ARM", "BLR", "CPV", "ALB", "GEO", "MKD", "MDA", "MNE", "SRB", "UKR"],
+      "government_fee_amount": null,
+      "government_fee_currency": null,
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+      ]
+    }
+  ],
+  "portals": [
+    {
+      "portal_kind": "foreign_ministry",
+      "url": "https://www.exteriores.gob.es/",
+      "operator": "Ministry of Foreign Affairs, European Union and Cooperation (Spain)",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["tourist_visa", "visa_free_entry"],
+      "source_urls": [
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+      ]
+    },
+    {
+      "portal_kind": "consulate_site",
+      "url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+      "operator": "Consulate General of Spain in Washington DC",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["tourist_visa"],
+      "source_urls": [
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+      ]
+    },
+    {
+      "portal_kind": "authorized_visa_center",
+      "url": "https://usa.blsspainvisa.com/",
+      "operator": "BLS International",
+      "operator_kind": "contracted_visa_center",
+      "official_linking_source": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+      "supported_categories": ["tourist_visa"],
+      "source_urls": [
+        "https://usa.blsspainvisa.com/washington/",
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+      ]
+    },
+    {
+      "portal_kind": "authorized_visa_center",
+      "url": "https://ireland.blsspainvisa.com/",
+      "operator": "BLS International",
+      "operator_kind": "contracted_visa_center",
+      "official_linking_source": "https://www.exteriores.gob.es/Embajadas/dublin/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+      "supported_categories": ["tourist_visa"],
+      "source_urls": [
+        "https://www.exteriores.gob.es/Embajadas/dublin/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+      ]
+    },
+    {
+      "portal_kind": "eta_portal",
+      "url": "https://travel-europe.europa.eu/etias_en",
+      "operator": "European Union",
+      "operator_kind": "government",
+      "official_linking_source": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Condiciones-de-entrada-en-Espana.aspx",
+      "supported_categories": ["eta"],
+      "source_urls": [
+        "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Condiciones-de-entrada-en-Espana.aspx"
+      ]
+    }
+  ],
+  "passport_validity": {
+    "rule_kind": "months_after_departure",
+    "months": 3,
+    "min_blank_pages": null,
+    "condition_text": "Entry rule (Spanish MFA): 'The document must be valid until at least three months after the planned date of departure from the Schengen territory, and must have been issued during the ten years immediately before the date of entry.' For Schengen-visa applications the Washington consulate additionally requires the passport to be valid a minimum of 90 days after expected departure and to have at least two blank visa pages; a blank-page rule for visa-exempt ENTRY is not stated on the fetched official pages.",
+    "source_urls": [
+      "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Condiciones-de-entrada-en-Espana.aspx",
+      "https://www.spain.info/en/travel-tips/visa-passport/",
+      "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+    ]
+  },
+  "jurisdictions": [],
+  "unresolved": [
+    "EU ETIAS portal pages (https://travel-europe.europa.eu/etias_en and https://travel-europe.europa.eu/etias/what-etias_en) returned no readable static content (JavaScript-rendered); ETIAS status (not yet operational, expected last quarter of 2026) is recorded from the Spanish MFA Washington consulate page and spain.info instead.",
+    "Main MFA citizen-services visa page (https://www.exteriores.gob.es/en/ServiciosAlCiudadano/Paginas/Visados.aspx) returned HTTP 404; consulate/embassy pages on the same official exteriores.gob.es domain were used instead.",
+    "Annex II footnotes condition the exemption for the United Arab Emirates and several small states on entry into force of an EU visa-waiver agreement; the in-force status of those agreements was not separately verified from a fetched official page. ARE is recorded VISA_FREE per the Annex II listing with the footnote preserved in conditions.",
+    "Reduced Schengen-visa fee amounts for visa-facilitation nationalities are referenced on the Washington consulate page without amounts; recorded with null amount.",
+    "The Annex I/II list PDF is an image-based scan; pages were read visually after rendering. Annex I entries were transcribed from an imperfect OCR text layer, but all 16 target nationalities (and Vanuatu's presence in Annex I) were confirmed legibly.",
+    "Fee refundability and consulate-accepted payment methods (beyond BLS Washington's debit-card-only note) are not stated on the fetched official pages."
+  ]
+}

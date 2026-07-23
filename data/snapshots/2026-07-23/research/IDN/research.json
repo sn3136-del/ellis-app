@@ -1,0 +1,383 @@
+{
+  "destination": "IDN",
+  "retrieved_at": "2026-07-23T07:16:44Z",
+  "research_status": "research_incomplete",
+  "sources": [
+    {
+      "search_query": "Indonesia official immigration tourist visa on arrival imigrasi.go.id",
+      "original_url": "https://evisa.imigrasi.go.id/front/info/evoa",
+      "final_url": "https://evisa.imigrasi.go.id/front/info/evoa",
+      "redirect_chain": [],
+      "final_hostname": "evisa.imigrasi.go.id",
+      "source_authority": "official_application_portal",
+      "relevant_excerpt": "Holders of passports of these following countries are eligible to apply for Visitor Visa: Albania, Andorra, Argentina, Australia, Austria, Bahrain, Belarus, Belgium, Bosnia Herzegovina, Brazil, Brunei Darussalam, Bulgaria, Cambodia, Canada, Chile, China, Colombia, Croatia, Cyprus, Czech, Denmark, Ecuador, Egypt, Estonia, Finland, France, Germany, Greece, Hong Kong, Hungary, Iceland, India, Ireland, Italy, Japan, Jordan, Kuwait, Kazakhstan, Laos, Latvia, Liechtenstein, Lithuania, Luxembourg, Malaysia, Maldives, Malta, Mexico, Monaco, Morocco, Myanmar, Netherland, New Zealand, Norway, Oman, Palestine, Peru, Philippines, Poland, Portugal, Republic of Korea, Qatar, Romania, Russia, San Marino, Saudi Arabia, Serbia, Seychelles, Singapore, Slovakia, Slovenia, South Africa, Spain, Suriname, Sweden, Switzerland, Taiwan, Thailand, Timor Leste, Tunisia, Turkiye, Ukraine, United Arab Emirates, United Kingdom, United States of America, Uzbekistan, Vatican, Vietnam. [Visitor Visa e-VOA] '30-day stay in Indonesia' for tourism, government visits, business meetings, goods purchasing, or transit only; visa validity '90 days' from issuance; fee IDR 500.000,00; passport valid at least '6 (six) months from the date of arrival'; 'Issuance of Visitor Visa does not guarantee entry to Indonesia'; single entry; no refunds for denied or unused visas; payment via Mastercard, Visa, or JCB.",
+      "retrieved_at": "2026-07-23T07:16:44Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Indonesia official immigration tourist visa on arrival imigrasi.go.id",
+      "original_url": "https://www.imigrasi.go.id/",
+      "final_url": "https://www.imigrasi.go.id/",
+      "redirect_chain": [],
+      "final_hostname": "www.imigrasi.go.id",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Situs Web Resmi Imigrasi Republik Indonesia. Menu: Daftar Subjek VoA, BVK & Calling Visa; Bebas Visa Kunjungan; Daftar Visa Indonesia; layanan Electronic Visa dan E-Visa on Arrival.",
+      "retrieved_at": "2026-07-23T07:16:44Z",
+      "effective_date_evidence": null,
+      "page_language": "id"
+    },
+    {
+      "search_query": "imigrasi.go.id daftar subjek VoA BVK bebas visa kunjungan calling visa",
+      "original_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+      "final_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+      "redirect_chain": [],
+      "final_hostname": "www.imigrasi.go.id",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Daftar Subjek Visa on Arrival (97 negara): Afrika Selatan, Albania, Amerika Serikat, Andorra, Arab Saudi, Argentina, Armenia, Australia, Austria, Azerbaijan, Bahrain, Belanda, Belarus, Belgia, Brazil, Brunei Darussalam, Bosnia Herzegovina, Bulgaria, Ceko, Chile, Denmark, Ekuador, Estonia, Filipina, Finlandia, Guatemala, Hongkong, Hungaria, India, Inggris, Irlandia, Italia, Islandia, Jepang, Jerman, Kamboja, Kanada, Kazakhstan, Kenya, Kolombia, Korea Selatan, Kroasia, Kuwait, Laos, Latvia, Liechtenstein, Lithuania, Luksemburg, Maladewa, Malaysia, Malta, Maroko, Mauritius, Meksiko, Mesir, Monako, Mongolia, Mozambik, Myanmar, Norwegia, Oman, Palestina, Papua Nugini, Perancis, Peru, Polandia, Portugal, Qatar, Rumania, Rusia, Rwanda, Selandia Baru, Serbia, Seychelles, Singapura, Siprus, Slovakia, Slovenia, Spanyol, Suriname, Swedia, Swiss, Taiwan, Tanzania, Thailand, Timor Leste, Tiongkok, Tunisia, Turki, Uni Emirat Arab, Uzbekistan, Ukraina, Vatikan, Venezuela, Vietnam, Yordania, Yunani.",
+      "retrieved_at": "2026-07-23T07:16:44Z",
+      "effective_date_evidence": null,
+      "page_language": "id"
+    },
+    {
+      "search_query": "imigrasi.go.id daftar subjek VoA BVK bebas visa kunjungan calling visa",
+      "original_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-bebas-visa-kunjungan?golden_visa=0&all=1",
+      "final_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-bebas-visa-kunjungan?golden_visa=0&all=1",
+      "redirect_chain": [],
+      "final_hostname": "www.imigrasi.go.id",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Daftar Subjek Bebas Visa Kunjungan — Daftar Negara, Pemerintah Dari Daerah Administrasi Khusus Suatu Negara, dan Entitas Tertentu: 1. Brunei Darussalam 2. Malaysia 3. Tailan 4. Vietnam 5. Philipina 6. Kamboja 7. Singapura 8. Myanmar 9. Laos 10. Timor Leste 11. Suriname 12. Kolombia 13. Hong Kong 14. Turki 15. Brazil 16. Peru 17. Kazakhstan 18. Makau 19. Belarus 20. Warga Negara Asing pemegang permanent resident Singapura yang melalui Tempat Pemeriksaan Imigrasi tertentu.",
+      "retrieved_at": "2026-07-23T07:16:44Z",
+      "effective_date_evidence": null,
+      "page_language": "id"
+    },
+    {
+      "search_query": "site:imigrasi.go.id Peraturan Presiden bebas visa kunjungan Turki Brazil Peru Kazakhstan Belarus",
+      "original_url": "https://kemenimipas.go.id/berita-utama/kemenimipas-menambah-enam-negara-penerima-bebas-visa-kunjungan-ke-indonesia",
+      "final_url": "https://kemenimipas.go.id/berita-utama/kemenimipas-menambah-enam-negara-penerima-bebas-visa-kunjungan-ke-indonesia",
+      "redirect_chain": [],
+      "final_hostname": "kemenimipas.go.id",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Peraturan Menteri Imigrasi dan Pemasyarakatan (Permenimipas) Republik Indonesia Nomor 10 Tahun 2026 tentang Penambahan Daftar Negara, Pemerintah Wilayah Administratif Khusus Suatu Negara, dan Entitas Tertentu yang Diberikan Bebas Visa Kunjungan — menambahkan Republik Turki, Republik Federatif Brasil, Republik Peru, Republik Kazakhstan, Daerah Administratif Khusus Makau (RRT), dan Republik Belarus. 'Berdasarkan hasil evaluasi dan rapat lintas kementerian koordinator yang membidangi hukum, hak asasi manusia, imigrasi dan pemasyarakatan; Menteri menambahkan daftar negara...' (Menteri Agus Andrianto). Diundangkan dalam Berita Negara Republik Indonesia Tahun 2026 Nomor 463, 9 Juli 2026. Dasar: Peraturan Presiden Nomor 95 Tahun 2024 tentang Bebas Visa Kunjungan.",
+      "retrieved_at": "2026-07-23T07:16:44Z",
+      "effective_date_evidence": "Berita Negara Republik Indonesia Tahun 2026 Nomor 463; promulgated 2026-07-09",
+      "page_language": "id"
+    },
+    {
+      "search_query": "site:imigrasi.go.id Peraturan Presiden bebas visa kunjungan Turki Brazil Peru Kazakhstan Belarus",
+      "original_url": "https://www.imigrasi.go.id/berita/pemerintah-indonesia-terapkan-bebas-visa-kunjungan-bagi-warga-negara-brasil-dan-turki",
+      "final_url": "https://www.imigrasi.go.id/berita/pemerintah-indonesia-terapkan-bebas-visa-kunjungan-bagi-warga-negara-brasil-dan-turki",
+      "redirect_chain": [],
+      "final_hostname": "www.imigrasi.go.id",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Pemerintah Indonesia Terapkan Bebas Visa Kunjungan Bagi Warga Negara Brasil dan Turki. Berlaku efektif 3 Juli 2025 berdasarkan Peraturan Menteri Imigrasi dan Pemasyarakatan Nomor 9 Tahun 2025 (dasar: Peraturan Presiden Nomor 95 Tahun 2024). Masa tinggal maksimal 30 hari, tidak dapat diperpanjang; bebas visa kunjungan 'cannot be extended or converted to other types of residence permits' (tidak dapat diperpanjang atau dialihstatuskan ke jenis izin tinggal lain). Tujuan yang diizinkan: wisata, pertemuan bisnis, dan pengobatan.",
+      "retrieved_at": "2026-07-23T07:16:44Z",
+      "effective_date_evidence": "Effective 2025-07-03 per Permenimipas No. 9/2025 (for Brazil and Turkey additions)",
+      "page_language": "id"
+    },
+    {
+      "search_query": "imigrasi.go.id daftar subjek VoA BVK bebas visa kunjungan calling visa",
+      "original_url": "https://bontang.imigrasi.go.id/layanan-publik/kategori/wna/sub/daftar-subjek-voa-bvk-calling-visa",
+      "final_url": "https://bontang.imigrasi.go.id/layanan-publik/kategori/wna/sub/daftar-subjek-voa-bvk-calling-visa",
+      "redirect_chain": [],
+      "final_hostname": "bontang.imigrasi.go.id",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Daftar Subjek VoA, BVK & Calling Visa (Kantor Imigrasi Kelas III Non TPI Bontang). Visa on Arrival: 'Daftar Negara, Pemerintah Dari Daerah Administrasi Khusus Suatu Negara, dan Entitas Tertentu' — 97 negara. Bebas Visa Kunjungan: 'Brunei Darussalam, Malaysia, Thailand, Vietnam, Philipina, Kamboja, Singapura, Myanmar, Laos, Timor Leste' dan lainnya. Calling Visa: 'Afganistan, Israel, Korea Utara, Liberia, Nigeria, Somalia'. Juga memuat titik masuk (entry points) bagi pemegang E-VoA di bandara, pos lintas batas, dan pelabuhan.",
+      "retrieved_at": "2026-07-23T07:16:44Z",
+      "effective_date_evidence": null,
+      "page_language": "id"
+    },
+    {
+      "search_query": "imigrasi.go.id daftar subjek VoA BVK bebas visa kunjungan calling visa",
+      "original_url": "https://jakartapusat.imigrasi.go.id/layanan/warga-negara-asing-wna/daftar-subjek-voa-bvk-calling-visa/daftar-subjek-calling-visa",
+      "final_url": "https://jakartapusat.imigrasi.go.id/layanan/warga-negara-asing-wna/daftar-subjek-voa-bvk-calling-visa/daftar-subjek-calling-visa",
+      "redirect_chain": [],
+      "final_hostname": "jakartapusat.imigrasi.go.id",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Daftar Subjek Calling Visa: 'Afganistan, Israel, Korea Utara, Liberia, Nigeria, Somalia'. Halaman tidak memuat rincian prosedur permohonan Calling Visa.",
+      "retrieved_at": "2026-07-23T07:16:44Z",
+      "effective_date_evidence": null,
+      "page_language": "id"
+    },
+    {
+      "search_query": "Indonesia tourist visa fee",
+      "original_url": "https://evisa.imigrasi.go.id/front/faq/dd5c2220-28a7-4024-9a10-82f30a09e0d2",
+      "final_url": "https://evisa.imigrasi.go.id/front/faq/dd5c2220-28a7-4024-9a10-82f30a09e0d2",
+      "redirect_chain": [],
+      "final_hostname": "evisa.imigrasi.go.id",
+      "source_authority": "official_application_portal",
+      "relevant_excerpt": "Tourist/visitor eVisa allowing stays up to 60 days (extendable). Fee: IDR 1,500,000. 'Most tourist visas are processed within 5 (five) working days'. Proof of living cost: 'at least US$ 2,000 (two thousand United States Dollars) or equivalent'. Passport valid minimum 6 months. 'This visa must be used within 90 days from the date of issue'. 'You are prohibited from carrying out any profit-making activities in any form'. Extensions permitted; visa may be extended or converted to another permit type.",
+      "retrieved_at": "2026-07-23T07:16:44Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Indonesia evisa electronic travel authorization",
+      "original_url": "https://evisa.imigrasi.go.id/web/services",
+      "final_url": "https://evisa.imigrasi.go.id/web/services",
+      "redirect_chain": [],
+      "final_hostname": "evisa.imigrasi.go.id",
+      "source_authority": "official_application_portal",
+      "relevant_excerpt": "The Official Immigration Services Website for Indonesia. Service categories: 'E-Visa', 'Stay Permit', 'Citizenship' — 'E-Visa Services' with an 'Apply' button.",
+      "retrieved_at": "2026-07-23T07:16:44Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Indonesia visa exemption list tourism kemlu",
+      "original_url": "https://consular.embassyofindonesia.org/visa/genv/VOA/getstarted.html",
+      "final_url": "https://consular.embassyofindonesia.org/visa/genv/VOA/getstarted.html",
+      "redirect_chain": [],
+      "final_hostname": "consular.embassyofindonesia.org",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Visa Exemption: 'maximum 30 days and cannot be extended'. Visa on Arrival: 'maximum of 30 days and can be extended once for another 30 days'. 'Passport that is valid for a minimum of 6 (six) months' with at least one blank page; return ticket required. 'For every other foreign nationals which countries are not listed above must apply for a visa through a sponsor, who is a corporation/travel agent/visa agent/hotel residing in Indonesia.' (Page also retains COVID-era items such as proof of vaccination and PeduliLindungi app, which may be outdated.)",
+      "retrieved_at": "2026-07-23T07:16:44Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Indonesia foreign ministry tourist visa",
+      "original_url": "https://kemlu.go.id/",
+      "final_url": "https://kemlu.go.id/",
+      "redirect_chain": [],
+      "final_hostname": "kemlu.go.id",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "Portal Kemlu (Kementerian Luar Negeri Republik Indonesia). Homepage is JavaScript-rendered; no visa content was extractable from the fetched HTML.",
+      "retrieved_at": "2026-07-23T07:16:44Z",
+      "effective_date_evidence": null,
+      "page_language": "id"
+    }
+  ],
+  "dispositions": [
+    {
+      "nationalities": ["BRN", "MYS", "THA", "VNM", "PHL", "KHM", "SGP", "MMR", "LAO", "TLS", "SUR", "COL", "HKG", "TUR", "BRA", "PER", "KAZ", "MAC", "BLR"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "30 days",
+      "conditions": [
+        "Bebas Visa Kunjungan (BVK): stay cannot be extended or converted to another type of stay permit (imigrasi.go.id)",
+        "Permitted purposes include tourism, business meetings, and medical treatment (imigrasi.go.id news, Brazil/Turkey announcement)",
+        "Legal basis: Presidential Regulation No. 95/2024; additions via Permenimipas No. 9/2025 (Brazil, Turkey; effective 2025-07-03) and Permenimipas No. 10/2026 (Peru, Kazakhstan, Macau SAR, Belarus; Berita Negara 2026 No. 463, 2026-07-09)",
+        "Foreign nationals holding Singapore permanent residence also qualify when entering through designated immigration checkpoints ('Tempat Pemeriksaan Imigrasi tertentu')",
+        "Passport must be valid at least 6 months"
+      ],
+      "source_urls": [
+        "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-bebas-visa-kunjungan?golden_visa=0&all=1",
+        "https://www.imigrasi.go.id/berita/pemerintah-indonesia-terapkan-bebas-visa-kunjungan-bagi-warga-negara-brasil-dan-turki",
+        "https://kemenimipas.go.id/berita-utama/kemenimipas-menambah-enam-negara-penerima-bebas-visa-kunjungan-ke-indonesia",
+        "https://consular.embassyofindonesia.org/visa/genv/VOA/getstarted.html"
+      ]
+    },
+    {
+      "nationalities": ["BRN", "MYS", "THA", "VNM", "PHL", "KHM", "SGP", "MMR", "LAO", "TLS", "SUR", "COL", "HKG", "TUR", "BRA", "PER", "KAZ", "MAC", "BLR"],
+      "category": "tourist_visa",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "No tourist visa needed for stays up to 30 days (visa-free entry).",
+        "For a longer or extendable stay these nationals may instead use Visa on Arrival / e-VOA (all except Macau appear on the VOA subject list) or apply for a tourist eVisa."
+      ],
+      "source_urls": [
+        "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-bebas-visa-kunjungan?golden_visa=0&all=1",
+        "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival"
+      ]
+    },
+    {
+      "nationalities": ["ZAF", "ALB", "USA", "AND", "SAU", "ARG", "ARM", "AUS", "AUT", "AZE", "BHR", "NLD", "BLR", "BEL", "BRA", "BRN", "BIH", "BGR", "CZE", "CHL", "DNK", "ECU", "EST", "PHL", "FIN", "GTM", "HKG", "HUN", "IND", "GBR", "IRL", "ITA", "ISL", "JPN", "DEU", "KHM", "CAN", "KAZ", "KEN", "COL", "KOR", "HRV", "KWT", "LAO", "LVA", "LIE", "LTU", "LUX", "MDV", "MYS", "MLT", "MAR", "MUS", "MEX", "EGY", "MCO", "MNG", "MOZ", "MMR", "NOR", "OMN", "PSE", "PNG", "FRA", "PER", "POL", "PRT", "QAT", "ROU", "RUS", "RWA", "NZL", "SRB", "SYC", "SGP", "CYP", "SVK", "SVN", "ESP", "SUR", "SWE", "CHE", "TWN", "TZA", "THA", "TLS", "CHN", "TUN", "TUR", "ARE", "UZB", "UKR", "VAT", "VEN", "VNM", "JOR", "GRC"],
+      "category": "visa_on_arrival_tourist",
+      "disposition": "VISA_ON_ARRIVAL",
+      "maximum_stay": "30 days, extendable once for a further 30 days (maximum 60 days)",
+      "conditions": [
+        "Fee IDR 500,000 (Visitor Visa tariff on evisa.imigrasi.go.id; card processing fees may apply)",
+        "Can be obtained on arrival at designated entry points or in advance online as e-VOA via evisa.imigrasi.go.id (the e-VOA page lists 87 eligible passports, including all 16 focus nationalities)",
+        "Purposes: tourism, government visits, business meetings, goods purchasing, or transit only",
+        "Single entry; visa must be used within 90 days of issuance; issuance does not guarantee entry",
+        "Passport valid at least 6 months from the date of arrival",
+        "Extension rule (30+30 days) per Embassy of Indonesia, Washington DC: 'maximum of 30 days and can be extended once for another 30 days'"
+      ],
+      "source_urls": [
+        "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+        "https://evisa.imigrasi.go.id/front/info/evoa",
+        "https://consular.embassyofindonesia.org/visa/genv/VOA/getstarted.html"
+      ]
+    },
+    {
+      "nationalities": ["ALL_OTHERS"],
+      "category": "evisa_tourist",
+      "disposition": "EVISA_REQUIRED",
+      "maximum_stay": "60 days (extendable)",
+      "conditions": [
+        "Nationalities not on the visa-exemption (BVK) or Visa on Arrival lists must obtain a visit visa before travel; applications are made online through the official eVisa portal evisa.imigrasi.go.id",
+        "Per the Embassy of Indonesia in Washington DC, such applicants 'must apply for a visa through a sponsor, who is a corporation/travel agent/visa agent/hotel residing in Indonesia'",
+        "Tourist eVisa fee IDR 1,500,000; proof of living cost of at least USD 2,000; processed within about 5 working days; must be used within 90 days of issue",
+        "EXCEPTION not covered by this row: nationals of Calling Visa countries (Afghanistan, Israel, North Korea, Liberia, Nigeria, Somalia) are subject to a special Calling Visa procedure whose application channel is not detailed on the official pages fetched — see policies and unresolved"
+      ],
+      "source_urls": [
+        "https://evisa.imigrasi.go.id/front/faq/dd5c2220-28a7-4024-9a10-82f30a09e0d2",
+        "https://evisa.imigrasi.go.id/web/services",
+        "https://consular.embassyofindonesia.org/visa/genv/VOA/getstarted.html"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "eta",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Indonesia does not operate a separate electronic travel authorization (eTA) for tourism; the channels published by the Directorate General of Immigration are visa exemption (Bebas Visa Kunjungan), Visa on Arrival / e-VOA, eVisa, and Calling Visa"
+      ],
+      "source_urls": [
+        "https://www.imigrasi.go.id/",
+        "https://bontang.imigrasi.go.id/layanan-publik/kategori/wna/sub/daftar-subjek-voa-bvk-calling-visa",
+        "https://evisa.imigrasi.go.id/web/services"
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "policy_kind": "visa_exemption_list",
+      "policy_name": "Bebas Visa Kunjungan (BVK) — Visit Visa Exemption",
+      "description": "Visa-free short visit for citizens of 19 countries/special-administrative-region governments plus foreign holders of Singapore permanent residence entering via designated checkpoints. Stay is a maximum of 30 days and cannot be extended or converted to another stay permit. Base regulation Perpres 95/2024; Brazil and Turkey added by Permenimipas 9/2025 effective 2025-07-03; Peru, Kazakhstan, Macau SAR and Belarus added by Permenimipas 10/2026 (Berita Negara 2026 No. 463, promulgated 2026-07-09). Permitted purposes include tourism, business meetings, and medical treatment.",
+      "applies_to_nationalities": ["BRN", "MYS", "THA", "VNM", "PHL", "KHM", "SGP", "MMR", "LAO", "TLS", "SUR", "COL", "HKG", "TUR", "BRA", "PER", "KAZ", "MAC", "BLR"],
+      "conditions": [
+        "Maximum 30 days, non-extendable, non-convertible",
+        "Singapore permanent residents (any nationality) qualify only through designated immigration checkpoints"
+      ],
+      "maximum_stay": "30 days",
+      "official_source_urls": [
+        "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-bebas-visa-kunjungan?golden_visa=0&all=1",
+        "https://www.imigrasi.go.id/berita/pemerintah-indonesia-terapkan-bebas-visa-kunjungan-bagi-warga-negara-brasil-dan-turki",
+        "https://kemenimipas.go.id/berita-utama/kemenimipas-menambah-enam-negara-penerima-bebas-visa-kunjungan-ke-indonesia"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "visa_on_arrival_program",
+      "policy_name": "Visa on Arrival (VoA) / electronic Visa on Arrival (e-VOA)",
+      "description": "Citizens of 97 listed countries/entities may obtain a Visitor Visa on arrival (or online in advance as e-VOA via evisa.imigrasi.go.id, which lists 87 eligible passports) for tourism, government visits, business meetings, goods purchasing, or transit. 30-day stay, extendable once for another 30 days. Fee IDR 500,000. Single entry; visa validity 90 days from issuance; designated entry points published by the Directorate General of Immigration.",
+      "applies_to_nationalities": ["ZAF", "ALB", "USA", "AND", "SAU", "ARG", "ARM", "AUS", "AUT", "AZE", "BHR", "NLD", "BLR", "BEL", "BRA", "BRN", "BIH", "BGR", "CZE", "CHL", "DNK", "ECU", "EST", "PHL", "FIN", "GTM", "HKG", "HUN", "IND", "GBR", "IRL", "ITA", "ISL", "JPN", "DEU", "KHM", "CAN", "KAZ", "KEN", "COL", "KOR", "HRV", "KWT", "LAO", "LVA", "LIE", "LTU", "LUX", "MDV", "MYS", "MLT", "MAR", "MUS", "MEX", "EGY", "MCO", "MNG", "MOZ", "MMR", "NOR", "OMN", "PSE", "PNG", "FRA", "PER", "POL", "PRT", "QAT", "ROU", "RUS", "RWA", "NZL", "SRB", "SYC", "SGP", "CYP", "SVK", "SVN", "ESP", "SUR", "SWE", "CHE", "TWN", "TZA", "THA", "TLS", "CHN", "TUN", "TUR", "ARE", "UZB", "UKR", "VAT", "VEN", "VNM", "JOR", "GRC"],
+      "conditions": [
+        "Fee IDR 500,000; extendable once (30+30 days)",
+        "e-VOA applications online at evisa.imigrasi.go.id (87 passports listed there, additionally including San Marino; a few countries on the 97-country border-VOA list are absent from the e-VOA list)",
+        "Passport valid at least 6 months from arrival"
+      ],
+      "maximum_stay": "30 days, extendable once for a further 30 days",
+      "official_source_urls": [
+        "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+        "https://evisa.imigrasi.go.id/front/info/evoa"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "evisa_program",
+      "policy_name": "Indonesia eVisa (tourist visit visa) via evisa.imigrasi.go.id",
+      "description": "Official online visa system of the Directorate General of Immigration. Tourist visit eVisa allows a stay of up to 60 days, extendable, fee IDR 1,500,000, processed in about 5 working days, must be used within 90 days of issuance; proof of living cost of at least USD 2,000 required. This is the default pre-travel channel for nationalities not eligible for visa exemption or Visa on Arrival (embassy guidance indicates a sponsor in Indonesia is required for such applicants).",
+      "applies_to_nationalities": ["ALL"],
+      "conditions": [
+        "Apply online at evisa.imigrasi.go.id",
+        "Profit-making activities prohibited; visit purposes only",
+        "Nationals of Calling Visa countries are subject to a special approval procedure (see special_regime policy)"
+      ],
+      "maximum_stay": "60 days (extendable)",
+      "official_source_urls": [
+        "https://evisa.imigrasi.go.id/front/faq/dd5c2220-28a7-4024-9a10-82f30a09e0d2",
+        "https://evisa.imigrasi.go.id/web/services"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "Calling Visa",
+      "description": "Citizens of certain countries deemed to require special scrutiny ('Calling Visa' subjects) cannot use standard visa channels; per the Directorate General of Immigration office pages the current list is Afghanistan, Israel, North Korea, Liberia, Nigeria, Somalia. The specific application procedure is not described on the official pages fetched.",
+      "applies_to_nationalities": ["AFG", "ISR", "PRK", "LBR", "NGA", "SOM"],
+      "conditions": [
+        "Special approval procedure; details not published on the fetched official pages"
+      ],
+      "maximum_stay": null,
+      "official_source_urls": [
+        "https://bontang.imigrasi.go.id/layanan-publik/kategori/wna/sub/daftar-subjek-voa-bvk-calling-visa",
+        "https://jakartapusat.imigrasi.go.id/layanan/warga-negara-asing-wna/daftar-subjek-voa-bvk-calling-visa/daftar-subjek-calling-visa"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    }
+  ],
+  "fees": [
+    {
+      "visa_category": "visa_on_arrival_tourist",
+      "visa_subtype": "Visitor Visa — Visa on Arrival / e-VOA (30-day stay, extendable once)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 500000,
+      "government_fee_currency": "IDR",
+      "refundability": "Non-refundable; no refunds for denied or unused visas",
+      "accepted_payment_methods": ["Mastercard (online e-VOA)", "Visa card (online e-VOA)", "JCB (online e-VOA)"],
+      "source_urls": ["https://evisa.imigrasi.go.id/front/info/evoa"]
+    },
+    {
+      "visa_category": "evisa_tourist",
+      "visa_subtype": "Tourist visit eVisa (up to 60-day stay, extendable)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 1500000,
+      "government_fee_currency": "IDR",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": ["https://evisa.imigrasi.go.id/front/faq/dd5c2220-28a7-4024-9a10-82f30a09e0d2"]
+    }
+  ],
+  "portals": [
+    {
+      "portal_kind": "immigration_authority",
+      "url": "https://www.imigrasi.go.id/",
+      "operator": "Direktorat Jenderal Imigrasi (Directorate General of Immigration), Republic of Indonesia",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["visa_free_entry", "visa_on_arrival_tourist", "evisa_tourist", "tourist_visa"],
+      "source_urls": ["https://www.imigrasi.go.id/"]
+    },
+    {
+      "portal_kind": "evisa_portal",
+      "url": "https://evisa.imigrasi.go.id/",
+      "operator": "Direktorat Jenderal Imigrasi (Directorate General of Immigration), Republic of Indonesia",
+      "operator_kind": "government",
+      "official_linking_source": "https://www.imigrasi.go.id/",
+      "supported_categories": ["evisa_tourist", "visa_on_arrival_tourist"],
+      "source_urls": [
+        "https://evisa.imigrasi.go.id/front/info/evoa",
+        "https://evisa.imigrasi.go.id/web/services"
+      ]
+    },
+    {
+      "portal_kind": "foreign_ministry",
+      "url": "https://kemlu.go.id/",
+      "operator": "Kementerian Luar Negeri Republik Indonesia (Ministry of Foreign Affairs)",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": [],
+      "source_urls": ["https://kemlu.go.id/"]
+    }
+  ],
+  "passport_validity": {
+    "rule_kind": "months_after_arrival",
+    "months": 6,
+    "min_blank_pages": 1,
+    "condition_text": "Passport must be valid for at least 6 (six) months from the date of arrival (evisa.imigrasi.go.id Visitor Visa requirements). The Embassy of Indonesia in Washington DC additionally states the passport must have at least one blank page; the blank-page rule was not found on a .go.id page.",
+    "source_urls": [
+      "https://evisa.imigrasi.go.id/front/info/evoa",
+      "https://consular.embassyofindonesia.org/visa/genv/VOA/getstarted.html"
+    ]
+  },
+  "jurisdictions": [],
+  "unresolved": [
+    "Calling Visa (AFG, ISR, PRK, LBR, NGA, SOM): official pages list the subject countries but not the application procedure or channel; no disposition row was recorded for these six nationalities, and the ALL_OTHERS eVisa row explicitly excludes them. This is the main reason for research_status=research_incomplete.",
+    "Blank-page rule (min 1 blank page) and the sponsor requirement for non-VOA/non-exempt nationalities are sourced only from the official Embassy of Indonesia (Washington DC) site consular.embassyofindonesia.org, which is official but not a .go.id domain and still displays COVID-era requirements (vaccination proof, PeduliLindungi) that appear outdated.",
+    "List-size discrepancy between channels: imigrasi.go.id 'Daftar Subjek Visa on Arrival' lists 97 countries, while the e-VOA eligibility list on evisa.imigrasi.go.id lists 87 (e.g., San Marino appears only on the e-VOA list; Guatemala, Kenya, Mauritius, Mongolia, Mozambique, Papua New Guinea, Rwanda, Tanzania, Venezuela appear only on the 97-country list). All 16 focus nationalities (CHN, USA, GBR, IND, SGP, HKG, TWN, JPN, KOR, DEU, FRA, AUS, CAN, RUS, ARE, BRA) appear on both lists. Treated as an online-vs-border channel difference, not a conflict.",
+    "Macau (MAC) is on the visa-free (BVK) list but does not appear on the fetched 97-country VOA subject list.",
+    "kemlu.go.id (foreign ministry) homepage is JavaScript-rendered; no visa content could be extracted, so no MOFA-specific visa page is cited.",
+    "Indonesian Embassy in Berlin (indonesianembassy.de) was unreachable (connection refused), so it could not be used as a corroborating consular source.",
+    "The VFS Global e-VOA site (indonesiavoa.vfsevisa.id) surfaced in search results but no official .go.id page linking to it was fetched, so it was excluded from portals.",
+    "Regulation number behind the current 97-country VOA list was not stated on the fetched list page; effective-date evidence exists only for the BVK additions (Permenimipas 9/2025 effective 2025-07-03; Permenimipas 10/2026 promulgated 2026-07-09, Berita Negara 2026 No. 463)."
+  ]
+}

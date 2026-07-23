@@ -27,8 +27,11 @@ async function call(method, path, session, body) {
   const text = await res.text()
   const data = text ? JSON.parse(text) : {}
   if (!res.ok) {
-    const err = new Error(data.detail || `HTTP ${res.status}`)
+    const detail = data.detail
+    const message = typeof detail === 'string' && detail ? detail : `HTTP ${res.status}`
+    const err = new Error(message)
     err.status = res.status
+    err.detail = detail // structured payloads (e.g. resolve 422 {missing_fields})
     throw err
   }
   return data
@@ -145,7 +148,26 @@ export function createVisaClient(session) {
     cancel: (id) => call('POST', `/cases/${id}/signals/cancel`, session, {}),
 
     // MOCK-ONLY: the verification token the mock portal "emailed" (dev demos).
-    mockVerification: (id) => call('GET', `/cases/${id}/mock/verification`, session)
+    mockVerification: (id) => call('GET', `/cases/${id}/mock/verification`, session),
+
+    // Snapshot route-intake (applicant "Start your visa" wizard).
+    snapshotInfo: () => call('GET', '/snapshot/info', session),
+    snapshotRegistries: () => call('GET', '/snapshot/registries', session),
+    createIntake: (body) => call('POST', '/intake', session, body),
+    listIntakes: () => call('GET', '/intake', session),
+    getIntake: (id) => call('GET', `/intake/${id}`, session),
+    updateIntake: (id, body) => call('PUT', `/intake/${id}`, session, body),
+    resolveIntake: (id) => call('POST', `/intake/${id}/resolve`, session, {}),
+    routeEvidence: (resolutionId) => call('GET', `/snapshot/route-evidence/${resolutionId}`, session),
+
+    // Snapshot administration (admin session required).
+    adminSnapshotCoverage: () => call('GET', '/admin/snapshot/coverage', session),
+    adminSnapshotBatches: () => call('GET', '/admin/snapshot/batches', session),
+    adminReviewQueue: () => call('GET', '/admin/snapshot/review-queue', session),
+    adminResolveReview: (id, body) => call('POST', `/admin/snapshot/review-queue/${id}/resolve`, session, body),
+    adminConflicts: () => call('GET', '/admin/snapshot/conflicts', session),
+    adminRouteQueue: () => call('GET', '/admin/snapshot/route-queue', session),
+    adminAdapterTasks: () => call('GET', '/admin/snapshot/adapter-tasks', session)
   }
 }
 

@@ -1,0 +1,527 @@
+{
+  "destination": "PHL",
+  "retrieved_at": "2026-07-23T07:06:36Z",
+  "research_status": "research_incomplete",
+  "sources": [
+    {
+      "search_query": "official Philippines evisa portal Department of Foreign Affairs",
+      "original_url": "https://evisa.gov.ph/",
+      "final_url": "https://evisa.gov.ph/",
+      "redirect_chain": [],
+      "final_hostname": "evisa.gov.ph",
+      "source_authority": "official_application_portal",
+      "relevant_excerpt": "The eVisaPH system is an \"Electronic Visa Online\" application platform. The system was \"developed by\" the Department of Foreign Affairs (DFA), Department of Information and Communications Technology (DICT), Department of Tourism (DOT), National Intelligence Coordination Agency (NICA), Bureau of Immigration (BI), and Department of Justice (DOJ). The process involves registering, filling forms, uploading documents, making payment, potentially submitting original documents, and receiving the eVisa \"via email and registered e-Visa account.\"",
+      "retrieved_at": "2026-07-23T07:06:36Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Bureau of Immigration Philippines Indian nationals visa-free entry 14 days announcement 2025",
+      "original_url": "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa",
+      "final_url": "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa",
+      "redirect_chain": [],
+      "final_hostname": "evisa.gov.ph",
+      "source_authority": "official_application_portal",
+      "relevant_excerpt": "\"passport valid for at least six (6) months beyond the contemplated period of stay\" and return/outward tickets. Brazil and Israel receive 59-day entry under existing agreements. \"Chinese nationals may enter the Philippines without a visa for a non-extendible and non-convertible period of 14 days for tourism and business purposes\" \"Effective 16 January 2026\" \"Entry under this visa-free privilege shall be allowed only through the following designated ports of entry: Ninoy Aquino International Airport, Metro Manila [and] Mactan-Cebu International Airport, Cebu\". Mainland Chinese for tourism with a valid or unexpired Australian, Japanese, Canadian, Schengen or US visa may enter for 7 days (extendable to 21 days total). \"Indian nationals may enter the Philippines without a visa for a non-extendible and non-convertible period of 14 days for tourism and business purposes\" starting \"08 June 2025\". \"Hong Kong SAR passport holders may enter the Philippines visa-free for an initial stay of fourteen (14) days\". \"Macau SAR passport holders may enter the Philippines without a visa for an initial stay of fourteen (14) days\". \"Holders of Hong Kong British passports\" may enter for 7 days (extendable to 21 days). Visa-free country list (verbatim capture, 155 countries at 30 days incl.): Andorra, Angola, Antigua and Barbuda, Argentina, Australia, Austria ... Canada ... France, Germany ... Japan, Kazakhstan ... Republic of Korea, Romania, Russia ... Saudi Arabia ... Singapore ... United Arab Emirates, United Kingdom of Great Britain and Northern Ireland, United Republic of Tanzania, United States of America ... Zambia, Zimbabwe.",
+      "retrieved_at": "2026-07-23T07:06:36Z",
+      "effective_date_evidence": "China visa-free: \"Effective 16 January 2026\"; India visa-free: starting \"08 June 2025\"",
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Philippines evisa portal Department of Foreign Affairs",
+      "original_url": "https://evisa.gov.ph/page/policy",
+      "final_url": "https://evisa.gov.ph/page/policy",
+      "redirect_chain": [],
+      "final_hostname": "evisa.gov.ph",
+      "source_authority": "official_application_portal",
+      "relevant_excerpt": "\"Nationals of other countries not indicated/included in the above-mentioned Executive order No. 408 are considered VISA-REQUIRED NATIONALS.\" These individuals must meet a \"more stringent set of documentary and other requirements per Philippine Codified Visa Rules and Regulations.\" Applicants can pursue Philippine visa applications at embassies and consulates abroad. The portal describes visa categories 9(a-1) through 9(a-8).",
+      "retrieved_at": "2026-07-23T07:06:36Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Philippines evisa portal Department of Foreign Affairs",
+      "original_url": "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=9%28a%29+Temporary+Visitors+Visa&l3=9%28a-2%29+-+Tourism%2FLeisure+Visitors",
+      "final_url": "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=9%28a%29+Temporary+Visitors+Visa&l3=9%28a-2%29+-+Tourism%2FLeisure+Visitors",
+      "redirect_chain": [],
+      "final_hostname": "evisa.gov.ph",
+      "source_authority": "official_application_portal",
+      "relevant_excerpt": "9(a-2) Tourism/Leisure Visitors: \"Foreign nationals visiting the Philippines temporarily for pleasure or touristic, leisure, religious, recreation, or amusement purposes\". Minimum requirements: flight reservations for entry and exit; financial capacity documentation (bank statements, employment certificates, or sponsor guarantees); proof of ties to home country; hotel accommodation or lodging proof; parental permission for minors traveling alone. \"issued Philippine e-Visas are not valid for conversion to other types of Philippine visas, and are not valid for extension of the authorized period of stay.\"",
+      "retrieved_at": "2026-07-23T07:06:36Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Philippines evisa portal Department of Foreign Affairs",
+      "original_url": "https://evisa.gov.ph/frequently-ask-questions",
+      "final_url": "https://evisa.gov.ph/frequently-ask-questions",
+      "redirect_chain": [],
+      "final_hostname": "evisa.gov.ph",
+      "source_authority": "official_application_portal",
+      "relevant_excerpt": "\"Foreign nationals can apply for a Philippine e-Visa if they are travelling to the country for business, pleasure, medical treatment, training, attendance in conferences, meetings and workshops/seminars, and other purposes.\" \"The processing time of e-Visas will be 7-12 working days for single entry and 15-21 working days for multiple entries.\" The eligible Country of Citizenship list and the fee amount load dynamically and were not retrievable from the static page.",
+      "retrieved_at": "2026-07-23T07:06:36Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "site:immigration.gov.ph temporary visitor visa 9a visa waiver tourist",
+      "original_url": "https://immigration.gov.ph/",
+      "final_url": "https://immigration.gov.ph/",
+      "redirect_chain": [],
+      "final_hostname": "immigration.gov.ph",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Bureau of Immigration Philippines. The site lists a \"Temporary Visitor Visa (9A)\" under Non-Immigrant Visa options. There is a \"Visa Waiver\" program with a dedicated e-Service available at their online portal, and a \"Tourist Visa Extension\" service accessible through their e-Services platform. The website directs travelers to the eTravel System, described as the \"Philippine One-Stop Electronic Travel Declaration System\". The BI acts as \"the primary enforcement arm of the Department of Justice\".",
+      "retrieved_at": "2026-07-23T07:06:36Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "site:immigration.gov.ph temporary visitor visa 9a visa waiver tourist",
+      "original_url": "https://immigration.gov.ph/visas/visa-waiver/",
+      "final_url": "https://immigration.gov.ph/visas/visa-waiver/",
+      "redirect_chain": [],
+      "final_hostname": "immigration.gov.ph",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Temporary Visitor (9A) Visa Waiver. Eligibility: \"Non-visa required tourists admitted initially for thirty (30) days and is requesting for an initial extension of twenty-nine (29) days\". Fees (Philippine Peso) for the initial 30+29 day authorization: Visa Waiver P500, Application Fee P1,000, Certification Fee P500, Legal Research Fee P30, Express Fee P1,000, Total P3,030. Overstay penalty P500 per month. Requirements include the CGAF \"from either at the Public Information and Assistance Unit (PIAU) at BI G/F Main Office or from the official BI Website\", passport, and documentary checklist items. Special passport holders (Macau-Portuguese, Hong Kong-British, and Hong Kong SAR passports) have varying initial admissions of 7 or 14 days.",
+      "retrieved_at": "2026-07-23T07:06:36Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "site:immigration.gov.ph temporary visitor visa 9a visa waiver tourist",
+      "original_url": "https://immigration.gov.ph/faqs/",
+      "final_url": "https://immigration.gov.ph/faqs/",
+      "redirect_chain": [],
+      "final_hostname": "immigration.gov.ph",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "\"Foreign nationals under E.O. 408, as amended, admissible for thirty (30) days initial stay.\" Extensions: \"non-visa required national may extend their stay up to thirty six (36) months while visa required national may extend their stay up to twenty four (24) months.\" Extensions available for \"one (1) month, two (2) months or six (6) months\" with application \"at least one week prior to the expiration of your valid stay.\" Visa Upon Arrival options mentioned: \"Visa Upon Arrival VA thirty (30) days\", group tours under Memorandum Order, Pro-Investment Visa under Memorandum Circular.",
+      "retrieved_at": "2026-07-23T07:06:36Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Philippine Embassy Washington DC tourist visa 9a fees visa-free entry official site",
+      "original_url": "https://philippineembassy-dc.org/visa/",
+      "final_url": "https://philippineembassy-dc.org/visa/",
+      "redirect_chain": [],
+      "final_hostname": "philippineembassy-dc.org",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "9(A) Temporary Visitor's Visa fees: visa-free nationals \"USD 30\", Chinese nationals \"USD 25\", non-visa-free nationals \"USD 40\"; all fees \"non-refundable\", paid by money order to \"Embassy of the Philippines\". Passport must be \"valid for at least six months upon entry\". \"Roundtrip or onward ticket out of the Philippines with a departure date within 59 days (for visa-free nationals) or 30 days (for non-visa-free nationals) of arrival.\" \"Certain international travelers may be eligible to travel to the Philippines without a visa if they meet the requirements for visa-free travel.\"",
+      "retrieved_at": "2026-07-23T07:06:36Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Philippine Embassy Washington DC tourist visa 9a fees visa-free entry official site",
+      "original_url": "https://philippineembassy-dc.org/schedule-and-fees/",
+      "final_url": "https://philippineembassy-dc.org/schedule-and-fees/",
+      "redirect_chain": [],
+      "final_hostname": "philippineembassy-dc.org",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Temporary Visitor Visa (9A). Visa-free country nationals: \"Single Entry $30\" valid three months, \"Multiple Entry $60\" valid six months, \"Multiple Entry $90\" valid one year. Non visa-free country nationals: \"Single Entry $40\", \"Multiple Entry $80\" (six months), \"Multiple Entry $120\" (one year). Chinese nationals: \"Single Entry $25\", \"Multiple Entry $50\" (six months), \"Multiple Entry $100\" (one year). Transit Visa 9(B): \"$20\".",
+      "retrieved_at": "2026-07-23T07:06:36Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Bureau of Immigration Philippines Indian nationals visa-free entry 14 days announcement 2025",
+      "original_url": "https://philippineembassy-dc.org/announcement-on-the-new-philippine-visa-policy-for-indian-nationals/",
+      "final_url": "https://philippineembassy-dc.org/announcement-on-the-new-philippine-visa-policy-for-indian-nationals/",
+      "redirect_chain": [],
+      "final_hostname": "philippineembassy-dc.org",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Effective 8 June 2025, Indian nationals may enter for a \"non-extendible and non-convertible period of 14 days for tourism purposes\" upon presenting a passport valid for at least six months beyond the contemplated stay, confirmed hotel booking, proof of financial capacity, and return or onward ticket. Indian nationals holding valid American, Japanese, Australian, Canadian, Schengen, Singapore, or UK (AJACSSUK) visas or residence permits may enter without a visa for a \"non-extendible period of 30 days for tourism\". Both options are \"not convertible to a visa-based stay or other admission status categories\"; applicants must have no derogatory immigration records.",
+      "retrieved_at": "2026-07-23T07:06:36Z",
+      "effective_date_evidence": "Effective June 8, 2025",
+      "page_language": "en"
+    }
+  ],
+  "dispositions": [
+    {
+      "nationalities": ["AND","AGO","ATG","ARG","AUS","AUT","BHS","BHR","BRB","BEL","BLZ","BEN","BTN","BOL","BWA","BRN","BGR","BFA","BDI","KHM","CMR","CAN","CPV","CAF","TCD","CHL","COL","COM","COG","CRI","CIV","HRV","CYP","CZE","COD","DNK","DJI","DMA","DOM","ECU","SLV","GNQ","ERI","EST","ETH","FJI","FIN","FRA","GAB","GMB","DEU","GHA","GRC","GRD","GTM","GIN","GNB","GUY","HTI","HND","HUN","ISL","IDN","IRL","ITA","JAM","JPN","KAZ","KEN","KIR","KWT","KGZ","LAO","LVA","LSO","LBR","LIE","LTU","LUX","MDG","MWI","MYS","MDV","MLI","MLT","MHL","MRT","MUS","MEX","FSM","MCO","MNG","MAR","MOZ","MMR","NAM","NPL","NLD","NZL","NIC","NER","NOR","OMN","PLW","PAN","PNG","PRY","PER","POL","PRT","QAT","KOR","ROU","RUS","RWA","KNA","LCA","VCT","WSM","SMR","STP","SAU","SEN","SYC","SGP","SVK","SVN","SLB","ZAF","ESP","SUR","SWZ","SWE","CHE","TJK","THA","TGO","TTO","TUN","TUR","TKM","TUV","UGA","ARE","GBR","TZA","USA","URY","UZB","VUT","VAT","VEN","VNM","ZMB","ZWE"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "30 days initial stay, extendable in-country via BI visa waiver/extensions up to 36 months total",
+      "conditions": [
+        "Passport valid for at least six (6) months beyond the contemplated period of stay",
+        "Valid ticket for return journey to port of origin or next port of destination",
+        "Entry for business or tourism purposes under Executive Order No. 408, as amended",
+        "First extension: 29-day visa waiver from the Bureau of Immigration (total 59 days); non-visa-required nationals may extend up to 36 months total"
+      ],
+      "source_urls": [
+        "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa",
+        "https://immigration.gov.ph/faqs/",
+        "https://immigration.gov.ph/visas/visa-waiver/"
+      ]
+    },
+    {
+      "nationalities": ["BRA","ISR"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "59 days",
+      "conditions": [
+        "Visa-free for 59 days from entry pursuant to existing bilateral agreements with the Philippines",
+        "Passport valid for at least six (6) months beyond the contemplated period of stay; return or onward ticket"
+      ],
+      "source_urls": [
+        "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa"
+      ]
+    },
+    {
+      "nationalities": ["CHN"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "14 days, non-extendible and non-convertible",
+      "conditions": [
+        "Effective 16 January 2026",
+        "Tourism and business purposes only",
+        "Entry allowed only through designated ports: Ninoy Aquino International Airport (Metro Manila) and Mactan-Cebu International Airport (Cebu)",
+        "Separately, mainland Chinese tourists holding a valid/unexpired Australian, Japanese, Canadian, Schengen or US visa may enter for 7 days, extendable to 21 days total"
+      ],
+      "source_urls": [
+        "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa"
+      ]
+    },
+    {
+      "nationalities": ["IND"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "14 days, non-extendible and non-convertible (30 days if holding valid AJACSSUK visa or residence permit)",
+      "conditions": [
+        "Effective 8 June 2025",
+        "Tourism (and business per eVisa portal) purposes",
+        "Passport valid for at least six months beyond the contemplated stay",
+        "Confirmed hotel accommodation/booking and proof of financial capacity (14-day option)",
+        "Return or onward ticket to next country of destination",
+        "Holders of valid American, Japanese, Australian, Canadian, Schengen, Singapore or UK (AJACSSUK) visas or residence permits: 30 days, non-extendible",
+        "No derogatory record with the Bureau of Immigration",
+        "Not convertible to a visa-based stay or other admission status categories"
+      ],
+      "source_urls": [
+        "https://philippineembassy-dc.org/announcement-on-the-new-philippine-visa-policy-for-indian-nationals/",
+        "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa"
+      ]
+    },
+    {
+      "nationalities": ["HKG"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "14 days initial stay",
+      "conditions": [
+        "Hong Kong SAR passport holders; extension via Bureau of Immigration visa waiver",
+        "Holders of Hong Kong British (BNO) passports: 7 days initial, extendable to 21 days"
+      ],
+      "source_urls": [
+        "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa",
+        "https://immigration.gov.ph/visas/visa-waiver/"
+      ]
+    },
+    {
+      "nationalities": ["MAC"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "14 days initial stay",
+      "conditions": [
+        "Macau SAR passport holders; Macau-Portuguese passport holders have different (7-day) initial admission per BI visa waiver page"
+      ],
+      "source_urls": [
+        "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa",
+        "https://immigration.gov.ph/visas/visa-waiver/"
+      ]
+    },
+    {
+      "nationalities": ["CHN"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "59 days per 9(a) visa admission, extendable in-country (visa-required nationals up to 24 months)",
+      "conditions": [
+        "For stays beyond the 14-day visa-free privilege, Chinese nationals apply for a 9(a) Temporary Visitor Visa at a Philippine embassy or consulate (dedicated fee tier exists, e.g. USD 25 single entry at Embassy in Washington DC)"
+      ],
+      "source_urls": [
+        "https://philippineembassy-dc.org/schedule-and-fees/",
+        "https://immigration.gov.ph/faqs/"
+      ]
+    },
+    {
+      "nationalities": ["ALL_OTHERS"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "59 days per 9(a) visa validity terms; visa-required nationals may extend stay in-country up to 24 months",
+      "conditions": [
+        "Nationals of countries not included in Executive Order No. 408, as amended, are VISA-REQUIRED NATIONALS",
+        "Apply for a 9(a) Temporary Visitor Visa at a Philippine embassy or consulate; an e-Visa channel (evisa.gov.ph) exists for applicants in covered jurisdictions (eligibility list not verifiable from static official pages)",
+        "More stringent set of documentary and other requirements per Philippine Codified Visa Rules and Regulations",
+        "Passport valid for six (6) months beyond the date of departure from the Philippines; onward ticket with departure within 30 days of arrival (per Embassy Washington DC)"
+      ],
+      "source_urls": [
+        "https://evisa.gov.ph/page/policy",
+        "https://philippineembassy-dc.org/visa/",
+        "https://immigration.gov.ph/faqs/"
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "policy_kind": "visa_exemption_list",
+      "policy_name": "Executive Order No. 408 (as amended) visa-free entry for temporary visitors",
+      "description": "Nationals of 157 countries (155 at 30 days plus Brazil and Israel at 59 days) may enter the Philippines without a visa for business and tourism, provided they hold valid return/onward tickets and passports valid at least six months beyond the contemplated stay. Initial 30-day admission is extendable through Bureau of Immigration visa waiver (first extension 29 days) and further extensions up to 36 months total for non-visa-required nationals.",
+      "applies_to_nationalities": ["AND","AGO","ATG","ARG","AUS","AUT","BHS","BHR","BRB","BEL","BLZ","BEN","BTN","BOL","BWA","BRA","BRN","BGR","BFA","BDI","KHM","CMR","CAN","CPV","CAF","TCD","CHL","COL","COM","COG","CRI","CIV","HRV","CYP","CZE","COD","DNK","DJI","DMA","DOM","ECU","SLV","GNQ","ERI","EST","ETH","FJI","FIN","FRA","GAB","GMB","DEU","GHA","GRC","GRD","GTM","GIN","GNB","GUY","HTI","HND","HUN","ISL","IDN","IRL","ISR","ITA","JAM","JPN","KAZ","KEN","KIR","KWT","KGZ","LAO","LVA","LSO","LBR","LIE","LTU","LUX","MDG","MWI","MYS","MDV","MLI","MLT","MHL","MRT","MUS","MEX","FSM","MCO","MNG","MAR","MOZ","MMR","NAM","NPL","NLD","NZL","NIC","NER","NOR","OMN","PLW","PAN","PNG","PRY","PER","POL","PRT","QAT","KOR","ROU","RUS","RWA","KNA","LCA","VCT","WSM","SMR","STP","SAU","SEN","SYC","SGP","SVK","SVN","SLB","ZAF","ESP","SUR","SWZ","SWE","CHE","TJK","THA","TGO","TTO","TUN","TUR","TKM","TUV","UGA","ARE","GBR","TZA","USA","URY","UZB","VUT","VAT","VEN","VNM","ZMB","ZWE"],
+      "conditions": [
+        "Business and tourism purposes only",
+        "Valid ticket for return journey to port of origin or next port of destination",
+        "Passport valid for at least six (6) months beyond the contemplated period of stay",
+        "Brazil and Israel: 59 days pursuant to bilateral agreements"
+      ],
+      "maximum_stay": "30 days (Brazil and Israel: 59 days)",
+      "official_source_urls": [
+        "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa",
+        "https://immigration.gov.ph/faqs/"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "Visa-free entry for Chinese nationals (14 days)",
+      "description": "Chinese nationals may enter the Philippines without a visa for a non-extendible and non-convertible period of 14 days for tourism and business purposes, effective 16 January 2026, only through Ninoy Aquino International Airport and Mactan-Cebu International Airport. Separately, mainland Chinese tourists holding a valid Australian, Japanese, Canadian, Schengen or US visa may enter for 7 days, extendable to 21 days total.",
+      "applies_to_nationalities": ["CHN"],
+      "conditions": [
+        "Non-extendible and non-convertible",
+        "Tourism and business purposes",
+        "Designated ports of entry only: NAIA (Metro Manila) and Mactan-Cebu International Airport (Cebu)"
+      ],
+      "maximum_stay": "14 days",
+      "official_source_urls": [
+        "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa"
+      ],
+      "effective_from": "2026-01-16",
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "Visa-free privileges for Indian nationals",
+      "description": "Effective 8 June 2025, Indian nationals may enter visa-free for a non-extendible, non-convertible 14-day period for tourism (passport 6+ months validity, confirmed hotel booking, proof of financial capacity, return/onward ticket). Indian nationals holding valid AJACSSUK (American, Japanese, Australian, Canadian, Schengen, Singapore, UK) visas or residence permits may enter visa-free for a non-extendible 30-day period. Available at any Philippine port of entry; no derogatory BI record.",
+      "applies_to_nationalities": ["IND"],
+      "conditions": [
+        "14 days: passport valid 6+ months beyond stay, confirmed hotel booking, proof of financial capacity, return/onward ticket",
+        "30 days: valid AJACSSUK visa or residence permit, passport valid 6+ months, return/onward ticket",
+        "Non-extendible, non-convertible; no derogatory record with the Bureau of Immigration"
+      ],
+      "maximum_stay": "14 days (30 days with AJACSSUK visa/permit)",
+      "official_source_urls": [
+        "https://philippineembassy-dc.org/announcement-on-the-new-philippine-visa-policy-for-indian-nationals/",
+        "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa"
+      ],
+      "effective_from": "2025-06-08",
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "Hong Kong SAR and Macau SAR passport holders",
+      "description": "Hong Kong SAR passport holders and Macau SAR passport holders may enter the Philippines visa-free for an initial stay of fourteen (14) days. Holders of Hong Kong British (BNO) and Macau-Portuguese passports receive 7 days initial admission (Hong Kong British extendable to 21 days).",
+      "applies_to_nationalities": ["HKG","MAC"],
+      "conditions": [
+        "Initial admission 14 days for HK SAR and Macau SAR passports",
+        "Hong Kong British passports: 7 days, extendable to 21 days; Macau-Portuguese passports: 7 days initial admission per BI"
+      ],
+      "maximum_stay": "14 days initial",
+      "official_source_urls": [
+        "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa",
+        "https://immigration.gov.ph/visas/visa-waiver/"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "evisa_program",
+      "policy_name": "Philippine e-Visa (eVisaPH)",
+      "description": "Online application platform for the 9(a) Temporary Visitor Visa (subtypes 9(a-1) business through 9(a-8) other purposes, including 9(a-2) Tourism/Leisure), developed by DFA with DICT, DOT, NICA, BI and DOJ. Processing 7-12 working days (single entry) and 15-21 working days (multiple entry). e-Visas are not convertible to other visa types and not valid for extension of the authorized stay. The list of eligible citizenships/countries of residence is rendered dynamically on the portal and could not be verified from static pages.",
+      "applies_to_nationalities": [],
+      "conditions": [
+        "Tourism applicants (9(a-2)) need flight reservations for entry and exit, proof of financial capacity, proof of ties to home country, hotel/lodging proof; parental permission for minors traveling alone",
+        "The e-Visa is not a guarantee of admission"
+      ],
+      "maximum_stay": null,
+      "official_source_urls": [
+        "https://evisa.gov.ph/",
+        "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=9%28a%29+Temporary+Visitors+Visa&l3=9%28a-2%29+-+Tourism%2FLeisure+Visitors",
+        "https://evisa.gov.ph/frequently-ask-questions"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "consular_visa_regime",
+      "policy_name": "9(a) Temporary Visitor Visa via Philippine embassies and consulates",
+      "description": "Nationals of countries not included in EO 408 (as amended) are visa-required and apply for the 9(a) Temporary Visitor Visa at Philippine Foreign Service Posts. Fee tiers at the Embassy in Washington DC: visa-free nationals USD 30/60/90, non-visa-free nationals USD 40/80/120, Chinese nationals USD 25/50/100 (single 3-month / multiple 6-month / multiple 1-year validity). Visa-required nationals admitted on 9(a) may extend stay with the BI up to 24 months.",
+      "applies_to_nationalities": [],
+      "conditions": [
+        "More stringent documentary requirements per Philippine Codified Visa Rules and Regulations",
+        "Onward ticket departing within 59 days of arrival (visa-free nationals) or 30 days (non-visa-free nationals)",
+        "Fees are non-refundable"
+      ],
+      "maximum_stay": "59 days per admission; extendable up to 24 months (visa-required) / 36 months (non-visa-required)",
+      "official_source_urls": [
+        "https://evisa.gov.ph/page/policy",
+        "https://philippineembassy-dc.org/visa/",
+        "https://philippineembassy-dc.org/schedule-and-fees/",
+        "https://immigration.gov.ph/faqs/"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "Bureau of Immigration Temporary Visitor (9A) Visa Waiver and Tourist Visa Extension",
+      "description": "Non-visa-required tourists admitted for 30 days may obtain an initial 29-day visa waiver extension (total 59 days) and further extensions of 1, 2 or 6 months, up to 36 months total stay; visa-required nationals may extend up to 24 months. Apply at least one week before the current stay expires; also available online via BI e-Services.",
+      "applies_to_nationalities": [],
+      "conditions": [
+        "Initial visa waiver package fee P3,030 (Visa Waiver P500, Application P1,000, Certification P500, Legal Research P30, Express P1,000)",
+        "Overstay penalty P500 per month"
+      ],
+      "maximum_stay": "up to 36 months total (non-visa-required) / 24 months (visa-required)",
+      "official_source_urls": [
+        "https://immigration.gov.ph/visas/visa-waiver/",
+        "https://immigration.gov.ph/faqs/"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "visa_on_arrival_program",
+      "policy_name": "Visa Upon Arrival (VUA) programs",
+      "description": "The BI FAQ lists Visa Upon Arrival options including a 30-day Visa Upon Arrival, group tours under a Memorandum Order, and a Pro-Investment Visa under a Memorandum Circular. Eligibility criteria, covered nationalities and fees are not detailed on the fetched official pages.",
+      "applies_to_nationalities": [],
+      "conditions": [
+        "Details (eligible nationalities, sponsorship/accreditation requirements, fees) not verified from fetched official pages"
+      ],
+      "maximum_stay": "30 days (per BI FAQ mention)",
+      "official_source_urls": [
+        "https://immigration.gov.ph/faqs/"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    }
+  ],
+  "fees": [
+    {
+      "visa_category": "9(a) Temporary Visitor Visa (consular)",
+      "visa_subtype": "visa-free country nationals — single entry (3 months) / multiple entry (6 months) / multiple entry (1 year)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 30,
+      "government_fee_currency": "USD",
+      "refundability": "non-refundable",
+      "accepted_payment_methods": ["money order (Embassy of the Philippines, Washington DC)"],
+      "source_urls": [
+        "https://philippineembassy-dc.org/schedule-and-fees/",
+        "https://philippineembassy-dc.org/visa/"
+      ]
+    },
+    {
+      "visa_category": "9(a) Temporary Visitor Visa (consular)",
+      "visa_subtype": "non-visa-free country nationals — single entry USD 40 (3 months); multiple entry USD 80 (6 months) / USD 120 (1 year)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 40,
+      "government_fee_currency": "USD",
+      "refundability": "non-refundable",
+      "accepted_payment_methods": ["money order (Embassy of the Philippines, Washington DC)"],
+      "source_urls": [
+        "https://philippineembassy-dc.org/schedule-and-fees/",
+        "https://philippineembassy-dc.org/visa/"
+      ]
+    },
+    {
+      "visa_category": "9(a) Temporary Visitor Visa (consular)",
+      "visa_subtype": "Chinese nationals — single entry USD 25 (3 months); multiple entry USD 50 (6 months) / USD 100 (1 year)",
+      "applies_to_nationalities": ["CHN"],
+      "government_fee_amount": 25,
+      "government_fee_currency": "USD",
+      "refundability": "non-refundable",
+      "accepted_payment_methods": ["money order (Embassy of the Philippines, Washington DC)"],
+      "source_urls": [
+        "https://philippineembassy-dc.org/schedule-and-fees/",
+        "https://philippineembassy-dc.org/visa/"
+      ]
+    },
+    {
+      "visa_category": "Temporary Visitor (9A) Visa Waiver (in-country extension, initial 29-day waiver)",
+      "visa_subtype": "total P3,030: Visa Waiver P500 + Application P1,000 + Certification P500 + Legal Research P30 + Express P1,000",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 3030,
+      "government_fee_currency": "PHP",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://immigration.gov.ph/visas/visa-waiver/"
+      ]
+    }
+  ],
+  "portals": [
+    {
+      "portal_kind": "evisa_portal",
+      "url": "https://evisa.gov.ph/",
+      "operator": "Department of Foreign Affairs (with DICT, DOT, NICA, BI, DOJ)",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["9(a) Temporary Visitor Visa (9(a-1) business through 9(a-8) other purposes, incl. 9(a-2) tourism/leisure)"],
+      "source_urls": ["https://evisa.gov.ph/"]
+    },
+    {
+      "portal_kind": "immigration_authority",
+      "url": "https://immigration.gov.ph/",
+      "operator": "Bureau of Immigration (Department of Justice)",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["visa waiver / tourist visa extension", "temporary visitor visa (9A) information", "eTravel declaration links"],
+      "source_urls": ["https://immigration.gov.ph/"]
+    },
+    {
+      "portal_kind": "appointment_portal",
+      "url": "https://e-services.immigration.gov.ph/",
+      "operator": "Bureau of Immigration",
+      "operator_kind": "government",
+      "official_linking_source": "https://immigration.gov.ph/",
+      "supported_categories": ["online visa waiver (29-day extension)", "tourist visa extension"],
+      "source_urls": ["https://immigration.gov.ph/", "https://immigration.gov.ph/visas/visa-waiver/"]
+    },
+    {
+      "portal_kind": "foreign_ministry",
+      "url": "https://dfa.gov.ph/",
+      "operator": "Department of Foreign Affairs",
+      "operator_kind": "government",
+      "official_linking_source": "https://evisa.gov.ph/",
+      "supported_categories": ["visa policy guidelines", "foreign service post directory"],
+      "source_urls": ["https://evisa.gov.ph/"]
+    },
+    {
+      "portal_kind": "embassy_site",
+      "url": "https://philippineembassy-dc.org/",
+      "operator": "Embassy of the Republic of the Philippines, Washington D.C.",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["9(a) temporary visitor visa applications", "fee schedule"],
+      "source_urls": ["https://philippineembassy-dc.org/visa/", "https://philippineembassy-dc.org/schedule-and-fees/"]
+    }
+  ],
+  "passport_validity": {
+    "rule_kind": "months_after_departure",
+    "months": 6,
+    "min_blank_pages": null,
+    "condition_text": "Visa-free entrants need a passport valid for at least six (6) months beyond the contemplated period of stay (eVisa portal policy page). For visa applications, the passport must be valid for six (6) months beyond the applicant's date of departure from the Philippines; Embassy Washington DC states passports must be valid for at least six months upon entry. No blank-page rule stated on fetched official pages.",
+    "source_urls": [
+      "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa",
+      "https://philippineembassy-dc.org/visa/"
+    ]
+  },
+  "jurisdictions": [],
+  "unresolved": [
+    "TWN (Taiwan passport holders): no disposition recorded. dfa.gov.ph and all *.dfa.gov.ph embassy subdomains returned HTTP 403 to automated fetch; https://www.meco.org.tw/ (Manila Economic and Cultural Office, the Philippines' de facto mission in Taiwan) failed TLS certificate verification ('unable to verify the first certificate'); the eVisa portal's visa-free policy page does not mention Taiwan. Search results indicate MECO announced 14-day visa-free entry for Taiwan passport holders, extended 2026-07-01 through 2027-06-30 (non-extendible, non-convertible; visa required for stays over 14 days), but only news outlets were reachable and news is excluded as evidence. Needs verification against MECO or DFA when reachable.",
+    "eVisa eligible citizenships/countries of residence: the evisa.gov.ph 'Check if you need visa' selector and fee amounts load dynamically; the static pages fetched do not enumerate eligible countries or the e-Visa government fee. Not recorded.",
+    "Complete EO 408 exemption list: captured verbatim from evisa.gov.ph (155 countries at 30 days plus Brazil and Israel at 59 days = 157, matching the count DFA publishes). One extraction pass omitted Costa Rica while another included it; Costa Rica (CRI) is included based on the first pass. Reconfirm the canonical list against dfa.gov.ph 'Guidelines on the Entry of Temporary Visitors to the Philippines' (HTTP 403 at research time).",
+    "Consular 9(a) fees are per-post: the recorded USD amounts are the Embassy of the Philippines Washington D.C. schedule; other posts may differ in amount/currency.",
+    "Visa Upon Arrival programs (30-day VUA, group tours under Memorandum Order, Pro-Investment Visa under Memorandum Circular) are mentioned on the BI FAQ but eligibility, covered nationalities and fees are not detailed on fetched official pages.",
+    "Blank passport page requirement: not stated on any fetched official page.",
+    "eTravel declaration (etravel.gov.ph) is referenced on immigration.gov.ph as the 'Philippine One-Stop Electronic Travel Declaration System' but was not fetched or recorded as a portal.",
+    "Attempted but unfetchable official URLs (HTTP 403): https://dfa.gov.ph/main/index.php/component/content/category/156, https://tokyope.dfa.gov.ph/index.php/visa-free-entry-for-temporary-visits, https://ottawape.dfa.gov.ph/index.php/47-consular-section/visa/84-visa-free-entry, https://copenhagenpe.dfa.gov.ph/index.php/consular-services/requirements-for-temporary-visitor-s-visa/18-consular-services-menu/463-visa-free-entry-for-temporary-visits."
+  ]
+}

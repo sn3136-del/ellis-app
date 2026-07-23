@@ -1,0 +1,651 @@
+{
+  "destination": "KOR",
+  "retrieved_at": "2026-07-23T07:18:28Z",
+  "research_status": "research_incomplete",
+  "sources": [
+    {
+      "search_query": "South Korea official K-ETA electronic travel authorization k-eta.go.kr",
+      "original_url": "https://www.k-eta.go.kr/portal/guide/viewetaualification.do?locale=EN",
+      "final_url": "https://www.k-eta.go.kr/portal/guide/viewetaualification.do?locale=EN",
+      "redirect_chain": [],
+      "final_hostname": "www.k-eta.go.kr",
+      "source_authority": "official_application_portal",
+      "relevant_excerpt": "대한민국 전자여행허가제(K-ETA) 한시 면제 기간 연장 알림 (2026-03-20) ... 수수료: KRW 10,000원 (USD 약 7~8달러) ... 심사: 일반적으로 72시간 이내 ... 대한민국에 비자없이 입국 가능한 국민 [eligibility list itself is rendered client-side and was not retrievable as text]",
+      "retrieved_at": "2026-07-23T07:06:31Z",
+      "effective_date_evidence": "Notice titled 'K-ETA 한시 면제 기간 연장 알림' dated 2026-03-20 on the portal",
+      "page_language": "ko, en"
+    },
+    {
+      "search_query": "K-ETA temporary exemption extension 2026 notice k-eta.go.kr 22 countries until",
+      "original_url": "https://www.mofa.go.kr/ca-en/brd/m_5231/view.do?seq=761797",
+      "final_url": "https://www.mofa.go.kr/ca-en/brd/m_5231/view.do?seq=761797",
+      "redirect_chain": [],
+      "final_hostname": "www.mofa.go.kr",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Extension of Temporary Exemption from K-ETA (until December 31, 2026) ... Canada is exempt; for other countries, please check the K-ETA official website for details. ... may still apply for K-ETA if they wish to receive the benefits associated with K-ETA approval, such as exemption from completing an arrival card upon entry into the Republic of Korea. (Notice dated December 18, 2025)",
+      "retrieved_at": "2026-07-23T07:06:31Z",
+      "effective_date_evidence": "Exemption extended until December 31, 2026; embassy notice dated 2025-12-18",
+      "page_language": "en"
+    },
+    {
+      "search_query": "K-ETA temporary exemption extension 2026 notice k-eta.go.kr 22 countries until",
+      "original_url": "https://www.mofa.go.kr/us-hagatna-en/brd/m_5521/view.do?seq=761689",
+      "final_url": "https://www.mofa.go.kr/us-hagatna-en/brd/m_5521/view.do?seq=761689",
+      "redirect_chain": [],
+      "final_hostname": "www.mofa.go.kr",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "The extension applies to all countries currently covered under the K-ETA temporary exemption (including the United States). ... The exemption will therefore remain in effect until December 31, 2026. ... Fees paid for already issued K-ETA approvals are non-refundable.",
+      "retrieved_at": "2026-07-23T07:06:31Z",
+      "effective_date_evidence": "Exemption in effect until December 31, 2026",
+      "page_language": "en"
+    },
+    {
+      "search_query": "South Korea official K-ETA electronic travel authorization k-eta.go.kr",
+      "original_url": "https://overseas.mofa.go.kr/ie-en/brd/m_23773/view.do?seq=761699",
+      "final_url": "https://overseas.mofa.go.kr/ie-en/brd/m_23773/view.do?seq=761699",
+      "redirect_chain": [],
+      "final_hostname": "overseas.mofa.go.kr",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "K-ETA (Korea Electronic Travel Authorization) Required for Visa-free country travelers ... The fee is 10,000 KRW (approximately $9-10, Additional fee excluded). ... The period of validity is 2 years from the date of authorization. ... Validity period will be expanded to 3 years from K-ETA applied from July 3, 2023. ... Exempt: UN passport holders, ABTC holders, USFK service members, aircraft/ship crew, transfer passengers; diplomatic or official passport holders (from January 9, 2023); persons aged 17 and under or 65 and above (from July 3, 2023).",
+      "retrieved_at": "2026-07-23T07:06:31Z",
+      "effective_date_evidence": "3-year validity applies to K-ETA applied for from July 3, 2023",
+      "page_language": "en"
+    },
+    {
+      "search_query": "mofa.go.kr 사증면제협정 체결국가 현황 일반여권 90일",
+      "original_url": "https://overseas.mofa.go.kr/dk-ko/brd/m_7140/view.do?seq=949336",
+      "final_url": "https://overseas.mofa.go.kr/dk-ko/brd/m_7140/view.do?seq=949336",
+      "redirect_chain": [],
+      "final_hostname": "overseas.mofa.go.kr",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "외국인 무사증 입국 — 무사증입국 지정국가: (아시아) 일본(90일), 홍콩(90일), 마카오(90일), 타이완, 브루나이, 카타르, 사우디아라비아, 쿠웨이트, 오만, 예멘공화국, 아랍에미리트, 바레인 / (북미) 미국(90일), 카나다(6개월) / (남미) 아르헨티나, 온두라스, 파라과이, 우루과이, 에쿠아도르, 가이아나 / (유럽) 안도라, 모나코, 산마리노, 사이프러스, 알바니아, 크로아티아, 슬로베니아(90일), 바티칸, 보스니아·헤르체고비나, 세르비아, 몬테네그로 / (대양주) 호주(90일), 괌, 피지, 나우루, 팔라우, 키리바시, 마샬군도, 솔로몬군도, 미크로네시아, 뉴칼레도니아, 사모아, 투발루, 통가 / (아프리카) 남아프리카공화국, 모리셔스, 세이쉘, 스와질랜드, 이집트 [기타 국가는 원칙 30일]",
+      "retrieved_at": "2026-07-23T07:06:31Z",
+      "effective_date_evidence": null,
+      "page_language": "ko"
+    },
+    {
+      "search_query": "visa.go.kr 무사증입국 사증면제 국가 안내 단기방문 (found via 주시카고/주센다이 embassy board search)",
+      "original_url": "https://overseas.mofa.go.kr/jp-sendai-ko/brd/m_663/view.do?seq=620657",
+      "final_url": "https://overseas.mofa.go.kr/jp-sendai-ko/brd/m_663/view.do?seq=620657",
+      "redirect_chain": [],
+      "final_hostname": "overseas.mofa.go.kr",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "비자면제 협정국가 (2007.01.01 기준) — 무사증입국 허가대상 : 총 110개 국가 국민 ... 90일: (아시아) 태국, 싱가포르, 뉴질랜드, 말레이시아 등 / (미주) 멕시코, 브라질, 칠레 등 22개국 / (유럽) 그리스, 오스트리아, 스위스, 리히텐슈타인, 프랑스, 영국, 네덜란드, 벨기에, 룩셈부르크, 독일, 스페인, 핀란드, 스웨덴, 덴마크, 노르웨이, 아일랜드, 아이슬란드, 몰타, 폴란드, 헝가리, 불가리아, 체코, 터키, 슬로바키아, 루마니아, 이탈리아, 에스토니아, 라트비아, 리투아니아 / (중동·아프리카) 모로코, 라이베리아, 이스라엘 ... 60일: 포르투갈, 레소토 / 30일: 튀니지",
+      "retrieved_at": "2026-07-23T07:06:31Z",
+      "effective_date_evidence": "Page states list is as of 2007.01.01 (dated snapshot; agreement terms for GBR/DEU/FRA/SGP/BRA = 90 days)",
+      "page_language": "ko"
+    },
+    {
+      "search_query": "hikorea.go.kr 사증면제협정 국가 목록 입국 외국인 체류기간 90일 영국 독일 프랑스",
+      "original_url": "https://hikorea.go.kr/info/InfoDatail.pt?CAT_SEQ=144&PARENT_ID=11",
+      "final_url": "https://hikorea.go.kr/info/InfoDatail.pt?CAT_SEQ=144&PARENT_ID=11",
+      "redirect_chain": [],
+      "final_hostname": "hikorea.go.kr",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "다만, 다음에 해당하는 자는 사증없이 입국할 수 있습니다: 사증면제협정 체결국가 국민, 국제친선·관광 또는 국가이익 등을 위하여 대통령령으로 입국이 허가된 자, 재입국허가를 받은 자, 난민여행증명서 소지자. B-1(사증면제)·B-2(관광통과) 체류자격: 관광, 통과 등 목적, 체류기간 90일 이내.",
+      "retrieved_at": "2026-07-23T07:06:31Z",
+      "effective_date_evidence": null,
+      "page_language": "ko"
+    },
+    {
+      "search_query": "visa.go.kr 사증 안내 (portal menu exploration)",
+      "original_url": "https://www.visa.go.kr/openPage.do?MENU_ID=10201",
+      "final_url": "https://www.visa.go.kr/openPage.do?MENU_ID=10201",
+      "redirect_chain": [],
+      "final_hostname": "www.visa.go.kr",
+      "source_authority": "official_application_portal",
+      "relevant_excerpt": "전자사증(e-visa) 발급 대상: E-1 교수, E-3 연구, E-4 기술지도, E-5 전문직업, E-7 특정활동 및 동반가족(F-3), 의료관광(C-3-3) 및 치료요양(G-1-10), 단기상용(C-3-4), 단기취업(C-4), 유학(D-2, D-2-3, D-2-4). 제출: 여권사본, 사진파일 (총천연색, 3.5cm*4.5cm), 신용카드(수수료 전자결제용), 각 체류자격별 제출서류 파일. [일반 관광(C-3-1)은 전자사증 대상에 포함되지 않음]",
+      "retrieved_at": "2026-07-23T07:06:31Z",
+      "effective_date_evidence": null,
+      "page_language": "ko"
+    },
+    {
+      "search_query": "official South Korea evisa (Korea Visa Portal)",
+      "original_url": "https://www.visa.go.kr/openPage.do?MENU_ID=10102",
+      "final_url": "https://www.visa.go.kr/openPage.do?MENU_ID=10102",
+      "redirect_chain": [],
+      "final_hostname": "www.visa.go.kr",
+      "source_authority": "official_application_portal",
+      "relevant_excerpt": "Korea Visa Portal — 'Visa Navigator' tool to identify appropriate visa categories (단기방문: 관광 등); links to electronic arrival card registration and the HiKorea portal; covers short-term visit (tourism, business, transit) and all long-term visa categories.",
+      "retrieved_at": "2026-07-23T07:06:31Z",
+      "effective_date_evidence": null,
+      "page_language": "ko"
+    },
+    {
+      "search_query": "mofa.go.kr 사증면제협정 체결국가 현황 일반여권 90일 (Brazil embassy visa guide)",
+      "original_url": "https://overseas.mofa.go.kr/br-ko/brd/m_6106/view.do?seq=1015482&page=1",
+      "final_url": "https://overseas.mofa.go.kr/br-ko/brd/m_6106/view.do?seq=1015482&page=1",
+      "redirect_chain": [],
+      "final_hostname": "overseas.mofa.go.kr",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "사증(비자) 일반(의미, 제출서류, 수수료 등) 안내 — 수수료(2025년 상반기): 단수사증(90일 이하) 미화 40달러 상당 금액 (220헤알) / 단수사증(91일 이상) 미화 60달러 상당 금액 (330헤알) / 더블사증 미화 70달러 상당 금액 (385헤알) / 복수사증 미화 90달러 상당 금액 (495헤알). ... 입국일 기준 브라질 여권의 잔여 유효기간은 최소 6개월 이상 남아 있어야 합니다.",
+      "retrieved_at": "2026-07-23T07:06:31Z",
+      "effective_date_evidence": "Fee table labeled 2025 first half (2025년 상반기)",
+      "page_language": "ko"
+    },
+    {
+      "search_query": "주중국 대한민국 대사관 중국 단체관광객 무사증 입국 2026 연장 공지",
+      "original_url": "https://id.mofa.go.kr/www/brd/m_4080/view.do?seq=376381",
+      "final_url": "http://www.mofa.go.kr/www/brd/m_4080/view.do?seq=376381",
+      "redirect_chain": [
+        "https://id.mofa.go.kr/www/brd/m_4080/view.do?seq=376381",
+        "http://www.mofa.go.kr/www/brd/m_4080/view.do?seq=376381"
+      ],
+      "final_hostname": "www.mofa.go.kr",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "중국 단체관광객 한시 무사증 시행계획 발표 — 시행 기간: 올해 9월 29일부터 내년 6월 30일까지. 대상: 전담여행사가 모객한 3인 이상의 단체관광객. 체류: 15일 범위 내에서 무사증으로 국내 관광이 가능. 제주: 기존과 동일하게 30일간 개별관광과 단체관광이 모두 허용. 분기별 평균 이탈률이 2% 이상인 경우에 지정을 취소.",
+      "retrieved_at": "2026-07-23T07:06:31Z",
+      "effective_date_evidence": "Program period 2025-09-29 to 2026-06-30 as published in this MOFA press release",
+      "page_language": "ko"
+    },
+    {
+      "search_query": "법무부 보도자료 중국 단체관광객 한시 무사증 12월 31일 연장 moj.go.kr",
+      "original_url": "https://www.moj.go.kr/bbs/moj/183/599186/artclView.do",
+      "final_url": "https://www.moj.go.kr/bbs/moj/183/599186/artclView.do",
+      "redirect_chain": [],
+      "final_hostname": "www.moj.go.kr",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "(2025.9.29. 법무부 설명자료) 중국 단체관광객 무사증 입국자는 전자입국신고서 제출 대상이 아닙니다. 단체 무사증으로 입국하는 관광객들은 여행사가 사전에 제출한 단체여행객 명단(체류지 포함)으로 입국신고서 제출을 대체.",
+      "retrieved_at": "2026-07-23T07:06:31Z",
+      "effective_date_evidence": "MOJ explanatory material dated 2025-09-29",
+      "page_language": "ko"
+    },
+    {
+      "search_query": "주러시아 대한민국 대사관 한러 사증면제협정 60일 90일 무비자 입국",
+      "original_url": "https://overseas.mofa.go.kr/ru-ko/brd/m_7358/view.do?seq=1335897&page=1",
+      "final_url": "https://overseas.mofa.go.kr/ru-ko/brd/m_7358/view.do?seq=1335897&page=1",
+      "redirect_chain": [],
+      "final_hostname": "overseas.mofa.go.kr",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "한러 사증면제협정에 따른 출입국 관련 안내(FAQ) — 러시아국민도 비자 없이 한국 입국이 가능합니다(연속하여 최대 60일, 전체 180일 기간 내 총 90일 체류 가능). 사전에 반드시 전자여행허가(K-ETA) 신청 및 허가를 받아야 합니다 (www.k-eta.go.kr). 러시아 국민 중 17세 이하·65세 이상은 K-ETA 면제, 다만 입국일 기준 18세가 되는 경우에는 K-ETA를 받아야 함. 대사관은 K-ETA 신청 및 허가에 관한 권한이 없습니다.",
+      "retrieved_at": "2026-07-23T07:06:31Z",
+      "effective_date_evidence": "FAQ dated 2023-11-03 in title (23.11.03)",
+      "page_language": "ko"
+    },
+    {
+      "search_query": "주타이베이 대한민국 대표부 대만 국민 무사증 입국 90일 공지",
+      "original_url": "https://overseas.mofa.go.kr/tw-ko/brd/m_24333/view.do?seq=44&page=1",
+      "final_url": "https://overseas.mofa.go.kr/tw-ko/brd/m_24333/view.do?seq=44&page=1",
+      "redirect_chain": [],
+      "final_hostname": "overseas.mofa.go.kr",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "일본, 대만, 마카오 대상 한시적 무사증 입국 재개 ('22. 8. 4.부터 '22. 8. 31.까지) — 체류자격·기간: 관광・통과 (B-2-1), 90일. K-ETA 신청 필수(최소 탑승 72시간 전까지). 기존 104개 국가에서 일본, 대만, 마카오를 추가하여 총 107개 국가로 K-ETA 신청 대상을 확대. [이후 일본·대만·마카오 무사증 입국은 상시화되었으며 지정 무사증 국가 목록에 포함됨 — 주덴마크 대사관 목록 참조]",
+      "retrieved_at": "2026-07-23T07:06:31Z",
+      "effective_date_evidence": "Notice covers 2022-08-04 to 2022-08-31 (historical); confirms B-2-1 status and 90-day stay for TWN",
+      "page_language": "ko"
+    },
+    {
+      "search_query": "\"ae-ko\" OR 주아랍에미리트 대사관 사증 안내 UAE 국민 한국 무비자 90일 view.do",
+      "original_url": "https://overseas.mofa.go.kr/ae-ko/brd/m_20354/view.do?seq=2&page=1",
+      "final_url": "https://overseas.mofa.go.kr/ae-ko/brd/m_20354/view.do?seq=2&page=1",
+      "redirect_chain": [],
+      "final_hostname": "overseas.mofa.go.kr",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Visa application documents (외국인 한국방문) — Tourist visa (C-3-9): valid passport with more than 6 months validity; recent original stamped bank statements and/or financial records for three months. Fees: 160 AED(Single Entry), 280AED(Double Entry), 360AED(Multiple Entry) — general rates, vary by nationality and stay duration. Visa issuance generally takes about 4 - 7 working days from the day of submission. Having all of the required documents does not guarantee a visa.",
+      "retrieved_at": "2026-07-23T07:06:31Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "\"overseas.mofa.go.kr\" embassy notice \"visa waiver\" OR \"visa exemption\" countries list 90 days tourist Korea",
+      "original_url": "https://overseas.mofa.go.kr/ca-vancouver-en/brd/m_4542/view.do?seq=738221&page=1",
+      "final_url": "https://overseas.mofa.go.kr/ca-vancouver-en/brd/m_4542/view.do?seq=738221&page=1",
+      "redirect_chain": [],
+      "final_hostname": "overseas.mofa.go.kr",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Visa Free/Waiver Entry for Foreigners — Please visit K-eta website if your country is one of the visa-free entry countries (https://www.k-eta.go.kr/portal/apply/index.do?locale=EN). APEC Business Travel Card holders from 16 designated economies receive Short Term Business (C-2) visa status, and are allowed to stay for up to 90 days. UN LAISSEZ-PASSER holders are granted to stay for 30 days.",
+      "retrieved_at": "2026-07-23T07:06:31Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    }
+  ],
+  "dispositions": [
+    {
+      "nationalities": ["JPN", "HKG", "MAC"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days",
+      "conditions": [
+        "Designated visa-free entry (B-1/B-2) for tourism/short visit; no paid activities",
+        "K-ETA required in principle for visa-free entrants; a temporary K-ETA exemption for designated countries is in effect until 2026-12-31 (full country list on k-eta.go.kr; USA and Canada explicitly confirmed by embassy notices)"
+      ],
+      "source_urls": [
+        "https://overseas.mofa.go.kr/dk-ko/brd/m_7140/view.do?seq=949336",
+        "https://overseas.mofa.go.kr/tw-ko/brd/m_24333/view.do?seq=44&page=1",
+        "https://www.mofa.go.kr/us-hagatna-en/brd/m_5521/view.do?seq=761689"
+      ]
+    },
+    {
+      "nationalities": ["TWN"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days",
+      "conditions": [
+        "Tourism/transit status B-2-1, 90 days (per Korean Mission in Taipei notice)",
+        "K-ETA required in principle; temporary K-ETA exemption for designated countries until 2026-12-31 — verify coverage on k-eta.go.kr"
+      ],
+      "source_urls": [
+        "https://overseas.mofa.go.kr/tw-ko/brd/m_24333/view.do?seq=44&page=1",
+        "https://overseas.mofa.go.kr/dk-ko/brd/m_7140/view.do?seq=949336"
+      ]
+    },
+    {
+      "nationalities": ["USA"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days",
+      "conditions": [
+        "Designated visa-free entry for tourism (미국 90일)",
+        "Temporarily exempt from K-ETA until 2026-12-31 (explicitly confirmed: 'including the United States'); may voluntarily obtain K-ETA to skip the arrival card"
+      ],
+      "source_urls": [
+        "https://overseas.mofa.go.kr/dk-ko/brd/m_7140/view.do?seq=949336",
+        "https://www.mofa.go.kr/us-hagatna-en/brd/m_5521/view.do?seq=761689"
+      ]
+    },
+    {
+      "nationalities": ["CAN"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "6 months",
+      "conditions": [
+        "Designated visa-free entry for tourism (카나다 6개월)",
+        "Temporarily exempt from K-ETA until 2026-12-31 (explicitly confirmed by Embassy in Canada notice); may voluntarily obtain K-ETA to skip the arrival card"
+      ],
+      "source_urls": [
+        "https://overseas.mofa.go.kr/dk-ko/brd/m_7140/view.do?seq=949336",
+        "https://www.mofa.go.kr/ca-en/brd/m_5231/view.do?seq=761797"
+      ]
+    },
+    {
+      "nationalities": ["AUS"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days",
+      "conditions": [
+        "Designated visa-free entry for tourism (호주 90일)",
+        "K-ETA required in principle; temporary K-ETA exemption for designated countries until 2026-12-31 — verify coverage on k-eta.go.kr"
+      ],
+      "source_urls": [
+        "https://overseas.mofa.go.kr/dk-ko/brd/m_7140/view.do?seq=949336",
+        "https://www.mofa.go.kr/us-hagatna-en/brd/m_5521/view.do?seq=761689"
+      ]
+    },
+    {
+      "nationalities": ["GBR", "DEU", "FRA", "SGP", "BRA"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days",
+      "conditions": [
+        "Visa waiver agreement countries, ordinary passports, 90 days (per consulate list dated 2007-01-01; agreement terms for these countries unchanged in later official communications)",
+        "K-ETA required in principle; temporary K-ETA exemption for designated countries until 2026-12-31 — verify coverage on k-eta.go.kr"
+      ],
+      "source_urls": [
+        "https://overseas.mofa.go.kr/jp-sendai-ko/brd/m_663/view.do?seq=620657",
+        "https://hikorea.go.kr/info/InfoDatail.pt?CAT_SEQ=144&PARENT_ID=11",
+        "https://www.mofa.go.kr/us-hagatna-en/brd/m_5521/view.do?seq=761689"
+      ]
+    },
+    {
+      "nationalities": ["RUS"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "60 days per entry; max 90 days within any 180-day period",
+      "conditions": [
+        "Korea-Russia visa waiver agreement (ordinary passports)",
+        "K-ETA approval mandatory before boarding (persons aged 17 and under or 65 and over exempt; a person turning 18 by the entry date needs K-ETA)"
+      ],
+      "source_urls": [
+        "https://overseas.mofa.go.kr/ru-ko/brd/m_7358/view.do?seq=1335897&page=1"
+      ]
+    },
+    {
+      "nationalities": ["ARE"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": null,
+      "conditions": [
+        "아랍에미리트 (UAE) appears on the official designated visa-free entry country list (Embassy of Korea in Denmark page)",
+        "Current maximum stay not verified from a fetched official page (the fetched list groups UAE under the default 30-day tier; other reports state 90 days under a reciprocity MOU) — see unresolved",
+        "K-ETA rules for visa-free entrants apply — verify on k-eta.go.kr"
+      ],
+      "source_urls": [
+        "https://overseas.mofa.go.kr/dk-ko/brd/m_7140/view.do?seq=949336"
+      ]
+    },
+    {
+      "nationalities": ["JPN", "HKG", "MAC", "TWN", "USA", "CAN", "AUS", "GBR", "DEU", "FRA", "SGP", "BRA", "RUS", "ARE"],
+      "category": "tourist_visa",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "No tourist visa needed: visa-free entry available for tourism within the permitted stay (see visa_free_entry rows)"
+      ],
+      "source_urls": [
+        "https://hikorea.go.kr/info/InfoDatail.pt?CAT_SEQ=144&PARENT_ID=11",
+        "https://overseas.mofa.go.kr/dk-ko/brd/m_7140/view.do?seq=949336"
+      ]
+    },
+    {
+      "nationalities": ["KOR"],
+      "category": "tourist_visa",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Citizens of the destination country (Republic of Korea) need no visa to enter"
+      ],
+      "source_urls": [
+        "https://hikorea.go.kr/info/InfoDatail.pt?CAT_SEQ=144&PARENT_ID=11"
+      ]
+    },
+    {
+      "nationalities": ["CHN", "IND"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "90 days or less (short-term visit C-3)",
+      "conditions": [
+        "Not on the visa waiver agreement list or the designated visa-free entry list; must obtain a short-term visit (C-3) visa from a Korean embassy/consulate before travel",
+        "CHN only: a temporary visa-free program for group tourists (3+ persons recruited by designated travel agencies, stay up to 15 days) was officially in force 2025-09-29 to 2026-06-30; extension beyond 2026-06-30 was reported but NOT verified from a fetched official page — see unresolved",
+        "CHN only: Jeju special regime — Chinese tourists (individual and group) permitted 30 days visa-free for Jeju (per MOFA press release)"
+      ],
+      "source_urls": [
+        "https://hikorea.go.kr/info/InfoDatail.pt?CAT_SEQ=144&PARENT_ID=11",
+        "https://overseas.mofa.go.kr/jp-sendai-ko/brd/m_663/view.do?seq=620657",
+        "https://overseas.mofa.go.kr/dk-ko/brd/m_7140/view.do?seq=949336",
+        "http://www.mofa.go.kr/www/brd/m_4080/view.do?seq=376381"
+      ]
+    },
+    {
+      "nationalities": ["ALL_OTHERS"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "90 days or less (short-term visit C-3)",
+      "conditions": [
+        "Default channel: foreigners must hold a valid passport and visa issued by a Korean embassy/consulate unless covered by a visa waiver agreement, designated visa-free entry, re-entry permit, or refugee travel document (HiKorea)"
+      ],
+      "source_urls": [
+        "https://hikorea.go.kr/info/InfoDatail.pt?CAT_SEQ=144&PARENT_ID=11",
+        "https://overseas.mofa.go.kr/ae-ko/brd/m_20354/view.do?seq=2&page=1"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "evisa_tourist",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Korea operates an e-visa (전자사증) system, but its published eligible categories are limited (E-series work, C-3-3 medical tourism, C-3-4 short-term business, C-4, D-2 study); general tourism (C-3-1) is not an e-visa category"
+      ],
+      "source_urls": [
+        "https://www.visa.go.kr/openPage.do?MENU_ID=10201"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "visa_on_arrival_tourist",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "No tourist visa-on-arrival channel: HiKorea's exhaustive list of persons who may enter without a visa (waiver agreement nationals, designated visa-free nationals, re-entry permit holders, refugee travel document holders) does not include any on-arrival visa issuance for tourism; all others need a visa before travel"
+      ],
+      "source_urls": [
+        "https://hikorea.go.kr/info/InfoDatail.pt?CAT_SEQ=144&PARENT_ID=11"
+      ]
+    },
+    {
+      "nationalities": ["RUS"],
+      "category": "eta",
+      "disposition": "ETA_REQUIRED",
+      "maximum_stay": "60 days per entry; max 90 days within any 180-day period",
+      "conditions": [
+        "K-ETA approval must be obtained via www.k-eta.go.kr before boarding; Russia is not covered by the temporary K-ETA exemption per the Embassy in Russia FAQ (K-ETA stated as mandatory)",
+        "Fee 10,000 KRW; validity 3 years (for K-ETA applied for from 2023-07-03); age 17 and under / 65 and over exempt"
+      ],
+      "source_urls": [
+        "https://overseas.mofa.go.kr/ru-ko/brd/m_7358/view.do?seq=1335897&page=1",
+        "https://overseas.mofa.go.kr/ie-en/brd/m_23773/view.do?seq=761699"
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "policy_kind": "visa_exemption_list",
+      "policy_name": "Visa waiver agreements and designated visa-free entry (B-1 / B-2)",
+      "description": "Nationals of countries with which Korea has concluded visa waiver agreements, and nationals of countries designated for visa-free entry by presidential decree (international friendship / tourism / national interest), may enter without a visa under B-1 (visa exemption) or B-2 (tourism/transit) status, generally for up to 90 days (some countries 30 or 60 days; Canada 6 months). Paid activities are not permitted.",
+      "applies_to_nationalities": ["JPN", "HKG", "MAC", "TWN", "USA", "CAN", "AUS", "GBR", "DEU", "FRA", "SGP", "BRA", "RUS", "ARE"],
+      "conditions": [
+        "Tourism / visit / transit purposes only; no remunerative activity",
+        "K-ETA rules apply to visa-free entrants (see eta_program)",
+        "The full official list (100+ countries) is maintained on k-eta.go.kr and government portals; the applies_to list here contains only the nationalities verified during this research"
+      ],
+      "maximum_stay": "Typically 90 days; 30/60 days for some countries; 6 months for Canada; Russia 60 days per entry (90/180)",
+      "official_source_urls": [
+        "https://hikorea.go.kr/info/InfoDatail.pt?CAT_SEQ=144&PARENT_ID=11",
+        "https://overseas.mofa.go.kr/dk-ko/brd/m_7140/view.do?seq=949336",
+        "https://overseas.mofa.go.kr/jp-sendai-ko/brd/m_663/view.do?seq=620657",
+        "https://overseas.mofa.go.kr/ru-ko/brd/m_7358/view.do?seq=1335897&page=1"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "eta_program",
+      "policy_name": "K-ETA (Korea Electronic Travel Authorization)",
+      "description": "Electronic travel authorization required in principle for nationals of visa-free entry countries before boarding a flight or ship to Korea. Apply at www.k-eta.go.kr; review generally within 72 hours. Fee 10,000 KRW; valid 3 years (for applications from 2023-07-03) with multiple entries. A temporary exemption for designated countries (22 countries per portal notices; USA and Canada explicitly confirmed) is in effect until 2026-12-31; exempt nationals may still apply voluntarily to skip the paper/electronic arrival card.",
+      "applies_to_nationalities": ["ALL"],
+      "conditions": [
+        "Applies only to nationals eligible for visa-free entry; visa holders do not need K-ETA",
+        "Exempt regardless of nationality: diplomatic/official passport holders, UN laissez-passer holders, ABTC holders, crew, transfer passengers, persons aged 17 and under or 65 and over",
+        "Temporary exemption for designated countries runs until 2026-12-31 (extension notice on k-eta.go.kr dated 2026-03-20; embassy notices dated Dec 2025)"
+      ],
+      "maximum_stay": null,
+      "official_source_urls": [
+        "https://www.k-eta.go.kr/portal/guide/viewetaualification.do?locale=EN",
+        "https://overseas.mofa.go.kr/ie-en/brd/m_23773/view.do?seq=761699",
+        "https://www.mofa.go.kr/ca-en/brd/m_5231/view.do?seq=761797",
+        "https://www.mofa.go.kr/us-hagatna-en/brd/m_5521/view.do?seq=761689"
+      ],
+      "effective_from": "2021-09-01",
+      "effective_until": null
+    },
+    {
+      "policy_kind": "evisa_program",
+      "policy_name": "Korea e-Visa (전자사증) — limited categories, no general tourist e-visa",
+      "description": "The Korea Visa Portal (visa.go.kr) issues electronic visas only for specific categories: E-1/E-3/E-4/E-5/E-7 professional work (and F-3 dependents), C-3-3 medical tourism via certified institutions, C-3-4 short-term business with prior entry history, C-4 short-term employment for invited scientists, and D-2 study categories. General tourism (C-3-1) is not an e-visa category; tourists who need a visa must apply through a Korean embassy or consulate.",
+      "applies_to_nationalities": ["ALL"],
+      "conditions": [
+        "Required for e-visa: passport copy, color photo 3.5x4.5cm, credit card for electronic fee payment, category-specific documents"
+      ],
+      "maximum_stay": null,
+      "official_source_urls": [
+        "https://www.visa.go.kr/openPage.do?MENU_ID=10201"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "Temporary visa-free entry for Chinese group tourists (중국 단체관광객 한시 무사증)",
+      "description": "Chinese group tourists (3 or more persons) recruited by designated travel agencies (Korean MCST-designated domestic agencies and Korean-mission-designated agencies in China) may enter Korea visa-free and travel nationwide for up to 15 days. Officially published period: 2025-09-29 to 2026-06-30. Separately, Chinese tourists are permitted 30 days visa-free for Jeju (individual and group). Whether the nationwide group program was extended past 2026-06-30 (media reported extension to 2026-12-31) was NOT verified from a fetched official page.",
+      "applies_to_nationalities": ["CHN"],
+      "conditions": [
+        "Group of 3+ recruited by designated travel agencies; passenger lists submitted in advance replace individual arrival cards",
+        "Agency designation revoked if quarterly average absconding rate is 2% or more",
+        "Stay up to 15 days, nationwide (Jeju separately 30 days under existing regime)"
+      ],
+      "maximum_stay": "15 days (nationwide program); 30 days (Jeju regime)",
+      "official_source_urls": [
+        "http://www.mofa.go.kr/www/brd/m_4080/view.do?seq=376381",
+        "https://www.moj.go.kr/bbs/moj/183/599186/artclView.do"
+      ],
+      "effective_from": "2025-09-29",
+      "effective_until": "2026-06-30"
+    },
+    {
+      "policy_kind": "consular_visa_regime",
+      "policy_name": "Short-term visit visa (C-3) via Korean embassies and consulates",
+      "description": "Nationals not covered by visa waiver agreements or designated visa-free entry must obtain a visa from a Korean embassy or consulate before travel. The relevant tourist category is short-term visit C-3 (e.g., C-3-9 general tourist), for stays of 90 days or less. Standard government fee schedule: single entry up to 90 days USD 40; single entry 91+ days USD 60; double entry USD 70; multiple entry USD 90 (charged in local-currency equivalents that vary by post and by nationality-specific reciprocity arrangements, e.g., 160/280/360 AED at the Embassy in the UAE). Issuance is discretionary; documents do not guarantee a visa.",
+      "applies_to_nationalities": ["ALL_OTHERS"],
+      "conditions": [
+        "Apply at the Korean mission with jurisdiction over the applicant's residence",
+        "Typical processing 4-7 working days (Embassy in UAE); longer if interview/investigation needed",
+        "Financial documents (e.g., 3 months of bank statements) commonly required for tourist applications"
+      ],
+      "maximum_stay": "90 days or less",
+      "official_source_urls": [
+        "https://overseas.mofa.go.kr/br-ko/brd/m_6106/view.do?seq=1015482&page=1",
+        "https://overseas.mofa.go.kr/ae-ko/brd/m_20354/view.do?seq=2&page=1",
+        "https://hikorea.go.kr/info/InfoDatail.pt?CAT_SEQ=144&PARENT_ID=11"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    }
+  ],
+  "fees": [
+    {
+      "visa_category": "short_term_visit_C-3",
+      "visa_subtype": "single_entry_up_to_90_days",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 40,
+      "government_fee_currency": "USD",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://overseas.mofa.go.kr/br-ko/brd/m_6106/view.do?seq=1015482&page=1"
+      ]
+    },
+    {
+      "visa_category": "short_term_visit_C-3",
+      "visa_subtype": "single_entry_91_days_or_more",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 60,
+      "government_fee_currency": "USD",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://overseas.mofa.go.kr/br-ko/brd/m_6106/view.do?seq=1015482&page=1"
+      ]
+    },
+    {
+      "visa_category": "short_term_visit_C-3",
+      "visa_subtype": "double_entry",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 70,
+      "government_fee_currency": "USD",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://overseas.mofa.go.kr/br-ko/brd/m_6106/view.do?seq=1015482&page=1"
+      ]
+    },
+    {
+      "visa_category": "short_term_visit_C-3",
+      "visa_subtype": "multiple_entry",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 90,
+      "government_fee_currency": "USD",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://overseas.mofa.go.kr/br-ko/brd/m_6106/view.do?seq=1015482&page=1"
+      ]
+    },
+    {
+      "visa_category": "eta",
+      "visa_subtype": "K-ETA",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 10000,
+      "government_fee_currency": "KRW",
+      "refundability": "Fees paid for already issued K-ETA approvals are non-refundable",
+      "accepted_payment_methods": ["credit card (online electronic payment)"],
+      "source_urls": [
+        "https://www.k-eta.go.kr/portal/guide/viewetaualification.do?locale=EN",
+        "https://overseas.mofa.go.kr/ie-en/brd/m_23773/view.do?seq=761699",
+        "https://www.mofa.go.kr/us-hagatna-en/brd/m_5521/view.do?seq=761689"
+      ]
+    }
+  ],
+  "portals": [
+    {
+      "portal_kind": "eta_portal",
+      "url": "https://www.k-eta.go.kr/",
+      "operator": "Korea Immigration Service, Ministry of Justice",
+      "operator_kind": "government",
+      "official_linking_source": "https://overseas.mofa.go.kr/ca-vancouver-en/brd/m_4542/view.do?seq=738221&page=1",
+      "supported_categories": ["eta (K-ETA for visa-free entrants)"],
+      "source_urls": [
+        "https://www.k-eta.go.kr/portal/guide/viewetaualification.do?locale=EN",
+        "https://overseas.mofa.go.kr/ru-ko/brd/m_7358/view.do?seq=1335897&page=1"
+      ]
+    },
+    {
+      "portal_kind": "evisa_portal",
+      "url": "https://www.visa.go.kr/",
+      "operator": "Ministry of Justice (Korea Visa Portal)",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": [
+        "e-visa for limited categories (E-1/E-3/E-4/E-5/E-7, C-3-3 medical, C-3-4 business, C-4, D-2)",
+        "visa information / Visa Navigator for all categories"
+      ],
+      "source_urls": [
+        "https://www.visa.go.kr/openPage.do?MENU_ID=10201",
+        "https://www.visa.go.kr/openPage.do?MENU_ID=10102"
+      ]
+    },
+    {
+      "portal_kind": "immigration_authority",
+      "url": "https://www.hikorea.go.kr/",
+      "operator": "Korea Immigration Service (HiKorea e-government portal for foreigners)",
+      "operator_kind": "government",
+      "official_linking_source": "https://www.visa.go.kr/openPage.do?MENU_ID=10102",
+      "supported_categories": ["entry/stay information", "immigration services"],
+      "source_urls": [
+        "https://hikorea.go.kr/info/InfoDatail.pt?CAT_SEQ=144&PARENT_ID=11"
+      ]
+    },
+    {
+      "portal_kind": "immigration_authority",
+      "url": "https://www.moj.go.kr/",
+      "operator": "Ministry of Justice, Republic of Korea",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["immigration policy announcements and press materials"],
+      "source_urls": [
+        "https://www.moj.go.kr/bbs/moj/183/599186/artclView.do"
+      ]
+    },
+    {
+      "portal_kind": "foreign_ministry",
+      "url": "https://www.mofa.go.kr/",
+      "operator": "Ministry of Foreign Affairs, Republic of Korea",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["visa policy press releases", "embassy/consulate network (overseas.mofa.go.kr)"],
+      "source_urls": [
+        "http://www.mofa.go.kr/www/brd/m_4080/view.do?seq=376381",
+        "https://www.mofa.go.kr/ca-en/brd/m_5231/view.do?seq=761797"
+      ]
+    }
+  ],
+  "passport_validity": {
+    "rule_kind": "unknown",
+    "months": null,
+    "min_blank_pages": null,
+    "condition_text": "No universal statutory passport-validity rule for visa-free entry was found on Korea Immigration Service pages. Korean missions state 6-month requirements in specific contexts: Embassy in Brazil — '입국일 기준 브라질 여권의 잔여 유효기간은 최소 6개월 이상 남아 있어야 합니다' (at least 6 months remaining from date of entry, for Brazilian passports); Embassy in UAE — visa applications require a passport valid 'more than 6 months'. Treat 6 months as common consular practice, not a verified universal entry rule.",
+    "source_urls": [
+      "https://overseas.mofa.go.kr/br-ko/brd/m_6106/view.do?seq=1015482&page=1",
+      "https://overseas.mofa.go.kr/ae-ko/brd/m_20354/view.do?seq=2&page=1"
+    ]
+  },
+  "jurisdictions": [],
+  "unresolved": [
+    "Full current visa-exemption list with per-country stays could not be fetched from a single current official page: the k-eta.go.kr eligibility list is rendered client-side (JavaScript), and MOFA 'wpge' content pages (e.g., overseas.mofa.go.kr/us-newyork-en/wpge/m_23502/contents.do, us-losangeles-en/wpge/m_4397/contents.do, mofa.go.kr/eng visa pages) all failed with redirect loops (>10 redirects). Lists used instead: Embassy in Denmark designated-country list (undated board post) and Sendai consulate waiver-agreement list (dated 2007-01-01) — details for some smaller countries may be outdated.",
+    "Full official list of the 22 countries covered by the temporary K-ETA exemption (until 2026-12-31) was not retrievable: the k-eta.go.kr notice page (board/viewboarddetail.do?bbsSn=299707) returned a system error; only USA and Canada are confirmed by name from fetched embassy notices. GBR/DEU/FRA/AUS/JPN/HKG/TWN/SGP coverage is widely reported but marked as 'verify on k-eta.go.kr' in dispositions.",
+    "ARE (UAE): confirmed on the designated visa-free entry list, but the current maximum stay was not verified from a fetched official page (the fetched Denmark-embassy list groups UAE in the default 30-day tier; a reciprocity MOU granting 90 days is reported in search results but no official page stating it was successfully fetched). maximum_stay left null.",
+    "CHN: the nationwide temporary visa-free program for group tourists is officially documented only through 2026-06-30 (MOFA press release). Media and a PM statement report extension to 2026-12-31, and MOJ reportedly extended the 6-country group-visa FEE waiver to 2026-12-31, but no official page confirming either extension could be fetched. As of the snapshot date (2026-07-23, after 2026-06-30), the program's operational status is uncertain; CHN is therefore recorded under the default EMBASSY_VISA_REQUIRED with the program described in policies.",
+    "Transit-without-visa programs (e.g., 30-day 'tourists in transit' B-2 arrangements) were not researched to verification; no transit_authorization rows recorded.",
+    "No universal passport-validity or blank-page rule was verified from the immigration authority; only per-embassy 6-month statements were found (see passport_validity).",
+    "IND: reports of a group-tourist visa FEE waiver (6 countries including India) until 2026-12-31 were not verified from an official fetched page; standard C-3 fee schedule recorded instead."
+  ]
+}
