@@ -138,10 +138,48 @@ def set_route_gate(body: GateBody, db=Depends(get_session), p: Principal = Depen
 @app.get("/cases/{application_id}/live-preflight")
 def case_live_preflight(application_id: str, db=Depends(get_session),
                         p: Principal = Depends(get_principal)):
-    from . import personal_gate
+    from . import personal_gate, passport_validity
     app_row = _owned(db, p, application_id)
     ec = _case_execution_class(app_row.destination_country, app_row.visa_type)
-    return personal_gate.live_preflight(db, app_row, ec)
+    pre = personal_gate.live_preflight(db, app_row, ec)
+    pre["passport_validity"] = passport_validity.check_case_passport(db, app_row)
+    return pre
+
+
+@app.get("/cases/{application_id}/passport-validity")
+def get_passport_validity(application_id: str, db=Depends(get_session),
+                          p: Principal = Depends(get_principal)):
+    """Phase 5 verdict: expiry vs. today + the destination's VERIFIED validity
+    rule (never a generic six-month assumption), with renewal instructions."""
+    from . import passport_validity
+    app_row = _owned(db, p, application_id)
+    return passport_validity.check_case_passport(db, app_row)
+
+
+# ---- Email delivery (Phase 8) ----
+@app.get("/cases/{application_id}/emails")
+def list_case_emails(application_id: str, db=Depends(get_session),
+                     p: Principal = Depends(get_principal)):
+    _owned(db, p, application_id)
+    rows = db.execute(select(models.EmailNotification).where(
+        models.EmailNotification.application_id == application_id)).scalars().all()
+    return {"emails": [{"id": r.id, "event": r.event, "subject": r.subject,
+                        "status": r.status, "locale": r.locale,
+                        "attempts": r.attempts} for r in rows]}
+
+
+@app.post("/admin/email/process-queue")
+def process_email_queue(db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from . import emails as emails_mod
+    require_admin(p)
+    return emails_mod.process_queue(db, org_id=p.org_id)
+
+
+@app.get("/admin/email/dead-letters")
+def email_dead_letters(db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from . import emails as emails_mod
+    require_admin(p)
+    return {"dead": emails_mod.dead_letters(db, p.org_id)}
 
 
 # ---- Route rules (Phase 2) + fees (Phase 3) ----
@@ -673,7 +711,15 @@ def approve_document(application_id: str, doc_id: str, edits: Optional[list[Fiel
     audit.record(db, org_id=p.org_id, application_id=application_id, action="document_approved",
                  detail={"doc_id": doc_id, "edits": [e.key for e in (edits or [])],
                          "signatures_invalidated": invalidated}, actor=p.user_id)
-    return {"approved": True, "answers": app_row.answers, "signatures_invalidated": invalidated}
+    # Phase 5: validate passport expiry IMMEDIATELY after applicant approval.
+    validity = None
+    if doc.doc_type == "passport":
+        from . import passport_validity
+        validity = passport_validity.check_case_passport(db, app_row)
+        if validity.get("blocking"):
+            passport_validity.enforce_and_notify(db, app_row, validity)
+    return {"approved": True, "answers": app_row.answers,
+            "signatures_invalidated": invalidated, "passport_validity": validity}
 
 
 @app.post("/cases/{application_id}/preferences")
@@ -955,6 +1001,13 @@ def start_case(application_id: str, db=Depends(get_session), p: Principal = Depe
                      detail={"missing_gates": e.missing_gates, "missing_info": e.missing_info},
                      actor=p.user_id)
         raise HTTPException(409, str(e))
+    # Phase 5: an expired / insufficient-validity passport blocks submission.
+    from . import passport_validity
+    validity = passport_validity.check_case_passport(db, app_row)
+    if validity.get("blocking"):
+        passport_validity.enforce_and_notify(db, app_row, validity)
+        raise HTTPException(409, detail={"reason": "passport_validity",
+                                         "verdict": validity})
     status, _ = service.signal(db, application_id, "start")
     _record_terminal_execution(db, p, application_id)
     return status

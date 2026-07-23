@@ -226,6 +226,13 @@ class EmailNotification(Base, TimestampMixin):
     subject: Mapped[str] = mapped_column(String(300))
     body: Mapped[str] = mapped_column(Text)
     sent: Mapped[bool] = mapped_column(Boolean, default=False)
+    # Phase 8 delivery lifecycle: queued -> sent | failed (retryable) -> dead (DLQ).
+    # 'recorded' = local dev recorder (never claims real delivery).
+    status: Mapped[str] = mapped_column(String(20), default="queued", index=True)
+    event: Mapped[str] = mapped_column(String(60), default="")
+    locale: Mapped[str] = mapped_column(String(12), default="en")
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    last_error: Mapped[str] = mapped_column(String(200), default="")
 
 
 class PortalDraft(Base, TimestampMixin):
