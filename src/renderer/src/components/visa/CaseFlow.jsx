@@ -11,7 +11,8 @@ import OcrReview from './OcrReview.jsx'
 import Preferences from './Preferences.jsx'
 import {
   SignatureModal, LiveViewModal, PaymentApprove, PaymentModal,
-  AppointmentCalendar, RescheduleConfirm, DeclarationModal
+  AppointmentCalendar, RescheduleConfirm, DeclarationModal,
+  StandingAuthModal, FinalReviewModal
 } from './handoffs.jsx'
 
 const JOURNEY = [
@@ -43,12 +44,15 @@ export default function CaseFlow({ client, caseId, onNotify }) {
   const [error, setError] = useState(null)
   const [modal, setModal] = useState(null)   // active handoff modal id
   const [busy, setBusy] = useState(false)
+  const [standing, setStanding] = useState(null)  // standing-authorization state
 
   async function refresh() {
     try {
       const c = await client.getCase(caseId)
       setStatus(c)
       client.audit(caseId).then((a) => setAudit(a.events || [])).catch(() => {})
+      client.getStandingAuthorization(caseId)
+        .then((s) => setStanding(s.current)).catch(() => {})
     } catch (e) { setError({ message: e.message }) }
   }
   useEffect(() => { refresh() }, [caseId])
@@ -110,7 +114,27 @@ export default function CaseFlow({ client, caseId, onNotify }) {
                 Add and approve your documents and set your appointment preferences,
                 then start. Ellis will pause for you at every step that needs you.
               </div>
-              <button className="btn" disabled={busy} onClick={start}>{busy ? 'Starting…' : 'Start application'}</button>
+              {standing?.granted && !standing?.revoked ? (
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                  <span className="chip chip--ink" title={standing.text_hash}>
+                    Standing authorization v{standing.version} granted
+                  </span>
+                  <button className="btn" disabled={busy} onClick={start}>
+                    {busy ? 'Starting…' : 'Start application'}
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 8 }}>
+                    First, grant Ellis its one-time standing authorization: it covers
+                    routine portal steps only. Payment always needs your separate,
+                    exact-amount confirmation.
+                  </div>
+                  <button className="btn" onClick={() => setModal('standing_auth')}>
+                    Review & grant authorization
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -183,6 +207,16 @@ export default function CaseFlow({ client, caseId, onNotify }) {
       )}
       {modal === 'personal_declaration' && (
         <DeclarationModal onResolve={resolve} onClose={() => setModal(null)} />
+      )}
+      {modal === 'standing_auth' && (
+        <StandingAuthModal client={client} caseId={caseId}
+          onClose={() => setModal(null)}
+          onDone={(res) => { setStanding(res); setModal(null); toast('Authorization granted') }} />
+      )}
+      {modal === 'final_review' && (
+        <FinalReviewModal client={client} caseId={caseId}
+          onClose={() => setModal(null)}
+          onDone={async () => { setModal(null); toast('Signed'); await start() }} />
       )}
     </div>
   )

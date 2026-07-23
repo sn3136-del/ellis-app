@@ -172,6 +172,30 @@ export function createVisaClient(session) {
     browserLiveView: (id) => call('GET', `/cases/${id}/browser-session/live-view`, session),
     closeBrowserSession: (id) => call('DELETE', `/cases/${id}/browser-session`, session),
 
+    // Standing authorization (§5): one versioned grant at onboarding covers
+    // routine actions; payment always stays a separate exact-amount approval.
+    getStandingAuthorization: (id, locale = 'en') =>
+      call('GET', `/cases/${id}/standing-authorization?locale=${encodeURIComponent(locale)}`, session),
+    grantStandingAuthorization: (id, body = {}) =>
+      call('POST', `/cases/${id}/standing-authorization`, session, body),
+    revokeStandingAuthorization: (id, reason = '') =>
+      call('DELETE', `/cases/${id}/standing-authorization`, session, { reason }),
+
+    // Final review + exact-version signature (§7).
+    getFinalReview: (id, locale = 'en') =>
+      call('GET', `/cases/${id}/final-review?locale=${encodeURIComponent(locale)}`, session),
+    createFinalReview: (id, locale = 'en') =>
+      call('POST', `/cases/${id}/final-review?locale=${encodeURIComponent(locale)}`, session, {}),
+    signFinalReview: (id, body) => call('POST', `/cases/${id}/final-review/sign`, session, body),
+
+    // Exact-amount payment authorization state (§6).
+    getPaymentAuthorization: (id) => call('GET', `/cases/${id}/payment-authorization`, session),
+    // The confirmation echoes the exact amount the applicant SAW, so a stale
+    // display can never approve a different figure.
+    approvePaymentExact: (id, amountCents, currency) =>
+      call('POST', `/cases/${id}/signals/approve_payment`, session,
+           { amount_cents: amountCents, currency }),
+
     // Snapshot administration (admin session required).
     adminSnapshotCoverage: () => call('GET', '/admin/snapshot/coverage', session),
     adminSnapshotBatches: () => call('GET', '/admin/snapshot/batches', session),
@@ -203,7 +227,8 @@ export const HANDOFF_UI = {
   appointment_selection: 'AppointmentCalendar', // select_appointment(slot_id)
   no_availability: 'AppointmentCalendar',
   reschedule_approval: 'RescheduleConfirm',     // approve_reschedule
-  personal_declaration: 'DeclarationModal'      // complete_declaration
+  personal_declaration: 'DeclarationModal',     // complete_declaration
+  final_review: 'FinalReviewModal'              // review + sign the exact version
 }
 
 // Which signal resolves a given handoff (used by the case flow to advance).
@@ -216,7 +241,8 @@ export const HANDOFF_SIGNAL = {
   payment: 'complete_payment',
   appointment_selection: 'select_appointment',
   reschedule_approval: 'approve_reschedule',
-  personal_declaration: 'complete_declaration'
+  personal_declaration: 'complete_declaration',
+  final_review: 'start'
 }
 
 // Human-readable label + one-line guidance per handoff, for the flow header.
@@ -234,5 +260,6 @@ export const HANDOFF_COPY = {
   appointment_selection: ['Choose an appointment', 'Pick a qualifying slot from your calendar.'],
   no_availability: ['No slots yet', 'Nothing matches your preferences yet — Ellis keeps watching.'],
   reschedule_approval: ['Approve reschedule', 'An earlier slot is available — approve moving to it.'],
-  personal_declaration: ['Sign the declaration', 'Only you can sign the government declaration, under penalty of perjury.']
+  personal_declaration: ['Sign the declaration', 'Only you can sign the government declaration, under penalty of perjury.'],
+  final_review: ['Final review & signature', 'Review the exact final application and sign it before Ellis submits.']
 }

@@ -339,20 +339,42 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
 
 // ---- Payment approval (handoff: payment_approval) --------------------------
 export function PaymentApprove({ pending, onResolve, onClose }) {
+  const t = useT()
   const [busy, setBusy] = useState(false)
-  const fee = pending?.fee
+  const [error, setError] = useState(null)
+  const fee = pending?.fee || {}
+  const rows = [
+    fee.government_fee_cents != null &&
+      { label: t('pay.governmentFee'), value: `${(fee.government_fee_cents / 100).toFixed(2)} ${fee.currency || ''}` },
+    fee.service_fee_cents != null && fee.service_fee_cents > 0 &&
+      { label: t('pay.serviceFee'), value: `${(fee.service_fee_cents / 100).toFixed(2)} ${fee.currency || ''}` },
+    { label: t('pay.payee'), value: fee.payee || pending?.payee || t('pay.officialPortal') },
+    { label: t('pay.refundability'), value: fee.refundability || t('pay.refundUnknown') },
+    fee.source_url && { label: t('pay.feeSource'), value: fee.source_url }
+  ].filter(Boolean)
   return (
     <Overlay onClose={onClose} width={520}>
-      <Head title="Approve the official fee" onClose={onClose}
-            sub="Confirm the fee before the payment window opens. You pay it yourself." />
+      <Head title={t('pay.confirmTitle')} onClose={onClose} sub={t('pay.confirmSub')} />
       <div className="stat" style={{ marginTop: 12 }}>
         <div className="stat__num">{formatFee(fee) || '—'}</div>
-        <div className="stat__cap">Official portal fee</div>
+        <div className="stat__cap">{t('pay.exactAmount')}</div>
       </div>
+      <KVList fields={rows} />
+      <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 10 }}>
+        {t('pay.exactNote')}
+      </div>
+      {error && <ErrorNote error={error} />}
       <div className="modal__foot">
-        <button className="btn btn--ghost" onClick={onClose}>Cancel</button>
-        <button className="btn" disabled={busy} onClick={async () => { setBusy(true); await onResolve('approve_payment') }}>
-          {busy ? 'Approving…' : 'Approve fee'}
+        <button className="btn btn--ghost" onClick={onClose}>{t('pay.cancel')}</button>
+        <button className="btn" disabled={busy || fee.amount == null} onClick={async () => {
+          setBusy(true); setError(null)
+          try {
+            // Echo the EXACT amount shown so a stale display can never approve
+            // a different figure — the backend refuses a mismatch (§6).
+            await onResolve('approve_payment', { amount_cents: fee.amount, currency: fee.currency })
+          } catch (e) { setError({ message: e.message }); setBusy(false) }
+        }}>
+          {busy ? t('pay.confirming') : t('pay.confirmCta')}
         </button>
       </div>
     </Overlay>
@@ -465,6 +487,148 @@ export function DeclarationModal({ onResolve, onClose }) {
         <button className="btn" disabled={!agree || busy} onClick={async () => { setBusy(true); await onResolve('complete_declaration') }}>
           {busy ? 'Submitting…' : 'I personally declare'}
         </button>
+      </div>
+    </Overlay>
+  )
+}
+
+// ---- Standing authorization (brief §5) -------------------------------------
+// One versioned grant at onboarding covers routine actions (portal selection,
+// forms, uploads, booking within preferences, post-signature submission).
+// Payment always remains a separate exact-amount confirmation.
+export function StandingAuthModal({ client, caseId, locale = 'en', onDone, onClose }) {
+  const t = useT()
+  const [data, setData] = useState(null)
+  const [agree, setAgree] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState(null)
+  useEffect(() => {
+    client.getStandingAuthorization(caseId, locale)
+      .then(setData).catch((e) => setError({ message: e.message }))
+  }, [caseId, locale])
+  return (
+    <Overlay onClose={onClose}>
+      <Head title={t('standing.title')} onClose={onClose} sub={t('standing.sub')} />
+      {!data && !error && <Loading label={t('standing.loading')} />}
+      {data && (
+        <>
+          <div className="card card--soft" style={{ padding: 14, maxHeight: 260, overflowY: 'auto',
+            whiteSpace: 'pre-wrap', fontSize: 12.5, fontFamily: 'ui-monospace, monospace' }}>
+            {data.text}
+          </div>
+          <ul style={{ fontSize: 12.5, color: 'var(--muted)', margin: '10px 0 0 18px' }}>
+            <li>{t('standing.d.official')}</li>
+            <li>{t('standing.d.routine')}</li>
+            <li>{t('standing.d.noInvent')}</li>
+            <li>{t('standing.d.notAll')}</li>
+            <li>{t('standing.d.truth')}</li>
+            <li>{t('standing.d.sign')}</li>
+            <li>{t('standing.d.payment')}</li>
+            <li>{t('standing.d.secure')}</li>
+            <li>{t('standing.d.personal')}</li>
+          </ul>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', margin: '12px 0', fontSize: 13 }}>
+            <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
+            <span>{t('standing.agree', { version: data.text_version })}</span>
+          </label>
+        </>
+      )}
+      {error && <ErrorNote error={error} />}
+      <div className="modal__foot">
+        <button className="btn btn--ghost" onClick={onClose}>{t('standing.later')}</button>
+        <button className="btn" disabled={!agree || busy || !data} onClick={async () => {
+          setBusy(true); setError(null)
+          try {
+            const res = await client.grantStandingAuthorization(caseId, { locale })
+            onDone && onDone(res)
+          } catch (e) { setError({ message: e.message }); setBusy(false) }
+        }}>{busy ? t('standing.granting') : t('standing.grant')}</button>
+      </div>
+    </Overlay>
+  )
+}
+
+// ---- Final review + exact-version signature (brief §7) ---------------------
+// The applicant reviews the complete final package, then signs that EXACT
+// version (content hash echoed). Any later material change invalidates it.
+export function FinalReviewModal({ client, caseId, locale = 'en', onDone, onClose }) {
+  const t = useT()
+  const [review, setReview] = useState(null)   // created review version + step-up token
+  const [consent, setConsent] = useState(false)
+  const [intent, setIntent] = useState(false)
+  const [signature, setSignature] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState(null)
+  useEffect(() => {
+    client.createFinalReview(caseId, locale)
+      .then(setReview).catch((e) => setError({ message: e.message }))
+  }, [caseId, locale])
+  const pkg = review?.package || {}
+  const answerRows = Object.entries(pkg.answers || {})
+    .map(([label, value]) => ({ label, value: String(value) }))
+  const docRows = (pkg.documents || [])
+    .map((d) => ({ label: d.name, value: d.approved ? t('final.docApproved') : t('final.docPending') }))
+  return (
+    <Overlay onClose={onClose}>
+      <Head title={t('final.title')} onClose={onClose} sub={t('final.sub')} />
+      {!review && !error && <Loading label={t('final.loading')} />}
+      {review && (
+        <div style={{ maxHeight: '46vh', overflowY: 'auto' }}>
+          <div className="eyebrow">{t('final.travel')}</div>
+          <KVList fields={[
+            { label: t('final.applicant'), value: pkg.applicant?.full_name || '' },
+            { label: t('final.destination'), value: pkg.travel?.destination || '' },
+            { label: t('final.visaType'), value: pkg.travel?.visa_type || '' },
+            { label: t('final.portal'), value: pkg.portal || '' },
+            pkg.fees?.available !== false && pkg.fees?.amount != null &&
+              { label: t('final.fee'), value: `${(pkg.fees.amount / 100).toFixed(2)} ${pkg.fees.currency || ''}` },
+            pkg.appointment &&
+              { label: t('final.appointment'), value: pkg.appointment.confirmation_no || pkg.appointment.slot_id }
+          ].filter(Boolean)} />
+          <div className="eyebrow" style={{ marginTop: 10 }}>{t('final.answers')}</div>
+          <KVList fields={answerRows} />
+          {docRows.length > 0 && (
+            <>
+              <div className="eyebrow" style={{ marginTop: 10 }}>{t('final.documents')}</div>
+              <KVList fields={docRows} />
+            </>
+          )}
+          <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 8 }}>
+            {t('final.versionLine', { version: review.version, hash: (review.content_hash || '').slice(0, 12) })}
+          </div>
+        </div>
+      )}
+      {review && (
+        <>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', margin: '10px 0 4px', fontSize: 13 }}>
+            <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+            <span>{t('final.consent')}</span>
+          </label>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', margin: '4px 0', fontSize: 13 }}>
+            <input type="checkbox" checked={intent} onChange={(e) => setIntent(e.target.checked)} />
+            <span>{t('final.intent')}</span>
+          </label>
+          <input className="input" style={{ marginTop: 6 }} placeholder={t('final.typedSignature')}
+                 value={signature} onChange={(e) => setSignature(e.target.value)} />
+        </>
+      )}
+      {error && <ErrorNote error={error} />}
+      <div className="modal__foot">
+        <button className="btn btn--ghost" onClick={onClose}>{t('final.later')}</button>
+        <button className="btn" disabled={!review || !consent || !intent || !signature.trim() || busy}
+                onClick={async () => {
+          setBusy(true); setError(null)
+          try {
+            await client.signFinalReview(caseId, {
+              review_version_id: review.id,
+              content_hash: review.content_hash,
+              consent_given: consent, intent_confirmed: intent,
+              signature_method: 'typed', signature_value: signature.trim(),
+              step_up_token: review.step_up_token
+            })
+            onDone && onDone()
+          } catch (e) { setError({ message: e.message }); setBusy(false) }
+        }}>{busy ? t('final.signing') : t('final.signCta')}</button>
       </div>
     </Overlay>
   )
