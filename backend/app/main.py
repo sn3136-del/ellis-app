@@ -44,9 +44,17 @@ app.add_middleware(
 )
 
 
+# Phase 17: structured redacted request logging + flag-gated Sentry/OTel.
+from .observability import RequestLogMiddleware as _ReqLog, init_sentry as _init_sentry, init_otel as _init_otel  # noqa: E402
+
+app.add_middleware(_ReqLog)
+
+
 @app.on_event("startup")
 def _startup():
     create_all()
+    _init_sentry()
+    _init_otel()
 
 
 @app.get("/healthz")
@@ -154,6 +162,59 @@ def get_passport_validity(application_id: str, db=Depends(get_session),
     from . import passport_validity
     app_row = _owned(db, p, application_id)
     return passport_validity.check_case_passport(db, app_row)
+
+
+# ---- Document preview (Phase 13): signed, expiring content URLs ----
+_DOC_URL_TTL_SECONDS = 300
+
+
+def _doc_sig(document_id: str, exp: int) -> str:
+    import hmac as _hmac
+    import hashlib as _hashlib
+    from .config import settings as _settings
+    payload = f"doc.{document_id}.{exp}"
+    return _hmac.new(_settings().action_token_secret.encode(), payload.encode(),
+                     _hashlib.sha256).hexdigest()[:32]
+
+
+@app.get("/cases/{application_id}/documents/{doc_id}/url")
+def document_preview_url(application_id: str, doc_id: str, db=Depends(get_session),
+                         p: Principal = Depends(get_principal)):
+    """Mint a short-lived signed URL for the in-app preview. Authenticated +
+    tenant-checked here; the content endpoint then only needs the signature (so
+    <img>/<iframe> can load it without headers). No filesystem paths, no bucket
+    URLs, no credentials are ever exposed."""
+    import time as _time
+    _owned(db, p, application_id)
+    doc = db.get(models.StoredDocument, doc_id)
+    if not doc or doc.application_id != application_id:
+        raise HTTPException(404, "document not found")
+    blob = db.get(models.DocumentBlob, doc_id)
+    if blob is None:
+        return {"available": False,
+                "reason": "no stored content for this document (text-only fixture)"}
+    exp = int(_time.time()) + _DOC_URL_TTL_SECONDS
+    return {"available": True, "mime": blob.mime, "expires_in": _DOC_URL_TTL_SECONDS,
+            "url": f"/documents/{doc_id}/content?exp={exp}&sig={_doc_sig(doc_id, exp)}"}
+
+
+@app.get("/documents/{doc_id}/content")
+def document_content(doc_id: str, exp: int, sig: str, db=Depends(get_session)):
+    """Serve preview bytes for a valid, unexpired signed URL. The signature (not
+    a session) is the authorization — minted only for the owning tenant."""
+    import hmac as _hmac
+    import time as _time
+    if exp < _time.time():
+        raise HTTPException(401, "preview link expired")
+    if not _hmac.compare_digest(sig, _doc_sig(doc_id, exp)):
+        raise HTTPException(401, "invalid preview signature")
+    blob = db.get(models.DocumentBlob, doc_id)
+    if blob is None:
+        raise HTTPException(404, "document content not found")
+    from fastapi.responses import Response
+    return Response(content=blob.content, media_type=blob.mime,
+                    headers={"Cache-Control": "private, no-store",
+                             "Content-Disposition": "inline"})
 
 
 # ---- Email delivery (Phase 8) ----
@@ -412,6 +473,18 @@ def revoke_setup_component(component: str, db=Depends(get_session), p: Principal
     return setup_mod.revoke_component(db, org_id=p.org_id, component=component, actor=p.user_id)
 
 
+@app.get("/diagnostics/providers")
+def provider_diagnostics(_: Principal = Depends(get_principal)):
+    """Circuit-breaker states, kill switches, and observability status — no
+    secrets, no raw provider responses."""
+    from . import provider_errors
+    from .config import killswitches
+    from . import observability
+    return {"breakers": provider_errors.breakers_snapshot(),
+            "kill_switches": killswitches(),
+            "observability": observability.status()}
+
+
 @app.get("/diagnostics/ocr")
 def ocr_diagnostics(_: Principal = Depends(get_principal)):
     # Non-sensitive booleans + redacted error category only. Never returns
@@ -615,6 +688,12 @@ def add_document(application_id: str, body: AddDocument, db=Depends(get_session)
                                 extracted_fields=fields_map)
     db.add(doc)
     db.commit()
+    # Phase 13: keep the bytes for the in-app preview (served only via the
+    # authenticated endpoint / short-lived signed URLs — never a local path).
+    if content:
+        db.add(models.DocumentBlob(document_id=doc.id, org_id=p.org_id,
+                                   mime=body.mime, content=content))
+        db.commit()
     audit.record(db, org_id=p.org_id, application_id=application_id, action="document_ocr",
                  detail={"doc_type": doc_type, "mrz_valid": result.mrz_valid,
                          "engine": ocr_meta.get("primary"), "fallback_used": ocr_meta.get("fallback_used"),

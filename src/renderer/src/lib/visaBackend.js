@@ -96,6 +96,17 @@ export function createVisaClient(session) {
     rotateSetupComponent: (component, value) => call('POST', `/setup/rotate/${component}`, session, { value }),
     revokeSetupComponent: (component) => call('POST', `/setup/revoke/${component}`, session, {}),
 
+    // Document preview (Phase 13): short-lived signed URL for in-app rendering.
+    documentPreviewUrl: (id, docId) => call('GET', `/cases/${id}/documents/${docId}/url`, session),
+
+    // Personal-test gate + route data
+    livePreflight: (id) => call('GET', `/cases/${id}/live-preflight`, session),
+    passportValidity: (id) => call('GET', `/cases/${id}/passport-validity`, session),
+    routeReadiness: (params) => call('GET', `/routes/readiness?${new URLSearchParams(params)}`, session),
+    routeFees: (params) => call('GET', `/routes/fees?${new URLSearchParams(params)}`, session),
+    routeCoverage: () => call('GET', '/routes/coverage', session),
+    caseEmails: (id) => call('GET', `/cases/${id}/emails`, session),
+
     // Privacy (Phase 10) + ops (Phase 11)
     exportCase: (id) => call('GET', `/cases/${id}/export`, session),
     exportOrg: () => call('GET', '/export', session),

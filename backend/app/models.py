@@ -7,7 +7,8 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
-from sqlalchemy import String, Integer, BigInteger, Float, Boolean, ForeignKey, Text, JSON, DateTime
+from sqlalchemy import (String, Integer, BigInteger, Float, Boolean, ForeignKey, Text,
+                        JSON, DateTime, LargeBinary)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base
@@ -156,6 +157,18 @@ class StoredDocument(Base, TimestampMixin):
     approved: Mapped[bool] = mapped_column(Boolean, default=False)
     quality_warnings: Mapped[list] = mapped_column(JSON, default=list)
     application: Mapped[VisaApplication] = relationship(back_populates="documents")
+
+
+class DocumentBlob(Base):
+    """Document bytes for the in-app preview (Phase 13). Served ONLY through the
+    authenticated content endpoint / short-lived signed URLs — never a local
+    filesystem path, never a raw bucket URL. Production replaces this table with
+    S3/GCS + KMS behind the same endpoint contract."""
+    __tablename__ = "document_blobs"
+    document_id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    org_id: Mapped[str] = mapped_column(String(64), index=True)
+    mime: Mapped[str] = mapped_column(String(80))
+    content: Mapped[bytes] = mapped_column(LargeBinary)
 
 
 class AppointmentPreference(Base, TimestampMixin):

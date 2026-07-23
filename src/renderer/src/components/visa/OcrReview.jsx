@@ -10,6 +10,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useToast, Loading, ErrorNote, Empty } from '../ui.jsx'
 import { fieldRows, documentReady } from '../../lib/visaSession.js'
+import DocPreview from './DocPreview.jsx'
 
 const ALLOWED = { 'application/pdf': 'pdf', 'image/jpeg': 'jpg', 'image/png': 'png', 'image/tiff': 'tiff' }
 const MAX_BYTES = 10 * 1024 * 1024
@@ -69,6 +70,7 @@ function DocumentCard({ doc, conflicts, client, caseId, onApproved }) {
   const [edits, setEdits] = useState({})     // key -> {state, value}
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
+  const [preview, setPreview] = useState(false)   // Phase 13 in-app preview
   const rows = fieldRows(doc.extracted_fields, conflicts)
   const rejectedMissing = rows.some((r) => (edits[r.key]?.state === 'rejected'))
 
@@ -103,7 +105,9 @@ function DocumentCard({ doc, conflicts, client, caseId, onApproved }) {
             {doc.approved && <span className="chip chip--ink" style={{ marginLeft: 6 }}>approved</span>}
           </div>
         </div>
+        <button className="btn btn--ghost btn--sm" onClick={() => setPreview(true)}>Preview</button>
       </div>
+      {preview && <DocPreview client={client} caseId={caseId} doc={doc} onClose={() => setPreview(false)} />}
       {(doc.quality_warnings || []).length > 0 && (
         <div className="card card--soft" style={{ padding: 10, marginBottom: 10, fontSize: 12 }}>
           <strong>Quality notes:</strong> {doc.quality_warnings.join(', ')}
