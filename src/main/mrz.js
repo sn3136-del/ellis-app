@@ -37,6 +37,34 @@ export function mrzDate(yymmdd, isExpiry) {
 const TO_DIGIT = { O: '0', Q: '0', D: '0', I: '1', L: '1', Z: '2', S: '5', B: '8', G: '6', T: '7', A: '4' }
 const TO_ALPHA = { 0: 'O', 1: 'I', 2: 'Z', 5: 'S', 8: 'B', 6: 'G' }
 
+// A name is letters only. When OCR reads a digit in a name field it is ALWAYS a
+// misread letter, so map the common confusions back (0→O, 1→I, 5→S, 8→B) and
+// drop any residual digit/glyph. Total and idempotent: 'N0EMI ELIAS' → 'NOEMI
+// ELIAS'. Used everywhere a passport name is parsed, stored, or compared.
+const NAME_DIGIT_TO_ALPHA = { 0: 'O', 1: 'I', 5: 'S', 8: 'B' }
+
+export function normalizeName(s) {
+  if (s == null) return ''
+  return String(s).toUpperCase()
+    .replace(/[<]+/g, ' ')
+    .replace(/[0158]/g, (d) => NAME_DIGIT_TO_ALPHA[d])
+    .replace(/[^A-Z '-]+/g, ' ')   // letters-only zone (+ space, apostrophe, hyphen)
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+// Token-aware agreement between two names after letters-only normalization, so
+// a digit-confusion can never make matching names look different. Tolerates a
+// single-character OCR slip per token and one missing token in longer names.
+export function namesAgree(a, b) {
+  const ta = normalizeName(a).split(' ').filter(Boolean)
+  const tb = normalizeName(b).split(' ').filter(Boolean)
+  if (!ta.length || !tb.length) return true
+  const hit = (t) => tb.some((x) => x === t || (t.length >= 3 && editDistance(t, x) <= 1))
+  const hits = ta.filter(hit).length
+  return hits >= Math.min(ta.length, tb.length) - (ta.length > 2 ? 1 : 0) && hits >= 1
+}
+
 function coerceDigits(s) {
   return s.replace(/[A-Z]/g, (c) => TO_DIGIT[c] || c)
 }
@@ -88,8 +116,10 @@ export function parseMrz(text) {
   const issuer = l1.slice(2, 5).replace(/</g, '')
   const nameZone = l1.slice(5)
   const [surRaw, givRaw = ''] = nameZone.split('<<')
-  fields.surname = surRaw.replace(/</g, ' ').trim()
-  fields.givenNames = givRaw.replace(/</g, ' ').trim()
+  // Names are letters only: normalize OCR digit-for-letter misreads at the
+  // source so 'N0EMI' is stored as 'NOEMI', never a digit.
+  fields.surname = normalizeName(surRaw)
+  fields.givenNames = normalizeName(givRaw)
   fields.fullName = `${fields.givenNames} ${fields.surname}`.trim()
   fields.issuingCountry = ISO3_COUNTRY[issuer] || issuer
   if (l2) {
@@ -140,21 +170,33 @@ export function refineMrzWithVisualZone(fields, text) {
   if (!fields) return fields
   const grab = (re) => {
     const m = text.match(re)
-    return m ? m[1].trim().toUpperCase().replace(/\s{2,}/g, ' ') : null
+    return m ? m[1].trim() : null
   }
-  const vSurname = grab(/surname[^A-Za-z\n]{0,4}([A-Za-z][A-Za-z '-]{0,30})/i)
-  const vGiven = grab(/given\s*names?[^A-Za-z\n]{0,4}([A-Za-z][A-Za-z '-]{0,30})/i)
+  // Visual-zone reads are letters-only too — normalize them the same way so a
+  // digit-confusion on either side never registers as a disagreement.
+  const vSurname = normalizeName(grab(/surname[^A-Za-z0-9\n]{0,4}([A-Za-z0-9][A-Za-z0-9 '-]{0,30})/i))
+  const vGiven = normalizeName(grab(/given\s*names?[^A-Za-z0-9\n]{0,4}([A-Za-z0-9][A-Za-z0-9 '-]{0,30})/i))
   const vNumber = grab(/passport\s*(?:no|number)\.?[^A-Z0-9\n]{0,4}([A-Z0-9]{6,10})/i)
-  const roughly = (a, b) => {
-    if (!a || !b) return false
-    const ta = a.split(/\s+/), tb = b.split(/\s+/)
-    return ta.some((x) => tb.some((y) => x === y || editDistance(x, y) <= Math.max(1, Math.floor(Math.max(x.length, y.length) / 4))))
-  }
-  if (vSurname && (roughly(vSurname, fields.surname) || roughly(vSurname, fields.givenNames) || !fields.surname)) {
+  const vFull = `${vGiven} ${vSurname}`.trim()
+
+  // The MRZ machine-encoded name is the authoritative source; the visual zone
+  // is a cross-check (brief: "prefer the valid MRZ value"). Only fall back to
+  // the visual name when the MRZ name is missing.
+  if (!fields.surname && vSurname) {
     fields.surname = vSurname
-    if (vGiven) fields.givenNames = vGiven
+    fields.givenNames = vGiven
     fields.fullName = `${fields.givenNames || ''} ${fields.surname}`.trim()
     fields.visualZoneVerified = true
+  } else if (vSurname || vGiven) {
+    // Both present: agreement (after normalization) confirms; a real
+    // disagreement is flagged so the applicant confirms before it is used.
+    if (namesAgree(vFull, fields.fullName)) {
+      fields.visualZoneVerified = true
+    } else {
+      fields.nameNeedsConfirmation = true
+      fields.visualName = vFull
+      fields.mrzName = fields.fullName
+    }
   }
   if (vNumber && fields.passportNumber && vNumber !== fields.passportNumber) {
     // Trust whichever side validates: the MRZ number wins when its check

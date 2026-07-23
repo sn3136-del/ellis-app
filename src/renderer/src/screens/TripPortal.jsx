@@ -46,7 +46,13 @@ const ARRIVAL_SYSTEMS = {
 // Loose name comparison mirroring the agent's verifier: order-insensitive
 // token overlap, tolerant of one OCR-level character difference per token.
 function looseNameMatch(a, b) {
-  const norm = (s) => String(s || '').toUpperCase().replace(/[^A-Z ]/g, ' ').split(/\s+/).filter(Boolean)
+  // Names are letters only: map common OCR digit-for-letter misreads back
+  // (0→O, 1→I, 5→S, 8→B) BEFORE stripping, so 'N0EMI' normalizes to 'NOEMI'
+  // instead of splitting into 'N' + 'EMI' and falsely mismatching 'NOEMI'.
+  const NAME_DIGIT = { 0: 'O', 1: 'I', 5: 'S', 8: 'B' }
+  const norm = (s) => String(s || '').toUpperCase()
+    .replace(/[0158]/g, (d) => NAME_DIGIT[d])
+    .replace(/[^A-Z ]/g, ' ').split(/\s+/).filter(Boolean)
   const dist = (x, y) => {
     const dp = Array.from({ length: x.length + 1 }, (_, i) => [i, ...Array(y.length).fill(0)])
     for (let j = 0; j <= y.length; j++) dp[0][j] = j

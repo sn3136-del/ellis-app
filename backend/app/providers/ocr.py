@@ -69,6 +69,22 @@ def _repair_numeric(field: str) -> str:
                  .replace("B", "8").replace("Z", "2").replace("G", "6"))
 
 
+# A passport name is letters only, so a digit read inside a name field is always
+# a misread letter. Map the common confusions back (0->O, 1->I, 5->S, 8->B) and
+# drop any residual digit so 'N0EMI ELIAS' becomes 'NOEMI ELIAS'. Total and
+# idempotent; the single source of name normalization on the backend.
+_NAME_DIGIT_TO_ALPHA = str.maketrans({"0": "O", "1": "I", "5": "S", "8": "B"})
+
+
+def normalize_name(s: str) -> str:
+    import re
+    if not s:
+        return ""
+    s = s.upper().replace("<", " ").translate(_NAME_DIGIT_TO_ALPHA)
+    s = re.sub(r"[^A-Z '-]+", " ", s)   # letters-only zone (+ space, ' , -)
+    return re.sub(r"\s+", " ", s).strip()
+
+
 def _find_td3_lines(text: str):
     """Locate the two TD3 MRZ lines anywhere in OCR text, tolerant of spaces,
     surrounding text, leading characters, and line-wrapping. Uses search (not
@@ -101,8 +117,10 @@ def parse_mrz(text: str) -> dict | None:
         return None
     issuing = l1[2:5].replace("<", "")
     names = l1[5:].split("<<", 1)
-    surname = names[0].replace("<", " ").strip()
-    given = names[1].replace("<", " ").strip() if len(names) > 1 else ""
+    # Names are letters only: normalize OCR digit-for-letter misreads so a name
+    # is never stored with a digit (e.g. 'N0EMI' -> 'NOEMI').
+    surname = normalize_name(names[0])
+    given = normalize_name(names[1]) if len(names) > 1 else ""
     passport_no = l2[0:9]
     nationality = l2[10:13].replace("<", "")
     # Date fields are strictly numeric YYMMDD — repair OCR letter/digit confusion

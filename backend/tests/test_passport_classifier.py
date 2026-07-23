@@ -198,3 +198,42 @@ def test_endpoint_supporting_document_not_rejected(client):
     b = r.json()
     assert b["rejected"] is False
     assert b["accepted_as_passport_identity"] is False
+
+
+# ---- passport-name OCR normalization (letters-only names) regression ----
+# Given name NOEMI misread as N0EMI (zero for O); surname ELIAS.
+MRZ_N0EMI = ("P<UTOELIAS<<N0EMI<<<<<<<<<<<<<<<<<<<<<<<<<<<\n"
+             "L898902C36UTO7408122F1204159ZE184226B<<<<<10")
+
+
+def test_normalize_name_maps_digit_confusions_to_letters_only():
+    assert ocr.normalize_name("N0EMI ELIAS") == "NOEMI ELIAS"
+    assert ocr.normalize_name("N0EM1") == "NOEMI"      # 0->O, 1->I
+    assert ocr.normalize_name("5TEPHEN") == "STEPHEN"  # 5->S
+    assert ocr.normalize_name("8LAKE") == "BLAKE"      # 8->B
+    # Filler chevrons collapse; the result is letters only.
+    assert ocr.normalize_name("EL<IAS<<") == "EL IAS"
+
+
+def test_parse_mrz_name_is_letters_only_never_a_digit():
+    mrz = ocr.parse_mrz(MRZ_N0EMI)
+    assert mrz is not None
+    assert mrz["given_names"] == "NOEMI"
+    assert mrz["surname"] == "ELIAS"
+    assert not any(ch.isdigit() for ch in mrz["given_names"] + mrz["surname"])
+
+
+def test_digit_confused_name_does_not_create_a_false_cross_document_conflict():
+    # The same person's name read cleanly on one doc and with an OCR digit on
+    # another must NOT register as a conflict once both are normalized.
+    clean = ocr.parse_mrz(PASSPORT_MRZ.replace("ERIKSSON<<ANNA<MARIA", "ELIAS<<NOEMI"))
+    dirty = ocr.parse_mrz(MRZ_N0EMI)
+    docs = [{"doc_type": "passport", "extracted_fields": {
+                "surname": {"value": clean["surname"]},
+                "given_names": {"value": clean["given_names"]}}},
+            {"doc_type": "passport", "extracted_fields": {
+                "surname": {"value": dirty["surname"]},
+                "given_names": {"value": dirty["given_names"]}}}]
+    conflicts = ocr.cross_document_conflicts(docs)
+    name_conflicts = [c for c in conflicts if c["field"] in ("surname", "given_names")]
+    assert name_conflicts == []
