@@ -117,6 +117,10 @@ class LiveKimiProvider:  # pragma: no cover - needs a real key/network
         self._timeout = s.kimi_timeout_seconds
 
     def _chat(self, system: str, user: str, json_mode: bool = True) -> dict:
+        # Always prefix the Ellis identity so the model can never present itself
+        # as Kimi/Moonshot/the underlying model, or as an official/lawyer/embassy.
+        from ..i18n import ELLIS_SYSTEM_IDENTITY
+        system = ELLIS_SYSTEM_IDENTITY + "\n\n" + system
         body = {"model": self._model, "messages": [
             {"role": "system", "content": system}, {"role": "user", "content": user}]}
         if json_mode:
@@ -138,6 +142,16 @@ class LiveKimiProvider:  # pragma: no cover - needs a real key/network
     def summarize_review(self, application: dict) -> dict:
         return self._chat("Summarize this application for applicant review. JSON {summary,risks}.",
                           json.dumps(application))
+
+    def translate(self, text: str, target: str, source: str) -> str:  # pragma: no cover - needs key
+        from ..i18n import LANGUAGE_NAMES
+        tgt = LANGUAGE_NAMES.get(target, target)
+        out = self._chat(
+            f"Translate the user's text into {tgt}. Keep the meaning faithful and "
+            f"natural. Preserve every ⟦T…⟧ sentinel EXACTLY as written — do not "
+            f"translate, reorder, or remove them. Reply JSON {{\"translated\":\"...\"}}.",
+            text)
+        return out.get("translated", text)
 
     def run(self, goal: str, context: dict) -> AgentResult:
         # A bounded tool-calling loop would live here; every proposed call is

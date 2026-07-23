@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { ellis, ROLE_TABS } from './lib/api.js'
 import { buildTourSteps } from './lib/tour.js'
+import { LocaleProvider } from './lib/locale.jsx'
 import { ToastProvider } from './components/ui.jsx'
 import Sidebar from './components/Sidebar.jsx'
 import OnboardingDemo from './components/OnboardingDemo.jsx'
@@ -20,6 +21,12 @@ import VisaConsole from './screens/VisaConsole.jsx'
 import AdminConsole from './screens/AdminConsole.jsx'
 
 export default function App() {
+  // LocaleProvider wraps every branch so the language toggle + t() work on the
+  // role/country/login screens and the main shell alike.
+  return <LocaleProvider><AppInner /></LocaleProvider>
+}
+
+function AppInner() {
   const [booted, setBooted] = useState(false)
   const [showDemo, setShowDemo] = useState(false)
   const [role, setRole] = useState(null)

@@ -1,0 +1,103 @@
+"""Phase 6 — dynamic translation (token/identifier preservation, caching,
+honest unavailability) + assistant identity (always Ellis, never the model,
+never a government official/lawyer/embassy)."""
+from tests.conftest import AUTH
+from app import i18n
+
+
+def _fake_translator(masked, target, source):
+    # A stand-in that "translates" by tagging — the point is that it must not
+    # touch the ⟦T…⟧ sentinels, so we can prove the tokens survive.
+    return f"[{target}] " + masked
+
+
+def test_protect_and_restore_roundtrip():
+    text = ("Upload passport.pdf before 2026-10-10; the fee is $80. "
+            "See https://evisa.gov.vn and enter passport L898902C3 for {name}.")
+    masked, mapping = i18n.protect_tokens(text)
+    # None of the protected tokens remain in the masked text.
+    for tok in ("passport.pdf", "2026-10-10", "$80", "https://evisa.gov.vn", "L898902C3", "{name}"):
+        assert tok not in masked, tok
+    # Restoring returns the exact original.
+    assert i18n.restore_tokens(masked, mapping) == text
+
+
+def test_translate_preserves_identifiers_and_urls():
+    text = "Enter passport L898902C3 at https://evisa.gov.vn by 2026-10-10 ({ref})."
+    out = i18n.translate(text, "zh-CN", "en", translator=_fake_translator)
+    assert out["status"] == "ok"
+    # Identifiers / URLs / dates / placeholders are intact in the translation.
+    for tok in ("L898902C3", "https://evisa.gov.vn", "2026-10-10", "{ref}"):
+        assert tok in out["translated"], tok
+
+
+def test_translate_caches_repeats():
+    i18n.clear_cache()
+    a = i18n.translate("Please review your details.", "zh-CN", "en", translator=_fake_translator)
+    b = i18n.translate("Please review your details.", "zh-CN", "en", translator=_fake_translator)
+    assert a["cached"] is False and b["cached"] is True
+    assert a["translated"] == b["translated"]
+
+
+def test_translate_unsupported_language():
+    out = i18n.translate("hello", "fr", "en", translator=_fake_translator)
+    assert out["status"] == "unsupported_language"
+    assert out["translated"] == "hello"
+
+
+def test_translate_passthrough_same_language():
+    out = i18n.translate("hello", "en", "en", translator=_fake_translator)
+    assert out["status"] == "passthrough"
+
+
+def test_translate_unavailable_is_honest_not_fabricated():
+    # No live Kimi in hermetic tests → the default translator is unavailable and
+    # we return the ORIGINAL text, never a fabricated translation.
+    i18n.clear_cache()
+    original = "This exact phrase is only used by the unavailability test."
+    out = i18n.translate(original, "zh-CN", "en")
+    assert out["status"] == "unavailable"
+    assert out["translated"] == original
+
+
+def test_identity_question_detection():
+    for q in ("What is your name?", "who are you", "Introduce yourself",
+              "你是谁", "你叫什么名字", "介绍一下你自己", "你是誰"):
+        assert i18n.is_identity_question(q) is True
+    assert i18n.is_identity_question("What documents do I need?") is False
+
+
+def test_assistant_identity_is_ellis_in_every_language():
+    for lang in ("en", "zh-CN", "zh-Hant"):
+        ans = i18n.assistant_identity_answer(lang)
+        assert "Ellis" in ans
+        low = ans.lower()
+        assert "kimi" not in low and "moonshot" not in low
+    # English answer disclaims official/lawyer/embassy roles.
+    en = i18n.assistant_identity_answer("en").lower()
+    assert "government official" in en and "lawyer" in en and "embassy" in en
+
+
+def test_system_identity_forbids_model_disclosure_and_official_claims():
+    s = i18n.ELLIS_SYSTEM_IDENTITY.lower()
+    assert "ellis" in s
+    assert "kimi" in s and "moonshot" in s          # explicitly named as forbidden
+    assert "government official" in s and "lawyer" in s and "embassy" in s
+
+
+# ---- endpoints ----
+def test_languages_endpoint(client):
+    langs = client.get("/i18n/languages", headers=AUTH).json()["languages"]
+    assert {l["code"] for l in langs} == {"en", "zh-CN", "zh-Hant"}
+
+
+def test_identity_endpoint(client):
+    r = client.get("/assistant/identity", headers=AUTH, params={"lang": "zh-CN"}).json()
+    assert r["name"] == "Ellis" and r["lang"] == "zh-CN"
+    assert "Ellis" in r["answer"]
+
+
+def test_translate_endpoint_unavailable_returns_original(client):
+    r = client.post("/i18n/translate", headers=AUTH,
+                    json={"text": "Please review.", "target_lang": "zh-CN"}).json()
+    assert r["status"] == "unavailable" and r["translated"] == "Please review."

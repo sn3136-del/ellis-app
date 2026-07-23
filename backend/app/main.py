@@ -69,6 +69,36 @@ def get_capabilities(_: Principal = Depends(get_principal)):
     return caps
 
 
+# ---- Internationalization (Phase 6): dynamic-content translation + identity ----
+class TranslateBody(BaseModel):
+    text: str
+    target_lang: str
+    source_lang: str = "auto"
+
+
+@app.get("/i18n/languages")
+def i18n_languages(_: Principal = Depends(get_principal)):
+    from . import i18n
+    return {"languages": [{"code": c, "name": i18n.LANGUAGE_NAMES[c]} for c in i18n.SUPPORTED_LANGS]}
+
+
+@app.post("/i18n/translate")
+def i18n_translate(body: TranslateBody, _: Principal = Depends(get_principal)):
+    """Backend-only dynamic-content translation via Kimi K3. Placeholders,
+    URLs, dates, amounts, filenames, and passport numbers / MRZ / identifiers are
+    never translated; unavailable → the original text (never fabricated)."""
+    from . import i18n
+    return i18n.translate(body.text, body.target_lang, body.source_lang)
+
+
+@app.get("/assistant/identity")
+def assistant_identity(lang: str = "en", _: Principal = Depends(get_principal)):
+    """The assistant always identifies as Ellis, in any supported language, and
+    never as the underlying model or as a government official/lawyer/embassy."""
+    from . import i18n
+    return {"name": "Ellis", "lang": lang, "answer": i18n.assistant_identity_answer(lang)}
+
+
 @app.get("/diagnostics/ocr")
 def ocr_diagnostics(_: Principal = Depends(get_principal)):
     # Non-sensitive booleans + redacted error category only. Never returns
