@@ -414,12 +414,18 @@ def create_authorization(application_id: str, body: Authorization, db=Depends(ge
 class DiscoverBody(BaseModel):
     country: str
     visa_type: str = "tourist"
+    nationality: str = ""     # applicant nationality — refines queries + eligibility
+    residence: str = ""       # applicant country of residence
 
 
 @app.post("/discovery")
 def run_discovery(body: DiscoverBody, db=Depends(get_session), p: Principal = Depends(get_principal)):
     from .portal import discovery
-    draft = discovery.discover_official_visa_portal(country=body.country, visa_type=body.visa_type)
+    from datetime import datetime, timezone
+    draft = discovery.discover_official_visa_portal(
+        country=body.country, visa_type=body.visa_type,
+        nationality=body.nationality, residence=body.residence,
+        reviewer="", verification_timestamp=datetime.now(timezone.utc).isoformat())
     row = models.PortalDraft(org_id=p.org_id, country=body.country, visa_type=body.visa_type,
                              draft=draft, status="disabled_draft")
     db.add(row)
@@ -430,7 +436,8 @@ def run_discovery(body: DiscoverBody, db=Depends(get_session), p: Principal = De
     # The draft is ALWAYS disabled; activation requires human review + approval.
     return {"draft_id": row.id, "adapter_status": draft["adapter_status"],
             "production_enabled": draft["production_enabled"], "requires_admin_review": True,
-            "search_status": draft["search_status"], "verified_candidates": draft["verified_candidates"]}
+            "search_status": draft["search_status"], "verified_candidates": draft["verified_candidates"],
+            "queries": draft["queries"], "portal_limitations": draft["portal_limitations"]}
 
 
 @app.get("/discovery/drafts")
