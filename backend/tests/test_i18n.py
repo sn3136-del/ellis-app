@@ -31,6 +31,29 @@ def test_translate_preserves_identifiers_and_urls():
         assert tok in out["translated"], tok
 
 
+def test_numeric_passport_number_is_masked_regression():
+    # REGRESSION (review-confirmed): a purely-numeric passport/ID number (e.g. a
+    # US 9-digit passport) must be masked, not sent verbatim to the translator.
+    text = "Your passport 123456789 and ID 87654321 were received."
+    masked, mapping = i18n.protect_tokens(text)
+    assert "123456789" not in masked and "87654321" not in masked
+    assert i18n.restore_tokens(masked, mapping) == text
+
+
+def test_lowercase_alphanumeric_identifier_is_masked_regression():
+    masked, mapping = i18n.protect_tokens("passport ab1234567 received")
+    assert "ab1234567" not in masked
+    assert i18n.restore_tokens(masked, mapping) == "passport ab1234567 received"
+
+
+def test_sentinel_collision_is_safe_regression():
+    # REGRESSION: text that already contains a sentinel-shaped substring must not
+    # be corrupted on restore.
+    text = "Ref ⟦T0⟧ and passport E12345678 at https://x.io"
+    masked, mapping = i18n.protect_tokens(text)
+    assert i18n.restore_tokens(masked, mapping) == text
+
+
 def test_translate_caches_repeats():
     i18n.clear_cache()
     a = i18n.translate("Please review your details.", "zh-CN", "en", translator=_fake_translator)

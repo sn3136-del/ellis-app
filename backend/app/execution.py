@@ -91,6 +91,11 @@ def clamp(claimed: ExecutionClass, driver: ExecutionClass) -> ExecutionClass:
     return claimed if _REALNESS[claimed] <= _REALNESS[driver] else driver
 
 
+def _cap(ec: ExecutionClass, max_ec: ExecutionClass) -> ExecutionClass:
+    """Cap a provider class at a maximum realness (the least-real of the two)."""
+    return ec if _REALNESS[ec] <= _REALNESS[max_ec] else max_ec
+
+
 def is_real_government_result(ec) -> bool:
     """True only for a real production result. Sandbox, local, and mock are all
     explicitly NOT real government results."""
@@ -139,6 +144,11 @@ def classify_adapter(adapter) -> ExecutionClass:
     if adapter is None:
         return ExecutionClass.UNSUPPORTED
     driver_ec = classify_driver(getattr(adapter, "driver", None))
+    # An undeclared / unverified driver (not a provider class — e.g.
+    # MANUAL_REVIEW_REQUIRED) is NEVER elevated to a real result by a config
+    # claim. The driver's disposition stands, so config alone can't fake reality.
+    if driver_ec not in PROVIDER_CLASSES:
+        return driver_ec
     approved = getattr(adapter, "production_approval_status", "") == "production_approved"
     enabled = bool(getattr(adapter, "production_enabled", False))
     if approved and enabled:
@@ -146,7 +156,10 @@ def classify_adapter(adapter) -> ExecutionClass:
     elif getattr(adapter, "production_approval_status", "") in ("tested", "implemented"):
         claimed = ExecutionClass.LIVE_SANDBOX
     else:
-        claimed = driver_ec if driver_ec in PROVIDER_CLASSES else ExecutionClass.MANUAL_REVIEW_REQUIRED
+        # Not production-enabled → at most LIVE_SANDBOX even with a live driver
+        # (honors the contract: a disabled/paused/mid-activation adapter is never
+        # a real production result, even if the driver itself is live).
+        claimed = _cap(driver_ec, ExecutionClass.LIVE_SANDBOX)
     return clamp(claimed, driver_ec)
 
 
@@ -229,13 +242,18 @@ def legend() -> dict:
 
 
 def record_execution(db, *, org_id: str, application_id: str, action: str, ec,
-                     detail: dict | None = None):
+                     detail: dict | None = None, government_outcome: bool = False):
     """Persist the execution classification for one action to the database AND
     the audit trail (both are required by the brief). Detail must be
-    non-sensitive metadata only — it is redacted on the audit path regardless."""
+    non-sensitive metadata only — it is redacted on the audit path regardless.
+
+    `is_real_government_result` is stored True ONLY for a real GOVERNMENT OUTCOME
+    (a submission/payment/appointment/completion on a verified live-production
+    adapter) — never for a mere live PROVIDER execution such as OCR. Callers set
+    government_outcome=True only for terminal portal outcomes."""
     from . import models, audit
     ec = coerce(ec)
-    real = is_real_government_result(ec)
+    real = government_outcome and is_real_government_result(ec)
     row = models.ExecutionRecord(org_id=org_id, application_id=application_id,
                                  action=action, execution_class=str(ec),
                                  is_real_government_result=real, detail=detail or {})

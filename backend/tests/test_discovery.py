@@ -15,6 +15,17 @@ def test_domain_classification():
     assert discovery.classify_domain("https://vfsglobal.com/x")["is_known_contractor"] is True
 
 
+def test_domain_classification_rejects_gov_label_spoofs_regression():
+    # REGRESSION (review-confirmed): a spoof that merely contains a 'gov' label
+    # (visa.gov.com, fastvisa.gov.io, x.gov.co) must NOT be a government domain.
+    for spoof in ("https://cheap-visa.gov.com/apply", "https://fastvisa.gov.io",
+                  "https://anything.gov.co", "https://gov.evil.com"):
+        assert discovery.classify_domain(spoof)["is_government_domain"] is False, spoof
+    # Real government suffixes still classify correctly.
+    for real in ("https://travel.state.gov", "https://evisa.gov.vn", "https://india.gov.in"):
+        assert discovery.classify_domain(real)["is_government_domain"] is True, real
+
+
 def test_query_variants_cover_official_terms():
     qs = discovery.query_variants("Vietnam")
     joined = " ".join(qs).lower()

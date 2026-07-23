@@ -81,9 +81,13 @@ _PROTECT_PATTERNS = (
     ("amount", re.compile(r"[$€£¥]\s?\d[\d,]*(?:\.\d+)?|\b\d[\d,]*(?:\.\d+)?\s?(?:USD|EUR|GBP|CNY|JPY|SGD)\b")),
     ("date", re.compile(r"\b\d{4}-\d{2}-\d{2}\b|\b\d{1,2}/\d{1,2}/\d{2,4}\b")),
     # Passport-number / identifier-like: 6-9 chars with at least one letter AND
-    # one digit (matches the whole token; pure words and pure numbers are left
-    # alone). The alnum branch is first so a mixed token is masked in full.
-    ("identifier", re.compile(r"\b(?=[A-Z0-9]*[A-Z])(?=[A-Z0-9]*\d)[A-Z0-9]{6,9}\b|\b[A-Z]{1,2}\d{5,9}\b")),
+    # one digit (matches the whole token). Case-insensitive so lowercase tokens
+    # (ab1234567) are also masked. Pure words are left alone.
+    ("identifier", re.compile(r"\b(?=[A-Za-z0-9]*[A-Za-z])(?=[A-Za-z0-9]*\d)[A-Za-z0-9]{6,9}\b|\b[A-Za-z]{1,2}\d{5,9}\b")),
+    # Purely-numeric passport / ID numbers (e.g. US 9-digit passports). Dates and
+    # amounts are already masked above, so a bare 7+ digit run here is an
+    # identifier — masked so a translator can never reformat identity digits.
+    ("numeric_id", re.compile(r"\b\d{7,}\b")),
 )
 
 
@@ -92,10 +96,15 @@ def protect_tokens(text: str) -> tuple[str, dict]:
     opaque sentinels. Returns (masked_text, mapping sentinel->original)."""
     mapping: dict[str, str] = {}
     counter = 0
+    # Choose a sentinel marker guaranteed absent from the input so restore can
+    # never collide with a sentinel-shaped substring that was already present.
+    marker = "⟦T"
+    while marker in text:
+        marker += "X"
 
     def _mask(m):
         nonlocal counter
-        sentinel = f"⟦T{counter}⟧"   # ⟦T0⟧ — a translator won't touch it
+        sentinel = f"{marker}{counter}⟧"
         mapping[sentinel] = m.group(0)
         counter += 1
         return sentinel

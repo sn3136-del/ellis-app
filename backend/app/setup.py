@@ -10,9 +10,24 @@ and production startup is blocked while default credentials are in place.
 from __future__ import annotations
 
 import hashlib
+import re
 
 from . import models, audit, vault
 from .providers.email import EmailConfig, config_valid, get_provider
+
+# Defense-in-depth: even though secrets have dedicated vaulted fields, strip any
+# secret-looking key a client might nest into the free-form config dicts
+# (google/trip/base_urls/branding) so a credential can never land in the
+# non-secret config that redacted_status returns.
+_SENSITIVE_KEY = re.compile(r"secret|password|passwd|token|api[_-]?key|credential|private[_-]?key", re.I)
+
+
+def _sanitize_config(obj):
+    if isinstance(obj, dict):
+        return {k: _sanitize_config(v) for k, v in obj.items() if not _SENSITIVE_KEY.search(str(k))}
+    if isinstance(obj, list):
+        return [_sanitize_config(v) for v in obj]
+    return obj
 
 # Secret components (vault-stored). Everything else is non-secret config.
 SECRET_COMPONENTS = (
@@ -55,7 +70,9 @@ def save_setup(db, *, org_id: str, actor: str, payload: dict) -> dict:
         row.admin_email = payload["admin_email"]
     for key in ("data_region", "retention_days", "base_urls", "branding", "google", "trip"):
         if key in payload and payload[key] is not None:
-            cfg[key] = payload[key]
+            # Sanitize free-form dicts so a nested secret can never be stored as
+            # non-secret config (dedicated vaulted fields exist for real secrets).
+            cfg[key] = _sanitize_config(payload[key]) if isinstance(payload[key], (dict, list)) else payload[key]
 
     # Email config (non-secret parts) + credential validation.
     email_in = payload.get("email")

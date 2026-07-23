@@ -97,6 +97,29 @@ def test_invalid_mrz_is_unverified_not_accepted():
     assert r["reject"] is True
 
 
+def test_visa_with_P_name_is_still_rejected_regression():
+    # REGRESSION (review-confirmed critical): an MRV whose name zone contains a
+    # 'P' (PETROV/PHAM/PHILIP) must NOT be misread as a passport. Document code is
+    # read from the START of MRZ line 1, so 'V' wins regardless of the name.
+    mrv_p = ("V<UTOPETROV<<IVAN<<<<<<<<<<<<<<<<<<<<<<<<<<<\n"
+             "L898902C36UTO7408122F1204159ZE184226B<<<<<10")
+    r = pc.classify_page(text=mrv_p, mrz=_mrz(mrv_p))
+    assert r["page_type"] == "visa_page"
+    assert r["accepted_as_passport_identity"] is False
+    assert r["reject"] is True
+    assert r["message"] == pc.VISA_STAMP_MESSAGE
+
+
+def test_national_id_with_P_name_still_rejected_regression():
+    td1_p = ("I<UTOD231458907<<<<<<<<<<<<<<<\n"
+             "7408122F1204159UTO<<<<<<<<<<<6\n"
+             "PETROV<<IVAN<<<<<<<<<<<<<<<<<<")
+    r = pc.classify_page(text=td1_p, mrz=_mrz(td1_p))
+    assert r["page_type"] in ("national_id", "residence_permit")
+    assert r["reject"] is True
+    assert r["accepted_as_passport_identity"] is False
+
+
 def test_supporting_document_is_not_an_error():
     r = pc.classify_page(text="Account balance: 5000\nAccount holder: Anna Eriksson", mrz=None)
     assert r["reject"] is False
@@ -146,6 +169,25 @@ def test_endpoint_rejects_visa_page_and_stores_no_identity(client, db):
     assert doc.doc_type == "visa_page"
     assert doc.page_classification["page_type"] == "visa_page"
     assert doc.extracted_fields == {}
+
+
+def test_endpoint_visa_with_P_name_stores_no_identity(client, db):
+    cid = _case(client)
+    mrv_p = ("V<UTOPETROV<<IVAN<<<<<<<<<<<<<<<<<<<<<<<<<<<\n"
+             "L898902C36UTO7408122F1204159ZE184226B<<<<<10")
+    b = client.post(f"/cases/{cid}/documents", headers=AUTH,
+                    json={"name": "visa.jpg", "mime": "image/jpeg", "text": mrv_p}).json()
+    assert b["rejected"] is True and b["doc_type"] == "visa_page"
+    assert b["extracted_fields"] == {}
+
+
+def test_endpoint_unverified_passport_stores_no_identity(client, db):
+    # An unverifiable-MRZ page (checksum broken) must also seed NO identity.
+    b = client.post(f"/cases/{_case(client)}/documents", headers=AUTH,
+                    json={"name": "blurry.jpg", "mime": "image/jpeg", "text": INVALID_TD3}).json()
+    assert b["rejected"] is True
+    assert b["page_type"] == "passport_biodata_unverified"
+    assert b["extracted_fields"] == {}
 
 
 def test_endpoint_supporting_document_not_rejected(client):

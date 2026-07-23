@@ -46,18 +46,45 @@ _ID_WORDS = ("identity card", "national id", "national identity", "id card",
 _COVER_WORDS = ("passport", "passeport", "reisepass", "pasaporte")
 
 
+# The ICAO document code is the FIRST character of MRZ line 1: 'P' passport,
+# 'V' machine-readable visa, 'I'/'A'/'C' ID card / residence permit (TD1/TD2).
+_KIND_BY_CODE = {"P": "TD3_PASSPORT", "V": "MRV_VISA", "I": "TD1_TD2", "A": "TD1_TD2", "C": "TD1_TD2"}
+
+
+def _mrz_lines(text: str) -> list[str]:
+    """Whitespace-stripped lines that look like an MRZ line (>=28 chars, all in
+    the MRZ charset, containing the '<' filler)."""
+    out = []
+    for raw in text.upper().splitlines():
+        ln = raw.replace(" ", "")
+        if len(ln) >= 28 and "<" in ln and re.fullmatch(r"[A-Z0-9<]+", ln):
+            out.append(ln)
+    return out
+
+
 def _detect_mrz_kind(text: str) -> str | None:
-    """Return the ICAO MRZ document kind found anywhere in the OCR text.
-    TD3_PASSPORT | MRV_VISA | TD1_TD2 | None. Deterministic and script-tolerant."""
-    u = "".join(text.upper().split())  # strip all whitespace
-    # All three require the '<' filler runs that only an MRZ has, so ordinary
-    # all-caps prose (e.g. "REPUBLIC OF …") can never be mistaken for an MRZ.
-    if re.search(r"P[A-Z<][A-Z<]{3}[A-Z]*<<[A-Z<]+", u):
-        return "TD3_PASSPORT"           # passport biodata MRZ (line 1 begins 'P')
-    if re.search(r"V[A-Z<][A-Z<]{3}[A-Z]*<<[A-Z<]+", u):
-        return "MRV_VISA"               # machine-readable visa (line 1 begins 'V')
-    if re.search(r"[IAC][A-Z<][A-Z]{3}[A-Z0-9<]*<<<", u):
-        return "TD1_TD2"                # ID card / residence permit MRZ (TD1/TD2)
+    """Return the ICAO MRZ document kind. TD3_PASSPORT | MRV_VISA | TD1_TD2 | None.
+
+    PRIMARY: read the document code from the START of MRZ line 1. This is the
+    critical fix — searching a concatenation of both lines let a 'P' inside a
+    visa/ID name zone (e.g. PETROV, PHAM) masquerade as a passport document code,
+    so a machine-readable VISA was accepted as a passport identity source.
+    """
+    lines = _mrz_lines(text)
+    if lines and lines[0][0] in _KIND_BY_CODE:
+        return _KIND_BY_CODE[lines[0][0]]
+    # FALLBACK for merged/wrapped OCR with no clear line breaks: choose the MRZ
+    # whose document-code pattern starts EARLIEST. The true doc code precedes the
+    # name zone, so a visa ('V…') is chosen over a later name-zone 'P'.
+    u = "".join(text.upper().split())
+    hits = []
+    for code, kind in (("P", "TD3_PASSPORT"), ("V", "MRV_VISA"), ("[IAC]", "TD1_TD2")):
+        m = re.search(code + r"[A-Z<][A-Z<]{3}[A-Z0-9<]*?<<", u)
+        if m:
+            hits.append((m.start(), kind))
+    if hits:
+        hits.sort()
+        return hits[0][1]
     return None
 
 

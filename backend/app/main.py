@@ -362,10 +362,11 @@ def add_document(application_id: str, body: AddDocument, db=Depends(get_session)
                   for f in result.fields}
     if classification["reject"]:
         doc_type = classification["page_type"]
-        # Never let a visa/stamp/cover/ID page seed passport identity. The
-        # 'unverified biodata' case keeps its fields for manual review only.
-        if classification["page_type"] != "passport_biodata_unverified":
-            fields_map = {}
+        # Never let a REJECTED page seed passport identity — this includes visa/
+        # stamp/cover/national-ID pages AND an unverifiable-MRZ page. The applicant
+        # re-uploads a clear biodata page; identity is only ever seeded from an
+        # accepted, checksum-validated biodata page.
+        fields_map = {}
 
     doc = models.StoredDocument(org_id=p.org_id, application_id=application_id, name=body.name,
                                 mime=body.mime, size_bytes=body.size_bytes, sha256=sha,
@@ -734,9 +735,11 @@ def _record_terminal_execution(db, p: Principal, application_id: str):
     app_row = db.get(models.VisaApplication, application_id)
     if app_row and app_row.state == "COMPLETED":
         ec = _case_execution_class(app_row.destination_country, app_row.visa_type)
+        # A completed case IS a government-outcome action, so its record reflects
+        # whether the outcome was real (True only for verified LIVE_PRODUCTION).
         execution.record_execution(db, org_id=p.org_id, application_id=application_id,
                                    action="case_completed", ec=ec,
-                                   detail={"state": app_row.state})
+                                   detail={"state": app_row.state}, government_outcome=True)
 
 
 @app.post("/cases/{application_id}/start")

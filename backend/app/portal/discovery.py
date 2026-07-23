@@ -62,7 +62,10 @@ def query_variants(country: str, nationality: str = "", residence: str = "") -> 
 
 def classify_domain(url: str) -> dict:
     host = (urlparse(url).netloc or url).lower()
-    is_gov = any(host.endswith(t) or (t.strip(".") in host.split(".")) for t in _GOV_TLDS)
+    # Require a PROPER suffix match. The earlier "gov label anywhere" test wrongly
+    # classified spoofs like visa.gov.com / fastvisa.gov.io as government domains;
+    # a real official domain ends with the government TLD (state.gov, evisa.gov.vn).
+    is_gov = any(host == t.lstrip(".") or host.endswith(t) for t in _GOV_TLDS)
     looks_official = is_gov or any(h in host for h in _GOV_HINTS)
     contractor = any(host.endswith(c) for c in _KNOWN_CONTRACTORS)
     return {"host": host, "is_government_domain": is_gov,

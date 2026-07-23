@@ -69,6 +69,25 @@ def test_secrets_are_vaulted_and_never_echoed(client, db):
     assert secret not in json.dumps(status)
 
 
+def test_nested_secret_in_config_is_stripped_regression(client, db):
+    # REGRESSION (review-confirmed): a secret nested into a free-form config dict
+    # (e.g. trip.client_secret) must be stripped, never stored/echoed as config.
+    fresh = {"Authorization": "Bearer admin-token", "X-Org-Id": "orgNest", "X-User-Id": "adminN"}
+    r = client.post("/setup", headers=fresh, json={
+        "tenant_name": "T", "admin_email": "a@b.c",
+        "trip": {"client_id": "ok-to-store", "client_secret": "LEAKED-SECRET-XYZ"},
+        "google": {"project": "p", "api_key": "GOOGLE-LEAK-123"}}).json()
+    import json as _json
+    blob = _json.dumps(r)
+    assert "LEAKED-SECRET-XYZ" not in blob and "GOOGLE-LEAK-123" not in blob
+    row = db.get(models.TenantSetup, "orgNest")
+    stored = _json.dumps(row.config)
+    assert "LEAKED-SECRET-XYZ" not in stored and "GOOGLE-LEAK-123" not in stored
+    # Non-secret siblings are retained.
+    assert row.config["trip"]["client_id"] == "ok-to-store"
+    assert row.config["google"]["project"] == "p"
+
+
 def test_full_valid_setup_is_complete(client):
     r = client.post("/setup", headers=ADMIN, json={
         "tenant_name": "Trip.com IT", "admin_email": "it@trip.example",

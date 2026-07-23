@@ -52,6 +52,48 @@ def test_classify_adapter_none_is_unsupported():
     assert execution.classify_adapter(None) == EC.UNSUPPORTED
 
 
+class _LiveDriver:
+    execution_class = "LIVE_PRODUCTION"
+
+
+class _UndeclaredDriver:
+    """A real-ish driver that forgot to declare its class (e.g. a future
+    Playwright driver mid-build). Must NOT be trusted as real."""
+
+
+def test_config_cannot_elevate_an_undeclared_driver_regression():
+    # REGRESSION (review-confirmed high): a driver that is not a known provider
+    # class must never be elevated to LIVE_PRODUCTION by a config claim.
+    class A:
+        production_approval_status = "production_approved"
+        production_enabled = True
+        driver = _UndeclaredDriver()
+    ec = execution.classify_adapter(A())
+    assert ec != EC.LIVE_PRODUCTION
+    assert execution.is_real_government_result(ec) is False
+
+
+def test_live_driver_not_enabled_is_at_most_sandbox_regression():
+    # REGRESSION: an approved-but-not-enabled (or paused/mid-activation) adapter
+    # with a real live driver is at most LIVE_SANDBOX — never a real result.
+    class A:
+        production_approval_status = "production_approved"
+        production_enabled = False
+        driver = _LiveDriver()
+    ec = execution.classify_adapter(A())
+    assert ec == EC.LIVE_SANDBOX
+    assert execution.is_real_government_result(ec) is False
+
+
+def test_live_driver_approved_and_enabled_is_real():
+    # The legitimate real path still works: verified live driver + approved+enabled.
+    class A:
+        production_approval_status = "production_approved"
+        production_enabled = True
+        driver = _LiveDriver()
+    assert execution.classify_adapter(A()) == EC.LIVE_PRODUCTION
+
+
 # ---- OCR classification ----
 def test_classify_ocr_local_vs_live():
     assert execution.classify_ocr({"primary": "local_text"}) == EC.LOCAL_PROVIDER
@@ -125,6 +167,28 @@ def test_ocr_endpoint_returns_and_persists_local_class(client, db):
         models.ExecutionRecord.application_id == cid,
         models.ExecutionRecord.action == "document_ocr")).scalar_one()
     assert rec.execution_class == "LOCAL_PROVIDER" and rec.is_real_government_result is False
+
+
+def test_ocr_record_is_not_a_real_government_result(client, db):
+    # REGRESSION (review-confirmed): a document_ocr execution record must NOT be
+    # flagged is_real_government_result — OCR is a provider run, not a gov outcome.
+    cid = client.post("/cases", headers=AUTH, json={
+        "full_name": "Anna", "email": "a@e.com", "destination_country": "Mockland"}).json()["id"]
+    client.post(f"/cases/{cid}/documents", headers=AUTH,
+                json={"name": "passport.pdf", "mime": "application/pdf", "text": PASSPORT_MRZ})
+    rec = db.execute(select(models.ExecutionRecord).where(
+        models.ExecutionRecord.application_id == cid,
+        models.ExecutionRecord.action == "document_ocr")).scalar_one()
+    assert rec.is_real_government_result is False
+
+
+def test_record_execution_government_outcome_flag(db):
+    # government_outcome=False never marks real, even for LIVE_PRODUCTION.
+    execution.record_execution(db, org_id="orgX", application_id="", action="document_ocr",
+                               ec=EC.LIVE_PRODUCTION, government_outcome=False)
+    r = db.execute(select(models.ExecutionRecord).where(
+        models.ExecutionRecord.org_id == "orgX")).scalars().first()
+    assert r.is_real_government_result is False
 
 
 def test_get_case_carries_mock_disposition(client, db):
