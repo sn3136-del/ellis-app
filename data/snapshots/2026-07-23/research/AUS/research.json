@@ -1,0 +1,19 @@
+{
+  "destination": "AUS",
+  "retrieved_at": "2026-07-23T08:02:15Z",
+  "research_status": "human_review_required",
+  "sources": [],
+  "dispositions": [],
+  "policies": [],
+  "fees": [],
+  "portals": [],
+  "passport_validity": null,
+  "jurisdictions": [],
+  "unresolved": [
+    "No official Australian government page could be fetched. immi.homeaffairs.gov.au and www.homeaffairs.gov.au return HTTP 403 Forbidden to WebFetch on every attempted path (visitor-600 tourist-stream-overseas, evisitor-651, electronic-travel-authority-601, help-text/eta/information.aspx, current-visa-pricing/visitor, and the research-and-stats visitor-visa PDF). This is bot protection; the task forbids bypassing it.",
+    "dfat.gov.au (foreign ministry) timed out (60s) on two attempts and could not be loaded.",
+    "The Claude-in-Chrome browser extension is not connected, so the blocked pages could not be retrieved via a real browser session.",
+    "Search results (allowed only to LOCATE official pages, not as evidence) indicate the relevant official pages exist: Visitor visa subclass 600 (Tourist stream), eVisitor subclass 651, and Electronic Travel Authority subclass 601 at immi.homeaffairs.gov.au. These were NOT recorded as dispositions/policies/fees/portals because none of the pages could be fetched and verified.",
+    "REQUIRED HUMAN/BROWSER FOLLOW-UP: retrieve via an authenticated browser (1) eVisitor 651 eligible-country list + max stay + fee; (2) ETA 601 eligible-passport list + max stay + service charge + official app/portal; (3) Visitor 600 Tourist stream base visa application charge and channel for non-exempt nationalities (incl. CHN, IND, RUS, BRA, ARE and others); (4) passport-validity rule. Then populate dispositions/fees/policies/portals from those fetched pages."
+  ]
+}

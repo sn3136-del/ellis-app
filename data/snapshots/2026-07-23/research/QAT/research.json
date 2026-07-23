@@ -1,0 +1,261 @@
+{
+  "destination": "QAT",
+  "retrieved_at": "2026-07-23T08:02:12Z",
+  "research_status": "research_incomplete",
+  "sources": [
+    {
+      "search_query": "Qatar official immigration tourist visa portal.moi.gov.qa",
+      "original_url": "https://portal.moi.gov.qa/qatarvisas/",
+      "final_url": "https://portal.moi.gov.qa/qatarvisas/",
+      "redirect_chain": [],
+      "final_hostname": "portal.moi.gov.qa",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Citizens from more than 95 countries around the world are permitted to enter Qatar with a visa upon arrival. Entry requirements include a valid passport with minimum three months' validity, a confirmed onward/return ticket, and compulsory health insurance from Ministry of Public Health-registered providers. Tourist visa categories are offered via the Hayya platform: Tourist Visa, entry visas for GCC residents, visas for those accompanying GCC citizens, and Entry Visa via Electronic Travel Authorization (ETA).",
+      "retrieved_at": "2026-07-23T08:02:12Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Qatar MOI general administration nationality borders expatriate affairs visas on arrival",
+      "original_url": "https://portal.moi.gov.qa/wps/portal/MOIInternet/departmentcommittees/ganationalborderexpatriateaffairs/",
+      "final_url": "https://portal.moi.gov.qa/wps/portal/MOIInternet/departmentcommittees/ganationalborderexpatriateaffairs/",
+      "redirect_chain": [],
+      "final_hostname": "portal.moi.gov.qa",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "General Administration of Nationality, Borders and Expatriate Affairs page referencing an 'On Arrival Visas' section. Contact: 44890212, 44883777, bpea@moi.gov.qa. The specific eligible-country lists and stay durations are presented via a linked sub-page rendered client-side and were not retrievable as text.",
+      "retrieved_at": "2026-07-23T08:02:12Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Qatar MOI on-arrival visas categories tourist 90 days 30 days",
+      "original_url": "https://portal.moi.gov.qa/wps/wcm/connect/wcmlib-internet-en/sa-departmentcommittee/generaladministrationofnationalitybordersandexpatriateaffairs/visas/c27493",
+      "final_url": "https://portal.moi.gov.qa/wps/wcm/connect/wcmlib-internet-en/sa-departmentcommittee/generaladministrationofnationalitybordersandexpatriateaffairs/visas/c27493",
+      "redirect_chain": [],
+      "final_hostname": "portal.moi.gov.qa",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "On-arrival visa categories listed: 'Toursit (90 days)', 'Tourist(30 days)', 'Common tourist visa for 33 countries', 'Visa for GCC Residents and their accompaniers', 'Visa for accompaniers of GCC citizens', 'On-arrival visa for truck drivers from GCC residents', 'Visa for newborn babies', 'Visa for of seafarers', 'Business visa (in accordance with the terms and conditions)'. Contact aimmig@moi.gov.qa. The specific country lists within each category were on client-side-rendered sub-pages and not retrievable as text.",
+      "retrieved_at": "2026-07-23T08:02:12Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Qatar electronic travel authorization eligibility",
+      "original_url": "https://portal.moi.gov.qa/wps/wcm/connect/wcmlib-internet-en/sa-departmentcommittee/generaladministrationofnationalitybordersandexpatriateaffairs/visas/4657",
+      "final_url": "https://portal.moi.gov.qa/wps/wcm/connect/wcmlib-internet-en/sa-departmentcommittee/generaladministrationofnationalitybordersandexpatriateaffairs/visas/4657",
+      "redirect_chain": [],
+      "final_hostname": "portal.moi.gov.qa",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "The ETA is granted to any nationality holding a valid residence permit or visa in the following countries: the UK, USA, Canada, Australia, New Zealand, Schengen countries, and GCC nations. Required documents: proof of hotel booking or other accommodation, return or onboard ticket, copy of passport valid for not less than six months, and a copy of the residence permit or entry visa to the countries mentioned above valid for not less than 30 days. It allows travellers to obtain a visa upon arrival for a stay of up to 30 days, extendable online for another 30 days for use during the same visit. Applications are submitted through www.qatarvisaservice.com; the applicant receives an e-notification valid for 30 days, renewable online.",
+      "retrieved_at": "2026-07-23T08:02:12Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Qatar MOI seafarers immediate entry visa",
+      "original_url": "https://portal.moi.gov.qa/wps/wcm/connect/wcmlib-internet-en/sa-departmentcommittee/generaladministrationofnationalitybordersandexpatriateaffairs/visas/c29600",
+      "final_url": "https://portal.moi.gov.qa/wps/wcm/connect/wcmlib-internet-en/sa-departmentcommittee/generaladministrationofnationalitybordersandexpatriateaffairs/visas/c29600",
+      "redirect_chain": [],
+      "final_hostname": "portal.moi.gov.qa",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Visa for seafarers: an immediate entry visa granted through accredited maritime tourist agencies, issued for sea activities only, with a maximum stay of 4 days (96 hours). Requires a valid passport.",
+      "retrieved_at": "2026-07-23T08:02:12Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Qatar MOI tips guidelines for visitors visa extension medical",
+      "original_url": "https://portal.moi.gov.qa/wps/wcm/connect/wcmlib-internet-en/sa-departmentcommittee/generaladministrationofnationalitybordersandexpatriateaffairs/visas/47",
+      "final_url": "https://portal.moi.gov.qa/wps/wcm/connect/wcmlib-internet-en/sa-departmentcommittee/generaladministrationofnationalitybordersandexpatriateaffairs/visas/47",
+      "redirect_chain": [],
+      "final_hostname": "portal.moi.gov.qa",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "When entering the country on a visit visa, the visitor must confirm the duration of the visit granted to him according to the type of visit visa. For a family visit the visitor is granted one month. Visitors wishing to extend beyond one month must complete medical checkup procedures before their visa expires or face a fine of QR 200 for each day of delay (maximum QR 12,000).",
+      "retrieved_at": "2026-07-23T08:02:12Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "visitqatar.com entry visa requirements visa-free countries",
+      "original_url": "https://visitqatar.com/intl-en/plan-your-trip/visas",
+      "final_url": "https://visitqatar.com/intl-en/plan-your-trip/visas",
+      "redirect_chain": [],
+      "final_hostname": "visitqatar.com",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Travelers from various countries are eligible for visa-free entry to Qatar; visa-free entry to 102 nationalities. Nationals of the Gulf Cooperation Council countries (Bahrain, Kuwait, Oman, Saudi Arabia and United Arab Emirates) do not require a visa to enter Qatar. Visas can be applied for on the Hayya platform for a cost of QAR 100. The visitor's passport must be valid for at least three months from the date of arrival in Qatar. Stay duration under visa-free entry can be either 30 days or 90 days depending on nationality.",
+      "retrieved_at": "2026-07-23T08:02:12Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Qatar Hayya tourist evisa GCC visa free",
+      "original_url": "https://hayya.qa/",
+      "final_url": "https://hayya.qa/",
+      "redirect_chain": [],
+      "final_hostname": "hayya.qa",
+      "source_authority": "official_application_portal",
+      "relevant_excerpt": "All GCC nationals are welcome to visit Qatar without a visa. All you need is your passport or GCC ID. The Hayya platform offers Hayya Tourist E-Visas and different types of visas, with a Track your E-Visa feature and a Hayya mobile app for managing applications.",
+      "retrieved_at": "2026-07-23T08:02:12Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    }
+  ],
+  "dispositions": [
+    {
+      "nationalities": ["ARE", "SAU", "BHR", "KWT", "OMN"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": null,
+      "conditions": [
+        "GCC nationals enter without a visa using a valid passport or GCC ID"
+      ],
+      "source_urls": [
+        "https://visitqatar.com/intl-en/plan-your-trip/visas",
+        "https://hayya.qa/",
+        "https://portal.moi.gov.qa/qatarvisas/"
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "policy_kind": "visa_exemption_list",
+      "policy_name": "Visa-free entry / visa on arrival (visa waiver)",
+      "description": "Qatar grants visa-free entry (a free waiver issued on arrival) to citizens of around 100-102 nationalities for tourism. Stay is either 30 days or 90 days depending on nationality; the 30-day waiver is extendable for a further 30 days. Requires a passport valid at least 3 months from arrival, a confirmed onward/return ticket, and compulsory health insurance from a Ministry of Public Health-registered provider. The waiver is free of charge. GCC nationals (Bahrain, Kuwait, Oman, Saudi Arabia, UAE) enter without any visa on passport or GCC ID. The specific 90-day and 30-day country lists are published on the MOI portal but are rendered client-side and could not be extracted as verifiable text during this research.",
+      "applies_to_nationalities": ["ARE", "SAU", "BHR", "KWT", "OMN"],
+      "conditions": [
+        "Passport valid at least 3 months from date of arrival",
+        "Confirmed onward or return ticket",
+        "Compulsory health insurance from an MoPH-registered provider",
+        "Waiver is free of charge",
+        "Stay is 30 or 90 days depending on nationality; 30-day waiver extendable for another 30 days"
+      ],
+      "maximum_stay": "30 or 90 days depending on nationality",
+      "official_source_urls": [
+        "https://portal.moi.gov.qa/qatarvisas/",
+        "https://visitqatar.com/intl-en/plan-your-trip/visas",
+        "https://portal.moi.gov.qa/wps/wcm/connect/wcmlib-internet-en/sa-departmentcommittee/generaladministrationofnationalitybordersandexpatriateaffairs/visas/c27493"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "eta_program",
+      "policy_name": "Electronic Travel Authorization (ETA)",
+      "description": "Facilitation allowing travellers of any nationality who hold a valid residence permit or entry visa in the UK, USA, Canada, Australia, New Zealand, a Schengen country, or a GCC nation to obtain a visa upon arrival. Grants a stay of up to 30 days, extendable online for another 30 days for the same visit. Requires proof of accommodation, a return/onward ticket, a passport valid at least 6 months, and the residence permit/entry visa valid at least 30 days. Applied for via www.qatarvisaservice.com.",
+      "applies_to_nationalities": ["ALL"],
+      "conditions": [
+        "Holder of valid residence permit or entry visa in UK, USA, Canada, Australia, New Zealand, Schengen, or GCC",
+        "Residence permit/entry visa valid at least 30 days",
+        "Passport valid at least 6 months",
+        "Proof of accommodation and return/onward ticket required"
+      ],
+      "maximum_stay": "30 days, extendable online for another 30 days",
+      "official_source_urls": [
+        "https://portal.moi.gov.qa/wps/wcm/connect/wcmlib-internet-en/sa-departmentcommittee/generaladministrationofnationalitybordersandexpatriateaffairs/visas/4657"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "evisa_program",
+      "policy_name": "Hayya tourist e-visa",
+      "description": "Nationalities not eligible for visa-free entry or an ETA apply before travel for a tourist visa through the official Hayya platform (hayya.qa / Hayya mobile app) at a cost of QAR 100. Hayya also handles GCC-resident and GCC-companion entry visas.",
+      "applies_to_nationalities": [],
+      "conditions": [
+        "Applied for online via the Hayya platform prior to travel",
+        "Cost QAR 100"
+      ],
+      "maximum_stay": null,
+      "official_source_urls": [
+        "https://visitqatar.com/intl-en/plan-your-trip/visas",
+        "https://hayya.qa/",
+        "https://portal.moi.gov.qa/qatarvisas/"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    }
+  ],
+  "fees": [
+    {
+      "visa_category": "visa_free_entry",
+      "visa_subtype": "visa waiver on arrival",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 0,
+      "government_fee_currency": "QAR",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://portal.moi.gov.qa/qatarvisas/"
+      ]
+    },
+    {
+      "visa_category": "evisa_tourist",
+      "visa_subtype": "Hayya tourist e-visa",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 100,
+      "government_fee_currency": "QAR",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://visitqatar.com/intl-en/plan-your-trip/visas"
+      ]
+    }
+  ],
+  "portals": [
+    {
+      "portal_kind": "immigration_authority",
+      "url": "https://portal.moi.gov.qa/qatarvisas/",
+      "operator": "Ministry of Interior (MOI), State of Qatar",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["visa_free_entry", "eta", "tourist_visa"],
+      "source_urls": ["https://portal.moi.gov.qa/qatarvisas/"]
+    },
+    {
+      "portal_kind": "evisa_portal",
+      "url": "https://hayya.qa/",
+      "operator": "Hayya Platform, State of Qatar",
+      "operator_kind": "government",
+      "official_linking_source": "https://portal.moi.gov.qa/qatarvisas/",
+      "supported_categories": ["evisa_tourist", "visa_free_entry"],
+      "source_urls": ["https://hayya.qa/", "https://portal.moi.gov.qa/qatarvisas/"]
+    },
+    {
+      "portal_kind": "eta_portal",
+      "url": "https://www.qatarvisaservice.com/",
+      "operator": "Qatar Visa Service",
+      "operator_kind": "unknown",
+      "official_linking_source": "https://portal.moi.gov.qa/wps/wcm/connect/wcmlib-internet-en/sa-departmentcommittee/generaladministrationofnationalitybordersandexpatriateaffairs/visas/4657",
+      "supported_categories": ["eta"],
+      "source_urls": ["https://portal.moi.gov.qa/wps/wcm/connect/wcmlib-internet-en/sa-departmentcommittee/generaladministrationofnationalitybordersandexpatriateaffairs/visas/4657"]
+    },
+    {
+      "portal_kind": "foreign_ministry",
+      "url": "https://mofa.gov.qa/en/consular-services/visas/visas",
+      "operator": "Ministry of Foreign Affairs, State of Qatar",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["tourist_visa"],
+      "source_urls": ["https://visitqatar.com/intl-en/plan-your-trip/visas"]
+    }
+  ],
+  "passport_validity": {
+    "rule_kind": "months_after_arrival",
+    "months": 3,
+    "min_blank_pages": null,
+    "condition_text": "The visitor's passport must be valid for at least three months from the date of arrival in Qatar for visa-free/on-arrival entry. Note: the ETA program specifically requires a passport valid for at least six months.",
+    "source_urls": [
+      "https://visitqatar.com/intl-en/plan-your-trip/visas",
+      "https://portal.moi.gov.qa/qatarvisas/",
+      "https://portal.moi.gov.qa/wps/wcm/connect/wcmlib-internet-en/sa-departmentcommittee/generaladministrationofnationalitybordersandexpatriateaffairs/visas/4657"
+    ]
+  },
+  "jurisdictions": [],
+  "unresolved": [
+    "The exact 90-day and 30-day visa-free country lists (and the 'common tourist visa for 33 countries' list) are published on the MOI portal sub-pages but are rendered client-side (JavaScript) and could not be extracted as verifiable text via WebFetch; blogs were not used per source rules.",
+    "Because the per-nationality lists could not be verified from official text, individual dispositions for CHN, USA, GBR, IND, SGP, HKG, TWN, JPN, KOR, DEU, FRA, AUS, CAN, RUS, BRA are unresolved. Only GCC (ARE + BHR/KWT/OMN/SAU) visa-free status is officially verified. Official statements confirm ~100-102 nationalities receive visa-free entry, but the specific bucket (30 vs 90 days) for each requested nationality is unconfirmed.",
+    "hukoomi.gov.qa/en/service/tourist-visa-upon-and-before-arrival returned HTTP 403 and could not be used.",
+    "qatarvisaservice.com (ETA processor) operator status could not be confirmed as an officially contracted center vs a third party; it is the URL cited on the MOI ETA page.",
+    "Whether the Hayya QAR 100 tourist e-visa fee is refundable and accepted payment methods were not stated on official pages."
+  ]
+}

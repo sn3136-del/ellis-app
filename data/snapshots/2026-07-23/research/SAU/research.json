@@ -1,0 +1,104 @@
+{
+  "destination": "SAU",
+  "retrieved_at": "2026-07-23T08:07:24Z",
+  "research_status": "research_incomplete",
+  "sources": [
+    {
+      "search_query": "mofa.gov.sa tourist visa eligible countries eVisa OR \"visit visa\"",
+      "original_url": "https://www.mofa.gov.sa/en/Pages/default.aspx",
+      "final_url": "https://www.mofa.gov.sa/en/Pages/default.aspx",
+      "redirect_chain": ["https://www.mofa.gov.sa/en/Pages/default.aspx"],
+      "final_hostname": "www.mofa.gov.sa",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "Ministry of Foreign Affairs (Kingdom of Saudi Arabia) official homepage. The visa services are handled through a separate dedicated official platform linked in the 'Related Sites' footer section: https://ksavisa.sa . Visa-related eServices listed on the MOFA site are 'Family Visit Request', 'Office Authorization on work visa', and 'Work Visa Request for Organizations and Diplomatic Missions'. No tourist/eVisa eligible-country list, disposition detail, or fee schedule is exposed on this page; it delegates to the ksavisa.sa platform. (Page fetched and loaded; content summarized by fetch tool, no full tourist-visa policy text present.)",
+      "retrieved_at": "2026-07-23T08:06:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Saudi Arabia evisa visa.mofa.gov.sa",
+      "original_url": "https://visa.mofa.gov.sa/",
+      "final_url": "https://visa.mofa.gov.sa/",
+      "redirect_chain": ["https://visa.mofa.gov.sa/"],
+      "final_hostname": "visa.mofa.gov.sa",
+      "source_authority": "official_application_portal",
+      "relevant_excerpt": "منصة التأشيرات (the Visa Platform) — official Saudi government visa application portal landing page. Contains login sections for individuals and government entities and an application-status inquiry form, and references the new 'KSA VISA' platform. A subpage notice reads: 'يجب التأكد من توفر بيانات جوازات السفر للمطلوبين للزيارة قبل البدء بتقديم الطلب' (passport data for the intended visitors must be verified before submitting an application). The landing page does not enumerate tourist eligible countries or fees.",
+      "retrieved_at": "2026-07-23T08:04:00Z",
+      "effective_date_evidence": null,
+      "page_language": "ar"
+    },
+    {
+      "search_query": "saudiembassy.sa tourist visit visa tourism requirements",
+      "original_url": "https://embassies.mofa.gov.sa/sites/usa/EN/CONSULARANDTRAVELSERVICES/VISAAPPLICATION/Pages/Government-Visit-Visa.aspx",
+      "final_url": "https://saudiembassy.sa/",
+      "redirect_chain": ["https://embassies.mofa.gov.sa/sites/usa/EN/CONSULARANDTRAVELSERVICES/VISAAPPLICATION/Pages/Government-Visit-Visa.aspx", "https://saudiembassy.sa/"],
+      "final_hostname": "saudiembassy.sa",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Official unified embassy portal of the Kingdom of Saudi Arabia Ministry of Foreign Affairs. Lists a directory of 108 embassies and 20 consulates across 109 countries, with navigation for services, news, media and embassy information, and footer links to related government resources (including mofa.gov.sa). The legacy embassies.mofa.gov.sa embassy/consular visa pages now 302-redirect to this saudiembassy.sa portal. The portal landing page does not itself expose the tourist-visa eligible-country groups or fee schedule as machine-readable text (single-page-application content not returned to the fetch tool).",
+      "retrieved_at": "2026-07-23T08:05:30Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    }
+  ],
+  "dispositions": [],
+  "policies": [],
+  "fees": [],
+  "portals": [
+    {
+      "portal_kind": "evisa_portal",
+      "url": "https://ksavisa.sa",
+      "operator": "Kingdom of Saudi Arabia (Ministry of Foreign Affairs / unified national visa platform)",
+      "operator_kind": "government",
+      "official_linking_source": "https://www.mofa.gov.sa/en/Pages/default.aspx",
+      "supported_categories": ["tourist_visa", "visit_visa"],
+      "source_urls": ["https://www.mofa.gov.sa/en/Pages/default.aspx"]
+    },
+    {
+      "portal_kind": "immigration_authority",
+      "url": "https://visa.mofa.gov.sa/",
+      "operator": "Ministry of Foreign Affairs, Kingdom of Saudi Arabia (منصة التأشيرات / Visa Platform)",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["visit_visa", "family_visit", "work_visa"],
+      "source_urls": ["https://visa.mofa.gov.sa/"]
+    },
+    {
+      "portal_kind": "foreign_ministry",
+      "url": "https://www.mofa.gov.sa/en/Pages/default.aspx",
+      "operator": "Ministry of Foreign Affairs, Kingdom of Saudi Arabia",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": [],
+      "source_urls": ["https://www.mofa.gov.sa/en/Pages/default.aspx"]
+    },
+    {
+      "portal_kind": "embassy_site",
+      "url": "https://saudiembassy.sa/",
+      "operator": "Ministry of Foreign Affairs, Kingdom of Saudi Arabia (unified embassy/consulate portal)",
+      "operator_kind": "government",
+      "official_linking_source": "https://www.mofa.gov.sa/en/Pages/default.aspx",
+      "supported_categories": ["tourist_visa", "family_visit"],
+      "source_urls": ["https://saudiembassy.sa/"]
+    },
+    {
+      "portal_kind": "evisa_portal",
+      "url": "https://visa.visitsaudi.com/",
+      "operator": "Saudi Tourism Authority / Visit Saudi (official tourist eVisa portal)",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["tourist_visa", "evisa_tourist"],
+      "source_urls": []
+    }
+  ],
+  "passport_validity": null,
+  "jurisdictions": [],
+  "unresolved": [
+    "Could NOT verify the tourist-visa eligible-country list from a fetched official page. The commonly cited list (66 eligible nationalities for the tourist eVisa; a Group A eligible for eVisa + visa-on-arrival + embassy visa vs Group B embassy-only) appears only in search-result snippets and non-authoritative sites, which the source rules exclude as evidence.",
+    "The official tourist eVisa portal https://visa.visitsaudi.com/ returned HTTP 403 (anti-bot) to WebFetch and could not be loaded; the browser tool (claude-in-chrome) was not connected, so its rendered content could not be captured. Included only as a portal, not cited as a source.",
+    "www.visitsaudi.com visa-regulations and help-center pages are JavaScript single-page applications that returned only a page title to WebFetch (no body). ksavisa.sa (the official platform linked from mofa.gov.sa) is likewise an SPA that returned only its heading.",
+    "Official Saudi Press Agency article (spa.gov.sa/en/N1981235) and the national portal my.gov.sa/en/content/tourism both returned HTTP 403 to WebFetch.",
+    "Legacy MOFA embassy PDF 'Saudi Arabia Visit Visa for Tourism' and the per-embassy visa .aspx pages on embassies.mofa.gov.sa now 302-redirect to the saudiembassy.sa SPA, losing the document path; the tourism-visa PDF content could not be retrieved.",
+    "Therefore NO dispositions, fees, policies, or passport-validity rule were recorded: none could be substantiated from a fetched authoritative page. Widely reported but UNVERIFIED figures (for the pipeline to re-check via a rendering-capable fetch): eVisa valid 1 year multiple-entry, up to 90 days per stay; online tourist eVisa ~SAR 535 and visa-on-arrival ~SAR 480 (incl. mandatory medical insurance); passport valid >=6 months from entry; GCC citizens visa-free and GCC residents eVisa-eligible; visa-on-arrival for eVisa-eligible nationals and holders of used US/UK/Schengen visas.",
+    "RECOMMENDATION: re-run this destination with a connected browser / headless renderer to load visa.visitsaudi.com and ksavisa.sa, and to open the saudiembassy.sa tourist-visa page, which are the authoritative sources for the eligible-country groups and fee schedule."
+  ]
+}

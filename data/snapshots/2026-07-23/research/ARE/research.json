@@ -1,0 +1,256 @@
+{
+  "destination": "ARE",
+  "retrieved_at": "2026-07-23T08:05:47Z",
+  "research_status": "verified",
+  "sources": [
+    {
+      "search_query": "United Arab Emirates official government tourist visa entry requirements u.ae visa-free nationalities",
+      "original_url": "https://u.ae/en/information-and-services/visa-and-emirates-id/residence-visas/tourist-visa",
+      "final_url": "https://u.ae/en/information-and-services/visa-and-emirates-id/residence-visas/tourist-visa",
+      "redirect_chain": [],
+      "final_hostname": "u.ae",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "The tourist visa is available to those ineligible for visa-free entry or visa-on-arrival options. Applicants can obtain tourist visas through: the Federal Authority for Identity, Citizenship, Customs and Port Security (online); UAE-based airlines (Etihad, Emirates, Fly Dubai); licensed travel agents and hotels; and the General Directorate of Identity and Foreigners Affairs - Dubai. The UAE's embassies do not issue tourist visas. The 5-year multiple entry tourist visa allows visitors to enter the UAE multiple times on self-sponsorship and remain in the country for 90 days on each visit, extendable for a further 90 days; it requires a bank balance of 4,000 USD or its equivalent during the last six months, a valid health insurance policy applicable in the UAE valid for 180 days, and a ticket showing a continuing or return journey from the UAE.",
+      "retrieved_at": "2026-07-23T08:02:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "u.ae entry visa requirements citizens exempted visa on arrival list",
+      "original_url": "https://www.mofa.gov.ae/en/missions/stockholm/services/visas",
+      "final_url": "https://www.mofa.gov.ae/en/missions/stockholm/services/visas",
+      "redirect_chain": [],
+      "final_hostname": "www.mofa.gov.ae",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "GCC Citizens: No visa required; present GCC passport or ID card at entry. EU & Associated Nations (6-month passport validity), up to 90 days in any 180-day period: Sweden, Austria, Malta, Poland, The Netherlands, Portugal, Norway, Lithuania, Germany, Switzerland, Hungary, Latvia, Italy, France, Denmark, Slovakia, Spain, Greece, Estonia, Croatia, Luxembourg, Belgium, Finland, Iceland, Slovenia, Romania, Bulgaria, Cyprus, Czech, Liechtenstein, and Montenegro. Other Exempt Nations (30-day maximum): United States of America, Australia, New Zealand, United Kingdom, Monaco, Singapore, Malaysia, Brunei, San Marino, Canada, Japan, Korea, Vatican, Andorra, Hong Kong, Ireland, Russia, Bahamas, and Republic of India. Reciprocal Exemptions (ordinary passports, 30 days): Seychelles, Bahamas, Argentina, and China. Indian passport holders with valid EU/British residence permits receive 30-day exemptions. Fees: Tourist Visa 100 AED + 10 AED delivery (30 days); Short Visit 500 AED + 10 AED delivery (30 days); Long Visit 1,000 AED (90 days); Multiple Entry 2,000 AED (6 months, max 14 days per entry). Passport must be valid at least six months.",
+      "retrieved_at": "2026-07-23T08:03:30Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "official UAE embassy Washington visas US citizens",
+      "original_url": "https://www.uae-embassy.org/visas-us-citizens",
+      "final_url": "https://www.uae-embassy.org/visas-us-citizens",
+      "redirect_chain": [],
+      "final_hostname": "www.uae-embassy.org",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "A visa will be issued upon entry, allowing a maximum stay of 90 days non-renewable, whether continuously or intermittently, within 180 days calculated from the date of first entry. Travelers must have a valid passport that will last at least six months beyond your expected arrival date in the UAE. A fine of 50 AED will be imposed for each day exceeding the 90 days allowed for staying in the country.",
+      "retrieved_at": "2026-07-23T08:03:30Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "UAE embassy visas for non-US citizens exempted countries India visa on arrival",
+      "original_url": "https://www.uae-embassy.org/visas-for-non-us-citizens",
+      "final_url": "https://www.uae-embassy.org/visas-for-non-us-citizens",
+      "redirect_chain": [],
+      "final_hostname": "www.uae-embassy.org",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "An original passport should not expire within six months of the expected arrival date in the UAE. Indian citizens with U.S. visas, green cards, UK residence permits, or EU residence permits can obtain an entry visa upon arrival in the UAE, valid for 14 days, for a fee of AED 100.",
+      "retrieved_at": "2026-07-23T08:04:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "official UAE ICP immigration authority visa services portal",
+      "original_url": "https://icp.gov.ae/en/services/",
+      "final_url": "https://icp.gov.ae/en/services/",
+      "redirect_chain": [],
+      "final_hostname": "icp.gov.ae",
+      "source_authority": "official_application_portal",
+      "relevant_excerpt": "Official portal for the Federal Authority for Identity, Citizenship, Customs & Port Security (ICP). Under Online Services it lists 'Issuance of a Visa' as an available service. Contact: Smart Services Platform; Phone 171 (inside UAE) or +971600522222 (outside UAE).",
+      "retrieved_at": "2026-07-23T08:05:47Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    }
+  ],
+  "dispositions": [
+    {
+      "nationalities": ["DEU", "FRA"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days within any 180-day period",
+      "conditions": ["Passport valid at least 6 months from date of arrival", "Part of the EU & associated nations 90-day visa-free group"],
+      "source_urls": ["https://www.mofa.gov.ae/en/missions/stockholm/services/visas"]
+    },
+    {
+      "nationalities": ["GBR", "IND", "SGP", "HKG", "JPN", "KOR", "CAN", "AUS", "RUS"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "30 days",
+      "conditions": ["Passport valid at least 6 months from date of arrival", "Visa issued/stamped on arrival at no charge; part of the 30-day visa-free group"],
+      "source_urls": ["https://www.mofa.gov.ae/en/missions/stockholm/services/visas"]
+    },
+    {
+      "nationalities": ["CHN"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "30 days",
+      "conditions": ["Ordinary passports only, under a reciprocal exemption agreement", "Passport valid at least 6 months from date of arrival"],
+      "source_urls": ["https://www.mofa.gov.ae/en/missions/stockholm/services/visas"]
+    },
+    {
+      "nationalities": ["USA"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days non-renewable within any 180-day period",
+      "conditions": ["Visa issued upon entry (no advance application)", "Passport valid at least 6 months beyond arrival", "50 AED per-day fine for overstay beyond 90 days", "Note: MOFA general country list groups the USA under the 30-day exemption tier; the UAE Embassy (Washington) states a 90-day allowance for US citizens"],
+      "source_urls": ["https://www.uae-embassy.org/visas-us-citizens", "https://www.mofa.gov.ae/en/missions/stockholm/services/visas"]
+    },
+    {
+      "nationalities": ["TWN", "BRA", "ALL_OTHERS"],
+      "category": "evisa_tourist",
+      "disposition": "EVISA_REQUIRED",
+      "maximum_stay": "30 days (extendable) or up to 60 days depending on visa type",
+      "conditions": ["Not on the UAE visa-free / reciprocal-exemption lists", "Must obtain a tourist entry permit before travel via the ICP online smart services, GDRFA-Dubai, a UAE national airline, or a licensed travel agent/hotel", "UAE embassies do NOT issue tourist visas", "Absence-from-official-list inference for TWN and BRA"],
+      "source_urls": ["https://u.ae/en/information-and-services/visa-and-emirates-id/residence-visas/tourist-visa", "https://icp.gov.ae/en/services/"]
+    },
+    {
+      "nationalities": ["ARE"],
+      "category": "visa_free_entry",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": ["Emirati nationals are citizens of the destination; no visa applies"],
+      "source_urls": ["https://www.mofa.gov.ae/en/missions/stockholm/services/visas"]
+    }
+  ],
+  "policies": [
+    {
+      "policy_kind": "visa_exemption_list",
+      "policy_name": "UAE visa-free entry - GCC and reciprocal/EU list",
+      "description": "GCC nationals enter with passport or national ID, no visa. Listed EU & associated nations receive up to 90 days within any 180-day period. A separate list of nations receives a 30-day visa-free entry. A reciprocal exemption (ordinary passports) grants 30 days to Seychelles, Bahamas, Argentina, and China. All require passports valid at least 6 months.",
+      "applies_to_nationalities": ["SWE","AUT","MLT","POL","NLD","PRT","NOR","LTU","DEU","CHE","HUN","LVA","ITA","FRA","DNK","SVK","ESP","GRC","EST","HRV","LUX","BEL","FIN","ISL","SVN","ROU","BGR","CYP","CZE","LIE","MNE","USA","AUS","NZL","GBR","MCO","SGP","MYS","BRN","SMR","CAN","JPN","KOR","VAT","AND","HKG","IRL","RUS","BHS","IND","SYC","ARG","CHN"],
+      "conditions": ["Passport valid at least 6 months from date of arrival", "China and reciprocal-exemption countries: ordinary passports only"],
+      "maximum_stay": "90 days (EU/associated group) or 30 days (other exempt/reciprocal groups)",
+      "official_source_urls": ["https://www.mofa.gov.ae/en/missions/stockholm/services/visas"],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "visa_on_arrival_program",
+      "policy_name": "Conditional visa on arrival for Indian passport holders",
+      "description": "Indian citizens holding a valid U.S. visa, U.S. green card, UK residence permit, or EU residence permit can obtain an entry visa on arrival valid for 14 days for a fee of AED 100. (Indian ordinary passport holders are separately in the 30-day visa-free list.)",
+      "applies_to_nationalities": ["IND"],
+      "conditions": ["Holder of valid US visa/green card or UK/EU residence permit", "Permit/visa valid at least 6 months from arrival"],
+      "maximum_stay": "14 days",
+      "official_source_urls": ["https://www.uae-embassy.org/visas-for-non-us-citizens", "https://www.mofa.gov.ae/en/missions/stockholm/services/visas"],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "consular_visa_regime",
+      "policy_name": "UAE tourist visa (sponsor-based, online)",
+      "description": "Nationals not eligible for visa-free entry must obtain a tourist entry permit before travel. Applications are made online through the Federal Authority for Identity, Citizenship, Customs and Port Security (ICP), through GDRFA-Dubai, through UAE national airlines (Emirates, Etihad, flydubai), or through licensed travel agents and hotels. UAE embassies do not issue tourist visas. A 5-year multiple-entry tourist visa (90 days per visit, extendable 90 more) is also available with financial and insurance conditions.",
+      "applies_to_nationalities": ["ALL_OTHERS"],
+      "conditions": ["Applied online/through a sponsor (airline, hotel, agent, ICP smart services)", "5-year multi-entry visa requires ~USD 4,000 bank balance over 6 months, 180-day UAE health insurance, and return/onward ticket"],
+      "maximum_stay": "30 or 60 days per single/multiple entry visit (5-year visa: 90 days per visit)",
+      "official_source_urls": ["https://u.ae/en/information-and-services/visa-and-emirates-id/residence-visas/tourist-visa"],
+      "effective_from": null,
+      "effective_until": null
+    }
+  ],
+  "fees": [
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "30-day tourist visa (consular fee schedule)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 100,
+      "government_fee_currency": "AED",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": ["https://www.mofa.gov.ae/en/missions/stockholm/services/visas"]
+    },
+    {
+      "visa_category": "short_visit_visa",
+      "visa_subtype": "30-day short visit",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 500,
+      "government_fee_currency": "AED",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": ["https://www.mofa.gov.ae/en/missions/stockholm/services/visas"]
+    },
+    {
+      "visa_category": "long_visit_visa",
+      "visa_subtype": "90-day long visit",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 1000,
+      "government_fee_currency": "AED",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": ["https://www.mofa.gov.ae/en/missions/stockholm/services/visas"]
+    },
+    {
+      "visa_category": "multiple_entry_visit_visa",
+      "visa_subtype": "6-month multiple entry (max 14 days/entry)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 2000,
+      "government_fee_currency": "AED",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": ["https://www.mofa.gov.ae/en/missions/stockholm/services/visas"]
+    },
+    {
+      "visa_category": "visa_on_arrival",
+      "visa_subtype": "14-day VOA for eligible Indian passport holders",
+      "applies_to_nationalities": ["IND"],
+      "government_fee_amount": 100,
+      "government_fee_currency": "AED",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": ["https://www.uae-embassy.org/visas-for-non-us-citizens", "https://www.mofa.gov.ae/en/missions/stockholm/services/visas"]
+    }
+  ],
+  "portals": [
+    {
+      "portal_kind": "immigration_authority",
+      "url": "https://icp.gov.ae/en/",
+      "operator": "Federal Authority for Identity, Citizenship, Customs and Port Security (ICP)",
+      "operator_kind": "government",
+      "official_linking_source": "https://u.ae/en/information-and-services/visa-and-emirates-id/residence-visas/tourist-visa",
+      "supported_categories": ["tourist_visa", "entry_permit", "visa_issuance"],
+      "source_urls": ["https://icp.gov.ae/en/services/", "https://u.ae/en/information-and-services/visa-and-emirates-id/residence-visas/tourist-visa"]
+    },
+    {
+      "portal_kind": "evisa_portal",
+      "url": "https://icp.gov.ae/en/services/",
+      "operator": "Federal Authority for Identity, Citizenship, Customs and Port Security (ICP)",
+      "operator_kind": "government",
+      "official_linking_source": "https://u.ae/en/information-and-services/visa-and-emirates-id/residence-visas/tourist-visa",
+      "supported_categories": ["tourist_visa", "issuance_of_a_visa"],
+      "source_urls": ["https://icp.gov.ae/en/services/"]
+    },
+    {
+      "portal_kind": "foreign_ministry",
+      "url": "https://www.mofa.gov.ae/en",
+      "operator": "Ministry of Foreign Affairs (MOFAIC)",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["consular_visa", "tourist_visa"],
+      "source_urls": ["https://www.mofa.gov.ae/en/missions/stockholm/services/visas"]
+    },
+    {
+      "portal_kind": "embassy_site",
+      "url": "https://www.uae-embassy.org",
+      "operator": "Embassy of the United Arab Emirates, Washington DC",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["entry_requirements", "tourist_visa"],
+      "source_urls": ["https://www.uae-embassy.org/visas-us-citizens", "https://www.uae-embassy.org/visas-for-non-us-citizens"]
+    }
+  ],
+  "passport_validity": {
+    "rule_kind": "months_after_arrival",
+    "months": 6,
+    "min_blank_pages": null,
+    "condition_text": "Passport must be valid for at least six months beyond the expected date of arrival in the UAE.",
+    "source_urls": ["https://www.uae-embassy.org/visas-us-citizens", "https://www.mofa.gov.ae/en/missions/stockholm/services/visas"]
+  },
+  "jurisdictions": [],
+  "unresolved": [
+    "The u.ae dedicated 'visa-free entry' and 'visa on arrival' sub-pages returned HTTP 404 via WebFetch; the authoritative country lists were instead obtained from the MOFA (mofa.gov.ae) Stockholm mission page, a destination foreign-ministry source.",
+    "USA maximum stay: the MOFA general list groups the USA in the 30-day tier, while the UAE Embassy (Washington) states 90 days non-renewable within 180 days for US citizens. Recorded 90 days per the US-specific embassy source; flag for review.",
+    "TWN (Taiwan) and BRA (Brazil) are classified as tourist-visa-required by absence from the official exemption lists rather than by an explicit statement; not independently confirmed on a UAE government page.",
+    "Consular fee schedule captured from the MOFA Stockholm mission page; embassies no longer issue tourist visas, so applicable online/sponsor-channel tourist-permit fees on the ICP portal were not separately confirmed."
+  ]
+}

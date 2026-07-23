@@ -1,0 +1,370 @@
+{
+  "destination": "EGY",
+  "retrieved_at": "2026-07-23T07:47:57Z",
+  "research_status": "research_incomplete",
+  "sources": [
+    {
+      "search_query": "official Egypt evisa portal visa2egypt.gov.eg tourist visa",
+      "original_url": "https://egyptembassy.net/consular-services/visas-travel/6874-2/",
+      "final_url": "https://egyptembassy.net/consular-services/visas-travel/6874-2/",
+      "redirect_chain": [],
+      "final_hostname": "egyptembassy.net",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Official Electronic Visa Portal for touristic visits for selected countries : www.visa2egypt.gov.eg ... For Tourist Visa ONLY. ... if you have any questions in regards to an E-visa application, kindly contact them through their website as the Egyptian consulate doesn't have an access to the portal to assist you.",
+      "retrieved_at": "2026-07-23T07:41:30Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Egypt evisa portal visa2egypt.gov.eg tourist visa",
+      "original_url": "https://www.visa2egypt.gov.eg/eVisa/Home",
+      "final_url": "https://www.visa2egypt.gov.eg/eVisa/Home",
+      "redirect_chain": [],
+      "final_hostname": "www.visa2egypt.gov.eg",
+      "source_authority": "official_application_portal",
+      "relevant_excerpt": "Welcome to Egypt e-Visa Portal ... Sign Up [requires] your email address and some complementary information ... Sign In [to] get access to your pending application(s), or apply for new application ... Apply and pay online [accepting] Visa card, MasterCard or other debit cards ... you will receive an email informing you, with the current application status ... You have to create an e-Visa application at least 7 days before your departure.",
+      "retrieved_at": "2026-07-23T07:42:30Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "official Egypt evisa portal visa2egypt.gov.eg tourist visa",
+      "original_url": "https://www.visa2egypt.gov.eg/eVisa/FAQ",
+      "final_url": "https://www.visa2egypt.gov.eg/eVisa/FAQ",
+      "redirect_chain": [],
+      "final_hostname": "www.visa2egypt.gov.eg",
+      "source_authority": "official_application_portal",
+      "relevant_excerpt": "Single entry visa (Tourism) 30$ ... Multiple entries visa (Tourism) 65$ ... Passport valid for at least 6 months from arrival date. ... Egyptian port authorities have the right to refuse entry to Egypt for an e-visa holder without any explanation. Eligible countries listed on the FAQ: Albania, Argentina, Armenia, Australia, Austria, Azerbaijan, Bahrain, Belarus, Belgium, Bolivia, Bosnia and Herzegovina, Brazil, Bulgaria, Canada, Chile, China, China/Taiwan, Colombia, Croatia, Cyprus, Czech, Denmark, Ecuador, Estonia, Finland, France, Georgia, Germany, Greece, Hungary, Iceland, India, Iraq, Ireland, Italy, Japan, Korea (South), Kuwait, Latvia, Lithuania, Luxembourg, Macedonia, Malaysia, Malta, Mexico, Moldova, Monaco, Montenegro, Netherlands, New Zealand, Norway, Oman, Paraguay, Peru, Poland, Portugal, Qatar, Republic of Kosovo, Romania, Russian Federation, San Marino, Saudi Arabia, Serbia, Singapore, Slovakia, Slovenia, South Africa, Spain, Sweden, Switzerland, Ukraine, United Arab Emirates, United Kingdom (England, Northern Ireland, Scotland and Wales), United States of America, Uruguay, Vatican, Venezuela, Vietnam.",
+      "retrieved_at": "2026-07-23T07:43:30Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Egypt foreign ministry tourist visa requirements official mfa.gov.eg",
+      "original_url": "https://egyptembassy.net/consular-services/visas-travel/visa-requirements/",
+      "final_url": "https://egyptembassy.net/consular-services/visas-travel/visa-requirements/",
+      "redirect_chain": [],
+      "final_hostname": "egyptembassy.net",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Fees: $32 (Single Entry) or $67 (Multiple Entry/ applicant has to provide a ticket reflecting multiple entry into the country) cash. ... Actual passport plus TWO copies of the information page (that has the photo) (valid for at least 6 months on arrival) ... Visa applicants (except the listed nationalities) are advised to get the visa in advance ... Passports holder's who are on list of countries requiring pre-approval cannot acquire visa upon arrival ... Pre-approval list: Afghanistan, Ethiopia, Iran, Israel, Mali, Niger, Palestine, Sudan (Sudanese nationals must apply with Sudanese passports only), Syria, Any Travel Document.",
+      "retrieved_at": "2026-07-23T07:45:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Egyptian consulate London official website tourist visa requirements British citizens",
+      "original_url": "https://egyptconsulate.co.uk/visas/",
+      "final_url": "https://egyptconsulate.co.uk/visas/",
+      "redirect_chain": [],
+      "final_hostname": "egyptconsulate.co.uk",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Nationals of the following countries can obtain a visa upon arrival at any of the Egyptian ports of entry: UK, EU members, USA, Australia, Croatia, Georgia, Japan, Canada, New Zealand, Norway, Macedonia, Republic of Korea. ... Single Entry Visas are valid for 6 months and allow a maximum stay of ONLY 30 days in Egypt. ... Multiple Entry Visas are valid for 6 months and allow a collective stay of 90 days in Egypt. ... Nationals of the UK, EU members, and the USA travelling to Sharm El Sheikh, Dahab, Nuweiba and Taba resorts ONLY, for a maximum of 15 DAYS, do not require a visa prior to travelling, as a FREE entry permission stamp will be granted upon arrival. ... Passports of all nationalities must be valid for at least 6 months on the date of issuing the visa. ... Nationals of the following countries: Afghanistan, Ethiopia, Iran, Mali, Niger, Syria, Palestine and Israel [need clearance, which] takes at least 8 weeks and may take up to 3 months. Tourist visa fees at this consulate: UK citizens GBP 33 (single) / GBP 68 (multiple).",
+      "retrieved_at": "2026-07-23T07:46:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Egyptian consulate London official website tourist visa requirements British citizens",
+      "original_url": "https://egyptconsulate.co.uk/faq/",
+      "final_url": "https://egyptconsulate.co.uk/faq/",
+      "redirect_chain": [],
+      "final_hostname": "egyptconsulate.co.uk",
+      "source_authority": "embassy_or_consulate",
+      "relevant_excerpt": "Visa fee payable on arrival is 25 US dollars or equivalent in Egyptian pounds. ... Visa on arrival eligible nationalities: UK, EU, Australia, Canada, Croatia, Georgia, Japan, New Zealand, Norway, Macedonia, Republic of Korea, Russian Federation, Serbia, Ukraine, USA. ... Nationals of UK, EU & USA travelling to Sharm El Sheikh, Taba, Dahab and Nuweiba for up to 14 days stay, are visa exempt. ... All passports must be at least 6 months valid before expiry date. ... A multiple-entry visa can only be applied for prior to travelling and valid for the applicant the right to a maximum 90 days stay in Egypt, 6 months, during which the applicant can enter Egypt more than once.",
+      "retrieved_at": "2026-07-23T07:46:30Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    }
+  ],
+  "dispositions": [
+    {
+      "nationalities": ["ALB", "ARG", "ARM", "AUS", "AUT", "AZE", "BHR", "BLR", "BEL", "BOL", "BIH", "BRA", "BGR", "CAN", "CHL", "CHN", "TWN", "COL", "HRV", "CYP", "CZE", "DNK", "ECU", "EST", "FIN", "FRA", "GEO", "DEU", "GRC", "HUN", "ISL", "IND", "IRQ", "IRL", "ITA", "JPN", "KOR", "KWT", "LVA", "LTU", "LUX", "MKD", "MYS", "MLT", "MEX", "MDA", "MCO", "MNE", "NLD", "NZL", "NOR", "OMN", "PRY", "PER", "POL", "PRT", "QAT", "XKX", "ROU", "RUS", "SMR", "SAU", "SRB", "SGP", "SVK", "SVN", "ZAF", "ESP", "SWE", "CHE", "UKR", "ARE", "GBR", "USA", "URY", "VAT", "VEN", "VNM"],
+      "category": "evisa_tourist",
+      "disposition": "EVISA_REQUIRED",
+      "maximum_stay": "30 days (single entry); multiple entry allows a collective stay of 90 days within 6-month validity (per Egyptian Consulate London description of tourist visas)",
+      "conditions": [
+        "Tourism purpose only ('For Tourist Visa ONLY' per Embassy of Egypt Washington DC)",
+        "Application must be created at least 7 days before departure",
+        "Egyptian port authorities have the right to refuse entry to an e-visa holder without explanation",
+        "eVisa is one available channel; nationalities also on the visa-on-arrival list may instead obtain a visa on arrival, and any nationality may apply through an Egyptian consulate",
+        "Passport must be valid at least 6 months from arrival date"
+      ],
+      "source_urls": [
+        "https://www.visa2egypt.gov.eg/eVisa/FAQ",
+        "https://www.visa2egypt.gov.eg/eVisa/Home",
+        "https://egyptembassy.net/consular-services/visas-travel/6874-2/",
+        "https://egyptconsulate.co.uk/visas/"
+      ]
+    },
+    {
+      "nationalities": ["GBR", "USA", "AUS", "CAN", "NZL", "JPN", "KOR", "NOR", "GEO", "MKD", "RUS", "SRB", "UKR", "AUT", "BEL", "BGR", "HRV", "CYP", "CZE", "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HUN", "IRL", "ITA", "LVA", "LTU", "LUX", "MLT", "NLD", "POL", "PRT", "ROU", "SVK", "SVN", "ESP", "SWE"],
+      "category": "visa_on_arrival_tourist",
+      "disposition": "VISA_ON_ARRIVAL",
+      "maximum_stay": "30 days (single-entry tourist visa per Egyptian Consulate London)",
+      "conditions": [
+        "Available at Egyptian ports of entry",
+        "Fee USD 25 or equivalent in Egyptian pounds, payable on arrival",
+        "Consulate Visas page lists: UK, EU members, USA, Australia, Croatia, Georgia, Japan, Canada, New Zealand, Norway, Macedonia, Republic of Korea; consulate FAQ additionally lists Russian Federation, Serbia and Ukraine — union recorded here",
+        "Nationalities on the pre-approval list cannot acquire visa upon arrival"
+      ],
+      "source_urls": [
+        "https://egyptconsulate.co.uk/visas/",
+        "https://egyptconsulate.co.uk/faq/"
+      ]
+    },
+    {
+      "nationalities": ["GBR", "USA", "AUT", "BEL", "BGR", "HRV", "CYP", "CZE", "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HUN", "IRL", "ITA", "LVA", "LTU", "LUX", "MLT", "NLD", "POL", "PRT", "ROU", "SVK", "SVN", "ESP", "SWE"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "15 days (Consulate Visas page); consulate FAQ states 14 days",
+      "conditions": [
+        "Sinai resorts ONLY: Sharm El Sheikh, Dahab, Nuweiba and Taba, without leaving those resort areas",
+        "A FREE entry permission stamp is granted upon arrival",
+        "This is a territorially limited special regime, not a general visa exemption; travel elsewhere in Egypt requires a visa"
+      ],
+      "source_urls": [
+        "https://egyptconsulate.co.uk/visas/",
+        "https://egyptconsulate.co.uk/faq/"
+      ]
+    },
+    {
+      "nationalities": ["HKG"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "30 days (single entry); 90 days collective (multiple entry)",
+      "conditions": [
+        "INFERRED: Hong Kong SAR is absent from the official eVisa eligible-country list and from the consulate visa-on-arrival list, so the default consular channel applies; no fetched official Egyptian source explicitly addresses HKSAR passports — see unresolved"
+      ],
+      "source_urls": [
+        "https://www.visa2egypt.gov.eg/eVisa/FAQ",
+        "https://egyptconsulate.co.uk/visas/"
+      ]
+    },
+    {
+      "nationalities": ["ALL_OTHERS"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "30 days (single entry); 90 days collective (multiple entry), both within 6-month visa validity",
+      "conditions": [
+        "Apply in advance at an Egyptian embassy or consulate",
+        "Nationals of Afghanistan, Ethiopia, Iran, Israel, Mali, Niger, Palestine, Sudan, Syria, and holders of any travel document require pre-approval/security clearance (6-8 weeks minimum per Washington DC embassy; up to 3 months per London consulate) and cannot obtain a visa on arrival",
+        "Passport must be valid at least 6 months"
+      ],
+      "source_urls": [
+        "https://egyptembassy.net/consular-services/visas-travel/visa-requirements/",
+        "https://egyptconsulate.co.uk/visas/"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "eta",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Official Egyptian sources describe three tourist channels — eVisa, visa on arrival, and consular visa (plus the Sinai-resorts free stamp); no electronic travel authorization program is mentioned"
+      ],
+      "source_urls": [
+        "https://www.visa2egypt.gov.eg/eVisa/FAQ",
+        "https://egyptconsulate.co.uk/visas/",
+        "https://egyptembassy.net/consular-services/visas-travel/visa-requirements/"
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "policy_kind": "evisa_program",
+      "policy_name": "Egypt e-Visa (tourism)",
+      "description": "Official Electronic Visa Portal for touristic visits for selected countries at www.visa2egypt.gov.eg. Tourist visa only; single-entry USD 30 or multiple-entry USD 65, paid online by credit/debit card. Application must be created at least 7 days before departure. Port authorities retain the right to refuse entry.",
+      "applies_to_nationalities": ["ALB", "ARG", "ARM", "AUS", "AUT", "AZE", "BHR", "BLR", "BEL", "BOL", "BIH", "BRA", "BGR", "CAN", "CHL", "CHN", "TWN", "COL", "HRV", "CYP", "CZE", "DNK", "ECU", "EST", "FIN", "FRA", "GEO", "DEU", "GRC", "HUN", "ISL", "IND", "IRQ", "IRL", "ITA", "JPN", "KOR", "KWT", "LVA", "LTU", "LUX", "MKD", "MYS", "MLT", "MEX", "MDA", "MCO", "MNE", "NLD", "NZL", "NOR", "OMN", "PRY", "PER", "POL", "PRT", "QAT", "XKX", "ROU", "RUS", "SMR", "SAU", "SRB", "SGP", "SVK", "SVN", "ZAF", "ESP", "SWE", "CHE", "UKR", "ARE", "GBR", "USA", "URY", "VAT", "VEN", "VNM"],
+      "conditions": [
+        "Tourism only",
+        "Apply at least 7 days before departure",
+        "Passport valid at least 6 months from arrival date",
+        "Entry may be refused by port authorities despite visa approval"
+      ],
+      "maximum_stay": "30 days (single entry, per consular description of Egyptian tourist visas); not explicitly stated on the portal pages fetched",
+      "official_source_urls": [
+        "https://www.visa2egypt.gov.eg/eVisa/Home",
+        "https://www.visa2egypt.gov.eg/eVisa/FAQ",
+        "https://egyptembassy.net/consular-services/visas-travel/6874-2/"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "visa_on_arrival_program",
+      "policy_name": "Egypt tourist visa on arrival",
+      "description": "Nationals of listed countries can obtain a visa upon arrival at any Egyptian port of entry for USD 25 (or equivalent in Egyptian pounds). Single-entry tourist visas allow a maximum stay of 30 days.",
+      "applies_to_nationalities": ["GBR", "USA", "AUS", "CAN", "NZL", "JPN", "KOR", "NOR", "GEO", "MKD", "RUS", "SRB", "UKR", "AUT", "BEL", "BGR", "HRV", "CYP", "CZE", "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HUN", "IRL", "ITA", "LVA", "LTU", "LUX", "MLT", "NLD", "POL", "PRT", "ROU", "SVK", "SVN", "ESP", "SWE"],
+      "conditions": [
+        "Fee USD 25 or equivalent in Egyptian pounds payable on arrival",
+        "Nationalities requiring pre-approval cannot acquire visa upon arrival"
+      ],
+      "maximum_stay": "30 days",
+      "official_source_urls": [
+        "https://egyptconsulate.co.uk/visas/",
+        "https://egyptconsulate.co.uk/faq/"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "consular_visa_regime",
+      "policy_name": "Egyptian consular tourist visa (default channel)",
+      "description": "All nationalities not covered by the eVisa or visa-on-arrival channels must obtain a visa in advance from an Egyptian embassy or consulate. Single Entry Visas are valid for 6 months and allow a maximum stay of ONLY 30 days; Multiple Entry Visas are valid for 6 months and allow a collective stay of 90 days. Nationals of Afghanistan, Ethiopia, Iran, Israel, Mali, Niger, Palestine, Sudan, Syria and holders of any travel document require security pre-approval (6-8 weeks minimum, up to 3 months).",
+      "applies_to_nationalities": ["ALL"],
+      "conditions": [
+        "Passport valid at least 6 months",
+        "Pre-approval nationalities cannot use visa on arrival",
+        "Consular fees vary by post (e.g. USD 32/67 at Washington DC; GBP 33/68 at London)"
+      ],
+      "maximum_stay": "30 days (single entry); 90 days collective (multiple entry)",
+      "official_source_urls": [
+        "https://egyptembassy.net/consular-services/visas-travel/visa-requirements/",
+        "https://egyptconsulate.co.uk/visas/"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "special_regime",
+      "policy_name": "Sinai resorts free entry permission stamp",
+      "description": "Nationals of the UK, EU members, and the USA travelling to Sharm El Sheikh, Dahab, Nuweiba and Taba resorts ONLY, for a maximum of 15 DAYS (consulate FAQ states 14 days), do not require a visa prior to travelling; a FREE entry permission stamp is granted upon arrival.",
+      "applies_to_nationalities": ["GBR", "USA", "AUT", "BEL", "BGR", "HRV", "CYP", "CZE", "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HUN", "IRL", "ITA", "LVA", "LTU", "LUX", "MLT", "NLD", "POL", "PRT", "ROU", "SVK", "SVN", "ESP", "SWE"],
+      "conditions": [
+        "Valid only for the Sharm El Sheikh, Dahab, Nuweiba and Taba resort areas; travel beyond them requires a visa"
+      ],
+      "maximum_stay": "15 days (Visas page) / 14 days (FAQ)",
+      "official_source_urls": [
+        "https://egyptconsulate.co.uk/visas/",
+        "https://egyptconsulate.co.uk/faq/"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    }
+  ],
+  "fees": [
+    {
+      "visa_category": "evisa_tourist",
+      "visa_subtype": "single_entry",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 30,
+      "government_fee_currency": "USD",
+      "refundability": null,
+      "accepted_payment_methods": ["Visa card", "MasterCard", "other debit cards (online)"],
+      "source_urls": ["https://www.visa2egypt.gov.eg/eVisa/FAQ", "https://www.visa2egypt.gov.eg/eVisa/Home"]
+    },
+    {
+      "visa_category": "evisa_tourist",
+      "visa_subtype": "multiple_entry",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 65,
+      "government_fee_currency": "USD",
+      "refundability": null,
+      "accepted_payment_methods": ["Visa card", "MasterCard", "other debit cards (online)"],
+      "source_urls": ["https://www.visa2egypt.gov.eg/eVisa/FAQ", "https://www.visa2egypt.gov.eg/eVisa/Home"]
+    },
+    {
+      "visa_category": "visa_on_arrival_tourist",
+      "visa_subtype": "single_entry",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 25,
+      "government_fee_currency": "USD",
+      "refundability": null,
+      "accepted_payment_methods": ["cash on arrival (USD 25 or equivalent in Egyptian pounds)"],
+      "source_urls": ["https://egyptconsulate.co.uk/faq/"]
+    },
+    {
+      "visa_category": "tourist_visa_consular",
+      "visa_subtype": "single_entry (Embassy of Egypt, Washington DC)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 32,
+      "government_fee_currency": "USD",
+      "refundability": null,
+      "accepted_payment_methods": ["cash"],
+      "source_urls": ["https://egyptembassy.net/consular-services/visas-travel/visa-requirements/"]
+    },
+    {
+      "visa_category": "tourist_visa_consular",
+      "visa_subtype": "multiple_entry (Embassy of Egypt, Washington DC)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 67,
+      "government_fee_currency": "USD",
+      "refundability": null,
+      "accepted_payment_methods": ["cash"],
+      "source_urls": ["https://egyptembassy.net/consular-services/visas-travel/visa-requirements/"]
+    },
+    {
+      "visa_category": "tourist_visa_consular",
+      "visa_subtype": "single_entry (Egyptian Consulate, London; UK citizens)",
+      "applies_to_nationalities": ["GBR"],
+      "government_fee_amount": 33,
+      "government_fee_currency": "GBP",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": ["https://egyptconsulate.co.uk/visas/"]
+    },
+    {
+      "visa_category": "tourist_visa_consular",
+      "visa_subtype": "multiple_entry (Egyptian Consulate, London; UK citizens)",
+      "applies_to_nationalities": ["GBR"],
+      "government_fee_amount": 68,
+      "government_fee_currency": "GBP",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": ["https://egyptconsulate.co.uk/visas/"]
+    }
+  ],
+  "portals": [
+    {
+      "portal_kind": "evisa_portal",
+      "url": "https://www.visa2egypt.gov.eg/eVisa/Home",
+      "operator": "Government of the Arab Republic of Egypt",
+      "operator_kind": "government",
+      "official_linking_source": "https://egyptembassy.net/consular-services/visas-travel/6874-2/",
+      "supported_categories": ["tourist single entry eVisa", "tourist multiple entry eVisa"],
+      "source_urls": ["https://www.visa2egypt.gov.eg/eVisa/Home", "https://www.visa2egypt.gov.eg/eVisa/FAQ", "https://egyptembassy.net/consular-services/visas-travel/6874-2/"]
+    },
+    {
+      "portal_kind": "embassy_site",
+      "url": "https://egyptembassy.net/",
+      "operator": "Embassy of Egypt, Washington DC",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["consular tourist visa"],
+      "source_urls": ["https://egyptembassy.net/consular-services/visas-travel/visa-requirements/", "https://egyptembassy.net/consular-services/visas-travel/6874-2/"]
+    },
+    {
+      "portal_kind": "consulate_site",
+      "url": "https://egyptconsulate.co.uk/",
+      "operator": "Egyptian Consulate, London",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["consular tourist visa"],
+      "source_urls": ["https://egyptconsulate.co.uk/visas/", "https://egyptconsulate.co.uk/faq/"]
+    }
+  ],
+  "passport_validity": {
+    "rule_kind": "months_after_arrival",
+    "months": 6,
+    "min_blank_pages": 1,
+    "condition_text": "eVisa portal FAQ: 'Passport valid for at least 6 months from arrival date.' Embassy of Egypt Washington DC: passport 'valid for at least 6 months on arrival' and must have an empty visa page. Egyptian Consulate London: 'Passports of all nationalities must be valid for at least 6 months on the date of issuing the visa.'",
+    "source_urls": [
+      "https://www.visa2egypt.gov.eg/eVisa/FAQ",
+      "https://egyptembassy.net/consular-services/visas-travel/visa-requirements/",
+      "https://egyptconsulate.co.uk/visas/"
+    ]
+  },
+  "jurisdictions": [],
+  "unresolved": [
+    "No consolidated official general visa-exemption list could be verified. Possible exemptions for certain Arab/GCC nationalities remain unverified; note that Bahrain, Kuwait, Oman, Qatar, Saudi Arabia and UAE appear on the eVisa eligible-country list, implying they need visas, but no official page explicitly confirming or denying a broader exemption was reachable.",
+    "Egyptian Ministry of Foreign Affairs site (https://www.mfa.gov.eg/en) returned HTTP 403 Forbidden; could not be used.",
+    "Cairo Airport official Entry Visa page (https://www.cairo-airport.com/en-us/Services/Passenger-Guide/Entry-Visa) refused connections (ECONNREFUSED); State Information Service (sis.gov.eg) failed TLS certificate verification; egypt.travel failed DNS resolution. Could not corroborate the June-2025 pilot visa-on-arrival kiosk system reported by SIS.",
+    "Sinai resorts free-stamp duration conflict within one consulate: 15 days on the Visas page vs 14 days on the FAQ of egyptconsulate.co.uk; both recorded.",
+    "The eVisa maximum stay is not explicitly stated on the fetched portal pages; the 30-day single-entry / 90-day-collective multiple-entry figures come from the Egyptian Consulate London's description of Egyptian tourist visas generally.",
+    "The eVisa eligible-country enumeration extracted from the portal FAQ (78 countries listed) may be incomplete; the extraction referenced a larger count. The authoritative list is on https://www.visa2egypt.gov.eg/eVisa/FAQ.",
+    "HKG disposition (embassy visa required) is inferred from Hong Kong's absence from the official eVisa and visa-on-arrival lists; no fetched official Egyptian source explicitly addresses HKSAR passports. MAC (Macao) similarly unaddressed and falls under ALL_OTHERS.",
+    "Visa-on-arrival eligible list differs slightly between the consulate Visas page and its FAQ (FAQ adds Russian Federation, Serbia, Ukraine); the union was recorded.",
+    "Fee variations by channel/post recorded as-is: eVisa USD 30/65, visa on arrival USD 25, Washington DC consular USD 32/67, London consular GBP 33/68. These are per-channel/per-post differences, not necessarily conflicts."
+  ]
+}

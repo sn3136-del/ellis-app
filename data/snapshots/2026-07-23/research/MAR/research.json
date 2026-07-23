@@ -1,0 +1,203 @@
+{
+  "destination": "MAR",
+  "retrieved_at": "2026-07-23T08:02:15Z",
+  "research_status": "research_incomplete",
+  "sources": [
+    {
+      "search_query": "official Morocco evisa acces-maroc.ma electronic visa tourist",
+      "original_url": "https://www.acces-maroc.ma/assets/docs/Conditions%20utilisation%20eVisa%20-%20An.pdf",
+      "final_url": "https://www.acces-maroc.ma/assets/docs/Conditions%20utilisation%20eVisa%20-%20An.pdf",
+      "redirect_chain": [],
+      "final_hostname": "www.acces-maroc.ma",
+      "source_authority": "official_application_portal",
+      "relevant_excerpt": "The electronic visa is a one-person authorization allowing access and stay for a limited and uninterrupted time on the Moroccan territory. It is issued online to certain categories of foreign citizens subject to the formality of visa to enter the Kingdom. Category A: Citizens of certain countries, subject to the formality of the visa, which list is defined by the competent Moroccan authorities (Azerbaijan, Benin, Brunei Darussalam, Cambodia, Guatemala, India, Jordan, Laos, Israel, Thailand and Vietnam) holders of an ordinary passport, valid for at least 90 days from the date of the evisa application. Category B: Foreign citizens, subject to the formality of visa, living in one of the countries which list is defined by the competent Moroccan authorities (European Union, United States of America, Australia, Canada, United Kingdom, Japan, Norway, New Zealand, United Arab Emirates and Switzerland) holders of a valid ordinary passport, at least 90 days from the date of the application, and with a residency card or residency permit valid for at least 180 days. Category C: Foreign citizens holders of one of the nonelectronic visas of countries (Schengen, United States of America, Australia, United Kingdom, Ireland, Japan, Canada, Norway and New Zealand)... multiple-entries and valid for at least 90 days. GENERAL CONDITIONS: The maximum period of the electronic visa validity is 180 days, starting from the date of issue, for a single entry and a period of stay not exceeding 30 days. The e-Visa is issued for 'Tourism' or 'Business' purposes. Only ORDINARY PASSPORTS are accepted.",
+      "retrieved_at": "2026-07-23T08:02:15Z",
+      "effective_date_evidence": "eVisa procedure launched 10 July 2022 via www.acces-maroc.ma (per Ministry of Foreign Affairs)",
+      "page_language": "en"
+    },
+    {
+      "search_query": "acces-maroc.ma AEVM conditions utilisation travel authorization pdf",
+      "original_url": "https://www.acces-maroc.ma/assets/docs/Guide%20AEVM.pdf",
+      "final_url": "https://www.acces-maroc.ma/assets/docs/Guide%20AEVM.pdf",
+      "redirect_chain": [],
+      "final_hostname": "www.acces-maroc.ma",
+      "source_authority": "official_application_portal",
+      "relevant_excerpt": "Guide d'utilisation pour l'introduction d'une demande d'autorisation electronique de voyage (AEVM). Etape 01 : Verification d'eligibilite. Le visiteur du site www.acces-maroc.ma, peut a travers le formulaire de la page d'accueil, verifier quel document necessaire pour pouvoir se rendre au Maroc, en introduisant 6 informations : Nationalite, Type de passeport, Pays de residence, Visa additionnel, Motif de voyage et Date naissance. Selon les informations renseignees, vous serez informe de la procedure a suivre pour vous rendre au Maroc: Le demandeur n'est pas soumis a la formalite du visa. Le demandeur est soumis a la formalite du visa a deposer au poste consulaire. Le demandeur est soumis a la formalite de l'AEVM. Le demandeur peut avoir un eVisa.",
+      "retrieved_at": "2026-07-23T08:02:15Z",
+      "effective_date_evidence": null,
+      "page_language": "fr"
+    },
+    {
+      "search_query": "diplomatie.ma consulat.ma visa exempted countries list Morocco",
+      "original_url": "https://www.consulat.ma/index.php/en/list-countries-whose-citizens-are-exempted-entry-visa-morocco",
+      "final_url": "https://www.consulat.ma/index.php/en/list-countries-whose-citizens-are-exempted-entry-visa-morocco",
+      "redirect_chain": [],
+      "final_hostname": "www.consulat.ma",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "List of countries whose citizens are exempted from entry visa into Morocco: Algeria, Germany, Austria, Australia, Saudi Arabia, Argentina, Belgium, Bahrain, Burkina Faso, Brazil, Bulgaria, Ivory Coast, Canada, Chile, China, Cyprus, Colombia, Congo (Brazzaville) (Besoin d'une AEVM), Czech Republic, Croatia, Denmark, Spain + Andorra, Estonia, United States of America, United Arab Emirates, Sweden, Finland, France + Monaco, Gabon, Greece, Guinea (Conakry) (Besoin d'une AEVM), Iceland, Italy, Ireland, Japan, Kuwait, Latvia, Liechtenstein, Lithuania, Luxembourg, Mali (Besoin d'une AEVM), Malta, Maldives (a stay limited to 30 days), Mexico, Niger, Norway, New Zealand, Oman, Portugal, Netherlands, Philippines, Peru, Poland, Puerto Rico, Qatar, Macao (Administrative area), South Korea, Romania, San Marino, Slovakia, Senegal, Singapore, Switzerland, Slovenia, Russian Federation, Tunisia, Turkey, Togo, United Kingdom, Indonesia, Hong-Kong (a stay limited to 30 days), Hungary (a stay limited to 90 days), Malaysia (a stay limited to 90 days).",
+      "retrieved_at": "2026-07-23T08:02:15Z",
+      "effective_date_evidence": "Page is the current consular-services exemption list on the Ministry of Foreign Affairs consular portal (footer copyright 2018, kept updated)",
+      "page_language": "en"
+    }
+  ],
+  "dispositions": [
+    {
+      "nationalities": ["CHN","USA","GBR","SGP","JPN","KOR","DEU","FRA","AUS","CAN","RUS","ARE","BRA"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days",
+      "conditions": ["Listed on the official consular exemption list; standard exemption stay is 90 days (the list annotates only deviations from that baseline)","Ordinary passport"],
+      "source_urls": ["https://www.consulat.ma/index.php/en/list-countries-whose-citizens-are-exempted-entry-visa-morocco"]
+    },
+    {
+      "nationalities": ["HKG"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "30 days",
+      "conditions": ["Hong-Kong SAR passport is visa-exempt but explicitly limited to a 30-day stay on the official exemption list"],
+      "source_urls": ["https://www.consulat.ma/index.php/en/list-countries-whose-citizens-are-exempted-entry-visa-morocco"]
+    },
+    {
+      "nationalities": ["IND"],
+      "category": "evisa_tourist",
+      "disposition": "EVISA_REQUIRED",
+      "maximum_stay": "30 days",
+      "conditions": ["India is an eVisa Category A nationality: ordinary passport valid at least 90 days from application","Apply online at www.acces-maroc.ma; single entry, stay not exceeding 30 days, eVisa valid 180 days from issue","Not on the visa-exemption list"],
+      "source_urls": ["https://www.acces-maroc.ma/assets/docs/Conditions%20utilisation%20eVisa%20-%20An.pdf"]
+    },
+    {
+      "nationalities": ["AZE","BEN","BRN","KHM","GTM","JOR","LAO","ISR","THA","VNM"],
+      "category": "evisa_tourist",
+      "disposition": "EVISA_REQUIRED",
+      "maximum_stay": "30 days",
+      "conditions": ["eVisa Category A nationalities (ordinary passport valid >=90 days from application)","Apply at www.acces-maroc.ma; single entry, max 30-day stay, eVisa valid 180 days from issue"],
+      "source_urls": ["https://www.acces-maroc.ma/assets/docs/Conditions%20utilisation%20eVisa%20-%20An.pdf"]
+    },
+    {
+      "nationalities": ["MLI","COG","GIN"],
+      "category": "eta",
+      "disposition": "ETA_REQUIRED",
+      "maximum_stay": null,
+      "conditions": ["These nationalities appear on the visa-exemption list but are annotated 'Besoin d'une AEVM' (electronic travel authorization required) with a link to www.acces-maroc.ma"],
+      "source_urls": ["https://www.consulat.ma/index.php/en/list-countries-whose-citizens-are-exempted-entry-visa-morocco"]
+    },
+    {
+      "nationalities": ["TWN"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": null,
+      "conditions": ["Taiwan is not on the visa-exemption list and is not an eVisa Category A nationality; a consular tourist visa is required by nationality","May qualify for an eVisa under Category B (residence permit in an eligible country) or Category C (multiple-entry visa from an eligible country)"],
+      "source_urls": ["https://www.consulat.ma/index.php/en/list-countries-whose-citizens-are-exempted-entry-visa-morocco","https://www.acces-maroc.ma/assets/docs/Conditions%20utilisation%20eVisa%20-%20An.pdf"]
+    },
+    {
+      "nationalities": ["ALL_OTHERS"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": null,
+      "conditions": ["Nationalities neither on the visa-exemption list nor eVisa Category A must obtain a visa at a Moroccan Embassy or Consulate General","Such travellers may instead qualify for an eVisa under Category B (valid residence permit in an eligible country) or Category C (multiple-entry visa from an eligible country) via www.acces-maroc.ma"],
+      "source_urls": ["https://www.acces-maroc.ma/assets/docs/Conditions%20utilisation%20eVisa%20-%20An.pdf","https://www.acces-maroc.ma/assets/docs/Guide%20AEVM.pdf"]
+    }
+  ],
+  "policies": [
+    {
+      "policy_kind": "visa_exemption_list",
+      "policy_name": "List of countries whose citizens are exempted from entry visa into Morocco",
+      "description": "Official consular list of nationalities exempt from an entry visa to Morocco. Standard exemption stay is 90 days; the list annotates only deviations (Hong-Kong and Maldives limited to 30 days). Mali, Congo (Brazzaville) and Guinea (Conakry) are listed but require an AEVM electronic travel authorization.",
+      "applies_to_nationalities": ["DZA","DEU","AUT","AUS","SAU","ARG","BEL","BHR","BFA","BRA","BGR","CIV","CAN","CHL","CHN","CYP","COL","COG","CZE","HRV","DNK","ESP","AND","EST","USA","ARE","SWE","FIN","FRA","MCO","GAB","GRC","GIN","ISL","ITA","IRL","JPN","KWT","LVA","LIE","LTU","LUX","MLI","MLT","MDV","MEX","NER","NOR","NZL","OMN","PRT","NLD","PHL","PER","POL","PRI","QAT","MAC","KOR","ROU","SMR","SVK","SEN","SGP","CHE","SVN","RUS","TUN","TUR","TGO","GBR","IDN","HKG","HUN","MYS"],
+      "conditions": ["Standard exemption stay 90 days","Hong-Kong and Maldives: 30-day stay limit","Mali, Congo (Brazzaville), Guinea (Conakry): AEVM required despite exemption"],
+      "maximum_stay": "90 days",
+      "official_source_urls": ["https://www.consulat.ma/index.php/en/list-countries-whose-citizens-are-exempted-entry-visa-morocco"],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "evisa_program",
+      "policy_name": "Morocco electronic visa (eVisa) - acces-maroc.ma",
+      "description": "Online tourism/business eVisa issued to three categories of visa-subject foreigners: Category A (specific nationalities including India), Category B (residents of eligible countries holding a valid residence permit), Category C (holders of a multiple-entry visa from eligible countries). Single entry, max 30-day stay, eVisa valid 180 days from issue. Ordinary passports only. Express (24h) or Standard (72h) processing. Non-refundable.",
+      "applies_to_nationalities": ["AZE","BEN","BRN","KHM","GTM","IND","JOR","LAO","ISR","THA","VNM"],
+      "conditions": ["Category A nationalities eligible by nationality","Category B: valid residence permit (>=180 days) in EU/USA/Australia/Canada/UK/Japan/Norway/New Zealand/UAE/Switzerland","Category C: multiple-entry non-electronic visa (>=90 days) from Schengen/USA/Australia/UK/Ireland/Japan/Canada/Norway/New Zealand","Ordinary passport valid >=90 days from application","Tourism or Business only; no residency"],
+      "maximum_stay": "30 days",
+      "official_source_urls": ["https://www.acces-maroc.ma/assets/docs/Conditions%20utilisation%20eVisa%20-%20An.pdf"],
+      "effective_from": "2022-07-10",
+      "effective_until": null
+    },
+    {
+      "policy_kind": "eta_program",
+      "policy_name": "Autorisation Electronique de Voyage au Maroc (AEVM)",
+      "description": "Electronic travel authorization required for certain visa-exempt nationalities before travel to Morocco, applied for online at www.acces-maroc.ma. The official consular exemption list flags Mali, Congo (Brazzaville) and Guinea (Conakry) as requiring an AEVM.",
+      "applies_to_nationalities": ["MLI","COG","GIN"],
+      "conditions": ["Requested online via www.acces-maroc.ma","Applies to specified visa-exempt nationalities"],
+      "maximum_stay": null,
+      "official_source_urls": ["https://www.consulat.ma/index.php/en/list-countries-whose-citizens-are-exempted-entry-visa-morocco","https://www.acces-maroc.ma/assets/docs/Guide%20AEVM.pdf"],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "consular_visa_regime",
+      "policy_name": "Consular tourist visa (Embassy / Consulate General of Morocco)",
+      "description": "Default channel for nationalities that are neither visa-exempt nor eVisa-eligible by nationality, and for holders of non-ordinary travel documents. Applications are lodged at the Moroccan Embassy or Consulate General near the applicant's place of residence.",
+      "applies_to_nationalities": ["ALL_OTHERS"],
+      "conditions": ["Holders of diplomatic/service/special passports and travel documents for refugees/stateless persons must apply at an Embassy or Consulate General"],
+      "maximum_stay": null,
+      "official_source_urls": ["https://www.acces-maroc.ma/assets/docs/Conditions%20utilisation%20eVisa%20-%20An.pdf","https://www.acces-maroc.ma/assets/docs/Guide%20AEVM.pdf"],
+      "effective_from": null,
+      "effective_until": null
+    }
+  ],
+  "fees": [
+    {
+      "visa_category": "eVisa (tourist)",
+      "visa_subtype": "standard / express",
+      "applies_to_nationalities": null,
+      "government_fee_amount": null,
+      "government_fee_currency": null,
+      "refundability": "non-refundable (any validated and paid request cannot be cancelled or refunded)",
+      "accepted_payment_methods": null,
+      "source_urls": ["https://www.acces-maroc.ma/assets/docs/Conditions%20utilisation%20eVisa%20-%20An.pdf"]
+    }
+  ],
+  "portals": [
+    {
+      "portal_kind": "evisa_portal",
+      "url": "https://www.acces-maroc.ma",
+      "operator": "Kingdom of Morocco - Ministry of Foreign Affairs, African Cooperation and Moroccan Expatriates",
+      "operator_kind": "government",
+      "official_linking_source": "https://www.consulat.ma/index.php/en/list-countries-whose-citizens-are-exempted-entry-visa-morocco",
+      "supported_categories": ["evisa_tourist","evisa_business","eta"],
+      "source_urls": ["https://www.acces-maroc.ma/assets/docs/Conditions%20utilisation%20eVisa%20-%20An.pdf","https://www.acces-maroc.ma/assets/docs/Guide%20AEVM.pdf"]
+    },
+    {
+      "portal_kind": "eta_portal",
+      "url": "https://www.acces-maroc.ma",
+      "operator": "Kingdom of Morocco - Ministry of Foreign Affairs, African Cooperation and Moroccan Expatriates",
+      "operator_kind": "government",
+      "official_linking_source": "https://www.consulat.ma/index.php/en/list-countries-whose-citizens-are-exempted-entry-visa-morocco",
+      "supported_categories": ["eta"],
+      "source_urls": ["https://www.acces-maroc.ma/assets/docs/Guide%20AEVM.pdf","https://www.consulat.ma/index.php/en/list-countries-whose-citizens-are-exempted-entry-visa-morocco"]
+    },
+    {
+      "portal_kind": "foreign_ministry",
+      "url": "https://www.consulat.ma",
+      "operator": "Kingdom of Morocco - Ministry of Foreign Affairs consular services",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["visa_exemption_list","tourist_visa","appointment"],
+      "source_urls": ["https://www.consulat.ma/index.php/en/list-countries-whose-citizens-are-exempted-entry-visa-morocco"]
+    }
+  ],
+  "passport_validity": {
+    "rule_kind": "unknown",
+    "months": null,
+    "min_blank_pages": null,
+    "condition_text": "The only official passport-validity rule obtained applies to the eVisa: an ordinary passport valid for at least 90 days from the date of the eVisa application (Category A/B/C); diplomatic, service, special passports and refugee/stateless travel documents are not accepted for the eVisa. No official general passport-validity rule for visa-free tourist entry was located.",
+    "source_urls": ["https://www.acces-maroc.ma/assets/docs/Conditions%20utilisation%20eVisa%20-%20An.pdf"]
+  },
+  "jurisdictions": [],
+  "unresolved": [
+    "Government fee amounts for the eVisa (standard/express) and for consular tourist visas were not obtained from official pages; the acces-maroc.ma fee is displayed only after completing the eligibility/application form. Non-official figures were not used.",
+    "consulat.ma blocks WebFetch (WAF 'Request Rejected'); the official exemption-list page was retrieved via a direct HTTP GET with a standard browser User-Agent (no CAPTCHA/bot-detection was bypassed). diplomatie.ma and its embassy subdomains (us.diplomatie.ma, in.diplomatie.ma) could not be fetched because their TLS certificate chain is not verifiable.",
+    "Full AEVM eligibility list and AEVM validity/stay/fees were not obtained from an official source; only Mali, Congo (Brazzaville) and Guinea (Conakry) are confirmed AEVM-required (flagged on the consular exemption list). A temporary AFCON-2025 AEVM expansion (per news) was not verifiable on official pages and is not recorded.",
+    "No official general passport-validity or blank-page rule for visa-free tourist entry was located.",
+    "TWN disposition (embassy visa) is inferred from absence on the exemption list and eVisa Category A; no official page states Taiwan explicitly."
+  ]
+}

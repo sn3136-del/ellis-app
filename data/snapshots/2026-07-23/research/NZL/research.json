@@ -1,0 +1,310 @@
+{
+  "destination": "NZL",
+  "retrieved_at": "2026-07-23T08:02:36Z",
+  "research_status": "verified",
+  "sources": [
+    {
+      "search_query": "New Zealand official immigration NZeTA electronic travel authority visitor visa waiver countries",
+      "original_url": "https://www.immigration.govt.nz/visit/what-you-need-to-visit-new-zealand/visa-waiver-countries-and-territories/",
+      "final_url": "https://www.immigration.govt.nz/visit/what-you-need-to-visit-new-zealand/visa-waiver-countries-and-territories/",
+      "redirect_chain": [],
+      "final_hostname": "www.immigration.govt.nz",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Complete visa waiver list: Andorra, Argentina, Austria, Bahrain, Belgium, Brazil, Brunei, Bulgaria, Canada, Chile, Croatia, Cyprus, Czech Republic, Denmark, Estonia (citizens only), Finland, France, Germany, Greece, Hong Kong, Hungary, Iceland, Ireland, Israel, Italy, Japan, South Korea, Kuwait, Latvia (citizens only), Liechtenstein, Lithuania (citizens only), Luxembourg, Macau, Malaysia, Malta, Mauritius, Mexico, Monaco, Netherlands, Norway, Oman, Poland, Portugal, Qatar, Romania, San Marino, Saudi Arabia, Seychelles, Singapore, Slovak Republic, Slovenia, Spain, Sweden, Switzerland, Taiwan, United Arab Emirates, United Kingdom, United States of America, Uruguay, and Vatican City. Visitors from visa waiver countries do not need a visitor visa to enter New Zealand for a period of less than 3 months, or 6 months if from the United Kingdom. NZeTA required. Australian citizens and permanent residents travelling on an Australian passport do not need a visa or an NZeTA.",
+      "retrieved_at": "2026-07-23T08:02:36Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "New Zealand official immigration NZeTA electronic travel authority visitor visa waiver countries",
+      "original_url": "https://www.immigration.govt.nz/visas/new-zealand-electronic-travel-authority-nzeta/",
+      "final_url": "https://www.immigration.govt.nz/visas/new-zealand-electronic-travel-authority-nzeta/",
+      "redirect_chain": [],
+      "final_hostname": "www.immigration.govt.nz",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "You may obtain an NZeTA if you are a citizen of a visa waiver country or territory, a citizen of China or a Pacific Islands Forum country travelling from Australia with an eligible Australian visa, a cruise or cargo ship passenger, an Australian permanent resident, or transiting through New Zealand. Maximum stay: up to 3 months at a time, or up to 6 months at a time if you are from the United Kingdom. Transit passengers: up to 24 hours at Auckland International Airport only. You can only be in New Zealand for up to 6 months within any 12-month period. Cost: From NZD $17. Valid for 2 years for travellers (5 years for airline crew). Allow 72 hours. Official application portal: https://nzeta.immigration.govt.nz/",
+      "retrieved_at": "2026-07-23T08:02:36Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "immigration.govt.nz visa waiver countries list visitor visa",
+      "original_url": "https://www.govt.nz/browse/immigration-and-visas/visitor-visas-and-the-nzeta/check-if-you-need-a-visitor-visa-or-an-nzeta/",
+      "final_url": "https://www.govt.nz/browse/immigration-and-visas/visitor-visas-and-the-nzeta/check-if-you-need-a-visitor-visa-or-an-nzeta/",
+      "redirect_chain": [],
+      "final_hostname": "www.govt.nz",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Most people travelling to New Zealand need to get either a visa, or a New Zealand Electronic Travel Authority (NZeTA). Which one you need depends on your passport and situation. Use Immigration New Zealand's online tool to find out what you need. Passport holders from visa waiver countries can use the NZeTA system; others require a visitor visa.",
+      "retrieved_at": "2026-07-23T08:02:36Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "immigration.govt.nz visa waiver countries list visitor visa",
+      "original_url": "https://www.immigration.govt.nz/visas/visitor-visa/",
+      "final_url": "https://www.immigration.govt.nz/visas/visitor-visa/",
+      "redirect_chain": [],
+      "final_hostname": "www.immigration.govt.nz",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "People travelling on a passport from some countries must apply for a Visitor Visa to visit New Zealand. Maximum stay: up to either 6 months or 9 months depending on visa type; multiple-entry visas permit stays of up to 6 months per 12-month period, single-entry up to 9 months within an 18-month period. Application fee starts at NZD $441. Apply online through https://apply.immigration.govt.nz/ or complete the Visitor Visa Application (INZ 1017) paper form. Your passport or certificate of identity must be valid for at least 3 months after the date you plan to leave New Zealand.",
+      "retrieved_at": "2026-07-23T08:02:36Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "immigration.govt.nz International Visitor Conservation and Tourism Levy IVL amount NZD NZeTA cost",
+      "original_url": "https://www.immigration.govt.nz/process-to-apply/applying-for-a-visa/fees-processing-times-and-refunds/paying-the-international-visitor-levy/",
+      "final_url": "https://www.immigration.govt.nz/process-to-apply/applying-for-a-visa/fees-processing-times-and-refunds/paying-the-international-visitor-levy/",
+      "redirect_chain": [],
+      "final_hostname": "www.immigration.govt.nz",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "International Visitor Conservation and Tourism Levy (IVL) amount: NZD $100. The IVL applies to most people applying for visitor visas, NZeTAs, student visas, working holiday schemes, and specific work visas. Exemptions exist for Australian and New Zealand passport holders, certain Pacific Island nation citizens, transit passengers, resident visa holders, and Business Visitor Visa holders. You pay it when you request an NZeTA, or apply for your visa. We do not refund the IVL, even if we decline your application.",
+      "retrieved_at": "2026-07-23T08:02:36Z",
+      "effective_date_evidence": "Page issued Monday 02 Mar 2026",
+      "page_language": "en"
+    }
+  ],
+  "dispositions": [
+    {
+      "nationalities": ["USA", "SGP", "HKG", "TWN", "JPN", "KOR", "DEU", "FRA", "CAN", "ARE", "BRA"],
+      "category": "eta",
+      "disposition": "ETA_REQUIRED",
+      "maximum_stay": "3 months per visit (max 6 months within any 12-month period)",
+      "conditions": [
+        "Citizen of a visa waiver country/territory travelling on that passport",
+        "Must request an NZeTA before travel",
+        "Must pay the International Visitor Conservation and Tourism Levy (IVL) of NZD 100",
+        "Must meet health and character requirements and be a genuine visitor"
+      ],
+      "source_urls": [
+        "https://www.immigration.govt.nz/visit/what-you-need-to-visit-new-zealand/visa-waiver-countries-and-territories/",
+        "https://www.immigration.govt.nz/visas/new-zealand-electronic-travel-authority-nzeta/"
+      ]
+    },
+    {
+      "nationalities": ["GBR"],
+      "category": "eta",
+      "disposition": "ETA_REQUIRED",
+      "maximum_stay": "6 months per visit (UK passport holders)",
+      "conditions": [
+        "UK citizens may stay up to 6 months at a time under the NZeTA",
+        "Must request an NZeTA before travel",
+        "Must pay the IVL of NZD 100"
+      ],
+      "source_urls": [
+        "https://www.immigration.govt.nz/visit/what-you-need-to-visit-new-zealand/visa-waiver-countries-and-territories/",
+        "https://www.immigration.govt.nz/visas/new-zealand-electronic-travel-authority-nzeta/"
+      ]
+    },
+    {
+      "nationalities": ["AUS"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "Indefinite (grant of residence on arrival under trans-Tasman arrangement)",
+      "conditions": [
+        "Australian citizens and permanent residents travelling on an Australian passport do not need a visa or an NZeTA"
+      ],
+      "source_urls": [
+        "https://www.immigration.govt.nz/visit/what-you-need-to-visit-new-zealand/visa-waiver-countries-and-territories/",
+        "https://www.immigration.govt.nz/visas/new-zealand-electronic-travel-authority-nzeta/"
+      ]
+    },
+    {
+      "nationalities": ["CHN", "IND", "RUS"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "Up to 6 months (multiple-entry) or 9 months (single-entry) depending on visa granted",
+      "conditions": [
+        "Not on the visa waiver list; must apply for a Visitor Visa before travel",
+        "Apply online at https://apply.immigration.govt.nz/ or via INZ 1017 paper form",
+        "Government fee from NZD 441 plus IVL of NZD 100"
+      ],
+      "source_urls": [
+        "https://www.immigration.govt.nz/visas/visitor-visa/",
+        "https://www.govt.nz/browse/immigration-and-visas/visitor-visas-and-the-nzeta/check-if-you-need-a-visitor-visa-or-an-nzeta/"
+      ]
+    },
+    {
+      "nationalities": ["USA", "GBR", "SGP", "HKG", "TWN", "JPN", "KOR", "DEU", "FRA", "CAN", "ARE", "BRA", "AUS"],
+      "category": "tourist_visa",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Visa waiver / trans-Tasman travellers do not apply for a consular Visitor Visa; they use the NZeTA (or no authority for Australians)"
+      ],
+      "source_urls": [
+        "https://www.immigration.govt.nz/visit/what-you-need-to-visit-new-zealand/visa-waiver-countries-and-territories/"
+      ]
+    },
+    {
+      "nationalities": ["ALL_OTHERS"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "Up to 6 months (multiple-entry) or 9 months (single-entry) depending on visa granted",
+      "conditions": [
+        "Any nationality not on the visa waiver list must apply for a Visitor Visa before travel",
+        "Apply online at https://apply.immigration.govt.nz/ or via INZ 1017 paper form",
+        "Government fee from NZD 441 plus IVL of NZD 100"
+      ],
+      "source_urls": [
+        "https://www.immigration.govt.nz/visas/visitor-visa/",
+        "https://www.immigration.govt.nz/visit/what-you-need-to-visit-new-zealand/visa-waiver-countries-and-territories/"
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "policy_kind": "visa_exemption_list",
+      "policy_name": "New Zealand visa waiver countries and territories",
+      "description": "Passport holders from listed visa waiver countries/territories do not need a Visitor Visa for a stay of less than 3 months (6 months for the United Kingdom), but must request an NZeTA before travel and pay the IVL. Australian citizens and permanent residents on an Australian passport need neither a visa nor an NZeTA.",
+      "applies_to_nationalities": ["AND", "ARG", "AUT", "BHR", "BEL", "BRA", "BRN", "BGR", "CAN", "CHL", "HRV", "CYP", "CZE", "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HKG", "HUN", "ISL", "IRL", "ISR", "ITA", "JPN", "KOR", "KWT", "LVA", "LIE", "LTU", "LUX", "MAC", "MYS", "MLT", "MUS", "MEX", "MCO", "NLD", "NOR", "OMN", "POL", "PRT", "QAT", "ROU", "SMR", "SAU", "SYC", "SGP", "SVK", "SVN", "ESP", "SWE", "CHE", "TWN", "ARE", "GBR", "USA", "URY", "VAT"],
+      "conditions": [
+        "Estonia, Latvia, Lithuania: citizens only",
+        "Greece: passports issued on/after 1 January 2006 only",
+        "Hong Kong and Macau: specific passport type requirements apply",
+        "NZeTA required before travel; IVL of NZD 100 payable"
+      ],
+      "maximum_stay": "3 months per visit (6 months for United Kingdom)",
+      "official_source_urls": [
+        "https://www.immigration.govt.nz/visit/what-you-need-to-visit-new-zealand/visa-waiver-countries-and-territories/"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "eta_program",
+      "policy_name": "New Zealand Electronic Travel Authority (NZeTA)",
+      "description": "Electronic travel authority required for citizens of visa waiver countries/territories, cruise/cargo ship passengers, eligible travellers from Australia, and transit passengers. Allows visitor stays up to 3 months (6 months for UK) and transit up to 24 hours (Auckland International Airport only). Valid 2 years for travellers.",
+      "applies_to_nationalities": ["AND", "ARG", "AUT", "BHR", "BEL", "BRA", "BRN", "BGR", "CAN", "CHL", "HRV", "CYP", "CZE", "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HKG", "HUN", "ISL", "IRL", "ISR", "ITA", "JPN", "KOR", "KWT", "LVA", "LIE", "LTU", "LUX", "MAC", "MYS", "MLT", "MUS", "MEX", "MCO", "NLD", "NOR", "OMN", "POL", "PRT", "QAT", "ROU", "SMR", "SAU", "SYC", "SGP", "SVK", "SVN", "ESP", "SWE", "CHE", "TWN", "ARE", "GBR", "USA", "URY", "VAT"],
+      "conditions": [
+        "Must be requested before travel; allow 72 hours",
+        "Cost from NZD 17 (app) / NZD 23 (website)",
+        "IVL of NZD 100 payable at the same time",
+        "You can only be in New Zealand for up to 6 months within any 12-month period"
+      ],
+      "maximum_stay": "3 months per visit (6 months for United Kingdom); transit up to 24 hours",
+      "official_source_urls": [
+        "https://www.immigration.govt.nz/visas/new-zealand-electronic-travel-authority-nzeta/"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "consular_visa_regime",
+      "policy_name": "New Zealand Visitor Visa",
+      "description": "Nationals not on the visa waiver list must apply for a Visitor Visa before travelling to New Zealand for tourism. Applications are made online through the Immigration New Zealand portal or by paper form INZ 1017.",
+      "applies_to_nationalities": ["ALL_OTHERS"],
+      "conditions": [
+        "Government fee from NZD 441",
+        "IVL of NZD 100 payable",
+        "Passport valid at least 3 months after planned departure"
+      ],
+      "maximum_stay": "Up to 6 months (multiple-entry) or 9 months (single-entry)",
+      "official_source_urls": [
+        "https://www.immigration.govt.nz/visas/visitor-visa/"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    }
+  ],
+  "fees": [
+    {
+      "visa_category": "NZeTA (New Zealand Electronic Travel Authority)",
+      "visa_subtype": "mobile app application",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 17,
+      "government_fee_currency": "NZD",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://www.immigration.govt.nz/visas/new-zealand-electronic-travel-authority-nzeta/"
+      ]
+    },
+    {
+      "visa_category": "NZeTA (New Zealand Electronic Travel Authority)",
+      "visa_subtype": "website application",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 23,
+      "government_fee_currency": "NZD",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://www.immigration.govt.nz/visas/new-zealand-electronic-travel-authority-nzeta/"
+      ]
+    },
+    {
+      "visa_category": "Visitor Visa",
+      "visa_subtype": "online/paper",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 441,
+      "government_fee_currency": "NZD",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://www.immigration.govt.nz/visas/visitor-visa/"
+      ]
+    },
+    {
+      "visa_category": "International Visitor Conservation and Tourism Levy (IVL)",
+      "visa_subtype": null,
+      "applies_to_nationalities": null,
+      "government_fee_amount": 100,
+      "government_fee_currency": "NZD",
+      "refundability": "Non-refundable (not refunded even if application declined)",
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://www.immigration.govt.nz/process-to-apply/applying-for-a-visa/fees-processing-times-and-refunds/paying-the-international-visitor-levy/"
+      ]
+    }
+  ],
+  "portals": [
+    {
+      "portal_kind": "immigration_authority",
+      "url": "https://www.immigration.govt.nz/",
+      "operator": "Immigration New Zealand (Ministry of Business, Innovation and Employment)",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["visa_waiver_information", "eta", "tourist_visa"],
+      "source_urls": [
+        "https://www.immigration.govt.nz/visit/what-you-need-to-visit-new-zealand/visa-waiver-countries-and-territories/"
+      ]
+    },
+    {
+      "portal_kind": "eta_portal",
+      "url": "https://nzeta.immigration.govt.nz/",
+      "operator": "Immigration New Zealand",
+      "operator_kind": "government",
+      "official_linking_source": "https://www.immigration.govt.nz/visas/new-zealand-electronic-travel-authority-nzeta/",
+      "supported_categories": ["eta"],
+      "source_urls": [
+        "https://www.immigration.govt.nz/visas/new-zealand-electronic-travel-authority-nzeta/"
+      ]
+    },
+    {
+      "portal_kind": "evisa_portal",
+      "url": "https://apply.immigration.govt.nz/",
+      "operator": "Immigration New Zealand",
+      "operator_kind": "government",
+      "official_linking_source": "https://www.immigration.govt.nz/visas/visitor-visa/",
+      "supported_categories": ["tourist_visa"],
+      "source_urls": [
+        "https://www.immigration.govt.nz/visas/visitor-visa/"
+      ]
+    }
+  ],
+  "passport_validity": {
+    "rule_kind": "months_after_departure",
+    "months": 3,
+    "min_blank_pages": null,
+    "condition_text": "Your passport or certificate of identity must be valid for at least 3 months after the date you plan to leave New Zealand.",
+    "source_urls": [
+      "https://www.immigration.govt.nz/visas/visitor-visa/"
+    ]
+  },
+  "jurisdictions": [],
+  "unresolved": [
+    "The dedicated NZeTA application-process page (nzeta-application-process-and-what-you-need) returned HTTP 404; NZeTA app/website prices (NZD 17 / NZD 23) were confirmed from the main NZeTA page and a government search summary rather than that sub-page.",
+    "Blank-page requirement not stated on the official pages fetched.",
+    "Per-nationality confirmation for CHN/IND/RUS relies on their absence from the official visa waiver list rather than a nationality-specific official statement."
+  ]
+}

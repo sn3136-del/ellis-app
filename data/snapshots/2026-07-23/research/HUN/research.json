@@ -1,0 +1,354 @@
+{
+  "destination": "HUN",
+  "retrieved_at": "2026-07-23T07:44:31Z",
+  "research_status": "verified",
+  "sources": [
+    {
+      "search_query": "Hungary official visa exemption list nationalities visa-free oif.gov.hu",
+      "original_url": "https://konzinfo.mfa.gov.hu/en/visa-free-travel-hungary",
+      "final_url": "https://konzinfo.mfa.gov.hu/en/visa-free-travel-hungary",
+      "redirect_chain": [],
+      "final_hostname": "konzinfo.mfa.gov.hu",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "Holders of passports issued by the countries, entities or territories listed in the table below are granted visa-free travel to Hungary for a definite period of time. [...] 90 days always refer to a maximum period of stay in any 180-day period. [...] In accordance with Article 6 (1) (a) of the Schengen Borders Code the validity of the travel document shall last until at least three months after the intended date of departure from the territory of the Member States and the travel document shall have been issued within the previous 10 years. Table entries confirmed: United States 90 days; United Kingdom 90 days (plus BNO, BOTC, BOC, BPP, BS categories); Japan 90 days; South Korea 90 days; Singapore 90 days; Hong Kong SAR 90 days (SAR passport); Taiwan 90 days (passport must include identity card number); Australia 90 days; Canada 90 days; Brazil 90 days; United Arab Emirates 90 days; Germany and France 90 days (ordinary passport or national ID card, EU/EEA); China: diplomatic 90 days / service 30 days only (ordinary passports NOT visa-free); India: diplomatic/official passports only; Russia: service passports only. Biometric passports required for ordinary-passport holders of Kosovo, North Macedonia, Montenegro, Serbia and Ukraine. Legal basis: Regulation (EU) 2018/1806.",
+      "retrieved_at": "2026-07-23T07:41:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Hungary foreign ministry consular services tourist Schengen visa konzinfo",
+      "original_url": "https://konzinfo.mfa.gov.hu/en/how-apply-visa",
+      "final_url": "https://konzinfo.mfa.gov.hu/en/how-apply-visa",
+      "redirect_chain": [],
+      "final_hostname": "konzinfo.mfa.gov.hu",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "Hungary is a Member State of the Schengen Agreement as of 21 December, 2007. [...] The Schengen regulations are only applicable for a stay not exceeding 90 days. The page is the MFA hub distinguishing short-term stays (not exceeding 90 days, Schengen C visa) from long-stay entries (exceeding 90 days), directing applicants to consular application channels. No eVisa, electronic travel authorization or visa-on-arrival channel is offered for tourism.",
+      "retrieved_at": "2026-07-23T07:41:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "direct navigation from https://konzinfo.mfa.gov.hu/en/how-apply-visa (query family: Hungary tourist visa fee)",
+      "original_url": "https://konzinfo.mfa.gov.hu/en/short-term-stay",
+      "final_url": "https://konzinfo.mfa.gov.hu/en/short-term-stay",
+      "redirect_chain": [],
+      "final_hostname": "konzinfo.mfa.gov.hu",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "Schengen C (short-stay) visa fee: EUR 90 for adults, EUR 45 for children aged 6-12, children under 6 exempt. Applications must be submitted in person at a consulate where the applicant has habitual residence; applications can be filed 6 months - 15 days before the start of the intended visit. The decision about the admissible applications are to be made within 15 calendar days from the date of submission (extendable to 45 days). Travel document must contain at least two blank pages, be issued within the previous 10 years, and remain valid at least three months after the intended date of departure. Tourism documentation: the certificate of the travel agency; or in the case of an individual visit: the prepaid reservation of accommodation. A visa is only a preliminary permission for entry, and not an automatic entry authorization.",
+      "retrieved_at": "2026-07-23T07:42:30Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Hungary official visa exemption list nationalities visa-free oif.gov.hu",
+      "original_url": "https://oif.gov.hu/factsheets/visa-free-citizens",
+      "final_url": "https://oif.gov.hu/factsheets/visa-free-citizens",
+      "redirect_chain": [],
+      "final_hostname": "oif.gov.hu",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Regulation (EU) 2018/1806 of the European Parliament and of the Council - LIST OF THIRD COUNTRIES WHOSE NATIONALS ARE EXEMPTED FROM THE VISA REQUIREMENT WHEN CROSSING THE BORDERS OF THE MEMBER STATES FOR THE PURPOSE OF A STAY NOT EXCEEDING 90 DAYS IN ANY 180-DAY PERIOD. Countries listed include: Albania, Andorra, Antigua and Barbuda, Argentina, Australia, Bahamas, Barbados, Bosnia and Herzegovina, Brazil, Brunei, Canada, Chile, Colombia, Costa Rica, Dominica, East Timor, Georgia, Grenada, Guatemala, Honduras, Hong Kong SAR, Israel, Japan, Kiribati, Kosovo, South Korea, Macao SAR, North Macedonia, Malaysia, Marshall Islands, Mauritius, Mexico, Micronesia, Moldova, Monaco, Montenegro, Nauru, New Zealand, Nicaragua, Palau, Panama, Paraguay, Peru, Saint Kitts and Nevis, Saint Lucia, Saint Vincent and the Grenadines, Samoa, San Marino, Seychelles, Singapore, Solomon Islands, Serbia (except holders of Serbian passports issued by the Serbian Coordination Directorate), Taiwan, Tonga, Trinidad and Tobago, Tuvalu, Ukraine, United Arab Emirates, United Kingdom, United States, Uruguay, Vatican City, Venezuela, Vanuatu.",
+      "retrieved_at": "2026-07-23T07:41:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "site:konzinfo.mfa.gov.hu visa appointment konzinfobooking application center VFS",
+      "original_url": "https://konzinfo.mfa.gov.hu/en/embassies/russia-consular-office-moscow",
+      "final_url": "https://konzinfo.mfa.gov.hu/en/embassies/russia-consular-office-moscow",
+      "redirect_chain": [],
+      "final_hostname": "konzinfo.mfa.gov.hu",
+      "source_authority": "destination_foreign_ministry",
+      "relevant_excerpt": "Schengen visa applications from Russian citizens are accepted at the Visa Application Center in Moscow (Kashirskoe shosse 3, k. 2, s. 4, business centre 'Sirius Park') and at regional offices operated by VFS Global. Make an appointment: https://konzinfobooking.mfa.gov.hu/home. Customer reception: Mo - Thu 9:00 am - 12:00 am and 01:00 pm - 04:00 pm. Contact: consular.mow@mfa.gov.hu, website moszkva.mfa.gov.hu.",
+      "retrieved_at": "2026-07-23T07:43:30Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Hungary foreign ministry consular services tourist Schengen visa konzinfo",
+      "original_url": "https://konzinfobooking.mfa.gov.hu",
+      "final_url": "https://konzinfobooking.mfa.gov.hu",
+      "redirect_chain": [],
+      "final_hostname": "konzinfobooking.mfa.gov.hu",
+      "source_authority": "official_application_portal",
+      "relevant_excerpt": "Konzinfo Booking (V2.1.22) - the page loaded as a JavaScript application shell showing only 'An unhandled error has occurred. Reload' to the non-interactive fetcher; the portal is the Hungarian MFA appointment booking system referenced by konzinfo.mfa.gov.hu consular pages ('Make an appointment: https://konzinfobooking.mfa.gov.hu/home').",
+      "retrieved_at": "2026-07-23T07:42:30Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    }
+  ],
+  "dispositions": [
+    {
+      "nationalities": ["USA", "GBR", "JPN", "KOR", "SGP", "AUS", "CAN", "BRA", "ARE"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "Stay not exceeding 90 days in any 180-day period across the whole Schengen Area (Regulation (EU) 2018/1806 Annex II)",
+        "Passport valid at least 3 months after intended departure from the Schengen Area and issued within the previous 10 years"
+      ],
+      "source_urls": [
+        "https://konzinfo.mfa.gov.hu/en/visa-free-travel-hungary",
+        "https://oif.gov.hu/factsheets/visa-free-citizens"
+      ]
+    },
+    {
+      "nationalities": ["DEU", "FRA"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days in any 180-day period (short-stay rule; EU citizens additionally enjoy EU free-movement rights)",
+      "conditions": [
+        "EU/EEA member state citizens may enter with an ordinary passport or national ID card"
+      ],
+      "source_urls": [
+        "https://konzinfo.mfa.gov.hu/en/visa-free-travel-hungary"
+      ]
+    },
+    {
+      "nationalities": ["HKG"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "Applies to holders of the Hong Kong Special Administrative Region passport only"
+      ],
+      "source_urls": [
+        "https://konzinfo.mfa.gov.hu/en/visa-free-travel-hungary",
+        "https://oif.gov.hu/factsheets/visa-free-citizens"
+      ]
+    },
+    {
+      "nationalities": ["TWN"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "Applies only to holders of Taiwan passports that include an identity card number"
+      ],
+      "source_urls": [
+        "https://konzinfo.mfa.gov.hu/en/visa-free-travel-hungary",
+        "https://oif.gov.hu/factsheets/visa-free-citizens"
+      ]
+    },
+    {
+      "nationalities": ["USA", "GBR", "JPN", "KOR", "SGP", "HKG", "TWN", "AUS", "CAN", "BRA", "ARE", "DEU", "FRA"],
+      "category": "tourist_visa",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Visa-exempt for tourist stays up to 90 days in any 180-day period; no tourist visa needed"
+      ],
+      "source_urls": [
+        "https://konzinfo.mfa.gov.hu/en/visa-free-travel-hungary",
+        "https://oif.gov.hu/factsheets/visa-free-citizens"
+      ]
+    },
+    {
+      "nationalities": ["CHN", "IND"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "Ordinary-passport holders are not on the visa-exemption list (China: only diplomatic 90 days / service 30 days visa-free; India: only diplomatic/official passports visa-free)",
+        "Schengen short-stay C visa required, applied for in person at the Hungarian consulate of habitual residence (or its mandated visa application center); application window 6 months to 15 days before travel",
+        "Tourism supporting documents: travel-agency certificate or prepaid accommodation reservation"
+      ],
+      "source_urls": [
+        "https://konzinfo.mfa.gov.hu/en/visa-free-travel-hungary",
+        "https://konzinfo.mfa.gov.hu/en/short-term-stay"
+      ]
+    },
+    {
+      "nationalities": ["RUS"],
+      "category": "tourist_visa",
+      "disposition": "AUTHORIZED_VISA_CENTER_REQUIRED",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "Ordinary-passport holders require a Schengen short-stay C visa (only Russian service passports are visa-free)",
+        "Applications in Russia are lodged at the Visa Application Center in Moscow or at regional offices operated by VFS Global, per the Hungarian MFA consular page for Moscow",
+        "Appointment via https://konzinfobooking.mfa.gov.hu/home"
+      ],
+      "source_urls": [
+        "https://konzinfo.mfa.gov.hu/en/visa-free-travel-hungary",
+        "https://konzinfo.mfa.gov.hu/en/embassies/russia-consular-office-moscow"
+      ]
+    },
+    {
+      "nationalities": ["ALL_OTHERS"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "Nationalities not on the Regulation (EU) 2018/1806 Annex II exemption list require a Schengen short-stay C visa issued via a Hungarian consulate (some jurisdictions use mandated VFS Global visa application centers)"
+      ],
+      "source_urls": [
+        "https://oif.gov.hu/factsheets/visa-free-citizens",
+        "https://konzinfo.mfa.gov.hu/en/short-term-stay",
+        "https://konzinfo.mfa.gov.hu/en/how-apply-visa"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "evisa_tourist",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Hungary operates no tourist eVisa program; the MFA consular service describes in-person consular application as the only tourist-visa channel"
+      ],
+      "source_urls": [
+        "https://konzinfo.mfa.gov.hu/en/how-apply-visa",
+        "https://konzinfo.mfa.gov.hu/en/short-term-stay"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "eta",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "No Hungarian electronic travel authorization exists as of 2026-07-23; no ETA channel appears on the MFA consular pages (the EU-wide ETIAS system was not in operation per the official channels reviewed)"
+      ],
+      "source_urls": [
+        "https://konzinfo.mfa.gov.hu/en/how-apply-visa",
+        "https://konzinfo.mfa.gov.hu/en/visa-free-travel-hungary"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "visa_on_arrival_tourist",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Hungary offers no tourist visa on arrival; Schengen C visas must be obtained before travel and 'a visa is only a preliminary permission for entry'"
+      ],
+      "source_urls": [
+        "https://konzinfo.mfa.gov.hu/en/how-apply-visa",
+        "https://konzinfo.mfa.gov.hu/en/short-term-stay"
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "policy_kind": "visa_exemption_list",
+      "policy_name": "Visa exemption under Regulation (EU) 2018/1806 Annex II (Schengen short-stay)",
+      "description": "Nationals of third countries listed in Annex II of Regulation (EU) 2018/1806 are exempt from the visa requirement for stays not exceeding 90 days in any 180-day period. EU/EEA citizens enter freely with passport or national ID card. Special conditions: Hong Kong and Macao SAR passports qualify; Taiwan passports must contain an identity card number; ordinary-passport holders of Kosovo, North Macedonia, Montenegro, Serbia and Ukraine need biometric passports; Serbian passports issued by the Serbian Coordination Directorate are excluded; several British national categories (BNO, BOTC, BOC, BPP, BS) are also exempt.",
+      "applies_to_nationalities": ["ALB", "AND", "ATG", "ARG", "AUS", "BHS", "BRB", "BIH", "BRA", "BRN", "CAN", "CHL", "COL", "CRI", "DMA", "TLS", "GEO", "GRD", "GTM", "HND", "HKG", "ISR", "JPN", "KIR", "XKX", "KOR", "MAC", "MKD", "MYS", "MHL", "MUS", "MEX", "FSM", "MDA", "MCO", "MNE", "NRU", "NZL", "NIC", "PLW", "PAN", "PRY", "PER", "KNA", "LCA", "VCT", "WSM", "SMR", "SYC", "SGP", "SLB", "SRB", "TWN", "TON", "TTO", "TUV", "UKR", "ARE", "GBR", "USA", "URY", "VAT", "VEN", "VUT"],
+      "conditions": [
+        "Maximum stay 90 days in any 180-day period across the Schengen Area",
+        "Passport valid at least 3 months after intended departure and issued within the previous 10 years",
+        "Biometric passport required for ordinary-passport holders of Kosovo, North Macedonia, Montenegro, Serbia and Ukraine",
+        "Taiwan passports must include an identity card number; Hong Kong/Macao must hold SAR passports"
+      ],
+      "maximum_stay": "90 days in any 180-day period",
+      "official_source_urls": [
+        "https://konzinfo.mfa.gov.hu/en/visa-free-travel-hungary",
+        "https://oif.gov.hu/factsheets/visa-free-citizens"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    },
+    {
+      "policy_kind": "consular_visa_regime",
+      "policy_name": "Schengen short-stay (C) visa via Hungarian consulates",
+      "description": "Non-exempt nationals must obtain a Schengen C visa before travel, applied for in person at the Hungarian consulate covering their habitual residence; in several jurisdictions applications are lodged through visa application centers operated by VFS Global. Applications may be filed 6 months to 15 days before the intended visit; decisions within 15 calendar days (extendable to 45). The visa is valid for the whole Schengen Area. Tourist supporting documents: travel-agency certificate or prepaid accommodation reservation.",
+      "applies_to_nationalities": ["ALL_OTHERS"],
+      "conditions": [
+        "In-person submission at the competent Hungarian consulate or its mandated visa application center",
+        "Application window: 6 months to 15 days before travel",
+        "Decision within 15 calendar days, extendable to 45 days",
+        "A visa is a preliminary permission for entry, not an automatic entry authorization"
+      ],
+      "maximum_stay": "90 days in any 180-day period",
+      "official_source_urls": [
+        "https://konzinfo.mfa.gov.hu/en/short-term-stay",
+        "https://konzinfo.mfa.gov.hu/en/how-apply-visa",
+        "https://konzinfo.mfa.gov.hu/en/embassies/russia-consular-office-moscow"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    }
+  ],
+  "fees": [
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "Schengen C short-stay visa (adult)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 90,
+      "government_fee_currency": "EUR",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": ["https://konzinfo.mfa.gov.hu/en/short-term-stay"]
+    },
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "Schengen C short-stay visa (child aged 6-12)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 45,
+      "government_fee_currency": "EUR",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": ["https://konzinfo.mfa.gov.hu/en/short-term-stay"]
+    },
+    {
+      "visa_category": "tourist_visa",
+      "visa_subtype": "Schengen C short-stay visa (child under 6 - exempt)",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 0,
+      "government_fee_currency": "EUR",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": ["https://konzinfo.mfa.gov.hu/en/short-term-stay"]
+    }
+  ],
+  "portals": [
+    {
+      "portal_kind": "foreign_ministry",
+      "url": "https://konzinfo.mfa.gov.hu/en",
+      "operator": "Ministry of Foreign Affairs and Trade of Hungary (Konzuli Szolgalat)",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["tourist_visa", "visa_free_entry"],
+      "source_urls": [
+        "https://konzinfo.mfa.gov.hu/en/visa-free-travel-hungary",
+        "https://konzinfo.mfa.gov.hu/en/how-apply-visa",
+        "https://konzinfo.mfa.gov.hu/en/short-term-stay"
+      ]
+    },
+    {
+      "portal_kind": "immigration_authority",
+      "url": "https://oif.gov.hu",
+      "operator": "National Directorate-General for Aliens Policing (Orszagos Idegenrendeszeti Foigazgatosag)",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["visa_free_entry", "tourist_visa"],
+      "source_urls": ["https://oif.gov.hu/factsheets/visa-free-citizens"]
+    },
+    {
+      "portal_kind": "appointment_portal",
+      "url": "https://konzinfobooking.mfa.gov.hu/home",
+      "operator": "Ministry of Foreign Affairs and Trade of Hungary",
+      "operator_kind": "government",
+      "official_linking_source": "https://konzinfo.mfa.gov.hu/en/embassies/russia-consular-office-moscow",
+      "supported_categories": ["tourist_visa"],
+      "source_urls": [
+        "https://konzinfo.mfa.gov.hu/en/embassies/russia-consular-office-moscow",
+        "https://konzinfobooking.mfa.gov.hu"
+      ]
+    }
+  ],
+  "passport_validity": {
+    "rule_kind": "months_after_departure",
+    "months": 3,
+    "min_blank_pages": 2,
+    "condition_text": "Per Article 6(1)(a) of the Schengen Borders Code, the travel document must be valid until at least three months after the intended date of departure from the territory of the Member States and must have been issued within the previous 10 years. For visa applicants the MFA additionally requires the travel document to contain at least two blank pages.",
+    "source_urls": [
+      "https://konzinfo.mfa.gov.hu/en/visa-free-travel-hungary",
+      "https://konzinfo.mfa.gov.hu/en/short-term-stay"
+    ]
+  },
+  "jurisdictions": [],
+  "unresolved": [
+    "VFS Global visa application center URLs could not be verified: Hungarian embassy microsites on *.mfa.gov.hu (peking, delhi, mumbai, szingapur, biskek) returned truncated JS shells to the fetcher, so no authorized_visa_center portal row was recorded. VFS involvement itself IS verified via https://konzinfo.mfa.gov.hu/en/embassies/russia-consular-office-moscow.",
+    "https://konzinfobooking.mfa.gov.hu loaded only as a JavaScript app shell (error state for non-interactive fetch); its role as the official appointment portal is established by the konzinfo.mfa.gov.hu Moscow consular page that links it.",
+    "Fee waiver/reduction categories beyond the child rates (e.g. nationals of visa-facilitation-agreement countries) were not enumerated."
+  ]
+}

@@ -1,0 +1,323 @@
+{
+  "destination": "GRC",
+  "retrieved_at": "2026-07-23T08:01:58Z",
+  "research_status": "verified",
+  "sources": [
+    {
+      "search_query": "Greece official immigration tourist visa Schengen who needs visa",
+      "original_url": "https://home-affairs.ec.europa.eu/policies/schengen-borders-and-visa/visa-policy_en",
+      "final_url": "https://home-affairs.ec.europa.eu/policies/schengen-borders-and-visa/visa-policy_en",
+      "redirect_chain": [],
+      "final_hostname": "home-affairs.ec.europa.eu",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Nationals of countries listed in Annex II of Regulation (EU) 2018/1806 do not require a visa for short-stay visits (27 of these countries have visa waiver agreements with the EU). Nationals of countries in Annex I of Regulation (EU) 2018/1806 must obtain a visa. They can enter Schengen area countries as many times as they want, but only stay for a total of 90 days, every 180 days. Regulation (EU) 2018/1806 establishes the legal framework for visa policy across Schengen countries.",
+      "retrieved_at": "2026-07-23T08:03:00Z",
+      "effective_date_evidence": "Regulation (EU) 2018/1806 (consolidated)",
+      "page_language": "en"
+    },
+    {
+      "search_query": "\"Annex II\" Regulation 2018/1806 visa exempt countries list site:home-affairs.ec.europa.eu",
+      "original_url": "https://home-affairs.ec.europa.eu/system/files/2020-05/regulation-2018-1806.pdf",
+      "final_url": "https://home-affairs.ec.europa.eu/system/files/2020-05/regulation-2018-1806.pdf",
+      "redirect_chain": [],
+      "final_hostname": "home-affairs.ec.europa.eu",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "ANNEX II LIST OF THIRD COUNTRIES WHOSE NATIONALS ARE EXEMPT FROM THE REQUIREMENT TO BE IN POSSESSION OF A VISA WHEN CROSSING THE EXTERNAL BORDERS OF THE MEMBER STATES FOR STAYS OF NO MORE THAN 90 DAYS IN ANY 180-DAY PERIOD. 1. STATES: Andorra, United Arab Emirates, Antigua and Barbuda, Argentina, Australia, Barbados, Brunei, Brazil, Bahamas, Canada, Chile, Colombia, Costa Rica, Guatemala, Honduras, Israel, Japan, Saint Kitts and Nevis, South Korea ... Monaco, Mauritius, Mexico, Malaysia, New Zealand, Panama, Paraguay, Singapore, San Marino, El Salvador, Trinidad and Tobago, United States, Uruguay, Holy See, Venezuela, Samoa. 2. SPECIAL ADMINISTRATIVE REGIONS OF THE PEOPLE'S REPUBLIC OF CHINA: Hong Kong SAR (holders of a 'Hong Kong Special Administrative Region' passport), Macao SAR (holders of a 'Regiao Administrativa Especial de Macau' passport). 4. ENTITIES... Taiwan (only holders of passports issued by Taiwan which include an identity card number). Article 4(1): Nationals of third countries listed in Annex II shall be exempt from the requirement set out in Article 3(1) for stays of no more than 90 days in any 180-day period. ANNEX I (visa required) includes China, India, Russia.",
+      "retrieved_at": "2026-07-23T08:05:00Z",
+      "effective_date_evidence": "OJ L 303, 28.11.2018 (base text of Regulation (EU) 2018/1806)",
+      "page_language": "en"
+    },
+    {
+      "search_query": "Schengen Visa Fee increased 11 June 2024 home-affairs",
+      "original_url": "https://home-affairs.ec.europa.eu/news/schengen-visa-fee-increased-11-june-2024-2024-06-13_en",
+      "final_url": "https://home-affairs.ec.europa.eu/news/schengen-visa-fee-increased-11-june-2024-2024-06-13_en",
+      "redirect_chain": [],
+      "final_hostname": "home-affairs.ec.europa.eu",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "As of 11 June 2024, the fee for a Schengen visa has raised from EUR 80 to EUR 90 for adults and from EUR 40 to EUR 45 for children aged six to below 12 years.",
+      "retrieved_at": "2026-07-23T08:06:00Z",
+      "effective_date_evidence": "Effective 11 June 2024 (Commission Delegated Regulation revising Visa Code fees)",
+      "page_language": "en"
+    },
+    {
+      "search_query": "Applying for a Schengen visa home-affairs europa passport validity fee",
+      "original_url": "https://home-affairs.ec.europa.eu/policies/schengen/visa-policy/applying-schengen-visa_en",
+      "final_url": "https://home-affairs.ec.europa.eu/policies/schengen/visa-policy/applying-schengen-visa_en",
+      "redirect_chain": [],
+      "final_hostname": "home-affairs.ec.europa.eu",
+      "source_authority": "destination_government",
+      "relevant_excerpt": "Citizens of certain non-EU countries must hold a short-stay visa when travelling to the Schengen area. Submit your application at the consulate of your primary destination country. You may stay up to 90 days within any 180-day period. Your passport must remain valid for at least three months beyond your scheduled departure from the Schengen zone. Standard fees: EUR 90 (adults), EUR 45 (children 6-12), EUR 35 (Armenian, Azerbaijani, Belarusian nationals), EUR 67.50 (Cape Verdean nationals). Processing typically takes 15 days.",
+      "retrieved_at": "2026-07-23T08:07:00Z",
+      "effective_date_evidence": null,
+      "page_language": "en"
+    },
+    {
+      "search_query": "Greek Schengen visa fee 80 to 90 euro authorized visa center United Kingdom",
+      "original_url": "https://uk-gr.gvcworld.eu/en/news/increase-of-schengen-visa-fee",
+      "final_url": "https://uk-gr.gvcworld.eu/en/news/increase-of-schengen-visa-fee",
+      "redirect_chain": [],
+      "final_hostname": "uk-gr.gvcworld.eu",
+      "source_authority": "authorized_visa_center",
+      "relevant_excerpt": "The visa fee for Schengen visas will be increased from 80 to 90 euro ... effective June 11, 2024. Manchester and Edinburgh: Thursday, June 6, 2024 onwards; London: Monday June 10, 2024, onwards. Operated by Global Visa Center World; footer lists the Greek Ministry of Foreign Affairs and the Embassy of the Hellenic Republic in the United Kingdom as useful links.",
+      "retrieved_at": "2026-07-23T08:04:00Z",
+      "effective_date_evidence": "Fee change effective 11 June 2024",
+      "page_language": "en"
+    }
+  ],
+  "dispositions": [
+    {
+      "nationalities": ["USA", "JPN", "KOR", "SGP", "AUS", "CAN", "BRA", "ARE"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "Listed in Annex II of Regulation (EU) 2018/1806; exempt from short-stay visa for the Schengen area including Greece",
+        "United Arab Emirates exemption is in force via the EU-UAE short-stay visa waiver agreement",
+        "From late 2026 these visa-exempt travellers will additionally need an ETIAS travel authorisation (not yet operational as of 2026-07-23)"
+      ],
+      "source_urls": [
+        "https://home-affairs.ec.europa.eu/system/files/2020-05/regulation-2018-1806.pdf",
+        "https://home-affairs.ec.europa.eu/policies/schengen-borders-and-visa/visa-policy_en"
+      ]
+    },
+    {
+      "nationalities": ["GBR"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "British citizens are visa-exempt for short stays; the United Kingdom was added to Annex II of Regulation (EU) 2018/1806 by Regulation (EU) 2019/592 after Brexit",
+        "The fetched base 2018 text predates the UK addition; UK exemption confirmed by current EU visa-policy page"
+      ],
+      "source_urls": [
+        "https://home-affairs.ec.europa.eu/policies/schengen-borders-and-visa/visa-policy_en"
+      ]
+    },
+    {
+      "nationalities": ["HKG"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "Exemption applies only to holders of a 'Hong Kong Special Administrative Region' passport (Annex II)"
+      ],
+      "source_urls": [
+        "https://home-affairs.ec.europa.eu/system/files/2020-05/regulation-2018-1806.pdf"
+      ]
+    },
+    {
+      "nationalities": ["TWN"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": "90 days in any 180-day period",
+      "conditions": [
+        "Exemption applies only to holders of Taiwan passports which include an identity card number (Annex II)"
+      ],
+      "source_urls": [
+        "https://home-affairs.ec.europa.eu/system/files/2020-05/regulation-2018-1806.pdf"
+      ]
+    },
+    {
+      "nationalities": ["DEU", "FRA"],
+      "category": "visa_free_entry",
+      "disposition": "VISA_FREE",
+      "maximum_stay": null,
+      "conditions": [
+        "EU/Schengen member state nationals enjoy freedom of movement; not subject to third-country visa policy or the 90/180 limit"
+      ],
+      "source_urls": [
+        "https://home-affairs.ec.europa.eu/policies/schengen-borders-and-visa/visa-policy_en"
+      ]
+    },
+    {
+      "nationalities": ["CHN", "IND", "RUS"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "Up to 90 days in any 180-day period if the short-stay (type C) visa is granted",
+      "conditions": [
+        "Listed in Annex I of Regulation (EU) 2018/1806; must obtain a Schengen short-stay (type C) visa before travel",
+        "Apply at the Greek consulate of the main destination or at the authorised visa-application centre; standard adult fee EUR 90"
+      ],
+      "source_urls": [
+        "https://home-affairs.ec.europa.eu/system/files/2020-05/regulation-2018-1806.pdf",
+        "https://home-affairs.ec.europa.eu/policies/schengen/visa-policy/applying-schengen-visa_en"
+      ]
+    },
+    {
+      "nationalities": ["ALL_OTHERS"],
+      "category": "tourist_visa",
+      "disposition": "EMBASSY_VISA_REQUIRED",
+      "maximum_stay": "Up to 90 days in any 180-day period if granted",
+      "conditions": [
+        "Nationals of any country listed in Annex I of Regulation (EU) 2018/1806 not explicitly listed above require a Schengen short-stay visa"
+      ],
+      "source_urls": [
+        "https://home-affairs.ec.europa.eu/system/files/2020-05/regulation-2018-1806.pdf",
+        "https://home-affairs.ec.europa.eu/policies/schengen/visa-policy/applying-schengen-visa_en"
+      ]
+    },
+    {
+      "nationalities": ["ALL"],
+      "category": "evisa_tourist",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "Greece/Schengen operates no tourist eVisa; short stays are either visa-free (Annex II) or require a consular Schengen visa (Annex I)"
+      ],
+      "source_urls": [
+        "https://home-affairs.ec.europa.eu/policies/schengen/visa-policy/applying-schengen-visa_en"
+      ]
+    },
+    {
+      "nationalities": ["USA", "GBR", "JPN", "KOR", "SGP", "AUS", "CAN", "BRA", "ARE", "HKG", "TWN", "DEU", "FRA"],
+      "category": "tourist_visa",
+      "disposition": "NOT_APPLICABLE",
+      "maximum_stay": null,
+      "conditions": [
+        "These nationalities are visa-exempt for short stays; no consular tourist visa is required"
+      ],
+      "source_urls": [
+        "https://home-affairs.ec.europa.eu/system/files/2020-05/regulation-2018-1806.pdf"
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "policy_kind": "visa_exemption_list",
+      "policy_name": "Schengen short-stay visa exemption (Annex II, Regulation (EU) 2018/1806)",
+      "description": "Nationals of third countries listed in Annex II of Regulation (EU) 2018/1806 are exempt from the short-stay visa requirement for the Schengen area, including Greece, for stays of no more than 90 days in any 180-day period. List includes (non-exhaustive): Andorra, United Arab Emirates, Antigua and Barbuda, Argentina, Australia, Barbados, Brunei, Brazil, Bahamas, Canada, Chile, Colombia, Costa Rica, Guatemala, Honduras, Israel, Japan, Saint Kitts and Nevis, South Korea, Monaco, Mauritius, Mexico, Malaysia, New Zealand, Panama, Paraguay, Singapore, San Marino, El Salvador, Trinidad and Tobago, United States, Uruguay, Holy See, Venezuela, Samoa; plus Hong Kong SAR and Macao SAR passport holders, British citizens (via Reg 2019/592), and Taiwan passport holders whose passports include an identity-card number.",
+      "applies_to_nationalities": ["USA", "GBR", "JPN", "KOR", "SGP", "AUS", "CAN", "BRA", "ARE", "HKG", "MAC", "TWN"],
+      "conditions": [
+        "Maximum 90 days in any 180-day period",
+        "Some exemptions are limited to biometric-passport holders or subject to specific passport types (Hong Kong/Macao/Taiwan)"
+      ],
+      "maximum_stay": "90 days in any 180-day period",
+      "official_source_urls": [
+        "https://home-affairs.ec.europa.eu/system/files/2020-05/regulation-2018-1806.pdf",
+        "https://home-affairs.ec.europa.eu/policies/schengen-borders-and-visa/visa-policy_en"
+      ],
+      "effective_from": "2018-11-28",
+      "effective_until": null
+    },
+    {
+      "policy_kind": "consular_visa_regime",
+      "policy_name": "Schengen short-stay (type C) visa",
+      "description": "Nationals of countries listed in Annex I of Regulation (EU) 2018/1806 (e.g. China, India, Russia) must obtain a Schengen short-stay (type C) visa before travelling to Greece. Applications are submitted at the Greek consulate of the main destination or at an authorised visa-application centre. Standard adult fee EUR 90; passport must be valid at least three months beyond intended departure.",
+      "applies_to_nationalities": ["CHN", "IND", "RUS"],
+      "conditions": [
+        "Apply at Greek consulate / authorised visa centre before travel",
+        "Adult fee EUR 90; reduced fees for children and certain nationalities"
+      ],
+      "maximum_stay": "90 days in any 180-day period",
+      "official_source_urls": [
+        "https://home-affairs.ec.europa.eu/policies/schengen/visa-policy/applying-schengen-visa_en",
+        "https://home-affairs.ec.europa.eu/system/files/2020-05/regulation-2018-1806.pdf"
+      ],
+      "effective_from": null,
+      "effective_until": null
+    }
+  ],
+  "fees": [
+    {
+      "visa_category": "Schengen short-stay visa (type C)",
+      "visa_subtype": "adult",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 90,
+      "government_fee_currency": "EUR",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://home-affairs.ec.europa.eu/news/schengen-visa-fee-increased-11-june-2024-2024-06-13_en",
+        "https://home-affairs.ec.europa.eu/policies/schengen/visa-policy/applying-schengen-visa_en"
+      ]
+    },
+    {
+      "visa_category": "Schengen short-stay visa (type C)",
+      "visa_subtype": "child aged 6 to below 12",
+      "applies_to_nationalities": null,
+      "government_fee_amount": 45,
+      "government_fee_currency": "EUR",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://home-affairs.ec.europa.eu/news/schengen-visa-fee-increased-11-june-2024-2024-06-13_en",
+        "https://home-affairs.ec.europa.eu/policies/schengen/visa-policy/applying-schengen-visa_en"
+      ]
+    },
+    {
+      "visa_category": "Schengen short-stay visa (type C)",
+      "visa_subtype": "reduced fee (Armenian, Azerbaijani, Belarusian nationals)",
+      "applies_to_nationalities": ["ARM", "AZE", "BLR"],
+      "government_fee_amount": 35,
+      "government_fee_currency": "EUR",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://home-affairs.ec.europa.eu/policies/schengen/visa-policy/applying-schengen-visa_en"
+      ]
+    },
+    {
+      "visa_category": "Schengen short-stay visa (type C)",
+      "visa_subtype": "reduced fee (Cape Verdean nationals)",
+      "applies_to_nationalities": ["CPV"],
+      "government_fee_amount": 67.50,
+      "government_fee_currency": "EUR",
+      "refundability": null,
+      "accepted_payment_methods": null,
+      "source_urls": [
+        "https://home-affairs.ec.europa.eu/policies/schengen/visa-policy/applying-schengen-visa_en"
+      ]
+    }
+  ],
+  "portals": [
+    {
+      "portal_kind": "immigration_authority",
+      "url": "https://home-affairs.ec.europa.eu/policies/schengen/visa-policy_en",
+      "operator": "European Commission (DG Migration and Home Affairs)",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["Schengen short-stay visa (type C)", "visa exemption"],
+      "source_urls": [
+        "https://home-affairs.ec.europa.eu/policies/schengen/visa-policy_en"
+      ]
+    },
+    {
+      "portal_kind": "foreign_ministry",
+      "url": "https://www.mfa.gr/en/services/visas-for-foreigners-traveling-to-greece/",
+      "operator": "Hellenic Republic - Ministry of Foreign Affairs",
+      "operator_kind": "government",
+      "official_linking_source": null,
+      "supported_categories": ["Schengen short-stay visa", "visa exemption"],
+      "source_urls": [
+        "https://home-affairs.ec.europa.eu/policies/schengen/visa-policy/applying-schengen-visa_en"
+      ]
+    },
+    {
+      "portal_kind": "authorized_visa_center",
+      "url": "https://uk-gr.gvcworld.eu/en/",
+      "operator": "Global Visa Center World (GVCWorld)",
+      "operator_kind": "contracted_visa_center",
+      "official_linking_source": null,
+      "supported_categories": ["Schengen short-stay visa (type C)"],
+      "source_urls": [
+        "https://uk-gr.gvcworld.eu/en/news/increase-of-schengen-visa-fee"
+      ]
+    }
+  ],
+  "passport_validity": {
+    "rule_kind": "months_after_departure",
+    "months": 3,
+    "min_blank_pages": null,
+    "condition_text": "Passport must remain valid for at least three months beyond the scheduled departure from the Schengen zone (per EU/Schengen entry conditions). Blank-page requirement not stated on the fetched EU pages.",
+    "source_urls": [
+      "https://home-affairs.ec.europa.eu/policies/schengen/visa-policy/applying-schengen-visa_en"
+    ]
+  },
+  "jurisdictions": [],
+  "unresolved": [
+    "The Hellenic Ministry of Foreign Affairs site (www.mfa.gr) returned HTTP 403 to WebFetch and no browser was available, so no Greece-specific government page could be fetched directly; the visa regime was verified from binding EU government sources (europa.eu) that Greece applies as a Schengen member.",
+    "The fetched regulation PDF is the base 2018 text of Regulation (EU) 2018/1806; the United Kingdom's addition to Annex II (Regulation (EU) 2019/592, post-Brexit) is reflected in the current EU visa-policy page but not in the fetched PDF.",
+    "ETIAS (European Travel Information and Authorisation System) will require visa-exempt travellers to obtain a travel authorisation before Greece/Schengen entry, expected from late 2026; the official ETIAS pages (travel-europe.europa.eu) rendered empty to WebFetch, so the exact start date and fee were not verified and no ETA disposition was recorded.",
+    "GVC World (uk-gr.gvcworld.eu) is the visa-application contractor for UK-based applicants to Greece, but the exact mfa.gr page that officially designates it could not be fetched, so official_linking_source is left null."
+  ]
+}
