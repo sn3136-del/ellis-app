@@ -11,8 +11,9 @@
     "start": "electron-vite preview",
     "dist": "electron-vite build && electron-builder",
     "dist:mac": "electron-vite build && electron-builder --mac",
-    "test": "node --test --test-concurrency=1 tests/portal/framework.test.mjs tests/portal/e2e.test.mjs",
-    "test:portal": "node --test --test-concurrency=1 tests/portal/framework.test.mjs tests/portal/e2e.test.mjs"
+    "test": "node --test --test-concurrency=1 tests/build_security.test.mjs tests/portal/framework.test.mjs tests/portal/e2e.test.mjs",
+    "test:portal": "node --test --test-concurrency=1 tests/portal/framework.test.mjs tests/portal/e2e.test.mjs",
+    "test:security": "node --test tests/build_security.test.mjs"
   },
   "build": {
     "appId": "com.ellis.app",
@@ -22,7 +23,20 @@
     },
     "files": [
       "out/**/*",
-      "resources/**/*"
+      "resources/**/*",
+      "!**/*.key",
+      "!**/*.pem",
+      "!**/*.p12",
+      "!**/*.pfx",
+      "!**/id_rsa*",
+      "!**/.env",
+      "!**/.env.*",
+      "!**/*.env",
+      "!**/application_default_credentials.json",
+      "!**/service-account*.json",
+      "!**/kimi.key",
+      "!**/private_fixtures/**",
+      "!**/*.passport"
     ],
     "mac": {
       "category": "public.app-category.business",

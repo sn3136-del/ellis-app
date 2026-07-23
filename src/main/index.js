@@ -650,42 +650,42 @@ function aiHandler(name, method) {
   })
 }
 
-// Conversational handlers try the smartest available provider in order:
-// Kimi K3 (immigration profile) -> Ollama -> Claude (if key) -> built-in engine.
-// Admin-provisioned Kimi K3 key: lets the operator ship one API key for every
-// user, so travelers never configure anything. Checked in order:
-//   1. ELLIS_KIMI_KEY environment variable
-//   2. kimi.key file in the app's user-data folder (drop-in, no rebuild)
-//   3. resources/kimi.key bundled with the app at build time
+// SECURITY (must-hold invariant): the Electron client must NEVER contain,
+// receive, or ship provider credentials, and must NEVER call an external
+// provider (Kimi/Moonshot, Google Document AI, Browserbase, Stripe, cloud
+// storage, government portals) with a bundled credential. All real provider
+// access happens ONLY in the authenticated backend — the renderer talks to it
+// through src/renderer/src/lib/visaBackend.js over authenticated HTTP.
+//
+// Historically this file loaded an "admin-provisioned" Kimi key from
+// resources/kimi.key (bundled into the distributable app.asar) and from a
+// drop-in file in userData. That shipped a live provider key to every user of
+// the distributable. Both file paths are removed. See docs/SECURITY_ROTATION.md
+// (the previously shipped key is marked for immediate rotation). The legacy
+// on-device AI workspace may still be exercised by a DEVELOPER on their own
+// machine via the ELLIS_KIMI_KEY env var, but only in an UNPACKAGED dev build —
+// a packaged/distributable Ellis makes zero direct external-provider calls.
+function clientProviderCallsAllowed() {
+  // Never in a packaged/shipped app; a hard kill-switch env var can force-off.
+  return !app.isPackaged && process.env.ELLIS_DISABLE_CLIENT_PROVIDERS !== '1'
+}
 let adminKeyCache = null
 function adminKimiKey() {
   if (adminKeyCache !== null) return adminKeyCache
+  // No bundled or drop-in credential files — ever. Dev-only env var, and never
+  // when packaged. This function can never read a file inside the app bundle.
   const clean = (v) => {
     const k = String(v || '').trim()
     return k && !k.startsWith('#') ? k : ''
   }
-  let found = clean(process.env.ELLIS_KIMI_KEY)
-  if (!found) {
-    const candidates = [
-      join(app.getPath('userData'), 'kimi.key'),
-      process.resourcesPath ? join(process.resourcesPath, 'kimi.key') : null,
-      join(app.getAppPath(), 'resources', 'kimi.key')
-    ].filter(Boolean)
-    for (const p of candidates) {
-      try {
-        if (existsSync(p)) {
-          const lines = readFileSync(p, 'utf-8').split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('#'))
-          if (lines[0]) { found = lines[0]; break }
-        }
-      } catch { /* unreadable candidate — try next */ }
-    }
-  }
-  adminKeyCache = found || ''
+  adminKeyCache = clientProviderCallsAllowed() ? clean(process.env.ELLIS_KIMI_KEY) : ''
   return adminKeyCache
 }
 function kimiCfg(s) {
   const k = s?.kimi || {}
-  const own = (k.apiKey || '').trim()
+  // In a packaged build a user-pasted key is also refused at the call sites:
+  // provider access is backend-only. Dev builds may use a developer's own key.
+  const own = clientProviderCallsAllowed() ? (k.apiKey || '').trim() : ''
   const apiKey = own || adminKimiKey()
   return { ...k, apiKey, managed: !own && !!apiKey }
 }
@@ -696,8 +696,10 @@ function smartHandler(name, fns, localMethod) {
     const chain = []
     const kc = kimiCfg(s)
     if (fns.kimi && s.kimi?.enabled !== false && kc.apiKey) chain.push(['kimi', () => fns.kimi(kc, payload)])
-    const key = (s.anthropicKey || '').trim()
-    if (key || claude.ambientCredsAvailable()) chain.push(['claude', () => fns.claude(key, s.anthropicModel, payload)])
+    // Claude/ambient host creds are also refused in a packaged build — external
+    // provider calls are backend-only. Ollama (local, keyless) stays available.
+    const key = clientProviderCallsAllowed() ? (s.anthropicKey || '').trim() : ''
+    if (clientProviderCallsAllowed() && (key || claude.ambientCredsAvailable())) chain.push(['claude', () => fns.claude(key, s.anthropicModel, payload)])
     if (s.localAI?.enabled) chain.push(['ollama', () => fns.ollama({ endpoint: s.localAI.endpoint, model: s.localAI.model }, payload)])
     let lastErr = null
     for (const [engineName, run] of chain) {
@@ -1304,6 +1306,15 @@ ipcMain.handle('trips:agent:record', (_e, { tripId, entry }) => {
   return { ok: !!t }
 })
 
+// Redact anything that looks like a provider secret before it can surface in
+// the UI or logs (defense in depth — messages should never carry a key).
+function redactSecrets(s) {
+  return String(s || '')
+    .replace(/sk-[A-Za-z0-9_\-]{12,}/g, 'sk-***REDACTED***')
+    .replace(/AKIA[0-9A-Z]{16}/g, 'AKIA***REDACTED***')
+    .replace(/Bearer\s+[A-Za-z0-9._\-]{12,}/gi, 'Bearer ***REDACTED***')
+    .replace(/-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/g, '***REDACTED PRIVATE KEY***')
+}
 function parseError(err) {
   if (err?.code === 'NO_API_KEY' || err?.message === 'NO_API_KEY') {
     return { code: 'NO_API_KEY', message: 'No AI key configured. Add a Kimi or Claude key in Settings.' }
@@ -1311,7 +1322,7 @@ function parseError(err) {
   const status = err?.status || err?.response?.status
   if (status === 401) return { code: 'AUTH', message: 'The AI provider rejected the API key. Check it in Settings.' }
   if (status === 429) return { code: 'RATE', message: 'AI provider rate limit or quota reached. Try again shortly.' }
-  return { code: 'UNKNOWN', message: err?.message || 'Something went wrong calling the model.' }
+  return { code: 'UNKNOWN', message: redactSecrets(err?.message) || 'Something went wrong calling the model.' }
 }
 
 
