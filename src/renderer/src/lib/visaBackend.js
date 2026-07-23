@@ -69,6 +69,18 @@ export function createVisaClient(session) {
     appointment: (id) => call('GET', `/cases/${id}/appointment`, session),
     audit: (id) => call('GET', `/cases/${id}/audit`, session),
 
+    // Adapter administration (Phase 2)
+    adminListAdapters: () => call('GET', '/admin/adapters', session),
+    adminCoverage: () => call('GET', '/admin/coverage', session),
+    adminCreateAdapter: (payload) => call('POST', '/admin/adapters', session, payload),
+    adminGetAdapter: (id) => call('GET', `/admin/adapters/${id}`, session),
+    adminUpdateAdapter: (id, config) => call('PUT', `/admin/adapters/${id}`, session, config),
+    adminTransition: (id, toState, evidence = {}) =>
+      call('POST', `/admin/adapters/${id}/transition`, session, { to_state: toState, evidence }),
+    adminKill: (id, reason = '') => call('POST', `/admin/adapters/${id}/kill`, session, { reason }),
+    adminClearKill: (id) => call('POST', `/admin/adapters/${id}/clear-kill`, session, {}),
+    adminRollback: (id, toVersion) => call('POST', `/admin/adapters/${id}/rollback`, session, { to_version: toVersion }),
+
     // Privacy (Phase 10) + ops (Phase 11)
     exportCase: (id) => call('GET', `/cases/${id}/export`, session),
     exportOrg: () => call('GET', '/export', session),

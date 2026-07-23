@@ -8,6 +8,13 @@ export function newSession({ orgId = 'ellis-demo', userId = 'applicant-1', token
   return { token, orgId, userId }
 }
 
+// Admin session: the backend grants the admin role only for the dedicated admin
+// token (dev default 'admin-token'; production = a Clerk admin claim). Adapter
+// approval/activation/kill/rollback require this.
+export function newAdminSession({ orgId = 'platform', userId = 'admin-1', token = 'admin-token' } = {}) {
+  return { token, orgId, userId }
+}
+
 // Map an OCR confidence (0..1) to a severity bucket for the review badges.
 export function confidenceLevel(confidence) {
   if (confidence == null) return 'mid'

@@ -23,6 +23,7 @@ class Principal:
     org_id: str
     user_id: str
     step_up: bool = False
+    role: str = "applicant"   # applicant | admin (production: from the Clerk JWT)
 
 
 def _require(cond: bool, code: int, msg: str):
@@ -34,16 +35,25 @@ async def get_principal(
     authorization: str = Header(default=""),
     x_org_id: str = Header(default=""),
     x_user_id: str = Header(default=""),
+    x_role: str = Header(default=""),
 ) -> Principal:
     s = settings()
     token = authorization.replace("Bearer ", "").strip()
     if s.clerk_secret_key:
         # Production path — verify a Clerk session token.
         return verify_clerk(token)
-    # Dev path — a shared dev token plus explicit org/user headers.
-    _require(token == s.dev_api_token, 401, "invalid token")
+    # Dev path — a shared dev token plus explicit org/user headers. The admin
+    # role is granted only when the caller presents the dedicated admin token
+    # (ELLIS_ADMIN_TOKEN), never merely by asserting x_role.
+    _require(token == s.dev_api_token or token == s.admin_token, 401, "invalid token")
     _require(bool(x_org_id and x_user_id), 401, "missing org/user")
-    return Principal(org_id=x_org_id, user_id=x_user_id)
+    role = "admin" if (token == s.admin_token and s.admin_token) else "applicant"
+    return Principal(org_id=x_org_id, user_id=x_user_id, role=role)
+
+
+def require_admin(principal: Principal):
+    """Administrator-only actions (adapter approval/activation/kill/rollback)."""
+    _require(principal.role == "admin", 403, "administrator role required")
 
 
 def verify_clerk(token: str) -> Principal:  # pragma: no cover - activation stub

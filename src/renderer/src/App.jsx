@@ -17,6 +17,7 @@ import Settings from './screens/Settings.jsx'
 import Notifications from './screens/Notifications.jsx'
 import TripPortal from './screens/TripPortal.jsx'
 import VisaConsole from './screens/VisaConsole.jsx'
+import AdminConsole from './screens/AdminConsole.jsx'
 
 export default function App() {
   const [booted, setBooted] = useState(false)
@@ -82,6 +83,7 @@ export default function App() {
           {view === 'dashboard' && <Dashboard role={role} profile={profile} onNav={nav} onOpenCase={openCase} onNotify={bumpNotif} />}
           {view === 'cases' && <Cases role={role} profile={profile} onOpen={openCase} />}
           {view === 'visa' && <VisaConsole role={role} profile={profile} onNotify={bumpNotif} />}
+          {view === 'admin' && <AdminConsole />}
           {view === 'case' && caseId && <CaseWorkspace caseId={caseId} role={role} profile={profile} tab={caseTab} onTab={setCaseTab} onBack={() => nav('cases')} onSettings={() => nav('settings')} onNotify={bumpNotif} />}
           {view === 'assistant' && <Assistant role={role} onSettings={() => nav('settings')} />}
           {view === 'notifications' && <Notifications role={role} onOpenCase={openCase} onChanged={bumpNotif} />}

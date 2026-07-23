@@ -652,6 +652,105 @@ def metrics(db=Depends(get_session), p: Principal = Depends(get_principal)):
     }
 
 
+# ---- Country-adapter administration + approval lifecycle (Phase 2) ----
+class AdapterCreate(BaseModel):
+    country: str
+    visa_type: str = "tourist"
+    config: dict = {}
+
+
+class AdapterTransition(BaseModel):
+    to_state: str
+    evidence: dict = {}
+
+
+class AdapterRollback(BaseModel):
+    to_version: int
+
+
+class KillBody(BaseModel):
+    reason: str = ""
+
+
+def _adapter_err(fn):
+    from . import adapters_admin as aa
+    try:
+        return fn()
+    except aa.NotAuthorizedError as e:
+        raise HTTPException(403, str(e))
+    except aa.LifecycleError as e:
+        raise HTTPException(400, str(e))
+
+
+@app.get("/admin/adapters")
+def admin_list_adapters(db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from . import adapters_admin as aa
+    return {"adapters": aa.list_adapters(db), "is_admin": p.role == "admin"}
+
+
+@app.get("/admin/coverage")
+def admin_coverage(db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from . import adapters_admin as aa
+    return {"coverage": aa.coverage_matrix(db)}
+
+
+@app.post("/admin/adapters")
+def admin_create_adapter(body: AdapterCreate, db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from . import adapters_admin as aa
+    rec = aa.create_adapter(db, country=body.country, visa_type=body.visa_type,
+                            config=body.config, actor=p.user_id)
+    return aa.to_dict(rec)
+
+
+@app.get("/admin/adapters/{adapter_id}")
+def admin_get_adapter(adapter_id: str, db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from . import adapters_admin as aa
+    rec = db.get(models.AdapterRecord, adapter_id)
+    if not rec:
+        raise HTTPException(404, "adapter not found")
+    return {**aa.to_dict(rec), "versions": aa.versions(db, adapter_id),
+            "audit": aa.adapter_audit(db, adapter_id)}
+
+
+@app.put("/admin/adapters/{adapter_id}")
+def admin_update_adapter(adapter_id: str, config: dict, db=Depends(get_session),
+                         p: Principal = Depends(get_principal)):
+    from . import adapters_admin as aa
+    return _adapter_err(lambda: aa.to_dict(aa.update_config(db, adapter_id, config, p.user_id)))
+
+
+@app.post("/admin/adapters/{adapter_id}/transition")
+def admin_transition_adapter(adapter_id: str, body: AdapterTransition, db=Depends(get_session),
+                             p: Principal = Depends(get_principal)):
+    from . import adapters_admin as aa
+    return _adapter_err(lambda: aa.to_dict(aa.transition(
+        db, adapter_id, body.to_state, actor=p.user_id, is_admin=(p.role == "admin"),
+        evidence=body.evidence)))
+
+
+@app.post("/admin/adapters/{adapter_id}/kill")
+def admin_kill_adapter(adapter_id: str, body: KillBody, db=Depends(get_session),
+                       p: Principal = Depends(get_principal)):
+    from . import adapters_admin as aa
+    return _adapter_err(lambda: aa.to_dict(aa.kill(
+        db, adapter_id, actor=p.user_id, is_admin=(p.role == "admin"), reason=body.reason)))
+
+
+@app.post("/admin/adapters/{adapter_id}/clear-kill")
+def admin_clear_kill(adapter_id: str, db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from . import adapters_admin as aa
+    return _adapter_err(lambda: aa.to_dict(aa.clear_kill(
+        db, adapter_id, actor=p.user_id, is_admin=(p.role == "admin"))))
+
+
+@app.post("/admin/adapters/{adapter_id}/rollback")
+def admin_rollback_adapter(adapter_id: str, body: AdapterRollback, db=Depends(get_session),
+                           p: Principal = Depends(get_principal)):
+    from . import adapters_admin as aa
+    return _adapter_err(lambda: aa.to_dict(aa.rollback(
+        db, adapter_id, body.to_version, actor=p.user_id, is_admin=(p.role == "admin"))))
+
+
 # ---- Webhooks (signature-verified, idempotent) ----
 @app.post("/webhooks/stripe")
 async def stripe_webhook(stripe_signature: str = Header(default=""), db=Depends(get_session)):

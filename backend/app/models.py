@@ -259,3 +259,34 @@ class PortalState(Base, TimestampMixin):
     __tablename__ = "portal_states"
     case_id: Mapped[str] = mapped_column(String(64), primary_key=True)
     state: Mapped[dict] = mapped_column(JSON, default=dict)
+
+
+class AdapterRecord(Base, TimestampMixin):
+    """The authoritative lifecycle record for a country/visa-type portal adapter.
+    Distinct from the runtime PortalAdapter (which binds a driver): this is what
+    an administrator manages through discovered→…→production_active, and what the
+    runtime consults before ever using an adapter in production."""
+    __tablename__ = "adapter_records"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    country: Mapped[str] = mapped_column(String(80), index=True)
+    visa_type: Mapped[str] = mapped_column(String(40), default="tourist")
+    config: Mapped[dict] = mapped_column(JSON, default=dict)          # all portal metadata
+    lifecycle_state: Mapped[str] = mapped_column(String(40), default="discovered", index=True)
+    approval_status: Mapped[str] = mapped_column(String(40), default="unapproved")
+    production_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
+    kill_switch: Mapped[bool] = mapped_column(Boolean, default=False)
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    monitoring_status: Mapped[str] = mapped_column(String(40), default="not_monitored")
+    rollback_version: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+
+
+class AdapterVersion(Base):
+    """Immutable config snapshots for version history + rollback."""
+    __tablename__ = "adapter_versions"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    adapter_id: Mapped[str] = mapped_column(String(32), index=True)
+    version: Mapped[int] = mapped_column(Integer)
+    config: Mapped[dict] = mapped_column(JSON, default=dict)
+    lifecycle_state: Mapped[str] = mapped_column(String(40), default="")
+    created_by: Mapped[str] = mapped_column(String(64), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
