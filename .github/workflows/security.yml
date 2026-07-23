@@ -1,0 +1,44 @@
+name: security
+
+# Release gate: never ship a build that contains a provider key, .env, ADC,
+# private fixture, Live View URL, or credential-like resource.
+on:
+  push: { branches: [ main ] }
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  secret-and-build-scan:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Install deps
+        run: npm ci || npm install
+      - name: Unit + build-security tests
+        run: npm test
+      - name: Clean Electron build
+        run: npm run build
+      - name: Package (unpacked) for scanning
+        run: npx --no-install electron-builder --mac --dir
+      - name: Scan packaged artifacts for secrets (release gate)
+        run: ./scripts/scan-release-secrets.sh
+      - name: Assert no credential files tracked in git
+        run: |
+          if git ls-files | grep -EI '(^|/)(kimi\.key|.*\.key|.*\.pem|\.env|application_default_credentials\.json|fixture_(us|sg|cn))' ; then
+            echo "Tracked credential/private file detected"; exit 1
+          fi
+          echo "No credential/private files tracked."
+
+  backend-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Install backend deps
+        run: pip install -r backend/requirements.txt
+      - name: Backend hermetic tests
+        working-directory: backend
+        run: python -m pytest tests/test_unit.py tests/test_e2e.py tests/test_signature.py tests/test_discovery.py tests/test_tripcom.py tests/test_temporal.py tests/test_privacy.py -q

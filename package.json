@@ -11,6 +11,8 @@
     "start": "electron-vite preview",
     "dist": "electron-vite build && electron-builder",
     "dist:mac": "electron-vite build && electron-builder --mac",
+    "dist:mac:dir": "electron-vite build && electron-builder --mac --dir",
+    "scan:release": "./scripts/scan-release-secrets.sh",
     "test": "node --test --test-concurrency=1 tests/build_security.test.mjs tests/visa/visa_ui_logic.test.mjs tests/portal/framework.test.mjs tests/portal/e2e.test.mjs",
     "test:portal": "node --test --test-concurrency=1 tests/portal/framework.test.mjs tests/portal/e2e.test.mjs",
     "test:security": "node --test tests/build_security.test.mjs",

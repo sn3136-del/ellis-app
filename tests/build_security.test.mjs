@@ -52,7 +52,10 @@ const SECRET_VALUE = [
   { name: 'AWS access key id', re: /\bAKIA[0-9A-Z]{16}\b/ },
   { name: 'Google API key', re: /\bAIza[0-9A-Za-z_\-]{30,}\b/ },
   { name: 'PEM private key block', re: /-----BEGIN [A-Z ]*PRIVATE KEY-----/ },
-  { name: 'Service-account private_key field', re: /"private_key"\s*:\s*"-----BEGIN/ }
+  { name: 'Service-account private_key field', re: /"private_key"\s*:\s*"-----BEGIN/ },
+  { name: 'Moonshot key assignment', re: /MOONSHOT_API_KEY\s*=\s*sk-/ },
+  { name: 'Browserbase key assignment', re: /BROWSERBASE_API_KEY\s*=\s*[A-Za-z0-9]/ },
+  { name: 'Browserbase Live View URL', re: /browserbase\.com\/v1\/sessions\/[A-Za-z0-9-]+\/(live|debug)/ }
 ]
 
 function walk(dir, out = []) {
@@ -166,4 +169,38 @@ test('any packaged app under release/ must not bundle credential files', () => {
     })
     assert.deepEqual(bad, [], `packaged app ${basename(dirname(dirname(asar)))} bundles credentials:\n  ${bad.join('\n  ')}`)
   }
+})
+
+test('packaged app.asar contents carry no secret VALUES (deep extract scan)', () => {
+  const releaseDir = join(ROOT, 'release')
+  if (!existsSync(releaseDir)) return
+  const asars = walk(releaseDir, []).filter((f) => basename(f) === 'app.asar')
+  const tmpBase = join(ROOT, 'release', '.asar_scan_tmp')
+  const hits = []
+  for (const asar of asars) {
+    const dest = join(tmpBase, basename(dirname(dirname(asar))))
+    try {
+      execFileSync('npx', ['--no-install', 'asar', 'extract', asar, dest], { stdio: 'ignore' })
+    } catch { continue } // asar tool unavailable — the filename test above still applies
+    for (const f of walk(dest, [])) {
+      if (f.includes('/node_modules/')) continue
+      if (!/\.(js|mjs|json|map|html|txt|env)$/i.test(f) && basename(f) !== '.env') continue
+      let text
+      try { text = readFileSync(f, 'utf-8') } catch { continue }
+      for (const { name, re } of SECRET_VALUE) {
+        if (re.test(text)) hits.push(`${name} in ${f.replace(dest, basename(dirname(dirname(asar))) + ':')}`)
+      }
+    }
+  }
+  try { execFileSync('rm', ['-rf', tmpBase]) } catch { /* best effort */ }
+  assert.deepEqual(hits, [], `packaged app bundles live secret values:\n  ${hits.join('\n  ')}`)
+})
+
+test('packaged main process enforces backend-only provider calls', () => {
+  const built = join(ROOT, 'out/main/index.js')
+  if (!existsSync(built)) return // nothing built yet
+  const src = readFileSync(built, 'utf-8')
+  assert.ok(/clientProviderCallsAllowed/.test(src), 'built main must gate provider calls')
+  assert.ok(/isPackaged/.test(src), 'built main must consult app.isPackaged')
+  assert.ok(!/resourcesPath[^\n]{0,40}kimi\.key/.test(src), 'built main must not read a bundled kimi.key')
 })
