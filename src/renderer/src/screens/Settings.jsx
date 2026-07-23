@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
-import { ellis, INTEGRATIONS } from '../lib/api.js'
+import { ellis } from '../lib/api.js'
 import { useToast } from '../components/ui.jsx'
 import { Icon } from '../components/icons.jsx'
 
-export default function Settings({ onReplayTour, onReplayOnboarding }) {
+export default function Settings() {
   const toast = useToast()
   const [s, setS] = useState(null)
   const [llmStatus, setLlmStatus] = useState(null)
@@ -33,15 +33,7 @@ export default function Settings({ onReplayTour, onReplayOnboarding }) {
     await ellis.saveSettings(s)
     const st = await ellis.ai.kimiStatus()
     setKimiChecking(false); setKimiStatus(st)
-    toast(st.available ? 'Kimi K3 connected — Ellis Immigration Intelligence is live' : st.reason === 'NO_KEY' ? 'Add a Moonshot API key first' : 'Could not reach Kimi K3 — check the key and endpoint')
-  }
-
-  async function toggleIntegration(id) {
-    const integrations = { ...(s.integrations || {}), [id]: !s.integrations?.[id] }
-    const next = { ...s, integrations }
-    setS(next)
-    await ellis.saveSettings(next)
-    toast(integrations[id] ? `Connected to ${INTEGRATIONS.find((x) => x.id === id)?.label}` : `Disconnected ${INTEGRATIONS.find((x) => x.id === id)?.label}`)
+    toast(st.available ? 'Kimi K3 connected' : st.reason === 'NO_KEY' ? 'Add a Moonshot API key first' : 'Could not reach Kimi K3 — check the key and endpoint')
   }
 
   return (
@@ -52,11 +44,12 @@ export default function Settings({ onReplayTour, onReplayOnboarding }) {
       </div>
 
       <div className="page" style={{ maxWidth: 760 }}>
-        <div className="eyebrow" style={{ marginBottom: 12 }}>Ask Ellis intelligence</div>
+        <div className="eyebrow" style={{ marginBottom: 12 }}>AI engine</div>
         <div className="card" style={{ padding: 22, marginBottom: 20 }}>
-          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>Kimi K3 — Ellis Immigration Intelligence (primary)</div>
+          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>Kimi K3 (primary)</div>
+          <div style={{ fontSize: 12.5, color: 'var(--muted-2)', marginBottom: 8 }}>Used by the simulated demo pipeline only.</div>
           <div style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 14 }}>
-            Ellis runs on an immigration-tailored profile of Kimi K3 (Moonshot AI) — a frontier model with a 1M-token context and vision, specialized here for visas, document reading/translation, and the Trip.com one-click pipeline. <b>This build ships with a managed Kimi K3 key already active — no setup needed.</b> Enter your own key below only to bill usage to your organization instead (it takes precedence over the managed key).
+            The demo pipeline's document reading, translation, and gap review can run on Kimi K3 (Moonshot AI). Enter a key below to enable it; without a key the deterministic built-in engine is used.
           </div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
             <button className="btn btn--sm" onClick={() => ellis.openExternal('https://platform.kimi.ai/console/api-keys')}><Icon.globe style={{ width: 15, height: 15 }} /> Get a Kimi API key</button>
@@ -78,7 +71,7 @@ export default function Settings({ onReplayTour, onReplayOnboarding }) {
           </div>
           {kimiStatus && (
             <div style={{ fontSize: 12.5, color: 'var(--muted-2)', marginBottom: 4 }}>
-              {kimiStatus.available ? `Connected to Kimi${kimiStatus.managed ? ' (managed key provisioned by your administrator — no setup needed)' : ''}. Available models: ${(kimiStatus.models || []).slice(0, 6).join(', ') || 'ready'}` : `Not connected${kimiStatus.reason === 'NO_KEY' ? ' — no API key set (personal or admin-provisioned).' : ' — ' + (kimiStatus.reason || 'unreachable') + '.'}`}
+              {kimiStatus.available ? `Connected to Kimi. Available models: ${(kimiStatus.models || []).slice(0, 6).join(', ') || 'ready'}` : `Not connected${kimiStatus.reason === 'NO_KEY' ? ' — no API key set.' : ' — ' + (kimiStatus.reason || 'unreachable') + '.'}`}
             </div>
           )}
 
@@ -86,7 +79,7 @@ export default function Settings({ onReplayTour, onReplayOnboarding }) {
 
           <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>Local AI — free, private, no API key</div>
           <div style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 14 }}>
-            Turn Ask Ellis into a full LLM that runs entirely on your laptop — no key, no cost, nothing leaves your device. One-time setup: (1) download Ollama, (2) open Terminal and run <code style={{ background: 'var(--bg-2,#f3f3f3)', padding: '1px 6px', borderRadius: 4 }}>ollama pull {s.localAI?.model || 'llama3.1:8b'}</code>, (3) enable the toggle below. Ellis then answers any question and runs tasks through the local model, and falls back to the built-in engine if it isn’t running.
+            Run the demo pipeline's language tasks entirely on this laptop — no key, no cost, nothing leaves the device. One-time setup: (1) download Ollama, (2) open Terminal and run <code style={{ background: 'var(--bg-2,#f3f3f3)', padding: '1px 6px', borderRadius: 4 }}>ollama pull {s.localAI?.model || 'llama3.1:8b'}</code>, (3) enable the toggle below.
           </div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
             <button className="btn btn--sm" onClick={() => ellis.openExternal('https://ollama.com/download')}><Icon.download style={{ width: 15, height: 15 }} /> Download Ollama</button>
@@ -94,7 +87,7 @@ export default function Settings({ onReplayTour, onReplayOnboarding }) {
           </div>
           <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, cursor: 'pointer', marginBottom: 12 }}>
             <input type="checkbox" checked={!!s.localAI?.enabled} onChange={(e) => setLocalAI({ enabled: e.target.checked })} />
-            Use Local AI for Ask Ellis (when available)
+            Use Local AI (when available)
           </label>
           <div className="grid grid-2">
             <div className="field"><label>Local model name</label>
@@ -116,7 +109,7 @@ export default function Settings({ onReplayTour, onReplayOnboarding }) {
 
           <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>Anthropic Claude — Fable 5 (optional, paid key)</div>
           <div style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 14 }}>
-            Paste an API key from console.anthropic.com to run the agent on Claude Fable 5 (Anthropic's most capable model, with automatic Opus 4.8 fallback). There is no free Claude API tier — for free, use Local AI above. Chain order: Kimi K3 → Claude → Local AI → built-in.
+            Paste an API key from console.anthropic.com to run the demo pipeline on Claude Fable 5. There is no free Claude API tier — for free, use Local AI above. Chain order: Kimi K3 → Claude → Local AI → built-in.
           </div>
           <div className="field"><label>Anthropic Claude API key</label>
             <input className="input" type="password" value={s.anthropicKey || ''} onChange={(e) => set({ anthropicKey: e.target.value })} placeholder="sk-ant-..." />
@@ -125,12 +118,6 @@ export default function Settings({ onReplayTour, onReplayOnboarding }) {
             <select className="select" value={s.anthropicModel || 'claude-fable-5'} onChange={(e) => set({ anthropicModel: e.target.value })}>
               {['claude-fable-5', 'claude-opus-4-8', 'claude-sonnet-5', 'claude-haiku-4-5'].map((m) => <option key={m}>{m}</option>)}
             </select>
-          </div>
-          <div style={{ fontSize: 12.5, color: 'var(--muted-2)' }}>
-            {s.kimi?.enabled && ((s.kimi?.apiKey || '').trim() || kimiStatus?.managed) ? 'Active: Kimi K3 immigration profile (falls back to Local AI / Claude / built-in on error).'
-              : s.localAI?.enabled ? 'Active: Local AI (falls back to built-in if Ollama is off).'
-              : (s.anthropicKey || '').trim() ? 'Active: Claude (falls back to built-in on error).'
-              : 'Active: Ellis built-in engine (free, offline).'}
           </div>
         </div>
 
@@ -166,75 +153,10 @@ export default function Settings({ onReplayTour, onReplayOnboarding }) {
             <input className="input" value={s.tripFiling?.endpoint || ''}
               onChange={(e) => setS({ ...s, tripFiling: { ...(s.tripFiling || {}), endpoint: e.target.value } })}
               placeholder="Agency / visa-centre intake address — required for automatic transmission" />
+            <div style={{ fontSize: 12.5, color: 'var(--muted-2)', marginTop: 6 }}>Used by the simulated demo pipeline only.</div>
           </div>
-        </div>
-
-        <div className="eyebrow" style={{ marginBottom: 12 }}>Organization</div>
-        <div className="card" style={{ padding: 22, marginBottom: 20 }}>
-          <div className="field"><label>Organization name (appears on exported PDFs)</label>
-            <input className="input" value={s.organizationName} onChange={(e) => set({ organizationName: e.target.value })} />
-          </div>
-          <div className="grid grid-2">
-            <div className="field"><label>Default destination</label>
-              <select className="select" value={s.defaultDestination} onChange={(e) => set({ defaultDestination: e.target.value })}>
-                <option>USA</option><option>Canada</option>
-              </select>
-            </div>
-            <div className="field"><label>Default translation language</label>
-              <select className="select" value={s.defaultLanguage} onChange={(e) => set({ defaultLanguage: e.target.value })}>
-                {['English', 'French', 'Simplified Chinese', 'Spanish'].map((l) => <option key={l}>{l}</option>)}
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div className="eyebrow" style={{ marginBottom: 12 }}>Deadlines & compliance</div>
-        <div className="card" style={{ padding: 22, marginBottom: 20 }}>
-          <div className="field"><label>Remind me this many days before any expiry / deadline</label>
-            <select className="select" value={s.reminderDays} onChange={(e) => set({ reminderDays: Number(e.target.value) })}>
-              {[30, 45, 60, 90, 120].map((d) => <option key={d} value={d}>{d} days</option>)}
-            </select>
-          </div>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, cursor: 'pointer' }}>
-            <input type="checkbox" checked={s.autoReview} onChange={(e) => set({ autoReview: e.target.checked })} />
-            Auto-run a compliance scan when a case is opened
-          </label>
-        </div>
-
-        <div className="eyebrow" style={{ marginBottom: 12 }}>Integrations</div>
-        <div className="card" style={{ padding: 22, marginBottom: 20 }}>
-          {INTEGRATIONS.map((it, i) => {
-            const on = !!s.integrations?.[it.id]
-            return (
-              <div key={it.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: i === INTEGRATIONS.length - 1 ? 'none' : '1px solid var(--line)' }}>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                  <div className="captile__icon" style={{ width: 34, height: 34 }}><Icon.plug style={{ width: 16, height: 16 }} /></div>
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: 14 }}>{it.label} {on && <span className="chip" style={{ marginLeft: 6 }}>Connected</span>}</div>
-                    <div style={{ fontSize: 13, color: 'var(--muted)' }}>{it.desc}</div>
-                  </div>
-                </div>
-                <button className={on ? 'btn btn--ghost btn--sm' : 'btn btn--sm'} onClick={() => toggleIntegration(it.id)}>{on ? 'Disconnect' : 'Connect'}</button>
-              </div>
-            )
-          })}
-        </div>
-
-        <div className="eyebrow" style={{ marginBottom: 12 }}>Help & demo</div>
-        <div className="card" style={{ padding: 22 }}>
-          <Action title="Replay the product tour" desc="Walk through a template case step by step." btn="Start tour" onClick={onReplayTour} />
-          <Action title="Replay the welcome animation" desc="See the intro shown on first launch." btn="Play" onClick={onReplayOnboarding} last />
         </div>
       </div>
-    </div>
-  )
-}
-
-function Action({ title, desc, btn, onClick, last }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: last ? 'none' : '1px solid var(--line)' }}>
-      <div><div style={{ fontWeight: 600, fontSize: 14 }}>{title}</div><div style={{ fontSize: 13, color: 'var(--muted)' }}>{desc}</div></div>
-      <button className="btn btn--ghost btn--sm" onClick={onClick}>{btn}</button>
     </div>
   )
 }

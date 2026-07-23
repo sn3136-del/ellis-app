@@ -1,7 +1,7 @@
 {
   "name": "ellis",
   "version": "1.0.0",
-  "description": "Ellis - AI workspace for immigration operations",
+  "description": "Ellis for Trip.com - one-click tourist visa applications",
   "main": "./out/main/index.js",
   "author": "Ellis",
   "license": "UNLICENSED",
@@ -13,7 +13,7 @@
     "dist:mac": "electron-vite build && electron-builder --mac",
     "dist:mac:dir": "electron-vite build && electron-builder --mac --dir",
     "scan:release": "./scripts/scan-release-secrets.sh",
-    "test": "node --test --test-concurrency=1 tests/build_security.test.mjs tests/visa/visa_ui_logic.test.mjs tests/visa/i18n.test.mjs tests/portal/framework.test.mjs tests/portal/e2e.test.mjs",
+    "test": "node --test --test-concurrency=1 tests/build_security.test.mjs tests/tripcom_only.test.mjs tests/visa/visa_ui_logic.test.mjs tests/visa/i18n.test.mjs tests/portal/framework.test.mjs tests/portal/e2e.test.mjs",
     "test:portal": "node --test --test-concurrency=1 tests/portal/framework.test.mjs tests/portal/e2e.test.mjs",
     "test:security": "node --test tests/build_security.test.mjs",
     "test:visa": "node --test tests/visa/visa_ui_logic.test.mjs",
@@ -21,7 +21,7 @@
   },
   "build": {
     "appId": "com.ellis.app",
-    "productName": "Ellis",
+    "productName": "Ellis for Trip.com",
     "directories": {
       "output": "release"
     },
@@ -64,7 +64,6 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.112.4",
     "nodemailer": "^9.0.3",
-    "openai": "^4.56.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   }

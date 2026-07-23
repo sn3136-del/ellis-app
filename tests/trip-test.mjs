@@ -1,8 +1,14 @@
 // Live UI test: the Trip.com one-click agentic tourist-visa flow (v2 UI).
-// Covers: Trip.com tile -> login -> branded portal (no Ellis header items,
-// language switcher) -> new application (date limits, live route check) ->
-// agent pipeline -> progress bar 100% -> per-step email confirmations ->
-// visa PDF delivered. Then a second, hard consular scenario (China -> USA).
+//
+// REQUIRES: the app running with ELLIS_RUNTIME_MODE=local_mock_demo (and
+// --remote-debugging-port=9222). The simulated demo portal (TripPortal) lives
+// at the 'demo' view, reachable only via the "Demo portal" sidebar item that
+// exists only in local_mock_demo mode — there is no role select or login.
+//
+// Covers: Demo portal nav -> branded portal (no Ellis header items, language
+// switcher) -> new application (date limits, live route check) -> agent
+// pipeline -> progress bar 100% -> per-step email confirmations -> visa PDF
+// delivered. Then a second, hard consular scenario (China -> USA).
 const list = await (await fetch('http://127.0.0.1:9222/json')).json()
 const ws = new WebSocket(list.find((t) => t.type === 'page').webSocketDebuggerUrl)
 await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej })
@@ -49,21 +55,12 @@ async function fillNewApp(name, email, nat, dest, dep, ret) {
     return true})()`)
 }
 
-console.log('== Role select ==')
+console.log('== Demo portal navigation (requires ELLIS_RUNTIME_MODE=local_mock_demo) ==')
 for (let esc = 0; esc < 3; esc++) { if (!(await evaljs(`(()=>{const x=document.querySelector('.trip-back'); if(!x) return false; x.click(); return true})()`))) break; await sleep(700) }
 let t = await text()
-if (t.includes('switch role')) { await click('Switch role'); await sleep(700); t = await text() }
-if (t.includes('skip')) { await click('Skip'); await sleep(600); t = await text() }
-ok(t.includes('who is using ellis today?'), 'role select shown')
-ok(t.includes('trip.com'), 'Trip.com tile present')
-ok(await evaljs(`(()=>{const b=[...document.querySelectorAll('.rolecard')].find(x=>x.textContent.includes('Trip.com')); if(!b) return false; b.click(); return true})()`), 'click Trip.com tile')
-await sleep(600)
-
-console.log('== Login (Trip.com skips country step) ==')
-t = await text()
-ok(t.includes('sign in'), 'login shown directly (no country step)')
-await evaljs(`(()=>{const ins=[...document.querySelectorAll('input')]; window.__set(ins[0],'admin'); window.__set(ins[1],'1234'); return true})()`)
-await evaljs(`(()=>{const b=[...document.querySelectorAll('button')].find(b=>/sign in/i.test(b.textContent)); b.click(); return true})()`)
+ok(t.includes('demo portal'), 'Demo portal nav item present (local_mock_demo mode active)')
+ok(t.includes('simulated portal'), 'permanent SIMULATED PORTAL banner visible')
+ok(await evaljs(`(()=>{const b=[...document.querySelectorAll('.nav__item')].find(x=>/demo portal/i.test(x.textContent)); if(!b) return false; b.click(); return true})()`), 'open Demo portal view')
 await sleep(900)
 
 console.log('== Branded portal header ==')

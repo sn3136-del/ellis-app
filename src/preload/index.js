@@ -1,30 +1,26 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
+// Ellis for Trip.com — the preload exposes only what the Trip.com-only shell
+// uses: settings, notifications, document utilities, PDF export, the demo
+// pipeline's trips/tripAgent channels (registered by the main process only in
+// local_mock_demo mode; otherwise they reply { error: 'demo_disabled' }), and
+// the support-chat AI channel plus engine status checks for Settings.
 const api = {
-  // settings & state
-  getState: () => ipcRenderer.invoke('state:get'),
+  // settings
   getSettings: () => ipcRenderer.invoke('settings:get'),
   saveSettings: (partial) => ipcRenderer.invoke('settings:save', partial),
-  resetDemo: () => ipcRenderer.invoke('demo:reset'),
+
+  // shell utilities
   exportPdf: (payload) => ipcRenderer.invoke('export:pdf', payload),
   exportPdfToDesktop: (payload) => ipcRenderer.invoke('export:pdfToDesktop', payload),
   revealFile: (path) => ipcRenderer.invoke('file:reveal', path),
   openExternal: (url) => ipcRenderer.invoke('open:external', url),
-  sendEmail: (payload) => ipcRenderer.invoke('email:send', payload),
-  smtpStatus: () => ipcRenderer.invoke('email:smtpStatus'),
 
   // notifications
-  listNotifs: (role) => ipcRenderer.invoke('notifs:list', role),
+  listNotifs: (scope) => ipcRenderer.invoke('notifs:list', scope),
   addNotif: (n) => ipcRenderer.invoke('notifs:add', n),
   markNotifRead: (id) => ipcRenderer.invoke('notifs:markRead', id),
-  markAllNotifsRead: (role) => ipcRenderer.invoke('notifs:markAllRead', role),
-
-  // cases
-  listCases: () => ipcRenderer.invoke('cases:list'),
-  getCase: (id) => ipcRenderer.invoke('cases:get', id),
-  createCase: (data) => ipcRenderer.invoke('cases:create', data),
-  updateCase: (id, patch) => ipcRenderer.invoke('cases:update', id, patch),
-  deleteCase: (id) => ipcRenderer.invoke('cases:delete', id),
+  markAllNotifsRead: (scope) => ipcRenderer.invoke('notifs:markAllRead', scope),
 
   // documents
   pickDocuments: () => ipcRenderer.invoke('docs:pickAndRead'),
@@ -32,7 +28,7 @@ const api = {
   detectDocLanguage: (path) => ipcRenderer.invoke('doc:detectLanguage', { path }),
   translateDoc: (payload) => ipcRenderer.invoke('doc:translate', payload),
 
-  // Trip.com portal
+  // Trip.com demo portal (gated by runtime mode in the main process)
   listTrips: () => ipcRenderer.invoke('trips:list'),
   createTrip: (data) => ipcRenderer.invoke('trips:create', data),
   updateTrip: (id, patch) => ipcRenderer.invoke('trips:update', id, patch),
@@ -55,19 +51,8 @@ const api = {
     record: (tripId, entry) => ipcRenderer.invoke('trips:agent:record', { tripId, entry })
   },
 
-  // AI capabilities
+  // AI: support chat + engine status (Settings connection checks)
   ai: {
-    extractDocument: (p) => ipcRenderer.invoke('ai:extractDocument', p),
-    answerQuestion: (p) => ipcRenderer.invoke('ai:answerQuestion', p),
-    riskFlags: (p) => ipcRenderer.invoke('ai:riskFlags', p),
-    summarizeNotice: (p) => ipcRenderer.invoke('ai:summarizeNotice', p),
-    prepareForm: (p) => ipcRenderer.invoke('ai:prepareForm', p),
-    evidencePacket: (p) => ipcRenderer.invoke('ai:evidencePacket', p),
-    complianceAudit: (p) => ipcRenderer.invoke('ai:complianceAudit', p),
-    travelRisk: (p) => ipcRenderer.invoke('ai:travelRisk', p),
-    lifecyclePlan: (p) => ipcRenderer.invoke('ai:lifecyclePlan', p),
-    translateDocument: (p) => ipcRenderer.invoke('ai:translateDocument', p),
-    authenticityCheck: (p) => ipcRenderer.invoke('ai:authenticityCheck', p),
     assistantChat: (p) => ipcRenderer.invoke('ai:assistantChat', p),
     localStatus: (p) => ipcRenderer.invoke('ai:localStatus', p),
     kimiStatus: () => ipcRenderer.invoke('ai:kimiStatus')

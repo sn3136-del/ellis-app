@@ -34,6 +34,26 @@ async function call(method, path, session, body) {
   return data
 }
 
+// Runtime-mode probe. GET {base}/capabilities and return its "runtime_mode"
+// field (one of: test | local_mock_demo | tripcom_evaluation | staging |
+// production). FAIL-SAFE: on ANY error — network failure, non-2xx, bad JSON,
+// missing/empty field — return 'production' so no simulated/demo surface can
+// ever appear by accident.
+export async function fetchRuntimeMode(baseUrl) {
+  try {
+    const res = await fetch(`${baseUrl || BASE}/capabilities`, {
+      headers: authHeaders(null),
+      signal: typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? AbortSignal.timeout(5000) : undefined
+    })
+    if (!res.ok) return 'production'
+    const data = await res.json()
+    const mode = data && typeof data.runtime_mode === 'string' ? data.runtime_mode.trim() : ''
+    return mode || 'production'
+  } catch {
+    return 'production'
+  }
+}
+
 export function createVisaClient(session) {
   return {
     base: BASE,

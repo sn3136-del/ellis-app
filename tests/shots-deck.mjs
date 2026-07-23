@@ -1,4 +1,9 @@
 // Capture full-window Welcome / User information / Confirmation for the Trip.com pitch deck.
+//
+// REQUIRES: the app running with ELLIS_RUNTIME_MODE=local_mock_demo (and
+// --remote-debugging-port=9222). The simulated demo portal lives at the
+// 'demo' view, reachable only via the "Demo portal" sidebar item that exists
+// only in local_mock_demo mode — there is no role select or login.
 import { writeFileSync, copyFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -69,19 +74,17 @@ async function ensureHome() {
   for (let i = 0; i < 10; i++) {
     let t = await text()
     if (t.includes('process your visa') && t.includes('get started')) return true
-    if (t.includes('sign in')) {
-      await evaljs(`(()=>{const ins=[...document.querySelectorAll('input')]; if(ins[0]) window.__set(ins[0],'admin'); if(ins[1]) window.__set(ins[1],'1234'); return true})()`)
-      await evaljs(`(()=>{const b=[...document.querySelectorAll('button')].find(b=>/sign in/i.test(b.textContent)); if(b) b.click(); return true})()`)
-      await sleep(800); continue
+    if (t.includes('the simulated demo portal is disabled')) {
+      console.log('demo portal disabled — start the app with ELLIS_RUNTIME_MODE=local_mock_demo')
+      return false
     }
-    if (t.includes('who is using ellis')) {
-      await evaljs(`(()=>{const b=[...document.querySelectorAll('.rolecard')].find(x=>x.textContent.includes('Trip.com')); if(b) b.click(); return true})()`)
-      await sleep(700); continue
-    }
-    if (t.includes('skip')) { await click('Skip'); await sleep(400); continue }
-    if (t.includes('switch role')) { await click('Switch role'); await sleep(500); continue }
-    await evaljs(`(()=>{const x=document.querySelector('.trip-back'); if(x) x.click(); return true})()`)
-    await sleep(500)
+    // Inside the portal on a sub-page: the round back arrow returns toward
+    // the portal home (or exits to the shell, handled by the nav click below).
+    const backed = await evaljs(`(()=>{const x=document.querySelector('.trip-back'); if(!x) return false; x.click(); return true})()`)
+    if (backed) { await sleep(500); continue }
+    // In the shell: open the Demo portal view (exists only in local_mock_demo).
+    await evaljs(`(()=>{const b=[...document.querySelectorAll('.nav__item')].find(x=>/demo portal/i.test(x.textContent)); if(b) b.click(); return true})()`)
+    await sleep(700)
   }
   return (await text()).includes('get started')
 }

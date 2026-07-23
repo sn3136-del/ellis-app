@@ -26,6 +26,7 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False
 def create_all(bind=None):
     # Import models so metadata is populated before create_all.
     from . import models  # noqa: F401
+    from .visa_snapshot import models as snapshot_models  # noqa: F401
     eng = bind or engine
     Base.metadata.create_all(eng)
     _ensure_columns(eng)

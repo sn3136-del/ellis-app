@@ -1,4 +1,9 @@
 // End-to-end Trip.com cases for Sammy Abdella across 5 routes.
+//
+// REQUIRES: the app running with ELLIS_RUNTIME_MODE=local_mock_demo (and
+// --remote-debugging-port=9222). The simulated demo portal lives at the
+// 'demo' view, reachable only via the "Demo portal" sidebar item that exists
+// only in local_mock_demo mode — there is no role select or login.
 import { writeFileSync } from 'node:fs'
 
 const ROUTES = [
@@ -38,28 +43,20 @@ const ok = (c, n, x = '') => { c ? pass++ : fail++; console.log(c ? '  PASS' : '
 const report = []
 
 async function ensureTripHome() {
-  for (let attempt = 0; attempt < 6; attempt++) {
+  for (let attempt = 0; attempt < 8; attempt++) {
     let t = await text()
     if (t.includes('process your visa') && t.includes('get started')) return true
-    if (t.includes('sign in')) {
-      await evaljs(`(()=>{const ins=[...document.querySelectorAll('input')]; if(ins[0]) window.__set(ins[0],'admin'); if(ins[1]) window.__set(ins[1],'1234'); return true})()`)
-      await evaljs(`(()=>{const b=[...document.querySelectorAll('button')].find(b=>/sign in/i.test(b.textContent)); if(b) b.click(); return true})()`)
-      await sleep(900)
-      continue
+    if (t.includes('the simulated demo portal is disabled')) {
+      console.log('  [abort] demo portal disabled — start the app with ELLIS_RUNTIME_MODE=local_mock_demo')
+      return false
     }
-    if (t.includes('who is using ellis')) {
-      await evaljs(`(()=>{const b=[...document.querySelectorAll('.rolecard')].find(x=>x.textContent.includes('Trip.com')); if(b) b.click(); return true})()`)
-      await sleep(700)
-      continue
-    }
-    if (t.includes('skip')) { await click('Skip'); await sleep(500); continue }
-    if (t.includes('switch role')) { await click('Switch role'); await sleep(600); continue }
+    // Inside the portal on a sub-page: the round back arrow returns toward
+    // the portal home (or exits to the shell, handled by the nav click below).
     const backed = await evaljs(`(()=>{const x=document.querySelector('.trip-back'); if(!x) return false; x.click(); return true})()`)
-    if (!backed) {
-      // force role select via switch if available in other workspaces
-      await evaljs(`(()=>{const b=[...document.querySelectorAll('button')].find(b=>/switch (role|workspace)/i.test(b.textContent)); if(b) b.click(); return true})()`)
-    }
-    await sleep(600)
+    if (backed) { await sleep(600); continue }
+    // In the shell: open the Demo portal view (exists only in local_mock_demo).
+    await evaljs(`(()=>{const b=[...document.querySelectorAll('.nav__item')].find(x=>/demo portal/i.test(x.textContent)); if(b) b.click(); return true})()`)
+    await sleep(700)
   }
   return (await text()).includes('get started')
 }

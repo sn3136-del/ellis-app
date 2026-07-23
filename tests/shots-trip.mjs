@@ -1,4 +1,9 @@
-// Capture screenshots of the Trip.com portal: role select, home, new form, detail.
+// Capture screenshots of the Trip.com demo portal: shell, home, new form, detail.
+//
+// REQUIRES: the app running with ELLIS_RUNTIME_MODE=local_mock_demo (and
+// --remote-debugging-port=9222). The simulated demo portal lives at the
+// 'demo' view, reachable only via the "Demo portal" sidebar item that exists
+// only in local_mock_demo mode — there is no role select or login.
 const list = await (await fetch('http://127.0.0.1:9222/json')).json()
 const ws = new WebSocket(list[0].webSocketDebuggerUrl)
 await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej })
@@ -17,12 +22,14 @@ async function shot(name) {
 const click = (t) => evaljs(`(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.textContent.trim().toLowerCase().includes(${JSON.stringify(t.toLowerCase())})); if(!b) return false; b.click(); return true})()`)
 const text = async () => (await evaljs('document.body.innerText')).toLowerCase()
 
-if ((await text()).includes('switch role')) { await click('switch role'); await sleep(700) }
-await shot('trip-roleselect')
-await evaljs(`(()=>{const b=[...document.querySelectorAll('.rolecard')].find(x=>x.textContent.includes('Trip.com')); b.click(); return true})()`)
-await sleep(600)
-await evaljs(`(()=>{const ins=[...document.querySelectorAll('input')]; const s=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set; s.call(ins[0],'admin'); ins[0].dispatchEvent(new Event('input',{bubbles:true})); s.call(ins[1],'1234'); ins[1].dispatchEvent(new Event('input',{bubbles:true})); return true})()`)
-await evaljs(`(()=>{const b=[...document.querySelectorAll('button')].find(b=>/sign in/i.test(b.textContent)); b.click(); return true})()`)
+// Escape any portal sub-page back to the shell, then shoot the shell itself.
+for (let i = 0; i < 3; i++) { if (!(await evaljs(`(()=>{const x=document.querySelector('.trip-back'); if(!x) return false; x.click(); return true})()`))) break; await sleep(600) }
+await shot('trip-shell')
+if (!(await text()).includes('demo portal')) {
+  console.log('Demo portal nav item not found — start the app with ELLIS_RUNTIME_MODE=local_mock_demo')
+  process.exit(1)
+}
+await evaljs(`(()=>{const b=[...document.querySelectorAll('.nav__item')].find(x=>/demo portal/i.test(x.textContent)); if(b) b.click(); return true})()`)
 await sleep(900)
 await shot('trip-home')
 await click('start a visa application')

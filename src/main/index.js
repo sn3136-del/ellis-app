@@ -2,7 +2,7 @@ import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import { readFileSync, writeFileSync, existsSync } from 'fs'
 import { execFile } from 'child_process'
-import { getState, update, resetDemo } from './store.js'
+import { getState, update } from './store.js'
 import * as local from './localEngine.js'
 import * as claude from './claude.js'
 import * as localLLM from './localLLM.js'
@@ -25,6 +25,22 @@ import { visaGrantHtml } from './visaDoc.js'
 // Whatever happens, every request gets an answer.
 function engine() {
   return local
+}
+
+// --- Runtime mode (main process) ---------------------------------------------
+// The simulated Trip.com demo pipeline (trips:* / trips:agent:* handlers and
+// the auto-emailing monitor service) is ONLY active in local_mock_demo (or
+// test) mode, selected explicitly via the ELLIS_RUNTIME_MODE environment
+// variable. Default is 'production': no demo handlers, no monitor, no
+// fabricated documents, no automatic traveler emails.
+const RUNTIME_MODE = String(process.env.ELLIS_RUNTIME_MODE || 'production').trim() || 'production'
+const DEMO_PIPELINE_ENABLED = RUNTIME_MODE === 'local_mock_demo' || RUNTIME_MODE === 'test'
+
+// Register a demo-pipeline IPC channel: the real handler in demo mode, a
+// refusal stub everywhere else (never silently simulate outside demo mode).
+function demoHandle(channel, handler) {
+  if (DEMO_PIPELINE_ENABLED) ipcMain.handle(channel, handler)
+  else ipcMain.handle(channel, () => ({ error: 'demo_disabled' }))
 }
 
 let mainWindow = null
@@ -65,15 +81,12 @@ function createWindow() {
   }
 }
 
-// --- IPC: settings & state -------------------------------------------------
-ipcMain.handle('state:get', () => getState())
-
+// --- IPC: settings -----------------------------------------------------------
 ipcMain.handle('settings:get', () => getState().settings)
 ipcMain.handle('settings:save', (_e, partial) => {
   const s = update((st) => Object.assign(st.settings, partial))
   return s.settings
 })
-ipcMain.handle('demo:reset', () => resetDemo())
 
 // --- IPC: notifications ----------------------------------------------------
 ipcMain.handle('notifs:list', (_e, role) => {
@@ -171,11 +184,6 @@ end tell
 `, 20000)
   return r.ok && parseInt(r.out, 10) > 0
 }
-
-ipcMain.handle('email:smtpStatus', () => {
-  const cfg = smtpConfig()
-  return { configured: cfg.configured, user: cfg.user, host: cfg.host }
-})
 
 async function deliverEmail({ to, subject, body, attachmentPath, attachmentPaths }) {
   // The Mail.app path sends plain text, so **emphasis** would arrive as
@@ -306,51 +314,6 @@ end tell
   return { ok: false, error: send.error || draft.error || 'Mail send failed' }
 }
 
-ipcMain.handle('email:send', (_e, payload) => deliverEmail(payload))
-
-// --- IPC: cases ------------------------------------------------------------
-ipcMain.handle('cases:list', () => getState().cases)
-ipcMain.handle('cases:get', (_e, id) => getState().cases.find((c) => c.id === id) || null)
-ipcMain.handle('cases:create', (_e, data) => {
-  const now = Date.now()
-  const newCase = {
-    id: 'case_' + now + '_' + Math.random().toString(36).slice(2, 7),
-    createdAt: now,
-    updatedAt: now,
-    applicantName: data.applicantName || 'New applicant',
-    originCountry: data.originCountry || '',
-    destinationCountry: data.destinationCountry || 'USA',
-    pathway: data.pathway || 'work',
-    visaType: data.visaType || '',
-    employer: data.employer || '',
-    ownerRole: data.ownerRole || 'immigrant',
-    documents: [],
-    facts: data.facts || {},
-    tasks: [],
-    findings: [],
-    notes: '',
-    messages: []
-  }
-  update((st) => st.cases.unshift(newCase))
-  return newCase
-})
-ipcMain.handle('cases:update', (_e, id, patch) => {
-  let result = null
-  update((st) => {
-    const c = st.cases.find((x) => x.id === id)
-    if (c) {
-      Object.assign(c, patch, { updatedAt: Date.now() })
-      result = c
-    }
-  })
-  return result
-})
-ipcMain.handle('cases:delete', (_e, id) => {
-  update((st) => {
-    st.cases = st.cases.filter((c) => c.id !== id)
-  })
-  return true
-})
 
 // --- IPC: documents --------------------------------------------------------
 const BINARY_DOC_EXTS = ['pdf', 'jpg', 'jpeg', 'png', 'heic', 'webp']
@@ -638,17 +601,7 @@ ipcMain.handle('export:pdfToDesktop', async (_e, { html, suggestedName }) => {
 // Reveal a saved file in Finder.
 ipcMain.handle('file:reveal', (_e, path) => { try { shell.showItemInFolder(path); return true } catch { return false } })
 
-// --- IPC: AI capabilities --------------------------------------------------
-function aiHandler(name, method) {
-  ipcMain.handle(name, async (_e, payload) => {
-    try {
-      const data = await engine()[method](payload)
-      return { ok: true, data }
-    } catch (err) {
-      return { ok: false, error: parseError(err) }
-    }
-  })
-}
+// --- IPC: AI (support chat + engine status only) ----------------------------
 
 // SECURITY (must-hold invariant): the Electron client must NEVER contain,
 // receive, or ship provider credentials, and must NEVER call an external
@@ -720,23 +673,12 @@ ipcMain.handle('ai:kimiStatus', async () => {
   return { ...res, managed: kc.managed }
 })
 
-aiHandler('ai:extractDocument', 'extractDocument')
-smartHandler('ai:answerQuestion', { kimi: kimi.answerQuestion, ollama: localLLM.answerQuestion, claude: claude.answerQuestion }, 'answerQuestion')
-aiHandler('ai:riskFlags', 'riskFlags')
-aiHandler('ai:summarizeNotice', 'summarizeNotice')
-aiHandler('ai:prepareForm', 'prepareForm')
-aiHandler('ai:evidencePacket', 'evidencePacket')
-aiHandler('ai:complianceAudit', 'complianceAudit')
-aiHandler('ai:travelRisk', 'travelRisk')
-aiHandler('ai:lifecyclePlan', 'lifecyclePlan')
-aiHandler('ai:translateDocument', 'translateDocument')
-aiHandler('ai:authenticityCheck', 'authenticityCheck')
 smartHandler('ai:assistantChat', { kimi: kimi.assistantChat, ollama: localLLM.assistantChat, claude: claude.assistantChat }, 'assistantChat')
 
 // --- IPC: Trip.com portal ----------------------------------------------------
 // Trip applications are stored separately from immigration cases.
-ipcMain.handle('trips:list', () => getState().trips || [])
-ipcMain.handle('trips:create', (_e, data) => {
+demoHandle('trips:list', () => getState().trips || [])
+demoHandle('trips:create', (_e, data) => {
   let created
   update((st) => {
     if (!Array.isArray(st.trips)) st.trips = []
@@ -751,7 +693,7 @@ ipcMain.handle('trips:create', (_e, data) => {
   })
   return created
 })
-ipcMain.handle('trips:update', (_e, id, patch) => {
+demoHandle('trips:update', (_e, id, patch) => {
   let result = null
   update((st) => {
     const t = (st.trips || []).find((x) => x.id === id)
@@ -770,7 +712,7 @@ ipcMain.handle('trips:update', (_e, id, patch) => {
   })
   return result
 })
-ipcMain.handle('trips:delete', (_e, id) => {
+demoHandle('trips:delete', (_e, id) => {
   update((st) => { st.trips = (st.trips || []).filter((t) => t.id !== id) })
   return true
 })
@@ -783,7 +725,7 @@ ipcMain.handle('trips:delete', (_e, id) => {
 // UI does not display on the critical path) is only fetched when explicitly
 // requested via wantBrief, so plan lookups never block on the model.
 const planCache = new Map()
-ipcMain.handle('trips:plan', async (_e, payload) => {
+demoHandle('trips:plan', async (_e, payload) => {
   try {
     const t = payload?.traveler || {}
     const key = `${t.nationality}|${t.destination}`
@@ -839,7 +781,7 @@ function patchTrip(id, patch, logEntry) {
 
 // Step 1 — ingest: OCR every uploaded doc that still needs it, normalize the
 // passport into trip state, and run the deterministic verification checks.
-ipcMain.handle('trips:agent:ingest', async (_e, { tripId }) => {
+demoHandle('trips:agent:ingest', async (_e, { tripId }) => {
   const trip = getTrip(tripId)
   if (!trip) return { ok: false, error: 'Trip not found' }
   const docs = (trip.documents || []).map((d) => ({ ...d }))
@@ -908,7 +850,7 @@ ipcMain.handle('trips:agent:ingest', async (_e, { tripId }) => {
 
 // Step 2 — review: LLM gap analysis of the uploads against the route's
 // requirements (Kimi → Ollama), deterministic keyword reviewer as the floor.
-ipcMain.handle('trips:agent:review', async (_e, { tripId }) => {
+demoHandle('trips:agent:review', async (_e, { tripId }) => {
   const trip = getTrip(tripId)
   if (!trip) return { ok: false, error: 'Trip not found' }
   const plan = trip.plan || await tripEngine.tripPlan({ traveler: trip })
@@ -947,7 +889,7 @@ ipcMain.handle('trips:agent:review', async (_e, { tripId }) => {
 })
 
 // Step 3 — assemble: build the structured application from extracted fields.
-ipcMain.handle('trips:agent:assemble', async (_e, { tripId }) => {
+demoHandle('trips:agent:assemble', async (_e, { tripId }) => {
   const trip = getTrip(tripId)
   if (!trip) return { ok: false, error: 'Trip not found' }
   const plan = trip.plan || await tripEngine.tripPlan({ traveler: trip })
@@ -965,7 +907,7 @@ ipcMain.handle('trips:agent:assemble', async (_e, { tripId }) => {
 // Select the filing location for this trip: the nearest accredited agency
 // (agency channels) or nearest embassy/consulate/VAC to the traveler's
 // address. Persisted on the trip with the distance evidence.
-ipcMain.handle('trips:agent:mission', async (_e, { tripId }) => {
+demoHandle('trips:agent:mission', async (_e, { tripId }) => {
   const trip = getTrip(tripId)
   if (!trip) return { ok: false, error: 'Trip not found' }
   const plan = trip.plan || await tripEngine.tripPlan({ traveler: trip })
@@ -983,7 +925,7 @@ ipcMain.handle('trips:agent:mission', async (_e, { tripId }) => {
 })
 
 // Step 4 — appointment: book a deterministic slot and write the ICS artifact.
-ipcMain.handle('trips:agent:appointment', async (_e, { tripId, where }) => {
+demoHandle('trips:agent:appointment', async (_e, { tripId, where }) => {
   const trip = getTrip(tripId)
   if (!trip) return { ok: false, error: 'Trip not found' }
   const plan = trip.plan || await tripEngine.tripPlan({ traveler: trip })
@@ -1014,7 +956,7 @@ ipcMain.handle('trips:agent:appointment', async (_e, { tripId, where }) => {
 // centre's intake address; in demo it routes to the demo inbox (clearly
 // labeled). The transmission result — via, recipient, message id — is the
 // persisted evidence behind the "Submitted" claim.
-ipcMain.handle('trips:agent:submit', async (_e, { tripId, attachments, channelLabel }) => {
+demoHandle('trips:agent:submit', async (_e, { tripId, attachments, channelLabel }) => {
   const trip = getTrip(tripId)
   if (!trip) return { ok: false, error: 'Trip not found' }
   const plan = trip.plan || await tripEngine.tripPlan({ traveler: trip })
@@ -1108,7 +1050,7 @@ async function llmTextChain(prompt) {
 // Portal discovery: the agent searches the live web for the official
 // embassy/portal for this corridor, reads the top official page, and
 // extracts the application channel. Findings persist with source evidence.
-ipcMain.handle('trips:agent:research', async (_e, { tripId }) => {
+demoHandle('trips:agent:research', async (_e, { tripId }) => {
   const trip = getTrip(tripId)
   if (!trip) return { ok: false, error: 'Trip not found' }
   const plan = trip.plan || await tripEngine.tripPlan({ traveler: trip })
@@ -1170,7 +1112,7 @@ async function buildRemedy(tripId, reason) {
   })
   return remediation
 }
-ipcMain.handle('trips:agent:remedy', async (_e, { tripId, reason }) => {
+demoHandle('trips:agent:remedy', async (_e, { tripId, reason }) => {
   const remediation = await buildRemedy(tripId, reason)
   return remediation ? { ok: true, remediation } : { ok: false, error: 'Trip not found' }
 })
@@ -1228,7 +1170,7 @@ async function refuseTrip(tripId, docPath, reason) {
 // K3 then reviews the complete application the way a consular officer would
 // and adds judgment risks. High risks with a document fix reopen the
 // documents gate instead of filing an application that would be refused.
-ipcMain.handle('trips:agent:riskReview', async (_e, { tripId }) => {
+demoHandle('trips:agent:riskReview', async (_e, { tripId }) => {
   const trip = getTrip(tripId)
   if (!trip) return { ok: false, error: 'Trip not found' }
   const plan = trip.plan || await tripEngine.tripPlan({ traveler: trip })
@@ -1295,7 +1237,7 @@ ipcMain.handle('trips:agent:riskReview', async (_e, { tripId }) => {
 
 // Record a renderer-produced artifact (a generated PDF) or milestone in the
 // trip's agent log so every claim in the UI has a persisted trail.
-ipcMain.handle('trips:agent:record', (_e, { tripId, entry }) => {
+demoHandle('trips:agent:record', (_e, { tripId, entry }) => {
   if (!entry || !entry.title) return { ok: false, error: 'Missing entry' }
   const t = patchTrip(tripId, {}, {
     step: String(entry.step || 'note'),
@@ -1339,14 +1281,14 @@ async function sendTripUpdate(tripId, { subject, body, attachmentPaths }) {
   const refd = subject.includes(tripRef(trip)) ? subject : `${subject} · ${tripRef(trip)}`
   return deliverEmail({ to, subject: refd, body, attachmentPaths })
 }
-ipcMain.handle('trips:email', (_e, { tripId, subject, body, attachmentPaths }) =>
+demoHandle('trips:email', (_e, { tripId, subject, body, attachmentPaths }) =>
   sendTripUpdate(tripId, { subject, body, attachmentPaths }))
 
-ipcMain.handle('trips:decisionsInfo', (_e, { tripId }) => {
+demoHandle('trips:decisionsInfo', (_e, { tripId }) => {
   const trip = tripId ? getTrip(tripId) : null
   return { dir: decisionsDir(), ref: trip ? tripRef(trip) : null }
 })
-ipcMain.handle('trips:openDecisionsDir', () => { shell.openPath(decisionsDir()); return true })
+demoHandle('trips:openDecisionsDir', () => { shell.openPath(decisionsDir()); return true })
 
 // Auto-issue: called by the monitoring service when the decision document
 // arrives, and reachable by the manual decision card. Marks the trip issued,
@@ -1417,11 +1359,13 @@ async function issueTrip(tripId, attachmentPath, sourceDetail) {
     issuingNow.delete(tripId)
   }
 }
-ipcMain.handle('trips:issue', (_e, { tripId, attachmentPath, detail }) =>
+demoHandle('trips:issue', (_e, { tripId, attachmentPath, detail }) =>
   issueTrip(tripId, attachmentPath, detail || 'Authority decision recorded: approved'))
 
 app.whenReady().then(() => {
-  startMonitor(issueTrip, refuseTrip)
+  // The monitor auto-sends traveler emails — it must NEVER run outside the
+  // explicitly selected local demo mode.
+  if (DEMO_PIPELINE_ENABLED) startMonitor(issueTrip, refuseTrip)
   createWindow()
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
