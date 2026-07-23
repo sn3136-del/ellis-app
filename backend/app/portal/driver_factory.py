@@ -94,6 +94,23 @@ def register_runtime_adapters(portal) -> None:
         build_vietnam_evisa_adapter(portal)
 
 
+def bind_live_adapter(adapter, *, session=None, page=None, state_probe=None,
+                      require_real_key: bool = True):
+    """Bind a production-approved adapter to the REAL Browserbase live driver.
+
+    This is the activation path: it is reached only for an adapter that has
+    passed the adapters_admin lifecycle to production_approved+enabled, in a
+    real-only runtime mode, with a real Browserbase key. Any of those missing
+    raises RealOnlyStop from the driver's own fail-closed constructor — a live
+    driver can never be bound speculatively, and MockPortal is never a fallback
+    here. Returns the adapter with its `.driver` replaced by the live driver."""
+    from .live_driver import BrowserbaseLiveViewDriver
+    adapter.driver = BrowserbaseLiveViewDriver(
+        adapter, session=session, page=page, state_probe=state_probe,
+        require_real_key=require_real_key)
+    return adapter
+
+
 def select_runtime_adapter(country: str, visa_type: str):
     """Select the adapter for execution. Mock-allowed modes keep the Mockland
     demo fallback; real-only modes have NO fallback — unknown/unsupported

@@ -176,3 +176,32 @@ def test_temporal_worker_wiring_refuses_real_only(clean_settings):
     from app import temporal_worker
     with pytest.raises(SystemExit):
         temporal_worker._wire_portal_store()
+
+
+def test_bind_live_adapter_failcloses_without_key(clean_settings):
+    """The activation path binds the real driver only for a production-approved
+    adapter with a real key; without one it fails closed (never MockPortal)."""
+    _set_mode(mode="production")
+    from app.portal import driver_factory as df
+
+    class _A:
+        adapter_id = "vietnam-evisa-tourist-v1"
+        approved_domains = ["evisa.gov.vn"]
+        production_approval_status = "production_approved"
+        production_enabled = True
+    with pytest.raises(df.RealOnlyStop):
+        df.bind_live_adapter(_A(), require_real_key=True)  # no BB key configured
+
+
+def test_bind_live_adapter_refuses_unapproved(clean_settings):
+    _set_mode(mode="production")
+    from app.portal import driver_factory as df
+
+    class _A:
+        adapter_id = "x"
+        approved_domains = ["evisa.gov.vn"]
+        production_approval_status = "tested"   # not approved
+        production_enabled = False
+    with pytest.raises(df.RealOnlyStop):
+        df.bind_live_adapter(_A(), session={"id": "s"}, page=object(),
+                             require_real_key=False)
