@@ -190,6 +190,68 @@ function joinDetail(parts) {
 }
 
 // ---------------------------------------------------------------------------
+// On-demand route research (focused research job auto-started by resolve).
+//
+// The backend pipeline reports 18 fine-grained stages; applicants see 9
+// friendly progress steps. Unknown stages fail safe to the FIRST step — the
+// UI must never show progress it cannot vouch for.
+export const RESEARCH_STEP_KEYS = [
+  'research.step.stored',     // 0 Checking stored requirements
+  'research.step.sources',    // 1 Researching official government sources
+  'research.step.extract',    // 2 Extracting route requirements
+  'research.step.consulate',  // 3 Verifying the competent consulate
+  'research.step.portal',     // 4 Verifying the official portal
+  'research.step.fees',       // 5 Checking fees
+  'research.step.conflicts',  // 6 Checking for conflicts
+  'research.step.save',       // 7 Saving verified requirements
+  'research.step.adapter'     // 8 Evaluating adapter readiness
+]
+
+const RESEARCH_STAGE_STEP = {
+  RECEIVE_ROUTE: 0, NORMALIZE_ROUTE: 0, CHECK_STORED_POLICY: 0,
+  DISCOVER_OFFICIAL_SOURCES: 1, VERIFY_SOURCE_DOMAINS: 1, FETCH_SOURCE_CONTENT: 1,
+  KIMI_EXTRACT_AND_TRANSLATE: 2, NORMALIZE_REQUIREMENTS: 2,
+  RESOLVE_CONSULAR_JURISDICTION: 3,
+  VERIFY_OFFICIAL_PORTAL: 4,
+  VERIFY_ROUTE_FEES: 5,
+  DETECT_CONFLICTS: 6,
+  CREATE_IMMUTABLE_POLICY_VERSION: 7, LINK_ROUTE: 7, IMPORT_TO_POSTGRESQL: 7, EXPORT_TO_JSONL: 7,
+  EVALUATE_ADAPTER_READINESS: 8, RETURN_ROUTE_STATUS: 8
+}
+
+export function researchStageMeta(stage) {
+  const order = RESEARCH_STAGE_STEP[stage]
+  const idx = typeof order === 'number' ? order : 0 // unknown stage -> first step (fail-safe)
+  return { order: idx, i18nKey: RESEARCH_STEP_KEYS[idx] }
+}
+
+// Is a research-job status terminal (stop polling)?  queued/running keep the
+// poll alive; every terminal status stops it. UNKNOWN statuses are treated as
+// TERMINAL — never poll forever on a status we do not understand; the UI shows
+// a generic honest "stopped" state instead.
+const RESEARCH_ACTIVE = new Set(['queued', 'running'])
+
+export function researchTerminal(status) {
+  return !RESEARCH_ACTIVE.has(status)
+}
+
+// One tone + i18n label per research-job status. Unknown statuses fail safe
+// to 'blocked' — never presented as progress or success.
+const RESEARCH_STATUS = {
+  complete: { tone: 'ok', i18nKey: 'research.status.complete' },
+  running: { tone: 'info', i18nKey: 'research.status.running' },
+  queued: { tone: 'info', i18nKey: 'research.status.queued' },
+  research_incomplete: { tone: 'warn', i18nKey: 'research.status.research_incomplete' },
+  timed_out: { tone: 'warn', i18nKey: 'research.status.timed_out' },
+  conflicted: { tone: 'blocked', i18nKey: 'research.status.conflicted' },
+  failed: { tone: 'blocked', i18nKey: 'research.status.failed' }
+}
+
+export function researchStatusMeta(status) {
+  return RESEARCH_STATUS[status] || { tone: 'blocked', i18nKey: 'research.status.UNKNOWN' }
+}
+
+// ---------------------------------------------------------------------------
 // Small shared helpers for the wizard UI (still pure).
 
 // Basic applicant-email validation (deliberately simple; the backend is the

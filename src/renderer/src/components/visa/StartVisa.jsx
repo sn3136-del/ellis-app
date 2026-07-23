@@ -12,10 +12,37 @@ import { useToast, Loading, ErrorNote } from '../ui.jsx'
 import { SUPPORTED, LANGUAGE_NAMES } from '../../lib/i18n.js'
 import {
   conditionField, missingRequired, readinessMeta, checksSummary,
-  validEmail, datesOrdered, RESIDENCE_STATUS_OPTIONS
+  validEmail, datesOrdered, RESIDENCE_STATUS_OPTIONS,
+  researchStageMeta, researchTerminal, researchStatusMeta, RESEARCH_STEP_KEYS
 } from '../../lib/intake.js'
 
 const INVALID_STYLE = { borderColor: 'var(--ink)', boxShadow: '0 0 0 3px rgba(10,10,10,0.14)' }
+
+// ---------------------------------------------------------------------------
+// On-demand research-job persistence: the job id is stored per intake so the
+// applicant can close the app mid-research and resume the live progress view.
+const RESEARCH_STORE_PREFIX = 'ellis.research.'
+
+function storedResearchJobId(intakeId) {
+  try { return window.localStorage.getItem(RESEARCH_STORE_PREFIX + intakeId) } catch { return null }
+}
+function storeResearchJobId(intakeId, jobId) {
+  try { window.localStorage.setItem(RESEARCH_STORE_PREFIX + intakeId, jobId) } catch { /* non-fatal */ }
+}
+function clearResearchJobId(intakeId) {
+  try { window.localStorage.removeItem(RESEARCH_STORE_PREFIX + intakeId) } catch { /* non-fatal */ }
+}
+
+// Newest progress timestamp of a research job (ISO strings compare lexically).
+function newestProgressAt(job) {
+  const progress = Array.isArray(job?.progress) ? job.progress : []
+  let newest = null
+  for (const p of progress) {
+    const at = p && typeof p.at === 'string' ? p.at : null
+    if (at && (!newest || at > newest)) newest = at
+  }
+  return newest
+}
 
 // Which wizard step each intake field lives on (for the 422 missing-field jump).
 const STEP_FIELDS = [
@@ -56,6 +83,7 @@ export default function StartVisa({ client }) {
   const [resolving, setResolving] = useState(false)
   const [resolveError, setResolveError] = useState(null)
   const [result, setResult] = useState(null)
+  const [researchJob, setResearchJob] = useState(null) // {id, status, stage, ...} while researching
 
   const answersRef = useRef(answers)
   answersRef.current = answers
@@ -70,14 +98,46 @@ export default function StartVisa({ client }) {
         client.snapshotInfo(), client.snapshotRegistries(), client.listIntakes()
       ])
       setInfo(i); setReg(r)
-      const drafts = (list.intakes || [])
+      const intakes = list.intakes || []
+      const drafts = intakes
         .filter((x) => x.status === 'draft')
         .sort((a, b) => String(b.updated_at || '').localeCompare(String(a.updated_at || '')))
       setDraft(drafts[0] || null)
+      if (await resumeResearch(intakes)) return
       setPhase('hero')
     } catch (e) {
       setLoadError({ message: e.message })
     }
+  }
+
+  // If a resolved intake left a stored research-job id behind and that job is
+  // still non-terminal, reopen straight into the live progress view.
+  async function resumeResearch(intakes) {
+    const candidates = intakes
+      .filter((x) => x && x.id && storedResearchJobId(x.id))
+      .sort((a, b) => String(b.updated_at || '').localeCompare(String(a.updated_at || '')))
+    for (const it of candidates) {
+      const jobId = storedResearchJobId(it.id)
+      try {
+        const job = await client.getResearchJob(jobId)
+        if (!researchTerminal(job.status)) {
+          // Load the intake's saved answers too, so "Edit answers" from the
+          // research panel never autosaves an empty draft over them.
+          const full = await client.getIntake(it.id)
+          setIntakeId(it.id)
+          setAnswers({ travel_purpose: 'tourism', ...(full.answers || {}) })
+          setStep(0); setMissing([])
+          setResearchJob(job)
+          setPhase('research')
+          return true
+        }
+        clearResearchJobId(it.id) // finished while we were away — start fresh
+      } catch (e) {
+        // Job/intake gone server-side: drop the stale key. Transient errors keep it.
+        if (e && (e.status === 404 || e.status === 410)) clearResearchJobId(it.id)
+      }
+    }
+    return false
   }
   useEffect(() => { loadAll() }, [])
   useEffect(() => () => clearTimeout(saveTimer.current), [])
@@ -116,7 +176,7 @@ export default function StartVisa({ client }) {
       const res = await client.createIntake({ answers: seed, preferred_language: lang, email: '' })
       setIntakeId(res.id)
       setAnswers({ ...seed, ...(res.answers || {}) })
-      setStep(0); setMissing([]); setResult(null); setResolveError(null)
+      setStep(0); setMissing([]); setResult(null); setResolveError(null); setResearchJob(null)
       setPhase('wizard')
     } catch (e) { setLoadError({ message: e.message }) }
   }
@@ -127,7 +187,7 @@ export default function StartVisa({ client }) {
       const res = await client.getIntake(draft.id)
       setIntakeId(res.id)
       setAnswers({ travel_purpose: 'tourism', ...(res.answers || {}) })
-      setStep(0); setMissing([]); setResult(null); setResolveError(null)
+      setStep(0); setMissing([]); setResult(null); setResolveError(null); setResearchJob(null)
       setPhase('wizard')
     } catch (e) { setLoadError({ message: e.message }) }
   }
@@ -153,8 +213,17 @@ export default function StartVisa({ client }) {
     try {
       await flushSave()
       const res = await client.resolveIntake(intakeId)
-      setResult(res)
-      setPhase('result')
+      if (res.research_job && res.research_job.id) {
+        // The route was missing/incomplete and a focused on-demand research
+        // job was auto-started: show live progress instead of the plain
+        // NOT_READY card. Persist the job id so closing the app can resume.
+        storeResearchJobId(intakeId, res.research_job.id)
+        setResearchJob(res.research_job)
+        setPhase('research')
+      } else {
+        setResult(res)
+        setPhase('result')
+      }
     } catch (e) {
       const mf = e.detail && Array.isArray(e.detail.missing_fields) ? e.detail.missing_fields : null
       if (e.status === 422 && mf && mf.length) {
@@ -229,6 +298,17 @@ export default function StartVisa({ client }) {
           </div>
           {draft && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 12 }}>{t('start.resume.sub')}</div>}
         </div>
+      </div>
+    )
+  }
+
+  if (phase === 'research' && researchJob && intakeId) {
+    return (
+      <div>
+        {header}
+        <ResearchPanel client={client} t={t} intakeId={intakeId} initialJob={researchJob}
+          onEdit={() => { setPhase('wizard'); setStep(3) }}
+          onNew={startNew} />
       </div>
     )
   }
@@ -561,9 +641,15 @@ const STATUS_NOTE_KEY = {
   LIVE_PRODUCTION_READY: 'result.productionHonest'
 }
 
-function ResultPanel({ client, t, result, onEdit, onNew }) {
+// Renders from either source: the direct resolve response OR the `resolution`
+// object of a finished research job (which carries no `checks` — the check
+// rows are then omitted rather than shown as invented pendings). An optional
+// `dateHonesty` ({label, ...}) from research results is shown under the
+// snapshot line.
+function ResultPanel({ client, t, result, dateHonesty, onEdit, onNew }) {
   const meta = readinessMeta(result.readiness_status)
-  const rows = checksSummary(result.checks)
+  const hasChecks = result.checks && typeof result.checks === 'object'
+  const rows = hasChecks ? checksSummary(result.checks) : []
   const noteKey = STATUS_NOTE_KEY[result.readiness_status] || 'result.notReadySaved'
   const [showSources, setShowSources] = useState(false)
   const [evidence, setEvidence] = useState(null)
@@ -592,7 +678,7 @@ function ResultPanel({ client, t, result, onEdit, onNew }) {
 
       <p className="prose" style={{ fontSize: 13.5, marginBottom: 18 }}>{t(noteKey)}</p>
 
-      <div className="eyebrow">{t('result.checksTitle')}</div>
+      {hasChecks && <div className="eyebrow">{t('result.checksTitle')}</div>}
       <div style={{ marginBottom: 16 }}>
         {rows.map((r) => (
           <div className="kv" key={r.key}>
@@ -644,9 +730,166 @@ function ResultPanel({ client, t, result, onEdit, onNew }) {
         <button className="btn btn--sm btn--ghost" onClick={onNew}>{t('start.resume.new')}</button>
       </div>
 
-      <div style={{ fontSize: 11.5, color: 'var(--muted-2)', marginTop: 18, paddingTop: 12, borderTop: '1px solid var(--line)' }}>
-        {(result.snapshot?.date || '')} · {t('snapshot.disclaimer')}
+      <div style={{ marginTop: 18, paddingTop: 12, borderTop: '1px solid var(--line)' }}>
+        <div style={{ fontSize: 11.5, color: 'var(--muted-2)' }}>
+          {(result.snapshot?.date || '')} · {t('snapshot.disclaimer')}
+        </div>
+        {dateHonesty?.label && (
+          <div style={{ fontSize: 12.5, fontWeight: 700, marginTop: 6 }} data-testid="date-honesty">
+            {dateHonesty.label}
+          </div>
+        )}
       </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// On-demand research progress panel. Shown when resolve auto-started a focused
+// research job for a missing/incomplete route. Polls the job every 2.5s until
+// a terminal status, then renders the honest outcome — the normal readiness
+// result panel when a resolution exists, an honest stopped/review state
+// otherwise. Requirements are NEVER invented in any state.
+const RESEARCH_POLL_MS = 2500
+const RESEARCH_STALL_MS = 60000
+
+function ResearchPanel({ client, t, intakeId, initialJob, onEdit, onNew }) {
+  const [job, setJob] = useState(initialJob)
+  const [pollError, setPollError] = useState(null)
+  const resumedOnce = useRef(false)
+
+  useEffect(() => {
+    let stopped = false
+    let timer = null
+    async function tick() {
+      try {
+        const j = await client.getResearchJob(initialJob.id)
+        if (stopped) return
+        setJob(j); setPollError(null)
+        if (researchTerminal(j.status)) {
+          clearResearchJobId(intakeId) // done — nothing left to resume
+          return
+        }
+        maybeResume(j)
+      } catch (e) {
+        if (stopped) return
+        setPollError({ message: e.message }) // transient: keep polling
+      }
+      timer = setTimeout(tick, RESEARCH_POLL_MS)
+    }
+    // Re-drive a stalled queued/running job at most once per panel mount:
+    // only when the newest progress entry is older than 60s.
+    function maybeResume(j) {
+      if (resumedOnce.current) return
+      const at = newestProgressAt(j)
+      if (!at) return
+      const age = Date.now() - Date.parse(at)
+      if (Number.isFinite(age) && age > RESEARCH_STALL_MS) {
+        resumedOnce.current = true
+        client.resumeResearchJob(initialJob.id).catch(() => {})
+      }
+    }
+    tick()
+    return () => { stopped = true; clearTimeout(timer) }
+  }, [initialJob.id])
+
+  const status = job?.status
+  const statusMeta = researchStatusMeta(status)
+  const terminal = researchTerminal(status)
+  const result = job?.result && typeof job.result === 'object' ? job.result : null
+  const resolution = result?.resolution && typeof result.resolution === 'object' ? result.resolution : null
+  const dateHonesty = result?.date_honesty && typeof result.date_honesty === 'object' ? result.date_honesty : null
+
+  // Honest terminal notes: review-task note for incomplete/timed-out,
+  // disagreement note for conflicted, generic stopped note otherwise.
+  const terminalNoteKey =
+    status === 'research_incomplete' || status === 'timed_out' ? 'research.reviewNote'
+      : status === 'conflicted' ? 'research.conflictNote'
+        : status === 'complete' ? null : 'research.stoppedNote'
+
+  if (terminal && resolution) {
+    return (
+      <div>
+        {terminalNoteKey && (
+          <div className="card card--soft" style={{ padding: '12px 16px', marginBottom: 14 }} data-testid="research-terminal-note">
+            <div style={{ fontSize: 13, fontWeight: 600 }}>{t(statusMeta.i18nKey)}</div>
+            <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 3 }}>{t(terminalNoteKey)}</div>
+          </div>
+        )}
+        <ResultPanel client={client} t={t} result={resolution} dateHonesty={dateHonesty}
+          onEdit={onEdit} onNew={onNew} />
+      </div>
+    )
+  }
+
+  if (terminal) {
+    return (
+      <div className="card" style={{ padding: 24 }} data-testid="research-terminal">
+        <div className="eyebrow">{t('research.title')}</div>
+        <div style={{ borderRadius: 12, padding: '18px 20px', marginBottom: 16, ...TONE_STYLES[statusMeta.tone] }}
+          data-tone={statusMeta.tone}>
+          <div style={{ fontSize: 21, fontWeight: 700 }}>{t(statusMeta.i18nKey)}</div>
+        </div>
+        <p className="prose" style={{ fontSize: 13.5, marginBottom: 18 }}>
+          {t(terminalNoteKey || 'research.stoppedNote')}
+        </p>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button className="btn btn--sm btn--ghost" onClick={onEdit}>{t('start.editAnswers')}</button>
+          <button className="btn btn--sm btn--ghost" onClick={onNew}>{t('start.resume.new')}</button>
+        </div>
+      </div>
+    )
+  }
+
+  // ---- live progress -------------------------------------------------------
+  const stageMeta = researchStageMeta(job?.stage)
+  const progress = Array.isArray(job?.progress) ? job.progress : []
+  const newest = progress.length ? progress[progress.length - 1] : null
+  const counters = job?.counters && typeof job.counters === 'object' ? job.counters : {}
+  const hasCounters = counters.pages_fetched != null || counters.gov_candidates != null
+
+  return (
+    <div className="card" style={{ padding: 24 }} data-testid="research-progress">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+        <div>
+          <div className="eyebrow">{t('result.title')}</div>
+          <div style={{ fontSize: 21, fontWeight: 700, marginTop: 2 }}>{t('research.title')}</div>
+        </div>
+        <span className="chip">{t(statusMeta.i18nKey)}</span>
+      </div>
+      <p className="prose" style={{ fontSize: 13.5, margin: '10px 0 16px' }}>{t('research.sub')}</p>
+
+      <div style={{ marginBottom: 14 }} data-testid="research-steps">
+        {RESEARCH_STEP_KEYS.map((key, i) => {
+          const done = i < stageMeta.order
+          const current = i === stageMeta.order
+          return (
+            <div key={key} data-current={current || undefined}
+              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0',
+                opacity: done || current ? 1 : 0.45 }}>
+              <span className={'sevbadge ' + (done ? 'sevbadge--ok' : 'sevbadge--mid')}>
+                {done ? '✓' : current ? '…' : i + 1}
+              </span>
+              <span style={{ fontSize: 13.5, fontWeight: current ? 700 : 400 }}>{t(key)}</span>
+            </div>
+          )
+        })}
+      </div>
+
+      {newest?.note && (
+        <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 6 }} data-testid="research-note">
+          {newest.note}
+        </div>
+      )}
+      {hasCounters && (
+        <div style={{ fontSize: 12, color: 'var(--muted-2)' }} data-testid="research-counters">
+          {t('research.counters', {
+            pages: counters.pages_fetched ?? 0,
+            sources: counters.gov_candidates ?? 0
+          })}
+        </div>
+      )}
+      {pollError && <ErrorNote error={pollError} />}
     </div>
   )
 }

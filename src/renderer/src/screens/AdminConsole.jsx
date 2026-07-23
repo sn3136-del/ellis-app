@@ -8,7 +8,7 @@ import { Icon } from '../components/icons.jsx'
 import { useLocale } from '../lib/locale.jsx'
 import { createVisaClient } from '../lib/visaBackend.js'
 import { newAdminSession } from '../lib/visaSession.js'
-import { readinessMeta } from '../lib/intake.js'
+import { readinessMeta, researchStatusMeta } from '../lib/intake.js'
 
 const STATE_LABELS = {
   discovered: 'Discovered', disabled_draft: 'Disabled draft', technical_review: 'Technical review',
@@ -32,7 +32,8 @@ const SNAPSHOT_TABS = [
   ['reviews', 'admin.tab.reviews'],
   ['conflicts', 'admin.tab.conflicts'],
   ['route queue', 'admin.tab.routeQueue'],
-  ['adapter tasks', 'admin.tab.adapterTasks']
+  ['adapter tasks', 'admin.tab.adapterTasks'],
+  ['research jobs', 'admin.tab.researchJobs']
 ]
 
 export default function AdminConsole() {
@@ -139,6 +140,7 @@ export default function AdminConsole() {
         {tab === 'conflicts' && <ConflictsTab client={client} t={t} />}
         {tab === 'route queue' && <RouteQueueTab client={client} t={t} />}
         {tab === 'adapter tasks' && <AdapterTasksTab client={client} t={t} />}
+        {tab === 'research jobs' && <ResearchJobsTab client={client} t={t} />}
       </div>
     </div>
   )
@@ -350,6 +352,86 @@ function AdapterTasksTab({ client, t }) {
           )}
         </div>
       ))}
+    </div>
+  )
+}
+
+// On-demand research jobs started by applicant resolves (focused per-route
+// research). Status chip tone comes from the same fail-safe mapping the
+// applicant UI uses (researchStatusMeta).
+function ResearchStatusChip({ status, t }) {
+  const meta = researchStatusMeta(status)
+  const style = meta.tone === 'blocked' ? { background: 'var(--crit)', color: '#fff', borderColor: 'var(--crit)' }
+    : meta.tone === 'warn' ? { borderColor: 'var(--ink)' } : undefined
+  return (
+    <span className={'chip' + (meta.tone === 'ok' ? ' chip--ink' : '')} style={style} data-tone={meta.tone}>
+      {t(meta.i18nKey)}
+    </span>
+  )
+}
+
+const RJ_TH = { textAlign: 'left', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.04em',
+  color: 'var(--muted-2)', fontWeight: 600, padding: '10px 12px', borderBottom: '1px solid var(--line)', whiteSpace: 'nowrap' }
+const RJ_TD = { fontSize: 12.5, padding: '9px 12px', borderBottom: '1px solid var(--line)', verticalAlign: 'top', whiteSpace: 'nowrap' }
+
+function ResearchJobsTab({ client, t }) {
+  const [jobs, setJobs] = useState(null)
+  const [error, setError] = useState(null)
+  const [busy, setBusy] = useState(false)
+  async function load() {
+    setBusy(true)
+    try {
+      setJobs((await client.adminResearchJobs()).jobs || [])
+      setError(null)
+    } catch (e) { setError({ message: e.message }) }
+    setBusy(false)
+  }
+  useEffect(() => { load() }, [])
+  return (
+    <div className="tabpanel">
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
+        <button className="btn btn--sm btn--ghost" disabled={busy} onClick={load}>
+          {busy ? '…' : t('admin.researchJobs.refresh')}
+        </button>
+      </div>
+      {error && <ErrorNote error={error} />}
+      {jobs === null ? <Loading />
+        : jobs.length === 0 ? <Empty title={t('admin.researchJobs.empty')} />
+          : (
+            <div className="card" style={{ padding: 0, overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr>
+                    <th style={RJ_TH}>route</th>
+                    <th style={RJ_TH}>status</th>
+                    <th style={RJ_TH}>stage</th>
+                    <th style={RJ_TH}>attempts</th>
+                    <th style={RJ_TH}>researched</th>
+                    <th style={RJ_TH}>model</th>
+                    <th style={RJ_TH}>created</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {jobs.map((j) => (
+                    <tr key={j.id}>
+                      <td style={RJ_TD}>
+                        <span title={j.route_key} style={{ fontFamily: 'monospace', fontSize: 11.5, display: 'inline-block',
+                          maxWidth: 240, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', verticalAlign: 'bottom' }}>
+                          {j.route_key || '—'}
+                        </span>
+                      </td>
+                      <td style={RJ_TD}><ResearchStatusChip status={j.status} t={t} /></td>
+                      <td style={RJ_TD}><span style={{ fontFamily: 'monospace', fontSize: 11 }}>{j.stage || '—'}</span></td>
+                      <td style={RJ_TD}>{j.attempts ?? '—'}</td>
+                      <td style={RJ_TD}>{j.researched_at || '—'}</td>
+                      <td style={RJ_TD}>{j.kimi_model || '—'}</td>
+                      <td style={RJ_TD}>{j.created_at || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
     </div>
   )
 }

@@ -31,10 +31,17 @@ Runtime modes: `test | local_mock_demo | tripcom_evaluation | staging | producti
 
 ## Snapshot-data caveats (all modes)
 
-- The 2026-07-23 requirements snapshot is being populated by one-time
-  official-source research; routes not yet verified resolve NOT_READY or
-  PREPARATION_ONLY. Coverage: see `data/snapshots/2026-07-23/coverage_report.json`
+- STRATEGY (2026-07-23): global pre-research was discontinued in favor of
+  cached ON-DEMAND route research. 29 destinations carry ingested official
+  evidence; any other exact route is researched on demand when an applicant
+  enters it (OnDemandRouteResearchJob, Kimi-grounded, honest limits), and the
+  verified result is cached for reuse. Routes not yet researched resolve
+  NOT_READY (with an automatic focused research job) — never guessed.
+  Coverage: see `data/snapshots/2026-07-23/coverage_report.json`
   (matrix completeness is structural, NOT requirements coverage).
+- JS-rendered official portals (SPAs) can defeat plain-HTTP fetching; the
+  research job then finishes research_incomplete with a review task instead of
+  guessing. Browser-rendered fetching is a future activation step.
 - Fees/portals/jurisdictions marked anything other than `verified` must never be
   presented as verified; the resolution engine already enforces this.
 - Before any irreversible action (payment, booking, submission) a MANUAL live

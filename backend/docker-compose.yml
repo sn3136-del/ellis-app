@@ -88,6 +88,9 @@ services:
   api:
     build: .
     container_name: ellis-api
+    # Backend-only provider creds (Kimi/Browserbase) from the git-ignored .env;
+    # explicit `environment:` entries below still take precedence.
+    env_file: [.env]
     depends_on:
       postgres: {condition: service_healthy}
       temporal: {condition: service_healthy}
@@ -139,6 +142,7 @@ services:
   worker:
     build: .
     container_name: ellis-worker
+    env_file: [.env]
     depends_on:
       postgres: {condition: service_healthy}
       temporal: {condition: service_healthy}

@@ -6,13 +6,13 @@
   "written": {
     "conflicts.jsonl": 0,
     "coverage_report.json": 1,
-    "data/global_visa_routes.jsonl": 0,
+    "data/global_visa_routes.jsonl": 1,
     "global_consular_jurisdictions.jsonl": 0,
     "global_fee_schedules.jsonl": 108,
     "global_portals.jsonl": 114,
-    "global_source_evidence.jsonl": 260,
+    "global_source_evidence.jsonl": 272,
     "global_visa_policies.jsonl": 116,
-    "global_visa_routes.jsonl": 0,
+    "global_visa_routes.jsonl": 1,
     "research_backlog.jsonl": 203
   }
 }

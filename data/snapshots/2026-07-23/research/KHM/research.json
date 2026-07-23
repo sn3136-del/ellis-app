@@ -1,460 +1,765 @@
 {
-  "destination": "KHM",
-  "retrieved_at": "2026-07-23T07:22:34Z",
-  "research_status": "human_review_required",
-  "sources": [
-    {
-      "search_query": "Cambodia Ministry of Foreign Affairs visa exemption list official",
-      "original_url": "https://www.embassyofcambodiadc.org/how-to-get-a-visa.html",
-      "final_url": "https://www.embassyofcambodiadc.org/how-to-get-a-visa.html",
-      "redirect_chain": [],
-      "final_hostname": "www.embassyofcambodiadc.org",
-      "source_authority": "embassy_or_consulate",
-      "relevant_excerpt": "The embassy issues six visa categories: Tourist (Type-T), Business (Type-E), Khmer (Type-K), Courtesy (Type-C), Official (Type-B), and Diplomatic (Type-A). ... \"E-Visa (evisa.gov.kh)\" ... \"Passport must be valid at least six(6) months (based of passport expiration date) prior to their travel entry date to Cambodia.\" ... Visa exemption: \"For ASEAN member and other countries traveling with their valid national passport that does not required visa to enter Cambodia.\" ... \"Issued Visa/s are not refundable or transferable.\"",
-      "retrieved_at": "2026-07-23T07:22:34Z",
-      "effective_date_evidence": null,
-      "page_language": "en"
-    },
-    {
-      "search_query": "embassyofcambodiadc.org tourist visa type-T fee",
-      "original_url": "https://www.embassyofcambodiadc.org/tourist_visa_type-t.html",
-      "final_url": "https://www.embassyofcambodiadc.org/tourist_visa_type-t.html",
-      "redirect_chain": [],
-      "final_hostname": "www.embassyofcambodiadc.org",
-      "source_authority": "embassy_or_consulate",
-      "relevant_excerpt": "\"$ 30 in form of Money Order or Cashier Check and have it payable to Embassy of Cambodia.\" (no personal checks, credit cards, or cash) ... The visa is \"valid to use or enter Cambodia within three(3) months from the date of issue\" and allows travelers to \"stay for 30 days upon entering the Country.\" ... \"Visa can be extended upon entry for another 30 days at Cambodia Immigration Office.\" ... Required: original passport with at least one blank visa page; completed visa application form with one 2x2 passport photo. ... \"Passport must be valid for at least six(6) months (based on passport expiration date) prior to the date of entry to Cambodia.\" ... Processing: \"7-10 working days + return shipping days (for mailing applicant's only)\".",
-      "retrieved_at": "2026-07-23T07:22:34Z",
-      "effective_date_evidence": null,
-      "page_language": "en"
-    },
-    {
-      "search_query": "official Cambodia evisa government portal evisa.gov.kh tourist visa",
-      "original_url": "https://www.embassyofcambodiadc.org/wwwevisagovkh.html",
-      "final_url": "https://www.embassyofcambodiadc.org/wwwevisagovkh.html",
-      "redirect_chain": [],
-      "final_hostname": "www.embassyofcambodiadc.org",
-      "source_authority": "embassy_or_consulate",
-      "relevant_excerpt": "\"The Official e-Visa website is https://www.evisa.gov.kh\" ... \"The e-Visa service is provided by the Cambodian Ministry of Foreign Affairs and International Cooperation.\" ... \"List of ports accepted the e-Visa\" (link to the official portal).",
-      "retrieved_at": "2026-07-23T07:22:34Z",
-      "effective_date_evidence": null,
-      "page_language": "en"
-    },
-    {
-      "search_query": "Royal Embassy of Cambodia visa exemption ordinary passport ASEAN 14 days 30 days list",
-      "original_url": "https://www.cambodiaembassyuk.org/faq/",
-      "final_url": "https://www.cambodiaembassyuk.org/faq/",
-      "redirect_chain": [],
-      "final_hostname": "www.cambodiaembassyuk.org",
-      "source_authority": "embassy_or_consulate",
-      "relevant_excerpt": "Visa classes: Tourist Visa (T Class): \"Single-entry, 3-month validity, 30-day allowable stay\"; Business Visa (E Class): \"Single-entry, 3-month validity, 30-day allowable stay\". eVisa portal: \"https://www.evisa.gov.kh/\". Visa exemption (Regular passports): Brunei Darussalam 14 days; Indonesia 30 days; Lao PDR 30 days; Malaysia 30 days; Myanmar 14 days; Philippines 30 days; Singapore 30 days; Thailand 14 days; Vietnam 30 days; Hong Kong (SAR) 30 days; Hungary 15 days. Other listed countries (incl. Bangladesh, Belarus, Brazil, Chile, China, Colombia, Cuba, Ecuador, India, Iran, Japan, Korea (South), Kuwait, Mongolia, Morocco, Nepal, Peru, Romania, Russia, Serbia, Seychelles, Timor-Leste, Turkey, Uruguay): exemption for diplomatic/official passports only — no exemption for regular passports. United Arab Emirates: not listed in the exemption tables. Border checkpoints: \"Visas on arrival and e-visas are available there\" (checkpoints including Bavet, Poipet, Cham Yeam).",
-      "retrieved_at": "2026-07-23T07:22:34Z",
-      "effective_date_evidence": null,
-      "page_language": "en"
-    },
-    {
-      "search_query": "embassyofcambodiadc.org tourist visa type-T fee",
-      "original_url": "https://www.cambodiaembassyuk.org/visa-cosular-services/tourist-visa-t-class/",
-      "final_url": "https://www.cambodiaembassyuk.org/visa-cosular-services/tourist-visa-t-class/",
-      "redirect_chain": [],
-      "final_hostname": "www.cambodiaembassyuk.org",
-      "source_authority": "embassy_or_consulate",
-      "relevant_excerpt": "\"3-month visa validity before departure date\" ... \"30 days allowable stay upon entering Cambodia\" ... Passport: \"at least 6 months remaining upon entering Cambodia\" plus \"at least 2 blank pages remaining\" ... Processing: in-person \"3 working days\"; by post \"5 working days\" ... e-Visa: \"the Embassy does not take any responsibility for the e-Visa applications\" (processed by Cambodia's E-Visa Office).",
-      "retrieved_at": "2026-07-23T07:22:34Z",
-      "effective_date_evidence": null,
-      "page_language": "en"
-    },
-    {
-      "search_query": "official Cambodia evisa government portal evisa.gov.kh tourist visa",
-      "original_url": "https://www.cambodiaembassyuk.org/visa-cosular-services/apply-e-visa/",
-      "final_url": "https://www.cambodiaembassyuk.org/visa-cosular-services/apply-e-visa/",
-      "redirect_chain": [],
-      "final_hostname": "www.cambodiaembassyuk.org",
-      "source_authority": "embassy_or_consulate",
-      "relevant_excerpt": "\"The website www.evisa.gov.kh now serves as a platform for tourists to apply Cambodia tourist Visa online.\" ... \"The e-Visa is operated by the E-Visa Office of the Ministry of Foreign Affairs and International Cooperation of Cambodia, not by the Royal Embassy of Cambodia in London.\" ... \"Any issues related to e-Visa, please contact the e-Visa Office at www.evisa.gov.kh/contact_us\"",
-      "retrieved_at": "2026-07-23T07:22:34Z",
-      "effective_date_evidence": null,
-      "page_language": "en"
-    },
-    {
-      "search_query": "Cambodia Ministry of Foreign Affairs visa exemption list official",
-      "original_url": "https://www.cambodiaembassyuk.org/visa-exemption/",
-      "final_url": "https://www.cambodiaembassyuk.org/visa-exemption/",
-      "redirect_chain": [],
-      "final_hostname": "www.cambodiaembassyuk.org",
-      "source_authority": "embassy_or_consulate",
-      "relevant_excerpt": "\"List of Visa Exemption between Cambodia and other Countries\" — the page presents the MFAIC exemption list as an image; textual contents not machine-readable.",
-      "retrieved_at": "2026-07-23T07:22:34Z",
-      "effective_date_evidence": null,
-      "page_language": "en"
-    },
-    {
-      "search_query": "embassyofcambodiadc.org tourist visa type-T fee",
-      "original_url": "https://www.cambodiaembassycbr.org/touristvisa",
-      "final_url": "https://www.cambodiaembassycbr.org/touristvisa",
-      "redirect_chain": [],
-      "final_hostname": "www.cambodiaembassycbr.org",
-      "source_authority": "embassy_or_consulate",
-      "relevant_excerpt": "\"3-month visa validity after issued\" ... \"Only 30 days allowable stay upon entering Cambodia\" ... \"Tourists can also apply through Electronic Visa (E-Visa) with this link https://www.evisa.gov.kh\" ... Passport \"Validity: at least 6 months remaining upon entering Cambodia\" and \"at least 2 blank pages remaining\" ... Processing time: \"3 to 5 working days\".",
-      "retrieved_at": "2026-07-23T07:22:34Z",
-      "effective_date_evidence": null,
-      "page_language": "en"
-    },
-    {
-      "search_query": "Cambodia immigration.gov.kh visa on arrival tourist visa fee",
-      "original_url": "https://www.immigration.gov.kh/",
-      "final_url": "https://www.immigration.gov.kh/",
-      "redirect_chain": [],
-      "final_hostname": "www.immigration.gov.kh",
-      "source_authority": "destination_government",
-      "relevant_excerpt": "Official website of the General Department of Immigration of Cambodia. \"All travelers can submit the Cambodia e-Arrival within 7 days before or on arrival. Submission is Free.\" Contact: info@immigration.gov.kh.",
-      "retrieved_at": "2026-07-23T07:22:34Z",
-      "effective_date_evidence": null,
-      "page_language": "km,en"
-    },
-    {
-      "search_query": "Cambodia immigration.gov.kh visa on arrival tourist visa fee",
-      "original_url": "https://arrival.gov.kh/",
-      "final_url": "https://arrival.gov.kh/",
-      "redirect_chain": [],
-      "final_hostname": "arrival.gov.kh",
-      "source_authority": "official_application_portal",
-      "relevant_excerpt": "\"Cambodia e-Arrival\" — the page is a JavaScript application; only the title was retrievable via static fetch.",
-      "retrieved_at": "2026-07-23T07:22:34Z",
-      "effective_date_evidence": null,
-      "page_language": "en"
-    },
-    {
-      "search_query": "tourism.gov.kh OR pressocm.gov.kh OR immigration.gov.kh visa exemption Chinese tourists trial 2026",
-      "original_url": "https://www.tourism.gov.kh/",
-      "final_url": "https://www.tourism.gov.kh/",
-      "redirect_chain": [],
-      "final_hostname": "www.tourism.gov.kh",
-      "source_authority": "destination_government",
-      "relevant_excerpt": "\"Ministry of Tourism\" — the site renders via JavaScript; no announcement content was retrievable via static fetch (checked for the reported June 15 - October 15, 2026 Chinese-national visa exemption trial announcement).",
-      "retrieved_at": "2026-07-23T07:22:34Z",
-      "effective_date_evidence": null,
-      "page_language": "en"
-    }
-  ],
-  "dispositions": [
-    {
-      "nationalities": ["IDN", "LAO", "MYS", "PHL", "SGP", "VNM"],
-      "category": "visa_free_entry",
-      "disposition": "VISA_FREE",
-      "maximum_stay": "30 days",
-      "conditions": [
-        "Ordinary (regular) passport holders under ASEAN visa exemption agreements",
-        "All travelers must submit the free Cambodia e-Arrival card within 7 days before or on arrival"
-      ],
-      "source_urls": [
-        "https://www.cambodiaembassyuk.org/faq/",
-        "https://www.immigration.gov.kh/"
-      ]
-    },
-    {
-      "nationalities": ["BRN", "MMR", "THA"],
-      "category": "visa_free_entry",
-      "disposition": "VISA_FREE",
-      "maximum_stay": "14 days",
-      "conditions": [
-        "Ordinary (regular) passport holders under ASEAN visa exemption agreements",
-        "All travelers must submit the free Cambodia e-Arrival card within 7 days before or on arrival"
-      ],
-      "source_urls": [
-        "https://www.cambodiaembassyuk.org/faq/",
-        "https://www.immigration.gov.kh/"
-      ]
-    },
-    {
-      "nationalities": ["HKG"],
-      "category": "visa_free_entry",
-      "disposition": "VISA_FREE",
-      "maximum_stay": "30 days",
-      "conditions": [
-        "Hong Kong SAR passport holders (regular passports), per bilateral exemption listed by the Royal Embassy of Cambodia in London"
-      ],
-      "source_urls": ["https://www.cambodiaembassyuk.org/faq/"]
-    },
-    {
-      "nationalities": ["HUN"],
-      "category": "visa_free_entry",
-      "disposition": "VISA_FREE",
-      "maximum_stay": "15 days",
-      "conditions": [
-        "Hungarian regular passport holders, per bilateral exemption listed by the Royal Embassy of Cambodia in London"
-      ],
-      "source_urls": ["https://www.cambodiaembassyuk.org/faq/"]
-    },
-    {
-      "nationalities": ["BRN", "IDN", "LAO", "MYS", "MMR", "PHL", "SGP", "THA", "VNM", "HKG", "HUN"],
-      "category": "tourist_visa",
-      "disposition": "NOT_APPLICABLE",
-      "maximum_stay": null,
-      "conditions": [
-        "Visa-free for tourist stays within the exemption duration; a visa is required only for stays beyond the exemption"
-      ],
-      "source_urls": ["https://www.cambodiaembassyuk.org/faq/"]
-    },
-    {
-      "nationalities": ["CHN", "USA", "GBR", "IND", "TWN", "JPN", "KOR", "DEU", "FRA", "AUS", "CAN", "RUS", "ARE", "BRA"],
-      "category": "visa_free_entry",
-      "disposition": "NOT_APPLICABLE",
-      "maximum_stay": null,
-      "conditions": [
-        "Not on Cambodia's visa exemption list for ordinary/regular passports per the Royal Embassy of Cambodia in London FAQ (CHN, IND, JPN, KOR, RUS, BRA appear on the list for diplomatic/official passports only; USA, GBR, TWN, DEU, FRA, AUS, CAN, ARE are not listed at all)",
-        "CHN CAVEAT: a temporary trial visa exemption for PRC passport holders (reported 2026-06-15 through 2026-10-15, 14 days per entry, multiple entries, e-Arrival card required) is widely reported and would cover the snapshot date, but could NOT be verified on any reachable Cambodian government page - see unresolved; human review required"
-      ],
-      "source_urls": ["https://www.cambodiaembassyuk.org/faq/"]
-    },
-    {
-      "nationalities": ["CHN", "USA", "GBR", "IND", "TWN", "JPN", "KOR", "DEU", "FRA", "AUS", "CAN", "RUS", "ARE", "BRA"],
-      "category": "tourist_visa",
-      "disposition": "EMBASSY_VISA_REQUIRED",
-      "maximum_stay": "30 days",
-      "conditions": [
-        "Tourist (Type-T / T Class) visa: single entry, 3-month validity from issue, 30-day allowable stay, extendable once for another 30 days at the Cambodia Immigration Office",
-        "eVisa (online) and visa on arrival are official alternative channels for tourists (see evisa_tourist and visa_on_arrival_tourist rows)",
-        "CHN: see unresolved regarding the reported temporary trial exemption in force at the snapshot date"
-      ],
-      "source_urls": [
-        "https://www.embassyofcambodiadc.org/tourist_visa_type-t.html",
-        "https://www.cambodiaembassyuk.org/visa-cosular-services/tourist-visa-t-class/",
-        "https://www.cambodiaembassycbr.org/touristvisa"
-      ]
-    },
-    {
-      "nationalities": ["CHN", "USA", "GBR", "IND", "TWN", "JPN", "KOR", "DEU", "FRA", "AUS", "CAN", "RUS", "ARE", "BRA"],
-      "category": "evisa_tourist",
-      "disposition": "EVISA_REQUIRED",
-      "maximum_stay": "30 days",
-      "conditions": [
-        "Optional online channel: tourist e-Visa (Type T) via the official portal https://www.evisa.gov.kh operated by the E-Visa Office of the Ministry of Foreign Affairs and International Cooperation",
-        "Accepted at a published list of ports of entry (list on the official portal, which was unreachable to our fetcher)",
-        "Per-nationality eVisa eligibility restrictions (if any) could not be verified because the portal was unreachable - see unresolved"
-      ],
-      "source_urls": [
-        "https://www.embassyofcambodiadc.org/wwwevisagovkh.html",
-        "https://www.cambodiaembassyuk.org/visa-cosular-services/apply-e-visa/",
-        "https://www.cambodiaembassycbr.org/touristvisa"
-      ]
-    },
-    {
-      "nationalities": ["CHN", "USA", "GBR", "IND", "TWN", "JPN", "KOR", "DEU", "FRA", "AUS", "CAN", "RUS", "ARE", "BRA"],
-      "category": "visa_on_arrival_tourist",
-      "disposition": "VISA_ON_ARRIVAL",
-      "maximum_stay": null,
-      "conditions": [
-        "Visas on arrival are available at major international checkpoints (including Bavet, Poipet, Cham Yeam) per the Royal Embassy of Cambodia in London FAQ",
-        "Fee and per-nationality eligibility for visa on arrival are not stated on any fetched official page - see unresolved"
-      ],
-      "source_urls": ["https://www.cambodiaembassyuk.org/faq/"]
-    },
-    {
-      "nationalities": ["ALL_OTHERS"],
-      "category": "tourist_visa",
-      "disposition": "EMBASSY_VISA_REQUIRED",
-      "maximum_stay": "30 days",
-      "conditions": [
-        "Default channel: Tourist (Type-T) visa from a Cambodian embassy/consulate; single entry, 3-month validity, 30-day stay, extendable once for 30 days",
-        "eVisa (evisa.gov.kh) and visa on arrival are official alternative channels for tourists; per-nationality restrictions on those channels could not be verified"
-      ],
-      "source_urls": [
-        "https://www.embassyofcambodiadc.org/how-to-get-a-visa.html",
-        "https://www.embassyofcambodiadc.org/tourist_visa_type-t.html",
-        "https://www.cambodiaembassyuk.org/faq/"
-      ]
-    }
-  ],
-  "policies": [
-    {
-      "policy_kind": "visa_exemption_list",
-      "policy_name": "List of Visa Exemption between Cambodia and other Countries",
-      "description": "Bilateral and ASEAN visa exemption agreements. Ordinary/regular-passport exemptions for tourism: Brunei 14 days, Indonesia 30, Lao PDR 30, Malaysia 30, Myanmar 14, Philippines 30, Singapore 30, Thailand 14, Vietnam 30, Hong Kong SAR 30, Hungary 15. All other countries on the list (e.g. China, India, Japan, South Korea, Russia, Brazil, Kuwait, Turkey, Iran, Mongolia, Belarus, Seychelles) are exempt for diplomatic/official passports only.",
-      "applies_to_nationalities": ["BRN", "IDN", "LAO", "MYS", "MMR", "PHL", "SGP", "THA", "VNM", "HKG", "HUN"],
-      "conditions": [
-        "The authoritative list is published by the Ministry of Foreign Affairs and International Cooperation (mfaic.gov.kh, list page dated 2025-03-26), which was unreachable (WAF 'Request Rejected'); the list here is taken from the Royal Embassy of Cambodia in London FAQ and may lag MFAIC updates"
-      ],
-      "maximum_stay": "14-30 days depending on nationality",
-      "official_source_urls": [
-        "https://www.cambodiaembassyuk.org/faq/",
-        "https://www.cambodiaembassyuk.org/visa-exemption/"
-      ],
-      "effective_from": null,
-      "effective_until": null
-    },
-    {
-      "policy_kind": "evisa_program",
-      "policy_name": "Cambodia e-Visa (Tourist Type-T)",
-      "description": "Online tourist visa issued via the official portal https://www.evisa.gov.kh, operated by the E-Visa Office of the Ministry of Foreign Affairs and International Cooperation. Tourist (T) class: single entry, valid to enter within 3 months of issue, 30-day stay. Accepted at a published list of ports of entry.",
-      "applies_to_nationalities": ["ALL_OTHERS"],
-      "conditions": [
-        "Government fee could not be verified from an official page (portal unreachable to our fetcher); widely reported as USD 30 for tourist e-Visa since 2025-01-01 - unverified",
-        "Per-nationality eligibility restrictions could not be verified"
-      ],
-      "maximum_stay": "30 days",
-      "official_source_urls": [
-        "https://www.embassyofcambodiadc.org/wwwevisagovkh.html",
-        "https://www.cambodiaembassyuk.org/visa-cosular-services/apply-e-visa/",
-        "https://www.cambodiaembassycbr.org/touristvisa"
-      ],
-      "effective_from": null,
-      "effective_until": null
-    },
-    {
-      "policy_kind": "visa_on_arrival_program",
-      "policy_name": "Cambodia visa on arrival",
-      "description": "Visas on arrival are available for tourists at major international entry checkpoints (including Bavet, Poipet and Cham Yeam land borders) per the Royal Embassy of Cambodia in London FAQ. Fee and eligibility details are not stated on any fetched official page.",
-      "applies_to_nationalities": ["ALL_OTHERS"],
-      "conditions": [
-        "Fee (widely reported USD 30 tourist / USD 35 business) not verified on an official page",
-        "Per-nationality eligibility restrictions not verified"
-      ],
-      "maximum_stay": null,
-      "official_source_urls": ["https://www.cambodiaembassyuk.org/faq/"],
-      "effective_from": null,
-      "effective_until": null
-    },
-    {
-      "policy_kind": "consular_visa_regime",
-      "policy_name": "Tourist (Type-T / T Class) consular visa",
-      "description": "Standard tourist visa issued by Cambodian embassies and consulates: single entry, valid to enter Cambodia within 3 months of issue, 30-day allowable stay, extendable once for another 30 days at the Cambodia Immigration Office. Fee at the Washington DC embassy: USD 30. Issued visas are not refundable or transferable.",
-      "applies_to_nationalities": ["ALL_OTHERS"],
-      "conditions": [
-        "Passport valid at least 6 months at date of entry; blank-page requirement varies by embassy (DC: at least 1 blank visa page; London/Canberra: at least 2 blank pages)"
-      ],
-      "maximum_stay": "30 days",
-      "official_source_urls": [
-        "https://www.embassyofcambodiadc.org/tourist_visa_type-t.html",
-        "https://www.cambodiaembassyuk.org/visa-cosular-services/tourist-visa-t-class/",
-        "https://www.cambodiaembassycbr.org/touristvisa"
-      ],
-      "effective_from": null,
-      "effective_until": null
-    },
-    {
-      "policy_kind": "special_regime",
-      "policy_name": "Cambodia e-Arrival card (CeA)",
-      "description": "All travelers must submit the Cambodia e-Arrival card, available at https://arrival.gov.kh, within 7 days before or on arrival. Submission is free. Operated under the General Department of Immigration.",
-      "applies_to_nationalities": ["ALL"],
-      "conditions": ["Free of charge", "Submit within 7 days before or on arrival"],
-      "maximum_stay": null,
-      "official_source_urls": [
-        "https://www.immigration.gov.kh/",
-        "https://arrival.gov.kh/"
-      ],
-      "effective_from": null,
-      "effective_until": null
-    }
-  ],
-  "fees": [
-    {
-      "visa_category": "tourist_visa",
-      "visa_subtype": "Tourist (Type-T) consular visa at the Royal Embassy of Cambodia, Washington DC",
-      "applies_to_nationalities": null,
-      "government_fee_amount": 30,
-      "government_fee_currency": "USD",
-      "refundability": "non-refundable ('Issued Visa/s are not refundable or transferable')",
-      "accepted_payment_methods": ["money order", "cashier's check"],
-      "source_urls": [
-        "https://www.embassyofcambodiadc.org/tourist_visa_type-t.html",
-        "https://www.embassyofcambodiadc.org/how-to-get-a-visa.html"
-      ]
-    }
-  ],
-  "portals": [
-    {
-      "portal_kind": "evisa_portal",
-      "url": "https://www.evisa.gov.kh",
-      "operator": "E-Visa Office, Ministry of Foreign Affairs and International Cooperation of Cambodia",
-      "operator_kind": "government",
-      "official_linking_source": "https://www.embassyofcambodiadc.org/wwwevisagovkh.html",
-      "supported_categories": ["evisa_tourist"],
-      "source_urls": [
-        "https://www.embassyofcambodiadc.org/wwwevisagovkh.html",
-        "https://www.cambodiaembassyuk.org/visa-cosular-services/apply-e-visa/",
-        "https://www.cambodiaembassycbr.org/touristvisa"
-      ]
-    },
-    {
-      "portal_kind": "immigration_authority",
-      "url": "https://www.immigration.gov.kh",
-      "operator": "General Department of Immigration, Kingdom of Cambodia",
-      "operator_kind": "government",
-      "official_linking_source": null,
-      "supported_categories": ["visa_extension", "e_arrival_card"],
-      "source_urls": ["https://www.immigration.gov.kh/"]
-    },
-    {
-      "portal_kind": "immigration_authority",
-      "url": "https://arrival.gov.kh",
-      "operator": "General Department of Immigration, Kingdom of Cambodia (Cambodia e-Arrival)",
-      "operator_kind": "government",
-      "official_linking_source": "https://www.immigration.gov.kh/",
-      "supported_categories": ["e_arrival_card"],
-      "source_urls": ["https://arrival.gov.kh/", "https://www.immigration.gov.kh/"]
-    },
-    {
-      "portal_kind": "foreign_ministry",
-      "url": "https://www.mfaic.gov.kh",
-      "operator": "Ministry of Foreign Affairs and International Cooperation of Cambodia",
-      "operator_kind": "government",
-      "official_linking_source": "https://www.cambodiaembassyuk.org/visa-cosular-services/apply-e-visa/",
-      "supported_categories": ["visa_exemption_list", "evisa_tourist"],
-      "source_urls": ["https://www.cambodiaembassyuk.org/visa-cosular-services/apply-e-visa/"]
-    },
-    {
-      "portal_kind": "embassy_site",
-      "url": "https://www.embassyofcambodiadc.org",
-      "operator": "Royal Embassy of Cambodia, Washington DC",
-      "operator_kind": "government",
-      "official_linking_source": null,
-      "supported_categories": ["tourist_visa"],
-      "source_urls": [
-        "https://www.embassyofcambodiadc.org/how-to-get-a-visa.html",
-        "https://www.embassyofcambodiadc.org/tourist_visa_type-t.html"
-      ]
-    },
-    {
-      "portal_kind": "embassy_site",
-      "url": "https://www.cambodiaembassyuk.org",
-      "operator": "Royal Embassy of Cambodia, London",
-      "operator_kind": "government",
-      "official_linking_source": null,
-      "supported_categories": ["tourist_visa"],
-      "source_urls": [
-        "https://www.cambodiaembassyuk.org/faq/",
-        "https://www.cambodiaembassyuk.org/visa-cosular-services/tourist-visa-t-class/"
-      ]
-    },
-    {
-      "portal_kind": "embassy_site",
-      "url": "https://www.cambodiaembassycbr.org",
-      "operator": "Royal Embassy of Cambodia, Canberra",
-      "operator_kind": "government",
-      "official_linking_source": null,
-      "supported_categories": ["tourist_visa"],
-      "source_urls": ["https://www.cambodiaembassycbr.org/touristvisa"]
-    }
-  ],
-  "passport_validity": {
-    "rule_kind": "months_after_arrival",
-    "months": 6,
-    "min_blank_pages": 2,
-    "condition_text": "Passport must be valid at least six (6) months at the date of entry to Cambodia (Royal Embassy of Cambodia in Washington DC, London and Canberra all state this). Blank pages: London and Canberra embassies require at least 2 blank pages remaining; the Washington DC embassy requires at least one blank visa page. The stricter 2-page figure is recorded here.",
-    "source_urls": [
-      "https://www.embassyofcambodiadc.org/tourist_visa_type-t.html",
-      "https://www.cambodiaembassyuk.org/visa-cosular-services/tourist-visa-t-class/",
-      "https://www.cambodiaembassycbr.org/touristvisa",
-      "https://www.embassyofcambodiadc.org/how-to-get-a-visa.html"
-    ]
+ "destination": "KHM",
+ "retrieved_at": "2026-07-23T07:22:34Z",
+ "research_status": "human_review_required",
+ "sources": [
+  {
+   "search_query": "Cambodia Ministry of Foreign Affairs visa exemption list official",
+   "original_url": "https://www.embassyofcambodiadc.org/how-to-get-a-visa.html",
+   "final_url": "https://www.embassyofcambodiadc.org/how-to-get-a-visa.html",
+   "redirect_chain": [],
+   "final_hostname": "www.embassyofcambodiadc.org",
+   "source_authority": "embassy_or_consulate",
+   "relevant_excerpt": "The embassy issues six visa categories: Tourist (Type-T), Business (Type-E), Khmer (Type-K), Courtesy (Type-C), Official (Type-B), and Diplomatic (Type-A). ... \"E-Visa (evisa.gov.kh)\" ... \"Passport must be valid at least six(6) months (based of passport expiration date) prior to their travel entry date to Cambodia.\" ... Visa exemption: \"For ASEAN member and other countries traveling with their valid national passport that does not required visa to enter Cambodia.\" ... \"Issued Visa/s are not refundable or transferable.\"",
+   "retrieved_at": "2026-07-23T07:22:34Z",
+   "effective_date_evidence": null,
+   "page_language": "en"
   },
-  "jurisdictions": [],
-  "unresolved": [
-    "CHN (HUMAN REVIEW REQUIRED): Multiple non-official reports (including China's State Council Information Office english.scio.gov.cn 2025-12-03, Xinhua, and industry alerts) state Cambodia granted a temporary trial visa exemption for PRC passport holders (reported to include Hong Kong and Macao SAR passports and to exclude Taiwan), 14 days per entry, multiple entries, no fee, from 2026-06-15 through 2026-10-15, announced via a Council of Ministers letter signed by standing secretary of state Hing Thoraxy and by the Ministry of Tourism (announcement reported 2026-01-16). This window COVERS the snapshot date 2026-07-23, meaning the CHN dispositions recorded here from official embassy pages (visa required) are likely superseded during the trial window. No reachable Cambodian government page confirmed it: mfaic.gov.kh is WAF-blocked, tourism.gov.kh and arrival.gov.kh render via JavaScript with no static content, and evisa.gov.kh is unreachable (redirect loop). Non-Cambodian sources were not used as evidence per source rules.",
-    "MFAIC visa-exemption list page unreachable: https://www.mfaic.gov.kh/Page/2025-03-26-Visa-Exemption-List-of-Visa-Exemption-between-Cambodia-and-other-Countries-15-22-56, https://www.mfaic.gov.kh/en/2025-03-26-visa-exemption-list-of-visa-exemption-between-cambodia-and-other-countries-15-22-56 and https://recberlin.mfaic.gov.kh/en-us/visa-exemption all returned WAF 'Request Rejected'. The exemption list was instead taken from the Royal Embassy of Cambodia in London FAQ, which may lag MFAIC updates.",
-    "Official eVisa portal https://www.evisa.gov.kh unreachable via fetcher: redirect loop (>10) on every path tried (/, /faq, /contact_us, /information/visa_type/4). Anti-bot protection was not bypassed. Consequently the eVisa government fee (widely reported USD 30 tourist since 2025-01-01, previously USD 36, possibly plus processing charge) is NOT recorded in fees, and the eVisa-accepted ports list and per-nationality eligibility restrictions are unverified.",
-    "Visa-on-arrival fee (widely reported USD 30 tourist / USD 35 business) and VOA per-nationality eligibility are not stated on any fetched official page; no VOA fee recorded.",
-    "Blank-page rule differs between official embassy pages: Washington DC requires at least 1 blank visa page; London and Canberra require at least 2 blank pages.",
-    "tourism.gov.kh and arrival.gov.kh are JavaScript applications; static fetch retrieved only page titles, so announcement/FAQ content there could not be inspected."
+  {
+   "search_query": "embassyofcambodiadc.org tourist visa type-T fee",
+   "original_url": "https://www.embassyofcambodiadc.org/tourist_visa_type-t.html",
+   "final_url": "https://www.embassyofcambodiadc.org/tourist_visa_type-t.html",
+   "redirect_chain": [],
+   "final_hostname": "www.embassyofcambodiadc.org",
+   "source_authority": "embassy_or_consulate",
+   "relevant_excerpt": "\"$ 30 in form of Money Order or Cashier Check and have it payable to Embassy of Cambodia.\" (no personal checks, credit cards, or cash) ... The visa is \"valid to use or enter Cambodia within three(3) months from the date of issue\" and allows travelers to \"stay for 30 days upon entering the Country.\" ... \"Visa can be extended upon entry for another 30 days at Cambodia Immigration Office.\" ... Required: original passport with at least one blank visa page; completed visa application form with one 2x2 passport photo. ... \"Passport must be valid for at least six(6) months (based on passport expiration date) prior to the date of entry to Cambodia.\" ... Processing: \"7-10 working days + return shipping days (for mailing applicant's only)\".",
+   "retrieved_at": "2026-07-23T07:22:34Z",
+   "effective_date_evidence": null,
+   "page_language": "en"
+  },
+  {
+   "search_query": "official Cambodia evisa government portal evisa.gov.kh tourist visa",
+   "original_url": "https://www.embassyofcambodiadc.org/wwwevisagovkh.html",
+   "final_url": "https://www.embassyofcambodiadc.org/wwwevisagovkh.html",
+   "redirect_chain": [],
+   "final_hostname": "www.embassyofcambodiadc.org",
+   "source_authority": "embassy_or_consulate",
+   "relevant_excerpt": "\"The Official e-Visa website is https://www.evisa.gov.kh\" ... \"The e-Visa service is provided by the Cambodian Ministry of Foreign Affairs and International Cooperation.\" ... \"List of ports accepted the e-Visa\" (link to the official portal).",
+   "retrieved_at": "2026-07-23T07:22:34Z",
+   "effective_date_evidence": null,
+   "page_language": "en"
+  },
+  {
+   "search_query": "Royal Embassy of Cambodia visa exemption ordinary passport ASEAN 14 days 30 days list",
+   "original_url": "https://www.cambodiaembassyuk.org/faq/",
+   "final_url": "https://www.cambodiaembassyuk.org/faq/",
+   "redirect_chain": [],
+   "final_hostname": "www.cambodiaembassyuk.org",
+   "source_authority": "embassy_or_consulate",
+   "relevant_excerpt": "Visa classes: Tourist Visa (T Class): \"Single-entry, 3-month validity, 30-day allowable stay\"; Business Visa (E Class): \"Single-entry, 3-month validity, 30-day allowable stay\". eVisa portal: \"https://www.evisa.gov.kh/\". Visa exemption (Regular passports): Brunei Darussalam 14 days; Indonesia 30 days; Lao PDR 30 days; Malaysia 30 days; Myanmar 14 days; Philippines 30 days; Singapore 30 days; Thailand 14 days; Vietnam 30 days; Hong Kong (SAR) 30 days; Hungary 15 days. Other listed countries (incl. Bangladesh, Belarus, Brazil, Chile, China, Colombia, Cuba, Ecuador, India, Iran, Japan, Korea (South), Kuwait, Mongolia, Morocco, Nepal, Peru, Romania, Russia, Serbia, Seychelles, Timor-Leste, Turkey, Uruguay): exemption for diplomatic/official passports only — no exemption for regular passports. United Arab Emirates: not listed in the exemption tables. Border checkpoints: \"Visas on arrival and e-visas are available there\" (checkpoints including Bavet, Poipet, Cham Yeam).",
+   "retrieved_at": "2026-07-23T07:22:34Z",
+   "effective_date_evidence": null,
+   "page_language": "en"
+  },
+  {
+   "search_query": "embassyofcambodiadc.org tourist visa type-T fee",
+   "original_url": "https://www.cambodiaembassyuk.org/visa-cosular-services/tourist-visa-t-class/",
+   "final_url": "https://www.cambodiaembassyuk.org/visa-cosular-services/tourist-visa-t-class/",
+   "redirect_chain": [],
+   "final_hostname": "www.cambodiaembassyuk.org",
+   "source_authority": "embassy_or_consulate",
+   "relevant_excerpt": "\"3-month visa validity before departure date\" ... \"30 days allowable stay upon entering Cambodia\" ... Passport: \"at least 6 months remaining upon entering Cambodia\" plus \"at least 2 blank pages remaining\" ... Processing: in-person \"3 working days\"; by post \"5 working days\" ... e-Visa: \"the Embassy does not take any responsibility for the e-Visa applications\" (processed by Cambodia's E-Visa Office).",
+   "retrieved_at": "2026-07-23T07:22:34Z",
+   "effective_date_evidence": null,
+   "page_language": "en"
+  },
+  {
+   "search_query": "official Cambodia evisa government portal evisa.gov.kh tourist visa",
+   "original_url": "https://www.cambodiaembassyuk.org/visa-cosular-services/apply-e-visa/",
+   "final_url": "https://www.cambodiaembassyuk.org/visa-cosular-services/apply-e-visa/",
+   "redirect_chain": [],
+   "final_hostname": "www.cambodiaembassyuk.org",
+   "source_authority": "embassy_or_consulate",
+   "relevant_excerpt": "\"The website www.evisa.gov.kh now serves as a platform for tourists to apply Cambodia tourist Visa online.\" ... \"The e-Visa is operated by the E-Visa Office of the Ministry of Foreign Affairs and International Cooperation of Cambodia, not by the Royal Embassy of Cambodia in London.\" ... \"Any issues related to e-Visa, please contact the e-Visa Office at www.evisa.gov.kh/contact_us\"",
+   "retrieved_at": "2026-07-23T07:22:34Z",
+   "effective_date_evidence": null,
+   "page_language": "en"
+  },
+  {
+   "search_query": "Cambodia Ministry of Foreign Affairs visa exemption list official",
+   "original_url": "https://www.cambodiaembassyuk.org/visa-exemption/",
+   "final_url": "https://www.cambodiaembassyuk.org/visa-exemption/",
+   "redirect_chain": [],
+   "final_hostname": "www.cambodiaembassyuk.org",
+   "source_authority": "embassy_or_consulate",
+   "relevant_excerpt": "\"List of Visa Exemption between Cambodia and other Countries\" — the page presents the MFAIC exemption list as an image; textual contents not machine-readable.",
+   "retrieved_at": "2026-07-23T07:22:34Z",
+   "effective_date_evidence": null,
+   "page_language": "en"
+  },
+  {
+   "search_query": "embassyofcambodiadc.org tourist visa type-T fee",
+   "original_url": "https://www.cambodiaembassycbr.org/touristvisa",
+   "final_url": "https://www.cambodiaembassycbr.org/touristvisa",
+   "redirect_chain": [],
+   "final_hostname": "www.cambodiaembassycbr.org",
+   "source_authority": "embassy_or_consulate",
+   "relevant_excerpt": "\"3-month visa validity after issued\" ... \"Only 30 days allowable stay upon entering Cambodia\" ... \"Tourists can also apply through Electronic Visa (E-Visa) with this link https://www.evisa.gov.kh\" ... Passport \"Validity: at least 6 months remaining upon entering Cambodia\" and \"at least 2 blank pages remaining\" ... Processing time: \"3 to 5 working days\".",
+   "retrieved_at": "2026-07-23T07:22:34Z",
+   "effective_date_evidence": null,
+   "page_language": "en"
+  },
+  {
+   "search_query": "Cambodia immigration.gov.kh visa on arrival tourist visa fee",
+   "original_url": "https://www.immigration.gov.kh/",
+   "final_url": "https://www.immigration.gov.kh/",
+   "redirect_chain": [],
+   "final_hostname": "www.immigration.gov.kh",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Official website of the General Department of Immigration of Cambodia. \"All travelers can submit the Cambodia e-Arrival within 7 days before or on arrival. Submission is Free.\" Contact: info@immigration.gov.kh.",
+   "retrieved_at": "2026-07-23T07:22:34Z",
+   "effective_date_evidence": null,
+   "page_language": "km,en"
+  },
+  {
+   "search_query": "Cambodia immigration.gov.kh visa on arrival tourist visa fee",
+   "original_url": "https://arrival.gov.kh/",
+   "final_url": "https://arrival.gov.kh/",
+   "redirect_chain": [],
+   "final_hostname": "arrival.gov.kh",
+   "source_authority": "official_application_portal",
+   "relevant_excerpt": "\"Cambodia e-Arrival\" — the page is a JavaScript application; only the title was retrievable via static fetch.",
+   "retrieved_at": "2026-07-23T07:22:34Z",
+   "effective_date_evidence": null,
+   "page_language": "en"
+  },
+  {
+   "search_query": "tourism.gov.kh OR pressocm.gov.kh OR immigration.gov.kh visa exemption Chinese tourists trial 2026",
+   "original_url": "https://www.tourism.gov.kh/",
+   "final_url": "https://www.tourism.gov.kh/",
+   "redirect_chain": [],
+   "final_hostname": "www.tourism.gov.kh",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "\"Ministry of Tourism\" — the site renders via JavaScript; no announcement content was retrievable via static fetch (checked for the reported June 15 - October 15, 2026 Chinese-national visa exemption trial announcement).",
+   "retrieved_at": "2026-07-23T07:22:34Z",
+   "effective_date_evidence": null,
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=SGP|iss=SGP|doc=ordinary_passport|res=SGP|dest=KHM|cat=evisa_tourist|sub=any|pur=tourism|per=2026-10-01|jur=default",
+   "original_url": "https://immigration.gov.kh/",
+   "final_url": "https://immigration.gov.kh/",
+   "redirect_chain": [
+    "https://www.immigration.gov.kh/",
+    "https://immigration.gov.kh/"
+   ],
+   "final_hostname": "immigration.gov.kh",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "អគ្គនាយកដ្ឋានអន្តោប្រវេសន៍\nA Cambodia Government Agency Website How to identify ចូលគណនី អគ្គនាយកដ្ឋានអន្តោប្រវេសន៍ GENERAL DEPARTMENT OF IMMIGRATION ទំព័រដើម អគ្គនាយកដ្ឋាន ថ្នាក់ដឹកនាំ សសយក យេនឌ័រ កីឡា សេវាសាធារណៈ ទំនាក់ទំនង ព័ត៌មាន បណ្ណាល័យឌីជីថល សេចក្តីជូនដំណឹង ឯកសារផ្លូវការ All travelers can submit the Cambodia e-Arrival within 7 days before or on arrival. Submission is Free. Submission is Free. វីដេអូព័ត៌មាន ឯកសារផ្លូវការ ឯកសារផ្សេងទៀត នាយកដ្ឋាន អគ្គនាយកដ្ឋានអន្តោប្រវេសន៍ GENERAL DEPARTMENT OF IMMIGRATION ផ្លូវជាតិលេខ១ ភូមិបឹងឈូក សង្កាត់និរោធ ខណ្ឌច្បារអំពៅ រាជធានីភ្នំពេញ, ព្រះរាជាណាចក្រកម្ពុជា info@immigration.gov.kh Get General Department Of Immigration Logo 500×500, 1024×1024 ទំនាក់ទំនង មតិយោបល់ បានបង្កើតឡើងដើម្បីប្រើប្រាស់សម្រាប់ Edge, Firefox, Chrome, Safari ឆ្នាំ © 2025 រក្សាសិទ្ធិគ្រប់យ៉ាងដោយ អគ្គនាយកដ្ឋានអន្តោប្រវេសន៍ ជំនាន់: 1.0.1\nPlease enable JavaScript to continue using this application.",
+   "retrieved_at": "2026-07-23T08:28:10+00:00",
+   "content_sha256": "0accc414b434cd5b44f215d5f2db4bab2c08df999c0ca362a001cddcefff7c06",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=SGP|iss=SGP|doc=ordinary_passport|res=SGP|dest=KHM|cat=evisa_tourist|sub=any|pur=tourism|per=2026-10-01|jur=default",
+   "original_url": "https://arrival.gov.kh/",
+   "final_url": "https://arrival.gov.kh/",
+   "redirect_chain": [],
+   "final_hostname": "arrival.gov.kh",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Cambodia e-Arrival\n-->\n-->",
+   "retrieved_at": "2026-07-23T08:28:10+00:00",
+   "content_sha256": "58f977e02f60716164371b25a4afd9fd9cd90341b6820fd9fdd36ac1909517d7",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=SGP|iss=SGP|doc=ordinary_passport|res=SGP|dest=KHM|cat=evisa_tourist|sub=any|pur=tourism|per=2026-10-01|jur=default",
+   "original_url": "https://www.tourism.gov.kh/",
+   "final_url": "https://www.tourism.gov.kh/",
+   "redirect_chain": [],
+   "final_hostname": "www.tourism.gov.kh",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Ministry of Tourism",
+   "retrieved_at": "2026-07-23T08:28:11+00:00",
+   "content_sha256": "233ffcbd67182ef5a0e5afe555d7022f861800bf32639075bbcb732b227294c2",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=SGP|iss=SGP|doc=ordinary_passport|res=SGP|dest=KHM|cat=evisa_tourist|sub=any|pur=tourism|per=2026-10-01|jur=default",
+   "original_url": "https://www.evisa.gov.kh/",
+   "final_url": "https://www.evisa.gov.kh/",
+   "redirect_chain": [
+    "https://www.evisa.gov.kh",
+    "https://www.evisa.gov.kh/"
+   ],
+   "final_hostname": "www.evisa.gov.kh",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Authentication challenge pages\nLoading... No Data Powered by Nexusguard",
+   "retrieved_at": "2026-07-23T08:28:13+00:00",
+   "content_sha256": "f6c5c6da92bbefa738e430e3277d9f1bc1f62a135c19aed0d0da34ba117dfc1e",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=SGP|iss=SGP|doc=ordinary_passport|res=SGP|dest=KHM|cat=evisa_tourist|sub=any|pur=tourism|per=2026-10-01|jur=default",
+   "original_url": "https://immigration.gov.kh/",
+   "final_url": "https://immigration.gov.kh/",
+   "redirect_chain": [
+    "https://www.immigration.gov.kh",
+    "https://immigration.gov.kh/"
+   ],
+   "final_hostname": "immigration.gov.kh",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "អគ្គនាយកដ្ឋានអន្តោប្រវេសន៍\nA Cambodia Government Agency Website How to identify ចូលគណនី អគ្គនាយកដ្ឋានអន្តោប្រវេសន៍ GENERAL DEPARTMENT OF IMMIGRATION ទំព័រដើម អគ្គនាយកដ្ឋាន ថ្នាក់ដឹកនាំ សសយក យេនឌ័រ កីឡា សេវាសាធារណៈ ទំនាក់ទំនង ព័ត៌មាន បណ្ណាល័យឌីជីថល សេចក្តីជូនដំណឹង ឯកសារផ្លូវការ All travelers can submit the Cambodia e-Arrival within 7 days before or on arrival. Submission is Free. Submission is Free. វីដេអូព័ត៌មាន ឯកសារផ្លូវការ ឯកសារផ្សេងទៀត នាយកដ្ឋាន អគ្គនាយកដ្ឋានអន្តោប្រវេសន៍ GENERAL DEPARTMENT OF IMMIGRATION ផ្លូវជាតិលេខ១ ភូមិបឹងឈូក សង្កាត់និរោធ ខណ្ឌច្បារអំពៅ រាជធានីភ្នំពេញ, ព្រះរាជាណាចក្រកម្ពុជា info@immigration.gov.kh Get General Department Of Immigration Logo 500×500, 1024×1024 ទំនាក់ទំនង មតិយោបល់ បានបង្កើតឡើងដើម្បីប្រើប្រាស់សម្រាប់ Edge, Firefox, Chrome, Safari ឆ្នាំ © 2025 រក្សាសិទ្ធិគ្រប់យ៉ាងដោយ អគ្គនាយកដ្ឋានអន្តោប្រវេសន៍ ជំនាន់: 1.0.1\nPlease enable JavaScript to continue using this application.",
+   "retrieved_at": "2026-07-23T08:28:13+00:00",
+   "content_sha256": "0accc414b434cd5b44f215d5f2db4bab2c08df999c0ca362a001cddcefff7c06",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=SGP|iss=SGP|doc=ordinary_passport|res=SGP|dest=KHM|cat=evisa_tourist|sub=any|pur=tourism|per=2026-10-01|jur=default",
+   "original_url": "https://arrival.gov.kh",
+   "final_url": "https://arrival.gov.kh",
+   "redirect_chain": [],
+   "final_hostname": "arrival.gov.kh",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Cambodia e-Arrival\n-->\n-->",
+   "retrieved_at": "2026-07-23T08:28:13+00:00",
+   "content_sha256": "58f977e02f60716164371b25a4afd9fd9cd90341b6820fd9fdd36ac1909517d7",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=SGP|iss=SGP|doc=ordinary_passport|res=SGP|dest=KHM|cat=evisa_tourist|sub=any|pur=tourism|per=2026-10-01|jur=default",
+   "original_url": "https://www.mfaic.gov.kh",
+   "final_url": "https://www.mfaic.gov.kh",
+   "redirect_chain": [],
+   "final_hostname": "www.mfaic.gov.kh",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Request Rejected\nThe requested URL was rejected. Please consult with your administrator.\nYour support ID is a7cce1ae-9888-4c6d-957b-8e9532d89e45 [Go Back]",
+   "retrieved_at": "2026-07-23T08:28:13+00:00",
+   "content_sha256": "442b332cd49cdbcc13af94da6a2b076d4cbedfdcfb8ea4269270fb568ee53804",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=SGP|iss=SGP|doc=ordinary_passport|res=SGP|dest=KHM|cat=evisa_tourist|sub=any|pur=tourism|per=2026-10-01|jur=default",
+   "original_url": "https://www.embassyofcambodiadc.org",
+   "final_url": "https://www.embassyofcambodiadc.org",
+   "redirect_chain": [],
+   "final_hostname": "www.embassyofcambodiadc.org",
+   "source_authority": "non_authoritative",
+   "relevant_excerpt": "ROYAL EMBASSY OF CAMBODIA TO THE UNITED STATES OF AMERICA IN WASHINGTON D.C. - The Royal Embassy of Cambodia to the U.S.\n2025 © Royal Embassy of Cambodia Washington D.C. USA. All rights reserved.\nEmbassy\nAmbassador\nTourism\nCulture & Religion\nCAMBODIA\nMonarchy\nGovernment\nForeign Relations\nNational Assembly\nCONSULAR\nHow to Get a Visa\n&gt;\nTOURIST VISA\nKHMER VISA\nBUSINESS VISA\nDIPLOMATIC/OFFICIAL VISA\nCOURTESY VISA\nARRIVAL PROCEDURE\nWALK-IN APPLICATION\nSEND VIA MAIL\nEMBASSY SERVICES\nConsulate in USA & Canada\nCambodia Mission Abroad\nE-Visa (evisa.gov.kh)\nTemporary Travel Document\nCambodian Passport Holder\nOTHER LINKS\n&gt;\nLink to Ministries/State Agency\nLink to Organizations\nUS Embassy in Cambodia\nMinistry of Tourism\nCONTACT US\nFAQ\nEMBASSY UPDATES\nCOVID-19\nNews\nActivity\nEvents\nVideos\nFollow us on our Facebook page@ CambodiaEmbUS\nTRAVEL TO CAMBODIA\nAbout Cambodia How to obtain a Visa &#8203; How to submit application &nbsp; CHECK VISA STATUS&#8203; Arrival Procedure Angkor Wat Ticket Pass Taste of Angkor &#8203;\"Best Asian Cookbook\" Visa Exemptions Foreigner marrying a Cambodian Foreigner obtaining drivers license List of fraud e-visa website &#8203; Frequently asked questions (FAQ)\nSERVICES\nVisas Legalization Authentication\nCAMBODIAN CONCERNS\nHow to apply a K-Visa Cambodian Passport Temporary travel document Transportation of human remains Transportation of cremated remains &#8203; Translation of Khmer Driver license Frequently asked questions\nEMBASSY UPDATES\nEmbassy Holiday&nbsp",
+   "retrieved_at": "2026-07-23T08:28:13+00:00",
+   "content_sha256": "51c93b525b2803d50e07768fef363c35d0a313bc264d625fa5171a7a1603f481",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=SGP|iss=SGP|doc=ordinary_passport|res=SGP|dest=KHM|cat=evisa_tourist|sub=any|pur=tourism|per=2026-10-01|jur=default",
+   "original_url": "https://www.cambodiaembassyuk.org",
+   "final_url": "https://www.cambodiaembassyuk.org",
+   "redirect_chain": [],
+   "final_hostname": "www.cambodiaembassyuk.org",
+   "source_authority": "non_authoritative",
+   "relevant_excerpt": "Embassy - Royal Embassy of Cambodia in London\nSkip to content\nRoyal Embassy of Cambodia\nAccredited to: United Kingdom - Ireland - Finland - Sweden - Denmark - Norway\nEMBASSY\nAmbassador\nThe Embassy Staff\nEconomic Diplomacy\nCambodia’s Foreign Policy Direction\nInformation for Visitors\nPublic Holiday\nMedia &#038; Culture\nEmbassy News\nCulture and Religion\nKhmer Cuisine\nStudent Hub\nTourism\nTrade and Investment\nVideo Gallery\nCAMBODIA\nMonarchy\nSenate\nNational Assembly\nGovernment\nForeign Relations\nInvest in Cambodia (CDC)\nTourism\nCulture &#038; Religion\nEducation\nCambodia Postal Code\nList of Provinces &#038; Municipalities in Cambodia\nCONSULAR\nDigital Criminal Record\nApply e-visa\nDiplomatic Visa (A Class)\nOfficial Visa (B Class)\nCourtesy Visa (C Class)\nBusiness Visa (E Class)\nTourist Visa (T Class)\nKhmer Visa (K Class)\nVisa Exemption\nNEWSLETTER\nPress Release\nCONTACT US\nEMBASSY\nAmbassador\nThe Embassy Staff\nEconomic Diplomacy\nCambodia’s Foreign Policy Direction\nInformation for Visitors\nPublic Holiday\nMedia &#038; Culture\nEmbassy News\nCulture and Religion\nKhmer Cuisine\nStudent Hub\nTourism\nTrade and Investment\nVideo Gallery\nCAMBODIA\nMonarchy\nSenate\nNational Assembly\nGovernment\nForeign Relations\nInvest in Cambodia (CDC)\nTourism\nCulture &#038; Religion\nEducation\nCambodia Postal Code\nList of Provinces &#038; Municipalities in Cambodia\nCONSULAR\nDigital Criminal Record\nApply e-visa\nDiplomatic Visa (A Class)\nOfficial Visa (B Class)\nCourtesy Visa (C Class)\nBusiness Visa (E Class)\nTourist Visa (T",
+   "retrieved_at": "2026-07-23T08:28:14+00:00",
+   "content_sha256": "b2677fd24898cef6e05dfd38e6c7183d955559fadf03ef0a109379d81ea0ddee",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=SGP|iss=SGP|doc=ordinary_passport|res=SGP|dest=KHM|cat=evisa_tourist|sub=any|pur=tourism|per=2026-10-01|jur=default",
+   "original_url": "https://www.cambodiaembassycbr.org",
+   "final_url": "https://www.cambodiaembassycbr.org",
+   "redirect_chain": [],
+   "final_hostname": "www.cambodiaembassycbr.org",
+   "source_authority": "non_authoritative",
+   "relevant_excerpt": "-->\nRoyal Embassy of Cambodia in Canberra, Australia\ntop of page ROYAL EMBASSY OF CAMBODIA\nAustralia and New Zealand Home Culture &amp; Religion Consular Services Tourist Visa (T Class) Diplomatic Visa (A Class) Official Visa (B Class) Courtesy Visa (C Class) Business Visa (E Class) Khmer Visa (K Class) Temporary Travel Document Authorisation for Passport Renewal Traveling with human ashes Travel with Human Remains to Cambodia Foreigner Marrying a Cambodian Birth Certificate Translation Driver License Translation Family Book Translation Residential Book Translation National I.D Translation Visa Services Trade &amp; Investment Trade Investment Cambodian Product Economic Diplomacy Defence CO-OP. Mission Updates Notification Newsletter Event Public Holiday Contact Us About Us Embassy Staff More Use tab to navigate through the menu items.\nLatest Newsfeed His Excellency NOM Piseth presents Credentials to Her Excellency Sam Mostyn, Governor-General of the Commonwealth of Australia On 5 May 2026, His Excellency NOM Piseth, Ambassador Extraordinary and Plenipotentiary of the Kingdom of Cambodia to Australia, accompanied by Mr. LIM Sambath (Counselor), Mr. SOTH Sothearak (Defence Attaché), and Ms. VADHANA Nika (First Secretary), officially presented his Credentials to Her Excellency Sam Mostyn, Governor-General of the Commonwealth of Australia, at Government House in Canberra. During the presentation of credentials, His Excellency the Ambassador conveyed Announcement of the closure of",
+   "retrieved_at": "2026-07-23T08:28:14+00:00",
+   "content_sha256": "14719bb9c17dc7ad9e981981ab8ddc509020fd202a929dbaab8e13cb2ac26113",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=SGP|iss=SGP|doc=ordinary_passport|res=SGP|dest=KHM|cat=evisa_tourist|sub=any|pur=tourism|per=2026-10-01|jur=default",
+   "original_url": "https://www.embassyofcambodiadc.org/how-to-get-a-visa.html",
+   "final_url": "https://www.embassyofcambodiadc.org/how-to-get-a-visa.html",
+   "redirect_chain": [],
+   "final_hostname": "www.embassyofcambodiadc.org",
+   "source_authority": "non_authoritative",
+   "relevant_excerpt": "How to Get a Visa to Cambodia - ROYAL EMBASSY OF CAMBODIA TO THE UNITED STATES OF AMERICA IN WASHINGTON D.C.\n2025 © Royal Embassy of Cambodia Washington D.C. USA. All rights reserved.\nEmbassy\nAmbassador\nTourism\nCulture & Religion\nCAMBODIA\nMonarchy\nGovernment\nForeign Relations\nNational Assembly\nCONSULAR\nHow to Get a Visa\n&gt;\nTOURIST VISA\nKHMER VISA\nBUSINESS VISA\nDIPLOMATIC/OFFICIAL VISA\nCOURTESY VISA\nARRIVAL PROCEDURE\nWALK-IN APPLICATION\nSEND VIA MAIL\nEMBASSY SERVICES\nConsulate in USA & Canada\nCambodia Mission Abroad\nE-Visa (evisa.gov.kh)\nTemporary Travel Document\nCambodian Passport Holder\nOTHER LINKS\n&gt;\nLink to Ministries/State Agency\nLink to Organizations\nUS Embassy in Cambodia\nMinistry of Tourism\nCONTACT US\nFAQ\nEMBASSY UPDATES\nCOVID-19\nNews\nActivity\nEvents\nVideos\nVISA AVAILABLE AT THE EMBASSY Click the visa type below to direct you to the visa requirements and instructions on how to apply. Issued Visa/s are not refundable or transferable. &#8203;\nTOURIST&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;(Type-T) Visa&nbsp; &nbsp;\nBUSINESS&nbsp; &nbsp; &nbsp; &nbsp;(Type-E) Visa &nbsp;\nKHMER&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (Type-K) Visa&nbsp;- for Cambodians holding valid foreign passports\nCOURTESY&nbsp; &nbsp; &nbsp; (Type-C) Visa&nbsp;- for registered NGOs with a valid MoU&nbsp;\nOFFICIAL&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;(Type-B) Visa &nbsp;\nDIPLOMATIC&nbsp; &nbsp;(Type-A) Visa &nbsp;\nCHECK VISA STATUS If you already submitted your passport/s to the Embassy for visa processing, ",
+   "retrieved_at": "2026-07-23T08:28:14+00:00",
+   "content_sha256": "f05c385f73f7b5ce06a492bdcd13364d9059c1b28f600eab2e3754a728bc3dba",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=SGP|iss=SGP|doc=ordinary_passport|res=SGP|dest=KHM|cat=evisa_tourist|sub=any|pur=tourism|per=2026-10-01|jur=default",
+   "original_url": "https://www.embassyofcambodiadc.org/tourist_visa_type-t.html",
+   "final_url": "https://www.embassyofcambodiadc.org/tourist_visa_type-t.html",
+   "redirect_chain": [],
+   "final_hostname": "www.embassyofcambodiadc.org",
+   "source_authority": "non_authoritative",
+   "relevant_excerpt": "tourist_visa_type-t - ROYAL EMBASSY OF CAMBODIA TO THE UNITED STATES OF AMERICA IN WASHINGTON D.C.\n2025 © Royal Embassy of Cambodia Washington D.C. USA. All rights reserved.\nTOURIST (Type-T) Visa\nEmbassy\nAmbassador\nTourism\nCulture & Religion\nCAMBODIA\nMonarchy\nGovernment\nForeign Relations\nNational Assembly\nCONSULAR\nHow to Get a Visa\n&gt;\nTOURIST VISA\nKHMER VISA\nBUSINESS VISA\nDIPLOMATIC/OFFICIAL VISA\nCOURTESY VISA\nARRIVAL PROCEDURE\nWALK-IN APPLICATION\nSEND VIA MAIL\nEMBASSY SERVICES\nConsulate in USA & Canada\nCambodia Mission Abroad\nE-Visa (evisa.gov.kh)\nTemporary Travel Document\nCambodian Passport Holder\nOTHER LINKS\n&gt;\nLink to Ministries/State Agency\nLink to Organizations\nUS Embassy in Cambodia\nMinistry of Tourism\nCONTACT US\nFAQ\nEMBASSY UPDATES\nCOVID-19\nNews\nActivity\nEvents\nVideos\nTourist (Type-T) VISA\nVertical Divider\nAbout Cambodia Visa information Cambodia Arrival Procedure Visa requirements Visa application form &nbsp; How to apply for&nbsp;by walk-in How to apply for by mail&#8203; &#8203;&#8203; Embassy address&#8203; Processing time &#8203; &#8203; Visa exemptions Bulk Visa submission &#8203; Cambodia mission abroad Angkor Wat ticket Follow us on social media Frequently asked questions CHECK VISA STATUS ONLINE\nVertical Divider\n​\nVISA INFORMATION\nVisa valid to use for travelers&nbsp;entering via airport, seaport, and land port. It is a sticker visa that requires actual passport for visa processing. Single entry visa and valid to use or enter Cambodia within three(3) mont",
+   "retrieved_at": "2026-07-23T08:28:14+00:00",
+   "content_sha256": "8115e8642ce0b39e49202550c4f1b6bdf56aaf1871057c2cef5ba91986e6878f",
+   "page_language": "en"
+  }
+ ],
+ "dispositions": [
+  {
+   "nationalities": [
+    "IDN",
+    "LAO",
+    "MYS",
+    "PHL",
+    "SGP",
+    "VNM"
+   ],
+   "category": "visa_free_entry",
+   "disposition": "VISA_FREE",
+   "maximum_stay": "30 days",
+   "conditions": [
+    "Ordinary (regular) passport holders under ASEAN visa exemption agreements",
+    "All travelers must submit the free Cambodia e-Arrival card within 7 days before or on arrival"
+   ],
+   "source_urls": [
+    "https://www.cambodiaembassyuk.org/faq/",
+    "https://www.immigration.gov.kh/"
+   ]
+  },
+  {
+   "nationalities": [
+    "BRN",
+    "MMR",
+    "THA"
+   ],
+   "category": "visa_free_entry",
+   "disposition": "VISA_FREE",
+   "maximum_stay": "14 days",
+   "conditions": [
+    "Ordinary (regular) passport holders under ASEAN visa exemption agreements",
+    "All travelers must submit the free Cambodia e-Arrival card within 7 days before or on arrival"
+   ],
+   "source_urls": [
+    "https://www.cambodiaembassyuk.org/faq/",
+    "https://www.immigration.gov.kh/"
+   ]
+  },
+  {
+   "nationalities": [
+    "HKG"
+   ],
+   "category": "visa_free_entry",
+   "disposition": "VISA_FREE",
+   "maximum_stay": "30 days",
+   "conditions": [
+    "Hong Kong SAR passport holders (regular passports), per bilateral exemption listed by the Royal Embassy of Cambodia in London"
+   ],
+   "source_urls": [
+    "https://www.cambodiaembassyuk.org/faq/"
+   ]
+  },
+  {
+   "nationalities": [
+    "HUN"
+   ],
+   "category": "visa_free_entry",
+   "disposition": "VISA_FREE",
+   "maximum_stay": "15 days",
+   "conditions": [
+    "Hungarian regular passport holders, per bilateral exemption listed by the Royal Embassy of Cambodia in London"
+   ],
+   "source_urls": [
+    "https://www.cambodiaembassyuk.org/faq/"
+   ]
+  },
+  {
+   "nationalities": [
+    "BRN",
+    "IDN",
+    "LAO",
+    "MYS",
+    "MMR",
+    "PHL",
+    "SGP",
+    "THA",
+    "VNM",
+    "HKG",
+    "HUN"
+   ],
+   "category": "tourist_visa",
+   "disposition": "NOT_APPLICABLE",
+   "maximum_stay": null,
+   "conditions": [
+    "Visa-free for tourist stays within the exemption duration; a visa is required only for stays beyond the exemption"
+   ],
+   "source_urls": [
+    "https://www.cambodiaembassyuk.org/faq/"
+   ]
+  },
+  {
+   "nationalities": [
+    "CHN",
+    "USA",
+    "GBR",
+    "IND",
+    "TWN",
+    "JPN",
+    "KOR",
+    "DEU",
+    "FRA",
+    "AUS",
+    "CAN",
+    "RUS",
+    "ARE",
+    "BRA"
+   ],
+   "category": "visa_free_entry",
+   "disposition": "NOT_APPLICABLE",
+   "maximum_stay": null,
+   "conditions": [
+    "Not on Cambodia's visa exemption list for ordinary/regular passports per the Royal Embassy of Cambodia in London FAQ (CHN, IND, JPN, KOR, RUS, BRA appear on the list for diplomatic/official passports only; USA, GBR, TWN, DEU, FRA, AUS, CAN, ARE are not listed at all)",
+    "CHN CAVEAT: a temporary trial visa exemption for PRC passport holders (reported 2026-06-15 through 2026-10-15, 14 days per entry, multiple entries, e-Arrival card required) is widely reported and would cover the snapshot date, but could NOT be verified on any reachable Cambodian government page - see unresolved; human review required"
+   ],
+   "source_urls": [
+    "https://www.cambodiaembassyuk.org/faq/"
+   ]
+  },
+  {
+   "nationalities": [
+    "CHN",
+    "USA",
+    "GBR",
+    "IND",
+    "TWN",
+    "JPN",
+    "KOR",
+    "DEU",
+    "FRA",
+    "AUS",
+    "CAN",
+    "RUS",
+    "ARE",
+    "BRA"
+   ],
+   "category": "tourist_visa",
+   "disposition": "EMBASSY_VISA_REQUIRED",
+   "maximum_stay": "30 days",
+   "conditions": [
+    "Tourist (Type-T / T Class) visa: single entry, 3-month validity from issue, 30-day allowable stay, extendable once for another 30 days at the Cambodia Immigration Office",
+    "eVisa (online) and visa on arrival are official alternative channels for tourists (see evisa_tourist and visa_on_arrival_tourist rows)",
+    "CHN: see unresolved regarding the reported temporary trial exemption in force at the snapshot date"
+   ],
+   "source_urls": [
+    "https://www.embassyofcambodiadc.org/tourist_visa_type-t.html",
+    "https://www.cambodiaembassyuk.org/visa-cosular-services/tourist-visa-t-class/",
+    "https://www.cambodiaembassycbr.org/touristvisa"
+   ]
+  },
+  {
+   "nationalities": [
+    "CHN",
+    "USA",
+    "GBR",
+    "IND",
+    "TWN",
+    "JPN",
+    "KOR",
+    "DEU",
+    "FRA",
+    "AUS",
+    "CAN",
+    "RUS",
+    "ARE",
+    "BRA"
+   ],
+   "category": "evisa_tourist",
+   "disposition": "EVISA_REQUIRED",
+   "maximum_stay": "30 days",
+   "conditions": [
+    "Optional online channel: tourist e-Visa (Type T) via the official portal https://www.evisa.gov.kh operated by the E-Visa Office of the Ministry of Foreign Affairs and International Cooperation",
+    "Accepted at a published list of ports of entry (list on the official portal, which was unreachable to our fetcher)",
+    "Per-nationality eVisa eligibility restrictions (if any) could not be verified because the portal was unreachable - see unresolved"
+   ],
+   "source_urls": [
+    "https://www.embassyofcambodiadc.org/wwwevisagovkh.html",
+    "https://www.cambodiaembassyuk.org/visa-cosular-services/apply-e-visa/",
+    "https://www.cambodiaembassycbr.org/touristvisa"
+   ]
+  },
+  {
+   "nationalities": [
+    "CHN",
+    "USA",
+    "GBR",
+    "IND",
+    "TWN",
+    "JPN",
+    "KOR",
+    "DEU",
+    "FRA",
+    "AUS",
+    "CAN",
+    "RUS",
+    "ARE",
+    "BRA"
+   ],
+   "category": "visa_on_arrival_tourist",
+   "disposition": "VISA_ON_ARRIVAL",
+   "maximum_stay": null,
+   "conditions": [
+    "Visas on arrival are available at major international checkpoints (including Bavet, Poipet, Cham Yeam) per the Royal Embassy of Cambodia in London FAQ",
+    "Fee and per-nationality eligibility for visa on arrival are not stated on any fetched official page - see unresolved"
+   ],
+   "source_urls": [
+    "https://www.cambodiaembassyuk.org/faq/"
+   ]
+  },
+  {
+   "nationalities": [
+    "ALL_OTHERS"
+   ],
+   "category": "tourist_visa",
+   "disposition": "EMBASSY_VISA_REQUIRED",
+   "maximum_stay": "30 days",
+   "conditions": [
+    "Default channel: Tourist (Type-T) visa from a Cambodian embassy/consulate; single entry, 3-month validity, 30-day stay, extendable once for 30 days",
+    "eVisa (evisa.gov.kh) and visa on arrival are official alternative channels for tourists; per-nationality restrictions on those channels could not be verified"
+   ],
+   "source_urls": [
+    "https://www.embassyofcambodiadc.org/how-to-get-a-visa.html",
+    "https://www.embassyofcambodiadc.org/tourist_visa_type-t.html",
+    "https://www.cambodiaembassyuk.org/faq/"
+   ]
+  }
+ ],
+ "policies": [
+  {
+   "policy_kind": "visa_exemption_list",
+   "policy_name": "List of Visa Exemption between Cambodia and other Countries",
+   "description": "Bilateral and ASEAN visa exemption agreements. Ordinary/regular-passport exemptions for tourism: Brunei 14 days, Indonesia 30, Lao PDR 30, Malaysia 30, Myanmar 14, Philippines 30, Singapore 30, Thailand 14, Vietnam 30, Hong Kong SAR 30, Hungary 15. All other countries on the list (e.g. China, India, Japan, South Korea, Russia, Brazil, Kuwait, Turkey, Iran, Mongolia, Belarus, Seychelles) are exempt for diplomatic/official passports only.",
+   "applies_to_nationalities": [
+    "BRN",
+    "IDN",
+    "LAO",
+    "MYS",
+    "MMR",
+    "PHL",
+    "SGP",
+    "THA",
+    "VNM",
+    "HKG",
+    "HUN"
+   ],
+   "conditions": [
+    "The authoritative list is published by the Ministry of Foreign Affairs and International Cooperation (mfaic.gov.kh, list page dated 2025-03-26), which was unreachable (WAF 'Request Rejected'); the list here is taken from the Royal Embassy of Cambodia in London FAQ and may lag MFAIC updates"
+   ],
+   "maximum_stay": "14-30 days depending on nationality",
+   "official_source_urls": [
+    "https://www.cambodiaembassyuk.org/faq/",
+    "https://www.cambodiaembassyuk.org/visa-exemption/"
+   ],
+   "effective_from": null,
+   "effective_until": null
+  },
+  {
+   "policy_kind": "evisa_program",
+   "policy_name": "Cambodia e-Visa (Tourist Type-T)",
+   "description": "Online tourist visa issued via the official portal https://www.evisa.gov.kh, operated by the E-Visa Office of the Ministry of Foreign Affairs and International Cooperation. Tourist (T) class: single entry, valid to enter within 3 months of issue, 30-day stay. Accepted at a published list of ports of entry.",
+   "applies_to_nationalities": [
+    "ALL_OTHERS"
+   ],
+   "conditions": [
+    "Government fee could not be verified from an official page (portal unreachable to our fetcher); widely reported as USD 30 for tourist e-Visa since 2025-01-01 - unverified",
+    "Per-nationality eligibility restrictions could not be verified"
+   ],
+   "maximum_stay": "30 days",
+   "official_source_urls": [
+    "https://www.embassyofcambodiadc.org/wwwevisagovkh.html",
+    "https://www.cambodiaembassyuk.org/visa-cosular-services/apply-e-visa/",
+    "https://www.cambodiaembassycbr.org/touristvisa"
+   ],
+   "effective_from": null,
+   "effective_until": null
+  },
+  {
+   "policy_kind": "visa_on_arrival_program",
+   "policy_name": "Cambodia visa on arrival",
+   "description": "Visas on arrival are available for tourists at major international entry checkpoints (including Bavet, Poipet and Cham Yeam land borders) per the Royal Embassy of Cambodia in London FAQ. Fee and eligibility details are not stated on any fetched official page.",
+   "applies_to_nationalities": [
+    "ALL_OTHERS"
+   ],
+   "conditions": [
+    "Fee (widely reported USD 30 tourist / USD 35 business) not verified on an official page",
+    "Per-nationality eligibility restrictions not verified"
+   ],
+   "maximum_stay": null,
+   "official_source_urls": [
+    "https://www.cambodiaembassyuk.org/faq/"
+   ],
+   "effective_from": null,
+   "effective_until": null
+  },
+  {
+   "policy_kind": "consular_visa_regime",
+   "policy_name": "Tourist (Type-T / T Class) consular visa",
+   "description": "Standard tourist visa issued by Cambodian embassies and consulates: single entry, valid to enter Cambodia within 3 months of issue, 30-day allowable stay, extendable once for another 30 days at the Cambodia Immigration Office. Fee at the Washington DC embassy: USD 30. Issued visas are not refundable or transferable.",
+   "applies_to_nationalities": [
+    "ALL_OTHERS"
+   ],
+   "conditions": [
+    "Passport valid at least 6 months at date of entry; blank-page requirement varies by embassy (DC: at least 1 blank visa page; London/Canberra: at least 2 blank pages)"
+   ],
+   "maximum_stay": "30 days",
+   "official_source_urls": [
+    "https://www.embassyofcambodiadc.org/tourist_visa_type-t.html",
+    "https://www.cambodiaembassyuk.org/visa-cosular-services/tourist-visa-t-class/",
+    "https://www.cambodiaembassycbr.org/touristvisa"
+   ],
+   "effective_from": null,
+   "effective_until": null
+  },
+  {
+   "policy_kind": "special_regime",
+   "policy_name": "Cambodia e-Arrival card (CeA)",
+   "description": "All travelers must submit the Cambodia e-Arrival card, available at https://arrival.gov.kh, within 7 days before or on arrival. Submission is free. Operated under the General Department of Immigration.",
+   "applies_to_nationalities": [
+    "ALL"
+   ],
+   "conditions": [
+    "Free of charge",
+    "Submit within 7 days before or on arrival"
+   ],
+   "maximum_stay": null,
+   "official_source_urls": [
+    "https://www.immigration.gov.kh/",
+    "https://arrival.gov.kh/"
+   ],
+   "effective_from": null,
+   "effective_until": null
+  }
+ ],
+ "fees": [
+  {
+   "visa_category": "tourist_visa",
+   "visa_subtype": "Tourist (Type-T) consular visa at the Royal Embassy of Cambodia, Washington DC",
+   "applies_to_nationalities": null,
+   "government_fee_amount": 30,
+   "government_fee_currency": "USD",
+   "refundability": "non-refundable ('Issued Visa/s are not refundable or transferable')",
+   "accepted_payment_methods": [
+    "money order",
+    "cashier's check"
+   ],
+   "source_urls": [
+    "https://www.embassyofcambodiadc.org/tourist_visa_type-t.html",
+    "https://www.embassyofcambodiadc.org/how-to-get-a-visa.html"
+   ]
+  }
+ ],
+ "portals": [
+  {
+   "portal_kind": "evisa_portal",
+   "url": "https://www.evisa.gov.kh",
+   "operator": "E-Visa Office, Ministry of Foreign Affairs and International Cooperation of Cambodia",
+   "operator_kind": "government",
+   "official_linking_source": "https://www.embassyofcambodiadc.org/wwwevisagovkh.html",
+   "supported_categories": [
+    "evisa_tourist"
+   ],
+   "source_urls": [
+    "https://www.embassyofcambodiadc.org/wwwevisagovkh.html",
+    "https://www.cambodiaembassyuk.org/visa-cosular-services/apply-e-visa/",
+    "https://www.cambodiaembassycbr.org/touristvisa"
+   ]
+  },
+  {
+   "portal_kind": "immigration_authority",
+   "url": "https://www.immigration.gov.kh",
+   "operator": "General Department of Immigration, Kingdom of Cambodia",
+   "operator_kind": "government",
+   "official_linking_source": null,
+   "supported_categories": [
+    "visa_extension",
+    "e_arrival_card"
+   ],
+   "source_urls": [
+    "https://www.immigration.gov.kh/"
+   ]
+  },
+  {
+   "portal_kind": "immigration_authority",
+   "url": "https://arrival.gov.kh",
+   "operator": "General Department of Immigration, Kingdom of Cambodia (Cambodia e-Arrival)",
+   "operator_kind": "government",
+   "official_linking_source": "https://www.immigration.gov.kh/",
+   "supported_categories": [
+    "e_arrival_card"
+   ],
+   "source_urls": [
+    "https://arrival.gov.kh/",
+    "https://www.immigration.gov.kh/"
+   ]
+  },
+  {
+   "portal_kind": "foreign_ministry",
+   "url": "https://www.mfaic.gov.kh",
+   "operator": "Ministry of Foreign Affairs and International Cooperation of Cambodia",
+   "operator_kind": "government",
+   "official_linking_source": "https://www.cambodiaembassyuk.org/visa-cosular-services/apply-e-visa/",
+   "supported_categories": [
+    "visa_exemption_list",
+    "evisa_tourist"
+   ],
+   "source_urls": [
+    "https://www.cambodiaembassyuk.org/visa-cosular-services/apply-e-visa/"
+   ]
+  },
+  {
+   "portal_kind": "embassy_site",
+   "url": "https://www.embassyofcambodiadc.org",
+   "operator": "Royal Embassy of Cambodia, Washington DC",
+   "operator_kind": "government",
+   "official_linking_source": null,
+   "supported_categories": [
+    "tourist_visa"
+   ],
+   "source_urls": [
+    "https://www.embassyofcambodiadc.org/how-to-get-a-visa.html",
+    "https://www.embassyofcambodiadc.org/tourist_visa_type-t.html"
+   ]
+  },
+  {
+   "portal_kind": "embassy_site",
+   "url": "https://www.cambodiaembassyuk.org",
+   "operator": "Royal Embassy of Cambodia, London",
+   "operator_kind": "government",
+   "official_linking_source": null,
+   "supported_categories": [
+    "tourist_visa"
+   ],
+   "source_urls": [
+    "https://www.cambodiaembassyuk.org/faq/",
+    "https://www.cambodiaembassyuk.org/visa-cosular-services/tourist-visa-t-class/"
+   ]
+  },
+  {
+   "portal_kind": "embassy_site",
+   "url": "https://www.cambodiaembassycbr.org",
+   "operator": "Royal Embassy of Cambodia, Canberra",
+   "operator_kind": "government",
+   "official_linking_source": null,
+   "supported_categories": [
+    "tourist_visa"
+   ],
+   "source_urls": [
+    "https://www.cambodiaembassycbr.org/touristvisa"
+   ]
+  }
+ ],
+ "passport_validity": {
+  "rule_kind": "months_after_arrival",
+  "months": 6,
+  "min_blank_pages": 2,
+  "condition_text": "Passport must be valid at least six (6) months at the date of entry to Cambodia (Royal Embassy of Cambodia in Washington DC, London and Canberra all state this). Blank pages: London and Canberra embassies require at least 2 blank pages remaining; the Washington DC embassy requires at least one blank visa page. The stricter 2-page figure is recorded here.",
+  "source_urls": [
+   "https://www.embassyofcambodiadc.org/tourist_visa_type-t.html",
+   "https://www.cambodiaembassyuk.org/visa-cosular-services/tourist-visa-t-class/",
+   "https://www.cambodiaembassycbr.org/touristvisa",
+   "https://www.embassyofcambodiadc.org/how-to-get-a-visa.html"
   ]
+ },
+ "jurisdictions": [],
+ "unresolved": [
+  "CHN (HUMAN REVIEW REQUIRED): Multiple non-official reports (including China's State Council Information Office english.scio.gov.cn 2025-12-03, Xinhua, and industry alerts) state Cambodia granted a temporary trial visa exemption for PRC passport holders (reported to include Hong Kong and Macao SAR passports and to exclude Taiwan), 14 days per entry, multiple entries, no fee, from 2026-06-15 through 2026-10-15, announced via a Council of Ministers letter signed by standing secretary of state Hing Thoraxy and by the Ministry of Tourism (announcement reported 2026-01-16). This window COVERS the snapshot date 2026-07-23, meaning the CHN dispositions recorded here from official embassy pages (visa required) are likely superseded during the trial window. No reachable Cambodian government page confirmed it: mfaic.gov.kh is WAF-blocked, tourism.gov.kh and arrival.gov.kh render via JavaScript with no static content, and evisa.gov.kh is unreachable (redirect loop). Non-Cambodian sources were not used as evidence per source rules.",
+  "MFAIC visa-exemption list page unreachable: https://www.mfaic.gov.kh/Page/2025-03-26-Visa-Exemption-List-of-Visa-Exemption-between-Cambodia-and-other-Countries-15-22-56, https://www.mfaic.gov.kh/en/2025-03-26-visa-exemption-list-of-visa-exemption-between-cambodia-and-other-countries-15-22-56 and https://recberlin.mfaic.gov.kh/en-us/visa-exemption all returned WAF 'Request Rejected'. The exemption list was instead taken from the Royal Embassy of Cambodia in London FAQ, which may lag MFAIC updates.",
+  "Official eVisa portal https://www.evisa.gov.kh unreachable via fetcher: redirect loop (>10) on every path tried (/, /faq, /contact_us, /information/visa_type/4). Anti-bot protection was not bypassed. Consequently the eVisa government fee (widely reported USD 30 tourist since 2025-01-01, previously USD 36, possibly plus processing charge) is NOT recorded in fees, and the eVisa-accepted ports list and per-nationality eligibility restrictions are unverified.",
+  "Visa-on-arrival fee (widely reported USD 30 tourist / USD 35 business) and VOA per-nationality eligibility are not stated on any fetched official page; no VOA fee recorded.",
+  "Blank-page rule differs between official embassy pages: Washington DC requires at least 1 blank visa page; London and Canberra require at least 2 blank pages.",
+  "tourism.gov.kh and arrival.gov.kh are JavaScript applications; static fetch retrieved only page titles, so announcement/FAQ content there could not be inspected."
+ ]
 }

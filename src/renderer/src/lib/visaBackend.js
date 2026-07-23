@@ -160,6 +160,11 @@ export function createVisaClient(session) {
     resolveIntake: (id) => call('POST', `/intake/${id}/resolve`, session, {}),
     routeEvidence: (resolutionId) => call('GET', `/snapshot/route-evidence/${resolutionId}`, session),
 
+    // On-demand route research (auto-started by resolve when a route is
+    // missing/incomplete; the applicant UI polls until a terminal status).
+    getResearchJob: (id) => call('GET', `/research-jobs/${id}`, session),
+    resumeResearchJob: (id) => call('POST', `/research-jobs/${id}/resume`, session, {}),
+
     // Snapshot administration (admin session required).
     adminSnapshotCoverage: () => call('GET', '/admin/snapshot/coverage', session),
     adminSnapshotBatches: () => call('GET', '/admin/snapshot/batches', session),
@@ -167,7 +172,8 @@ export function createVisaClient(session) {
     adminResolveReview: (id, body) => call('POST', `/admin/snapshot/review-queue/${id}/resolve`, session, body),
     adminConflicts: () => call('GET', '/admin/snapshot/conflicts', session),
     adminRouteQueue: () => call('GET', '/admin/snapshot/route-queue', session),
-    adminAdapterTasks: () => call('GET', '/admin/snapshot/adapter-tasks', session)
+    adminAdapterTasks: () => call('GET', '/admin/snapshot/adapter-tasks', session),
+    adminResearchJobs: () => call('GET', '/admin/snapshot/research-jobs', session)
   }
 }
 
