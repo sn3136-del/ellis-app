@@ -96,6 +96,9 @@ class Settings:
         # --- Temporal ---
         self.temporal_host = os.getenv("TEMPORAL_HOST", "")  # empty → DB workflow runner
 
+        # --- App base URL (for signed email deep links) ---
+        self.app_base_url = os.getenv("ELLIS_APP_BASE_URL", "")
+
 
 @lru_cache
 def settings() -> Settings:

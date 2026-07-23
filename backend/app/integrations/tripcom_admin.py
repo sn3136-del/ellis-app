@@ -68,9 +68,11 @@ def process_deliveries(db, *, org_id: str, transport=None,
     `transport(endpoint, headers, body)->{ok,...}` is injectable for tests."""
     cfg = _trip_config(db, org_id)
     endpoint = cfg["sandbox_base_url"] or ""
+    # Include 'unconfigured' so events queued BEFORE the tenant configured the
+    # sandbox endpoint are retried once it is configured (never silently stuck).
     rows = db.execute(select(models.WebhookDelivery).where(
         models.WebhookDelivery.org_id == org_id,
-        models.WebhookDelivery.status.in_(("pending", "failed")))).scalars().all()
+        models.WebhookDelivery.status.in_(("pending", "failed", "unconfigured")))).scalars().all()
     delivered = failed = dead = unconfigured = 0
     for row in rows:
         if not endpoint or not cfg["webhook_secret"]:

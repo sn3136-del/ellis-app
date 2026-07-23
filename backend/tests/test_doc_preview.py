@@ -59,6 +59,16 @@ def test_text_only_document_is_honestly_unavailable(client):
     assert r["available"] is False and "no stored content" in r["reason"]
 
 
+def test_erasure_deletes_document_blob_regression(client, db):
+    # REGRESSION (review-confirmed high): applicant erasure must delete the raw
+    # passport-scan bytes, not leave them in the DB indefinitely.
+    from app import models, privacy
+    cid, did = _case_with_image(client)
+    assert db.get(models.DocumentBlob, did) is not None
+    privacy.delete_case(db, cid, actor="applicant")
+    assert db.get(models.DocumentBlob, did) is None
+
+
 def test_wrong_doc_for_case_404(client):
     cid1, did1 = _case_with_image(client)
     cid2 = client.post("/cases", headers=AUTH, json={

@@ -122,9 +122,37 @@ def persist_workflow(db, wf: VisaWorkflow):
     db.commit()
 
 
+def enforce_safety(db, application_id: str, wf) -> None:
+    """The single, centralized safety gate for EVERY workflow transition —
+    HTTP /start, HTTP /signals, and the background worker all pass through here,
+    so no entry point can skip it (the review found /signals and the worker
+    bypassed a gate placed only in the /start handler).
+
+    (1) Live-class routes are hard-blocked until every readiness gate + all
+        required applicant info are complete (PreparationOnlyMode).
+    (2) An expired / insufficient-validity passport blocks any transition
+        (PassportBlocked), and queues the renewal email.
+
+    Mock/local routes pass the live gate (they cannot touch a real portal), but
+    the passport check applies to all classes."""
+    from . import personal_gate, passport_validity, models
+    from .execution import classify_adapter
+    app_row = db.get(models.VisaApplication, application_id)
+    if app_row is None:
+        return
+    ec = classify_adapter(getattr(wf, "adapter", None))
+    personal_gate.assert_ready_for_live_action(db, app_row, ec)   # PreparationOnlyMode
+    verdict = passport_validity.check_case_passport(db, app_row)
+    if verdict.get("blocking"):
+        passport_validity.enforce_and_notify(db, app_row, verdict)
+        raise passport_validity.PassportBlocked(verdict)
+
+
 def signal(db, application_id: str, name: str, **kwargs):
-    """Load → apply a signal → persist. The single durable transition point."""
+    """Load → enforce safety → apply a signal → persist. The single durable
+    transition point; the safety gate here covers every caller."""
     wf = load_workflow(db, application_id)
+    enforce_safety(db, application_id, wf)
     method = getattr(wf, name)
     status = method(**kwargs) if kwargs else method()
     persist_workflow(db, wf)

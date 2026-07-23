@@ -59,8 +59,12 @@ def test_all_fifteen_gates_must_pass(client, db):
         **ROUTE, "gate": keys[-1], "complete": True, "evidence": "final confirmation configured"})
     status = client.get("/routes/readiness", headers=AUTH, params=ROUTE).json()
     assert status["route_approved_for_live"] is True and status["mode"] == "live_ready"
-    # Gates record who/when/evidence.
-    g = status["gates"]["official_portal_verified"]
+    # Non-admin readiness is redacted: no evidence / admin identity leaked.
+    assert "evidence" not in status["gates"]["official_portal_verified"]
+    assert "by" not in status["gates"]["official_portal_verified"]
+    # Admin readiness records who/when/evidence.
+    admin_status = client.get("/routes/readiness", headers=ADMIN, params=ROUTE).json()
+    g = admin_status["gates"]["official_portal_verified"]
     assert g["by"] == "gate-admin" and g["evidence"] and g["at"]
 
 
@@ -111,3 +115,33 @@ def test_mock_start_still_allowed(client):
         "full_name": "Anna", "email": "a@e.com", "destination_country": "Mockland"}).json()["id"]
     r = client.post(f"/cases/{cid}/start", headers=AUTH)
     assert r.status_code == 200
+
+
+def test_signals_path_also_enforces_passport_block_regression(client):
+    # REGRESSION (review-confirmed high): the passport block must hold on the
+    # /signals path too, not only /start — otherwise an expired-passport case can
+    # be driven to completion by skipping /start.
+    cid = client.post("/cases", headers=AUTH, json={
+        "full_name": "Anna", "email": "a@e.com", "destination_country": "Mockland",
+        "answers": {"expiry_date": "120415"}}).json()["id"]
+    assert client.post(f"/cases/{cid}/start", headers=AUTH).status_code == 409
+    # The alternate entry point is blocked identically.
+    r = client.post(f"/cases/{cid}/signals/approve_review", headers=AUTH, json={})
+    assert r.status_code == 409
+    assert r.json()["detail"]["reason"] == "passport_validity"
+
+
+def test_worker_does_not_start_a_passport_blocked_case_regression(db):
+    # REGRESSION (review-confirmed high): the background worker calls
+    # service.signal and must be subject to the same guard (enforcement lives at
+    # the durable transition point, not in the HTTP handler).
+    from app import worker, models
+    a = models.Applicant(org_id="o", user_id="u", full_name="A", email="a@e.com")
+    db.add(a); db.flush()
+    app_row = models.VisaApplication(org_id="o", user_id="u", applicant_id=a.id,
+                                     destination_country="Mockland",
+                                     answers={"expiry_date": "120415"})
+    db.add(app_row); db.commit()
+    worker.tick_once(db)                       # must NOT advance the blocked case
+    db.refresh(app_row)
+    assert app_row.state == "DRAFT"

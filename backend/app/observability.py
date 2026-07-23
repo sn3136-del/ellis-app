@@ -33,7 +33,9 @@ _SENSITIVE_VALUE = re.compile(
     r"|vault://\S+"                           # vault refs stay internal
     r"|https?://\S*(browserbase|liveview|live-view)\S*"  # Live View URLs
     r"|[A-Z0-9<]{6,}<{2,}[A-Z0-9<]*"          # MRZ fragments
-    r"|\b(?=[A-Z0-9]*[A-Z])(?=[A-Z0-9]*\d)[A-Z0-9]{8,9}\b"  # passport-like ids
+    r"|\b(?=[A-Z0-9]*[A-Z])(?=[A-Z0-9]*\d)[A-Z0-9]{8,9}\b"  # alnum passport-like ids
+    r"|\b\d{8,9}\b"                            # all-numeric passport/ID numbers (e.g. US 9-digit)
+    r"|[?&](sig|token|t)=[A-Za-z0-9._\-]+"     # signed URL params (doc preview / deep links)
     r")")
 
 
@@ -115,7 +117,10 @@ def init_otel() -> str:
     except ImportError:
         _STATE["otel"] = "disabled (opentelemetry not installed)"
         return _STATE["otel"]
-    _STATE["otel"] = "enabled"    # pragma: no cover - full setup needs the SDK
+    # Honest: the package + endpoint are present, but this build does not wire a
+    # TracerProvider/OTLP exporter, so nothing is actually exported. Do NOT claim
+    # 'enabled'. Wiring the exporter is a deliberate activation step.
+    _STATE["otel"] = "configured (exporter not wired in this build)"  # pragma: no cover
     return _STATE["otel"]
 
 

@@ -33,6 +33,11 @@ _ADAPTER_RUNG = {
     "limited_rollout": "production_approved",
     "production_active": "production_approved",
 }
+# Lifecycle states that count as "an adapter is actually implemented". Early
+# states (discovered / disabled_draft / *_review) prove nothing is built yet.
+_ADAPTER_IMPLEMENTED_STATES = {
+    "mock_tested", "staging_tested", "approved", "limited_rollout", "production_active",
+}
 
 _RULE_FIELDS = (
     "source_url", "source_authority", "effective_date", "expiration_date",
@@ -122,33 +127,47 @@ def route_status(db, *, destination: str, visa_type: str = "tourist", nationalit
         models.PortalDraft.country == destination,
         models.PortalDraft.visa_type == visa_type)).scalars().all()
     has_sources = any((d.draft or {}).get("verified_candidates") for d in drafts)
-    fee = verified_current_fee(db, **args)
+    fee = verified_current_fee(db, **args)   # None if absent, unreviewed, OR stale
+    # Deterministic adapter selection (create_adapter allows duplicates).
     adapter = db.execute(select(models.AdapterRecord).where(
         models.AdapterRecord.country == destination,
-        models.AdapterRecord.visa_type == visa_type)).scalars().first()
+        models.AdapterRecord.visa_type == visa_type
+    ).order_by(models.AdapterRecord.version.desc(),
+               models.AdapterRecord.created_at.desc())).scalars().first()
 
+    # Build the earned rung WITHOUT skipping: each level requires the level
+    # below it. Preparation/handoff both require verified requirements AND a
+    # verified, non-stale fee.
     status = "not_researched"
     if has_sources or pending is not None:
         status = "sources_discovered"
     if verified is not None:
         status = "requirements_verified"
         if fee is not None:
-            # Requirements + fees verified ⇒ Ellis can prepare the application
-            # and hand off — the highest rung evidence supports without an adapter.
+            status = "fees_verified"
+            status = "preparation_supported"
             status = "applicant_handoff_supported"
-    if adapter is not None and verified is not None:
-        status = max(status, "adapter_implemented", key=STATUS_LADDER.index)
-        rung = _ADAPTER_RUNG.get(adapter.lifecycle_state)
-        if rung:
-            status = max(status, rung, key=STATUS_LADDER.index)
+
+    # Adapter rungs require verified requirements AND a verified fee — and only
+    # a MEANINGFUL adapter lifecycle counts (a 'discovered'/'disabled_draft'
+    # record proves nothing is implemented). A paused/killed adapter reports
+    # temporarily_paused regardless of the earned rung.
+    if adapter is not None:
         if adapter.lifecycle_state in ("paused", "rolled_back") or adapter.kill_switch:
             return {**args, "status": "temporarily_paused", "paused": True,
                     "rule_version": verified.version if verified else None,
                     "fee_verified": fee is not None}
+        if verified is not None and fee is not None:
+            if adapter.lifecycle_state in _ADAPTER_IMPLEMENTED_STATES:
+                status = max(status, "adapter_implemented", key=STATUS_LADDER.index)
+            rung = _ADAPTER_RUNG.get(adapter.lifecycle_state)
+            if rung:
+                status = max(status, rung, key=STATUS_LADDER.index)
     return {**args, "status": status, "paused": False,
             "rule_version": verified.version if verified else None,
             "rule_review": (pending.review_status if pending else None),
-            "fee_verified": fee is not None}
+            "fee_verified": fee is not None,
+            "adapter_lifecycle": adapter.lifecycle_state if adapter else None}
 
 
 def coverage_matrix(db) -> list[dict]:

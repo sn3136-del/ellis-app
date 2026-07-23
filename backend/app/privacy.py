@@ -78,6 +78,16 @@ def delete_case(db, application_id: str, *, actor: str = "applicant", reason: st
         raise KeyError("case not found")
     org_id = app.org_id
     counts = {}
+    # Document preview bytes are keyed by document_id (not application_id), so
+    # erase them explicitly — otherwise raw passport-scan bytes would survive
+    # applicant erasure indefinitely.
+    doc_ids = [d.id for d in _rows(db, models.StoredDocument, application_id)]
+    blob_n = 0
+    for did in doc_ids:
+        blob = db.get(models.DocumentBlob, did)
+        if blob:
+            db.delete(blob); blob_n += 1
+    counts["document_blobs"] = blob_n
     for model in _CASE_CHILD_MODELS:
         rows = _rows(db, model, application_id)
         counts[model.__tablename__] = len(rows)

@@ -65,6 +65,29 @@ def test_retry_then_dead_letter_and_replay(db, client):
     assert listing[row.id]["status"] == "dead"     # original never mutated
 
 
+def test_unconfigured_delivery_retries_after_config_regression(db):
+    # REGRESSION (review-confirmed): an event queued BEFORE the sandbox endpoint
+    # is configured must be delivered once configuration arrives (not stuck).
+    tripcom_admin.queue_event(db, org_id="orgLate",
+                              event=tripcom.case_status_event(
+                                  tripcom_case_ref="L", ellis_case_id="e", state="COMPLETED"))
+    assert tripcom_admin.process_deliveries(db, org_id="orgLate")["unconfigured"] == 1
+    _configured(db, org="orgLate")
+    out = tripcom_admin.process_deliveries(db, org_id="orgLate", transport=lambda e, h, b: {"ok": True})
+    assert out["delivered"] == 1
+    assert tripcom_admin.list_deliveries(db, "orgLate")[0]["status"] == "delivered"
+
+
+def test_replay_and_original_get_distinct_nonces_regression(db):
+    # REGRESSION: identical payloads signed in the same second must get DISTINCT
+    # nonces (else one is rejected as a replay of the other).
+    c = tripcom.SandboxClient("s", "https://x.example")
+    body = {"type": "case.status", "x": 1}
+    h1 = c.signed_headers(body)
+    h2 = c.signed_headers(body)
+    assert h1["X-Tripcom-Nonce"] != h2["X-Tripcom-Nonce"]
+
+
 def test_health_is_honestly_labeled(db):
     _configured(db)
     h = tripcom_admin.health(db, "orgTC")

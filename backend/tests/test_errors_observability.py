@@ -132,6 +132,23 @@ def test_sentry_otel_honestly_disabled(monkeypatch):
     assert st["sentry"].startswith("disabled") and st["otel"].startswith("disabled")
 
 
+def test_scrub_redacts_all_numeric_passport_and_signed_params_regression():
+    # REGRESSION (review-confirmed): all-numeric passport numbers + signed URL
+    # params must be scrubbed from logs/telemetry.
+    rec = obs.scrub({"msg": "passport 123456789 at /documents/x/content?exp=1&sig=deadbeefcafe"})
+    blob = json.dumps(rec)
+    assert "123456789" not in blob
+    assert "sig=deadbeefcafe" not in blob
+
+
+def test_otel_never_claims_enabled_without_exporter_regression(monkeypatch):
+    # REGRESSION: init_otel must not report 'enabled' when no exporter is wired.
+    monkeypatch.setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://collector:4317")
+    st = obs.init_otel()
+    assert st != "enabled"
+    assert st.startswith("disabled") or st.startswith("configured")
+
+
 def test_request_log_carries_no_query_string(client):
     # The middleware logs method/path/status only — exercise a request and make
     # sure a signed query param never reaches the structured record.

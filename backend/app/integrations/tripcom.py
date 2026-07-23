@@ -12,6 +12,7 @@ import hashlib
 import hmac
 import json
 import time
+import uuid
 
 CONTRACT_VERSION = "tripcom-sandbox-v1"
 _SIGN_HEADER = "X-Tripcom-Signature"
@@ -97,7 +98,10 @@ class SandboxClient:
     def signed_headers(self, body: dict) -> dict:
         raw = json.dumps(body, sort_keys=True).encode()
         ts = str(int(time.time()))
-        nonce = hashlib.sha256(raw + ts.encode()).hexdigest()[:16]
+        # A random nonce (not derived from body+ts) so two identical payloads
+        # signed in the same second — e.g. a retry and an admin replay — get
+        # DISTINCT nonces and neither is rejected as a replay of the other.
+        nonce = uuid.uuid4().hex[:16]
         return {_TS_HEADER: ts, _NONCE_HEADER: nonce, _SIGN_HEADER: sign_payload(self.secret, raw, ts, nonce)}
 
 

@@ -59,6 +59,10 @@ REQUIRED_APPLICANT_INFO: dict[str, str] = {
 
 # Execution classes that involve a REAL external portal → gate-enforced.
 LIVE_CLASSES = {ExecutionClass.LIVE_SANDBOX, ExecutionClass.LIVE_PRODUCTION}
+# Classes that must NEVER auto-proceed: an unknown/undeclared driver
+# (MANUAL_REVIEW_REQUIRED) or an unsupported route. Only MOCK / LOCAL_PROVIDER
+# proceed without gates (they cannot touch a real portal and are labeled).
+BLOCKED_CLASSES = {ExecutionClass.MANUAL_REVIEW_REQUIRED, ExecutionClass.UNSUPPORTED}
 
 
 class PreparationOnlyMode(Exception):
@@ -90,9 +94,11 @@ def _row(db, *, destination: str, visa_type: str, nationality: str = "",
 
 
 def readiness(db, *, destination: str, visa_type: str = "tourist",
-              nationality: str = "", residence: str = "") -> dict:
+              nationality: str = "", residence: str = "", include_evidence: bool = False) -> dict:
     """The honest gate report for one exact route. A route with no record has
-    every gate incomplete — absence of evidence is never readiness."""
+    every gate incomplete — absence of evidence is never readiness. Gate
+    evidence text + the recording admin's id are internal audit material and are
+    included ONLY when include_evidence=True (admin views)."""
     row = _row(db, destination=destination, visa_type=visa_type,
                nationality=nationality, residence=residence)
     stored = (row.gates if row else {}) or {}
@@ -101,9 +107,11 @@ def readiness(db, *, destination: str, visa_type: str = "tourist",
     for key, label in GATES.items():
         entry = stored.get(key) or {}
         complete = bool(entry.get("complete"))
-        gates[key] = {"label": label, "complete": complete,
-                      "evidence": entry.get("evidence", ""),
-                      "by": entry.get("by", ""), "at": entry.get("at", "")}
+        g = {"label": label, "complete": complete}
+        if include_evidence:
+            g.update({"evidence": entry.get("evidence", ""),
+                      "by": entry.get("by", ""), "at": entry.get("at", "")})
+        gates[key] = g
         if not complete:
             missing.append(key)
     return {"destination": destination, "visa_type": visa_type,
@@ -133,7 +141,7 @@ def set_gate(db, *, destination: str, visa_type: str, nationality: str, residenc
                          "nationality": nationality, "residence": residence,
                          "gate": gate, "complete": complete}, actor=actor)
     return readiness(db, destination=destination, visa_type=visa_type,
-                     nationality=nationality, residence=residence)
+                     nationality=nationality, residence=residence, include_evidence=True)
 
 
 def missing_applicant_info(app_row: models.VisaApplication) -> list[dict]:
@@ -188,6 +196,10 @@ def assert_ready_for_live_action(db, app_row: models.VisaApplication, ec) -> Non
     execution class is live. Mock/local classes pass through (they cannot touch
     a real portal, and are labeled MOCK end-to-end)."""
     ec = coerce(ec)
+    # An unknown/undeclared driver or unsupported route must never auto-proceed
+    # (fail safe) — treat it as fully un-ready pending manual review.
+    if ec in BLOCKED_CLASSES:
+        raise PreparationOnlyMode(list(GATES.keys()), [])
     if ec not in LIVE_CLASSES:
         return
     pre = live_preflight(db, app_row, ec)

@@ -47,6 +47,14 @@ RULE_KINDS = ("valid_on_arrival", "valid_through_departure",
               "months_after_arrival", "months_after_departure")
 
 
+class PassportBlocked(Exception):
+    """Raised to hard-block a workflow transition when the passport is expired
+    or has insufficient validity for the destination. Carries the verdict."""
+    def __init__(self, verdict: dict):
+        self.verdict = verdict
+        super().__init__(verdict.get("explanation", "passport validity blocks this action"))
+
+
 def parse_expiry(value: str) -> date | None:
     """Accept MRZ YYMMDD or ISO YYYY-MM-DD. MRZ century pivot: <70 → 20xx."""
     v = (value or "").strip()
@@ -151,6 +159,15 @@ def check_case_passport(db, app_row: models.VisaApplication, *, today: date | No
                                     f"expires {expiry.isoformat()}."),
                     "renewal": renewal_instructions(issuing),
                     "retry": "Upload the renewed passport and try again — your case is preserved."}
+        # The rule needs travel dates we don't have yet → we did NOT evaluate it.
+        # Report honestly (do not claim the rule was satisfied).
+        if need_until is None and rule.get("kind") in ("valid_on_arrival", "valid_through_departure",
+                                                       "months_after_arrival", "months_after_departure"):
+            return {"status": "ok_pending_travel_dates", "blocking": False,
+                    "expiry_date": expiry.isoformat(), "rule": rule,
+                    "explanation": (f"The passport is not expired, but {app_row.destination_country}'s "
+                                    "validity rule depends on your intended travel dates, which aren't "
+                                    "provided yet — it will be checked once you supply them.")}
         min_pages = int(rule.get("min_blank_pages", 0) or 0)
         if min_pages:
             return {"status": "ok_with_conditions", "blocking": False,
@@ -175,7 +192,9 @@ def _iso(v) -> date | None:
 
 def enforce_and_notify(db, app_row: models.VisaApplication, verdict: dict, *, locale: str = "en") -> None:
     """On a blocking verdict: email the renewal instructions (queued through the
-    Phase 8 pipeline) and record the block. Idempotent per (case, status)."""
+    Phase 8 pipeline) and record the block. The renewal email is sent at most
+    once per case (deduped on the 'passport_expired' event), so repeated blocked
+    transitions don't spam the applicant."""
     from . import emails, audit
     if not verdict.get("blocking"):
         return

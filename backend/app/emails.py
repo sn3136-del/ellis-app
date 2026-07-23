@@ -133,6 +133,8 @@ class SensitiveContentError(ValueError):
 def _deep_link(application_id: str, *, ttl_seconds: int = 72 * 3600) -> str:
     """Signed, expiring case deep link (no session cookie, no PII in the URL)."""
     s = settings()
+    # Configured tenant app URL (ELLIS_APP_BASE_URL); the placeholder is used
+    # only in local/dev where no app URL is set.
     base = (getattr(s, "app_base_url", "") or "https://app.ellis.example")
     exp = int(time.time()) + ttl_seconds
     payload = f"{application_id}.{exp}"
@@ -226,11 +228,12 @@ def process_queue(db, *, org_id: str = "", sender=None, max_attempts: int = MAX_
     `sender(to, subject, body)->{ok, delivered, ...}` is injectable for tests."""
     rows = db.execute(select(models.EmailNotification).where(
         models.EmailNotification.status.in_(("queued", "failed")))).scalars().all()
-    sent = failed = dead = recorded = 0
+    sent = failed = dead = recorded = attempted = 0
     for row in rows:
         app_row = db.get(models.VisaApplication, row.application_id)
         if org_id and (not app_row or app_row.org_id != org_id):
-            continue
+            continue    # different tenant / orphaned — not attempted, not counted
+        attempted += 1
         send = sender or _default_sender(db, app_row.org_id if app_row else "")
         try:
             result = send(to=row.to_addr, subject=row.subject, body=row.body)
@@ -253,7 +256,7 @@ def process_queue(db, *, org_id: str = "", sender=None, max_attempts: int = MAX_
                 row.status = "failed"
                 failed += 1
     db.commit()
-    return {"processed": len(rows), "sent": sent, "recorded": recorded,
+    return {"processed": attempted, "sent": sent, "recorded": recorded,
             "failed": failed, "dead_lettered": dead}
 
 

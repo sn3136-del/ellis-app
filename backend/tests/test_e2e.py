@@ -55,7 +55,7 @@ def _new_case(db, org="org1", user="user1", country="Mockland"):
         org_id=org, user_id=user, applicant_id=a.id, destination_country=country,
         answers={"full_name": "Anna Eriksson", "email": "anna@example.com",
                  "passport_number": "L898902C3", "nationality": "UTO", "birth_date": "740812",
-                 "sex": "F", "passport_expiry": "120415", "intended_arrival": "2026-10-10",
+                 "sex": "F", "passport_expiry": "330415", "intended_arrival": "2026-10-10",
                  "intended_departure": "2026-10-20", "entry_checkpoint": "Noi Bai",
                  "accommodation": "Hotel"})
     db.add(app_row)

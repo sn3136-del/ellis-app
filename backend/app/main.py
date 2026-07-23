@@ -122,10 +122,13 @@ class GateBody(BaseModel):
 @app.get("/routes/readiness")
 def route_readiness(destination: str, visa_type: str = "tourist", nationality: str = "",
                     residence: str = "", db=Depends(get_session),
-                    _: Principal = Depends(get_principal)):
+                    p: Principal = Depends(get_principal)):
     from . import personal_gate
+    # Gate evidence + the recording admin's id are internal audit material —
+    # included only for the admin role.
     return personal_gate.readiness(db, destination=destination, visa_type=visa_type,
-                                   nationality=nationality, residence=residence)
+                                   nationality=nationality, residence=residence,
+                                   include_evidence=(p.role == "admin"))
 
 
 @app.post("/admin/routes/readiness")
@@ -1108,33 +1111,29 @@ def _record_terminal_execution(db, p: Principal, application_id: str):
         tripcom_admin.queue_event(db, org_id=p.org_id, event=event)
 
 
-@app.post("/cases/{application_id}/start")
-def start_case(application_id: str, db=Depends(get_session), p: Principal = Depends(get_principal)):
-    from . import personal_gate
-    app_row = _owned(db, p, application_id)
-    # HARD GATE: a route whose adapter is live (sandbox/production) may not start
-    # unless every readiness gate and all required applicant info are complete.
-    # Mock/local routes proceed — they cannot touch a real portal and are
-    # labeled MOCK end-to-end.
-    ec = _case_execution_class(app_row.destination_country, app_row.visa_type)
+def _signal_or_gate_error(db, p: Principal, application_id: str, name: str, **kwargs):
+    """Drive one workflow transition, translating the centralized safety-gate
+    exceptions (service.enforce_safety) into honest 409s. Both /start and
+    /signals route through here so neither can bypass the gate."""
+    from . import personal_gate, passport_validity
     try:
-        personal_gate.assert_ready_for_live_action(db, app_row, ec)
+        status, _ = service.signal(db, application_id, name, **kwargs)
     except personal_gate.PreparationOnlyMode as e:
         audit.record(db, org_id=p.org_id, application_id=application_id,
-                     action="live_start_blocked_preparation_mode",
-                     detail={"missing_gates": e.missing_gates, "missing_info": e.missing_info},
-                     actor=p.user_id)
+                     action="live_action_blocked_preparation_mode",
+                     detail={"missing_gates": e.missing_gates, "missing_info": e.missing_info,
+                             "signal": name}, actor=p.user_id)
         raise HTTPException(409, str(e))
-    # Phase 5: an expired / insufficient-validity passport blocks submission.
-    from . import passport_validity
-    validity = passport_validity.check_case_passport(db, app_row)
-    if validity.get("blocking"):
-        passport_validity.enforce_and_notify(db, app_row, validity)
-        raise HTTPException(409, detail={"reason": "passport_validity",
-                                         "verdict": validity})
-    status, _ = service.signal(db, application_id, "start")
+    except passport_validity.PassportBlocked as e:
+        raise HTTPException(409, detail={"reason": "passport_validity", "verdict": e.verdict})
     _record_terminal_execution(db, p, application_id)
     return status
+
+
+@app.post("/cases/{application_id}/start")
+def start_case(application_id: str, db=Depends(get_session), p: Principal = Depends(get_principal)):
+    _owned(db, p, application_id)
+    return _signal_or_gate_error(db, p, application_id, "start")
 
 
 @app.post("/cases/{application_id}/signals/{name}")
@@ -1149,9 +1148,7 @@ def send_signal(application_id: str, name: str, body: Optional[SignalBody] = Non
         kwargs["token"] = body.token
     if name == "select_appointment":
         kwargs["slot_id"] = body.slot_id
-    status, _ = service.signal(db, application_id, name, **kwargs)
-    _record_terminal_execution(db, p, application_id)
-    return status
+    return _signal_or_gate_error(db, p, application_id, name, **kwargs)
 
 
 @app.get("/cases/{application_id}/audit")
