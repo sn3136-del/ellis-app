@@ -1,0 +1,1453 @@
+{
+  "entries": [
+    {
+      "alpha_2": "AF",
+      "code": "AFG",
+      "kind": "state_nationality",
+      "name": "Afghanistan",
+      "notes": null
+    },
+    {
+      "alpha_2": "AO",
+      "code": "AGO",
+      "kind": "state_nationality",
+      "name": "Angola",
+      "notes": null
+    },
+    {
+      "alpha_2": "AL",
+      "code": "ALB",
+      "kind": "state_nationality",
+      "name": "Albania",
+      "notes": null
+    },
+    {
+      "alpha_2": "AD",
+      "code": "AND",
+      "kind": "state_nationality",
+      "name": "Andorra",
+      "notes": null
+    },
+    {
+      "alpha_2": "AE",
+      "code": "ARE",
+      "kind": "state_nationality",
+      "name": "United Arab Emirates",
+      "notes": null
+    },
+    {
+      "alpha_2": "AR",
+      "code": "ARG",
+      "kind": "state_nationality",
+      "name": "Argentina",
+      "notes": null
+    },
+    {
+      "alpha_2": "AM",
+      "code": "ARM",
+      "kind": "state_nationality",
+      "name": "Armenia",
+      "notes": null
+    },
+    {
+      "alpha_2": "AG",
+      "code": "ATG",
+      "kind": "state_nationality",
+      "name": "Antigua and Barbuda",
+      "notes": null
+    },
+    {
+      "alpha_2": "AU",
+      "code": "AUS",
+      "kind": "state_nationality",
+      "name": "Australia",
+      "notes": null
+    },
+    {
+      "alpha_2": "AT",
+      "code": "AUT",
+      "kind": "state_nationality",
+      "name": "Austria",
+      "notes": null
+    },
+    {
+      "alpha_2": "AZ",
+      "code": "AZE",
+      "kind": "state_nationality",
+      "name": "Azerbaijan",
+      "notes": null
+    },
+    {
+      "alpha_2": "BI",
+      "code": "BDI",
+      "kind": "state_nationality",
+      "name": "Burundi",
+      "notes": null
+    },
+    {
+      "alpha_2": "BE",
+      "code": "BEL",
+      "kind": "state_nationality",
+      "name": "Belgium",
+      "notes": null
+    },
+    {
+      "alpha_2": "BJ",
+      "code": "BEN",
+      "kind": "state_nationality",
+      "name": "Benin",
+      "notes": null
+    },
+    {
+      "alpha_2": "BF",
+      "code": "BFA",
+      "kind": "state_nationality",
+      "name": "Burkina Faso",
+      "notes": null
+    },
+    {
+      "alpha_2": "BD",
+      "code": "BGD",
+      "kind": "state_nationality",
+      "name": "Bangladesh",
+      "notes": null
+    },
+    {
+      "alpha_2": "BG",
+      "code": "BGR",
+      "kind": "state_nationality",
+      "name": "Bulgaria",
+      "notes": null
+    },
+    {
+      "alpha_2": "BH",
+      "code": "BHR",
+      "kind": "state_nationality",
+      "name": "Bahrain",
+      "notes": null
+    },
+    {
+      "alpha_2": "BS",
+      "code": "BHS",
+      "kind": "state_nationality",
+      "name": "Bahamas",
+      "notes": null
+    },
+    {
+      "alpha_2": "BA",
+      "code": "BIH",
+      "kind": "state_nationality",
+      "name": "Bosnia and Herzegovina",
+      "notes": null
+    },
+    {
+      "alpha_2": "BY",
+      "code": "BLR",
+      "kind": "state_nationality",
+      "name": "Belarus",
+      "notes": null
+    },
+    {
+      "alpha_2": "BZ",
+      "code": "BLZ",
+      "kind": "state_nationality",
+      "name": "Belize",
+      "notes": null
+    },
+    {
+      "alpha_2": "BO",
+      "code": "BOL",
+      "kind": "state_nationality",
+      "name": "Bolivia, Plurinational State of",
+      "notes": null
+    },
+    {
+      "alpha_2": "BR",
+      "code": "BRA",
+      "kind": "state_nationality",
+      "name": "Brazil",
+      "notes": null
+    },
+    {
+      "alpha_2": "BB",
+      "code": "BRB",
+      "kind": "state_nationality",
+      "name": "Barbados",
+      "notes": null
+    },
+    {
+      "alpha_2": "BN",
+      "code": "BRN",
+      "kind": "state_nationality",
+      "name": "Brunei Darussalam",
+      "notes": null
+    },
+    {
+      "alpha_2": "BT",
+      "code": "BTN",
+      "kind": "state_nationality",
+      "name": "Bhutan",
+      "notes": null
+    },
+    {
+      "alpha_2": "BW",
+      "code": "BWA",
+      "kind": "state_nationality",
+      "name": "Botswana",
+      "notes": null
+    },
+    {
+      "alpha_2": "CF",
+      "code": "CAF",
+      "kind": "state_nationality",
+      "name": "Central African Republic",
+      "notes": null
+    },
+    {
+      "alpha_2": "CA",
+      "code": "CAN",
+      "kind": "state_nationality",
+      "name": "Canada",
+      "notes": null
+    },
+    {
+      "alpha_2": "CH",
+      "code": "CHE",
+      "kind": "state_nationality",
+      "name": "Switzerland",
+      "notes": null
+    },
+    {
+      "alpha_2": "CL",
+      "code": "CHL",
+      "kind": "state_nationality",
+      "name": "Chile",
+      "notes": null
+    },
+    {
+      "alpha_2": "CN",
+      "code": "CHN",
+      "kind": "state_nationality",
+      "name": "China",
+      "notes": null
+    },
+    {
+      "alpha_2": "CI",
+      "code": "CIV",
+      "kind": "state_nationality",
+      "name": "Côte d'Ivoire",
+      "notes": null
+    },
+    {
+      "alpha_2": "CM",
+      "code": "CMR",
+      "kind": "state_nationality",
+      "name": "Cameroon",
+      "notes": null
+    },
+    {
+      "alpha_2": "CD",
+      "code": "COD",
+      "kind": "state_nationality",
+      "name": "Congo, The Democratic Republic of the",
+      "notes": null
+    },
+    {
+      "alpha_2": "CG",
+      "code": "COG",
+      "kind": "state_nationality",
+      "name": "Congo",
+      "notes": null
+    },
+    {
+      "alpha_2": "CO",
+      "code": "COL",
+      "kind": "state_nationality",
+      "name": "Colombia",
+      "notes": null
+    },
+    {
+      "alpha_2": "KM",
+      "code": "COM",
+      "kind": "state_nationality",
+      "name": "Comoros",
+      "notes": null
+    },
+    {
+      "alpha_2": "CV",
+      "code": "CPV",
+      "kind": "state_nationality",
+      "name": "Cabo Verde",
+      "notes": null
+    },
+    {
+      "alpha_2": "CR",
+      "code": "CRI",
+      "kind": "state_nationality",
+      "name": "Costa Rica",
+      "notes": null
+    },
+    {
+      "alpha_2": "CU",
+      "code": "CUB",
+      "kind": "state_nationality",
+      "name": "Cuba",
+      "notes": null
+    },
+    {
+      "alpha_2": "CY",
+      "code": "CYP",
+      "kind": "state_nationality",
+      "name": "Cyprus",
+      "notes": null
+    },
+    {
+      "alpha_2": "CZ",
+      "code": "CZE",
+      "kind": "state_nationality",
+      "name": "Czechia",
+      "notes": null
+    },
+    {
+      "alpha_2": "DE",
+      "code": "DEU",
+      "kind": "state_nationality",
+      "name": "Germany",
+      "notes": null
+    },
+    {
+      "alpha_2": "DJ",
+      "code": "DJI",
+      "kind": "state_nationality",
+      "name": "Djibouti",
+      "notes": null
+    },
+    {
+      "alpha_2": "DM",
+      "code": "DMA",
+      "kind": "state_nationality",
+      "name": "Dominica",
+      "notes": null
+    },
+    {
+      "alpha_2": "DK",
+      "code": "DNK",
+      "kind": "state_nationality",
+      "name": "Denmark",
+      "notes": null
+    },
+    {
+      "alpha_2": "DO",
+      "code": "DOM",
+      "kind": "state_nationality",
+      "name": "Dominican Republic",
+      "notes": null
+    },
+    {
+      "alpha_2": "DZ",
+      "code": "DZA",
+      "kind": "state_nationality",
+      "name": "Algeria",
+      "notes": null
+    },
+    {
+      "alpha_2": "EC",
+      "code": "ECU",
+      "kind": "state_nationality",
+      "name": "Ecuador",
+      "notes": null
+    },
+    {
+      "alpha_2": "EG",
+      "code": "EGY",
+      "kind": "state_nationality",
+      "name": "Egypt",
+      "notes": null
+    },
+    {
+      "alpha_2": "ER",
+      "code": "ERI",
+      "kind": "state_nationality",
+      "name": "Eritrea",
+      "notes": null
+    },
+    {
+      "alpha_2": "ES",
+      "code": "ESP",
+      "kind": "state_nationality",
+      "name": "Spain",
+      "notes": null
+    },
+    {
+      "alpha_2": "EE",
+      "code": "EST",
+      "kind": "state_nationality",
+      "name": "Estonia",
+      "notes": null
+    },
+    {
+      "alpha_2": "ET",
+      "code": "ETH",
+      "kind": "state_nationality",
+      "name": "Ethiopia",
+      "notes": null
+    },
+    {
+      "alpha_2": "FI",
+      "code": "FIN",
+      "kind": "state_nationality",
+      "name": "Finland",
+      "notes": null
+    },
+    {
+      "alpha_2": "FJ",
+      "code": "FJI",
+      "kind": "state_nationality",
+      "name": "Fiji",
+      "notes": null
+    },
+    {
+      "alpha_2": "FR",
+      "code": "FRA",
+      "kind": "state_nationality",
+      "name": "France",
+      "notes": null
+    },
+    {
+      "alpha_2": "FM",
+      "code": "FSM",
+      "kind": "state_nationality",
+      "name": "Micronesia, Federated States of",
+      "notes": null
+    },
+    {
+      "alpha_2": "GA",
+      "code": "GAB",
+      "kind": "state_nationality",
+      "name": "Gabon",
+      "notes": null
+    },
+    {
+      "alpha_2": null,
+      "code": "GBD",
+      "kind": "british_class",
+      "name": "British Overseas Territories Citizen",
+      "notes": "BOTC — distinct from British Citizen (GBR)."
+    },
+    {
+      "alpha_2": null,
+      "code": "GBN",
+      "kind": "british_class",
+      "name": "British National (Overseas)",
+      "notes": "BN(O) — Hong Kong-linked British nationality class."
+    },
+    {
+      "alpha_2": null,
+      "code": "GBO",
+      "kind": "british_class",
+      "name": "British Overseas Citizen",
+      "notes": "BOC."
+    },
+    {
+      "alpha_2": null,
+      "code": "GBP",
+      "kind": "british_class",
+      "name": "British Protected Person",
+      "notes": "BPP."
+    },
+    {
+      "alpha_2": "GB",
+      "code": "GBR",
+      "kind": "state_nationality",
+      "name": "United Kingdom",
+      "notes": null
+    },
+    {
+      "alpha_2": null,
+      "code": "GBS",
+      "kind": "british_class",
+      "name": "British Subject",
+      "notes": "British Subject under the British Nationality Act 1981."
+    },
+    {
+      "alpha_2": "GE",
+      "code": "GEO",
+      "kind": "state_nationality",
+      "name": "Georgia",
+      "notes": null
+    },
+    {
+      "alpha_2": "GH",
+      "code": "GHA",
+      "kind": "state_nationality",
+      "name": "Ghana",
+      "notes": null
+    },
+    {
+      "alpha_2": "GN",
+      "code": "GIN",
+      "kind": "state_nationality",
+      "name": "Guinea",
+      "notes": null
+    },
+    {
+      "alpha_2": "GM",
+      "code": "GMB",
+      "kind": "state_nationality",
+      "name": "Gambia",
+      "notes": null
+    },
+    {
+      "alpha_2": "GW",
+      "code": "GNB",
+      "kind": "state_nationality",
+      "name": "Guinea-Bissau",
+      "notes": null
+    },
+    {
+      "alpha_2": "GQ",
+      "code": "GNQ",
+      "kind": "state_nationality",
+      "name": "Equatorial Guinea",
+      "notes": null
+    },
+    {
+      "alpha_2": "GR",
+      "code": "GRC",
+      "kind": "state_nationality",
+      "name": "Greece",
+      "notes": null
+    },
+    {
+      "alpha_2": "GD",
+      "code": "GRD",
+      "kind": "state_nationality",
+      "name": "Grenada",
+      "notes": null
+    },
+    {
+      "alpha_2": "GT",
+      "code": "GTM",
+      "kind": "state_nationality",
+      "name": "Guatemala",
+      "notes": null
+    },
+    {
+      "alpha_2": "GY",
+      "code": "GUY",
+      "kind": "state_nationality",
+      "name": "Guyana",
+      "notes": null
+    },
+    {
+      "alpha_2": "HK",
+      "code": "HKG",
+      "kind": "territory_document_class",
+      "name": "Hong Kong",
+      "notes": null
+    },
+    {
+      "alpha_2": "HN",
+      "code": "HND",
+      "kind": "state_nationality",
+      "name": "Honduras",
+      "notes": null
+    },
+    {
+      "alpha_2": "HR",
+      "code": "HRV",
+      "kind": "state_nationality",
+      "name": "Croatia",
+      "notes": null
+    },
+    {
+      "alpha_2": "HT",
+      "code": "HTI",
+      "kind": "state_nationality",
+      "name": "Haiti",
+      "notes": null
+    },
+    {
+      "alpha_2": "HU",
+      "code": "HUN",
+      "kind": "state_nationality",
+      "name": "Hungary",
+      "notes": null
+    },
+    {
+      "alpha_2": "ID",
+      "code": "IDN",
+      "kind": "state_nationality",
+      "name": "Indonesia",
+      "notes": null
+    },
+    {
+      "alpha_2": "IN",
+      "code": "IND",
+      "kind": "state_nationality",
+      "name": "India",
+      "notes": null
+    },
+    {
+      "alpha_2": "IE",
+      "code": "IRL",
+      "kind": "state_nationality",
+      "name": "Ireland",
+      "notes": null
+    },
+    {
+      "alpha_2": "IR",
+      "code": "IRN",
+      "kind": "state_nationality",
+      "name": "Iran, Islamic Republic of",
+      "notes": null
+    },
+    {
+      "alpha_2": "IQ",
+      "code": "IRQ",
+      "kind": "state_nationality",
+      "name": "Iraq",
+      "notes": null
+    },
+    {
+      "alpha_2": "IS",
+      "code": "ISL",
+      "kind": "state_nationality",
+      "name": "Iceland",
+      "notes": null
+    },
+    {
+      "alpha_2": "IL",
+      "code": "ISR",
+      "kind": "state_nationality",
+      "name": "Israel",
+      "notes": null
+    },
+    {
+      "alpha_2": "IT",
+      "code": "ITA",
+      "kind": "state_nationality",
+      "name": "Italy",
+      "notes": null
+    },
+    {
+      "alpha_2": "JM",
+      "code": "JAM",
+      "kind": "state_nationality",
+      "name": "Jamaica",
+      "notes": null
+    },
+    {
+      "alpha_2": "JO",
+      "code": "JOR",
+      "kind": "state_nationality",
+      "name": "Jordan",
+      "notes": null
+    },
+    {
+      "alpha_2": "JP",
+      "code": "JPN",
+      "kind": "state_nationality",
+      "name": "Japan",
+      "notes": null
+    },
+    {
+      "alpha_2": "KZ",
+      "code": "KAZ",
+      "kind": "state_nationality",
+      "name": "Kazakhstan",
+      "notes": null
+    },
+    {
+      "alpha_2": "KE",
+      "code": "KEN",
+      "kind": "state_nationality",
+      "name": "Kenya",
+      "notes": null
+    },
+    {
+      "alpha_2": "KG",
+      "code": "KGZ",
+      "kind": "state_nationality",
+      "name": "Kyrgyzstan",
+      "notes": null
+    },
+    {
+      "alpha_2": "KH",
+      "code": "KHM",
+      "kind": "state_nationality",
+      "name": "Cambodia",
+      "notes": null
+    },
+    {
+      "alpha_2": "KI",
+      "code": "KIR",
+      "kind": "state_nationality",
+      "name": "Kiribati",
+      "notes": null
+    },
+    {
+      "alpha_2": "KN",
+      "code": "KNA",
+      "kind": "state_nationality",
+      "name": "Saint Kitts and Nevis",
+      "notes": null
+    },
+    {
+      "alpha_2": "KR",
+      "code": "KOR",
+      "kind": "state_nationality",
+      "name": "Korea, Republic of",
+      "notes": null
+    },
+    {
+      "alpha_2": "KW",
+      "code": "KWT",
+      "kind": "state_nationality",
+      "name": "Kuwait",
+      "notes": null
+    },
+    {
+      "alpha_2": "LA",
+      "code": "LAO",
+      "kind": "state_nationality",
+      "name": "Lao People's Democratic Republic",
+      "notes": null
+    },
+    {
+      "alpha_2": "LB",
+      "code": "LBN",
+      "kind": "state_nationality",
+      "name": "Lebanon",
+      "notes": null
+    },
+    {
+      "alpha_2": "LR",
+      "code": "LBR",
+      "kind": "state_nationality",
+      "name": "Liberia",
+      "notes": null
+    },
+    {
+      "alpha_2": "LY",
+      "code": "LBY",
+      "kind": "state_nationality",
+      "name": "Libya",
+      "notes": null
+    },
+    {
+      "alpha_2": "LC",
+      "code": "LCA",
+      "kind": "state_nationality",
+      "name": "Saint Lucia",
+      "notes": null
+    },
+    {
+      "alpha_2": "LI",
+      "code": "LIE",
+      "kind": "state_nationality",
+      "name": "Liechtenstein",
+      "notes": null
+    },
+    {
+      "alpha_2": "LK",
+      "code": "LKA",
+      "kind": "state_nationality",
+      "name": "Sri Lanka",
+      "notes": null
+    },
+    {
+      "alpha_2": "LS",
+      "code": "LSO",
+      "kind": "state_nationality",
+      "name": "Lesotho",
+      "notes": null
+    },
+    {
+      "alpha_2": "LT",
+      "code": "LTU",
+      "kind": "state_nationality",
+      "name": "Lithuania",
+      "notes": null
+    },
+    {
+      "alpha_2": "LU",
+      "code": "LUX",
+      "kind": "state_nationality",
+      "name": "Luxembourg",
+      "notes": null
+    },
+    {
+      "alpha_2": "LV",
+      "code": "LVA",
+      "kind": "state_nationality",
+      "name": "Latvia",
+      "notes": null
+    },
+    {
+      "alpha_2": "MO",
+      "code": "MAC",
+      "kind": "territory_document_class",
+      "name": "Macao",
+      "notes": null
+    },
+    {
+      "alpha_2": "MA",
+      "code": "MAR",
+      "kind": "state_nationality",
+      "name": "Morocco",
+      "notes": null
+    },
+    {
+      "alpha_2": "MC",
+      "code": "MCO",
+      "kind": "state_nationality",
+      "name": "Monaco",
+      "notes": null
+    },
+    {
+      "alpha_2": "MD",
+      "code": "MDA",
+      "kind": "state_nationality",
+      "name": "Moldova, Republic of",
+      "notes": null
+    },
+    {
+      "alpha_2": "MG",
+      "code": "MDG",
+      "kind": "state_nationality",
+      "name": "Madagascar",
+      "notes": null
+    },
+    {
+      "alpha_2": "MV",
+      "code": "MDV",
+      "kind": "state_nationality",
+      "name": "Maldives",
+      "notes": null
+    },
+    {
+      "alpha_2": "MX",
+      "code": "MEX",
+      "kind": "state_nationality",
+      "name": "Mexico",
+      "notes": null
+    },
+    {
+      "alpha_2": "MH",
+      "code": "MHL",
+      "kind": "state_nationality",
+      "name": "Marshall Islands",
+      "notes": null
+    },
+    {
+      "alpha_2": "MK",
+      "code": "MKD",
+      "kind": "state_nationality",
+      "name": "North Macedonia",
+      "notes": null
+    },
+    {
+      "alpha_2": "ML",
+      "code": "MLI",
+      "kind": "state_nationality",
+      "name": "Mali",
+      "notes": null
+    },
+    {
+      "alpha_2": "MT",
+      "code": "MLT",
+      "kind": "state_nationality",
+      "name": "Malta",
+      "notes": null
+    },
+    {
+      "alpha_2": "MM",
+      "code": "MMR",
+      "kind": "state_nationality",
+      "name": "Myanmar",
+      "notes": null
+    },
+    {
+      "alpha_2": "ME",
+      "code": "MNE",
+      "kind": "state_nationality",
+      "name": "Montenegro",
+      "notes": null
+    },
+    {
+      "alpha_2": "MN",
+      "code": "MNG",
+      "kind": "state_nationality",
+      "name": "Mongolia",
+      "notes": null
+    },
+    {
+      "alpha_2": "MZ",
+      "code": "MOZ",
+      "kind": "state_nationality",
+      "name": "Mozambique",
+      "notes": null
+    },
+    {
+      "alpha_2": "MR",
+      "code": "MRT",
+      "kind": "state_nationality",
+      "name": "Mauritania",
+      "notes": null
+    },
+    {
+      "alpha_2": "MU",
+      "code": "MUS",
+      "kind": "state_nationality",
+      "name": "Mauritius",
+      "notes": null
+    },
+    {
+      "alpha_2": "MW",
+      "code": "MWI",
+      "kind": "state_nationality",
+      "name": "Malawi",
+      "notes": null
+    },
+    {
+      "alpha_2": "MY",
+      "code": "MYS",
+      "kind": "state_nationality",
+      "name": "Malaysia",
+      "notes": null
+    },
+    {
+      "alpha_2": "NA",
+      "code": "NAM",
+      "kind": "state_nationality",
+      "name": "Namibia",
+      "notes": null
+    },
+    {
+      "alpha_2": "NE",
+      "code": "NER",
+      "kind": "state_nationality",
+      "name": "Niger",
+      "notes": null
+    },
+    {
+      "alpha_2": "NG",
+      "code": "NGA",
+      "kind": "state_nationality",
+      "name": "Nigeria",
+      "notes": null
+    },
+    {
+      "alpha_2": "NI",
+      "code": "NIC",
+      "kind": "state_nationality",
+      "name": "Nicaragua",
+      "notes": null
+    },
+    {
+      "alpha_2": "NL",
+      "code": "NLD",
+      "kind": "state_nationality",
+      "name": "Netherlands",
+      "notes": null
+    },
+    {
+      "alpha_2": "NO",
+      "code": "NOR",
+      "kind": "state_nationality",
+      "name": "Norway",
+      "notes": null
+    },
+    {
+      "alpha_2": "NP",
+      "code": "NPL",
+      "kind": "state_nationality",
+      "name": "Nepal",
+      "notes": null
+    },
+    {
+      "alpha_2": "NR",
+      "code": "NRU",
+      "kind": "state_nationality",
+      "name": "Nauru",
+      "notes": null
+    },
+    {
+      "alpha_2": "NZ",
+      "code": "NZL",
+      "kind": "state_nationality",
+      "name": "New Zealand",
+      "notes": null
+    },
+    {
+      "alpha_2": "OM",
+      "code": "OMN",
+      "kind": "state_nationality",
+      "name": "Oman",
+      "notes": null
+    },
+    {
+      "alpha_2": "PK",
+      "code": "PAK",
+      "kind": "state_nationality",
+      "name": "Pakistan",
+      "notes": null
+    },
+    {
+      "alpha_2": "PA",
+      "code": "PAN",
+      "kind": "state_nationality",
+      "name": "Panama",
+      "notes": null
+    },
+    {
+      "alpha_2": "PE",
+      "code": "PER",
+      "kind": "state_nationality",
+      "name": "Peru",
+      "notes": null
+    },
+    {
+      "alpha_2": "PH",
+      "code": "PHL",
+      "kind": "state_nationality",
+      "name": "Philippines",
+      "notes": null
+    },
+    {
+      "alpha_2": "PW",
+      "code": "PLW",
+      "kind": "state_nationality",
+      "name": "Palau",
+      "notes": null
+    },
+    {
+      "alpha_2": "PG",
+      "code": "PNG",
+      "kind": "state_nationality",
+      "name": "Papua New Guinea",
+      "notes": null
+    },
+    {
+      "alpha_2": "PL",
+      "code": "POL",
+      "kind": "state_nationality",
+      "name": "Poland",
+      "notes": null
+    },
+    {
+      "alpha_2": "KP",
+      "code": "PRK",
+      "kind": "state_nationality",
+      "name": "Korea, Democratic People's Republic of",
+      "notes": null
+    },
+    {
+      "alpha_2": "PT",
+      "code": "PRT",
+      "kind": "state_nationality",
+      "name": "Portugal",
+      "notes": null
+    },
+    {
+      "alpha_2": "PY",
+      "code": "PRY",
+      "kind": "state_nationality",
+      "name": "Paraguay",
+      "notes": null
+    },
+    {
+      "alpha_2": "QA",
+      "code": "QAT",
+      "kind": "state_nationality",
+      "name": "Qatar",
+      "notes": null
+    },
+    {
+      "alpha_2": "RO",
+      "code": "ROU",
+      "kind": "state_nationality",
+      "name": "Romania",
+      "notes": null
+    },
+    {
+      "alpha_2": "RU",
+      "code": "RUS",
+      "kind": "state_nationality",
+      "name": "Russian Federation",
+      "notes": null
+    },
+    {
+      "alpha_2": "RW",
+      "code": "RWA",
+      "kind": "state_nationality",
+      "name": "Rwanda",
+      "notes": null
+    },
+    {
+      "alpha_2": "SA",
+      "code": "SAU",
+      "kind": "state_nationality",
+      "name": "Saudi Arabia",
+      "notes": null
+    },
+    {
+      "alpha_2": "SD",
+      "code": "SDN",
+      "kind": "state_nationality",
+      "name": "Sudan",
+      "notes": null
+    },
+    {
+      "alpha_2": "SN",
+      "code": "SEN",
+      "kind": "state_nationality",
+      "name": "Senegal",
+      "notes": null
+    },
+    {
+      "alpha_2": "SG",
+      "code": "SGP",
+      "kind": "state_nationality",
+      "name": "Singapore",
+      "notes": null
+    },
+    {
+      "alpha_2": "SB",
+      "code": "SLB",
+      "kind": "state_nationality",
+      "name": "Solomon Islands",
+      "notes": null
+    },
+    {
+      "alpha_2": "SL",
+      "code": "SLE",
+      "kind": "state_nationality",
+      "name": "Sierra Leone",
+      "notes": null
+    },
+    {
+      "alpha_2": "SV",
+      "code": "SLV",
+      "kind": "state_nationality",
+      "name": "El Salvador",
+      "notes": null
+    },
+    {
+      "alpha_2": "SM",
+      "code": "SMR",
+      "kind": "state_nationality",
+      "name": "San Marino",
+      "notes": null
+    },
+    {
+      "alpha_2": "SO",
+      "code": "SOM",
+      "kind": "state_nationality",
+      "name": "Somalia",
+      "notes": null
+    },
+    {
+      "alpha_2": "RS",
+      "code": "SRB",
+      "kind": "state_nationality",
+      "name": "Serbia",
+      "notes": null
+    },
+    {
+      "alpha_2": "SS",
+      "code": "SSD",
+      "kind": "state_nationality",
+      "name": "South Sudan",
+      "notes": null
+    },
+    {
+      "alpha_2": "ST",
+      "code": "STP",
+      "kind": "state_nationality",
+      "name": "Sao Tome and Principe",
+      "notes": null
+    },
+    {
+      "alpha_2": "SR",
+      "code": "SUR",
+      "kind": "state_nationality",
+      "name": "Suriname",
+      "notes": null
+    },
+    {
+      "alpha_2": "SK",
+      "code": "SVK",
+      "kind": "state_nationality",
+      "name": "Slovakia",
+      "notes": null
+    },
+    {
+      "alpha_2": "SI",
+      "code": "SVN",
+      "kind": "state_nationality",
+      "name": "Slovenia",
+      "notes": null
+    },
+    {
+      "alpha_2": "SE",
+      "code": "SWE",
+      "kind": "state_nationality",
+      "name": "Sweden",
+      "notes": null
+    },
+    {
+      "alpha_2": "SZ",
+      "code": "SWZ",
+      "kind": "state_nationality",
+      "name": "Eswatini",
+      "notes": null
+    },
+    {
+      "alpha_2": "SC",
+      "code": "SYC",
+      "kind": "state_nationality",
+      "name": "Seychelles",
+      "notes": null
+    },
+    {
+      "alpha_2": "SY",
+      "code": "SYR",
+      "kind": "state_nationality",
+      "name": "Syrian Arab Republic",
+      "notes": null
+    },
+    {
+      "alpha_2": "TD",
+      "code": "TCD",
+      "kind": "state_nationality",
+      "name": "Chad",
+      "notes": null
+    },
+    {
+      "alpha_2": "TG",
+      "code": "TGO",
+      "kind": "state_nationality",
+      "name": "Togo",
+      "notes": null
+    },
+    {
+      "alpha_2": "TH",
+      "code": "THA",
+      "kind": "state_nationality",
+      "name": "Thailand",
+      "notes": null
+    },
+    {
+      "alpha_2": "TJ",
+      "code": "TJK",
+      "kind": "state_nationality",
+      "name": "Tajikistan",
+      "notes": null
+    },
+    {
+      "alpha_2": "TM",
+      "code": "TKM",
+      "kind": "state_nationality",
+      "name": "Turkmenistan",
+      "notes": null
+    },
+    {
+      "alpha_2": "TL",
+      "code": "TLS",
+      "kind": "state_nationality",
+      "name": "Timor-Leste",
+      "notes": null
+    },
+    {
+      "alpha_2": "TO",
+      "code": "TON",
+      "kind": "state_nationality",
+      "name": "Tonga",
+      "notes": null
+    },
+    {
+      "alpha_2": "TT",
+      "code": "TTO",
+      "kind": "state_nationality",
+      "name": "Trinidad and Tobago",
+      "notes": null
+    },
+    {
+      "alpha_2": "TN",
+      "code": "TUN",
+      "kind": "state_nationality",
+      "name": "Tunisia",
+      "notes": null
+    },
+    {
+      "alpha_2": "TR",
+      "code": "TUR",
+      "kind": "state_nationality",
+      "name": "Türkiye",
+      "notes": null
+    },
+    {
+      "alpha_2": "TV",
+      "code": "TUV",
+      "kind": "state_nationality",
+      "name": "Tuvalu",
+      "notes": null
+    },
+    {
+      "alpha_2": "TW",
+      "code": "TWN",
+      "kind": "territory_document_class",
+      "name": "Taiwan, Province of China",
+      "notes": null
+    },
+    {
+      "alpha_2": "TZ",
+      "code": "TZA",
+      "kind": "state_nationality",
+      "name": "Tanzania, United Republic of",
+      "notes": null
+    },
+    {
+      "alpha_2": "UG",
+      "code": "UGA",
+      "kind": "state_nationality",
+      "name": "Uganda",
+      "notes": null
+    },
+    {
+      "alpha_2": "UA",
+      "code": "UKR",
+      "kind": "state_nationality",
+      "name": "Ukraine",
+      "notes": null
+    },
+    {
+      "alpha_2": "UY",
+      "code": "URY",
+      "kind": "state_nationality",
+      "name": "Uruguay",
+      "notes": null
+    },
+    {
+      "alpha_2": "US",
+      "code": "USA",
+      "kind": "state_nationality",
+      "name": "United States",
+      "notes": null
+    },
+    {
+      "alpha_2": "UZ",
+      "code": "UZB",
+      "kind": "state_nationality",
+      "name": "Uzbekistan",
+      "notes": null
+    },
+    {
+      "alpha_2": "VA",
+      "code": "VAT",
+      "kind": "state_nationality",
+      "name": "Holy See (Vatican City State)",
+      "notes": null
+    },
+    {
+      "alpha_2": "VC",
+      "code": "VCT",
+      "kind": "state_nationality",
+      "name": "Saint Vincent and the Grenadines",
+      "notes": null
+    },
+    {
+      "alpha_2": "VE",
+      "code": "VEN",
+      "kind": "state_nationality",
+      "name": "Venezuela, Bolivarian Republic of",
+      "notes": null
+    },
+    {
+      "alpha_2": "VN",
+      "code": "VNM",
+      "kind": "state_nationality",
+      "name": "Viet Nam",
+      "notes": null
+    },
+    {
+      "alpha_2": "VU",
+      "code": "VUT",
+      "kind": "state_nationality",
+      "name": "Vanuatu",
+      "notes": null
+    },
+    {
+      "alpha_2": "WS",
+      "code": "WSM",
+      "kind": "state_nationality",
+      "name": "Samoa",
+      "notes": null
+    },
+    {
+      "alpha_2": null,
+      "code": "XXA",
+      "kind": "special",
+      "name": "Stateless person",
+      "notes": "1954 Convention travel document holders; nationality recorded as stateless."
+    },
+    {
+      "alpha_2": null,
+      "code": "XXB",
+      "kind": "special",
+      "name": "Refugee (1951 Convention)",
+      "notes": "Refugee travel document holders under the 1951 Convention."
+    },
+    {
+      "alpha_2": null,
+      "code": "XXC",
+      "kind": "special",
+      "name": "Refugee (other)",
+      "notes": "Refugee travel document holders outside the 1951 Convention."
+    },
+    {
+      "alpha_2": null,
+      "code": "XXX",
+      "kind": "special",
+      "name": "Unspecified nationality",
+      "notes": "Nationality unspecified on travel document."
+    },
+    {
+      "alpha_2": "YE",
+      "code": "YEM",
+      "kind": "state_nationality",
+      "name": "Yemen",
+      "notes": null
+    },
+    {
+      "alpha_2": "ZA",
+      "code": "ZAF",
+      "kind": "state_nationality",
+      "name": "South Africa",
+      "notes": null
+    },
+    {
+      "alpha_2": "ZM",
+      "code": "ZMB",
+      "kind": "state_nationality",
+      "name": "Zambia",
+      "notes": null
+    },
+    {
+      "alpha_2": "ZW",
+      "code": "ZWE",
+      "kind": "state_nationality",
+      "name": "Zimbabwe",
+      "notes": null
+    }
+  ],
+  "entry_count": 206,
+  "generated_at": "2026-07-23",
+  "notes": "State nationalities (ISO alpha-3) + SAR/Taiwan document classes + special classes (stateless, refugee, British nationality classes).",
+  "registry": "nationalities",
+  "snapshot_date": "2026-07-23",
+  "source": "ISO via pycountry 26.2.16 + explicitly curated additions (see backend/scripts/gen_reference_data.py)",
+  "version": 1
+}

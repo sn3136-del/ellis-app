@@ -33,15 +33,39 @@ def _bool(key: str, default: bool = False) -> bool:
     return v.strip().lower() in ("1", "true", "yes", "on")
 
 
+RUNTIME_MODES = ("test", "local_mock_demo", "tripcom_evaluation", "staging", "production")
+# Modes in which MockPortal may be constructed at all.
+MOCK_ALLOWED_MODES = ("test", "local_mock_demo")
+# Modes with the absolute real-only execution boundary (never MockPortal,
+# never invented fees/appointments/confirmations — fail closed instead).
+REAL_ONLY_MODES = ("tripcom_evaluation", "staging", "production")
+
+
+def _derive_runtime_mode(env: str) -> str:
+    """ELLIS_RUNTIME_MODE wins; otherwise derive from ELLIS_ENV. Any invalid or
+    unknown value fails CLOSED to 'production' (real-only, no mocks)."""
+    raw = os.getenv("ELLIS_RUNTIME_MODE", "").strip().lower()
+    if raw:
+        return raw if raw in RUNTIME_MODES else "production"
+    return {"test": "test", "development": "local_mock_demo",
+            "staging": "staging", "production": "production"}.get(env, "production")
+
+
 class Settings:
     # Read env in __init__ (NOT as class attributes) so a cache_clear() +
     # re-instantiation picks up any changed environment — config is reloadable.
     def __init__(self):
         self.app_name = "ellis-visa-backend"
         self.env = os.getenv("ELLIS_ENV", "development")
+        # Explicit runtime mode (brief section 3). Fail-closed: unknown → production.
+        self.runtime_mode = _derive_runtime_mode(self.env)
+        raw_mode = os.getenv("ELLIS_RUNTIME_MODE", "").strip().lower()
+        self.runtime_mode_invalid = bool(raw_mode) and raw_mode not in RUNTIME_MODES
+        self.mock_portal_allowed = self.runtime_mode in MOCK_ALLOWED_MODES
+        self.real_only_mode = self.runtime_mode in REAL_ONLY_MODES
         # Production mode hardens the "never present a mock/sandbox result as a
         # real government outcome" guard (execution.assert_not_mock_in_production).
-        self.production_mode = self.env in ("production", "staging")
+        self.production_mode = self.env in ("production", "staging") or self.real_only_mode
         # SQLite for local/dev/test; set DATABASE_URL to a Postgres/Neon DSN in prod.
         self.database_url = os.getenv("DATABASE_URL", "sqlite:///./ellis.db")
 

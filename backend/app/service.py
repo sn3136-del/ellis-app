@@ -12,20 +12,10 @@ from __future__ import annotations
 from sqlalchemy import select
 
 from . import models
-from .portal.contract import select_adapter, clear_registry
-from .portal.mock_portal import MockPortal
-from .portal.adapters.mockland import build_mockland_adapter
-from .portal.adapters.vietnam_evisa import build_vietnam_evisa_adapter
+from .portal.driver_factory import (RealOnlyStop, build_runtime_portal,
+                                    register_runtime_adapters,
+                                    select_runtime_adapter)
 from .workflow import VisaWorkflow
-
-
-def _register_adapters(portal):
-    # Adapters are bound to a portal driver. For the mock/tested adapters that
-    # is the in-process MockPortal; a production adapter binds a Browserbase
-    # Playwright driver instead.
-    clear_registry()
-    build_mockland_adapter(portal)
-    build_vietnam_evisa_adapter(portal)
 
 
 def _emailer(db, application_id):
@@ -46,12 +36,14 @@ def load_workflow(db, application_id: str) -> VisaWorkflow:
     ).scalar_one_or_none()
 
     # Rehydrate the portal from persisted state (or a fresh one on first run).
+    # In real-only runtime modes this raises RealOnlyStop — MockPortal is never
+    # bound and there is no live driver yet (brief section 3, fail closed).
     portal_state = (exec_row.snapshot or {}).get("portal") if exec_row else None
-    portal = MockPortal.from_state(portal_state) if portal_state else MockPortal()
-    _register_adapters(portal)
+    portal = build_runtime_portal(portal_state)
+    register_runtime_adapters(portal)
 
     country = app.destination_country
-    adapter = select_adapter(country, app.visa_type) or select_adapter("Mockland", "tourist")
+    adapter = select_runtime_adapter(country, app.visa_type)
 
     auth = db.execute(
         select(models.AuthorizationEnvelope).where(models.AuthorizationEnvelope.application_id == application_id)
@@ -136,11 +128,19 @@ def enforce_safety(db, application_id: str, wf) -> None:
     Mock/local routes pass the live gate (they cannot touch a real portal), but
     the passport check applies to all classes."""
     from . import personal_gate, passport_validity, models
-    from .execution import classify_adapter
+    from .config import settings
+    from .execution import ExecutionClass, MockAsProductionError, classify_adapter, coerce
     app_row = db.get(models.VisaApplication, application_id)
     if app_row is None:
         return
     ec = classify_adapter(getattr(wf, "adapter", None))
+    # Belt-and-suspenders for the real-only boundary: in real-only runtime
+    # modes a MOCK/LOCAL execution class must never transition at all.
+    # (load_workflow already refuses to bind MockPortal there; this guards any
+    # future path that hands a pre-built workflow to signal().)
+    if settings().real_only_mode and coerce(ec) in (ExecutionClass.MOCK, ExecutionClass.LOCAL_PROVIDER):
+        raise MockAsProductionError(
+            f"runtime mode '{settings().runtime_mode}' forbids executing a {coerce(ec)}-class portal flow")
     personal_gate.assert_ready_for_live_action(db, app_row, ec)   # PreparationOnlyMode
     verdict = passport_validity.check_case_passport(db, app_row)
     if verdict.get("blocking"):

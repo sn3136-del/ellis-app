@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ellis://schemas/global_source_evidence.schema.json",
+  "title": "Source-evidence record (snapshot 2026-07-23)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["snapshot_date", "evidence_id", "search_query", "original_url", "final_url", "final_hostname", "source_authority", "retrieved_at", "content_hash", "verification_status"],
+  "properties": {
+    "snapshot_date": { "type": "string", "const": "2026-07-23" },
+    "evidence_id": { "type": "string", "minLength": 8 },
+    "search_query": { "type": ["string", "null"] },
+    "original_url": { "type": "string" },
+    "final_url": { "type": "string" },
+    "redirect_chain": { "type": ["array", "null"], "items": { "type": "string" } },
+    "final_hostname": { "type": "string" },
+    "source_authority": { "type": "string", "enum": ["destination_government", "destination_foreign_ministry", "embassy_or_consulate", "official_application_portal", "authorized_visa_center", "licensed_structured_provider", "human_reviewed_evidence", "non_authoritative"] },
+    "applicable_jurisdiction": { "type": ["string", "null"] },
+    "relevant_excerpt": { "type": ["string", "null"], "maxLength": 5000 },
+    "retrieved_at": { "type": "string" },
+    "effective_date_evidence": { "type": ["string", "null"] },
+    "content_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "page_language": { "type": ["string", "null"] },
+    "translation_reference": { "type": ["string", "null"] },
+    "verification_status": { "type": "string", "enum": ["unverified", "verified", "conflicted", "rejected"] },
+    "reviewer_status": { "type": ["string", "null"], "enum": ["not_reviewed", "queued", "human_verified", "rejected", null] },
+    "supports_records": { "type": ["array", "null"], "items": { "type": "string" }, "description": "record_ids this evidence supports" },
+    "notes": { "type": ["string", "null"] }
+  }
+}

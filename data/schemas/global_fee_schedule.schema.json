@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ellis://schemas/global_fee_schedule.schema.json",
+  "title": "Fee-schedule record (snapshot 2026-07-23)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["snapshot_date", "fee_id", "version", "destination_country", "visa_category", "fee_status", "content_hash"],
+  "properties": {
+    "snapshot_date": { "type": "string", "const": "2026-07-23" },
+    "fee_id": { "type": "string", "minLength": 8 },
+    "version": { "type": "integer", "minimum": 1 },
+    "destination_country": { "type": "string" },
+    "visa_category": { "type": "string" },
+    "visa_subtype": { "type": ["string", "null"] },
+    "applies_to_nationalities": { "type": ["array", "null"], "items": { "type": "string" } },
+    "government_fee_amount": { "type": ["number", "null"] },
+    "government_fee_currency": { "type": ["string", "null"] },
+    "service_fee_amount": { "type": ["number", "null"] },
+    "service_fee_currency": { "type": ["string", "null"] },
+    "appointment_fee_amount": { "type": ["number", "null"] },
+    "biometrics_fee_amount": { "type": ["number", "null"] },
+    "courier_fee_amount": { "type": ["number", "null"] },
+    "other_fees": { "type": ["array", "null"], "items": { "type": "object", "additionalProperties": true } },
+    "refundability": { "type": ["string", "null"] },
+    "accepted_payment_methods": { "type": ["array", "null"], "items": { "type": "string" } },
+    "official_source_urls": { "type": ["array", "null"], "items": { "type": "string" } },
+    "source_hashes": { "type": ["array", "null"], "items": { "type": "string" } },
+    "retrieved_at": { "type": ["string", "null"] },
+    "fee_status": { "type": "string", "enum": ["unknown", "verified", "stale", "conflicted", "not_applicable"] },
+    "content_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "notes": { "type": ["string", "null"] }
+  }
+}

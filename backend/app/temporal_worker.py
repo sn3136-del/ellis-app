@@ -14,14 +14,32 @@ import asyncio
 from .config import settings
 
 
+def _wire_portal_store():
+    """Wire the portal store for the current runtime mode.
+
+    Mock-allowed modes get the DB-backed MockPortal store (restart-durability
+    demos). Real-only modes REFUSE to start: there is no live portal store yet
+    and the worker must never run cases against a mock there (fail closed)."""
+    from .config import settings
+    from .temporal_app import set_portal_store
+    s = settings()
+    if not s.mock_portal_allowed:
+        raise SystemExit(
+            f"temporal worker refusing to start: runtime mode '{s.runtime_mode}' "
+            "is real-only and no production-approved live portal store exists. "
+            "MockPortal-backed DbPortalStore is prohibited outside test/local_mock_demo.")
+    from .portal_store import DbPortalStore
+    set_portal_store(DbPortalStore())
+
+
 async def _main():  # pragma: no cover - requires a running Temporal server
     from temporalio.client import Client
     from temporalio.worker import Worker
-    from .temporal_app import VisaProcessingWorkflow, ALL_ACTIVITIES, set_portal_store
-    from .portal_store import DbPortalStore
+    from .temporal_app import VisaProcessingWorkflow, ALL_ACTIVITIES
 
-    # Durable, DB-backed portal so reconciliation survives a worker restart.
-    set_portal_store(DbPortalStore())
+    # Durable, DB-backed portal so reconciliation survives a worker restart
+    # (mode-gated: refuses to start in real-only modes).
+    _wire_portal_store()
 
     host = settings().temporal_host or "localhost:7233"
     # Resilient connect — the Temporal frontend may still be warming up even

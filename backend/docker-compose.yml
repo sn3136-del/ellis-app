@@ -96,6 +96,10 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://ellis:ellis@postgres:5432/ellis
       ELLIS_ENV: development
+      # Explicit runtime mode (brief section 3). The local compose stack is the
+      # SIMULATED demo: MockPortal permitted, permanent banner in the UI.
+      # Real deployments set tripcom_evaluation | staging | production.
+      ELLIS_RUNTIME_MODE: local_mock_demo
       TEMPORAL_HOST: temporal:7233
       # Object storage (MinIO / S3-compatible)
       ELLIS_S3_ENDPOINT: http://minio:9000
@@ -137,6 +141,7 @@ services:
       temporal: {condition: service_healthy}
     environment:
       DATABASE_URL: postgresql+psycopg://ellis:ellis@postgres:5432/ellis
+      ELLIS_RUNTIME_MODE: local_mock_demo
       TEMPORAL_HOST: temporal:7233
       ELLIS_SMTP_HOST: mailpit
       ELLIS_SMTP_PORT: "1025"
@@ -155,6 +160,9 @@ services:
     build: .
     container_name: ellis-mock-portal
     command: ["uvicorn", "app.portal.http_mock:app", "--host", "0.0.0.0", "--port", "8090"]
+    environment:
+      # http_mock refuses to start in any real-only runtime mode.
+      ELLIS_RUNTIME_MODE: local_mock_demo
     ports: ["8090:8090"]
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8090/healthz').status==200 else 1)\""]

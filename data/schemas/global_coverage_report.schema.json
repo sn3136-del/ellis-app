@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ellis://schemas/global_coverage_report.schema.json",
+  "title": "Snapshot coverage report (2026-07-23)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["snapshot_date", "generated_from", "matrix", "metrics"],
+  "properties": {
+    "snapshot_date": { "type": "string", "const": "2026-07-23" },
+    "generated_from": { "type": "string", "description": "git commit or pipeline run id" },
+    "matrix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["expected_entries", "created_entries", "excluded_entries"],
+      "properties": {
+        "expected_entries": { "type": "integer", "minimum": 0 },
+        "created_entries": { "type": "integer", "minimum": 0 },
+        "excluded_entries": { "type": "integer", "minimum": 0 },
+        "exclusion_rules": { "type": ["array", "null"], "items": { "type": "string" } },
+        "dispositions": { "type": ["object", "null"], "additionalProperties": { "type": "integer" } }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["MATRIX_COMPLETENESS", "SOURCE_COVERAGE", "REQUIREMENTS_VERIFIED_COVERAGE", "FEE_VERIFIED_COVERAGE", "PREPARATION_COVERAGE", "APPLICANT_HANDOFF_COVERAGE", "PRODUCTION_ADAPTER_COVERAGE"],
+      "properties": {
+        "MATRIX_COMPLETENESS": { "type": "number", "minimum": 0, "maximum": 1 },
+        "SOURCE_COVERAGE": { "type": "number", "minimum": 0, "maximum": 1 },
+        "REQUIREMENTS_VERIFIED_COVERAGE": { "type": "number", "minimum": 0, "maximum": 1 },
+        "FEE_VERIFIED_COVERAGE": { "type": "number", "minimum": 0, "maximum": 1 },
+        "PREPARATION_COVERAGE": { "type": "number", "minimum": 0, "maximum": 1 },
+        "APPLICANT_HANDOFF_COVERAGE": { "type": "number", "minimum": 0, "maximum": 1 },
+        "PRODUCTION_ADAPTER_COVERAGE": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "counts": { "type": ["object", "null"], "additionalProperties": { "type": "integer" } },
+    "notes": { "type": ["string", "null"] }
+  }
+}

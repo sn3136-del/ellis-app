@@ -13,7 +13,15 @@ from __future__ import annotations
 from fastapi import FastAPI
 from pydantic import BaseModel
 
+from ..config import settings
 from .mock_portal import MockPortal, HOST
+
+# Mock-only service: refuse to even import-and-serve in real-only runtime
+# modes so this container can never ship into a production deployment.
+if not settings().mock_portal_allowed:  # pragma: no cover - deployment guard
+    raise RuntimeError(
+        f"http_mock is a simulated portal and refuses to start in runtime mode "
+        f"'{settings().runtime_mode}' (allowed: test, local_mock_demo)")
 
 app = FastAPI(title="Ellis Mock Visa Portal", version="0.1.0")
 _portal = MockPortal()

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ellis://schemas/global_portal.schema.json",
+  "title": "Official-portal record (snapshot 2026-07-23)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["snapshot_date", "portal_id", "version", "destination_country", "portal_kind", "url", "verification_status", "content_hash"],
+  "properties": {
+    "snapshot_date": { "type": "string", "const": "2026-07-23" },
+    "portal_id": { "type": "string", "minLength": 8 },
+    "version": { "type": "integer", "minimum": 1 },
+    "destination_country": { "type": "string" },
+    "portal_kind": { "type": "string", "enum": ["evisa_portal", "eta_portal", "appointment_portal", "embassy_site", "consulate_site", "immigration_authority", "foreign_ministry", "authorized_visa_center", "status_check_portal"] },
+    "operator": { "type": ["string", "null"] },
+    "operator_kind": { "type": ["string", "null"], "enum": ["government", "contracted_visa_center", "unknown", null] },
+    "url": { "type": "string", "format": "uri" },
+    "hostnames": { "type": ["array", "null"], "items": { "type": "string" } },
+    "allowed_redirect_hosts": { "type": ["array", "null"], "items": { "type": "string" } },
+    "official_linking_source": { "type": ["string", "null"] },
+    "supported_categories": { "type": ["array", "null"], "items": { "type": "string" } },
+    "supported_nationalities": { "type": ["array", "null"], "items": { "type": "string" } },
+    "languages": { "type": ["array", "null"], "items": { "type": "string" } },
+    "verification_status": { "type": "string", "enum": ["unverified", "verified_official_domain", "verified_via_official_link", "conflicted", "unavailable"] },
+    "verification_evidence_urls": { "type": ["array", "null"], "items": { "type": "string" } },
+    "source_hashes": { "type": ["array", "null"], "items": { "type": "string" } },
+    "retrieved_at": { "type": ["string", "null"] },
+    "content_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "notes": { "type": ["string", "null"] }
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "entries": [
+    {
+      "code": "tourist_visa",
+      "name": "Tourist visa (consular)",
+      "notes": "Sticker/label visa issued by an embassy, consulate, or authorized visa center.",
+      "subtypes": [
+        "single_entry",
+        "double_entry",
+        "multiple_entry",
+        "group_tourist"
+      ]
+    },
+    {
+      "code": "evisa_tourist",
+      "name": "Tourist eVisa",
+      "notes": "Electronic visa applied for and issued online through an official portal.",
+      "subtypes": [
+        "single_entry",
+        "multiple_entry"
+      ]
+    },
+    {
+      "code": "eta",
+      "name": "Electronic travel authorization",
+      "notes": "Pre-travel electronic authorization for otherwise visa-free or visa-waiver travellers (e.g. ESTA, UK ETA, NZeTA, Canadian eTA, K-ETA).",
+      "subtypes": [
+        "standard"
+      ]
+    },
+    {
+      "code": "visa_on_arrival_tourist",
+      "name": "Tourist visa on arrival",
+      "notes": "Visa granted at the border/airport on arrival; may require pre-registration.",
+      "subtypes": [
+        "single_entry",
+        "multiple_entry"
+      ]
+    },
+    {
+      "code": "visa_free_entry",
+      "name": "Visa-free entry (tourism)",
+      "notes": "No visa or authorization required for a tourist stay within the permitted period; a disposition, present so route records can bind conditions/evidence.",
+      "subtypes": [
+        "standard"
+      ]
+    },
+    {
+      "code": "transit_authorization",
+      "name": "Transit visa / authorization",
+      "notes": "Authorization required to transit; included because tourist itineraries traverse transit states.",
+      "subtypes": [
+        "airside_transit",
+        "landside_transit"
+      ]
+    }
+  ],
+  "entry_count": 6,
+  "generated_at": "2026-07-23",
+  "notes": "Curated tourist-visa category/subtype taxonomy.",
+  "registry": "tourist_visa_categories",
+  "snapshot_date": "2026-07-23",
+  "source": "curated",
+  "version": 1
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ellis://schemas/global_visa_policy.schema.json",
+  "title": "Destination visa-policy record (snapshot 2026-07-23)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["snapshot_date", "policy_id", "version", "destination_country", "policy_kind", "research_status", "content_hash"],
+  "properties": {
+    "snapshot_date": { "type": "string", "const": "2026-07-23" },
+    "policy_id": { "type": "string", "minLength": 8 },
+    "version": { "type": "integer", "minimum": 1 },
+    "destination_country": { "type": "string", "minLength": 2, "maxLength": 3 },
+    "policy_kind": { "type": "string", "enum": ["visa_exemption_list", "evisa_program", "eta_program", "visa_on_arrival_program", "consular_visa_regime", "transit_regime", "special_regime"] },
+    "policy_name": { "type": ["string", "null"] },
+    "description": { "type": ["string", "null"] },
+    "applies_to_nationalities": { "type": ["array", "null"], "items": { "type": "string" } },
+    "applies_to_document_types": { "type": ["array", "null"], "items": { "type": "string" } },
+    "applies_to_residence": { "type": ["array", "null"], "items": { "type": "string" } },
+    "conditions": { "type": ["array", "null"], "items": { "type": "string" } },
+    "maximum_stay": { "type": ["string", "null"] },
+    "official_source_urls": { "type": ["array", "null"], "items": { "type": "string" } },
+    "source_hashes": { "type": ["array", "null"], "items": { "type": "string" } },
+    "retrieved_at": { "type": ["string", "null"] },
+    "effective_from": { "type": ["string", "null"] },
+    "effective_until": { "type": ["string", "null"] },
+    "research_status": { "type": "string", "enum": ["not_researched", "in_progress", "verified", "research_incomplete", "conflicted", "human_review_required"] },
+    "human_review_status": { "type": ["string", "null"], "enum": ["not_reviewed", "queued", "in_review", "human_verified", "rejected", null] },
+    "content_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "notes": { "type": ["string", "null"] }
+  }
+}

@@ -18,9 +18,19 @@ from .portal.mock_portal import MockPortal
 
 
 class DbPortalStore:
-    """Loads/saves a per-case MockPortal snapshot in the portal_states table."""
+    """Loads/saves a per-case MockPortal snapshot in the portal_states table.
+
+    Mock-only component: constructing it in a real-only runtime mode is a
+    programming error and refuses immediately (brief section 3 — no code path
+    may bind a case to MockPortal outside test/local_mock_demo)."""
 
     def __init__(self, ensure_schema: bool = True):
+        from .config import settings
+        s = settings()
+        if not s.mock_portal_allowed:
+            raise RuntimeError(
+                f"DbPortalStore is MockPortal-backed and prohibited in runtime "
+                f"mode '{s.runtime_mode}'")
         if ensure_schema:
             create_all()
 
@@ -30,6 +40,9 @@ class DbPortalStore:
             row = db.get(models.PortalState, case_id)
             if row and row.state:
                 return MockPortal.from_state(row.state)
+            # First activity for a NEW case starts with a fresh portal; the
+            # temporal workflow only reaches here for cases it was started
+            # with, so this is initialization, not silent fabrication.
             return MockPortal()
         finally:
             db.close()

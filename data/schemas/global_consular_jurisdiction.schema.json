@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ellis://schemas/global_consular_jurisdiction.schema.json",
+  "title": "Consular-jurisdiction record (snapshot 2026-07-23)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["snapshot_date", "jurisdiction_id", "version", "destination_country", "residence_jurisdiction", "verification_status", "content_hash"],
+  "properties": {
+    "snapshot_date": { "type": "string", "const": "2026-07-23" },
+    "jurisdiction_id": { "type": "string", "minLength": 8 },
+    "version": { "type": "integer", "minimum": 1 },
+    "destination_country": { "type": "string" },
+    "residence_jurisdiction": { "type": "string", "description": "Applicant residence country/territory (or subdivision) this rule covers" },
+    "residence_subdivisions": { "type": ["array", "null"], "items": { "type": "string" } },
+    "competent_post_name": { "type": ["string", "null"] },
+    "competent_post_kind": { "type": ["string", "null"], "enum": ["embassy", "consulate_general", "consulate", "honorary_consulate", "visa_center", "online_only", "unknown", null] },
+    "competent_post_address": { "type": ["string", "null"] },
+    "competent_post_url": { "type": ["string", "null"] },
+    "covers_nationalities": { "type": ["array", "null"], "items": { "type": "string" } },
+    "conditions": { "type": ["array", "null"], "items": { "type": "string" } },
+    "verification_status": { "type": "string", "enum": ["unverified", "verified", "conflicted", "manual_review_required"] },
+    "official_source_urls": { "type": ["array", "null"], "items": { "type": "string" } },
+    "source_hashes": { "type": ["array", "null"], "items": { "type": "string" } },
+    "retrieved_at": { "type": ["string", "null"] },
+    "content_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "notes": { "type": ["string", "null"] }
+  }
+}

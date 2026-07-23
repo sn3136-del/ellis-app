@@ -20,10 +20,8 @@ from .providers import ocr as ocr_provider
 from .providers import passport_classifier
 from .providers import docusign
 from .providers.kimi import run_agent
-from .portal.contract import list_adapters, clear_registry
-from .portal.mock_portal import MockPortal
-from .portal.adapters.mockland import build_mockland_adapter
-from .portal.adapters.vietnam_evisa import build_vietnam_evisa_adapter
+from .portal.contract import list_adapters
+from .portal.mock_portal import MockPortal  # only constructed in mock-allowed modes
 
 app = FastAPI(title="Ellis Visa Backend", version="0.1.0")
 
@@ -65,15 +63,24 @@ def healthz():
 @app.get("/capabilities")
 def get_capabilities(_: Principal = Depends(get_principal)):
     caps = capabilities()
-    # Every runtime today binds the MockPortal driver, so the runtime portal
-    # execution class is MOCK — surfaced honestly so no client mistakes a
-    # completed case for a real government submission.
+    # Honest runtime classification: mock-allowed modes bind the MockPortal
+    # driver (class MOCK); real-only modes have NO portal driver until an
+    # individually approved live adapter exists (class UNSUPPORTED) — surfaced
+    # so no client mistakes a completed case for a real government submission.
     from .config import settings as _s
+    s = _s()
+    if s.mock_portal_allowed:
+        runtime_pec = str(execution.classify_driver(MockPortal()))
+    else:
+        runtime_pec = str(execution.ExecutionClass.UNSUPPORTED)
+    caps["runtime_mode"] = s.runtime_mode
     caps["execution_classification"] = {
         "legend": execution.legend(),
-        "runtime_portal_execution_class": str(execution.classify_driver(MockPortal())),
+        "runtime_portal_execution_class": runtime_pec,
         "real_result_class": execution.REAL_RESULT_CLASS.value,
-        "production_mode": _s().production_mode,
+        "production_mode": s.production_mode,
+        "runtime_mode": s.runtime_mode,
+        "mock_portal_allowed": s.mock_portal_allowed,
     }
     return caps
 
@@ -533,12 +540,12 @@ def ocr_diagnostics(_: Principal = Depends(get_principal)):
 
 @app.get("/adapters")
 def get_adapters(_: Principal = Depends(get_principal)):
-    # Registry is portal-bound; build once to list metadata honestly.
-    clear_registry()
-    p = MockPortal()
-    build_mockland_adapter(p)
-    build_vietnam_evisa_adapter(p)
-    return {"adapters": list_adapters()}
+    # Registry is mode-keyed: mock modes list the demo adapters; real-only
+    # modes honestly list only production-approved live adapters (none today).
+    from .config import settings as _s
+    from .portal.driver_factory import register_adapters_for_mode
+    register_adapters_for_mode()
+    return {"adapters": list_adapters(), "runtime_mode": _s().runtime_mode}
 
 
 # ---- Schemas ----
@@ -606,16 +613,13 @@ def _owned(db, p: Principal, application_id: str) -> models.VisaApplication:
 
 
 def _case_execution_class(country: str, visa_type: str):
-    """Classify what running this case's route ACTUALLY produces. The runtime
-    binds the MockPortal driver to every adapter, so this returns MOCK today and
-    will return the real class automatically once a live driver is bound to an
-    approved adapter — the classification follows the driver, never a claim."""
-    clear_registry()
-    portal = MockPortal()
-    build_mockland_adapter(portal)
-    build_vietnam_evisa_adapter(portal)
-    from .portal.contract import select_adapter
-    adapter = select_adapter(country, visa_type) or select_adapter("Mockland", "tourist")
+    """Classify what running this case's route ACTUALLY produces. Mock-allowed
+    modes bind the MockPortal driver (class MOCK). Real-only modes register no
+    demo adapters at all, so an unsupported route classifies UNSUPPORTED — the
+    classification follows the driver, never a claim."""
+    from .portal.driver_factory import register_adapters_for_mode, select_metadata_adapter
+    register_adapters_for_mode()
+    adapter = select_metadata_adapter(country, visa_type)
     return execution.classify_adapter(adapter)
 
 
@@ -658,7 +662,8 @@ def mock_verification(application_id: str, db=Depends(get_session), p: Principal
     the local stack); this endpoint is disabled outside development and never
     exposes real personal data — only the mock's own generated token."""
     from .config import settings as _settings
-    if _settings().env not in ("development", "test"):
+    # Mock-only surface: reachable only in mock-allowed runtime modes.
+    if not _settings().mock_portal_allowed or _settings().env not in ("development", "test"):
         raise HTTPException(404, "not found")
     _owned(db, p, application_id)
     wf = service.load_workflow(db, application_id)
@@ -754,14 +759,14 @@ def add_document(application_id: str, body: AddDocument, db=Depends(get_session)
 
 def _required_fields_for(country: str, visa_type: str) -> list[str]:
     """The applicant fields the destination's adapter requires (for the
-    'missing information' step). Adapters are portal-bound; build once to read
-    their metadata honestly."""
-    clear_registry()
-    portal = MockPortal()
-    build_mockland_adapter(portal)
-    build_vietnam_evisa_adapter(portal)
-    from .portal.contract import select_adapter
-    adapter = select_adapter(country, visa_type) or select_adapter("Mockland", "tourist")
+    'missing information' step). Mode-keyed: real-only modes without a live
+    adapter honestly return [] — requirements come from the verified snapshot,
+    never invented from demo adapter metadata."""
+    from .portal.driver_factory import register_adapters_for_mode, select_metadata_adapter
+    register_adapters_for_mode()
+    adapter = select_metadata_adapter(country, visa_type)
+    if adapter is None:
+        return []
     return list(getattr(adapter, "required_applicant_fields", []) or [])
 
 
@@ -1116,8 +1121,22 @@ def _signal_or_gate_error(db, p: Principal, application_id: str, name: str, **kw
     exceptions (service.enforce_safety) into honest 409s. Both /start and
     /signals route through here so neither can bypass the gate."""
     from . import personal_gate, passport_validity
+    from .portal.driver_factory import RealOnlyStop
     try:
         status, _ = service.signal(db, application_id, name, **kwargs)
+    except RealOnlyStop as e:
+        # Real-only runtime mode with no approved live adapter: the case is
+        # preserved and the workflow STOPS with a typed status — it never
+        # silently falls back to MockPortal (brief section 3).
+        audit.record(db, org_id=p.org_id, application_id=application_id,
+                     action="real_only_stop",
+                     detail={"status": e.status, "detail": e.detail, "signal": name},
+                     actor=p.user_id)
+        raise HTTPException(409, detail={"reason": "real_only_stop", "status": e.status,
+                                         "detail": e.detail})
+    except execution.MockAsProductionError as e:
+        raise HTTPException(409, detail={"reason": "real_only_stop", "status": "UNSUPPORTED",
+                                         "detail": str(e)})
     except personal_gate.PreparationOnlyMode as e:
         audit.record(db, org_id=p.org_id, application_id=application_id,
                      action="live_action_blocked_preparation_mode",

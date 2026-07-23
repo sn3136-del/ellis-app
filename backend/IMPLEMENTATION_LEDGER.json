@@ -1,5 +1,16 @@
 {
-  "updated": "2026-07-23 checkpoint (2nd adversarial review of the sweep diff + all confirmed defects fixed)",
+  "updated": "2026-07-23 baseline reverification at 60bb9bf before global-snapshot brief",
+  "baseline_2026_07_23_reverified": {
+    "git": "main @ 60bb9bf, working tree clean",
+    "backend_hermetic": "198 passed (pytest tests/ minus live_providers/live_temporal_restart/private_passports), 5.86s, ACTUALLY RERUN",
+    "js_tests": "56 passed (npm test: 8 security + 14 visa+i18n + 34 portal), ACTUALLY RERUN",
+    "renderer_build": "electron-vite build green, ACTUALLY RERUN",
+    "docker": "8/8 services up, 7 with healthchecks all healthy (postgres, temporal, temporal-ui, minio, mailpit, api, worker, mock-portal), VERIFIED",
+    "frontend_backend_acceptance": "1 passed against live stack (full applicant lifecycle via visaBackend.js), ACTUALLY RERUN",
+    "release_secret_scan": "CLEAN on existing release/ (scan-release-secrets.sh), ACTUALLY RERUN",
+    "electron_packaging": "build_security.test.mjs passed within npm test (deep asar scan of existing release); full clean rebuild deferred until after Trip.com-only conversion changes the bundle",
+    "notes": "docs/PRODUCTION_BLOCKERS.md, data/, migrations/ do not exist yet — deliverables of the 2026-07-23 global-snapshot brief"
+  },
   "completed_2026_07_23_sweep_review_fixes": [
     "Ran a 2nd adversarial review (35 agents, 5 dimensions) over the sweep diff 9fbdfd4..HEAD; 26 findings confirmed. ALL addressed + regression-tested (backend hermetic 191->198).",
     "FIX HIGH (gate bypass — 2 entry points): the 15-gate + passport-validity hard block lived ONLY in the /start HTTP handler, so POST /cases/{id}/signals/{name} AND the background worker (worker.tick_once) both bypassed it. CENTRALIZED both guards into service.enforce_safety(), called at the single durable transition point service.signal — every caller (start, signals, worker) now enforces. HTTP handlers translate PreparationOnlyMode + passport_validity.PassportBlocked into 409s via _signal_or_gate_error. Tests: signals-path-blocked, worker-does-not-start-blocked-case. (Test fixture used an EXPIRED specimen expiry 120415 → updated _new_case to 330415; the block was working, the fixture was unrealistic.)",

@@ -10,7 +10,8 @@ python-multipart>=0.0.9
 psycopg[binary]>=3.1          # PostgreSQL driver (compose api+worker)
 temporalio>=1.5               # durable workflows against the Temporal cluster
 # --- Activated per-integration (import-guarded; absent → local fallback) ---
-# alembic>=1.13               # migrations (create_all is used when absent)
+alembic>=1.13
+jsonschema>=4.21
 # boto3>=1.34                 # S3 / KMS / Secrets Manager
 # google-cloud-documentai     # OCR
 # stripe>=8                   # Issuing
@@ -19,3 +20,4 @@ temporalio>=1.5               # durable workflows against the Temporal cluster
 google-auth>=2.20
 requests>=2.31
 pytest-asyncio>=0.23
+pycountry==26.2.16

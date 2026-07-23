@@ -1,0 +1,4991 @@
+{
+  "entries": [
+    {
+      "alpha_2": "AD",
+      "alpha_3": "AND",
+      "is_territory": false,
+      "name": "Andorra",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "AE",
+      "alpha_3": "ARE",
+      "is_territory": false,
+      "name": "United Arab Emirates",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "AF",
+      "alpha_3": "AFG",
+      "is_territory": false,
+      "name": "Afghanistan",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "AG",
+      "alpha_3": "ATG",
+      "is_territory": false,
+      "name": "Antigua and Barbuda",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "AI",
+      "alpha_3": "AIA",
+      "is_territory": true,
+      "name": "Anguilla",
+      "parent_alpha_2": "GB",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "AL",
+      "alpha_3": "ALB",
+      "is_territory": false,
+      "name": "Albania",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "AM",
+      "alpha_3": "ARM",
+      "is_territory": false,
+      "name": "Armenia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "AO",
+      "alpha_3": "AGO",
+      "is_territory": false,
+      "name": "Angola",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "AQ",
+      "alpha_3": "ATA",
+      "is_territory": true,
+      "name": "Antarctica",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "AR",
+      "alpha_3": "ARG",
+      "is_territory": false,
+      "name": "Argentina",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "AS",
+      "alpha_3": "ASM",
+      "is_territory": true,
+      "name": "American Samoa",
+      "parent_alpha_2": "US",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "AT",
+      "alpha_3": "AUT",
+      "is_territory": false,
+      "name": "Austria",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "AU",
+      "alpha_3": "AUS",
+      "is_territory": false,
+      "name": "Australia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "AW",
+      "alpha_3": "ABW",
+      "is_territory": true,
+      "name": "Aruba",
+      "parent_alpha_2": "NL",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "AX",
+      "alpha_3": "ALA",
+      "is_territory": true,
+      "name": "Åland Islands",
+      "parent_alpha_2": "FI",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "AZ",
+      "alpha_3": "AZE",
+      "is_territory": false,
+      "name": "Azerbaijan",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "BA",
+      "alpha_3": "BIH",
+      "is_territory": false,
+      "name": "Bosnia and Herzegovina",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "BB",
+      "alpha_3": "BRB",
+      "is_territory": false,
+      "name": "Barbados",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "BD",
+      "alpha_3": "BGD",
+      "is_territory": false,
+      "name": "Bangladesh",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "BE",
+      "alpha_3": "BEL",
+      "is_territory": false,
+      "name": "Belgium",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "BF",
+      "alpha_3": "BFA",
+      "is_territory": false,
+      "name": "Burkina Faso",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "BG",
+      "alpha_3": "BGR",
+      "is_territory": false,
+      "name": "Bulgaria",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "BH",
+      "alpha_3": "BHR",
+      "is_territory": false,
+      "name": "Bahrain",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "BI",
+      "alpha_3": "BDI",
+      "is_territory": false,
+      "name": "Burundi",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "BJ",
+      "alpha_3": "BEN",
+      "is_territory": false,
+      "name": "Benin",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "BL",
+      "alpha_3": "BLM",
+      "is_territory": true,
+      "name": "Saint Barthélemy",
+      "parent_alpha_2": "FR",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "BM",
+      "alpha_3": "BMU",
+      "is_territory": true,
+      "name": "Bermuda",
+      "parent_alpha_2": "GB",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "BN",
+      "alpha_3": "BRN",
+      "is_territory": false,
+      "name": "Brunei Darussalam",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "BO",
+      "alpha_3": "BOL",
+      "is_territory": false,
+      "name": "Bolivia, Plurinational State of",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "BQ",
+      "alpha_3": "BES",
+      "is_territory": true,
+      "name": "Bonaire, Sint Eustatius and Saba",
+      "parent_alpha_2": "NL",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "BR",
+      "alpha_3": "BRA",
+      "is_territory": false,
+      "name": "Brazil",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "BS",
+      "alpha_3": "BHS",
+      "is_territory": false,
+      "name": "Bahamas",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "BT",
+      "alpha_3": "BTN",
+      "is_territory": false,
+      "name": "Bhutan",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "BV",
+      "alpha_3": "BVT",
+      "is_territory": true,
+      "name": "Bouvet Island",
+      "parent_alpha_2": "NO",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "BW",
+      "alpha_3": "BWA",
+      "is_territory": false,
+      "name": "Botswana",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "BY",
+      "alpha_3": "BLR",
+      "is_territory": false,
+      "name": "Belarus",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "BZ",
+      "alpha_3": "BLZ",
+      "is_territory": false,
+      "name": "Belize",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "CA",
+      "alpha_3": "CAN",
+      "is_territory": false,
+      "name": "Canada",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "CC",
+      "alpha_3": "CCK",
+      "is_territory": true,
+      "name": "Cocos (Keeling) Islands",
+      "parent_alpha_2": "AU",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "CD",
+      "alpha_3": "COD",
+      "is_territory": false,
+      "name": "Congo, The Democratic Republic of the",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "CF",
+      "alpha_3": "CAF",
+      "is_territory": false,
+      "name": "Central African Republic",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "CG",
+      "alpha_3": "COG",
+      "is_territory": false,
+      "name": "Congo",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "CH",
+      "alpha_3": "CHE",
+      "is_territory": false,
+      "name": "Switzerland",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "CI",
+      "alpha_3": "CIV",
+      "is_territory": false,
+      "name": "Côte d'Ivoire",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "CK",
+      "alpha_3": "COK",
+      "is_territory": true,
+      "name": "Cook Islands",
+      "parent_alpha_2": "NZ",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "CL",
+      "alpha_3": "CHL",
+      "is_territory": false,
+      "name": "Chile",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "CM",
+      "alpha_3": "CMR",
+      "is_territory": false,
+      "name": "Cameroon",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "CN",
+      "alpha_3": "CHN",
+      "is_territory": false,
+      "name": "China",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "CO",
+      "alpha_3": "COL",
+      "is_territory": false,
+      "name": "Colombia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "CR",
+      "alpha_3": "CRI",
+      "is_territory": false,
+      "name": "Costa Rica",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "CU",
+      "alpha_3": "CUB",
+      "is_territory": false,
+      "name": "Cuba",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "CV",
+      "alpha_3": "CPV",
+      "is_territory": false,
+      "name": "Cabo Verde",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "CW",
+      "alpha_3": "CUW",
+      "is_territory": true,
+      "name": "Curaçao",
+      "parent_alpha_2": "NL",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "CX",
+      "alpha_3": "CXR",
+      "is_territory": true,
+      "name": "Christmas Island",
+      "parent_alpha_2": "AU",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "CY",
+      "alpha_3": "CYP",
+      "is_territory": false,
+      "name": "Cyprus",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "CZ",
+      "alpha_3": "CZE",
+      "is_territory": false,
+      "name": "Czechia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "DE",
+      "alpha_3": "DEU",
+      "is_territory": false,
+      "name": "Germany",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "DJ",
+      "alpha_3": "DJI",
+      "is_territory": false,
+      "name": "Djibouti",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "DK",
+      "alpha_3": "DNK",
+      "is_territory": false,
+      "name": "Denmark",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "DM",
+      "alpha_3": "DMA",
+      "is_territory": false,
+      "name": "Dominica",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "DO",
+      "alpha_3": "DOM",
+      "is_territory": false,
+      "name": "Dominican Republic",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "DZ",
+      "alpha_3": "DZA",
+      "is_territory": false,
+      "name": "Algeria",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "EC",
+      "alpha_3": "ECU",
+      "is_territory": false,
+      "name": "Ecuador",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "EE",
+      "alpha_3": "EST",
+      "is_territory": false,
+      "name": "Estonia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "EG",
+      "alpha_3": "EGY",
+      "is_territory": false,
+      "name": "Egypt",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "EH",
+      "alpha_3": "ESH",
+      "is_territory": true,
+      "name": "Western Sahara",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "ER",
+      "alpha_3": "ERI",
+      "is_territory": false,
+      "name": "Eritrea",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "ES",
+      "alpha_3": "ESP",
+      "is_territory": false,
+      "name": "Spain",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "ET",
+      "alpha_3": "ETH",
+      "is_territory": false,
+      "name": "Ethiopia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "FI",
+      "alpha_3": "FIN",
+      "is_territory": false,
+      "name": "Finland",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "FJ",
+      "alpha_3": "FJI",
+      "is_territory": false,
+      "name": "Fiji",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "FK",
+      "alpha_3": "FLK",
+      "is_territory": true,
+      "name": "Falkland Islands (Malvinas)",
+      "parent_alpha_2": "GB",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "FM",
+      "alpha_3": "FSM",
+      "is_territory": false,
+      "name": "Micronesia, Federated States of",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "FO",
+      "alpha_3": "FRO",
+      "is_territory": true,
+      "name": "Faroe Islands",
+      "parent_alpha_2": "DK",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "FR",
+      "alpha_3": "FRA",
+      "is_territory": false,
+      "name": "France",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "GA",
+      "alpha_3": "GAB",
+      "is_territory": false,
+      "name": "Gabon",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "GB",
+      "alpha_3": "GBR",
+      "is_territory": false,
+      "name": "United Kingdom",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "GD",
+      "alpha_3": "GRD",
+      "is_territory": false,
+      "name": "Grenada",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "GE",
+      "alpha_3": "GEO",
+      "is_territory": false,
+      "name": "Georgia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "GF",
+      "alpha_3": "GUF",
+      "is_territory": true,
+      "name": "French Guiana",
+      "parent_alpha_2": "FR",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "GG",
+      "alpha_3": "GGY",
+      "is_territory": true,
+      "name": "Guernsey",
+      "parent_alpha_2": "GB",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "GH",
+      "alpha_3": "GHA",
+      "is_territory": false,
+      "name": "Ghana",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "GI",
+      "alpha_3": "GIB",
+      "is_territory": true,
+      "name": "Gibraltar",
+      "parent_alpha_2": "GB",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "GL",
+      "alpha_3": "GRL",
+      "is_territory": true,
+      "name": "Greenland",
+      "parent_alpha_2": "DK",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "GM",
+      "alpha_3": "GMB",
+      "is_territory": false,
+      "name": "Gambia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "GN",
+      "alpha_3": "GIN",
+      "is_territory": false,
+      "name": "Guinea",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "GP",
+      "alpha_3": "GLP",
+      "is_territory": true,
+      "name": "Guadeloupe",
+      "parent_alpha_2": "FR",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "GQ",
+      "alpha_3": "GNQ",
+      "is_territory": false,
+      "name": "Equatorial Guinea",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "GR",
+      "alpha_3": "GRC",
+      "is_territory": false,
+      "name": "Greece",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "GS",
+      "alpha_3": "SGS",
+      "is_territory": true,
+      "name": "South Georgia and the South Sandwich Islands",
+      "parent_alpha_2": "GB",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "GT",
+      "alpha_3": "GTM",
+      "is_territory": false,
+      "name": "Guatemala",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "GU",
+      "alpha_3": "GUM",
+      "is_territory": true,
+      "name": "Guam",
+      "parent_alpha_2": "US",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "GW",
+      "alpha_3": "GNB",
+      "is_territory": false,
+      "name": "Guinea-Bissau",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "GY",
+      "alpha_3": "GUY",
+      "is_territory": false,
+      "name": "Guyana",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "HK",
+      "alpha_3": "HKG",
+      "is_territory": true,
+      "name": "Hong Kong",
+      "parent_alpha_2": "CN",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "HM",
+      "alpha_3": "HMD",
+      "is_territory": true,
+      "name": "Heard Island and McDonald Islands",
+      "parent_alpha_2": "AU",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "HN",
+      "alpha_3": "HND",
+      "is_territory": false,
+      "name": "Honduras",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "HR",
+      "alpha_3": "HRV",
+      "is_territory": false,
+      "name": "Croatia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "HT",
+      "alpha_3": "HTI",
+      "is_territory": false,
+      "name": "Haiti",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "HU",
+      "alpha_3": "HUN",
+      "is_territory": false,
+      "name": "Hungary",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "ID",
+      "alpha_3": "IDN",
+      "is_territory": false,
+      "name": "Indonesia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "IE",
+      "alpha_3": "IRL",
+      "is_territory": false,
+      "name": "Ireland",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "IL",
+      "alpha_3": "ISR",
+      "is_territory": false,
+      "name": "Israel",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "IM",
+      "alpha_3": "IMN",
+      "is_territory": true,
+      "name": "Isle of Man",
+      "parent_alpha_2": "GB",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "IN",
+      "alpha_3": "IND",
+      "is_territory": false,
+      "name": "India",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "IO",
+      "alpha_3": "IOT",
+      "is_territory": true,
+      "name": "British Indian Ocean Territory",
+      "parent_alpha_2": "GB",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "IQ",
+      "alpha_3": "IRQ",
+      "is_territory": false,
+      "name": "Iraq",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "IR",
+      "alpha_3": "IRN",
+      "is_territory": false,
+      "name": "Iran, Islamic Republic of",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "IS",
+      "alpha_3": "ISL",
+      "is_territory": false,
+      "name": "Iceland",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "IT",
+      "alpha_3": "ITA",
+      "is_territory": false,
+      "name": "Italy",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "JE",
+      "alpha_3": "JEY",
+      "is_territory": true,
+      "name": "Jersey",
+      "parent_alpha_2": "GB",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "JM",
+      "alpha_3": "JAM",
+      "is_territory": false,
+      "name": "Jamaica",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "JO",
+      "alpha_3": "JOR",
+      "is_territory": false,
+      "name": "Jordan",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "JP",
+      "alpha_3": "JPN",
+      "is_territory": false,
+      "name": "Japan",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "KE",
+      "alpha_3": "KEN",
+      "is_territory": false,
+      "name": "Kenya",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "KG",
+      "alpha_3": "KGZ",
+      "is_territory": false,
+      "name": "Kyrgyzstan",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "KH",
+      "alpha_3": "KHM",
+      "is_territory": false,
+      "name": "Cambodia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "KI",
+      "alpha_3": "KIR",
+      "is_territory": false,
+      "name": "Kiribati",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "KM",
+      "alpha_3": "COM",
+      "is_territory": false,
+      "name": "Comoros",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "KN",
+      "alpha_3": "KNA",
+      "is_territory": false,
+      "name": "Saint Kitts and Nevis",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "KP",
+      "alpha_3": "PRK",
+      "is_territory": false,
+      "name": "Korea, Democratic People's Republic of",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "KR",
+      "alpha_3": "KOR",
+      "is_territory": false,
+      "name": "Korea, Republic of",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "KW",
+      "alpha_3": "KWT",
+      "is_territory": false,
+      "name": "Kuwait",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "KY",
+      "alpha_3": "CYM",
+      "is_territory": true,
+      "name": "Cayman Islands",
+      "parent_alpha_2": "GB",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "KZ",
+      "alpha_3": "KAZ",
+      "is_territory": false,
+      "name": "Kazakhstan",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "LA",
+      "alpha_3": "LAO",
+      "is_territory": false,
+      "name": "Lao People's Democratic Republic",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "LB",
+      "alpha_3": "LBN",
+      "is_territory": false,
+      "name": "Lebanon",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "LC",
+      "alpha_3": "LCA",
+      "is_territory": false,
+      "name": "Saint Lucia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "LI",
+      "alpha_3": "LIE",
+      "is_territory": false,
+      "name": "Liechtenstein",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "LK",
+      "alpha_3": "LKA",
+      "is_territory": false,
+      "name": "Sri Lanka",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "LR",
+      "alpha_3": "LBR",
+      "is_territory": false,
+      "name": "Liberia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "LS",
+      "alpha_3": "LSO",
+      "is_territory": false,
+      "name": "Lesotho",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "LT",
+      "alpha_3": "LTU",
+      "is_territory": false,
+      "name": "Lithuania",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "LU",
+      "alpha_3": "LUX",
+      "is_territory": false,
+      "name": "Luxembourg",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "LV",
+      "alpha_3": "LVA",
+      "is_territory": false,
+      "name": "Latvia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "LY",
+      "alpha_3": "LBY",
+      "is_territory": false,
+      "name": "Libya",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "MA",
+      "alpha_3": "MAR",
+      "is_territory": false,
+      "name": "Morocco",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "MC",
+      "alpha_3": "MCO",
+      "is_territory": false,
+      "name": "Monaco",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "MD",
+      "alpha_3": "MDA",
+      "is_territory": false,
+      "name": "Moldova, Republic of",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "ME",
+      "alpha_3": "MNE",
+      "is_territory": false,
+      "name": "Montenegro",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "MF",
+      "alpha_3": "MAF",
+      "is_territory": true,
+      "name": "Saint Martin (French part)",
+      "parent_alpha_2": "FR",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "MG",
+      "alpha_3": "MDG",
+      "is_territory": false,
+      "name": "Madagascar",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "MH",
+      "alpha_3": "MHL",
+      "is_territory": false,
+      "name": "Marshall Islands",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "MK",
+      "alpha_3": "MKD",
+      "is_territory": false,
+      "name": "North Macedonia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "ML",
+      "alpha_3": "MLI",
+      "is_territory": false,
+      "name": "Mali",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "MM",
+      "alpha_3": "MMR",
+      "is_territory": false,
+      "name": "Myanmar",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "MN",
+      "alpha_3": "MNG",
+      "is_territory": false,
+      "name": "Mongolia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "MO",
+      "alpha_3": "MAC",
+      "is_territory": true,
+      "name": "Macao",
+      "parent_alpha_2": "CN",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "MP",
+      "alpha_3": "MNP",
+      "is_territory": true,
+      "name": "Northern Mariana Islands",
+      "parent_alpha_2": "US",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "MQ",
+      "alpha_3": "MTQ",
+      "is_territory": true,
+      "name": "Martinique",
+      "parent_alpha_2": "FR",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "MR",
+      "alpha_3": "MRT",
+      "is_territory": false,
+      "name": "Mauritania",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "MS",
+      "alpha_3": "MSR",
+      "is_territory": true,
+      "name": "Montserrat",
+      "parent_alpha_2": "GB",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "MT",
+      "alpha_3": "MLT",
+      "is_territory": false,
+      "name": "Malta",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "MU",
+      "alpha_3": "MUS",
+      "is_territory": false,
+      "name": "Mauritius",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "MV",
+      "alpha_3": "MDV",
+      "is_territory": false,
+      "name": "Maldives",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "MW",
+      "alpha_3": "MWI",
+      "is_territory": false,
+      "name": "Malawi",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "MX",
+      "alpha_3": "MEX",
+      "is_territory": false,
+      "name": "Mexico",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "MY",
+      "alpha_3": "MYS",
+      "is_territory": false,
+      "name": "Malaysia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "MZ",
+      "alpha_3": "MOZ",
+      "is_territory": false,
+      "name": "Mozambique",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "NA",
+      "alpha_3": "NAM",
+      "is_territory": false,
+      "name": "Namibia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "NC",
+      "alpha_3": "NCL",
+      "is_territory": true,
+      "name": "New Caledonia",
+      "parent_alpha_2": "FR",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "NE",
+      "alpha_3": "NER",
+      "is_territory": false,
+      "name": "Niger",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "NF",
+      "alpha_3": "NFK",
+      "is_territory": true,
+      "name": "Norfolk Island",
+      "parent_alpha_2": "AU",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "NG",
+      "alpha_3": "NGA",
+      "is_territory": false,
+      "name": "Nigeria",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "NI",
+      "alpha_3": "NIC",
+      "is_territory": false,
+      "name": "Nicaragua",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "NL",
+      "alpha_3": "NLD",
+      "is_territory": false,
+      "name": "Netherlands",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "NO",
+      "alpha_3": "NOR",
+      "is_territory": false,
+      "name": "Norway",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "NP",
+      "alpha_3": "NPL",
+      "is_territory": false,
+      "name": "Nepal",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "NR",
+      "alpha_3": "NRU",
+      "is_territory": false,
+      "name": "Nauru",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "NU",
+      "alpha_3": "NIU",
+      "is_territory": true,
+      "name": "Niue",
+      "parent_alpha_2": "NZ",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "NZ",
+      "alpha_3": "NZL",
+      "is_territory": false,
+      "name": "New Zealand",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "OM",
+      "alpha_3": "OMN",
+      "is_territory": false,
+      "name": "Oman",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "PA",
+      "alpha_3": "PAN",
+      "is_territory": false,
+      "name": "Panama",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "PE",
+      "alpha_3": "PER",
+      "is_territory": false,
+      "name": "Peru",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "PF",
+      "alpha_3": "PYF",
+      "is_territory": true,
+      "name": "French Polynesia",
+      "parent_alpha_2": "FR",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "PG",
+      "alpha_3": "PNG",
+      "is_territory": false,
+      "name": "Papua New Guinea",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "PH",
+      "alpha_3": "PHL",
+      "is_territory": false,
+      "name": "Philippines",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "PK",
+      "alpha_3": "PAK",
+      "is_territory": false,
+      "name": "Pakistan",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "PL",
+      "alpha_3": "POL",
+      "is_territory": false,
+      "name": "Poland",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "PM",
+      "alpha_3": "SPM",
+      "is_territory": true,
+      "name": "Saint Pierre and Miquelon",
+      "parent_alpha_2": "FR",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "PN",
+      "alpha_3": "PCN",
+      "is_territory": true,
+      "name": "Pitcairn",
+      "parent_alpha_2": "GB",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "PR",
+      "alpha_3": "PRI",
+      "is_territory": true,
+      "name": "Puerto Rico",
+      "parent_alpha_2": "US",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "PS",
+      "alpha_3": "PSE",
+      "is_territory": true,
+      "name": "Palestine, State of",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "PT",
+      "alpha_3": "PRT",
+      "is_territory": false,
+      "name": "Portugal",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "PW",
+      "alpha_3": "PLW",
+      "is_territory": false,
+      "name": "Palau",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "PY",
+      "alpha_3": "PRY",
+      "is_territory": false,
+      "name": "Paraguay",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "QA",
+      "alpha_3": "QAT",
+      "is_territory": false,
+      "name": "Qatar",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "RE",
+      "alpha_3": "REU",
+      "is_territory": true,
+      "name": "Réunion",
+      "parent_alpha_2": "FR",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "RO",
+      "alpha_3": "ROU",
+      "is_territory": false,
+      "name": "Romania",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "RS",
+      "alpha_3": "SRB",
+      "is_territory": false,
+      "name": "Serbia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "RU",
+      "alpha_3": "RUS",
+      "is_territory": false,
+      "name": "Russian Federation",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "RW",
+      "alpha_3": "RWA",
+      "is_territory": false,
+      "name": "Rwanda",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "SA",
+      "alpha_3": "SAU",
+      "is_territory": false,
+      "name": "Saudi Arabia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "SB",
+      "alpha_3": "SLB",
+      "is_territory": false,
+      "name": "Solomon Islands",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "SC",
+      "alpha_3": "SYC",
+      "is_territory": false,
+      "name": "Seychelles",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "SD",
+      "alpha_3": "SDN",
+      "is_territory": false,
+      "name": "Sudan",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "SE",
+      "alpha_3": "SWE",
+      "is_territory": false,
+      "name": "Sweden",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "SG",
+      "alpha_3": "SGP",
+      "is_territory": false,
+      "name": "Singapore",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "SH",
+      "alpha_3": "SHN",
+      "is_territory": true,
+      "name": "Saint Helena, Ascension and Tristan da Cunha",
+      "parent_alpha_2": "GB",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "SI",
+      "alpha_3": "SVN",
+      "is_territory": false,
+      "name": "Slovenia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "SJ",
+      "alpha_3": "SJM",
+      "is_territory": true,
+      "name": "Svalbard and Jan Mayen",
+      "parent_alpha_2": "NO",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "SK",
+      "alpha_3": "SVK",
+      "is_territory": false,
+      "name": "Slovakia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "SL",
+      "alpha_3": "SLE",
+      "is_territory": false,
+      "name": "Sierra Leone",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "SM",
+      "alpha_3": "SMR",
+      "is_territory": false,
+      "name": "San Marino",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "SN",
+      "alpha_3": "SEN",
+      "is_territory": false,
+      "name": "Senegal",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "SO",
+      "alpha_3": "SOM",
+      "is_territory": false,
+      "name": "Somalia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "SR",
+      "alpha_3": "SUR",
+      "is_territory": false,
+      "name": "Suriname",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "SS",
+      "alpha_3": "SSD",
+      "is_territory": false,
+      "name": "South Sudan",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "ST",
+      "alpha_3": "STP",
+      "is_territory": false,
+      "name": "Sao Tome and Principe",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "SV",
+      "alpha_3": "SLV",
+      "is_territory": false,
+      "name": "El Salvador",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "SX",
+      "alpha_3": "SXM",
+      "is_territory": true,
+      "name": "Sint Maarten (Dutch part)",
+      "parent_alpha_2": "NL",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "SY",
+      "alpha_3": "SYR",
+      "is_territory": false,
+      "name": "Syrian Arab Republic",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "SZ",
+      "alpha_3": "SWZ",
+      "is_territory": false,
+      "name": "Eswatini",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "TC",
+      "alpha_3": "TCA",
+      "is_territory": true,
+      "name": "Turks and Caicos Islands",
+      "parent_alpha_2": "GB",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "TD",
+      "alpha_3": "TCD",
+      "is_territory": false,
+      "name": "Chad",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "TF",
+      "alpha_3": "ATF",
+      "is_territory": true,
+      "name": "French Southern Territories",
+      "parent_alpha_2": "FR",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "TG",
+      "alpha_3": "TGO",
+      "is_territory": false,
+      "name": "Togo",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "TH",
+      "alpha_3": "THA",
+      "is_territory": false,
+      "name": "Thailand",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "TJ",
+      "alpha_3": "TJK",
+      "is_territory": false,
+      "name": "Tajikistan",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "TK",
+      "alpha_3": "TKL",
+      "is_territory": true,
+      "name": "Tokelau",
+      "parent_alpha_2": "NZ",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "TL",
+      "alpha_3": "TLS",
+      "is_territory": false,
+      "name": "Timor-Leste",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "TM",
+      "alpha_3": "TKM",
+      "is_territory": false,
+      "name": "Turkmenistan",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "TN",
+      "alpha_3": "TUN",
+      "is_territory": false,
+      "name": "Tunisia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "TO",
+      "alpha_3": "TON",
+      "is_territory": false,
+      "name": "Tonga",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "TR",
+      "alpha_3": "TUR",
+      "is_territory": false,
+      "name": "Türkiye",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "TT",
+      "alpha_3": "TTO",
+      "is_territory": false,
+      "name": "Trinidad and Tobago",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "TV",
+      "alpha_3": "TUV",
+      "is_territory": false,
+      "name": "Tuvalu",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "TW",
+      "alpha_3": "TWN",
+      "is_territory": true,
+      "name": "Taiwan, Province of China",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "TZ",
+      "alpha_3": "TZA",
+      "is_territory": false,
+      "name": "Tanzania, United Republic of",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "UA",
+      "alpha_3": "UKR",
+      "is_territory": false,
+      "name": "Ukraine",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "UG",
+      "alpha_3": "UGA",
+      "is_territory": false,
+      "name": "Uganda",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "UM",
+      "alpha_3": "UMI",
+      "is_territory": true,
+      "name": "United States Minor Outlying Islands",
+      "parent_alpha_2": "US",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "US",
+      "alpha_3": "USA",
+      "is_territory": false,
+      "name": "United States",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "UY",
+      "alpha_3": "URY",
+      "is_territory": false,
+      "name": "Uruguay",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "UZ",
+      "alpha_3": "UZB",
+      "is_territory": false,
+      "name": "Uzbekistan",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "VA",
+      "alpha_3": "VAT",
+      "is_territory": false,
+      "name": "Holy See (Vatican City State)",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "VC",
+      "alpha_3": "VCT",
+      "is_territory": false,
+      "name": "Saint Vincent and the Grenadines",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "VE",
+      "alpha_3": "VEN",
+      "is_territory": false,
+      "name": "Venezuela, Bolivarian Republic of",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "VG",
+      "alpha_3": "VGB",
+      "is_territory": true,
+      "name": "Virgin Islands, British",
+      "parent_alpha_2": "GB",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "VI",
+      "alpha_3": "VIR",
+      "is_territory": true,
+      "name": "Virgin Islands, U.S.",
+      "parent_alpha_2": "US",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "VN",
+      "alpha_3": "VNM",
+      "is_territory": false,
+      "name": "Viet Nam",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "VU",
+      "alpha_3": "VUT",
+      "is_territory": false,
+      "name": "Vanuatu",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "WF",
+      "alpha_3": "WLF",
+      "is_territory": true,
+      "name": "Wallis and Futuna",
+      "parent_alpha_2": "FR",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "WS",
+      "alpha_3": "WSM",
+      "is_territory": false,
+      "name": "Samoa",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "YE",
+      "alpha_3": "YEM",
+      "is_territory": false,
+      "name": "Yemen",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "YT",
+      "alpha_3": "MYT",
+      "is_territory": true,
+      "name": "Mayotte",
+      "parent_alpha_2": "FR",
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "ZA",
+      "alpha_3": "ZAF",
+      "is_territory": false,
+      "name": "South Africa",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "ZM",
+      "alpha_3": "ZMB",
+      "is_territory": false,
+      "name": "Zambia",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "alpha_2": "ZW",
+      "alpha_3": "ZWE",
+      "is_territory": false,
+      "name": "Zimbabwe",
+      "parent_alpha_2": null,
+      "residence_statuses": [
+        "citizen",
+        "permanent_resident",
+        "temporary_resident",
+        "student",
+        "worker",
+        "refugee_status_holder",
+        "asylum_seeker",
+        "stateless_resident",
+        "visitor",
+        "other",
+        "unknown"
+      ]
+    }
+  ],
+  "entry_count": 249,
+  "generated_at": "2026-07-23",
+  "notes": "Every country/territory as a possible jurisdiction of lawful residence, with normalized residence statuses.",
+  "registry": "residence_jurisdictions",
+  "snapshot_date": "2026-07-23",
+  "source": "ISO via pycountry 26.2.16 + explicitly curated additions (see backend/scripts/gen_reference_data.py)",
+  "version": 1
+}
