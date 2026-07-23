@@ -35,7 +35,7 @@ def _wire_portal_store():
 async def _main():  # pragma: no cover - requires a running Temporal server
     from temporalio.client import Client
     from temporalio.worker import Worker
-    from .temporal_app import VisaProcessingWorkflow, ALL_ACTIVITIES
+    from .temporal_app import ALL_ACTIVITIES, ALL_WORKFLOWS
 
     # Durable, DB-backed portal so reconciliation survives a worker restart
     # (mode-gated: refuses to start in real-only modes).
@@ -56,7 +56,7 @@ async def _main():  # pragma: no cover - requires a running Temporal server
             await asyncio.sleep(2)
     if client is None:
         raise RuntimeError(f"could not connect to Temporal at {host}: {last_err}")
-    worker = Worker(client, task_queue="visa", workflows=[VisaProcessingWorkflow],
+    worker = Worker(client, task_queue="visa", workflows=ALL_WORKFLOWS,
                     activities=ALL_ACTIVITIES)
     print(f"Temporal worker connected to {host}, task queue 'visa' (DB portal store active)", flush=True)
     await worker.run()

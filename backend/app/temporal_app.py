@@ -15,6 +15,7 @@ from dataclasses import dataclass, field
 from datetime import timedelta
 
 from temporalio import activity, workflow
+from temporalio.common import RetryPolicy
 
 # --- per-case portal resolution (worker side) ------------------------------
 # Two modes:
@@ -251,3 +252,47 @@ class VisaProcessingWorkflow:
 
 ALL_ACTIVITIES = [act_register, act_verify_email, act_login, act_create_application,
                   act_pay, act_book, act_declare, act_submit]
+
+
+# --- One-time durable snapshot research processing (brief section 13) --------
+# A ONE-SHOT workflow: it drains the resumable research batches and completes.
+# There is deliberately NO schedule, NO cron, NO recurring refresh — restart
+# durability comes from Temporal's replay + the DB-persisted batch stages.
+
+@activity.defn
+async def act_snapshot_resume() -> dict:
+    from .db import SessionLocal
+    from .visa_snapshot.pipeline import resume as _resume
+    db = SessionLocal()
+    try:
+        return _resume(db)
+    finally:
+        db.close()
+
+
+@workflow.defn
+class OneTimeSnapshotResearchWorkflow:
+    """Drains all research batches whose input files exist, then finishes.
+    Re-run manually (one-shot) after more research input lands; never scheduled."""
+
+    @workflow.run
+    async def run(self, max_rounds: int = 50) -> dict:
+        totals = {"rounds": 0, "completed": 0}
+        for _ in range(max_rounds):
+            r = await workflow.execute_activity(
+                act_snapshot_resume,
+                start_to_close_timeout=timedelta(minutes=30),
+                retry_policy=RetryPolicy(maximum_attempts=3),
+            )
+            totals["rounds"] += 1
+            totals["completed"] += r.get("completed_now", 0)
+            # Done when nothing is left that CAN progress (only batches still
+            # awaiting research input remain, or everything is complete).
+            if r.get("processed", 0) == 0 or r.get("completed_now", 0) == 0:
+                totals["remaining_awaiting_input"] = r.get("awaiting_research_input", 0)
+                break
+        return totals
+
+
+ALL_ACTIVITIES.append(act_snapshot_resume)
+ALL_WORKFLOWS = [VisaProcessingWorkflow, OneTimeSnapshotResearchWorkflow]

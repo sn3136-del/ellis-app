@@ -138,10 +138,14 @@ def test_schema_rejects_wrong_snapshot_date():
 
 
 def test_no_recurring_refresh_anywhere():
-    """No cron/interval/schedule-based rule refresh may exist in the snapshot package."""
-    pkg = Path(__file__).resolve().parents[1] / "app" / "visa_snapshot"
-    banned = ("schedule.every", "cron", "CronTrigger", "start_interval", "create_schedule", "ScheduleSpec")
-    for py in pkg.rglob("*.py"):
+    """No cron/interval/schedule-based rule refresh may exist in the snapshot
+    package OR the Temporal app (the one-time research workflow is one-shot)."""
+    app_dir = Path(__file__).resolve().parents[1] / "app"
+    # API-usage tokens (not prose): actually creating a schedule/cron trigger.
+    banned = ("schedule.every", "CronTrigger", "start_interval", "create_schedule",
+              "ScheduleSpec", "ScheduleActionStartWorkflow", "cron_schedule")
+    targets = list((app_dir / "visa_snapshot").rglob("*.py")) + [app_dir / "temporal_app.py"]
+    for py in targets:
         text = py.read_text(encoding="utf-8")
         for token in banned:
             assert token not in text, f"{py.name} contains banned recurring-refresh token {token!r}"
