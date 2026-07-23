@@ -15,6 +15,11 @@ import {
   validEmail, datesOrdered, RESIDENCE_STATUS_OPTIONS,
   researchStageMeta, researchTerminal, researchStatusMeta, RESEARCH_STEP_KEYS
 } from '../../lib/intake.js'
+import ConnectorBuild from './ConnectorBuild.jsx'
+
+// Readiness statuses that mean no verified LIVE connector exists yet, so the
+// applicant may ask Ellis to build one (brief §10).
+const NEEDS_CONNECTOR = new Set(['APPLICANT_HANDOFF_READY', 'LIVE_SANDBOX_READY'])
 
 const INVALID_STYLE = { borderColor: 'var(--ink)', boxShadow: '0 0 0 3px rgba(10,10,10,0.14)' }
 
@@ -722,6 +727,16 @@ function ResultPanel({ client, t, result, dateHonesty, onEdit, onNew }) {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {NEEDS_CONNECTOR.has(result.readiness_status) && result.route_key && (
+        <div style={{ marginTop: 18 }}>
+          <ConnectorBuild client={client}
+            route={{ route_key: result.route_key,
+                     destination: result.normalized_input?.destination || result.destination || '',
+                     visa_type: result.normalized_input?.visa_category || 'tourist',
+                     portal_evidence: result.portal_evidence || {} }} />
         </div>
       )}
 

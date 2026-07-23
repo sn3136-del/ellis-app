@@ -33,7 +33,8 @@ const SNAPSHOT_TABS = [
   ['conflicts', 'admin.tab.conflicts'],
   ['route queue', 'admin.tab.routeQueue'],
   ['adapter tasks', 'admin.tab.adapterTasks'],
-  ['research jobs', 'admin.tab.researchJobs']
+  ['research jobs', 'admin.tab.researchJobs'],
+  ['adapter factory', 'admin.tab.factory']
 ]
 
 export default function AdminConsole() {
@@ -141,7 +142,146 @@ export default function AdminConsole() {
         {tab === 'route queue' && <RouteQueueTab client={client} t={t} />}
         {tab === 'adapter tasks' && <AdapterTasksTab client={client} t={t} />}
         {tab === 'research jobs' && <ResearchJobsTab client={client} t={t} />}
+        {tab === 'adapter factory' && <AdapterFactoryTab client={client} t={t} isAdmin={isAdmin} toast={toast} />}
       </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Adapter Factory tab (brief §13, §30): internal release queue + evidence.
+// The applicant never sees this; release/kill/rollback are admin-only actions.
+function AdapterFactoryTab({ client, t, isAdmin, toast }) {
+  const [queue, setQueue] = useState(null)
+  const [candidates, setCandidates] = useState([])
+  const [releases, setReleases] = useState([])
+  const [selected, setSelected] = useState(null)   // {candidate_id, version}
+  const [evidence, setEvidence] = useState(null)
+  const [error, setError] = useState(null)
+
+  async function refresh() {
+    try {
+      const [q, c, r] = await Promise.all([
+        client.adminFactoryQueue(), client.adminFactoryCandidates(),
+        client.adminFactoryReleases()])
+      setQueue(q.builds); setCandidates(c.candidates); setReleases(r.releases)
+    } catch (e) { setError({ message: e.message }) }
+  }
+  useEffect(() => { refresh() }, [])
+
+  async function openEvidence(cand) {
+    setSelected({ candidate_id: cand.id, version: cand.current_version })
+    try { setEvidence(await client.adminFactoryEvidence(cand.id, cand.current_version)) }
+    catch (e) { setError({ message: e.message }) }
+  }
+
+  async function act(fn, ok) {
+    setError(null)
+    try { await fn(); toast(ok); await refresh() }
+    catch (e) { setError({ message: e.message }) }
+  }
+
+  if (!queue) return <Loading label={t('admin.factory.loading')} />
+  return (
+    <div className="tabpanel">
+      <div style={{ fontWeight: 700, marginBottom: 4 }}>{t('admin.factory.title')}</div>
+      <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 12 }}>{t('admin.factory.sub')}</div>
+      {error && <ErrorNote error={error} />}
+
+      <div className="eyebrow">{t('admin.factory.queue')}</div>
+      {queue.length === 0 ? <Empty label={t('admin.factory.empty')} /> : (
+        <table className="table" style={{ marginBottom: 16 }}>
+          <thead><tr>
+            <th>{t('admin.factory.route')}</th><th>{t('admin.factory.state')}</th>
+            <th>{t('admin.factory.consent')}</th><th></th>
+          </tr></thead>
+          <tbody>
+            {queue.map((b) => (
+              <tr key={b.id}>
+                <td style={{ fontSize: 11 }}>{b.destination || b.route_key}</td>
+                <td><span className="chip">{b.state}</span></td>
+                <td>{b.consented ? '✓' : '—'}</td>
+                <td>{b.candidate_id &&
+                  <button className="btn btn--sm btn--ghost" onClick={() => {
+                    const c = candidates.find((x) => x.id === b.candidate_id)
+                    if (c) openEvidence(c)
+                  }}>{t('admin.factory.review')}</button>}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      {evidence && selected && (
+        <div className="card" style={{ padding: 16, marginBottom: 16 }}>
+          <div style={{ fontWeight: 700, marginBottom: 8 }}>
+            {t('admin.factory.evidenceTitle')} · v{selected.version}
+            {evidence.quarantined && <span className="chip" style={{ marginLeft: 8, background: 'var(--crit)', color: '#fff' }}>QUARANTINED</span>}
+          </div>
+          <KVList fields={[
+            { label: t('admin.factory.routeScope'), value: JSON.stringify(evidence.evidence.route_scope) },
+            { label: t('admin.factory.hostnames'), value: (evidence.evidence.allowed_hostnames || []).join(', ') },
+            { label: t('admin.factory.operator'), value: evidence.evidence.portal_operator },
+            { label: t('admin.factory.flowNodes'), value: String(evidence.evidence.flow_nodes) },
+            { label: t('admin.factory.contentHash'), value: (evidence.evidence.content_hash || '').slice(0, 16) + '…' },
+            { label: t('admin.factory.staticValid'), value: evidence.evidence.static_validation?.passed ? '✓ passed' : '✗ failed' },
+            { label: t('admin.factory.testLayers'),
+              value: (evidence.evidence.test_classifications || [])
+                .map((c) => `${c.classification}${c.passed ? '✓' : '✗'}`).join('  ') }
+          ]} />
+          {(evidence.known_limitations || []).length > 0 && (
+            <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 6 }}>
+              {t('admin.factory.limitations')}: {evidence.known_limitations.join('; ')}
+            </div>
+          )}
+          <details style={{ marginTop: 8 }}>
+            <summary style={{ cursor: 'pointer', fontSize: 12 }}>{t('admin.factory.viewDiff')}</summary>
+            <pre style={{ fontSize: 10.5, overflow: 'auto', maxHeight: 240, background: 'var(--soft)', padding: 8, borderRadius: 6 }}>
+              {JSON.stringify(evidence.flow, null, 1)}
+            </pre>
+          </details>
+          {isAdmin && (
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
+              <button className="btn btn--sm" onClick={() => act(
+                () => client.adminFactoryRelease(selected.candidate_id, selected.version, 'sandbox'),
+                t('admin.factory.releasedSandbox'))}>{t('admin.factory.releaseSandbox')}</button>
+              <button className="btn btn--sm" onClick={() => act(
+                () => client.adminFactoryRelease(selected.candidate_id, selected.version, 'staging'),
+                t('admin.factory.releasedStaging'))}>{t('admin.factory.releaseStaging')}</button>
+              <button className="btn btn--sm" onClick={() => act(
+                () => client.adminFactoryRelease(selected.candidate_id, selected.version, 'production'),
+                t('admin.factory.releasedProduction'))}>{t('admin.factory.releaseProduction')}</button>
+              <button className="btn btn--sm btn--ghost" onClick={() => act(
+                () => client.adminFactoryKill(selected.candidate_id, 'admin kill'),
+                t('admin.factory.killed'))}>{t('admin.factory.kill')}</button>
+              <button className="btn btn--sm btn--ghost" onClick={() => act(
+                () => client.adminFactoryQuarantine(selected.candidate_id, selected.version, 'admin quarantine'),
+                t('admin.factory.quarantined'))}>{t('admin.factory.quarantine')}</button>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="eyebrow">{t('admin.factory.releaseHistory')}</div>
+      {releases.length === 0 ? <Empty label={t('admin.factory.noReleases')} /> : (
+        <table className="table">
+          <thead><tr>
+            <th>{t('admin.factory.route')}</th><th>{t('admin.factory.tier')}</th>
+            <th>v</th><th>{t('admin.factory.by')}</th><th>{t('admin.factory.active')}</th>
+          </tr></thead>
+          <tbody>
+            {releases.map((r) => (
+              <tr key={r.id}>
+                <td style={{ fontSize: 11 }}>{r.route_key}</td>
+                <td><span className="chip">{r.tier}</span></td>
+                <td>{r.version}</td>
+                <td style={{ fontSize: 11 }}>{r.released_by} ({r.kind})</td>
+                <td>{r.active ? '✓' : '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   )
 }

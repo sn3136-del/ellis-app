@@ -196,6 +196,40 @@ export function createVisaClient(session) {
       call('POST', `/cases/${id}/signals/approve_payment`, session,
            { amount_cents: amountCents, currency }),
 
+    // Automated adapter factory (§10-§13, §33). The applicant only ever sees
+    // simple progress labels — never adapter code or portal internals.
+    buildConsentCopy: () => call('GET', '/adapter-build/consent-copy', session),
+    requestAdapterBuild: (body) => call('POST', '/adapter-build/request', session, body),
+    consentAdapterBuild: (id, locale = 'en') =>
+      call('POST', `/adapter-build/${id}/consent`, session, { locale }),
+    getAdapterBuild: (id) => call('GET', `/adapter-build/${id}`, session),
+    resumeAdapterBuild: (id) => call('POST', `/adapter-build/${id}/resume`, session, {}),
+
+    // Admin: adapter-factory queue + release controls (admin session required).
+    adminFactoryQueue: () => call('GET', '/admin/adapter-factory/queue', session),
+    adminFactoryCandidates: () => call('GET', '/admin/adapter-factory/candidates', session),
+    adminFactoryEvidence: (candId, version) =>
+      call('GET', `/admin/adapter-factory/candidates/${candId}/evidence${version ? `?version=${version}` : ''}`, session),
+    adminFactoryRelease: (candId, version, tier) =>
+      call('POST', '/admin/adapter-factory/release', session,
+           { candidate_id: candId, version, tier }),
+    adminFactoryQuarantine: (candId, version, reason) =>
+      call('POST', '/admin/adapter-factory/quarantine', session,
+           { candidate_id: candId, version, reason }),
+    adminFactoryKill: (candId, reason) =>
+      call('POST', '/admin/adapter-factory/kill', session, { candidate_id: candId, reason }),
+    adminFactoryClearKill: (candId) =>
+      call('POST', '/admin/adapter-factory/clear-kill', session, { candidate_id: candId }),
+    adminFactoryRollback: (candId, tier, reason) =>
+      call('POST', '/admin/adapter-factory/rollback', session,
+           { candidate_id: candId, tier, reason }),
+    adminFactoryReviewTasks: () => call('GET', '/admin/adapter-factory/review-tasks', session),
+    adminFactoryResolveReview: (taskId, note, decision = 'resolved') =>
+      call('POST', `/admin/adapter-factory/review-tasks/${taskId}/resolve`, session,
+           { note, decision }),
+    adminFactoryFailures: () => call('GET', '/admin/adapter-factory/failures', session),
+    adminFactoryReleases: () => call('GET', '/admin/adapter-factory/releases', session),
+
     // Snapshot administration (admin session required).
     adminSnapshotCoverage: () => call('GET', '/admin/snapshot/coverage', session),
     adminSnapshotBatches: () => call('GET', '/admin/snapshot/batches', session),
