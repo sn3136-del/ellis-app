@@ -118,8 +118,10 @@ services:
       # Host ADC mounted READ-ONLY into ONLY the services that call Google.
       # Never baked into the image or build context (see .dockerignore).
       - ${HOME}/.config/gcloud/application_default_credentials.json:/var/run/secrets/google/application_default_credentials.json:ro
+      # Dev: live-mount the app package so backend edits reflect without rebuild.
+      - ./app:/app/app
     ports: ["8000:8000"]
-    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/healthz').status==200 else 1)\""]
       interval: 5s

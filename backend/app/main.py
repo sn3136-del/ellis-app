@@ -25,6 +25,22 @@ from .portal.adapters.vietnam_evisa import build_vietnam_evisa_adapter
 
 app = FastAPI(title="Ellis Visa Backend", version="0.1.0")
 
+# CORS so the Electron renderer (file:// / vite dev server) can reach the API.
+# The renderer authenticates with a Bearer token in the Authorization header
+# (never cookies), so credentials are disabled and a wildcard origin is safe in
+# development. Production restricts via ELLIS_CORS_ORIGINS (comma-separated).
+import os as _os
+from fastapi.middleware.cors import CORSMiddleware
+
+_cors = [o.strip() for o in _os.getenv("ELLIS_CORS_ORIGINS", "*").split(",") if o.strip()]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_cors,
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.on_event("startup")
 def _startup():
@@ -128,9 +144,38 @@ def get_case(application_id: str, db=Depends(get_session), p: Principal = Depend
     app_row = _owned(db, p, application_id)
     exec_row = db.execute(select(models.WorkflowExecution).where(
         models.WorkflowExecution.application_id == application_id)).scalar_one_or_none()
+    appt = db.execute(select(models.Appointment).where(
+        models.Appointment.application_id == application_id)).scalar_one_or_none()
+    conf = db.execute(select(models.SubmissionConfirmation).where(
+        models.SubmissionConfirmation.application_id == application_id)).scalar_one_or_none()
     return {"id": app_row.id, "state": app_row.state, "answers": app_row.answers,
             "pending": exec_row.pending if exec_row else None,
-            "portal_reference": app_row.portal_reference}
+            "portal_reference": app_row.portal_reference,
+            "appointment": ({"slot_id": appt.slot_id, "location_id": appt.location_id,
+                             "start_utc": appt.start_utc, "confirmation_no": appt.confirmation_no,
+                             "reschedule_count": appt.reschedule_count} if appt else None),
+            "confirmation": ({"reference_no": conf.reference_no, "receipt_no": conf.receipt_no}
+                             if conf else None)}
+
+
+@app.get("/cases/{application_id}/mock/verification")
+def mock_verification(application_id: str, db=Depends(get_session), p: Principal = Depends(get_principal)):
+    """MOCK-ONLY convenience: returns the verification token the mock portal
+    'emailed', so the applicant UI can complete the email-verification handoff in
+    a demo. In production the applicant reads their own real email (or Mailpit in
+    the local stack); this endpoint is disabled outside development and never
+    exposes real personal data — only the mock's own generated token."""
+    from .config import settings as _settings
+    if _settings().env not in ("development", "test"):
+        raise HTTPException(404, "not found")
+    _owned(db, p, application_id)
+    wf = service.load_workflow(db, application_id)
+    portal = getattr(wf, "_portal", None)
+    emails = list(getattr(portal, "emails", []) or [])
+    for e in reversed(emails):
+        if e.get("kind") == "verification" and "token=" in e.get("link", ""):
+            return {"token": e["link"].split("token=")[1], "kind": "verification"}
+    return {"token": None, "kind": "verification"}
 
 
 @app.post("/cases/{application_id}/documents")
@@ -171,16 +216,57 @@ def add_document(application_id: str, body: AddDocument, db=Depends(get_session)
             "extracted_fields": doc.extracted_fields, "quality_warnings": result.quality_warnings}
 
 
+def _required_fields_for(country: str, visa_type: str) -> list[str]:
+    """The applicant fields the destination's adapter requires (for the
+    'missing information' step). Adapters are portal-bound; build once to read
+    their metadata honestly."""
+    clear_registry()
+    portal = MockPortal()
+    build_mockland_adapter(portal)
+    build_vietnam_evisa_adapter(portal)
+    from .portal.contract import select_adapter
+    adapter = select_adapter(country, visa_type) or select_adapter("Mockland", "tourist")
+    return list(getattr(adapter, "required_applicant_fields", []) or [])
+
+
 @app.get("/cases/{application_id}/review")
 def review(application_id: str, db=Depends(get_session), p: Principal = Depends(get_principal)):
-    _owned(db, p, application_id)
+    app_row = _owned(db, p, application_id)
     docs = db.execute(select(models.StoredDocument).where(
         models.StoredDocument.application_id == application_id)).scalars().all()
     conflicts = ocr_provider.cross_document_conflicts(
         [{"fields": [{"key": k, "value": v["value"]} for k, v in d.extracted_fields.items()]} for d in docs])
+    required = _required_fields_for(app_row.destination_country, app_row.visa_type)
+    answers = app_row.answers or {}
+    missing = [f for f in required if not answers.get(f)]
     return {"documents": [{"id": d.id, "name": d.name, "doc_type": d.doc_type, "approved": d.approved,
                            "extracted_fields": d.extracted_fields, "quality_warnings": d.quality_warnings}
-                          for d in docs], "conflicts": conflicts}
+                          for d in docs], "conflicts": conflicts,
+            "required_fields": required, "missing_fields": missing, "answers": answers}
+
+
+class AnswersUpdate(BaseModel):
+    answers: dict
+
+
+@app.post("/cases/{application_id}/answers")
+def update_answers(application_id: str, body: AnswersUpdate, db=Depends(get_session),
+                   p: Principal = Depends(get_principal)):
+    """Merge applicant-supplied answers (the 'missing information' step). A
+    material change invalidates any prior signature, exactly like approving a
+    document field."""
+    app_row = _owned(db, p, application_id)
+    ans = dict(app_row.answers or {})
+    changed = {k: v for k, v in (body.answers or {}).items() if ans.get(k) != v}
+    ans.update({k: v for k, v in (body.answers or {}).items()})
+    app_row.answers = ans
+    db.commit()
+    invalidated = invalidate_signatures_if_changed(db, application_id)
+    audit.record(db, org_id=p.org_id, application_id=application_id, action="answers_updated",
+                 detail={"keys": list(changed.keys()), "signatures_invalidated": invalidated}, actor=p.user_id)
+    required = _required_fields_for(app_row.destination_country, app_row.visa_type)
+    missing = [f for f in required if not ans.get(f)]
+    return {"answers": ans, "missing_fields": missing, "signatures_invalidated": invalidated}
 
 
 @app.post("/cases/{application_id}/documents/{doc_id}/approve")

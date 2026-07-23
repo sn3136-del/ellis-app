@@ -36,6 +36,7 @@ async function call(method, path, session, body) {
 
 export function createVisaClient(session) {
   return {
+    base: BASE,
     capabilities: () => call('GET', '/capabilities', session),
     listAdapters: () => call('GET', '/adapters', session),
 
@@ -46,6 +47,8 @@ export function createVisaClient(session) {
     review: (id) => call('GET', `/cases/${id}/review`, session),
     approveDocument: (id, docId, edits = []) =>
       call('POST', `/cases/${id}/documents/${docId}/approve`, session, edits),
+
+    updateAnswers: (id, answers) => call('POST', `/cases/${id}/answers`, session, { answers }),
 
     setPreferences: (id, prefs) => call('POST', `/cases/${id}/preferences`, session, { prefs }),
     createAuthorization: (id, payload) => call('POST', `/cases/${id}/authorization`, session, payload),
@@ -64,21 +67,70 @@ export function createVisaClient(session) {
     completeDeclaration: (id) => call('POST', `/cases/${id}/signals/complete_declaration`, session, {}),
 
     appointment: (id) => call('GET', `/cases/${id}/appointment`, session),
-    audit: (id) => call('GET', `/cases/${id}/audit`, session)
+    audit: (id) => call('GET', `/cases/${id}/audit`, session),
+
+    // Native e-signature (Phase 3): prepare returns the exact document + hash +
+    // a short-lived step-up token; sign submits consent/intent/typed-or-drawn.
+    prepareAuthorization: (id, payload) =>
+      call('POST', `/cases/${id}/authorization/prepare`, session, payload),
+    signAuthorization: (id, payload) =>
+      call('POST', `/cases/${id}/authorization/sign`, session, payload),
+
+    // Human-handoff signals.
+    approveReschedule: (id) => call('POST', `/cases/${id}/signals/approve_reschedule`, session, {}),
+    cancel: (id) => call('POST', `/cases/${id}/signals/cancel`, session, {}),
+
+    // MOCK-ONLY: the verification token the mock portal "emailed" (dev demos).
+    mockVerification: (id) => call('GET', `/cases/${id}/mock/verification`, session)
   }
 }
 
-// The handoff → UI mapping the screens use to render the right modal/panel.
+// The backend pauses at these handoff strings (app/workflow.py _pause). Each maps
+// to the applicant UI surface that resolves it. Keep in sync with the backend.
 export const HANDOFF_UI = {
-  review: 'ReviewScreen',
-  authorization: 'AuthorizationScreen',
-  captcha: 'LiveViewModal',
-  email_verification: 'LiveViewModal',
+  review: 'ReviewPanel',            // approve_review
+  authorization: 'SignatureModal',  // prepare+sign, then sign_authorization
+  captcha: 'LiveViewModal',         // solve_captcha (Ellis never solves it)
+  email_verification: 'LiveViewModal', // verify_email(token)
   otp: 'LiveViewModal',
   identity: 'LiveViewModal',
-  payment: 'PaymentModal',
-  appointment_selection: 'AppointmentCalendar',
-  reschedule_approval: 'RescheduleConfirm',
-  personal_declaration: 'LiveViewModal',
-  no_availability: 'AppointmentCalendar'
+  login_challenge: 'LiveViewModal',
+  payment_approval: 'PaymentApprove', // approve_payment (shows fee)
+  payment: 'PaymentModal',          // complete_payment (secure window; no card seen)
+  three_ds: 'PaymentModal',
+  appointment_selection: 'AppointmentCalendar', // select_appointment(slot_id)
+  no_availability: 'AppointmentCalendar',
+  reschedule_approval: 'RescheduleConfirm',     // approve_reschedule
+  personal_declaration: 'DeclarationModal'      // complete_declaration
+}
+
+// Which signal resolves a given handoff (used by the case flow to advance).
+export const HANDOFF_SIGNAL = {
+  review: 'approve_review',
+  captcha: 'solve_captcha',
+  email_verification: 'verify_email',
+  otp: 'verify_email',
+  payment_approval: 'approve_payment',
+  payment: 'complete_payment',
+  appointment_selection: 'select_appointment',
+  reschedule_approval: 'approve_reschedule',
+  personal_declaration: 'complete_declaration'
+}
+
+// Human-readable label + one-line guidance per handoff, for the flow header.
+export const HANDOFF_COPY = {
+  review: ['Review your answers', 'Confirm every extracted value before Ellis proceeds.'],
+  authorization: ['Sign the Ellis authorization', 'Authorize Ellis to act for you on this application.'],
+  captcha: ['Solve the CAPTCHA', 'Complete it yourself in the secure window — Ellis never solves CAPTCHAs.'],
+  email_verification: ['Verify your email', 'Open the verification link the portal emailed you.'],
+  otp: ['Enter the one-time code', 'Type the code from your authenticator or SMS in the secure window.'],
+  identity: ['Identity check', 'Complete the identity step in the secure window.'],
+  login_challenge: ['Portal login challenge', 'Complete the portal sign-in challenge in the secure window.'],
+  payment_approval: ['Approve the fee', 'Confirm the official fee before payment begins.'],
+  payment: ['Pay the official fee', 'Enter your card directly in the portal — Ellis never sees it.'],
+  three_ds: ['Confirm 3-D Secure', 'Approve the bank verification in the secure window.'],
+  appointment_selection: ['Choose an appointment', 'Pick a qualifying slot from your calendar.'],
+  no_availability: ['No slots yet', 'Nothing matches your preferences yet — Ellis keeps watching.'],
+  reschedule_approval: ['Approve reschedule', 'An earlier slot is available — approve moving to it.'],
+  personal_declaration: ['Sign the declaration', 'Only you can sign the government declaration, under penalty of perjury.']
 }

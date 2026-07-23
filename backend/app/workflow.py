@@ -50,6 +50,10 @@ class VisaWorkflow:
             for k in ("credential_ref", "session_ref", "application_id", "receipt",
                       "appointment", "confirmation", "reschedules", "fee", "target_slot"):
                 setattr(self, k, snap.get(k))
+            # Searched slots must survive the reload between signals, else the
+            # APPOINTMENT_AVAILABLE step sees an empty list after select/book and
+            # falsely reports no availability.
+            self._last_slots = snap.get("last_slots", [])
             self.pending = exec_row.get("pending")
         else:
             self.machine = CaseMachine("DRAFT")
@@ -57,6 +61,7 @@ class VisaWorkflow:
             self.credential_ref = self.session_ref = self.application_id = None
             self.receipt = self.appointment = self.confirmation = self.fee = self.target_slot = None
             self.reschedules = 0
+            self._last_slots = []
             self.pending = None
         self.artifacts = []
 
@@ -71,7 +76,8 @@ class VisaWorkflow:
                 "session_ref": self.session_ref, "application_id": self.application_id,
                 "receipt": self.receipt, "appointment": self.appointment,
                 "confirmation": self.confirmation, "reschedules": self.reschedules,
-                "fee": self.fee, "target_slot": self.target_slot}
+                "fee": self.fee, "target_slot": self.target_slot,
+                "last_slots": getattr(self, "_last_slots", [])}
 
     def status(self) -> dict:
         return {"case_id": self.case_id, "state": self.machine.state, "pending": self.pending,
