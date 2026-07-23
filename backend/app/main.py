@@ -100,6 +100,202 @@ def assistant_identity(lang: str = "en", _: Principal = Depends(get_principal)):
     return {"name": "Ellis", "lang": lang, "answer": i18n.assistant_identity_answer(lang)}
 
 
+# ---- Personal-test safety gate (brief item #6): route readiness ----
+class GateBody(BaseModel):
+    destination: str
+    visa_type: str = "tourist"
+    nationality: str = ""
+    residence: str = ""
+    gate: str
+    complete: bool
+    evidence: str = ""
+
+
+@app.get("/routes/readiness")
+def route_readiness(destination: str, visa_type: str = "tourist", nationality: str = "",
+                    residence: str = "", db=Depends(get_session),
+                    _: Principal = Depends(get_principal)):
+    from . import personal_gate
+    return personal_gate.readiness(db, destination=destination, visa_type=visa_type,
+                                   nationality=nationality, residence=residence)
+
+
+@app.post("/admin/routes/readiness")
+def set_route_gate(body: GateBody, db=Depends(get_session), p: Principal = Depends(get_principal)):
+    """Human administrators only. Kimi has no such tool; search results can never
+    mark a gate. Evidence is mandatory to mark a gate complete."""
+    from . import personal_gate
+    require_admin(p)
+    try:
+        return personal_gate.set_gate(db, destination=body.destination, visa_type=body.visa_type,
+                                      nationality=body.nationality, residence=body.residence,
+                                      gate=body.gate, complete=body.complete,
+                                      evidence=body.evidence, actor=p.user_id)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+
+@app.get("/cases/{application_id}/live-preflight")
+def case_live_preflight(application_id: str, db=Depends(get_session),
+                        p: Principal = Depends(get_principal)):
+    from . import personal_gate
+    app_row = _owned(db, p, application_id)
+    ec = _case_execution_class(app_row.destination_country, app_row.visa_type)
+    return personal_gate.live_preflight(db, app_row, ec)
+
+
+# ---- Route rules (Phase 2) + fees (Phase 3) ----
+class RuleCreate(BaseModel):
+    destination: str
+    visa_type: str = "tourist"
+    nationality: str = ""
+    residence: str = ""
+    source_url: str
+    source_authority: str = ""
+    effective_date: str = ""
+    expiration_date: str = ""
+    eligibility_conditions: list = []
+    required_documents: list = []
+    processing_method: str = ""
+    electronic_available: Optional[bool] = None
+    biometrics_required: Optional[bool] = None
+    interview_required: Optional[bool] = None
+    appointment_required: Optional[bool] = None
+    personal_appearance_required: Optional[bool] = None
+    third_party_preparation_allowed: Optional[bool] = None
+    third_party_submission_allowed: Optional[bool] = None
+    declaration_mandatory: Optional[bool] = None
+    passport_validity_rule: dict = {}
+    confidence: float = 0.0
+
+
+class ReviewDecision(BaseModel):
+    decision: str   # verified | rejected | stale
+
+
+@app.post("/admin/routes/rules")
+def create_route_rule(body: RuleCreate, db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from . import rules as rules_mod
+    require_admin(p)
+    try:
+        r = rules_mod.create_rule(db, actor=p.user_id, **body.model_dump())
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    return {"id": r.id, "version": r.version, "review_status": r.review_status}
+
+
+@app.post("/admin/routes/rules/{rule_id}/review")
+def review_route_rule(rule_id: str, body: ReviewDecision, db=Depends(get_session),
+                      p: Principal = Depends(get_principal)):
+    from . import rules as rules_mod
+    require_admin(p)
+    try:
+        r = rules_mod.review_rule(db, rule_id=rule_id, decision=body.decision, actor=p.user_id)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    except KeyError:
+        raise HTTPException(404, "rule not found")
+    return {"id": r.id, "review_status": r.review_status, "version": r.version}
+
+
+@app.get("/routes/rules")
+def get_route_rule(destination: str, visa_type: str = "tourist", nationality: str = "",
+                   residence: str = "", db=Depends(get_session), _: Principal = Depends(get_principal)):
+    from . import rules as rules_mod
+    args = dict(destination=destination, visa_type=visa_type,
+                nationality=nationality, residence=residence)
+    r = rules_mod.latest_rule(db, **args)
+    history = rules_mod.rule_history(db, **args)
+    def _d(x):
+        return {"id": x.id, "version": x.version, "review_status": x.review_status,
+                "source_url": x.source_url, "source_authority": x.source_authority,
+                "effective_date": x.effective_date, "expiration_date": x.expiration_date,
+                "eligibility_conditions": x.eligibility_conditions,
+                "required_documents": x.required_documents,
+                "processing_method": x.processing_method,
+                "electronic_available": x.electronic_available,
+                "biometrics_required": x.biometrics_required,
+                "interview_required": x.interview_required,
+                "appointment_required": x.appointment_required,
+                "personal_appearance_required": x.personal_appearance_required,
+                "third_party_preparation_allowed": x.third_party_preparation_allowed,
+                "third_party_submission_allowed": x.third_party_submission_allowed,
+                "declaration_mandatory": x.declaration_mandatory,
+                "passport_validity_rule": x.passport_validity_rule,
+                "confidence": x.confidence,
+                "retrieved_at": x.retrieved_at.isoformat() if x.retrieved_at else None}
+    return {"verified": _d(r) if r else None,
+            "history": [{"id": h.id, "version": h.version, "review_status": h.review_status}
+                        for h in history]}
+
+
+@app.get("/routes/coverage")
+def get_route_coverage(db=Depends(get_session), _: Principal = Depends(get_principal)):
+    from . import rules as rules_mod
+    return {"status_ladder": rules_mod.STATUS_LADDER, "routes": rules_mod.coverage_matrix(db)}
+
+
+class FeeCreate(BaseModel):
+    destination: str
+    visa_type: str = "tourist"
+    nationality: str = ""
+    residence: str = ""
+    government_fee_cents: int = 0
+    service_fee_cents: int = 0
+    optional_fees: list = []
+    currency: str = "USD"
+    conditions: list = []
+    refundability: str = ""
+    payment_methods: list = []
+    payment_timing: str = ""
+    source_url: str
+    source_authority: str = ""
+    effective_date: str = ""
+
+
+@app.post("/admin/routes/fees")
+def create_route_fee(body: FeeCreate, db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from . import fees as fees_mod
+    require_admin(p)
+    try:
+        r = fees_mod.create_fee(db, actor=p.user_id, **body.model_dump())
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    return {"id": r.id, "version": r.version, "review_status": r.review_status}
+
+
+@app.post("/admin/routes/fees/{fee_id}/review")
+def review_route_fee(fee_id: str, body: ReviewDecision, db=Depends(get_session),
+                     p: Principal = Depends(get_principal)):
+    from . import fees as fees_mod
+    require_admin(p)
+    try:
+        r = fees_mod.review_fee(db, fee_id=fee_id, decision=body.decision, actor=p.user_id)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    except KeyError:
+        raise HTTPException(404, "fee record not found")
+    return {"id": r.id, "review_status": r.review_status, "version": r.version}
+
+
+@app.get("/routes/fees")
+def get_route_fee(destination: str, visa_type: str = "tourist", nationality: str = "",
+                  residence: str = "", db=Depends(get_session), _: Principal = Depends(get_principal)):
+    """Full fee breakdown for display BEFORE payment. Honest when no verified
+    current fee exists — automated payment is blocked in that case."""
+    from . import fees as fees_mod
+    rec = fees_mod.verified_current_fee(db, destination=destination, visa_type=visa_type,
+                                        nationality=nationality, residence=residence)
+    return fees_mod.fee_breakdown(rec)
+
+
+@app.get("/admin/routes/fees/stale")
+def get_stale_fees(db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from . import fees as fees_mod
+    require_admin(p)
+    return {"stale": fees_mod.stale_fees(db)}
+
+
 # ---- Trip.com first-run administrator setup (Phase 7) ----
 class SetupBody(BaseModel):
     tenant_name: Optional[str] = None
@@ -744,7 +940,21 @@ def _record_terminal_execution(db, p: Principal, application_id: str):
 
 @app.post("/cases/{application_id}/start")
 def start_case(application_id: str, db=Depends(get_session), p: Principal = Depends(get_principal)):
-    _owned(db, p, application_id)
+    from . import personal_gate
+    app_row = _owned(db, p, application_id)
+    # HARD GATE: a route whose adapter is live (sandbox/production) may not start
+    # unless every readiness gate and all required applicant info are complete.
+    # Mock/local routes proceed — they cannot touch a real portal and are
+    # labeled MOCK end-to-end.
+    ec = _case_execution_class(app_row.destination_country, app_row.visa_type)
+    try:
+        personal_gate.assert_ready_for_live_action(db, app_row, ec)
+    except personal_gate.PreparationOnlyMode as e:
+        audit.record(db, org_id=p.org_id, application_id=application_id,
+                     action="live_start_blocked_preparation_mode",
+                     detail={"missing_gates": e.missing_gates, "missing_info": e.missing_info},
+                     actor=p.user_id)
+        raise HTTPException(409, str(e))
     status, _ = service.signal(db, application_id, "start")
     _record_terminal_execution(db, p, application_id)
     return status

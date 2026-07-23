@@ -304,6 +304,88 @@ class ExecutionRecord(Base):
     detail: Mapped[dict] = mapped_column(JSON, default=dict)  # non-sensitive metadata only
 
 
+class RouteRule(Base, TimestampMixin):
+    """One versioned visa-route rule (Phase 2). Route = destination + visa type +
+    nationality + residence (+ purpose/duration in conditions). Only official
+    sources; requires human review before production use. Kimi never authors an
+    approved rule."""
+    __tablename__ = "route_rules"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    destination: Mapped[str] = mapped_column(String(80), index=True)
+    visa_type: Mapped[str] = mapped_column(String(80), default="tourist")
+    nationality: Mapped[str] = mapped_column(String(80), default="")
+    residence: Mapped[str] = mapped_column(String(80), default="")
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    # Source provenance (official government/embassy/consulate/contractor).
+    source_url: Mapped[str] = mapped_column(String(500), default="")
+    source_authority: Mapped[str] = mapped_column(String(200), default="")
+    retrieved_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    effective_date: Mapped[str] = mapped_column(String(20), default="")
+    expiration_date: Mapped[str] = mapped_column(String(20), default="")
+    # Rule content (structured, non-secret).
+    eligibility_conditions: Mapped[list] = mapped_column(JSON, default=list)
+    required_documents: Mapped[list] = mapped_column(JSON, default=list)
+    processing_method: Mapped[str] = mapped_column(String(60), default="")   # evisa|embassy|vac|on_arrival
+    electronic_available: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    biometrics_required: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    interview_required: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    appointment_required: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    personal_appearance_required: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    third_party_preparation_allowed: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    third_party_submission_allowed: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    declaration_mandatory: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    # Destination-specific passport-validity requirement (Phase 5), e.g.
+    # {"kind": "months_after_departure", "months": 6, "min_blank_pages": 2}
+    passport_validity_rule: Mapped[dict] = mapped_column(JSON, default=dict)
+    confidence: Mapped[float] = mapped_column(Float, default=0.0)
+    review_status: Mapped[str] = mapped_column(String(30), default="pending", index=True)  # pending|verified|rejected|stale
+    reviewed_by: Mapped[str] = mapped_column(String(64), default="")
+    superseded_by: Mapped[str] = mapped_column(String(32), default="")   # version chain
+
+
+class FeeRecord(Base, TimestampMixin):
+    """One versioned official-fee record for a route (Phase 3). Fees come only
+    from official sources or authorized contractors; Kimi never invents or
+    estimates one. Automated payment is blocked without a verified current fee."""
+    __tablename__ = "fee_records"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    destination: Mapped[str] = mapped_column(String(80), index=True)
+    visa_type: Mapped[str] = mapped_column(String(80), default="tourist")
+    nationality: Mapped[str] = mapped_column(String(80), default="")
+    residence: Mapped[str] = mapped_column(String(80), default="")
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    government_fee_cents: Mapped[int] = mapped_column(Integer, default=0)
+    service_fee_cents: Mapped[int] = mapped_column(Integer, default=0)
+    optional_fees: Mapped[list] = mapped_column(JSON, default=list)   # [{label, amount_cents, currency}]
+    currency: Mapped[str] = mapped_column(String(8), default="USD")
+    conditions: Mapped[list] = mapped_column(JSON, default=list)      # entries/age/speed/reciprocity…
+    refundability: Mapped[str] = mapped_column(String(200), default="")
+    payment_methods: Mapped[list] = mapped_column(JSON, default=list)
+    payment_timing: Mapped[str] = mapped_column(String(100), default="")
+    source_url: Mapped[str] = mapped_column(String(500), default="")
+    source_authority: Mapped[str] = mapped_column(String(200), default="")
+    retrieved_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    effective_date: Mapped[str] = mapped_column(String(20), default="")
+    review_status: Mapped[str] = mapped_column(String(30), default="pending", index=True)  # pending|verified|rejected|stale
+    reviewed_by: Mapped[str] = mapped_column(String(64), default="")
+
+
+class RouteReadiness(Base, TimestampMixin):
+    """The 15-point safety gate for one exact route (destination + visa type +
+    applicant nationality + residence). Every irreversible live action is blocked
+    until every gate is complete. Gates are set ONLY by a human administrator
+    through the admin endpoint — never by Kimi, never by search results."""
+    __tablename__ = "route_readiness"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    destination: Mapped[str] = mapped_column(String(80), index=True)
+    visa_type: Mapped[str] = mapped_column(String(80), default="tourist")
+    nationality: Mapped[str] = mapped_column(String(80), default="")
+    residence: Mapped[str] = mapped_column(String(80), default="")
+    # gate_key -> {complete: bool, evidence: str, by: str, at: iso}
+    gates: Mapped[dict] = mapped_column(JSON, default=dict)
+    notes: Mapped[str] = mapped_column(Text, default="")
+
+
 class TenantSetup(Base, TimestampMixin):
     """First-run administrator setup (Phase 7). Stores NON-SECRET configuration
     only. Provider credentials live in the vault (backend-only); this row keeps
