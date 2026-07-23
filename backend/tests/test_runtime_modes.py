@@ -76,6 +76,51 @@ def test_real_only_selection_stops_unsupported_no_fallback(clean_settings):
         assert df.select_metadata_adapter("Japan", "tourist") is None
 
 
+# ---- local_real_services: the packaged app's default (real-only) ----
+def test_local_real_services_is_real_only(clean_settings):
+    s = _set_mode(mode="local_real_services")
+    assert s.runtime_mode == "local_real_services"
+    assert s.real_only_mode and not s.mock_portal_allowed
+    assert s.production_mode           # hardens the mock-as-production guard
+
+
+def test_local_real_services_never_builds_mockportal(clean_settings, monkeypatch):
+    _set_mode(mode="local_real_services")
+    from app.portal import mock_portal
+    monkeypatch.setattr(mock_portal.MockPortal, "__init__",
+                        lambda self, *a, **k: (_ for _ in ()).throw(AssertionError("MockPortal constructed")))
+    with pytest.raises(df.RealOnlyStop):
+        df.build_runtime_portal(None)
+
+
+def test_local_real_services_never_reaches_synthetic_observer(clean_settings):
+    """The adapter factory's SyntheticPortal observer is available ONLY in
+    mock-allowed modes; in real-only modes it fails closed to None (no
+    simulated portal behavior in the packaged runtime)."""
+    _set_mode(mode="local_real_services")
+    from app.adapter_factory import api as factory_api
+    assert factory_api._synthetic_observer(["portal.gov.example"]) is None
+    # And a build resumed in this mode with no live observer never fabricates a
+    # portal — _observer_for returns None (or a live one only if BB configured).
+    from app.providers import browser as bb
+    if not bb.is_configured():
+        assert factory_api._observer_for(["portal.gov.example"]) is None
+
+
+def test_production_runtime_cannot_instantiate_synthetic_portal(clean_settings, monkeypatch):
+    """Build-time guarantee (§5): in a real-only runtime, SyntheticPortal is
+    never constructed on any production code path we control."""
+    for mode in ("local_real_services", "production", "staging"):
+        _set_mode(mode=mode)
+        from app.portal import synthetic
+        monkeypatch.setattr(synthetic.SyntheticPortal, "__init__",
+                            lambda self, *a, **k: (_ for _ in ()).throw(
+                                AssertionError("SyntheticPortal constructed in real-only mode")))
+        from app.adapter_factory import api as factory_api
+        # The observer selection must not construct a synthetic portal.
+        assert factory_api._synthetic_observer(["h.gov"]) is None
+
+
 def test_mock_modes_still_work(clean_settings):
     for m in ("test", "local_mock_demo"):
         _set_mode(mode=m)

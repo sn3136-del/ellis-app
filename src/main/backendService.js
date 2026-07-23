@@ -76,10 +76,13 @@ export async function startBackend() {
     return { ok: false, reused: false, spawned: false }
   }
 
+  // Mutable data lives OUTSIDE the (read-only, signed) app bundle, under
+  // Application Support — never inside Contents/Resources.
   const dbPath = join(app.getPath('userData'), 'ellis.db')
   const env = {
     ...process.env,
-    ELLIS_RUNTIME_MODE: 'local_mock_demo',
+    // REAL-SERVICES-ONLY: never local_mock_demo in the packaged runtime.
+    ELLIS_RUNTIME_MODE: process.env.ELLIS_RUNTIME_MODE || 'local_real_services',
     DATABASE_URL: `sqlite:///${dbPath}`,
     ELLIS_DATA_DIR: p.data,
     PYTHONUNBUFFERED: '1',

@@ -33,12 +33,18 @@ def _bool(key: str, default: bool = False) -> bool:
     return v.strip().lower() in ("1", "true", "yes", "on")
 
 
-RUNTIME_MODES = ("test", "local_mock_demo", "tripcom_evaluation", "staging", "production")
+# local_real_services: a single-user LOCAL desktop deployment that talks to
+# REAL providers (Document AI, Kimi, Browserbase) against a local SQLite DB and
+# dev-token auth — but with the absolute real-only execution boundary. It is the
+# default for the self-contained packaged app: never a mock/synthetic portal,
+# never invented fees/appointments/confirmations; fail closed instead.
+RUNTIME_MODES = ("test", "local_mock_demo", "local_real_services",
+                 "tripcom_evaluation", "staging", "production")
 # Modes in which MockPortal may be constructed at all.
 MOCK_ALLOWED_MODES = ("test", "local_mock_demo")
 # Modes with the absolute real-only execution boundary (never MockPortal,
 # never invented fees/appointments/confirmations — fail closed instead).
-REAL_ONLY_MODES = ("tripcom_evaluation", "staging", "production")
+REAL_ONLY_MODES = ("local_real_services", "tripcom_evaluation", "staging", "production")
 
 
 def _derive_runtime_mode(env: str) -> str:

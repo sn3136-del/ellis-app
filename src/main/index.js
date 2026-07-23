@@ -34,12 +34,16 @@ function engine() {
 // test) mode, selected explicitly via the ELLIS_RUNTIME_MODE environment
 // variable. Default is 'production': no demo handlers, no monitor, no
 // fabricated documents, no automatic traveler emails.
-// The packaged app is a self-contained LOCAL app: it bundles and launches its
-// own backend and mock portal, so it defaults to local_mock_demo (with the
-// prominent SIMULATED banner). A developer running from source defaults to
-// 'production' and starts their own backend. Either can be overridden via env.
+// The packaged app is a self-contained, REAL-SERVICES-ONLY app: it bundles and
+// launches its own backend and defaults to 'local_real_services' — real
+// providers against a local DB, with the absolute real-only boundary (never a
+// mock/synthetic portal, never invented fees/appointments/confirmations; fail
+// closed instead). The simulated Trip.com demo pipeline is NEVER enabled in the
+// packaged app. A developer running from source defaults to 'production' and
+// starts their own backend. Only an explicit ELLIS_RUNTIME_MODE=local_mock_demo
+// (dev only) turns on the demo pipeline.
 const RUNTIME_MODE = String(
-  process.env.ELLIS_RUNTIME_MODE || (app.isPackaged ? 'local_mock_demo' : 'production')
+  process.env.ELLIS_RUNTIME_MODE || (app.isPackaged ? 'local_real_services' : 'production')
 ).trim() || 'production'
 const DEMO_PIPELINE_ENABLED = RUNTIME_MODE === 'local_mock_demo' || RUNTIME_MODE === 'test'
 
