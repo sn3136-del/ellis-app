@@ -15,7 +15,7 @@ kill_tree() {
 }
 
 stopped=0
-for n in frontend worker backend; do
+for n in web frontend worker backend; do
   pf="$RUN/$n.pid"
   if [ -f "$pf" ]; then
     pid="$(cat "$pf" 2>/dev/null)"
@@ -28,9 +28,10 @@ for n in frontend worker backend; do
   fi
 done
 
-# Final sweep: ensure nothing Ellis-owned still holds the loopback port.
+# Final sweep: ensure nothing Ellis-owned still holds the loopback ports.
 if lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1; then
   pkill -f "uvicorn app.main:app.*--port $PORT" 2>/dev/null && { echo "stopped stray backend on :$PORT"; stopped=1; } || true
 fi
+pkill -f "vite --config .*vite.web.config.mjs" 2>/dev/null && { echo "stopped stray web server"; stopped=1; } || true
 
 [ "$stopped" = "1" ] && echo "Ellis stopped." || echo "Ellis was not running (no live PID files)."

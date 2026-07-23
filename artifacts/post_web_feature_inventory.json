@@ -1,0 +1,928 @@
+{
+ "head": "32a6da74eb5ad0dd53bba0ecd2d7ba1a9921d02d",
+ "generated_by": "pre_package_feature_inventory",
+ "backend_route_count": 85,
+ "backend_routes": [
+  {
+   "path": "/adapters",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/admin/adapters",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/admin/adapters",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/admin/adapters/harness",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/admin/adapters/{adapter_id}",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/admin/adapters/{adapter_id}",
+   "methods": [
+    "PUT"
+   ]
+  },
+  {
+   "path": "/admin/adapters/{adapter_id}/clear-kill",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/admin/adapters/{adapter_id}/kill",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/admin/adapters/{adapter_id}/rollback",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/admin/adapters/{adapter_id}/transition",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/admin/coverage",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/admin/email/dead-letters",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/admin/email/process-queue",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/admin/routes/fees",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/admin/routes/fees/stale",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/admin/routes/fees/{fee_id}/review",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/admin/routes/readiness",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/admin/routes/rules",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/admin/routes/rules/{rule_id}/review",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/admin/tripcom/deliveries",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/admin/tripcom/deliveries/{delivery_id}/replay",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/admin/tripcom/health",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/admin/tripcom/process",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/applicants/{applicant_id}",
+   "methods": [
+    "DELETE"
+   ]
+  },
+  {
+   "path": "/assistant/identity",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/capabilities",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/cases",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}",
+   "methods": [
+    "DELETE"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/answers",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/appointment",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/audit",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/authorization",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/authorization/prepare",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/authorization/sign",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/browser-session",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/browser-session",
+   "methods": [
+    "DELETE"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/browser-session/live-view",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/documents",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/documents/{doc_id}/approve",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/documents/{doc_id}/url",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/emails",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/export",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/final-review",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/final-review",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/final-review/sign",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/live-preflight",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/mock/verification",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/passport-validity",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/payment-authorization",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/preferences",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/review",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/signals/{name}",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/standing-authorization",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/standing-authorization",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/standing-authorization",
+   "methods": [
+    "DELETE"
+   ]
+  },
+  {
+   "path": "/cases/{application_id}/start",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/diagnostics/ocr",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/diagnostics/providers",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/discovery",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/discovery/drafts",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/discovery/drafts/{draft_id}/review",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/docs",
+   "methods": [
+    "GET",
+    "HEAD"
+   ]
+  },
+  {
+   "path": "/docs/oauth2-redirect",
+   "methods": [
+    "GET",
+    "HEAD"
+   ]
+  },
+  {
+   "path": "/documents/{doc_id}/content",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/export",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/healthz",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/i18n/languages",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/i18n/translate",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/metrics",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/openapi.json",
+   "methods": [
+    "GET",
+    "HEAD"
+   ]
+  },
+  {
+   "path": "/readyz",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/redoc",
+   "methods": [
+    "GET",
+    "HEAD"
+   ]
+  },
+  {
+   "path": "/routes/coverage",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/routes/fees",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/routes/readiness",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/routes/rules",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/setup",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/setup/email/test",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/setup/revoke/{component}",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/setup/rotate/{component}",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/setup/status",
+   "methods": [
+    "GET"
+   ]
+  },
+  {
+   "path": "/setup/test/{component}",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/webhooks/docusign",
+   "methods": [
+    "POST"
+   ]
+  },
+  {
+   "path": "/webhooks/stripe",
+   "methods": [
+    "POST"
+   ]
+  }
+ ],
+ "python_module_count": 94,
+ "python_modules": [
+  "backend/app/__init__.py",
+  "backend/app/adapter_factory/__init__.py",
+  "backend/app/adapter_factory/api.py",
+  "backend/app/adapter_factory/build_workflow.py",
+  "backend/app/adapter_factory/compiler.py",
+  "backend/app/adapter_factory/generator.py",
+  "backend/app/adapter_factory/live_driver.py",
+  "backend/app/adapter_factory/models.py",
+  "backend/app/adapter_factory/recon.py",
+  "backend/app/adapter_factory/release.py",
+  "backend/app/adapter_factory/repair.py",
+  "backend/app/adapter_factory/runtime.py",
+  "backend/app/adapter_factory/schema.py",
+  "backend/app/adapter_factory/specgen.py",
+  "backend/app/adapter_factory/statemachine.py",
+  "backend/app/adapter_factory/static_validator.py",
+  "backend/app/adapter_factory/testing.py",
+  "backend/app/adapters_admin.py",
+  "backend/app/appointments.py",
+  "backend/app/audit.py",
+  "backend/app/authorization.py",
+  "backend/app/config.py",
+  "backend/app/db.py",
+  "backend/app/emails.py",
+  "backend/app/execution.py",
+  "backend/app/fees.py",
+  "backend/app/final_review.py",
+  "backend/app/i18n.py",
+  "backend/app/integrations/__init__.py",
+  "backend/app/integrations/tripcom.py",
+  "backend/app/integrations/tripcom_admin.py",
+  "backend/app/main.py",
+  "backend/app/models.py",
+  "backend/app/observability.py",
+  "backend/app/passport_validity.py",
+  "backend/app/payments.py",
+  "backend/app/personal_gate.py",
+  "backend/app/portal/__init__.py",
+  "backend/app/portal/adapter_harness.py",
+  "backend/app/portal/adapters/__init__.py",
+  "backend/app/portal/adapters/mockland.py",
+  "backend/app/portal/adapters/vietnam_evisa.py",
+  "backend/app/portal/contract.py",
+  "backend/app/portal/discovery.py",
+  "backend/app/portal/driver_factory.py",
+  "backend/app/portal/http_mock.py",
+  "backend/app/portal/live_browser.py",
+  "backend/app/portal/live_driver.py",
+  "backend/app/portal/mock_portal.py",
+  "backend/app/portal/synthetic.py",
+  "backend/app/portal_store.py",
+  "backend/app/privacy.py",
+  "backend/app/provider_errors.py",
+  "backend/app/providers/__init__.py",
+  "backend/app/providers/browser.py",
+  "backend/app/providers/documentai.py",
+  "backend/app/providers/docusign.py",
+  "backend/app/providers/email.py",
+  "backend/app/providers/esign.py",
+  "backend/app/providers/kimi.py",
+  "backend/app/providers/kimi_vision.py",
+  "backend/app/providers/ocr.py",
+  "backend/app/providers/ocr_health.py",
+  "backend/app/providers/passport_classifier.py",
+  "backend/app/providers/payment.py",
+  "backend/app/providers/pdfgen.py",
+  "backend/app/routes_import.py",
+  "backend/app/rules.py",
+  "backend/app/security.py",
+  "backend/app/service.py",
+  "backend/app/setup.py",
+  "backend/app/statemachine.py",
+  "backend/app/temporal_app.py",
+  "backend/app/temporal_worker.py",
+  "backend/app/vault.py",
+  "backend/app/visa_snapshot/__init__.py",
+  "backend/app/visa_snapshot/__main__.py",
+  "backend/app/visa_snapshot/api.py",
+  "backend/app/visa_snapshot/authority.py",
+  "backend/app/visa_snapshot/coverage.py",
+  "backend/app/visa_snapshot/export.py",
+  "backend/app/visa_snapshot/fetching.py",
+  "backend/app/visa_snapshot/importer.py",
+  "backend/app/visa_snapshot/kimi_research.py",
+  "backend/app/visa_snapshot/matrix.py",
+  "backend/app/visa_snapshot/models.py",
+  "backend/app/visa_snapshot/ondemand.py",
+  "backend/app/visa_snapshot/pipeline.py",
+  "backend/app/visa_snapshot/registry.py",
+  "backend/app/visa_snapshot/resolution.py",
+  "backend/app/visa_snapshot/routekey.py",
+  "backend/app/visa_snapshot/validation.py",
+  "backend/app/worker.py",
+  "backend/app/workflow.py"
+ ],
+ "renderer_file_count": 22,
+ "renderer_files": [
+  "src/renderer/src/components/Sidebar.jsx",
+  "src/renderer/src/components/icons.jsx",
+  "src/renderer/src/components/ui.jsx",
+  "src/renderer/src/components/visa/CaseFlow.jsx",
+  "src/renderer/src/components/visa/ConnectorBuild.jsx",
+  "src/renderer/src/components/visa/DocPreview.jsx",
+  "src/renderer/src/components/visa/OcrReview.jsx",
+  "src/renderer/src/components/visa/Preferences.jsx",
+  "src/renderer/src/components/visa/StartVisa.jsx",
+  "src/renderer/src/components/visa/handoffs.jsx",
+  "src/renderer/src/lib/api.js",
+  "src/renderer/src/lib/i18n.js",
+  "src/renderer/src/lib/intake.js",
+  "src/renderer/src/lib/locale.jsx",
+  "src/renderer/src/lib/pdf.js",
+  "src/renderer/src/lib/visaBackend.js",
+  "src/renderer/src/lib/visaSession.js",
+  "src/renderer/src/screens/AdminConsole.jsx",
+  "src/renderer/src/screens/Settings.jsx",
+  "src/renderer/src/screens/SetupWizard.jsx",
+  "src/renderer/src/screens/TripPortal.jsx",
+  "src/renderer/src/screens/VisaConsole.jsx"
+ ],
+ "migrations": [
+  "4ff4920431fd_on_demand_route_research_jobs.py",
+  "648869085988_adapter_factory_tables.py",
+  "949b2638a102_browser_sessions.py",
+  "984526c3b1f6_route_intakes_for_applicant_start_your_.py",
+  "a1c5d7e9f2b4_standing_auth_review_payment.py",
+  "b8a9508310a8_snapshot_2026_07_23_20_global_visa_.py"
+ ],
+ "features": {
+  "trip_intake": {
+   "present": true,
+   "file": "src/renderer/src/screens/TripPortal.jsx",
+   "file_exists": true,
+   "symbol": null,
+   "symbol_found": null
+  },
+  "route_resolution": {
+   "present": true,
+   "file": "backend/app/visa_snapshot/resolution.py",
+   "file_exists": true,
+   "symbol": "def resolve",
+   "symbol_found": true
+  },
+  "on_demand_research": {
+   "present": true,
+   "file": "backend/app/visa_snapshot/ondemand.py",
+   "file_exists": true,
+   "symbol": "def run_job",
+   "symbol_found": true
+  },
+  "kimi_k3_integration": {
+   "present": true,
+   "file": "backend/app/providers/kimi.py",
+   "file_exists": true,
+   "symbol": "LiveKimiProvider",
+   "symbol_found": true
+  },
+  "kimi_grounded_extraction": {
+   "present": true,
+   "file": "backend/app/visa_snapshot/kimi_research.py",
+   "file_exists": true,
+   "symbol": "EXTRACTABLE_FIELDS",
+   "symbol_found": true
+  },
+  "citation_validation": {
+   "present": true,
+   "file": "backend/app/visa_snapshot/kimi_research.py",
+   "file_exists": true,
+   "symbol": "ungrounded",
+   "symbol_found": true
+  },
+  "google_document_ai_ocr": {
+   "present": true,
+   "file": "backend/app/providers/ocr.py",
+   "file_exists": true,
+   "symbol": "DocumentAiProvider",
+   "symbol_found": true
+  },
+  "mrz_validation": {
+   "present": true,
+   "file": "backend/app/providers/ocr.py",
+   "file_exists": true,
+   "symbol": "mrz_check_digit",
+   "symbol_found": true
+  },
+  "mrz_name_normalization_fix": {
+   "present": true,
+   "file": "backend/app/providers/ocr.py",
+   "file_exists": true,
+   "symbol": "normalize_name",
+   "symbol_found": true
+  },
+  "mrz_name_fix_js": {
+   "present": true,
+   "file": "src/main/mrz.js",
+   "file_exists": true,
+   "symbol": "normalizeName",
+   "symbol_found": true
+  },
+  "document_validation": {
+   "present": true,
+   "file": "backend/app/providers/passport_classifier.py",
+   "file_exists": true,
+   "symbol": "classify_page",
+   "symbol_found": true
+  },
+  "standing_authorization": {
+   "present": true,
+   "file": "backend/app/authorization.py",
+   "file_exists": true,
+   "symbol": "def grant",
+   "symbol_found": true
+  },
+  "appointment_preferences": {
+   "present": true,
+   "file": "backend/app/appointments.py",
+   "file_exists": true,
+   "symbol": "default_preferences",
+   "symbol_found": true
+  },
+  "final_review_and_signature": {
+   "present": true,
+   "file": "backend/app/final_review.py",
+   "file_exists": true,
+   "symbol": "verify_ready_to_submit",
+   "symbol_found": true
+  },
+  "exact_amount_payment_authorization": {
+   "present": true,
+   "file": "backend/app/payments.py",
+   "file_exists": true,
+   "symbol": "def authorize",
+   "symbol_found": true
+  },
+  "adapter_factory_models": {
+   "present": true,
+   "file": "backend/app/adapter_factory/models.py",
+   "file_exists": true,
+   "symbol": "AdapterBuildRequest",
+   "symbol_found": true
+  },
+  "adapter_state_machine": {
+   "present": true,
+   "file": "backend/app/adapter_factory/statemachine.py",
+   "file_exists": true,
+   "symbol": "BUILD_STATES",
+   "symbol_found": true
+  },
+  "typed_adapter_specification": {
+   "present": true,
+   "file": "backend/app/adapter_factory/schema.py",
+   "file_exists": true,
+   "symbol": "ACTION_TYPES",
+   "symbol_found": true
+  },
+  "static_validator": {
+   "present": true,
+   "file": "backend/app/adapter_factory/static_validator.py",
+   "file_exists": true,
+   "symbol": "validate_candidate",
+   "symbol_found": true
+  },
+  "synthetic_test_engine": {
+   "present": true,
+   "file": "backend/app/portal/synthetic.py",
+   "file_exists": true,
+   "symbol": "SyntheticPortal",
+   "symbol_found": true
+  },
+  "contract_test_engine": {
+   "present": true,
+   "file": "backend/app/adapter_factory/testing.py",
+   "file_exists": true,
+   "symbol": "run_contract_layer",
+   "symbol_found": true
+  },
+  "browserbase_session_service": {
+   "present": true,
+   "file": "backend/app/providers/browser.py",
+   "file_exists": true,
+   "symbol": "create_session",
+   "symbol_found": true
+  },
+  "browserbase_live_view": {
+   "present": true,
+   "file": "backend/app/providers/browser.py",
+   "file_exists": true,
+   "symbol": "live_view_url",
+   "symbol_found": true
+  },
+  "browserbase_structural_observer": {
+   "present": true,
+   "file": "backend/app/portal/live_browser.py",
+   "file_exists": true,
+   "symbol": "LiveBrowserSession",
+   "symbol_found": true
+  },
+  "browserbase_deterministic_driver": {
+   "present": true,
+   "file": "backend/app/adapter_factory/live_driver.py",
+   "file_exists": true,
+   "symbol": "BrowserbasePageDriver",
+   "symbol_found": true
+  },
+  "outcome_evidence_collector": {
+   "present": true,
+   "file": "backend/app/adapter_factory/runtime.py",
+   "file_exists": true,
+   "symbol": "AdapterOutcomeEvidence",
+   "symbol_found": true
+  },
+  "payment_reconciliation": {
+   "present": true,
+   "file": "backend/app/adapter_factory/runtime.py",
+   "file_exists": true,
+   "symbol": "_already_done",
+   "symbol_found": true
+  },
+  "appointment_reconciliation": {
+   "present": true,
+   "file": "backend/app/portal/live_driver.py",
+   "file_exists": true,
+   "symbol": "reconcil",
+   "symbol_found": true
+  },
+  "submission_reconciliation": {
+   "present": true,
+   "file": "backend/app/workflow.py",
+   "file_exists": true,
+   "symbol": "already submitted",
+   "symbol_found": true
+  },
+  "capability_release": {
+   "present": true,
+   "file": "backend/app/adapter_factory/release.py",
+   "file_exists": true,
+   "symbol": "def release",
+   "symbol_found": true
+  },
+  "kill_switch": {
+   "present": true,
+   "file": "backend/app/adapter_factory/release.py",
+   "file_exists": true,
+   "symbol": "engage_kill_switch",
+   "symbol_found": true
+  },
+  "quarantine": {
+   "present": true,
+   "file": "backend/app/adapter_factory/release.py",
+   "file_exists": true,
+   "symbol": "def quarantine",
+   "symbol_found": true
+  },
+  "rollback": {
+   "present": true,
+   "file": "backend/app/adapter_factory/release.py",
+   "file_exists": true,
+   "symbol": "def rollback",
+   "symbol_found": true
+  },
+  "restart_recovery": {
+   "present": true,
+   "file": "backend/app/service.py",
+   "file_exists": true,
+   "symbol": "load_workflow",
+   "symbol_found": true
+  },
+  "admin_console": {
+   "present": true,
+   "file": "src/renderer/src/screens/AdminConsole.jsx",
+   "file_exists": true,
+   "symbol": "AdapterFactoryTab",
+   "symbol_found": true
+  },
+  "research_jobs_ui": {
+   "present": true,
+   "file": "src/renderer/src/screens/AdminConsole.jsx",
+   "file_exists": true,
+   "symbol": "ResearchJobsTab",
+   "symbol_found": true
+  },
+  "runtime_mode_protections": {
+   "present": true,
+   "file": "backend/app/portal/driver_factory.py",
+   "file_exists": true,
+   "symbol": "RealOnlyStop",
+   "symbol_found": true
+  },
+  "no_mockportal_production": {
+   "present": true,
+   "file": "backend/app/execution.py",
+   "file_exists": true,
+   "symbol": "assert_not_mock_in_production",
+   "symbol_found": true
+  },
+  "i18n_en_zhCN_zhHant": {
+   "present": true,
+   "file": "src/renderer/src/lib/i18n.js",
+   "file_exists": true,
+   "symbol": "zh-Hant",
+   "symbol_found": true
+  }
+ },
+ "features_present": 39,
+ "features_total": 39
+}

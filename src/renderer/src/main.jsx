@@ -1,3 +1,4 @@
+import './webShim.js'   // browser fallback for the preload bridge (inert under Electron)
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import './theme.css'
