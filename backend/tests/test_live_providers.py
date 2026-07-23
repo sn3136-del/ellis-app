@@ -73,3 +73,34 @@ def test_browserbase_session_lifecycle():
     # Release the session.
     httpx.post(f"{base}/sessions/{sid}", headers={"X-BB-API-Key": BB, "content-type": "application/json"},
                json={"projectId": proj_id, "status": "REQUEST_RELEASE"}, timeout=30)
+
+
+@pytest.mark.skipif(not BB, reason="BROWSERBASE_API_KEY not in .env")
+def test_browserbase_live_recon_structural_observation():
+    """End-to-end credential-free recon over a real Browserbase+Playwright
+    session against a REVERSIBLE public page (example.com). Proves the live
+    observer returns sanitized structure with no values. Requires:
+        pip install playwright && python -m playwright install chromium
+    """
+    playwright = pytest.importorskip("playwright.sync_api",
+                                     reason="playwright not installed")
+    # Route the app at the real key (self-contained; conftest blanked env).
+    os.environ["BROWSERBASE_API_KEY"] = BB
+    from app.config import settings
+    settings.cache_clear()
+    from app.portal.live_browser import LiveBrowserSession
+
+    session = LiveBrowserSession(allowed_hostnames=["example.com"])
+    try:
+        obs = session.observe("https://example.com/")
+        assert obs["ok"] is True, obs
+        assert obs["hostname"].endswith("example.com")
+        assert isinstance(obs["elements"], list)
+        # Structure only — never a value or a secret-shaped string.
+        assert "value" not in str(obs).lower() or "value=" not in str(obs)
+        for e in obs["elements"]:
+            assert "value" not in e
+    finally:
+        session.close()
+        os.environ["BROWSERBASE_API_KEY"] = ""
+        settings.cache_clear()

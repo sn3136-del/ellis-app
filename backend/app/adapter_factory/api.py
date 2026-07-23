@@ -56,6 +56,23 @@ def _synthetic_observer(hostnames):
     return SyntheticPortal(scenario="single_step_login", hostname=host).observe
 
 
+def _live_observer(hostnames):
+    """Credential-free live reconnaissance over Browserbase — real modes only,
+    and only when a Browserbase key is configured. Never authenticates."""
+    from ..providers import browser as bb
+    if settings().mock_portal_allowed or not bb.is_configured():
+        return None
+    from ..portal.live_browser import build_observer_factory
+    return build_observer_factory([h for h in (hostnames or []) if h])
+
+
+def _observer_for(hostnames):
+    """Pick the reconnaissance observer for the current runtime mode:
+    synthetic in mock/test modes, live Browserbase in real modes when
+    configured, else None (the build parks at MANUAL_REVIEW honestly)."""
+    return _synthetic_observer(hostnames) or _live_observer(hostnames)
+
+
 @router.get("/adapter-build/consent-copy")
 def build_consent_copy(_: Principal = Depends(get_principal)):
     return {"text_version": CONSENT_TEXT_VERSION, "disclosures": CONSENT_DISCLOSURES}
@@ -81,7 +98,7 @@ def consent_build(request_id: str, body: ConsentBody, db=Depends(get_session),
     req = _owned_build(db, p, request_id)
     record_consent(db, req, user_id=p.user_id, locale=body.locale)
     # Advance the build as far as it can go without further human input.
-    observer = _synthetic_observer((req.portal_evidence or {}).get("hostnames", []))
+    observer = _observer_for((req.portal_evidence or {}).get("hostnames", []))
     run_build(db, req.id, observer=observer)
     db.refresh(req)
     return status_for_applicant(req)
@@ -100,7 +117,7 @@ def resume_build(request_id: str, db=Depends(get_session),
     """Idempotent resume — safe after any restart; re-checks each stage."""
     req = _owned_build(db, p, request_id)
     if req.consent_given:
-        observer = _synthetic_observer((req.portal_evidence or {}).get("hostnames", []))
+        observer = _observer_for((req.portal_evidence or {}).get("hostnames", []))
         run_build(db, req.id, observer=observer)
         db.refresh(req)
     return status_for_applicant(req)
