@@ -244,3 +244,18 @@ class AuditEvent(Base):
     actor: Mapped[str] = mapped_column(String(64), default="system")
     action: Mapped[str] = mapped_column(String(80))
     detail: Mapped[dict] = mapped_column(JSON, default=dict)
+
+
+class PortalState(Base, TimestampMixin):
+    """Persisted per-case portal snapshot for the real-Temporal worker.
+
+    Temporal makes the *workflow* durable across worker restarts, but the mock
+    portal's own state (paid / booked / submitted) must also survive a restart —
+    otherwise reconciliation on a restarted worker could double-pay. Activities
+    load → mutate → save this row so a restarted worker reconciles correctly
+    against the authoritative portal state. In production the portal is the real
+    external government portal reached over Browserbase; this table is the mock's
+    stand-in for that external durability."""
+    __tablename__ = "portal_states"
+    case_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    state: Mapped[dict] = mapped_column(JSON, default=dict)

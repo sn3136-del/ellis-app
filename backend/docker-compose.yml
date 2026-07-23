@@ -1,14 +1,19 @@
-# Local development environment for the Ellis visa backend.
+# Local development / staging-shaped environment for the Ellis visa backend.
 #
-# NOTE: verified locally — `docker compose up` brings up the full stack. (Docker
-# is available in this environment; the backend also runs without it on
-# brings up Postgres, Temporal + UI, the API, the worker, and the mock portal.
-# The backend also runs with zero of these (SQLite + DB workflow runner) — see
-# README; compose is for the full production-shaped stack.
+# `docker compose up --build` brings up the full production-shaped stack:
+#   postgres, temporal (+ UI), minio (S3), mailpit (SMTP), the FastAPI API, the
+#   Temporal worker, and the mock visa portal. Every service has a health check
+#   and correct startup ordering. The backend also runs with NONE of these
+#   (SQLite + in-process DB workflow runner) — see README; compose is the full
+#   stack used for the live Temporal worker-restart durability proof.
+#
+# No secrets are baked into images or the build context (see .dockerignore).
+# Google ADC is mounted READ-ONLY into only the services that call Google.
 
 services:
   postgres:
     image: postgres:16
+    container_name: ellis-postgres
     environment:
       POSTGRES_USER: ellis
       POSTGRES_PASSWORD: ellis
@@ -19,11 +24,13 @@ services:
       test: ["CMD-SHELL", "pg_isready -U ellis"]
       interval: 5s
       timeout: 3s
-      retries: 10
+      retries: 15
 
   temporal:
     image: temporalio/auto-setup:1.24
-    depends_on: [postgres]
+    container_name: ellis-temporal
+    depends_on:
+      postgres: {condition: service_healthy}
     environment:
       DB: postgres12
       DB_PORT: 5432
@@ -31,31 +38,75 @@ services:
       POSTGRES_PWD: ellis
       POSTGRES_SEEDS: postgres
     ports: ["7233:7233"]
+    healthcheck:
+      # Frontend binds the pod IP (not loopback); reach it via the service DNS
+      # name, which Docker resolves to this container's own IP. SERVING once the
+      # schema + namespaces are registered.
+      test: ["CMD-SHELL", "tctl --address temporal:7233 cluster health 2>&1 | grep -q SERVING"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
 
   temporal-ui:
     image: temporalio/ui:2.26.2
-    depends_on: [temporal]
+    container_name: ellis-temporal-ui
+    depends_on:
+      temporal: {condition: service_healthy}
     environment:
       TEMPORAL_ADDRESS: temporal:7233
     ports: ["8080:8080"]
 
-  minio:  # optional local S3 emulator
+  minio:  # S3-compatible object storage (documents, artifacts)
     image: minio/minio:latest
+    container_name: ellis-minio
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: ellis
       MINIO_ROOT_PASSWORD: ellis-secret
     ports: ["9000:9000", "9001:9001"]
+    volumes: ["miniodata:/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "mc ready local || curl -fsS http://127.0.0.1:9000/minio/health/live || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  mailpit:  # local SMTP capture + web UI (email notifications)
+    image: axllent/mailpit:latest
+    container_name: ellis-mailpit
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+    ports: ["1025:1025", "8025:8025"]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8025/livez || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
   api:
     build: .
+    container_name: ellis-api
     depends_on:
       postgres: {condition: service_healthy}
+      temporal: {condition: service_healthy}
+      minio: {condition: service_started}
+      mailpit: {condition: service_started}
     environment:
       DATABASE_URL: postgresql+psycopg://ellis:ellis@postgres:5432/ellis
       ELLIS_ENV: development
       TEMPORAL_HOST: temporal:7233
-      # Provider creds are injected here in real deployments; absent → fallbacks.
+      # Object storage (MinIO / S3-compatible)
+      ELLIS_S3_ENDPOINT: http://minio:9000
+      ELLIS_S3_BUCKET: ellis-documents
+      ELLIS_S3_ACCESS_KEY: ellis
+      ELLIS_S3_SECRET_KEY: ellis-secret
+      # Email (Mailpit SMTP)
+      ELLIS_SMTP_HOST: mailpit
+      ELLIS_SMTP_PORT: "1025"
+      ELLIS_EMAIL_FROM: no-reply@ellis.local
+      # Provider creds injected here in real deployments; absent → fallbacks.
       # Google ADC mounted read-only (below) so Document AI works in-container.
       GOOGLE_APPLICATION_CREDENTIALS: /var/run/secrets/google/application_default_credentials.json
       GOOGLE_CLOUD_PROJECT: "712137185724"
@@ -69,14 +120,24 @@ services:
       - ${HOME}/.config/gcloud/application_default_credentials.json:/var/run/secrets/google/application_default_credentials.json:ro
     ports: ["8000:8000"]
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/healthz').status==200 else 1)\""]
+      interval: 5s
+      timeout: 4s
+      retries: 20
+      start_period: 10s
 
   worker:
     build: .
+    container_name: ellis-worker
     depends_on:
       postgres: {condition: service_healthy}
+      temporal: {condition: service_healthy}
     environment:
       DATABASE_URL: postgresql+psycopg://ellis:ellis@postgres:5432/ellis
       TEMPORAL_HOST: temporal:7233
+      ELLIS_SMTP_HOST: mailpit
+      ELLIS_SMTP_PORT: "1025"
       GOOGLE_APPLICATION_CREDENTIALS: /var/run/secrets/google/application_default_credentials.json
       GOOGLE_CLOUD_PROJECT: "712137185724"
       GOOGLE_DOCUMENT_AI_OCR_PROCESSOR_ID: a3d15fa0e93981ce
@@ -86,10 +147,20 @@ services:
     command: ["python", "-m", "app.temporal_worker"]
 
   mock-portal:
-    # The mock portal is in-process for tests; this service exposes it over HTTP
-    # for manual/staging adapter testing (activation: add app/portal/http_mock.py).
+    # The safe mock visa portal over HTTP (never a real government site). The
+    # in-process MockPortal is what tests + the Temporal worker use; this service
+    # exposes it for manual/staging adapter testing.
     build: .
-    command: ["python", "-c", "print('mock portal placeholder — see app/portal/mock_portal.py')"]
+    container_name: ellis-mock-portal
+    command: ["uvicorn", "app.portal.http_mock:app", "--host", "0.0.0.0", "--port", "8090"]
+    ports: ["8090:8090"]
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8090/healthz').status==200 else 1)\""]
+      interval: 5s
+      timeout: 4s
+      retries: 20
+      start_period: 8s
 
 volumes:
   pgdata:
+  miniodata:

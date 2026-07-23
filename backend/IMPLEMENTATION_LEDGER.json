@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-22 checkpoint",
+  "updated": "2026-07-23 checkpoint (security correction + live Docker/Temporal Phase 1)",
   "resume": {
     "how_to_continue": "Everything needed is in this repo + ledger + tests + commit history. Recreate venv: (cd backend && python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt). Real creds live ONLY in the git-ignored backend/.env (not committed) and host ADC at ~/.config/gcloud/application_default_credentials.json. Private passport fixtures live ONLY at ~/.ellis_private_fixtures (0600, outside repo).",
     "next_implementation_task": "PHASE UI: wire Electron applicant screens to the backend using src/renderer/src/lib/visaBackend.js — start with the OCR-review screen (upload -> Document AI -> field review/approve).",
@@ -23,10 +23,10 @@
     "google_document_ai": {"status": "provider_tested",  "notes": "ADC via google-auth; OCR + Form Parser HTTP 200; real passport MRZ checksum VALID; quota project quiet-terminal-503221-i3; processors in project 712137185724"},
     "browserbase":    {"status": "provider_tested",       "notes": "session create/release live; live_view_url wired"},
     "postgres":       {"status": "integration_tested",    "notes": "compose up healthy; schema applied clean; full workflow + restart durability on Postgres; BigInteger fix for epoch-ms"},
-    "docker":         {"status": "verified",              "notes": "image builds 308MB; containerized API health/auth/create OK; ADC mounted read-only into api+worker"},
+    "docker":         {"status": "integration_tested",    "notes": "FULL compose stack up + healthy: postgres, temporal(+ui), minio, mailpit, api, worker, mock-portal. Dockerfile drops tests COPY; requirements add psycopg[binary]+temporalio; every service has healthcheck + startup ordering; ADC mounted read-only into api+worker only. Containerized API creates cases on Postgres."},
     "stripe_issuing": {"status": "implemented_untested",  "notes": "applicant payment window is the working default"},
     "clerk":          {"status": "implemented_untested",  "notes": "dev-token auth active; verify_clerk stubbed"},
-    "temporal":       {"status": "not_started",           "notes": "DB-persisted durable runner used + proven; Temporal cluster not wired"}
+    "temporal":       {"status": "integration_tested",    "notes": "REAL Temporal cluster (temporalio/auto-setup 1.24) live in compose; worker (app.temporal_worker) connects with a DB-backed portal store (portal_states table) so reconciliation survives restart. tests/test_live_temporal_restart.py (LIVE_TEMPORAL=1) drives a case to a human-action state, STOPS the worker container (Temporal describe=RUNNING → durable), RESTARTS it, resumes via signals, completes, and proves charge/book/submit each == 1 across TWO restarts + reconcile short-circuit. In-process time-skipping tests still 2 pass."}
   },
   "ocr_hierarchy": {
     "tier1_document_ai": "primary, provider_tested on consented passport",
@@ -56,9 +56,12 @@
     "PRIVATE FIXTURES: all 6 consented passports (US/SG jpg+pdf, CN x2 jpg, PDF) processed through REAL Google Document AI (Enterprise OCR + Form Parser both ok on all 6); after MRZ parser hardening (regex search-anywhere in _find_td3_lines + _repair_numeric OCR fix for O/0/I/1 on date+checkdigit fields) all 6/6 classify as passport with deterministic ICAO MRZ checksum VALID, high confidence, 0 warnings, 0 conflicts. Structural-only reporting; no personal values. Chinese-passport MRZ (line1 'PO'+CHN, OCR noise) now validates.",
     "PHASE 2 REAL TEMPORAL: temporalio 1.30.0 installed (py3.14); app/temporal_app.py (VisaProcessingWorkflow @workflow.defn + 8 @activity.defn wrapping mock portal; signals approve_review/sign_authorization/solve_captcha/verify_email/approve_payment/complete_payment/complete_declaration; pay/book/submit activities RECONCILE via get_application_state before acting); app/temporal_worker.py entry point for TEMPORAL_HOST; docker-compose worker -> app.temporal_worker. tests/test_temporal.py 2 pass using WorkflowEnvironment.start_time_skipping(): drives to COMPLETED via signals, asserts no dup pay/book/submit, and Replayer.replay_workflow(history) proves determinism = restart-safe. pytest.ini asyncio_mode=auto."
   ],
+  "completed_2026_07_23_security_phase1": [
+    "SECURITY CORRECTION: removed the bundled Kimi key from the Electron client. Confirmed shipped inside release/mac-arm64/Ellis.app/Contents/Resources/app.asar (/resources/kimi.key) → marked for rotation in docs/SECURITY_ROTATION.md. src/main/index.js no longer reads any bundled/drop-in credential file; all client-side external-provider calls gated behind clientProviderCallsAllowed()=!app.isPackaged (packaged app = zero direct provider calls; everything backend-only via visaBackend.js). package.json build.files hardened with negation globs. Deleted leaked key + compromised release. Added tests/build_security.test.mjs (in npm test): fails on any provider key/private fixture/.env/ADC/credential resource in a shippable dir or inside a packaged app.asar. npm test 32 pass (6 security + 26 portal). Client error messages redact secrets.",
+    "PHASE 1 LIVE DOCKER + TEMPORAL: full compose stack (postgres, temporal+ui, minio, mailpit, api, worker, mock-portal HTTP service app/portal/http_mock.py) with healthchecks + correct depends_on ordering; temporal healthcheck uses service-DNS tctl. DB-backed portal store (app/portal_store.py + models.PortalState) makes reconciliation restart-safe. Proved live worker stop/restart durability + no duplicate pay/book/submit via tests/test_live_temporal_restart.py."
+  ],
   "not_done_yet": [
     "PHASE 3/4/5(UI)/7(UI)/8-of-second-brief: full Electron applicant UI screens (Live View modals, payment modal, appointment calendar, OCR-review UI, signature UI) wired to backend via src/renderer/src/lib/visaBackend.js",
-    "Run the FULL Temporal cluster live via `docker compose up` (temporal+temporal-ui services are wired; tests use in-process time-skipping server which is real Temporal SDK)",
     "PHASE 7 full country-adapter build pipeline beyond discovery drafts + Vietnam config (real Playwright drivers per portal)",
     "PHASE 9 production multi-tenant storage (S3/GCS/KMS/Secret Manager), data export/deletion endpoints",
     "PHASE 10 monitoring (Sentry/OTel/metrics/alerting/kill-switches), load tests, staging deploy",

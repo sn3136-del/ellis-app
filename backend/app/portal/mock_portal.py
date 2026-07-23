@@ -142,6 +142,10 @@ class MockPortal:
             return {"ok": False, "code": "REQUIRES_3DS", "threeDsToken": _uid()}
         app["paid"] = True
         app["receipt"] = {"receiptNo": "RCPT-" + _uid(), "amount": 8000, "currency": "USD"}
+        # Append-only side-effect ledger — lets a durability drill COUNT actual
+        # charges and prove no double-charge across a worker restart/retry.
+        self.log.append({"event": "charge", "applicationId": application_id,
+                         "receiptNo": app["receipt"]["receiptNo"]})
         return {"ok": True, "receipt": app["receipt"]}
 
     def search_appointments(self, *, session_token, location_ids=None):
@@ -164,6 +168,7 @@ class MockPortal:
         slot["taken"] = True
         app["appointment"] = {"slotId": slot_id, "locationId": slot["locationId"],
                               "startUtc": slot["startUtc"], "confirmationNo": "APT-" + _uid()}
+        self.log.append({"event": "book", "applicationId": application_id, "slotId": slot_id})
         return {"ok": True, "appointment": app["appointment"]}
 
     def reschedule_appointment(self, *, session_token, application_id, new_slot_id):
@@ -202,6 +207,8 @@ class MockPortal:
             return {"ok": True, "idempotent": True, "confirmation": app["confirmation"]}
         app["submitted"] = True
         app["confirmation"] = {"referenceNo": "REF-" + _uid(10)}
+        self.log.append({"event": "submit", "applicationId": application_id,
+                         "referenceNo": app["confirmation"]["referenceNo"]})
         return {"ok": True, "confirmation": app["confirmation"],
                 "receipt": app["receipt"], "appointment": app["appointment"]}
 
@@ -220,7 +227,8 @@ class MockPortal:
         return {"maintenance": self.maintenance, "payment_outcome": self.payment_outcome,
                 "require_captcha": self.require_captcha, "session_ttl_ms": self.session_ttl_ms,
                 "accounts": self.accounts, "sessions": self.sessions,
-                "applications": self.applications, "emails": self.emails, "inventory": self.inventory}
+                "applications": self.applications, "emails": self.emails,
+                "inventory": self.inventory, "log": self.log}
 
     @classmethod
     def from_state(cls, state: dict) -> "MockPortal":
@@ -233,4 +241,5 @@ class MockPortal:
         p.sessions = state.get("sessions", {})
         p.applications = state.get("applications", {})
         p.emails = state.get("emails", [])
+        p.log = state.get("log", [])
         return p
