@@ -48,6 +48,14 @@ Run the automated suite: `./scripts/run-acceptance-tests.sh`.
 | AT-38 | Document preview | AT-06 | Preview button / signed URL | expiring signed URLs; auth + tenant checks; no local paths | test_doc_preview (5) | PASS | |
 | AT-39 | Provider errors + breakers | — | GET `/diagnostics/providers` | taxonomy w/ safe messages; breakers open/half-open/close; secrets scrubbed | test_errors_observability (11) | PASS | |
 | AT-40 | Trip.com connector admin | admin | health/deliveries/replay/process | honest sandbox label; signed deliveries; replay; case.status carries execution class | test_tripcom_admin (6) | PASS | NOT production |
+| AT-41 | Runtime-mode boundary | — | set each ELLIS_RUNTIME_MODE; start a case | MockPortal only in test/local_mock_demo (+banner); real-only modes stop typed (UNSUPPORTED/PORTAL_UNAVAILABLE), MockPortal never constructed | test_runtime_modes (14) | PASS | poisoned-constructor proof |
+| AT-42 | Trip.com-only bundle | — | `npm test` (tripcom_only) | legacy products absent from source AND built renderer bundle; root bundle gone | tripcom_only.test.mjs (6) | PASS | |
+| AT-43 | Route intake + resolution | applicant | Start-your-visa wizard; Resolve route | save/resume; one readiness status; honest checks; snapshot-date labels; NOT_READY never invents requirements | test_route_resolution (8) + intake_logic | PASS | |
+| AT-44 | Snapshot data layer | admin | importer validate/dry-run/apply/rollback; matrix; export | immutable versions; material-change review tasks; 318,222-entry matrix; 7 separate coverage metrics | test_snapshot_core (12) + test_snapshot_importer (12) | PASS | matrix completeness ≠ requirements coverage |
+| AT-45 | On-demand route research | applicant | Resolve a missing route | focused job auto-starts (this route only); 9-step progress UI; grounded Kimi extraction rejects uncited fields; blocked sources → honest incomplete + review task; cache reuse = zero fetches; date-honest labels | test_ondemand_research (11) | PASS | live-proven vs KHM (honest incomplete on SPA portal) |
+| AT-46 | Live driver safety | — | (unit) drive pay/book/submit via BrowserbaseLiveViewDriver | fail-closed binding; evidence-only success; reconcile prevents duplicate pay/submit; secrets refused; allowlist enforced | test_live_driver (13) | PASS | no live portal contacted |
+| AT-47 | Browser sessions + Live View | applicant | open/refresh/close case browser session | tenant-isolated; URLs minted fresh, no-store, never logged/audited; honest local-mode 404 | test_browser_sessions (5) | PASS | |
+| AT-48 | Adapter dry-validation harness | admin | GET `/admin/adapters/harness` | structural/safety/domains/selectors/extraction/recovery checks + live-binding fail-closed proof; evidence only, cannot approve | test_adapter_harness (7) | PASS | |
 
 ## Not yet covered (honest gaps)
 

@@ -214,7 +214,107 @@ function SnapshotTab({ client, t }) {
           </div>
         ))}
       </div>
+
+      <ReverifyCard client={client} t={t} />
     </div>
+  )
+}
+
+// Manual reverification of a destination's official sources (admin-only).
+// Records which URLs were re-checked, whether fee and portal were confirmed,
+// and a mandatory note. The backend classifies each stored URL as a government
+// domain or not — shown honestly per URL.
+function ReverifyCard({ client, t }) {
+  const toast = useToast()
+  const [f, setF] = useState({ destination: '', urls: '', note: '', fee: false, portal: false })
+  const [busy, setBusy] = useState(false)
+  const [result, setResult] = useState(null)
+  const [error, setError] = useState(null)
+
+  async function submit() {
+    const destination = f.destination.trim()
+    const urls = f.urls.split('\n').map((s) => s.trim()).filter(Boolean)
+    const note = f.note.trim()
+    if (!destination) { toast(t('admin.reverify.destinationRequired')); return }
+    if (urls.length === 0) { toast(t('admin.reverify.urlsRequired')); return }
+    if (!note) { toast(t('admin.reverify.noteRequired')); return }
+    setBusy(true); setError(null)
+    try {
+      const r = await client.adminReverify({
+        destination_country: destination,
+        urls,
+        note,
+        fee_confirmed: f.fee,
+        portal_confirmed: f.portal
+      })
+      setResult(r)
+      toast(t('admin.reverify.recorded'))
+    } catch (e) { setError({ message: e.message }) }
+    setBusy(false)
+  }
+
+  return (
+    <>
+      <div className="eyebrow" style={{ marginTop: 22 }}>{t('admin.reverify.title')}</div>
+      <div className="card" style={{ padding: 16 }}>
+        <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>{t('admin.reverify.sub')}</div>
+        <div className="grid grid-2" style={{ gap: 12, marginTop: 10 }}>
+          <div className="field">
+            <label>{t('admin.reverify.destination')}</label>
+            <input className="input" value={f.destination}
+              onChange={(e) => setF({ ...f, destination: e.target.value })} placeholder="FRA" />
+          </div>
+          <div className="field">
+            <label>{t('admin.reverify.note')}</label>
+            <input className="input" value={f.note}
+              onChange={(e) => setF({ ...f, note: e.target.value })} />
+          </div>
+        </div>
+        <div className="field" style={{ marginTop: 10 }}>
+          <label>{t('admin.reverify.urls')}</label>
+          <textarea className="input" rows={4} value={f.urls} spellCheck={false}
+            style={{ fontFamily: 'monospace', fontSize: 12, resize: 'vertical' }}
+            onChange={(e) => setF({ ...f, urls: e.target.value })}
+            placeholder={'https://www.diplomatie.gouv.fr/…\nhttps://france-visas.gouv.fr/…'} />
+        </div>
+        <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', marginTop: 8 }}>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13 }}>
+            <input type="checkbox" checked={f.fee} onChange={(e) => setF({ ...f, fee: e.target.checked })} />
+            <span>{t('admin.reverify.fee')}</span>
+          </label>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13 }}>
+            <input type="checkbox" checked={f.portal} onChange={(e) => setF({ ...f, portal: e.target.checked })} />
+            <span>{t('admin.reverify.portal')}</span>
+          </label>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginTop: 12 }}>
+          <div style={{ fontSize: 11, color: 'var(--muted-2)' }}>{t('admin.reverify.reminder')}</div>
+          <button className="btn btn--sm" disabled={busy} onClick={submit}>
+            {busy ? t('admin.reverify.submitting') : t('admin.reverify.submit')}
+          </button>
+        </div>
+        {error && <ErrorNote error={error} />}
+        {result && (
+          <div style={{ marginTop: 14 }}>
+            <div className="eyebrow">{t('admin.reverify.stored')} · {result.destination}</div>
+            {(result.stored || []).map((s, i) => (
+              <div key={i} className="row" style={{ alignItems: 'center' }}>
+                <div className="row__main">
+                  <div className="row__title" style={{ fontFamily: 'monospace', fontSize: 11.5, wordBreak: 'break-all' }}>
+                    {s.url}
+                  </div>
+                </div>
+                <span className={'chip' + (s.government_domain ? ' chip--ink' : '')}
+                  style={s.government_domain ? undefined : { background: 'var(--crit)', color: '#fff', borderColor: 'var(--crit)' }}>
+                  {s.government_domain ? t('admin.reverify.gov') : t('admin.reverify.nonGov')}
+                </span>
+              </div>
+            ))}
+            {result.note && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 8 }}>{result.note}</div>}
+          </div>
+        )}
+      </div>
+    </>
   )
 }
 

@@ -11,6 +11,7 @@
 //  - Live View URLs are treated as sensitive: shown, never logged or emailed.
 import { useEffect, useRef, useState } from 'react'
 import { useToast, Loading, ErrorNote, KVList } from '../ui.jsx'
+import { useT } from '../../lib/locale.jsx'
 import { formatFee, formatSlot } from '../../lib/visaSession.js'
 
 function Overlay({ children, onClose, width = 620 }) {
@@ -171,11 +172,25 @@ export function SignatureModal({ client, caseId, authorization, onDone, onClose 
 }
 
 // ---- Live View handoff (captcha / email_verification / otp / identity) -----
+// Opens (or reuses) the case's isolated Browserbase session and embeds the
+// provider's Live View URL in a sandboxed iframe — the "small Ellis window".
+// The URL is SHORT-LIVED and sensitive: it lives only in component state and
+// is NEVER logged, cached, or persisted. When Browserbase is not configured
+// (local mode) or no live-view URL is available, the modal falls back to the
+// original instruction-panel behavior with an honest note.
 export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, onClose }) {
   const toast = useToast()
+  const t = useT()
   const [busy, setBusy] = useState(false)
   const [token, setToken] = useState(null)
   const [error, setError] = useState(null)
+  // Live-view state: 'connecting' | 'embedded' | 'unavailable' | 'closed'.
+  // liveUrl is kept ONLY here (component state) — see privacy invariants above.
+  const [liveState, setLiveState] = useState('connecting')
+  const [liveUrl, setLiveUrl] = useState(null)
+  const [frameNonce, setFrameNonce] = useState(0)
+  const [refreshing, setRefreshing] = useState(false)
+  const [closing, setClosing] = useState(false)
   const handoff = pending?.handoff
   const live = pending?.live_view
 
@@ -184,6 +199,56 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
       client.mockVerification(caseId).then((r) => setToken(r.token)).catch(() => {})
     }
   }, [handoff, caseId])
+
+  // On open: create/reuse the case's isolated browser session, then fetch a
+  // FRESH live-view URL (they expire quickly — never reuse a stale one).
+  useEffect(() => {
+    let alive = true
+    async function open() {
+      try {
+        const s = await client.createBrowserSession(caseId)
+        if (!alive) return
+        if (s && s.mode === 'browserbase' && s.live_view_available) {
+          const lv = await client.browserLiveView(caseId)
+          if (!alive) return
+          setLiveUrl(lv.url)
+          setLiveState('embedded')
+        } else {
+          setLiveState('unavailable')
+        }
+      } catch {
+        // No open session / local mode / provider URL unavailable → honest fallback.
+        if (alive) setLiveState('unavailable')
+      }
+    }
+    open()
+    return () => { alive = false }
+    // NOTE: the session is intentionally NOT deleted on unmount — it is the
+    // case's own isolated automation session; only the explicit
+    // "Close secure window" button tears it down.
+  }, [caseId])
+
+  async function refreshLiveView() {
+    setRefreshing(true)
+    try {
+      const lv = await client.browserLiveView(caseId) // always a FRESH url
+      setLiveUrl(lv.url)
+      setFrameNonce((n) => n + 1)
+      setLiveState('embedded')
+    } catch {
+      setLiveUrl(null)
+      setLiveState('unavailable')
+    }
+    setRefreshing(false)
+  }
+
+  async function closeSecureWindow() {
+    setClosing(true)
+    try { await client.closeBrowserSession(caseId) } catch { /* non-fatal */ }
+    setLiveUrl(null)
+    setLiveState('closed')
+    setClosing(false)
+  }
 
   async function done() {
     setBusy(true); setError(null)
@@ -199,10 +264,11 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
     } catch (e) { setError({ message: e.message }); setBusy(false) }
   }
 
+  const embedded = liveState === 'embedded' && !!liveUrl
   return (
-    <Overlay onClose={onClose}>
+    <Overlay onClose={onClose} width={embedded ? 960 : 620}>
       <Head title={title} sub={sub} onClose={onClose} />
-      <SecureWindow live={live} />
+      {/* Safety copy stays ABOVE the embedded window for the relevant kinds. */}
       {handoff === 'captcha' && (
         <div style={{ fontSize: 13, marginTop: 12 }}>
           <strong>Ellis never solves CAPTCHAs.</strong> Complete it yourself in the secure window, then confirm below.
@@ -217,7 +283,51 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
       )}
       <div style={{ fontSize: 11, color: 'var(--muted-2)', marginTop: 10 }}>
         Ellis collects no passwords, one-time codes, card details, or CAPTCHA answers.
+        Ellis never sees your card and never solves CAPTCHAs.
       </div>
+
+      {liveState === 'connecting' && <Loading label={t('live.connecting')} />}
+
+      {embedded && (
+        <div style={{ marginTop: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+            <div className="eyebrow">{t('live.embedded')}</div>
+            <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+              <button className="btn btn--sm btn--ghost" disabled={refreshing} onClick={refreshLiveView}>
+                {refreshing ? '…' : t('live.refresh')}
+              </button>
+              <button className="btn btn--sm btn--ghost" disabled={closing} onClick={closeSecureWindow}>
+                {closing ? '…' : t('live.closeWindow')}
+              </button>
+            </div>
+          </div>
+          <iframe
+            key={frameNonce}
+            src={liveUrl}
+            title="Ellis secure window"
+            sandbox="allow-same-origin allow-scripts allow-forms"
+            referrerPolicy="no-referrer"
+            style={{ width: '100%', height: '70vh', border: '1px solid var(--line)',
+              borderRadius: 10, marginTop: 8, background: '#fff' }}
+          />
+        </div>
+      )}
+
+      {liveState === 'closed' && (
+        <div className="card card--soft" style={{ padding: 14, marginTop: 12, fontSize: 13 }}>
+          {t('live.closed')}
+        </div>
+      )}
+
+      {liveState === 'unavailable' && (
+        <>
+          <div className="card card--soft" style={{ padding: 14, marginTop: 12, fontSize: 13 }}>
+            {t('live.unavailable')}
+          </div>
+          <SecureWindow live={live} />
+        </>
+      )}
+
       {error && <ErrorNote error={error} />}
       <div className="modal__foot">
         <button className="btn btn--ghost" onClick={onClose}>Not now</button>

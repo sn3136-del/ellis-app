@@ -165,6 +165,13 @@ export function createVisaClient(session) {
     getResearchJob: (id) => call('GET', `/research-jobs/${id}`, session),
     resumeResearchJob: (id) => call('POST', `/research-jobs/${id}/resume`, session, {}),
 
+    // Isolated per-case browser session (Browserbase Live View). The live-view
+    // URL is SHORT-LIVED and sensitive: fetch a fresh one every time, keep it
+    // only in component state, and NEVER cache, log, or persist it.
+    createBrowserSession: (id) => call('POST', `/cases/${id}/browser-session`, session, {}),
+    browserLiveView: (id) => call('GET', `/cases/${id}/browser-session/live-view`, session),
+    closeBrowserSession: (id) => call('DELETE', `/cases/${id}/browser-session`, session),
+
     // Snapshot administration (admin session required).
     adminSnapshotCoverage: () => call('GET', '/admin/snapshot/coverage', session),
     adminSnapshotBatches: () => call('GET', '/admin/snapshot/batches', session),
@@ -173,7 +180,10 @@ export function createVisaClient(session) {
     adminConflicts: () => call('GET', '/admin/snapshot/conflicts', session),
     adminRouteQueue: () => call('GET', '/admin/snapshot/route-queue', session),
     adminAdapterTasks: () => call('GET', '/admin/snapshot/adapter-tasks', session),
-    adminResearchJobs: () => call('GET', '/admin/snapshot/research-jobs', session)
+    adminResearchJobs: () => call('GET', '/admin/snapshot/research-jobs', session),
+    // Manual snapshot reverification (admin session required). Body:
+    // {destination_country, urls: [..], note, fee_confirmed, portal_confirmed}.
+    adminReverify: (body) => call('POST', '/admin/snapshot/reverify', session, body)
   }
 }
 
