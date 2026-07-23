@@ -52,3 +52,6 @@ ocr_scratch/
 
 # Local Claude settings may contain embedded keys
 .claude/settings.local.json
+
+# === Generated adapter candidate bundles (DB is authoritative) ===
+backend/app/portal_adapters/generated/

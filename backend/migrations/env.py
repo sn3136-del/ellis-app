@@ -9,6 +9,7 @@ from sqlalchemy import create_engine
 from app.db import Base
 from app import models  # noqa: F401
 from app.visa_snapshot import models as snapshot_models  # noqa: F401
+from app.adapter_factory import models as factory_models  # noqa: F401
 
 config = context.config
 target_metadata = Base.metadata
