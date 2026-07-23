@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from fastapi import FastAPI, Depends, HTTPException, Header, Request
+from fastapi import FastAPI, Depends, HTTPException, Header, Request, Response
 from pydantic import BaseModel
 from sqlalchemy import select
 
@@ -543,6 +543,21 @@ def ocr_diagnostics(_: Principal = Depends(get_principal)):
     return ocr_health.diagnostic()
 
 
+@app.get("/admin/adapters/harness")
+def adapters_harness(p: Principal = Depends(get_principal)):
+    """Dry contract validation for every registered adapter definition (no live
+    portal contact). The report is contract-test EVIDENCE, never an approval —
+    activation stays a human admin action in adapters_admin."""
+    require_admin(p)
+    from .config import settings as _s
+    from .portal.adapter_harness import dry_validate
+    from .portal.driver_factory import register_adapters_for_mode
+    from .portal.contract import _REGISTRY
+    register_adapters_for_mode()
+    return {"runtime_mode": _s().runtime_mode,
+            "reports": [dry_validate(a).as_dict() for a in _REGISTRY.values()]}
+
+
 @app.get("/adapters")
 def get_adapters(_: Principal = Depends(get_principal)):
     # Registry is mode-keyed: mock modes list the demo adapters; real-only
@@ -626,6 +641,78 @@ def _case_execution_class(country: str, visa_type: str):
     register_adapters_for_mode()
     adapter = select_metadata_adapter(country, visa_type)
     return execution.classify_adapter(adapter)
+
+
+# ---- Browserbase Live View infrastructure (generic; no portal transactions) --
+# Sessions are tenant+case isolated. Live View URLs are short-lived, minted
+# fresh per request, returned with no-store, and NEVER persisted, audited, or
+# logged (observability.scrub also redacts Live-View URL shapes defensively).
+
+@app.post("/cases/{application_id}/browser-session")
+def create_browser_session(application_id: str, response: Response,
+                           db=Depends(get_session), p: Principal = Depends(get_principal)):
+    _owned(db, p, application_id)
+    from .providers import browser as bb
+    row = db.execute(select(models.BrowserSession).where(
+        models.BrowserSession.application_id == application_id,
+        models.BrowserSession.status == "open")).scalars().first()
+    if row is None:
+        sess = bb.create_session()
+        row = models.BrowserSession(org_id=p.org_id, application_id=application_id,
+                                    provider_session_id=sess.get("id", ""),
+                                    mode=sess.get("mode", "local"))
+        db.add(row)
+        db.commit()
+        audit.record(db, org_id=p.org_id, application_id=application_id,
+                     action="browser_session_opened",
+                     detail={"mode": row.mode}, actor=p.user_id)  # no ids/urls in audit
+    response.headers["Cache-Control"] = "no-store"
+    return {"id": row.id, "mode": row.mode, "status": row.status,
+            "live_view_available": row.mode == "browserbase"}
+
+
+@app.get("/cases/{application_id}/browser-session/live-view")
+def browser_session_live_view(application_id: str, response: Response,
+                              db=Depends(get_session), p: Principal = Depends(get_principal)):
+    """Mint a fresh short-lived Live View URL. Honest 404s: no session, or the
+    stack runs without Browserbase (local mode has no Live View)."""
+    _owned(db, p, application_id)
+    from .providers import browser as bb
+    row = db.execute(select(models.BrowserSession).where(
+        models.BrowserSession.application_id == application_id,
+        models.BrowserSession.status == "open")).scalars().first()
+    if row is None:
+        raise HTTPException(404, "no open browser session for this case")
+    if row.mode != "browserbase":
+        raise HTTPException(404, "live view unavailable: session is local mode "
+                                 "(Browserbase not configured)")
+    url = bb.live_view_url(row.provider_session_id)
+    if not url:
+        raise HTTPException(404, "live view URL unavailable from provider")
+    response.headers["Cache-Control"] = "no-store"
+    return {"url": url, "expires_hint_seconds": 300}
+
+
+@app.delete("/cases/{application_id}/browser-session")
+def close_browser_session(application_id: str, db=Depends(get_session),
+                          p: Principal = Depends(get_principal)):
+    _owned(db, p, application_id)
+    from .providers import browser as bb
+    from .models import _now as _model_now
+    closed = 0
+    for row in db.execute(select(models.BrowserSession).where(
+            models.BrowserSession.application_id == application_id,
+            models.BrowserSession.status == "open")).scalars():
+        bb.close_session(row.provider_session_id)
+        row.status = "closed"
+        row.closed_at = _model_now()
+        closed += 1
+    db.commit()
+    if closed:
+        audit.record(db, org_id=p.org_id, application_id=application_id,
+                     action="browser_session_closed", detail={"count": closed},
+                     actor=p.user_id)
+    return {"closed": closed}
 
 
 @app.get("/cases/{application_id}")

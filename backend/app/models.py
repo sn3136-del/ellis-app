@@ -276,6 +276,22 @@ class PortalDraft(Base, TimestampMixin):
     reviewed_by: Mapped[str] = mapped_column(String(64), default="")
 
 
+class BrowserSession(Base, TimestampMixin):
+    """Per-case isolated Browserbase session handle (tenant-scoped).
+
+    Only the provider session id is stored — NEVER a Live View / debugger URL
+    (those are short-lived, minted fresh per request, and never logged) and
+    NEVER provider credentials (backend-only, from the vault/env)."""
+    __tablename__ = "browser_sessions"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    org_id: Mapped[str] = mapped_column(String(64), index=True)
+    application_id: Mapped[str] = mapped_column(String(32), index=True)
+    provider_session_id: Mapped[str] = mapped_column(String(120), default="")
+    mode: Mapped[str] = mapped_column(String(24), default="local")   # browserbase|local
+    status: Mapped[str] = mapped_column(String(16), default="open", index=True)  # open|closed
+    closed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
 class AuditEvent(Base):
     __tablename__ = "audit_events"
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
