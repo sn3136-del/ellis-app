@@ -49,6 +49,34 @@ DISPOSITIONS = ("VISA_FREE", "ETA_REQUIRED", "EVISA_REQUIRED", "VISA_ON_ARRIVAL"
                 "RESEARCH_INCOMPLETE", "CONFLICTED", "HUMAN_REVIEW_REQUIRED")
 
 
+KNOWN_CATEGORIES = ("tourist_visa", "evisa_tourist", "eta", "visa_on_arrival_tourist",
+                    "visa_free_entry", "transit_authorization")
+
+KNOWN_POLICY_KINDS = ("visa_exemption_list", "evisa_program", "eta_program",
+                      "visa_on_arrival_program", "consular_visa_regime",
+                      "transit_regime", "special_regime")
+
+
+def _normalize_category_label(raw) -> str:
+    """Map a research-file category label onto the fixed taxonomy. Free-text
+    labels (e.g. destination-specific visa class names) normalize to
+    tourist_visa; the original label is preserved in the record JSON."""
+    v = str(raw or "").strip().lower().replace("-", "_").replace(" ", "_")
+    if v in KNOWN_CATEGORIES:
+        return v
+    if "arrival" in v:
+        return "visa_on_arrival_tourist"
+    if "evisa" in v or "e_visa" in v:
+        return "evisa_tourist"
+    if v in ("eta", "electronic_travel_authorization") or "authorization" in v:
+        return "eta"
+    if "transit" in v:
+        return "transit_authorization"
+    if "exempt" in v or "free" in v or "waiver" in v:
+        return "visa_free_entry"
+    return "tourist_visa"
+
+
 def _now_label() -> str:
     # Deterministic-friendly label; actual timestamps come from evidence records.
     from datetime import datetime, timezone
@@ -200,7 +228,7 @@ def process_batch(db, batch: SnapshotResearchBatch, *, max_stages: int = 12) -> 
             seen: dict[tuple, str] = {}
             conflicts = 0
             for d in data.get("dispositions", []):
-                cat = d.get("category", "tourist_visa")
+                cat = _normalize_category_label(d.get("category"))
                 for nat in d.get("nationalities", []) or ["ALL"]:
                     k = (nat, cat)
                     if k in seen and seen[k] != d.get("disposition"):
@@ -224,7 +252,10 @@ def process_batch(db, batch: SnapshotResearchBatch, *, max_stages: int = 12) -> 
             data = _load_research(batch.destination_country) or {}
             created = 0
             for i, p in enumerate(data.get("policies", [])):
-                uid = f"{batch.destination_country}:{p.get('policy_kind','special_regime')}:{i}"
+                kind = p.get("policy_kind", "special_regime")
+                if kind not in KNOWN_POLICY_KINDS:
+                    kind = "special_regime"
+                uid = f"{batch.destination_country}:{kind}:{i}"[:120]
                 head = db.execute(select(VisaPolicy).where(
                     VisaPolicy.policy_uid == uid)).scalar_one_or_none()
                 rec = {**p, "snapshot_date": SNAPSHOT_DATE,
@@ -233,7 +264,7 @@ def process_batch(db, batch: SnapshotResearchBatch, *, max_stages: int = 12) -> 
                 if head is None:
                     head = VisaPolicy(snapshot_date=SNAPSHOT_DATE, policy_uid=uid,
                                       destination_country=batch.destination_country,
-                                      policy_kind=p.get("policy_kind", "special_regime"),
+                                      policy_kind=kind,
                                       policy_name=(p.get("policy_name") or "")[:300],
                                       research_status=data.get("research_status", "research_incomplete"))
                     db.add(head)
@@ -340,7 +371,7 @@ def process_batch(db, batch: SnapshotResearchBatch, *, max_stages: int = 12) -> 
             explicit: dict[tuple[str, str], str] = {}
             all_others: dict[str, str] = {}
             for d in data.get("dispositions", []):
-                cat = d.get("category", "tourist_visa")
+                cat = _normalize_category_label(d.get("category"))
                 disp = d.get("disposition", "RESEARCH_INCOMPLETE")
                 if disp not in DISPOSITIONS:
                     continue
@@ -393,12 +424,15 @@ def process_batch(db, batch: SnapshotResearchBatch, *, max_stages: int = 12) -> 
             research_status = data.get("research_status", "research_incomplete")
             created = 0
             for i, f in enumerate(data.get("fees", [])):
-                uid = f"{batch.destination_country}:{f.get('visa_category','tourist_visa')}:{i}"
+                cat = _normalize_category_label(f.get("visa_category"))
+                uid = f"{batch.destination_country}:{cat}:{i}"[:160]
                 dup = db.execute(select(VisaFeeVersion).where(
                     VisaFeeVersion.fee_uid == uid)).scalar_one_or_none()
                 if dup:
                     continue
                 rec = {**f, "snapshot_date": SNAPSHOT_DATE,
+                       "visa_category": cat,
+                       "visa_category_source_label": f.get("visa_category"),
                        "destination_country": batch.destination_country}
                 srcs = f.get("source_urls", []) or f.get("official_source_urls", [])
                 fee_verified = (research_status == "verified" and
@@ -406,7 +440,7 @@ def process_batch(db, batch: SnapshotResearchBatch, *, max_stages: int = 12) -> 
                 db.add(VisaFeeVersion(
                     snapshot_date=SNAPSHOT_DATE, fee_uid=uid, version=1,
                     destination_country=batch.destination_country,
-                    visa_category=f.get("visa_category", "tourist_visa"),
+                    visa_category=cat,
                     record=rec, content_hash=canonical_hash(rec),
                     fee_status="verified" if fee_verified else "unknown"))
                 created += 1
@@ -454,9 +488,24 @@ def resume(db, *, limit: int | None = None) -> dict:
     batches = db.execute(q).scalars().all()
     if limit:
         batches = batches[:limit]
-    done = awaiting = invalid = 0
+    done = awaiting = invalid = errored = 0
+    errors: list[dict] = []
     for b in batches:
-        b = process_batch(db, b)
+        try:
+            b = process_batch(db, b)
+        except Exception as e:  # noqa: BLE001 - one bad batch never kills the run
+            db.rollback()
+            errored += 1
+            try:
+                b.attempt_count += 1
+                b.result = "error"
+                b.detail = dict(b.detail or {}, last_error=str(e)[:400])
+                db.commit()
+            except Exception:  # noqa: BLE001
+                db.rollback()
+            if len(errors) < 10:
+                errors.append({"batch": b.batch_key, "error": str(e)[:200]})
+            continue
         if b.result == "complete":
             done += 1
         elif b.result == "awaiting_research_input":
@@ -464,7 +513,8 @@ def resume(db, *, limit: int | None = None) -> dict:
         elif b.result == "research_input_invalid":
             invalid += 1
     return {"processed": len(batches), "completed_now": done,
-            "awaiting_research_input": awaiting, "research_input_invalid": invalid}
+            "awaiting_research_input": awaiting, "research_input_invalid": invalid,
+            "errored": errored, "errors": errors}
 
 
 def status(db) -> dict:

@@ -17,7 +17,8 @@ from .. import audit
 from ..security import Principal, get_principal, require_admin
 from ..db import get_session
 from . import SNAPSHOT_DATE, SNAPSHOT_LABEL, UPDATE_MODE, AUTOMATIC_RULE_REFRESH_ENABLED
-from .models import (AdapterDevelopmentTask, HumanReviewTask, RouteIntake,
+from .models import (AdapterDevelopmentTask, ConsularJurisdictionRule,
+                     HumanReviewTask, OfficialPortalRecord, RouteIntake,
                      RouteResolution, SnapshotConflict, SnapshotResearchBatch,
                      SourceEvidence, VisaRoute, VisaRouteVersion)
 from . import resolution as resolution_mod
@@ -187,6 +188,69 @@ def route_evidence(resolution_id: str, db=Depends(get_session),
                           "excerpt": e.relevant_excerpt[:600],
                           "language": e.page_language,
                           "content_hash": e.content_hash} for e in ev[:40]]}
+
+
+# ---- Resolvers (brief section 18) -------------------------------------------
+
+@router.get("/snapshot/resolvers/portal")
+def resolve_official_portal(destination: str, db=Depends(get_session),
+                            p: Principal = Depends(get_principal)):
+    """Official-portal resolver: only VERIFIED portals (official domain or an
+    official page linking the exact contractor). Unverifiable -> honest empty
+    list with MANUAL_REVIEW_REQUIRED, never a guess."""
+    from .registry import RegistryError, normalize_country
+    try:
+        dest = normalize_country(destination, field="destination")
+    except RegistryError as e:
+        raise HTTPException(400, str(e))
+    rows = db.execute(select(OfficialPortalRecord).where(
+        OfficialPortalRecord.snapshot_date == SNAPSHOT_DATE,
+        OfficialPortalRecord.destination_country == dest)).scalars().all()
+    verified = [r for r in rows if r.verification_status in
+                ("verified_official_domain", "verified_via_official_link")]
+    return {
+        "destination": dest, "snapshot_date": SNAPSHOT_DATE, "disclaimer": DISCLAIMER_EN,
+        "status": "VERIFIED" if verified else "MANUAL_REVIEW_REQUIRED",
+        "portals": [{"kind": r.portal_kind, "url": r.url, "operator": r.operator or None,
+                     "operator_kind": r.operator_kind,
+                     "verification_status": r.verification_status,
+                     "official_linking_source": r.official_linking_source or None,
+                     "hostnames": r.hostnames} for r in verified],
+        "unverified_count": len(rows) - len(verified),
+    }
+
+
+@router.get("/snapshot/resolvers/jurisdiction")
+def resolve_consular_jurisdiction(destination: str, residence: str,
+                                  db=Depends(get_session),
+                                  p: Principal = Depends(get_principal)):
+    """Consular-jurisdiction resolver. Never inferred from geographic
+    proximity: only verified snapshot rules backed by official evidence.
+    Unverifiable -> MANUAL_REVIEW_REQUIRED."""
+    from .registry import RegistryError, normalize_country
+    try:
+        dest = normalize_country(destination, field="destination")
+        res = normalize_country(residence, field="residence")
+    except RegistryError as e:
+        raise HTTPException(400, str(e))
+    rule = db.execute(select(ConsularJurisdictionRule).where(
+        ConsularJurisdictionRule.snapshot_date == SNAPSHOT_DATE,
+        ConsularJurisdictionRule.destination_country == dest,
+        ConsularJurisdictionRule.residence_jurisdiction == res)).scalars().first()
+    if not rule or rule.verification_status != "verified":
+        return {"destination": dest, "residence": res, "snapshot_date": SNAPSHOT_DATE,
+                "status": "MANUAL_REVIEW_REQUIRED",
+                "reason": ("jurisdiction rule not verified in the snapshot"
+                           if rule else "no jurisdiction rule in the snapshot"),
+                "disclaimer": DISCLAIMER_EN}
+    return {"destination": dest, "residence": res, "snapshot_date": SNAPSHOT_DATE,
+            "status": "VERIFIED",
+            "competent_post": {"name": rule.competent_post_name,
+                               "kind": rule.competent_post_kind,
+                               "url": rule.competent_post_url or None},
+            "covers_nationalities": rule.covers_nationalities or None,
+            "conditions": rule.conditions or None,
+            "evidence": rule.evidence_ids or [], "disclaimer": DISCLAIMER_EN}
 
 
 # ---- Administration (brief section 27) --------------------------------------
