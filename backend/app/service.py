@@ -72,7 +72,43 @@ def load_workflow(db, application_id: str) -> VisaWorkflow:
                       authorization=authorization, exec_row=exec_dict, db=db,
                       emailer=_emailer(db, application_id))
     wf._portal = portal
+    _wire_case_hooks(db, wf, app)
     return wf
+
+
+def _wire_case_hooks(db, wf: VisaWorkflow, app_row):
+    """DB-backed enforcement hooks: exact-amount payment authorization rows
+    (payments.py) and the §25 submission gate (final_review.py)."""
+    from . import payments, final_review
+
+    def payments_hook(event, payload):
+        if event == "authorized":
+            fee = payload.get("fee") or {}
+            payments.authorize(
+                db, app_row=app_row, principal_user="applicant",
+                amount_cents=payload["amount_cents"], currency=payload["currency"],
+                payee=payload.get("payee", ""),
+                government_fee_cents=int(fee.get("government_fee_cents", 0) or 0),
+                service_fee_cents=int(fee.get("service_fee_cents", 0) or 0),
+                reason="visa application fee")
+        elif event == "invalidated":
+            payments.invalidate_mismatched(db, wf.case_id, payload["amount_cents"],
+                                           payload["currency"], org_id=app_row.org_id)
+        elif event == "consumed":
+            row = payments.valid_authorization(db, wf.case_id,
+                                               payload["amount_cents"], payload["currency"])
+            if row:
+                payments.consume(db, row.id)
+
+    def submission_gate():
+        try:
+            final_review.verify_ready_to_submit(db, app_row)
+            return True, ""
+        except Exception as e:  # noqa: BLE001 — reason surfaces in the pause
+            return False, str(e)[:200]
+
+    wf.payments_hook = payments_hook
+    wf.submission_gate = submission_gate
 
 
 def persist_workflow(db, wf: VisaWorkflow):

@@ -25,7 +25,8 @@ _CASE_CHILD_MODELS = [
     models.PortalAccount, models.NativeSignature, models.SignatureEvent, models.StoredDocument,
     models.AppointmentPreference, models.Appointment, models.PaymentAttempt,
     models.SubmissionConfirmation, models.WorkflowExecution, models.HumanHandoff,
-    models.EmailNotification,
+    models.EmailNotification, models.ApplicantStandingAuthorization,
+    models.ApplicationReviewVersion, models.PaymentAuthorization,
 ]
 
 

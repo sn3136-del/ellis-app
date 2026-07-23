@@ -465,3 +465,77 @@ class AdapterVersion(Base):
     lifecycle_state: Mapped[str] = mapped_column(String(40), default="")
     created_by: Mapped[str] = mapped_column(String(64), default="")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class ApplicantStandingAuthorization(Base, TimestampMixin):
+    """One versioned standing authorization granted at onboarding. Immutable
+    once granted: any change of the authorization text or permitted actions
+    creates a NEW row (next version) and supersedes the prior one. Revocation
+    flips revoked, never deletes. The applicant grants this once per case; it
+    covers routine portal selection, form filling, uploads, appointment booking
+    within saved preferences, payment navigation, and post-signature submission
+    where permitted — payment amount confirmation always remains separate."""
+    __tablename__ = "applicant_standing_authorizations"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    org_id: Mapped[str] = mapped_column(String(64), index=True)
+    application_id: Mapped[str] = mapped_column(ForeignKey("visa_applications.id"), index=True)
+    applicant_id: Mapped[str] = mapped_column(String(32), default="")
+    route_key: Mapped[str] = mapped_column(String(400), default="")
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    text_version: Mapped[str] = mapped_column(String(20))       # authorization text version id
+    text_hash: Mapped[str] = mapped_column(String(64))          # sha256 of the exact text shown
+    ui_locale: Mapped[str] = mapped_column(String(12), default="en")
+    permitted_actions: Mapped[list] = mapped_column(JSON, default=list)
+    appointment_preferences: Mapped[dict] = mapped_column(JSON, default=dict)
+    payment_confirmation_required: Mapped[bool] = mapped_column(Boolean, default=True)
+    signature_policy: Mapped[str] = mapped_column(String(40), default="exact_version_esign")
+    granted_by: Mapped[str] = mapped_column(String(64), default="")
+    granted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    revoked: Mapped[bool] = mapped_column(Boolean, default=False)
+    revoked_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    revoked_reason: Mapped[str] = mapped_column(String(300), default="")
+    superseded_by: Mapped[str] = mapped_column(String(32), default="")
+
+
+class ApplicationReviewVersion(Base, TimestampMixin):
+    """The exact final review package the applicant saw. Immutable; the
+    signature binds to content_hash. Any material change afterward invalidates
+    the signature and requires a fresh review version + fresh signature."""
+    __tablename__ = "application_review_versions"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    org_id: Mapped[str] = mapped_column(String(64), index=True)
+    application_id: Mapped[str] = mapped_column(ForeignKey("visa_applications.id"), index=True)
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    package: Mapped[dict] = mapped_column(JSON, default=dict)   # full review package (redacted-safe)
+    content_hash: Mapped[str] = mapped_column(String(64), index=True)
+    route_version: Mapped[str] = mapped_column(String(64), default="")
+    adapter_version: Mapped[str] = mapped_column(String(64), default="")
+    signed: Mapped[bool] = mapped_column(Boolean, default=False)
+    signature_id: Mapped[str] = mapped_column(String(32), default="")
+    invalidated: Mapped[bool] = mapped_column(Boolean, default=False)
+    invalidated_reason: Mapped[str] = mapped_column(String(300), default="")
+
+
+class PaymentAuthorization(Base, TimestampMixin):
+    """One exact-amount payment approval. Authorizes ONLY the displayed amount,
+    currency, and payee. A different final amount/currency invalidates it and a
+    new confirmation is required. Consumed exactly once by a payment attempt."""
+    __tablename__ = "payment_authorizations"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    org_id: Mapped[str] = mapped_column(String(64), index=True)
+    application_id: Mapped[str] = mapped_column(ForeignKey("visa_applications.id"), index=True)
+    amount_cents: Mapped[int] = mapped_column(Integer)
+    currency: Mapped[str] = mapped_column(String(8))
+    government_fee_cents: Mapped[int] = mapped_column(Integer, default=0)
+    service_fee_cents: Mapped[int] = mapped_column(Integer, default=0)
+    payee: Mapped[str] = mapped_column(String(200), default="")
+    refundability: Mapped[str] = mapped_column(String(200), default="")
+    fee_source_url: Mapped[str] = mapped_column(String(500), default="")
+    fee_version: Mapped[int] = mapped_column(Integer, default=0)
+    reason: Mapped[str] = mapped_column(String(300), default="")
+    status: Mapped[str] = mapped_column(String(20), default="authorized", index=True)
+    # authorized | consumed | invalidated | superseded
+    approved_by: Mapped[str] = mapped_column(String(64), default="")
+    approved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    consumed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    invalidated_reason: Mapped[str] = mapped_column(String(300), default="")

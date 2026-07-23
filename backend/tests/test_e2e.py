@@ -35,9 +35,29 @@ def _drive_to_completion(db, app_id, portal_emailbox=None):
                                         slot_id=pending["slots"][0]["slotId"])
         elif h == "personal_declaration":
             status, wf = service.signal(db, app_id, "complete_declaration")
+        elif h == "final_review":
+            _sign_final_review(db, app_id)
+            status, wf = service.signal(db, app_id, "start")
         else:
             break
     return status, wf
+
+
+def _sign_final_review(db, app_id):
+    """Review + sign the exact final application version (§7)."""
+    from app import final_review
+    app_row = db.get(models.VisaApplication, app_id)
+    row = final_review.create_review_version(db, app_row, actor="user1")
+    sig = models.NativeSignature(org_id=app_row.org_id, application_id=app_id,
+                                 app_version=app_row.current_version,
+                                 template_version="t1", consent_version="c1",
+                                 signature_method="typed", auth_method="email_otp",
+                                 document_hash=row.content_hash, artifact_hash="test",
+                                 app_snapshot_hash=row.content_hash)
+    db.add(sig)
+    db.flush()
+    final_review.record_signature(db, row, signature_id=sig.id, actor="user1")
+    return row
 
 
 def _latest_verify_token(wf):
@@ -69,6 +89,9 @@ def _new_case(db, org="org1", user="user1", country="Mockland"):
     db.add(models.AuthorizationEnvelope(application_id=app_row.id, provider="in_app_authorization",
                                         max_fee_cents=10000, currency="USD", allow_auto_book=True))
     db.commit()
+    # Standing authorization (§5) — granted once at onboarding.
+    from app import authorization as standing
+    standing.grant(db, app_row=app_row, principal_user=user)
     return app_row.id
 
 

@@ -5,6 +5,8 @@ tenant isolation. Sensitive transitions go through the durable service layer.
 """
 from __future__ import annotations
 
+import json
+
 from typing import Optional
 
 from fastapi import FastAPI, Depends, HTTPException, Header, Request, Response
@@ -1145,6 +1147,167 @@ def _latest_env(db, application_id: str):
         models.AuthorizationEnvelope.created_at.desc())).scalars().first()
 
 
+# ---- Standing authorization (brief §5) ----
+class StandingAuthBody(BaseModel):
+    locale: str = "en"
+    appointment_preferences: Optional[dict] = None
+    route_key: str = ""
+
+
+class RevokeBody(BaseModel):
+    reason: str = ""
+
+
+@app.get("/cases/{application_id}/standing-authorization")
+def get_standing_authorization(application_id: str, locale: str = "en",
+                               db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from . import authorization as standing
+    app_row = _owned(db, p, application_id)
+    applicant = db.get(models.Applicant, app_row.applicant_id)
+    return {"current": standing.to_dict(standing.current(db, application_id)),
+            "text": standing.build_text(locale=locale, applicant_name=applicant.full_name,
+                                        destination=app_row.destination_country,
+                                        visa_type=app_row.visa_type),
+            "text_version": standing.TEXT_VERSION,
+            "permitted_actions": standing.PERMITTED_ACTIONS,
+            "disclosures": standing.DISCLOSURES}
+
+
+@app.post("/cases/{application_id}/standing-authorization")
+def grant_standing_authorization(application_id: str, body: StandingAuthBody,
+                                 db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from . import authorization as standing
+    app_row = _owned(db, p, application_id)
+    row = standing.grant(db, app_row=app_row, principal_user=p.user_id,
+                         locale=body.locale,
+                         appointment_preferences=body.appointment_preferences,
+                         route_key=body.route_key)
+    return standing.to_dict(row)
+
+
+@app.delete("/cases/{application_id}/standing-authorization")
+def revoke_standing_authorization(application_id: str, body: Optional[RevokeBody] = None,
+                                  db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from . import authorization as standing
+    app_row = _owned(db, p, application_id)
+    try:
+        row = standing.revoke(db, app_row=app_row, principal_user=p.user_id,
+                              reason=(body.reason if body else ""))
+    except standing.AuthorizationMissing as e:
+        raise HTTPException(404, str(e))
+    return standing.to_dict(row)
+
+
+# ---- Final review + exact-version signature (brief §7) ----
+class FinalReviewSignBody(BaseModel):
+    review_version_id: str
+    content_hash: str
+    consent_given: bool = False
+    intent_confirmed: bool = False
+    signature_method: str = "typed"
+    signature_value: str = ""
+    step_up_token: str
+    auth_method: str = "email_otp"
+
+
+@app.get("/cases/{application_id}/final-review")
+def get_final_review(application_id: str, locale: str = "en",
+                     db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from . import final_review
+    app_row = _owned(db, p, application_id)
+    final_review.check_and_invalidate(db, app_row)
+    return {"latest": final_review.to_dict(final_review.latest(db, application_id)),
+            "preview": final_review.build_package(db, app_row, locale=locale),
+            "current_material_hash": final_review.material_hash(db, app_row)}
+
+
+@app.post("/cases/{application_id}/final-review")
+def create_final_review(application_id: str, locale: str = "en",
+                        db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from . import final_review
+    app_row = _owned(db, p, application_id)
+    row = final_review.create_review_version(db, app_row, actor=p.user_id, locale=locale)
+    token = issue_action_token(p, "final_review_sign", application_id, ttl_seconds=600)
+    return {**final_review.to_dict(row), "step_up_token": token}
+
+
+@app.post("/cases/{application_id}/final-review/sign")
+def sign_final_review(application_id: str, body: FinalReviewSignBody, request: Request,
+                      db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from . import final_review
+    from .providers import esign
+    app_row = _owned(db, p, application_id)
+    verify_action_token(body.step_up_token, "final_review_sign", application_id)
+    row = db.get(models.ApplicationReviewVersion, body.review_version_id)
+    if not row or row.application_id != application_id:
+        raise HTTPException(404, "review version not found")
+    if row.invalidated:
+        raise HTTPException(409, "this review version was invalidated — re-review required")
+    # The applicant signs the EXACT version: the echoed hash must match, and the
+    # version must still match the live material state.
+    if body.content_hash != row.content_hash:
+        raise HTTPException(409, "content hash mismatch — review the current version")
+    if row.content_hash != final_review.material_hash(db, app_row):
+        row.invalidated = True
+        row.invalidated_reason = "material change before signature"
+        db.commit()
+        raise HTTPException(409, "the application changed — a fresh final review is required")
+    if not (body.consent_given and body.intent_confirmed):
+        raise HTTPException(422, "consent and intent confirmation are both required")
+    applicant = db.get(models.Applicant, app_row.applicant_id)
+    doc_text = json.dumps(row.package, sort_keys=True, default=str)
+    req = esign.SignatureRequest(
+        applicant={"full_name": applicant.full_name, "email": applicant.email},
+        org_id=app_row.org_id, case_id=application_id, app_version=app_row.current_version,
+        document_text=doc_text, document_hash=esign.document_hash(doc_text),
+        consent_given=body.consent_given, intent_confirmed=body.intent_confirmed,
+        signature_method=body.signature_method, signature_value=body.signature_value,
+        step_up_verified=True, auth_method=body.auth_method,
+        ip_address=request.client.host if request.client else "",
+        user_agent=request.headers.get("user-agent", ""))
+    try:
+        result = esign.get_provider().sign(req)
+    except ValueError as e:
+        raise HTTPException(422, str(e))
+    sig = models.NativeSignature(
+        org_id=app_row.org_id, application_id=application_id, app_version=app_row.current_version,
+        provider=result["provider"], template_version=result["template_version"],
+        consent_version=result["consent_version"], document_hash=result["document_hash"],
+        artifact_hash=result["artifact_hash"],
+        artifact_ref=f"local://sig/{result['artifact_hash'][:16]}",
+        signature_method=result["signature_method"], auth_method=result["auth_method"],
+        ip_address=req.ip_address, user_agent=req.user_agent[:300],
+        app_snapshot_hash=row.content_hash)
+    db.add(sig)
+    db.flush()
+    _sig_event(db, sig.id, application_id, "signed",
+               {"kind": "final_review", "review_version": row.version,
+                "artifact_hash": result["artifact_hash"]})
+    final_review.record_signature(db, row, signature_id=sig.id, actor=p.user_id)
+    return {"signature_id": sig.id, "review_version": row.version,
+            "content_hash": row.content_hash, "artifact_hash": result["artifact_hash"]}
+
+
+# ---- Payment authorization view (brief §6) ----
+@app.get("/cases/{application_id}/payment-authorization")
+def get_payment_authorization(application_id: str, db=Depends(get_session),
+                              p: Principal = Depends(get_principal)):
+    from . import payments
+    _owned(db, p, application_id)
+    exec_row = db.execute(select(models.WorkflowExecution).where(
+        models.WorkflowExecution.application_id == application_id)).scalar_one_or_none()
+    fee = ((exec_row.snapshot or {}).get("fee") if exec_row else None) or {}
+    rows = db.execute(select(models.PaymentAuthorization).where(
+        models.PaymentAuthorization.application_id == application_id).order_by(
+        models.PaymentAuthorization.approved_at.desc())).scalars().all()
+    current = next((r for r in rows if r.status == "authorized"), None)
+    return {"current": payments.to_dict(current),
+            "history": [payments.to_dict(r) for r in rows[:10]],
+            "fee": {k: fee.get(k) for k in ("amount", "currency", "display",
+                                            "government_fee_cents", "service_fee_cents")
+                    if k in fee}}
+
+
 def _sig_event(db, signature_id: str, application_id: str, event: str, detail: dict):
     from sqlalchemy import func
     nseq = (db.query(func.max(models.SignatureEvent.seq)).scalar() or 0) + 1
@@ -1154,8 +1317,10 @@ def _sig_event(db, signature_id: str, application_id: str, event: str, detail: d
 
 
 def invalidate_signatures_if_changed(db, application_id: str):
-    """Any material change to answers/documents invalidates completed signatures."""
+    """Any material change to answers/documents invalidates completed signatures
+    AND the signed final-review version (§7 — back to review + new signature)."""
     from .providers import esign
+    from . import final_review
     app_row = db.get(models.VisaApplication, application_id)
     docs = [d.name for d in db.execute(select(models.StoredDocument).where(
         models.StoredDocument.application_id == application_id)).scalars().all()]
@@ -1170,6 +1335,8 @@ def invalidate_signatures_if_changed(db, application_id: str):
             changed += 1
     if changed:
         db.commit()
+    if final_review.check_and_invalidate(db, app_row):
+        changed += 1
     return changed
 
 
@@ -1182,6 +1349,10 @@ _SIGNALS = {"approve_review", "sign_authorization", "solve_captcha", "verify_ema
 class SignalBody(BaseModel):
     token: Optional[str] = None
     slot_id: Optional[str] = None
+    # approve_payment: the client echoes the exact amount it displayed so the
+    # confirmation can never silently cover a different figure (§6).
+    amount_cents: Optional[int] = None
+    currency: Optional[str] = None
 
 
 def _record_terminal_execution(db, p: Principal, application_id: str):
@@ -1259,6 +1430,9 @@ def send_signal(application_id: str, name: str, body: Optional[SignalBody] = Non
         kwargs["token"] = body.token
     if name == "select_appointment":
         kwargs["slot_id"] = body.slot_id
+    if name == "approve_payment" and body.amount_cents is not None:
+        kwargs["amount_cents"] = body.amount_cents
+        kwargs["currency"] = body.currency
     return _signal_or_gate_error(db, p, application_id, name, **kwargs)
 
 

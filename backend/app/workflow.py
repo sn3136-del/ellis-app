@@ -42,6 +42,9 @@ class VisaWorkflow:
         self.authorization = authorization or {}
         self.db = db
         self.emailer = emailer
+        # Injected by the service layer (DB-backed); None in pure unit tests.
+        self.payments_hook = None      # (event, payload) -> None
+        self.submission_gate = None    # () -> (ok, reason)
 
         if exec_row and exec_row.get("snapshot"):
             snap = exec_row["snapshot"]
@@ -50,6 +53,7 @@ class VisaWorkflow:
             for k in ("credential_ref", "session_ref", "application_id", "receipt",
                       "appointment", "confirmation", "reschedules", "fee", "target_slot"):
                 setattr(self, k, snap.get(k))
+            self.payment_authorization = snap.get("payment_authorization")
             # Searched slots must survive the reload between signals, else the
             # APPOINTMENT_AVAILABLE step sees an empty list after select/book and
             # falsely reports no availability.
@@ -63,6 +67,7 @@ class VisaWorkflow:
             self.reschedules = 0
             self._last_slots = []
             self.pending = None
+            self.payment_authorization = None
         self.artifacts = []
 
     def _fresh_inputs(self):
@@ -77,7 +82,8 @@ class VisaWorkflow:
                 "receipt": self.receipt, "appointment": self.appointment,
                 "confirmation": self.confirmation, "reschedules": self.reschedules,
                 "fee": self.fee, "target_slot": self.target_slot,
-                "last_slots": getattr(self, "_last_slots", [])}
+                "last_slots": getattr(self, "_last_slots", []),
+                "payment_authorization": getattr(self, "payment_authorization", None)}
 
     def status(self) -> dict:
         return {"case_id": self.case_id, "state": self.machine.state, "pending": self.pending,
@@ -117,10 +123,53 @@ class VisaWorkflow:
         self.inputs["email_verify_token"] = token
         return self._drive()
 
-    def approve_payment(self):
+    def approve_payment(self, amount_cents=None, currency=None):
+        # The approval binds to the EXACT fee shown at pause time (§6): amount,
+        # currency, payee. When the client echoes the amount it saw, a mismatch
+        # with the current fee means the display was stale — refuse and re-show.
+        if amount_cents is not None and self.fee and (
+                int(amount_cents) != self.fee["amount"]
+                or (currency or self.fee["currency"]) != self.fee["currency"]):
+            self._emit("payment_approval_rejected_stale_amount",
+                       {"shown_amount_cents": int(amount_cents),
+                        "current_amount_cents": self.fee["amount"]})
+            self._pause(f"The fee changed. Approve the {self.fee['display']} fee.",
+                        "payment_approval", fee=self.fee)
+            return self.status()
+        if self.fee:
+            self.payment_authorization = {
+                "amount_cents": self.fee["amount"], "currency": self.fee["currency"],
+                "payee": self.adapter.portal_operator, "status": "authorized"}
+            if self.payments_hook:
+                self.payments_hook("authorized", dict(self.payment_authorization,
+                                                      fee=dict(self.fee)))
         self.inputs["payment_approved"] = True
-        self._emit("payment_approved", {"max_fee_cents": self.authorization.get("max_fee_cents")})
+        self._emit("payment_approved", {
+            "amount_cents": (self.fee or {}).get("amount"),
+            "currency": (self.fee or {}).get("currency"),
+            "max_fee_cents": self.authorization.get("max_fee_cents")})
         return self._drive()
+
+    def _payment_authorization_matches_fee(self) -> bool:
+        pa = getattr(self, "payment_authorization", None)
+        return bool(pa and pa.get("status") == "authorized" and self.fee
+                    and pa.get("amount_cents") == self.fee["amount"]
+                    and pa.get("currency") == self.fee["currency"])
+
+    def _void_payment_authorization(self, why: str):
+        self.inputs["payment_approved"] = False
+        self.payment_authorization = None
+        if self.payments_hook and self.fee:
+            self.payments_hook("invalidated", {"amount_cents": self.fee["amount"],
+                                               "currency": self.fee["currency"]})
+        self._emit("payment_authorization_invalidated", {"reason": why[:120]})
+
+    def _consume_payment_authorization(self):
+        pa = getattr(self, "payment_authorization", None)
+        if pa and pa.get("status") == "authorized":
+            pa["status"] = "consumed"
+            if self.payments_hook:
+                self.payments_hook("consumed", dict(pa))
 
     def complete_payment(self):
         self.inputs["payment_completed"] = True
@@ -280,6 +329,9 @@ class VisaWorkflow:
             self._emit("fee_discovered", {"amount": fee["amount"], "currency": fee["currency"]})
             m.transition("PAYMENT_APPROVAL_REQUIRED")
         elif st == "PAYMENT_APPROVAL_REQUIRED":
+            # An approval is valid only for the EXACT amount + currency shown.
+            if self.inputs["payment_approved"] and not self._payment_authorization_matches_fee():
+                self._void_payment_authorization("fee changed since approval")
             if not self.inputs["payment_approved"]:
                 return self._pause(f"Approve the {self.fee['display']} fee.", "payment_approval", fee=self.fee)
             mx = self.authorization.get("max_fee_cents")
@@ -303,7 +355,13 @@ class VisaWorkflow:
             cur = d.get_application_state(session_token=token, application_id=self.application_id)
             if cur["ok"] and cur["paid"]:
                 self.receipt = cur.get("receipt") or self.receipt
+                self._consume_payment_authorization()
                 return m.transition("PAYMENT_COMPLETED", "already paid (reconciled)")
+            # Final pre-charge check: the authorization must still match the
+            # exact fee. A drift here voids it and returns to approval (§6).
+            if not self._payment_authorization_matches_fee():
+                self._void_payment_authorization("authorization no longer matches the exact fee")
+                return m.transition("PAYMENT_APPROVAL_REQUIRED", "exact-amount re-approval required")
             res = d.pay(session_token=token, application_id=self.application_id, payment_ref=self.case_id)
             if not res["ok"] and res.get("code") == "REQUIRES_3DS":
                 self.inputs["payment_completed"] = False
@@ -311,6 +369,7 @@ class VisaWorkflow:
             if not res["ok"]:
                 return m.transition("RECOVERABLE_FAILURE", res.get("code", "pay"))
             self.receipt = res["receipt"]
+            self._consume_payment_authorization()
             self.artifacts.append({"kind": "receipt", "value": res["receipt"]})
             self._emit("payment_captured", {"receipt_no": res["receipt"]["receiptNo"]})
             m.transition("PAYMENT_COMPLETED")
@@ -399,6 +458,15 @@ class VisaWorkflow:
                 return m.transition("RECOVERABLE_FAILURE", "declaration")
             m.transition("READY_TO_SUBMIT")
         elif st == "READY_TO_SUBMIT":
+            # §25: submission needs a valid standing authorization + a signed,
+            # unchanged final review version. The DB-backed gate is injected by
+            # the service layer; without one (pure unit tests) nothing blocks.
+            if self.submission_gate:
+                ok, why = self.submission_gate()
+                if not ok:
+                    return self._pause(why or "Final review and signature required.",
+                                       "final_review")
+            self.pending = None
             m.transition("SUBMITTING")
         elif st == "SUBMITTING":
             token = vault.reveal(self.session_ref)
