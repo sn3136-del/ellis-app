@@ -23,7 +23,7 @@ from ..security import Principal, get_principal, require_admin
 from ..config import settings
 from .. import models, audit
 from . import models as fm
-from . import build_workflow, generator, release as releasesvc, recon
+from . import build_workflow, generator, release as releasesvc, recon, auto_release
 from .build_workflow import (create_request, record_consent, run_build,
                              status_for_applicant, CONSENT_DISCLOSURES,
                              CONSENT_TEXT_VERSION)
@@ -100,6 +100,10 @@ def consent_build(request_id: str, body: ConsentBody, db=Depends(get_session),
     # Advance the build as far as it can go without further human input.
     observer = _observer_for((req.portal_evidence or {}).get("hostnames", []))
     run_build(db, req.id, observer=observer)
+    # Independent policy engine auto-releases the reversible (sandbox) capability
+    # the moment the evidence gate passes — no routine administrator action. It
+    # is deterministic (not Kimi) and can only touch the reversible tier.
+    auto_release.evaluate_build(db, req.id)
     db.refresh(req)
     return status_for_applicant(req)
 
@@ -119,6 +123,7 @@ def resume_build(request_id: str, db=Depends(get_session),
     if req.consent_given:
         observer = _observer_for((req.portal_evidence or {}).get("hostnames", []))
         run_build(db, req.id, observer=observer)
+        auto_release.evaluate_build(db, req.id)
         db.refresh(req)
     return status_for_applicant(req)
 

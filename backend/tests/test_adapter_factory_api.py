@@ -37,6 +37,22 @@ def test_applicant_build_flow_reaches_ready_label(client):
     assert "label" in r.json()
 
 
+# ---- applicant build auto-releases the reversible capability, no admin ----
+def test_applicant_build_auto_releases_sandbox_without_admin(client, db):
+    """After the applicant consents, the independent policy engine auto-releases
+    the reversible (sandbox) capability with NO administrator action."""
+    from app.adapter_factory import release as releasesvc, auto_release
+    bid, status = _request_and_build(client)
+    assert status["label"] == "ready"          # RELEASED_SANDBOX -> "ready"
+    binding = releasesvc.active_binding(db, route_key="rk1|apitest", tier="sandbox")
+    assert binding is not None                  # auto-released, no admin call
+    caps = auto_release.released_capabilities(db, "rk1|apitest")["capabilities"]
+    assert caps["form_completion"]["released"] is True
+    assert caps["form_completion"]["via"] == "sandbox_auto"
+    # Irreversible capabilities remain gated on a human staging/production release.
+    assert caps["payment_preparation"]["released"] is False
+
+
 def test_build_consent_required_and_versioned(client):
     r = client.get("/adapter-build/consent-copy", headers=AUTH)
     assert r.status_code == 200
