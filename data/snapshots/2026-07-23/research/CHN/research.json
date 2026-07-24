@@ -1,0 +1,166 @@
+{
+ "destination": "CHN",
+ "retrieved_at": "2026-07-23T22:07:37+00:00",
+ "research_status": "research_incomplete",
+ "sources": [
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=CHN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://cova.mfa.gov.cn/",
+   "final_url": "https://cova.mfa.gov.cn/",
+   "redirect_chain": [],
+   "final_hostname": "cova.mfa.gov.cn",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "loading...",
+   "retrieved_at": "2026-07-24T04:31:49+00:00",
+   "content_sha256": "9ef6a2e5e6a30db8e0d59f0491cae474a90fa50f1a257a031e879946e9a365ac",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=CHN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://avas.mfa.gov.cn/",
+   "final_url": "https://avas.mfa.gov.cn/",
+   "redirect_chain": [],
+   "final_hostname": "avas.mfa.gov.cn",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "loading\nloading...",
+   "retrieved_at": "2026-07-24T04:31:50+00:00",
+   "content_sha256": "155c8429376fb217b8ca73a2c6cdb4c282adef4172c531929fb09214bf7d8062",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=CHN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/",
+   "final_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/",
+   "redirect_chain": [
+    "http://us.china-embassy.gov.cn/eng/lsfw/zj/",
+    "https://us.china-embassy.gov.cn/eng/lsfw/zj/"
+   ],
+   "final_hostname": "us.china-embassy.gov.cn",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Applications_Embassy of the People's Republic of China in the United States of America\n中文\nHome\nAbout the Embassy\nConsular Services\nEmbassy Tour\nNotices\nGuide to Payment Services in China\nEssential Tips for New Arrivals to Beijing Make Your Trip Efficient & Easy\nAnnouncement on the Adjustment of the Consular Jurisdiction of Chinese Embassy and Consulates General in the United States of America\nmore...\nTopics\n2024 Two Sessions\n45th Annivesary of China-U.S. Diplomatic Relations\n20th Party Congress\nWonderful Xinjiang\nmore...\nHome &nbsp;>&nbsp; Consular Services &nbsp;>&nbsp; Applications\n· Visa Office Notices\n· Passport/Travel Document\n· Notarization/Authentication\n· Visa Application\n· Contact Us\n· Notice on Walk-in Without Appointment Visa Application Service（2023-10-20）\nEmbassy of the People's Republic of China in the United States of America\n3505 International Place, N.W.\nWashington, D.C. 20008 U.S.A.\nTel: +1-202-495-2000\nFax: +1-202-495-2138\nE-mail: chinaembpress_us@mfa.gov.cn\nVisa Office\nAddress: 2201 Wisconsin Avenue, N.W. Suite 110, Washington, D.C. 20007\nTel: +001 202-495-2071 (12:30-16:30, Monday to Friday, except for holidays)\nFax: +1 202-525-2056\nEmail for Passport and Travel Document Application: washington_hz@csm.mfa.gov.cn\nEmail for Authentication Application: washington_gzrz@csm.mfa.gov.cn\nEmail for Visa Application: washington_visa@csm.mfa.gov.cn",
+   "retrieved_at": "2026-07-24T04:31:51+00:00",
+   "content_sha256": "65e3f447b5b8a7828d1ed08b145c7c16cc7d43cdbec490b84237ed1fc60a0bc3",
+   "page_language": "zh"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=CHN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://us.china-embassy.gov.cn/eng/lsfw/",
+   "final_url": "https://us.china-embassy.gov.cn/eng/lsfw/",
+   "redirect_chain": [
+    "http://us.china-embassy.gov.cn/eng/lsfw/",
+    "https://us.china-embassy.gov.cn/eng/lsfw/"
+   ],
+   "final_hostname": "us.china-embassy.gov.cn",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Consular Services_Embassy of the People's Republic of China in the United States of America\n中文\nHome\nAbout the Embassy\nConsular Services\nEmbassy Tour\nNotices\nGuide to Payment Services in China\nEssential Tips for New Arrivals to Beijing Make Your Trip Efficient & Easy\nAnnouncement on the Adjustment of the Consular Jurisdiction of Chinese Embassy and Consulates General in the United States of America\nmore...\nTopics\n2024 Two Sessions\n45th Annivesary of China-U.S. Diplomatic Relations\n20th Party Congress\nWonderful Xinjiang\nmore...\nHome &nbsp;>&nbsp; Consular Services\nApplications\nVisa Office Notices\nPassport/Travel Document\nNotarization/Authentication\nVisa Application\nContact Us\nThe Consular Jurisdiction of Chinese Embassy and Consulates General in the United States of America\nEmbassy of the People's Republic of China in the United States of America\n3505 International Place, N.W.\nWashington, D.C. 20008 U.S.A.\nTel: +1-202-495-2000\nFax: +1-202-495-2138\nE-mail: chinaembpress_us@mfa.gov.cn\nVisa Office\nAddress: 2201 Wisconsin Avenue, N.W. Suite 110, Washington, D.C. 20007\nTel: +001 202-495-2071 (12:30-16:30, Monday to Friday, except for holidays)\nFax: +1 202-525-2056\nEmail for Passport and Travel Document Application: washington_hz@csm.mfa.gov.cn\nEmail for Authentication Application: washington_gzrz@csm.mfa.gov.cn\nEmail for Visa Application: washington_visa@csm.mfa.gov.cn",
+   "retrieved_at": "2026-07-24T04:31:52+00:00",
+   "content_sha256": "1a8add37062cda98780f65660a0a66041cbe443916bd1d8a209b82d36e1b281e",
+   "page_language": "zh"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=CHN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://newyork.china-consulate.gov.cn/eng/",
+   "final_url": "https://newyork.china-consulate.gov.cn/eng/",
+   "redirect_chain": [
+    "http://newyork.china-consulate.gov.cn/eng/",
+    "https://newyork.china-consulate.gov.cn/eng/"
+   ],
+   "final_hostname": "newyork.china-consulate.gov.cn",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Consulate General of the People’s Republic of China in New York\n中文\nHome\nAbout us\nConsular Services\nMedia\nCommerce\nEducation\nTechnology\nCulture\nConsul General Activities\nmore...\nConsul General Chen Li Attends “The Path Forward 2026” China-U.S. Business Exchange Event\nOn July 16, Consul General Chen Li attended “The Path Forward 2026” China-U.S. business exchange event hosted by the China General Chamber of Commerce-USA and delivered a keynote speech.\nConsul General Chen Li Engages with Ohio’s Agricultural Community\nOn June 26, Consul General Chen Li visited the Ohio Soybean Council and held in-depth discussions with soybean farmers and cattlemen on issues including China-U.S. agricultural trade.\nConsul General Chen Li Visit Pittsburgh\nFrom June 24 to 25, 2026, Chen Li, the Chinese Consul General in New York, visited Pittsburgh. During the visit, he met with Mayor O'Connor, as well as executives from Block Communications and PPG Industries.The U.S.side said that they welcomed the stability of bilateral relations, and hoped to deepen cooperation in sister-city ties, trade, and people-to-people exchanges.\nConsul General Chen Li Attends the Opening Ceremony of the 47th Boston Hong Kong Dragon Boat Festival\nOn June 14, the 47th Boston Hong Kong Dragon Boat Festival was held along the Charles River in Boston. Consul General Chen Li attended the event with his wife and delivered remarks.\nThe Chinese Consulate General Hosts the Second \"Youth Dialogue for the Future\" Joint Concert\nOn J",
+   "retrieved_at": "2026-07-24T04:31:53+00:00",
+   "content_sha256": "d4e5a8800af5f9937880683ab4b3c32b441dba9f9bda7eea64926ca07a0f14ba",
+   "page_language": "zh"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=CHN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://sanfrancisco.china-consulate.gov.cn/eng/",
+   "final_url": "https://sanfrancisco.china-consulate.gov.cn/eng/",
+   "redirect_chain": [
+    "http://sanfrancisco.china-consulate.gov.cn/eng/",
+    "https://sanfrancisco.china-consulate.gov.cn/eng/"
+   ],
+   "final_hostname": "sanfrancisco.china-consulate.gov.cn",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Consulate General of the People's Republic of China in San Francisco\nHome\nAbout Us\nConsul General Zhang Jianmin\nConsulate Sections\nConsular District\nContact Us\nConsular Service\nVisas and Apostille\nContact Us\nPress and Media\nNews\nForeign Ministry Spokesperson's Remarks\nConsular Spokesperson’s Remarks\nMedia Services\nCulture\nEconomic and Commercial Affairs\nEducation\nThis site\nDownload Forms\nIssues in Focus\nthe 20th National Congress of the CPC\nThe Belt and Road Initiative\nChina International Import Expo\nSouth China Sea\nChina's Peaceful Development\nChina's Tibet\nTaiwan Issue\nChina’s Xinjiang\nPictures in the News\nmore...\nConsul General Zhang Jianmin Briefs the Media On China-US Summit\nChinese Consulate General in San Francisco Hosted 2026 “Chi...\nThe Chinese Consulate General in San Francisco Hosts 2026 Spr...\nChinese Consulate General and San Francisco Jointly Host Flag...\nConsulate Headlines\nmore...\nConsul General Zhang Jianmin and His wife Attend the San Francisco Dragon Boat Festival (2026-06-23)\nConsul General Zhang Jianmin Talks with Media (2026-05-27)\nConsul General Zhang Jianmin Briefs the Media On China-US Summit (2026-05-27)\nChinese Consulate General in San Francisco Hosted 2026 “Chinese Bridge” Competition (2026-05-26)\nConsular District News\nmore...\nMOFCOM Spokesperson’s Remarks on China’s Recent Economic and Trade Policies and Measures (2025-10-14)\nChina strongly opposes US 'reciprocal tariffs,' to take countermeasure: commerce ministry (2025-04-04)\nChinese Foreign Min",
+   "retrieved_at": "2026-07-24T04:31:53+00:00",
+   "content_sha256": "01d3299617be8cd45320d652f30514faf8a42ff18f0ff3a06a9e77c9c875ccc5",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=CHN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://losangeles.china-consulate.gov.cn/eng/",
+   "final_url": "https://losangeles.china-consulate.gov.cn/eng/",
+   "redirect_chain": [
+    "http://losangeles.china-consulate.gov.cn/eng/",
+    "https://losangeles.china-consulate.gov.cn/eng/"
+   ],
+   "final_hostname": "losangeles.china-consulate.gov.cn",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "The Consulate General of The People's Republic of China in Los Angeles\nHome\nConsulate Events\nChinese News\nAbout Us\nConsular Service\nTopics\nLinks\nLinks\nThis Site\n&nbsp; Consulate Events\n&nbsp; Chinese News\n&nbsp; About Us\nConsul General\nService Area\nContact us\n&nbsp; Consular Service\nNotice\nVisa for China\nApostille\nProcessing fees\nContact us\nConsular Protection and Assistance\nDownload Forms\nLaws and Regulations\n&nbsp; Topics\n19th CPC Congress\n2021 NPC & CPPCC\n· Notice on Implementing Online Filling of the Arrival Card &#12288;&#12288;&#12288;\n· FAQs on Visa-free Entry into China &#12288;&#12288;&#12288;\n· Notice on the Extension of the Unilateral Visa-Free Policy &#12288;&#12288;&#12288;\n· Notice on the Launch of China Online Visa Application System &#12288;&#12288;&#12288;\n· Travel to China, All You Need to Know &#12288;&#12288;&#12288;\n&nbsp;&nbsp; Consulate Events\nConsul General Guo Shaochun Met with Descendants of a Chinese-American Flying Tigers Veteran Who Donated Medals and Commemorative Badges\n· Consul General Guo Shaochun Attended held 2026 Tea for Harmony Yaji Cultural Salon in L.A\n&nbsp; (2026-05-27)\n· Ambassador Xie Feng delivers video remarks at the 2026 China–California Business Forum\n&nbsp; (2026-05-16)\n· The Chinese Consulate General in Los Angeles Held the 2026 “Chinese Bridge” Chinese Proficiency Competition\n&nbsp; (2026-05-14)\n· The Chinese Consulate General in Los Angeles Held “Experience China” Open Day Event\n&nbsp; (2026-05-14)\n· Madame Wang Wei Attended ",
+   "retrieved_at": "2026-07-24T04:31:54+00:00",
+   "content_sha256": "651b9826c4b62506140fbdecb8fccf318900f73c167139fba6f827b3f60f10c7",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=CHN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://chicago.china-consulate.gov.cn/eng/",
+   "final_url": "https://chicago.china-consulate.gov.cn/eng/",
+   "redirect_chain": [
+    "http://chicago.china-consulate.gov.cn/eng/",
+    "https://chicago.china-consulate.gov.cn/eng/"
+   ],
+   "final_hostname": "chicago.china-consulate.gov.cn",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Consulate General of The People's Republic of China in Chicago\nHome\nConsulate Information\nMessage from the Consul General\nBiography of Consul General\nConsul General's Remarks\nContact Us\nConsulate Section\nVisa & Authentication\nOverseas Chinese\nEconomy & Trade\nEducation\nScience & Technology\nCulture\nConsular Services\n中文\nChina News\nmore...\nPresident Xi Jinping Meets with United Nations Secretary General António Guterres\nPresident Xi Jinping Meets with Prime Minister of Cambodia Hun Manet\nPresident Xi Jinping Meets with Prime Minister of Thailand Anutin Charnvirakul\nPresident Xi Jinping Attends the Opening Ceremony of the 2026 World AI Conference and High-Level Meeting on Global AI Governance and Delivers Keynote Address\nPresident Xi Jinping Meets with President of Kazakhstan Kassym-Jomart Tokayev\nChina-U.S. Relations\nmore...\nMOFCOM Spokesperson’s Remarks on China’s Recent Economic and Trade Policies and Measures\nPresident Xi Jinping Meets with U.S. Presid...\n2025-10-30\nChina unveils outcomes of China-U.S. econom...\n2025-10-30\nWang Yi Has a Phone Call with U.S. Secretar...\n2025-10-27\nChina, U.S. reach basic consensuses on arra...\n2025-10-26\nConsul General's Activities\nmore...\nConsul General Wang Baodong Attended “Amazing S...\nThe Chinese Consulate General in Chicago Celebrat...\nConsul General Wang Baodong Met with Latin-Americ...\nConsul General Wang Baodong Attends the “Detroit...\nConsul General Wang Baodong Publishes an Article ...\nConsul General Wang Baodong Attended the Ch...\n2",
+   "retrieved_at": "2026-07-24T04:31:56+00:00",
+   "content_sha256": "1b7eb05d798ed07f496553769078931c879fafa35e0e0b7b6a35f1737eb2627b",
+   "page_language": "zh"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=CHN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://en.nia.gov.cn/",
+   "final_url": "https://en.nia.gov.cn/",
+   "redirect_chain": [],
+   "final_hostname": "en.nia.gov.cn",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "National Immigration administration\nLanguages\n中文\nEnglish\nРусский\nFrançais\nEspañol\nالعربية\nCN\nHome\nNews\nOpen Government\nPress Conference\nServices\nContact Us\nA Total of 178 Million Exits and Entries Recorded in Q3 ...\nConference on Regional Migration Governance Policies Hel...\nSub-Forum on Migration Management Cooperation Held as Pa...\nRussian, French, Spanish and Arabic Versions of National...\n-->\nChina’s Cross-Border Trips Hit a Record 369 Million in First Half of 2026\nAnnouncement on the 2026 Photography Submission on \"China in the Eyes of International Friends\"\nAround 6.67 Million Border Crossings Recorded During Dragon Boat Festival Holiday\nImmigration officers share stories of safeguarding national border\nMORE>>\nConference on Regional Migration Governance Policies Held in Lianyungang, Jiangsu Province\nSub-Forum on Migration Management Cooperation Held as Part of 2025 Conference of Global Public Security Cooperation Forum (Lianyungang)\nNIA Launches China Immigration Service Hotline and English Version Website on April 8\nLaws and Regulations\nLaws and Regulations\nNotice\nShanghai Pudong International Airport Pilots Border Inspection Exemption Po...\nExit and Entry Administration Law of the People's Republic of China\nNationality Law of the People's Republic of China\nRegulations of the People's Republic of China on Administration of the Entr...\nMORE>>\nNotice\nAnnouncement on the 2026 Photography Submission on \"China in the Eyes of In...\nAnnouncement on the Implementation of Elect",
+   "retrieved_at": "2026-07-24T04:32:00+00:00",
+   "content_sha256": "954158ff8920fefd4006b17fc257e8ca495666f802e94159cf616738b69a4d17",
+   "page_language": "zh"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=CHN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://www.nia.gov.cn/",
+   "final_url": "https://www.nia.gov.cn/",
+   "redirect_chain": [],
+   "final_hostname": "www.nia.gov.cn",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "﻿\n国家移民管理局\n中文\nEnglish\nРусский\nFrançais\nEspañol\nالعربية\nEN\n| -->\n| -->\n| -->\n| -->\n| -->\n| -->\n-->\n| -->\n| -->\n-->\n无障碍浏览\n首页\n组织机构\n新闻发布\n政务公开\n办事服务\n互动交流\n概况信息\n国家移民管理局（中华人民共和国出入境管理局）于2018年4月2日组建成立，是公安部管理的国家局，为副部级。国家移民管理局领导管理全国出入境边防检查机构、边境管理机构各项工作，指导管理各省、自治区、直辖市公安机关出入境管理机构业务工作。\n机构职责\n&nbsp;&nbsp;&nbsp;&nbsp;\n&nbsp;&nbsp;国家移民管理局内设：综合司(移民事务国际合作司)、政策法规司、外国人管理司、公民出入境管理司、边防检查管理司、信息科技司、干部人事司、后勤保障司等8个司。下设出入境管理信息技术研究所、移民事务服务中心和警务保障中心3个直属事业单位。\n&nbsp;&nbsp;&nbsp;&nbsp;主办单位：国家移民管理局\n&nbsp;&nbsp;&nbsp;&nbsp;网站电话：010-66265110\n&nbsp;&nbsp;&nbsp;&nbsp;通讯地址：北京市东长安街14号(邮编：100741)\n领导信息\n王志忠： 公安部党委委员、副部长，国家移民管理局（中华人民共和国出入境管理局）党组书记、局长\n刘海涛： 国家移民管理局（中华人民共和国出入境管理局）党组成员、副局长\n毛&emsp;旭： 国家移民管理局（中华人民共和国出入境管理局）党组成员、副局长\n仇保利： 国家移民管理局（中华人民共和国出入境管理局）党组成员、副局长\n池景阳： 国家移民管理局（中华人民共和国出入境管理局）党组成员、副局长\n移民管理要闻\n公安部要闻 -->\n上半年3.69亿人次出入境 创历史新高\n7月10日，国家移民管理局召开新闻发布会，发布2026年上半年移民管理工作主要数据。\n上半年，全国移民管理机构累计查验出入境人员3.69亿人次，同比上升10.8%，创历史新高；其中内地（大陆）居民1.76亿人次、港澳台居民1.47亿人次、外国人4590.6万人次，同比分别上升10.7%、8.1%、20.6%。入境外国人达2291.4万人次，同比增长20.4%，呈现快速增长趋势；其中免签入境外国人1781.5万人次，占入境外国人77....\n媒体聚焦\n新华每日电讯：创历史新高 上半年3.69亿人...\n07-13\n人民日报：登轮即度假 出海过周末（经济聚焦）...\n06-16\n法治日报：科技为“开放的中国”增动力添活力 ...\n05-28\n人民日报：4位移民管理领域代表与中外记者交流...\n05-28\n人民日报：中蒙最大陆路口岸今年出入境人员突破...\n05-15\n人民日报：横琴口岸通关累计突破1亿人次\n04-28\n人民日报：忠诚守卫国门 服务便企惠民\n04-20\n通知公告\n国家移民管理局新闻发布会采访通知\n07-08\n国家移民管理局直属机构2026年度拟补充...\n07-07\n国家移民管理局出入境管理信息技术研究所2...\n06-30\n国家移民管理局2026年度公开遴选拟任职...\n06-11\n政策文件\n《公安机关人民警察证使用管理规定》（公安...\n07-07\n国务院关于对外投资的规定\n06-01\n中华人民共和国反外国不当域外管辖条例\n04-13\n国务院关于印发《中国（内蒙古）自由贸易试...\n04-09\n习近平对基础教育工作作出重要指示\n习近平：全面贯彻党的教育方针落实立德树人根",
+   "retrieved_at": "2026-07-24T04:32:01+00:00",
+   "content_sha256": "5dea2e3eca7e9805aedce3c8f1941f4ea3d95d2b75db93ff2706148389dc286e",
+   "page_language": "zh"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=CHN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://cs.mfa.gov.cn/",
+   "final_url": "https://cs.mfa.gov.cn/",
+   "redirect_chain": [
+    "http://cs.mfa.gov.cn/",
+    "https://cs.mfa.gov.cn/"
+   ],
+   "final_hostname": "cs.mfa.gov.cn",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "中国领事服务网\n-->\n欢迎访问中国领事服务网！\n关于领事\n走进领事司\n领事司简介\n领事常识\n联系方式\n中国公民出国\n护照/旅行证\n护照/旅行证简介 申办护照\n出国签证 出国签证信息 出国签证简介 申办出国签证 常见问答\nAPEC商务旅行卡\nAPEC商务旅行卡简介\n申办APEC商务旅行卡\n常见问答\n领事认证\n领事认证简介\n申办领事认证须知 常见问答\n国内领事认证网上填表系统 （用于企业申办商事类文书领事认证）\n附加证明书 《公约》简介 缔约国名单 申办附加证明书须知 常见问答 相关资讯\n国际旅行证件温馨提示\n了解中国公民出国行前准备、出境入境、在外居留、申办证件相关事项\n了解目的地\n亚洲\n欧洲\n非洲\n北美洲\n南美洲\n大洋洲\n领事保护指南\n《海外防范电信网络诈骗宣传手册》\n对外劳务合作企业名单\n出国及海外中国公民自愿登记\n常见问答\n-->\n中国公民在海外\n领事保护\n安全提醒\n领保新闻\n领保指南\n应急电话\n护照/旅行证\n护照/旅行证简介\n申办护照/旅行证\n常见问答\n公证\n驻外使领馆公证简介\n申办公证须知\n常见问答\n领事认证\n领事认证简介\n申办领事认证须知\n常见问答\n婚姻登记\n驻外使领馆婚姻登记\n婚姻登记预约\n申办婚姻登记须知\n申请补领婚姻登记证件须知\n常见问答\n海外申请护照预约\n常见问答\n-->\n外国人来华 Visit China\n来华签证\n来华签证简介\n申办来华签证须知\n常见问答\nAbout Chinese Visa\n领事认证（含外国人在华申办领事认证）\n领事认证简介\n申办领事认证须知\nConsular Legalisation/Apostillisation\nConsular Legalisation/Apostillisation Q&A\n资料表格\n表格资料\n护照/旅行证\n领事保护\nAPEC商务旅行卡\n来华签证\n出国签证\n公证认证\n婚姻登记\n其他资料\n法律法规\n出入境相关\n公认证婚姻相关\n外国人事务\n条约协议\n办事指南\n中国公民出国\n护照/旅行证\n出国签证\nAPEC商务旅行卡\n领事认证\n国际旅行证件温馨提示\n中国公民出国\n了解目的地\n护照/旅行证\n出国签证\nAPEC商务旅行卡\n领事认证\n中国公民在海外\n领事保护\n护照/旅行证\n公证\n领事认证\n婚姻登记\n外国人来华 Visit China\n来华签证\nAbout Chinese Visa\n领事认证（含外国人在华申办领事认证）\nConsular Legalisation/Apostillisation\n了解目的地\n亚洲\n欧洲\n非洲\n北美洲\n南美洲\n大洋洲\n文书核查 Verification\n中国领事认证/附加证明书核查 Legalization/Apostille Verification of China\n外国附加证明书核查指南 Legalization/Apostille Verification of Foreign Countries\n外国附加证明书式样资料库\n1\n2\n3\n4\n中俄举行首次海外公民安全事务磋商\n中国与吉尔吉斯斯坦举行第八轮领事磋商\n中新（西兰）举行第四轮领事磋商\n中巴（基斯坦）举行第十轮领事磋商\n安全提醒\n领侨播报\n通知公告\n中俄举行首次海外公民安全事务磋商\n[ 详细 ]\n中国与吉尔吉斯斯坦举行第八轮领事磋商\n06-12\n中新（西兰）举行第四轮领事磋商\n04-15\n中巴（基斯坦）举行第十轮领事磋商\n04-01\n外交部领事司司长龙舟会见俄罗斯驻广州总领事捷普洛夫\n03-18\n外交部领事司司长龙舟会见法国外交部海外侨民事务和...\n02-04\n中加（拿大）举行第五轮领事磋商\n12-",
+   "retrieved_at": "2026-07-24T04:32:03+00:00",
+   "content_sha256": "e4538444f57e891a2c920b3bc3bff355d5bf67e626e53d328e418d0ec909f070",
+   "page_language": "zh"
+  }
+ ],
+ "dispositions": [],
+ "policies": [],
+ "fees": [],
+ "portals": [],
+ "jurisdictions": [],
+ "unresolved": []
+}
