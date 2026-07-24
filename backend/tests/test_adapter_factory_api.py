@@ -49,8 +49,11 @@ def test_applicant_build_auto_releases_sandbox_without_admin(client, db):
     caps = auto_release.released_capabilities(db, "rk1|apitest")["capabilities"]
     assert caps["form_completion"]["released"] is True
     assert caps["form_completion"]["via"] == "sandbox_auto"
-    # Irreversible capabilities remain gated on a human staging/production release.
-    assert caps["payment_preparation"]["released"] is False
+    # Irreversible capabilities also auto-release per capability (no admin), when
+    # the built flow contains their safe nodes — via=capability_auto.
+    assert caps["payment_preparation"]["released"] is True
+    assert caps["payment_preparation"]["via"] == "capability_auto"
+    assert caps["submission_execution"]["released"] is True
 
 
 def test_build_consent_required_and_versioned(client):

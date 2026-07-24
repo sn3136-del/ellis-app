@@ -36,14 +36,17 @@ def test_auto_release_releases_sandbox_when_gates_pass(db):
     db.refresh(req)
     assert req.state == "RELEASED_SANDBOX"
     caps = auto_release.released_capabilities(db, req.route_key)["capabilities"]
-    # Reversible capabilities are released by the automatic engine...
+    # Reversible capabilities are released by the automatic sandbox binding...
     assert caps["route_research"]["released"] is True
     assert caps["form_completion"]["released"] is True
     assert caps["document_upload"]["released"] is True
-    # ...irreversible ones are NOT (they require a human staging/production release).
-    assert caps["payment_preparation"]["released"] is False
-    assert caps["submission_execution"]["released"] is False
-    assert caps["account_registration"]["released"] is False
+    # ...and irreversible ones auto-release per capability (the synthetic full
+    # flow contains their safe nodes) — NO administrator, via=capability_auto.
+    for cap in ("account_registration", "appointment_booking",
+                "payment_preparation", "submission_execution"):
+        assert caps[cap]["released"] is True, cap
+        assert caps[cap]["via"] == "capability_auto", cap
+        assert caps[cap]["reversible"] is False
 
 
 def test_auto_release_is_idempotent(db):
