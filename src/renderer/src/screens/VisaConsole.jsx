@@ -90,7 +90,18 @@ export default function VisaConsole({ profile, onNotify, adminMode }) {
 
         {(tab === 'start' || !adminMode) && (
           <div className="tabpanel">
-            <StartVisa client={client} />
+            <StartVisa client={client}
+              onOpenCase={(c) => {
+                // Continuation (or resume of a converted intake): keep/refresh
+                // the case in the local list and open its flow at the current
+                // stage — never restart the intake wizard.
+                addCase({ id: c.id,
+                  full_name: c.full_name || 'My application',
+                  destination_country: c.destination_country || '',
+                  visa_type: c.visa_type || 'tourist',
+                  createdAt: Date.now() })
+                setOpenId(c.id)
+              }} />
           </div>
         )}
 

@@ -135,6 +135,29 @@ def get_intake(intake_id: str, db=Depends(get_session), p: Principal = Depends(g
     return out
 
 
+@router.delete("/intake/{intake_id}")
+def delete_intake(intake_id: str, db=Depends(get_session),
+                  p: Principal = Depends(get_principal)):
+    """Erase an intake that never became a case: its answers (which may hold
+    passport-derived identity data), every uploaded intake document (raw
+    passport bytes + extracted profile), and its research linkage. Converted
+    intakes are erased through DELETE /cases/{id} instead — one erasure home
+    per datum. Leaves a single non-PII tombstone audit event."""
+    from .models import RouteIntakeDocument
+    r = _owned_intake(db, p, intake_id)
+    if r.case_id:
+        raise HTTPException(409, "intake was converted — erase the case instead")
+    docs = db.execute(select(RouteIntakeDocument).where(
+        RouteIntakeDocument.intake_id == r.id)).scalars().all()
+    for d in docs:
+        db.delete(d)
+    db.delete(r)
+    db.commit()
+    audit.record(db, org_id=p.org_id, application_id="", action="route_intake_erased",
+                 detail={"intake_id": intake_id, "documents": len(docs)}, actor=p.user_id)
+    return {"deleted": True, "documents": len(docs)}
+
+
 @router.put("/intake/{intake_id}")
 def update_intake(intake_id: str, body: IntakeBody, db=Depends(get_session),
                   p: Principal = Depends(get_principal)):
@@ -150,6 +173,141 @@ def update_intake(intake_id: str, body: IntakeBody, db=Depends(get_session),
         r.preferred_language = body.preferred_language
     db.commit()
     return {"id": r.id, "status": r.status, "answers": r.answers}
+
+
+# ---- Intake passport upload (applicant journey, Part 1) ---------------------
+# The applicant may START with a passport instead of typing passport-derived
+# fields. The existing OCR hierarchy (Document AI -> flagged Kimi vision ->
+# local deterministic MRZ) runs exactly as at the case stage; the profile
+# builder is deterministic and whitelisted — Kimi can never invent identity
+# data. Raw recognized text is transient and never persisted or logged.
+
+_DOC_MIME_ALLOWLIST = ("application/pdf", "image/jpeg", "image/png", "image/tiff")
+_DOC_MAX_BYTES = 10 * 1024 * 1024
+
+
+class IntakeDocumentBody(BaseModel):
+    name: str
+    mime: str = "application/pdf"
+    size_bytes: int = 1024
+    text: str = ""          # embedded text layer / fixture for the local provider
+    content_b64: str = ""   # base64 image/PDF bytes -> Document AI / Kimi vision
+
+
+def _profile_response(doc, *, duplicate: bool = False) -> dict:
+    profile = doc.passport_profile or {}
+    return {"accepted": True, "rejected": False, "duplicate": duplicate,
+            "document_id": doc.id, "doc_type": doc.doc_type,
+            "mrz_valid": bool(profile.get("mrz_valid")),
+            "execution_class": doc.execution_class,
+            "profile": profile,
+            "prefill": profile.get("prefill") or {},
+            "conflicts": profile.get("conflicts") or [],
+            "quality_warnings": doc.quality_warnings or []}
+
+
+@router.post("/intake/{intake_id}/passport")
+def upload_intake_passport(intake_id: str, body: IntakeDocumentBody,
+                           db=Depends(get_session), p: Principal = Depends(get_principal)):
+    import base64
+    import hashlib
+
+    from ..providers import ocr as ocr_provider
+    from ..providers import passport_classifier
+    from .. import execution
+    from . import intake_flow
+    from .models import RouteIntakeDocument
+
+    r = _owned_intake(db, p, intake_id)
+    if r.status == "converted":
+        raise HTTPException(409, "intake already converted to a case")
+    if body.mime not in _DOC_MIME_ALLOWLIST:
+        raise HTTPException(415, "unsupported document type")
+    if body.size_bytes > _DOC_MAX_BYTES:
+        raise HTTPException(413, "document too large")
+    content = b""
+    if body.content_b64:
+        try:
+            content = base64.b64decode(body.content_b64)
+        except Exception:
+            raise HTTPException(400, "invalid content_b64")
+        if len(content) > _DOC_MAX_BYTES:
+            raise HTTPException(413, "document too large")
+    sha = hashlib.sha256(content or body.text.encode()).hexdigest()
+
+    # Duplicate upload (double click, retry after refresh): return the existing
+    # record — never a second row.
+    existing = db.execute(select(RouteIntakeDocument).where(
+        RouteIntakeDocument.intake_id == r.id,
+        RouteIntakeDocument.sha256 == sha)).scalars().first()
+    if existing is not None:
+        return _profile_response(existing, duplicate=True)
+
+    result, ocr_meta = ocr_provider.process_with_failover(
+        content=content, text=body.text, mime=body.mime)
+    ec = execution.classify_ocr(ocr_meta)
+    mrz = ocr_provider.parse_mrz(result.recognized_text) if result.recognized_text else None
+    classification = passport_classifier.classify_page(
+        text=result.recognized_text, mrz=mrz, has_image=bool(content),
+        vision_hint=result.doc_type)
+    # Only a validated biodata page may seed passport identity — a model hint
+    # of "passport" without a checksum-valid MRZ is never enough.
+    if classification["reject"] or not classification["accepted_as_passport_identity"]:
+        # Honest rejection with the exact retry guidance; nothing is stored, so
+        # the applicant can immediately retry with the biodata page.
+        return {"accepted": False, "rejected": True,
+                "page_type": classification["page_type"],
+                "message": classification["message"] or
+                "This page could not be used as the passport biodata page. "
+                "Upload a clear photo of the photo page of your passport.",
+                "quality_warnings": result.quality_warnings}
+
+    fields_map = {f.key: {"value": f.value, "confidence": f.confidence, "page": f.page}
+                  for f in result.fields}
+    profile = intake_flow.build_passport_profile(
+        ocr_fields=fields_map, mrz=mrz, recognized_text=result.recognized_text,
+        mrz_valid=bool(mrz and mrz.get("mrz_valid")))
+    doc = RouteIntakeDocument(
+        org_id=p.org_id, user_id=p.user_id, intake_id=r.id, name=body.name,
+        mime=body.mime, size_bytes=body.size_bytes, sha256=sha,
+        content=content or None, text=body.text, doc_type="passport",
+        execution_class=str(ec),
+        page_classification={k: classification[k] for k in
+                             ("page_type", "accepted_as_passport_identity",
+                              "reject", "reasons")},
+        extracted_fields=fields_map, passport_profile=profile,
+        quality_warnings=result.quality_warnings)
+    db.add(doc)
+    db.commit()
+    # Structural audit only — never field values (passport PII stays out of logs).
+    audit.record(db, org_id=p.org_id, application_id="", action="intake_passport_ocr",
+                 detail={"intake_id": r.id, "doc_type": doc.doc_type,
+                         "mrz_valid": profile.get("mrz_valid"),
+                         "engine": ocr_meta.get("primary"),
+                         "fallback_used": ocr_meta.get("fallback_used"),
+                         "execution_class": str(ec),
+                         "fields_extracted": len(profile.get("fields") or {}),
+                         "needs_confirmation": sum(
+                             1 for f in (profile.get("fields") or {}).values()
+                             if f.get("needs_confirmation")),
+                         "conflicts": len(profile.get("conflicts") or [])},
+                 actor=p.user_id)
+    return _profile_response(doc)
+
+
+@router.get("/intake/{intake_id}/passport")
+def get_intake_passport(intake_id: str, db=Depends(get_session),
+                        p: Principal = Depends(get_principal)):
+    """Latest extracted passport profile for this intake (refresh-resume of the
+    confirmation panel)."""
+    from .models import RouteIntakeDocument
+    r = _owned_intake(db, p, intake_id)
+    doc = db.execute(select(RouteIntakeDocument).where(
+        RouteIntakeDocument.intake_id == r.id)
+        .order_by(RouteIntakeDocument.created_at.desc())).scalars().first()
+    if doc is None:
+        return {"profile": None}
+    return _profile_response(doc)
 
 
 @router.post("/intake/{intake_id}/resolve")
@@ -262,6 +420,189 @@ def route_guidance(intake_id: str, background: BackgroundTasks,
             pass
     g["intake_id"] = r.id
     return g
+
+
+# ---- Continuation: guidance -> case (applicant journey, Part 3) -------------
+# The primary "Continue" action after Kimi guidance. Creates (or reuses) the
+# case, saves the guidance + route-specific checklist to it, carries the
+# intake's confirmed passport document over, links the async official-source
+# audit, and schedules adapter generation through the existing authorized
+# bridge. Idempotent: a duplicate click returns the same case. NO administrator
+# approval exists anywhere on this path.
+
+def _continuation_summary(db, r, cg, case_row) -> dict:
+    from . import intake_flow
+    from .. import models as core_models
+    docs = db.execute(select(core_models.StoredDocument).where(
+        core_models.StoredDocument.application_id == case_row.id)).scalars().all()
+    status = intake_flow.apply_checklist_status(
+        cg.checklist or [],
+        [{"doc_type": d.doc_type,
+          "accepted_as_passport_identity": (d.page_classification or {}).get(
+              "accepted_as_passport_identity", True)} for d in docs])
+    audit_info = None
+    if cg.audit_job_id:
+        from .models import OnDemandRouteResearchJob
+        job = db.get(OnDemandRouteResearchJob, cg.audit_job_id)
+        if job:
+            audit_info = {"id": job.id, "status": job.status, "stage": job.stage}
+    return {"case_id": case_row.id, "intake_id": r.id, "status": r.status,
+            "case_state": case_row.state,
+            "disposition": cg.disposition,
+            "continuation_kind": cg.continuation_kind,
+            "checklist": status["items"], "checklist_counts": status["counts"],
+            "guidance": cg.guidance, "audit": audit_info}
+
+
+@router.post("/intake/{intake_id}/continue")
+def continue_intake(intake_id: str, background: BackgroundTasks,
+                    db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from .. import models as core_models
+    from . import intake_flow, kimi_primary
+    from .models import CaseRouteGuidance, OnDemandRouteResearchJob, RouteIntakeDocument
+    from .registry import load_registry
+
+    r = _owned_intake(db, p, intake_id)
+
+    # Idempotent: already converted -> return the SAME case (duplicate clicks,
+    # refresh, retries never create a second application).
+    if r.case_id:
+        case_row = db.get(core_models.VisaApplication, r.case_id)
+        cg = db.execute(select(CaseRouteGuidance).where(
+            CaseRouteGuidance.case_id == r.case_id)).scalars().first()
+        if case_row is not None and cg is not None:
+            out = _continuation_summary(db, r, cg, case_row)
+            out["already_converted"] = True
+            return out
+
+    route = _guidance_route(r)
+    try:
+        g = kimi_primary.get_route_guidance(db, route)
+    except kimi_primary.GuidanceUnavailable as e:
+        raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
+                                         "reason": str(e)})
+    meta = intake_flow.continuation_meta(g)
+    if meta["blocked"]:
+        # The precise unresolved blocker, never a silent dead-end.
+        raise HTTPException(409, detail={"reason": "guidance_blocked",
+                                         "blockers": meta["blockers"]})
+
+    answers = dict(r.answers or {})
+    full_name = str(answers.get("full_name") or "").strip()
+    if not full_name:
+        parts = [answers.get("given_names"), answers.get("surname")]
+        full_name = " ".join(str(x) for x in parts if x).strip() or "Applicant"
+    email = str(r.email or answers.get("email") or "")
+
+    # Destination display name from the registry (case rows use country names).
+    dest_code = str(answers.get("destination_country") or "")
+    dest_name = dest_code
+    for c in load_registry("countries")["entries"]:
+        if dest_code in (c.get("alpha_3"), c.get("alpha_2")):
+            dest_name = c.get("common_name") or c["name"]
+            break
+
+    applicant = core_models.Applicant(
+        org_id=p.org_id, user_id=p.user_id, full_name=full_name, email=email,
+        phone="", time_zone="UTC")
+    db.add(applicant)
+    db.flush()
+    case_answers = dict(answers)
+    case_answers.setdefault("full_name", full_name)
+    case_answers.setdefault("email", email)
+    # Canonical aliases the case pipeline reads (validity checks, adapters).
+    alias = {"nationality": answers.get("passport_nationality"),
+             "issuing_country": answers.get("passport_issuing_country"),
+             "current_residence": answers.get("lawful_country_of_residence"),
+             "expiry_date": answers.get("passport_expiry_date"),
+             "intended_arrival": answers.get("arrival_date"),
+             "intended_departure": answers.get("departure_date")}
+    for k, v in alias.items():
+        if v and not case_answers.get(k):
+            case_answers[k] = v
+    case_row = core_models.VisaApplication(
+        org_id=p.org_id, user_id=p.user_id, applicant_id=applicant.id,
+        destination_country=dest_name, visa_type="tourist", answers=case_answers)
+    db.add(case_row)
+    db.flush()
+
+    # Carry the intake's passport document into the case (no re-upload). It
+    # arrives pre-approved ONLY when the applicant demonstrably confirmed the
+    # extracted profile — i.e. its prefill values were applied into the intake
+    # answers ("Use these details"). Otherwise the document stays unapproved
+    # and goes through the normal case-stage review like any upload.
+    intake_docs = db.execute(select(RouteIntakeDocument).where(
+        RouteIntakeDocument.intake_id == r.id)
+        .order_by(RouteIntakeDocument.created_at.desc())).scalars().all()
+    if intake_docs:
+        d = intake_docs[0]
+        pre = (d.passport_profile or {}).get("prefill") or {}
+        confirmed = all(
+            k in pre and str(answers.get(k, "")) == str(pre[k])
+            for k in ("passport_number", "birth_date"))
+        stored = core_models.StoredDocument(
+            org_id=p.org_id, application_id=case_row.id, name=d.name,
+            mime=d.mime, size_bytes=d.size_bytes, sha256=d.sha256,
+            storage_ref=f"local://{d.sha256[:16]}", doc_type=d.doc_type,
+            ocr_status="done", execution_class=d.execution_class,
+            page_classification=d.page_classification,
+            extracted_fields=d.extracted_fields,
+            quality_warnings=d.quality_warnings, approved=confirmed)
+        db.add(stored)
+        db.flush()
+        if d.content:
+            db.add(core_models.DocumentBlob(document_id=stored.id, org_id=p.org_id,
+                                            mime=d.mime, content=d.content))
+            d.content = None   # bytes now live (and are erased) with the case
+
+    guidance_saved = dict(g)
+    guidance_saved.pop("intake_id", None)
+    checklist = intake_flow.derive_document_checklist(g.get("guidance") or {})
+    resolution = db.get(RouteResolution, r.resolution_id) if r.resolution_id else None
+    audit_job = db.execute(select(OnDemandRouteResearchJob).where(
+        OnDemandRouteResearchJob.intake_id == r.id)
+        .order_by(OnDemandRouteResearchJob.created_at.desc())).scalars().first()
+    cg = CaseRouteGuidance(
+        org_id=p.org_id, case_id=case_row.id, intake_id=r.id,
+        route_key=(resolution.route_key if resolution else ""),
+        disposition=(g.get("guidance") or {}).get("disposition") or "",
+        continuation_kind=meta["kind"], guidance=guidance_saved,
+        checklist=checklist,
+        audit_job_id=(audit_job.id if audit_job else None))
+    db.add(cg)
+
+    # Link the case everywhere the journey is tracked; the async audit keeps
+    # running and never blocks preparation.
+    r.case_id = case_row.id
+    r.status = "converted"
+    if resolution is not None:
+        resolution.case_id = case_row.id
+    if audit_job is not None:
+        audit_job.case_id = case_row.id
+    db.commit()
+
+    audit.record(db, org_id=p.org_id, application_id=case_row.id,
+                 action="route_intake_converted",
+                 detail={"intake_id": r.id, "disposition": cg.disposition,
+                         "continuation_kind": cg.continuation_kind,
+                         "checklist_items": len(checklist),
+                         "documents_carried": 1 if intake_docs else 0},
+                 actor=p.user_id)
+    audit.record(db, org_id=p.org_id, application_id=case_row.id,
+                 action="case_created",
+                 detail={"destination": dest_name, "via": "intake_continuation"},
+                 actor=p.user_id)
+
+    # Adapter generation through the existing authorized bridge (background;
+    # the build pipeline's own gates + auto-release policy decide the rest).
+    if (g.get("guidance") or {}).get("official_portal_url") and \
+            g.get("status") == kimi_primary.STATUS_PRIMARY and resolution is not None:
+        background.add_task(_guidance_build_bg, p.org_id, p.user_id, case_row.id,
+                            route, resolution.route_key, g["guidance"])
+
+    out = _continuation_summary(db, r, cg, case_row)
+    out["already_converted"] = False
+    return out
 
 
 def _guidance_build_bg(org_id, user_id, case_id, route, key, guidance):  # pragma: no cover - thin wrapper

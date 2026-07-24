@@ -6,6 +6,7 @@ tenant isolation. Sensitive transitions go through the durable service layer.
 from __future__ import annotations
 
 import json
+import re
 
 from typing import Optional
 
@@ -793,6 +794,21 @@ def add_document(application_id: str, body: AddDocument, db=Depends(get_session)
         if len(content) > 10 * 1024 * 1024:
             raise HTTPException(413, "document too large")
     sha = hashlib.sha256(content or body.text.encode()).hexdigest()
+    # Duplicate upload (double click / re-drop of the same file): return the
+    # existing record — a duplicate never creates a second document row.
+    dup = db.execute(select(models.StoredDocument).where(
+        models.StoredDocument.application_id == application_id,
+        models.StoredDocument.sha256 == sha)).scalars().first()
+    if dup is not None:
+        pc = dup.page_classification or {}
+        return {"id": dup.id, "doc_type": dup.doc_type, "duplicate": True,
+                "mrz_valid": bool((dup.extracted_fields or {}).get("passport_number")),
+                "execution_class": dup.execution_class,
+                "page_type": pc.get("page_type", ""),
+                "accepted_as_passport_identity": pc.get("accepted_as_passport_identity", False),
+                "rejected": pc.get("reject", False), "message": "",
+                "extracted_fields": dup.extracted_fields,
+                "quality_warnings": dup.quality_warnings}
     # OCR hierarchy with recorded failover: Document AI → (flagged) Kimi vision → local.
     result, ocr_meta = ocr_provider.process_with_failover(content=content, text=body.text, mime=body.mime)
     ec = execution.classify_ocr(ocr_meta)
@@ -806,8 +822,32 @@ def add_document(application_id: str, body: AddDocument, db=Depends(get_session)
         text=result.recognized_text, mrz=mrz, has_image=bool(content),
         vision_hint=result.doc_type)
     doc_type = result.doc_type
+    # A passport PHOTOGRAPH legitimately has no readable text — when the file
+    # name says it's a photo, accept it as the checklist's photo document
+    # instead of rejecting it as an unreadable biodata page. It is never an
+    # identity source.
+    if classification["reject"] and content and \
+            classification["page_type"] in ("unreadable", "blank_page", "blurry") and \
+            re.search(r"photo|portrait|headshot", body.name or "", re.I):
+        classification = {**classification, "reject": False, "message": "",
+                          "page_type": "photo",
+                          "accepted_as_passport_identity": False}
+        doc_type = "photo"
     fields_map = {f.key: {"value": f.value, "confidence": f.confidence, "page": f.page}
                   for f in result.fields}
+    # Supporting documents (not passport pages, not rejected pages) get a
+    # route-checklist classification: deterministic keywords first, then an
+    # optional digit-masked Kimi call ONLY when the result stayed generic.
+    if not classification["reject"] and \
+            not classification["accepted_as_passport_identity"] and \
+            result.doc_type != "passport":
+        from .providers import doc_classifier
+        refined = doc_classifier.classify_supporting_document(
+            result.recognized_text, body.name)
+        if refined == "document":
+            refined = doc_classifier.classify_with_kimi(result.recognized_text) or refined
+        if refined != "document":
+            doc_type = refined
     if classification["reject"]:
         doc_type = classification["page_type"]
         # Never let a REJECTED page seed passport identity — this includes visa/
@@ -882,6 +922,39 @@ def review(application_id: str, db=Depends(get_session), p: Principal = Depends(
                            "extracted_fields": d.extracted_fields, "quality_warnings": d.quality_warnings}
                           for d in docs], "conflicts": conflicts,
             "required_fields": required, "missing_fields": missing, "answers": answers}
+
+
+@app.get("/cases/{application_id}/checklist")
+def case_checklist(application_id: str, db=Depends(get_session),
+                   p: Principal = Depends(get_principal)):
+    """The route-specific journey state saved at continuation: guidance,
+    disposition, document checklist with live per-item status, and the async
+    official-source audit's progress (which never blocks preparation)."""
+    _owned(db, p, application_id)
+    from .visa_snapshot import intake_flow
+    from .visa_snapshot.models import CaseRouteGuidance, OnDemandRouteResearchJob
+    cg = db.execute(select(CaseRouteGuidance).where(
+        CaseRouteGuidance.case_id == application_id)).scalars().first()
+    if cg is None:
+        return {"guidance": None, "disposition": None, "continuation_kind": None,
+                "checklist": [], "checklist_counts": {"total": 0, "required_missing": 0},
+                "audit": None}
+    docs = db.execute(select(models.StoredDocument).where(
+        models.StoredDocument.application_id == application_id)).scalars().all()
+    status = intake_flow.apply_checklist_status(
+        cg.checklist or [],
+        [{"doc_type": d.doc_type,
+          "accepted_as_passport_identity": (d.page_classification or {}).get(
+              "accepted_as_passport_identity", True)} for d in docs])
+    audit_info = None
+    if cg.audit_job_id:
+        job = db.get(OnDemandRouteResearchJob, cg.audit_job_id)
+        if job:
+            audit_info = {"id": job.id, "status": job.status, "stage": job.stage}
+    return {"guidance": cg.guidance, "disposition": cg.disposition,
+            "continuation_kind": cg.continuation_kind, "intake_id": cg.intake_id,
+            "checklist": status["items"], "checklist_counts": status["counts"],
+            "audit": audit_info}
 
 
 class AnswersUpdate(BaseModel):

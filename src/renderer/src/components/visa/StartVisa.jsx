@@ -14,9 +14,11 @@ import {
   conditionField, missingRequired, readinessMeta, checksSummary,
   validEmail, datesOrdered, RESIDENCE_STATUS_OPTIONS,
   researchStageMeta, researchTerminal, researchStatusMeta, RESEARCH_STEP_KEYS,
-  guidanceDispositionMeta, guidanceStepMeta, guidanceIsUsable
+  guidanceDispositionMeta, guidanceStepMeta, guidanceIsUsable,
+  continuationMeta, deriveAge
 } from '../../lib/intake.js'
 import ConnectorBuild from './ConnectorBuild.jsx'
+import PassportIntake from './PassportIntake.jsx'
 
 // Readiness statuses that mean no verified LIVE connector exists yet, so the
 // applicant may ask Ellis to build one (brief §10).
@@ -54,9 +56,11 @@ function newestProgressAt(job) {
 const STEP_FIELDS = [
   ['passport_nationality', 'passport_issuing_country', 'travel_document_type',
     'lawful_country_of_residence', 'residence_status'],
-  ['destination_country', 'visa_category', 'visa_subtype', 'travel_purpose',
+  // visa_category/visa_subtype are determined automatically by Ellis from the
+  // route — the applicant never picks a category before the route is known.
+  ['destination_country', 'travel_purpose',
     'arrival_date', 'departure_date', 'transit_countries'],
-  ['age', 'dependants', 'existing_destination_visas', 'existing_residence_permits',
+  ['birth_date', 'age', 'dependants', 'existing_destination_visas', 'existing_residence_permits',
     'prior_refusals', 'existing_portal_account', 'preferred_language', 'email']
 ]
 
@@ -71,15 +75,16 @@ function openUrl(url) {
   else window.open(url, '_blank', 'noopener')
 }
 
-export default function StartVisa({ client }) {
+export default function StartVisa({ client, onOpenCase }) {
   const { t, lang } = useLocale()
   const toast = useToast()
 
-  const [phase, setPhase] = useState('loading') // loading | hero | wizard | result
+  const [phase, setPhase] = useState('loading') // loading | hero | wizard | guidance | research | result
   const [loadError, setLoadError] = useState(null)
   const [info, setInfo] = useState(null)
   const [reg, setReg] = useState(null)
   const [draft, setDraft] = useState(null)      // newest resumable draft intake
+  const [converted, setConverted] = useState(null) // newest converted intake -> its case
 
   const [intakeId, setIntakeId] = useState(null)
   const [answers, setAnswers] = useState({})
@@ -93,6 +98,10 @@ export default function StartVisa({ client }) {
   const [guidance, setGuidance] = useState(null)       // Kimi-primary AI route guidance
   const [guidanceLoading, setGuidanceLoading] = useState(false)
   const [guidanceError, setGuidanceError] = useState(null)
+  const [entryMode, setEntryMode] = useState(null)     // null (choice) | 'manual' — Step 1 mode
+  const [passportConfirmed, setPassportConfirmed] = useState(false)
+  const [continuing, setContinuing] = useState(false)
+  const [continueError, setContinueError] = useState(null)
 
   const answersRef = useRef(answers)
   answersRef.current = answers
@@ -112,7 +121,14 @@ export default function StartVisa({ client }) {
         .filter((x) => x.status === 'draft')
         .sort((a, b) => String(b.updated_at || '').localeCompare(String(a.updated_at || '')))
       setDraft(drafts[0] || null)
+      // A converted intake means an in-flight case: the applicant resumes at
+      // the case's current stage, never back at the start of the wizard.
+      const conv = intakes
+        .filter((x) => x.status === 'converted' && x.case_id)
+        .sort((a, b) => String(b.updated_at || '').localeCompare(String(a.updated_at || '')))
+      setConverted(conv[0] || null)
       if (await resumeResearch(intakes)) return
+      if (await resumeResolved(intakes)) return
       setPhase('hero')
     } catch (e) {
       setLoadError({ message: e.message })
@@ -122,8 +138,10 @@ export default function StartVisa({ client }) {
   // If a resolved intake left a stored research-job id behind and that job is
   // still non-terminal, reopen straight into the live progress view.
   async function resumeResearch(intakes) {
+    // A converted intake's stored job id is the background AUDIT of an already
+    // created case — never a foreground research flow to trap the applicant in.
     const candidates = intakes
-      .filter((x) => x && x.id && storedResearchJobId(x.id))
+      .filter((x) => x && x.id && x.status !== 'converted' && storedResearchJobId(x.id))
       .sort((a, b) => String(b.updated_at || '').localeCompare(String(a.updated_at || '')))
     for (const it of candidates) {
       const jobId = storedResearchJobId(it.id)
@@ -147,6 +165,29 @@ export default function StartVisa({ client }) {
       }
     }
     return false
+  }
+  // A resolved-but-not-yet-continued intake resumes AT THE GUIDANCE PAGE
+  // (cached guidance loads instantly) — the applicant's answers and the
+  // primary continuation are never dropped by a refresh or restart.
+  async function resumeResolved(intakes) {
+    const cand = intakes
+      .filter((x) => x && x.id && x.status === 'resolved' && !x.case_id)
+      .sort((a, b) => String(b.updated_at || '').localeCompare(String(a.updated_at || '')))[0]
+    if (!cand) return false
+    try {
+      const full = await client.getIntake(cand.id)
+      const g = await client.routeGuidance(cand.id)
+      setIntakeId(cand.id)
+      setAnswers({ travel_purpose: 'tourism', ...(full.answers || {}) })
+      setStep(0); setMissing([]); setGuidanceError(null); setContinueError(null)
+      setEntryMode((full.answers || {}).passport_nationality ? 'manual' : null)
+      setPassportConfirmed(!!(full.answers || {}).passport_number)
+      setGuidance(g)
+      setPhase('guidance')
+      return true
+    } catch {
+      return false // guidance unavailable right now -> normal hero
+    }
   }
   useEffect(() => { loadAll() }, [])
   useEffect(() => () => clearTimeout(saveTimer.current), [])
@@ -186,6 +227,8 @@ export default function StartVisa({ client }) {
       setIntakeId(res.id)
       setAnswers({ ...seed, ...(res.answers || {}) })
       setStep(0); setMissing([]); setResult(null); setResolveError(null); setResearchJob(null)
+      setEntryMode(null); setPassportConfirmed(false); setContinueError(null)
+      setGuidance(null); setGuidanceError(null); setGuidanceLoading(false)
       setPhase('wizard')
     } catch (e) { setLoadError({ message: e.message }) }
   }
@@ -195,10 +238,39 @@ export default function StartVisa({ client }) {
     try {
       const res = await client.getIntake(draft.id)
       setIntakeId(res.id)
-      setAnswers({ travel_purpose: 'tourism', ...(res.answers || {}) })
+      const merged = { travel_purpose: 'tourism', ...(res.answers || {}) }
+      setAnswers(merged)
       setStep(0); setMissing([]); setResult(null); setResolveError(null); setResearchJob(null)
+      // A draft that already carries passport data resumes past the chooser.
+      setEntryMode(merged.passport_nationality ? 'manual' : null)
+      setPassportConfirmed(!!merged.passport_number)
+      setContinueError(null)
+      setGuidance(null); setGuidanceError(null); setGuidanceLoading(false)
       setPhase('wizard')
     } catch (e) { setLoadError({ message: e.message }) }
+  }
+
+  // ---- continuation after guidance (the primary CTA) -----------------------
+  async function continueToCase() {
+    setContinuing(true); setContinueError(null)
+    try {
+      await flushSave()
+      const res = await client.continueIntake(intakeId)
+      // The stored research-job id now belongs to the case's background audit —
+      // clear it so a restart never traps the applicant in the research view.
+      clearResearchJobId(intakeId)
+      onOpenCase && onOpenCase({
+        id: res.case_id,
+        full_name: answersRef.current.full_name || '',
+        destination_country: answersRef.current.destination_country || '',
+        visa_type: 'tourist',
+        continuation_kind: res.continuation_kind
+      })
+    } catch (e) {
+      const blockers = e.detail && Array.isArray(e.detail.blockers) ? e.detail.blockers : null
+      setContinueError({ message: blockers ? blockers.join(', ') : e.message })
+    }
+    setContinuing(false)
   }
 
   // ---- resolve -------------------------------------------------------------
@@ -210,7 +282,7 @@ export default function StartVisa({ client }) {
     return [...new Set(bad)]
   }
   async function resolve() {
-    setResolveError(null)
+    setResolveError(null); setGuidanceError(null)
     const bad = localProblems()
     if (bad.length) {
       setMissing(bad)
@@ -313,14 +385,23 @@ export default function StartVisa({ client }) {
             {t('start.hero.sub')}
           </p>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
-            {draft && (
-              <button className="btn" onClick={resumeDraft}>{t('start.resume.title')}</button>
+            {converted && (
+              <button className="btn" data-testid="resume-case"
+                onClick={() => onOpenCase && onOpenCase({ id: converted.case_id,
+                  destination_country: (converted.answers || {}).destination_country || '',
+                  full_name: (converted.answers || {}).full_name || '', visa_type: 'tourist' })}>
+                {t('case.resume')}
+              </button>
             )}
-            <button className={'btn' + (draft ? ' btn--ghost' : '')} onClick={startNew}>
-              {draft ? t('start.resume.new') : t('start.hero.cta')}
+            {draft && (
+              <button className={'btn' + (converted ? ' btn--ghost' : '')} onClick={resumeDraft}>{t('start.resume.title')}</button>
+            )}
+            <button className={'btn' + (draft || converted ? ' btn--ghost' : '')} onClick={startNew}>
+              {draft || converted ? t('start.resume.new') : t('start.hero.cta')}
             </button>
           </div>
-          {draft && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 12 }}>{t('start.resume.sub')}</div>}
+          {converted && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 12 }}>{t('case.resumeSub')}</div>}
+          {draft && !converted && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 12 }}>{t('start.resume.sub')}</div>}
         </div>
       </div>
     )
@@ -332,6 +413,7 @@ export default function StartVisa({ client }) {
         {header}
         <GuidancePanel t={t} guidance={guidance} loading={guidanceLoading}
           error={guidanceError}
+          onContinue={continueToCase} continuing={continuing} continueError={continueError}
           onEdit={() => { setPhase('wizard'); setStep(3) }}
           onNew={startNew} />
       </div>
@@ -382,6 +464,31 @@ export default function StartVisa({ client }) {
         </div>
 
         {step === 0 && (
+          <PassportIntake client={client} intakeId={intakeId} t={t}
+            confirmed={passportConfirmed}
+            onApply={(prefill) => {
+              setAnswers((prev) => {
+                const next = { ...prev }
+                for (const [k, v] of Object.entries(prefill || {})) {
+                  if (v !== undefined && v !== null && v !== '') next[k] = v
+                }
+                answersRef.current = next
+                return next
+              })
+              setMissing((m) => m.filter((k) => !(prefill || {})[k]))
+              setPassportConfirmed(true)
+              setEntryMode('manual')   // reveal the (now prefilled) fields for review
+              scheduleSave()
+              toast(t('passport.applied'))
+            }}
+            onManual={() => setEntryMode('manual')} />
+        )}
+        {step === 0 && passportConfirmed && (
+          <div style={{ marginBottom: 10 }}>
+            <span className="chip chip--ink" data-testid="passport-prefilled-chip">✓ {t('passport.prefilledChip')}</span>
+          </div>
+        )}
+        {step === 0 && entryMode === 'manual' && (
           <div className="grid grid-2" style={{ gap: 12 }}>
             <Field label={t('field.passport_nationality')} invalid={isMissing('passport_nationality')}>
               <SearchSelect t={t} value={answers.passport_nationality} options={nationalityOpts}
@@ -423,18 +530,15 @@ export default function StartVisa({ client }) {
                 invalid={isMissing('destination_country')}
                 onChange={(v) => setAnswer('destination_country', v)} />
             </Field>
-            <Field label={t('field.visa_category')} invalid={isMissing('visa_category')}>
-              <select className="select" value={answers.visa_category || 'tourist_visa'}
-                onChange={(e) => { setAnswer('visa_category', e.target.value); setAnswer('visa_subtype', undefined) }}>
-                {categories.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
-              </select>
-            </Field>
-            <Field label={t('field.visa_subtype')} optional t={t}>
-              <select className="select" value={answers.visa_subtype || ''}
-                onChange={(e) => setAnswer('visa_subtype', e.target.value || undefined)}>
-                <option value="">{t('start.select')}</option>
-                {subtypes.map((s) => <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>)}
-              </select>
+            {/* The visa/entry category is determined automatically by Ellis
+                once the route is known — the applicant never has to pick
+                "Tourist visa (consular)" before Ellis knows whether a visa is
+                even required. */}
+            <Field label={t('field.visa_category')}>
+              <div className="input" style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-soft)',
+                fontSize: 13, color: 'var(--muted)' }} data-testid="auto-category">
+                {t('start.autoCategory')}
+              </div>
             </Field>
             <Field label={t('field.travel_purpose')}>
               <div className="input" style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-soft)' }}>
@@ -463,10 +567,26 @@ export default function StartVisa({ client }) {
 
         {step === 2 && (
           <div className="grid grid-2" style={{ gap: 12 }}>
+            <Field label={t('field.birth_date')} invalid={isMissing('birth_date')}>
+              <input type="date" className="input" value={answers.birth_date || ''}
+                onChange={(e) => {
+                  const dob = e.target.value || undefined
+                  setAnswer('birth_date', dob)
+                  // Age is ALWAYS derived from the date of birth — never typed
+                  // independently once a birth date exists.
+                  const age = dob ? deriveAge(dob, new Date().toISOString().slice(0, 10)) : null
+                  setAnswer('age', age == null ? undefined : age)
+                }} />
+            </Field>
             <Field label={t('field.age')} invalid={isMissing('age')}>
-              <input type="number" min="0" max="130" className="input" style={isMissing('age') ? INVALID_STYLE : undefined}
-                value={answers.age ?? ''}
-                onChange={(e) => setAnswer('age', e.target.value === '' ? undefined : Number(e.target.value))} />
+              {answers.birth_date
+                ? <div className="input" style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-soft)' }}
+                    data-testid="derived-age">
+                    {answers.age ?? '—'} · {t('passport.source.derived')}
+                  </div>
+                : <input type="number" min="0" max="130" className="input" style={isMissing('age') ? INVALID_STYLE : undefined}
+                    value={answers.age ?? ''}
+                    onChange={(e) => setAnswer('age', e.target.value === '' ? undefined : Number(e.target.value))} />}
             </Field>
             <Field label={t('field.dependants')} optional t={t}>
               <input type="number" min="0" max="20" className="input" value={answers.dependants ?? ''}
@@ -627,13 +747,14 @@ function ReviewStep({ t, answers, info, missing, display, onJump }) {
   push('lawful_country_of_residence', display.countryName(answers.lawful_country_of_residence))
   if (answers.residence_status) push('residence_status', t('res.' + answers.residence_status))
   push('destination_country', display.countryName(answers.destination_country))
-  push('visa_category', display.catName(answers.visa_category || 'tourist_visa'))
-  if (answers.visa_subtype) push('visa_subtype', String(answers.visa_subtype).replace(/_/g, ' '))
+  // The category is determined automatically by Ellis, never picked upfront.
+  push('visa_category', t('start.autoCategory'))
   push('travel_purpose', t('purpose.tourism'))
   push('arrival_date', answers.arrival_date)
   push('departure_date', answers.departure_date)
   if (Array.isArray(answers.transit_countries) && answers.transit_countries.length)
     push('transit_countries', answers.transit_countries.map(display.countryName).join(', '))
+  if (answers.birth_date) push('birth_date', answers.birth_date)
   push('age', answers.age)
   if (answers.dependants != null) push('dependants', answers.dependants)
   if (answers.existing_destination_visas) push('existing_destination_visas', answers.existing_destination_visas)
@@ -681,7 +802,8 @@ const STATUS_NOTE_KEY = {
 // applicant sees instead of waiting for the official-source audit. Clearly
 // labeled "AI-generated route guidance"; irreversible actions still carry an
 // explicit confirmation requirement (never a one-click).
-function GuidancePanel({ t, guidance, loading, error, onEdit, onNew }) {
+function GuidancePanel({ t, guidance, loading, error, onEdit, onNew,
+                         onContinue, continuing, continueError }) {
   if (loading) {
     return (
       <div className="card" style={{ padding: 24, textAlign: 'center' }}>
@@ -690,7 +812,9 @@ function GuidancePanel({ t, guidance, loading, error, onEdit, onNew }) {
       </div>
     )
   }
-  if (error) {
+  // A stale error must never mask real guidance — the error card renders only
+  // when there is no guidance to show.
+  if (error && !guidance) {
     return (
       <div className="card" style={{ padding: 24 }}>
         <ErrorNote error={{ message: t('guidance.unavailable') }} />
@@ -708,6 +832,8 @@ function GuidancePanel({ t, guidance, loading, error, onEdit, onNew }) {
   const plan = Array.isArray(guidance.workflow_plan) ? guidance.workflow_plan : []
   const irreversible = plan.map(guidanceStepMeta).filter((s) => s.requiresConfirmation)
   const fee = g.government_fee || {}
+  // The primary continuation: no normal route ends at this page.
+  const cont = continuationMeta(guidance)
   return (
     <div className="card" style={{ padding: 24 }}>
       {/* AI-generated indicator — always visible with guidance-driven flow. */}
@@ -760,9 +886,33 @@ function GuidancePanel({ t, guidance, loading, error, onEdit, onNew }) {
         </div>
       )}
 
-      <div style={{ marginTop: 16, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+      {/* Continuation. A blocked CONDITIONAL route shows the precise blocker
+          instead of a CTA; everything else continues into the journey. */}
+      {cont.blocked ? (
+        <div className="note note--warn" style={{ marginTop: 12 }} data-testid="guidance-blocked">
+          <div style={{ fontWeight: 600 }}>{t('guidance.continue.blockedTitle')}</div>
+          {cont.blockers.map((b, i) => (
+            <div key={i} style={{ fontSize: 13 }}>• {String(b).replace(/_/g, ' ')}</div>
+          ))}
+        </div>
+      ) : (
+        <div style={{ marginTop: 16 }}>
+          {cont.partial && cont.blockers.length > 0 && (
+            <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 8 }}>
+              {t('guidance.uncertainMissing')}: {cont.blockers.map((b) => String(b).replace(/_/g, ' ')).join(', ')}
+            </div>
+          )}
+          <button className="btn" disabled={continuing} onClick={onContinue}
+            data-testid="guidance-continue" data-kind={cont.kind}>
+            {continuing ? t('guidance.continuing') : t(cont.ctaKey)}
+          </button>
+        </div>
+      )}
+      {continueError && <ErrorNote error={continueError} />}
+
+      <div style={{ marginTop: 14, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
         <button className="btn btn--ghost btn--sm" onClick={onEdit}>{t('start.editAnswers')}</button>
-        <button className="btn btn--sm" onClick={onNew}>{t('start.resume.new')}</button>
+        <button className="btn btn--ghost btn--sm" onClick={onNew}>{t('start.resume.new')}</button>
       </div>
     </div>
   )

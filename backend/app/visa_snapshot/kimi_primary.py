@@ -107,7 +107,15 @@ def _live_call(system: str, user: str) -> dict:
     if not (s.moonshot_api_key and s.kimi_enabled):
         raise GuidanceUnavailable("Kimi K3 not configured — guidance unavailable")
     from ..providers.kimi import LiveKimiProvider
-    return LiveKimiProvider()._chat(system, user, json_mode=True)
+    provider = LiveKimiProvider()
+    # The route decision is a deep-reasoning call: K3 regularly needs >120s for
+    # visa-required routes, and an aborted call caches an unusable UNCERTAIN
+    # answer. Still a HARD timeout — just a budget sized for this one call
+    # (first-time routes only; identical routes hit the cache instantly).
+    import os as _os
+    guidance_timeout = int(_os.getenv("KIMI_GUIDANCE_TIMEOUT_SECONDS", "240") or 240)
+    provider._timeout = max(provider._timeout, guidance_timeout)
+    return provider._chat(system, user, json_mode=True)
 
 
 def _call(system: str, user: str) -> dict:

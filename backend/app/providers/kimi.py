@@ -128,8 +128,14 @@ class LiveKimiProvider:  # pragma: no cover - needs a real key/network
         r = self._httpx.post(self._url, headers={"authorization": f"Bearer {self._key}"},
                              json=body, timeout=self._timeout)
         r.raise_for_status()
-        content = r.json()["choices"][0]["message"]["content"]
+        msg = r.json()["choices"][0]["message"]
+        content = msg.get("content") or ""
         m = re.search(r"\{[\s\S]*\}", content)
+        if not m:
+            # K3 is a reasoning model: under json_mode it occasionally leaves
+            # "content" empty and puts the answer in "reasoning_content"
+            # (kimi_vision handles the same quirk). Fall back before giving up.
+            m = re.search(r"\{[\s\S]*\}", msg.get("reasoning_content") or "")
         return json.loads(m.group(0)) if m else {}
 
     def classify_document(self, doc_excerpt: str) -> dict:

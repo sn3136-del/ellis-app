@@ -98,6 +98,25 @@ def delete_case(db, application_id: str, *, actor: str = "applicant", reason: st
     ps = db.get(models.PortalState, application_id)
     if ps:
         db.delete(ps); counts["portal_states"] = 1
+    # Journey rows keyed by case_id: the saved route guidance/checklist, and any
+    # intake-stage document rows linked through the converted intake (their
+    # bytes and extracted passport profile are personal data).
+    from .visa_snapshot.models import CaseRouteGuidance, RouteIntake, RouteIntakeDocument
+    cg = db.execute(select(CaseRouteGuidance).where(
+        CaseRouteGuidance.case_id == application_id)).scalars().all()
+    counts["case_route_guidance"] = len(cg)
+    for row in cg:
+        db.delete(row)
+    intakes = db.execute(select(RouteIntake).where(
+        RouteIntake.case_id == application_id)).scalars().all()
+    idoc_n = 0
+    for it in intakes:
+        for idoc in db.execute(select(RouteIntakeDocument).where(
+                RouteIntakeDocument.intake_id == it.id)).scalars().all():
+            db.delete(idoc); idoc_n += 1
+        db.delete(it)
+    counts["route_intakes"] = len(intakes)
+    counts["route_intake_documents"] = idoc_n
     # Old audit events for this case are personal-linked; remove them, then
     # write a single fresh tombstone.
     for e in _rows(db, models.AuditEvent, application_id):

@@ -3,12 +3,14 @@
 // at, and finally show the confirmation + receipt + appointment. The backend
 // (DB-runner or Temporal) owns all state; this screen reads status and sends the
 // matching signal for each handoff.
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useToast, Loading, ErrorNote, KVList, Empty } from '../ui.jsx'
+import { useLocale } from '../../lib/locale.jsx'
 import { HANDOFF_COPY } from '../../lib/visaBackend.js'
 import { handoffCopy, isTerminal, formatSlot, resultDisposition } from '../../lib/visaSession.js'
 import OcrReview from './OcrReview.jsx'
 import Preferences from './Preferences.jsx'
+import Checklist from './Checklist.jsx'
 import {
   SignatureModal, LiveViewModal, PaymentApprove, PaymentModal,
   AppointmentCalendar, RescheduleConfirm, DeclarationModal,
@@ -37,6 +39,7 @@ function Timeline({ state }) {
 
 export default function CaseFlow({ client, caseId, onNotify }) {
   const toast = useToast()
+  const { t } = useLocale()
   const [tab, setTab] = useState('journey')
   const [status, setStatus] = useState(null)
   const [prefs, setPrefs] = useState(null)
@@ -45,6 +48,8 @@ export default function CaseFlow({ client, caseId, onNotify }) {
   const [modal, setModal] = useState(null)   // active handoff modal id
   const [busy, setBusy] = useState(false)
   const [standing, setStanding] = useState(null)  // standing-authorization state
+  const [journey, setJourney] = useState(null)    // saved guidance + checklist + audit status
+  const landedOnDocs = useRef(false)
 
   async function refresh() {
     try {
@@ -53,6 +58,16 @@ export default function CaseFlow({ client, caseId, onNotify }) {
       client.audit(caseId).then((a) => setAudit(a.events || [])).catch(() => {})
       client.getStandingAuthorization(caseId)
         .then((s) => setStanding(s.current)).catch(() => {})
+      client.caseChecklist(caseId).then((j) => {
+        setJourney(j)
+        // A freshly continued case lands the applicant on document intake —
+        // once, never fighting later manual tab choices.
+        if (!landedOnDocs.current && c.state === 'DRAFT' &&
+            j && (j.checklist_counts || {}).required_missing > 0) {
+          landedOnDocs.current = true
+          setTab('documents')
+        }
+      }).catch(() => {})
     } catch (e) { setError({ message: e.message }) }
   }
   useEffect(() => { refresh() }, [caseId])
@@ -105,9 +120,15 @@ export default function CaseFlow({ client, caseId, onNotify }) {
         <div className="tabpanel">
           <Timeline state={state} />
           <ExecutionBanner status={status} />
+          <JourneyHeader t={t} journey={journey} />
           {error && <ErrorNote error={error} />}
 
-          {!started && (
+          {!started && journey?.continuation_kind === 'entry_preparation' && (
+            <EntryPrep t={t} client={client} caseId={caseId} journey={journey}
+              onToDocuments={() => setTab('documents')} />
+          )}
+
+          {!started && journey?.continuation_kind !== 'entry_preparation' && (
             <div className="card" style={{ padding: 22 }}>
               <div style={{ fontWeight: 700, marginBottom: 6 }}>Ready to submit?</div>
               <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>
@@ -164,6 +185,12 @@ export default function CaseFlow({ client, caseId, onNotify }) {
 
       {tab === 'documents' && (
         <div className="tabpanel">
+          <JourneyHeader t={t} journey={journey} />
+          <Checklist t={t} checklist={journey?.checklist}
+            counts={journey?.checklist_counts && {
+              required: (journey.checklist || []).filter((i) => i.required && i.kind === 'document').length,
+              missing: journey.checklist_counts.required_missing
+            }} />
           <OcrReview client={client} caseId={caseId} onChanged={refresh} />
         </div>
       )}
@@ -218,6 +245,74 @@ export default function CaseFlow({ client, caseId, onNotify }) {
           onClose={() => setModal(null)}
           onDone={async () => { setModal(null); toast('Signed'); await start() }} />
       )}
+    </div>
+  )
+}
+
+// Route summary + async official-source audit status. The audit NEVER blocks
+// preparation; its status is shown honestly and quietly.
+function JourneyHeader({ t, journey }) {
+  if (!journey || !journey.continuation_kind) return null
+  const g = (journey.guidance || {}).guidance || {}
+  const auditStatus = journey.audit && journey.audit.status
+  const auditRunning = auditStatus === 'queued' || auditStatus === 'running'
+  return (
+    <div className="card card--soft" style={{ padding: '10px 14px', marginBottom: 12 }}
+      data-testid="journey-header" data-kind={journey.continuation_kind}>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        <span className="badge badge--ai">{t('guidance.aiBadge')}</span>
+        {g.visa_category && <span className="chip">{g.visa_category}</span>}
+        {g.permitted_stay && <span className="chip">{g.permitted_stay}</span>}
+        {journey.audit && (
+          <span className="chip" data-testid="audit-chip">
+            {auditRunning ? t('case.audit.running') : t('case.audit.done')}
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Visa-exempt continuation: NOT a dead-end and NOT a consular visa application.
+// Real entry preparation — passport validity, onward travel, accommodation,
+// arrival-card style forms — driven by the same checklist.
+function EntryPrep({ t, client, caseId, journey, onToDocuments }) {
+  const [validity, setValidity] = useState(null)
+  useEffect(() => {
+    client.passportValidity(caseId).then(setValidity).catch(() => {})
+  }, [caseId])
+  const g = (journey.guidance || {}).guidance || {}
+  const counts = journey.checklist_counts || {}
+  const done = (counts.required_missing || 0) === 0
+  return (
+    <div className="card" style={{ padding: 22 }} data-testid="entry-prep">
+      <div style={{ fontWeight: 700, marginBottom: 4 }}>{t('case.entryPrep.title')}</div>
+      <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>{t('case.entryPrep.sub')}</div>
+      {g.passport_validity && (
+        <div className="kv">
+          <div className="kv__k">{t('case.entryPrep.validity')}</div>
+          <div className="kv__v">
+            {g.passport_validity}
+            {validity && validity.status && (
+              <span className="chip" style={{ marginLeft: 8 }} data-testid="validity-status">
+                {String(validity.status).replace(/_/g, ' ')}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+      {Array.isArray(g.forms) && g.forms.length > 0 && (
+        <div className="kv">
+          <div className="kv__k">{t('checklist.preparedLater')}</div>
+          <div className="kv__v">{g.forms.join(' · ')}</div>
+        </div>
+      )}
+      <div style={{ fontSize: 12.5, color: 'var(--muted)', margin: '10px 0' }}>
+        {t('case.entryPrep.window')}
+      </div>
+      <button className="btn" onClick={onToDocuments} data-testid="entry-prep-docs">
+        {done ? t('case.entryPrep.review') : t('case.docsFirst')}
+      </button>
     </div>
   )
 }

@@ -308,6 +308,136 @@ export function guidanceIsUsable(g) {
   return !!g && g.status === 'KIMI_PRIMARY' && g.ai_generated === true
 }
 
+// ---------------------------------------------------------------------------
+// Continuation after guidance (mirrors backend intake_flow.continuation_meta —
+// the backend is authoritative; this drives the primary CTA only).
+export const CONTINUATION_KIND = {
+  VISA_REQUIRED: { kind: 'visa_application', ctaKey: 'guidance.continue.visa' },
+  VISA_EXEMPT: { kind: 'entry_preparation', ctaKey: 'guidance.continue.exempt' },
+  ELECTRONIC_AUTHORIZATION_REQUIRED: { kind: 'authorization_application', ctaKey: 'guidance.continue.eta' },
+  CONDITIONAL: { kind: 'conditional_guidance', ctaKey: 'guidance.continue.partial' }
+}
+
+// The primary continuation for a guidance result. Blocked ONLY when the gap
+// prevents safe preparation (no known disposition); a known disposition with
+// residual gaps continues "with available guidance" (partial). Unknown shapes
+// fail safe to blocked — the guidance page must never dead-end silently, but
+// it must never invent a route either.
+export function continuationMeta(g) {
+  if (!g || typeof g !== 'object') {
+    return { blocked: true, kind: null, ctaKey: null, partial: false, blockers: [] }
+  }
+  const disp = g.guidance && typeof g.guidance === 'object' ? g.guidance.disposition : undefined
+  const entry = CONTINUATION_KIND[disp]
+  const blockers = [
+    ...(Array.isArray(g.missing_fields) ? g.missing_fields : []),
+    ...(Array.isArray(g.contradictions) ? g.contradictions : [])
+  ]
+  if (entry && g.status === 'KIMI_PRIMARY') {
+    return { blocked: false, kind: entry.kind, ctaKey: entry.ctaKey,
+      partial: disp === 'CONDITIONAL', blockers: [] }
+  }
+  if (entry && g.status === 'KIMI_UNCERTAIN') {
+    return { blocked: false, kind: entry.kind, ctaKey: 'guidance.continue.partial',
+      partial: true, blockers }
+  }
+  return { blocked: true, kind: null, ctaKey: null, partial: false,
+    blockers: blockers.length ? blockers : ['disposition'] }
+}
+
+// ---------------------------------------------------------------------------
+// Passport profile display + prefill (upload-first Step 1).
+
+// Age is ALWAYS derived from the date of birth and today — never typed by OCR
+// or a model. Returns null for anything unparseable (the UI then leaves the
+// age field editable instead of showing a wrong number).
+export function deriveAge(birthIso, todayIso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(birthIso || ''))
+  const t = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(todayIso || ''))
+  if (!m || !t) return null
+  const [by, bm, bd] = [Number(m[1]), Number(m[2]), Number(m[3])]
+  const [ty, tm, td] = [Number(t[1]), Number(t[2]), Number(t[3])]
+  const age = ty - by - ((tm < bm || (tm === bm && td < bd)) ? 1 : 0)
+  return age >= 0 && age <= 130 ? age : null
+}
+
+// Order in which extracted profile fields are shown to the applicant.
+export const PROFILE_FIELD_ORDER = [
+  'full_name', 'surname', 'given_names', 'passport_number', 'nationality',
+  'issuing_country', 'birth_date', '_age', 'sex', 'expiry_date', 'issue_date',
+  'place_of_birth', 'issuing_authority'
+]
+
+// Render-ready rows for the extracted-passport preview. Every row carries its
+// provenance and whether the applicant must confirm it; unknown/missing fields
+// simply do not appear (never invented).
+export function profileRows(profile) {
+  const fields = profile && typeof profile === 'object' && profile.fields &&
+    typeof profile.fields === 'object' ? profile.fields : {}
+  const rows = []
+  for (const key of PROFILE_FIELD_ORDER) {
+    const f = fields[key]
+    if (!f || f.value == null || f.value === '') continue
+    const conf = typeof f.confidence === 'number' ? f.confidence : 0
+    rows.push({
+      key,
+      labelKey: 'ppf.' + (key === '_age' ? 'age' : key),
+      value: String(f.value),
+      confidence: conf,
+      source: f.source === 'mrz' ? 'mrz' : f.source === 'derived' ? 'derived' : 'ocr',
+      needsConfirm: f.needs_confirmation === true,
+      note: typeof f.note === 'string' ? f.note : '',
+      level: f.needs_confirmation === true ? 'bad' : conf >= 0.9 ? 'ok' : 'mid'
+    })
+  }
+  return rows
+}
+
+// The wizard-answer prefill from a profile + applicant edits made in the
+// preview. Edits win over extracted values; empty edits fall back.
+export function prefillWithEdits(profile, edits = {}) {
+  const base = profile && typeof profile === 'object' && profile.prefill &&
+    typeof profile.prefill === 'object' ? { ...profile.prefill } : {}
+  const keyMap = {
+    full_name: 'full_name', surname: 'surname', given_names: 'given_names',
+    passport_number: 'passport_number', nationality: 'passport_nationality',
+    issuing_country: 'passport_issuing_country', birth_date: 'birth_date',
+    sex: 'sex', expiry_date: 'passport_expiry_date'
+  }
+  for (const [profKey, val] of Object.entries(edits || {})) {
+    const ansKey = keyMap[profKey]
+    if (ansKey && val != null && String(val).trim() !== '') base[ansKey] = String(val).trim()
+  }
+  // Age always re-derives from the (possibly edited) date of birth.
+  if (base.birth_date) {
+    const age = deriveAge(base.birth_date, new Date().toISOString().slice(0, 10))
+    if (age != null) base.age = age
+    else delete base.age
+  }
+  return base
+}
+
+// ---------------------------------------------------------------------------
+// Route checklist display helpers (items come from the backend checklist).
+const CHECKLIST_STATUS = {
+  provided: { tone: 'ok', i18nKey: 'checklist.provided' },
+  pending: { tone: 'pending', i18nKey: 'checklist.pending' },
+  auto: { tone: 'info', i18nKey: 'checklist.auto' },
+  prepared_later: { tone: 'info', i18nKey: 'checklist.preparedLater' }
+}
+
+export function checklistStatusMeta(status) {
+  return CHECKLIST_STATUS[status] || { tone: 'pending', i18nKey: 'checklist.pending' }
+}
+
+export function checklistCounts(items) {
+  const list = Array.isArray(items) ? items : []
+  const required = list.filter((i) => i && i.required && i.kind === 'document')
+  const missing = required.filter((i) => i.status === 'pending')
+  return { total: list.length, required: required.length, missing: missing.length,
+    complete: required.length > 0 && missing.length === 0 }
+}
+
 export const RESIDENCE_STATUS_OPTIONS = [
   'citizen', 'permanent_resident', 'temporary_resident', 'student', 'worker',
   'refugee_status_holder', 'asylum_seeker', 'stateless_resident', 'visitor', 'other'

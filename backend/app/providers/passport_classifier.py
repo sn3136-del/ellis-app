@@ -36,8 +36,23 @@ BIODATA = "passport_biodata"
 # Keyword evidence (deterministic, case-insensitive).
 _VISA_WORDS = ("multiple entry", "single entry", "duration of stay", "visa type",
                "visa category", "visa number", "number of entries", "valid for travel to")
-_STAMP_WORDS = ("admitted", "departure", "port of entry", "immigration officer",
-                "arrival", "entry stamp", "exit stamp", "admission number")
+# Strong passport-stamp markers. Two deliberate exclusions: generic travel
+# words ("arrival", "departure") appear in every flight itinerary and hotel
+# booking, and the bare word "immigration" appears in legitimate supporting
+# documents (Singapore's "Immigration & Checkpoints Authority" arrival card,
+# invitation letters addressed to an immigration bureau) — those flow through
+# this classifier during document intake and must never be misread as passport
+# stamp pages. Weak stamp words still catch a real stamp page below via the
+# short-text / no-supporting-document guard.
+_STAMP_WORDS = ("admitted", "port of entry", "immigration officer",
+                "entry stamp", "exit stamp", "admission number")
+_STAMP_WEAK_WORDS = ("arrival", "departure", "departed")
+# Words that mark a legitimate supporting document — a page carrying any of
+# these is never a bare stamp page.
+_SUPPORTING_DOC_WORDS = ("itinerary", "flight", "airline", "hotel", "booking",
+                         "reservation", "statement", "balance", "insurance",
+                         "invitation", "arrival card", "declaration",
+                         "e-ticket", "boarding")
 _OBS_WORDS = ("observations", "endorsements", "amendments", "official observations")
 _RESIDENCE_WORDS = ("residence permit", "permis de séjour", "aufenthaltstitel",
                     "carte de séjour", "titre de séjour", "residence card")
@@ -155,8 +170,13 @@ def classify_page(*, text: str = "", mrz: dict | None = None, has_image: bool = 
         reasons.append("visa-page keywords present, no passport MRZ")
         return result("visa_page", reject=True, message=VISA_STAMP_MESSAGE)
 
-    # 6. Entry/exit stamp keywords → stamp page.
-    if _has(text, _STAMP_WORDS):
+    # 6. Entry/exit stamp keywords → stamp page. Strong markers always fire;
+    #    weak markers (ARRIVAL/DEPARTURE alone, as many stamps read) fire only
+    #    for near-empty pages with no supporting-document evidence, so a flight
+    #    itinerary or hotel booking is never misread as a stamp page.
+    weak_stamp = (_has(text, _STAMP_WEAK_WORDS) and len(stripped) < 120
+                  and not _has(text, _SUPPORTING_DOC_WORDS))
+    if _has(text, _STAMP_WORDS) or weak_stamp:
         reasons.append("entry/exit stamp keywords present, no passport MRZ")
         return result("stamp_page", reject=True, message=VISA_STAMP_MESSAGE)
 

@@ -11,7 +11,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from sqlalchemy import (JSON, Boolean, DateTime, Float, ForeignKey, Integer,
-                        String, Text, UniqueConstraint)
+                        LargeBinary, String, Text, UniqueConstraint)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..db import Base
@@ -412,3 +412,46 @@ class KimiRouteGuidanceCache(Base, TimestampMixin):
     model: Mapped[str] = mapped_column(String(64), default="")
     generated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     fresh_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class RouteIntakeDocument(Base, TimestampMixin):
+    """A document the applicant uploads DURING intake (before a case exists) —
+    today always the passport biodata page. Bytes are kept so continuation can
+    carry the document into the created case without a re-upload; the extracted
+    profile records provenance + confidence per field and is what the applicant
+    confirms. Tenant-scoped; erased with the intake."""
+    __tablename__ = "route_intake_documents"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    org_id: Mapped[str] = mapped_column(String(64), index=True)
+    user_id: Mapped[str] = mapped_column(String(64), default="")
+    intake_id: Mapped[str] = mapped_column(String(32), index=True)
+    name: Mapped[str] = mapped_column(String(255), default="")
+    mime: Mapped[str] = mapped_column(String(64), default="application/pdf")
+    size_bytes: Mapped[int] = mapped_column(Integer, default=0)
+    sha256: Mapped[str] = mapped_column(String(64), default="", index=True)
+    content: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True)
+    text: Mapped[str] = mapped_column(Text, default="")   # text-layer path (no bytes)
+    doc_type: Mapped[str] = mapped_column(String(48), default="passport")
+    execution_class: Mapped[str] = mapped_column(String(32), default="LOCAL_PROVIDER")
+    page_classification: Mapped[dict] = mapped_column(JSON, default=dict)
+    extracted_fields: Mapped[dict] = mapped_column(JSON, default=dict)
+    passport_profile: Mapped[dict] = mapped_column(JSON, default=dict)
+    quality_warnings: Mapped[list] = mapped_column(JSON, default=list)
+
+
+class CaseRouteGuidance(Base, TimestampMixin):
+    """The Kimi route guidance + derived checklist SAVED to a case at
+    continuation (guidance -> case bridge). Durable: survives cache expiry and
+    restarts; superseded content is refreshed in place when the async
+    official-source audit lands."""
+    __tablename__ = "case_route_guidance"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    org_id: Mapped[str] = mapped_column(String(64), index=True)
+    case_id: Mapped[str] = mapped_column(String(32), unique=True, index=True)
+    intake_id: Mapped[str | None] = mapped_column(String(32), nullable=True, index=True)
+    route_key: Mapped[str] = mapped_column(String(400), default="")
+    disposition: Mapped[str] = mapped_column(String(48), default="")
+    continuation_kind: Mapped[str] = mapped_column(String(32), default="")
+    guidance: Mapped[dict] = mapped_column(JSON, default=dict)     # full guidance result
+    checklist: Mapped[list] = mapped_column(JSON, default=list)
+    audit_job_id: Mapped[str | None] = mapped_column(String(32), nullable=True)

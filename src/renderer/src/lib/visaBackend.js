@@ -160,6 +160,15 @@ export function createVisaClient(session) {
     resolveIntake: (id) => call('POST', `/intake/${id}/resolve`, session, {}),
     // Kimi-primary immediate route guidance (AI-generated; cached per route).
     routeGuidance: (id) => call('POST', `/intake/${id}/guidance`, session, {}),
+    // Passport upload at intake Step 1: the existing OCR/MRZ pipeline extracts
+    // a deterministic profile the applicant confirms before it prefills answers.
+    uploadIntakePassport: (id, doc) => call('POST', `/intake/${id}/passport`, session, doc),
+    getIntakePassport: (id) => call('GET', `/intake/${id}/passport`, session),
+    // The primary continuation after guidance: creates/reuses the case, saves
+    // the guidance + route checklist to it, and carries documents over.
+    continueIntake: (id) => call('POST', `/intake/${id}/continue`, session, {}),
+    // Route journey state saved on the case (guidance, checklist, audit status).
+    caseChecklist: (id) => call('GET', `/cases/${id}/checklist`, session),
     routeEvidence: (resolutionId) => call('GET', `/snapshot/route-evidence/${resolutionId}`, session),
 
     // On-demand route research (auto-started by resolve when a route is
