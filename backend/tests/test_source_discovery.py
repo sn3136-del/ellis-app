@@ -16,6 +16,12 @@ from app.visa_snapshot.fetching import FetchResult
 from app.visa_snapshot.models import VisaRoute
 from app.visa_snapshot.routekey import RouteInput, normalize_route, route_key
 
+# Un-researched destinations no other test module caches (the shared session DB
+# is populated by snapshot-importing tests) — so research genuinely runs instead
+# of short-circuiting at CHECK_STORED_POLICY on a stored/verified route.
+DEST_OK = "BR"     # Brazil — route completes via discovery in this test
+DEST_NONE = "PE"   # Peru — "finds nothing" honesty test
+
 GOV_URL = "https://www.evisa.gov.kh/info"      # .gov.kh — government suffix
 GOV_ROOT = "https://www.evisa.gov.kh/"
 BLOG_URL = "https://travelblog.example/cambodia"
@@ -142,16 +148,25 @@ def _fake_extractor(system, user):
     }, "conflicts": [], "summary": "eVisa required."}
 
 
+def _ri_dest(dest):
+    return RouteInput(passport_nationality="SGP", passport_issuing_country="SG",
+                      travel_document_type="ordinary_passport",
+                      lawful_country_of_residence="SG", destination_country=dest,
+                      visa_category="evisa_tourist", policy_period="2026-10-01")
+
+
 def test_on_demand_job_completes_via_route_aware_discovery(db):
     """The failing case shape: NO set_search_provider, only a Kimi proposer.
     Discovery must find the official source via the route-aware call and the job
     must complete with a verified, cached route."""
+    ri = _ri_dest(DEST_OK)
+    answers = dict(ROUTE_ANSWERS, destination_country=DEST_OK)
     source_discovery.set_proposer(lambda q: [GOV_URL, BLOG_URL])
     fetching.set_fetcher(_fake_fetch_ok)
     kimi_research.set_extractor(_fake_extractor)
     job = ondemand.create_job(db, org_id="org-sd", user_id="u1",
-                              answers=ROUTE_ANSWERS, normalized=normalize_route(_ri()),
-                              key=route_key(_ri()))
+                              answers=answers, normalized=normalize_route(ri),
+                              key=route_key(ri))
     job = ondemand.run_job(db, job.id)
     assert job.status == "complete", (job.status, job.error, job.progress[-4:])
     assert job.result["resolution"]["readiness_status"] != "NOT_READY"
@@ -169,11 +184,8 @@ def test_discovery_finds_nothing_stays_honest(db):
     """A proposer that returns only a non-government blog: no verified evidence,
     job ends research_incomplete honestly — never fabricated. Uses a distinct,
     un-cached destination so no stored policy short-circuits the research."""
-    ri = RouteInput(passport_nationality="SGP", passport_issuing_country="SG",
-                    travel_document_type="ordinary_passport",
-                    lawful_country_of_residence="SG", destination_country="LA",
-                    visa_category="evisa_tourist", policy_period="2026-10-01")
-    answers = dict(ROUTE_ANSWERS, destination_country="LA")
+    ri = _ri_dest(DEST_NONE)
+    answers = dict(ROUTE_ANSWERS, destination_country=DEST_NONE)
     source_discovery.set_proposer(lambda q: [BLOG_URL])
     fetching.set_fetcher(_fake_fetch_ok)
     kimi_research.set_extractor(_fake_extractor)
