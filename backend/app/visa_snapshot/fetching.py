@@ -85,6 +85,13 @@ def _default_fetch(url: str, *, timeout_seconds: float = 20.0) -> FetchResult:
 
 _FETCHER = None
 
+# Optional render fallback for JS-rendered official portals (e.g. inm.gob.mx
+# serves an empty shell to a plain GET). callable(url, timeout_seconds=...) ->
+# FetchResult. Registered by the real Browserbase renderer when configured;
+# injectable in tests. Absent -> a failed/empty plain fetch stays an honest
+# failure (never fabricated around).
+_RENDER_FETCHER = None
+
 
 def set_fetcher(fn) -> None:
     """Inject callable(url, timeout_seconds=...) -> FetchResult (tests). None resets."""
@@ -92,10 +99,44 @@ def set_fetcher(fn) -> None:
     _FETCHER = fn
 
 
+def set_render_fetcher(fn) -> None:
+    """Inject a JS-render fallback fetcher (Browserbase-backed in prod, fake in
+    tests). callable(url, timeout_seconds=...) -> FetchResult. None resets."""
+    global _RENDER_FETCHER
+    _RENDER_FETCHER = fn
+
+
+def _render_fetcher():
+    """The render fallback to use: an injected one wins; otherwise the real
+    Browserbase renderer when it is configured + available; otherwise None."""
+    if _RENDER_FETCHER is not None:
+        return _RENDER_FETCHER
+    try:
+        from .render_fetch import default_render_fetcher
+        return default_render_fetcher()
+    except Exception:  # noqa: BLE001 - render fallback is best-effort, never required
+        return None
+
+
 def fetch(url: str, *, timeout_seconds: float = 20.0) -> FetchResult:
     if _FETCHER is not None:
         return _FETCHER(url, timeout_seconds=timeout_seconds)
-    return _default_fetch(url, timeout_seconds=timeout_seconds)
+    res = _default_fetch(url, timeout_seconds=timeout_seconds)
+    # A blocked or JS-empty official page (200 but no extractable text, or a
+    # transport error) gets ONE render attempt when a renderer is available. The
+    # rendered result is verified/grounded downstream exactly like a plain fetch.
+    if not res.ok:
+        rf = _render_fetcher()
+        if rf is not None:
+            try:
+                rendered = rf(url, timeout_seconds=timeout_seconds)
+            except Exception as e:  # noqa: BLE001 - honest failure, never fabricated
+                return res if res.error else FetchResult(
+                    requested_url=url, ok=False, retrieved_at=_now(),
+                    error=f"render fallback failed: {str(e)[:200]}")
+            if rendered.ok:
+                return rendered
+    return res
 
 
 # --- Search provider (query -> candidate URLs). Never fabricates: candidates
@@ -117,6 +158,16 @@ class SearchUnavailable(Exception):
 def search(query: str) -> list[str]:
     if _SEARCH is not None:
         return list(_SEARCH(query) or [])
+    # No injected provider: fall back to the real, controlled discovery provider
+    # (Kimi K3 proposes candidate official URLs; they are verified + grounded
+    # downstream). Only active in real runtime modes with a configured Kimi key.
+    try:
+        from .source_discovery import default_search_provider
+        prov = default_search_provider()
+    except Exception:  # noqa: BLE001 - discovery must never crash research
+        prov = None
+    if prov is not None:
+        return list(prov(query) or [])
     raise SearchUnavailable(
         "no external search provider configured — discovery uses stored "
         "sources/portals only (honest; nothing is fabricated)")

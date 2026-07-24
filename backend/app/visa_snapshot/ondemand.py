@@ -214,14 +214,28 @@ def run_job(db, job_id: str) -> OnDemandRouteResearchJob:
                                   if s.get("final_url")]
                     except json.JSONDecodeError:
                         _note(job, stage, "prior research file unparseable — ignored")
-                # 3) external search provider when configured (honest when not).
+                # 3) automatic discovery. Prefer ONE route-aware Kimi call (official
+                # sources are a property of the route, not the query phrasing);
+                # fall back to the per-query search() seam for injected providers
+                # (tests) or when route-aware discovery is unavailable.
                 queries_used = 0
+                route_cands = None
                 try:
-                    for q in _search_queries(job.route)[: (job.limits or {}).get("max_queries", 10)]:
-                        cands += search(q)
-                        queries_used += 1
-                except SearchUnavailable as e:
-                    _note(job, stage, str(e))
+                    from .source_discovery import discover_candidates_for_route
+                    route_cands = discover_candidates_for_route(job.route)
+                except Exception as e:  # noqa: BLE001 - discovery never crashes research
+                    _note(job, stage, f"route discovery error: {str(e)[:120]}")
+                if route_cands is not None:
+                    cands += route_cands
+                    queries_used = 1
+                    _note(job, stage, f"route-aware discovery proposed {len(route_cands)} candidates")
+                else:
+                    try:
+                        for q in _search_queries(job.route)[: (job.limits or {}).get("max_queries", 10)]:
+                            cands += search(q)
+                            queries_used += 1
+                    except SearchUnavailable as e:
+                        _note(job, stage, str(e))
                 state["queries_used"] = queries_used
                 # dedupe, keep order
                 seen, ordered = set(), []
