@@ -2,22 +2,36 @@
 
 Layer 1 static  → STATIC_VALIDATED       (static_validator, no execution)
 Layer 3 contract→ CONTRACT_TESTED        (flow vs recorded sanitized structures)
-Layer 2 synthetic→ SYNTHETIC_TESTED      (full drive of synthetic portals with
-                                          simulated applicant handoffs and a
-                                          side-effect ledger audit)
+Layer 2 behavioral, one of:
+  SYNTHETIC_TESTED       (mock/test modes: full drive of synthetic portals with
+                          simulated applicant handoffs + side-effect ledger audit)
+  LIVE_STRUCTURAL_TESTED (real modes: safe REVERSIBLE public navigation of the
+                          flow's own pages through the credential-free live
+                          observer — every navigation target must resolve on an
+                          allowed hostname and every selector an interactive node
+                          touches must exist in the freshly observed structure.
+                          No login, no fill, no click, no side effects.)
 
-Live layers (public navigation, authenticated, official sandbox, controlled
-production) are NOT run here — they require authorized real access and are
-recorded only when actually executed. Nothing in this module can claim them.
+The behavioral layer is mode-aware because SyntheticPortal may never be
+instantiated in real runtime modes (local_real_services/staging/production):
+`run_behavioral_layer` picks the corpus in mock-allowed modes and the live
+structural layer otherwise. Authenticated/sandboxed/production live layers are
+still NOT run here — they require authorized real access and are recorded only
+when actually executed. Nothing in this module can claim them.
 """
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from sqlalchemy import select
 
-from ..portal.synthetic import SyntheticPortal
+from ..config import settings
 from . import models as fm
 from .compiler import compile_flow
 from .static_validator import validate_candidate
+
+if TYPE_CHECKING:  # SyntheticPortal is imported lazily — never in real modes.
+    from ..portal.synthetic import SyntheticPortal
 
 
 def _record(db, version_row, layer, classification, passed, summary) -> fm.AdapterTestRun:
@@ -121,6 +135,13 @@ def run_synthetic_layer(db, version_row, *, scenarios=None,
     """§26 Layer 2: the synthetic corpus. A scenario passes only when the flow
     terminates safely AND the ledger shows no duplicate side effects AND no
     misleading banner was believed."""
+    # Lazy import + hard mode gate: the synthetic corpus exists ONLY where mock
+    # portals are allowed. Real modes use run_live_structural_layer instead.
+    if not settings().mock_portal_allowed:
+        raise RuntimeError(
+            "SyntheticPortal may not be instantiated in a real runtime mode — "
+            "use run_live_structural_layer for the behavioral layer")
+    from ..portal.synthetic import SyntheticPortal
     scenarios = scenarios or DEFAULT_SYNTHETIC_SCENARIOS
     per_scenario = {}
     all_ok = True
@@ -159,6 +180,79 @@ def run_synthetic_layer(db, version_row, *, scenarios=None,
                                       content=detail))
     db.commit()
     return run
+
+
+# Interactive actions whose selectors must exist in freshly observed structure.
+_INTERACTIVE_ACTIONS = ("CLICK", "FILL_NON_SENSITIVE", "SELECT", "CHECK",
+                        "READ_TEXT", "READ_FEE")
+
+
+def run_live_structural_layer(db, version_row, observer) -> fm.AdapterTestRun:
+    """Behavioral layer for REAL modes: safe, reversible, credential-free
+    verification of the generated flow against the LIVE portal.
+
+    Re-observes every NAVIGATE target through the live observer (public
+    navigation only — the observer never authenticates, fills, or clicks) and
+    verifies (a) each target resolves OK on an allowed hostname, and (b) every
+    selector an interactive node touches exists in the freshly observed,
+    sanitized live structure. Nothing here creates an account, submits, books,
+    or pays; a challenged/unreachable page is an honest failure, never bypassed."""
+    from .recon import sanitize_structure
+    if observer is None:
+        return _record(db, version_row, "live_structural", "LIVE_STRUCTURAL_FAILED",
+                       False, {"error": "no live observer available"})
+    try:
+        compiled = compile_flow(version_row)
+    except Exception as e:  # noqa: BLE001
+        return _record(db, version_row, "live_structural", "LIVE_STRUCTURAL_FAILED",
+                       False, {"error": str(e)[:300]})
+    problems: list[str] = []
+    observed_selectors: set[str] = set()
+    pages_observed = 0
+    visited: dict[str, bool] = {}
+    for node in compiled.nodes.values():
+        if node.get("action") != "NAVIGATE":
+            continue
+        for url in node.get("allowed_url_patterns") or []:
+            if url in visited:
+                continue
+            obs = observer(url)
+            ok = bool(obs and obs.get("ok"))
+            visited[url] = ok
+            if not ok:
+                err = (obs or {}).get("error") or f"status {(obs or {}).get('status')}"
+                problems.append(f"{node['node_id']}: {url} not observable ({err})")
+                continue
+            pages_observed += 1
+            art = sanitize_structure(obs)   # same chokepoint as recon (§14)
+            for el in art.get("elements", []):
+                observed_selectors.add(el.get("selector"))
+    for node in compiled.nodes.values():
+        sel = node.get("selector")
+        if sel and node.get("action") in _INTERACTIVE_ACTIONS \
+                and sel not in observed_selectors:
+            problems.append(f"{node['node_id']}: selector {sel!r} not present in "
+                            f"live structure")
+    passed = not problems and pages_observed > 0
+    if pages_observed == 0 and not problems:
+        problems.append("flow contains no observable navigation target")
+        passed = False
+    return _record(db, version_row, "live_structural",
+                   "LIVE_STRUCTURAL_TESTED" if passed else "LIVE_STRUCTURAL_FAILED",
+                   passed, {"pages_observed": pages_observed,
+                            "selectors_live": len(observed_selectors),
+                            "problems": problems[:10]})
+
+
+def run_behavioral_layer(db, version_row, *, observer=None,
+                         hostname: str = "portal.gov.example") -> fm.AdapterTestRun:
+    """Mode-aware behavioral layer: synthetic corpus where mock portals are
+    allowed (tests/demo), live structural verification in real modes. This is
+    the single dispatch point build_workflow and repair use, so no code path
+    can instantiate SyntheticPortal in local_real_services/staging/production."""
+    if settings().mock_portal_allowed:
+        return run_synthetic_layer(db, version_row, hostname=hostname)
+    return run_live_structural_layer(db, version_row, observer)
 
 
 def layers_passed(db, version_row) -> set[str]:

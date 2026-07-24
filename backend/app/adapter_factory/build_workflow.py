@@ -11,9 +11,12 @@ no payment, booking, or submission ever happens here (§10).
 """
 from __future__ import annotations
 
+from urllib.parse import urlparse
+
 from sqlalchemy import select
 
 from .. import audit
+from ..config import settings
 from ..visa_snapshot.authority import is_government_host
 from . import models as fm
 from . import recon, specgen, generator, testing, repair
@@ -41,6 +44,25 @@ def set_observer_factory(fn):
     tests/demo; a Browserbase structural probe when live recon lands."""
     global _observer_factory
     _observer_factory = fn
+
+
+def default_observer(hostnames):
+    """Mode-based observer selection — the single source of truth the API and
+    the automatic research->build bridge share:
+    - mock/test modes: SyntheticPortal (never in real modes — fail closed),
+    - real modes: the live credential-free Browserbase+Playwright observer
+      when configured (returns a closable observer owning one session),
+    - otherwise None (the build parks at MANUAL_REVIEW honestly)."""
+    s = settings()
+    if s.mock_portal_allowed:
+        from ..portal.synthetic import SyntheticPortal
+        host = (hostnames or ["portal.gov.example"])[0]
+        return SyntheticPortal(scenario="single_step_login", hostname=host).observe
+    from ..providers import browser as bb
+    if bb.is_configured():
+        from ..portal.live_browser import build_observer_factory
+        return build_observer_factory([h for h in (hostnames or []) if h])
+    return None
 
 
 class BuildError(Exception):
@@ -106,6 +128,34 @@ def run_build(db, request_id: str, *, observer=None, max_stages: int = 40) -> fm
     req.attempts += 1
     db.commit()
 
+    # Lazy observer: created only when a stage needs it (recon / behavioral /
+    # repair), so a resume at a late stage never opens a browser session.
+    # Precedence: explicit observer > injected factory > mode default.
+    _created: dict = {"obs": None, "made": False}
+
+    def _obs():
+        if observer is not None:
+            return observer
+        if not _created["made"]:
+            hosts = (req.portal_evidence or {}).get("hostnames", [])
+            _created["obs"] = ((_observer_factory and _observer_factory(hosts))
+                               or default_observer(hosts))
+            _created["made"] = True
+        return _created["obs"]
+
+    try:
+        return _run_build_stages(db, req, _obs, max_stages)
+    finally:
+        # Close any live session the build itself created (never the caller's).
+        close = getattr(_created["obs"], "close", None)
+        if close:
+            try:
+                close()
+            except Exception:  # noqa: BLE001 - session cleanup is best-effort
+                pass
+
+
+def _run_build_stages(db, req, _obs, max_stages: int) -> fm.AdapterBuildRequest:
     for _ in range(max_stages):
         st = req.state
         try:
@@ -148,15 +198,15 @@ def run_build(db, request_id: str, *, observer=None, max_stages: int = 40) -> fm
             elif st == "RECON_PENDING":
                 transition(req, "RECON_RUNNING")
             elif st == "RECON_RUNNING":
-                obs = observer or (_observer_factory and _observer_factory(
-                    (req.portal_evidence or {}).get("hostnames", [])))
+                obs = _obs()
                 if obs is None:
                     transition(req, "MANUAL_REVIEW_REQUIRED",
                                "no credential-free portal observer available")
                     _review(db, req, "recon_unavailable",
                             "live structural reconnaissance is not yet wired for this portal")
                     break
-                job = recon.run_recon(db, build_request=req, observer=obs)
+                job = recon.run_recon(db, build_request=req, observer=obs,
+                                      start_paths=_recon_paths(req))
                 if job.status != "complete":
                     transition(req, "MANUAL_REVIEW_REQUIRED", f"recon: {job.error[:80]}")
                     _review(db, req, "recon_failed", job.error or "recon failed")
@@ -194,21 +244,27 @@ def run_build(db, request_id: str, *, observer=None, max_stages: int = 40) -> fm
                 transition(req, "SYNTHETIC_TESTING" if run.passed else "TESTS_FAILED",
                            "contract green" if run.passed else "contract failed")
             elif st == "SYNTHETIC_TESTING":
+                # Mode-aware behavioral layer: synthetic corpus in mock/test
+                # modes, reversible LIVE structural verification in real modes
+                # (SyntheticPortal is never instantiated there). The stage name
+                # is kept for state-machine durability across restarts.
                 row = _current_version(db, req)
-                run = testing.run_synthetic_layer(db, row)
+                hosts = (req.portal_evidence or {}).get("hostnames", [])
+                run = testing.run_behavioral_layer(
+                    db, row, observer=_obs(),
+                    hostname=(hosts[0] if hosts else "portal.gov.example"))
                 transition(req, "TESTS_PASSED" if run.passed else "TESTS_FAILED",
-                           "synthetic corpus green" if run.passed else "synthetic failed")
+                           f"behavioral layer {'green' if run.passed else 'failed'} "
+                           f"({run.classification})")
             elif st == "TESTS_FAILED":
                 cand = db.get(fm.AdapterCandidate, req.current_candidate_id)
                 row = _current_version(db, req)
                 failure = _last_failure_detail(db, row)
                 transition(req, "AUTOMATIC_REPAIR")
-                obs = observer or (_observer_factory and _observer_factory(
-                    (req.portal_evidence or {}).get("hostnames", [])))
                 attempt = repair.attempt_repair(
                     db, build_request=req, candidate=cand,
                     failed_version=row.version, sanitized_detail=failure,
-                    observer=obs)
+                    observer=_obs())
                 if attempt.outcome == "repaired":
                     transition(req, "CODE_GENERATED", f"repaired as v{attempt.new_version}")
                     # Version already tested by repair; jump the state machine
@@ -242,19 +298,52 @@ def run_build(db, request_id: str, *, observer=None, max_stages: int = 40) -> fm
     return req
 
 
+_DEFAULT_RECON_PATHS = ("/", "/login", "/application", "/fees",
+                        "/appointments", "/submit")
+
+
+def _recon_paths(req) -> tuple:
+    """Recon start paths: the standard probe set plus the exact path of the
+    officially verified portal URL from route research (so a real portal whose
+    entry page is not "/" is still observed). Hostname checks stay unchanged."""
+    paths = list(_DEFAULT_RECON_PATHS)
+    portal_url = (req.portal_evidence or {}).get("portal_url", "")
+    if portal_url:
+        p = urlparse(portal_url).path
+        if p and p != "/" and p not in paths:
+            paths.append(p)
+    return tuple(paths)
+
+
 def _policy_review(db, req) -> str:
+    """Deterministic automation-policy decision. OBJECTIVE automatic bases:
+    - the synthetic test portal (tests/demo), and
+    - a portal whose every hostname is a verified official government domain
+      (research already grounded it in official sources; the domain check is
+      the same deterministic authority test used for evidence verification).
+    Anything else stays "pending" -> honest manual review. No model output is
+    consulted, so a hostile page can never influence this decision."""
     row = db.execute(select(fm.PortalAutomationPolicyReview).where(
         fm.PortalAutomationPolicyReview.route_key == req.route_key)).scalars().first()
     if row is None:
         hosts = (req.portal_evidence or {}).get("hostnames", [])
         synthetic = (req.portal_evidence or {}).get("verification") == "synthetic_test_portal"
+        all_gov = bool(hosts) and all(is_government_host(h) for h in hosts)
+        if synthetic:
+            decision, basis, reviewer = ("automation_permitted",
+                                         {"synthetic": True},
+                                         "deterministic-default")
+        elif all_gov:
+            decision, basis, reviewer = ("automation_permitted",
+                                         {"synthetic": False,
+                                          "official_government_domains": hosts},
+                                         "deterministic-official-domain-policy")
+        else:
+            decision, basis, reviewer = "pending", {"synthetic": False}, ""
         row = fm.PortalAutomationPolicyReview(
             route_key=req.route_key,
             portal_operator=(req.portal_evidence or {}).get("operator", ""),
-            hostnames=hosts,
-            decision="automation_permitted" if synthetic else "pending",
-            basis={"synthetic": synthetic},
-            reviewed_by="deterministic-default" if synthetic else "")
+            hostnames=hosts, decision=decision, basis=basis, reviewed_by=reviewer)
         db.add(row)
         db.commit()
     return row.decision

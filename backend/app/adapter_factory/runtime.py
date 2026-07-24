@@ -307,3 +307,44 @@ def start_execution(db, *, org_id: str, application_id: str, route_key: str,
     runner = FlowRunner(db, execution=execution, compiled=compiled, driver=driver,
                         case_answers=case_answers, documents=documents)
     return execution, runner
+
+
+def execute_released_route_live(db, *, org_id: str, application_id: str,
+                                route_key: str, tier: str = "sandbox",
+                                case_answers: dict | None = None,
+                                documents: list | None = None) -> dict:
+    """Automatic secure execution of the RELEASED adapter for a route through a
+    live Browserbase session (real modes) — the runner entry the continuous
+    research → build → release chain hands over to.
+
+    All start_execution guards apply unchanged (released binding for the exact
+    route+tier, no quarantine, no kill switch). The driver is the credential-
+    isolated BrowserbasePageDriver on one isolated session; the runner executes
+    the typed flow until completion or the first APPLICANT_HANDOFF (CAPTCHA/
+    OTP/identity/declaration/payment stay personal), and the session is always
+    released. Kimi is never on this path."""
+    from ..portal.live_browser import LiveBrowserSession
+    from .live_driver import BrowserbasePageDriver
+
+    binding = active_binding(db, route_key=route_key, tier=tier)
+    if binding is None:
+        raise RuntimeRefused(
+            f"no released adapter is bound for this exact route at tier {tier!r} — "
+            "execution refused (fail closed)")
+    version_row = db.execute(select(fm.AdapterCandidateVersion).where(
+        fm.AdapterCandidateVersion.candidate_id == binding.candidate_id,
+        fm.AdapterCandidateVersion.version == binding.candidate_version)).scalar_one_or_none()
+    hosts = ((version_row.manifest or {}).get("allowed_hostnames")
+             if version_row else None) or []
+    session = LiveBrowserSession(allowed_hostnames=hosts)
+    try:
+        page = session._ensure_page()
+        driver = BrowserbasePageDriver(page, allowed_hostnames=hosts)
+        execution, runner = start_execution(
+            db, org_id=org_id, application_id=application_id, route_key=route_key,
+            tier=tier, driver=driver, case_answers=case_answers, documents=documents)
+        result = runner.run()
+        return {"execution_id": execution.id, "result": result,
+                "candidate_version": binding.candidate_version, "tier": tier}
+    finally:
+        session.close()

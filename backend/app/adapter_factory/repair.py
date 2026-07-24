@@ -111,11 +111,16 @@ def attempt_repair(db, *, build_request: fm.AdapterBuildRequest,
         repair_of_version=failed_version,
         limitations=[f"repair of v{failed_version}: {failure_class}"])
 
-    # All required layers rerun on the NEW version (§27, §35.42).
+    # All required layers rerun on the NEW version (§27, §35.42). The
+    # behavioral layer is mode-aware: synthetic corpus in mock/test modes,
+    # reversible live structural verification in real modes.
+    hosts = (build_request.portal_evidence or {}).get("hostnames", [])
     static_run = testing.run_static_layer(db, new_row)
     contract_run = testing.run_contract_layer(db, new_row, artifacts)
-    synthetic_run = testing.run_synthetic_layer(db, new_row)
-    ok = static_run.passed and contract_run.passed and synthetic_run.passed
+    behavioral_run = testing.run_behavioral_layer(
+        db, new_row, observer=observer,
+        hostname=(hosts[0] if hosts else "portal.gov.example"))
+    ok = static_run.passed and contract_run.passed and behavioral_run.passed
     attempt.new_version = new_row.version
     attempt.outcome = "repaired" if ok else "stopped"
     if not ok:

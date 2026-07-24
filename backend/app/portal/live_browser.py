@@ -183,8 +183,16 @@ class LiveBrowserSession:
 
 def build_observer_factory(hostnames: list[str]):
     """Return `observer(url) -> observation` backed by ONE live session, for
-    `recon.run_recon` / `build_workflow.run_build`. Real Browserbase only."""
+    `recon.run_recon` / `build_workflow.run_build`. Real Browserbase only.
+    The returned callable carries `.close()` so the caller (run_build's finally
+    block, or the API layer) can release the Browserbase session when done."""
     if not bb.is_configured():
         return None
     session = LiveBrowserSession(allowed_hostnames=hostnames)
-    return session.observe
+
+    def observe(url: str) -> dict:
+        return session.observe(url)
+
+    observe.close = session.close
+    observe.session = session          # runtime reuse: same page drives execution
+    return observe

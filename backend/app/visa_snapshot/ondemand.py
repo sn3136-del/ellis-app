@@ -488,12 +488,24 @@ def _evaluate_adapter_readiness(db, job, state: dict) -> dict:
             visa_type=job.route.get("visa_category", "tourist_visa"),
             portal_evidence=portal_evidence, runtime_mode=settings().runtime_mode,
             standing_authorization_id=sa.id)
+        # Objective jurisdiction evidence from THIS route's grounded research:
+        # the portal was verified on an official government domain for the exact
+        # route (which already encodes consular jurisdiction, default = the
+        # destination's national online portal serving the whole route).
+        jur = state.get("jurisdiction") or {}
+        req.jurisdiction_evidence = {
+            "verified": True, "basis": "route_research_verified_portal",
+            "consular_jurisdiction": (jur.get("value") if isinstance(jur, dict)
+                                      else None) or "default",
+            "portal_url": portal,
+            "sources": (state.get("disposition_sources") or [])[:5]}
+        bdb.commit()
         bw.record_consent(bdb, req, user_id=job.user_id or sa.granted_by,
                           locale=job.requested_language or "en")
-        # Advance as far as the environment allows (a real portal parks at recon
-        # MANUAL_REVIEW without a live observer; synthetic completes + releases).
-        obs = bw._observer_factory(hosts) if bw._observer_factory else None
-        bw.run_build(bdb, req.id, observer=obs)
+        # Advance as far as the environment allows. run_build selects the
+        # mode-appropriate observer itself (synthetic in mock/test modes, live
+        # Browserbase+Playwright in real modes) and closes any session it opens.
+        bw.run_build(bdb, req.id)
         rel = auto_release.evaluate_build(bdb, req.id)
         out.update(auto_build_started=True, build_id=req.id, build_state=req.state,
                    released=bool(rel.released), released_tier=rel.tier,
