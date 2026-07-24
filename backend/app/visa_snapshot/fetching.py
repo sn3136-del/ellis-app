@@ -26,13 +26,27 @@ class FetchResult:
     page_language: str = ""
     retrieved_at: str = ""
     error: str = ""
+    links: list = field(default_factory=list)   # absolute http(s) links on the page
+    challenge: bool = False                      # anti-bot / JS-shell detected
 
 
 _TAG_RE = re.compile(r"<(script|style)[^>]*>.*?</\1>", re.S | re.I)
 _HTML_RE = re.compile(r"<[^>]+>")
 _WS_RE = re.compile(r"[ \t\r\f\v]+")
+_HREF_RE = re.compile(r"""<a\b[^>]*\bhref\s*=\s*["']([^"'#>]+)["']""", re.I)
 
 MAX_TEXT_CHARS = 40_000
+
+# A 200 response whose body is one of these (or is a tiny shell) is an anti-bot
+# / JS-render challenge, NOT the official content — it must route to the render
+# fallback, never be stored as a "source". No challenge is ever bypassed; a real
+# browser (Browserbase) simply renders the same public page.
+_CHALLENGE_RE = re.compile(
+    r"verifying your browser|checking your browser|just a moment|enable javascript|"
+    r"please enable js|radware|perfdrive|incident id|cf-browser-verification|"
+    r"attention required|access denied|请开启 ?javascript|正在验证|人机验证|"
+    r"unsupported browser|ddos|bot ?detection|captcha-delivery", re.I)
+_MIN_REAL_TEXT = 120
 
 
 def html_to_text(html: str) -> str:
@@ -41,6 +55,36 @@ def html_to_text(html: str) -> str:
     text = _WS_RE.sub(" ", text)
     lines = [ln.strip() for ln in text.splitlines()]
     return "\n".join(ln for ln in lines if ln)[:MAX_TEXT_CHARS]
+
+
+def _is_challenge(text: str, status: int | None) -> bool:
+    if status == 200 and len(text.strip()) < _MIN_REAL_TEXT:
+        return True
+    return bool(_CHALLENGE_RE.search(text[:1500]))
+
+
+def extract_links(html: str, base_url: str, *, max_links: int = 80) -> list[str]:
+    """Absolute http(s) links on the page (for bounded internal-link following)."""
+    from urllib.parse import urljoin, urlparse
+    out, seen = [], set()
+    for m in _HREF_RE.finditer(html or ""):
+        raw = m.group(1).strip()
+        if not raw or raw.lower().startswith(("javascript:", "mailto:", "tel:")):
+            continue
+        try:
+            u = urljoin(base_url, raw)
+        except Exception:  # noqa: BLE001
+            continue
+        if urlparse(u).scheme not in ("http", "https"):
+            continue
+        u = u.split("#")[0]
+        if u in seen:
+            continue
+        seen.add(u)
+        out.append(u)
+        if len(out) >= max_links:
+            break
+    return out
 
 
 def _now() -> str:
@@ -63,21 +107,30 @@ def _detect_lang(text: str) -> str:
 
 def _default_fetch(url: str, *, timeout_seconds: float = 20.0) -> FetchResult:
     import httpx
+    # A browser-like UA reduces spurious anti-bot challenges on official sites;
+    # a genuine challenge is still detected and routed to the render fallback.
+    ua = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+          "(KHTML, like Gecko) Chrome/125.0 Safari/537.36 "
+          "EllisVisaResearch/1.0 (+official-source verification)")
     chain: list[str] = []
     try:
         with httpx.Client(follow_redirects=True, timeout=timeout_seconds,
-                          headers={"User-Agent": "EllisVisaResearch/1.0 (+official-source verification)"}) as c:
+                          headers={"User-Agent": ua, "Accept-Language": "en,zh;q=0.8,es;q=0.7"}) as c:
             r = c.get(url)
         chain = [str(h.url) for h in r.history] + ([str(r.url)] if r.history else [])
         text = html_to_text(r.text or "")
+        challenge = _is_challenge(text, r.status_code)
         return FetchResult(
-            requested_url=url, ok=r.status_code == 200 and bool(text),
+            requested_url=url, ok=r.status_code == 200 and bool(text) and not challenge,
             final_url=str(r.url), redirect_chain=chain,
             final_hostname=(r.url.host or "").lower(), http_status=r.status_code,
             content_text=text,
             content_hash=hashlib.sha256((r.text or "").encode("utf-8", "ignore")).hexdigest(),
             page_language=_detect_lang(text), retrieved_at=_now(),
-            error="" if r.status_code == 200 else f"http {r.status_code}")
+            links=extract_links(r.text or "", str(r.url)),
+            challenge=challenge,
+            error=("anti-bot/JS challenge shell" if challenge
+                   else "" if r.status_code == 200 else f"http {r.status_code}"))
     except Exception as e:  # noqa: BLE001 - recorded honestly, never guessed around
         return FetchResult(requested_url=url, ok=False, redirect_chain=chain,
                            retrieved_at=_now(), error=str(e)[:300])

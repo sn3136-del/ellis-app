@@ -1,0 +1,21 @@
+{
+  "_comment": "Curated OFFICIAL source URLs per destination — deep requirement pages an applicant must use, discovered via real official-source research. These are HINTS of where to look: the on-demand research pipeline independently RE-FETCHES each one (real HTTP + Browserbase render fallback) and grounds every field in the actual page text via Kimi + the deterministic ResearchEvidenceValidator. Nothing here is trusted as a claim; only the fetched page content is evidence. Government domains only.",
+  "CHN": [
+    "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/",
+    "https://us.china-embassy.gov.cn/eng/lsfw/zj/notice/202312/t20231230_11215436.htm",
+    "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/202509/t20250920_11712385.htm",
+    "https://newyork.china-consulate.gov.cn/eng/lsfw/Visa/cjwd/202505/t20250522_11630648.htm",
+    "https://losangeles.china-consulate.gov.cn/eng/visa/chinavisa/202509/t20250920_11712348.htm",
+    "https://sanfrancisco.china-consulate.gov.cn/eng/lsfw/lszj/notice/202408/t20240822_11477665.htm",
+    "https://cova.mfa.gov.cn/",
+    "https://en.nia.gov.cn/"
+  ],
+  "MEX": [
+    "https://www.inm.gob.mx/gobmx/word/index.php/paises-no-requieren-visa-para-mexico/",
+    "https://www.sectur.gob.mx/guia-de-viaje/visa/",
+    "https://consulmex.sre.gob.mx/washington/index.php/ligavisos/15-informacion/182-visas-english",
+    "https://www.inm.gob.mx/gobmx/word/index.php/paises-requieren-visa-para-mexico/",
+    "https://www.gob.mx/inm/acciones-y-programas/forma-migratoria-multiple-fmm",
+    "https://www.inm.gob.mx/fmme/publico/en/solicitud.html"
+  ]
+}

@@ -253,7 +253,10 @@ def test_no_global_fleet_behavior():
 
 def test_date_honesty_for_late_research(db, monkeypatch):
     fetching.set_fetcher(_fake_fetch_ok)
-    fetching.set_search_provider(lambda q: [GOV_URL])
+    # Jurisdiction-consistent official source for Laos (.gov.la) so the
+    # evidence validator accepts the disposition (this test is about date
+    # honesty, not jurisdiction).
+    fetching.set_search_provider(lambda q: ["https://www.evisa.gov.la/info"])
     kimi_research.set_extractor(_fake_extractor_good)
     answers = dict(ROUTE_ANSWERS, destination_country="LA")   # Laos
     norm = dict(_normalized(), destination_country="LAO")

@@ -74,6 +74,30 @@ def is_government_host(host: str) -> bool:
     return any(host == s or host.endswith("." + s) for s in GOV_SUFFIXES)
 
 
+def registrable_domain(host: str) -> str:
+    """Best-effort registrable domain (one label above the effective TLD). For a
+    government host the effective TLD is the matched GOV_SUFFIX (e.g. gov.cn,
+    gob.mx), so us.china-embassy.gov.cn -> china-embassy.gov.cn and
+    www.inm.gob.mx -> inm.gob.mx. Used to keep internal-link following on the
+    same official site."""
+    host = (host or "").lower().strip(".")
+    if not host:
+        return ""
+    # Longest matching gov suffix wins (gov.cn beats a bare 'cn').
+    suffix = ""
+    for s in sorted(GOV_SUFFIXES, key=len, reverse=True):
+        if host == s or host.endswith("." + s):
+            suffix = s
+            break
+    if suffix:
+        if host == suffix:
+            return host
+        label = host[: -(len(suffix) + 1)].rsplit(".", 1)[-1]
+        return f"{label}.{suffix}" if label else host
+    parts = host.split(".")
+    return ".".join(parts[-2:]) if len(parts) >= 2 else host
+
+
 def classify_evidence(evidence: dict) -> str:
     """Return the verification status for one evidence record:
     'verified' (official domain), 'verified_via_official_link' handled by the

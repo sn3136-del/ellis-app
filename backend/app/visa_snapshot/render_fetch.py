@@ -73,13 +73,17 @@ def browserbase_render_fetch(url: str, *, timeout_seconds: float = 20.0) -> Fetc
                 browser.close()
         text = html_to_text(html or "")
         host = (final_url.split("/")[2] if "//" in final_url else "").lower()
+        from .fetching import _is_challenge, extract_links
+        challenge = _is_challenge(text, status)
         return FetchResult(
-            requested_url=url, ok=bool(text), final_url=final_url,
+            requested_url=url, ok=bool(text) and not challenge, final_url=final_url,
             redirect_chain=[final_url] if final_url != url else [],
             final_hostname=host, http_status=status, content_text=text,
             content_hash=hashlib.sha256((html or "").encode("utf-8", "ignore")).hexdigest(),
             page_language=_detect_lang(text), retrieved_at=_now(),
-            error="" if text else "render produced no extractable text")
+            links=extract_links(html or "", final_url), challenge=challenge,
+            error=("anti-bot/JS challenge shell after render" if challenge
+                   else "" if text else "render produced no extractable text"))
     except Exception as e:  # noqa: BLE001 - honest failure
         return FetchResult(requested_url=url, ok=False, retrieved_at=_now(),
                            error=f"render fallback error: {str(e)[:200]}")

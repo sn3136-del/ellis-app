@@ -22,9 +22,21 @@ from app.visa_snapshot.routekey import RouteInput, normalize_route, route_key
 DEST_OK = "BR"     # Brazil — route completes via discovery in this test
 DEST_NONE = "PE"   # Peru — "finds nothing" honesty test
 
-GOV_URL = "https://www.evisa.gov.kh/info"      # .gov.kh — government suffix
-GOV_ROOT = "https://www.evisa.gov.kh/"
-BLOG_URL = "https://travelblog.example/cambodia"
+# Jurisdiction-consistent official host per test destination (the disposition
+# source must belong to the destination's government — evidence_validator now
+# enforces this). Each suffix is a real gov suffix not owned by another mapped
+# country, so it jurisdiction-matches its (un-mapped) destination.
+_GOV_HOST = {"BR": "evisa.gov.br", "BN": "evisa.gov.bn", "BH": "evisa.gov.bh",
+             "PE": "evisa.gov.br"}
+
+
+def _gov_url(dest, path="/info"):
+    return f"https://www.{_GOV_HOST[dest]}{path}"
+
+
+GOV_URL = _gov_url("BR")
+GOV_ROOT = _gov_url("BR", "/")
+BLOG_URL = "https://travelblog.example/somewhere"
 
 ROUTE_ANSWERS = {
     "passport_nationality": "SGP", "passport_issuing_country": "SG",

@@ -50,8 +50,40 @@ DISPOSITIONS = ("VISA_FREE", "ETA_REQUIRED", "EVISA_REQUIRED", "VISA_ON_ARRIVAL"
                 "EMBASSY_VISA_REQUIRED", "AUTHORIZED_VISA_CENTER_REQUIRED",
                 "TRANSIT_AUTHORIZATION_REQUIRED", "NOT_APPLICABLE")
 
-DEFAULT_LIMITS = {"max_seconds": 300, "max_queries": 10, "max_pages": 12,
-                  "per_source_timeout": 20, "max_kimi_retries": 2}
+DEFAULT_LIMITS = {"max_seconds": 300, "max_queries": 10, "max_pages": 16,
+                  "per_source_timeout": 20, "max_kimi_retries": 2,
+                  "max_deep_links": 10}
+
+# Paths/anchors that indicate a DEEP visa-requirement page (multilingual:
+# English, Simplified Chinese pinyin/字, Spanish). Used to follow internal links
+# from official landing pages into the pages that actually state requirements.
+import re as _re  # noqa: E402
+_VISA_LINK_RE = _re.compile(
+    r"visa|visas|tourist|touris|qianzheng|qzyw|qz/|/qz|签证|旅游|"
+    r"consular|lingshi|领事|requirement|require|apply|application|fee|fees|"
+    r"document|photo|appointment|biometric|fingerprint|interview|"
+    r"fmm|fmme|forma[-_ ]?migratoria|tramite|trámite|requisito|estancia|"
+    r"no[-_ ]?visa|paises|países|sin[-_ ]?visa|turismo|turista|migratori", _re.I)
+
+
+def _visa_relevant_links(fr, *, limit: int = 8) -> list[str]:
+    """Same-registrable-domain official links on a landing page whose URL matches
+    a visa-requirement keyword — the deep pages worth following."""
+    from .authority import hostname, is_government_host, registrable_domain
+    base_reg = registrable_domain(fr.final_hostname)
+    out: list[str] = []
+    for u in (fr.links or []):
+        h = hostname(u)
+        if not is_government_host(h):
+            continue
+        if registrable_domain(h) != base_reg:
+            continue
+        if not _VISA_LINK_RE.search(u):
+            continue
+        out.append(u)
+        if len(out) >= limit:
+            break
+    return out
 
 
 def _now() -> str:
@@ -197,6 +229,17 @@ def run_job(db, job_id: str) -> OnDemandRouteResearchJob:
 
             elif stage == "DISCOVER_OFFICIAL_SOURCES":
                 cands: list[str] = []
+                # 0) curated OFFICIAL deep-source hints for this destination
+                # (government domains only). Fetched + independently grounded like
+                # any other candidate — hints steer WHERE to look, never WHAT to say.
+                try:
+                    from .source_discovery import official_source_seeds
+                    seeds = official_source_seeds(dest)
+                    if seeds:
+                        cands += seeds
+                        _note(job, stage, f"{len(seeds)} curated official seed(s)")
+                except Exception as e:  # noqa: BLE001 - seeds optional
+                    _note(job, stage, f"seed load error: {str(e)[:100]}")
                 # 1) verified stored evidence + portals for THIS destination only.
                 for e in db.execute(select(SourceEvidence).where(
                         SourceEvidence.applicable_jurisdiction == dest,
@@ -257,12 +300,13 @@ def run_job(db, job_id: str) -> OnDemandRouteResearchJob:
                 job.stage = "FETCH_SOURCE_CONTENT"
 
             elif stage == "FETCH_SOURCE_CONTENT":
+                from .authority import hostname as _host
                 limits = job.limits or DEFAULT_LIMITS
                 pages, failures = [], []
-                for url in state.get("fetch_order", [])[: limits.get("max_pages", 12)]:
-                    if _budget_exceeded(job, t0):
-                        break
-                    fr = fetch(url, timeout_seconds=limits.get("per_source_timeout", 20))
+                seen_urls: set[str] = set()
+                deep_queue: list[str] = []
+
+                def _record(fr, source="discovered"):
                     if fr.ok:
                         pages.append({"id": f"s{len(pages)+1}", "url": fr.final_url,
                                       "hostname": fr.final_hostname, "text": fr.content_text,
@@ -270,13 +314,36 @@ def run_job(db, job_id: str) -> OnDemandRouteResearchJob:
                                       "content_hash": fr.content_hash,
                                       "page_language": fr.page_language,
                                       "retrieved_at": fr.retrieved_at})
+                        # Queue visa-relevant internal links from official pages so
+                        # research reaches DEEP requirement pages, not just homepages.
+                        if is_government_host(fr.final_hostname):
+                            for lk in _visa_relevant_links(fr, limit=8):
+                                if lk not in seen_urls:
+                                    deep_queue.append(lk)
                     else:
-                        # §11: preserve the attempt + failure; never guess around it.
-                        failures.append({"url": url, "error": fr.error,
+                        failures.append({"url": fr.requested_url, "error": fr.error,
+                                         "challenge": bool(getattr(fr, "challenge", False)),
                                          "at": fr.retrieved_at})
+
+                for url in state.get("fetch_order", [])[: limits.get("max_pages", 12)]:
+                    if _budget_exceeded(job, t0) or url in seen_urls:
+                        continue
+                    seen_urls.add(url)
+                    _record(fetch(url, timeout_seconds=limits.get("per_source_timeout", 20)))
+                # One bounded round of internal-link following into deep pages.
+                deep_budget = limits.get("max_deep_links", 10)
+                for url in deep_queue[:deep_budget]:
+                    if _budget_exceeded(job, t0) or url in seen_urls:
+                        continue
+                    seen_urls.add(url)
+                    _record(fetch(url, timeout_seconds=limits.get("per_source_timeout", 20)),
+                            source="internal_link")
                 state["pages"] = pages
                 state["fetch_failures"] = failures
-                _note(job, stage, f"fetched {len(pages)} ok, {len(failures)} failed/blocked")
+                state["deep_links_followed"] = min(len(deep_queue), deep_budget)
+                _note(job, stage, f"fetched {len(pages)} ok "
+                      f"({state['deep_links_followed']} via internal links), "
+                      f"{len(failures)} failed/blocked")
                 job.stage = "KIMI_EXTRACT_AND_TRANSLATE"
 
             elif stage == "KIMI_EXTRACT_AND_TRANSLATE":
@@ -306,14 +373,46 @@ def run_job(db, job_id: str) -> OnDemandRouteResearchJob:
                 job.stage = "NORMALIZE_REQUIREMENTS"
 
             elif stage == "NORMALIZE_REQUIREMENTS":
+                from . import evidence_validator as evv
                 ex = state.get("extraction") or {"fields": {}, "conflicts": []}
                 f = ex["fields"]
+                pages = state.get("pages", [])
                 disp = None
                 vr = f.get("visa_requirement", {}).get("value")
-                if isinstance(vr, str) and vr.strip().upper().replace(" ", "_") in DISPOSITIONS:
-                    disp = vr.strip().upper().replace(" ", "_")
+                if isinstance(vr, str):
+                    norm = vr.strip().upper().replace(" ", "_")
+                    norm = {"VISA_EXEMPT": "VISA_FREE"}.get(norm, norm)
+                    if norm in DISPOSITIONS:
+                        disp = norm
+                disp_sources = f.get("visa_requirement", {}).get("sources", [])
+                # INDEPENDENT validation of Kimi's disposition against page text.
+                verdict = evv.validate_disposition(job.route, disp, disp_sources, pages)
+                if disp and not verdict["ok"]:
+                    _note(job, stage, f"rejected Kimi disposition {disp}: "
+                          f"{'; '.join(verdict['reasons'])[:150]}")
+                    disp = None
+                # If Kimi missed it (or it failed validation), deterministically
+                # detect the disposition from the fetched OFFICIAL page text —
+                # grounded in a real excerpt, never invented.
+                if disp is None:
+                    det = evv.detect_disposition_from_pages(job.route, pages)
+                    if det["conflict"]:
+                        state["material_conflict"] = True
+                        _note(job, stage, "official sources conflict on visa requirement "
+                              f"(attested: {list(det['attested'].keys())})")
+                    elif det["disposition"]:
+                        disp = det["disposition"]
+                        disp_sources = [det["supporting_url"]]
+                        verdict = {"ok": True, "supporting_url": det["supporting_url"],
+                                   "supporting_excerpt": det["supporting_excerpt"], "reasons": []}
+                        _note(job, stage, f"disposition {disp} grounded from official page "
+                              f"{evv.hostname(det['supporting_url'])}")
                 state["disposition"] = disp
-                state["disposition_sources"] = f.get("visa_requirement", {}).get("sources", [])
+                state["disposition_sources"] = disp_sources
+                state["disposition_evidence"] = {
+                    "supporting_url": verdict.get("supporting_url", ""),
+                    "supporting_excerpt": verdict.get("supporting_excerpt", ""),
+                    "validated": bool(disp and verdict.get("ok"))}
                 job.stage = "RESOLVE_CONSULAR_JURISDICTION"
 
             elif stage == "RESOLVE_CONSULAR_JURISDICTION":
@@ -354,7 +453,10 @@ def run_job(db, job_id: str) -> OnDemandRouteResearchJob:
                 conflicts = (state.get("extraction") or {}).get("conflicts", [])
                 state["conflicts"] = conflicts
                 material = [c for c in conflicts if c.get("field") == "visa_requirement"]
-                state["material_conflict"] = bool(material)
+                # Preserve a conflict the deterministic disposition detector
+                # already found in NORMALIZE_REQUIREMENTS (Kimi conflicts are
+                # additive, never authoritative-erasing).
+                state["material_conflict"] = bool(material) or bool(state.get("material_conflict"))
                 job.stage = "CREATE_IMMUTABLE_POLICY_VERSION"
 
             elif stage == "CREATE_IMMUTABLE_POLICY_VERSION":
@@ -539,6 +641,8 @@ def _slim_counters(state: dict) -> dict:
             "fetch_failures": state.get("fetch_failures", [])[:10],
             "gov_candidates": state.get("gov_candidates", 0),
             "disposition": state.get("disposition"),
+            "disposition_evidence": state.get("disposition_evidence", {}),
+            "deep_links_followed": state.get("deep_links_followed", 0),
             "material_conflict": state.get("material_conflict", False),
             "extraction_fields": len(((state.get("extraction") or {}).get("fields", {}))),
             "extraction_rejected": len(((state.get("extraction") or {}).get("rejected", []))),

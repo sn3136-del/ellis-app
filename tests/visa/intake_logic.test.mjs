@@ -330,3 +330,30 @@ test('datesOrdered requires departure strictly after arrival when both set', () 
   assert.equal(datesOrdered('', '2026-09-01'), true, 'incomplete pairs are not an error yet')
   assert.equal(datesOrdered('2026-09-01', ''), true)
 })
+
+// ---------------------------------------------------------------------------
+// applicant UI auto-updates when research completes (poll -> terminal -> result)
+// ---------------------------------------------------------------------------
+
+test('research polling: active statuses keep polling, terminal statuses stop', () => {
+  // While queued/running the wizard keeps polling (non-terminal).
+  for (const s of ['queued', 'running']) {
+    assert.equal(researchTerminal(s), false, `${s} should keep polling`)
+  }
+  // Every outcome the backend can finish on is terminal -> the wizard stops
+  // polling and renders the result automatically (no manual refresh / admin).
+  for (const s of ['complete', 'research_incomplete', 'timed_out', 'conflicted', 'failed']) {
+    assert.equal(researchTerminal(s), true, `${s} should be terminal`)
+  }
+})
+
+test('research completion surfaces an ok result; incomplete/conflict stay honest', () => {
+  const done = researchStatusMeta('complete')
+  assert.equal(done.tone, 'ok')
+  assert.equal(done.i18nKey, 'research.status.complete')
+  // A conflict is never shown as progress or success.
+  assert.equal(researchStatusMeta('conflicted').tone, 'blocked')
+  assert.equal(researchStatusMeta('research_incomplete').tone, 'warn')
+  // Unknown status fails safe to blocked (never a fake success).
+  assert.equal(researchStatusMeta('bogus').tone, 'blocked')
+})

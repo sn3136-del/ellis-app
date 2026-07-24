@@ -147,6 +147,46 @@ def reset_cache() -> None:
     _propose_cached.cache_clear()
 
 
+import json as _json
+from functools import lru_cache as _lru
+from pathlib import Path as _Path
+
+
+@_lru(maxsize=1)
+def _load_seeds() -> dict:
+    """Curated per-destination OFFICIAL source URL hints (deep requirement
+    pages). Read-only reference data; the pipeline independently re-fetches and
+    grounds each URL, so these only steer WHERE to look — never WHAT to claim."""
+    from .registry import SNAPSHOT_DIR
+    # data/reference/official_source_seeds.json (repo-relative, next to snapshots)
+    candidates = [
+        _Path(SNAPSHOT_DIR).parent / "reference" / "official_source_seeds.json",
+        _Path(__file__).resolve().parents[3] / "data" / "reference" / "official_source_seeds.json",
+    ]
+    for p in candidates:
+        try:
+            if p.exists():
+                data = _json.loads(p.read_text(encoding="utf-8"))
+                return {k.upper(): v for k, v in data.items()
+                        if isinstance(v, list) and not k.startswith("_")}
+        except Exception:  # noqa: BLE001 - seeds are optional, never crash research
+            continue
+    return {}
+
+
+def official_source_seeds(destination: str) -> list[str]:
+    """Curated official-source URL hints for a destination (government domains
+    only). Empty when none are curated — discovery then relies on Kimi proposals
+    + internal-link following alone."""
+    from .authority import hostname, is_government_host
+    seeds = _load_seeds().get((destination or "").upper(), [])
+    out = []
+    for u in seeds:
+        if isinstance(u, str) and _URL_RE.match(u.strip()) and is_government_host(hostname(u)):
+            out.append(u.strip())
+    return out
+
+
 def is_available() -> bool:
     """True when a discovery provider should be active: an injected test proposer,
     or a real runtime mode with a configured, enabled Kimi key. Otherwise
