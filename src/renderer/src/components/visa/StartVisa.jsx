@@ -13,7 +13,8 @@ import { SUPPORTED, LANGUAGE_NAMES } from '../../lib/i18n.js'
 import {
   conditionField, missingRequired, readinessMeta, checksSummary,
   validEmail, datesOrdered, RESIDENCE_STATUS_OPTIONS,
-  researchStageMeta, researchTerminal, researchStatusMeta, RESEARCH_STEP_KEYS
+  researchStageMeta, researchTerminal, researchStatusMeta, RESEARCH_STEP_KEYS,
+  guidanceDispositionMeta, guidanceStepMeta, guidanceIsUsable
 } from '../../lib/intake.js'
 import ConnectorBuild from './ConnectorBuild.jsx'
 
@@ -89,6 +90,9 @@ export default function StartVisa({ client }) {
   const [resolveError, setResolveError] = useState(null)
   const [result, setResult] = useState(null)
   const [researchJob, setResearchJob] = useState(null) // {id, status, stage, ...} while researching
+  const [guidance, setGuidance] = useState(null)       // Kimi-primary AI route guidance
+  const [guidanceLoading, setGuidanceLoading] = useState(false)
+  const [guidanceError, setGuidanceError] = useState(null)
 
   const answersRef = useRef(answers)
   answersRef.current = answers
@@ -218,10 +222,25 @@ export default function StartVisa({ client }) {
     try {
       await flushSave()
       const res = await client.resolveIntake(intakeId)
-      if (res.research_job && res.research_job.id) {
-        // The route was missing/incomplete and a focused on-demand research
-        // job was auto-started: show live progress instead of the plain
-        // NOT_READY card. Persist the job id so closing the app can resume.
+      // Kimi-primary: if the route isn't already grounded, get an IMMEDIATE
+      // AI-generated route decision so the applicant never waits for the
+      // official-source audit (which continues in the background).
+      if (res.kimi_guidance) {
+        setGuidance(res.kimi_guidance)      // cached -> instant
+        setResult(res); setPhase('guidance')
+      } else if (res.kimi_guidance_pending) {
+        setResult(res); setPhase('guidance'); setGuidanceLoading(true)
+        try {
+          const g = await client.routeGuidance(intakeId)
+          setGuidance(g)
+        } catch (ge) {
+          setGuidanceError({ message: ge.detail?.reason || ge.message })
+        }
+        setGuidanceLoading(false)
+        // The official-source research job (if any) keeps running as an audit;
+        // record it so its grounded result can supersede guidance later.
+        if (res.research_job && res.research_job.id) storeResearchJobId(intakeId, res.research_job.id)
+      } else if (res.research_job && res.research_job.id) {
         storeResearchJobId(intakeId, res.research_job.id)
         setResearchJob(res.research_job)
         setPhase('research')
@@ -303,6 +322,18 @@ export default function StartVisa({ client }) {
           </div>
           {draft && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 12 }}>{t('start.resume.sub')}</div>}
         </div>
+      </div>
+    )
+  }
+
+  if (phase === 'guidance' && intakeId) {
+    return (
+      <div>
+        {header}
+        <GuidancePanel t={t} guidance={guidance} loading={guidanceLoading}
+          error={guidanceError}
+          onEdit={() => { setPhase('wizard'); setStep(3) }}
+          onNew={startNew} />
       </div>
     )
   }
@@ -644,6 +675,106 @@ const STATUS_NOTE_KEY = {
   APPLICANT_HANDOFF_READY: 'result.handoffHonest',
   LIVE_SANDBOX_READY: 'result.sandboxHonest',
   LIVE_PRODUCTION_READY: 'result.productionHonest'
+}
+
+// Kimi-primary route guidance card: an IMMEDIATE AI-generated route result the
+// applicant sees instead of waiting for the official-source audit. Clearly
+// labeled "AI-generated route guidance"; irreversible actions still carry an
+// explicit confirmation requirement (never a one-click).
+function GuidancePanel({ t, guidance, loading, error, onEdit, onNew }) {
+  if (loading) {
+    return (
+      <div className="card" style={{ padding: 24, textAlign: 'center' }}>
+        <div className="badge badge--ai" style={{ marginBottom: 12 }}>{t('guidance.aiBadge')}</div>
+        <Loading label={t('guidance.loading')} />
+      </div>
+    )
+  }
+  if (error) {
+    return (
+      <div className="card" style={{ padding: 24 }}>
+        <ErrorNote error={{ message: t('guidance.unavailable') }} />
+        <div style={{ marginTop: 12, display: 'flex', gap: 10 }}>
+          <button className="btn btn--ghost btn--sm" onClick={onEdit}>{t('start.editAnswers')}</button>
+          <button className="btn btn--sm" onClick={onNew}>{t('start.resume.new')}</button>
+        </div>
+      </div>
+    )
+  }
+  if (!guidance) return null
+  const g = guidance.guidance || {}
+  const disp = guidanceDispositionMeta(g.disposition)
+  const usable = guidanceIsUsable(guidance)
+  const plan = Array.isArray(guidance.workflow_plan) ? guidance.workflow_plan : []
+  const irreversible = plan.map(guidanceStepMeta).filter((s) => s.requiresConfirmation)
+  const fee = g.government_fee || {}
+  return (
+    <div className="card" style={{ padding: 24 }}>
+      {/* AI-generated indicator — always visible with guidance-driven flow. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+        <span className="badge badge--ai">{t('guidance.aiBadge')}</span>
+        {guidance.cached && <span className="chip chip--sm">{t('guidance.cached')}</span>}
+        {guidance.stale && <span className="chip chip--sm">{t('guidance.refreshing')}</span>}
+      </div>
+      <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 14 }}>
+        {t('guidance.disclaimer')}
+      </div>
+
+      {usable ? (
+        <>
+          <div className={'result__disp result__disp--' + disp.tone} style={{ marginBottom: 8 }}>
+            {t(disp.i18nKey)}
+          </div>
+          <div className="grid grid-2" style={{ gap: 8, marginBottom: 12 }}>
+            {g.visa_category && <GField label={t('guidance.f.category')} value={g.visa_category} />}
+            {g.permitted_stay && <GField label={t('guidance.f.stay')} value={g.permitted_stay} />}
+            {g.passport_validity && <GField label={t('guidance.f.passport')} value={g.passport_validity} />}
+            {g.processing_time && <GField label={t('guidance.f.processing')} value={g.processing_time} />}
+            {(fee.amount != null) && <GField label={t('guidance.f.fee')} value={`${fee.amount} ${fee.currency || ''}`} />}
+            {g.application_channel && <GField label={t('guidance.f.channel')} value={String(g.application_channel).replace(/_/g, ' ')} />}
+          </div>
+          {Array.isArray(g.required_documents) && g.required_documents.length > 0 && (
+            <div style={{ marginBottom: 12 }}>
+              <div className="eyebrow">{t('guidance.f.documents')}</div>
+              <ul style={{ margin: '6px 0 0', paddingLeft: 18 }}>
+                {g.required_documents.map((d, i) => <li key={i} style={{ fontSize: 13.5 }}>{d}</li>)}
+              </ul>
+            </div>
+          )}
+          {/* The safety boundary, shown plainly. */}
+          {irreversible.length > 0 && (
+            <div className="note note--warn" style={{ marginTop: 8 }}>
+              {t('guidance.confirmBoundary')}
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="note note--warn">
+          <div style={{ fontWeight: 600, marginBottom: 6 }}>{t('guidance.uncertainTitle')}</div>
+          {Array.isArray(guidance.missing_fields) && guidance.missing_fields.length > 0 && (
+            <div style={{ fontSize: 13 }}>{t('guidance.uncertainMissing')}: {guidance.missing_fields.join(', ')}</div>
+          )}
+          {Array.isArray(guidance.contradictions) && guidance.contradictions.map((c, i) => (
+            <div key={i} style={{ fontSize: 13 }}>• {c}</div>
+          ))}
+        </div>
+      )}
+
+      <div style={{ marginTop: 16, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        <button className="btn btn--ghost btn--sm" onClick={onEdit}>{t('start.editAnswers')}</button>
+        <button className="btn btn--sm" onClick={onNew}>{t('start.resume.new')}</button>
+      </div>
+    </div>
+  )
+}
+
+function GField({ label, value }) {
+  return (
+    <div>
+      <div className="eyebrow">{label}</div>
+      <div style={{ fontSize: 13.5 }}>{value}</div>
+    </div>
+  )
 }
 
 // Renders from either source: the direct resolve response OR the `resolution`

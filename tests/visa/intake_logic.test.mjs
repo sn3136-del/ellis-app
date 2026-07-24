@@ -5,7 +5,8 @@ import assert from 'node:assert/strict'
 import {
   conditionField, missingRequired, readinessMeta, checksSummary,
   validEmail, datesOrdered,
-  researchStageMeta, researchTerminal, researchStatusMeta, RESEARCH_STEP_KEYS
+  researchStageMeta, researchTerminal, researchStatusMeta, RESEARCH_STEP_KEYS,
+  guidanceDispositionMeta, guidanceStepMeta, guidanceIsUsable
 } from '../../src/renderer/src/lib/intake.js'
 import { STRINGS } from '../../src/renderer/src/lib/i18n.js'
 
@@ -356,4 +357,58 @@ test('research completion surfaces an ok result; incomplete/conflict stay honest
   assert.equal(researchStatusMeta('research_incomplete').tone, 'warn')
   // Unknown status fails safe to blocked (never a fake success).
   assert.equal(researchStatusMeta('bogus').tone, 'blocked')
+})
+
+// ---------------------------------------------------------------------------
+// Kimi-primary route guidance (pure display logic)
+// ---------------------------------------------------------------------------
+
+test('guidanceDispositionMeta maps known dispositions and fails safe', () => {
+  assert.equal(guidanceDispositionMeta('VISA_EXEMPT').tone, 'ok')
+  assert.equal(guidanceDispositionMeta('VISA_REQUIRED').tone, 'info')
+  assert.equal(guidanceDispositionMeta('ELECTRONIC_AUTHORIZATION_REQUIRED').tone, 'info')
+  assert.equal(guidanceDispositionMeta('CONDITIONAL').tone, 'warn')
+  // Unknown/absent disposition is never shown as a confident result.
+  assert.equal(guidanceDispositionMeta('???').tone, 'blocked')
+  assert.equal(guidanceDispositionMeta(undefined).i18nKey, 'guidance.disp.unknown')
+})
+
+test('every guidance i18n key resolves in all locales', () => {
+  const keys = [
+    'guidance.aiBadge', 'guidance.disclaimer', 'guidance.confirmBoundary',
+    'guidance.uncertainTitle', 'guidance.disp.exempt', 'guidance.disp.required',
+    'guidance.disp.eta', 'guidance.disp.conditional', 'guidance.disp.unknown',
+    'guidance.f.category', 'guidance.f.stay', 'guidance.f.fee', 'guidance.cached'
+  ]
+  for (const code of Object.keys(STRINGS)) {
+    for (const k of keys) {
+      assert.ok(STRINGS[code][k] && STRINGS[code][k].length > 0, `${code}:${k} missing`)
+    }
+  }
+})
+
+test('guidanceStepMeta: irreversible steps ALWAYS require confirmation', () => {
+  for (const s of ['account_registration', 'appointment_booking', 'payment',
+                   'final_review_and_signature', 'submission']) {
+    const m = guidanceStepMeta(s)
+    assert.equal(m.reversible, false, `${s} must be irreversible`)
+    assert.equal(m.requiresConfirmation, true, `${s} must require confirmation`)
+  }
+  // Reversible preparation is drivable without a confirmation gate.
+  for (const s of ['collect_documents', 'ocr_and_validate_passport',
+                   'prepare_forms', 'generate_route_adapter', 'appointment_search',
+                   'display_exact_fees', 'track_status']) {
+    const m = guidanceStepMeta(s)
+    assert.equal(m.reversible, true, `${s} should be reversible`)
+    assert.equal(m.requiresConfirmation, false)
+  }
+  // Accepts the object form the backend emits ({step, reversible, ...}).
+  assert.equal(guidanceStepMeta({ step: 'payment' }).requiresConfirmation, true)
+})
+
+test('guidanceIsUsable only for a confident, AI-labeled KIMI_PRIMARY result', () => {
+  assert.equal(guidanceIsUsable({ status: 'KIMI_PRIMARY', ai_generated: true }), true)
+  assert.equal(guidanceIsUsable({ status: 'KIMI_UNCERTAIN', ai_generated: true }), false)
+  assert.equal(guidanceIsUsable({ status: 'KIMI_PRIMARY', ai_generated: false }), false)
+  assert.equal(guidanceIsUsable(null), false)
 })

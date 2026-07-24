@@ -392,3 +392,23 @@ class RouteReadinessEvaluation(Base, TimestampMixin):
     gates: Mapped[dict] = mapped_column(JSON, default=dict)
     evaluated_by: Mapped[str] = mapped_column(String(120), default="system")
     snapshot_date: Mapped[str] = mapped_column(String(10), default="")
+
+
+class KimiRouteGuidanceCache(Base, TimestampMixin):
+    """Cached Kimi-primary route guidance: one immediate structured answer per
+    nationality × residence × destination × purpose × jurisdiction × policy
+    month. Reused instantly for identical routes; refreshed asynchronously when
+    stale (fresh_until passed). AI guidance only — the official-source pipeline
+    remains the asynchronous audit and supersedes it once grounded."""
+    __tablename__ = "kimi_route_guidance_cache"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    cache_key: Mapped[str] = mapped_column(String(200), unique=True, index=True)
+    route: Mapped[dict] = mapped_column(JSON, default=dict)
+    status: Mapped[str] = mapped_column(String(24), default="KIMI_PRIMARY", index=True)
+    # KIMI_PRIMARY | KIMI_UNCERTAIN
+    guidance: Mapped[dict] = mapped_column(JSON, default=dict)
+    missing_fields: Mapped[list] = mapped_column(JSON, default=list)
+    contradictions: Mapped[list] = mapped_column(JSON, default=list)
+    model: Mapped[str] = mapped_column(String(64), default="")
+    generated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    fresh_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

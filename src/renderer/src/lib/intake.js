@@ -266,6 +266,48 @@ export function datesOrdered(arrival, departure) {
   return String(departure) > String(arrival)
 }
 
+// ---------------------------------------------------------------------------
+// Kimi-primary route guidance (pure display helpers).
+
+// Disposition -> tone + i18n label. Unknown fails safe to 'blocked' (never
+// presented as a confident result).
+const GUIDANCE_DISPOSITION = {
+  VISA_EXEMPT: { tone: 'ok', i18nKey: 'guidance.disp.exempt' },
+  VISA_REQUIRED: { tone: 'info', i18nKey: 'guidance.disp.required' },
+  ELECTRONIC_AUTHORIZATION_REQUIRED: { tone: 'info', i18nKey: 'guidance.disp.eta' },
+  CONDITIONAL: { tone: 'warn', i18nKey: 'guidance.disp.conditional' }
+}
+
+export function guidanceDispositionMeta(disposition) {
+  return GUIDANCE_DISPOSITION[disposition] ||
+    { tone: 'blocked', i18nKey: 'guidance.disp.unknown' }
+}
+
+// A workflow step the AI guidance may drive. Irreversible steps ALWAYS carry
+// requiresConfirmation, regardless of what the model said, so the UI can never
+// present a one-click irreversible action.
+const IRREVERSIBLE_STEPS = new Set([
+  'account_registration', 'appointment_booking', 'payment',
+  'final_review_and_signature', 'submission'
+])
+
+export function guidanceStepMeta(step) {
+  const reversible = !IRREVERSIBLE_STEPS.has(step && step.step ? step.step : step)
+  const id = (step && step.step) || step
+  return {
+    id,
+    reversible,
+    requiresConfirmation: !reversible,
+    i18nKey: `guidance.step.${id}`
+  }
+}
+
+// True only for a usable, applicant-facing AI result. KIMI_UNCERTAIN and unknown
+// statuses are shown honestly (gaps surfaced), never as a confident answer.
+export function guidanceIsUsable(g) {
+  return !!g && g.status === 'KIMI_PRIMARY' && g.ai_generated === true
+}
+
 export const RESIDENCE_STATUS_OPTIONS = [
   'citizen', 'permanent_resident', 'temporary_resident', 'student', 'worker',
   'refugee_status_holder', 'asylum_seeker', 'stateless_resident', 'visitor', 'other'

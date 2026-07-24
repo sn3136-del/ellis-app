@@ -158,6 +158,8 @@ export function createVisaClient(session) {
     getIntake: (id) => call('GET', `/intake/${id}`, session),
     updateIntake: (id, body) => call('PUT', `/intake/${id}`, session, body),
     resolveIntake: (id) => call('POST', `/intake/${id}/resolve`, session, {}),
+    // Kimi-primary immediate route guidance (AI-generated; cached per route).
+    routeGuidance: (id) => call('POST', `/intake/${id}/guidance`, session, {}),
     routeEvidence: (resolutionId) => call('GET', `/snapshot/route-evidence/${resolutionId}`, session),
 
     // On-demand route research (auto-started by resolve when a route is

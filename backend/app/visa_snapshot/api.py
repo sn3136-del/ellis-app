@@ -185,10 +185,94 @@ def resolve_intake(intake_id: str, background: BackgroundTasks,
             db, org_id=p.org_id, user_id=p.user_id, intake_id=r.id, case_id=r.case_id,
             answers=r.answers, normalized=norm, key=result["route_key"],
             language=r.preferred_language or "en")
-        result["research_job"] = {"id": job.id, "status": job.status, "stage": job.stage}
+        # The official-source job is the asynchronous AUDIT — it never blocks
+        # the applicant; Kimi-primary guidance (below) drives the flow now.
+        result["research_job"] = {"id": job.id, "status": job.status, "stage": job.stage,
+                                  "role": "async_official_source_audit"}
         if job.status == "queued":
             background.add_task(_run_research_job_bg, job.id)
+
+    # Kimi-primary immediate guidance: attach instantly when cached; otherwise
+    # the UI calls POST /intake/{id}/guidance (one structured Kimi call).
+    from . import kimi_primary
+    route = _guidance_route(r, checks)
+    try:
+        cached_row = kimi_primary._cached(db, kimi_primary.cache_key(route))
+        if cached_row is not None:
+            g = kimi_primary.get_route_guidance(db, route)
+            result["kimi_guidance"] = g
+            if g.get("stale"):
+                background.add_task(kimi_primary.refresh_stale_async,
+                                    _new_session, route)
+        else:
+            result["kimi_guidance_pending"] = kimi_primary.is_available()
+    except kimi_primary.GuidanceUnavailable:
+        result["kimi_guidance_pending"] = False
     return result
+
+
+def _new_session():
+    from ..db import SessionLocal
+    return SessionLocal()
+
+
+def _guidance_route(r, checks: dict | None = None) -> dict:
+    """Route facts for guidance: intake answers + normalized codes when known."""
+    route = dict(r.answers or {})
+    norm = ((checks or {}).get("normalization", {}) or {}).get("normalized") or {}
+    route.update({k: v for k, v in norm.items() if v})
+    return route
+
+
+@router.post("/intake/{intake_id}/guidance")
+def route_guidance(intake_id: str, background: BackgroundTasks,
+                   db=Depends(get_session), p: Principal = Depends(get_principal)):
+    """Immediate Kimi-primary route guidance (status KIMI_PRIMARY, clearly
+    labeled AI-generated). Cached identical routes return instantly; a new route
+    makes ONE structured Kimi call (with one targeted retry). Never blocks on —
+    or starts — broad research; the official-source audit runs separately."""
+    r = _owned_intake(db, p, intake_id)
+    from . import kimi_primary
+    route = _guidance_route(r)
+    try:
+        g = kimi_primary.get_route_guidance(db, route)
+    except kimi_primary.GuidanceUnavailable as e:
+        raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
+                                         "reason": str(e)})
+    if g.get("stale"):
+        background.add_task(kimi_primary.refresh_stale_async, _new_session, route)
+    # Guidance-driven adapter generation (authorized bridge; reversible build +
+    # normal validation/auto-release pipeline) happens in the background.
+    if r.case_id and (g.get("guidance") or {}).get("official_portal_url") \
+            and g["status"] == kimi_primary.STATUS_PRIMARY:
+        from .routekey import RouteInput, route_key as _rk
+        try:
+            key = _rk(RouteInput(
+                passport_nationality=route.get("passport_nationality", ""),
+                passport_issuing_country=route.get("passport_issuing_country", ""),
+                travel_document_type=route.get("travel_document_type", "ordinary_passport"),
+                lawful_country_of_residence=route.get("lawful_country_of_residence", ""),
+                destination_country=route.get("destination_country", ""),
+                visa_category=route.get("visa_category", "tourist_visa"),
+                policy_period=route.get("arrival_date")))
+            background.add_task(_guidance_build_bg, p.org_id, p.user_id, r.case_id,
+                                route, key, g["guidance"])
+            g["adapter_build"] = "scheduled"
+        except Exception:  # noqa: BLE001 - build scheduling is best-effort
+            pass
+    g["intake_id"] = r.id
+    return g
+
+
+def _guidance_build_bg(org_id, user_id, case_id, route, key, guidance):  # pragma: no cover - thin wrapper
+    from . import kimi_primary
+    db = _new_session()
+    try:
+        kimi_primary.maybe_start_adapter_build(
+            db, org_id=org_id, user_id=user_id, case_id=case_id,
+            route=route, route_key=key, guidance=guidance)
+    finally:
+        db.close()
 
 
 def _run_research_job_bg(job_id: str) -> None:  # pragma: no cover - thin wrapper
