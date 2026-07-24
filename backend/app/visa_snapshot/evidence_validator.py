@@ -40,7 +40,9 @@ _DISPOSITION_SUPPORT = {
     "VISA_REQUIRED": (
         r"visa (is |are )?required|must (obtain|apply for|hold) (a )?visa|"
         r"need(s|ed)? (a |an )?visa|apply for a( tourist| l| chinese)? visa|"
-        r"tourist \(l\) visa|\bl visa\b|签证|需要办理签证|需申请签证|应当申请签证|"
+        r"tourist \(l[- ]?visa\)|tourist \(l\) visa|\bl[- ]visa\b|"
+        r"documents? required for( a| the)? (tourist )?visa|"
+        r"签证|需要办理签证|需申请签证|应当申请签证|办理.{0,4}签证|"
         r"requiere (una )?visa|necesita(n)? (una )?visa|debe(n)? tramitar (una )?visa",
         # Negations (English/Spanish/Chinese) that flip a "visa" mention to
         # visa-free — must NOT be read as a requirement.
@@ -55,14 +57,20 @@ _DISPOSITION_SUPPORT = {
         r"without a visa|visa exemption|visa[- ]exempt|免签|无需签证|免办签证|"
         r"no (se )?requiere(n)? (de )?visa|sin (necesidad de )?visa|exent[ao]s? de visa|"
         r"no necesita(n)? visa|not require a visa|may enter.*without a visa",
-        r"must (obtain|apply for) a visa|visa is required|需要签证|requiere visa",
+        # NOT tourism-relevant visa-free: transit-only exemptions (e.g. China's
+        # visa-free transit) do not make a TOURIST route visa-free.
+        r"must (obtain|apply for) a visa|visa is required|需要签证|requiere visa|"
+        r"transit|过境|tr[aá]nsito",
     ),
     "EVISA_REQUIRED": (
         # Must be an e-VISA specifically — never a mere "electronic form" (e.g.
         # Mexico's electronic FMM entry permit is NOT an e-visa).
         r"\be-?visa\b|electronic visa|电子签证|visa electr[oó]nica",
+        # ...and never a mention of a DIFFERENT region's e-visa (e.g. a Hong
+        # Kong / Macao e-visa headline on a mainland-China page).
         r"visa[- ]free|no visa (is )?required|do(es)? not (require|need) a visa|免签|"
-        r"no (se )?requiere(n)? visa|no necesita(n)? visa",
+        r"no (se )?requiere(n)? visa|no necesita(n)? visa|"
+        r"hong kong|macao|macau|香港|澳门|澳門",
     ),
     "ETA_REQUIRED": (
         r"electronic travel authoriz|\beta\b|电子旅行授权",
@@ -281,10 +289,17 @@ def detect_disposition_from_pages(route: dict, pages: list[dict]) -> dict:
         if not source_is_official(url) or not jurisdiction_matches(url, dest):
             continue
         text = p.get("text", "") or ""
-        for disp in _DISP_SPECIFICITY:
-            if supports_disposition(text, disp, nationality=nat):
-                attested.setdefault(disp, []).append(url)
-                excerpt_for.setdefault(disp, (url, find_supporting_excerpt(text, disp)))
+        # Per-page attestation. A page that attests MULTIPLE contradictory
+        # dispositions (e.g. a headline list mentioning both "e-visa" and
+        # "visa-free") is NOISE — it is skipped, never allowed to ground or to
+        # manufacture a conflict. Only a page with one clear disposition counts.
+        page_disps = [d for d in _DISP_SPECIFICITY
+                      if supports_disposition(text, d, nationality=nat)]
+        if len(page_disps) != 1:
+            continue
+        disp = page_disps[0]
+        attested.setdefault(disp, []).append(url)
+        excerpt_for.setdefault(disp, (url, find_supporting_excerpt(text, disp)))
     if not attested:
         return {"disposition": None, "supporting_url": "", "supporting_excerpt": "",
                 "attested": {}, "conflict": False}

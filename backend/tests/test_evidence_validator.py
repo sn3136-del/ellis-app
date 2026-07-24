@@ -233,3 +233,25 @@ def test_conflicting_official_sources_flagged(db):
     job = ondemand.run_job(db, job.id)
     assert job.counters.get("material_conflict") is True
     assert job.status in ("conflicted", "research_incomplete")
+
+
+def test_noisy_headline_page_skipped_and_hong_kong_evisa_ignored():
+    """A dense embassy headline page (mentions Hong Kong 'e-Visa' AND a visa-free
+    arrangement) is NOISE -> skipped; a clean L-visa page grounds the route."""
+    noisy = {"url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/qz2021/",
+             "hostname": "us.china-embassy.gov.cn",
+             "text": ("Embassy of China in the United States. Notices: Hong Kong "
+                      "e-Visa Arrangement. Visa-free transit policy update. "
+                      "Tourist visa application documents simplified.")}
+    clean = {"url": "https://us.china-embassy.gov.cn/eng/notice.htm",
+             "hostname": "us.china-embassy.gov.cn",
+             "text": ("For U.S. citizens: the documents required for the tourist "
+                      "visa (L-Visa) will be simplified. Apply at the Embassy.")}
+    # The noisy page attests >1 disposition -> excluded; clean page grounds it.
+    det = evv.detect_disposition_from_pages(
+        {"destination_country": "CHN", "passport_nationality": "USA"}, [noisy, clean])
+    assert det["disposition"] == "EMBASSY_VISA_REQUIRED"
+    assert not det["conflict"]
+    assert "china-embassy.gov.cn/eng/notice" in det["supporting_url"]
+    # The Hong Kong e-visa mention must NOT ground EVISA for mainland China.
+    assert "EVISA_REQUIRED" not in det["attested"]
