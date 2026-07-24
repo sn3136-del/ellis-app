@@ -307,3 +307,123 @@ def start_execution(db, *, org_id: str, application_id: str, route_key: str,
     runner = FlowRunner(db, execution=execution, compiled=compiled, driver=driver,
                         case_answers=case_answers, documents=documents)
     return execution, runner
+
+
+def _required_capabilities(compiled) -> set:
+    """The irreversible capabilities a compiled flow would exercise, from its
+    handoff kinds and irreversible-node success evidence."""
+    caps: set[str] = set()
+    for n in compiled.nodes.values():
+        if n.get("action") == "APPLICANT_HANDOFF":
+            if n.get("handoff_kind") == "credentials":
+                caps.add("account_registration")
+            if n.get("handoff_kind") == "payment_credentials":
+                caps.add("payment_preparation")
+        if n.get("irreversibility") == "irreversible":
+            for e in (n.get("success_evidence") or []):
+                if e.get("category") == "appointment_booked":
+                    caps.add("appointment_booking")
+                if e.get("category") == "submission_accepted":
+                    caps.add("submission_execution")
+    return caps
+
+
+def _standing_auth_covers(db, application_id: str, action: str) -> bool:
+    from ..authorization import valid as auth_valid
+    row = auth_valid(db, application_id)
+    return bool(row and action in (row.permitted_actions or []))
+
+
+def _submission_preconditions(db, application_id: str) -> tuple[bool, str]:
+    """Submission requires a CURRENT signed final review (material changes
+    invalidate it) and a confirmed exact-amount payment."""
+    from .. import models as app_models, final_review, payments  # noqa: F401
+    app_row = db.get(app_models.VisaApplication, application_id)
+    if app_row is None:
+        return False, "application not found for submission preconditions"
+    try:
+        final_review.check_and_invalidate(db, app_row)   # invalidate on material change
+    except Exception:  # noqa: BLE001
+        pass
+    rv = final_review.latest(db, application_id)
+    if rv is None or not rv.signed or getattr(rv, "invalidated", False):
+        return False, "no current signed final review"
+    rows = db.execute(select(app_models.PaymentAuthorization).where(
+        app_models.PaymentAuthorization.application_id == application_id,
+        app_models.PaymentAuthorization.status.in_(("authorized", "consumed")))).scalars().all()
+    if not rows:
+        return False, "exact-amount payment not confirmed"
+    return True, ""
+
+
+def assert_execution_allowed(db, *, route_key: str, application_id: str, compiled) -> None:
+    """Fail-closed runtime gate for automatic secure execution. For every
+    irreversible capability the flow would exercise, require (a) the capability
+    is auto-released, (b) the case's standing authorization covers its action,
+    and — for submission — a current signed final review + confirmed exact-amount
+    payment. Applicant handoffs (CAPTCHA/OTP/identity/declaration/payment) are
+    enforced by the flow itself. NO administrator is ever consulted."""
+    from . import auto_release
+    required = _required_capabilities(compiled)
+    blockers: list[str] = []
+    for cap in sorted(required):
+        if auto_release.capability_released(db, route_key=route_key, capability=cap) is None:
+            blockers.append(f"capability '{cap}' not released")
+            continue
+        action = auto_release.CAPABILITY_ACTIONS[cap]
+        if not _standing_auth_covers(db, application_id, action):
+            blockers.append(f"standing authorization does not cover '{cap}'")
+        if cap == "submission_execution":
+            ok, why = _submission_preconditions(db, application_id)
+            if not ok:
+                blockers.append(f"submission blocked ({why})")
+    if blockers:
+        raise RuntimeRefused("automatic execution refused: " + "; ".join(blockers))
+
+
+def execute_released_route_live(db, *, org_id: str, application_id: str,
+                                route_key: str, tier: str = "sandbox",
+                                case_answers: dict | None = None,
+                                documents: list | None = None) -> dict:
+    """Automatic secure execution of the RELEASED adapter for a route through a
+    live Browserbase session (real modes) — the runner entry the continuous
+    research → build → release chain hands over to.
+
+    All start_execution guards apply unchanged (released binding for the exact
+    route+tier, no quarantine, no kill switch). The driver is the credential-
+    isolated BrowserbasePageDriver on one isolated session; the runner executes
+    the typed flow until completion or the first APPLICANT_HANDOFF (CAPTCHA/
+    OTP/identity/declaration/payment stay personal), and the session is always
+    released. Kimi is never on this path."""
+    from ..portal.live_browser import LiveBrowserSession
+    from .live_driver import BrowserbasePageDriver
+
+    binding = active_binding(db, route_key=route_key, tier=tier)
+    if binding is None:
+        raise RuntimeRefused(
+            f"no released adapter is bound for this exact route at tier {tier!r} — "
+            "execution refused (fail closed)")
+    version_row = db.execute(select(fm.AdapterCandidateVersion).where(
+        fm.AdapterCandidateVersion.candidate_id == binding.candidate_id,
+        fm.AdapterCandidateVersion.version == binding.candidate_version)).scalar_one_or_none()
+    hosts = ((version_row.manifest or {}).get("allowed_hostnames")
+             if version_row else None) or []
+    # Fail-closed capability + authorization + signature/payment gate BEFORE any
+    # live session is opened. An unreleased capability, an uncovered standing
+    # authorization, or an unsigned/unpaid submission stops here honestly.
+    if version_row is not None:
+        assert_execution_allowed(db, route_key=route_key,
+                                 application_id=application_id,
+                                 compiled=compile_flow(version_row))
+    session = LiveBrowserSession(allowed_hostnames=hosts)
+    try:
+        page = session._ensure_page()
+        driver = BrowserbasePageDriver(page, allowed_hostnames=hosts)
+        execution, runner = start_execution(
+            db, org_id=org_id, application_id=application_id, route_key=route_key,
+            tier=tier, driver=driver, case_answers=case_answers, documents=documents)
+        result = runner.run()
+        return {"execution_id": execution.id, "result": result,
+                "candidate_version": binding.candidate_version, "tier": tier}
+    finally:
+        session.close()

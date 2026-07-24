@@ -47,8 +47,31 @@ function DemoDisabled() {
   )
 }
 
+// Internal/operator surfaces (Adapter Admin, Cases & tools, CapabilityGrid,
+// CountryMatrix, release/quarantine/rollback/kill-switch) are HIDDEN from the
+// ordinary applicant — not deleted. An operator reveals them out-of-band via
+// `#admin` in the URL or a persisted local flag; an applicant never sees them.
+function detectAdminMode() {
+  try {
+    if (typeof window === 'undefined') return false
+    const hash = (window.location.hash || '').toLowerCase()
+    if (hash === '#admin' || hash === '#ops') {
+      try { window.localStorage.setItem('ellis_admin', '1') } catch { /* ignore */ }
+      return true
+    }
+    if (hash === '#applicant') {
+      try { window.localStorage.removeItem('ellis_admin') } catch { /* ignore */ }
+      return false
+    }
+    return window.localStorage.getItem('ellis_admin') === '1'
+  } catch {
+    return false
+  }
+}
+
 function AppInner() {
   const [view, setView] = useState('visa')
+  const [adminMode] = useState(detectAdminMode)
   // Fail-safe default: 'production' until the backend proves otherwise.
   const [runtimeMode, setRuntimeMode] = useState('production')
 
@@ -75,10 +98,11 @@ function AppInner() {
       <div className={'app' + (demoMode ? ' app--banner' : '')}>
         {demoMode && <SimulatedBanner />}
         <div className="shell">
-          <Sidebar view={view} onNav={setView} runtimeMode={runtimeMode} />
+          <Sidebar view={view} onNav={setView} runtimeMode={runtimeMode} adminMode={adminMode} />
           <main className="main">
-            {view === 'visa' && <VisaConsole onNotify={() => {}} />}
-            {view === 'admin' && <AdminConsole />}
+            {view === 'visa' && <VisaConsole onNotify={() => {}} adminMode={adminMode} />}
+            {/* Admin console is operator-only; an applicant can never route here. */}
+            {view === 'admin' && (adminMode ? <AdminConsole /> : <VisaConsole onNotify={() => {}} adminMode={adminMode} />)}
             {view === 'setup' && <SetupWizard />}
             {view === 'settings' && <Settings />}
             {view === 'demo' && (demoMode

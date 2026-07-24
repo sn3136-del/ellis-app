@@ -2,17 +2,22 @@ import { Icon } from './icons.jsx'
 import { wordmarkWhite } from '../assets/logos.js'
 import { useLocale, LanguageToggle } from '../lib/locale.jsx'
 
-const NAV = [
+// The applicant primarily sees "Start your visa". Internal operator surfaces
+// (Adapter Admin) are hidden unless admin mode is explicitly enabled.
+const APPLICANT_NAV = [
   { id: 'visa', key: 'nav.visa', icon: 'globe' },
-  { id: 'admin', key: 'nav.admin', icon: 'shield' },
   { id: 'setup', key: 'nav.setup', icon: 'gear' }
 ]
+const ADMIN_NAV = { id: 'admin', key: 'nav.admin', icon: 'shield' }
 
-export default function Sidebar({ view, onNav, runtimeMode }) {
+export default function Sidebar({ view, onNav, runtimeMode, adminMode }) {
   const { t } = useLocale()
-  const items = runtimeMode === 'local_mock_demo'
-    ? [...NAV, { id: 'demo', key: 'nav.demo', icon: 'cases' }]
-    : NAV
+  let items = adminMode
+    ? [APPLICANT_NAV[0], ADMIN_NAV, APPLICANT_NAV[1]]
+    : APPLICANT_NAV
+  if (runtimeMode === 'local_mock_demo') {
+    items = [...items, { id: 'demo', key: 'nav.demo', icon: 'cases' }]
+  }
 
   return (
     <aside className="sidebar">

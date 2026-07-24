@@ -82,10 +82,13 @@ def test_release_and_binding_are_the_only_execution_gate(db):
 # ---- §35.15-18 production refuses unreleased / mismatch / sandbox-only / synthetic observer ----
 def test_production_observer_refused_outside_mock_modes(db, monkeypatch):
     # The synthetic observer may only stand in for live recon in mock modes.
+    # In a real mode without Browserbase, observer selection yields None (the
+    # build parks at MANUAL_REVIEW honestly) — never a synthetic stand-in.
     from app.config import settings as _settings
+    from app.adapter_factory.build_workflow import default_observer
     real = _settings()
     monkeypatch.setattr(real, "mock_portal_allowed", False, raising=False)
-    obs = factory_api._synthetic_observer([HOST])
+    obs = default_observer([HOST])
     assert obs is None
 
 

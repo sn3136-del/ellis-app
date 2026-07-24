@@ -99,9 +99,9 @@ def test_local_real_services_never_reaches_synthetic_observer(clean_settings):
     simulated portal behavior in the packaged runtime)."""
     _set_mode(mode="local_real_services")
     from app.adapter_factory import api as factory_api
-    assert factory_api._synthetic_observer(["portal.gov.example"]) is None
-    # And a build resumed in this mode with no live observer never fabricates a
-    # portal — _observer_for returns None (or a live one only if BB configured).
+    # A build resumed in this mode with no live observer never fabricates a
+    # portal — observer selection returns None (or a live one only if BB
+    # configured). default_observer is the single source of truth now.
     from app.providers import browser as bb
     if not bb.is_configured():
         assert factory_api._observer_for(["portal.gov.example"]) is None
@@ -116,9 +116,13 @@ def test_production_runtime_cannot_instantiate_synthetic_portal(clean_settings, 
         monkeypatch.setattr(synthetic.SyntheticPortal, "__init__",
                             lambda self, *a, **k: (_ for _ in ()).throw(
                                 AssertionError("SyntheticPortal constructed in real-only mode")))
-        from app.adapter_factory import api as factory_api
-        # The observer selection must not construct a synthetic portal.
-        assert factory_api._synthetic_observer(["h.gov"]) is None
+        from app.adapter_factory.build_workflow import default_observer
+        from app.providers import browser as bb
+        # The observer selection must not construct a synthetic portal (the
+        # monkeypatched __init__ above would raise). Without Browserbase it
+        # fails closed to None.
+        if not bb.is_configured():
+            assert default_observer(["h.gov"]) is None
 
 
 def test_mock_modes_still_work(clean_settings):

@@ -1,0 +1,130 @@
+{
+ "destination": "MEX",
+ "retrieved_at": "2026-07-23T22:08:56+00:00",
+ "research_status": "research_incomplete",
+ "sources": [
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=MEX|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-30|jur=default",
+   "original_url": "https://embamex.sre.gob.mx/eua/index.php/es/",
+   "final_url": "https://embamex.sre.gob.mx/eua/index.php/es/",
+   "redirect_chain": [
+    "https://embamex.sre.gob.mx/eua/",
+    "https://embamex.sre.gob.mx/eua/index.php/es/"
+   ],
+   "final_hostname": "embamex.sre.gob.mx",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Radware Page\nVerifying your browser before proceeding...\nIncident ID:\naf87ab98-duau-4fe7-9a50-e18375d3e527",
+   "retrieved_at": "2026-07-24T04:27:19+00:00",
+   "content_sha256": "cf6280774b0787a7a77581184073b405d466dcf2d0a71b6b3029d1b636733eae",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=MEX|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-30|jur=default",
+   "original_url": "https://embamex.sre.gob.mx/eua/index.php/consulados",
+   "final_url": "https://embamex.sre.gob.mx/eua/index.php/consulados",
+   "redirect_chain": [],
+   "final_hostname": "embamex.sre.gob.mx",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Radware Page\nVerifying your browser before proceeding...\nIncident ID:\nf3db55e0-duau-43bf-9f11-e232f751e176",
+   "retrieved_at": "2026-07-24T04:27:20+00:00",
+   "content_sha256": "9cbf7a225368b466dce4e6b0d1df0a17e4b27e1c7b0a05954c46edae1c973fca",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=MEX|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-30|jur=default",
+   "original_url": "https://www.gob.mx/inm",
+   "final_url": "https://www.gob.mx/inm",
+   "redirect_chain": [],
+   "final_hostname": "www.gob.mx",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Instituto Nacional de Migración | Gobierno | gob.mx\nSaltar al contenido principal\nInterruptor de Navegación\nTrámites\nGobierno\nEnglish\nSitio de Instituto Nacional de Migración\nAa+\nAa-\ncuenta con un\n-->\nInterruptor de Navegación\nBlog\nMultimedia\nPrensa\nAcciones y programas\nDocumentos\nContacto\nProtección de datos personales\nTransparencia\nEste contenido será modificado temporalmente en atención a las disposiciones legales y normativas en materia electoral, con motivo del inicio de periodo de campaña\n-\n-\n.\nEnlaces\nParticipa -->\nDatos\nPublicaciones -->\nPortal de Obligaciones de Transparencia\nPNT\nTransparencia para el Pueblo\nAlerta\nDenuncia\n¿Qué es gob.mx?\nEs el portal único de trámites, información y participación ciudadana. Leer más\nDeclaración de Accesibilidad\n-->\nTérminos y Condiciones\nDenuncia contra servidores públicos\nContacto\nDudas e información\na cam@inami.gob.mx\nSíguenos en",
+   "retrieved_at": "2026-07-24T04:27:20+00:00",
+   "content_sha256": "b721d1cbfecd728fab902dfd452406bc1bee151db1ddc66147dc07366ca7ac54",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=MEX|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-30|jur=default",
+   "original_url": "https://www.inm.gob.mx/gobmx/word/index.php/paises-requieren-visa-para-mexico/",
+   "final_url": "https://www.inm.gob.mx/gobmx/word/index.php/paises-requieren-visa-para-mexico/",
+   "redirect_chain": [],
+   "final_hostname": "www.inm.gob.mx",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Países y regiones que requieren visa para viajar a México | Instituto Nacional de Migracion\nInterruptor de Navegación Trámites Gobierno Participa Búsqueda\nInterruptor de Navegación\nBlog\nMultimedia\nPrensa\nAcciones y Programas\nDocumentos\nContacto\nTransparencia\nProtección de datos personales\nInstituto Nacional de Migración\nPaíses y regiones que requieren visa para viajar a México\nPaíses y regiones que requieren visa para viajar a México\nLas personas nacionales de los siguientes países o regiones bajo cualquier condición de ingreso, deben obtener una visa para viajar a México &nbsp; Condiciones de estancia (artículo 52 de la Ley de Migración): Visitante sin permiso para realizar actividades remuneradas (turismo, negocios, otros). I. Visitante con permiso para realizar actividades remuneradas II. Visitante regional (Aplicable [&hellip;]\nLas personas nacionales de los siguientes países o regiones bajo cualquier condición de ingreso, deben obtener una visa para viajar a México\n&nbsp;\nCondiciones de estancia (artículo 52 de la Ley de Migración):\nVisitante sin permiso para realizar actividades remuneradas (turismo, negocios, otros).\nI. Visitante con permiso para realizar actividades remuneradas\nII. Visitante regional (Aplicable en los estados del Sur)\nIII. Visitante trabajador fronterizo (Aplicable en los estados del Sur)\nIV. Visitante por razones humanitarias\nV. Visitante con fines de adopción\nVI. Residente temporal\nVII. Residente temporal estudiante\nDeberán solicitar en algún consul",
+   "retrieved_at": "2026-07-24T04:27:21+00:00",
+   "content_sha256": "5efb03c8640d48c498af9578ba5e13c598560e3599774a318e6b253a73aa66b8",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=MEX|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-30|jur=default",
+   "original_url": "https://www.inm.gob.mx/gobmx/word/index.php/paises-no-requieren-visa-para-mexico/",
+   "final_url": "https://www.inm.gob.mx/gobmx/word/index.php/paises-no-requieren-visa-para-mexico/",
+   "redirect_chain": [],
+   "final_hostname": "www.inm.gob.mx",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Países y regiones que No requieren visa para viajar a México | Instituto Nacional de Migracion\nInterruptor de Navegación Trámites Gobierno Participa Búsqueda\nInterruptor de Navegación\nBlog\nMultimedia\nPrensa\nAcciones y Programas\nDocumentos\nContacto\nTransparencia\nProtección de datos personales\nInstituto Nacional de Migración\nPaíses y regiones que No requieren visa para viajar a México\nPaíses y regiones que No requieren visa para viajar a México\nLas personas nacionales de los siguientes países o regiones, no requieren visa para viajar a México ni para solicitar su internación como visitante sin permiso para realizar actividades remuneradas (turismo) En el filtro de revisión migratoria, la persona extranjera deberá presentar: 1.- Pasaporte o documento de identidad y viaje vigente que sea válido conforme al [&hellip;]\nLas personas nacionales de los siguientes países o regiones, no requieren visa para viajar a México ni para solicitar su internación como visitante sin permiso para realizar actividades remuneradas (turismo)\nEn el filtro de revisión migratoria, la persona extranjera deberá presentar:\n1.- Pasaporte o documento de identidad y viaje vigente que sea válido conforme al derecho internacional.\n2.- Forma Migratoria Múltiple (FMM) debidamente llenada (únicamente en los ingresos vía terrestre), recuerde que en los aeropuertos internacionales no tiene que presentar, llenar o portar ninguna FMM ya que se generará al ingreso y a través de la intervención de la autoridad migratori",
+   "retrieved_at": "2026-07-24T04:27:22+00:00",
+   "content_sha256": "e3f2871a644821f84f6a26965d83acf900b9efdb7ef9fb59a2a049b37d5c849b",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=MEX|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-30|jur=default",
+   "original_url": "https://www.inm.gob.mx/fmme/publico/en/solicitud.html",
+   "final_url": "https://www.inm.gob.mx/fmme/publico/en/solicitud.html",
+   "redirect_chain": [],
+   "final_hostname": "www.inm.gob.mx",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Instituto Nacional de Migración - Forma Migratoria Múltiple\nInicio\nForma Migratoria M&uacute;ltiple\nMultiple Immigration Form (FMM)\nES\nEN\nJP\nCN\nKO\nBy Land\nGeneral conditions\nThe FMM applicant shall hold a valid and current passport or card passport (Tarjeta Pasaporte) in accordance with the international law regulations; in case the country of citizenship requires it, the passport must have a valid unexpired visa.\nThe applicant is aware that the card passport (Tarjeta Pasaporte) can only be used in the border crossings by land and for visiting the border zone; it might not be used to travel to the territory of the Mexican Republic or used for international air trips.\nThe applicant shall complete the information needed in the request of the FMM, as appears in his/her passport.\nThe applicant accepts under oath, that the information and documents provided are true; therefore, the applicant acknowledges herein that if any false information is provided, he/she could be subject to penalties in accordance with the applicable legal regulation.\nConditions of the Forma Migratoria Múltiple obtained by electronic means\nThe Forma Migratoria Múltiple can be obtained by electronic means through the Institute website, the foreigners, who enter to the country by land, can obtain it through the facilities aimed for the international transit of persons.\nThe applicant agrees that the status condition of stay that he/she shall obtain, by means of the information provided, only be as visitor witho",
+   "retrieved_at": "2026-07-24T04:27:23+00:00",
+   "content_sha256": "1e8b4d7a51f30c585035d4b596fa0408a018b1241e18311f24b843409b03dcdc",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=MEX|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-30|jur=default",
+   "original_url": "https://validate.perfdrive.com/?ssa=2b549fcd-e70b-45d2-9d87-db23a2c9347c&ssb=66852287807&ssc=https%3A%2F%2Fwww.miconsulado.sre.gob.mx%2F&ssi=baf59996-dtri-4db2-903e-fdb8d4fb2ed1&ssk=botmanager_support@radware.com&ssm=22253907398758220131003528850900&ssn=a0bcadf194581d88c748aba024ad8e9e336b294b9394-3847-4a6a-a91e6b&sso=0c6972ea-b633fdf2a1d5b34e461a87a1d2c7ac5c5920dde1df43e3f1&ssp=18046042251784836527178483179241568&ssq=60726156724442813364967243046326542650693&ssr=MTcyLjU2LjE2NC4xMTE=&sst=EllisVisaResearch/1.0%20(+official-source%20verification)&ssu=&ssv=&ssw=&ssx=eyJ1em14IjoiN2Y5MDAwOGQzN2QwNTAtNjk2YS00YWY1LTkwMWMtNTFmNGVmMmVlNDU1MS0xNzg0ODY3MjQzNjc1NTY3LTZlNjU4NTllZGMxMDE3YTYxMyIsIl9fdXptZiI6IjdmOTAwMDI5NGI5Mzk0LTM4NDctNGE2YS1hMmVhLWI2MzNmZGYyYTFkNTEtMTc4NDg2NzI0MzY3NTU2Ny0wMDE2MmQyYTQ2MjNkZDUzMzZlMTMiLCJyZCI6InNyZS5nb2IubXgifQ==",
+   "final_url": "https://validate.perfdrive.com/?ssa=2b549fcd-e70b-45d2-9d87-db23a2c9347c&ssb=66852287807&ssc=https%3A%2F%2Fwww.miconsulado.sre.gob.mx%2F&ssi=baf59996-dtri-4db2-903e-fdb8d4fb2ed1&ssk=botmanager_support@radware.com&ssm=22253907398758220131003528850900&ssn=a0bcadf194581d88c748aba024ad8e9e336b294b9394-3847-4a6a-a91e6b&sso=0c6972ea-b633fdf2a1d5b34e461a87a1d2c7ac5c5920dde1df43e3f1&ssp=18046042251784836527178483179241568&ssq=60726156724442813364967243046326542650693&ssr=MTcyLjU2LjE2NC4xMTE=&sst=EllisVisaResearch/1.0%20(+official-source%20verification)&ssu=&ssv=&ssw=&ssx=eyJ1em14IjoiN2Y5MDAwOGQzN2QwNTAtNjk2YS00YWY1LTkwMWMtNTFmNGVmMmVlNDU1MS0xNzg0ODY3MjQzNjc1NTY3LTZlNjU4NTllZGMxMDE3YTYxMyIsIl9fdXptZiI6IjdmOTAwMDI5NGI5Mzk0LTM4NDctNGE2YS1hMmVhLWI2MzNmZGYyYTFkNTEtMTc4NDg2NzI0MzY3NTU2Ny0wMDE2MmQyYTQ2MjNkZDUzMzZlMTMiLCJyZCI6InNyZS5nb2IubXgifQ==",
+   "redirect_chain": [
+    "https://miconsulado.sre.gob.mx/",
+    "https://www.miconsulado.sre.gob.mx",
+    "https://validate.perfdrive.com/?ssa=2b549fcd-e70b-45d2-9d87-db23a2c9347c&ssb=66852287807&ssc=https%3A%2F%2Fwww.miconsulado.sre.gob.mx%2F&ssi=baf59996-dtri-4db2-903e-fdb8d4fb2ed1&ssk=botmanager_support@radware.com&ssm=22253907398758220131003528850900&ssn=a0bcadf194581d88c748aba024ad8e9e336b294b9394-3847-4a6a-a91e6b&sso=0c6972ea-b633fdf2a1d5b34e461a87a1d2c7ac5c5920dde1df43e3f1&ssp=18046042251784836527178483179241568&ssq=60726156724442813364967243046326542650693&ssr=MTcyLjU2LjE2NC4xMTE=&sst=EllisVisaResearch/1.0%20(+official-source%20verification)&ssu=&ssv=&ssw=&ssx=eyJ1em14IjoiN2Y5MDAwOGQzN2QwNTAtNjk2YS00YWY1LTkwMWMtNTFmNGVmMmVlNDU1MS0xNzg0ODY3MjQzNjc1NTY3LTZlNjU4NTllZGMxMDE3YTYxMyIsIl9fdXptZiI6IjdmOTAwMDI5NGI5Mzk0LTM4NDctNGE2YS1hMmVhLWI2MzNmZGYyYTFkNTEtMTc4NDg2NzI0MzY3NTU2Ny0wMDE2MmQyYTQ2MjNkZDUzMzZlMTMiLCJyZCI6InNyZS5nb2IubXgifQ=="
+   ],
+   "final_hostname": "validate.perfdrive.com",
+   "source_authority": "non_authoritative",
+   "relevant_excerpt": "Radware Captcha Page\nWe apologize for the inconvenience...\n...but your activity and behavior on this site made us think that you are a bot.\nNote: A number of things could be going on here.\nIf you are attempting to access this site using an anonymous Private/Proxy network, please disable that and try accessing site again.\nDue to previously detected malicious behavior which originated from the network you're using, please request unblock to site.\nIncident ID: baf59996-dtri-4db2-903e-fdb8d4fb2ed1\nPlease solve this CAPTCHA to request unblock to the website\nYou reached this page when trying to access\nhttps://www.miconsulado.sre.gob.mx/ from\n172.56.164.111 on\nJuly 24 2026, 04:27:24 UTC",
+   "retrieved_at": "2026-07-24T04:27:24+00:00",
+   "content_sha256": "1a5dcff6c6f7d6dc19fd933ed971be542d11691d3098b990ee31937e3a0c83b0",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=MEX|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-30|jur=default",
+   "original_url": "https://citas.sre.gob.mx/",
+   "final_url": "https://citas.sre.gob.mx/",
+   "redirect_chain": [],
+   "final_hostname": "citas.sre.gob.mx",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Radware Page\nVerifying your browser before proceeding...\nIncident ID:\n74150708-dsbe-4a1a-88af-2492f5167956",
+   "retrieved_at": "2026-07-24T04:27:24+00:00",
+   "content_sha256": "9d704edbb63bfe7e2cdd71b400f7a39c44575d34ec76e6cc2c35840a100ee882",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=MEX|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-30|jur=default",
+   "original_url": "https://www.gob.mx/sre",
+   "final_url": "https://www.gob.mx/sre",
+   "redirect_chain": [],
+   "final_hostname": "www.gob.mx",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Secretaría de Relaciones Exteriores | Gobierno | gob.mx\nSaltar al contenido principal\nInterruptor de Navegación\nTrámites\nGobierno\nEnglish\nSitio de Secretaría de Relaciones Exteriores\nAa+\nAa-\ncuenta con un\n-->\nInterruptor de Navegación\nContacto\nMultimedia\nPrensa\nGestión diplomática sobre vacunas COVID-19\nAcciones y programas\nProtección de datos personales\nTransparencia\nEste contenido será modificado temporalmente en atención a las disposiciones legales y normativas en materia electoral, con motivo del inicio de periodo de campaña\n-\n-\n.\nEnlaces\nParticipa -->\nDatos\nPublicaciones -->\nPortal de Obligaciones de Transparencia\nPNT\nTransparencia para el Pueblo\nAlerta\nDenuncia\n¿Qué es gob.mx?\nEs el portal único de trámites, información y participación ciudadana. Leer más\nEnglish\nFrançais\nDeclaración de Accesibilidad\n-->\nTérminos y Condiciones\nDenuncia contra servidores públicos\nContacto\nDudas e información\na atencionciudadana@sre.gob.mx\nSíguenos en",
+   "retrieved_at": "2026-07-24T04:27:25+00:00",
+   "content_sha256": "cd4d8015ae5e50b5cfbd62aaa6bb4ce255c6404b58ff3ed0431453275d06a322",
+   "page_language": "en"
+  }
+ ],
+ "dispositions": [],
+ "policies": [],
+ "fees": [],
+ "portals": [],
+ "jurisdictions": [],
+ "unresolved": [
+  "source unavailable: https://travel.state.gov/content/travel/en/international-travel/International-Travel-Country-Information-Pages/Mexico.html (http 403)"
+ ]
+}

@@ -227,6 +227,26 @@ class AdapterRelease(Base, _Stamped):
     revoked_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
+class AdapterCapabilityRelease(Base, _Stamped):
+    """A single capability of a released adapter, auto-released by the
+    deterministic AutoReleasePolicyEngine when that capability's OBJECTIVE
+    evidence gate passes — never by an administrator. Records the evidence that
+    justified it (auditable) and can be revoked by kill switch / quarantine.
+    Exactly one active row per (route_key, capability)."""
+    __tablename__ = "adapter_capability_releases"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    route_key: Mapped[str] = mapped_column(String(400), index=True)
+    capability: Mapped[str] = mapped_column(String(40), index=True)
+    candidate_id: Mapped[str] = mapped_column(String(32), index=True)
+    candidate_version: Mapped[int] = mapped_column(Integer)
+    released_by: Mapped[str] = mapped_column(String(64), default="auto-release-policy-engine")
+    evidence: Mapped[dict] = mapped_column(JSON, default=dict)
+    active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+    revoked_by: Mapped[str] = mapped_column(String(64), default="")
+    revoked_reason: Mapped[str] = mapped_column(String(300), default="")
+    revoked_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
 class AdapterRuntimeBinding(Base, _Stamped):
     """What the deterministic runtime may execute right now, per route+tier.
     Exactly one active binding per (route_key, tier)."""

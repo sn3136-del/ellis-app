@@ -88,13 +88,20 @@ def release(db, *, candidate_id: str, version: int, tier: str, actor: str,
             raise ReleaseRefused("an AI/automated actor may not perform a release")
 
     # Independent evidence gate: static validation + required layers green.
+    # The behavioral layer is mode-dependent evidence: SYNTHETIC_TESTED (the
+    # synthetic corpus, mock/test modes) or LIVE_STRUCTURAL_TESTED (reversible
+    # live verification against the real portal, real modes). Either satisfies
+    # the behavioral requirement; both are deterministic recorded test runs.
     pkg = evidence_package(db, version_row)
     if not pkg["static_validation"]["passed"]:
         raise ReleaseRefused("static validation is not green — release refused")
     passed_layers = {r["classification"] for r in pkg["test_classifications"] if r["passed"]}
-    required = {"STATIC_VALIDATED", "SYNTHETIC_TESTED"} if tier == "sandbox" else \
-        {"STATIC_VALIDATED", "SYNTHETIC_TESTED", "CONTRACT_TESTED"}
+    behavioral = {"SYNTHETIC_TESTED", "LIVE_STRUCTURAL_TESTED"}
+    required = {"STATIC_VALIDATED"} if tier == "sandbox" else \
+        {"STATIC_VALIDATED", "CONTRACT_TESTED"}
     missing = required - passed_layers
+    if not (behavioral & passed_layers):
+        missing.add("SYNTHETIC_TESTED|LIVE_STRUCTURAL_TESTED")
     if missing:
         raise ReleaseRefused(f"missing required passing test layers for {tier}: {sorted(missing)}")
 
@@ -180,6 +187,11 @@ def engage_kill_switch(db, *, candidate_id: str, actor: str, is_admin: bool,
     row.engaged_by = actor
     row.engaged_at = datetime.now(timezone.utc)
     db.commit()
+    # A kill switch also revokes every automatic per-capability release for this
+    # candidate — no released capability survives an engaged kill switch.
+    from . import auto_release
+    auto_release.revoke_capabilities(db, candidate_id=candidate_id,
+                                     reason=f"kill switch: {reason}", actor=actor)
     audit.record(db, org_id="platform", application_id=candidate_id,
                  action="adapter_kill_switch_engaged", detail={"reason": reason[:120]},
                  actor=actor)
@@ -223,6 +235,10 @@ def quarantine(db, *, candidate_id: str, version: int, actor: str, reason: str =
     db.add(fm.AdapterReviewTask(candidate_id=candidate_id, candidate_version=version,
                                 kind="quarantine_review", reason=reason[:400]))
     db.commit()
+    # Quarantine also revokes every automatic per-capability release.
+    from . import auto_release
+    auto_release.revoke_capabilities(db, candidate_id=candidate_id,
+                                     reason=f"quarantine: {reason}", actor=actor)
     audit.record(db, org_id="platform", application_id=candidate_id,
                  action="adapter_version_quarantined",
                  detail={"version": version, "reason": reason[:120]}, actor=actor)

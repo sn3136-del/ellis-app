@@ -18,7 +18,7 @@ function loadCases() {
 }
 function saveCases(list) { try { localStorage.setItem(LS_KEY, JSON.stringify(list)) } catch { /* ignore */ } }
 
-export default function VisaConsole({ profile, onNotify }) {
+export default function VisaConsole({ profile, onNotify, adminMode }) {
   const toast = useToast()
   const { t } = useLocale()
   const [session] = useState(() => newSession({ orgId: profile?.orgId || 'ellis-demo' }))
@@ -75,22 +75,26 @@ export default function VisaConsole({ profile, onNotify }) {
           <ErrorNote error={{ message: 'Cannot reach the Ellis backend at localhost:8000. Start it with `docker compose up` in backend/.' }} />
         )}
 
-        <div className="tabs">
-          <button className={'tab' + (tab === 'start' ? ' is-active' : '')} onClick={() => setTab('start')}>
-            {t('visa.tab.start')}
-          </button>
-          <button className={'tab' + (tab === 'cases' ? ' is-active' : '')} onClick={() => setTab('cases')}>
-            {t('visa.tab.cases')}
-          </button>
-        </div>
+        {/* Internal "Cases & tools" (capability grid, country matrix, session
+            tools) is operator-only. The applicant sees only "Start your visa". */}
+        {adminMode && (
+          <div className="tabs">
+            <button className={'tab' + (tab === 'start' ? ' is-active' : '')} onClick={() => setTab('start')}>
+              {t('visa.tab.start')}
+            </button>
+            <button className={'tab' + (tab === 'cases' ? ' is-active' : '')} onClick={() => setTab('cases')}>
+              {t('visa.tab.cases')}
+            </button>
+          </div>
+        )}
 
-        {tab === 'start' && (
+        {(tab === 'start' || !adminMode) && (
           <div className="tabpanel">
             <StartVisa client={client} />
           </div>
         )}
 
-        {tab === 'cases' && (
+        {adminMode && tab === 'cases' && (
         <div className="grid grid-2" style={{ gap: 20, alignItems: 'start' }}>
           <div>
             <div className="eyebrow">Start a case</div>
