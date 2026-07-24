@@ -255,3 +255,28 @@ def test_noisy_headline_page_skipped_and_hong_kong_evisa_ignored():
     assert "china-embassy.gov.cn/eng/notice" in det["supporting_url"]
     # The Hong Kong e-visa mention must NOT ground EVISA for mainland China.
     assert "EVISA_REQUIRED" not in det["attested"]
+
+
+def test_mission_self_reference_never_anchors():
+    """'Embassy of X in the United States' is the MISSION's location, not the
+    applicant's nationality — a visa-exemption page (about other countries)
+    with only that header must not ground VISA_FREE for a US applicant."""
+    text = ("Visa Exemption Eligibility_Embassy of the People's Republic of "
+            "China in the United States of America. Citizens of France, Germany "
+            "and Italy may enter China visa-free for up to 30 days.")
+    assert not evv.supports_disposition(text, "VISA_FREE", nationality="USA")
+    # With a REAL applicant-nationality statement it does ground.
+    text2 = ("U.S. citizens do not require a visa to enter for tourism.")
+    assert evv.supports_disposition(text2, "VISA_FREE", nationality="USA")
+
+
+def test_chinese_destination_mention_does_not_anchor():
+    """赴美国 ('traveling TO the US') in a nearby headline is a destination
+    mention, not the applicant's nationality — 免签 index links on a dense zh
+    homepage must not ground VISA_FREE for a US passport holder."""
+    text = ("单方面免签政策常见问题解答 FAQs on Visa-free Entry. "
+            "再次提醒赴美国、加拿大、墨西哥观看世界杯足球赛的中国公民注意安全。")
+    assert not evv.supports_disposition(text, "VISA_FREE", nationality="USA")
+    # 美国公民 (US citizens) IS a nationality anchor.
+    text2 = "美国公民来华旅游免签入境。"
+    assert evv.supports_disposition(text2, "VISA_FREE", nationality="USA")

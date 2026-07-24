@@ -83,12 +83,31 @@ def _corpus(pages: list[dict]) -> str:
         f"[{p['id']}] {p['url']} (host {p['hostname']}):\n{p['text'][:8000]}" for p in pages)
 
 
+# Hard wall-clock cap per model sub-call. The HTTP client has its own timeout,
+# but a wedged connection (observed live: a Kimi call stuck ESTABLISHED for
+# 15+ minutes) must never stall research. Injected extractors (tests) are
+# called directly — no thread — so test behavior is unchanged.
+MODEL_CALL_HARD_TIMEOUT = 180.0
+
+
 def _call_model(route: dict, pages: list[dict], *, max_retries: int) -> dict:
     user = json.dumps({"route": route}) + "\n\nSOURCE PAGES:\n" + _corpus(pages)
     last_err = None
     for _ in range(max_retries + 1):
         try:
-            return (_EXTRACTOR or _live_extract)(_SYSTEM, user)
+            if _EXTRACTOR is not None:
+                return _EXTRACTOR(_SYSTEM, user)
+            import concurrent.futures
+            ex = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+            fut = ex.submit(_live_extract, _SYSTEM, user)
+            try:
+                return fut.result(timeout=MODEL_CALL_HARD_TIMEOUT)
+            except concurrent.futures.TimeoutError:
+                last_err = TimeoutError(
+                    f"model call hard-timeout after {MODEL_CALL_HARD_TIMEOUT:.0f}s")
+                continue
+            finally:
+                ex.shutdown(wait=False)
         except KimiUnavailable:
             raise
         except Exception as e:  # noqa: BLE001

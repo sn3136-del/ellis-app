@@ -84,9 +84,12 @@ _DISPOSITION_SUPPORT = {
 # appears near the disposition statement, so a page's rule for OTHER
 # nationalities never grounds this route.
 _NATIONALITY_NAMES = {
+    # Chinese anchors use CITIZEN-forms (美国公民/美国护照/美籍) — a bare 美国 also
+    # matches "赴美国" ("traveling TO the US") in news headlines, which is a
+    # destination mention, not the applicant's nationality.
     "USA": ("united states", "u.s.", "u.s.a", " us ", "us citizen", "us national",
             "u.s. citizen", "american citizen", "americans", "estados unidos",
-            "estadounidense", "美国"),
+            "estadounidense", "美国公民", "美国护照", "美国国民", "美籍"),
     "CHN": ("china", "chinese", "中国"), "MEX": ("mexico", "méxico", "mexican"),
     "GBR": ("united kingdom", "british", "u.k."), "CAN": ("canada", "canadian"),
     "IND": ("india", "indian"), "VNM": ("vietnam", "vietnamese"),
@@ -100,12 +103,26 @@ _UNIVERSAL_MARKERS = (
 )
 
 
+# A diplomatic mission's own name ("Embassy of X in the United States", "驻美国
+# 使馆") states where the MISSION is, not the applicant's nationality — it must
+# never anchor a disposition. Stripped before anchoring.
+_MISSION_SELF_RE = re.compile(
+    r"(embassy|consulate([- ]general)?)[^.\n]{0,100}?in the united states( of america)?|"
+    r"embajada[^.\n]{0,80}?en (los )?estados unidos|驻美国?[使领]馆|驻美使领馆",
+    re.I)
+
+
 def _nationality_anchored(text: str, nationality: str, at: int, *, window: int = 500) -> bool:
     """True when the disposition statement applies to THIS applicant's
     nationality: either the nationality name appears within `window` chars of
     the matched phrase, OR the phrase is in a "list of countries" (universal
     marker) context AND the nationality name appears somewhere on the page (i.e.
-    it is in that list). A generic list header alone never grounds a route."""
+    it is in that list). A generic list header alone never grounds a route, and
+    a mission's self-reference ("Embassy ... in the United States") never counts
+    as a nationality anchor."""
+    # Blank out mission self-references with SAME-LENGTH spaces so `at` (an
+    # offset into the original text) stays aligned.
+    text = _MISSION_SELF_RE.sub(lambda m: " " * len(m.group(0)), text or "")
     low = (text or "").lower()
     lo, hi = max(0, at - window), min(len(low), at + window)
     seg = low[lo:hi]

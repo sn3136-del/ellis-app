@@ -171,18 +171,42 @@ def _render_fetcher():
         return None
 
 
+# Hard wall-clock cap for a single render attempt (Browserbase + Playwright).
+# The renderer already passes timeouts to each step, but a hung session/CDP
+# connect could still block forever; this guarantees the pipeline never stalls.
+RENDER_HARD_TIMEOUT = 45.0
+
+
+def _call_with_hard_timeout(fn, url, timeout_seconds, hard_timeout):
+    """Run fn(url, timeout_seconds=...) but abandon it after hard_timeout wall
+    seconds so a hung network call can never stall research. A timed-out call's
+    thread is left as a daemon (the process exits normally regardless)."""
+    import concurrent.futures
+    ex = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+    fut = ex.submit(lambda: fn(url, timeout_seconds=timeout_seconds))
+    try:
+        return fut.result(timeout=hard_timeout)
+    except concurrent.futures.TimeoutError:
+        return FetchResult(requested_url=url, ok=False, retrieved_at=_now(),
+                           error=f"render fallback hard-timeout after {hard_timeout:.0f}s")
+    finally:
+        ex.shutdown(wait=False)
+
+
 def fetch(url: str, *, timeout_seconds: float = 20.0) -> FetchResult:
     if _FETCHER is not None:
         return _FETCHER(url, timeout_seconds=timeout_seconds)
     res = _default_fetch(url, timeout_seconds=timeout_seconds)
-    # A blocked or JS-empty official page (200 but no extractable text, or a
-    # transport error) gets ONE render attempt when a renderer is available. The
-    # rendered result is verified/grounded downstream exactly like a plain fetch.
+    # A blocked or JS-empty official page (200 but no extractable text, an
+    # anti-bot challenge shell, or a transport error) gets ONE render attempt
+    # when a renderer is available, under a HARD wall-clock cap. The rendered
+    # result is verified/grounded downstream exactly like a plain fetch.
     if not res.ok:
         rf = _render_fetcher()
         if rf is not None:
             try:
-                rendered = rf(url, timeout_seconds=timeout_seconds)
+                rendered = _call_with_hard_timeout(
+                    rf, url, timeout_seconds, RENDER_HARD_TIMEOUT)
             except Exception as e:  # noqa: BLE001 - honest failure, never fabricated
                 return res if res.error else FetchResult(
                     requested_url=url, ok=False, retrieved_at=_now(),
