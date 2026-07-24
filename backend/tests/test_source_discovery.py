@@ -180,6 +180,50 @@ def test_on_demand_job_completes_via_route_aware_discovery(db):
     assert "route-aware discovery proposed" in notes
 
 
+def test_research_auto_triggers_adapter_build_when_authorized(db):
+    """After research verifies a portal-requiring route, the backend AUTOMATICALLY
+    starts the adapter build when the applicant's standing authorization covers
+    portal selection — removing the routine 'click Build connector' break."""
+    from tests.test_e2e import _new_case
+    from app.adapter_factory import models as afm
+    app_id = _new_case(db)  # creates a standing authorization covering portal selection
+    ri = _ri_dest("BN")     # Brunei — un-researched, distinct destination
+    answers = dict(ROUTE_ANSWERS, destination_country="BN")
+    source_discovery.set_proposer(lambda q: [GOV_URL])
+    fetching.set_fetcher(_fake_fetch_ok)
+    kimi_research.set_extractor(_fake_extractor)   # EVISA_REQUIRED + verified gov portal
+    job = ondemand.create_job(db, org_id="org1", user_id="user1", case_id=app_id,
+                              answers=answers, normalized=normalize_route(ri),
+                              key=route_key(ri))
+    job = ondemand.run_job(db, job.id)
+    assert job.status == "complete", (job.status, job.error)
+    ar = job.result["adapter_readiness"]
+    assert ar["adapter_ready"] is True, ar
+    assert ar["auto_build_started"] is True, ar
+    # A consented build request exists for this route, tied to the authorization.
+    req = db.execute(select(afm.AdapterBuildRequest).where(
+        afm.AdapterBuildRequest.route_key == job.route_key)).scalars().first()
+    assert req is not None and req.consent_given is True
+    assert req.standing_authorization_id
+
+
+def test_research_no_autobuild_without_standing_authorization(db):
+    """Adapter-ready but no standing authorization -> NO build is auto-started
+    (honest; the applicant must authorize first)."""
+    ri = _ri_dest("BH")     # Bahrain — un-researched, distinct destination
+    answers = dict(ROUTE_ANSWERS, destination_country="BH")
+    source_discovery.set_proposer(lambda q: [GOV_URL])
+    fetching.set_fetcher(_fake_fetch_ok)
+    kimi_research.set_extractor(_fake_extractor)
+    job = ondemand.create_job(db, org_id="org1", user_id="user1", case_id="no-such-app",
+                              answers=answers, normalized=normalize_route(ri),
+                              key=route_key(ri))
+    job = ondemand.run_job(db, job.id)
+    ar = job.result["adapter_readiness"]
+    assert ar["adapter_ready"] is True
+    assert ar["auto_build_started"] is False
+
+
 def test_discovery_finds_nothing_stays_honest(db):
     """A proposer that returns only a non-government blog: no verified evidence,
     job ends research_incomplete honestly — never fabricated. Uses a distinct,

@@ -391,6 +391,9 @@ def run_job(db, job_id: str) -> OnDemandRouteResearchJob:
                 job.stage = "EVALUATE_ADAPTER_READINESS"
 
             elif stage == "EVALUATE_ADAPTER_READINESS":
+                readiness = _evaluate_adapter_readiness(db, job, state)
+                job.result = dict(job.result or {}, adapter_readiness=readiness)
+                _note(job, stage, readiness.get("note", "adapter readiness evaluated"))
                 job.stage = "RETURN_ROUTE_STATUS"
 
             elif stage == "RETURN_ROUTE_STATUS":
@@ -428,6 +431,80 @@ def run_job(db, job_id: str) -> OnDemandRouteResearchJob:
         job.finished_at = _now()
         db.commit()
         return job
+
+
+# Dispositions whose fulfilment goes through an official online portal / post —
+# i.e. a route that a versioned adapter would operate.
+PORTAL_DISPOSITIONS = ("EVISA_REQUIRED", "ETA_REQUIRED", "EMBASSY_VISA_REQUIRED",
+                       "AUTHORIZED_VISA_CENTER_REQUIRED")
+
+
+def _evaluate_adapter_readiness(db, job, state: dict) -> dict:
+    """Deterministic adapter-readiness signal, and — when the applicant's
+    standing authorization covers portal selection — the AUTOMATIC research->build
+    trigger (removes the routine "applicant must click Build connector" break).
+
+    Fully defensive: this must NEVER fail the research job. Any error, missing
+    case linkage, or missing/insufficient standing authorization simply means no
+    build is auto-started (honest), and research still returns its status."""
+    disp = state.get("disposition")
+    portal = state.get("portal")
+    portal_required = disp in PORTAL_DISPOSITIONS
+    portal_verified = bool(portal)
+    adapter_ready = bool(portal_required and portal_verified
+                         and not state.get("material_conflict"))
+    out = {"disposition": disp, "portal_required": portal_required,
+           "portal_verified": portal_verified, "adapter_ready": adapter_ready,
+           "auto_build_started": False, "note": ""}
+    if not adapter_ready:
+        out["note"] = ("route not adapter-ready (no verified portal-requiring "
+                       "disposition)")
+        return out
+    if not job.case_id:
+        out["note"] = "adapter-ready; no case linked, awaiting applicant authorization"
+        return out
+    # Run the build bridge on a SEPARATE session so a build issue can never taint
+    # the research job's transaction (the research result is authoritative).
+    from ..db import SessionLocal
+    bdb = SessionLocal()
+    try:
+        from ..authorization import valid as auth_valid
+        sa = auth_valid(bdb, job.case_id)
+        if sa is None or "select_official_portal" not in (sa.permitted_actions or []):
+            out["note"] = "adapter-ready; awaiting applicant standing authorization"
+            return out
+        from ..adapter_factory import build_workflow as bw, auto_release
+        from .authority import hostname, is_government_host
+        host = hostname(portal)
+        hosts = [host] if is_government_host(host) else []
+        portal_evidence = {"hostnames": hosts, "operator": "official",
+                           "verification": "official_government_domain",
+                           "portal_url": portal,
+                           "official_source_urls": state.get("disposition_sources", [])}
+        req = bw.create_request(
+            bdb, org_id=job.org_id, user_id=job.user_id or sa.granted_by,
+            application_id=job.case_id, route_key=job.route_key,
+            destination=job.route["destination_country"],
+            visa_type=job.route.get("visa_category", "tourist_visa"),
+            portal_evidence=portal_evidence, runtime_mode=settings().runtime_mode,
+            standing_authorization_id=sa.id)
+        bw.record_consent(bdb, req, user_id=job.user_id or sa.granted_by,
+                          locale=job.requested_language or "en")
+        # Advance as far as the environment allows (a real portal parks at recon
+        # MANUAL_REVIEW without a live observer; synthetic completes + releases).
+        obs = bw._observer_factory(hosts) if bw._observer_factory else None
+        bw.run_build(bdb, req.id, observer=obs)
+        rel = auto_release.evaluate_build(bdb, req.id)
+        out.update(auto_build_started=True, build_id=req.id, build_state=req.state,
+                   released=bool(rel.released), released_tier=rel.tier,
+                   note=f"auto-build started (state {req.state}; "
+                        f"released={rel.released})")
+    except Exception as e:  # noqa: BLE001 - a build issue never fails research
+        bdb.rollback()
+        out["note"] = f"adapter-ready; auto-build deferred ({str(e)[:120]})"
+    finally:
+        bdb.close()
+    return out
 
 
 def _answers_from(job) -> dict:
