@@ -79,11 +79,32 @@ class BrowserbasePageDriver:
             self.page.fill(selector, str(value), timeout=15000)
             return {"ok": True}
         except Exception as e:  # noqa: BLE001
-            return {"ok": False, "code": "NO_SUCH_ELEMENT", "detail": str(e)[:120]}
+            # Readonly picker inputs (e.g. Ant Design date pickers) refuse
+            # fill(); they accept focused keyboard entry. Type, commit with
+            # Enter, then READ BACK the value — success only on exact echo.
+            try:
+                self.page.click(selector, timeout=10000)
+                self.page.keyboard.type(str(value), delay=25)
+                self.page.keyboard.press("Enter")
+                self.page.wait_for_timeout(300)
+                got = self.page.input_value(selector, timeout=5000)
+                # A picker panel can linger after Enter and swallow the next
+                # element's clicks — dismiss it before moving on.
+                self.page.keyboard.press("Escape")
+                if got == str(value):
+                    return {"ok": True, "method": "typed"}
+                return {"ok": False, "code": "VALUE_NOT_ACCEPTED",
+                        "detail": f"portal kept {got!r}"[:120]}
+            except Exception as e2:  # noqa: BLE001
+                return {"ok": False, "code": "NO_SUCH_ELEMENT",
+                        "detail": (str(e) + " | " + str(e2))[:120]}
 
     def click(self, selector: str) -> dict:
         try:
-            self.page.click(selector, timeout=15000)
+            # Text selectors can also match stale HIDDEN elements (e.g. a
+            # dismissed modal's button still in the DOM) — click the first
+            # VISIBLE match so the wait can't hang on an invisible node.
+            self.page.locator(f"{selector} >> visible=true").first.click(timeout=15000)
             return {"ok": True}
         except Exception as e:  # noqa: BLE001
             msg = str(e).lower()
@@ -99,6 +120,121 @@ class BrowserbasePageDriver:
             return {"ok": True, "text": (el.inner_text() or "")[:200]}
         except Exception as e:  # noqa: BLE001
             return {"ok": False, "code": "READ_ERROR", "detail": str(e)[:120]}
+
+    def check(self, selector: str) -> dict:
+        """Real checkbox tick. Refuses anything resembling a sensitive control
+        (final declarations are APPLICANT_HANDOFF nodes, never automated)."""
+        if _SENSITIVE_SELECTOR.search(selector or ""):
+            return {"ok": False, "code": "SENSITIVE_FIELD_AUTOMATION"}
+        try:
+            self.page.check(selector, timeout=15000)
+            return {"ok": True}
+        except Exception as e:  # noqa: BLE001
+            return {"ok": False, "code": "NO_SUCH_ELEMENT", "detail": str(e)[:120]}
+
+    def select_search(self, selector: str, value: str) -> dict:
+        """Search-combobox selection (verified live against Ant Design selects):
+        focus, TYPE the query (combobox inputs refuse fill()), WAIT for the
+        filtered option list (they load asynchronously), pick the exact match,
+        else the first option containing the query. The committed selection is
+        read back from the widget's selection element — an unreadable or
+        mismatched selection fails honestly (never a guess)."""
+        if _SENSITIVE_SELECTOR.search(selector or ""):
+            return {"ok": False, "code": "SENSITIVE_FIELD_AUTOMATION"}
+        want = str(value).strip()
+        try:
+            try:  # dismiss any lingering overlay (e.g. an open date picker)
+                self.page.keyboard.press("Escape")
+                self.page.wait_for_timeout(150)
+            except Exception:  # noqa: BLE001
+                pass
+            self.page.locator(f"{selector} >> visible=true").first.click(timeout=15000)
+            try:  # clear any previous query so filters start clean
+                self.page.keyboard.press("Control+A")
+                self.page.keyboard.press("Delete")
+            except Exception:  # noqa: BLE001
+                pass
+            self.page.keyboard.type(want, delay=25)
+            # Overlay options are often not painted yet, so inner_text() is
+            # empty — read textContent, which is present as soon as the node is.
+            def _label(handle):
+                try:
+                    return (handle.evaluate("el => el.textContent") or "").strip()
+                except Exception:  # noqa: BLE001
+                    return ""
+
+            options = []
+            for _ in range(16):     # up to ~8s for async option lists
+                self.page.wait_for_timeout(500)
+                options = [(o, _label(o))
+                           for o in self.page.query_selector_all('[role="option"]')]
+                options = [(o, t) for o, t in options if t]
+                if options:
+                    break
+            if not options:
+                self.page.keyboard.press("Escape")
+                return {"ok": False, "code": "NO_OPTIONS",
+                        "detail": f"no option matches {want[:40]!r}"}
+            target = chosen_text = None
+            for opt, text in options:
+                if text.lower() == want.lower():
+                    target, chosen_text = opt, text
+                    break
+            if target is None:
+                for opt, text in options:
+                    if want.lower() in text.lower():
+                        target, chosen_text = opt, text
+                        break
+            if target is None:
+                self.page.keyboard.press("Escape")
+                return {"ok": False, "code": "NO_OPTIONS",
+                        "detail": f"{len(options)} options, none match {want[:40]!r}"}
+            # Option rows live in a floating overlay that Playwright's
+            # actionability checks can consider unstable; dispatch the click
+            # directly on the resolved element (same user-visible effect).
+            target.evaluate("el => el.click()")
+            self.page.wait_for_timeout(400)
+            shown = ""
+            try:
+                shown = self.page.eval_on_selector(
+                    selector,
+                    "el => { const w = el.closest('[class*=\"select\"]');"
+                    " const s = w && w.querySelector('[class*=\"selection-item\"]');"
+                    " return s ? s.innerText.trim() : ''; }") or ""
+            except Exception:  # noqa: BLE001
+                shown = ""
+            if shown and not (want.lower() in shown.lower()
+                              or shown.lower() in chosen_text.lower()):
+                return {"ok": False, "code": "VALUE_NOT_ACCEPTED",
+                        "detail": f"portal shows {shown[:60]!r}"}
+            return {"ok": True, "shown": (shown or chosen_text)[:60]}
+        except Exception as e:  # noqa: BLE001
+            return {"ok": False, "code": "NO_SUCH_ELEMENT", "detail": str(e)[:120]}
+
+    def scroll_bottom(self, selector: str = "") -> dict:
+        """Scroll a container (or the window) to its bottom and emit a scroll
+        event — some portals gate their Continue buttons on a full read."""
+        try:
+            if selector:
+                self.page.eval_on_selector_all(
+                    selector,
+                    "els => els.forEach(el => { el.scrollTop = el.scrollHeight;"
+                    " el.dispatchEvent(new Event('scroll', {bubbles: true})); })")
+            else:
+                self.page.evaluate(
+                    "() => window.scrollTo(0, document.body.scrollHeight)")
+            return {"ok": True}
+        except Exception as e:  # noqa: BLE001
+            return {"ok": False, "code": "SCROLL_ERROR", "detail": str(e)[:120]}
+
+    def upload(self, selector: str, path: str) -> dict:
+        """Attach an authorized document to a real file input. The path is a
+        backend-local temp copy of a case document the applicant approved."""
+        try:
+            self.page.set_input_files(selector, path, timeout=30000)
+            return {"ok": True}
+        except Exception as e:  # noqa: BLE001
+            return {"ok": False, "code": "UPLOAD_FAILED", "detail": str(e)[:120]}
 
     def network_events(self) -> list[dict]:
         return list(self._events)

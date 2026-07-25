@@ -18,7 +18,7 @@ from app.visa_snapshot import kimi_primary
 from app.visa_snapshot.models import KimiRouteGuidanceCache
 
 from .test_intake_flow import (H, ANSWERS_SGP, EXEMPT_ANSWER, REQUIRED_ANSWER,
-                               ETA_ANSWER, _passport_text, _two_pass,
+                               ETA_ANSWER, _passport_text, _single_pass,
                                _resolve_with_guidance, _new_intake)
 
 H2 = {"Authorization": "Bearer dev-token", "X-Org-Id": "org-other", "X-User-Id": "u2"}

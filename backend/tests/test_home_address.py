@@ -14,7 +14,7 @@ from app.visa_snapshot.api import INTAKE_FIELDS
 from app.visa_snapshot.models import KimiRouteGuidanceCache
 
 from .test_intake_flow import (H, ANSWERS_SGP, EXEMPT_ANSWER, _passport_text,
-                               _two_pass)
+                               _single_pass)
 
 
 @pytest.fixture()
@@ -64,7 +64,7 @@ def test_resolve_refuses_intake_without_address(client):
 
 
 def test_continue_refuses_intake_without_address(client):
-    kimi_primary.set_provider(_two_pass(EXEMPT_ANSWER))
+    kimi_primary.set_provider(_single_pass(EXEMPT_ANSWER))
     answers = _strip_address(dict(ANSWERS_SGP, destination_country="EST"))
     iid = client.post("/intake", json={"answers": answers}, headers=H).json()["id"]
     client.post(f"/intake/{iid}/passport",
@@ -76,7 +76,7 @@ def test_continue_refuses_intake_without_address(client):
 
 
 def test_international_address_without_region_or_postal_is_valid(client):
-    kimi_primary.set_provider(_two_pass(EXEMPT_ANSWER))
+    kimi_primary.set_provider(_single_pass(EXEMPT_ANSWER))
     answers = dict(_strip_address(dict(ANSWERS_SGP, destination_country="ISL")),
                    address_line1="Plot 5, Airport Road",
                    address_city="Kigali", address_country="RWA")
@@ -89,7 +89,7 @@ def test_international_address_without_region_or_postal_is_valid(client):
 
 
 def test_address_persists_and_transfers_into_the_case(client, db):
-    kimi_primary.set_provider(_two_pass(EXEMPT_ANSWER))
+    kimi_primary.set_provider(_single_pass(EXEMPT_ANSWER))
     answers = dict(ANSWERS_SGP, destination_country="FIN")
     iid = client.post("/intake", json={"answers": answers}, headers=H).json()["id"]
     # Persists across refresh (a fresh GET returns the saved structured fields).
@@ -126,7 +126,7 @@ def test_adapter_vocabulary_and_synthetic_answers_cover_address():
 
 
 def test_address_never_in_audit_logs(client):
-    kimi_primary.set_provider(_two_pass(EXEMPT_ANSWER))
+    kimi_primary.set_provider(_single_pass(EXEMPT_ANSWER))
     answers = dict(ANSWERS_SGP, destination_country="NOR")
     iid = client.post("/intake", json={"answers": answers}, headers=H).json()["id"]
     client.post(f"/intake/{iid}/passport",

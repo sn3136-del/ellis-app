@@ -52,6 +52,9 @@ class PortalAdapter:
     allowed_actions: list = field(default_factory=lambda: ["navigate", "read"])
     prohibited_actions: list = field(default_factory=lambda: list(DEFAULT_PROHIBITED))
     channel: str = ""
+    # Portals like the Vietnam eVisa take personal applications with no account
+    # at all; the workflow then skips registration/login instead of inventing one.
+    account_required: bool = True
 
 
 def validate_adapter(a: PortalAdapter) -> list[str]:

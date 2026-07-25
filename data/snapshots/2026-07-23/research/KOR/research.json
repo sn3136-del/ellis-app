@@ -638,7 +638,31 @@
       "https://overseas.mofa.go.kr/ae-ko/brd/m_20354/view.do?seq=2&page=1"
     ]
   },
-  "jurisdictions": [],
+  "jurisdictions": [
+    {
+      "residence_jurisdiction": "CHN",
+      "residence_subdivisions": ["Shanghai", "Jiangsu", "Zhejiang", "Anhui"],
+      "competent_post_name": "Korea Visa Application Center (KVAC) Shanghai",
+      "competent_post_kind": "authorized_visa_center",
+      "competent_post_url": "https://www.visaforkorea-sh.com/",
+      "operator": "Korea Visa Application Center Shanghai (authorized by the Consulate General of the Republic of Korea in Shanghai)",
+      "official_linking_source": "https://overseas.mofa.go.kr/cn-shanghai-ko/brd/m_534/view.do?seq=1344586",
+      "covers_nationalities": ["CHN"],
+      "conditions": [
+        "Consular district: Shanghai municipality and Jiangsu, Zhejiang and Anhui provinces (residence/hukou based)",
+        "Appointment mandatory since 2026-06-01; book at visaforkorea-sh.com",
+        "Paper application submitted in person; physical passport is submitted",
+        "Fees: RMB 280 visa fee (single-entry short-term visit C-3-9) + RMB 120 service fee",
+        "Processing time approximately 7 working days",
+        "e-form preparation/printing via visa.go.kr (MENU_ID=1020408); status check via visa.go.kr (MENU_ID=10301, no login)"
+      ],
+      "source_urls": [
+        "https://www.visa.go.kr/openPage.do?LANG_TYPE=EN&MENU_ID=1020408",
+        "https://overseas.mofa.go.kr/cn-shanghai-ko/brd/m_534/view.do?seq=1344586",
+        "https://www.mofa.go.kr/www/brd/m_4080/view.do?seq=376381"
+      ]
+    }
+  ],
   "unresolved": [
     "Full current visa-exemption list with per-country stays could not be fetched from a single current official page: the k-eta.go.kr eligibility list is rendered client-side (JavaScript), and MOFA 'wpge' content pages (e.g., overseas.mofa.go.kr/us-newyork-en/wpge/m_23502/contents.do, us-losangeles-en/wpge/m_4397/contents.do, mofa.go.kr/eng visa pages) all failed with redirect loops (>10 redirects). Lists used instead: Embassy in Denmark designated-country list (undated board post) and Sendai consulate waiver-agreement list (dated 2007-01-01) — details for some smaller countries may be outdated.",
     "Full official list of the 22 countries covered by the temporary K-ETA exemption (until 2026-12-31) was not retrievable: the k-eta.go.kr notice page (board/viewboarddetail.do?bbsSn=299707) returned a system error; only USA and Canada are confirmed by name from fetched embassy notices. GBR/DEU/FRA/AUS/JPN/HKG/TWN/SGP coverage is widely reported but marked as 'verify on k-eta.go.kr' in dispositions.",

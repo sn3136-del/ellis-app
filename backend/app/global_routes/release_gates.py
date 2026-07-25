@@ -102,28 +102,55 @@ def evaluate_gates(db, *, build_request, candidate, version, family) -> dict:
          f"runtime mode {mode}")
 
     # 4. Safe read-only navigation succeeded (recon observed real pages).
+    #    A portal that DECLARES an entry gate must additionally have reached
+    #    the gated application form via the declared reversible replay —
+    #    instruction pages alone are not the portal's flow.
     recon_pages = _recon_pages(db, build_request)
-    gate("safe_navigation_succeeded", recon_pages > 0,
-         f"{recon_pages} public page(s) observed credential-free" if recon_pages
-         else "missing: successful read-only navigation of the real portal")
+    entry_gate = _entry_gate_declared(build_request)
+    form_observed = _entry_gated_form_observed(db, build_request)
+    if entry_gate:
+        nav_ok = recon_pages > 0 and form_observed
+        gate("safe_navigation_succeeded", nav_ok,
+             f"{recon_pages} public page(s) observed credential-free; declared "
+             f"entry gate replayed to the application form" if nav_ok else
+             ("missing: entry-gate replay did not reach the application form "
+              "credential-free" if recon_pages else
+              "missing: successful read-only navigation of the real portal"))
+    else:
+        gate("safe_navigation_succeeded", recon_pages > 0,
+             f"{recon_pages} public page(s) observed credential-free" if recon_pages
+             else "missing: successful read-only navigation of the real portal")
 
-    # 5. Required applicant fields mapped — counted from FILL nodes actually
-    #    IN the flow, not from the spec's mapping list (which can contain
-    #    mappings for pages the flow never visits).
-    fill_nodes = sum(1 for n in nodes if n.get("action") == "FILL_NON_SENSITIVE")
+    # 5. Required applicant fields mapped — counted from FILL/SELECT_SEARCH
+    #    nodes actually IN the flow, not from the spec's mapping list (which
+    #    can contain mappings for pages the flow never visits).
+    fill_nodes = sum(1 for n in nodes
+                     if n.get("action") in ("FILL_NON_SENSITIVE", "SELECT_SEARCH"))
     gate("required_fields_mapped", fill_nodes > 0,
-         f"{fill_nodes} grounded fill step(s) in the flow" if fill_nodes else
+         f"{fill_nodes} grounded fill/select step(s) in the flow" if fill_nodes else
          "missing: grounded applicant field mappings wired into the flow "
          "(no form page was mappable from public observation)")
 
     # 6. Selector stability across repeated sessions: the behavioral layer
     #    re-observes every selector in a FRESH session after recon mapped it.
-    behavioral = ("LIVE_STRUCTURAL_TESTED" in layers and layers["LIVE_STRUCTURAL_TESTED"]) or \
-                 ("SYNTHETIC_TESTED" in layers and layers["SYNTHETIC_TESTED"])
-    gate("selectors_verified_repeated_sessions", behavioral,
-         "selectors re-verified in an independent session" if behavioral else
-         "missing: selector re-verification in a second independent session "
-         "(live structural or synthetic behavioral layer)")
+    #    Live evidence must show TWO independent sessions (the recon session
+    #    is never one of them); the synthetic corpus re-drives per scenario.
+    synthetic_ok = "SYNTHETIC_TESTED" in layers and layers["SYNTHETIC_TESTED"]
+    live_ok = "LIVE_STRUCTURAL_TESTED" in layers and layers["LIVE_STRUCTURAL_TESTED"]
+    live_sessions = _live_structural_sessions(db, version.id) if live_ok else 0
+    if synthetic_ok:
+        gate("selectors_verified_repeated_sessions", True,
+             "selectors re-verified across the synthetic behavioral corpus")
+    elif live_ok:
+        gate("selectors_verified_repeated_sessions", live_sessions >= 2,
+             f"selectors verified live in {live_sessions} independent sessions"
+             if live_sessions >= 2 else
+             "missing: live selector re-verification ran in only one session — "
+             "a second independent session is required")
+    else:
+        gate("selectors_verified_repeated_sessions", False,
+             "missing: selector re-verification in a second independent session "
+             "(live structural or synthetic behavioral layer)")
 
     # 7. Account flow mapped where the portal requires an account.
     if family is not None and family.account_required:
@@ -136,12 +163,18 @@ def evaluate_gates(db, *, build_request, candidate, version, family) -> dict:
              "portal requires no account")
 
     # 8. Upload flow mapped where the portal exposes uploads.
-    uploads_observed = _uploads_observed(db, build_request)
+    uploads_observed = _uploads_observed_count(db, build_request)
     if uploads_observed:
-        upload_ok = any(n.get("action") == "UPLOAD_AUTHORIZED_DOCUMENT" for n in nodes) \
-            or bool(version.document_mappings)
+        upload_nodes = [n for n in nodes
+                        if n.get("action") == "UPLOAD_AUTHORIZED_DOCUMENT"]
+        upload_ok = bool(upload_nodes) or bool(version.document_mappings)
+        doc_types = sorted({n.get("doc_type", "") for n in upload_nodes if n.get("doc_type")}
+                           or {d.get("doc_type", "") for d in (version.document_mappings or [])})
         gate("upload_flow_mapped_where_applicable", upload_ok,
-             "document upload mapping present" if upload_ok else
+             f"{len(upload_nodes) or len(version.document_mappings or [])} upload "
+             f"mapping(s) for {uploads_observed} observed file field(s) "
+             f"(doc types: {', '.join(t for t in doc_types if t) or 'passport'})"
+             if upload_ok else
              "missing: document upload mapping for observed portal upload fields")
     else:
         gate("upload_flow_mapped_where_applicable", True,
@@ -153,11 +186,27 @@ def evaluate_gates(db, *, build_request, candidate, version, family) -> dict:
     gate("applicant_confirmation_gates_preserved", conf_ok,
          "no sensitive field is automated" if conf_ok else
          "missing: applicant control of sensitive steps")
-    needed = {k for k in ("captcha", "otp") if k in sensitive_observed}
+    # OBSERVED kinds (public recon) plus DECLARED kinds (curated: e.g. the
+    # Vietnam portal shows its CAPTCHA only at review/submit, which recon
+    # cannot observe credential-free — the declared handoff still guarantees
+    # the applicant completes it personally). Both must be handoff nodes.
+    declared_kinds = {k for k in (entry_gate.get("declared_handoffs") or [])
+                      if k in ("captcha", "otp")}
+    needed = {k for k in ("captcha", "otp") if k in sensitive_observed} | declared_kinds
     missing_handoffs = needed - handoffs
-    gate("captcha_otp_handoffs_preserved", not missing_handoffs,
-         "CAPTCHA/OTP handoffs preserved" if not missing_handoffs else
-         f"missing: applicant handoff node(s) for observed {sorted(missing_handoffs)}")
+    if not missing_handoffs:
+        detail = []
+        for k in sorted(needed):
+            basis = "observed on public pages" if k in sensitive_observed \
+                else "DECLARED (shown at review/submit; not observable credential-free)"
+            detail.append(f"{k} handoff present — {basis}")
+        gate("captcha_otp_handoffs_preserved", True,
+             "; ".join(detail) or "no CAPTCHA/OTP observed or declared")
+    else:
+        gate("captcha_otp_handoffs_preserved", False,
+             f"missing: applicant handoff node(s) for {sorted(missing_handoffs)} "
+             f"(observed: {sorted(sensitive_observed & needed)}, "
+             f"declared: {sorted(declared_kinds)})")
     def _evidence_categories(n) -> set[str]:
         ev = n.get("success_evidence") or []
         if isinstance(ev, dict):
@@ -245,7 +294,28 @@ def _observed_sensitive_kinds(db, build_request) -> set[str]:
     return kinds
 
 
-def _uploads_observed(db, build_request) -> bool:
+def _uploads_observed_count(db, build_request) -> int:
+    job = db.execute(select(fm.AdapterReconJob).where(
+        fm.AdapterReconJob.build_request_id == build_request.id)
+        .order_by(fm.AdapterReconJob.created_at.desc())).scalars().first()
+    if not job:
+        return 0
+    seen: set[str] = set()
+    for art in db.execute(select(fm.AdapterReconArtifact).where(
+            fm.AdapterReconArtifact.recon_job_id == job.id)).scalars():
+        for el in (art.structure or {}).get("elements", []):
+            if (el.get("type") or "").lower() == "file":
+                seen.add(el.get("selector") or el.get("name") or "file")
+    return len(seen)
+
+
+def _entry_gate_declared(build_request) -> dict:
+    return (build_request.portal_evidence or {}).get("entry_gate") or {}
+
+
+def _entry_gated_form_observed(db, build_request) -> bool:
+    """Did the LATEST recon job record the entry-gated application form
+    (content_class set by the declared-entry-gate replay)?"""
     job = db.execute(select(fm.AdapterReconJob).where(
         fm.AdapterReconJob.build_request_id == build_request.id)
         .order_by(fm.AdapterReconJob.created_at.desc())).scalars().first()
@@ -253,10 +323,21 @@ def _uploads_observed(db, build_request) -> bool:
         return False
     for art in db.execute(select(fm.AdapterReconArtifact).where(
             fm.AdapterReconArtifact.recon_job_id == job.id)).scalars():
-        for el in (art.structure or {}).get("elements", []):
-            if (el.get("type") or "").lower() == "file":
-                return True
+        if art.content_class == "application_form" and \
+                (art.structure or {}).get("elements"):
+            return True
     return False
+
+
+def _live_structural_sessions(db, version_id: str) -> int:
+    """Independent live sessions recorded by the LATEST live_structural run."""
+    run = db.execute(select(fm.AdapterTestRun).where(
+        fm.AdapterTestRun.candidate_version_id == version_id,
+        fm.AdapterTestRun.layer == "live_structural")
+        .order_by(fm.AdapterTestRun.created_at.desc())).scalars().first()
+    if run is None:
+        return 0
+    return int((run.summary or {}).get("independent_sessions", 1))
 
 
 def _irreversible_test_evidence(db, candidate) -> int:

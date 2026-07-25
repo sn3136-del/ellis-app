@@ -82,6 +82,15 @@ def generate_candidate_version(db, *, build_request: fm.AdapterBuildRequest,
         "artifact_kind": "typed_flow_v1",
         "runtime": "deterministic_flow_runner",
     }
+    # Declared entry gate (curated, reversible): carried on the manifest so
+    # the live structural test layer can replay it credential-free and the
+    # runtime driver knows how the form is reached.
+    entry_gate = (build_request.portal_evidence or {}).get("entry_gate") or {}
+    if entry_gate:
+        manifest["entry_gate"] = dict(
+            entry_gate,
+            base_url=(build_request.portal_evidence or {}).get("portal_url")
+            or (f"https://{spec.allowed_hostnames[0]}/" if spec.allowed_hostnames else ""))
     evidence_rules = {
         "success_requires": ["network_or_official_record"],
         "banner_text_sufficient": False,
@@ -95,13 +104,17 @@ def generate_candidate_version(db, *, build_request: fm.AdapterBuildRequest,
         "on_unexpected_state": "fail_closed",
         "rate_limits": {"actions_per_minute": 30},
     }
+    # Honest limitations recorded by the specification generator (e.g. the
+    # post-review submit control not being observable credential-free) ride
+    # into the candidate's known_limitations alongside caller-supplied ones.
+    spec_limitations = list((spec.generation_basis or {}).get("known_limitations") or [])
     row = fm.AdapterCandidateVersion(
         candidate_id=cand.id, version=version, specification_id=spec.id,
         manifest=manifest, flow=spec.flow, field_mappings=spec.field_mappings,
         document_mappings=spec.document_mappings, evidence_rules=evidence_rules,
         recovery=recovery, kill_switch_key=f"adapter:{cand.adapter_id}",
         rollback_to_version=max(version - 1, 0),
-        known_limitations=list(limitations or []),
+        known_limitations=list(limitations or []) + spec_limitations,
         created_by=created_by, repair_of_version=repair_of_version)
     row.content_hash = _hash_bundle(manifest, spec.flow, spec.field_mappings,
                                     spec.document_mappings, evidence_rules, recovery)

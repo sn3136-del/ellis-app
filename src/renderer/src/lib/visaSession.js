@@ -115,6 +115,61 @@ export function formatFee(fee) {
   return ''
 }
 
+// ---- Dynamic "additional information" questions (Part 4) -------------------
+// Mid-flight the live portal may need a detail Ellis never collected. The
+// backend pauses with handoff "additional_information" and a list of
+// applicant-friendly questions: {key, question, why, format, mandatory,
+// kind: 'text'|'date'|'select'|'document', options?}. Document-kind questions
+// (key prefixed "document:") are resolved on the Documents tab, never typed
+// into the modal.
+
+export function isDocumentQuestion(q) {
+  return !!q && (q.kind === 'document' || String(q.key || '').startsWith('document:'))
+}
+
+// Split the pending questions into typed-answer questions and document asks.
+export function splitQuestions(questions) {
+  const list = Array.isArray(questions) ? questions : []
+  return {
+    inputQuestions: list.filter((q) => q && q.key && !isDocumentQuestion(q)),
+    documentQuestions: list.filter((q) => q && q.key && isDocumentQuestion(q))
+  }
+}
+
+// Basic MM/DD/YYYY shape check for typed date answers. The backend remains the
+// date authority (it canonicalizes to ISO) — this only catches obvious slips
+// before a round trip.
+export function isValidDateShape(value) {
+  const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(String(value == null ? '' : value).trim())
+  if (!m) return false
+  const mm = Number(m[1])
+  const dd = Number(m[2])
+  return mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31
+}
+
+// Validate the modal's entered values against the asked (non-document)
+// questions. Returns { answers, errors }: answers holds ONLY answered keys
+// (trimmed, non-empty); errors maps question key -> i18n error key. Mandatory
+// questions must be answered; date answers must pass the shape check.
+export function collectAnswers(questions, values = {}) {
+  const answers = {}
+  const errors = {}
+  for (const q of Array.isArray(questions) ? questions : []) {
+    if (!q || !q.key || isDocumentQuestion(q)) continue
+    const v = String(values[q.key] == null ? '' : values[q.key]).trim()
+    if (!v) {
+      if (q.mandatory) errors[q.key] = 'addinfo.errRequired'
+      continue
+    }
+    if (q.kind === 'date' && !isValidDateShape(v)) {
+      errors[q.key] = 'addinfo.errDate'
+      continue
+    }
+    answers[q.key] = v
+  }
+  return { answers, errors }
+}
+
 // A short human label + guidance for the current handoff, with a safe fallback.
 export function handoffCopy(copyMap, handoff) {
   const entry = copyMap[handoff]

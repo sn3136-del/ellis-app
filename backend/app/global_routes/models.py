@@ -75,6 +75,11 @@ class PortalFamily(Base, TimestampMixin):
     nationality_scope: Mapped[list] = mapped_column(JSON, default=list)
     supported_outcomes: Mapped[list] = mapped_column(JSON, default=list)
     account_required: Mapped[bool] = mapped_column(Boolean, default=False)
+    # Curated, human-authored entry-gate declaration for portals whose
+    # application form sits behind an in-session instruction sequence:
+    # {actions: [{action: CLICK|SCROLL_TO_BOTTOM|CHECK, selector}], expect_path,
+    #  form_ready_selector?, declared_handoffs?}. Empty dict = no gate.
+    entry_gate: Mapped[dict] = mapped_column(JSON, default=dict)
     verification_status: Mapped[str] = mapped_column(String(32), default="seed_unverified", index=True)  # FAMILY_VERIFICATION
     verification_evidence: Mapped[dict] = mapped_column(JSON, default=dict)
     last_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

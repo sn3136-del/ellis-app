@@ -84,6 +84,26 @@ def close_session(session_id: str) -> None:
         pass
 
 
+def session_connect_info(session_id: str) -> dict:
+    """Re-attach info for an EXISTING session ({id, mode, connect_url}) so a
+    later request can drive the SAME applicant portal session (resume after a
+    question/CAPTCHA). Raises if the session is gone or not running."""
+    s = settings()
+    if not s.browserbase_api_key or session_id.startswith("local-"):
+        raise RuntimeError("no live Browserbase session to re-attach")
+    import httpx
+    r = httpx.get(f"{_BB_BASE}/sessions/{session_id}",
+                  headers={"X-BB-API-Key": s.browserbase_api_key}, timeout=30)
+    r.raise_for_status()
+    data = r.json()
+    if str(data.get("status", "")).upper() not in ("RUNNING", "ACTIVE"):
+        raise RuntimeError(f"session {session_id} is not running")
+    connect = data.get("connectUrl")
+    if not connect:
+        raise RuntimeError("session has no connect URL")
+    return {"id": session_id, "mode": "browserbase", "connect_url": connect}
+
+
 def live_view_url(session_id: str) -> str | None:
     """Fetch the short-lived Live View (debugger) URL for a session. This is the
     surface the applicant uses for CAPTCHA/OTP/payment/declaration. Never emailed."""

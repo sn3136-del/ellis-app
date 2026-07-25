@@ -248,17 +248,16 @@ def test_no_passport_pii_in_audit_log(client, db):
 # =========================================================================
 # Part 3 — continuation from guidance into the case workflow
 # =========================================================================
-def _two_pass(answer):
-    """Both Kimi passes: the analysis answer for pass 1, ACCEPT for pass 2."""
+def _single_pass(answer):
+    """The single-pass Kimi provider: one analysis answer, never a verifier."""
     def provider(system, user):
-        if "verifier" in system:
-            return {"verdict": "ACCEPT", "issues": [], "corrected": None}
+        assert "verifier" not in system, "no second verification pass may run"
         return dict(answer)
     return provider
 
 
 def _resolve_with_guidance(client, answer, answers=ANSWERS_SGP):
-    kimi_primary.set_provider(_two_pass(answer))
+    kimi_primary.set_provider(_single_pass(answer))
     iid = _new_intake(client, answers)
     client.post(f"/intake/{iid}/passport",
                 json={"name": "p.pdf", "text": _passport_text()}, headers=H)
@@ -373,10 +372,10 @@ def test_passport_data_survives_guidance_and_continuation(client, db):
 def test_continuation_never_starts_or_links_official_source_research(client, db):
     """The applicant flow performs ZERO official-source research: resolve,
     guidance, and continuation neither create nor link a research job — even
-    when an (admin-created) job exists for the same intake. The Kimi two-pass
-    verification is reported instead of any audit."""
+    when an (admin-created) job exists for the same intake. The single-pass
+    Kimi decision is reported instead of any audit."""
     from app.visa_snapshot import ondemand
-    kimi_primary.set_provider(_two_pass(EXEMPT_ANSWER))
+    kimi_primary.set_provider(_single_pass(EXEMPT_ANSWER))
     iid = _new_intake(client, dict(ANSWERS_SGP, destination_country="IDN"))
     before = db.query(OnDemandRouteResearchJob).count()
     rr = client.post(f"/intake/{iid}/resolve", headers=H)
@@ -393,7 +392,8 @@ def test_continuation_never_starts_or_links_official_source_research(client, db)
     assert r.status_code == 200
     body = r.json()
     assert "audit" not in body
-    assert body["verification"]["verdict"] == "ACCEPT"    # two-pass, not audit
+    assert body["verification"] == {"passes": 1,
+                                    "label": "Kimi route decision"}  # decision, not audit
     db.expire_all()
     job2 = db.get(OnDemandRouteResearchJob, job.id)
     assert job2.case_id is None                  # research stays a dev-only tool

@@ -5,6 +5,7 @@
   python -m app.global_routes build-family FAMILY_ID
   python -m app.global_routes retry-failed
   python -m app.global_routes revalidate
+  python -m app.global_routes apply-research
   python -m app.global_routes verify-live [--limit N] [--families a,b,c]
   python -m app.global_routes coverage
   python -m app.global_routes unsupported [--limit N]
@@ -156,6 +157,35 @@ def cmd_verify_live(args) -> dict:
         db.close()
 
 
+def cmd_apply_research(args) -> dict:
+    """Re-apply verified official research onto the pair-policy layer of the
+    TARGET DB (DATABASE_URL) without running any live adapter build:
+      1. verified research files + verified VisaRoute records -> pair upgrades
+      2. research-file jurisdictions -> consular jurisdiction rules / centers
+      3. verified pairs -> structural matrix sync
+      4. portal-family seed sync + stale bindings cleared / rebound
+      5. honest release-status recompute (verified non-portal workflows count
+         as released_workflow; provisional data never counts)
+    Idempotent and additive; typically preceded by
+      python -m app.routes_import apply data/global_visa_routes.jsonl
+    so curated/on-demand verified route records exist in the same DB."""
+    from . import baseline, families, orchestrator
+    from ..visa_snapshot import pipeline
+    db = _session()
+    try:
+        overrides = baseline.apply_research_overrides(db)
+        jurisdictions = pipeline.ingest_all_research_jurisdictions(db)
+        matrix = baseline.sync_matrix_dispositions(db)
+        fams = families.sync_families(db)
+        bindings = families.assign_families_to_pairs(db)
+        release = orchestrator.recompute_release_statuses(db)
+        return {"research_overrides": overrides, "jurisdictions": jurisdictions,
+                "matrix_sync": matrix, "family_sync": fams,
+                "family_bindings": bindings, "release_statuses": release}
+    finally:
+        db.close()
+
+
 def cmd_coverage(args) -> dict:
     from . import dashboard
     db = _session()
@@ -230,6 +260,7 @@ def main(argv=None) -> int:
     p.add_argument("family")
     sub.add_parser("retry-failed")
     sub.add_parser("revalidate")
+    sub.add_parser("apply-research")
     p = sub.add_parser("verify-live")
     p.add_argument("--limit", type=int, default=10)
     p.add_argument("--families", default="")
@@ -243,7 +274,8 @@ def main(argv=None) -> int:
     fn = {
         "build-all": cmd_build_all, "build-destination": cmd_build_destination,
         "build-family": cmd_build_family, "retry-failed": cmd_retry_failed,
-        "revalidate": cmd_revalidate, "verify-live": cmd_verify_live,
+        "revalidate": cmd_revalidate, "apply-research": cmd_apply_research,
+        "verify-live": cmd_verify_live,
         "coverage": cmd_coverage, "unsupported": cmd_unsupported,
         "export": cmd_export, "stop": cmd_stop, "resume": cmd_resume,
     }[args.cmd]

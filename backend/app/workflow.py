@@ -51,7 +51,8 @@ class VisaWorkflow:
             self.machine = CaseMachine(exec_row.get("state", "DRAFT"), exec_row.get("history"))
             self.inputs = snap.get("inputs", self._fresh_inputs())
             for k in ("credential_ref", "session_ref", "application_id", "receipt",
-                      "appointment", "confirmation", "reschedules", "fee", "target_slot"):
+                      "appointment", "confirmation", "reschedules", "fee", "target_slot",
+                      "_captcha_return_state"):
                 setattr(self, k, snap.get(k))
             self.payment_authorization = snap.get("payment_authorization")
             # Searched slots must survive the reload between signals, else the
@@ -83,7 +84,8 @@ class VisaWorkflow:
                 "confirmation": self.confirmation, "reschedules": self.reschedules,
                 "fee": self.fee, "target_slot": self.target_slot,
                 "last_slots": getattr(self, "_last_slots", []),
-                "payment_authorization": getattr(self, "payment_authorization", None)}
+                "payment_authorization": getattr(self, "payment_authorization", None),
+                "_captcha_return_state": getattr(self, "_captcha_return_state", None)}
 
     def status(self) -> dict:
         return {"case_id": self.case_id, "state": self.machine.state, "pending": self.pending,
@@ -94,6 +96,27 @@ class VisaWorkflow:
         if self.db is not None:
             audit.record(self.db, org_id=self.org_id, application_id=self.case_id,
                          action=action, detail=detail or {}, actor="ellis")
+
+    def _portal_step_blocked(self, res: dict, *, return_state: str):
+        """Common handling for a live portal step that needs the applicant:
+        a mid-flow CAPTCHA, missing information (dynamic questions), or an
+        applicant-only action. Returns the pause/transition result, or None
+        when the response is an ordinary failure."""
+        code = res.get("code", "")
+        if code == "CAPTCHA_REQUIRED":
+            self._captcha_return_state = return_state
+            return self.machine.transition("CAPTCHA_ACTION_REQUIRED", "portal CAPTCHA")
+        if code == "ADDITIONAL_INFORMATION_REQUIRED":
+            return self._pause("Additional information required",
+                               "additional_information",
+                               questions=res.get("questions") or [])
+        if code == "APPLICANT_ACTION_REQUIRED":
+            return self._pause("This step needs you in the secure portal window.",
+                               res.get("handoff") or "identity")
+        if code == "OUTCOME_UNCERTAIN":
+            return self.machine.transition("MANUAL_REVIEW_REQUIRED",
+                                           "outcome uncertain — human check required")
+        return None
 
     def _pause(self, reason, handoff, **extra):
         lv = None
@@ -117,6 +140,18 @@ class VisaWorkflow:
     def solve_captcha(self):
         self.inputs["captcha_solved"] = True
         self._emit("captcha_solved_by_applicant")
+        return self._drive()
+
+    def provide_information(self, answers=None):
+        """Dynamic missing-information answers (Part 4). The answers were
+        validated and persisted by the API layer; here they join the live
+        answer set and the SAME portal execution resumes from the same step —
+        never a restart, never a duplicate application."""
+        answers = answers or {}
+        self.answers.update(answers)
+        self.pending = None
+        self._emit("additional_information_provided",
+                   {"keys": sorted(answers.keys())[:40]})
         return self._drive()
 
     def verify_email(self, token):
@@ -254,7 +289,12 @@ class VisaWorkflow:
         elif st == "AUTHORIZATION_SIGNED":
             m.transition("PORTAL_ACCOUNT_REQUIRED")
         elif st == "PORTAL_ACCOUNT_REQUIRED":
-            m.transition("PORTAL_ACCOUNT_CREATING")
+            # Account-less portals (e.g. Vietnam eVisa personal applications)
+            # skip account creation honestly — nothing is registered.
+            if not getattr(self.adapter, "account_required", True):
+                m.transition("PORTAL_LOGIN_REQUIRED", "portal requires no account")
+            else:
+                m.transition("PORTAL_ACCOUNT_CREATING")
         elif st == "PORTAL_ACCOUNT_CREATING":
             password = vault.generate_password(self.adapter.password_requirements)
             stored = vault.store(password, {"portal": self.adapter.adapter_id, "kind": "portal_password"})
@@ -281,7 +321,11 @@ class VisaWorkflow:
             self.pending = None
             if not ok["ok"]:
                 return m.transition("RECOVERABLE_FAILURE", "CAPTCHA_FAILED")
-            m.transition("PORTAL_VERIFICATION_REQUIRED")
+            # A CAPTCHA can appear mid-form (application filling) as well as at
+            # account creation; return to wherever it interrupted.
+            m.transition(getattr(self, "_captcha_return_state", None)
+                         or "PORTAL_VERIFICATION_REQUIRED")
+            self._captcha_return_state = None
         elif st == "PORTAL_VERIFICATION_REQUIRED":
             if not self.inputs["email_verify_token"]:
                 return self._pause("Click the verification link in your email.", "email_verification")
@@ -294,8 +338,13 @@ class VisaWorkflow:
         elif st == "PORTAL_ACCOUNT_READY":
             m.transition("PORTAL_LOGIN_REQUIRED")
         elif st == "PORTAL_LOGIN_REQUIRED":
-            password = vault.reveal(self.credential_ref)
-            res = d.login(email=self.applicant["email"], password=password)
+            if not getattr(self.adapter, "account_required", True):
+                # Account-less portal: no stored credential exists (none was
+                # ever created). The driver returns its live-session reference.
+                res = d.login(email=self.applicant.get("email", ""))
+            else:
+                password = vault.reveal(self.credential_ref)
+                res = d.login(email=self.applicant["email"], password=password)
             if not res["ok"]:
                 return m.transition("RECOVERABLE_FAILURE", res.get("code", "login"))
             self.session_ref = vault.store(res["sessionToken"], {"kind": "portal_session"})["ref"]
@@ -303,12 +352,20 @@ class VisaWorkflow:
             m.transition("APPLICATION_FILLING")
         elif st == "APPLICATION_FILLING":
             token = vault.reveal(self.session_ref)
-            if not self.application_id:
+            # Released-flow drivers are resumable (they continue the SAME portal
+            # session from the same step), so re-entering this state after a
+            # question/CAPTCHA advances the form instead of creating a duplicate.
+            resumable = getattr(self.adapter, "channel", "") == "released_flow"
+            if not self.application_id or resumable:
                 res = d.create_application(session_token=token, answers=self.answers)
                 if not res["ok"]:
+                    blocked = self._portal_step_blocked(res, return_state="APPLICATION_FILLING")
+                    if blocked is not None:
+                        return blocked
                     return m.transition("RECOVERABLE_FAILURE", res.get("code", "apply"))
-                self.application_id = res["applicationId"]
-                self._emit("application_created", {"application_id": self.application_id})
+                if not self.application_id:
+                    self.application_id = res.get("applicationId") or self.case_id
+                    self._emit("application_created", {"application_id": self.application_id})
             m.transition("DOCUMENT_UPLOAD_PENDING")
         elif st == "DOCUMENT_UPLOAD_PENDING":
             token = vault.reveal(self.session_ref)
@@ -317,6 +374,9 @@ class VisaWorkflow:
                                         name=doc["name"], size_bytes=doc.get("size_bytes", 1024),
                                         mime=doc.get("mime", "application/pdf"))
                 if not res["ok"]:
+                    blocked = self._portal_step_blocked(res, return_state="DOCUMENT_UPLOAD_PENDING")
+                    if blocked is not None:
+                        return blocked
                     return m.transition("RECOVERABLE_FAILURE", f"upload:{res.get('code')}")
             self._emit("documents_uploaded", {"count": len(self.documents)})
             m.transition("FEE_DISCOVERY_PENDING")
@@ -324,6 +384,9 @@ class VisaWorkflow:
             token = vault.reveal(self.session_ref)
             fee = d.discover_fee(session_token=token, application_id=self.application_id)
             if not fee["ok"]:
+                blocked = self._portal_step_blocked(fee, return_state="FEE_DISCOVERY_PENDING")
+                if blocked is not None:
+                    return blocked
                 return m.transition("RECOVERABLE_FAILURE", "fee")
             self.fee = fee
             self._emit("fee_discovered", {"amount": fee["amount"], "currency": fee["currency"]})
@@ -443,6 +506,24 @@ class VisaWorkflow:
             self.reschedules += 1
             self._emit("appointment_rescheduled", {"count": self.reschedules})
             m.transition("APPOINTMENT_BOOKED")
+        elif st == "RECOVERABLE_FAILURE":
+            # Bounded automatic retry: resume at the state that failed when the
+            # machine allows it; repeated failures stop honestly for a human.
+            hist = self.machine.history
+            retries = sum(1 for h in hist[-8:] if h["state"] == "RECOVERABLE_FAILURE")
+            last_reason = (hist[-1].get("reason") or "") if hist else ""
+            prior = next((h["state"] for h in reversed(hist[:-1])
+                          if h["state"] != "RECOVERABLE_FAILURE"), None)
+            # A lost vault ref / portal session is repaired by re-login (which
+            # re-mints the session reference), not by re-running the failed step.
+            if "vault ref" in last_reason or "session" in last_reason.lower():
+                self.session_ref = None
+                prior = "PORTAL_LOGIN_REQUIRED"
+            from .statemachine import can_transition
+            if retries > 3 or not prior or not can_transition(st, prior):
+                return m.transition("MANUAL_REVIEW_REQUIRED",
+                                    "repeated recoverable failures")
+            m.transition(prior, "automatic retry after recoverable failure")
         elif st == "FINAL_REVIEW_REQUIRED":
             m.transition("PERSONAL_DECLARATION_REQUIRED" if self.adapter.personal_declaration_required
                          else "READY_TO_SUBMIT")

@@ -172,7 +172,7 @@ def case_live_preflight(application_id: str, db=Depends(get_session),
                         p: Principal = Depends(get_principal)):
     from . import personal_gate, passport_validity
     app_row = _owned(db, p, application_id)
-    ec = _case_execution_class(app_row.destination_country, app_row.visa_type)
+    ec = _case_execution_class(app_row.destination_country, app_row.visa_type, db=db, app_row=app_row)
     pre = personal_gate.live_preflight(db, app_row, ec)
     pre["passport_validity"] = passport_validity.check_case_passport(db, app_row)
     return pre
@@ -690,12 +690,20 @@ def _owned(db, p: Principal, application_id: str) -> models.VisaApplication:
     return app_row
 
 
-def _case_execution_class(country: str, visa_type: str):
+def _case_execution_class(country: str, visa_type: str, db=None, app_row=None):
     """Classify what running this case's route ACTUALLY produces. Mock-allowed
     modes bind the MockPortal driver (class MOCK). Real-only modes register no
-    demo adapters at all, so an unsupported route classifies UNSUPPORTED — the
-    classification follows the driver, never a claim."""
+    demo adapters; a route whose portal family carries a RELEASED adapter
+    executes through the live FlowRunner bridge (class LIVE_PRODUCTION — the
+    class the bound driver itself declares), and anything else classifies
+    UNSUPPORTED — the classification follows the driver, never a claim."""
+    from .config import settings as _settings
     from .portal.driver_factory import register_adapters_for_mode, select_metadata_adapter
+    if db is not None and app_row is not None and not _settings().mock_portal_allowed:
+        from .portal.released_flow import build_for_case
+        built = build_for_case(db, app_row)
+        if built is not None:
+            return execution.classify_adapter(built[1])
     register_adapters_for_mode()
     adapter = select_metadata_adapter(country, visa_type)
     return execution.classify_adapter(adapter)
@@ -782,7 +790,7 @@ def get_case(application_id: str, db=Depends(get_session), p: Principal = Depend
         models.Appointment.application_id == application_id)).scalar_one_or_none()
     conf = db.execute(select(models.SubmissionConfirmation).where(
         models.SubmissionConfirmation.application_id == application_id)).scalar_one_or_none()
-    ec = _case_execution_class(app_row.destination_country, app_row.visa_type)
+    ec = _case_execution_class(app_row.destination_country, app_row.visa_type, db=db, app_row=app_row)
     # The disposition is the display guard: it refuses to present submitted/paid/
     # booked/confirmed as REAL unless an approved LIVE_PRODUCTION adapter produced
     # them. Clients render disposition.display_status, not raw state, for anything
@@ -1098,10 +1106,9 @@ def review(application_id: str, db=Depends(get_session), p: Principal = Depends(
 @app.get("/cases/{application_id}/checklist")
 def case_checklist(application_id: str, db=Depends(get_session),
                    p: Principal = Depends(get_principal)):
-    """The route-specific journey state saved at continuation: guidance (with
-    its two-pass Kimi verification), disposition, workflow type, and the
-    document checklist with live per-item status. No official-source audit
-    exists on the applicant path."""
+    """The route-specific journey state saved at continuation: the Kimi route
+    decision, disposition, workflow type, and the document checklist with live
+    per-item status. No official-source audit exists on the applicant path."""
     app_row = _owned(db, p, application_id)
     from . import checklist_intake
     from .visa_snapshot import intake_flow
@@ -1111,13 +1118,17 @@ def case_checklist(application_id: str, db=Depends(get_session),
                 "checklist": [], "checklist_counts": {"total": 0, "required_missing": 0},
                 "intake_stage": {"completed": False, "completed_at": None},
                 "verification": None, "route_workflow_type": None}
-    g_inner = (cg.guidance or {}).get("guidance") or {}
+    # Serve-time normalization: stored two-pass-era guidance rows carry a label
+    # claiming a retired second-pass check — it must never reach the UI.
+    from .visa_snapshot import kimi_primary
+    guidance = kimi_primary.normalize_guidance_label(cg.guidance)
+    g_inner = (guidance or {}).get("guidance") or {}
     # Per-item status now reflects the applicant's EXPLICIT submissions (an
     # upload alone never fulfils a requirement) + the durable intake stage.
     status = checklist_intake.checklist_state(db, app_row, cg)
     from . import translation as translation_mod
     target = translation_mod.target_for_destination(app_row.destination_country)
-    return {"guidance": cg.guidance, "disposition": cg.disposition,
+    return {"guidance": guidance, "disposition": cg.disposition,
             "continuation_kind": cg.continuation_kind, "intake_id": cg.intake_id,
             "checklist": status["items"], "checklist_counts": status["counts"],
             "intake_stage": status["intake_stage"],
@@ -1125,7 +1136,7 @@ def case_checklist(application_id: str, db=Depends(get_session),
                 "target": target,
                 "target_name": translation_mod.language_name(target),
                 "certified_note": translation_mod.certified_translation_flag(g_inner)},
-            "verification": (cg.guidance or {}).get("verification") or None,
+            "verification": (guidance or {}).get("verification") or None,
             "route_workflow_type": g_inner.get("route_workflow_type"),
             "health_questions": intake_flow.pending_health_questions(
                 g_inner, answers=app_row.answers or {})}
@@ -1762,7 +1773,8 @@ def invalidate_signatures_if_changed(db, application_id: str):
 # ---- Workflow signals ----
 _SIGNALS = {"approve_review", "sign_authorization", "solve_captcha", "verify_email",
             "approve_payment", "complete_payment", "select_appointment",
-            "approve_reschedule", "complete_declaration", "cancel"}
+            "approve_reschedule", "complete_declaration", "cancel",
+            "provide_information"}
 
 
 class SignalBody(BaseModel):
@@ -1772,6 +1784,9 @@ class SignalBody(BaseModel):
     # confirmation can never silently cover a different figure (§6).
     amount_cents: Optional[int] = None
     currency: Optional[str] = None
+    # provide_information: answers to the dynamic missing-information questions
+    # the portal execution paused on (Part 4).
+    answers: Optional[dict] = None
 
 
 def _record_terminal_execution(db, p: Principal, application_id: str):
@@ -1780,7 +1795,7 @@ def _record_terminal_execution(db, p: Principal, application_id: str):
     a MOCK/sandbox run — the completed state alone must never imply 'real'."""
     app_row = db.get(models.VisaApplication, application_id)
     if app_row and app_row.state == "COMPLETED":
-        ec = _case_execution_class(app_row.destination_country, app_row.visa_type)
+        ec = _case_execution_class(app_row.destination_country, app_row.visa_type, db=db, app_row=app_row)
         # A completed case IS a government-outcome action, so its record reflects
         # whether the outcome was real (True only for verified LIVE_PRODUCTION).
         execution.record_execution(db, org_id=p.org_id, application_id=application_id,
@@ -1865,7 +1880,56 @@ def send_signal(application_id: str, name: str, body: Optional[SignalBody] = Non
     if name == "approve_payment" and body.amount_cents is not None:
         kwargs["amount_cents"] = body.amount_cents
         kwargs["currency"] = body.currency
+    if name == "provide_information":
+        answers = _validated_information_answers(db, application_id, body.answers or {})
+        if not answers:
+            raise HTTPException(422, detail={"reason": "no_valid_answers",
+                                             "message": "No usable answers were provided."})
+        # Persist first (DB is the source of truth), with the same material-
+        # change signature invalidation as the answers endpoint.
+        app_row = db.get(models.VisaApplication, application_id)
+        merged = dict(app_row.answers or {})
+        merged.update(answers)
+        app_row.answers = merged
+        db.commit()
+        invalidated = invalidate_signatures_if_changed(db, application_id)
+        audit.record(db, org_id=p.org_id, application_id=application_id,
+                     action="additional_information_provided",
+                     detail={"keys": sorted(answers.keys()),
+                             "signatures_invalidated": invalidated}, actor=p.user_id)
+        kwargs["answers"] = answers
     return _signal_or_gate_error(db, p, application_id, name, **kwargs)
+
+
+def _validated_information_answers(db, application_id: str, raw: dict) -> dict:
+    """Safe input validation for dynamic-question answers: only answers to the
+    questions Ellis actually asked (the pending payload), values as trimmed
+    strings, dates canonicalized via the single date authority."""
+    from . import dates as dates_mod
+    exec_row = db.execute(select(models.WorkflowExecution).where(
+        models.WorkflowExecution.application_id == application_id)).scalar_one_or_none()
+    pending = (exec_row.pending if exec_row else None) or {}
+    asked = {q.get("key"): q for q in (pending.get("questions") or []) if q.get("key")}
+    out: dict = {}
+    for key, value in (raw or {}).items():
+        q = asked.get(key)
+        if q is None or key.startswith("document:"):
+            continue    # never accept answer keys Ellis did not ask for
+        v = str(value if value is not None else "").strip()
+        if not v:
+            continue
+        if len(v) > 300:
+            raise HTTPException(422, detail={"reason": "invalid_answer", "key": key,
+                                             "message": "That answer is too long."})
+        if q.get("kind") == "date":
+            iso = dates_mod.normalize_any(v, kind="expiry", us_numeric=True)
+            if not iso:
+                raise HTTPException(422, detail={
+                    "reason": "invalid_answer", "key": key,
+                    "message": "Please enter a valid date."})
+            v = iso
+        out[key] = v
+    return out
 
 
 @app.get("/cases/{application_id}/audit")

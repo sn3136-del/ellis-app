@@ -338,14 +338,14 @@ def resolve_intake(intake_id: str, background: BackgroundTasks,
                  detail={"intake_id": r.id, "readiness": result["readiness_status"],
                          "route_key": result.get("route_key")}, actor=p.user_id)
 
-    # The Kimi two-pass decision is the ONLY route analysis in the applicant
+    # The single-pass Kimi decision is the ONLY route analysis in the applicant
     # flow. No official-source research job is created or started here — the
     # research pipeline remains a separate developer/administrator tool
     # (POST /admin/snapshot/research-jobs).
     checks = result.get("checks", {})
 
     # Kimi-primary immediate guidance: attach instantly when cached; otherwise
-    # the UI calls POST /intake/{id}/guidance (the bounded two-pass decision).
+    # the UI calls POST /intake/{id}/guidance (the bounded single-pass decision).
     from . import kimi_primary
     route = _guidance_route(r, checks)
     try:
@@ -379,9 +379,10 @@ def _guidance_route(r, checks: dict | None = None) -> dict:
 @router.post("/intake/{intake_id}/guidance")
 def route_guidance(intake_id: str, background: BackgroundTasks,
                    db=Depends(get_session), p: Principal = Depends(get_principal)):
-    """The Kimi two-pass route decision (primary analysis + independent Kimi
-    verification) under one hard 60-second deadline. Cached identical routes
-    return instantly. Never blocks on — or starts — official-source research."""
+    """The single-pass Kimi route decision (one structured analysis with
+    deterministic validation) under one hard 60-second deadline. Cached
+    identical routes return instantly. Never blocks on — or starts —
+    official-source research."""
     r = _owned_intake(db, p, intake_id)
     from . import kimi_primary
     route = _guidance_route(r)
@@ -432,16 +433,20 @@ def route_guidance(intake_id: str, background: BackgroundTasks,
 # approval exists anywhere on this path.
 
 def _continuation_summary(db, r, cg, case_row) -> dict:
+    from . import kimi_primary
     from .. import checklist_intake
     status = checklist_intake.checklist_state(db, case_row, cg)
+    # Serve-time normalization: stored two-pass-era guidance rows carry a label
+    # claiming a retired second-pass check — it must never reach the UI.
+    guidance = kimi_primary.normalize_guidance_label(cg.guidance)
     return {"case_id": case_row.id, "intake_id": r.id, "status": r.status,
             "case_state": case_row.state,
             "disposition": cg.disposition,
             "continuation_kind": cg.continuation_kind,
             "checklist": status["items"], "checklist_counts": status["counts"],
             "intake_stage": status["intake_stage"],
-            "guidance": cg.guidance,
-            "verification": (cg.guidance or {}).get("verification") or {}}
+            "guidance": guidance,
+            "verification": (guidance or {}).get("verification") or {}}
 
 
 @router.post("/intake/{intake_id}/continue")

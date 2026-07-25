@@ -10,9 +10,14 @@ from __future__ import annotations
 import re
 
 # Deterministic action types (§16). Anything else is rejected at compile time.
+# SELECT_SEARCH: search-combobox (click, type value, pick the exact/first
+#   matching option deterministically) — sensitivity-screened like FILL.
+# SCROLL_TO_BOTTOM: scroll a container (window when selector empty) to the
+#   bottom — reversible by construction (entry-gate instruction modals).
 ACTION_TYPES = [
     "NAVIGATE", "WAIT_FOR_STATE", "CLICK", "FILL_NON_SENSITIVE", "SELECT",
-    "CHECK", "UPLOAD_AUTHORIZED_DOCUMENT", "READ_TEXT", "READ_FEE",
+    "SELECT_SEARCH", "CHECK", "SCROLL_TO_BOTTOM", "UPLOAD_AUTHORIZED_DOCUMENT",
+    "READ_TEXT", "READ_FEE",
     "READ_APPOINTMENT_INVENTORY", "WAIT_FOR_NETWORK", "VERIFY_EVIDENCE",
     "APPLICANT_HANDOFF", "RECONCILE_OUTCOME", "PAUSE", "COMPLETE",
 ]
@@ -37,6 +42,7 @@ IRREVERSIBILITY = ["reversible", "conditionally_reversible", "irreversible"]
 
 NODE_DEFAULTS = {
     "purpose": "",
+    "doc_type": "",
     "expected_state": "",
     "allowed_url_patterns": [],
     "selector": "",
@@ -66,9 +72,30 @@ NODE_DEFAULTS = {
 _REQUIRED = ("node_id", "action", "allowed_hostname")
 
 _SELECTOR_OK = ("#", ".", "[", "input", "select", "textarea", "button", "form",
-                "a", "label", "iframe", "main")
+                "a", "label", "iframe", "main", "div")
 
 _NODE_ID_RE = re.compile(r"^[a-z0-9_\-]{2,120}$")
+
+# Two bounded Playwright selector forms remain deterministic despite spaces:
+#   tag:has-text("Exact visible text")   (short, quote-bounded text)
+#   <simple selector> >> nth=N           (fixed index over a simple selector)
+_PW_TEXT_RE = re.compile(r'^[a-z]+:has-text\("[^"<>]{1,60}"\)$')
+_PW_NTH_RE = re.compile(r'^(?P<base>\S+) >> nth=\d{1,2}$')
+
+
+def deterministic_selector(sel: str) -> bool:
+    """True for selectors a deterministic runtime can target: simple CSS with
+    no descendant combinators, or the two bounded Playwright forms above.
+    Deep ancestor paths (spaces / '>') are refused."""
+    sel = (sel or "").strip()
+    if not sel or not sel.startswith(_SELECTOR_OK):
+        return False
+    if " " not in sel and ">" not in sel:
+        return True
+    if _PW_TEXT_RE.match(sel):
+        return True
+    m = _PW_NTH_RE.match(sel)
+    return bool(m and ">" not in m.group("base"))
 
 
 def normalize_node(raw: dict) -> dict:
@@ -93,19 +120,38 @@ def validate_node(raw: dict, *, allowed_hostnames: list[str]) -> list[str]:
     allow = [h.lower() for h in allowed_hostnames]
     if host and not any(host == a or host.endswith("." + a) for a in allow):
         errs.append(f"{nid}: hostname {host!r} outside the adapter allowlist")
-    if action in ("CLICK", "FILL_NON_SENSITIVE", "SELECT", "CHECK", "READ_TEXT",
-                  "READ_FEE", "UPLOAD_AUTHORIZED_DOCUMENT"):
+    if action in ("CLICK", "FILL_NON_SENSITIVE", "SELECT", "SELECT_SEARCH",
+                  "CHECK", "READ_TEXT", "READ_FEE", "UPLOAD_AUTHORIZED_DOCUMENT"):
         sel = (node.get("selector") or "").strip()
         if not sel:
             errs.append(f"{nid}: {action} requires a deterministic selector")
         elif not sel.startswith(_SELECTOR_OK):
             errs.append(f"{nid}: selector {sel!r} is not a deterministic CSS selector")
-    if action == "FILL_NON_SENSITIVE":
+    if action == "SCROLL_TO_BOTTOM":
+        # Selector-or-empty (empty scrolls the window); always reversible.
+        sel = (node.get("selector") or "").strip()
+        if sel and not sel.startswith(_SELECTOR_OK):
+            errs.append(f"{nid}: selector {sel!r} is not a deterministic CSS selector")
+        if node.get("irreversibility") != "reversible":
+            errs.append(f"{nid}: SCROLL_TO_BOTTOM must be reversible")
+        if node.get("sensitive"):
+            errs.append(f"{nid}: SCROLL_TO_BOTTOM may never be marked sensitive")
+    if action in ("FILL_NON_SENSITIVE", "SELECT_SEARCH"):
         src = node.get("input_source") or ""
         if not src:
-            errs.append(f"{nid}: FILL_NON_SENSITIVE requires input_source")
+            errs.append(f"{nid}: {action} requires input_source")
         if _SENSITIVE_FIELD_RE.search(src) or node.get("sensitive"):
             errs.append(f"{nid}: sensitive input may never be automated — use APPLICANT_HANDOFF")
+    if action == "CHECK":
+        # Instruction/commitment acknowledgments may be checked; anything that
+        # smells like a signature/declaration-signing or otherwise sensitive
+        # control must remain an applicant handoff.
+        probe = f"{node.get('selector', '')} {node.get('input_source', '')}"
+        if _SENSITIVE_FIELD_RE.search(probe) or node.get("sensitive"):
+            errs.append(f"{nid}: sensitive checkbox may never be automated — "
+                        f"use APPLICANT_HANDOFF")
+    if action == "UPLOAD_AUTHORIZED_DOCUMENT" and not (node.get("doc_type") or "").strip():
+        errs.append(f"{nid}: UPLOAD_AUTHORIZED_DOCUMENT requires a declared doc_type")
     if action == "APPLICANT_HANDOFF":
         if node.get("handoff_kind") not in SENSITIVE_HANDOFF_KINDS:
             errs.append(f"{nid}: APPLICANT_HANDOFF requires a declared handoff_kind")

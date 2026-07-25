@@ -28,7 +28,7 @@ from sqlalchemy import func, insert, select, update
 
 from ..visa_snapshot import SNAPSHOT_DATE
 from ..visa_snapshot.matrix import matrix_key
-from ..visa_snapshot.models import RouteMatrixEntry, VisaRoute
+from ..visa_snapshot.models import RouteMatrixEntry, VisaRoute, VisaRouteVersion
 from ..visa_snapshot.registry import REFERENCE_DIR, load_registry
 from .models import RoutePairPolicy, pair_key
 
@@ -165,8 +165,10 @@ def import_reference_baseline(db, *, batch_size: int = 4000) -> dict:
 
 def _upsert_verified_pair(db, existing, *, nat: str, dest: str, disposition: str,
                           source_ref: str, urls: list[str], max_stay_days=None,
-                          retrieved_at: str = "") -> str:
-    """Write/upgrade one pair to verified official_research. Returns action."""
+                          retrieved_at: str = "", notes: str | None = None) -> str:
+    """Write/upgrade one pair to verified official_research. Returns action.
+    `notes` (channel metadata from the research record itself) is written only
+    when the research provides it — an absent value never clears prior notes."""
     outcome = DISPOSITION_TO_OUTCOME.get(disposition)
     if not outcome:
         return "skipped_meta_disposition"
@@ -192,6 +194,8 @@ def _upsert_verified_pair(db, existing, *, nat: str, dest: str, disposition: str
     from . import ELECTRONIC_OUTCOMES
     if outcome not in ELECTRONIC_OUTCOMES and outcome != "ENTRY_PREPARATION":
         values["portal_family_id"] = ""
+    if notes is not None:
+        values["notes"] = notes[:4000]
     if key in existing:
         db.execute(update(RoutePairPolicy)
                    .where(RoutePairPolicy.pair_key == key).values(**values))
@@ -200,7 +204,7 @@ def _upsert_verified_pair(db, existing, *, nat: str, dest: str, disposition: str
         db.execute(insert(RoutePairPolicy), [dict(
             id=uuid.uuid4().hex, snapshot_date=SNAPSHOT_DATE, pair_key=key,
             passport_nationality=nat, travel_document_type=ORDINARY,
-            destination_country=dest, notes="", **values)])
+            destination_country=dest, **dict({"notes": ""}, **values))])
         action = "created"
     existing[key] = ("official_research", "verified")
     return action
@@ -278,15 +282,28 @@ def apply_research_overrides(db, *, research_dir=None) -> dict:
                     assigned.add(nat)
             db.commit()
 
-    # Verified on-demand route records are per-exact-route official research.
+    # Verified on-demand/curated route records are per-exact-route official
+    # research. The pair carries the record's own provenance: official source
+    # URLs, retrieval time, maximum stay and channel notes come from the
+    # route's current immutable version — never invented here.
     for route in db.execute(select(VisaRoute).where(
             VisaRoute.research_status == "verified")).scalars().all():
         if route.disposition not in DISPOSITION_TO_OUTCOME:
             continue
+        version = db.execute(select(VisaRouteVersion).where(
+            VisaRouteVersion.route_id == route.id,
+            VisaRouteVersion.version == route.current_version)).scalars().first()
+        rec = (version.record if version is not None else None) or {}
+        urls = [u for u in (rec.get("official_source_urls") or [])
+                if isinstance(u, str)]
+        route_notes = rec.get("notes")
         action = _upsert_verified_pair(
             db, existing, nat=route.passport_nationality,
             dest=route.destination_country, disposition=route.disposition,
-            source_ref=f"route:{route.route_key[:380]}", urls=[])
+            source_ref=f"route:{route.route_key[:380]}", urls=urls,
+            max_stay_days=_parse_stay_days(rec.get("maximum_stay")),
+            retrieved_at=str(rec.get("retrieved_at") or ""),
+            notes=route_notes if isinstance(route_notes, str) and route_notes else None)
         stats["routes_applied"] += 1
         if action == "upgraded":
             stats["pairs_upgraded"] += 1

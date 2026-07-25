@@ -119,8 +119,15 @@ def _adapter_state(db, family_id: str) -> dict:
                                           else f"build status: {link.status}")}
 
 
-def _jurisdiction(db, dest: str, residence: str | None, nat: str) -> dict:
-    """Residence-dependent competent-post resolution. Never guesses."""
+def _jurisdiction(db, dest: str, residence: str | None, nat: str,
+                  subdivision: str | None = None) -> dict:
+    """Residence-dependent competent-post resolution. Never guesses.
+
+    A rule with residence_subdivisions is SUBDIVISION-SCOPED (e.g. KVAC
+    Shanghai covers Shanghai/Jiangsu/Zhejiang/Anhui): it is served only when
+    the applicant's stated subdivision is on its list. Without a subdivision,
+    only a country-wide rule (empty subdivision list) may answer — a
+    subdivision-scoped post is never guessed for the whole country."""
     if residence is None:
         return {"status": "residence_required",
                 "detail": "lawful country of residence is required to determine "
@@ -128,7 +135,8 @@ def _jurisdiction(db, dest: str, residence: str | None, nat: str) -> dict:
     rules = db.execute(select(ConsularJurisdictionRule).where(
         ConsularJurisdictionRule.destination_country == dest,
         ConsularJurisdictionRule.residence_jurisdiction == residence,
-        ConsularJurisdictionRule.verification_status == "verified")).scalars().all()
+        ConsularJurisdictionRule.verification_status == "verified")
+        .order_by(ConsularJurisdictionRule.competent_post_name)).scalars().all()
     rules = [r for r in rules
              if not r.covers_nationalities or nat in r.covers_nationalities]
     if not rules:
@@ -136,11 +144,33 @@ def _jurisdiction(db, dest: str, residence: str | None, nat: str) -> dict:
                 "detail": f"no verified consular jurisdiction rule for residence "
                           f"{residence} -> destination {dest}; the applicant must "
                           f"confirm the competent post"}
-    r = rules[0]
+    countrywide = [r for r in rules if not (r.residence_subdivisions or [])]
+    sub = (subdivision or "").strip().lower()
+    if sub:
+        scoped = [r for r in rules if any(
+            str(s).strip().lower() == sub for s in (r.residence_subdivisions or []))]
+        candidates = scoped or countrywide
+    else:
+        candidates = countrywide
+    if not candidates:
+        return {"status": "manual_selection_required",
+                "detail": (f"the competent post for destination {dest} depends on "
+                           f"the province/subdivision of residence within "
+                           f"{residence}; the applicant must confirm the competent "
+                           f"post"
+                           + (f" — no verified rule covers subdivision "
+                              f"{subdivision!r}" if sub else
+                              " — provide the residence subdivision")),
+                "options": [{"competent_post_name": r.competent_post_name,
+                             "competent_post_kind": r.competent_post_kind,
+                             "residence_subdivisions": r.residence_subdivisions or []}
+                            for r in rules]}
+    r = candidates[0]
     return {"status": "verified", "competent_post_name": r.competent_post_name,
             "competent_post_kind": r.competent_post_kind,
             "competent_post_url": r.competent_post_url,
-            "residence_subdivisions": r.residence_subdivisions or []}
+            "residence_subdivisions": r.residence_subdivisions or [],
+            "conditions": r.conditions or []}
 
 
 def _passport_validity(db, dest: str) -> dict | None:
@@ -182,9 +212,13 @@ def resolve_route(db, *, nationality: str, destination: str,
                   issuing_country: str | None = None,
                   travel_document_type: str = ORDINARY,
                   residence: str | None = None,
+                  residence_subdivision: str | None = None,
                   transit: bool = False) -> dict:
     """Resolve one tuple to a full, honest route record. Deterministic:
-    identical inputs always produce the identical record."""
+    identical inputs always produce the identical record.
+    residence_subdivision (province/state within the residence country) only
+    ever narrows the competent post for physical routes — it never changes
+    the pair policy."""
     n = normalize_inputs(nationality=nationality, destination=destination,
                          issuing_country=issuing_country,
                          travel_document_type=travel_document_type,
@@ -192,10 +226,12 @@ def resolve_route(db, *, nationality: str, destination: str,
     nat, dest, doc = (n["passport_nationality"], n["destination_country"],
                       n["travel_document_type"])
     res = n["lawful_country_of_residence"]
+    res_sub = (residence_subdivision or "").strip() or None
 
     record: dict = {
         "snapshot_date": SNAPSHOT_DATE,
-        "inputs": dict(n, transit_status="transit" if transit else "entry"),
+        "inputs": dict(n, residence_subdivision=res_sub,
+                       transit_status="transit" if transit else "entry"),
         "route_outcome": "UNRESOLVED",
         "disposition": "RESEARCH_INCOMPLETE",
         "verification_status": "unresolved",
@@ -254,7 +290,7 @@ def resolve_route(db, *, nationality: str, destination: str,
 
     # 2) Physical routes: jurisdiction is residence-dependent, never guessed.
     if outcome in _JURISDICTION_OUTCOMES:
-        j = _jurisdiction(db, dest, res, nat)
+        j = _jurisdiction(db, dest, res, nat, res_sub)
         record["jurisdiction"] = j
         if j["status"] == "residence_required":
             record["route_outcome"] = "REQUIRES_MANUAL_JURISDICTION_SELECTION"

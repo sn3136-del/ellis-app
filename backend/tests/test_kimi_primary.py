@@ -1,13 +1,14 @@
-"""Kimi two-pass route guidance: primary analysis + independent verification
-under one hard deadline.
+"""Kimi single-pass route guidance: ONE structured Kimi request per uncached
+route under one hard deadline.
 
-Proves: two Kimi passes produce the final authoritative result (ACCEPT keeps
-pass 1, REVISE applies the verifier's corrected JSON); normal route resolution
-performs no official-source research; cached identical routes load instantly
-(and cache only complete results); malformed answers retry exactly once; the
-total deadline is enforced with the honest retry message (never a spinner);
-provider failures map to precise messages; Kimi gets no secrets; irreversible
-actions keep applicant confirmation."""
+Proves: exactly one Kimi call produces the final authoritative result (no
+second verification pass exists); the honest label is "Kimi route decision";
+normal route resolution performs no official-source research; cached identical
+routes load instantly without any provider call (and cache only complete
+results); malformed answers retry exactly once; the total deadline is enforced
+with the honest retry message (never a spinner); provider failures map to
+precise messages; stored two-pass-era labels are normalized at serve time;
+Kimi gets no secrets; irreversible actions keep applicant confirmation."""
 import pytest
 from sqlalchemy import select
 
@@ -47,20 +48,19 @@ GOOD_ANSWER = {
     "confidence": "high",
 }
 
+# The exact label and stored artifacts from the retired two-pass era — used
+# only to prove serve-time normalization strips the claim.
+OLD_TWO_PASS_LABEL = ("Kimi K3 route decision — independently checked by a "
+                      "second Kimi pass.")
 
-def is_verify_call(system: str) -> bool:
-    return "verifier" in system
 
-
-def two_pass(answer, *, verdict="ACCEPT", issues=None, corrected=None, counter=None):
-    """A provider serving both passes: the analysis answer for pass 1, the
-    verification verdict for pass 2. `counter` tallies calls per pass."""
+def single_pass(answer, *, counter=None):
+    """A provider for the single-pass contract: every call is an analysis call
+    (a verification prompt must never be sent)."""
     def provider(system, user):
+        assert "verifier" not in system, "no second verification pass may run"
         if counter is not None:
-            counter["verify" if is_verify_call(system) else "analyze"] = \
-                counter.get("verify" if is_verify_call(system) else "analyze", 0) + 1
-        if is_verify_call(system):
-            return {"verdict": verdict, "issues": issues or [], "corrected": corrected}
+            counter["analyze"] = counter.get("analyze", 0) + 1
         return dict(answer)
     return provider
 
@@ -85,21 +85,23 @@ def _clear_cache(db):
     db.commit()
 
 
-# ---- two passes produce the final authoritative result -----------------------
-def test_two_passes_produce_final_result_without_research(db):
+# ---- one pass produces the final authoritative result -------------------------
+def test_single_pass_produces_final_result_without_research(db):
     _clear_cache(db)
     counter = {}
-    kimi_primary.set_provider(two_pass(GOOD_ANSWER, counter=counter))
+    kimi_primary.set_provider(single_pass(GOOD_ANSWER, counter=counter))
     before_jobs = db.query(OnDemandRouteResearchJob).count()
     g = kimi_primary.get_route_guidance(db, ROUTE)
     assert g["status"] == "KIMI_PRIMARY"
     assert g["ai_generated"] is True
-    assert counter == {"analyze": 1, "verify": 1}          # exactly two passes
-    assert g["verification"]["verdict"] == "ACCEPT"
-    assert g["verification"]["passes"] == 2
-    # The verified label replaces every official-source claim.
-    assert g["label"] == kimi_primary.VERIFIED_LABEL
+    assert counter == {"analyze": 1}                       # exactly ONE Kimi call
+    # The honest single-pass verification shape — no verdict, no second pass.
+    assert g["verification"] == {"passes": 1, "label": "Kimi route decision"}
+    # The decision label claims exactly one Kimi pass and nothing more.
+    assert g["label"] == kimi_primary.VERIFIED_LABEL == "Kimi route decision"
     assert "official sources" not in g["label"].lower()
+    assert "second" not in g["label"].lower()
+    assert "k3" not in g["label"].lower()
     assert g["guidance"]["disposition"] == "VISA_EXEMPT"
     steps = [s["step"] for s in g["workflow_plan"]]
     assert "collect_documents" in steps and "ocr_and_validate_passport" in steps
@@ -113,21 +115,6 @@ def test_two_passes_produce_final_result_without_research(db):
     assert g["elapsed_seconds"] < 60
 
 
-def test_revise_verdict_applies_the_corrected_json(db):
-    _clear_cache(db)
-    wrong = dict(GOOD_ANSWER, disposition="VISA_REQUIRED",
-                 route_workflow_type="embassy_submission")
-    corrected = dict(GOOD_ANSWER)   # the verifier corrects back to exempt
-    kimi_primary.set_provider(two_pass(wrong, verdict="REVISE",
-                                       issues=["USA passports are visa-exempt for JPN tourism"],
-                                       corrected=corrected))
-    g = kimi_primary.get_route_guidance(db, ROUTE)
-    assert g["status"] == "KIMI_PRIMARY"
-    assert g["verification"]["verdict"] == "REVISE"
-    assert g["verification"]["applied"] is True
-    assert g["guidance"]["disposition"] == "VISA_EXEMPT"   # the FINAL Kimi result
-
-
 def test_visa_required_plan_keeps_irreversible_confirmations(db):
     _clear_cache(db)
     ans = dict(GOOD_ANSWER, disposition="VISA_REQUIRED",
@@ -136,7 +123,7 @@ def test_visa_required_plan_keeps_irreversible_confirmations(db):
                official_portal_url="https://cova.mfa.gov.cn/", forms=["V.2013"],
                appointment_required=True, route_workflow_type="embassy_submission",
                arrival_card=None)
-    kimi_primary.set_provider(two_pass(ans))
+    kimi_primary.set_provider(single_pass(ans))
     g = kimi_primary.get_route_guidance(db, dict(ROUTE, destination_country="CHN"))
     assert g["status"] == "KIMI_PRIMARY"
     assert g["irreversible_requires_confirmation"] is True
@@ -155,7 +142,7 @@ def test_appointment_stages_only_when_appointment_required(db):
                application_channel="online_portal", appointment_required=False,
                government_fee={"amount": 25, "currency": "USD"},
                route_workflow_type="evisa_portal", arrival_card=None)
-    kimi_primary.set_provider(two_pass(ans))
+    kimi_primary.set_provider(single_pass(ans))
     g = kimi_primary.get_route_guidance(db, dict(ROUTE, destination_country="VNM"))
     steps = [s["step"] for s in g["workflow_plan"]]
     assert "appointment_search" not in steps and "appointment_booking" not in steps
@@ -165,33 +152,35 @@ def test_appointment_stages_only_when_appointment_required(db):
 def test_cached_identical_route_loads_immediately(db):
     _clear_cache(db)
     counter = {}
-    kimi_primary.set_provider(two_pass(GOOD_ANSWER, counter=counter))
+    kimi_primary.set_provider(single_pass(GOOD_ANSWER, counter=counter))
     g1 = kimi_primary.get_route_guidance(db, ROUTE)
     g2 = kimi_primary.get_route_guidance(db, ROUTE)
-    assert counter == {"analyze": 1, "verify": 1}   # second hit answered from cache
+    assert counter == {"analyze": 1}      # cache hit made NO provider call
     assert g1["cached"] is False and g2["cached"] is True
-    # The cached row keeps its two-pass verification.
-    assert g2["verification"]["verdict"] == "ACCEPT"
+    # The cached row keeps the honest single-pass shape and label.
+    assert g2["verification"] == {"passes": 1, "label": "Kimi route decision"}
     assert g2["label"] == kimi_primary.VERIFIED_LABEL
     # Same policy month + same route dimensions => same cache key.
     assert kimi_primary.cache_key(ROUTE) == kimi_primary.cache_key(
         dict(ROUTE, arrival_date="2026-09-25"))
     assert kimi_primary.cache_key(ROUTE) != kimi_primary.cache_key(
         dict(ROUTE, destination_country="KOR"))
-    # The two-pass schema version is part of the key (old rows never reused).
-    assert kimi_primary.CACHE_VERSION in kimi_primary.cache_key(ROUTE)
+    # The single-pass schema version is part of the key, so two-pass-era rows
+    # (v2) can never serve again.
+    assert kimi_primary.CACHE_VERSION == "v3"
+    assert kimi_primary.cache_key(ROUTE).endswith("|v3")
 
 
 def test_stale_cache_returns_instantly_flagged_for_refresh(db):
     _clear_cache(db)
-    kimi_primary.set_provider(two_pass(GOOD_ANSWER))
+    kimi_primary.set_provider(single_pass(GOOD_ANSWER))
     kimi_primary.get_route_guidance(db, ROUTE)
     row = db.execute(select(KimiRouteGuidanceCache)).scalars().first()
     from datetime import datetime, timedelta, timezone
     row.fresh_until = datetime.now(timezone.utc) - timedelta(days=1)
     db.commit()
     counter = {}
-    kimi_primary.set_provider(two_pass(GOOD_ANSWER, counter=counter))
+    kimi_primary.set_provider(single_pass(GOOD_ANSWER, counter=counter))
     g = kimi_primary.get_route_guidance(db, ROUTE)
     assert g["cached"] is True and g["stale"] is True   # instant, non-blocking
     assert counter == {}                                # refresh is async, not inline
@@ -201,16 +190,18 @@ def test_uncertain_results_are_never_cached(db):
     _clear_cache(db)
     bad = dict(GOOD_ANSWER)
     bad.pop("permitted_stay")
-    kimi_primary.set_provider(two_pass(bad))
+    kimi_primary.set_provider(single_pass(bad))
     g = kimi_primary.get_route_guidance(db, ROUTE)
     assert g["status"] == "KIMI_UNCERTAIN"
+    assert g["verification"] == {}                     # no decision, no claim
+    assert g["label"] == "AI-generated route guidance"
     assert db.query(KimiRouteGuidanceCache).count() == 0   # retry is always possible
 
 
 # ---- deadline ----------------------------------------------------------------
 def test_deadline_exceeded_is_honest_retryable_error(db, monkeypatch):
     _clear_cache(db)
-    kimi_primary.set_provider(two_pass(GOOD_ANSWER))
+    kimi_primary.set_provider(single_pass(GOOD_ANSWER))
     # A deadline below the minimum call budget trips before any Kimi call.
     monkeypatch.setenv("ELLIS_GUIDANCE_DEADLINE_SECONDS", "1")
     with pytest.raises(kimi_primary.GuidanceTimeout) as exc:
@@ -220,14 +211,18 @@ def test_deadline_exceeded_is_honest_retryable_error(db, monkeypatch):
     assert db.query(KimiRouteGuidanceCache).count() == 0   # never cached
 
 
-def test_slow_pass_one_exhausts_budget_before_verification(db, monkeypatch):
+def test_slow_malformed_analysis_exhausts_budget_before_retry(db, monkeypatch):
     _clear_cache(db)
     import time as _time
+    calls = {"n": 0}
+    incomplete = dict(GOOD_ANSWER)
+    incomplete.pop("permitted_stay")
 
     def slow(system, user):
-        assert not is_verify_call(system), "verification must not start after the deadline"
+        calls["n"] += 1
+        assert calls["n"] == 1, "the malformed retry must not start after the deadline"
         _time.sleep(0.3)
-        return dict(GOOD_ANSWER)
+        return dict(incomplete)
     kimi_primary.set_provider(slow)
     monkeypatch.setenv("ELLIS_GUIDANCE_DEADLINE_SECONDS", "5.2")  # 5.2-0.3 < 5 min budget
     with pytest.raises(kimi_primary.GuidanceTimeout):
@@ -247,9 +242,7 @@ def test_missing_fields_retry_once_then_honest_uncertain(db):
     bad.pop("permitted_stay"); bad.pop("processing_time")
 
     def flaky(system, user):
-        if is_verify_call(system):
-            counter["verify"] = counter.get("verify", 0) + 1
-            return {"verdict": "ACCEPT", "issues": [], "corrected": None}
+        assert "verifier" not in system
         counter["analyze"] = counter.get("analyze", 0) + 1
         if counter["analyze"] > 1:
             assert "permitted_stay" in user and "processing_time" in user  # targeted retry
@@ -258,7 +251,7 @@ def test_missing_fields_retry_once_then_honest_uncertain(db):
     before_jobs = db.query(OnDemandRouteResearchJob).count()
     before_tasks = db.query(HumanReviewTask).count()
     g = kimi_primary.get_route_guidance(db, ROUTE)
-    assert counter["analyze"] == 2                        # exactly one retry
+    assert counter == {"analyze": 2}                      # exactly one retry, no verify
     assert g["status"] == "KIMI_UNCERTAIN"
     assert set(g["missing_fields"]) == {"permitted_stay", "processing_time"}
     # No broad research auto-started; no administrator task created.
@@ -270,7 +263,7 @@ def test_contradictory_answer_flagged_precisely(db):
     _clear_cache(db)
     bad = dict(GOOD_ANSWER, disposition="VISA_EXEMPT",
                forms=["Visa application form DS-123"])
-    kimi_primary.set_provider(two_pass(bad))
+    kimi_primary.set_provider(single_pass(bad))
     g = kimi_primary.get_route_guidance(db, ROUTE)
     assert g["status"] == "KIMI_UNCERTAIN"
     assert any("visa application" in c for c in g["contradictions"])
@@ -278,16 +271,42 @@ def test_contradictory_answer_flagged_precisely(db):
 
 def test_malformed_disposition_rejected(db):
     _clear_cache(db)
-    kimi_primary.set_provider(two_pass(dict(GOOD_ANSWER, disposition="MAYBE")))
+    kimi_primary.set_provider(single_pass(dict(GOOD_ANSWER, disposition="MAYBE")))
     g = kimi_primary.get_route_guidance(db, ROUTE)
     assert g["status"] == "KIMI_UNCERTAIN" and "disposition" in g["missing_fields"]
+
+
+# ---- serve-time label normalization ------------------------------------------
+def test_stored_two_pass_label_is_normalized_at_serve_time():
+    stored = {
+        "status": "KIMI_PRIMARY",
+        "label": OLD_TWO_PASS_LABEL,
+        "guidance": {"disposition": "VISA_EXEMPT"},
+        "verification": {"verdict": "ACCEPT", "issues": [], "passes": 2,
+                         "label": OLD_TWO_PASS_LABEL},
+    }
+    out = kimi_primary.normalize_guidance_label(stored)
+    assert out["label"] == "Kimi route decision"
+    assert out["verification"] == {"passes": 1, "label": "Kimi route decision"}
+    # No second-pass claim survives anywhere in the normalized artifacts.
+    assert "second" not in out["label"].lower()
+    assert "second" not in str(out["verification"]).lower()
+    # Pure: the stored input is never mutated (no DB migration happens).
+    assert stored["label"] == OLD_TWO_PASS_LABEL
+    assert stored["verification"]["passes"] == 2
+    # Untouched pass-through for already-honest or non-dict values.
+    fresh = {"status": "KIMI_PRIMARY", "label": "Kimi route decision",
+             "verification": {"passes": 1, "label": "Kimi route decision"},
+             "guidance": {}}
+    assert kimi_primary.normalize_guidance_label(dict(fresh)) == fresh
+    assert kimi_primary.normalize_guidance_label(None) is None
 
 
 # ---- deterministic arithmetic (never the model) ------------------------------
 def test_trip_duration_vs_permitted_stay_advisory(db):
     _clear_cache(db)
     short = dict(GOOD_ANSWER, permitted_stay="30 days", permitted_stay_days=30)
-    kimi_primary.set_provider(two_pass(short))
+    kimi_primary.set_provider(single_pass(short))
     long_trip = dict(ROUTE, arrival_date="2026-09-01", departure_date="2026-11-15")
     g = kimi_primary.get_route_guidance(db, long_trip)
     assert any("exceeds the permitted stay" in a for a in g["advisories"])
@@ -297,7 +316,7 @@ def test_passport_expiry_advisory_is_calculated(db):
     _clear_cache(db)
     req = dict(GOOD_ANSWER,
                passport_validity_requirement={"kind": "months_after_arrival", "months": 6})
-    kimi_primary.set_provider(two_pass(req))
+    kimi_primary.set_provider(single_pass(req))
     g = kimi_primary.get_route_guidance(
         db, dict(ROUTE, passport_expiry_date="2026-10-01"))
     # Applicant-facing advisory dates are U.S. MM/DD/YYYY, never ISO.
@@ -307,7 +326,7 @@ def test_passport_expiry_advisory_is_calculated(db):
 
 def test_impossible_dates_flagged(db):
     _clear_cache(db)
-    kimi_primary.set_provider(two_pass(GOOD_ANSWER))
+    kimi_primary.set_provider(single_pass(GOOD_ANSWER))
     g = kimi_primary.get_route_guidance(
         db, dict(ROUTE, arrival_date="2026-09-20", departure_date="2026-09-10"))
     assert any("not after arrival" in a for a in g["advisories"])
@@ -386,7 +405,7 @@ def test_error_catalog_messages_are_exact():
 # ---- API flow ----------------------------------------------------------------
 def test_guidance_endpoint_drives_intake_flow(client, db):
     _clear_cache(db)
-    kimi_primary.set_provider(two_pass(GOOD_ANSWER))
+    kimi_primary.set_provider(single_pass(GOOD_ANSWER))
     r = client.post("/intake", headers=H, json={"answers": ROUTE})
     iid = r.json()["id"]
     rr = client.post(f"/intake/{iid}/resolve", headers=H)
@@ -399,7 +418,8 @@ def test_guidance_endpoint_drives_intake_flow(client, db):
     assert g.status_code == 200
     body = g.json()
     assert body["status"] == "KIMI_PRIMARY" and body["ai_generated"] is True
-    assert body["verification"]["verdict"] == "ACCEPT"
+    assert body["label"] == "Kimi route decision"
+    assert body["verification"] == {"passes": 1, "label": "Kimi route decision"}
     assert body["intake_id"] == iid
     # Second resolve now attaches the cached guidance instantly.
     rr2 = client.post(f"/intake/{iid}/resolve", headers=H)
@@ -408,7 +428,7 @@ def test_guidance_endpoint_drives_intake_flow(client, db):
 
 def test_timeout_maps_to_504_with_retry_message(client, db, monkeypatch):
     _clear_cache(db)
-    kimi_primary.set_provider(two_pass(GOOD_ANSWER))
+    kimi_primary.set_provider(single_pass(GOOD_ANSWER))
     monkeypatch.setenv("ELLIS_GUIDANCE_DEADLINE_SECONDS", "1")
     r = client.post("/intake", headers=H,
                     json={"answers": dict(ROUTE, destination_country="KOR")})

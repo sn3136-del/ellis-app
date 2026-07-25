@@ -69,7 +69,8 @@ def run_contract_layer(db, version_row, artifacts) -> fm.AdapterTestRun:
     for node in compiled.nodes.values():
         sel = node.get("selector")
         if sel and node["action"] in ("CLICK", "FILL_NON_SENSITIVE", "SELECT",
-                                      "CHECK", "READ_TEXT", "READ_FEE") \
+                                      "SELECT_SEARCH", "CHECK", "READ_TEXT",
+                                      "READ_FEE", "UPLOAD_AUTHORIZED_DOCUMENT") \
                 and sel not in observed:
             problems.append(f"{node['node_id']}: selector {sel!r} was never observed")
     passed = not problems
@@ -186,30 +187,19 @@ def run_synthetic_layer(db, version_row, *, scenarios=None,
 
 
 # Interactive actions whose selectors must exist in freshly observed structure.
-_INTERACTIVE_ACTIONS = ("CLICK", "FILL_NON_SENSITIVE", "SELECT", "CHECK",
-                        "READ_TEXT", "READ_FEE")
+_INTERACTIVE_ACTIONS = ("CLICK", "FILL_NON_SENSITIVE", "SELECT", "SELECT_SEARCH",
+                        "CHECK", "READ_TEXT", "READ_FEE",
+                        "UPLOAD_AUTHORIZED_DOCUMENT")
 
 
-def run_live_structural_layer(db, version_row, observer) -> fm.AdapterTestRun:
-    """Behavioral layer for REAL modes: safe, reversible, credential-free
-    verification of the generated flow against the LIVE portal.
-
-    Re-observes every NAVIGATE target through the live observer (public
-    navigation only — the observer never authenticates, fills, or clicks) and
-    verifies (a) each target resolves OK on an allowed hostname, and (b) every
-    selector an interactive node touches exists in the freshly observed,
-    sanitized live structure. Nothing here creates an account, submits, books,
-    or pays; a challenged/unreachable page is an honest failure, never bypassed."""
+def _observe_flow_structure(compiled, observer, problems: list[str],
+                            prefix: str = "") -> tuple[set[str], int]:
+    """One session's worth of safe, reversible, credential-free observation:
+    every NAVIGATE target, plus — when the manifest declares an entry gate —
+    the declared entry-gate replay to the gated application form. Returns the
+    freshly observed sanitized selector set and the page count. The observer
+    never authenticates and never fills/clicks beyond the DECLARED gate."""
     from .recon import sanitize_structure
-    if observer is None:
-        return _record(db, version_row, "live_structural", "LIVE_STRUCTURAL_FAILED",
-                       False, {"error": "no live observer available"})
-    try:
-        compiled = compile_flow(version_row)
-    except Exception as e:  # noqa: BLE001
-        return _record(db, version_row, "live_structural", "LIVE_STRUCTURAL_FAILED",
-                       False, {"error": str(e)[:300]})
-    problems: list[str] = []
     observed_selectors: set[str] = set()
     pages_observed = 0
     visited: dict[str, bool] = {}
@@ -224,18 +214,102 @@ def run_live_structural_layer(db, version_row, observer) -> fm.AdapterTestRun:
             visited[url] = ok
             if not ok:
                 err = (obs or {}).get("error") or f"status {(obs or {}).get('status')}"
-                problems.append(f"{node['node_id']}: {url} not observable ({err})")
+                problems.append(f"{prefix}{node['node_id']}: {url} not observable ({err})")
                 continue
             pages_observed += 1
             art = sanitize_structure(obs)   # same chokepoint as recon (§14)
             for el in art.get("elements", []):
                 observed_selectors.add(el.get("selector"))
+    gate = (compiled.manifest or {}).get("entry_gate") or {}
+    if gate:
+        replay = getattr(observer, "observe_with_entry_gate", None)
+        if replay is None:
+            problems.append(f"{prefix}entry_gate: observer cannot replay the "
+                            f"declared entry gate")
+        else:
+            base = gate.get("base_url") or ""
+            if not base:
+                for node in compiled.nodes.values():
+                    if node.get("action") == "NAVIGATE" and \
+                            (node.get("allowed_url_patterns") or []):
+                        base = node["allowed_url_patterns"][0]
+                        break
+            obs = replay(base, gate)
+            if not (obs and obs.get("ok")):
+                problems.append(f"{prefix}entry_gate: replay failed "
+                                f"({str((obs or {}).get('error', ''))[:120]})")
+            else:
+                pages_observed += 1
+                art = sanitize_structure(obs)
+                for el in art.get("elements", []):
+                    observed_selectors.add(el.get("selector"))
+    return observed_selectors, pages_observed
+
+
+def run_live_structural_layer(db, version_row, observer) -> fm.AdapterTestRun:
+    """Behavioral layer for REAL modes: safe, reversible, credential-free
+    verification of the generated flow against the LIVE portal.
+
+    Re-observes every NAVIGATE target (and replays a declared entry gate to
+    re-observe the gated application form) through the live observer — public
+    navigation and declared reversible acknowledgments only; it never
+    authenticates and never fills or clicks beyond the declared gate — and
+    verifies (a) each target resolves OK on an allowed hostname, and (b) every
+    selector an interactive node touches exists in the freshly observed,
+    sanitized live structure. When the observer can spawn an INDEPENDENT
+    second session, every selector is verified in that fresh session too
+    (selectors_verified_repeated_sessions evidence). Nothing here creates an
+    account, submits, books, or pays; a challenged/unreachable page is an
+    honest failure, never bypassed."""
+    if observer is None:
+        return _record(db, version_row, "live_structural", "LIVE_STRUCTURAL_FAILED",
+                       False, {"error": "no live observer available"})
+    try:
+        compiled = compile_flow(version_row)
+    except Exception as e:  # noqa: BLE001
+        return _record(db, version_row, "live_structural", "LIVE_STRUCTURAL_FAILED",
+                       False, {"error": str(e)[:300]})
+    problems: list[str] = []
+    try:
+        observed_selectors, pages_observed = _observe_flow_structure(
+            compiled, observer, problems)
+    except Exception as e:  # noqa: BLE001 — an observer crash is an honest failure
+        return _record(db, version_row, "live_structural", "LIVE_STRUCTURAL_FAILED",
+                       False, {"error": f"live observation crashed: {str(e)[:240]}"})
+    # Second, INDEPENDENT session (fresh browser session — never the recon
+    # session): selector stability across sessions is release-gate evidence.
+    sessions = 1
+    second_selectors: set[str] | None = None
+    spawn = getattr(observer, "spawn_independent", None)
+    try:
+        second = spawn() if spawn else None
+    except Exception as e:  # noqa: BLE001
+        second = None
+        problems.append(f"session2: could not open an independent session "
+                        f"({str(e)[:120]})")
+    if second is not None:
+        try:
+            second_selectors, _ = _observe_flow_structure(
+                compiled, second, problems, prefix="session2: ")
+            sessions = 2
+        except Exception as e:  # noqa: BLE001 — record, don't crash the stage
+            problems.append(f"session2: observation crashed ({str(e)[:120]})")
+        finally:
+            close = getattr(second, "close", None)
+            if close:
+                try:
+                    close()
+                except Exception:  # noqa: BLE001 - session cleanup best-effort
+                    pass
     for node in compiled.nodes.values():
         sel = node.get("selector")
-        if sel and node.get("action") in _INTERACTIVE_ACTIONS \
-                and sel not in observed_selectors:
-            problems.append(f"{node['node_id']}: selector {sel!r} not present in "
-                            f"live structure")
+        if sel and node.get("action") in _INTERACTIVE_ACTIONS:
+            if sel not in observed_selectors:
+                problems.append(f"{node['node_id']}: selector {sel!r} not present in "
+                                f"live structure")
+            elif second_selectors is not None and sel not in second_selectors:
+                problems.append(f"{node['node_id']}: selector {sel!r} unstable — "
+                                f"missing in the second independent session")
     passed = not problems and pages_observed > 0
     if pages_observed == 0 and not problems:
         problems.append("flow contains no observable navigation target")
@@ -244,6 +318,7 @@ def run_live_structural_layer(db, version_row, observer) -> fm.AdapterTestRun:
                    "LIVE_STRUCTURAL_TESTED" if passed else "LIVE_STRUCTURAL_FAILED",
                    passed, {"pages_observed": pages_observed,
                             "selectors_live": len(observed_selectors),
+                            "independent_sessions": sessions,
                             "problems": problems[:10]})
 
 

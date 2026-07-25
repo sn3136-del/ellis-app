@@ -1,31 +1,26 @@
-"""Kimi-primary route guidance: the authoritative TWO-PASS route decision.
+"""Kimi-primary route guidance: the authoritative SINGLE-PASS route decision.
 
-For a tourist route, PASS 1 (primary analysis) sends the applicant's route
-facts to Kimi K3 and requires one structured JSON answer covering the full
-route picture (disposition, category, stay, passport-validity requirement,
-documents, forms, channel/portal, fees, processing time, arrival card,
-health/vaccination conditions, biometrics/interview/appointment,
-account/payment/submission steps, exceptions, uncertainty). PASS 2
-(verification) sends the same facts PLUS pass 1's answer to a separate Kimi
-verification prompt that must detect contradictions, correct wrong
-nationality/destination/date assumptions, check trip duration against the
-permitted stay, distinguish visa-free entry from eVisa/electronic arrival
-forms and tourism from transit rules, and return ACCEPT or REVISE with the
-final authoritative JSON. The final Kimi result drives the Ellis workflow
-directly.
+For a tourist route, ONE structured Kimi request sends the applicant's route
+facts and requires one structured JSON answer covering the full route picture
+(disposition, category, stay, passport-validity requirement, documents, forms,
+channel/portal, fees, processing time, arrival card, health/vaccination
+conditions, biometrics/interview/appointment, account/payment/submission
+steps, exceptions, uncertainty). That Kimi result drives the Ellis workflow
+directly — there is no second model pass; every check on top of it is the
+deterministic validation in this module.
 
 NO official-source fetching, Browserbase research, or evidence validation runs
 on this path, and none is started asynchronously — the research pipeline
 remains a separate developer/administrator tool only.
 
-TIME LIMIT: the whole primary + verification process runs under ONE hard
-wall-clock deadline (default 60 seconds, ELLIS_GUIDANCE_DEADLINE_SECONDS).
-Every Kimi call gets a bounded timeout sized to the remaining budget, one
-controlled retry happens only for a malformed response and only when budget
-remains, and an exceeded deadline surfaces the honest retry message — never an
-indefinite spinner and never a broad-crawling fallback. Cached identical
-routes return immediately; only complete (KIMI_PRIMARY) results are cached, so
-a failed attempt never poisons the cache.
+TIME LIMIT: the whole analysis runs under ONE hard wall-clock deadline
+(default 60 seconds, ELLIS_GUIDANCE_DEADLINE_SECONDS). Every Kimi call gets a
+bounded timeout sized to the remaining budget, one controlled retry happens
+only for a malformed response and only when budget remains, and an exceeded
+deadline surfaces the honest retry message — never an indefinite spinner and
+never a broad-crawling fallback. Cached identical routes return immediately;
+only complete (KIMI_PRIMARY) results are cached, so a failed attempt never
+poisons the cache.
 
 Deterministic validation stays deterministic: JSON/schema whitelisting,
 mandatory-field checks, impossible-date and age arithmetic, passport-expiry
@@ -79,7 +74,7 @@ ALL_FIELDS = MANDATORY_FIELDS + (
     "account_registration_steps", "payment_process", "submission_process",
     "onward_travel_evidence", "accommodation_evidence", "financial_evidence",
     "insurance_required", "exceptions", "uncertainty", "confidence",
-    # Structured additions (two-pass schema):
+    # Structured additions:
     "permitted_stay_days",            # integer for deterministic duration checks
     "passport_validity_requirement",  # {kind, months} — deterministic comparison
     "arrival_card",                   # {required, name, submission_window}
@@ -87,25 +82,30 @@ ALL_FIELDS = MANDATORY_FIELDS + (
     "route_workflow_type",            # one of WORKFLOW_TYPES
 )
 
-# The user-facing verification label (replaces every "checked against official
-# sources" claim for guidance-driven flows).
-VERIFIED_LABEL = "Kimi K3 route decision — independently checked by a second Kimi pass."
+# The user-facing decision label (replaces every "checked against official
+# sources" or second-pass claim for guidance-driven flows). Exactly one Kimi
+# pass produces the decision — the label must never claim more.
+VERIFIED_LABEL = "Kimi route decision"
 
 # The honest hard-deadline message (shown instead of an endless spinner).
 TIMEOUT_MESSAGE = ("Ellis could not complete the AI route analysis within one "
                    "minute. Please retry.")
 
-# Total wall-clock budget for pass 1 + retry + pass 2 combined.
+# Total wall-clock budget for the analysis + its single malformed-retry.
 DEFAULT_DEADLINE_SECONDS = 60
 # Never start a Kimi call with less than this much budget left.
 MIN_CALL_BUDGET_SECONDS = 5
-# Output caps keep K3 latency inside the deadline (structured JSON only).
-PASS1_MAX_TOKENS = 3000
-PASS2_MAX_TOKENS = 3000
+# Output cap bounds Kimi latency inside the deadline. Kimi is a REASONING
+# model: completion_tokens includes its hidden reasoning (observed ~10-13k
+# characters before the ~1.5k-token JSON answer), so a small cap truncates the
+# JSON mid-object (finish_reason "length") and the route comes back uncertain.
+# 12000 leaves ample room for reasoning + the structured answer; the wall-clock
+# deadline still governs overall latency.
+PASS1_MAX_TOKENS = 12000
 
-# Cache-schema version: bumping invalidates single-pass-era rows so a cached
-# route is always a verified two-pass result.
-CACHE_VERSION = "v2"
+# Cache-schema version: bumping invalidates two-pass-era rows so a cached
+# route always carries the honest single-pass label and verification shape.
+CACHE_VERSION = "v3"
 
 # Default freshness window; stale entries are reused instantly and refreshed in
 # the background (never blocking the applicant).
@@ -142,22 +142,6 @@ countries, age, prior refusals, passport issue/expiration dates), answer from
 your knowledge of official visa policy.
 """ + _SCHEMA_SPEC)
 
-_VERIFY_SYSTEM = ("""You are an independent visa-route verifier. The user message
-contains the applicant's route facts and a PROPOSED route analysis produced by
-another engine. Check it strictly:
-- detect internal contradictions;
-- correct any wrong nationality, destination or date assumption;
-- verify the trip duration against the permitted stay;
-- distinguish visa-free entry from an eVisa or an electronic ARRIVAL FORM (an
-  arrival card is not a visa and never makes a route visa-required);
-- distinguish tourism rules from transit rules;
-- check the health/vaccination conditions really apply to THIS route.
-Reply STRICT JSON: {"verdict": "ACCEPT" | "REVISE", "issues": [short strings],
-"corrected": null when ACCEPT, otherwise the FULL corrected analysis using
-exactly this schema:
-""" + _SCHEMA_SPEC + "\n}")
-
-
 class GuidanceUnavailable(Exception):
     """No provider (no key / wrong mode) — honest, never fabricated."""
 
@@ -183,8 +167,7 @@ _PROVIDER = None
 
 
 def set_provider(fn) -> None:
-    """Inject callable(system, user)->dict for tests. None resets to live Kimi.
-    The SAME provider serves both passes; tests branch on the system prompt."""
+    """Inject callable(system, user)->dict for tests. None resets to live Kimi."""
     global _PROVIDER
     _PROVIDER = fn
 
@@ -463,14 +446,15 @@ def _is_stale(row) -> bool:
 
 def _result(status: str, guidance: dict, *, cached: bool, stale: bool,
             missing=None, contradictions=None, model: str = "",
-            verification: dict | None = None, advisories=None,
-            elapsed_seconds: float | None = None) -> dict:
-    verification = dict(verification or {})
-    verified = verification.get("verdict") in ("ACCEPT", "REVISE")
+            advisories=None, elapsed_seconds: float | None = None) -> dict:
+    # Exactly one Kimi pass produced this — the verification field says so
+    # honestly for a complete decision and is empty otherwise.
+    decided = status == STATUS_PRIMARY
+    verification = {"passes": 1, "label": VERIFIED_LABEL} if decided else {}
     out = {
         "status": status,
         "ai_generated": True,
-        "label": VERIFIED_LABEL if verified else "AI-generated route guidance",
+        "label": VERIFIED_LABEL if decided else "AI-generated route guidance",
         "guidance": guidance,
         "workflow_plan": derive_workflow_plan(guidance) if guidance else [],
         "missing_fields": list(missing or []),
@@ -486,22 +470,44 @@ def _result(status: str, guidance: dict, *, cached: bool, stale: bool,
     return out
 
 
-def get_route_guidance(db, route: dict, *, force_refresh: bool = False) -> dict:
-    """The authoritative two-pass route decision under one hard deadline.
+def normalize_guidance_label(guidance: dict | None):
+    """Serve-time normalization for STORED guidance JSON (case_route_guidance
+    rows written in the two-pass era). Their label and verification claim an
+    independent second-pass check that no longer exists — the claim must never
+    reach the UI. Pure and defensive: non-dict input is returned unchanged,
+    the input is never mutated, and no DB migration is needed."""
+    if not isinstance(guidance, dict):
+        return guidance
+    out = dict(guidance)
+    label = str(out.get("label") or "")
+    low = label.lower()
+    if "second" in low or "kimi k3" in low or "official source" in low:
+        out["label"] = VERIFIED_LABEL
+    ver = out.get("verification")
+    if isinstance(ver, dict) and ver:
+        stale = ver.get("verdict") in ("ACCEPT", "REVISE") \
+            or ver.get("passes") not in (None, 1) \
+            or "second" in str(ver.get("label") or "").lower()
+        if stale:
+            out["verification"] = {"passes": 1, "label": VERIFIED_LABEL}
+    return out
 
-    Cached identical routes return instantly. A fresh route runs:
-      PASS 1 (primary analysis) -> deterministic validation -> at most ONE
-      targeted retry when malformed/incomplete -> PASS 2 (independent Kimi
-      verification, ACCEPT or REVISE with the corrected JSON).
-    The final Kimi result is used directly. Never starts research; never
-    creates review tasks; never leaves the caller without a bounded outcome.
+
+def get_route_guidance(db, route: dict, *, force_refresh: bool = False) -> dict:
+    """The authoritative single-pass route decision under one hard deadline.
+
+    Cached identical routes return instantly. A fresh route runs exactly ONE
+    structured Kimi request -> deterministic validation -> at most ONE
+    targeted retry when malformed/incomplete (and only while budget remains).
+    The Kimi result is used directly. Never starts research; never creates
+    review tasks; never leaves the caller without a bounded outcome.
     """
     key = cache_key(route)
     row = _cached(db, key)
     if row is not None and not force_refresh:
         return _result(row.status, row.guidance, cached=True, stale=_is_stale(row),
                        missing=row.missing_fields, contradictions=row.contradictions,
-                       model=row.model, verification=row.verification or {},
+                       model=row.model,
                        advisories=deterministic_advisories(route, row.guidance or {}))
 
     if not is_available():
@@ -523,7 +529,7 @@ def get_route_guidance(db, route: dict, *, force_refresh: bool = False) -> dict:
     model = (os.getenv("KIMI_GUIDANCE_MODEL", "").strip() or settings().kimi_model) \
         if _PROVIDER is None else "injected-test-provider"
 
-    # ---- PASS 1: primary analysis ------------------------------------------
+    # ---- the ONE structured Kimi analysis ----------------------------------
     try:
         raw = _call(_SYSTEM, user, timeout=budget(), max_tokens=PASS1_MAX_TOKENS)
     except (GuidanceUnavailable, GuidanceTimeout, GuidanceProviderError):
@@ -549,48 +555,6 @@ def get_route_guidance(db, route: dict, *, force_refresh: bool = False) -> dict:
         except Exception:  # noqa: BLE001 - keep the first answer's honest gaps
             pass
 
-    # ---- PASS 2: independent Kimi verification ------------------------------
-    verification: dict = {}
-    if clean:
-        verify_user = json.dumps({"applicant_route": route_facts(route),
-                                  "proposed_analysis": clean})
-        verdict_raw: dict | None = None
-        try:
-            verdict_raw = _call(_VERIFY_SYSTEM, verify_user, timeout=budget(),
-                                max_tokens=PASS2_MAX_TOKENS)
-        except (GuidanceUnavailable, GuidanceTimeout, GuidanceProviderError):
-            raise
-        except Exception:  # noqa: BLE001 - malformed -> single bounded retry
-            verdict_raw = None
-        if not isinstance(verdict_raw, dict) or \
-                str(verdict_raw.get("verdict", "")).upper() not in ("ACCEPT", "REVISE"):
-            try:
-                verdict_raw = _call(_VERIFY_SYSTEM, verify_user +
-                                    "\n\nYour previous reply was not valid JSON with a "
-                                    "verdict. Reply exactly the required JSON.",
-                                    timeout=budget(), max_tokens=PASS2_MAX_TOKENS)
-            except (GuidanceUnavailable, GuidanceTimeout, GuidanceProviderError):
-                raise
-            except Exception:  # noqa: BLE001
-                verdict_raw = None
-        if not isinstance(verdict_raw, dict) or \
-                str(verdict_raw.get("verdict", "")).upper() not in ("ACCEPT", "REVISE"):
-            # Verification could not produce a verdict inside the deadline —
-            # the two-pass promise is broken, so fail honestly (retryable).
-            raise GuidanceTimeout()
-        verdict = str(verdict_raw.get("verdict")).upper()
-        issues = [str(i) for i in (verdict_raw.get("issues") or []) if str(i).strip()][:12]
-        verification = {"verdict": verdict, "issues": issues, "passes": 2,
-                        "label": VERIFIED_LABEL}
-        if verdict == "REVISE":
-            corr, c_missing, c_contra = validate_answer(verdict_raw.get("corrected") or {})
-            if corr and len(c_missing) + len(c_contra) <= len(missing) + len(contradictions):
-                # The verifier's corrected JSON is the final authoritative answer.
-                clean, missing, contradictions = corr, c_missing, c_contra
-                verification["applied"] = True
-            else:
-                verification["applied"] = False
-
     status = STATUS_PRIMARY if clean and not missing and not contradictions \
         else STATUS_UNCERTAIN
     elapsed = time.monotonic() - started
@@ -615,14 +579,13 @@ def get_route_guidance(db, route: dict, *, force_refresh: bool = False) -> dict:
         row.missing_fields = missing
         row.contradictions = contradictions
         row.model = model
-        row.verification = verification
+        row.verification = {"passes": 1, "label": VERIFIED_LABEL}
         row.generated_at = now
         row.fresh_until = now + timedelta(days=ttl)
         db.commit()
     return _result(status, clean, cached=False, stale=False,
                    missing=missing, contradictions=contradictions, model=model,
-                   verification=verification, advisories=advisories,
-                   elapsed_seconds=elapsed)
+                   advisories=advisories, elapsed_seconds=elapsed)
 
 
 def refresh_stale_async(db_factory, route: dict) -> None:

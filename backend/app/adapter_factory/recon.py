@@ -27,7 +27,12 @@ _DIRECTIVE_RE = re.compile(
     r"instruction|password to|send .* to|https?://|@)", re.IGNORECASE)
 
 _ALLOWED_TYPES = {"text", "email", "password", "date", "select", "checkbox",
-                  "radio", "file", "button", "tel", "number"}
+                  "radio", "file", "button", "tel", "number", "search-combobox"}
+
+# Entry-gate replay vocabulary (declared, curated; see live_browser).
+_ENTRY_GATE_ACTIONS = {"CLICK", "SCROLL_TO_BOTTOM", "CHECK"}
+ENTRY_GATED_FORM_PAGE_KEY = "application_form"
+ENTRY_GATED_FORM_CLASS = "application_form"
 
 # Values that must never appear in an artifact even if a buggy observer leaks
 # them: anything shaped like a secret or personal identifier.
@@ -61,6 +66,8 @@ def sanitize_structure(observation: dict) -> dict:
             "required": bool(el.get("required", False)),
             "sensitive": bool(el.get("sensitive", False)) or etype == "password",
         }
+        if el.get("placeholder"):
+            clean["placeholder"] = sanitize_label(el.get("placeholder", ""))
         if el.get("submits"):
             clean["submits"] = re.sub(r"[^a-z_]", "", str(el.get("submits", "")))[:40]
         if el.get("navigates_to"):
@@ -76,6 +83,15 @@ def sanitize_structure(observation: dict) -> dict:
         "iframes": [_pattern(f) for f in (observation.get("iframes") or [])][:10],
         "delayed_content": bool(observation.get("delayed", False)),
     }
+    # Entry-gate replay echo: WHICH declared reversible actions were performed
+    # to reach this page (action names + selectors only — never values/text).
+    if observation.get("entry_gate_replayed"):
+        out["entry_gate_replayed"] = [
+            {"action": s.get("action") if s.get("action") in _ENTRY_GATE_ACTIONS
+             else "REFUSED",
+             "selector": str(s.get("selector", ""))[:200],
+             "ok": bool(s.get("ok"))}
+            for s in list(observation["entry_gate_replayed"])[:12]]
     _assert_sanitized(out)
     return out
 
@@ -127,7 +143,8 @@ def run_recon(db, *, build_request: fm.AdapterBuildRequest, observer,
               start_paths=("/", "/login", "/application", "/fees",
                            "/appointments", "/submit"),
               hostnames: list[str] | None = None,
-              follow_links: bool = False) -> fm.AdapterReconJob:
+              follow_links: bool = False,
+              entry_gate: dict | None = None) -> fm.AdapterReconJob:
     """Observe the portal's public pages through `observer(url) -> observation`
     and persist sanitized artifacts. `observer` is the structural interface —
     SyntheticPortal.observe in tests, a Browserbase/Playwright structural probe
@@ -135,8 +152,16 @@ def run_recon(db, *, build_request: fm.AdapterBuildRequest, observer,
 
     With follow_links=True (live builds), one bounded second wave probes
     same-host links whose sanitized pattern looks visa-relevant — real portals
-    rarely use the standard probe paths. Never leaves the verified hosts."""
+    rarely use the standard probe paths. Never leaves the verified hosts.
+
+    When the portal family declares an `entry_gate` (curated reversible
+    click/scroll/acknowledge sequence gating the real application form), recon
+    ALSO replays it through `observer.observe_with_entry_gate` and records the
+    destination page as a distinct artifact whose content_class marks it as
+    the application form. Defaults to the build request's portal_evidence."""
     hosts = [h.lower() for h in (hostnames or (build_request.portal_evidence or {}).get("hostnames", []))]
+    if entry_gate is None:
+        entry_gate = (build_request.portal_evidence or {}).get("entry_gate") or None
     if not hosts:
         raise ReconRefused("no verified portal hostnames — recon may not guess where to look")
     job = fm.AdapterReconJob(build_request_id=build_request.id, org_id=build_request.org_id,
@@ -215,6 +240,12 @@ def run_recon(db, *, build_request: fm.AdapterBuildRequest, observer,
                 if _observe_one(lhost, lpath,
                                 _unique_key(_page_key_for(lpath), lpath)) is not None:
                     followed.append(lpath)
+        if entry_gate:
+            if _observe_entry_gated_form(db, job, build_request=build_request,
+                                         observer=observer, hosts=hosts,
+                                         entry_gate=entry_gate,
+                                         unique_key=_unique_key):
+                observed += 1
         job.pages_observed = observed
         job.status = "complete" if observed else "failed"
         if not observed:
@@ -228,6 +259,47 @@ def run_recon(db, *, build_request: fm.AdapterBuildRequest, observer,
                  detail={"job": job.id, "pages": observed, "status": job.status},
                  actor="ellis")
     return job
+
+
+def _observe_entry_gated_form(db, job, *, build_request, observer, hosts,
+                              entry_gate: dict, unique_key) -> bool:
+    """Replay the DECLARED entry gate and record the destination page as the
+    application-form artifact (returns True when recorded). Honest on every
+    failure path: a replay that does not land on the expected path records
+    the reason and NO form artifact — downstream gates then fail closed with
+    that exact gap."""
+    replay = getattr(observer, "observe_with_entry_gate", None)
+    if replay is None:
+        job.error = ("entry gate declared but the observer has no "
+                     "entry-gate replay capability")[:400]
+        return False
+    for a in entry_gate.get("actions") or []:
+        if (a or {}).get("action") not in _ENTRY_GATE_ACTIONS:
+            raise ReconRefused(f"entry gate action {(a or {}).get('action')!r} "
+                               f"outside the declared vocabulary")
+    base = (build_request.portal_evidence or {}).get("portal_url") or \
+        (f"https://{hosts[0]}/" if hosts else "")
+    raw = replay(base, entry_gate)
+    if not raw or not raw.get("ok"):
+        job.error = f"entry gate replay failed: {str((raw or {}).get('error', ''))[:200]}"[:400]
+        return False
+    if str(raw.get("hostname", "")).lower() not in hosts:
+        job.error = "entry gate replay ended off the verified hosts"[:400]
+        return False
+    art = sanitize_structure(raw)
+    expect = str(entry_gate.get("expect_path") or "").rstrip("/")
+    pattern = art.get("url_pattern", "")
+    if expect and not pattern.rstrip("/").endswith(expect):
+        job.error = (f"entry gate replay ended at {pattern[:120]!r}, "
+                     f"expected path {expect!r}")[:400]
+        return False
+    db.add(fm.AdapterReconArtifact(
+        recon_job_id=job.id,
+        page_key=unique_key(ENTRY_GATED_FORM_PAGE_KEY, pattern or ENTRY_GATED_FORM_PAGE_KEY),
+        hostname=art["hostname"], url_pattern=pattern, structure=art,
+        content_class=ENTRY_GATED_FORM_CLASS))
+    db.flush()
+    return True
 
 
 def artifacts(db, recon_job_id: str) -> list[fm.AdapterReconArtifact]:

@@ -29,7 +29,8 @@ from sqlalchemy import select
 
 from . import SNAPSHOT_DATE
 from .authority import classify_evidence, hostname, is_government_host
-from .models import (ConsularJurisdictionRule, HumanReviewTask, OfficialPortalRecord,
+from .models import (AuthorizedVisaCenter, ConsularJurisdictionRule,
+                     HumanReviewTask, OfficialPortalRecord,
                      PassportValidityRuleRecord, RouteMatrixEntry, SnapshotConflict,
                      SnapshotResearchBatch, SourceEvidence, VisaFeeVersion,
                      VisaPolicy, VisaPolicyVersion)
@@ -119,6 +120,100 @@ def _load_research(dest: str) -> dict | None:
 
 def _sha(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def ingest_jurisdictions(db, dest: str, data: dict) -> dict:
+    """Idempotent ingest of a research file's `jurisdictions` section into
+    ConsularJurisdictionRule (+ AuthorizedVisaCenter for contracted centers).
+
+    Verification is deterministic and fail-closed, mirroring the portal-record
+    convention: a rule is 'verified' ONLY when the competent post URL is on the
+    curated government allowlist, OR an official government page (itself on a
+    government domain — `official_linking_source`) names the exact contracted
+    center. Everything else stays manual_review_required and the resolver
+    never serves it."""
+    rules_created = centers_created = 0
+    for j in data.get("jurisdictions", []) or []:
+        res = j.get("residence_jurisdiction", "")
+        try:
+            res3 = normalize_country(res, field="residence") if res else ""
+        except Exception:
+            res3 = ""
+        if not res3:
+            continue
+        url = j.get("competent_post_url", "")
+        link = j.get("official_linking_source") or ""
+        verified = is_government_host(hostname(url)) or (
+            bool(link) and is_government_host(hostname(link)))
+        evidence = [u for u in (j.get("source_urls") or []) if isinstance(u, str)]
+        if link and link not in evidence:
+            evidence.insert(0, link)
+        dup = db.execute(select(ConsularJurisdictionRule).where(
+            ConsularJurisdictionRule.snapshot_date == SNAPSHOT_DATE,
+            ConsularJurisdictionRule.destination_country == dest,
+            ConsularJurisdictionRule.residence_jurisdiction == res3)).scalar_one_or_none()
+        if dup is None:
+            db.add(ConsularJurisdictionRule(
+                snapshot_date=SNAPSHOT_DATE,
+                destination_country=dest,
+                residence_jurisdiction=res3,
+                residence_subdivisions=j.get("residence_subdivisions", [])[:60],
+                competent_post_name=(j.get("competent_post_name") or "")[:300],
+                competent_post_kind=j.get("competent_post_kind", "unknown"),
+                competent_post_url=url[:500],
+                covers_nationalities=j.get("covers_nationalities", [])[:250],
+                conditions=j.get("conditions", [])[:20],
+                verification_status=("verified" if verified
+                                     else "manual_review_required"),
+                evidence_ids=evidence[:20]))
+            rules_created += 1
+        if j.get("competent_post_kind") == "authorized_visa_center" and \
+                (j.get("competent_post_name") or "").strip():
+            center_dup = db.execute(select(AuthorizedVisaCenter).where(
+                AuthorizedVisaCenter.snapshot_date == SNAPSHOT_DATE,
+                AuthorizedVisaCenter.destination_country == dest,
+                AuthorizedVisaCenter.name == j["competent_post_name"][:300]
+            )).scalar_one_or_none()
+            if center_dup is None:
+                db.add(AuthorizedVisaCenter(
+                    snapshot_date=SNAPSHOT_DATE,
+                    destination_country=dest,
+                    residence_jurisdiction=res3,
+                    operator=(j.get("operator") or "")[:300],
+                    name=j["competent_post_name"][:300],
+                    url=url[:500],
+                    official_linking_source=link[:500],
+                    verification_status=("verified" if verified
+                                         else "manual_review_required"),
+                    evidence_ids=evidence[:20]))
+                centers_created += 1
+    return {"jurisdiction_rules_created": rules_created,
+            "visa_centers_created": centers_created}
+
+
+def ingest_all_research_jurisdictions(db) -> dict:
+    """Re-runnable ingest of every research file's jurisdictions section.
+    Used by `python -m app.global_routes apply-research` so a DB whose batches
+    already passed CREATE_POLICY_VERSIONS (or never ran) still receives newly
+    researched jurisdiction rules. Idempotent via the same dup checks."""
+    dests = {c["alpha_3"] for c in load_registry("countries")["entries"]}
+    stats = {"destinations_seen": 0, "jurisdiction_rules_created": 0,
+             "visa_centers_created": 0}
+    if not RESEARCH_DIR.exists():
+        return stats
+    for path in sorted(RESEARCH_DIR.glob("*/research.json")):
+        data = _load_research(path.parent.name)
+        if not data or data.get("__parse_error__"):
+            continue
+        dest = (data.get("destination") or path.parent.name).upper()
+        if dest not in dests:
+            continue
+        out = ingest_jurisdictions(db, dest, data)
+        stats["destinations_seen"] += 1
+        stats["jurisdiction_rules_created"] += out["jurisdiction_rules_created"]
+        stats["visa_centers_created"] += out["visa_centers_created"]
+    db.commit()
+    return stats
 
 
 def process_batch(db, batch: SnapshotResearchBatch, *, max_stages: int = 12) -> SnapshotResearchBatch:
@@ -330,34 +425,7 @@ def process_batch(db, batch: SnapshotResearchBatch, *, max_stages: int = 12) -> 
                     supported_categories=portal.get("supported_categories", [])[:10],
                     verification_status=vs,
                     evidence_ids=portal.get("source_urls", [])[:20]))
-            for j in data.get("jurisdictions", []):
-                res = j.get("residence_jurisdiction", "")
-                try:
-                    res3 = normalize_country(res, field="residence") if res else ""
-                except Exception:
-                    res3 = ""
-                if not res3:
-                    continue
-                dup = db.execute(select(ConsularJurisdictionRule).where(
-                    ConsularJurisdictionRule.snapshot_date == SNAPSHOT_DATE,
-                    ConsularJurisdictionRule.destination_country == batch.destination_country,
-                    ConsularJurisdictionRule.residence_jurisdiction == res3)).scalar_one_or_none()
-                if dup:
-                    continue
-                url = j.get("competent_post_url", "")
-                db.add(ConsularJurisdictionRule(
-                    snapshot_date=SNAPSHOT_DATE,
-                    destination_country=batch.destination_country,
-                    residence_jurisdiction=res3,
-                    residence_subdivisions=j.get("residence_subdivisions", [])[:60],
-                    competent_post_name=(j.get("competent_post_name") or "")[:300],
-                    competent_post_kind=j.get("competent_post_kind", "unknown"),
-                    competent_post_url=url[:500],
-                    covers_nationalities=j.get("covers_nationalities", [])[:250],
-                    conditions=j.get("conditions", [])[:20],
-                    verification_status=("verified" if is_government_host(hostname(url))
-                                         else "manual_review_required"),
-                    evidence_ids=j.get("source_urls", [])[:20]))
+            ingest_jurisdictions(db, batch.destination_country, data)
             batch.record_count = created
             batch.stage = "LINK_ROUTE_ENTRIES"
 

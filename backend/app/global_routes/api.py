@@ -33,6 +33,7 @@ def admin_global_unsupported(limit: int = 200,
 @router.get("/global/route-outcome")
 def route_outcome(nationality: str, destination: str,
                   residence: str | None = None,
+                  residence_subdivision: str | None = None,
                   issuing_country: str | None = None,
                   travel_document_type: str = "ordinary_passport",
                   transit: bool = False,
@@ -41,7 +42,8 @@ def route_outcome(nationality: str, destination: str,
     try:
         rec = resolver_mod.resolve_route(
             db, nationality=nationality, destination=destination,
-            residence=residence, issuing_country=issuing_country,
+            residence=residence, residence_subdivision=residence_subdivision,
+            issuing_country=issuing_country,
             travel_document_type=travel_document_type, transit=transit)
     except RegistryError as exc:
         raise HTTPException(status_code=400, detail=str(exc))

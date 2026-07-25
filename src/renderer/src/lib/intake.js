@@ -479,7 +479,7 @@ export function prefillWithEdits(profile, edits = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// Route-specific journey rendering (Kimi two-pass drives WHICH stages exist).
+// Route-specific journey rendering (the Kimi workflow plan drives WHICH stages exist).
 
 // Stages implied by each irreversible workflow-plan step. Only stages whose
 // step actually appears in the route's plan are shown — never the whole
@@ -542,10 +542,13 @@ export function validityMeta(status) {
     offerRenewal: s === 'insufficient_validity' || s === 'expired' }
 }
 
-// The two-pass verification chip: shown only for a genuinely verified result.
+// The route-decision chip: shown for a valid Kimi decision. The current
+// backend sends {passes: 1, label: 'Kimi route decision'}; legacy client-side
+// data may still carry a two-pass verdict — both render the same honest chip.
 export function verificationMeta(verification) {
   const v = verification && typeof verification === 'object' ? verification : {}
-  const verified = v.verdict === 'ACCEPT' || v.verdict === 'REVISE'
+  const verified = Number(v.passes) >= 1 ||
+    v.verdict === 'ACCEPT' || v.verdict === 'REVISE'
   return { verified, i18nKey: verified ? 'guidance.verified' : null }
 }
 

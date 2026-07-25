@@ -38,6 +38,32 @@ _OUTCOME_TO_KINDS = {
 }
 
 
+_ENTRY_GATE_VOCAB = ("CLICK", "SCROLL_TO_BOTTOM", "CHECK")
+
+
+def _validate_entry_gate(family_id: str, gate: dict) -> None:
+    """A curated entry gate must stay inside the reversible vocabulary and
+    declare where it ends — a typo here must fail the seed load, not a build."""
+    actions = gate.get("actions")
+    if not isinstance(actions, list) or not actions:
+        raise ValueError(f"portal family {family_id}: entry_gate needs actions")
+    for a in actions:
+        if (a or {}).get("action") not in _ENTRY_GATE_VOCAB:
+            raise ValueError(f"portal family {family_id}: entry_gate action "
+                             f"{(a or {}).get('action')!r} outside "
+                             f"{_ENTRY_GATE_VOCAB}")
+        if a.get("action") != "SCROLL_TO_BOTTOM" and not str(a.get("selector") or "").strip():
+            raise ValueError(f"portal family {family_id}: entry_gate "
+                             f"{a['action']} needs a selector")
+    if not str(gate.get("expect_path") or "").startswith("/"):
+        raise ValueError(f"portal family {family_id}: entry_gate needs an "
+                         f"absolute expect_path")
+    for k in gate.get("declared_handoffs") or []:
+        if k not in ("captcha", "otp"):
+            raise ValueError(f"portal family {family_id}: entry_gate declared "
+                             f"handoff {k!r} unknown")
+
+
 def load_seed() -> list[dict]:
     data = json.loads(FAMILIES_SEED.read_text())
     if data.get("registry") != "portal_families":
@@ -50,6 +76,8 @@ def load_seed() -> list[dict]:
         if e["family_id"] in seen:
             raise ValueError(f"duplicate family_id {e['family_id']}")
         seen.add(e["family_id"])
+        if e.get("entry_gate"):
+            _validate_entry_gate(e["family_id"], e["entry_gate"])
     return entries
 
 
@@ -78,6 +106,7 @@ def sync_families(db) -> dict:
         fam.nationality_scope = e.get("nationality_scope") or []
         fam.supported_outcomes = e.get("supported_outcomes") or []
         fam.account_required = bool(e.get("account_required"))
+        fam.entry_gate = e.get("entry_gate") or {}
         fam.notes = e.get("notes", "")
         # Deterministic identity verification — never invented, never assumed.
         # A live_verified family keeps its stronger status; conflicted/

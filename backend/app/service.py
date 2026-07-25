@@ -12,6 +12,7 @@ from __future__ import annotations
 from sqlalchemy import select
 
 from . import models
+from .config import settings
 from .portal.driver_factory import (RealOnlyStop, build_runtime_portal,
                                     register_runtime_adapters,
                                     select_runtime_adapter)
@@ -36,18 +37,29 @@ def load_workflow(db, application_id: str) -> VisaWorkflow:
     ).scalar_one_or_none()
 
     # Rehydrate the portal from persisted state (or a fresh one on first run).
-    # In real-only runtime modes this raises RealOnlyStop — MockPortal is never
-    # bound and there is no live driver yet (brief section 3, fail closed).
-    portal_state = (exec_row.snapshot or {}).get("portal") if exec_row else None
-    portal = build_runtime_portal(portal_state)
-    register_runtime_adapters(portal)
+    # Real-only runtime modes: a route whose portal family has a RELEASED
+    # adapter (deterministic 16-gate release → active runtime binding) executes
+    # through the live FlowRunner bridge; every other route still fails closed
+    # with RealOnlyStop — MockPortal is never bound (brief section 3).
+    portal = adapter = None
+    if not settings().mock_portal_allowed:
+        from .portal.released_flow import build_for_case
+        built = build_for_case(db, app)
+        if built is not None:
+            portal, adapter = built
+    if adapter is None:
+        portal_state = (exec_row.snapshot or {}).get("portal") if exec_row else None
+        portal = build_runtime_portal(portal_state)
+        register_runtime_adapters(portal)
+        adapter = select_runtime_adapter(app.destination_country, app.visa_type)
 
-    country = app.destination_country
-    adapter = select_runtime_adapter(country, app.visa_type)
-
+    # A case can accumulate several envelopes (e.g. re-prepared signatures);
+    # the newest one carries the operative authorization.
     auth = db.execute(
-        select(models.AuthorizationEnvelope).where(models.AuthorizationEnvelope.application_id == application_id)
-    ).scalar_one_or_none()
+        select(models.AuthorizationEnvelope)
+        .where(models.AuthorizationEnvelope.application_id == application_id)
+        .order_by(models.AuthorizationEnvelope.created_at.desc())
+    ).scalars().first()
     authorization = {}
     if auth:
         authorization = {"max_fee_cents": auth.max_fee_cents, "currency": auth.currency,

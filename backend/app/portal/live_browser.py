@@ -29,6 +29,12 @@ _EXTRACT_JS = r"""
   const cssPath = (el) => {
     if (el.id) return '#' + CSS.escape(el.id);
     if (el.name) return el.tagName.toLowerCase() + '[name="' + el.name + '"]';
+    if (el.tagName === 'BUTTON') {
+      // A button with stable visible text gets a bounded, deterministic
+      // text selector instead of a brittle deep ancestor path.
+      const t = (el.innerText || '').trim().replace(/\s+/g, ' ').replace(/["<>]/g, '').slice(0, 40);
+      if (t) return 'button:has-text("' + t + '")';
+    }
     const parts = [];
     let n = el;
     while (n && n.nodeType === 1 && parts.length < 4) {
@@ -54,9 +60,17 @@ _EXTRACT_JS = r"""
   document.querySelectorAll('input, select, textarea, button, a[href]').forEach((el) => {
     const tag = el.tagName.toLowerCase();
     let type = (el.type || (tag === 'a' ? 'link' : tag)).toLowerCase();
+    // Search-combobox detection (ARIA-based): SPA select widgets whose entry
+    // control is a text input driving a filtered option list.
+    if (tag === 'input' && (type === 'text' || type === 'search' || type === '')) {
+      if (el.getAttribute('role') === 'combobox' ||
+          el.getAttribute('aria-autocomplete') === 'list' ||
+          el.closest('[role="combobox"]')) type = 'search-combobox';
+    }
     const name = (el.name || el.id || '').slice(0, 80);
     const label = (labelFor(el) || '').trim().slice(0, 120);
     const rec = { selector: cssPath(el).slice(0, 200), name, label, type,
+                  placeholder: (el.placeholder || '').slice(0, 60),
                   required: !!el.required || el.getAttribute('aria-required') === 'true',
                   sensitive: type === 'password' || sensitive.test(name) || sensitive.test(label) };
     if (tag === 'button' || type === 'submit') rec.submits = (name || 'submit').replace(/[^a-z_]/gi, '').toLowerCase().slice(0, 40);
@@ -81,7 +95,8 @@ _EXTRACT_JS = r"""
 CONNECT_TIMEOUT_MS = 60_000
 
 _ALLOWED_TYPES = {"text", "email", "password", "date", "select", "checkbox",
-                  "radio", "file", "button", "submit", "tel", "number", "link"}
+                  "radio", "file", "button", "submit", "tel", "number", "link",
+                  "search-combobox"}
 
 
 def normalize_observation(url: str, status: int, hostname: str, raw: dict,
@@ -102,6 +117,8 @@ def normalize_observation(url: str, status: int, hostname: str, raw: dict,
             "required": bool(el.get("required", False)),
             "sensitive": bool(el.get("sensitive", False)) or etype == "password",
         }
+        if el.get("placeholder"):
+            rec["placeholder"] = str(el.get("placeholder"))[:60]
         if el.get("submits"):
             rec["submits"] = re.sub(r"[^a-z_]", "", str(el.get("submits")))[:40]
         if el.get("navigates_to"):
@@ -187,6 +204,156 @@ class LiveBrowserSession:
             return {"ok": False, "status": 0, "url": url, "error": str(e)[:200]}
         return normalize_observation(final, status, urlparse(final).netloc, raw)  # pragma: no cover
 
+    # ---- declarative entry-gate replay (credential-free, reversible) --------
+    # Some SPA portals gate their application form behind an in-session
+    # instruction sequence (open modal, scroll acknowledgment text, tick the
+    # acknowledgment checkboxes, continue). The sequence is DECLARED, curated
+    # data — never inferred from page content — and only these reversible
+    # navigation/acknowledgment actions are permitted.
+    ENTRY_GATE_ACTIONS = ("CLICK", "SCROLL_TO_BOTTOM", "CHECK")
+    ENTRY_GATE_MAX_ACTIONS = 12
+
+    _SENSITIVE_TARGET_RE = re.compile(
+        r"(password|passcode|otp|one[-_]?time|cvv|cvc|card|pan|secret|token|"
+        r"captcha|pin|3ds|passkey|pay)", re.IGNORECASE)
+
+    def _assert_gate_target_safe(self, locator, action: str, selector: str):
+        """No entry-gate action may ever touch a password/payment/sensitive
+        field: CHECK only real checkboxes, CLICK never a value-bearing input."""
+        info = locator.evaluate(
+            "el => ({tag: el.tagName.toLowerCase(),"
+            " type: (el.getAttribute('type') || '').toLowerCase(),"
+            " ident: ((el.name || '') + ' ' + (el.id || ''))})")
+        if info.get("type") == "password" or \
+                self._SENSITIVE_TARGET_RE.search(info.get("ident", "")):
+            raise RuntimeError(f"entry gate refused: {selector!r} is a sensitive field")
+        if action == "CHECK" and not (info.get("tag") == "input"
+                                      and info.get("type") == "checkbox"):
+            raise RuntimeError(f"entry gate refused: CHECK target {selector!r} "
+                               f"is not a checkbox")
+        if action == "CLICK" and info.get("tag") in ("input", "textarea", "select") \
+                and info.get("type") not in ("button", "submit", "checkbox", "radio"):
+            raise RuntimeError(f"entry gate refused: CLICK target {selector!r} "
+                               f"is a form input")
+
+    @staticmethod
+    def _scroll_container_to_bottom(page, selector: str):
+        """Set scrollTop to max on every matching container (window when the
+        selector is empty) and dispatch a scroll event — SPAs enable their
+        'Next' button on the scroll event, not on scrollTop alone."""
+        page.evaluate(
+            """(sel) => {
+                 const targets = sel ? Array.from(document.querySelectorAll(sel))
+                                     : [document.scrollingElement];
+                 for (const t of targets) {
+                   if (!t) continue;
+                   t.scrollTop = t.scrollHeight;
+                   t.dispatchEvent(new Event('scroll', {bubbles: true}));
+                 }
+               }""", selector or "")
+
+    def observe_with_entry_gate(self, base_url: str, entry_gate: dict) -> dict:
+        """Replay a DECLARED entry gate from base_url and observe the
+        destination page's structure. Actions are restricted to the reversible
+        navigation/acknowledgment vocabulary; the observer still never
+        authenticates, never fills a value, and never leaves the allowlist."""
+        gate = entry_gate or {}
+        actions = list(gate.get("actions") or [])[: self.ENTRY_GATE_MAX_ACTIONS]
+        for a in actions:
+            if (a or {}).get("action") not in self.ENTRY_GATE_ACTIONS:
+                return {"ok": False, "status": 0, "url": base_url,
+                        "error": f"entry gate action {(a or {}).get('action')!r} "
+                                 f"not in the declared vocabulary"}
+        if self.allowed and not self._host_ok(base_url):
+            return {"ok": False, "status": 0, "url": base_url,
+                    "error": "off-allowlist host refused"}
+        page = self._ensure_page()
+        performed: list[dict] = []
+        try:                                                                     # pragma: no cover
+            resp = page.goto(base_url, wait_until="domcontentloaded", timeout=45000)
+            status = resp.status if resp else 200
+            for a in actions:
+                act = a["action"]
+                sel = str(a.get("selector") or "")
+                if act == "SCROLL_TO_BOTTOM":
+                    self._scroll_container_to_bottom(page, sel)
+                    performed.append({"action": act, "selector": sel, "ok": True})
+                    continue
+                loc = page.locator(sel).first
+                loc.wait_for(state="visible",
+                             timeout=int(a.get("timeout_ms") or 30000))
+                self._assert_gate_target_safe(loc, act, sel)
+                if act == "CLICK":
+                    loc.click(timeout=15000)
+                else:  # CHECK — a real checkbox check, acknowledgment only
+                    loc.check(timeout=15000)
+                performed.append({"action": act, "selector": sel, "ok": True})
+            expect_path = str(gate.get("expect_path") or "")
+            if expect_path:
+                page.wait_for_url(
+                    lambda u: urlparse(u).path.rstrip("/") == expect_path.rstrip("/"),
+                    timeout=30000)
+            # SPA render readiness (declared, portal-agnostic):
+            #  1. the destination path is already confirmed (wait_for_url);
+            #  2. wait for the declared concrete control ATTACHED — not
+            #     visible: styled upload inputs are permanently display:none
+            #     behind "Choose file" buttons, and a visibility wait on an
+            #     [id^=...] locator can pin itself to exactly those;
+            #  3. wait until the declared minimum number of form controls
+            #     exists — SPA forms hydrate field-by-field while nomenclature
+            #     lists load, which can be slow from a datacenter egress.
+            ready = str(gate.get("form_ready_selector") or "")
+            count_spec = gate.get("form_ready_all") or {}
+            count_sel = str(count_spec.get("selector") or "")
+            count_min = int(count_spec.get("min") or 0)
+            try:
+                if ready:
+                    page.wait_for_selector(ready, state="attached", timeout=90000)
+                if count_sel and count_min:
+                    page.wait_for_function(
+                        "([sel, n]) => document.querySelectorAll(sel).length >= n",
+                        arg=[count_sel, count_min], timeout=60000)
+                elif not ready:
+                    page.wait_for_load_state("networkidle", timeout=30000)
+            except Exception as e:  # noqa: BLE001 — honest, diagnosable failure
+                probe = count_sel or ready or "*"
+                try:
+                    have = page.evaluate(
+                        "(sel) => document.querySelectorAll(sel).length", probe)
+                except Exception:  # noqa: BLE001
+                    have = -1
+                return {"ok": False, "status": status, "url": page.url,
+                        "error": f"form not ready at "
+                                 f"{urlparse(page.url).path[:80]!r} "
+                                 f"({probe[:40]!r} matches={have}, "
+                                 f"need>={count_min or 1}): {str(e)[:100]}"}
+            final = page.url
+            if self.allowed and not self._host_ok(final):
+                return {"ok": False, "status": status, "url": final,
+                        "error": "entry gate left the allowlist"}
+            if expect_path and urlparse(final).path.rstrip("/") != expect_path.rstrip("/"):
+                return {"ok": False, "status": status, "url": final,
+                        "error": f"entry gate ended at {urlparse(final).path!r}, "
+                                 f"expected {expect_path!r}"}
+            raw = page.evaluate(_EXTRACT_JS)
+        except Exception as e:  # noqa: BLE001                                    # pragma: no cover
+            return {"ok": False, "status": 0, "url": base_url,
+                    "error": f"entry gate replay failed: {str(e)[:160]}"}
+        # The replayed gate controls WERE observed (interacted with): echo them
+        # as structural elements so downstream contract checks can ground the
+        # flow's entry-gate node selectors in recorded observation.
+        for i, st in enumerate(performed):                                       # pragma: no cover
+            if st["action"] in ("CLICK", "CHECK"):
+                raw.setdefault("elements", []).append({
+                    "selector": st["selector"],
+                    "name": f"entry_gate_step_{i + 1}",
+                    "label": "entry gate control",
+                    "type": "checkbox" if st["action"] == "CHECK" else "button",
+                    "required": False, "sensitive": False})
+        obs = normalize_observation(final, status, urlparse(final).netloc, raw)   # pragma: no cover
+        obs["entry_gate_replayed"] = performed                                    # pragma: no cover
+        return obs                                                                # pragma: no cover
+
 
 def build_observer_factory(hostnames: list[str]):
     """Return `observer(url) -> observation` backed by ONE live session, for
@@ -202,4 +369,48 @@ def build_observer_factory(hostnames: list[str]):
 
     observe.close = session.close
     observe.session = session          # runtime reuse: same page drives execution
+    # Entry-gate replay (declared, reversible) shares the same session/page.
+    observe.observe_with_entry_gate = session.observe_with_entry_gate
+    # A brand-new isolated session for repeated-session selector verification
+    # (the selectors_verified_repeated_sessions gate needs a SECOND session).
+    observe.spawn_independent = lambda: _threaded_observer_factory(hostnames)
+    return observe
+
+
+def _threaded_observer_factory(hostnames: list[str]):
+    """Independent live observer that runs ALL its Playwright work on one
+    dedicated OS thread. Playwright's sync API refuses a SECOND driver on a
+    thread that already hosts one ("Sync API inside the asyncio loop" — the
+    first driver's loop stays attached to the thread), so the second
+    independent session gets its own thread with no loop at all. Same
+    credential-free LiveBrowserSession underneath; calls are marshalled with
+    submit(...).result() so callers stay synchronous."""
+    if not bb.is_configured():
+        return None
+    from concurrent.futures import ThreadPoolExecutor
+    ex = ThreadPoolExecutor(max_workers=1,
+                            thread_name_prefix="live-observer-2")
+    holder: dict = {}
+
+    def _session() -> LiveBrowserSession:
+        if "s" not in holder:
+            holder["s"] = LiveBrowserSession(allowed_hostnames=hostnames)
+        return holder["s"]
+
+    def observe(url: str) -> dict:
+        return ex.submit(lambda: _session().observe(url)).result()
+
+    def observe_with_entry_gate(base_url: str, entry_gate: dict) -> dict:
+        return ex.submit(
+            lambda: _session().observe_with_entry_gate(base_url, entry_gate)).result()
+
+    def close():
+        try:
+            if "s" in holder:
+                ex.submit(holder["s"].close).result()
+        finally:
+            ex.shutdown(wait=False)
+
+    observe.observe_with_entry_gate = observe_with_entry_gate
+    observe.close = close
     return observe

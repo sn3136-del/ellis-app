@@ -18,7 +18,7 @@ import Checklist, { ContinuePanel } from './Checklist.jsx'
 import {
   SignatureModal, LiveViewModal, PaymentApprove, PaymentModal,
   AppointmentCalendar, RescheduleConfirm, DeclarationModal,
-  StandingAuthModal, FinalReviewModal
+  StandingAuthModal, FinalReviewModal, AdditionalInfoModal
 } from './handoffs.jsx'
 
 // Legacy full stage list — used ONLY for cases without a saved route journey
@@ -297,12 +297,24 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
           onClose={() => setModal(null)}
           onDone={async () => { setModal(null); toast('Signed'); await start() }} />
       )}
+      {modal === 'additional_information' && (
+        <AdditionalInfoModal pending={pending}
+          onResolve={resolve}
+          onGoToDocuments={() => { setModal(null); setTab('documents') }}
+          onContinueWithoutAnswers={async () => {
+            // Document-only ask: nothing to type. Close the modal and re-drive
+            // the paused case the same way final_review resumes (start()); the
+            // portal step re-checks and either proceeds or asks again honestly.
+            setModal(null); await start()
+          }}
+          onClose={() => setModal(null)} />
+      )}
     </div>
   )
 }
 
-// Route summary + the two-pass verification chip. No official-source audit
-// exists on the applicant path — the Kimi second pass is the check.
+// Route summary + the Kimi route-decision chip. No official-source audit
+// exists on the applicant path — deterministic validation is the check.
 function JourneyHeader({ t, journey }) {
   if (!journey || !journey.continuation_kind) return null
   const g = (journey.guidance || {}).guidance || {}

@@ -336,15 +336,27 @@ def build_family_adapter(db, family_id: str, *, observer=None) -> dict:
     if pair is not None:
         dest = pair.destination_country
 
+    portal_evidence = {"hostnames": family.hostnames or [],
+                       "operator": family.operator,
+                       "portal_url": family.base_url,
+                       "entry_urls": research_entry_urls(db, family)}
+    if family.entry_gate:
+        # Curated entry-gate declaration rides on the build's portal evidence:
+        # recon replays it, specgen emits its nodes, testing re-replays it.
+        portal_evidence["entry_gate"] = family.entry_gate
     req = build_workflow.create_request(
         db, org_id="global", user_id=ORCHESTRATOR_ACTOR, application_id="",
         route_key=rk, destination=dest,
         visa_type=(pair.primary_category if pair else "evisa_tourist"),
-        portal_evidence={"hostnames": family.hostnames or [],
-                         "operator": family.operator,
-                         "portal_url": family.base_url,
-                         "entry_urls": research_entry_urls(db, family)},
+        portal_evidence=portal_evidence,
         runtime_mode=settings().runtime_mode)
+    if family.entry_gate and not (req.portal_evidence or {}).get("entry_gate"):
+        # A pre-existing (resumed) request predating the family's entry-gate
+        # declaration still gets it — the resumed build must not re-run recon
+        # without the gate and honestly fail on a stale evidence shape.
+        req.portal_evidence = dict(req.portal_evidence or {},
+                                   entry_gate=family.entry_gate)
+        db.commit()
     # A national online portal is the destination's own single application
     # jurisdiction; residence-dependent consular routing does not apply.
     req.jurisdiction_evidence = {

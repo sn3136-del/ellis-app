@@ -4,7 +4,8 @@ import assert from 'node:assert/strict'
 
 import {
   confidenceLevel, fieldRows, documentReady, defaultPreferences, formatFee,
-  handoffCopy, formatSlot, isTerminal, dateToMs, msToDate, newSession, resultDisposition
+  handoffCopy, formatSlot, isTerminal, dateToMs, msToDate, newSession, resultDisposition,
+  isDocumentQuestion, splitQuestions, isValidDateShape, collectAnswers
 } from '../../src/renderer/src/lib/visaSession.js'
 import { HANDOFF_UI, HANDOFF_SIGNAL, HANDOFF_COPY } from '../../src/renderer/src/lib/visaBackend.js'
 
@@ -110,6 +111,78 @@ test('every handoff with a signal has UI + copy mappings', () => {
   // The two personal steps Ellis must never automate map to explicit surfaces.
   assert.equal(HANDOFF_UI.personal_declaration, 'DeclarationModal')
   assert.equal(HANDOFF_UI.captcha, 'LiveViewModal')
+})
+
+test('additional_information handoff is fully mapped', () => {
+  assert.equal(HANDOFF_UI.additional_information, 'AdditionalInfoModal')
+  assert.equal(HANDOFF_SIGNAL.additional_information, 'provide_information')
+  assert.equal(HANDOFF_COPY.additional_information[0], 'Additional information required')
+  assert.ok(HANDOFF_COPY.additional_information[1].length > 0)
+})
+
+test('isDocumentQuestion recognizes document asks by kind and key prefix', () => {
+  assert.equal(isDocumentQuestion({ key: 'document:photo', kind: 'document' }), true)
+  assert.equal(isDocumentQuestion({ key: 'document:photo', kind: 'text' }), true)
+  assert.equal(isDocumentQuestion({ key: 'religion', kind: 'text' }), false)
+  assert.equal(isDocumentQuestion(null), false)
+})
+
+test('splitQuestions separates typed questions from document asks', () => {
+  const { inputQuestions, documentQuestions } = splitQuestions([
+    { key: 'religion', kind: 'text', mandatory: true },
+    { key: 'document:portrait_photo', kind: 'document', mandatory: true },
+    { key: 'dob', kind: 'date', mandatory: true },
+    { key: '' },      // no key -> dropped
+    null              // junk -> dropped
+  ])
+  assert.deepEqual(inputQuestions.map((q) => q.key), ['religion', 'dob'])
+  assert.deepEqual(documentQuestions.map((q) => q.key), ['document:portrait_photo'])
+  // A missing/absent questions payload never throws.
+  assert.deepEqual(splitQuestions(undefined), { inputQuestions: [], documentQuestions: [] })
+})
+
+test('isValidDateShape accepts MM/DD/YYYY and rejects obvious slips', () => {
+  assert.equal(isValidDateShape('08/01/2026'), true)
+  assert.equal(isValidDateShape('8/1/2026'), true)
+  assert.equal(isValidDateShape('2026-08-01'), false)   // ISO is typed as US here
+  assert.equal(isValidDateShape('13/01/2026'), false)   // month out of range
+  assert.equal(isValidDateShape('08/32/2026'), false)   // day out of range
+  assert.equal(isValidDateShape('soon'), false)
+  assert.equal(isValidDateShape(''), false)
+})
+
+test('collectAnswers blocks empty mandatory fields and bad dates', () => {
+  const questions = [
+    { key: 'religion', kind: 'text', mandatory: true },
+    { key: 'entry_date', kind: 'date', mandatory: true },
+    { key: 'note', kind: 'text', mandatory: false }
+  ]
+  const { answers, errors } = collectAnswers(questions, { entry_date: 'not-a-date' })
+  assert.equal(errors.religion, 'addinfo.errRequired')
+  assert.equal(errors.entry_date, 'addinfo.errDate')
+  assert.equal('note' in errors, false)          // optional + empty -> fine
+  assert.deepEqual(answers, {})                  // nothing valid to send
+})
+
+test('collectAnswers returns ONLY answered keys, trimmed', () => {
+  const questions = [
+    { key: 'religion', kind: 'text', mandatory: true },
+    { key: 'entry_date', kind: 'date', mandatory: true },
+    { key: 'note', kind: 'text', mandatory: false },
+    { key: 'document:photo', kind: 'document', mandatory: true } // never typed
+  ]
+  const { answers, errors } = collectAnswers(questions, {
+    religion: '  None  ', entry_date: '08/01/2026', note: '', 'document:photo': 'x'
+  })
+  assert.deepEqual(errors, {})
+  assert.deepEqual(answers, { religion: 'None', entry_date: '08/01/2026' })
+})
+
+test('collectAnswers with only document questions yields no answers, no errors', () => {
+  const { answers, errors } = collectAnswers(
+    [{ key: 'document:portrait_photo', kind: 'document', mandatory: true }], {})
+  assert.deepEqual(answers, {})
+  assert.deepEqual(errors, {})
 })
 
 test('isTerminal recognizes COMPLETED', () => {

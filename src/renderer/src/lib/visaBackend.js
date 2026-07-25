@@ -101,6 +101,10 @@ export function createVisaClient(session) {
     selectAppointment: (id, slotId) =>
       call('POST', `/cases/${id}/signals/select_appointment`, session, { slot_id: slotId }),
     completeDeclaration: (id) => call('POST', `/cases/${id}/signals/complete_declaration`, session, {}),
+    // Dynamic missing-information answers (handoff: additional_information).
+    // `answers` = {questionKey: value}; dates may be MM/DD/YYYY (backend canonicalizes).
+    provideInformation: (id, answers) =>
+      call('POST', `/cases/${id}/signals/provide_information`, session, { answers }),
 
     appointment: (id) => call('GET', `/cases/${id}/appointment`, session),
     audit: (id) => call('GET', `/cases/${id}/audit`, session),
@@ -317,7 +321,8 @@ export const HANDOFF_UI = {
   no_availability: 'AppointmentCalendar',
   reschedule_approval: 'RescheduleConfirm',     // approve_reschedule
   personal_declaration: 'DeclarationModal',     // complete_declaration
-  final_review: 'FinalReviewModal'              // review + sign the exact version
+  final_review: 'FinalReviewModal',             // review + sign the exact version
+  additional_information: 'AdditionalInfoModal' // provide_information(answers)
 }
 
 // Which signal resolves a given handoff (used by the case flow to advance).
@@ -331,7 +336,8 @@ export const HANDOFF_SIGNAL = {
   appointment_selection: 'select_appointment',
   reschedule_approval: 'approve_reschedule',
   personal_declaration: 'complete_declaration',
-  final_review: 'start'
+  final_review: 'start',
+  additional_information: 'provide_information'
 }
 
 // Human-readable label + one-line guidance per handoff, for the flow header.
@@ -350,5 +356,6 @@ export const HANDOFF_COPY = {
   no_availability: ['No slots yet', 'Nothing matches your preferences yet — Ellis keeps watching.'],
   reschedule_approval: ['Approve reschedule', 'An earlier slot is available — approve moving to it.'],
   personal_declaration: ['Sign the declaration', 'Only you can sign the government declaration, under penalty of perjury.'],
-  final_review: ['Final review & signature', 'Review the exact final application and sign it before Ellis submits.']
+  final_review: ['Final review & signature', 'Review the exact final application and sign it before Ellis submits.'],
+  additional_information: ['Additional information required', 'The official application form needs a few more details. Ellis saved everything else and will continue exactly where it paused.']
 }

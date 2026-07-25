@@ -14,7 +14,7 @@ import {
   conditionField, missingRequired, readinessMeta, checksSummary,
   validEmail, datesOrdered, RESIDENCE_STATUS_OPTIONS,
   researchStageMeta, researchTerminal, researchStatusMeta, RESEARCH_STEP_KEYS,
-  guidanceDispositionMeta, guidanceStepMeta, guidanceIsUsable,
+  guidanceDispositionMeta, guidanceStepMeta, guidanceIsUsable, verificationMeta,
   continuationMeta, deriveAge, formatDateUS, localTodayIso, formatAddress
 } from '../../lib/intake.js'
 import ConnectorBuild from './ConnectorBuild.jsx'
@@ -252,7 +252,7 @@ export default function StartVisa({ client, onOpenCase }) {
     } catch (e) { setLoadError({ message: e.message }) }
   }
 
-  // ---- the bounded two-pass Kimi analysis (retryable) ----------------------
+  // ---- the bounded single-pass Kimi analysis (retryable) -------------------
   async function fetchGuidance() {
     setGuidanceLoading(true); setGuidanceError(null)
     try {
@@ -310,9 +310,9 @@ export default function StartVisa({ client, onOpenCase }) {
     try {
       await flushSave()
       const res = await client.resolveIntake(intakeId)
-      // The Kimi two-pass decision is the route analysis. No official-source
-      // research runs — resolve either attaches the cached verified result or
-      // the UI requests the bounded two-pass analysis now.
+      // The single-pass Kimi decision is the route analysis. No official-source
+      // research runs — resolve either attaches the cached result or the UI
+      // requests the bounded analysis now.
       if (res.kimi_guidance) {
         setGuidance(res.kimi_guidance)      // cached -> instant
         setResult(res); setPhase('guidance')
@@ -859,7 +859,7 @@ const STATUS_NOTE_KEY = {
   LIVE_PRODUCTION_READY: 'result.productionHonest'
 }
 
-// The visible 60-second bounded progress state for the two-pass analysis —
+// The visible 60-second bounded progress state for the Kimi analysis —
 // never an indefinite spinner. Counts down from the backend's hard deadline.
 const GUIDANCE_DEADLINE_SECONDS = 60
 
@@ -948,8 +948,8 @@ function CountryAnswer({ t, options, picked, setPicked, onSubmit }) {
   )
 }
 
-// The Kimi two-pass route decision card: pass 1 decides, pass 2 independently
-// verifies, and the verified label replaces every official-source claim.
+// The Kimi route decision card: one Kimi pass decides, deterministic checks
+// validate it, and the decision label replaces every official-source claim.
 // Irreversible actions still carry an explicit confirmation requirement.
 function GuidancePanel({ t, guidance, loading, error, onEdit, onNew, onRetry,
                          answers, onAnswerHealth,
@@ -987,8 +987,9 @@ function GuidancePanel({ t, guidance, loading, error, onEdit, onNew, onRetry,
   const plan = Array.isArray(guidance.workflow_plan) ? guidance.workflow_plan : []
   const irreversible = plan.map(guidanceStepMeta).filter((s) => s.requiresConfirmation)
   const fee = g.government_fee || {}
-  const verified = guidance.verification &&
-    (guidance.verification.verdict === 'ACCEPT' || guidance.verification.verdict === 'REVISE')
+  // The decision chip needs no verification verdict — a valid Kimi decision
+  // (usable KIMI_PRIMARY result, verification {passes: 1}) is enough.
+  const verified = usable || verificationMeta(guidance.verification).verified
   const advisories = Array.isArray(guidance.advisories) ? guidance.advisories : []
   // The primary continuation: no normal route ends at this page.
   const cont = continuationMeta(guidance)

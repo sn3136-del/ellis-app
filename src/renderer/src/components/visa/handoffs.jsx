@@ -12,7 +12,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useToast, Loading, ErrorNote, KVList } from '../ui.jsx'
 import { useT } from '../../lib/locale.jsx'
-import { formatFee, formatSlot } from '../../lib/visaSession.js'
+import { formatFee, formatSlot, splitQuestions, collectAnswers } from '../../lib/visaSession.js'
 
 function Overlay({ children, onClose, width = 620 }) {
   return (
@@ -486,6 +486,116 @@ export function DeclarationModal({ onResolve, onClose }) {
         <button className="btn btn--ghost" onClick={onClose}>Cancel</button>
         <button className="btn" disabled={!agree || busy} onClick={async () => { setBusy(true); await onResolve('complete_declaration') }}>
           {busy ? 'Submitting…' : 'I personally declare'}
+        </button>
+      </div>
+    </Overlay>
+  )
+}
+
+// ---- Dynamic missing information (handoff: additional_information) ---------
+// Mid-flight the official form needed a detail Ellis never collected. The
+// modal shows the portal's questions in applicant-friendly wording only —
+// never selectors, node ids, or developer terminology. Typed answers go back
+// via the provide_information signal and the SAME application resumes where
+// it paused. Document-kind questions are resolved on the Documents tab first;
+// when there is nothing to type, Continue re-drives the case the same way the
+// final-review handoff resumes (the Journey tab's start).
+export function AdditionalInfoModal({ pending, onResolve, onGoToDocuments,
+                                      onContinueWithoutAnswers, onClose }) {
+  const t = useT()
+  const { inputQuestions, documentQuestions } = splitQuestions(pending?.questions)
+  const [values, setValues] = useState({})
+  const [errors, setErrors] = useState({})     // question key -> display message
+  const [error, setError] = useState(null)     // non-field backend rejection
+  const [busy, setBusy] = useState(false)
+
+  function set(key, v) {
+    setValues((p) => ({ ...p, [key]: v }))
+    setErrors((p) => (p[key] ? { ...p, [key]: null } : p))
+  }
+
+  async function submit() {
+    setError(null)
+    const { answers, errors: errs } = collectAnswers(inputQuestions, values)
+    if (Object.keys(errs).length > 0) {
+      setErrors(Object.fromEntries(Object.entries(errs).map(([k, key]) => [k, t(key)])))
+      return
+    }
+    if (Object.keys(answers).length === 0) {
+      // Document-only ask (or nothing typed): nothing to send. Close and let
+      // the case re-drive from the Journey tab — never an empty signal.
+      if (onContinueWithoutAnswers) await onContinueWithoutAnswers()
+      else onClose()
+      return
+    }
+    setBusy(true)
+    try { await onResolve('provide_information', { answers }) }
+    catch (e) {
+      // 422 invalid_answer carries {key, message} — show it inline at the
+      // exact question; anything else shows as a general note.
+      const d = e && typeof e.detail === 'object' ? e.detail : null
+      if (d && d.reason === 'invalid_answer' && d.key && d.message) {
+        setErrors((p) => ({ ...p, [d.key]: d.message }))
+      } else {
+        setError({ message: (d && d.message) || e.message })
+      }
+      setBusy(false)
+    }
+  }
+
+  return (
+    <Overlay onClose={onClose}>
+      <Head title={t('addinfo.title')} onClose={onClose} sub={t('addinfo.sub')} />
+      {inputQuestions.map((q) => (
+        <div key={q.key} className="field" style={{ marginBottom: 12 }}>
+          <label>
+            {q.question}{q.mandatory === false ? ` ${t('addinfo.optional')}` : ''}
+          </label>
+          {q.why && (
+            <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: -2 }}>{q.why}</div>
+          )}
+          {q.kind === 'select' && Array.isArray(q.options) && q.options.length > 0 ? (
+            <select className="select" value={values[q.key] || ''}
+                    onChange={(e) => set(q.key, e.target.value)}>
+              <option value="">{t('addinfo.selectPlaceholder')}</option>
+              {q.options.map((o) => <option key={String(o)} value={String(o)}>{String(o)}</option>)}
+            </select>
+          ) : (
+            <input className="input" value={values[q.key] || ''}
+                   placeholder={q.kind === 'date' ? 'MM/DD/YYYY' : (q.format || '')}
+                   onChange={(e) => set(q.key, e.target.value)} />
+          )}
+          {errors[q.key] && (
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--crit)' }}>{errors[q.key]}</div>
+          )}
+        </div>
+      ))}
+      {documentQuestions.length > 0 && (
+        <div className="card card--soft" style={{ padding: 14, marginTop: 4 }}>
+          <div className="eyebrow">{t('addinfo.docsTitle')}</div>
+          {documentQuestions.map((q) => (
+            <div key={q.key} style={{ marginTop: 8 }}>
+              <div style={{ fontSize: 13.5, fontWeight: 600 }}>{q.question}</div>
+              {q.why && (
+                <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{q.why}</div>
+              )}
+            </div>
+          ))}
+          <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 10 }}>
+            {t('addinfo.docsNote')}
+          </div>
+          {onGoToDocuments && (
+            <button className="btn btn--sm" style={{ marginTop: 10 }} onClick={onGoToDocuments}>
+              {t('addinfo.docsCta')}
+            </button>
+          )}
+        </div>
+      )}
+      {error && <ErrorNote error={error} />}
+      <div className="modal__foot">
+        <button className="btn btn--ghost" onClick={onClose}>{t('addinfo.later')}</button>
+        <button className="btn" disabled={busy} onClick={submit}>
+          {busy ? t('addinfo.submitting') : t('addinfo.submit')}
         </button>
       </div>
     </Overlay>
