@@ -101,7 +101,17 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
   async function start() {
     setBusy(true); setError(null)
     try { apply(await client.start(caseId)); toast('Application started') }
-    catch (e) { setError({ message: e.message }) }
+    catch (e) {
+      // Honest fail-closed reasons get applicant-facing copy — never a bare
+      // HTTP status. real_only_stop = no approved live portal connection for
+      // this route; Ellis never simulates a government submission.
+      const reason = e.detail && typeof e.detail === 'object' ? e.detail.reason : null
+      setError({
+        message: reason === 'real_only_stop' ? t('case.portalUnavailable')
+          : reason === 'documents_incomplete' ? e.detail.message
+          : e.message
+      })
+    }
     setBusy(false)
   }
 

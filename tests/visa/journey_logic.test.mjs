@@ -220,6 +220,34 @@ test('continue button label follows the route kind; unknown journey hides it', (
 })
 
 // ---------------------------------------------------------------------------
+// Backend error surfacing: structured FastAPI details ({reason, message, …})
+// must reach the applicant as their honest explanation — never a bare
+// "HTTP 409" when the backend said exactly why it refused.
+import { errorMessageFrom } from '../../src/renderer/src/lib/visaBackend.js'
+
+test('structured error details surface their honest message, never a bare status', () => {
+  // real_only_stop shape (fail-closed portal gate).
+  assert.equal(errorMessageFrom({
+    reason: 'real_only_stop', status: 'PORTAL_UNAVAILABLE',
+    detail: 'runtime mode requires an approved live adapter'
+  }, 409), 'runtime mode requires an approved live adapter')
+  // documents_incomplete shape (server-side checklist gate).
+  assert.equal(errorMessageFrom({
+    reason: 'documents_incomplete',
+    message: 'Submit 2 remaining required documents before starting.'
+  }, 409), 'Submit 2 remaining required documents before starting.')
+  assert.equal(errorMessageFrom('plain string detail', 409), 'plain string detail')
+  assert.equal(errorMessageFrom(null, 409), 'HTTP 409')
+  assert.equal(errorMessageFrom({}, 503), 'HTTP 503')
+  // The applicant-facing portal-unavailable copy exists in every locale and
+  // never claims a submission happened or was simulated.
+  for (const lang of SUPPORTED) {
+    assert.ok(STRINGS[lang]['case.portalUnavailable'], lang)
+  }
+  assert.ok(/never simulates/i.test(STRINGS.en['case.portalUnavailable']))
+})
+
+// ---------------------------------------------------------------------------
 // Preview rotation geometry: rotate around the center inside a wrapper sized
 // to the ROTATED bounding box — width/height swap at 90°/270°, the container
 // resizes, and the full document always stays inside the layout at any zoom.

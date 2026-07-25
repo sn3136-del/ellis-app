@@ -18,6 +18,20 @@ function authHeaders(session) {
   }
 }
 
+// Human-readable message from a FastAPI error detail. Structured details
+// ({reason, message, detail, ...}) carry their own honest explanation — the
+// applicant must never be shown a bare "HTTP 409" when one exists.
+export function errorMessageFrom(detail, status) {
+  if (typeof detail === 'string' && detail) return detail
+  if (detail && typeof detail === 'object') {
+    for (const key of ['message', 'detail', 'reason']) {
+      const v = detail[key]
+      if (typeof v === 'string' && v.trim()) return v
+    }
+  }
+  return `HTTP ${status}`
+}
+
 async function call(method, path, session, body) {
   const res = await fetch(`${BASE}${path}`, {
     method,
@@ -28,8 +42,7 @@ async function call(method, path, session, body) {
   const data = text ? JSON.parse(text) : {}
   if (!res.ok) {
     const detail = data.detail
-    const message = typeof detail === 'string' && detail ? detail : `HTTP ${res.status}`
-    const err = new Error(message)
+    const err = new Error(errorMessageFrom(detail, res.status))
     err.status = res.status
     err.detail = detail // structured payloads (e.g. resolve 422 {missing_fields})
     throw err
