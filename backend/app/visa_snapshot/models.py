@@ -410,6 +410,9 @@ class KimiRouteGuidanceCache(Base, TimestampMixin):
     missing_fields: Mapped[list] = mapped_column(JSON, default=list)
     contradictions: Mapped[list] = mapped_column(JSON, default=list)
     model: Mapped[str] = mapped_column(String(64), default="")
+    # Second-pass Kimi verification: {verdict: ACCEPT|REVISE, issues, passes,
+    # label, applied?}. A cached route is always a verified two-pass result.
+    verification: Mapped[dict] = mapped_column(JSON, default=dict)
     generated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     fresh_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 

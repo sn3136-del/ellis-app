@@ -14,6 +14,7 @@ CANONICAL_TYPES = (
     "passport", "photo", "flight_itinerary", "hotel_booking", "bank_statement",
     "employment_letter", "student_letter", "invitation_letter",
     "travel_insurance", "residence_permit", "prior_visa", "destination_form",
+    "vaccination_certificate",
     "document",
 )
 
@@ -44,6 +45,10 @@ _KEYWORDS = (
     ("destination_form", ("arrival card", "application form", "declaration form",
                           "disembarkation")),
     ("photo", ("passport photo", "passport photograph", "photo specification")),
+    ("vaccination_certificate", ("vaccination", "vaccine", "immunization",
+                                 "immunisation", "yellow fever",
+                                 "international certificate of vaccination",
+                                 "prophylaxis", "dose", "batch number")),
 )
 
 

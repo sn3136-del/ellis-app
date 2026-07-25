@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ellis-web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "ellis:web"],
+      "port": 5199
+    }
+  ]
+}

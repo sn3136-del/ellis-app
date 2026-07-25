@@ -179,11 +179,51 @@ def case_live_preflight(application_id: str, db=Depends(get_session),
 @app.get("/cases/{application_id}/passport-validity")
 def get_passport_validity(application_id: str, db=Depends(get_session),
                           p: Principal = Depends(get_principal)):
-    """Phase 5 verdict: expiry vs. today + the destination's VERIFIED validity
-    rule (never a generic six-month assumption), with renewal instructions."""
-    from . import passport_validity
+    """Validity verdict: expiry (answers, falling back to the accepted passport
+    document's extracted date) vs. the destination rule (verified route rule,
+    else the Kimi two-pass requirement) — plus whether renewal is offered."""
+    from . import passport_validity, renewal
     app_row = _owned(db, p, application_id)
-    return passport_validity.check_case_passport(db, app_row)
+    verdict = passport_validity.check_case_passport(db, app_row)
+    verdict["renewal_offered"] = renewal.should_offer_renewal(verdict)
+    linked = renewal.get_linked_renewal(db, app_row)
+    if linked is not None:
+        verdict["renewal_case_id"] = linked.id
+    return verdict
+
+
+class RenewalRequest(BaseModel):
+    manual: bool = False   # True = the applicant chose "Renew my passport"
+
+
+@app.post("/cases/{application_id}/renewal")
+def start_passport_renewal(application_id: str, body: RenewalRequest = RenewalRequest(),
+                           db=Depends(get_session), p: Principal = Depends(get_principal)):
+    """Create (or reuse — idempotent) the linked passport-renewal case. Offered
+    automatically only for an expired / insufficient-validity passport; a valid
+    passport can still renew when the applicant explicitly asks (manual)."""
+    from . import passport_validity, renewal
+    from .visa_snapshot import kimi_primary
+    app_row = _owned(db, p, application_id)
+    verdict = passport_validity.check_case_passport(db, app_row)
+    try:
+        out = renewal.create_renewal_case(db, org_id=p.org_id, user_id=p.user_id,
+                                          travel_case=app_row, verdict=verdict,
+                                          manual=body.manual)
+    except ValueError as e:
+        raise HTTPException(409, str(e))
+    except renewal.RenewalUnavailable as e:
+        raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
+                                         "reason": str(e)})
+    except kimi_primary.GuidanceTimeout:
+        raise HTTPException(504, detail={"status": kimi_primary.STATUS_TIMEOUT,
+                                         "reason": kimi_primary.TIMEOUT_MESSAGE})
+    except kimi_primary.GuidanceProviderError as e:
+        raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
+                                         "reason": e.envelope.get("user_message"),
+                                         "category": e.envelope.get("category")})
+    out["travel_case_validity"] = verdict
+    return out
 
 
 # ---- Document preview (Phase 13): signed, expiring content URLs ----
@@ -810,7 +850,11 @@ def add_document(application_id: str, body: AddDocument, db=Depends(get_session)
                 "extracted_fields": dup.extracted_fields,
                 "quality_warnings": dup.quality_warnings}
     # OCR hierarchy with recorded failover: Document AI → (flagged) Kimi vision → local.
-    result, ocr_meta = ocr_provider.process_with_failover(content=content, text=body.text, mime=body.mime)
+    # A filename that says "passport" opts into the passport recovery path
+    # (EXIF/rotation retries + multipage-PDF biodata-page selection).
+    result, ocr_meta = ocr_provider.process_with_failover(
+        content=content, text=body.text, mime=body.mime,
+        expect_passport=bool(re.search(r"passport", body.name or "", re.I)))
     ec = execution.classify_ocr(ocr_meta)
 
     # Phase 4 — passport biodata-page classification. Accept ONLY a validated
@@ -927,34 +971,43 @@ def review(application_id: str, db=Depends(get_session), p: Principal = Depends(
 @app.get("/cases/{application_id}/checklist")
 def case_checklist(application_id: str, db=Depends(get_session),
                    p: Principal = Depends(get_principal)):
-    """The route-specific journey state saved at continuation: guidance,
-    disposition, document checklist with live per-item status, and the async
-    official-source audit's progress (which never blocks preparation)."""
-    _owned(db, p, application_id)
+    """The route-specific journey state saved at continuation: guidance (with
+    its two-pass Kimi verification), disposition, workflow type, and the
+    document checklist with live per-item status. No official-source audit
+    exists on the applicant path."""
+    app_row = _owned(db, p, application_id)
     from .visa_snapshot import intake_flow
-    from .visa_snapshot.models import CaseRouteGuidance, OnDemandRouteResearchJob
+    from .visa_snapshot.models import CaseRouteGuidance
     cg = db.execute(select(CaseRouteGuidance).where(
         CaseRouteGuidance.case_id == application_id)).scalars().first()
     if cg is None:
         return {"guidance": None, "disposition": None, "continuation_kind": None,
                 "checklist": [], "checklist_counts": {"total": 0, "required_missing": 0},
-                "audit": None}
+                "verification": None, "route_workflow_type": None}
     docs = db.execute(select(models.StoredDocument).where(
         models.StoredDocument.application_id == application_id)).scalars().all()
+    # Re-derive conditional items (health/vaccination) against the CURRENT case
+    # answers so an answered travel-history question updates the checklist.
+    checklist = cg.checklist or []
+    g_inner = (cg.guidance or {}).get("guidance") or {}
+    if g_inner.get("health_requirements"):
+        checklist = intake_flow.derive_document_checklist(
+            g_inner, answers=app_row.answers or {})
+        if checklist != (cg.checklist or []):
+            cg.checklist = checklist
+            db.commit()
     status = intake_flow.apply_checklist_status(
-        cg.checklist or [],
+        checklist,
         [{"doc_type": d.doc_type,
           "accepted_as_passport_identity": (d.page_classification or {}).get(
               "accepted_as_passport_identity", True)} for d in docs])
-    audit_info = None
-    if cg.audit_job_id:
-        job = db.get(OnDemandRouteResearchJob, cg.audit_job_id)
-        if job:
-            audit_info = {"id": job.id, "status": job.status, "stage": job.stage}
     return {"guidance": cg.guidance, "disposition": cg.disposition,
             "continuation_kind": cg.continuation_kind, "intake_id": cg.intake_id,
             "checklist": status["items"], "checklist_counts": status["counts"],
-            "audit": audit_info}
+            "verification": (cg.guidance or {}).get("verification") or None,
+            "route_workflow_type": g_inner.get("route_workflow_type"),
+            "health_questions": intake_flow.pending_health_questions(
+                g_inner, answers=app_row.answers or {})}
 
 
 class AnswersUpdate(BaseModel):
@@ -1006,13 +1059,20 @@ def approve_document(application_id: str, doc_id: str, edits: Optional[list[Fiel
                          "signatures_invalidated": invalidated}, actor=p.user_id)
     # Phase 5: validate passport expiry IMMEDIATELY after applicant approval.
     validity = None
+    travel_case_validity = None
     if doc.doc_type == "passport":
-        from . import passport_validity
+        from . import passport_validity, renewal
         validity = passport_validity.check_case_passport(db, app_row)
         if validity.get("blocking"):
             passport_validity.enforce_and_notify(db, app_row, validity)
+        # Renewal completion: an approved NEW passport inside a renewal case
+        # updates the linked travel case's passport fields, re-evaluates the
+        # destination validity, and resumes the travel case.
+        travel_case_validity = renewal.propagate_renewed_passport(
+            db, app_row, doc, actor=p.user_id)
     return {"approved": True, "answers": app_row.answers,
-            "signatures_invalidated": invalidated, "passport_validity": validity}
+            "signatures_invalidated": invalidated, "passport_validity": validity,
+            "travel_case_validity": travel_case_validity}
 
 
 @app.post("/cases/{application_id}/preferences")

@@ -250,6 +250,20 @@ export default function StartVisa({ client, onOpenCase }) {
     } catch (e) { setLoadError({ message: e.message }) }
   }
 
+  // ---- the bounded two-pass Kimi analysis (retryable) ----------------------
+  async function fetchGuidance() {
+    setGuidanceLoading(true); setGuidanceError(null)
+    try {
+      const g = await client.routeGuidance(intakeId)
+      setGuidance(g)
+    } catch (ge) {
+      // Provider-specific or deadline message straight from the backend —
+      // never a generic spinner and never a silent fallback.
+      setGuidanceError({ message: ge.detail?.reason || ge.message })
+    }
+    setGuidanceLoading(false)
+  }
+
   // ---- continuation after guidance (the primary CTA) -----------------------
   async function continueToCase() {
     setContinuing(true); setContinueError(null)
@@ -294,28 +308,15 @@ export default function StartVisa({ client, onOpenCase }) {
     try {
       await flushSave()
       const res = await client.resolveIntake(intakeId)
-      // Kimi-primary: if the route isn't already grounded, get an IMMEDIATE
-      // AI-generated route decision so the applicant never waits for the
-      // official-source audit (which continues in the background).
+      // The Kimi two-pass decision is the route analysis. No official-source
+      // research runs — resolve either attaches the cached verified result or
+      // the UI requests the bounded two-pass analysis now.
       if (res.kimi_guidance) {
         setGuidance(res.kimi_guidance)      // cached -> instant
         setResult(res); setPhase('guidance')
       } else if (res.kimi_guidance_pending) {
-        setResult(res); setPhase('guidance'); setGuidanceLoading(true)
-        try {
-          const g = await client.routeGuidance(intakeId)
-          setGuidance(g)
-        } catch (ge) {
-          setGuidanceError({ message: ge.detail?.reason || ge.message })
-        }
-        setGuidanceLoading(false)
-        // The official-source research job (if any) keeps running as an audit;
-        // record it so its grounded result can supersede guidance later.
-        if (res.research_job && res.research_job.id) storeResearchJobId(intakeId, res.research_job.id)
-      } else if (res.research_job && res.research_job.id) {
-        storeResearchJobId(intakeId, res.research_job.id)
-        setResearchJob(res.research_job)
-        setPhase('research')
+        setResult(res); setPhase('guidance')
+        await fetchGuidance()
       } else {
         setResult(res)
         setPhase('result')
@@ -412,7 +413,9 @@ export default function StartVisa({ client, onOpenCase }) {
       <div>
         {header}
         <GuidancePanel t={t} guidance={guidance} loading={guidanceLoading}
-          error={guidanceError}
+          error={guidanceError} onRetry={fetchGuidance}
+          answers={answers}
+          onAnswerHealth={(countries) => { setAnswer('recent_travel_countries', countries); flushSave() }}
           onContinue={continueToCase} continuing={continuing} continueError={continueError}
           onEdit={() => { setPhase('wizard'); setStep(3) }}
           onNew={startNew} />
@@ -798,29 +801,123 @@ const STATUS_NOTE_KEY = {
   LIVE_PRODUCTION_READY: 'result.productionHonest'
 }
 
-// Kimi-primary route guidance card: an IMMEDIATE AI-generated route result the
-// applicant sees instead of waiting for the official-source audit. Clearly
-// labeled "AI-generated route guidance"; irreversible actions still carry an
-// explicit confirmation requirement (never a one-click).
-function GuidancePanel({ t, guidance, loading, error, onEdit, onNew,
+// The visible 60-second bounded progress state for the two-pass analysis —
+// never an indefinite spinner. Counts down from the backend's hard deadline.
+const GUIDANCE_DEADLINE_SECONDS = 60
+
+function GuidanceCountdown({ t }) {
+  const [left, setLeft] = useState(GUIDANCE_DEADLINE_SECONDS)
+  useEffect(() => {
+    const timer = setInterval(() => setLeft((s) => Math.max(0, s - 1)), 1000)
+    return () => clearInterval(timer)
+  }, [])
+  const pct = Math.round(100 * (GUIDANCE_DEADLINE_SECONDS - left) / GUIDANCE_DEADLINE_SECONDS)
+  return (
+    <div data-testid="guidance-countdown" style={{ maxWidth: 360, margin: '10px auto 0' }}>
+      <div style={{ height: 6, borderRadius: 3, background: 'var(--bg-soft)', overflow: 'hidden' }}>
+        <div style={{ height: '100%', width: `${pct}%`, background: 'var(--ink)',
+          transition: 'width 1s linear' }} />
+      </div>
+      <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 6 }}>
+        {t('guidance.countdown', { s: left })}
+      </div>
+    </div>
+  )
+}
+
+// The conditional health question, asked at the guidance stage ONLY when the
+// verified route carries a conditional rule and the applicant has not
+// answered the travel-history question yet.
+function GuidanceHealthQuestion({ t, guidance, answers, onAnswer }) {
+  const [selecting, setSelecting] = useState(false)
+  const [picked, setPicked] = useState([])
+  const reqs = ((guidance || {}).guidance || {}).health_requirements || []
+  const conditional = reqs.filter((r) => r && r.applicability === 'conditional')
+  if (conditional.length === 0) return null
+  if (answers && Object.prototype.hasOwnProperty.call(answers, 'recent_travel_countries')) return null
+  const q = conditional[0]
+  return (
+    <div className="note" style={{ marginTop: 12 }} data-testid="guidance-health-question">
+      <div style={{ fontWeight: 600, fontSize: 13 }}>{t('health.questionTitle')}</div>
+      <div style={{ fontSize: 13, marginTop: 4 }}>
+        {q.question || `${t('health.questionTitle')}: ${q.name}`}
+      </div>
+      {q.trigger && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{q.trigger}</div>}
+      {!selecting ? (
+        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+          <button className="btn btn--sm" onClick={() => setSelecting(true)}>{t('health.yes')}</button>
+          <button className="btn btn--sm btn--ghost" onClick={() => onAnswer([])}>{t('health.no')}</button>
+        </div>
+      ) : (
+        <CountryAnswer t={t} options={q.trigger_countries || []}
+          picked={picked} setPicked={setPicked}
+          onSubmit={() => onAnswer(picked)} />
+      )}
+    </div>
+  )
+}
+
+// Country selection for a travel-history answer: chips when the rule names its
+// risk countries, a free entry when it does not (never a fictional default).
+function CountryAnswer({ t, options, picked, setPicked, onSubmit }) {
+  const [text, setText] = useState('')
+  const useChips = options.length > 0
+  return (
+    <div style={{ marginTop: 8 }}>
+      <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 6 }}>
+        {t('health.whichCountries')}
+      </div>
+      {useChips ? (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+          {options.map((c) => (
+            <button key={c} type="button"
+              className={'chip' + (picked.includes(c) ? ' chip--ink' : '')}
+              onClick={() => setPicked((p) => p.includes(c) ? p.filter((x) => x !== c) : [...p, c])}>
+              {c}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <input className="input" style={{ marginBottom: 8 }} value={text}
+          placeholder="e.g. KEN, BRA"
+          onChange={(e) => {
+            setText(e.target.value)
+            setPicked(e.target.value.split(',').map((s) => s.trim().toUpperCase()).filter(Boolean))
+          }} />
+      )}
+      <button className="btn btn--sm" disabled={picked.length === 0} onClick={onSubmit}>OK</button>
+    </div>
+  )
+}
+
+// The Kimi two-pass route decision card: pass 1 decides, pass 2 independently
+// verifies, and the verified label replaces every official-source claim.
+// Irreversible actions still carry an explicit confirmation requirement.
+function GuidancePanel({ t, guidance, loading, error, onEdit, onNew, onRetry,
+                         answers, onAnswerHealth,
                          onContinue, continuing, continueError }) {
   if (loading) {
     return (
       <div className="card" style={{ padding: 24, textAlign: 'center' }}>
         <div className="badge badge--ai" style={{ marginBottom: 12 }}>{t('guidance.aiBadge')}</div>
         <Loading label={t('guidance.loading')} />
+        <GuidanceCountdown t={t} />
       </div>
     )
   }
   // A stale error must never mask real guidance — the error card renders only
-  // when there is no guidance to show.
+  // when there is no guidance to show. The message is the backend's precise
+  // provider/deadline explanation, with an immediate retry.
   if (error && !guidance) {
     return (
       <div className="card" style={{ padding: 24 }}>
-        <ErrorNote error={{ message: t('guidance.unavailable') }} />
+        <ErrorNote error={{ message: error.message || t('guidance.unavailable') }} />
         <div style={{ marginTop: 12, display: 'flex', gap: 10 }}>
+          <button className="btn btn--sm" onClick={onRetry} data-testid="guidance-retry">
+            {t('guidance.timeoutRetry')}
+          </button>
           <button className="btn btn--ghost btn--sm" onClick={onEdit}>{t('start.editAnswers')}</button>
-          <button className="btn btn--sm" onClick={onNew}>{t('start.resume.new')}</button>
+          <button className="btn btn--ghost btn--sm" onClick={onNew}>{t('start.resume.new')}</button>
         </div>
       </div>
     )
@@ -832,19 +929,32 @@ function GuidancePanel({ t, guidance, loading, error, onEdit, onNew,
   const plan = Array.isArray(guidance.workflow_plan) ? guidance.workflow_plan : []
   const irreversible = plan.map(guidanceStepMeta).filter((s) => s.requiresConfirmation)
   const fee = g.government_fee || {}
+  const verified = guidance.verification &&
+    (guidance.verification.verdict === 'ACCEPT' || guidance.verification.verdict === 'REVISE')
+  const advisories = Array.isArray(guidance.advisories) ? guidance.advisories : []
   // The primary continuation: no normal route ends at this page.
   const cont = continuationMeta(guidance)
   return (
     <div className="card" style={{ padding: 24 }}>
       {/* AI-generated indicator — always visible with guidance-driven flow. */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, flexWrap: 'wrap' }}>
         <span className="badge badge--ai">{t('guidance.aiBadge')}</span>
+        {verified && (
+          <span className="chip chip--sm" data-testid="guidance-verified-chip">
+            {t('guidance.verified')}
+          </span>
+        )}
         {guidance.cached && <span className="chip chip--sm">{t('guidance.cached')}</span>}
         {guidance.stale && <span className="chip chip--sm">{t('guidance.refreshing')}</span>}
       </div>
       <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 14 }}>
         {t('guidance.disclaimer')}
       </div>
+      {advisories.length > 0 && (
+        <div className="note note--warn" style={{ marginBottom: 12 }} data-testid="guidance-advisories">
+          {advisories.map((a, i) => <div key={i} style={{ fontSize: 13 }}>• {a}</div>)}
+        </div>
+      )}
 
       {usable ? (
         <>
@@ -885,6 +995,11 @@ function GuidancePanel({ t, guidance, loading, error, onEdit, onNew,
           ))}
         </div>
       )}
+
+      {/* Travel-history question, asked ONLY when a conditional health rule
+          needs it — never a generic vaccination request. */}
+      <GuidanceHealthQuestion t={t} guidance={guidance} answers={answers}
+        onAnswer={onAnswerHealth} />
 
       {/* Continuation. A blocked CONDITIONAL route shows the precise blocker
           instead of a CTA; everything else continues into the journey. */}

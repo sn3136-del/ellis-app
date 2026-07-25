@@ -8,6 +8,10 @@ import { useToast, Loading, ErrorNote, KVList, Empty } from '../ui.jsx'
 import { useLocale } from '../../lib/locale.jsx'
 import { HANDOFF_COPY } from '../../lib/visaBackend.js'
 import { handoffCopy, isTerminal, formatSlot, resultDisposition } from '../../lib/visaSession.js'
+import {
+  applicableStages, showExecutionBanner, preferencesTabVisible,
+  validityMeta, verificationMeta
+} from '../../lib/intake.js'
 import OcrReview from './OcrReview.jsx'
 import Preferences from './Preferences.jsx'
 import Checklist from './Checklist.jsx'
@@ -17,17 +21,27 @@ import {
   StandingAuthModal, FinalReviewModal
 } from './handoffs.jsx'
 
+// Legacy full stage list — used ONLY for cases without a saved route journey
+// (no continuation kind). Routed cases render just their applicable stages.
 const JOURNEY = [
   'DRAFT', 'APPLICANT_REVIEW_REQUIRED', 'AUTHORIZATION_PENDING', 'PORTAL_ACCOUNT_CREATING',
   'PORTAL_VERIFICATION_REQUIRED', 'PAYMENT_APPROVAL_REQUIRED', 'PAYMENT_ACTION_REQUIRED',
   'APPOINTMENT_BOOKING', 'PERSONAL_DECLARATION_REQUIRED', 'SUBMITTING', 'COMPLETED'
 ]
 
-function Timeline({ state }) {
-  const idx = JOURNEY.indexOf(state)
+function Timeline({ state, journey }) {
+  // Route-specific stages from the Kimi workflow plan; [] = no submission
+  // timeline for this route at all (entry preparation / renewal prep).
+  const stages = applicableStages(
+    journey?.continuation_kind,
+    (journey?.guidance || {}).workflow_plan
+  ) ?? JOURNEY
+  if (stages.length === 0) return null
+  const idx = stages.indexOf(state)
   return (
-    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', margin: '4px 0 14px' }}>
-      {JOURNEY.map((s, i) => (
+    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', margin: '4px 0 14px' }}
+      data-testid="journey-timeline">
+      {stages.map((s, i) => (
         <span key={s} className={'chip' + (i <= idx && idx >= 0 ? ' chip--ink' : '')}
               style={{ fontSize: 10 }} title={s}>
           {s.replace(/_/g, ' ').toLowerCase()}
@@ -37,7 +51,7 @@ function Timeline({ state }) {
   )
 }
 
-export default function CaseFlow({ client, caseId, onNotify }) {
+export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
   const toast = useToast()
   const { t } = useLocale()
   const [tab, setTab] = useState('journey')
@@ -105,35 +119,55 @@ export default function CaseFlow({ client, caseId, onNotify }) {
 
   const copy = handoff ? handoffCopy(HANDOFF_COPY, handoff) : null
   const started = state && state !== 'DRAFT'
+  const kind = journey?.continuation_kind
+  // The Preferences tab is appointment configuration: only for routes whose
+  // verified guidance requires an appointment / in-person submission.
+  const tabs = ['journey', 'documents']
+  if (preferencesTabVisible(journey)) tabs.push('preferences')
+  tabs.push('activity')
+  const tabLabel = (id) => id === 'preferences'
+    ? t('case.tab.appointmentPrefs')
+    : id[0].toUpperCase() + id.slice(1)
 
   return (
     <div>
       <div className="tabs">
-        {['journey', 'documents', 'preferences', 'activity'].map((t) => (
-          <button key={t} className={'tab' + (tab === t ? ' is-active' : '')} onClick={() => setTab(t)}>
-            {t[0].toUpperCase() + t.slice(1)}
+        {tabs.map((tb) => (
+          <button key={tb} className={'tab' + (tab === tb ? ' is-active' : '')} onClick={() => setTab(tb)}>
+            {tabLabel(tb)}
           </button>
         ))}
       </div>
 
       {tab === 'journey' && (
         <div className="tabpanel">
-          <Timeline state={state} />
-          <ExecutionBanner status={status} />
+          <Timeline state={state} journey={journey} />
+          {/* The realness banner guards EXECUTED results. A routed case that
+              has not started yet shows precise provider/capability errors at
+              start time instead of a blanket warning; a route with no
+              submission at all never shows it. Legacy cases keep it always. */}
+          {showExecutionBanner(journey) && (started || !kind) && <ExecutionBanner status={status} />}
           <JourneyHeader t={t} journey={journey} />
           {error && <ErrorNote error={error} />}
 
-          {!started && journey?.continuation_kind === 'entry_preparation' && (
+          {!started && kind === 'entry_preparation' && (
             <EntryPrep t={t} client={client} caseId={caseId} journey={journey}
+              onOpenCase={onOpenCase}
               onToDocuments={() => setTab('documents')} />
           )}
 
-          {!started && journey?.continuation_kind !== 'entry_preparation' && (
+          {!started && kind === 'passport_renewal' && (
+            <RenewalPrep t={t} journey={journey}
+              onToDocuments={() => setTab('documents')} />
+          )}
+
+          {!started && kind !== 'entry_preparation' && kind !== 'passport_renewal' && (
             <div className="card" style={{ padding: 22 }}>
+              <CaseValidity t={t} client={client} caseId={caseId} onOpenCase={onOpenCase} />
               <div style={{ fontWeight: 700, marginBottom: 6 }}>Ready to submit?</div>
               <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>
-                Add and approve your documents and set your appointment preferences,
-                then start. Ellis will pause for you at every step that needs you.
+                Add and approve your documents, then start. Ellis will pause for
+                you at every step that needs you.
               </div>
               {standing?.granted && !standing?.revoked ? (
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
@@ -186,6 +220,8 @@ export default function CaseFlow({ client, caseId, onNotify }) {
       {tab === 'documents' && (
         <div className="tabpanel">
           <JourneyHeader t={t} journey={journey} />
+          <HealthQuestions t={t} client={client} caseId={caseId}
+            questions={journey?.health_questions} onAnswered={refresh} />
           <Checklist t={t} checklist={journey?.checklist}
             counts={journey?.checklist_counts && {
               required: (journey.checklist || []).filter((i) => i.required && i.kind === 'document').length,
@@ -195,7 +231,7 @@ export default function CaseFlow({ client, caseId, onNotify }) {
         </div>
       )}
 
-      {tab === 'preferences' && (
+      {tab === 'preferences' && tabs.includes('preferences') && (
         <div className="tabpanel">
           <Preferences client={client} caseId={caseId} initial={prefs} onSaved={(p) => { setPrefs(p); toast('Saved') }} />
         </div>
@@ -249,13 +285,12 @@ export default function CaseFlow({ client, caseId, onNotify }) {
   )
 }
 
-// Route summary + async official-source audit status. The audit NEVER blocks
-// preparation; its status is shown honestly and quietly.
+// Route summary + the two-pass verification chip. No official-source audit
+// exists on the applicant path — the Kimi second pass is the check.
 function JourneyHeader({ t, journey }) {
   if (!journey || !journey.continuation_kind) return null
   const g = (journey.guidance || {}).guidance || {}
-  const auditStatus = journey.audit && journey.audit.status
-  const auditRunning = auditStatus === 'queued' || auditStatus === 'running'
+  const ver = verificationMeta(journey.verification)
   return (
     <div className="card card--soft" style={{ padding: '10px 14px', marginBottom: 12 }}
       data-testid="journey-header" data-kind={journey.continuation_kind}>
@@ -263,10 +298,69 @@ function JourneyHeader({ t, journey }) {
         <span className="badge badge--ai">{t('guidance.aiBadge')}</span>
         {g.visa_category && <span className="chip">{g.visa_category}</span>}
         {g.permitted_stay && <span className="chip">{g.permitted_stay}</span>}
-        {journey.audit && (
-          <span className="chip" data-testid="audit-chip">
-            {auditRunning ? t('case.audit.running') : t('case.audit.done')}
+        {ver.verified && (
+          <span className="chip" data-testid="verification-chip">{t(ver.i18nKey)}</span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Standalone validity fetch + renew CTA for visa/authorization flows (the
+// entry-preparation panel embeds its own).
+function CaseValidity({ t, client, caseId, onOpenCase }) {
+  const toast = useToast()
+  const [validity, setValidity] = useState(null)
+  const [busy, setBusy] = useState(false)
+  useEffect(() => {
+    client.passportValidity(caseId).then(setValidity).catch(() => {})
+  }, [caseId])
+  if (!validity || !validity.renewal_offered) return null
+  async function renewFirst() {
+    setBusy(true)
+    try {
+      const res = await client.startRenewal(caseId)
+      toast(t('renewal.started'))
+      onOpenCase && onOpenCase({ id: res.renewal_case_id,
+        full_name: t('renewal.title'), destination_country: '',
+        visa_type: 'passport_renewal', continuation_kind: 'passport_renewal' })
+    } catch (e) { toast(e.detail?.reason || e.message) }
+    setBusy(false)
+  }
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <ValidityRow t={t} label={validity.expiry_date || ''} validity={validity}
+        onRenew={renewFirst} renewBusy={busy} />
+    </div>
+  )
+}
+
+// Passport-validity chip + the "Renew passport first" primary action when the
+// verdict calls for it. Shared by entry preparation and visa flows.
+function ValidityRow({ t, label, validity, onRenew, renewBusy }) {
+  const meta = validityMeta(validity && validity.status)
+  return (
+    <div className="kv">
+      <div className="kv__k">{t('case.entryPrep.validity')}</div>
+      <div className="kv__v">
+        {label}
+        {validity && validity.status && (
+          <span className="chip" style={{ marginLeft: 8 }} data-testid="validity-status"
+            data-status={validity.status}>
+            {t(meta.i18nKey)}
+            {validity.expiry_date ? ` · ${validity.expiry_date}` : ''}
           </span>
+        )}
+        {validity && validity.renewal_offered && onRenew && (
+          <div style={{ marginTop: 8 }}>
+            <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 6 }}>
+              {validity.explanation}
+            </div>
+            <button className="btn" disabled={renewBusy} onClick={onRenew}
+              data-testid="renew-first">
+              {renewBusy ? '…' : t('renewal.cta')}
+            </button>
+          </div>
         )}
       </div>
     </div>
@@ -274,30 +368,49 @@ function JourneyHeader({ t, journey }) {
 }
 
 // Visa-exempt continuation: NOT a dead-end and NOT a consular visa application.
-// Real entry preparation — passport validity, onward travel, accommodation,
-// arrival-card style forms — driven by the same checklist.
-function EntryPrep({ t, client, caseId, journey, onToDocuments }) {
+// Real entry preparation — passport validity, arrival card, onward travel,
+// accommodation — driven by the same checklist. No portal-account, payment,
+// appointment, or submission stage exists on this route.
+function EntryPrep({ t, client, caseId, journey, onToDocuments, onOpenCase }) {
+  const toast = useToast()
   const [validity, setValidity] = useState(null)
+  const [renewBusy, setRenewBusy] = useState(false)
   useEffect(() => {
     client.passportValidity(caseId).then(setValidity).catch(() => {})
   }, [caseId])
   const g = (journey.guidance || {}).guidance || {}
   const counts = journey.checklist_counts || {}
   const done = (counts.required_missing || 0) === 0
+  const card = g.arrival_card || {}
+
+  async function renewFirst() {
+    setRenewBusy(true)
+    try {
+      const res = await client.startRenewal(caseId)
+      toast(t('renewal.started'))
+      onOpenCase && onOpenCase({ id: res.renewal_case_id,
+        full_name: t('renewal.title'),
+        destination_country: '', visa_type: 'passport_renewal',
+        continuation_kind: 'passport_renewal' })
+    } catch (e) { toast(e.detail?.reason || e.message) }
+    setRenewBusy(false)
+  }
+
   return (
     <div className="card" style={{ padding: 22 }} data-testid="entry-prep">
       <div style={{ fontWeight: 700, marginBottom: 4 }}>{t('case.entryPrep.title')}</div>
-      <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>{t('case.entryPrep.sub')}</div>
+      <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}
+        data-testid="no-visa-note">{t('case.entryPrep.sub')}</div>
       {g.passport_validity && (
-        <div className="kv">
-          <div className="kv__k">{t('case.entryPrep.validity')}</div>
+        <ValidityRow t={t} label={g.passport_validity} validity={validity}
+          onRenew={renewFirst} renewBusy={renewBusy} />
+      )}
+      {card.required && (
+        <div className="kv" data-testid="arrival-card-row">
+          <div className="kv__k">{t('case.entryPrep.arrivalCard')}</div>
           <div className="kv__v">
-            {g.passport_validity}
-            {validity && validity.status && (
-              <span className="chip" style={{ marginLeft: 8 }} data-testid="validity-status">
-                {String(validity.status).replace(/_/g, ' ')}
-              </span>
-            )}
+            {card.name || t('case.entryPrep.arrivalCard')}
+            {card.submission_window ? ` — ${card.submission_window}` : ''}
           </div>
         </div>
       )}
@@ -310,9 +423,113 @@ function EntryPrep({ t, client, caseId, journey, onToDocuments }) {
       <div style={{ fontSize: 12.5, color: 'var(--muted)', margin: '10px 0' }}>
         {t('case.entryPrep.window')}
       </div>
+      {done && (
+        <div className="note" style={{ marginBottom: 10 }} data-testid="entry-prep-complete">
+          {t('case.entryPrep.complete')}
+        </div>
+      )}
       <button className="btn" onClick={onToDocuments} data-testid="entry-prep-docs">
         {done ? t('case.entryPrep.review') : t('case.docsFirst')}
       </button>
+    </div>
+  )
+}
+
+// Passport-renewal case: the Kimi renewal analysis (path, form, fees, times)
+// plus the linked-travel-case note. Documents flow through the normal
+// checklist; approving the NEW passport resumes the travel case automatically.
+function RenewalPrep({ t, journey, onToDocuments }) {
+  const gr = journey.guidance || {}
+  const g = gr.guidance || {}
+  const authority = gr.authority || {}
+  const fee = g.government_fee || {}
+  return (
+    <div className="card" style={{ padding: 22 }} data-testid="renewal-prep">
+      <div style={{ fontWeight: 700, marginBottom: 4 }}>{t('renewal.title')}</div>
+      <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>
+        {t('renewal.sub')}
+      </div>
+      <KVList fields={[
+        g.channel && { label: t('renewal.channel'), value: String(g.channel).replace(/_/g, ' ') },
+        g.renewal_form && { label: t('renewal.form'), value: g.renewal_form },
+        fee.amount != null && { label: t('renewal.fee'), value: `${fee.amount} ${fee.currency || ''}` },
+        g.processing_time_normal && { label: t('renewal.processing'), value: g.processing_time_normal },
+        g.processing_time_expedited && { label: t('renewal.expedited'), value: g.processing_time_expedited },
+        g.old_passport_surrender && { label: t('renewal.surrender'), value: g.old_passport_surrender },
+        g.delivery_method && { label: t('renewal.delivery'), value: g.delivery_method },
+        authority.authority && { label: t('renewal.authority'), value: authority.authority }
+      ].filter(Boolean)} />
+      <div style={{ fontSize: 12.5, color: 'var(--muted)', margin: '10px 0' }}>
+        {t('renewal.linkedNote')}
+      </div>
+      <button className="btn" onClick={onToDocuments}>{t('case.docsFirst')}</button>
+    </div>
+  )
+}
+
+// Travel-history question asked ONLY when a conditional health rule needs it
+// (e.g. yellow fever after presence in a risk country). Answering updates the
+// case answers; the checklist re-derives server-side.
+function HealthQuestions({ t, client, caseId, questions, onAnswered }) {
+  const toast = useToast()
+  const [selecting, setSelecting] = useState(null)   // question id while picking countries
+  const [picked, setPicked] = useState([])
+  const list = Array.isArray(questions) ? questions : []
+  if (list.length === 0) return null
+
+  async function answer(countries) {
+    try {
+      await client.updateAnswers(caseId, { recent_travel_countries: countries })
+      toast(t('health.saved'))
+      setSelecting(null); setPicked([])
+      onAnswered && onAnswered()
+    } catch (e) { toast(e.message) }
+  }
+
+  return (
+    <div className="card" style={{ padding: 18, marginBottom: 14 }} data-testid="health-questions">
+      <div className="eyebrow">{t('health.questionTitle')}</div>
+      {list.map((q) => (
+        <div key={q.id} style={{ marginTop: 8 }}>
+          <div style={{ fontSize: 13.5, fontWeight: 600 }}>{q.question}</div>
+          {q.trigger && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{q.trigger}</div>}
+          {selecting !== q.id ? (
+            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+              <button className="btn btn--sm" onClick={() => { setSelecting(q.id); setPicked([]) }}>
+                {t('health.yes')}
+              </button>
+              <button className="btn btn--sm btn--ghost" onClick={() => answer([])}>
+                {t('health.no')}
+              </button>
+            </div>
+          ) : (
+            <div style={{ marginTop: 8 }}>
+              <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 6 }}>
+                {t('health.whichCountries')}
+              </div>
+              {(q.trigger_countries || []).length > 0 ? (
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+                  {(q.trigger_countries || []).map((c) => (
+                    <button key={c} type="button"
+                      className={'chip' + (picked.includes(c) ? ' chip--ink' : '')}
+                      onClick={() => setPicked((p) =>
+                        p.includes(c) ? p.filter((x) => x !== c) : [...p, c])}>
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <input className="input" style={{ marginBottom: 8 }}
+                  placeholder="e.g. KEN, BRA"
+                  onChange={(e) => setPicked(e.target.value.split(',')
+                    .map((s) => s.trim().toUpperCase()).filter(Boolean))} />
+              )}
+              <button className="btn btn--sm" disabled={picked.length === 0}
+                onClick={() => answer(picked)}>OK</button>
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   )
 }

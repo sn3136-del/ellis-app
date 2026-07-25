@@ -244,7 +244,7 @@ def upload_intake_passport(intake_id: str, body: IntakeDocumentBody,
         return _profile_response(existing, duplicate=True)
 
     result, ocr_meta = ocr_provider.process_with_failover(
-        content=content, text=body.text, mime=body.mime)
+        content=content, text=body.text, mime=body.mime, expect_passport=True)
     ec = execution.classify_ocr(ocr_meta)
     mrz = ocr_provider.parse_mrz(result.recognized_text) if result.recognized_text else None
     classification = passport_classifier.classify_page(
@@ -327,31 +327,14 @@ def resolve_intake(intake_id: str, background: BackgroundTasks,
                  detail={"intake_id": r.id, "readiness": result["readiness_status"],
                          "route_key": result.get("route_key")}, actor=p.user_id)
 
-    # Strategy: cached on-demand research. When the exact route is missing/
-    # incomplete (NOT a material conflict awaiting human review), start a
-    # focused research job for THIS route only and report it to the UI.
+    # The Kimi two-pass decision is the ONLY route analysis in the applicant
+    # flow. No official-source research job is created or started here — the
+    # research pipeline remains a separate developer/administrator tool
+    # (POST /admin/snapshot/research-jobs).
     checks = result.get("checks", {})
-    sr = checks.get("snapshot_resolution", {})
-    needs_research = (result["readiness_status"] == "NOT_READY"
-                      and result.get("route_key")
-                      and sr.get("disposition") in ("RESEARCH_INCOMPLETE", None)
-                      and not checks.get("conflicts", {}).get("route_conflicted"))
-    if needs_research:
-        from . import ondemand
-        norm = checks.get("normalization", {}).get("normalized") or {}
-        job = ondemand.create_job(
-            db, org_id=p.org_id, user_id=p.user_id, intake_id=r.id, case_id=r.case_id,
-            answers=r.answers, normalized=norm, key=result["route_key"],
-            language=r.preferred_language or "en")
-        # The official-source job is the asynchronous AUDIT — it never blocks
-        # the applicant; Kimi-primary guidance (below) drives the flow now.
-        result["research_job"] = {"id": job.id, "status": job.status, "stage": job.stage,
-                                  "role": "async_official_source_audit"}
-        if job.status == "queued":
-            background.add_task(_run_research_job_bg, job.id)
 
     # Kimi-primary immediate guidance: attach instantly when cached; otherwise
-    # the UI calls POST /intake/{id}/guidance (one structured Kimi call).
+    # the UI calls POST /intake/{id}/guidance (the bounded two-pass decision).
     from . import kimi_primary
     route = _guidance_route(r, checks)
     try:
@@ -385,10 +368,9 @@ def _guidance_route(r, checks: dict | None = None) -> dict:
 @router.post("/intake/{intake_id}/guidance")
 def route_guidance(intake_id: str, background: BackgroundTasks,
                    db=Depends(get_session), p: Principal = Depends(get_principal)):
-    """Immediate Kimi-primary route guidance (status KIMI_PRIMARY, clearly
-    labeled AI-generated). Cached identical routes return instantly; a new route
-    makes ONE structured Kimi call (with one targeted retry). Never blocks on —
-    or starts — broad research; the official-source audit runs separately."""
+    """The Kimi two-pass route decision (primary analysis + independent Kimi
+    verification) under one hard 60-second deadline. Cached identical routes
+    return instantly. Never blocks on — or starts — official-source research."""
     r = _owned_intake(db, p, intake_id)
     from . import kimi_primary
     route = _guidance_route(r)
@@ -397,6 +379,14 @@ def route_guidance(intake_id: str, background: BackgroundTasks,
     except kimi_primary.GuidanceUnavailable as e:
         raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
                                          "reason": str(e)})
+    except kimi_primary.GuidanceTimeout:
+        raise HTTPException(504, detail={"status": kimi_primary.STATUS_TIMEOUT,
+                                         "reason": kimi_primary.TIMEOUT_MESSAGE})
+    except kimi_primary.GuidanceProviderError as e:
+        raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
+                                         "reason": e.envelope.get("user_message"),
+                                         "category": e.envelope.get("category"),
+                                         "provider_status": e.envelope.get("provider_status")})
     if g.get("stale"):
         background.add_task(kimi_primary.refresh_stale_async, _new_session, route)
     # Guidance-driven adapter generation (authorized bridge; reversible build +
@@ -440,18 +430,13 @@ def _continuation_summary(db, r, cg, case_row) -> dict:
         [{"doc_type": d.doc_type,
           "accepted_as_passport_identity": (d.page_classification or {}).get(
               "accepted_as_passport_identity", True)} for d in docs])
-    audit_info = None
-    if cg.audit_job_id:
-        from .models import OnDemandRouteResearchJob
-        job = db.get(OnDemandRouteResearchJob, cg.audit_job_id)
-        if job:
-            audit_info = {"id": job.id, "status": job.status, "stage": job.stage}
     return {"case_id": case_row.id, "intake_id": r.id, "status": r.status,
             "case_state": case_row.state,
             "disposition": cg.disposition,
             "continuation_kind": cg.continuation_kind,
             "checklist": status["items"], "checklist_counts": status["counts"],
-            "guidance": cg.guidance, "audit": audit_info}
+            "guidance": cg.guidance,
+            "verification": (cg.guidance or {}).get("verification") or {}}
 
 
 @router.post("/intake/{intake_id}/continue")
@@ -459,7 +444,7 @@ def continue_intake(intake_id: str, background: BackgroundTasks,
                     db=Depends(get_session), p: Principal = Depends(get_principal)):
     from .. import models as core_models
     from . import intake_flow, kimi_primary
-    from .models import CaseRouteGuidance, OnDemandRouteResearchJob, RouteIntakeDocument
+    from .models import CaseRouteGuidance, RouteIntakeDocument
     from .registry import load_registry
 
     r = _owned_intake(db, p, intake_id)
@@ -481,6 +466,13 @@ def continue_intake(intake_id: str, background: BackgroundTasks,
     except kimi_primary.GuidanceUnavailable as e:
         raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
                                          "reason": str(e)})
+    except kimi_primary.GuidanceTimeout:
+        raise HTTPException(504, detail={"status": kimi_primary.STATUS_TIMEOUT,
+                                         "reason": kimi_primary.TIMEOUT_MESSAGE})
+    except kimi_primary.GuidanceProviderError as e:
+        raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
+                                         "reason": e.envelope.get("user_message"),
+                                         "category": e.envelope.get("category")})
     meta = intake_flow.continuation_meta(g)
     if meta["blocked"]:
         # The precise unresolved blocker, never a silent dead-end.
@@ -547,6 +539,7 @@ def continue_intake(intake_id: str, background: BackgroundTasks,
             ocr_status="done", execution_class=d.execution_class,
             page_classification=d.page_classification,
             extracted_fields=d.extracted_fields,
+            passport_profile=d.passport_profile,
             quality_warnings=d.quality_warnings, approved=confirmed)
         db.add(stored)
         db.flush()
@@ -557,28 +550,23 @@ def continue_intake(intake_id: str, background: BackgroundTasks,
 
     guidance_saved = dict(g)
     guidance_saved.pop("intake_id", None)
-    checklist = intake_flow.derive_document_checklist(g.get("guidance") or {})
+    checklist = intake_flow.derive_document_checklist(g.get("guidance") or {},
+                                                     answers=case_answers)
     resolution = db.get(RouteResolution, r.resolution_id) if r.resolution_id else None
-    audit_job = db.execute(select(OnDemandRouteResearchJob).where(
-        OnDemandRouteResearchJob.intake_id == r.id)
-        .order_by(OnDemandRouteResearchJob.created_at.desc())).scalars().first()
     cg = CaseRouteGuidance(
         org_id=p.org_id, case_id=case_row.id, intake_id=r.id,
         route_key=(resolution.route_key if resolution else ""),
         disposition=(g.get("guidance") or {}).get("disposition") or "",
         continuation_kind=meta["kind"], guidance=guidance_saved,
-        checklist=checklist,
-        audit_job_id=(audit_job.id if audit_job else None))
+        checklist=checklist)
     db.add(cg)
 
-    # Link the case everywhere the journey is tracked; the async audit keeps
-    # running and never blocks preparation.
+    # Link the case everywhere the journey is tracked. No official-source
+    # audit exists on this path — the Kimi two-pass result is authoritative.
     r.case_id = case_row.id
     r.status = "converted"
     if resolution is not None:
         resolution.case_id = case_row.id
-    if audit_job is not None:
-        audit_job.case_id = case_row.id
     db.commit()
 
     audit.record(db, org_id=p.org_id, application_id=case_row.id,
@@ -646,14 +634,45 @@ def get_research_job(job_id: str, db=Depends(get_session),
 @router.post("/research-jobs/{job_id}/resume")
 def resume_research_job(job_id: str, background: BackgroundTasks,
                         db=Depends(get_session), p: Principal = Depends(get_principal)):
+    """Developer/administrator tool only — never part of the applicant flow."""
+    require_admin(p)
     from .models import OnDemandRouteResearchJob
     job = db.get(OnDemandRouteResearchJob, job_id)
-    if not job or job.org_id != p.org_id:
+    if not job:
         raise HTTPException(404, "research job not found")
     if job.status in ("complete", "failed", "conflicted"):
         return {"id": job.id, "status": job.status, "note": "job already finished"}
     background.add_task(_run_research_job_bg, job.id)
     return {"id": job.id, "status": "running", "stage": job.stage}
+
+
+class AdminResearchBody(BaseModel):
+    """Explicit developer/administrator request to research one exact route.
+    This is the ONLY way an official-source research job is created — the
+    applicant flow never starts one."""
+    intake_id: str
+
+
+@router.post("/admin/snapshot/research-jobs")
+def admin_start_research(body: AdminResearchBody, background: BackgroundTasks,
+                         db=Depends(get_session), p: Principal = Depends(get_principal)):
+    require_admin(p)
+    from . import ondemand
+    r = db.get(RouteIntake, body.intake_id)
+    if not r:
+        raise HTTPException(404, "intake not found")
+    res = db.get(RouteResolution, r.resolution_id) if r.resolution_id else None
+    if not res or not res.route_key:
+        raise HTTPException(409, "intake has no resolved route key — resolve it first")
+    norm = (res.checks or {}).get("normalization", {}).get("normalized") or {}
+    job = ondemand.create_job(
+        db, org_id=r.org_id, user_id=r.user_id, intake_id=r.id, case_id=r.case_id,
+        answers=r.answers, normalized=norm, key=res.route_key,
+        language=r.preferred_language or "en")
+    if job.status == "queued":
+        background.add_task(_run_research_job_bg, job.id)
+    return {"id": job.id, "status": job.status, "stage": job.stage,
+            "route_key": job.route_key}
 
 
 @router.get("/admin/snapshot/research-jobs")

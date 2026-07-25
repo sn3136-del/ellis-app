@@ -104,6 +104,50 @@ class LocalKimiProvider:
                            stopped_reason="done", engine=self.name)
 
 
+def _extract_json(text: str) -> dict:
+    """Extract the LARGEST parseable JSON object from model output. Robust to
+    preambles, trailing text, and multiple concatenated objects (a greedy
+    first-{ to last-} regex spans unrelated objects and fails to parse)."""
+    text = (text or "").strip()
+    if not text:
+        return {}
+    try:
+        out = json.loads(text)
+        return out if isinstance(out, dict) else {}
+    except (json.JSONDecodeError, ValueError):
+        pass
+    decoder = json.JSONDecoder()
+    best: dict = {}
+    best_len = 0
+    idx = 0
+    while True:
+        start = text.find("{", idx)
+        if start < 0:
+            break
+        try:
+            obj, end = decoder.raw_decode(text, start)
+            if isinstance(obj, dict) and (end - start) > best_len:
+                best, best_len = obj, end - start
+            idx = end
+        except (json.JSONDecodeError, ValueError):
+            idx = start + 1
+    return best
+
+
+class KimiHttpError(Exception):
+    """A Moonshot/Kimi HTTP failure with its status code, so callers can map
+    401 / 402 / 429 / 5xx to precise applicant-facing provider messages. The
+    raw response body is never attached — only the status."""
+
+    def __init__(self, status: int):
+        self.status = int(status)
+        super().__init__(f"kimi moonshot HTTP {status}")
+
+
+class KimiTimeout(Exception):
+    """The Kimi call exceeded its bounded wall-clock budget."""
+
+
 class LiveKimiProvider:  # pragma: no cover - needs a real key/network
     name = "kimi-k3"
 
@@ -116,27 +160,34 @@ class LiveKimiProvider:  # pragma: no cover - needs a real key/network
         self._model = s.kimi_model
         self._timeout = s.kimi_timeout_seconds
 
-    def _chat(self, system: str, user: str, json_mode: bool = True) -> dict:
+    def _chat(self, system: str, user: str, json_mode: bool = True, *,
+              timeout: float | None = None, max_tokens: int | None = None,
+              temperature: float | None = None, model: str | None = None) -> dict:
         # Always prefix the Ellis identity so the model can never present itself
         # as Kimi/Moonshot/the underlying model, or as an official/lawyer/embassy.
         from ..i18n import ELLIS_SYSTEM_IDENTITY
         system = ELLIS_SYSTEM_IDENTITY + "\n\n" + system
-        body = {"model": self._model, "messages": [
+        body = {"model": model or self._model, "messages": [
             {"role": "system", "content": system}, {"role": "user", "content": user}]}
         if json_mode:
             body["response_format"] = {"type": "json_object"}
-        r = self._httpx.post(self._url, headers={"authorization": f"Bearer {self._key}"},
-                             json=body, timeout=self._timeout)
-        r.raise_for_status()
+        if max_tokens is not None:
+            body["max_tokens"] = int(max_tokens)
+        if temperature is not None:
+            body["temperature"] = float(temperature)
+        try:
+            r = self._httpx.post(self._url, headers={"authorization": f"Bearer {self._key}"},
+                                 json=body, timeout=timeout if timeout is not None else self._timeout)
+        except self._httpx.TimeoutException as e:
+            raise KimiTimeout(f"kimi call exceeded its {timeout or self._timeout}s budget") from e
+        if r.status_code >= 400:
+            raise KimiHttpError(r.status_code)
         msg = r.json()["choices"][0]["message"]
-        content = msg.get("content") or ""
-        m = re.search(r"\{[\s\S]*\}", content)
-        if not m:
-            # K3 is a reasoning model: under json_mode it occasionally leaves
-            # "content" empty and puts the answer in "reasoning_content"
-            # (kimi_vision handles the same quirk). Fall back before giving up.
-            m = re.search(r"\{[\s\S]*\}", msg.get("reasoning_content") or "")
-        return json.loads(m.group(0)) if m else {}
+        # K3 is a reasoning model: under json_mode it occasionally leaves
+        # "content" empty and puts the answer in "reasoning_content"
+        # (kimi_vision handles the same quirk). Fall back before giving up.
+        return (_extract_json(msg.get("content") or "")
+                or _extract_json(msg.get("reasoning_content") or ""))
 
     def classify_document(self, doc_excerpt: str) -> dict:
         return self._chat("Classify this visa document. Reply JSON {type,confidence}.", doc_excerpt)

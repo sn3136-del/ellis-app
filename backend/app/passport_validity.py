@@ -111,17 +111,57 @@ def renewal_instructions(issuing_country: str) -> dict:
                      "then use \"Upload renewed passport and try again\" in Ellis.")}
 
 
+def _document_expiry(db, app_row: models.VisaApplication) -> tuple[date | None, str]:
+    """Fallback expiry from the case's accepted passport document (OCR/MRZ) so
+    the verdict is CALCULATED whenever the date exists anywhere — never
+    'unknown' with an extracted expiration on file. Returns (date, source)."""
+    docs = db.query(models.StoredDocument).filter_by(
+        application_id=app_row.id, doc_type="passport").all()
+    for d in docs:
+        if not (d.page_classification or {}).get("accepted_as_passport_identity", True):
+            continue
+        profile_field = ((d.passport_profile or {}).get("fields") or {}).get("expiry_date") or {}
+        cand = parse_expiry(str(profile_field.get("value") or ""))
+        if cand:
+            return cand, "passport_document_mrz" if profile_field.get("source") == "mrz" \
+                else "passport_document_ocr"
+        raw = ((d.extracted_fields or {}).get("expiry_date") or {})
+        cand = parse_expiry(str(raw.get("value") or ""))
+        if cand:
+            return cand, "passport_document_ocr"
+    return None, ""
+
+
+def _guidance_rule(db, app_row: models.VisaApplication) -> dict | None:
+    """The Kimi two-pass structured passport-validity requirement saved with the
+    case ({kind, months}) — used when no officially verified rule exists."""
+    from .visa_snapshot.models import CaseRouteGuidance
+    cg = db.query(CaseRouteGuidance).filter_by(case_id=app_row.id).first()
+    if not cg:
+        return None
+    req = ((cg.guidance or {}).get("guidance") or {}).get("passport_validity_requirement")
+    if isinstance(req, dict) and req.get("kind") in RULE_KINDS:
+        return {"kind": req["kind"], "months": int(req.get("months") or 0)}
+    return None
+
+
 def check_case_passport(db, app_row: models.VisaApplication, *, today: date | None = None) -> dict:
-    """The full Phase 5 verdict for a case. Reads the approved passport expiry
-    (answers) and the applicant's intended dates; applies the VERIFIED
-    destination rule when one exists (never a generic default)."""
+    """The full validity verdict for a case. Expiry comes from the approved
+    answers, falling back to the accepted passport document's extracted date
+    (so a verdict is calculated whenever the date exists). The rule comes from
+    the VERIFIED destination rule when one exists, else the Kimi two-pass
+    structured requirement saved with the case — each labeled by source."""
     from . import rules as rules_mod
     today = today or date.today()
     answers = app_row.answers or {}
-    expiry = parse_expiry(str(answers.get("expiry_date") or answers.get("passport_expiry") or ""))
+    expiry = parse_expiry(str(answers.get("expiry_date") or answers.get("passport_expiry")
+                              or answers.get("passport_expiry_date") or ""))
+    expiry_source = "applicant_confirmed" if expiry else ""
+    if expiry is None:
+        expiry, expiry_source = _document_expiry(db, app_row)
     issuing = str(answers.get("issuing_country") or answers.get("nationality") or "")
-    arrival = _iso(answers.get("intended_arrival"))
-    departure = _iso(answers.get("intended_departure"))
+    arrival = _iso(answers.get("intended_arrival") or answers.get("arrival_date"))
+    departure = _iso(answers.get("intended_departure") or answers.get("departure_date"))
 
     if expiry is None:
         return {"status": "unknown", "blocking": False,
@@ -129,55 +169,67 @@ def check_case_passport(db, app_row: models.VisaApplication, *, today: date | No
 
     if expiry < today:
         return {"status": "expired", "blocking": True,
-                "expiry_date": expiry.isoformat(),
+                "expiry_date": expiry.isoformat(), "expiry_source": expiry_source,
                 "explanation": (f"This passport expired on {expiry.isoformat()}. Processing cannot "
                                 "continue: no government portal accepts an application on an expired "
                                 "passport, and any data extracted from it cannot be used as approved "
                                 "application data."),
                 "renewal": renewal_instructions(issuing),
+                "renewal_recommended": True,
                 "retry": "Upload the renewed passport and try again — your case is preserved."}
 
-    # Destination-specific rule from the VERIFIED route rule (if one exists).
-    rule = None
+    # Destination-specific rule: the VERIFIED route rule when one exists,
+    # otherwise the Kimi two-pass structured requirement saved with the case.
+    rule, rule_source = None, ""
     verified = rules_mod.latest_rule(db, destination=app_row.destination_country,
                                      visa_type=app_row.visa_type,
                                      nationality=str(answers.get("passport_nationality", "") or ""),
                                      residence=str(answers.get("current_residence", "") or ""))
     if verified and verified.passport_validity_rule:
-        rule = verified.passport_validity_rule
+        rule, rule_source = verified.passport_validity_rule, "verified_route_rule"
+    if rule is None:
+        g_rule = _guidance_rule(db, app_row)
+        if g_rule:
+            rule, rule_source = g_rule, "kimi_two_pass_guidance"
     if rule:
         need_until, need_text = required_valid_until(rule, arrival, departure)
         if need_until and expiry < need_until:
             return {"status": "insufficient_validity", "blocking": True,
-                    "expiry_date": expiry.isoformat(),
+                    "expiry_date": expiry.isoformat(), "expiry_source": expiry_source,
                     "required_valid_until": need_until.isoformat(),
-                    "rule": rule,
+                    "rule": rule, "rule_source": rule_source,
                     "travel_dates": {"arrival": arrival.isoformat() if arrival else None,
                                      "departure": departure.isoformat() if departure else None},
                     "explanation": (f"{app_row.destination_country} requires a passport {need_text} — "
                                     f"until {need_until.isoformat()} for your dates — but this passport "
                                     f"expires {expiry.isoformat()}."),
                     "renewal": renewal_instructions(issuing),
+                    "renewal_recommended": True,
                     "retry": "Upload the renewed passport and try again — your case is preserved."}
         # The rule needs travel dates we don't have yet → we did NOT evaluate it.
         # Report honestly (do not claim the rule was satisfied).
         if need_until is None and rule.get("kind") in ("valid_on_arrival", "valid_through_departure",
                                                        "months_after_arrival", "months_after_departure"):
             return {"status": "ok_pending_travel_dates", "blocking": False,
-                    "expiry_date": expiry.isoformat(), "rule": rule,
+                    "expiry_date": expiry.isoformat(), "expiry_source": expiry_source,
+                    "rule": rule, "rule_source": rule_source,
                     "explanation": (f"The passport is not expired, but {app_row.destination_country}'s "
                                     "validity rule depends on your intended travel dates, which aren't "
                                     "provided yet — it will be checked once you supply them.")}
         min_pages = int(rule.get("min_blank_pages", 0) or 0)
         if min_pages:
             return {"status": "ok_with_conditions", "blocking": False,
-                    "expiry_date": expiry.isoformat(),
+                    "expiry_date": expiry.isoformat(), "expiry_source": expiry_source,
+                    "rule_source": rule_source,
                     "conditions": [f"{app_row.destination_country} requires at least {min_pages} blank "
                                    "pages — please confirm your passport has them."]}
         return {"status": "ok", "blocking": False, "expiry_date": expiry.isoformat(),
-                "explanation": f"Passport validity satisfies the verified {app_row.destination_country} rule."}
+                "expiry_source": expiry_source, "rule": rule, "rule_source": rule_source,
+                "explanation": (f"Passport validity satisfies the "
+                                f"{'verified' if rule_source == 'verified_route_rule' else 'Kimi-checked'} "
+                                f"{app_row.destination_country} rule ({need_text or 'valid'}).")}
     return {"status": "ok_rule_unverified", "blocking": False,
-            "expiry_date": expiry.isoformat(),
+            "expiry_date": expiry.isoformat(), "expiry_source": expiry_source,
             "explanation": (f"The passport is not expired, but {app_row.destination_country}'s exact "
                             "validity requirement has not been verified yet — it will be enforced "
                             "once the route rule is verified.")}

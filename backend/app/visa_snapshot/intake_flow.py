@@ -285,6 +285,19 @@ _DOC_TYPE_KEYWORDS = (
     ("passport", ("passport",)),
 )
 
+# A vaccination/health label is NEVER a plain checklist document: it is either
+# covered by the structured health_requirements (with its trigger evaluated
+# against the applicant's actual route) or omitted entirely. This keyword strip
+# is what keeps "Yellow fever certificate (if applicable)" noise out of a
+# direct U.S. -> Singapore checklist.
+_HEALTH_LABEL_WORDS = ("vaccin", "immuniz", "immunis", "yellow fever",
+                       "health certificate", "health declaration", "inoculat")
+
+
+def is_health_label(label: str) -> bool:
+    low = str(label or "").lower()
+    return any(w in low for w in _HEALTH_LABEL_WORDS)
+
 
 def doc_type_for_label(label: str) -> str:
     low = str(label or "").lower()
@@ -294,22 +307,97 @@ def doc_type_for_label(label: str) -> str:
     return "document"
 
 
-def derive_document_checklist(guidance: dict) -> list[dict]:
+# Answer keys whose countries count as the applicant's route exposure when a
+# health requirement is conditional on presence in trigger countries.
+_EXPOSURE_ANSWER_KEYS = ("lawful_country_of_residence", "transit_countries",
+                         "recent_travel_countries")
+
+
+def _exposure_countries(answers: dict) -> set[str]:
+    out: set[str] = set()
+    for key in _EXPOSURE_ANSWER_KEYS:
+        v = (answers or {}).get(key)
+        if isinstance(v, str) and v.strip():
+            out.add(v.strip().upper())
+        elif isinstance(v, list):
+            out.update(str(x).strip().upper() for x in v if str(x).strip())
+    return out
+
+
+def health_requirement_state(req: dict, answers: dict) -> str:
+    """Deterministic per-applicant state of one structured health requirement:
+      'required'        — applies to this applicant's route
+      'not_applicable'  — provably irrelevant (omit entirely)
+      'question'        — conditional and the deciding answer is missing
+    """
+    applicability = str((req or {}).get("applicability") or "").lower()
+    if applicability == "always_required":
+        return "required"
+    if applicability != "conditional":
+        return "not_applicable"
+    triggers = {str(c).strip().upper() for c in (req.get("trigger_countries") or [])
+                if str(c).strip()}
+    exposure = _exposure_countries(answers or {})
+    if triggers and exposure & triggers:
+        return "required"
+    # Conditional with no exposure match: only ask when the applicant has not
+    # yet answered the travel-history question; an answered (even empty)
+    # history means the condition provably does not apply.
+    if "recent_travel_countries" in (answers or {}):
+        recent = (answers or {}).get("recent_travel_countries")
+        if not triggers and isinstance(recent, list) and recent:
+            # No specific trigger list from the rule, but the applicant
+            # affirmed recent presence in a risk country -> evidence required.
+            return "required"
+        return "not_applicable"
+    return "question" if triggers or req.get("question") else "not_applicable"
+
+
+def pending_health_questions(guidance: dict, *, answers: dict) -> list[dict]:
+    """Travel-history questions to ask ONLY when a conditional health rule
+    needs them. Empty for routes with no conditional health requirement."""
+    out = []
+    for req in (guidance or {}).get("health_requirements") or []:
+        if health_requirement_state(req, answers) == "question":
+            out.append({
+                "id": f"health:{_slug(req.get('name'))}",
+                "name": req.get("name"),
+                "question": req.get("question") or (
+                    "In the last 6 days, were you in "
+                    + (", ".join(req.get("trigger_countries") or []) or "a risk country")
+                    + "?"),
+                "trigger": req.get("trigger") or "",
+                "trigger_countries": req.get("trigger_countries") or [],
+                "answer_key": "recent_travel_countries",
+            })
+    return out
+
+
+def derive_document_checklist(guidance: dict, *, answers: dict | None = None) -> list[dict]:
     """Checklist items: {id, label, kind, required, satisfied_by}. kind is
     'document' (uploadable), 'form' (route form Ellis prepares/tracks), or
-    'check' (Ellis evaluates automatically, e.g. passport validity)."""
+    'check' (Ellis evaluates automatically, e.g. passport validity).
+
+    Health/vaccination evidence appears ONLY when the structured requirement
+    applies to this applicant's actual route (origin/residence/transit/recent
+    travel); irrelevant items are omitted entirely, never shown as optional."""
     g = guidance or {}
+    answers = answers or {}
     disp = g.get("disposition")
     items: list[dict] = []
     seen: set[str] = set()
 
-    def add(item_id, label, *, kind="document", required=True, satisfied_by=None):
+    def add(item_id, label, *, kind="document", required=True, satisfied_by=None,
+            note=""):
         if item_id in seen:
             return
         seen.add(item_id)
-        items.append({"id": item_id, "label": str(label), "kind": kind,
-                      "required": bool(required),
-                      "satisfied_by": list(satisfied_by or [])})
+        item = {"id": item_id, "label": str(label), "kind": kind,
+                "required": bool(required),
+                "satisfied_by": list(satisfied_by or [])}
+        if note:
+            item["note"] = str(note)
+        items.append(item)
 
     add("passport", "Passport (biodata page)", satisfied_by=["passport"])
     if g.get("passport_validity"):
@@ -317,6 +405,8 @@ def derive_document_checklist(guidance: dict) -> list[dict]:
             kind="check", satisfied_by=[])
 
     for label in (g.get("required_documents") or []):
+        if is_health_label(label):
+            continue  # handled via structured health_requirements only
         dt = doc_type_for_label(label)
         if dt == "passport":
             continue
@@ -324,8 +414,8 @@ def derive_document_checklist(guidance: dict) -> list[dict]:
             add(f"form:{_slug(label)}", label, kind="form", satisfied_by=["destination_form"])
         elif dt == "document":
             # Unrecognized document types keep their OWN checklist item (a
-            # vaccination certificate and a police clearance must never
-            # collapse into one) — any generic upload can satisfy them.
+            # police clearance and an invitation must never collapse into
+            # one) — any generic upload can satisfy them.
             add(f"doc:{_slug(label)}", label, satisfied_by=["document"])
         else:
             add(dt, label, satisfied_by=[dt])
@@ -346,6 +436,24 @@ def derive_document_checklist(guidance: dict) -> list[dict]:
             satisfied_by=["bank_statement"])
     if g.get("insurance_required"):
         add("travel_insurance", "Travel insurance", satisfied_by=["travel_insurance"])
+
+    # Health/vaccination evidence: structured, trigger-evaluated, honest.
+    for req in g.get("health_requirements") or []:
+        state = health_requirement_state(req, answers)
+        if state != "required":
+            continue  # not_applicable -> omitted; question -> asked separately
+        name = str(req.get("name") or "Health certificate")
+        note = str(req.get("trigger") or "")
+        add(f"health:{_slug(name)}", name,
+            satisfied_by=["vaccination_certificate", "document"], note=note)
+
+    # Arrival card / electronic entry form (visa-exempt routes included).
+    card = g.get("arrival_card") or {}
+    if isinstance(card, dict) and card.get("required"):
+        label = str(card.get("name") or "Arrival card")
+        window = str(card.get("submission_window") or "")
+        add("arrival_card", label + (f" — {window}" if window else ""),
+            kind="form", satisfied_by=["destination_form"])
 
     for form in (g.get("forms") or []):
         add(f"form:{_slug(form)}", form, kind="form", satisfied_by=["destination_form"],

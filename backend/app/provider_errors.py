@@ -23,27 +23,27 @@ CATALOG: dict[str, dict] = {
         "user_message": "The AI assistant hit its response-size limit for this step. Your data is saved — try again, or continue without AI assistance.",
         "data_preserved": True, "retry": True, "manual_review": True, "provider_status": "degraded"},
     "kimi_quota_exhausted": {
-        "user_message": "The AI assistant's usage quota is exhausted. Your case is saved and continues without AI assistance until quota is restored.",
+        "user_message": "Kimi K3 credits or quota are unavailable. Update the Moonshot account or API key and retry.",
         "data_preserved": True, "retry": False, "manual_review": True, "provider_status": "quota_exhausted"},
     "kimi_rate_limited": {
-        "user_message": "The AI assistant is receiving too many requests. Your data is saved — please retry in a moment.",
+        "user_message": "Kimi K3 is rate-limited right now (too many requests). Your data is saved — please retry in a moment.",
         "data_preserved": True, "retry": True, "manual_review": True, "provider_status": "rate_limited"},
     "kimi_auth_failed": {
-        "user_message": "The AI assistant is temporarily unavailable (configuration issue). Your case is saved; an administrator has been notified.",
+        "user_message": "The Kimi K3 API key is missing or invalid. Update the Moonshot API key and retry.",
         "data_preserved": True, "retry": False, "manual_review": True, "provider_status": "auth_failed"},
     "kimi_unavailable": {
         "user_message": "The AI assistant is temporarily unavailable. Your case is saved and everything else keeps working.",
         "data_preserved": True, "retry": True, "manual_review": True, "provider_status": "unavailable"},
     # --- Google Document AI ---
     "documentai_quota_exhausted": {
-        "user_message": "Document reading is temporarily paused (service quota). Your upload is saved and will be processed as soon as capacity returns.",
+        "user_message": "Google Document AI quota is unavailable. Passport extraction could not run — your upload is saved and can be retried.",
         "data_preserved": True, "retry": True, "manual_review": True, "provider_status": "quota_exhausted"},
     "documentai_auth_failed": {
         "user_message": "Document reading is temporarily unavailable (configuration issue). Your upload is saved; an administrator has been notified.",
         "data_preserved": True, "retry": False, "manual_review": True, "provider_status": "auth_failed"},
     # --- Browserbase ---
     "browserbase_quota_exhausted": {
-        "user_message": "Secure browser sessions are temporarily at capacity. Your case is saved — the portal step will resume when a session is available.",
+        "user_message": "Browserbase credits are unavailable. Ellis cannot open the real portal until the Browserbase account is topped up.",
         "data_preserved": True, "retry": True, "manual_review": True, "provider_status": "quota_exhausted"},
     "browserbase_auth_failed": {
         "user_message": "Secure browser sessions are temporarily unavailable (configuration issue). An administrator has been notified.",
@@ -94,7 +94,7 @@ CATALOG: dict[str, dict] = {
 # Deterministic classification patterns applied to a provider/infra error string.
 _PATTERNS: list[tuple[str, re.Pattern]] = [
     ("kimi_token_limit", re.compile(r"max[_ ]?tokens|token limit|context[_ ]length", re.I)),
-    ("kimi_quota_exhausted", re.compile(r"(kimi|moonshot).*(quota|billing|insufficient)|insufficient_quota", re.I)),
+    ("kimi_quota_exhausted", re.compile(r"(kimi|moonshot).*(quota|billing|insufficient|402|payment required)|insufficient_quota", re.I)),
     ("kimi_rate_limited", re.compile(r"(kimi|moonshot).*(429|rate)|rate[_ ]?limit.*(kimi|moonshot)", re.I)),
     ("kimi_auth_failed", re.compile(r"(kimi|moonshot).*(401|403|unauthorized|invalid api key)", re.I)),
     ("kimi_unavailable", re.compile(r"(kimi|moonshot).*(unavailable|timeout|connection|5\d\d)", re.I)),

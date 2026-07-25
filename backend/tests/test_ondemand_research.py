@@ -219,23 +219,30 @@ def test_job_resume_is_idempotent_no_duplicate_versions(db):
     assert all(c == 1 for c in keys.values())   # one immutable version, no dups
 
 
-def test_intake_resolve_auto_creates_focused_job_only(db):
+def test_intake_resolve_never_creates_a_research_job(db):
+    """Research is a developer/administrator tool only: the applicant's resolve
+    NEVER auto-creates or auto-starts an official-source research job — even
+    for a NOT_READY route. Only POST /admin/snapshot/research-jobs (admin) can."""
+    from app.visa_snapshot.models import OnDemandRouteResearchJob
     client = TestClient(fastapi_app)
+    before = db.query(OnDemandRouteResearchJob).count()
     r = client.post("/intake", json={"answers": ROUTE_ANSWERS}, headers=H)
     iid = r.json()["id"]
     rr = client.post(f"/intake/{iid}/resolve", headers=H)
     assert rr.status_code == 200
     body = rr.json()
-    if body["readiness_status"] == "NOT_READY":
-        assert "research_job" in body
-        jid = body["research_job"]["id"]
-        jr = client.get(f"/research-jobs/{jid}", headers=H)
-        assert jr.status_code == 200
-        # tenant isolation
-        other = dict(H, **{"X-Org-Id": "org-other"})
-        assert client.get(f"/research-jobs/{jid}", headers=other).status_code == 404
-        # the job targets EXACTLY this route
-        assert jr.json()["route_key"] == body["route_key"]
+    assert "research_job" not in body
+    assert db.query(OnDemandRouteResearchJob).count() == before
+    # The applicant token cannot start research either.
+    assert client.post("/admin/snapshot/research-jobs",
+                       json={"intake_id": iid}, headers=H).status_code == 403
+    # An administrator explicitly can (the dev-only entry point).
+    admin = {"Authorization": "Bearer admin-token", "X-Org-Id": "platform",
+             "X-User-Id": "admin-1"}
+    ar = client.post("/admin/snapshot/research-jobs",
+                     json={"intake_id": iid}, headers=admin)
+    assert ar.status_code == 200
+    assert db.query(OnDemandRouteResearchJob).count() == before + 1
 
 
 def test_no_global_fleet_behavior():

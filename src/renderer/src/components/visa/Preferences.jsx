@@ -1,7 +1,10 @@
-// Appointment preferences (Phase 6). Captures the applicant's scheduling
-// constraints and controls (auto-book / reschedule policy) and saves them to the
-// backend, which ranks the earliest qualifying slot honoring every constraint.
-import { useState } from 'react'
+// Appointment preferences — shown ONLY when the route's verified guidance says
+// an appointment / in-person submission is required. Captures the applicant's
+// scheduling constraints and controls (auto-book / reschedule policy) and saves
+// them to the backend, which ranks the earliest qualifying slot honoring every
+// constraint. Centers come from the route's real adapter when one is released;
+// no fictional center or placeholder ever appears here.
+import { useEffect, useState } from 'react'
 import { useToast, ErrorNote } from '../ui.jsx'
 import { defaultPreferences, dateToMs, msToDate, PREF_DAY_MS } from '../../lib/visaSession.js'
 
@@ -12,7 +15,19 @@ export default function Preferences({ client, caseId, initial, onSaved }) {
   const [p, setP] = useState(() => ({ ...defaultPreferences(), ...(initial || {}) }))
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
+  const [centers, setCenters] = useState(null)   // real centers when the case's pending slots name them
   const set = (patch) => setP((prev) => ({ ...prev, ...patch }))
+
+  // Real center names only: the locations the case's actual portal driver has
+  // surfaced in pending appointment slots. No slots yet -> free-text input
+  // with no suggested value (never a fictional default).
+  useEffect(() => {
+    client.getCase(caseId).then((c) => {
+      const slots = (c.pending && Array.isArray(c.pending.slots)) ? c.pending.slots : []
+      const locs = [...new Set(slots.map((s) => s.locationId || s.location_id).filter(Boolean))]
+      setCenters(locs.length ? locs : null)
+    }).catch(() => {})
+  }, [caseId])
 
   function toggleWeekday(d) {
     const on = p.preferredWeekdays.includes(d)
@@ -33,8 +48,17 @@ export default function Preferences({ client, caseId, initial, onSaved }) {
     <div className="card" style={{ padding: 22 }}>
       <div className="grid grid-2" style={{ gap: 14 }}>
         <div className="field"><label>Preferred center</label>
-          <input className="input" value={p.preferredLocation}
-                 onChange={(e) => set({ preferredLocation: e.target.value })} placeholder="e.g. MOCKLAND-CAP" /></div>
+          {centers ? (
+            <select className="select" value={p.preferredLocation}
+                    onChange={(e) => set({ preferredLocation: e.target.value })}>
+              <option value="">No preference</option>
+              {centers.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          ) : (
+            <input className="input" value={p.preferredLocation}
+                   onChange={(e) => set({ preferredLocation: e.target.value })}
+                   placeholder="Center name (as shown by the official portal)" />
+          )}</div>
         <div className="field"><label>Alternative centers (comma-separated)</label>
           <input className="input" value={(p.alternativeLocations || []).join(', ')}
                  onChange={(e) => set({ alternativeLocations: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })} /></div>

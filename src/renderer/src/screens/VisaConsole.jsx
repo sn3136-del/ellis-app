@@ -53,7 +53,12 @@ export default function VisaConsole({ profile, onNotify, adminMode }) {
           <div style={{ fontSize: 13, color: 'var(--muted)', marginLeft: 8 }}>{c?.destination_country} · {c?.visa_type}</div>
         </div>
         <div className="page page--wide">
-          <CaseFlow client={client} caseId={openId} onNotify={onNotify} />
+          <CaseFlow client={client} caseId={openId} onNotify={onNotify}
+            onOpenCase={(c2) => { addCase({ id: c2.id,
+              full_name: c2.full_name || 'Case',
+              destination_country: c2.destination_country || '',
+              visa_type: c2.visa_type || 'tourist',
+              createdAt: Date.now() }); setOpenId(c2.id) }} />
         </div>
       </div>
     )
@@ -109,7 +114,7 @@ export default function VisaConsole({ profile, onNotify, adminMode }) {
         <div className="grid grid-2" style={{ gap: 20, alignItems: 'start' }}>
           <div>
             <div className="eyebrow">Start a case</div>
-            <NewCaseForm client={client} busy={creating} setBusy={setCreating}
+            <NewCaseForm client={client} busy={creating} setBusy={setCreating} caps={caps}
                          onCreated={(c) => { addCase(c); toast('Case created'); setOpenId(c.id) }} />
 
             <div className="eyebrow" style={{ marginTop: 24 }}>Your cases</div>
@@ -140,8 +145,11 @@ export default function VisaConsole({ profile, onNotify, adminMode }) {
   )
 }
 
-function NewCaseForm({ client, onCreated, busy, setBusy }) {
-  const [f, setF] = useState({ full_name: '', email: '', phone: '', destination_country: 'Mockland', visa_type: 'tourist', time_zone: 'UTC' })
+function NewCaseForm({ client, onCreated, busy, setBusy, caps }) {
+  // The Mockland test destination exists ONLY in mock-allowed runtime modes;
+  // real-services deployments never see a fictional destination anywhere.
+  const mockAllowed = caps?.execution_classification?.mock_portal_allowed === true
+  const [f, setF] = useState({ full_name: '', email: '', phone: '', destination_country: mockAllowed ? 'Mockland' : 'Vietnam', visa_type: 'tourist', time_zone: 'UTC' })
   const [error, setError] = useState(null)
   const set = (k, v) => setF((p) => ({ ...p, [k]: v }))
   async function create() {
@@ -162,7 +170,7 @@ function NewCaseForm({ client, onCreated, busy, setBusy }) {
         <div className="field"><label>Time zone</label><input className="input" value={f.time_zone} onChange={(e) => set('time_zone', e.target.value)} /></div>
         <div className="field"><label>Destination</label>
           <select className="select" value={f.destination_country} onChange={(e) => set('destination_country', e.target.value)}>
-            <option>Mockland</option><option>Vietnam</option>
+            {mockAllowed && <option>Mockland</option>}<option>Vietnam</option>
           </select></div>
         <div className="field"><label>Visa type</label>
           <select className="select" value={f.visa_type} onChange={(e) => set('visa_type', e.target.value)}>

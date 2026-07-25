@@ -172,3 +172,115 @@ test('checklist status meta + counts', () => {
     }
   }
 })
+
+// ---------------------------------------------------------------------------
+// Route-specific journey rendering: only applicable stages, banner suppression
+// for routes with no government submission, appointment-gated Preferences tab,
+// calculated validity display, and the two-pass verification chip.
+import {
+  applicableStages, showExecutionBanner, preferencesTabVisible,
+  validityMeta, verificationMeta
+} from '../../src/renderer/src/lib/intake.js'
+
+test('visa-exempt entry preparation has NO submission stages at all', () => {
+  assert.deepEqual(applicableStages('entry_preparation', [
+    { step: 'collect_documents' }, { step: 'arrival_card_preparation' }
+  ]), [])
+})
+
+test('stages come from the route plan — never the whole state machine', () => {
+  const plan = [
+    { step: 'collect_documents' }, { step: 'prepare_forms' },
+    { step: 'account_registration' }, { step: 'payment' }, { step: 'submission' }
+  ]
+  const stages = applicableStages('visa_application', plan)
+  assert.ok(stages.includes('PORTAL_ACCOUNT_CREATING'))
+  assert.ok(stages.includes('PAYMENT_APPROVAL_REQUIRED'))
+  assert.ok(stages.includes('SUBMITTING'))
+  assert.ok(!stages.includes('APPOINTMENT_BOOKING'))     // no appointment step
+  // Without an account/payment step those stages disappear too.
+  const lean = applicableStages('visa_application', [{ step: 'submission' }])
+  assert.ok(!lean.includes('PORTAL_ACCOUNT_CREATING'))
+  assert.ok(!lean.includes('PAYMENT_APPROVAL_REQUIRED'))
+})
+
+test('legacy cases without a journey keep their previous display (null)', () => {
+  assert.equal(applicableStages(null, []), null)
+  assert.equal(applicableStages(undefined, undefined), null)
+})
+
+test('the not-a-real-submission banner never shows for entry preparation', () => {
+  assert.equal(showExecutionBanner({ continuation_kind: 'entry_preparation' }), false)
+  // Fail safe: submission routes and unknown journeys KEEP the banner.
+  assert.equal(showExecutionBanner({ continuation_kind: 'visa_application' }), true)
+  assert.equal(showExecutionBanner(null), true)
+})
+
+test('Preferences tab appears only when an appointment is actually required', () => {
+  const exempt = { continuation_kind: 'entry_preparation',
+    guidance: { guidance: { appointment_required: false } } }
+  assert.equal(preferencesTabVisible(exempt), false)
+  const embassy = { continuation_kind: 'visa_application',
+    guidance: { guidance: { appointment_required: true } } }
+  assert.equal(preferencesTabVisible(embassy), true)
+  const evisa = { continuation_kind: 'visa_application',
+    guidance: { guidance: { appointment_required: false } } }
+  assert.equal(preferencesTabVisible(evisa), false)
+})
+
+test('validity is displayed as a calculated verdict, never raw unknown', () => {
+  for (const lang of SUPPORTED) {
+    for (const s of ['ok', 'ok_rule_unverified', 'ok_pending_travel_dates',
+                     'ok_with_conditions', 'insufficient_validity', 'expired', 'unknown']) {
+      assert.ok(STRINGS[lang][validityMeta(s).i18nKey], `${lang} ${s}`)
+    }
+  }
+  assert.equal(validityMeta('insufficient_validity').offerRenewal, true)
+  assert.equal(validityMeta('expired').offerRenewal, true)
+  assert.equal(validityMeta('ok').offerRenewal, false)
+  assert.equal(validityMeta('weird-new-status').i18nKey, 'validity.unknown')
+})
+
+test('two-pass verification chip only for genuinely verified results', () => {
+  assert.equal(verificationMeta({ verdict: 'ACCEPT' }).verified, true)
+  assert.equal(verificationMeta({ verdict: 'REVISE' }).verified, true)
+  assert.equal(verificationMeta({}).verified, false)
+  assert.equal(verificationMeta(null).verified, false)
+  for (const lang of SUPPORTED) {
+    assert.ok(STRINGS[lang]['guidance.verified'], lang)
+    // The badge names the Kimi second pass, never official sources.
+    assert.ok(!STRINGS.en['guidance.verified'].toLowerCase().includes('official source'))
+  }
+})
+
+test('no applicant-facing string ever claims an official-source check', () => {
+  for (const lang of SUPPORTED) {
+    assert.equal(STRINGS[lang]['case.audit.done'], undefined)
+    assert.equal(STRINGS[lang]['case.audit.running'], undefined)
+  }
+  assert.ok(!('Checked against official sources' in
+    Object.fromEntries(Object.values(STRINGS.en).map((v) => [v, 1]))))
+})
+
+// ---------------------------------------------------------------------------
+// No mock/fictional placeholder may exist anywhere in the applicant renderer.
+import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { join } from 'node:path'
+
+function walk(dir, out = []) {
+  for (const name of readdirSync(dir)) {
+    const p = join(dir, name)
+    if (statSync(p).isDirectory()) walk(p, out)
+    else out.push(p)
+  }
+  return out
+}
+
+test('the applicant renderer contains no MOCKLAND or fictional center', () => {
+  const root = new URL('../../src/renderer/src', import.meta.url).pathname
+  for (const file of walk(root)) {
+    if (!/\.(jsx?|css)$/.test(file)) continue
+    const text = readFileSync(file, 'utf8')
+    assert.ok(!text.includes('MOCKLAND'), `${file} contains MOCKLAND`)
+  }
+})

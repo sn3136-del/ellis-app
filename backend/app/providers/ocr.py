@@ -259,8 +259,8 @@ def get_provider(*, has_image: bool = False):
     return LocalOcrProvider()
 
 
-def process_with_failover(*, content: bytes = b"", text: str = "", mime: str = "application/pdf"):
-    """Production OCR hierarchy with explicit, recorded failover:
+def _run_tiers(*, content: bytes = b"", text: str = "", mime: str = "application/pdf"):
+    """One pass through the OCR hierarchy:
       Tier 1: Google Document AI (primary).
       Tier 2: Kimi K3 vision (ONLY on a recoverable Tier-1 failure AND when the
               ENABLE_KIMI_OCR_FALLBACK flag is on AND the input is an image).
@@ -299,6 +299,56 @@ def process_with_failover(*, content: bytes = b"", text: str = "", mime: str = "
     res = LocalOcrProvider().process(text=text, mime=mime)
     if meta["primary"] is None and not meta["docai_degraded"]:
         meta["primary"] = "local_text"
+    return res, meta
+
+
+def process_with_failover(*, content: bytes = b"", text: str = "",
+                          mime: str = "application/pdf",
+                          expect_passport: bool = False):
+    """The production OCR entry point: deterministic preprocessing (EXIF
+    orientation, glare/contrast diagnostics), one pass through the provider
+    hierarchy, then — when a passport is expected but no checksum-valid MRZ was
+    recognized — bounded automatic recovery:
+      * images: retry the hierarchy at 90/180/270 degrees until an MRZ
+        validates (rotated phone photos are accepted automatically);
+      * multipage PDFs: OCR each page individually and select the page whose
+        MRZ validates (the biodata page is picked automatically).
+    All retries are recorded in meta; nothing is ever invented."""
+    from . import preprocess
+
+    pre_warnings: list[str] = []
+    if content and preprocess.is_image(mime):
+        content, w = preprocess.exif_normalize(content, mime)
+        pre_warnings += w
+        pre_warnings += preprocess.readability_warnings(content, mime)
+
+    res, meta = _run_tiers(content=content, text=text, mime=mime)
+
+    if expect_passport and content and not res.mrz_valid:
+        if preprocess.is_image(mime):
+            for degrees in preprocess.CANDIDATE_ROTATIONS:
+                rotated = preprocess.rotate(content, mime, degrees)
+                if rotated is None:
+                    break
+                res2, meta2 = _run_tiers(content=rotated, text=text, mime=mime)
+                if res2.mrz_valid:
+                    meta2["rotation_applied"] = degrees
+                    pre_warnings.append(
+                        f"image was rotated {degrees}° and corrected automatically")
+                    res, meta = res2, meta2
+                    break
+        elif preprocess.is_pdf(mime) and preprocess.pdf_page_count(content) > 1:
+            for idx, page_bytes in enumerate(preprocess.pdf_pages(content)):
+                res2, meta2 = _run_tiers(content=page_bytes, text="", mime=mime)
+                if res2.mrz_valid:
+                    meta2["pdf_page_selected"] = idx + 1
+                    pre_warnings.append(
+                        f"passport biodata page found on PDF page {idx + 1}")
+                    res, meta = res2, meta2
+                    break
+
+    if pre_warnings:
+        res.quality_warnings = pre_warnings + list(res.quality_warnings or [])
     return res, meta
 
 

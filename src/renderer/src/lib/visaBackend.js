@@ -167,8 +167,12 @@ export function createVisaClient(session) {
     // The primary continuation after guidance: creates/reuses the case, saves
     // the guidance + route checklist to it, and carries documents over.
     continueIntake: (id) => call('POST', `/intake/${id}/continue`, session, {}),
-    // Route journey state saved on the case (guidance, checklist, audit status).
+    // Route journey state saved on the case (guidance + two-pass verification,
+    // route workflow type, checklist, pending health questions).
     caseChecklist: (id) => call('GET', `/cases/${id}/checklist`, session),
+    // Passport renewal: create/reuse the linked renewal case.
+    startRenewal: (id, manual = false) =>
+      call('POST', `/cases/${id}/renewal`, session, { manual }),
     routeEvidence: (resolutionId) => call('GET', `/snapshot/route-evidence/${resolutionId}`, session),
 
     // On-demand route research (auto-started by resolve when a route is

@@ -25,3 +25,5 @@ pycountry==26.2.16
 # Live Browserbase runtime driver + credential-free recon (optional; needs
 # `python -m playwright install chromium`). Live paths are flag/creds-gated.
 playwright>=1.44
+Pillow>=10.0
+pypdf>=4.0

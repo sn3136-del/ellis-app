@@ -245,8 +245,17 @@ def test_no_passport_pii_in_audit_log(client, db):
 # =========================================================================
 # Part 3 — continuation from guidance into the case workflow
 # =========================================================================
+def _two_pass(answer):
+    """Both Kimi passes: the analysis answer for pass 1, ACCEPT for pass 2."""
+    def provider(system, user):
+        if "verifier" in system:
+            return {"verdict": "ACCEPT", "issues": [], "corrected": None}
+        return dict(answer)
+    return provider
+
+
 def _resolve_with_guidance(client, answer, answers=ANSWERS_SGP):
-    kimi_primary.set_provider(lambda s, u: dict(answer))
+    kimi_primary.set_provider(_two_pass(answer))
     iid = _new_intake(client, answers)
     client.post(f"/intake/{iid}/passport",
                 json={"name": "p.pdf", "text": _passport_text()}, headers=H)
@@ -358,25 +367,33 @@ def test_passport_data_survives_guidance_and_continuation(client, db):
     assert idoc is not None and idoc.content is None
 
 
-def test_async_audit_keeps_running_and_never_blocks_preparation(client, db):
+def test_continuation_never_starts_or_links_official_source_research(client, db):
+    """The applicant flow performs ZERO official-source research: resolve,
+    guidance, and continuation neither create nor link a research job — even
+    when an (admin-created) job exists for the same intake. The Kimi two-pass
+    verification is reported instead of any audit."""
     from app.visa_snapshot import ondemand
-    kimi_primary.set_provider(lambda s, u: dict(EXEMPT_ANSWER))
+    kimi_primary.set_provider(_two_pass(EXEMPT_ANSWER))
     iid = _new_intake(client, dict(ANSWERS_SGP, destination_country="IDN"))
+    before = db.query(OnDemandRouteResearchJob).count()
+    rr = client.post(f"/intake/{iid}/resolve", headers=H)
+    assert rr.status_code == 200 and "research_job" not in rr.json()
     client.post(f"/intake/{iid}/guidance", headers=H)
-    # A queued (not yet finished) official-source audit exists for this intake.
+    assert db.query(OnDemandRouteResearchJob).count() == before   # none created
+    # Even an admin-created job for this intake is NOT adopted by continuation.
     job = ondemand.create_job(
         db, org_id="org-journey", user_id="uj", intake_id=iid, case_id=None,
         answers=dict(ANSWERS_SGP, destination_country="IDN"), normalized={},
         key="rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=IDN|cat=tourist_visa|sub=None|pur=tourism|per=2026-07-26|jur=default",
         language="en")
-    assert job.status == "queued"
     r = client.post(f"/intake/{iid}/continue", headers=H)
-    assert r.status_code == 200                  # preparation was never blocked
+    assert r.status_code == 200
     body = r.json()
-    assert body["audit"] and body["audit"]["status"] in ("queued", "running")
+    assert "audit" not in body
+    assert body["verification"]["verdict"] == "ACCEPT"    # two-pass, not audit
     db.expire_all()
     job2 = db.get(OnDemandRouteResearchJob, job.id)
-    assert job2.case_id == body["case_id"]       # audit follows the case
+    assert job2.case_id is None                  # research stays a dev-only tool
 
 
 def test_no_admin_approval_anywhere_on_the_continuation_path(client, db):
@@ -501,12 +518,24 @@ def test_icao_country_codes_map_to_iso3_or_require_selection():
 def test_generic_required_documents_keep_separate_checklist_items():
     cl = intake_flow.derive_document_checklist({
         "disposition": "VISA_REQUIRED",
-        "required_documents": ["Yellow fever vaccination certificate",
-                               "Police clearance certificate", "passport photo"]})
+        "required_documents": ["Police clearance certificate",
+                               "Notarized custody letter", "passport photo"]})
     ids = [i["id"] for i in cl]
     generic = [i for i in ids if i.startswith("doc:")]
     assert len(generic) == 2            # both unrecognized documents survive
     assert "photo" in ids
+
+
+def test_vaccination_labels_never_become_generic_checklist_items():
+    """A vaccination mention in required_documents is Kimi noise — health
+    evidence appears ONLY through the structured, trigger-evaluated
+    health_requirements (see test_vaccination_conditional.py)."""
+    cl = intake_flow.derive_document_checklist({
+        "disposition": "VISA_EXEMPT",
+        "required_documents": ["Yellow fever vaccination certificate (if applicable)",
+                               "passport"]})
+    assert not any("vaccin" in i["label"].lower() for i in cl)
+    assert not any(i["id"].startswith("health:") for i in cl)
 
 
 def test_stamp_page_detection_vs_supporting_documents():

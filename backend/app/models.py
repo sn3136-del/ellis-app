@@ -154,6 +154,11 @@ class StoredDocument(Base, TimestampMixin):
     # Passport biodata-page classification (accept | reject-with-reason).
     page_classification: Mapped[dict] = mapped_column(JSON, default=dict)
     extracted_fields: Mapped[dict] = mapped_column(JSON, default=dict)
+    # Deterministic passport profile carried from intake (per-field provenance
+    # mrz|ocr_text|derived, confidence, needs_confirmation, conflicts,
+    # mrz_valid) — kept with the document so OCR provenance and the applicant's
+    # confirmations survive the intake -> case continuation.
+    passport_profile: Mapped[dict] = mapped_column(JSON, default=dict)
     approved: Mapped[bool] = mapped_column(Boolean, default=False)
     quality_warnings: Mapped[list] = mapped_column(JSON, default=list)
     application: Mapped[VisaApplication] = relationship(back_populates="documents")

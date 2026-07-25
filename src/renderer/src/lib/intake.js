@@ -418,6 +418,77 @@ export function prefillWithEdits(profile, edits = {}) {
 }
 
 // ---------------------------------------------------------------------------
+// Route-specific journey rendering (Kimi two-pass drives WHICH stages exist).
+
+// Stages implied by each irreversible workflow-plan step. Only stages whose
+// step actually appears in the route's plan are shown — never the whole
+// internal state machine at once.
+const STAGE_BY_STEP = {
+  account_registration: ['PORTAL_ACCOUNT_CREATING', 'PORTAL_VERIFICATION_REQUIRED'],
+  payment: ['PAYMENT_APPROVAL_REQUIRED', 'PAYMENT_ACTION_REQUIRED'],
+  appointment_booking: ['APPOINTMENT_BOOKING'],
+  submission: ['PERSONAL_DECLARATION_REQUIRED', 'SUBMITTING']
+}
+
+// The applicable journey stages for a case, from its continuation kind and
+// Kimi workflow plan. Returns null when the case has no saved journey (legacy
+// case) — the caller falls back to its previous generic display. Returns []
+// for kinds with NO government submission (entry preparation, renewal prep):
+// no submission timeline exists for them at all.
+export function applicableStages(continuationKind, workflowPlan) {
+  if (!continuationKind) return null
+  if (continuationKind === 'entry_preparation') return []
+  const base = ['DRAFT', 'APPLICANT_REVIEW_REQUIRED', 'AUTHORIZATION_PENDING']
+  const steps = new Set((Array.isArray(workflowPlan) ? workflowPlan : [])
+    .map((s) => (s && s.step) || s))
+  const out = [...base]
+  for (const [step, stages] of Object.entries(STAGE_BY_STEP)) {
+    if (steps.has(step)) out.push(...stages)
+  }
+  out.push('COMPLETED')
+  return out
+}
+
+// The orange "not a real government submission" banner exists to guard routes
+// that DO end in a government submission. A route with no submission at all
+// (visa-exempt entry preparation) has nothing to guard — showing it there is
+// wrong. Fail safe: an unknown/missing journey keeps the banner.
+export function showExecutionBanner(journey) {
+  if (journey && journey.continuation_kind === 'entry_preparation') return false
+  return true
+}
+
+// The Preferences tab is appointment-booking configuration: visible ONLY when
+// the route's verified guidance says an appointment / in-person submission is
+// required. Legacy cases without a saved journey keep the previous behavior.
+export function preferencesTabVisible(journey) {
+  if (!journey || !journey.continuation_kind) return true
+  const g = (journey.guidance || {}).guidance || {}
+  return g.appointment_required === true
+}
+
+// Passport-validity verdict -> display meta. Unknown statuses fail safe to the
+// awaiting-passport presentation (never presented as valid).
+const VALIDITY_STATUSES = new Set(['ok', 'ok_rule_unverified',
+  'ok_pending_travel_dates', 'ok_with_conditions', 'insufficient_validity',
+  'expired', 'unknown'])
+
+export function validityMeta(status) {
+  const s = VALIDITY_STATUSES.has(status) ? status : 'unknown'
+  const tone = s === 'ok' ? 'ok'
+    : (s === 'insufficient_validity' || s === 'expired') ? 'blocked' : 'info'
+  return { i18nKey: 'validity.' + s, tone,
+    offerRenewal: s === 'insufficient_validity' || s === 'expired' }
+}
+
+// The two-pass verification chip: shown only for a genuinely verified result.
+export function verificationMeta(verification) {
+  const v = verification && typeof verification === 'object' ? verification : {}
+  const verified = v.verdict === 'ACCEPT' || v.verdict === 'REVISE'
+  return { verified, i18nKey: verified ? 'guidance.verified' : null }
+}
+
+// ---------------------------------------------------------------------------
 // Route checklist display helpers (items come from the backend checklist).
 const CHECKLIST_STATUS = {
   provided: { tone: 'ok', i18nKey: 'checklist.provided' },

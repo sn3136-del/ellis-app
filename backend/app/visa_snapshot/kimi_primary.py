@@ -1,40 +1,52 @@
-"""Kimi-primary route guidance: an IMMEDIATE structured route decision.
+"""Kimi-primary route guidance: the authoritative TWO-PASS route decision.
 
-For a new tourist route, ONE structured Kimi K3 call returns the full route
-picture (disposition, category, stay, passport rules, documents, forms,
-channel/portal, fees, processing time, biometrics/interview/appointment,
-account/payment/submission steps, exceptions, uncertainty). The answer:
+For a tourist route, PASS 1 (primary analysis) sends the applicant's route
+facts to Kimi K3 and requires one structured JSON answer covering the full
+route picture (disposition, category, stay, passport-validity requirement,
+documents, forms, channel/portal, fees, processing time, arrival card,
+health/vaccination conditions, biometrics/interview/appointment,
+account/payment/submission steps, exceptions, uncertainty). PASS 2
+(verification) sends the same facts PLUS pass 1's answer to a separate Kimi
+verification prompt that must detect contradictions, correct wrong
+nationality/destination/date assumptions, check trip duration against the
+permitted stay, distinguish visa-free entry from eVisa/electronic arrival
+forms and tourism from transit rules, and return ACCEPT or REVISE with the
+final authoritative JSON. The final Kimi result drives the Ellis workflow
+directly.
 
-- populates the applicant UI immediately (status KIMI_PRIMARY, clearly labeled
-  "AI-generated route guidance"),
-- derives the next workflow steps deterministically from its fields,
-- may auto-start the adapter build (same authorized bridge as research),
-- is cached by nationality × residence × destination × purpose × jurisdiction ×
-  policy month, reused instantly and refreshed asynchronously when stale.
+NO official-source fetching, Browserbase research, or evidence validation runs
+on this path, and none is started asynchronously — the research pipeline
+remains a separate developer/administrator tool only.
 
-It NEVER replaces the official-source pipeline: the existing on-demand research
-+ ResearchEvidenceValidator continue as an asynchronous AUDIT (started in the
-background as before), and their grounded result supersedes model guidance when
-it lands. Guidance drives only reversible preparation (documents, OCR, forms,
-adapter generation, navigation, appointment search, fee display); every real
-account creation, booking, payment or submission still requires the applicant's
-explicit confirmation and the runtime's fail-closed gates (runtime.
-assert_execution_allowed) — none of that is relaxed here.
+TIME LIMIT: the whole primary + verification process runs under ONE hard
+wall-clock deadline (default 60 seconds, ELLIS_GUIDANCE_DEADLINE_SECONDS).
+Every Kimi call gets a bounded timeout sized to the remaining budget, one
+controlled retry happens only for a malformed response and only when budget
+remains, and an exceeded deadline surfaces the honest retry message — never an
+indefinite spinner and never a broad-crawling fallback. Cached identical
+routes return immediately; only complete (KIMI_PRIMARY) results are cached, so
+a failed attempt never poisons the cache.
 
-Security: the prompt contains ONLY route facts the applicant typed (nationality,
-residence, destination, purpose, dates). No passwords, OTPs, cookies, payment
-credentials or portal sessions exist anywhere in this module, and Kimi's answer
-is data — it can name steps but cannot execute anything.
+Deterministic validation stays deterministic: JSON/schema whitelisting,
+mandatory-field checks, impossible-date and age arithmetic, passport-expiry
+calculations, and internal-contradiction checks all happen in code, never in
+the model.
 
-Failure handling: a missing mandatory field or a detected contradiction triggers
-ONE retry that lists exactly what was missing; a still-incomplete answer is
-returned honestly as KIMI_UNCERTAIN with the precise gaps — no silent broad
-research is started by this path, and no administrator task is created.
+Security: the prompt contains ONLY route facts the applicant typed or
+confirmed (nationality, residence, destination, purpose, dates, transit, age,
+prior refusals, passport issue/expiry dates). No passport image, no name, no
+passport number, no document bytes, and no secret ever reaches the model from
+this module, and Kimi's answer is data — it can name steps but cannot execute
+anything. Guidance drives only reversible preparation; every real account
+creation, booking, payment or submission still requires the applicant's
+explicit confirmation and the runtime's fail-closed gates.
 """
 from __future__ import annotations
 
 import json
-from datetime import datetime, timedelta, timezone
+import os
+import time
+from datetime import date, datetime, timedelta, timezone
 
 from sqlalchemy import select
 
@@ -44,9 +56,16 @@ from .models import KimiRouteGuidanceCache
 STATUS_PRIMARY = "KIMI_PRIMARY"
 STATUS_UNCERTAIN = "KIMI_UNCERTAIN"
 STATUS_UNAVAILABLE = "KIMI_UNAVAILABLE"
+STATUS_TIMEOUT = "KIMI_TIMEOUT"
 
 DISPOSITIONS = ("VISA_REQUIRED", "VISA_EXEMPT",
                 "ELECTRONIC_AUTHORIZATION_REQUIRED", "CONDITIONAL")
+
+# Route-specific workflow types the journey renders from. Derived
+# deterministically from disposition/channel when Kimi omits it.
+WORKFLOW_TYPES = ("visa_exempt_preparation", "evisa_portal", "embassy_submission",
+                  "visa_center_submission", "electronic_authorization",
+                  "visa_on_arrival", "conditional")
 
 # Fields Kimi must answer for the guidance to count as complete.
 MANDATORY_FIELDS = ("disposition", "visa_category", "permitted_stay",
@@ -60,19 +79,44 @@ ALL_FIELDS = MANDATORY_FIELDS + (
     "account_registration_steps", "payment_process", "submission_process",
     "onward_travel_evidence", "accommodation_evidence", "financial_evidence",
     "insurance_required", "exceptions", "uncertainty", "confidence",
+    # Structured additions (two-pass schema):
+    "permitted_stay_days",            # integer for deterministic duration checks
+    "passport_validity_requirement",  # {kind, months} — deterministic comparison
+    "arrival_card",                   # {required, name, submission_window}
+    "health_requirements",            # [{name, applicability, trigger_countries, trigger, question}]
+    "route_workflow_type",            # one of WORKFLOW_TYPES
 )
+
+# The user-facing verification label (replaces every "checked against official
+# sources" claim for guidance-driven flows).
+VERIFIED_LABEL = "Kimi K3 route decision — independently checked by a second Kimi pass."
+
+# The honest hard-deadline message (shown instead of an endless spinner).
+TIMEOUT_MESSAGE = ("Ellis could not complete the AI route analysis within one "
+                   "minute. Please retry.")
+
+# Total wall-clock budget for pass 1 + retry + pass 2 combined.
+DEFAULT_DEADLINE_SECONDS = 60
+# Never start a Kimi call with less than this much budget left.
+MIN_CALL_BUDGET_SECONDS = 5
+# Output caps keep K3 latency inside the deadline (structured JSON only).
+PASS1_MAX_TOKENS = 3000
+PASS2_MAX_TOKENS = 3000
+
+# Cache-schema version: bumping invalidates single-pass-era rows so a cached
+# route is always a verified two-pass result.
+CACHE_VERSION = "v2"
 
 # Default freshness window; stale entries are reused instantly and refreshed in
 # the background (never blocking the applicant).
 TTL_DAYS = 14
 
-_SYSTEM = """You are a visa-requirements engine. For the EXACT route in the user
-message (passport nationality, lawful residence, destination, purpose, dates),
-answer from your knowledge of official visa policy. Reply STRICT JSON with these
-fields (omit nothing; use null when genuinely unknown and add an entry to
-"uncertainty" naming the field and why):
+_SCHEMA_SPEC = """Reply STRICT JSON with these fields (omit nothing; use null
+when genuinely unknown and add an entry to "uncertainty" naming the field and why):
 disposition: one of VISA_REQUIRED | VISA_EXEMPT | ELECTRONIC_AUTHORIZATION_REQUIRED | CONDITIONAL
 visa_category, permitted_stay, passport_validity, processing_time: short strings
+permitted_stay_days: integer number of days of permitted stay, or null
+passport_validity_requirement: {"kind": "valid_on_arrival"|"valid_through_departure"|"months_after_arrival"|"months_after_departure", "months": integer|null}
 required_documents, forms, account_registration_steps, payment_process,
 submission_process, exceptions: arrays of short strings
 application_channel: online_portal | embassy | visa_center | on_arrival | not_required
@@ -82,14 +126,56 @@ photo_requirements, onward_travel_evidence, accommodation_evidence,
 financial_evidence: short strings or null
 biometrics_required, interview_required, appointment_required,
 insurance_required: true|false|null
+arrival_card: {"required": true|false|null, "name": string|null, "submission_window": string|null}
+health_requirements: array of {"name": string, "applicability": "always_required"|"conditional"|"not_applicable", "trigger_countries": [ISO3...], "trigger": string|null, "question": string|null} — put conditional vaccination/health items HERE ONLY, never in required_documents; applicability is for THIS applicant's stated route (origin, residence, transit); use "conditional" only when a fact you were not given (e.g. recent travel history) decides it
+route_workflow_type: visa_exempt_preparation | evisa_portal | embassy_submission | visa_center_submission | electronic_authorization | visa_on_arrival | conditional
 uncertainty: array of {"field":..., "reason":...} for anything not certain
 confidence: high | medium | low
 Rules: never guess a URL or a fee; unknown means null + uncertainty entry;
-missing information is NEVER visa-exempt; answer for THIS nationality only."""
+missing information is NEVER visa-exempt; answer for THIS nationality only;
+keep every string short — no prose."""
+
+_SYSTEM = ("""You are a visa-requirements engine. For the EXACT route in the user
+message (passport nationality, issuing country, travel-document type, lawful
+residence, destination, tourism purpose, dates, trip duration, transit
+countries, age, prior refusals, passport issue/expiration dates), answer from
+your knowledge of official visa policy.
+""" + _SCHEMA_SPEC)
+
+_VERIFY_SYSTEM = ("""You are an independent visa-route verifier. The user message
+contains the applicant's route facts and a PROPOSED route analysis produced by
+another engine. Check it strictly:
+- detect internal contradictions;
+- correct any wrong nationality, destination or date assumption;
+- verify the trip duration against the permitted stay;
+- distinguish visa-free entry from an eVisa or an electronic ARRIVAL FORM (an
+  arrival card is not a visa and never makes a route visa-required);
+- distinguish tourism rules from transit rules;
+- check the health/vaccination conditions really apply to THIS route.
+Reply STRICT JSON: {"verdict": "ACCEPT" | "REVISE", "issues": [short strings],
+"corrected": null when ACCEPT, otherwise the FULL corrected analysis using
+exactly this schema:
+""" + _SCHEMA_SPEC + "\n}")
 
 
 class GuidanceUnavailable(Exception):
     """No provider (no key / wrong mode) — honest, never fabricated."""
+
+
+class GuidanceTimeout(Exception):
+    """The 60-second route-analysis deadline was exceeded."""
+
+    def __init__(self, message: str = TIMEOUT_MESSAGE):
+        super().__init__(message)
+
+
+class GuidanceProviderError(Exception):
+    """A precise, applicant-safe provider failure (401/402/429/5xx/timeout).
+    Carries the provider_errors envelope — never a raw response or a secret."""
+
+    def __init__(self, envelope: dict):
+        self.envelope = envelope
+        super().__init__(envelope.get("user_message", "provider error"))
 
 
 # ---- provider seam (tests inject; real modes use live Kimi) ------------------
@@ -97,33 +183,44 @@ _PROVIDER = None
 
 
 def set_provider(fn) -> None:
-    """Inject callable(system, user)->dict for tests. None resets to live Kimi."""
+    """Inject callable(system, user)->dict for tests. None resets to live Kimi.
+    The SAME provider serves both passes; tests branch on the system prompt."""
     global _PROVIDER
     _PROVIDER = fn
 
 
-def _live_call(system: str, user: str) -> dict:
+def _deadline_seconds() -> float:
+    return float(os.getenv("ELLIS_GUIDANCE_DEADLINE_SECONDS",
+                           DEFAULT_DEADLINE_SECONDS) or DEFAULT_DEADLINE_SECONDS)
+
+
+def _live_call(system: str, user: str, *, timeout: float, max_tokens: int) -> dict:
     s = settings()
     if not (s.moonshot_api_key and s.kimi_enabled):
         raise GuidanceUnavailable("Kimi K3 not configured — guidance unavailable")
-    from ..providers.kimi import LiveKimiProvider
+    from ..providers.kimi import KimiHttpError, KimiTimeout, LiveKimiProvider
     provider = LiveKimiProvider()
-    # The route decision is a deep-reasoning call: K3 regularly needs >120s for
-    # visa-required routes, and an aborted call caches an unusable UNCERTAIN
-    # answer. Still a HARD timeout — just a budget sized for this one call
-    # (first-time routes only; identical routes hit the cache instantly).
-    import os as _os
-    guidance_timeout = int(_os.getenv("KIMI_GUIDANCE_TIMEOUT_SECONDS", "240") or 240)
-    provider._timeout = max(provider._timeout, guidance_timeout)
-    return provider._chat(system, user, json_mode=True)
+    # Optional operator override for the guidance model only (falls back to
+    # KIMI_MODEL). Lets a deployment pick a faster Kimi tier for the bounded
+    # route decision without touching the rest of the system.
+    model = os.getenv("KIMI_GUIDANCE_MODEL", "").strip() or None
+    try:
+        return provider._chat(system, user, json_mode=True, timeout=timeout,
+                              max_tokens=max_tokens, model=model)
+    except KimiTimeout as e:
+        raise GuidanceTimeout() from e
+    except KimiHttpError as e:
+        from .. import provider_errors
+        raise GuidanceProviderError(
+            provider_errors.user_error(f"kimi moonshot HTTP {e.status}")) from e
 
 
-def _call(system: str, user: str) -> dict:
+def _call(system: str, user: str, *, timeout: float, max_tokens: int) -> dict:
     if _PROVIDER is not None:
         return _PROVIDER(system, user)
     if settings().runtime_mode not in REAL_ONLY_MODES + ("test", "local_mock_demo"):
         raise GuidanceUnavailable("guidance disabled in this runtime mode")
-    return _live_call(system, user)
+    return _live_call(system, user, timeout=timeout, max_tokens=max_tokens)
 
 
 def is_available() -> bool:
@@ -134,22 +231,49 @@ def is_available() -> bool:
 
 
 # ---- prompt / validation -----------------------------------------------------
+ROUTE_FACT_KEYS = (
+    # Sanitized route facts ONLY — no name, no passport number, no images.
+    "passport_nationality", "passport_issuing_country", "travel_document_type",
+    "lawful_country_of_residence", "destination_country", "visa_category",
+    "travel_purpose", "arrival_date", "departure_date", "transit_countries",
+    "age", "prior_refusals", "existing_destination_visas",
+    "existing_residence_permits", "recent_travel_countries",
+    "passport_issue_date", "passport_expiry_date",
+)
+
+
+def route_facts(route: dict) -> dict:
+    """The sanitized fact set sent to Kimi (whitelist — nothing else leaves)."""
+    facts = {}
+    for k in ROUTE_FACT_KEYS:
+        v = (route or {}).get(k)
+        if v not in (None, "", []):
+            facts[k] = v
+    facts.setdefault("visa_category", "tourist_visa")
+    facts.setdefault("travel_purpose", "tourism")
+    a, d = _iso(facts.get("arrival_date")), _iso(facts.get("departure_date"))
+    if a and d and d > a:
+        facts["trip_duration_days"] = (d - a).days
+    facts["consular_jurisdiction"] = (route or {}).get("consular_jurisdiction") or "default"
+    return facts
+
+
 def build_prompt(route: dict) -> str:
     """User prompt from ROUTE FACTS ONLY (nothing sensitive exists here)."""
-    return json.dumps({
-        "passport_nationality": route.get("passport_nationality"),
-        "lawful_country_of_residence": route.get("lawful_country_of_residence"),
-        "destination_country": route.get("destination_country"),
-        "visa_category": route.get("visa_category", "tourist_visa"),
-        "travel_purpose": route.get("travel_purpose", "tourism"),
-        "arrival_date": route.get("arrival_date") or route.get("policy_period"),
-        "departure_date": route.get("departure_date"),
-        "consular_jurisdiction": route.get("consular_jurisdiction") or "default",
-    })
+    return json.dumps(route_facts(route))
+
+
+def _iso(v) -> date | None:
+    try:
+        return date.fromisoformat(str(v)) if v else None
+    except ValueError:
+        return None
 
 
 def validate_answer(raw: dict) -> tuple[dict, list, list]:
-    """Whitelist + shape-check one answer. Returns (clean, missing, contradictions)."""
+    """Whitelist + shape-check one answer. Returns (clean, missing, contradictions).
+    Purely deterministic — schema validity, mandatory fields, and internal
+    contradictions; never a model judgement."""
     clean: dict = {}
     for k in ALL_FIELDS:
         if k in (raw or {}):
@@ -165,6 +289,20 @@ def validate_answer(raw: dict) -> tuple[dict, list, list]:
             missing.append(k)
     if "disposition" in clean and isinstance(clean["disposition"], str):
         clean["disposition"] = clean["disposition"].upper()
+    # Normalize the structured additions defensively (wrong shapes are dropped,
+    # never trusted).
+    if not isinstance(clean.get("passport_validity_requirement"), dict):
+        clean.pop("passport_validity_requirement", None)
+    if not isinstance(clean.get("arrival_card"), dict):
+        clean.pop("arrival_card", None)
+    if not isinstance(clean.get("health_requirements"), list):
+        clean.pop("health_requirements", None)
+    else:
+        clean["health_requirements"] = [h for h in clean["health_requirements"]
+                                        if isinstance(h, dict) and h.get("name")]
+    wt = str(clean.get("route_workflow_type") or "").strip().lower()
+    if wt not in WORKFLOW_TYPES:
+        clean["route_workflow_type"] = derive_workflow_type(clean)
     contradictions = []
     # Narrow, precise checks — a visa-exempt route must not carry a visa
     # application form or a positive government visa fee.
@@ -176,20 +314,91 @@ def validate_answer(raw: dict) -> tuple[dict, list, list]:
         if isinstance(fee, dict) and (fee.get("amount") or 0) and \
                 "visa" in str(clean.get("visa_category", "")).lower():
             contradictions.append("disposition VISA_EXEMPT but a government visa fee is quoted")
+        if clean.get("route_workflow_type") not in ("visa_exempt_preparation", "conditional"):
+            contradictions.append("disposition VISA_EXEMPT but route_workflow_type "
+                                  f"is {clean.get('route_workflow_type')}")
+    ps_days = clean.get("permitted_stay_days")
+    if ps_days is not None and (not isinstance(ps_days, (int, float)) or ps_days < 0
+                                or ps_days > 3660):
+        clean.pop("permitted_stay_days", None)
     return clean, missing, contradictions
+
+
+def derive_workflow_type(g: dict) -> str:
+    """Deterministic fallback mapping disposition/channel -> workflow type."""
+    disp = str((g or {}).get("disposition") or "").upper()
+    chan = str((g or {}).get("application_channel") or "").lower()
+    if disp == "VISA_EXEMPT":
+        return "visa_exempt_preparation"
+    if disp == "ELECTRONIC_AUTHORIZATION_REQUIRED":
+        return "electronic_authorization"
+    if disp == "VISA_REQUIRED":
+        if chan == "online_portal":
+            return "evisa_portal"
+        if chan == "visa_center":
+            return "visa_center_submission"
+        if chan == "on_arrival":
+            return "visa_on_arrival"
+        return "embassy_submission"
+    return "conditional"
+
+
+def deterministic_advisories(route: dict, clean: dict, *, today: date | None = None) -> list[str]:
+    """Applicant-facing arithmetic the model is never trusted with: impossible
+    dates, trip duration vs permitted stay, passport-expiry vs the structured
+    validity requirement, age sanity. Advisories, not guidance mutations."""
+    from .. import passport_validity as pv
+    today = today or date.today()
+    out: list[str] = []
+    arrival, departure = _iso(route.get("arrival_date")), _iso(route.get("departure_date"))
+    if arrival and departure and departure <= arrival:
+        out.append("departure date is not after arrival date")
+    if arrival and arrival < today:
+        out.append(f"arrival date {arrival.isoformat()} is in the past")
+    days = clean.get("permitted_stay_days")
+    if arrival and departure and isinstance(days, (int, float)) and days:
+        trip = (departure - arrival).days
+        if trip > int(days):
+            out.append(f"trip duration {trip} days exceeds the permitted stay of {int(days)} days")
+    age = route.get("age")
+    if age is not None:
+        try:
+            if not (0 <= int(age) <= 130):
+                out.append("age is outside a plausible range")
+        except (TypeError, ValueError):
+            out.append("age is not a number")
+    expiry = pv.parse_expiry(str(route.get("passport_expiry_date") or ""))
+    if expiry:
+        if expiry < today:
+            out.append(f"passport expired on {expiry.isoformat()}")
+        else:
+            req = clean.get("passport_validity_requirement") or {}
+            if isinstance(req, dict) and req.get("kind"):
+                need, need_text = pv.required_valid_until(req, arrival, departure)
+                if need and expiry < need:
+                    out.append(f"passport expires {expiry.isoformat()} but must be "
+                               f"{need_text} — until {need.isoformat()}")
+    return out
 
 
 def derive_workflow_plan(g: dict) -> list[dict]:
     """Deterministic next-step plan from the guidance FIELDS (never free text).
+    Route-specific: only stages that apply to this route type appear.
     Reversible preparation only; irreversible steps carry the confirmation flag."""
     steps: list[dict] = []
     disp = g.get("disposition")
+    wtype = g.get("route_workflow_type") or derive_workflow_type(g)
     steps.append({"step": "collect_documents", "reversible": True,
                   "items": g.get("required_documents") or []})
     steps.append({"step": "ocr_and_validate_passport", "reversible": True})
     if disp == "VISA_EXEMPT":
         steps.append({"step": "prepare_entry_documents", "reversible": True,
                       "items": g.get("forms") or []})
+        card = g.get("arrival_card") or {}
+        if isinstance(card, dict) and card.get("required"):
+            steps.append({"step": "arrival_card_preparation", "reversible": True,
+                          "name": card.get("name"),
+                          "submission_window": card.get("submission_window")})
     else:
         steps.append({"step": "prepare_forms", "reversible": True,
                       "items": g.get("forms") or []})
@@ -202,15 +411,18 @@ def derive_workflow_plan(g: dict) -> list[dict]:
             steps.append({"step": "appointment_search", "reversible": True})
             steps.append({"step": "appointment_booking", "reversible": False,
                           "requires_applicant_confirmation": True})
-        steps.append({"step": "display_exact_fees", "reversible": True,
-                      "fee": g.get("government_fee")})
-        steps.append({"step": "payment", "reversible": False,
-                      "requires_applicant_confirmation": True})
+        fee = g.get("government_fee") or {}
+        if isinstance(fee, dict) and fee.get("amount"):
+            steps.append({"step": "display_exact_fees", "reversible": True, "fee": fee})
+            steps.append({"step": "payment", "reversible": False,
+                          "requires_applicant_confirmation": True})
         steps.append({"step": "final_review_and_signature", "reversible": False,
                       "requires_applicant_confirmation": True})
         steps.append({"step": "submission", "reversible": False,
                       "requires_applicant_confirmation": True})
     steps.append({"step": "track_status", "reversible": True})
+    for s in steps:
+        s["workflow_type"] = wtype
     return steps
 
 
@@ -225,6 +437,7 @@ def cache_key(route: dict) -> str:
         str(route.get("travel_purpose", "tourism")).lower(),
         str(route.get("consular_jurisdiction") or "default").lower(),
         policy_month,
+        CACHE_VERSION,
     ))
 
 
@@ -247,82 +460,167 @@ def _is_stale(row) -> bool:
 
 
 def _result(status: str, guidance: dict, *, cached: bool, stale: bool,
-            missing=None, contradictions=None, model: str = "") -> dict:
-    return {
+            missing=None, contradictions=None, model: str = "",
+            verification: dict | None = None, advisories=None,
+            elapsed_seconds: float | None = None) -> dict:
+    verification = dict(verification or {})
+    verified = verification.get("verdict") in ("ACCEPT", "REVISE")
+    out = {
         "status": status,
         "ai_generated": True,
-        "label": "AI-generated route guidance",
+        "label": VERIFIED_LABEL if verified else "AI-generated route guidance",
         "guidance": guidance,
         "workflow_plan": derive_workflow_plan(guidance) if guidance else [],
         "missing_fields": list(missing or []),
         "contradictions": list(contradictions or []),
+        "advisories": list(advisories or []),
         "cached": cached, "stale": stale, "model": model,
+        "verification": verification,
         # The safety boundary the UI must show with any guidance-driven flow:
         "irreversible_requires_confirmation": True,
-        "audit": "official-source verification runs asynchronously and, once "
-                 "grounded, supersedes this AI guidance",
     }
+    if elapsed_seconds is not None:
+        out["elapsed_seconds"] = round(elapsed_seconds, 2)
+    return out
 
 
 def get_route_guidance(db, route: dict, *, force_refresh: bool = False) -> dict:
-    """The immediate route decision. Cached identical routes return instantly;
-    a fresh route makes ONE structured Kimi call (with one targeted retry on
-    missing fields). Never starts broad research; never creates review tasks."""
+    """The authoritative two-pass route decision under one hard deadline.
+
+    Cached identical routes return instantly. A fresh route runs:
+      PASS 1 (primary analysis) -> deterministic validation -> at most ONE
+      targeted retry when malformed/incomplete -> PASS 2 (independent Kimi
+      verification, ACCEPT or REVISE with the corrected JSON).
+    The final Kimi result is used directly. Never starts research; never
+    creates review tasks; never leaves the caller without a bounded outcome.
+    """
     key = cache_key(route)
     row = _cached(db, key)
     if row is not None and not force_refresh:
         return _result(row.status, row.guidance, cached=True, stale=_is_stale(row),
                        missing=row.missing_fields, contradictions=row.contradictions,
-                       model=row.model)
+                       model=row.model, verification=row.verification or {},
+                       advisories=deterministic_advisories(route, row.guidance or {}))
 
     if not is_available():
         raise GuidanceUnavailable("Kimi K3 not configured — guidance unavailable")
 
+    started = time.monotonic()
+    deadline = started + _deadline_seconds()
+
+    def remaining() -> float:
+        return deadline - time.monotonic()
+
+    def budget() -> float:
+        r = remaining()
+        if r < MIN_CALL_BUDGET_SECONDS:
+            raise GuidanceTimeout()
+        return r
+
     user = build_prompt(route)
-    model = settings().kimi_model if _PROVIDER is None else "injected-test-provider"
+    model = (os.getenv("KIMI_GUIDANCE_MODEL", "").strip() or settings().kimi_model) \
+        if _PROVIDER is None else "injected-test-provider"
+
+    # ---- PASS 1: primary analysis ------------------------------------------
     try:
-        raw = _call(_SYSTEM, user)
-    except GuidanceUnavailable:
+        raw = _call(_SYSTEM, user, timeout=budget(), max_tokens=PASS1_MAX_TOKENS)
+    except (GuidanceUnavailable, GuidanceTimeout, GuidanceProviderError):
         raise
-    except Exception as e:  # noqa: BLE001 - one retry below, then honest failure
-        raw, _err = None, e
+    except Exception:  # noqa: BLE001 - malformed transport/JSON -> one retry below
+        raw = None
     clean, missing, contradictions = validate_answer(raw or {})
 
     if missing or contradictions:
-        # ONE targeted retry naming exactly what was missing/contradictory.
+        # ONE controlled retry, only for a malformed/incomplete answer and only
+        # inside the remaining budget.
         retry_user = (user + "\n\nYour previous answer was incomplete. "
                       + (f"Missing or invalid fields: {', '.join(missing)}. " if missing else "")
                       + (f"Contradictions to resolve: {'; '.join(contradictions)}. " if contradictions else "")
                       + "Reply the FULL corrected JSON.")
         try:
-            raw2 = _call(_SYSTEM, retry_user)
+            raw2 = _call(_SYSTEM, retry_user, timeout=budget(), max_tokens=PASS1_MAX_TOKENS)
             clean2, missing2, contradictions2 = validate_answer(raw2 or {})
             if len(missing2) + len(contradictions2) < len(missing) + len(contradictions):
                 clean, missing, contradictions = clean2, missing2, contradictions2
-        except GuidanceUnavailable:
+        except (GuidanceUnavailable, GuidanceTimeout, GuidanceProviderError):
             raise
         except Exception:  # noqa: BLE001 - keep the first answer's honest gaps
             pass
 
-    status = STATUS_PRIMARY if not missing and not contradictions else STATUS_UNCERTAIN
-    now = _now()
-    ttl = int(__import__("os").getenv("ELLIS_KIMI_GUIDANCE_TTL_DAYS", TTL_DAYS) or TTL_DAYS)
-    if row is None:
-        row = KimiRouteGuidanceCache(cache_key=key)
-        db.add(row)
-    row.route = {k: route.get(k) for k in (
-        "passport_nationality", "lawful_country_of_residence", "destination_country",
-        "visa_category", "travel_purpose", "arrival_date", "consular_jurisdiction")}
-    row.status = status
-    row.guidance = clean
-    row.missing_fields = missing
-    row.contradictions = contradictions
-    row.model = model
-    row.generated_at = now
-    row.fresh_until = now + timedelta(days=ttl)
-    db.commit()
+    # ---- PASS 2: independent Kimi verification ------------------------------
+    verification: dict = {}
+    if clean:
+        verify_user = json.dumps({"applicant_route": route_facts(route),
+                                  "proposed_analysis": clean})
+        verdict_raw: dict | None = None
+        try:
+            verdict_raw = _call(_VERIFY_SYSTEM, verify_user, timeout=budget(),
+                                max_tokens=PASS2_MAX_TOKENS)
+        except (GuidanceUnavailable, GuidanceTimeout, GuidanceProviderError):
+            raise
+        except Exception:  # noqa: BLE001 - malformed -> single bounded retry
+            verdict_raw = None
+        if not isinstance(verdict_raw, dict) or \
+                str(verdict_raw.get("verdict", "")).upper() not in ("ACCEPT", "REVISE"):
+            try:
+                verdict_raw = _call(_VERIFY_SYSTEM, verify_user +
+                                    "\n\nYour previous reply was not valid JSON with a "
+                                    "verdict. Reply exactly the required JSON.",
+                                    timeout=budget(), max_tokens=PASS2_MAX_TOKENS)
+            except (GuidanceUnavailable, GuidanceTimeout, GuidanceProviderError):
+                raise
+            except Exception:  # noqa: BLE001
+                verdict_raw = None
+        if not isinstance(verdict_raw, dict) or \
+                str(verdict_raw.get("verdict", "")).upper() not in ("ACCEPT", "REVISE"):
+            # Verification could not produce a verdict inside the deadline —
+            # the two-pass promise is broken, so fail honestly (retryable).
+            raise GuidanceTimeout()
+        verdict = str(verdict_raw.get("verdict")).upper()
+        issues = [str(i) for i in (verdict_raw.get("issues") or []) if str(i).strip()][:12]
+        verification = {"verdict": verdict, "issues": issues, "passes": 2,
+                        "label": VERIFIED_LABEL}
+        if verdict == "REVISE":
+            corr, c_missing, c_contra = validate_answer(verdict_raw.get("corrected") or {})
+            if corr and len(c_missing) + len(c_contra) <= len(missing) + len(contradictions):
+                # The verifier's corrected JSON is the final authoritative answer.
+                clean, missing, contradictions = corr, c_missing, c_contra
+                verification["applied"] = True
+            else:
+                verification["applied"] = False
+
+    status = STATUS_PRIMARY if clean and not missing and not contradictions \
+        else STATUS_UNCERTAIN
+    elapsed = time.monotonic() - started
+    advisories = deterministic_advisories(route, clean)
+
+    # Cache ONLY complete, verified results — a failed or uncertain attempt is
+    # returned honestly but never poisons the cache (the applicant can simply
+    # retry).
+    if status == STATUS_PRIMARY:
+        now = _now()
+        ttl = int(os.getenv("ELLIS_KIMI_GUIDANCE_TTL_DAYS", TTL_DAYS) or TTL_DAYS)
+        if row is None:
+            row = _cached(db, key)
+        if row is None:
+            row = KimiRouteGuidanceCache(cache_key=key)
+            db.add(row)
+        row.route = {k: route.get(k) for k in (
+            "passport_nationality", "lawful_country_of_residence", "destination_country",
+            "visa_category", "travel_purpose", "arrival_date", "consular_jurisdiction")}
+        row.status = status
+        row.guidance = clean
+        row.missing_fields = missing
+        row.contradictions = contradictions
+        row.model = model
+        row.verification = verification
+        row.generated_at = now
+        row.fresh_until = now + timedelta(days=ttl)
+        db.commit()
     return _result(status, clean, cached=False, stale=False,
-                   missing=missing, contradictions=contradictions, model=model)
+                   missing=missing, contradictions=contradictions, model=model,
+                   verification=verification, advisories=advisories,
+                   elapsed_seconds=elapsed)
 
 
 def refresh_stale_async(db_factory, route: dict) -> None:
