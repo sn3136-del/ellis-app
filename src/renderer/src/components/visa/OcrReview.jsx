@@ -45,11 +45,11 @@ function FieldRow({ row, edit, onEdit }) {
         </div>
       </div>
       {state === 'edit'
-        ? <input className="input" style={{ maxWidth: 260 }} defaultValue={row.value}
+        ? <input className="input" style={{ maxWidth: 260 }} defaultValue={row.display ?? row.value}
                  onChange={(e) => onEdit({ state: 'edit', value: e.target.value })} autoFocus />
         : <div style={{ fontFamily: 'var(--font)', fontSize: 14, maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis',
             textDecoration: state === 'rejected' ? 'line-through' : undefined, opacity: state === 'rejected' ? 0.5 : 1 }}>
-            {(edit?.value ?? row.value) || <span style={{ color: 'var(--muted-2)' }}>— missing —</span>}
+            {(edit?.value ?? row.display ?? row.value) || <span style={{ color: 'var(--muted-2)' }}>— missing —</span>}
           </div>}
       <div style={{ display: 'flex', gap: 4 }}>
         <button className={'btn btn--sm' + (state === 'edit' ? '' : ' btn--ghost')}

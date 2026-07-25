@@ -15,7 +15,7 @@ import {
   validEmail, datesOrdered, RESIDENCE_STATUS_OPTIONS,
   researchStageMeta, researchTerminal, researchStatusMeta, RESEARCH_STEP_KEYS,
   guidanceDispositionMeta, guidanceStepMeta, guidanceIsUsable,
-  continuationMeta, deriveAge
+  continuationMeta, deriveAge, formatDateUS, localTodayIso
 } from '../../lib/intake.js'
 import ConnectorBuild from './ConnectorBuild.jsx'
 import PassportIntake from './PassportIntake.jsx'
@@ -576,8 +576,10 @@ export default function StartVisa({ client, onOpenCase }) {
                   const dob = e.target.value || undefined
                   setAnswer('birth_date', dob)
                   // Age is ALWAYS derived from the date of birth — never typed
-                  // independently once a birth date exists.
-                  const age = dob ? deriveAge(dob, new Date().toISOString().slice(0, 10)) : null
+                  // independently once a birth date exists. "Today" is the
+                  // applicant's LOCAL calendar day (UTC would flip the age on
+                  // birthdays west of Greenwich).
+                  const age = dob ? deriveAge(dob, localTodayIso()) : null
                   setAnswer('age', age == null ? undefined : age)
                 }} />
             </Field>
@@ -753,11 +755,12 @@ function ReviewStep({ t, answers, info, missing, display, onJump }) {
   // The category is determined automatically by Ellis, never picked upfront.
   push('visa_category', t('start.autoCategory'))
   push('travel_purpose', t('purpose.tourism'))
-  push('arrival_date', answers.arrival_date)
-  push('departure_date', answers.departure_date)
+  // Applicant-facing dates are always U.S. MM/DD/YYYY (values stay ISO).
+  push('arrival_date', formatDateUS(answers.arrival_date))
+  push('departure_date', formatDateUS(answers.departure_date))
   if (Array.isArray(answers.transit_countries) && answers.transit_countries.length)
     push('transit_countries', answers.transit_countries.map(display.countryName).join(', '))
-  if (answers.birth_date) push('birth_date', answers.birth_date)
+  if (answers.birth_date) push('birth_date', formatDateUS(answers.birth_date))
   push('age', answers.age)
   if (answers.dependants != null) push('dependants', answers.dependants)
   if (answers.existing_destination_visas) push('existing_destination_visas', answers.existing_destination_visas)

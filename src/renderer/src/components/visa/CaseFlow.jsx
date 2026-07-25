@@ -10,7 +10,7 @@ import { HANDOFF_COPY } from '../../lib/visaBackend.js'
 import { handoffCopy, isTerminal, formatSlot, resultDisposition } from '../../lib/visaSession.js'
 import {
   applicableStages, showExecutionBanner, preferencesTabVisible,
-  validityMeta, verificationMeta
+  validityMeta, verificationMeta, formatDateUS, isDateKey
 } from '../../lib/intake.js'
 import OcrReview from './OcrReview.jsx'
 import Preferences from './Preferences.jsx'
@@ -329,7 +329,7 @@ function CaseValidity({ t, client, caseId, onOpenCase }) {
   }
   return (
     <div style={{ marginBottom: 14 }}>
-      <ValidityRow t={t} label={validity.expiry_date || ''} validity={validity}
+      <ValidityRow t={t} label={formatDateUS(validity.expiry_date || '')} validity={validity}
         onRenew={renewFirst} renewBusy={busy} />
     </div>
   )
@@ -348,7 +348,7 @@ function ValidityRow({ t, label, validity, onRenew, renewBusy }) {
           <span className="chip" style={{ marginLeft: 8 }} data-testid="validity-status"
             data-status={validity.status}>
             {t(meta.i18nKey)}
-            {validity.expiry_date ? ` · ${validity.expiry_date}` : ''}
+            {validity.expiry_date ? ` · ${formatDateUS(validity.expiry_date)}` : ''}
           </span>
         )}
         {validity && validity.renewal_offered && onRenew && (
@@ -535,7 +535,9 @@ function HealthQuestions({ t, client, caseId, questions, onAnswered }) {
 }
 
 function ReviewPanel({ answers, onApprove, busy }) {
-  const fields = Object.entries(answers || {}).map(([label, value]) => ({ label, value: String(value) }))
+  // Calendar dates display as U.S. MM/DD/YYYY; the answer values stay ISO.
+  const fields = Object.entries(answers || {}).map(([label, value]) => ({
+    label, value: isDateKey(label) ? formatDateUS(value) : String(value) }))
   return (
     <div className="card" style={{ padding: 14, background: '#fff' }}>
       <KVList fields={fields.length ? fields : [{ label: 'No answers yet', value: '' }]} />

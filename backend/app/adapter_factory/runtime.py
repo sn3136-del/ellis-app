@@ -133,6 +133,19 @@ class FlowRunner:
                 return {"status": "failed",
                         "reason": f"missing case answer {node.get('input_source')!r} — "
                                   "Ellis never guesses (§21)"}
+            # A node may declare the PORTAL's exact date format (tokens
+            # DD/MM/YYYY/MON/MONTH/YY): the canonical ISO value is rendered in
+            # that format — never the UI display format, never a guess (a
+            # declared format with a non-canonical value fails the step).
+            fmt = node.get("format")
+            if fmt:
+                from .. import dates as dates_mod
+                formatted = dates_mod.to_portal(str(value), fmt)
+                if not formatted:
+                    return {"status": "failed",
+                            "reason": f"answer {node.get('input_source')!r} is not a "
+                                      "canonical date — refusing to guess the portal format"}
+                value = formatted
             res = self.driver.fill(node["selector"], str(value))
             if not res.get("ok") and res.get("code") == "SENSITIVE_FIELD_AUTOMATION":
                 return {"status": "failed", "reason": "portal marked field sensitive — refusing"}

@@ -347,6 +347,7 @@ def deterministic_advisories(route: dict, clean: dict, *, today: date | None = N
     """Applicant-facing arithmetic the model is never trusted with: impossible
     dates, trip duration vs permitted stay, passport-expiry vs the structured
     validity requirement, age sanity. Advisories, not guidance mutations."""
+    from .. import dates as dates_mod
     from .. import passport_validity as pv
     today = today or date.today()
     out: list[str] = []
@@ -354,7 +355,7 @@ def deterministic_advisories(route: dict, clean: dict, *, today: date | None = N
     if arrival and departure and departure <= arrival:
         out.append("departure date is not after arrival date")
     if arrival and arrival < today:
-        out.append(f"arrival date {arrival.isoformat()} is in the past")
+        out.append(f"arrival date {dates_mod.to_display(arrival.isoformat())} is in the past")
     days = clean.get("permitted_stay_days")
     if arrival and departure and isinstance(days, (int, float)) and days:
         trip = (departure - arrival).days
@@ -370,14 +371,15 @@ def deterministic_advisories(route: dict, clean: dict, *, today: date | None = N
     expiry = pv.parse_expiry(str(route.get("passport_expiry_date") or ""))
     if expiry:
         if expiry < today:
-            out.append(f"passport expired on {expiry.isoformat()}")
+            out.append(f"passport expired on {dates_mod.to_display(expiry.isoformat())}")
         else:
             req = clean.get("passport_validity_requirement") or {}
             if isinstance(req, dict) and req.get("kind"):
                 need, need_text = pv.required_valid_until(req, arrival, departure)
                 if need and expiry < need:
-                    out.append(f"passport expires {expiry.isoformat()} but must be "
-                               f"{need_text} — until {need.isoformat()}")
+                    out.append(f"passport expires {dates_mod.to_display(expiry.isoformat())} "
+                               f"but must be {need_text} — until "
+                               f"{dates_mod.to_display(need.isoformat())}")
     return out
 
 

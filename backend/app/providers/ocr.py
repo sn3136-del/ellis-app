@@ -140,7 +140,9 @@ def parse_mrz(text: str) -> dict | None:
         "surname": surname, "given_names": given, "passport_number": passport_no.replace("<", ""),
         "nationality": nationality, "issuing_country": issuing, "birth_date": birth,
         "sex": sex, "expiry_date": expiry, "check_digits": checks,
+        "document_code": l1[0:2].replace("<", ""),   # ICAO doc type (P, PO, PD…)
         "mrz_valid": all(checks.values()),
+        "mrz_lines": [l1, l2],
     }
 
 
@@ -157,17 +159,7 @@ class LocalOcrProvider:
                              engine=self.name, recognized_text="")
         mrz = parse_mrz(text)
         if mrz:
-            fields = [
-                ExtractedField("surname", mrz["surname"], 0.99),
-                ExtractedField("given_names", mrz["given_names"], 0.99),
-                ExtractedField("passport_number", mrz["passport_number"], 0.99),
-                ExtractedField("nationality", mrz["nationality"], 0.98),
-                ExtractedField("birth_date", mrz["birth_date"], 0.98),
-                ExtractedField("sex", mrz["sex"], 0.98),
-                ExtractedField("expiry_date", mrz["expiry_date"], 0.98),
-            ]
-            if not mrz["mrz_valid"]:
-                warnings.append("MRZ check digit mismatch — verify manually")
+            fields = _fields_from_mrz(mrz, warnings)
             return OcrResult(ok=True, doc_type="passport", fields=fields,
                              quality_warnings=warnings, mrz_valid=mrz["mrz_valid"],
                              engine=self.name, recognized_text=text)
@@ -182,15 +174,21 @@ class LocalOcrProvider:
 
 
 def _fields_from_mrz(mrz: dict, warnings: list[str]) -> list[ExtractedField]:
+    """Extracted fields carry CANONICAL ISO dates (YYYY-MM-DD) — the raw MRZ
+    YYMMDD stays inside the mrz dict for checksum work, but nothing downstream
+    (answers, UI, forms) ever sees an un-normalized date value."""
+    from .. import dates as dates_mod
+    birth_iso = dates_mod.to_iso(dates_mod.parse_mrz_date(mrz["birth_date"], kind="birth"))
+    expiry_iso = dates_mod.to_iso(dates_mod.parse_mrz_date(mrz["expiry_date"], kind="expiry"))
     fields = [
         ExtractedField("surname", mrz["surname"], 0.99),
         ExtractedField("given_names", mrz["given_names"], 0.99),
         ExtractedField("passport_number", mrz["passport_number"], 0.99),
         ExtractedField("nationality", mrz["nationality"], 0.98),
         ExtractedField("issuing_country", mrz["issuing_country"], 0.98),
-        ExtractedField("birth_date", mrz["birth_date"], 0.98),
+        ExtractedField("birth_date", birth_iso or mrz["birth_date"], 0.98),
         ExtractedField("sex", mrz["sex"], 0.98),
-        ExtractedField("expiry_date", mrz["expiry_date"], 0.98),
+        ExtractedField("expiry_date", expiry_iso or mrz["expiry_date"], 0.98),
     ]
     if not mrz["mrz_valid"]:
         warnings.append("MRZ check digit mismatch — verify manually")

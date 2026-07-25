@@ -136,7 +136,7 @@ export default function PassportIntake({ client, intakeId, t, confirmed, onApply
                 ? <div style={{ fontSize: 14 }}>{edits.birth_date != null
                     ? (prefillWithEdits(result.profile, edits).age ?? '—') : r.value}</div>
                 : <input className="input" style={{ maxWidth: 220 }}
-                    value={edits[r.key] ?? r.value}
+                    value={edits[r.key] ?? r.display}
                     onChange={(e) => setEdits((m) => ({ ...m, [r.key]: e.target.value }))} />}
             </div>
           ))}

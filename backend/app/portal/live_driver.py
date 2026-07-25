@@ -153,14 +153,29 @@ class BrowserbaseLiveViewDriver:
 
     def _fill_mappings(self, mappings, answers: dict):
         """Fill deterministic selectors from adapter config. Sensitive-marked
-        fields are SKIPPED — they are entered by the applicant in Live View."""
+        fields are SKIPPED — they are entered by the applicant in Live View.
+
+        A mapping may declare `format` (tokens DD/MM/YYYY/MON/MONTH/YY) for
+        date fields: the canonical ISO value is then rendered in the EXACT
+        format that specific portal requires — never the UI display format. A
+        declared format with a non-ISO value fails closed (field skipped for
+        the applicant to complete in Live View) rather than writing a guess."""
+        from .. import dates as dates_mod
         page = self._ensure_page()
         for m in mappings or []:
             if m.get("sensitive"):
                 continue  # never typed by the driver
             field_name = m["field"]
-            if field_name in answers and answers[field_name] is not None:
-                page.fill(m["selector"], str(answers[field_name]))
+            if field_name not in answers or answers[field_name] is None:
+                continue
+            value = str(answers[field_name])
+            fmt = m.get("format")
+            if fmt:
+                formatted = dates_mod.to_portal(value, fmt)
+                if not formatted:
+                    continue           # non-canonical date: never write a guess
+                value = formatted
+            page.fill(m["selector"], value)
 
     def _extract(self, selector: str | None) -> str | None:
         if not selector:

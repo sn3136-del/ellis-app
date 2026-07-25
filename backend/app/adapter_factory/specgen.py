@@ -210,9 +210,11 @@ def _skeleton_flow(host: str, by_page: dict, mappings: list[dict]) -> list[dict]
         for m in mappings:
             if m["page_key"] != "application":
                 continue
+            extra = {"format": m["format"]} if m.get("format") else {}
             node(f"fill_{m['portal_field']}", "FILL_NON_SENSITIVE",
                  selector=m["selector"], input_source=m["ellis_field"],
-                 purpose=f"Fill {m['portal_field']} from the case record")
+                 purpose=f"Fill {m['portal_field']} from the case record",
+                 **extra)
         node("save_form", "CLICK", selector="#save-btn",
              purpose="Save the application form",
              expected_network=[{"endpoint": "/api/application", "method": "POST"}],

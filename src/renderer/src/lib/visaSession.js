@@ -26,6 +26,10 @@ export function confidenceLevel(confidence) {
 // Turn a document's extracted_fields map into sorted, render-ready rows. Each
 // row carries the value, confidence bucket, provenance, and whether it needs a
 // second look (low confidence, applicant edit, or an MRZ/visible-zone conflict).
+// Calendar-date values additionally carry `display` in the U.S. MM/DD/YYYY
+// format — the canonical ISO value underneath is never altered.
+import { formatDateUS, isDateKey } from './intake.js'
+
 export function fieldRows(extractedFields = {}, conflicts = []) {
   const conflictKeys = new Set(
     (conflicts || []).flatMap((c) => (c.keys || (c.key ? [c.key] : []))))
@@ -38,6 +42,7 @@ export function fieldRows(extractedFields = {}, conflicts = []) {
       return {
         key,
         value: value ?? '',
+        display: isDateKey(key) ? formatDateUS(value ?? '') : String(value ?? ''),
         confidence,
         source,
         level,

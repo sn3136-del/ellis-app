@@ -346,6 +346,53 @@ export function continuationMeta(g) {
 }
 
 // ---------------------------------------------------------------------------
+// Calendar dates. Canonical representation everywhere is ISO YYYY-MM-DD;
+// the APPLICANT always sees U.S. MM/DD/YYYY. Both directions are pure string
+// transforms — no Date()/timezone machinery, so a calendar date can never
+// shift by a day in conversion.
+const ISO_DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/
+const US_DATE_RE = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/
+
+// ISO -> MM/DD/YYYY for display. Anything non-canonical returns unchanged.
+export function formatDateUS(value) {
+  const m = ISO_DATE_RE.exec(String(value ?? ''))
+  if (!m) return String(value ?? '')
+  return `${m[2]}/${m[3]}/${m[1]}`
+}
+
+// Applicant-typed date (US MM/DD/YYYY or ISO) -> canonical ISO; '' if invalid.
+export function parseUSDate(value) {
+  const s = String(value ?? '').trim()
+  if (ISO_DATE_RE.test(s)) return validIso(s) ? s : ''
+  const m = US_DATE_RE.exec(s)
+  if (!m) return ''
+  const iso = `${m[3]}-${String(m[1]).padStart(2, '0')}-${String(m[2]).padStart(2, '0')}`
+  return validIso(iso) ? iso : ''
+}
+
+function validIso(iso) {
+  const m = ISO_DATE_RE.exec(iso)
+  if (!m) return false
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])]
+  if (mo < 1 || mo > 12 || d < 1) return false
+  const dim = [31, y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0) ? 29 : 28,
+    31, 30, 31, 30, 31, 31, 30, 31, 30, 31][mo - 1]
+  return d <= dim
+}
+
+// Today's LOCAL calendar date as ISO (never UTC — toISOString() flips the day
+// west of Greenwich for part of every day, skewing age on birthdays).
+export function localTodayIso(now = new Date()) {
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+}
+
+// Keys whose values are calendar dates (shown as MM/DD/YYYY, stored as ISO).
+export function isDateKey(key) {
+  const k = String(key || '').toLowerCase()
+  return k.endsWith('_date') || ['date_of_birth', 'date_of_expiry', 'date_of_issue'].includes(k)
+}
+
+// ---------------------------------------------------------------------------
 // Passport profile display + prefill (upload-first Step 1).
 
 // Age is ALWAYS derived from the date of birth and today — never typed by OCR
@@ -383,6 +430,9 @@ export function profileRows(profile) {
       key,
       labelKey: 'ppf.' + (key === '_age' ? 'age' : key),
       value: String(f.value),
+      // Applicant-facing rendering: calendar dates display as MM/DD/YYYY
+      // (the canonical ISO value is untouched underneath).
+      display: isDateKey(key) ? formatDateUS(f.value) : String(f.value),
       confidence: conf,
       source: f.source === 'mrz' ? 'mrz' : f.source === 'derived' ? 'derived' : 'ocr',
       needsConfirm: f.needs_confirmation === true,
@@ -402,15 +452,26 @@ export function prefillWithEdits(profile, edits = {}) {
     full_name: 'full_name', surname: 'surname', given_names: 'given_names',
     passport_number: 'passport_number', nationality: 'passport_nationality',
     issuing_country: 'passport_issuing_country', birth_date: 'birth_date',
-    sex: 'sex', expiry_date: 'passport_expiry_date'
+    sex: 'sex', expiry_date: 'passport_expiry_date',
+    issue_date: 'passport_issue_date'
   }
   for (const [profKey, val] of Object.entries(edits || {})) {
     const ansKey = keyMap[profKey]
-    if (ansKey && val != null && String(val).trim() !== '') base[ansKey] = String(val).trim()
+    if (!ansKey || val == null || String(val).trim() === '') continue
+    if (isDateKey(profKey)) {
+      // The applicant edits dates in the U.S. display format; answers stay
+      // canonical ISO. An unparseable date edit never overwrites the
+      // extracted value with garbage — the extracted ISO stands.
+      const iso = parseUSDate(val)
+      if (iso) base[ansKey] = iso
+      continue
+    }
+    base[ansKey] = String(val).trim()
   }
-  // Age always re-derives from the (possibly edited) date of birth.
+  // Age always re-derives from the (possibly edited) date of birth, using the
+  // applicant's LOCAL calendar day (never UTC).
   if (base.birth_date) {
-    const age = deriveAge(base.birth_date, new Date().toISOString().slice(0, 10))
+    const age = deriveAge(base.birth_date, localTodayIso())
     if (age != null) base.age = age
     else delete base.age
   }

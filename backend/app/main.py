@@ -1037,19 +1037,45 @@ def update_answers(application_id: str, body: AnswersUpdate, db=Depends(get_sess
 @app.post("/cases/{application_id}/documents/{doc_id}/approve")
 def approve_document(application_id: str, doc_id: str, edits: Optional[list[FieldEdit]] = None,
                      db=Depends(get_session), p: Principal = Depends(get_principal)):
+    from . import dates as dates_mod
     app_row = _owned(db, p, application_id)
     doc = db.get(models.StoredDocument, doc_id)
     if not doc or doc.application_id != application_id:
         raise HTTPException(404, "document not found")
+
+    def _date_kind(key: str) -> str | None:
+        k = key.lower()
+        if not (k.endswith("_date") or k in ("date_of_birth", "date_of_expiry", "date_of_issue")):
+            return None
+        return "birth" if "birth" in k else "issue" if "issue" in k else "expiry"
+
     fields = dict(doc.extracted_fields)
     for e in (edits or []):
-        fields[e.key] = {"value": e.value, "confidence": 1.0, "page": 1, "source": "applicant_edit"}
+        value = e.value
+        # An applicant may type a date in the U.S. display format (MM/DD/YYYY)
+        # or any printed form — it is normalized to the canonical YYYY-MM-DD
+        # before it is stored anywhere. An unparseable date entry is kept
+        # verbatim (visible, confirmable) rather than silently guessed.
+        kind = _date_kind(e.key)
+        if kind:
+            norm = dates_mod.normalize_any(value, kind=kind, us_numeric=True)
+            if norm:
+                value = norm
+        fields[e.key] = {"value": value, "confidence": 1.0, "page": 1, "source": "applicant_edit"}
     doc.extracted_fields = fields
     doc.approved = True
-    # Approved fields flow into the application answers.
+    # Approved fields flow into the application answers — date values always
+    # as canonical ISO (a raw MRZ YYMMDD or printed form can never leak into
+    # answers from this path).
     ans = dict(app_row.answers)
     for k, v in fields.items():
-        ans[k] = v["value"]
+        value = v["value"]
+        kind = _date_kind(k)
+        if kind:
+            norm = dates_mod.normalize_any(value, kind=kind, us_numeric=True)
+            if norm:
+                value = norm
+        ans[k] = value
     app_row.answers = ans
     db.commit()
     # A material change to approved data invalidates any prior signature.

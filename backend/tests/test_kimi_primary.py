@@ -298,7 +298,9 @@ def test_passport_expiry_advisory_is_calculated(db):
     kimi_primary.set_provider(two_pass(req))
     g = kimi_primary.get_route_guidance(
         db, dict(ROUTE, passport_expiry_date="2026-10-01"))
-    assert any("must be" in a and "2027-03-10" in a for a in g["advisories"])
+    # Applicant-facing advisory dates are U.S. MM/DD/YYYY, never ISO.
+    assert any("must be" in a and "03/10/2027" in a for a in g["advisories"])
+    assert not any("2027-03-10" in a for a in g["advisories"])
 
 
 def test_impossible_dates_flagged(db):

@@ -52,9 +52,12 @@ def build_vietnam_evisa_adapter(portal) -> PortalAdapter:
             {"field": "full_name", "selector": "#fullName"},
             {"field": "passport_number", "selector": "#passportNumber"},
             {"field": "nationality", "selector": "#nationality"},
-            {"field": "birth_date", "selector": "#dateOfBirth"},
+            # The Vietnam eVisa portal requires DD/MM/YYYY — the canonical ISO
+            # value is rendered in the PORTAL's format, never the UI format.
+            {"field": "birth_date", "selector": "#dateOfBirth", "format": "DD/MM/YYYY"},
             {"field": "entry_checkpoint", "selector": "#allowedToEntryThrough"},
-            {"field": "intended_arrival", "selector": "#grantEvisaValidFrom"},
+            {"field": "intended_arrival", "selector": "#grantEvisaValidFrom",
+             "format": "DD/MM/YYYY"},
         ],
         captcha_detect=".captcha, #captcha",
         password_requirements={"minLength": 8, "requireUpper": True, "requireDigit": True},

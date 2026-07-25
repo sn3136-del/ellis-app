@@ -1,4 +1,5 @@
 import os
+import shutil
 import sys
 import tempfile
 
@@ -6,6 +7,13 @@ import tempfile
 _DB_FD, _DB_PATH = tempfile.mkstemp(suffix=".db")
 os.environ["DATABASE_URL"] = f"sqlite:///{_DB_PATH}"
 os.environ["ELLIS_VAULT_PASSPHRASE"] = "test-passphrase"
+# Tests must NEVER write into the repo's data/ snapshots (research/export
+# stages rewrite JSONL files): point ELLIS_DATA_DIR at a session-scoped COPY.
+_REPO_DATA = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__)))), "data")
+_DATA_COPY = tempfile.mkdtemp(suffix="-ellis-data")
+shutil.copytree(_REPO_DATA, _DATA_COPY, dirs_exist_ok=True)
+os.environ["ELLIS_DATA_DIR"] = _DATA_COPY
 # Hermetic tests: force local fallbacks regardless of any real .env present, so
 # unit/e2e behavior is deterministic. Live-provider smoke tests are separate.
 for _k in ("MOONSHOT_API_KEY", "GOOGLE_CLOUD_PROJECT", "GOOGLE_DOCUMENT_AI_OCR_PROCESSOR_ID",

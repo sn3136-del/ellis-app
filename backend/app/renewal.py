@@ -34,13 +34,14 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import select
 
 from . import models
-from .passport_validity import RENEWAL_AUTHORITIES, parse_expiry, renewal_instructions
+from .passport_validity import RENEWAL_AUTHORITIES, renewal_instructions
 
 
-def passport_validity_parse(value) -> str | None:
-    """Normalize an extracted date (MRZ YYMMDD or ISO) to ISO, or None."""
-    d = parse_expiry(str(value or ""))
-    return d.isoformat() if d else None
+def passport_validity_parse(value, *, kind: str = "expiry") -> str | None:
+    """Normalize an extracted date (MRZ YYMMDD, printed, or ISO) to canonical
+    ISO with the CORRECT century context for its kind, or None."""
+    from . import dates as dates_mod
+    return dates_mod.normalize_any(value, kind=kind) or None
 
 CONTINUATION_KIND = "passport_renewal"
 
@@ -354,7 +355,7 @@ def propagate_renewed_passport(db, renewal_case: models.VisaApplication,
         answers["passport_number"] = new_number
     answers["expiry_date"] = new_expiry
     answers["passport_expiry_date"] = new_expiry
-    issue = passport_validity_parse(val("issue_date")) or val("issue_date")
+    issue = passport_validity_parse(val("issue_date"), kind="issue") or val("issue_date")
     if issue:
         answers["passport_issue_date"] = issue
     travel_case.answers = answers

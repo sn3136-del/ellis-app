@@ -24,8 +24,8 @@ from datetime import date
 # provider returns outside this list is dropped.
 PROFILE_FIELDS = (
     "surname", "given_names", "full_name", "passport_number", "nationality",
-    "issuing_country", "birth_date", "sex", "expiry_date", "issue_date",
-    "place_of_birth", "issuing_authority",
+    "issuing_country", "document_type", "birth_date", "sex", "expiry_date",
+    "issue_date", "place_of_birth", "place_of_issue", "issuing_authority",
 )
 
 # Confidence below this always requires applicant confirmation.
@@ -57,20 +57,11 @@ def _registry_code(value: str, *, kind: str) -> str | None:
 
 
 def mrz_date_to_iso(yymmdd: str, *, kind: str, today: date) -> str:
-    """Deterministic MRZ YYMMDD -> ISO date. Century pivot: a birth year in the
-    future is impossible (74 -> 1974 while today is 2026); an expiry uses the
-    same <70 pivot as passport_validity.parse_expiry."""
-    if not yymmdd or not re.fullmatch(r"\d{6}", yymmdd):
-        return ""
-    yy, mm, dd = int(yymmdd[0:2]), int(yymmdd[2:4]), int(yymmdd[4:6])
-    if kind == "birth":
-        century = 1900 if yy > (today.year % 100) else 2000
-    else:
-        century = 2000 if yy < 70 else 1900
-    try:
-        return date(century + yy, mm, dd).isoformat()
-    except ValueError:
-        return ""
+    """Deterministic MRZ YYMMDD -> canonical ISO date with CONTEXTUAL century
+    resolution (app.dates): a birth date must be a plausible past date, an
+    expiry a plausible recent-past/future date — never a fixed pivot."""
+    from .. import dates as dates_mod
+    return dates_mod.to_iso(dates_mod.parse_mrz_date(yymmdd, kind=kind, today=today))
 
 
 def derive_age(birth_iso: str, today: date) -> int | None:
@@ -85,22 +76,52 @@ def derive_age(birth_iso: str, today: date) -> int | None:
 
 
 # Visual-zone (printed text) extraction: a cross-check for the MRZ and the only
-# best-effort source for fields the MRZ does not carry (issue date, place of
-# birth, authority). Low confidence by construction — always confirmed.
+# best-effort source for fields the MRZ does not carry (issue date, places,
+# authority). Low confidence by construction — always confirmed.
+#
+# Passport labels are MULTILINGUAL RUNS ("Surname/Nom/Apellidos",
+# "出生日期/Date of birth") with the value usually on the NEXT line. Each
+# pattern therefore consumes the label's whole line (so a sibling label like
+# "Nom" can never be captured as the value — the source of a false
+# MRZ-vs-printed conflict), then captures the value on the same line after a
+# separator or on the following line. Labels match case-insensitively; the
+# value classes stay CASE-SENSITIVE.
+_DATE_VALUE = r"([0-9]{1,2}[^\n]{0,24}[0-9]{4}|[0-9]{4}-[0-9]{2}-[0-9]{2}|[0-9]{4}年[^\n]{0,12}日)"
+
+
+def _vz_pattern(label: str, value: str) -> re.Pattern:
+    # After the label line: optionally skip ONE line consisting ENTIRELY of
+    # native script (Chinese passports print the local value above the Latin
+    # one — a mixed line like "河北/HEBEI" is NOT skipped, its Latin part is
+    # the value), then an optional "native/" prefix on the value's own line.
+    return re.compile(
+        r"(?i:" + label + r")[^\n]*?(?:[:：]\s*|\n)\s*"
+        r"(?:[^\x00-\x7F\n]+\n\s*)?(?:[^\x00-\x7F]+/\s*)?" + value)
+
+
 _VZ_PATTERNS = {
-    "surname": r"(?:surname|apellidos|nom)\s*[:/]?\s*\n?\s*([A-Z][A-Z '\-]{1,40})",
-    "given_names": r"(?:given\s*names?|prenoms|nombres)\s*[:/]?\s*\n?\s*([A-Z][A-Z '\-]{1,40})",
-    "passport_number": r"(?:passport\s*(?:no|number)|document\s*no)\s*[.:/]?\s*\n?\s*([A-Z0-9]{6,10})",
-    "issue_date": r"(?:date\s*of\s*issue|issued?\s*(?:on|date))\s*[:/]?\s*\n?\s*([0-9]{1,2}\s*[A-Za-z]{3}\s*[0-9]{4}|[0-9]{4}-[0-9]{2}-[0-9]{2}|[0-9]{1,2}/[0-9]{1,2}/[0-9]{4})",
-    "place_of_birth": r"(?:place\s*of\s*birth)\s*[:/]?\s*\n?\s*([A-Z][A-Za-z ,.'\-]{1,40})",
-    "issuing_authority": r"(?:authority|issuing\s*authority)\s*[:/]?\s*\n?\s*([A-Z][A-Za-z ,.'\-]{1,60})",
+    "surname": _vz_pattern(r"surname", r"([A-Z][A-Z '\-]{1,40})"),
+    "given_names": _vz_pattern(r"given\s*names?", r"([A-Z][A-Z '\-]{1,40})"),
+    # Combined name field ("姓名/Name" on Chinese passports): the printed
+    # "SURNAME, GIVEN" line cross-checks the MRZ name zone, whose characters
+    # are NOT checksum-protected (a noisy scan can corrupt them silently).
+    "full_name": _vz_pattern(r"姓名|(?<![A-Za-z])name(?![A-Za-z])",
+                             r"([A-Z][A-Z ,'\-]{1,50})"),
+    "passport_number": _vz_pattern(r"passport\s*n|document\s*n", r"([A-Z0-9]{6,10})"),
+    "birth_date": _vz_pattern(r"date\s*of\s*birth|出生日期", _DATE_VALUE),
+    "expiry_date": _vz_pattern(r"date\s*of\s*expiry|date\s*of\s*expiration|有效期至", _DATE_VALUE),
+    "issue_date": _vz_pattern(r"date\s*of\s*issue|签发日期", _DATE_VALUE),
+    "place_of_birth": _vz_pattern(r"place\s*of\s*birth|出生地点", r"([A-Z][A-Za-z ,.'\-]{1,40})"),
+    "place_of_issue": _vz_pattern(r"place\s*of\s*issue|签发地点", r"([A-Z][A-Za-z ,.'\-]{1,40})"),
+    "issuing_authority": _vz_pattern(r"issuing\s*authority|(?<![a-z])authority|签发机关",
+                                     r"([A-Z][A-Za-z ,.'\-]{1,60})"),
 }
 
 
 def _visual_zone(text: str) -> dict:
     out = {}
     for key, pat in _VZ_PATTERNS.items():
-        m = re.search(pat, text or "", re.IGNORECASE)
+        m = pat.search(text or "")
         if m:
             out[key] = m.group(1).strip()
     return out
@@ -146,9 +167,14 @@ def build_passport_profile(*, ocr_fields: dict, mrz: dict | None,
         put("passport_number", mrz.get("passport_number"), base_conf, "mrz", needs)
         put("nationality", mrz.get("nationality"), base_conf, "mrz", needs)
         put("issuing_country", mrz.get("issuing_country"), base_conf, "mrz", needs)
+        doc_code = str(mrz.get("document_code") or "").strip()
+        if doc_code:
+            put("document_type", doc_code, base_conf, "mrz", needs,
+                note="ICAO document code")
         sex = str(mrz.get("sex") or "").strip("<")
         if sex in ("M", "F", "X"):
             put("sex", sex, base_conf, "mrz", needs)
+        # Dates: MRZ YYMMDD -> canonical ISO with contextual century resolution.
         birth_iso = mrz_date_to_iso(mrz.get("birth_date") or "", kind="birth", today=today)
         put("birth_date", birth_iso, base_conf, "mrz", needs)
         expiry_iso = mrz_date_to_iso(mrz.get("expiry_date") or "", kind="expiry", today=today)
@@ -174,8 +200,73 @@ def build_passport_profile(*, ocr_fields: dict, mrz: dict | None,
             cur["note"] = "printed zone disagrees with the machine-readable zone"
             conflicts.append({"field": key, "mrz": cur["value"], "visual": vz_val})
 
-    # Visual-only extras the MRZ cannot supply — always confirmed by the applicant.
-    for key in ("issue_date", "place_of_birth", "issuing_authority"):
+    # Combined printed name ("CHEN, NINGYAN") vs the MRZ name zone. MRZ name
+    # characters carry NO check digit, so scanner noise can corrupt them
+    # silently; token-set comparison (order-independent: the printed line is
+    # "SURNAME, GIVEN", the MRZ full name "GIVEN SURNAME") flags any mismatch
+    # for applicant confirmation — never a silent wrong name.
+    vz_full = vz.get("full_name")
+    if not vz_full and fields.get("surname"):
+        # Fallback when OCR ordering separates the label from its value: the
+        # printed "SURNAME, GIVEN" comma line is distinctive on its own. Only
+        # a line sharing at least one token with the MRZ name is treated as
+        # the printed name (unrelated comma lines are ignored).
+        mrz_toks = ({_norm(t) for t in str(fields["surname"]["value"]).split()} |
+                    {_norm(t) for t in str((fields.get("given_names") or {}).get("value", "")).split()})
+        for line in (recognized_text or "").splitlines():
+            m = re.fullmatch(r"\s*([A-Z][A-Z'\-]{1,24},\s?[A-Z][A-Z '\-]{1,30})\s*",
+                             line)
+            if not m:
+                continue
+            toks = {_norm(t) for t in re.split(r"[ ,]+", m.group(1)) if _norm(t)}
+            if toks & mrz_toks:
+                vz_full = m.group(1).strip()
+                break
+    if vz_full and fields.get("surname") and fields.get("given_names"):
+        printed_tokens = {_norm(t) for t in re.split(r"[ ,]+", vz_full) if _norm(t)}
+        mrz_tokens = ({_norm(t) for t in str(fields["surname"]["value"]).split()} |
+                      {_norm(t) for t in str(fields["given_names"]["value"]).split()})
+        if printed_tokens and printed_tokens != mrz_tokens:
+            for key in ("surname", "given_names", "full_name"):
+                if key in fields:
+                    fields[key]["needs_confirmation"] = True
+                    fields[key]["note"] = ("printed name disagrees with the "
+                                           "machine-readable zone")
+            conflicts.append({"field": "full_name",
+                              "mrz": (fields.get("full_name") or {}).get("value", ""),
+                              "visual": vz_full})
+
+    # Printed-zone DATES: deterministic parse (English month names, Chinese
+    # layouts, ISO — ambiguous numeric forms rejected), then compared with the
+    # MRZ date. A checksum-valid MRZ that AGREES with the printed zone is
+    # authoritative; a disagreement is flagged for applicant confirmation —
+    # never silently overwritten in either direction.
+    from .. import dates as dates_mod
+    for key, kind in (("birth_date", "birth"), ("expiry_date", "expiry")):
+        vz_raw = vz.get(key)
+        if not vz_raw:
+            continue
+        printed = dates_mod.parse_printed_date(vz_raw)
+        cur = fields.get(key)
+        if cur is None:
+            if printed:
+                put(key, dates_mod.to_iso(printed), 0.6, "ocr_text", True)
+        elif printed and dates_mod.to_iso(printed) != cur["value"]:
+            cur["needs_confirmation"] = True
+            cur["note"] = "printed date disagrees with the machine-readable zone"
+            conflicts.append({"field": key, "mrz": cur["value"],
+                              "visual": dates_mod.to_iso(printed)})
+
+    # Visual-only extras the MRZ cannot supply — always confirmed by the
+    # applicant. The issue date is normalized to canonical ISO when the
+    # printed form parses deterministically; an unparseable form is kept
+    # verbatim (flagged) rather than guessed.
+    if vz.get("issue_date"):
+        issue_printed = dates_mod.parse_printed_date(vz["issue_date"])
+        put("issue_date", dates_mod.to_iso(issue_printed) if issue_printed
+            else vz["issue_date"], 0.6, "ocr_text", True,
+            note="" if issue_printed else "could not read this date — please correct it")
+    for key in ("place_of_birth", "place_of_issue", "issuing_authority"):
         if vz.get(key):
             put(key, vz[key], 0.6, "ocr_text", True)
 
@@ -217,9 +308,18 @@ def build_passport_profile(*, ocr_fields: dict, mrz: dict | None,
                              ("given_names", "given_names"),
                              ("passport_number", "passport_number"),
                              ("birth_date", "birth_date"), ("sex", "sex"),
-                             ("expiry_date", "passport_expiry_date")):
-        if take(src_key):
-            prefill[ans_key] = take(src_key)
+                             ("expiry_date", "passport_expiry_date"),
+                             ("issue_date", "passport_issue_date")):
+        val = take(src_key)
+        if not val:
+            continue
+        # Date answers must be canonical ISO — an unparseable printed date
+        # stays visible in the profile (flagged) but never prefills answers.
+        if ans_key.endswith("_date") or src_key.endswith("_date"):
+            from .. import dates as dates_mod
+            if not dates_mod.is_iso(val):
+                continue
+        prefill[ans_key] = val
     age = derive_age(take("birth_date") or "", today)
     if age is not None:
         prefill["age"] = age

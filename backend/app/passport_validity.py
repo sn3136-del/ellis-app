@@ -56,20 +56,15 @@ class PassportBlocked(Exception):
 
 
 def parse_expiry(value: str) -> date | None:
-    """Accept MRZ YYMMDD or ISO YYYY-MM-DD. MRZ century pivot: <70 → 20xx."""
-    v = (value or "").strip()
-    if not v:
-        return None
+    """Accept canonical ISO, MRZ YYMMDD (contextual century — an expiry is a
+    plausible recent-past/future date, never a fixed pivot), or a printed
+    date form (deterministic parse; ambiguity rejected)."""
+    from . import dates as dates_mod
+    iso = dates_mod.normalize_any(value, kind="expiry")
     try:
-        if len(v) == 10 and v[4] == "-":
-            return date.fromisoformat(v)
-        if len(v) == 6 and v.isdigit():
-            yy, mm, dd = int(v[:2]), int(v[2:4]), int(v[4:6])
-            year = 2000 + yy if yy < 70 else 1900 + yy
-            return date(year, mm, dd)
+        return date.fromisoformat(iso) if iso else None
     except ValueError:
         return None
-    return None
 
 
 def _add_months(d: date, months: int) -> date:
@@ -167,13 +162,14 @@ def check_case_passport(db, app_row: models.VisaApplication, *, today: date | No
         return {"status": "unknown", "blocking": False,
                 "explanation": "No passport expiry on file yet — upload and approve the passport biodata page."}
 
+    from . import dates as dates_mod
     if expiry < today:
         return {"status": "expired", "blocking": True,
                 "expiry_date": expiry.isoformat(), "expiry_source": expiry_source,
-                "explanation": (f"This passport expired on {expiry.isoformat()}. Processing cannot "
-                                "continue: no government portal accepts an application on an expired "
-                                "passport, and any data extracted from it cannot be used as approved "
-                                "application data."),
+                "explanation": (f"This passport expired on {dates_mod.to_display(expiry.isoformat())}. "
+                                "Processing cannot continue: no government portal accepts an "
+                                "application on an expired passport, and any data extracted from "
+                                "it cannot be used as approved application data."),
                 "renewal": renewal_instructions(issuing),
                 "renewal_recommended": True,
                 "retry": "Upload the renewed passport and try again — your case is preserved."}
@@ -201,8 +197,9 @@ def check_case_passport(db, app_row: models.VisaApplication, *, today: date | No
                     "travel_dates": {"arrival": arrival.isoformat() if arrival else None,
                                      "departure": departure.isoformat() if departure else None},
                     "explanation": (f"{app_row.destination_country} requires a passport {need_text} — "
-                                    f"until {need_until.isoformat()} for your dates — but this passport "
-                                    f"expires {expiry.isoformat()}."),
+                                    f"until {dates_mod.to_display(need_until.isoformat())} for your "
+                                    f"dates — but this passport expires "
+                                    f"{dates_mod.to_display(expiry.isoformat())}."),
                     "renewal": renewal_instructions(issuing),
                     "renewal_recommended": True,
                     "retry": "Upload the renewed passport and try again — your case is preserved."}
