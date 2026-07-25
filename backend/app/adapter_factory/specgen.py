@@ -166,7 +166,12 @@ def _observed_selector(art, *keywords, clickable=False, fallback="") -> str:
     given fallback (which the contract layer will honestly reject if it was
     never observed). clickable=True restricts candidates to actual action
     elements (buttons/submitters) so a CLICK target can never resolve to a
-    text input whose label merely contains the keyword."""
+    text input whose label merely contains the keyword.
+
+    Real portals often yield deep ancestor-path selectors; those are not
+    deterministic per schema._SELECTOR_OK, so they are skipped rather than
+    emitted into a flow that would fail validation."""
+    from .schema import _SELECTOR_OK
     if art is None:
         return fallback
     for el in (art.structure or {}).get("elements", []):
@@ -176,8 +181,11 @@ def _observed_selector(art, *keywords, clickable=False, fallback="") -> str:
         if clickable and not (el.get("submits") or
                               (el.get("type") or "") in ("button", "submit")):
             continue
-        if any(k in name for k in keywords):
-            return el.get("selector") or fallback
+        if not any(k in name for k in keywords):
+            continue
+        sel = (el.get("selector") or "").strip()
+        if sel and sel.startswith(_SELECTOR_OK) and " " not in sel and ">" not in sel:
+            return sel
     return fallback
 
 
@@ -220,6 +228,7 @@ def generate_specification(db, *, build_request: fm.AdapterBuildRequest,
     for a in artifacts:
         for el in (a.structure or {}).get("elements", []):
             observed[(a.id, el.get("name"))] = el
+    from .schema import _SELECTOR_OK
     accepted, rejected = [], []
     for m in proposals:
         errs = validate_field_mapping(m)
@@ -233,6 +242,12 @@ def generate_specification(db, *, build_request: fm.AdapterBuildRequest,
             errs.append("sensitive_target_refused")
         elif m.get("selector") != el.get("selector"):
             errs.append("selector_mismatch_with_observation")
+        sel = str(m.get("selector") or "").strip()
+        # Deep ancestor paths from real portals are not deterministic targets;
+        # rejecting them here keeps the generated flow schema-valid instead of
+        # crashing specification generation.
+        if not sel.startswith(_SELECTOR_OK) or " " in sel or ">" in sel:
+            errs.append("non_deterministic_selector")
         if errs:
             rejected.append({"proposal": {k: str(v)[:80] for k, v in m.items()},
                              "reasons": errs})

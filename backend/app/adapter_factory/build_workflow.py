@@ -214,15 +214,20 @@ def _run_build_stages(db, req, _obs, max_stages: int) -> fm.AdapterBuildRequest:
                     transition(req, "MANUAL_REVIEW_REQUIRED", f"recon: {job.error[:80]}")
                     _review(db, req, "recon_failed", job.error or "recon failed")
                 else:
+                    # Generate the specification BEFORE announcing the state:
+                    # a generation failure must leave the build at
+                    # RECON_RUNNING so a resume retries it cleanly instead of
+                    # stranding it at SPECIFICATION_GENERATED with no spec.
                     req.portal_evidence = dict(req.portal_evidence or {},
                                                recon_job_id=job.id)
-                    transition(req, "SPECIFICATION_GENERATED",
-                               f"{job.pages_observed} pages mapped")
+                    db.commit()
                     arts = recon.artifacts(db, job.id)
                     spec = specgen.generate_specification(
                         db, build_request=req, recon_job=job, artifacts=arts,
                         generator_name="kimi-k3+deterministic-skeleton")
                     req.portal_evidence = dict(req.portal_evidence, spec_id=spec.id)
+                    transition(req, "SPECIFICATION_GENERATED",
+                               f"{job.pages_observed} pages mapped")
                     db.commit()
             elif st == "SPECIFICATION_GENERATED":
                 spec = db.get(fm.AdapterSpecification,

@@ -79,9 +79,9 @@ def build_inventory(db) -> list[dict]:
                  "url": f.base_url} for f in sorted(fams, key=lambda f: f.family_id)],
             "verified_snapshot_portals": portal_by_dest.get(dest, 0),
             "inbound_outcomes": dest_outcomes,
-            "has_defined_outcome_for_every_nationality": bool(dest_outcomes) and
-                "UNRESOLVED" not in {o for o, v in dest_outcomes.items()
-                                     if v["total"] > 0 and o == "UNRESOLVED"},
+            "has_defined_outcome_for_every_nationality":
+                bool(dest_outcomes) and
+                dest_outcomes.get("UNRESOLVED", {}).get("total", 0) == 0,
         })
     return inventory
 
