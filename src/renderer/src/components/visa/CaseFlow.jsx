@@ -229,6 +229,7 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
                 (journey.checklist || []).filter((i) => i.required && i.kind === 'document').length,
               missing: journey.checklist_counts.required_missing
             }}
+            translation={journey?.translation}
             onChanged={refresh} />
           <OcrReview client={client} caseId={caseId} onChanged={refresh} />
           <ContinuePanel t={t} client={client} caseId={caseId} journey={journey}

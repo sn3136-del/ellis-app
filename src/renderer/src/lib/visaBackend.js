@@ -179,6 +179,16 @@ export function createVisaClient(session) {
            { document_id: documentId, confirm }),
     withdrawChecklistDoc: (id, itemId) =>
       call('POST', `/cases/${id}/checklist/${encodeURIComponent(itemId)}/withdraw`, session, {}),
+    // Attach an EXISTING case document (a reused file or a translation
+    // artifact) to a requirement — binding only; Submit still fulfils it.
+    bindChecklistDoc: (id, itemId, documentId) =>
+      call('POST', `/cases/${id}/checklist/${encodeURIComponent(itemId)}/bind`, session,
+           { document_id: documentId }),
+    // Applicant-requested Kimi K3 machine translation of one document's
+    // OCR-extracted text (raw bytes never leave the backend).
+    translateDocument: (id, docId, target = null) =>
+      call('POST', `/cases/${id}/documents/${docId}/translate`, session,
+           target ? { target } : {}),
     setDocumentType: (id, docId, docType) =>
       call('POST', `/cases/${id}/documents/${docId}/set-type`, session, { doc_type: docType }),
     completeDocuments: (id) => call('POST', `/cases/${id}/checklist/complete`, session, {}),

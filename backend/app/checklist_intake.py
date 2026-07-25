@@ -79,18 +79,24 @@ def current_checklist(db, app_row, cg: CaseRouteGuidance | None = None) -> list[
 
 
 def document_rows(db, application_id: str) -> list[dict]:
-    """Status-computation rows for every stored document (no extracted PII)."""
+    """Status-computation rows for every stored document (no extracted PII —
+    language codes and a has-text flag only, never the text itself)."""
     docs = db.execute(select(models.StoredDocument).where(
         models.StoredDocument.application_id == application_id)).scalars().all()
+    translations = {d.translation_of: d.id for d in docs if d.translation_of}
     rows = []
     for d in docs:
         pc = d.page_classification or {}
         rows.append({
             "id": d.id, "name": d.name, "doc_type": d.doc_type,
             "ocr_status": d.ocr_status, "rejected": bool(pc.get("reject")),
+            "page_type": str(pc.get("page_type") or ""),
             "accepted_as_passport_identity": pc.get("accepted_as_passport_identity", False),
             "classifier": str(pc.get("classifier") or ""),
             "mime": d.mime, "size_bytes": d.size_bytes,
+            "language": d.language or {},
+            "has_text": bool((d.ocr_text or "").strip()),
+            "translation_document_id": translations.get(d.id),
         })
     return rows
 
@@ -145,7 +151,8 @@ def _verdict_for(item: dict, doc: models.StoredDocument) -> str:
     pc = doc.page_classification or {}
     return intake_flow.match_document_to_item(
         item, doc.doc_type, classifier=str(pc.get("classifier") or ""),
-        rejected=bool(pc.get("reject")))
+        rejected=bool(pc.get("reject")),
+        page_type=str(pc.get("page_type") or ""))
 
 
 def bind_document(db, p, app_row, item_id: str, document_id: str,
@@ -165,18 +172,11 @@ def bind_document(db, p, app_row, item_id: str, document_id: str,
     doc = _doc_row(db, app_row, document_id)
     verdict = _verdict_for(item, doc)
 
-    # One document must never satisfy two INCOMPATIBLE requirements: reusing a
-    # file already bound elsewhere is allowed only on a genuine match here.
-    others = db.execute(select(models.ChecklistSubmission).where(
-        models.ChecklistSubmission.application_id == app_row.id,
-        models.ChecklistSubmission.document_id == document_id,
-        models.ChecklistSubmission.item_id != str(item_id))).scalars().all()
-    if others and verdict != "match":
-        raise ChecklistError(409, {
-            "reason": "document_already_used",
-            "message": "This file is already attached to another requirement. "
-                       "Upload the correct document for this one."})
-
+    # The SAME stored document may serve any number of requirements the
+    # applicant explicitly chooses (one booking covering flight + hotel, one
+    # financial document covering several evidence items). Bytes are stored
+    # once (sha-deduplicated); each requirement gets its own independent
+    # binding and its own explicit Submit.
     existing = db.execute(select(models.ChecklistSubmission).where(
         models.ChecklistSubmission.application_id == app_row.id,
         models.ChecklistSubmission.item_id == str(item_id))).scalars().first()
@@ -216,9 +216,14 @@ def _binding_dict(sub: models.ChecklistSubmission, doc: models.StoredDocument,
 def submit_document(db, p, app_row, item_id: str, document_id: str | None,
                     *, confirm: bool = False) -> dict:
     """The applicant's explicit Submit for one requirement. Idempotent: a
-    repeated Submit returns the recorded submission unchanged. A confident
-    mismatch always blocks; an uncertain classification requires the
-    applicant's explicit confirmation (confirm=True)."""
+    repeated Submit returns the recorded submission unchanged.
+
+    Classification is ADVISORY, never a blocking authority: when the detected
+    type differs from the requirement (or could not be identified), Submit
+    needs the applicant's explicit confirmation (confirm=True, recorded as
+    applicant-confirmed) — and then always succeeds. Only files that failed
+    security/structural validation (refused at upload) or offer no secure
+    preview/download at all remain blocked."""
     cg = case_guidance(db, app_row.id)
     if cg is None:
         raise ChecklistError(409, "this case has no route checklist")
@@ -240,27 +245,38 @@ def submit_document(db, p, app_row, item_id: str, document_id: str | None,
         return {"submitted": True, "already_submitted": True,
                 "binding": _binding_dict(sub, doc, sub.match_verdict)}
     verdict = _verdict_for(item, doc)
+    if verdict != "match" and not confirm:
+        detected = doc.doc_type.replace("_", " ") if doc.doc_type else "unrecognized"
+        if verdict == "unreadable":
+            message = ("Ellis could not read this file. You can replace it "
+                       "with a clearer copy, or confirm you want to submit "
+                       "it as-is.")
+        elif verdict == "mismatch":
+            message = (f"Ellis detected this as {detected}. You selected "
+                       f"{item.get('label', 'this requirement')}. Confirm that "
+                       f"you want to use this document.")
+        else:
+            message = ("Ellis could not confidently identify this document. "
+                       "Confirm it satisfies this requirement, or pick its type.")
+        raise ChecklistError(409, {
+            "reason": "confirm_required", "match_verdict": verdict,
+            "detected_type": doc.doc_type,
+            "required_types": list(item.get("satisfied_by") or []),
+            "message": message})
     if verdict == "unreadable":
-        raise ChecklistError(409, {
-            "reason": "unreadable",
-            "message": "Ellis could not read this file. Replace it with a clearer copy."})
-    if verdict == "mismatch":
-        raise ChecklistError(409, {
-            "reason": "mismatch", "detected_type": doc.doc_type,
-            "required_types": list(item.get("satisfied_by") or []),
-            "message": f"This appears to be a different document type "
-                       f"({doc.doc_type.replace('_', ' ')}) than this requirement needs."})
-    if verdict == "uncertain" and not confirm:
-        raise ChecklistError(409, {
-            "reason": "confirm_required", "detected_type": doc.doc_type,
-            "required_types": list(item.get("satisfied_by") or []),
-            "message": "Ellis could not confidently identify this document. "
-                       "Confirm it satisfies this requirement, or pick its type."})
+        # Still honest about hard-broken files: with no stored bytes there is
+        # no secure preview or download, so nothing reviewable to confirm.
+        blob = db.get(models.DocumentBlob, doc.id)
+        if blob is None or not blob.content:
+            raise ChecklistError(409, {
+                "reason": "unreadable",
+                "message": "This file has no previewable content. Replace it "
+                           "with a readable copy."})
     sub.status = "submitted"
     sub.submitted_at = _now()
     sub.match_verdict = verdict
     sub.detected_type = doc.doc_type
-    if verdict == "uncertain":
+    if verdict != "match":
         sub.confirmed_by_applicant = True
     db.commit()
     audit.record(db, org_id=p.org_id, application_id=app_row.id,

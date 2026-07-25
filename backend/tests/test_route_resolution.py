@@ -41,6 +41,9 @@ def _seed_matrix(db, dest: str, nats=("CHN", "USA")):
 
 
 ANSWERS = {
+    "address_line1": "12 Harbor Lane", "address_city": "Springfield",
+    "address_region": "IL", "address_postal_code": "62704",
+    "address_country": "USA",
     "passport_nationality": "CHN", "passport_issuing_country": "CHN",
     "travel_document_type": "ordinary_passport", "lawful_country_of_residence": "USA",
     "destination_country": "JP", "visa_category": "tourist_visa",

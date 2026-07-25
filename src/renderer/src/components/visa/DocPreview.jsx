@@ -3,10 +3,14 @@
 // never a Finder window, never a filesystem path, never a bucket URL, and
 // never a cross-origin frame (the page CSP forbids embedding third-party
 // pages; blob: is the only frame/img source the preview uses). Supports
-// images (zoom + rotate), PDFs (native multi-page viewer), and an honest
-// fallback (name/type/size + download) for formats the browser cannot render.
-import { useEffect, useState } from 'react'
+// images and PDFs with center rotation (0/90/180/270 with a correctly swapped
+// bounding box so nothing is ever clipped or covered), zoom and Reset, plain
+// text (machine-translation artifacts), and an honest fallback
+// (name/type/size + download) for formats the browser cannot render.
+// Rotation is a viewing aid only — the stored document is never modified.
+import { useEffect, useRef, useState } from 'react'
 import { Loading } from '../ui.jsx'
+import { rotatedFrame } from '../../lib/intake.js'
 
 const RENDERABLE_IMAGE = /^image\/(jpeg|png|gif|webp)$/
 
@@ -18,15 +22,39 @@ function formatSize(bytes) {
   return `${(n / (1024 * 1024)).toFixed(1)} MB`
 }
 
+// A rotated element inside a wrapper sized to its rotated bounding box: the
+// wrapper participates in layout (scrolling works, nothing overlaps), the
+// element rotates around its own center.
+function RotatedBox({ w, h, rotation, zoom, maxW, children }) {
+  const f = rotatedFrame({ w, h, rotation, zoom, maxW })
+  if (!f.boxW) return null
+  return (
+    <div style={{ width: f.boxW, height: f.boxH, position: 'relative',
+                  margin: '16px auto', flexShrink: 0 }}
+      data-testid="preview-rotated-box" data-rotation={f.quarter}>
+      <div style={{ position: 'absolute', top: '50%', left: '50%',
+                    width: f.imgW, height: f.imgH,
+                    transform: `translate(-50%, -50%) rotate(${f.quarter}deg)`,
+                    transition: 'transform 120ms ease' }}>
+        {children}
+      </div>
+    </div>
+  )
+}
+
 export default function DocPreview({ client, caseId, doc, onClose }) {
   const [state, setState] = useState({ status: 'loading' })
   const [zoom, setZoom] = useState(1)
-  const [rotation, setRotation] = useState(0)
+  const [rotation, setRotation] = useState(0)   // persists while the preview is open
+  const [imgDims, setImgDims] = useState(null)  // natural {w, h}
+  const [areaW, setAreaW] = useState(0)
+  const areaRef = useRef(null)
 
   useEffect(() => {
     let alive = true
     let objectUrl = null
     setState({ status: 'loading' })
+    setImgDims(null)
     // Fresh signed URL every open (survives refresh/restart; links expire in
     // minutes), then authenticated-origin fetch → blob URL. The signed URL
     // itself never lands in the DOM.
@@ -38,6 +66,13 @@ export default function DocPreview({ client, caseId, doc, onClose }) {
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         const blob = await res.blob()
         if (!alive) return
+        if ((r.mime || '') === 'text/plain') {
+          const text = await blob.text()
+          objectUrl = URL.createObjectURL(blob)
+          setState({ status: 'ready', url: objectUrl, mime: r.mime,
+                     size: blob.size, text })
+          return
+        }
         objectUrl = URL.createObjectURL(blob)
         setState({ status: 'ready', url: objectUrl, mime: r.mime, size: blob.size })
       })
@@ -48,21 +83,41 @@ export default function DocPreview({ client, caseId, doc, onClose }) {
     }
   }, [caseId, doc.id])
 
+  // Track the preview area's usable width so the rotated bounding box always
+  // fits horizontally (vertical overflow scrolls).
+  useEffect(() => {
+    const el = areaRef.current
+    if (!el) return
+    const measure = () => setAreaW(Math.max(0, el.clientWidth - 32))
+    measure()
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null
+    ro && ro.observe(el)
+    return () => ro && ro.disconnect()
+  }, [state.status])
+
   const isPdf = state.mime === 'application/pdf'
   const isImage = RENDERABLE_IMAGE.test(state.mime || '')
-  const renderable = isPdf || isImage
+  const isText = state.mime === 'text/plain'
+  const renderable = isPdf || isImage || isText
+  const rotatable = isPdf || isImage
+  const pristine = zoom === 1 && rotation === 0
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal" style={{ maxWidth: 900, width: '92%' }} onClick={(e) => e.stopPropagation()}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-          <div style={{ fontWeight: 700, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{doc.name}</div>
-          {state.status === 'ready' && isImage && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+          <div style={{ fontWeight: 700, flex: 1, minWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis' }}>{doc.name}</div>
+          {state.status === 'ready' && rotatable && (
             <>
               <button className="btn btn--ghost btn--sm" onClick={() => setZoom((z) => Math.max(0.25, z - 0.25))}>−</button>
               <span className="chip" style={{ fontSize: 11 }}>{Math.round(zoom * 100)}%</span>
               <button className="btn btn--ghost btn--sm" onClick={() => setZoom((z) => Math.min(4, z + 0.25))}>+</button>
-              <button className="btn btn--ghost btn--sm" onClick={() => setRotation((r) => (r + 90) % 360)}>⟳ Rotate</button>
+              <button className="btn btn--ghost btn--sm" data-testid="rotate"
+                onClick={() => setRotation((r) => (r + 90) % 360)}>⟳ {rotation}°</button>
+              {!pristine && (
+                <button className="btn btn--ghost btn--sm" data-testid="reset-view"
+                  onClick={() => { setZoom(1); setRotation(0) }}>Reset</button>
+              )}
             </>
           )}
           {state.status === 'ready' && (
@@ -71,9 +126,11 @@ export default function DocPreview({ client, caseId, doc, onClose }) {
           <button className="btn btn--sm" onClick={onClose}>Close</button>
         </div>
 
-        <div style={{ background: 'var(--bg-2, #f4f4f4)', borderRadius: 10, minHeight: 320,
-                      maxHeight: '70vh', overflow: 'auto', display: 'flex',
-                      alignItems: 'flex-start', justifyContent: 'center' }}>
+        <div ref={areaRef}
+          style={{ background: 'var(--bg-2, #f4f4f4)', borderRadius: 10, minHeight: 320,
+                   maxHeight: '70vh', overflow: 'auto', display: 'flex',
+                   flexDirection: 'column', alignItems: 'center',
+                   justifyContent: 'flex-start' }}>
           {state.status === 'loading' && <div style={{ padding: 40 }}><Loading label="Loading document" /></div>}
           {state.status === 'unavailable' && (
             <div style={{ padding: 40, fontSize: 13, color: 'var(--muted)' }}>
@@ -86,13 +143,36 @@ export default function DocPreview({ client, caseId, doc, onClose }) {
             </div>
           )}
           {state.status === 'ready' && isPdf && (
-            <iframe title={doc.name} src={state.url} style={{ width: '100%', height: '68vh', border: 0 }} />
+            // PDF pages rotate wholesale (viewing aid only). Unrotated PDFs
+            // keep the full-width native viewer.
+            rotation === 0
+              ? <iframe title={doc.name} src={state.url}
+                  style={{ width: '100%', height: '68vh', border: 0,
+                           transform: zoom === 1 ? undefined : `scale(${zoom})`,
+                           transformOrigin: 'center top' }} />
+              : <RotatedBox w={areaW || 800} h={Math.round((areaW || 800) * 0.75)}
+                  rotation={rotation} zoom={zoom} maxW={areaW}>
+                  <iframe title={doc.name} src={state.url}
+                    style={{ width: '100%', height: '100%', border: 0 }} />
+                </RotatedBox>
           )}
           {state.status === 'ready' && isImage && (
-            <img src={state.url} alt={doc.name}
-                 style={{ transform: `scale(${zoom}) rotate(${rotation}deg)`,
-                          transformOrigin: 'center top', maxWidth: '100%',
-                          transition: 'transform 120ms ease' }} />
+            imgDims
+              ? <RotatedBox w={imgDims.w} h={imgDims.h} rotation={rotation}
+                  zoom={zoom} maxW={areaW}>
+                  <img src={state.url} alt={doc.name}
+                       style={{ width: '100%', height: '100%' }} />
+                </RotatedBox>
+              : <img src={state.url} alt={doc.name} style={{ maxWidth: '100%', padding: 16 }}
+                     onLoad={(e) => setImgDims({ w: e.target.naturalWidth,
+                                                 h: e.target.naturalHeight })} />
+          )}
+          {state.status === 'ready' && isText && (
+            <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                          fontSize: 13, lineHeight: 1.5, padding: 20, margin: 0,
+                          width: '100%', boxSizing: 'border-box',
+                          fontFamily: 'var(--font, inherit)' }}
+              data-testid="text-preview">{state.text}</pre>
           )}
           {state.status === 'ready' && !renderable && (
             <div style={{ padding: 40, textAlign: 'center' }} data-testid="preview-fallback">

@@ -25,10 +25,14 @@ from . import models as fm
 from .schema import validate_flow, validate_field_mapping
 
 # The only case fields Kimi may map portal inputs onto (non-sensitive only).
+# The structured home address is part of the canonical vocabulary so each
+# portal's exact address fields can be mapped onto it.
 ELLIS_FIELDS = [
     "full_name", "email", "passport_number", "nationality", "birth_date",
     "arrival_date", "departure_date", "travel_purpose", "accommodation",
     "entry_checkpoint", "prior_refusals",
+    "address_line1", "address_line2", "address_city", "address_region",
+    "address_postal_code", "address_country",
 ]
 
 # Portal-name heuristics used by the deterministic fallback mapper (tests and
@@ -41,6 +45,15 @@ _NAME_HINTS = {
     "departure_date": ("departure_date", "departure", "exit_date"),
     "birth_date": ("birth_date", "dob", "date_of_birth"),
     "prior_refusals": ("prior_refusals", "refusals"),
+    "address_line1": ("address_line1", "address1", "street_address", "address",
+                      "street"),
+    "address_line2": ("address_line2", "address2", "apartment", "unit"),
+    "address_city": ("address_city", "city", "town"),
+    "address_region": ("address_region", "state", "province", "region"),
+    "address_postal_code": ("address_postal_code", "postal_code", "zip",
+                            "zip_code", "postcode"),
+    "address_country": ("address_country", "country_of_residence",
+                        "residence_country"),
 }
 
 _mapper = None

@@ -250,20 +250,32 @@ def test_replace_resets_submission_and_withdraw_returns_to_needed(client):
     assert w2.status_code == 200 and w2.json()["withdrawn"] is False
 
 
-def test_clear_mismatch_blocks_submit(client):
-    """A confidently-classified different type (flight text on the hotel
-    requirement) can never be submitted — even with confirm=true."""
+def test_mismatch_is_advisory_and_submit_anyway_works(client):
+    """Classification is advisory, never a blocking authority: a confident
+    mismatch (flight text on the hotel requirement) warns with the exact
+    detected/selected wording, and the applicant's explicit confirmation
+    submits it — recorded as applicant-confirmed."""
     case_id = _continue_case(client, EXEMPT_ANSWER, "GTM")
     up = _upload(client, case_id, "hotel_booking", "not-hotel.pdf", text=FLIGHT_TEXT)
     assert up.json()["binding"]["match_verdict"] == "mismatch"
     j = client.get(f"/cases/{case_id}/checklist", headers=H).json()
     assert _item(j, "hotel_booking")["status"] == "mismatch"
-    for confirm in (False, True):
-        s = client.post(f"/cases/{case_id}/checklist/hotel_booking/submit",
-                        json={"confirm": confirm}, headers=H)
-        assert s.status_code == 409
-        assert s.json()["detail"]["reason"] == "mismatch"
-        assert s.json()["detail"]["detected_type"] == "flight_itinerary"
+    # Without confirmation: an advisory 409 naming both sides, never a block.
+    s = client.post(f"/cases/{case_id}/checklist/hotel_booking/submit",
+                    json={"confirm": False}, headers=H)
+    assert s.status_code == 409
+    d = s.json()["detail"]
+    assert d["reason"] == "confirm_required"
+    assert d["match_verdict"] == "mismatch"
+    assert d["detected_type"] == "flight_itinerary"
+    assert "Ellis detected" in d["message"] and "You selected" in d["message"]
+    # "Submit anyway" — explicit confirmation fulfils the requirement.
+    s = client.post(f"/cases/{case_id}/checklist/hotel_booking/submit",
+                    json={"confirm": True}, headers=H)
+    assert s.status_code == 200 and s.json()["submitted"] is True
+    assert s.json()["binding"]["confirmed_by_applicant"] is True
+    j = client.get(f"/cases/{case_id}/checklist", headers=H).json()
+    assert _item(j, "hotel_booking")["status"] == "submitted"
 
 
 def test_uncertain_classification_requires_explicit_confirmation(client):
@@ -300,15 +312,42 @@ def test_manual_type_choice_is_whitelisted_and_reevaluates(client):
     assert r.status_code == 409
 
 
-def test_one_document_never_satisfies_two_incompatible_requirements(client):
+def test_same_file_satisfies_multiple_requirements_independently(client, db):
+    """One uploaded file may be EXPLICITLY submitted for several requirements
+    (e.g. a combined booking). Bytes are stored once (sha-deduplicated);
+    each requirement keeps an independent binding, submission timestamp and
+    withdraw."""
     case_id = _continue_case(client, EXEMPT_ANSWER, "PAN")
-    up = _upload(client, case_id, "flight_itinerary", "f.pdf", text=FLIGHT_TEXT)
+    up = _upload(client, case_id, "flight_itinerary", "combined.pdf",
+                 text=FLIGHT_TEXT + "\n" + HOTEL_TEXT)
     assert up.status_code == 200
-    # Re-uploading the SAME file against the hotel requirement dedups to the
-    # same document and refuses the incompatible second binding.
-    again = _upload(client, case_id, "hotel_booking", "f.pdf", text=FLIGHT_TEXT)
-    assert again.status_code == 409
-    assert again.json()["detail"]["reason"] == "document_already_used"
+    doc_id = up.json()["id"]
+    client.post(f"/cases/{case_id}/checklist/flight_itinerary/submit",
+                json={"document_id": doc_id, "confirm": True}, headers=H)
+    # Re-uploading the SAME bytes against the hotel requirement dedups to the
+    # same document row and binds it there too.
+    again = _upload(client, case_id, "hotel_booking", "combined.pdf",
+                    text=FLIGHT_TEXT + "\n" + HOTEL_TEXT)
+    assert again.status_code == 200
+    assert again.json()["id"] == doc_id and again.json()["duplicate"] is True
+    s = client.post(f"/cases/{case_id}/checklist/hotel_booking/submit",
+                    json={"document_id": doc_id, "confirm": True}, headers=H)
+    assert s.status_code == 200
+    j = client.get(f"/cases/{case_id}/checklist", headers=H).json()
+    flight, hotel = _item(j, "flight_itinerary"), _item(j, "hotel_booking")
+    assert flight["status"] == "submitted" and hotel["status"] == "submitted"
+    assert flight["binding"]["document_id"] == hotel["binding"]["document_id"] == doc_id
+    assert flight["binding"]["submitted_at"] and hotel["binding"]["submitted_at"]
+    # Bytes stored once: one StoredDocument row, one blob.
+    docs = db.execute(select(core_models.StoredDocument).where(
+        core_models.StoredDocument.application_id == case_id,
+        core_models.StoredDocument.name == "combined.pdf")).scalars().all()
+    assert len(docs) == 1
+    # Withdrawing ONE requirement leaves the other submitted.
+    client.post(f"/cases/{case_id}/checklist/flight_itinerary/withdraw", headers=H)
+    j = client.get(f"/cases/{case_id}/checklist", headers=H).json()
+    assert _item(j, "flight_itinerary")["status"] == "pending"
+    assert _item(j, "hotel_booking")["status"] == "submitted"
 
 
 def test_unbound_upload_never_changes_checklist(client):
@@ -457,3 +496,122 @@ def test_checklist_responses_never_expose_storage_paths(client):
     j = client.get(f"/cases/{case_id}/checklist", headers=H)
     assert "local://" not in _json.dumps(j.json())
     assert "storage_ref" not in _json.dumps(j.json())
+
+
+# =========================================================================
+# Part 5 — the passport-classifier leak: passport-page validation must NEVER
+# touch unrelated checklist documents (real bank statements and bookings
+# almost always contain the word "Visa" — the card brand).
+# =========================================================================
+REAL_BANK_TEXT = ("Bank statement\nExample Bank, N.A.\nAccount statement\n"
+                  "Payment method on file: Visa debit card ending 4242\n"
+                  "Closing balance USD 12,345.67\nStatement period June 2026")
+REAL_HOTEL_TEXT = ("Hotel booking confirmation\nAccommodation: Grand Example\n"
+                   "Guest: J DOE\nCheck-in 26 Jul\nPaid with Visa **** 4242\n"
+                   "Visa support letter available on request")
+REAL_FLIGHT_TEXT = ("Flight itinerary — round-trip e-ticket\nAirline: Example Air\n"
+                    "PNR: XK4LM2\nDeparture: 26 JUL · Return: 26 AUG\n"
+                    "Note: check destination visa requirements before travel\n"
+                    "Paid by Visa credit card")
+
+PASSPORT_WARNING_SNIPPETS = ("visa or stamp page", "biodata", "machine-readable")
+
+
+def _assert_no_passport_warning(body):
+    assert body["rejected"] is False
+    assert body["message"] == ""
+    import json as _json
+    blob = _json.dumps(body.get("binding") or {})
+    for snippet in PASSPORT_WARNING_SNIPPETS:
+        assert snippet not in blob
+
+
+def test_bank_statement_with_visa_word_gets_no_passport_warning(client):
+    case_id = _continue_case(client, REQUIRED_ANSWER, "KAZ")
+    up = _upload(client, case_id, "bank_statement", "statement.pdf",
+                 text=REAL_BANK_TEXT)
+    assert up.status_code == 200
+    body = up.json()
+    _assert_no_passport_warning(body)
+    assert body["doc_type"] == "bank_statement"
+    assert body["binding"]["match_verdict"] == "match"
+    j = client.get(f"/cases/{case_id}/checklist", headers=H).json()
+    assert _item(j, "bank_statement")["status"] == "ready_to_submit"
+
+
+def test_hotel_booking_with_visa_words_gets_no_passport_warning(client):
+    case_id = _continue_case(client, EXEMPT_ANSWER, "UZB")
+    up = _upload(client, case_id, "hotel_booking", "booking.pdf",
+                 text=REAL_HOTEL_TEXT)
+    assert up.status_code == 200
+    _assert_no_passport_warning(up.json())
+    assert up.json()["doc_type"] == "hotel_booking"
+
+
+def test_flight_itinerary_with_visa_words_gets_no_passport_warning(client):
+    case_id = _continue_case(client, EXEMPT_ANSWER, "KGZ")
+    up = _upload(client, case_id, "flight_itinerary", "ticket.pdf",
+                 text=REAL_FLIGHT_TEXT)
+    assert up.status_code == 200
+    _assert_no_passport_warning(up.json())
+    assert up.json()["doc_type"] == "flight_itinerary"
+
+
+def test_photograph_gets_no_passport_warning(client):
+    case_id = _continue_case(client, REQUIRED_ANSWER, "TJK")
+    up = _upload(client, case_id, "photo", "IMG_9.jpg", mime="image/jpeg",
+                 content=JPEG)
+    assert up.status_code == 200
+    _assert_no_passport_warning(up.json())
+    assert up.json()["doc_type"] == "photo"
+
+
+def test_passport_requirement_still_gets_passport_validation(client):
+    """The biodata accept/reject flow still guards the PASSPORT requirement."""
+    case_id = _continue_case(client, REQUIRED_ANSWER, "TKM",
+                             confirm_passport=False)
+    client.post(f"/cases/{case_id}/checklist/passport/withdraw", headers=H)
+    up = _upload(client, case_id, "passport", "biodata.jpg", mime="image/jpeg",
+                 content=JPEG)   # unreadable image aimed at the passport row
+    assert up.status_code == 200
+    assert up.json()["rejected"] is True
+    assert "biodata" in up.json()["message"]
+
+
+def test_unreadable_upload_is_submittable_with_explicit_confirmation(client):
+    """Part 2: only security/structural failures block. An unreadable-but-
+    previewable file can be submitted once the applicant confirms."""
+    case_id = _continue_case(client, EXEMPT_ANSWER, "MNG")
+    up = _upload(client, case_id, "hotel_booking", "faint-scan.png",
+                 mime="image/png", content=PNG)
+    assert up.status_code == 200
+    j = client.get(f"/cases/{case_id}/checklist", headers=H).json()
+    assert _item(j, "hotel_booking")["status"] == "unreadable"
+    s = client.post(f"/cases/{case_id}/checklist/hotel_booking/submit",
+                    json={}, headers=H)
+    assert s.status_code == 409 and s.json()["detail"]["reason"] == "confirm_required"
+    s = client.post(f"/cases/{case_id}/checklist/hotel_booking/submit",
+                    json={"confirm": True}, headers=H)
+    assert s.status_code == 200 and s.json()["submitted"] is True
+    assert s.json()["binding"]["confirmed_by_applicant"] is True
+
+
+def test_reused_file_attaches_via_bind_endpoint_without_reupload(client):
+    """Explicit reuse without re-uploading bytes: bind an existing document to
+    a second requirement, then submit it there independently."""
+    case_id = _continue_case(client, EXEMPT_ANSWER, "ALB")
+    up = _upload(client, case_id, "flight_itinerary", "combo.pdf",
+                 text=FLIGHT_TEXT + "\n" + HOTEL_TEXT)
+    doc_id = up.json()["id"]
+    client.post(f"/cases/{case_id}/checklist/flight_itinerary/submit",
+                json={"document_id": doc_id, "confirm": True}, headers=H)
+    r = client.post(f"/cases/{case_id}/checklist/hotel_booking/bind",
+                    json={"document_id": doc_id}, headers=H)
+    assert r.status_code == 200
+    assert r.json()["binding"]["document_id"] == doc_id
+    s = client.post(f"/cases/{case_id}/checklist/hotel_booking/submit",
+                    json={"document_id": doc_id, "confirm": True}, headers=H)
+    assert s.status_code == 200
+    j = client.get(f"/cases/{case_id}/checklist", headers=H).json()
+    assert _item(j, "flight_itinerary")["status"] == "submitted"
+    assert _item(j, "hotel_booking")["status"] == "submitted"

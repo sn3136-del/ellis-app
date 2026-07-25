@@ -26,20 +26,28 @@ function readAsBase64(file) {
 }
 
 // One uploadable requirement row: Needed → Upload → Processing → review →
-// Submit → Fulfilled, with Replace / Remove / Withdraw and honest mismatch
-// messaging throughout.
-function DocumentItemRow({ t, client, caseId, item, onChanged }) {
+// Submit → Fulfilled, with Replace / Remove / Withdraw. Classification is
+// ADVISORY only: a differing detected type warns with the exact wording and
+// "Submit anyway" — the applicant's explicit choice always wins. Detected
+// language + optional Kimi K3 machine translation live here too.
+function DocumentItemRow({ t, client, caseId, item, translation, onChanged }) {
   const toast = useToast()
   const inputRef = useRef(null)
-  const [busy, setBusy] = useState('')        // 'upload' | 'submit' | 'withdraw' | 'type'
+  const [busy, setBusy] = useState('')        // 'upload' | 'submit' | 'withdraw' | 'type' | 'translate'
   const [preview, setPreview] = useState(false)
+  const [previewDoc, setPreviewDoc] = useState(null)   // {id, name} being previewed
   const [pickType, setPickType] = useState(false)
+  const [askTranslate, setAskTranslate] = useState(false)
   const binding = item.binding || null
   const status = item.status
   const meta = checklistStatusMeta(status)
   const done = status === 'submitted'
   const detectedKey = binding ? docTypeLabelKey(binding.detected_type) : null
-  const neededKey = docTypeLabelKey((item.satisfied_by || [])[0])
+  const language = (binding && binding.language) || {}
+  const target = translation || {}
+  const canTranslate = !!binding && binding.has_text && language.code &&
+    target.target && language.code !== target.target &&
+    binding.detected_type !== 'translation'
 
   async function onFile(file) {
     if (!file) return
@@ -97,6 +105,33 @@ function DocumentItemRow({ t, client, caseId, item, onChanged }) {
     setBusy('')
   }
 
+  // Runs only after the applicant's explicit consent (the extracted TEXT —
+  // never the image/PDF bytes — is sent to Kimi K3).
+  async function translate() {
+    setAskTranslate(false)
+    setBusy('translate')
+    try {
+      await client.translateDocument(caseId, binding.document_id)
+      toast(t('checklist.translatedToast'))
+      onChanged && onChanged()
+    } catch (e) {
+      toast(typeof e.detail === 'object' && e.detail?.message ? e.detail.message : e.message)
+    }
+    setBusy('')
+  }
+
+  async function attachTranslation() {
+    setBusy('type')
+    try {
+      await client.bindChecklistDoc(caseId, item.id, binding.translation_document_id)
+      toast(t('checklist.translationAttached'))
+      onChanged && onChanged()
+    } catch (e) {
+      toast(typeof e.detail === 'object' && e.detail?.message ? e.detail.message : e.message)
+    }
+    setBusy('')
+  }
+
   return (
     <div className="row" style={{ alignItems: 'flex-start', gap: 10, flexWrap: 'wrap' }}
       data-testid={'checklist-' + item.id} data-status={status}>
@@ -119,18 +154,25 @@ function DocumentItemRow({ t, client, caseId, item, onChanged }) {
                 {binding.document_name}
               </span>
               <span className="chip">{t(detectedKey)}</span>
+              {language.name && (
+                <span className="chip" data-testid="language-chip">
+                  {t('checklist.detectedLanguage', { language: language.name })}
+                </span>
+              )}
               {binding.match_verdict === 'match' && !done && (
                 <span className="chip" data-testid="match-ok">{t('checklist.matchOk')}</span>
               )}
               {done && binding.submitted_at && (
                 <span className="chip chip--ink" data-testid="submitted-chip">
                   {t('checklist.submitted')}
+                  {binding.confirmed_by_applicant ? ` · ${t('checklist.applicantConfirmed')}` : ''}
                 </span>
               )}
             </div>
+            {/* Advisory only — never a blocking authority. */}
             {status === 'mismatch' && (
-              <div style={{ color: 'var(--crit)', marginTop: 6 }} data-testid="mismatch-note">
-                {t('checklist.mismatchNote', { detected: t(detectedKey), needed: t(neededKey) })}
+              <div style={{ color: '#9a3412', marginTop: 6 }} data-testid="mismatch-note">
+                {t('checklist.advisoryNote', { detected: t(detectedKey), selected: item.label })}
               </div>
             )}
             {status === 'needs_review' && (
@@ -139,8 +181,8 @@ function DocumentItemRow({ t, client, caseId, item, onChanged }) {
               </div>
             )}
             {status === 'unreadable' && (
-              <div style={{ color: 'var(--crit)', marginTop: 6 }}>
-                {t('checklist.unreadableNote')}
+              <div style={{ color: '#9a3412', marginTop: 6 }}>
+                {t('checklist.unreadableAdvisory')}
               </div>
             )}
             {pickType && (
@@ -151,6 +193,51 @@ function DocumentItemRow({ t, client, caseId, item, onChanged }) {
                     {t(docTypeLabelKey(dt))}
                   </button>
                 ))}
+              </div>
+            )}
+            {canTranslate && !binding.translation_document_id && !askTranslate && (
+              <div style={{ marginTop: 8 }}>
+                <button className="btn btn--ghost btn--sm" disabled={!!busy}
+                  onClick={() => setAskTranslate(true)} data-testid={'translate-' + item.id}>
+                  {busy === 'translate' ? '…' : t('checklist.translateTo', { language: target.target_name })}
+                </button>
+              </div>
+            )}
+            {askTranslate && (
+              <div className="card card--soft" style={{ padding: 10, marginTop: 8 }}
+                data-testid="translate-consent">
+                <div style={{ marginBottom: 8 }}>{t('checklist.translateConsent')}</div>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button className="btn btn--sm" onClick={translate}>
+                    {t('checklist.translateConfirm')}
+                  </button>
+                  <button className="btn btn--ghost btn--sm" onClick={() => setAskTranslate(false)}>
+                    {t('checklist.translateCancel')}
+                  </button>
+                </div>
+              </div>
+            )}
+            {busy === 'translate' && <div style={{ marginTop: 8 }}><Loading label={t('checklist.translating')} /></div>}
+            {binding.translation_document_id && (
+              <div style={{ marginTop: 8, display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}
+                data-testid="translation-ready">
+                <span className="chip">{t('checklist.machineTranslation')}</span>
+                <button className="btn btn--ghost btn--sm"
+                  onClick={() => { setPreviewDoc({ id: binding.translation_document_id,
+                    name: t('checklist.machineTranslation') }); setPreview(true) }}>
+                  {t('checklist.previewTranslation')}
+                </button>
+                {!done && (
+                  <button className="btn btn--ghost btn--sm" disabled={!!busy}
+                    onClick={attachTranslation}>
+                    {t('checklist.useTranslation')}
+                  </button>
+                )}
+              </div>
+            )}
+            {(canTranslate || binding.translation_document_id) && target.certified_note && (
+              <div style={{ color: 'var(--muted)', marginTop: 6 }} data-testid="certified-note">
+                {t('checklist.certifiedNote')}
               </div>
             )}
           </div>
@@ -191,6 +278,12 @@ function DocumentItemRow({ t, client, caseId, item, onChanged }) {
                 </button>
               </>
             )}
+            {(status === 'mismatch' || status === 'unreadable') && (
+              <button className="btn btn--sm" disabled={!!busy} onClick={() => submit(true)}
+                data-testid={'submit-anyway-' + item.id}>
+                {busy === 'submit' ? '…' : t('checklist.submitAnyway')}
+              </button>
+            )}
             <button className="btn btn--ghost btn--sm" disabled={!!busy}
               onClick={() => inputRef.current?.click()} data-testid={'replace-' + item.id}>
               {t('checklist.replace')}
@@ -205,14 +298,14 @@ function DocumentItemRow({ t, client, caseId, item, onChanged }) {
 
       {preview && binding && (
         <DocPreview client={client} caseId={caseId}
-          doc={{ id: binding.document_id, name: binding.document_name }}
-          onClose={() => setPreview(false)} />
+          doc={previewDoc || { id: binding.document_id, name: binding.document_name }}
+          onClose={() => { setPreview(false); setPreviewDoc(null) }} />
       )}
     </div>
   )
 }
 
-export default function Checklist({ t, client, caseId, checklist, counts, onChanged }) {
+export default function Checklist({ t, client, caseId, checklist, counts, translation, onChanged }) {
   const items = Array.isArray(checklist) ? checklist : []
   if (items.length === 0) return null
   const c = counts || checklistCounts(items)
@@ -243,7 +336,8 @@ export default function Checklist({ t, client, caseId, checklist, counts, onChan
             )
           }
           return <DocumentItemRow key={item.id} t={t} client={client} caseId={caseId}
-                                  item={item} onChanged={onChanged} />
+                                  item={item} translation={translation}
+                                  onChanged={onChanged} />
         })}
       </div>
     </div>

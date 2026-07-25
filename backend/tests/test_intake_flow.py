@@ -40,6 +40,9 @@ def _passport_text(**kw):
 
 
 ANSWERS_SGP = {
+    "address_line1": "12 Harbor Lane", "address_city": "Springfield",
+    "address_region": "IL", "address_postal_code": "62704",
+    "address_country": "USA",
     "passport_nationality": "USA", "passport_issuing_country": "USA",
     "travel_document_type": "ordinary_passport",
     "lawful_country_of_residence": "USA", "destination_country": "SGP",

@@ -18,7 +18,9 @@ from app.visa_snapshot.models import (HumanReviewTask, KimiRouteGuidanceCache,
 
 H = {"Authorization": "Bearer dev-token", "X-Org-Id": "org-kp", "X-User-Id": "u1"}
 
-ROUTE = {"passport_nationality": "USA", "passport_issuing_country": "USA",
+ROUTE = {"address_line1": "12 Harbor Lane", "address_city": "Springfield",
+         "address_country": "USA",
+         "passport_nationality": "USA", "passport_issuing_country": "USA",
          "travel_document_type": "ordinary_passport",
          "lawful_country_of_residence": "USA", "destination_country": "JPN",
          "visa_category": "tourist_visa", "travel_purpose": "tourism",

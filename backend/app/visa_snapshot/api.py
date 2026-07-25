@@ -36,6 +36,17 @@ INTAKE_FIELDS = [
     {"key": "lawful_country_of_residence", "required": True},
     {"key": "residence_status", "required": False,
      "condition": "lawful_country_of_residence != passport_nationality"},
+    # Structured home address (commonly required by visa forms and portal
+    # account creation). Country-aware: only line 1, city and country are
+    # universally mandatory — many countries have no state/region or postal
+    # code, so those stay optional and no U.S. format is ever assumed.
+    {"key": "address_line1", "required": True},
+    {"key": "address_line2", "required": False},
+    {"key": "address_city", "required": True},
+    {"key": "address_region", "required": False},
+    {"key": "address_postal_code", "required": False},
+    {"key": "address_country", "required": True},
+    {"key": "mailing_address_same", "required": False, "default": True},
     {"key": "destination_country", "required": True},
     {"key": "visa_category", "required": True, "default": "tourist_visa"},
     {"key": "visa_subtype", "required": False},
@@ -473,7 +484,16 @@ def continue_intake(intake_id: str, background: BackgroundTasks,
         raise HTTPException(409, detail={"reason": "guidance_blocked",
                                          "blockers": meta["blockers"]})
 
+    # The structured home address is mandatory before a case exists — visa
+    # forms and portal account creation need it. Only the universal fields are
+    # enforced (line 1 / city / country); region and postal code are optional
+    # because many countries have neither.
     answers = dict(r.answers or {})
+    address_missing = [k for k in ("address_line1", "address_city", "address_country")
+                       if not str(answers.get(k) or "").strip()]
+    if address_missing:
+        raise HTTPException(422, detail={"reason": "address_required",
+                                         "missing_fields": address_missing})
     full_name = str(answers.get("full_name") or "").strip()
     if not full_name:
         parts = [answers.get("given_names"), answers.get("surname")]

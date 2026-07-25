@@ -19,6 +19,9 @@ GOV_URL = "https://www.evisa.gov.kh/info"   # .gov.kh is a government suffix
 BLOG_URL = "https://travelblog.example/cambodia"
 
 ROUTE_ANSWERS = {
+    "address_line1": "12 Harbor Lane", "address_city": "Springfield",
+    "address_region": "IL", "address_postal_code": "62704",
+    "address_country": "USA",
     "passport_nationality": "SGP", "passport_issuing_country": "SG",
     "travel_document_type": "ordinary_passport", "lawful_country_of_residence": "SG",
     "destination_country": "KH", "visa_category": "evisa_tourist",

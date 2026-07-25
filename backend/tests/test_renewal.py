@@ -95,6 +95,8 @@ def _make_case(client, *, expiry_iso="2026-10-01", email="r@example.com",
     """Travel case via the real intake continuation, with a confirmed passport
     expiry in the answers (as the applicant confirmation produces)."""
     answers = {
+        "address_line1": "12 Harbor Lane", "address_city": "Springfield",
+        "address_country": "USA",
         "passport_nationality": "USA", "passport_issuing_country": "USA",
         "travel_document_type": "ordinary_passport",
         "lawful_country_of_residence": "USA", "destination_country": "SGP",

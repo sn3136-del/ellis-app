@@ -15,7 +15,7 @@ import {
   validEmail, datesOrdered, RESIDENCE_STATUS_OPTIONS,
   researchStageMeta, researchTerminal, researchStatusMeta, RESEARCH_STEP_KEYS,
   guidanceDispositionMeta, guidanceStepMeta, guidanceIsUsable,
-  continuationMeta, deriveAge, formatDateUS, localTodayIso
+  continuationMeta, deriveAge, formatDateUS, localTodayIso, formatAddress
 } from '../../lib/intake.js'
 import ConnectorBuild from './ConnectorBuild.jsx'
 import PassportIntake from './PassportIntake.jsx'
@@ -55,7 +55,9 @@ function newestProgressAt(job) {
 // Which wizard step each intake field lives on (for the 422 missing-field jump).
 const STEP_FIELDS = [
   ['passport_nationality', 'passport_issuing_country', 'travel_document_type',
-    'lawful_country_of_residence', 'residence_status'],
+    'lawful_country_of_residence', 'residence_status',
+    'address_line1', 'address_line2', 'address_city', 'address_region',
+    'address_postal_code', 'address_country', 'mailing_address_same'],
   // visa_category/visa_subtype are determined automatically by Ellis from the
   // route — the applicant never picks a category before the route is known.
   ['destination_country', 'travel_purpose',
@@ -526,6 +528,54 @@ export default function StartVisa({ client, onOpenCase }) {
           </div>
         )}
 
+        {/* Structured home address — mandatory, entered manually, country-aware
+            (many countries have no state/region or postal code, so only
+            line 1 / city / country are required; no U.S. format is assumed).
+            Renders in BOTH entry modes. */}
+        {step === 0 && (
+          <div style={{ marginTop: 16 }} data-testid="address-section">
+            <div className="eyebrow">{t('address.title')}</div>
+            <div style={{ fontSize: 12.5, color: 'var(--muted)', margin: '2px 0 10px' }}>
+              {t('address.sub')}
+            </div>
+            <div className="grid grid-2" style={{ gap: 12 }}>
+              <Field label={t('field.address_line1')} invalid={isMissing('address_line1')}>
+                <input className="input" value={answers.address_line1 || ''}
+                  style={isMissing('address_line1') ? INVALID_STYLE : undefined}
+                  onChange={(e) => setAnswer('address_line1', e.target.value)} />
+              </Field>
+              <Field label={t('field.address_line2')}>
+                <input className="input" value={answers.address_line2 || ''}
+                  onChange={(e) => setAnswer('address_line2', e.target.value)} />
+              </Field>
+              <Field label={t('field.address_city')} invalid={isMissing('address_city')}>
+                <input className="input" value={answers.address_city || ''}
+                  style={isMissing('address_city') ? INVALID_STYLE : undefined}
+                  onChange={(e) => setAnswer('address_city', e.target.value)} />
+              </Field>
+              <Field label={t('field.address_region')}>
+                <input className="input" value={answers.address_region || ''}
+                  onChange={(e) => setAnswer('address_region', e.target.value)} />
+              </Field>
+              <Field label={t('field.address_postal_code')}>
+                <input className="input" value={answers.address_postal_code || ''}
+                  onChange={(e) => setAnswer('address_postal_code', e.target.value)} />
+              </Field>
+              <Field label={t('field.address_country')} invalid={isMissing('address_country')}>
+                <SearchSelect t={t} value={answers.address_country} options={countryOpts}
+                  invalid={isMissing('address_country')}
+                  onChange={(v) => setAnswer('address_country', v)} />
+              </Field>
+            </div>
+            <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 10,
+                            fontSize: 13, cursor: 'pointer' }}>
+              <input type="checkbox" checked={answers.mailing_address_same !== false}
+                onChange={(e) => setAnswer('mailing_address_same', e.target.checked)} />
+              {t('field.mailing_address_same')}
+            </label>
+          </div>
+        )}
+
         {step === 1 && (
           <div className="grid grid-2" style={{ gap: 12 }}>
             <Field label={t('field.destination_country')} invalid={isMissing('destination_country')}>
@@ -745,12 +795,17 @@ function MultiSelect({ values, options, onChange, t }) {
 // Review step: every answer with its display value; missing ones jump back.
 function ReviewStep({ t, answers, info, missing, display, onJump }) {
   const rows = []
-  const push = (key, value) => rows.push({ key, value })
+  const push = (key, value, labelKey) => rows.push({ key, value, labelKey })
   push('passport_nationality', display.nationalityName(answers.passport_nationality))
   push('passport_issuing_country', display.countryName(answers.passport_issuing_country))
   push('travel_document_type', display.docName(answers.travel_document_type || 'ordinary_passport'))
   push('lawful_country_of_residence', display.countryName(answers.lawful_country_of_residence))
   if (answers.residence_status) push('residence_status', t('res.' + answers.residence_status))
+  // Structured home address — the jump key lands on the address section.
+  push('address_line1', formatAddress({ ...answers,
+    address_country: display.countryName(answers.address_country) }), 'address.title')
+  push('mailing_address_same',
+    answers.mailing_address_same === false ? t('opt.no') : t('opt.yes'))
   push('destination_country', display.countryName(answers.destination_country))
   // The category is determined automatically by Ellis, never picked upfront.
   push('visa_category', t('start.autoCategory'))
@@ -772,12 +827,12 @@ function ReviewStep({ t, answers, info, missing, display, onJump }) {
 
   return (
     <div>
-      {rows.map(({ key, value }) => {
+      {rows.map(({ key, value, labelKey }) => {
         const bad = missing.includes(key)
         return (
           <div className="kv" key={key} style={{ cursor: 'pointer' }} onClick={() => onJump(key)}>
             <div className="kv__k" style={bad ? { color: 'var(--ink)', fontWeight: 700 } : undefined}>
-              {t('field.' + key)}{bad ? ' •' : ''}
+              {t(labelKey || 'field.' + key)}{bad ? ' •' : ''}
             </div>
             <div className="kv__v">{value == null || value === '' ? '—' : String(value)}</div>
           </div>

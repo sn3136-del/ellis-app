@@ -575,23 +575,26 @@ MANUAL_DOC_TYPES = (
     "vaccination_certificate",
 )
 
-# Classifier provenance considered DETERMINISTIC (a different specific type
-# from one of these is a clear mismatch → Submit blocked). Semantic (kimi)
-# classifications are treated as low-confidence: mismatches surface but the
-# applicant may explicitly confirm the assignment.
+# Classifier provenance considered DETERMINISTIC (drives whether a differing
+# type reads as a confident 'mismatch' advisory or a soft 'uncertain' one).
 _STRONG_CLASSIFIERS = ("mrz", "keyword", "filename", "applicant")
 
 
 def match_document_to_item(item: dict, doc_type: str, *, classifier: str = "",
-                           rejected: bool = False) -> str:
+                           rejected: bool = False, page_type: str = "") -> str:
     """How well a classified upload satisfies one checklist requirement.
-      'match'      — the document can satisfy this requirement (Submit enabled)
+
+    Every verdict is ADVISORY — classification never blocks the applicant's
+    explicit submission (only security/structural validation at upload does):
+      'match'      — the detected type satisfies this requirement
       'uncertain'  — could not be confidently identified / semantic-only guess
-                     (Submit requires the applicant's explicit confirmation)
-      'mismatch'   — confidently a DIFFERENT document type (Submit blocked)
-      'unreadable' — the upload was rejected as unreadable/unusable
+                     (Submit needs the applicant's explicit confirmation)
+      'mismatch'   — confidently a DIFFERENT document type ("Submit anyway"
+                     needs the applicant's explicit confirmation)
+      'unreadable' — no readable text / rejected page (still submittable with
+                     explicit confirmation while a secure preview exists)
     """
-    if rejected:
+    if rejected or str(page_type or "") in ("unreadable", "blank_page", "blurry"):
         return "unreadable"
     dt = str(doc_type or "")
     sat = set((item or {}).get("satisfied_by") or [])
@@ -646,15 +649,18 @@ def apply_checklist_status(checklist: list[dict], documents: list[dict],
                 verdict = match_document_to_item(
                     it, doc.get("doc_type"),
                     classifier=str(doc.get("classifier") or ""),
-                    rejected=bool(doc.get("rejected")))
+                    rejected=bool(doc.get("rejected")),
+                    page_type=str(doc.get("page_type") or ""))
                 confirmed = bool(sub.get("confirmed_by_applicant"))
-                if str(doc.get("ocr_status") or "done") not in ("done", ""):
+                # A SUBMITTED requirement stays fulfilled — the applicant's
+                # explicit confirmation outranks any advisory verdict.
+                if sub.get("status") == "submitted":
+                    it["status"] = "submitted"
+                elif str(doc.get("ocr_status") or "done") not in ("done", ""):
                     it["status"] = "processing"
                 elif verdict == "unreadable":
                     it["status"] = "unreadable"
-                elif sub.get("status") == "submitted":
-                    it["status"] = "submitted"
-                elif verdict == "match" or (verdict == "uncertain" and confirmed):
+                elif verdict == "match" or confirmed:
                     it["status"] = "ready_to_submit"
                 elif verdict == "mismatch":
                     it["status"] = "mismatch"
@@ -670,6 +676,9 @@ def apply_checklist_status(checklist: list[dict], documents: list[dict],
                     "submitted_at": sub.get("submitted_at"),
                     "mime": doc.get("mime"),
                     "size_bytes": doc.get("size_bytes"),
+                    "language": doc.get("language") or {},
+                    "has_text": bool(doc.get("has_text")),
+                    "translation_document_id": doc.get("translation_document_id") or None,
                 }
         if it["kind"] == "document" and it.get("required") and not it.get("waived"):
             required_docs += 1

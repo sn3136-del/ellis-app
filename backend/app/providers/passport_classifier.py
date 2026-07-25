@@ -103,6 +103,15 @@ def _detect_mrz_kind(text: str) -> str | None:
     return None
 
 
+def detect_mrz_kind(text: str) -> str | None:
+    """Public MRZ-kind probe: TD3_PASSPORT | MRV_VISA | TD1_TD2 | None. Used by
+    document intake to decide whether an upload is passport-adjacent AT ALL —
+    the full biodata accept/reject flow must only ever run for passport
+    requirements, never for bank statements or bookings that merely mention
+    the word 'visa'."""
+    return _detect_mrz_kind(text or "")
+
+
 def _has(text: str, words) -> bool:
     t = text.lower()
     return any(w in t for w in words)

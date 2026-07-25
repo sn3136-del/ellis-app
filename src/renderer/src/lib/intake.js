@@ -634,3 +634,53 @@ export const RESIDENCE_STATUS_OPTIONS = [
   'citizen', 'permanent_resident', 'temporary_resident', 'student', 'worker',
   'refugee_status_holder', 'asylum_seeker', 'stateless_resident', 'visitor', 'other'
 ]
+
+// ---------------------------------------------------------------------------
+// Document-preview rotation geometry (pure — unit-tested). The preview rotates
+// the document around its CENTER inside a wrapper sized to the ROTATED
+// bounding box, so the full document always stays inside the layout: at 90°
+// and 270° width/height swap, the container resizes, nothing is clipped and
+// controls never overlap the document. Zoom multiplies the fitted size.
+export function rotatedFrame({ w, h, rotation = 0, zoom = 1, maxW = 0 }) {
+  const q = ((Math.round(rotation / 90) * 90) % 360 + 360) % 360
+  const swap = q === 90 || q === 270
+  const rw = swap ? h : w
+  const rh = swap ? w : h
+  if (!(rw > 0) || !(rh > 0)) return { boxW: 0, boxH: 0, imgW: 0, imgH: 0, quarter: q, swap }
+  const fit = maxW > 0 ? Math.min(1, maxW / rw) : 1
+  return {
+    quarter: q,
+    swap,
+    boxW: rw * fit * zoom,   // wrapper = exact rotated bounding box
+    boxH: rh * fit * zoom,
+    imgW: w * fit * zoom,    // the element itself keeps its own aspect
+    imgH: h * fit * zoom
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Structured home address (mandatory at intake; country-aware). Only line 1,
+// city and country are universal — many countries have no state/region or
+// postal code, so those stay optional and no U.S. format is ever assumed.
+export const ADDRESS_REQUIRED_KEYS = ['address_line1', 'address_city', 'address_country']
+export const ADDRESS_KEYS = [
+  'address_line1', 'address_line2', 'address_city', 'address_region',
+  'address_postal_code', 'address_country'
+]
+
+export function missingAddress(answers = {}) {
+  return ADDRESS_REQUIRED_KEYS.filter((k) => {
+    const v = answers ? answers[k] : undefined
+    return v === undefined || v === null || String(v).trim() === ''
+  })
+}
+
+// Render-ready one-line address for review screens (never stored — the
+// structured fields remain the source of truth).
+export function formatAddress(answers = {}) {
+  const parts = [
+    answers.address_line1, answers.address_line2, answers.address_city,
+    answers.address_region, answers.address_postal_code, answers.address_country
+  ]
+  return parts.filter((p) => p != null && String(p).trim() !== '').join(', ')
+}

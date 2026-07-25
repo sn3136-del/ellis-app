@@ -154,21 +154,37 @@ def test_endpoint_accepts_valid_passport(client):
     assert b["extracted_fields"].get("passport_number")
 
 
-def test_endpoint_rejects_visa_page_and_stores_no_identity(client, db):
+def test_endpoint_visa_page_is_advisory_outside_passport_context(client, db):
+    """Classifier-leak fix: an MRV visa page uploaded WITHOUT passport context
+    is honestly typed (prior visa), never rejected with passport warnings —
+    and still NEVER seeds passport identity."""
     cid = _case(client)
     r = client.post(f"/cases/{cid}/documents", headers=AUTH,
                     json={"name": "visa.jpg", "mime": "image/jpeg", "text": VISA_MRV})
     b = r.json()
-    assert b["rejected"] is True
-    assert b["doc_type"] == "visa_page"
-    assert b["message"] == pc.VISA_STAMP_MESSAGE
+    assert b["rejected"] is False
+    assert b["message"] == ""
+    assert b["doc_type"] == "prior_visa"
     # A visa sticker must NEVER seed passport identity.
     assert b["extracted_fields"] == {}
     doc = db.execute(select(models.StoredDocument).where(
         models.StoredDocument.application_id == cid)).scalar_one()
-    assert doc.doc_type == "visa_page"
+    assert doc.doc_type == "prior_visa"
     assert doc.page_classification["page_type"] == "visa_page"
     assert doc.extracted_fields == {}
+
+
+def test_endpoint_visa_page_still_rejected_in_passport_context(client):
+    """Passport validation still applies when the applicant is PROVIDING a
+    passport (filename/requirement context) — a visa sticker is refused with
+    the exact biodata guidance."""
+    cid = _case(client)
+    b = client.post(f"/cases/{cid}/documents", headers=AUTH,
+                    json={"name": "my-passport.jpg", "mime": "image/jpeg",
+                          "text": VISA_MRV}).json()
+    assert b["rejected"] is True and b["doc_type"] == "visa_page"
+    assert b["message"] == pc.VISA_STAMP_MESSAGE
+    assert b["extracted_fields"] == {}
 
 
 def test_endpoint_visa_with_P_name_stores_no_identity(client, db):
@@ -177,14 +193,16 @@ def test_endpoint_visa_with_P_name_stores_no_identity(client, db):
              "L898902C36UTO7408122F1204159ZE184226B<<<<<10")
     b = client.post(f"/cases/{cid}/documents", headers=AUTH,
                     json={"name": "visa.jpg", "mime": "image/jpeg", "text": mrv_p}).json()
-    assert b["rejected"] is True and b["doc_type"] == "visa_page"
+    assert b["rejected"] is False and b["doc_type"] == "prior_visa"
     assert b["extracted_fields"] == {}
 
 
 def test_endpoint_unverified_passport_stores_no_identity(client, db):
-    # An unverifiable-MRZ page (checksum broken) must also seed NO identity.
+    # An unverifiable-MRZ page (checksum broken) must also seed NO identity —
+    # and in passport context it is still rejected with retry guidance.
     b = client.post(f"/cases/{_case(client)}/documents", headers=AUTH,
-                    json={"name": "blurry.jpg", "mime": "image/jpeg", "text": INVALID_TD3}).json()
+                    json={"name": "passport-blurry.jpg", "mime": "image/jpeg",
+                          "text": INVALID_TD3}).json()
     assert b["rejected"] is True
     assert b["page_type"] == "passport_biodata_unverified"
     assert b["extracted_fields"] == {}

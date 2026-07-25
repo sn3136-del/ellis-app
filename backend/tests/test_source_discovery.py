@@ -39,6 +39,9 @@ GOV_ROOT = _gov_url("BR", "/")
 BLOG_URL = "https://travelblog.example/somewhere"
 
 ROUTE_ANSWERS = {
+    "address_line1": "12 Harbor Lane", "address_city": "Springfield",
+    "address_region": "IL", "address_postal_code": "62704",
+    "address_country": "USA",
     "passport_nationality": "SGP", "passport_issuing_country": "SG",
     "travel_document_type": "ordinary_passport", "lawful_country_of_residence": "SG",
     "destination_country": "KH", "visa_category": "evisa_tourist",

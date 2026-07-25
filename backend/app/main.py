@@ -907,42 +907,93 @@ def add_document(application_id: str, body: AddDocument, db=Depends(get_session)
         or "passport" in item_types)
     ec = execution.classify_ocr(ocr_meta)
 
-    # Phase 4 — passport biodata-page classification. Accept ONLY a validated
-    # biodata page as the passport identity source; reject visa/stamp/cover/ID
-    # pages with the required guidance. A visa sticker is never an identity source,
-    # so a rejected passport-adjacent page carries NO extracted identity fields.
+    # Passport biodata classification is SCOPED (the classifier-leak fix): the
+    # full accept/reject flow runs ONLY when the applicant is providing a
+    # passport (the passport checklist row, or a filename that says so), or
+    # when the page carries an actual ICAO machine-readable zone. A bank
+    # statement that mentions "Visa card", a hotel booking, an itinerary or a
+    # photograph must NEVER receive passport-page validation or its warnings.
     mrz = ocr_provider.parse_mrz(result.recognized_text) if result.recognized_text else None
-    classification = passport_classifier.classify_page(
-        text=result.recognized_text, mrz=mrz, has_image=bool(content),
-        vision_hint=result.doc_type)
+    passport_context = bool(re.search(r"passport", body.name or "", re.I)) \
+        or "passport" in item_types
+    mrz_kind = passport_classifier.detect_mrz_kind(result.recognized_text or "")
     doc_type = result.doc_type
-    # Classification provenance drives the mismatch confidence downstream:
-    # deterministic classifiers (mrz/keyword/filename/applicant) can BLOCK a
-    # wrong submission; semantic (kimi) results only warn.
-    classifier_kind = "mrz" if (classification["accepted_as_passport_identity"]
-                                or result.doc_type == "passport") else "none"
-    # A passport PHOTOGRAPH legitimately has no readable text — when the file
-    # name says it's a photo (or the upload targets the photo requirement),
-    # accept it as the checklist's photo document instead of rejecting it as an
-    # unreadable biodata page. It is never an identity source.
-    if classification["reject"] and content and \
-            classification["page_type"] in ("unreadable", "blank_page", "blurry") and \
-            (re.search(r"photo|portrait|headshot", body.name or "", re.I)
-             or "photo" in item_types):
+    # Classification provenance drives advisory confidence downstream
+    # (mrz/keyword/filename/applicant = deterministic; kimi = semantic hint).
+    classifier_kind = "none"
+    is_photo_upload = bool(content) and not (result.recognized_text or "").strip() \
+        and (re.search(r"photo|portrait|headshot", body.name or "", re.I)
+             or "photo" in item_types)
+
+    if passport_context:
+        # Full biodata accept/reject UX — the applicant is providing a passport.
+        classification = passport_classifier.classify_page(
+            text=result.recognized_text, mrz=mrz, has_image=bool(content),
+            vision_hint=result.doc_type)
+        if classification["accepted_as_passport_identity"] or result.doc_type == "passport":
+            classifier_kind = "mrz"
+        if classification["reject"]:
+            doc_type = classification["page_type"]
+    elif mrz_kind is not None or result.doc_type == "passport":
+        # Passport-adjacent material aimed at a NON-passport requirement:
+        # classify honestly for the advisory ("Ellis detected this as …") but
+        # never reject and never attach passport-page warnings.
+        classification = passport_classifier.classify_page(
+            text=result.recognized_text, mrz=mrz, has_image=bool(content),
+            vision_hint=result.doc_type)
+        classifier_kind = "mrz"
+        page = classification["page_type"]
+        doc_type = ("passport" if classification["accepted_as_passport_identity"]
+                    else "prior_visa" if page == "visa_page"
+                    else "residence_permit" if page == "residence_permit"
+                    else "document")
+        classification = {**classification, "reject": False, "message": ""}
+    else:
+        # A plain supporting document: no passport validation of any kind.
+        if is_photo_upload:
+            classification = {"page_type": "photo",
+                              "accepted_as_passport_identity": False,
+                              "reject": False, "message": "",
+                              "reasons": ["image with no text targeted at the "
+                                          "photo requirement / photo filename"]}
+            doc_type = "photo"
+            classifier_kind = "filename" if re.search(
+                r"photo|portrait|headshot", body.name or "", re.I) else "applicant"
+        elif not (result.recognized_text or "").strip():
+            classification = {"page_type": "unreadable" if content else "supporting_document",
+                              "accepted_as_passport_identity": False,
+                              "reject": False, "message": "",
+                              "reasons": ["no readable text extracted"]}
+        else:
+            classification = {"page_type": "supporting_document",
+                              "accepted_as_passport_identity": False,
+                              "reject": False, "message": "",
+                              "reasons": ["supporting document; passport "
+                                          "validation not applicable"]}
+
+    # The photo carve-out also applies in passport context when the applicant
+    # clearly uploaded a photograph (filename) that OCR'd to nothing.
+    if passport_context and classification.get("reject") and is_photo_upload:
         classification = {**classification, "reject": False, "message": "",
                           "page_type": "photo",
                           "accepted_as_passport_identity": False}
         doc_type = "photo"
-        classifier_kind = "filename" if re.search(
-            r"photo|portrait|headshot", body.name or "", re.I) else "applicant"
+        classifier_kind = "filename"
+
     fields_map = {f.key: {"value": f.value, "confidence": f.confidence, "page": f.page}
                   for f in result.fields}
-    # Supporting documents (not passport pages, not rejected pages) get a
-    # route-checklist classification: deterministic keywords first, then an
-    # optional digit-masked Kimi call ONLY when the result stayed generic.
+    # A visa sticker / stamp / ID page must NEVER seed passport identity —
+    # advisory acceptance does not change that invariant: outside a validated
+    # biodata page, passport-adjacent material carries no identity fields.
+    if (mrz_kind is not None or result.doc_type == "passport") and \
+            not classification["accepted_as_passport_identity"]:
+        fields_map = {}
+    # Supporting documents get a route-checklist classification: deterministic
+    # keywords first, then an optional digit-masked Kimi call ONLY when the
+    # result stayed generic.
     if not classification["reject"] and \
             not classification["accepted_as_passport_identity"] and \
-            result.doc_type != "passport" and doc_type != "photo":
+            doc_type not in ("passport", "photo", "prior_visa", "residence_permit"):
         from .providers import doc_classifier
         refined = doc_classifier.classify_supporting_document(
             result.recognized_text, body.name)
@@ -956,12 +1007,16 @@ def add_document(application_id: str, body: AddDocument, db=Depends(get_session)
         if refined != "document":
             doc_type = refined
     if classification["reject"]:
-        doc_type = classification["page_type"]
         # Never let a REJECTED page seed passport identity — this includes visa/
         # stamp/cover/national-ID pages AND an unverifiable-MRZ page. The applicant
         # re-uploads a clear biodata page; identity is only ever seeded from an
         # accepted, checksum-validated biodata page.
         fields_map = {}
+
+    # Local, deterministic language detection on the extracted text — nothing
+    # leaves the backend for this label.
+    from . import translation as translation_mod
+    detected_language = translation_mod.detect_language(result.recognized_text or "")
 
     doc = models.StoredDocument(org_id=p.org_id, application_id=application_id, name=body.name,
                                 mime=body.mime, size_bytes=body.size_bytes, sha256=sha,
@@ -974,7 +1029,9 @@ def add_document(application_id: str, body: AddDocument, db=Depends(get_session)
                                     "reject": classification["reject"],
                                     "reasons": classification["reasons"],
                                     "classifier": classifier_kind},
-                                extracted_fields=fields_map)
+                                extracted_fields=fields_map,
+                                ocr_text=result.recognized_text or "",
+                                language=detected_language)
     db.add(doc)
     db.commit()
     # Phase 13: keep the bytes for the in-app preview (served only via the
@@ -1000,6 +1057,7 @@ def add_document(application_id: str, body: AddDocument, db=Depends(get_session)
            "accepted_as_passport_identity": classification["accepted_as_passport_identity"],
            "rejected": classification["reject"],
            "message": classification["message"],
+           "language": detected_language,
            "extracted_fields": doc.extracted_fields, "quality_warnings": result.quality_warnings}
     if body.checklist_item_id:
         out["binding"] = _bind(doc)
@@ -1055,10 +1113,16 @@ def case_checklist(application_id: str, db=Depends(get_session),
     # Per-item status now reflects the applicant's EXPLICIT submissions (an
     # upload alone never fulfils a requirement) + the durable intake stage.
     status = checklist_intake.checklist_state(db, app_row, cg)
+    from . import translation as translation_mod
+    target = translation_mod.target_for_destination(app_row.destination_country)
     return {"guidance": cg.guidance, "disposition": cg.disposition,
             "continuation_kind": cg.continuation_kind, "intake_id": cg.intake_id,
             "checklist": status["items"], "checklist_counts": status["counts"],
             "intake_stage": status["intake_stage"],
+            "translation": {
+                "target": target,
+                "target_name": translation_mod.language_name(target),
+                "certified_note": translation_mod.certified_translation_flag(g_inner)},
             "verification": (cg.guidance or {}).get("verification") or None,
             "route_workflow_type": g_inner.get("route_workflow_type"),
             "health_questions": intake_flow.pending_health_questions(
@@ -1107,6 +1171,61 @@ def withdraw_checklist_document(application_id: str, item_id: str,
     state = checklist_intake.checklist_state(db, app_row)
     out.update({"checklist": state["items"], "checklist_counts": state["counts"],
                 "intake_stage": state["intake_stage"]})
+    return out
+
+
+class ChecklistBind(BaseModel):
+    document_id: str
+
+
+@app.post("/cases/{application_id}/checklist/{item_id}/bind")
+def bind_checklist_document(application_id: str, item_id: str, body: ChecklistBind,
+                            db=Depends(get_session), p: Principal = Depends(get_principal)):
+    """Attach an EXISTING case document to a requirement (reusing an uploaded
+    file for another requirement, or attaching a translation artifact) —
+    binding only; the applicant's Submit still fulfils it."""
+    from . import checklist_intake
+    app_row = _owned(db, p, application_id)
+    try:
+        binding = checklist_intake.bind_document(
+            db, p, app_row, item_id, body.document_id,
+            provenance={"source": "applicant_attach"})
+    except checklist_intake.ChecklistError as e:
+        raise HTTPException(e.status_code, e.detail)
+    state = checklist_intake.checklist_state(db, app_row)
+    return {"binding": binding, "checklist": state["items"],
+            "checklist_counts": state["counts"],
+            "intake_stage": state["intake_stage"]}
+
+
+class DocTranslateBody(BaseModel):
+    # Explicit target override; defaults to the destination route's language.
+    target: Optional[str] = None
+
+
+@app.post("/cases/{application_id}/documents/{doc_id}/translate")
+def translate_case_document(application_id: str, doc_id: str,
+                            body: DocTranslateBody = DocTranslateBody(),
+                            db=Depends(get_session), p: Principal = Depends(get_principal)):
+    """Applicant-requested Kimi K3 machine translation of one document's
+    OCR-extracted TEXT (raw image/PDF bytes never leave the backend). The
+    result is a linked, clearly-labelled artifact — never presented as a
+    certified translation; idempotent per (document, target)."""
+    from . import checklist_intake, translation as translation_mod
+    app_row = _owned(db, p, application_id)
+    doc = db.get(models.StoredDocument, doc_id)
+    if not doc or doc.application_id != application_id:
+        raise HTTPException(404, "document not found")
+    target = (body.target or "").strip() or \
+        translation_mod.target_for_destination(app_row.destination_country)
+    try:
+        out = translation_mod.translate_document(db, p, app_row, doc, target)
+    except translation_mod.TranslationError as e:
+        raise HTTPException(e.status_code, e.detail)
+    cg = checklist_intake.case_guidance(db, application_id)
+    g_inner = ((cg.guidance if cg else {}) or {}).get("guidance") or {}
+    out["certified_translation_note"] = translation_mod.certified_translation_flag(g_inner)
+    out["target_language_name"] = translation_mod.language_name(target)
     return out
 
 

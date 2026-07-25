@@ -219,6 +219,94 @@ test('continue button label follows the route kind; unknown journey hides it', (
   }
 })
 
+// ---------------------------------------------------------------------------
+// Preview rotation geometry: rotate around the center inside a wrapper sized
+// to the ROTATED bounding box — width/height swap at 90°/270°, the container
+// resizes, and the full document always stays inside the layout at any zoom.
+import { rotatedFrame } from '../../src/renderer/src/lib/intake.js'
+
+test('rotation swaps the bounding box at 90/270 and preserves it at 0/180', () => {
+  const portrait = { w: 600, h: 800 }
+  for (const [rot, expW, expH] of [[0, 600, 800], [90, 800, 600],
+                                   [180, 600, 800], [270, 800, 600]]) {
+    const f = rotatedFrame({ ...portrait, rotation: rot, zoom: 1 })
+    assert.equal(f.boxW, expW, `rot ${rot} boxW`)
+    assert.equal(f.boxH, expH, `rot ${rot} boxH`)
+    // The element keeps its own aspect — only the wrapper swaps.
+    assert.equal(f.imgW, 600)
+    assert.equal(f.imgH, 800)
+  }
+  assert.equal(rotatedFrame({ ...portrait, rotation: 360 }).quarter, 0)
+  assert.equal(rotatedFrame({ ...portrait, rotation: -90 }).quarter, 270)
+})
+
+test('rotated documents fit the container width at every orientation and zoom', () => {
+  // Extremely tall document rotated sideways must fit a 700px-wide area.
+  const tall = { w: 500, h: 3000, maxW: 700 }
+  for (const rot of [0, 90, 180, 270]) {
+    for (const zoom of [0.5, 1]) {
+      const f = rotatedFrame({ ...tall, rotation: rot, zoom })
+      assert.ok(f.boxW <= 700 * zoom + 1e-9, `rot ${rot} zoom ${zoom} fits width`)
+      // The wrapper is EXACTLY the rotated bounding box — nothing can clip.
+      const swap = rot === 90 || rot === 270
+      assert.ok(Math.abs(f.boxW - (swap ? f.imgH : f.imgW)) < 1e-9)
+      assert.ok(Math.abs(f.boxH - (swap ? f.imgW : f.imgH)) < 1e-9)
+    }
+  }
+  // Landscape at 90° becomes portrait and still fits.
+  const land = rotatedFrame({ w: 2000, h: 900, rotation: 90, zoom: 1, maxW: 700 })
+  assert.ok(land.boxW <= 700 && land.boxH > land.boxW)
+  // Zoom scales linearly after rotation.
+  const z2 = rotatedFrame({ w: 600, h: 800, rotation: 90, zoom: 2, maxW: 700 })
+  const z1 = rotatedFrame({ w: 600, h: 800, rotation: 90, zoom: 1, maxW: 700 })
+  assert.ok(Math.abs(z2.boxW - z1.boxW * 2) < 1e-9)
+  // Degenerate input never crashes.
+  assert.equal(rotatedFrame({ w: 0, h: 0, rotation: 90 }).boxW, 0)
+})
+
+// ---------------------------------------------------------------------------
+// Structured home address (mandatory at intake; country-aware — no state or
+// postal code required anywhere).
+import { missingAddress, formatAddress, ADDRESS_REQUIRED_KEYS } from '../../src/renderer/src/lib/intake.js'
+
+test('address requires only line1/city/country — never state or postal code', () => {
+  assert.deepEqual(ADDRESS_REQUIRED_KEYS,
+    ['address_line1', 'address_city', 'address_country'])
+  assert.deepEqual(missingAddress({}),
+    ['address_line1', 'address_city', 'address_country'])
+  // A valid address with NO region and NO postal code (many countries).
+  const intl = { address_line1: 'Plot 5, Airport Road', address_city: 'Kigali',
+                 address_country: 'RWA' }
+  assert.deepEqual(missingAddress(intl), [])
+  assert.equal(formatAddress(intl), 'Plot 5, Airport Road, Kigali, RWA')
+  assert.deepEqual(missingAddress({ address_line1: '  ', address_city: 'X',
+                                    address_country: 'USA' }), ['address_line1'])
+  // Address i18n exists in every locale.
+  for (const lang of SUPPORTED) {
+    for (const k of ['address.title', 'field.address_line1', 'field.address_city',
+                     'field.address_country', 'field.mailing_address_same']) {
+      assert.ok(STRINGS[lang][k], `${lang} ${k}`)
+    }
+  }
+})
+
+// Advisory-trust + translation strings exist everywhere; the advisory wording
+// names both sides and never claims verification.
+test('advisory and translation strings are honest and fully localized', () => {
+  for (const lang of SUPPORTED) {
+    for (const k of ['checklist.advisoryNote', 'checklist.submitAnyway',
+                     'checklist.detectedLanguage', 'checklist.translateTo',
+                     'checklist.translateConsent', 'checklist.machineTranslation',
+                     'checklist.certifiedNote', 'checklist.applicantConfirmed']) {
+      assert.ok(STRINGS[lang][k], `${lang} ${k}`)
+    }
+  }
+  assert.ok(STRINGS.en['checklist.advisoryNote'].includes('{detected}'))
+  assert.ok(STRINGS.en['checklist.advisoryNote'].includes('{selected}'))
+  assert.ok(!/verified|guarantee/i.test(STRINGS.en['checklist.machineTranslation']))
+  assert.ok(/certified human translation/i.test(STRINGS.en['checklist.certifiedNote']))
+})
+
 test('doc-type labels are applicant-friendly and localized; whitelist excludes passport', () => {
   assert.equal(docTypeLabelKey('flight_itinerary'), 'doctype.flight_itinerary')
   assert.equal(docTypeLabelKey('weird_internal_thing'), 'doctype.document') // never internal ids

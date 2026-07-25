@@ -161,6 +161,13 @@ class StoredDocument(Base, TimestampMixin):
     passport_profile: Mapped[dict] = mapped_column(JSON, default=dict)
     approved: Mapped[bool] = mapped_column(Boolean, default=False)
     quality_warnings: Mapped[list] = mapped_column(JSON, default=list)
+    # OCR-extracted text kept ONLY for applicant-requested translation (never
+    # serialized in list endpoints, never logged; erased with the case).
+    ocr_text: Mapped[str] = mapped_column(Text, default="")
+    # Detected primary language of the extracted text: {code, name, confidence}.
+    language: Mapped[dict] = mapped_column(JSON, default=dict)
+    # Set on machine-translation artifacts: the source document id.
+    translation_of: Mapped[str] = mapped_column(String(32), default="")
     application: Mapped[VisaApplication] = relationship(back_populates="documents")
 
 

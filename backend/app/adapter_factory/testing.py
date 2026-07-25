@@ -127,7 +127,10 @@ DEFAULT_SYNTHETIC_SCENARIOS = [
 
 _ANSWERS = {"full_name": "Test Applicant", "passport_number": "X0000000",
             "arrival_date": "2026-10-10", "departure_date": "2026-10-20",
-            "email": "t@example.com"}
+            "email": "t@example.com",
+            "address_line1": "1 Test Street", "address_city": "Testville",
+            "address_region": "TS", "address_postal_code": "00000",
+            "address_country": "USA"}
 
 
 def run_synthetic_layer(db, version_row, *, scenarios=None,
