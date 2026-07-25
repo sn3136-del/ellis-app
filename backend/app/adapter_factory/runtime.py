@@ -87,6 +87,9 @@ class FlowRunner:
         self.documents = documents or []
         self.fee_seen = None
         self.slots_seen = []
+        # node_id -> the portal's own option labels, when a mapped answer was
+        # not on the portal's fixed list (drives the applicant question).
+        self.observed_options: dict[str, list] = {}
 
     # -- entry ---------------------------------------------------------------
     def run(self, *, resume_from: str | None = None, max_nodes: int = 200,
@@ -230,6 +233,15 @@ class FlowRunner:
                     display = _country_display_name(str(value))
                     if display and display.lower() != str(value).lower():
                         res = sel(node["selector"], display)
+                    if not res.get("ok") and res.get("code") == "NO_OPTIONS":
+                        # The portal offers a fixed list this answer isn't on.
+                        # Ellis never picks a near-miss — it asks the applicant
+                        # to choose from the portal's OWN options.
+                        opts = res.get("options") or []
+                        if opts:
+                            self.observed_options[node["node_id"]] = opts
+                            return {"status": "handoff",
+                                    "handoff_kind": "additional_information"}
             else:
                 res = self.driver.fill(node["selector"], str(value))
             if not res.get("ok") and res.get("code") == "SENSITIVE_FIELD_AUTOMATION":
@@ -299,6 +311,7 @@ class FlowRunner:
         """Applicant-friendly question for a node whose answer is missing.
         Never exposes selectors or developer terminology (§Part 4)."""
         q = dict(node.get("question") or {})
+        observed = self.observed_options.get(node.get("node_id", ""))
         key = node.get("input_source", "") or q.get("key", "")
         label = q.get("question") or (node.get("label") or key.replace("_", " ")).strip()
         if node.get("action") == "UPLOAD_AUTHORIZED_DOCUMENT":
@@ -315,7 +328,8 @@ class FlowRunner:
                 "mandatory": bool(node.get("mandatory", True)),
                 "kind": q.get("kind") or ("date" if node.get("format") else
                                           "select" if node.get("action") == "SELECT_SEARCH" else "text"),
-                **({"options": q["options"]} if q.get("options") else {})}
+                **({"options": observed or q.get("options")}
+                   if (observed or q.get("options")) else {})}
 
     def _collect_missing_questions(self, from_node_id: str) -> list:
         """All still-unanswered mandatory questions from this node onward, so
@@ -329,7 +343,8 @@ class FlowRunner:
             act = node.get("action")
             if act in ("FILL_NON_SENSITIVE", "SELECT_SEARCH"):
                 v = self.answers.get(node.get("input_source", ""), "")
-                if v in ("", None) and bool(node.get("mandatory", True)):
+                rejected = node.get("node_id", "") in self.observed_options
+                if (rejected or v in ("", None)) and bool(node.get("mandatory", True)):
                     out.append(self._question_for(node))
             elif act == "UPLOAD_AUTHORIZED_DOCUMENT":
                 if self._document_for(node.get("doc_type", "passport")) is None:

@@ -155,44 +155,44 @@ class BrowserbasePageDriver:
             except Exception:  # noqa: BLE001
                 pass
             self.page.keyboard.type(want, delay=25)
-            # Overlay options are often not painted yet, so inner_text() is
-            # empty — read textContent, which is present as soon as the node is.
-            def _label(handle):
-                try:
-                    return (handle.evaluate("el => el.textContent") or "").strip()
-                except Exception:  # noqa: BLE001
-                    return ""
-
-            options = []
+            # The option ROWS ([role=option]) are empty framework placeholders;
+            # the labels live in the item/content children. Match and click in
+            # one page evaluation so no element handle can go stale mid-scroll.
+            # EXACT match wins over substring: "China" must never select
+            # "China(Taiwan)" — a near-miss is a wrong answer, not a shortcut.
+            pick_js = """(want) => {
+              const seen = new Set(), opts = [];
+              for (const el of document.querySelectorAll(
+                     '[class*="select-item"], [class*="option-content"]')) {
+                if (el.offsetParent === null) continue;
+                const t = (el.textContent || '').trim();
+                if (!t || seen.has(t)) continue;
+                seen.add(t);
+                opts.push([el, t]);
+              }
+              if (!opts.length) return {labels: []};
+              const w = want.toLowerCase();
+              let hit = opts.find(([, t]) => t.toLowerCase() === w)
+                     || opts.find(([, t]) => t.toLowerCase().includes(w));
+              if (!hit) return {labels: opts.map(([, t]) => t).slice(0, 8)};
+              (hit[0].closest('[class*="select-item"]') || hit[0]).click();
+              return {chosen: hit[1]};
+            }"""
+            result = {}
             for _ in range(16):     # up to ~8s for async option lists
                 self.page.wait_for_timeout(500)
-                options = [(o, _label(o))
-                           for o in self.page.query_selector_all('[role="option"]')]
-                options = [(o, t) for o, t in options if t]
-                if options:
+                result = self.page.evaluate(pick_js, want) or {}
+                if result.get("chosen") or result.get("labels"):
                     break
-            if not options:
+            chosen_text = result.get("chosen")
+            if not chosen_text:
                 self.page.keyboard.press("Escape")
-                return {"ok": False, "code": "NO_OPTIONS",
-                        "detail": f"no option matches {want[:40]!r}"}
-            target = chosen_text = None
-            for opt, text in options:
-                if text.lower() == want.lower():
-                    target, chosen_text = opt, text
-                    break
-            if target is None:
-                for opt, text in options:
-                    if want.lower() in text.lower():
-                        target, chosen_text = opt, text
-                        break
-            if target is None:
-                self.page.keyboard.press("Escape")
-                return {"ok": False, "code": "NO_OPTIONS",
-                        "detail": f"{len(options)} options, none match {want[:40]!r}"}
-            # Option rows live in a floating overlay that Playwright's
-            # actionability checks can consider unstable; dispatch the click
-            # directly on the resolved element (same user-visible effect).
-            target.evaluate("el => el.click()")
+                labels = result.get("labels") or []
+                # Carry the portal's REAL choices back so the runtime can ask
+                # the applicant to pick one instead of failing on a near-miss.
+                return {"ok": False, "code": "NO_OPTIONS", "options": labels,
+                        "detail": (f"{len(labels)} options, none match {want[:30]!r}"
+                                   if labels else f"no option matches {want[:40]!r}")}
             self.page.wait_for_timeout(400)
             shown = ""
             try:

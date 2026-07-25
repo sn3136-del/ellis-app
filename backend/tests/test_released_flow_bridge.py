@@ -161,7 +161,10 @@ class FakePage:
     def input_value(self, selector, **_k):
         return self.filled.get(selector, "")
 
-    def evaluate(self, *_a, **_k):
+    def evaluate(self, js, arg=None):
+        # the combobox picker: echo the requested value as the chosen option
+        if "select-item" in str(js):
+            return {"chosen": arg} if arg else {"labels": []}
         return None
 
     def on(self, *_a, **_k):
