@@ -314,6 +314,28 @@ def ensure_full_pair_coverage(db, *, batch_size: int = 4000) -> dict:
             chunk = []
 
     nat_entries = {n["code"]: n for n in load_registry("nationalities")["entries"]}
+    territories = {c["alpha_3"] for c in load_registry("countries")["entries"]
+                   if c.get("is_territory")}
+
+    def _gap_reason(nat: str, dest: str) -> str:
+        """Say precisely WHY a pair is unresolved — never a generic shrug."""
+        kind = nat_entries[nat].get("kind")
+        parts = []
+        if kind == "special":
+            parts.append(f"nationality {nat} is a special travel-document class "
+                         f"(stateless/refugee/British class); entry policy is "
+                         f"document-specific and needs official research")
+        elif kind == "territory_document_class":
+            parts.append(f"nationality {nat} is a territory document class whose "
+                         f"treatment differs from its parent state")
+        if dest in territories:
+            parts.append(f"destination {dest} is a dependent territory whose entry "
+                         f"regime is set separately from its parent state")
+        if not parts:
+            parts.append("no reference or official data covers this pair")
+        return ("; ".join(parts) + " — official-source research required "
+                "before any outcome is claimed")
+
     for nat in nats:
         own = nat if nat_entries[nat].get("kind") in ("state_nationality", "territory_document_class") else None
         for dest in dests:
@@ -333,9 +355,8 @@ def ensure_full_pair_coverage(db, *, batch_size: int = 4000) -> dict:
                 official_source_urls=[], retrieved_at="", dataset_date="",
                 release_status="legally_unavailable" if is_self else "unresolved",
                 release_reason=("destination is the holder's own state — no tourist "
-                                "visa route exists" if is_self else
-                                "no reference or official data for this pair yet — "
-                                "official research required"),
+                                "visa route exists" if is_self
+                                else _gap_reason(nat, dest)[:400]),
                 notes="", ))
             have.add(key)
             if len(chunk) >= batch_size:

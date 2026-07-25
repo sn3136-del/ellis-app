@@ -248,6 +248,44 @@ def test_classify_error_permanent_marker_wins():
 
 # ---- csv integrity ---------------------------------------------------------
 
+def test_unresolved_pairs_state_why(gdb):
+    """An unresolved pair must say precisely why — territory destination,
+    special document class, or no data — never a generic shrug."""
+    rows = gdb.execute(select(RoutePairPolicy).where(
+        RoutePairPolicy.release_status == "unresolved").limit(200)).scalars().all()
+    assert rows
+    for p in rows:
+        assert "official-source research required" in p.release_reason
+        assert ("dependent territory" in p.release_reason or
+                "special travel-document class" in p.release_reason or
+                "territory document class" in p.release_reason or
+                "no reference or official data" in p.release_reason)
+
+
+def test_credential_gated_portal_fails_closed_not_released(gdb):
+    """A real portal whose form sits behind login exposes no mappable form
+    page to credential-free recon; the build must fail closed naming the
+    missing capability, never release an empty adapter."""
+    fam = gdb.execute(select(PortalFamily).where(
+        PortalFamily.family_id == "kazakhstan-vmp")).scalars().one()
+
+    def login_only_observer(url):
+        # public pages expose a login form only — no application form
+        elements = [{"selector": "#password", "name": "password", "label": "Password",
+                     "type": "password", "required": True, "sensitive": True}]
+        return {"ok": True, "url": url, "hostname": (fam.hostnames or [""])[0],
+                "status": 200, "title": "sign in", "elements": elements, "links": []}
+    out = orchestrator.build_family_adapter(gdb, "kazakhstan-vmp",
+                                            observer=login_only_observer)
+    assert out["released"] is False
+    assert any("field mappings" in m or "form page" in m for m in out["missing"])
+    from app.adapter_factory import release as releasesvc
+    link = gdb.execute(select(FamilyAdapterLink).where(
+        FamilyAdapterLink.family_id == "kazakhstan-vmp")).scalars().one()
+    assert releasesvc.active_binding(
+        db=gdb, route_key=link.representative_route_key, tier="sandbox") is None
+
+
 def test_tampered_baseline_csv_refused(gdb, tmp_path, monkeypatch):
     fake = tmp_path / "baseline.csv"
     fake.write_text("Passport,Destination,Requirement\nUSA,FRA,visa free\n")
