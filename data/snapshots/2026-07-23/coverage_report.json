@@ -1,20 +1,23 @@
 {
   "counts": {
     "conflicts_open": 0,
-    "fee_versions": 2,
-    "human_review_open": 10,
-    "jurisdiction_rules": 0,
+    "fee_versions": 6,
+    "human_review_open": 37,
+    "jurisdiction_rules": 3,
     "policies": 0,
-    "portals": 2,
-    "routes": 4,
-    "source_evidence": 4,
-    "source_evidence_verified": 3,
+    "portals": 8,
+    "routes": 14,
+    "source_evidence": 23,
+    "source_evidence_verified": 20,
     "visa_centers": 0
   },
   "generated_from": "unknown",
   "matrix": {
-    "created_entries": 0,
-    "dispositions": {},
+    "created_entries": 12,
+    "dispositions": {
+      "EMBASSY_VISA_REQUIRED": 1,
+      "RESEARCH_INCOMPLETE": 11
+    },
     "excluded_entries": 0,
     "exclusion_rules": [
       "destination == holder's own state -> explicit NOT_APPLICABLE row (never omitted)",
@@ -24,13 +27,13 @@
     "expected_entries": 318222
   },
   "metrics": {
-    "APPLICANT_HANDOFF_COVERAGE": 0.0,
-    "FEE_VERIFIED_COVERAGE": 0.0,
-    "MATRIX_COMPLETENESS": 0.0,
-    "PREPARATION_COVERAGE": 0.0,
+    "APPLICANT_HANDOFF_COVERAGE": 0.083333,
+    "FEE_VERIFIED_COVERAGE": 1.0,
+    "MATRIX_COMPLETENESS": 3.8e-05,
+    "PREPARATION_COVERAGE": 0.083333,
     "PRODUCTION_ADAPTER_COVERAGE": 0.0,
-    "REQUIREMENTS_VERIFIED_COVERAGE": 0.0,
-    "SOURCE_COVERAGE": 0.012048
+    "REQUIREMENTS_VERIFIED_COVERAGE": 0.083333,
+    "SOURCE_COVERAGE": 0.036145
   },
   "notes": "Matrix completeness is structural only; verified coverage is measured separately and is the honest service-level signal.",
   "snapshot_date": "2026-07-23"

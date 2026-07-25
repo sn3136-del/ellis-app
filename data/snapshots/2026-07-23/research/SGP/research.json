@@ -1,405 +1,874 @@
 {
-  "destination": "SGP",
-  "retrieved_at": "2026-07-23T07:06:33Z",
-  "research_status": "research_incomplete",
-  "sources": [
-    {
-      "search_query": "Singapore official immigration tourist visa requirements ICA",
-      "original_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
-      "final_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
-      "redirect_chain": [],
-      "final_hostname": "www.ica.gov.sg",
-      "source_authority": "destination_government",
-      "relevant_excerpt": "If you hold a travel document issued by one of the countries or places listed below, you will require a valid Singapore entry visa to travel to, and seek entry, into Singapore. [Listed countries/places:] Afghanistan, Algeria, Armenia, Azerbaijan, Bangladesh, Belarus, Democratic People's Republic of Korea, Egypt, Georgia, India, Iran, Iraq, Jordan, Kazakhstan, Kosovo, Kyrgyzstan, Lebanon, Libya, Mali, Moldova, Morocco, Nigeria, Pakistan, Russia, Somalia, South Sudan, Sudan, Syria, Tajikistan, Tunisia, Turkmenistan, Ukraine, Uzbekistan, Yemen. [Also visa-required document types:] Refugee travel documents, Alien's passports, Palestinian Authority passports, temporary UAE passports, Hong Kong SAR Documents of Identity, Macao SAR Travel Permits, PRC Travel Documents. ICA does not accept submission of visa application over the immigration counters. Nationals of the Commonwealth of Independent States, Georgia, India, Turkmenistan and Ukraine; as well as selected Nationals of the People's Republic of China (PRC) ... may be eligible for the Visa-Free Transit Facility. A Singapore entry visa is not an immigration pass. [It is] pre-entry permission [and the] period of stay in Singapore is not tied to the validity of your visa; it is determined by the duration of the Visit Pass issued in the form of electronic visit pass (e-Pass) at the checkpoint upon entry.",
-      "retrieved_at": "2026-07-23T07:06:33Z",
-      "effective_date_evidence": null,
-      "page_language": "en"
-    },
-    {
-      "search_query": "Singapore official immigration tourist visa requirements ICA",
-      "original_url": "https://www.mfa.gov.sg/visiting-singapore/check-if-you-need-a-singapore-visa/",
-      "final_url": "https://www.mfa.gov.sg/visiting-singapore/check-if-you-need-a-singapore-visa/",
-      "redirect_chain": [],
-      "final_hostname": "www.mfa.gov.sg",
-      "source_authority": "destination_foreign_ministry",
-      "relevant_excerpt": "All visitors to Singapore must meet the following entry requirements: [a valid travel document with] minimum validity of 6 months at the time of departure, [confirmed onward/return tickets, sufficient funds, and] Visa for entry into Singapore (if applicable). The visa application form is available free of charge at all Singapore overseas missions. [Form 14A may be downloaded from ICA's website.] Visa application can be submitted online [through the SAVE system via a local Singapore contact who is a citizen or Permanent Resident].",
-      "retrieved_at": "2026-07-23T07:06:33Z",
-      "effective_date_evidence": null,
-      "page_language": "en"
-    },
-    {
-      "search_query": "Singapore official immigration tourist visa requirements ICA",
-      "original_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
-      "final_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
-      "redirect_chain": [],
-      "final_hostname": "www.ica.gov.sg",
-      "source_authority": "destination_government",
-      "relevant_excerpt": "All travellers, except Singapore passport holders, must ensure their passport has a minimum validity of 6 months. Short-Term travellers should have sufficient cash and proof of onward travel (tickets, visas). All travellers are required to submit the SG Arrival Card within three (3) days (including the day of arrival) before arriving in Singapore. Short-Term travellers holding a passport or travel document from a visa-required country/region must apply for a Visa [or may use the Visa-Free Transit Facility for stays under 96 hours if eligible]. [Travellers must ensure they] do not stay beyond [their] Visit Pass validity.",
-      "retrieved_at": "2026-07-23T07:06:33Z",
-      "effective_date_evidence": null,
-      "page_language": "en"
-    },
-    {
-      "search_query": "Singapore official immigration tourist visa requirements ICA",
-      "original_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/india",
-      "final_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/india",
-      "redirect_chain": [],
-      "final_hostname": "www.ica.gov.sg",
-      "source_authority": "destination_government",
-      "relevant_excerpt": "Your visa application can be submitted online using the e-Service through a strategic partner or a local contact in Singapore. Your visa application can be submitted at the nearest Singapore Overseas Mission or through its authorised visa agent. A S$30 non-refundable processing fee is payable online using a Visa or MasterCard credit/debit card. Your visa application will be processed within three working days (excluding the day of submission). Some applications may take longer to process. [The e-Service link points to /esvclandingpage/save (SAVE), accessible through MyICA.]",
-      "retrieved_at": "2026-07-23T07:06:33Z",
-      "effective_date_evidence": null,
-      "page_language": "en"
-    },
-    {
-      "search_query": "Singapore official immigration tourist visa requirements ICA",
-      "original_url": "https://washington.mfa.gov.sg/visa-and-entry-requirements/",
-      "final_url": "https://washington.mfa.gov.sg/visa-and-entry-requirements/",
-      "redirect_chain": [],
-      "final_hostname": "washington.mfa.gov.sg",
-      "source_authority": "embassy_or_consulate",
-      "relevant_excerpt": "US Passport Holders (regular, official and diplomatic) do not require a visa to enter Singapore for business or for social visit purposes. The period of stay granted is shown on the visit pass endorsement given on your passport.",
-      "retrieved_at": "2026-07-23T07:06:33Z",
-      "effective_date_evidence": null,
-      "page_language": "en"
-    },
-    {
-      "search_query": "Singapore China mutual 30-day visa-free site:mfa.gov.sg OR site:ica.gov.sg",
-      "original_url": "https://www.ica.gov.sg/news-and-publications/newsroom/media-release/mutual-30-day-visa-exemption-arrangement-between-singapore-and-the-people-s-republic-of-china",
-      "final_url": "https://www.ica.gov.sg/news-and-publications/newsroom/media-release/mutual-30-day-visa-exemption-arrangement-between-singapore-and-the-people-s-republic-of-china",
-      "redirect_chain": [],
-      "final_hostname": "www.ica.gov.sg",
-      "source_authority": "destination_government",
-      "relevant_excerpt": "With effect from 9 February 2024, holders of ordinary passports issued by the People's Republic of China (PRC) will be exempted from visa requirements for a stay of up to 30 days in Singapore. Holders of all other travel documents issued by the PRC must continue to apply for an entry visa before travel into Singapore. [Under long-standing agreements, holders of diplomatic, public affairs and service passports issued by the PRC were already exempted from visa requirements.]",
-      "retrieved_at": "2026-07-23T07:06:33Z",
-      "effective_date_evidence": "With effect from 9 February 2024",
-      "page_language": "en"
-    },
-    {
-      "search_query": "Singapore China mutual 30-day visa-free site:mfa.gov.sg OR site:ica.gov.sg",
-      "original_url": "https://beijing.mfa.gov.sg/consular-services/visa-information/",
-      "final_url": "https://beijing.mfa.gov.sg/consular-services/visa-information/",
-      "redirect_chain": [],
-      "final_hostname": "beijing.mfa.gov.sg",
-      "source_authority": "embassy_or_consulate",
-      "relevant_excerpt": "Holders of all other travel documents issued by the PRC must continue to apply for an entry visa before travel into Singapore. These include the PRC Travel Document, Hong Kong SAR Document of Identity (DOI) and Macau SAR Travel Permit. The Singapore Embassy in Beijing and our Consulates-General in Chengdu, Guangzhou, Shanghai and Xiamen have ceased walk-in visa applications with effect from 8 Dec 2014. All Authorised Visa Agents in China charge a fixed visa fee of RMB 300 for a Singapore visa application [effective 1 February 2017; list of authorised agents updated 15 May 2026].",
-      "retrieved_at": "2026-07-23T07:06:33Z",
-      "effective_date_evidence": "fixed visa fee of RMB 300 ... effective February 1, 2017; agent list updated 15 May 2026",
-      "page_language": "en"
-    }
-  ],
-  "dispositions": [
-    {
-      "nationalities": ["CHN"],
-      "category": "visa_free_entry",
-      "disposition": "VISA_FREE",
-      "maximum_stay": "30 days",
-      "conditions": [
-        "Applies to holders of ordinary passports issued by the People's Republic of China, with effect from 9 February 2024 (mutual 30-day visa-exemption arrangement)",
-        "Holders of all other travel documents issued by the PRC (PRC Travel Document, etc.) must continue to apply for an entry visa before travel",
-        "SG Arrival Card must be submitted within 3 days (including the day of arrival) before arriving",
-        "Passport minimum validity of 6 months required"
-      ],
-      "source_urls": [
-        "https://www.ica.gov.sg/news-and-publications/newsroom/media-release/mutual-30-day-visa-exemption-arrangement-between-singapore-and-the-people-s-republic-of-china",
-        "https://beijing.mfa.gov.sg/consular-services/visa-information/"
-      ]
-    },
-    {
-      "nationalities": ["USA", "GBR", "HKG", "TWN", "JPN", "KOR", "DEU", "FRA", "AUS", "CAN", "ARE", "BRA"],
-      "category": "visa_free_entry",
-      "disposition": "VISA_FREE",
-      "maximum_stay": null,
-      "conditions": [
-        "These nationalities do not appear on ICA's list of visa-required countries/places, so no entry visa is required for social/tourist visits",
-        "US Passport Holders (regular, official and diplomatic) explicitly confirmed visa-free for business or social visit purposes by the Singapore Embassy in Washington DC",
-        "Period of stay is not fixed in advance: it is determined by the Visit Pass (e-Pass) granted by ICA at the checkpoint upon entry (extensions possible via ICA)",
-        "HKG = Hong Kong SAR passport holders; holders of the Hong Kong SAR Document of Identity DO require a visa",
-        "ARE = regular UAE passports; holders of temporary UAE passports DO require a visa",
-        "SG Arrival Card must be submitted within 3 days (including the day of arrival) before arriving",
-        "Passport minimum validity of 6 months, onward/return ticket and sufficient funds required"
-      ],
-      "source_urls": [
-        "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
-        "https://washington.mfa.gov.sg/visa-and-entry-requirements/",
-        "https://www.ica.gov.sg/enter-transit-depart/entering-singapore"
-      ]
-    },
-    {
-      "nationalities": ["SGP"],
-      "category": "visa_free_entry",
-      "disposition": "VISA_FREE",
-      "maximum_stay": null,
-      "conditions": [
-        "Singapore citizens entering their own country; not subject to entry visa or visit pass requirements",
-        "ICA exempts Singapore passport holders from the 6-month passport validity requirement"
-      ],
-      "source_urls": [
-        "https://www.ica.gov.sg/enter-transit-depart/entering-singapore"
-      ]
-    },
-    {
-      "nationalities": ["AFG", "DZA", "ARM", "AZE", "BGD", "BLR", "PRK", "EGY", "GEO", "IND", "IRN", "IRQ", "JOR", "KAZ", "XKX", "KGZ", "LBN", "LBY", "MLI", "MDA", "MAR", "NGA", "PAK", "RUS", "SOM", "SSD", "SDN", "SYR", "TJK", "TUN", "TKM", "UKR", "UZB", "YEM"],
-      "category": "tourist_visa",
-      "disposition": "EMBASSY_VISA_REQUIRED",
-      "maximum_stay": null,
-      "conditions": [
-        "Holders of travel documents issued by these countries/places require a valid Singapore entry visa before travel",
-        "Application channels: online via the SAVE e-Service through a local contact in Singapore or a strategic partner/authorised visa agent, or at the nearest Singapore Overseas Mission or through its authorised visa agent",
-        "ICA does not accept submission of visa applications over the immigration counters (no visa on arrival)",
-        "S$30 non-refundable processing fee; processing within three working days (excluding day of submission), some applications may take longer",
-        "The visa is pre-entry permission only; period of stay is determined by the Visit Pass (e-Pass) granted at the checkpoint upon entry",
-        "Also visa-required regardless of nationality: holders of refugee travel documents, alien's passports, Palestinian Authority passports, temporary UAE passports, Hong Kong SAR Documents of Identity, Macao SAR Travel Permits, and PRC Travel Documents",
-        "Nationals of the Commonwealth of Independent States, Georgia, India, Turkmenistan and Ukraine, and selected PRC nationals, may be eligible for the Visa-Free Transit Facility (transit only)"
-      ],
-      "source_urls": [
-        "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
-        "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/india"
-      ]
-    },
-    {
-      "nationalities": ["CHN", "USA", "GBR", "HKG", "TWN", "JPN", "KOR", "DEU", "FRA", "AUS", "CAN", "ARE", "BRA", "SGP"],
-      "category": "tourist_visa",
-      "disposition": "NOT_APPLICABLE",
-      "maximum_stay": null,
-      "conditions": [
-        "No consular/entry visa needed for tourism or social visits: these nationalities are not on ICA's visa-required list (CHN ordinary passports exempt since 9 February 2024)"
-      ],
-      "source_urls": [
-        "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
-        "https://www.ica.gov.sg/news-and-publications/newsroom/media-release/mutual-30-day-visa-exemption-arrangement-between-singapore-and-the-people-s-republic-of-china"
-      ]
-    },
-    {
-      "nationalities": ["ALL_OTHERS"],
-      "category": "visa_free_entry",
-      "disposition": "VISA_FREE",
-      "maximum_stay": null,
-      "conditions": [
-        "ICA publishes an exhaustive list of visa-required countries/places (all reproduced in the dispositions above); holders of national passports NOT on that list do not require an entry visa for social/tourist visits",
-        "Exception regardless of nationality: holders of refugee travel documents, alien's passports, Palestinian Authority passports, temporary UAE passports, Hong Kong SAR Documents of Identity, Macao SAR Travel Permits, and PRC Travel Documents require a visa",
-        "Period of stay is determined by the Visit Pass (e-Pass) granted at the checkpoint upon entry",
-        "SG Arrival Card must be submitted within 3 days (including the day of arrival) before arriving; passport minimum validity of 6 months"
-      ],
-      "source_urls": [
-        "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
-        "https://www.ica.gov.sg/enter-transit-depart/entering-singapore"
-      ]
-    },
-    {
-      "nationalities": ["ALL"],
-      "category": "visa_on_arrival_tourist",
-      "disposition": "NOT_APPLICABLE",
-      "maximum_stay": null,
-      "conditions": [
-        "Singapore does not issue tourist visas on arrival: ICA states it does not accept submission of visa applications over the immigration counters; visa-required nationals must obtain the entry visa before travel"
-      ],
-      "source_urls": [
-        "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements"
-      ]
-    },
-    {
-      "nationalities": ["ALL"],
-      "category": "eta",
-      "disposition": "NOT_APPLICABLE",
-      "maximum_stay": null,
-      "conditions": [
-        "Singapore operates no tourist eTA program: the official channels are the entry visa (pre-travel, for listed nationalities) or visa-free entry (all others)",
-        "The SG Arrival Card, required of all travellers within 3 days before arrival, is explicitly 'not a visa' per ICA and is a border-declaration form, not a travel authorization"
-      ],
-      "source_urls": [
-        "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
-        "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements"
-      ]
-    }
-  ],
-  "policies": [
-    {
-      "policy_kind": "visa_exemption_list",
-      "policy_name": "Singapore entry visa requirement list (negative list; all others visa-exempt)",
-      "description": "ICA publishes the exhaustive list of countries/places whose travel-document holders require a Singapore entry visa (34 countries plus specified special travel documents). Nationals of all other countries do not require a visa for social/tourist visits. The period of stay is determined by the Visit Pass (e-Pass) issued at the checkpoint upon entry, not by any visa.",
-      "applies_to_nationalities": ["ALL"],
-      "conditions": [
-        "Visa-required countries/places: Afghanistan, Algeria, Armenia, Azerbaijan, Bangladesh, Belarus, DPR Korea, Egypt, Georgia, India, Iran, Iraq, Jordan, Kazakhstan, Kosovo, Kyrgyzstan, Lebanon, Libya, Mali, Moldova, Morocco, Nigeria, Pakistan, Russia, Somalia, South Sudan, Sudan, Syria, Tajikistan, Tunisia, Turkmenistan, Ukraine, Uzbekistan, Yemen",
-        "Visa-required document types regardless of nationality: refugee travel documents, alien's passports, Palestinian Authority passports, temporary UAE passports, Hong Kong SAR Documents of Identity, Macao SAR Travel Permits, PRC Travel Documents"
-      ],
-      "maximum_stay": null,
-      "official_source_urls": [
-        "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements"
-      ],
-      "effective_from": null,
-      "effective_until": null
-    },
-    {
-      "policy_kind": "special_regime",
-      "policy_name": "Mutual 30-Day Visa-Exemption Arrangement between Singapore and the People's Republic of China",
-      "description": "With effect from 9 February 2024, holders of ordinary passports issued by the PRC are exempted from visa requirements for a stay of up to 30 days in Singapore. Holders of all other PRC-issued travel documents must continue to apply for an entry visa before travel.",
-      "applies_to_nationalities": ["CHN"],
-      "conditions": [
-        "Ordinary PRC passports only",
-        "PRC diplomatic, public affairs and service passport holders were already exempt under long-standing agreements"
-      ],
-      "maximum_stay": "30 days",
-      "official_source_urls": [
-        "https://www.ica.gov.sg/news-and-publications/newsroom/media-release/mutual-30-day-visa-exemption-arrangement-between-singapore-and-the-people-s-republic-of-china"
-      ],
-      "effective_from": "2024-02-09",
-      "effective_until": null
-    },
-    {
-      "policy_kind": "consular_visa_regime",
-      "policy_name": "Singapore entry visa (pre-travel application; issued electronically)",
-      "description": "Visa-required nationals must obtain a Singapore entry visa before travel. Applications are submitted online via ICA's SAVE e-Service through a local contact in Singapore or an authorised strategic partner/visa agent, or at a Singapore Overseas Mission or through its authorised visa agent. ICA does not accept visa applications at the immigration counters. In China, missions have ceased walk-in applications since 8 December 2014 and applications go through Authorised Visa Agents.",
-      "applies_to_nationalities": ["AFG", "DZA", "ARM", "AZE", "BGD", "BLR", "PRK", "EGY", "GEO", "IND", "IRN", "IRQ", "JOR", "KAZ", "XKX", "KGZ", "LBN", "LBY", "MLI", "MDA", "MAR", "NGA", "PAK", "RUS", "SOM", "SSD", "SDN", "SYR", "TJK", "TUN", "TKM", "UKR", "UZB", "YEM"],
-      "conditions": [
-        "S$30 non-refundable processing fee (online, Visa or MasterCard credit/debit card)",
-        "Processing within three working days excluding day of submission; some applications may take longer",
-        "The visa is pre-entry permission; period of stay is set by the Visit Pass (e-Pass) issued on entry"
-      ],
-      "maximum_stay": null,
-      "official_source_urls": [
-        "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
-        "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/india",
-        "https://beijing.mfa.gov.sg/consular-services/visa-information/"
-      ],
-      "effective_from": null,
-      "effective_until": null
-    },
-    {
-      "policy_kind": "transit_regime",
-      "policy_name": "Visa-Free Transit Facility (VFTF)",
-      "description": "Nationals of the Commonwealth of Independent States, Georgia, India, Turkmenistan and Ukraine, as well as selected nationals of the People's Republic of China, may be eligible for visa-free transit through Singapore for up to 96 hours under specific conditions (transit only; not a tourist-entry channel).",
-      "applies_to_nationalities": ["ARM", "AZE", "BLR", "GEO", "IND", "KAZ", "KGZ", "MDA", "RUS", "TJK", "TKM", "UKR", "UZB", "CHN"],
-      "conditions": [
-        "Transit to/from a third country; eligibility subject to specific conditions assessed by ICA",
-        "Stays under 96 hours"
-      ],
-      "maximum_stay": "96 hours",
-      "official_source_urls": [
-        "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
-        "https://www.ica.gov.sg/enter-transit-depart/entering-singapore"
-      ],
-      "effective_from": null,
-      "effective_until": null
-    },
-    {
-      "policy_kind": "special_regime",
-      "policy_name": "SG Arrival Card (SGAC)",
-      "description": "All travellers are required to submit the SG Arrival Card within three days (including the day of arrival) before arriving in Singapore. The SG Arrival Card is not a visa. Exceptions apply to those transiting without immigration clearance and to citizens/residents entering via land checkpoints.",
-      "applies_to_nationalities": ["ALL"],
-      "conditions": [
-        "Submit within 3 days (including day of arrival) before arriving",
-        "Not a visa; does not replace visa requirements"
-      ],
-      "maximum_stay": null,
-      "official_source_urls": [
-        "https://www.ica.gov.sg/enter-transit-depart/entering-singapore"
-      ],
-      "effective_from": null,
-      "effective_until": null
-    }
-  ],
-  "fees": [
-    {
-      "visa_category": "tourist_visa",
-      "visa_subtype": "entry visa (social visit) - ICA processing fee",
-      "applies_to_nationalities": null,
-      "government_fee_amount": 30,
-      "government_fee_currency": "SGD",
-      "refundability": "non-refundable",
-      "accepted_payment_methods": ["Visa credit/debit card (online)", "MasterCard credit/debit card (online)"],
-      "source_urls": [
-        "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/india"
-      ]
-    },
-    {
-      "visa_category": "tourist_visa",
-      "visa_subtype": "fixed all-in visa fee at Authorised Visa Agents in China (includes agent handling)",
-      "applies_to_nationalities": ["CHN"],
-      "government_fee_amount": 300,
-      "government_fee_currency": "CNY",
-      "refundability": null,
-      "accepted_payment_methods": null,
-      "source_urls": [
-        "https://beijing.mfa.gov.sg/consular-services/visa-information/"
-      ]
-    }
-  ],
-  "portals": [
-    {
-      "portal_kind": "immigration_authority",
-      "url": "https://www.ica.gov.sg/",
-      "operator": "Immigration & Checkpoints Authority (ICA), Singapore",
-      "operator_kind": "government",
-      "official_linking_source": null,
-      "supported_categories": ["tourist_visa", "visa_free_entry", "transit"],
-      "source_urls": [
-        "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
-        "https://www.ica.gov.sg/enter-transit-depart/entering-singapore"
-      ]
-    },
-    {
-      "portal_kind": "foreign_ministry",
-      "url": "https://www.mfa.gov.sg/",
-      "operator": "Ministry of Foreign Affairs, Singapore",
-      "operator_kind": "government",
-      "official_linking_source": null,
-      "supported_categories": ["tourist_visa", "visa_free_entry"],
-      "source_urls": [
-        "https://www.mfa.gov.sg/visiting-singapore/check-if-you-need-a-singapore-visa/"
-      ]
-    },
-    {
-      "portal_kind": "evisa_portal",
-      "url": "https://eservices.ica.gov.sg/esvclandingpage/save",
-      "operator": "Immigration & Checkpoints Authority (ICA) - SAVE e-Service (Submission of Application for Visa Electronically)",
-      "operator_kind": "government",
-      "official_linking_source": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/india",
-      "supported_categories": ["tourist_visa"],
-      "source_urls": [
-        "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/india"
-      ]
-    },
-    {
-      "portal_kind": "embassy_site",
-      "url": "https://washington.mfa.gov.sg/visa-and-entry-requirements/",
-      "operator": "Embassy of the Republic of Singapore in Washington DC",
-      "operator_kind": "government",
-      "official_linking_source": null,
-      "supported_categories": ["tourist_visa", "visa_free_entry"],
-      "source_urls": [
-        "https://washington.mfa.gov.sg/visa-and-entry-requirements/"
-      ]
-    },
-    {
-      "portal_kind": "embassy_site",
-      "url": "https://beijing.mfa.gov.sg/consular-services/visa-information/",
-      "operator": "Embassy of the Republic of Singapore in Beijing (maintains the Authorised Visa Agents list for China)",
-      "operator_kind": "government",
-      "official_linking_source": null,
-      "supported_categories": ["tourist_visa"],
-      "source_urls": [
-        "https://beijing.mfa.gov.sg/consular-services/visa-information/"
-      ]
-    }
-  ],
-  "passport_validity": {
-    "rule_kind": "months_after_arrival",
-    "months": 6,
-    "min_blank_pages": null,
-    "condition_text": "ICA: 'All travellers, except Singapore passport holders, must ensure their passport has a minimum validity of 6 months.' MFA phrases it as a travel document with 'minimum validity of 6 months at the time of departure'. No blank-page rule stated on the fetched official pages.",
-    "source_urls": [
-      "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
-      "https://www.mfa.gov.sg/visiting-singapore/check-if-you-need-a-singapore-visa/"
-    ]
+ "destination": "SGP",
+ "retrieved_at": "2026-07-23T07:06:33Z",
+ "research_status": "research_incomplete",
+ "sources": [
+  {
+   "search_query": "Singapore official immigration tourist visa requirements ICA",
+   "original_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+   "final_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+   "redirect_chain": [],
+   "final_hostname": "www.ica.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "If you hold a travel document issued by one of the countries or places listed below, you will require a valid Singapore entry visa to travel to, and seek entry, into Singapore. [Listed countries/places:] Afghanistan, Algeria, Armenia, Azerbaijan, Bangladesh, Belarus, Democratic People's Republic of Korea, Egypt, Georgia, India, Iran, Iraq, Jordan, Kazakhstan, Kosovo, Kyrgyzstan, Lebanon, Libya, Mali, Moldova, Morocco, Nigeria, Pakistan, Russia, Somalia, South Sudan, Sudan, Syria, Tajikistan, Tunisia, Turkmenistan, Ukraine, Uzbekistan, Yemen. [Also visa-required document types:] Refugee travel documents, Alien's passports, Palestinian Authority passports, temporary UAE passports, Hong Kong SAR Documents of Identity, Macao SAR Travel Permits, PRC Travel Documents. ICA does not accept submission of visa application over the immigration counters. Nationals of the Commonwealth of Independent States, Georgia, India, Turkmenistan and Ukraine; as well as selected Nationals of the People's Republic of China (PRC) ... may be eligible for the Visa-Free Transit Facility. A Singapore entry visa is not an immigration pass. [It is] pre-entry permission [and the] period of stay in Singapore is not tied to the validity of your visa; it is determined by the duration of the Visit Pass issued in the form of electronic visit pass (e-Pass) at the checkpoint upon entry.",
+   "retrieved_at": "2026-07-23T07:06:33Z",
+   "effective_date_evidence": null,
+   "page_language": "en"
   },
-  "jurisdictions": [],
-  "unresolved": [
-    "Maximum stay for visa-free nationals (other than CHN's 30 days under the mutual arrangement) is not published by ICA as a per-nationality list; ICA/embassy pages state the period of stay is determined by the Visit Pass (e-Pass) granted at the checkpoint on entry (visit passes are typically issued for 14, 30 or 90 days per ICA extension pages, but no official per-country table was found). maximum_stay left null for those rows.",
-    "The SAVE e-Service portal (https://eservices.ica.gov.sg/esvclandingpage/save) was fetched but is a JavaScript application whose content could not be extracted; it is therefore listed in portals (evidenced by the official ICA linking page) but not in sources.",
-    "The Beijing embassy page references an Authorised Visa Agents list (updated 15 May 2026) but individual agent names/URLs were not extractable from the fetch, so no authorized_visa_center portal rows were recorded.",
-    "Blank-page requirement: not stated on the official pages fetched.",
-    "The official SG Arrival Card submission URL was not captured verbatim from a fetched official page, so it is not recorded as a portal.",
-    "Of the 16 nationalities requested for explicit answers, RUS and IND are visa-required (see the EMBASSY_VISA_REQUIRED row); all other 14 are covered by visa-free rows."
+  {
+   "search_query": "Singapore official immigration tourist visa requirements ICA",
+   "original_url": "https://www.mfa.gov.sg/visiting-singapore/check-if-you-need-a-singapore-visa/",
+   "final_url": "https://www.mfa.gov.sg/visiting-singapore/check-if-you-need-a-singapore-visa/",
+   "redirect_chain": [],
+   "final_hostname": "www.mfa.gov.sg",
+   "source_authority": "destination_foreign_ministry",
+   "relevant_excerpt": "All visitors to Singapore must meet the following entry requirements: [a valid travel document with] minimum validity of 6 months at the time of departure, [confirmed onward/return tickets, sufficient funds, and] Visa for entry into Singapore (if applicable). The visa application form is available free of charge at all Singapore overseas missions. [Form 14A may be downloaded from ICA's website.] Visa application can be submitted online [through the SAVE system via a local Singapore contact who is a citizen or Permanent Resident].",
+   "retrieved_at": "2026-07-23T07:06:33Z",
+   "effective_date_evidence": null,
+   "page_language": "en"
+  },
+  {
+   "search_query": "Singapore official immigration tourist visa requirements ICA",
+   "original_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
+   "final_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
+   "redirect_chain": [],
+   "final_hostname": "www.ica.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "All travellers, except Singapore passport holders, must ensure their passport has a minimum validity of 6 months. Short-Term travellers should have sufficient cash and proof of onward travel (tickets, visas). All travellers are required to submit the SG Arrival Card within three (3) days (including the day of arrival) before arriving in Singapore. Short-Term travellers holding a passport or travel document from a visa-required country/region must apply for a Visa [or may use the Visa-Free Transit Facility for stays under 96 hours if eligible]. [Travellers must ensure they] do not stay beyond [their] Visit Pass validity.",
+   "retrieved_at": "2026-07-23T07:06:33Z",
+   "effective_date_evidence": null,
+   "page_language": "en"
+  },
+  {
+   "search_query": "Singapore official immigration tourist visa requirements ICA",
+   "original_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/india",
+   "final_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/india",
+   "redirect_chain": [],
+   "final_hostname": "www.ica.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Your visa application can be submitted online using the e-Service through a strategic partner or a local contact in Singapore. Your visa application can be submitted at the nearest Singapore Overseas Mission or through its authorised visa agent. A S$30 non-refundable processing fee is payable online using a Visa or MasterCard credit/debit card. Your visa application will be processed within three working days (excluding the day of submission). Some applications may take longer to process. [The e-Service link points to /esvclandingpage/save (SAVE), accessible through MyICA.]",
+   "retrieved_at": "2026-07-23T07:06:33Z",
+   "effective_date_evidence": null,
+   "page_language": "en"
+  },
+  {
+   "search_query": "Singapore official immigration tourist visa requirements ICA",
+   "original_url": "https://washington.mfa.gov.sg/visa-and-entry-requirements/",
+   "final_url": "https://washington.mfa.gov.sg/visa-and-entry-requirements/",
+   "redirect_chain": [],
+   "final_hostname": "washington.mfa.gov.sg",
+   "source_authority": "embassy_or_consulate",
+   "relevant_excerpt": "US Passport Holders (regular, official and diplomatic) do not require a visa to enter Singapore for business or for social visit purposes. The period of stay granted is shown on the visit pass endorsement given on your passport.",
+   "retrieved_at": "2026-07-23T07:06:33Z",
+   "effective_date_evidence": null,
+   "page_language": "en"
+  },
+  {
+   "search_query": "Singapore China mutual 30-day visa-free site:mfa.gov.sg OR site:ica.gov.sg",
+   "original_url": "https://www.ica.gov.sg/news-and-publications/newsroom/media-release/mutual-30-day-visa-exemption-arrangement-between-singapore-and-the-people-s-republic-of-china",
+   "final_url": "https://www.ica.gov.sg/news-and-publications/newsroom/media-release/mutual-30-day-visa-exemption-arrangement-between-singapore-and-the-people-s-republic-of-china",
+   "redirect_chain": [],
+   "final_hostname": "www.ica.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "With effect from 9 February 2024, holders of ordinary passports issued by the People's Republic of China (PRC) will be exempted from visa requirements for a stay of up to 30 days in Singapore. Holders of all other travel documents issued by the PRC must continue to apply for an entry visa before travel into Singapore. [Under long-standing agreements, holders of diplomatic, public affairs and service passports issued by the PRC were already exempted from visa requirements.]",
+   "retrieved_at": "2026-07-23T07:06:33Z",
+   "effective_date_evidence": "With effect from 9 February 2024",
+   "page_language": "en"
+  },
+  {
+   "search_query": "Singapore China mutual 30-day visa-free site:mfa.gov.sg OR site:ica.gov.sg",
+   "original_url": "https://beijing.mfa.gov.sg/consular-services/visa-information/",
+   "final_url": "https://beijing.mfa.gov.sg/consular-services/visa-information/",
+   "redirect_chain": [],
+   "final_hostname": "beijing.mfa.gov.sg",
+   "source_authority": "embassy_or_consulate",
+   "relevant_excerpt": "Holders of all other travel documents issued by the PRC must continue to apply for an entry visa before travel into Singapore. These include the PRC Travel Document, Hong Kong SAR Document of Identity (DOI) and Macau SAR Travel Permit. The Singapore Embassy in Beijing and our Consulates-General in Chengdu, Guangzhou, Shanghai and Xiamen have ceased walk-in visa applications with effect from 8 Dec 2014. All Authorised Visa Agents in China charge a fixed visa fee of RMB 300 for a Singapore visa application [effective 1 February 2017; list of authorised agents updated 15 May 2026].",
+   "retrieved_at": "2026-07-23T07:06:33Z",
+   "effective_date_evidence": "fixed visa fee of RMB 300 ... effective February 1, 2017; agent list updated 15 May 2026",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=SGP|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-26|jur=default",
+   "original_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+   "final_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+   "redirect_chain": [],
+   "final_hostname": "www.ica.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "ICA | Check if You Need an Entry Visa\nIdentity Cards, Passport and other Documents\nEntering, Transiting and Departing\nReside, Study and Work in Singapore\ne-Services and Forms\nCheck Status / Make Appointment\nWho We Are\nVision, Mission &amp; Values\nOur Checkpoints\nOur People\nOur Heritage\nAwards &amp; Accolades\nOur Service Commitment\nNews &amp; Publications\nNewsroom\nStatistics\nICA Annuals\nPublic Education\nPublications\nCareers\nJoin Us\nScholarships, Sponsorships &amp; Internships\nMeet Our Officers\nCareer FAQs\nMyICA\nToggle search bar\nToggle mobile menu\nHome\nEntering, Transiting and Departing\nEntering Singapore\nCheck if You Need an Entry Visa\nCheck if You Need an Entry Visa\nBack to top\nIf you hold a travel document 1 issued by one of the countries or places listed below, you will require a valid Singapore entry visa to travel to, and seek entry, into&nbsp;Singapore. Possession of a valid visa does not guarantee entry into Singapore. Please refer to entry requirements for more information. Please note the following: SG Arrival Card is not a visa . Please refer to SG Arrival Card e-Service &nbsp;for more\ninformation.\nValid visa holders are required to adhere to the latest travel requirements and advisories , where applicable. The period of stay in Singapore is not tied to the validity of your visa. The period of stay is determined by the duration of the Visit Pass issued to you in the form of electronic visit pass (e-Pass) at the checkpoint upon entry.&nbsp; To extend the duration of ",
+   "retrieved_at": "2026-07-24T07:41:01+00:00",
+   "content_sha256": "036ae0d49757e15e9f376ded13f7643aaa5c73af8b34319fa6d5eca23a033d74",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=SGP|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-26|jur=default",
+   "original_url": "https://www.mfa.gov.sg/visiting-singapore/check-if-you-need-a-singapore-visa/",
+   "final_url": "https://www.mfa.gov.sg/visiting-singapore/check-if-you-need-a-singapore-visa/",
+   "redirect_chain": [],
+   "final_hostname": "www.mfa.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Check if you need a Singapore visa | Ministry of Foreign Affairs Skip to main content A Singapore Government Agency Website  How to identify Official website links end with .gov.sg Government agencies communicate via .gov.sg websites (e.g. go.gov.sg/open).  Trusted websites Secure websites use HTTPS Look for a lock ( ) or https:// as an added precaution. Share sensitive information only on official, secure websites. Beware of scammers pretending to be MFA officers. Government officials will never ask you to transfer money or disclose bank log-in details over a phone call. Call the 24/7 ScamShield Helpline at 1799 if you are unsure if something is a scam. Travelling overseas I need help overseas Visiting Singapore Careers Newsroom About MFA eRegister trip Home Visiting Singapore Check if you need a Singapore visa Check if you need a Singapore visa Visa information for travellers visiting Singapore. Check with ICA Last updated 24 July 2026 The following information are obtained from the Singapore Immigration &amp; Checkpoints Authority (ICA), which is the authority responsible for visa matters. Please visit ICA’s website  for detailed information on visa and entry requirements. Alternatively, you may email us at mfa@mfa.gov.sg for enquiries on application of Singapore visa abroad. The visa application form is available free of charge at all Singapore overseas missions (except for non-resident High Commissioners/Ambassadors based in Singapore). You may also download Form 14A her",
+   "retrieved_at": "2026-07-24T07:41:01+00:00",
+   "content_sha256": "05032e2acdab8cf507ef993d53ad9f781cf8034d871777cf834d79a4046d37d6",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=SGP|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-26|jur=default",
+   "original_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
+   "final_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
+   "redirect_chain": [],
+   "final_hostname": "www.ica.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "ICA | Entering Singapore\nIdentity Cards, Passport and other Documents\nEntering, Transiting and Departing\nReside, Study and Work in Singapore\ne-Services and Forms\nCheck Status / Make Appointment\nWho We Are\nVision, Mission &amp; Values\nOur Checkpoints\nOur People\nOur Heritage\nAwards &amp; Accolades\nOur Service Commitment\nNews &amp; Publications\nNewsroom\nStatistics\nICA Annuals\nPublic Education\nPublications\nCareers\nJoin Us\nScholarships, Sponsorships &amp; Internships\nMeet Our Officers\nCareer FAQs\nMyICA\nToggle search bar\nToggle mobile menu\nHome\nEntering, Transiting and Departing\nEntering Singapore\nEntering Singapore\nBack to top\nTo ensure a smooth journey, travellers seeking to enter Singapore should comply with the general entry &nbsp; requirements listed below.\nGeneral Entry Requirements\nImmigration Requirements\nTo enter Singapore, travellers must meet the following immigration requirements:\ni) Travel Documents\nAll travellers, regardless of age, must hold a valid individually-issued travel document as collective travel documents are not accepted; and\nAll travellers, except Singapore passport holders, must ensure their passport has a minimum validity of 6 months.\nii) Visa\nShort-Term travellers holding a passport or travel document from a visa-required country/region must&nbsp; apply for a Visa\nVisa-required travellers can use the&nbsp; Visa-Free Transit Facility &nbsp;for stay of less than 96 hours in Singapore, if eligible\niii) SG Arrival Card (SGAC)\nAll travellers are required to",
+   "retrieved_at": "2026-07-24T07:41:01+00:00",
+   "content_sha256": "839dbdc4f67be8528c2eaa8e415cc3d19af062d8db9fe50113f07551e26222e8",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=SGP|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-26|jur=default",
+   "original_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/india",
+   "final_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/india",
+   "redirect_chain": [],
+   "final_hostname": "www.ica.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "ICA | Visa Detail Page\nIdentity Cards, Passport and other Documents\nEntering, Transiting and Departing\nReside, Study and Work in Singapore\ne-Services and Forms\nCheck Status / Make Appointment\nWho We Are\nVision, Mission &amp; Values\nOur Checkpoints\nOur People\nOur Heritage\nAwards &amp; Accolades\nOur Service Commitment\nNews &amp; Publications\nNewsroom\nStatistics\nICA Annuals\nPublic Education\nPublications\nCareers\nJoin Us\nScholarships, Sponsorships &amp; Internships\nMeet Our Officers\nCareer FAQs\nMyICA\nToggle search bar\nToggle mobile menu\nHome &gt;\nEntering, Transiting and Departing &gt;\nEntering Singapore &gt;\nCheck if You Need an Entry Visa &gt;\nIndia Visa Requirements\nIndia Visa Requirements\nYou will need a visa to enter Singapore if you are holding a travel document issued by this country.&nbsp; However, please note that holders of diplomatic, official and service passports do not need a visa for entry.\nApply Online\nDocuments Required\nYou will need to provide original documents and official translations (for documents in languages other than English), as well as copies of the documents for ICA to retain. ICA accepts: Translations provided by the embassy of the country/ place that issued the document Translations produced by a notary public in Singapore or the country/ place that issued the document Privately created translations attested by the embassy of the country/ place that issued the document, or notarised by a notary public in Singapore or the country/ place that issued t",
+   "retrieved_at": "2026-07-24T07:41:01+00:00",
+   "content_sha256": "51f05cc93172c5ceec00e41fe0e2a941baaa5afe447e3b6e48f4efa88308b913",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=SGP|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-26|jur=default",
+   "original_url": "https://washington.mfa.gov.sg/visa-and-entry-requirements/",
+   "final_url": "https://washington.mfa.gov.sg/visa-and-entry-requirements/",
+   "redirect_chain": [],
+   "final_hostname": "washington.mfa.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Visa and entry requirements | Embassy of the Republic of Singapore in Washington DC Skip to main content A Singapore Government Agency Website  How to identify Official website links end with .gov.sg Government agencies communicate via .gov.sg websites (e.g. go.gov.sg/open).  Trusted websites Secure websites use HTTPS Look for a lock ( ) or https:// as an added precaution. Share sensitive information only on official, secure websites. Government officials will never ask you to transfer money or disclose bank log-in details over a phone call. Call the 24/7 ScamShield Helpline at 1799 if you are unsure if something is a scam. For more information on how to protect yourself against scams, please visit the ScamShield website . Mission updates Consular services Procurement opportunities About the Embassy About Singapore eRegister trip Home Visa and entry requirements Visa and entry requirements Learn about visa application procedures and required documents to enter Singapore. Last updated 6 November 2025 On this page Countries/Regions which require a visa for entry into Singapore Visa-Free Transit Facility Submission of visa applications through Singapore Embassy in Washington D.C. Check status of visa application Singaporeans who wish to find out if they require a visa to visit a particular country should contact the country’s representative closest to you to be apprised of the latest requirements. All foreign visitors must ensure that they meet or possess entry requirements as s",
+   "retrieved_at": "2026-07-24T07:41:02+00:00",
+   "content_sha256": "c811e0b318992622f52739054eadd95638d596220fce7a8348855f0049e3abbd",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=SGP|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-26|jur=default",
+   "original_url": "https://www.ica.gov.sg/news-and-publications/newsroom/media-release/mutual-30-day-visa-exemption-arrangement-between-singapore-and-the-people-s-republic-of-china",
+   "final_url": "https://www.ica.gov.sg/news-and-publications/newsroom/media-release/mutual-30-day-visa-exemption-arrangement-between-singapore-and-the-people-s-republic-of-china",
+   "redirect_chain": [],
+   "final_hostname": "www.ica.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "ICA | Mutual 30-Day Visa-Exemption Arrangement Between Singapore and The People’s Republic Of China\nIdentity Cards, Passport and other Documents\nEntering, Transiting and Departing\nReside, Study and Work in Singapore\ne-Services and Forms\nCheck Status / Make Appointment\nWho We Are\nVision, Mission &amp; Values\nOur Checkpoints\nOur People\nOur Heritage\nAwards &amp; Accolades\nOur Service Commitment\nNews &amp; Publications\nNewsroom\nStatistics\nICA Annuals\nPublic Education\nPublications\nCareers\nJoin Us\nScholarships, Sponsorships &amp; Internships\nMeet Our Officers\nCareer FAQs\nMyICA\nToggle search bar\nToggle mobile menu\nHome\nNewsroom\nMedia Release Detail\nBack to top\nBack\nMutual 30-Day Visa-Exemption Arrangement Between Singapore and The People’s Republic Of China\n&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; With effect from 9 February 2024, holders of ordinary passports issued by the People’s Republic of China (PRC) will be exempted from visa requirements for a stay of up to 30 days in Singapore. There will be no refund of the visa processing fee for those who had earlier submitted an application.\n2.&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Similarly, holders of ordinary passports issued by Singapore will be exempted from visa requirements for a stay of up to 30 days in the PRC. This reciprocal visa exemption arrangement was announced at the 19th Joint Council for Bilateral Cooperation on 7 December 2023, and subsequently affirmed through an exchange of diplomatic notes between Singapore and the PR",
+   "retrieved_at": "2026-07-24T07:41:02+00:00",
+   "content_sha256": "7b8fdcf5fbd7d12226079354b2322553a3f61288b954a77de49ddcd96fa80eb1",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=SGP|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-26|jur=default",
+   "original_url": "https://beijing.mfa.gov.sg/consular-services/visa-information/",
+   "final_url": "https://beijing.mfa.gov.sg/consular-services/visa-information/",
+   "redirect_chain": [],
+   "final_hostname": "beijing.mfa.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Visa information | Embassy of the Republic of Singapore in Beijing Skip to main content A Singapore Government Agency Website  How to identify Official website links end with .gov.sg Government agencies communicate via .gov.sg websites (e.g. go.gov.sg/open).  Trusted websites Secure websites use HTTPS Look for a lock ( ) or https:// as an added precaution. Share sensitive information only on official, secure websites. Government officials will never ask you to transfer money or disclose bank log-in details over a phone call. Call the 24/7 ScamShield Helpline at 1799 if you are unsure if something is a scam. For more information on how to protect yourself against scams, please visit the ScamShield website . EN CN Mission updates Consular services Procurement opportunities About the Embassy About Singapore eRegister trip Home Consular services Visa information Visa information Information on the visa requirements to enter Singapore for Chinese (PRC) nationals. Last updated 18 May 2026 On this page Entry and visa requirements Visa application fee Documents required for visa application Submission of visa applications Visa processing time Collection of visas For enquiries Important notices Visa Free Transit Facility (VFTF) Frequently Asked Questions Entry and visa requirements With effect from 9 February 2024, holders of Ordinary Passports issued by the People’s Republic of China will be exempted from visa requirements for a stay of up to 30 days in Singapore. Holders of Diplomat",
+   "retrieved_at": "2026-07-24T07:41:02+00:00",
+   "content_sha256": "ec73f09e141c9220ec8473020dbd2984be73ffc0f677dc9ffadb46bf9c22295a",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=SGP|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-26|jur=default",
+   "original_url": "https://www.ica.gov.sg/",
+   "final_url": "https://www.ica.gov.sg/",
+   "redirect_chain": [],
+   "final_hostname": "www.ica.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Immigration & Checkpoints Authority (ICA)\nIdentity Cards, Passport and other Documents\nEntering, Transiting and Departing\nReside, Study and Work in Singapore\ne-Services and Forms\nCheck Status / Make Appointment\nWho We Are\nVision, Mission &amp; Values\nOur Checkpoints\nOur People\nOur Heritage\nAwards &amp; Accolades\nOur Service Commitment\nNews &amp; Publications\nNewsroom\nStatistics\nICA Annuals\nPublic Education\nPublications\nCareers\nJoin Us\nScholarships, Sponsorships &amp; Internships\nMeet Our Officers\nCareer FAQs\nMyICA\nToggle search bar\nToggle mobile menu\nSingapore Citizen\nApply/Renew\nPassport\nChange of Address\nIdentity Card\nRe-Register\nIdentity Card for 30/55-year-olds\nApply\nSingapore Citizenship\nSubmit\nSG Arrival Card\n...\nSee More\nPermanent Resident\nApply\nPermanent Residence\nApply/Renew\nRe-entry permit\nTransfer/Update Travel Document\nRe-Entry Permit\nSubmit\nSG Arrival Card\n...\nSee More\nPass Holder\nApply/Renew\nLong-Term Visit Pass\nApply/Renew\nStudent&#39;s Pass\nApply\nPermanent Residence\nUpdate\nParticulars/Address\nSubmit\nSG Arrival Card\n...\nSee More\nVisitor\nCheck\nEntry Visa Requirement\nSubmit\nSG Arrival Card\nSearch\ne-Pass Record\nApply to\nExtend Stay\nApply\nLong-Term Visit Pass/ Pre-Marriage LTVP Assessment\n...\nSee More\nPass Holder &gt; Particulars/Address\nGo Back\nLong-Term Visit Pass\nStudent&#39;s Pass\nVisitor &gt; Long-Term Visit Pass/ Pre-Marriage LTVP Assessment\nGo Back\nApply\nLong-Term Visit Pass\nApply\nPre-Marriage LTVP Assessment (Prospective Spouse of Singapore Citizen)\nSingapo",
+   "retrieved_at": "2026-07-24T07:41:02+00:00",
+   "content_sha256": "e726ce02c73be74af92acd237f69bbff0f73c1612293d1dd3dd65411dfb9bae1",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=SGP|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-26|jur=default",
+   "original_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/sg-arrival-card",
+   "final_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/sg-arrival-card",
+   "redirect_chain": [],
+   "final_hostname": "www.ica.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "ICA | SG Arrival Card (SGAC) with Electronic Health Declaration\nIdentity Cards, Passport and other Documents\nEntering, Transiting and Departing\nReside, Study and Work in Singapore\ne-Services and Forms\nCheck Status / Make Appointment\nWho We Are\nVision, Mission &amp; Values\nOur Checkpoints\nOur People\nOur Heritage\nAwards &amp; Accolades\nOur Service Commitment\nNews &amp; Publications\nNewsroom\nStatistics\nICA Annuals\nPublic Education\nPublications\nCareers\nJoin Us\nScholarships, Sponsorships &amp; Internships\nMeet Our Officers\nCareer FAQs\nMyICA\nToggle search bar\nToggle mobile menu\nHome\nEntering, Transiting and Departing\nEntering Singapore\nSG Arrival Card (SGAC)\nSG Arrival Card (SGAC) with Electronic Health Declaration\nBack to top\nSubmit Online\nSubmit the SG Arrival Card (SGAC) with Electronic Health Declaration\nYou can submit the SGAC via: SGAC e-Service &nbsp;(submit online here) ; or MyICA Mobile application - Download the official app for free from the&nbsp; App Store (iOS) &nbsp;or&nbsp; Google Play (Android) &nbsp;and enjoy seamless submissions with the MyICA Mobile app. Travellers are encouraged to download the MyICA Mobile application for your own convenience. The profile-saving function in the app can auto-populate relevant profile information for your subsequent trips to Singapore.&nbsp; Find out how the MyICA Mobile app can bring convenience to you on-the-go. SGAC submission is free of charge.&nbsp; ICA&nbsp; does not &nbsp;support or endorse services offered by commercial e",
+   "retrieved_at": "2026-07-24T07:41:03+00:00",
+   "content_sha256": "718ce79c01986c593813ee11c618de76ab08a6dc8613b71612b6dbfcf0e84f71",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=SGP|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-26|jur=default",
+   "original_url": "https://eservices.ica.gov.sg/sgarrivalcard/",
+   "final_url": "https://eservices.ica.gov.sg/sgarrivalcard/",
+   "redirect_chain": [],
+   "final_hostname": "eservices.ica.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "ICA | SG Arrival Card\nA Singapore Government Agency Website How to identify &nbsp; Home SGAC E-PASS FAQ\nENGLISH BAHASA MELAYU Bengali DEUTSCH FRANÇAIS Tiếng Việt हिंदी தமிழ் ไทย 日本語 简体中文 한국어 ENGLISH BAHASA MELAYU Bengali DEUTSCH FRANÇAIS Tiếng Việt हिंदी தமிழ் ไทย 日本語 简体中文 한국어 Home &nbsp; Singapore Arrival Card (SGAC) &nbsp; RETRIEVE ELECTRONIC PASS (e-PASS) &nbsp; FAQ Singapore Arrival Card (SGAC) and Electronic Pass (e-Pass) Enquiry Portal Submit SGAC Provide your arrival details for your upcoming trip. Update SGAC Make changes to the arrival information. Retrieve Electronic Pass (e-Pass Enquiry Portal) Retrieve e-Pass issued after immigration. What you should note: All travellers are required to submit their Singapore Arrival Card before arriving in Singapore, except: Those transiting/transferring through Singapore without seeking immigration clearance; and Residents travelling through the land checkpoints. For more information, please refer to Singapore's entry requirements . Immigration &amp; Checkpoints Authority Contact Us Report Vulnerability Privacy Terms of Use © 2025 Government of Singapore. &nbsp; Last Updated 25 March 2026 © 2025 Government of Singapore. Last Updated 25 March 2026 This website is optimised for Edge, Firefox, Chrome, Safari.",
+   "retrieved_at": "2026-07-24T07:41:14+00:00",
+   "content_sha256": "0bcbab881d638e612211a14fed6b65f651ac663489261ccf706e1c345450e874",
+   "page_language": "zh"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=SGP|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-26|jur=default",
+   "original_url": "https://eservices.ica.gov.sg/esvclandingpage/save",
+   "final_url": "https://eservices.ica.gov.sg/esvclandingpage/save",
+   "redirect_chain": [
+    "https://eservices.ica.gov.sg/esvclandingpage/save",
+    "https://eservices.ica.gov.sg/esvclandingpage/save"
+   ],
+   "final_hostname": "eservices.ica.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "ICA - Visa Application\nMyICA Home\nICA will NEVER ask for money/bank log-in details by phone.\nSuspicious? Call ScamShield 24/7 helpline at 1799. For scam related advice, visit\nGovernment Officials Impersonation Scams.\nAttention:\nApply for Entry Visa\nThis facility allows you to apply for a Singapore entry visa as a local contact or authorised visa agent or strategic partner.\nInformation Required\nPlease have the following information ready when submitting the visa application:\nDuly completed Form 14A (PDF, 445KB)\nsigned by the applicant. The visa application shall be made based on the information declared in this form. ICA may request for the form to be submitted.\nDuly completed Form V39A (PDF, 191KB)\nsigned by the local contact (if applicable)\nApplicant's recent passport-sized colour photograph (taken within the last three months).\nPlease see Photo Guidelines for information on photo requirements.\nA photocopy of the applicant's passport bio-data page (valid for at least six months)\nfrom the date of his entry into Singapore\nVISA or Master Credit/Debit Card, American Express Card or Internet Banking Details.\nI want to...\nApply for Entry Visa as a Local Contact (Individual Users)\nApply for Entry Visa as a Local Contact (Business Users)\nApply for Entry Visa as an Authorised Visa Agent\nApply for Entry Visa as a Strategic Partner\nEnquire Application Status\nImportant Notes\nIf you are using a pop-up blocker, please add the following as your allowed sites. Otherwise, the relevant transa",
+   "retrieved_at": "2026-07-24T07:41:19+00:00",
+   "content_sha256": "2e31c49f9d9c63535538664466772e1f57c84d3393dd74d626301bc250e7aa59",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=SGP|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-26|jur=default",
+   "original_url": "https://www.mfa.gov.sg/",
+   "final_url": "https://www.mfa.gov.sg/",
+   "redirect_chain": [],
+   "final_hostname": "www.mfa.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Home | Ministry of Foreign Affairs Skip to main content A Singapore Government Agency Website  How to identify Official website links end with .gov.sg Government agencies communicate via .gov.sg websites (e.g. go.gov.sg/open).  Trusted websites Secure websites use HTTPS Look for a lock ( ) or https:// as an added precaution. Share sensitive information only on official, secure websites. Beware of scammers pretending to be MFA officers. Government officials will never ask you to transfer money or disclose bank log-in details over a phone call. Call the 24/7 ScamShield Helpline at 1799 if you are unsure if something is a scam. Travelling overseas I need help overseas Visiting Singapore Careers Newsroom About MFA eRegister trip Ministry of Foreign Affairs Press Statements, Transcripts &amp; Photos Details of press statements, transcripts of speeches &amp; interviews, and photos can be found here. 23 July 2026 Transcript of Minister for Foreign Affairs Dr Vivian Balakrishnan&#x27;s Media Wrap-Up Interview at the 59th ASEAN Foreign Ministers&#x27; Meeting and Related Meetings, Manila, the Philippines, 23 July 2026 Transcripts 23 July 2026 5th Conference on Cooperation Among East Asian Countries for Palestinian Development (CEAPAD V), 22 July 2026 Press Statements 22 July 2026 Visit by Minister of Foreign Affairs of the Republic of Chile Francisco Pérez Mackenna, 21 to 23 July 2026 Press Statements Press Statements, Transcripts &amp; Photos Announcements and Highlights Details of u",
+   "retrieved_at": "2026-07-24T07:41:19+00:00",
+   "content_sha256": "e0bda2cc6a61ac4269e7b3e7a43885be40dc699268261ed7dba03490e22b900b",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=SGP|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-26|jur=default",
+   "original_url": "https://washington.mfa.gov.sg",
+   "final_url": "https://washington.mfa.gov.sg",
+   "redirect_chain": [
+    "https://www.mfa.gov.sg/Overseas-Mission/Washington",
+    "https://www.mfa.gov.sg/overseas-mission/washington/",
+    "https://washington.mfa.gov.sg"
+   ],
+   "final_hostname": "washington.mfa.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Home | Embassy of the Republic of Singapore in Washington DC Skip to main content A Singapore Government Agency Website  How to identify Official website links end with .gov.sg Government agencies communicate via .gov.sg websites (e.g. go.gov.sg/open).  Trusted websites Secure websites use HTTPS Look for a lock ( ) or https:// as an added precaution. Share sensitive information only on official, secure websites. Government officials will never ask you to transfer money or disclose bank log-in details over a phone call. Call the 24/7 ScamShield Helpline at 1799 if you are unsure if something is a scam. For more information on how to protect yourself against scams, please visit the ScamShield website . Mission updates Consular services Procurement opportunities About the Embassy About Singapore eRegister trip Embassy of the Republic of Singapore in Washington DC Mission updates Stay informed with the mission updates here. 13 July 2026 National Day Reception 2026 23 January 2026 Lunar New Year Reception 2026 Feature Articles 1 October 2025 Newsroom - Singapore and the United States Announcements Find out more Important information Customs &amp; Import information Healthcare information Tourist information Visa and entry requirements Join the Singapore Global Network Invest in Singapore Consular services from the Embassy of the Republic of Singapore in Washington DC Services that we provide for Singaporeans and those visiting Singapore. I’ve lost my Singapore passport If you’ve l",
+   "retrieved_at": "2026-07-24T07:41:19+00:00",
+   "content_sha256": "fbb7ad0162ef6795405cca460e130bda404b8a36a9a3c14c482a1a2cfaa1f5fe",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=SGP|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-26|jur=default",
+   "original_url": "https://www.mfa.gov.sg/overseas-mission/washington/consular-services/visa-information/",
+   "final_url": "https://www.mfa.gov.sg/overseas-mission/washington/consular-services/visa-information/",
+   "redirect_chain": [
+    "https://www.mfa.gov.sg/overseas-mission/washington/consular-services/visa-information/"
+   ],
+   "final_hostname": "www.mfa.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "404: Page not found | Ministry of Foreign Affairs Skip to main content A Singapore Government Agency Website&nbsp; How to identify Official website links end with .gov.sg Government agencies communicate via .gov.sg websites (e.g. go.gov.sg/open).&nbsp; Trusted websites Secure websites use HTTPS Look for a lock ( ) or https:// as an added precaution. Share sensitive information only on official, secure websites. Beware of scammers pretending to be MFA officers. Government officials will never ask you to transfer money or disclose bank log-in details over a phone call. Call the 24/7 ScamShield Helpline at 1799 if you are unsure if something is a scam. Travelling overseas I need help overseas Visiting Singapore Careers Newsroom About MFA eRegister trip Page not found This page might have been moved or deleted. Try searching for this page instead. Search for this page Go to homepage Ministry of Foreign Affairs Travelling overseas Get help overseas Visiting Singapore Careers Newsroom About MFA ICJ Candidature Lee Kuan Yew Exchange Fellowship Courses at Singapore Cooperation Programme Find an overseas mission Reach us Contact Feedback © 2026 Government of Singapore , last updated 24 July 2026 Report Vulnerability Privacy Statement Terms of Use REACH Made with Isomer Built by Open Government Products Ministry of Foreign Affairs Travelling overseas Get help overseas Visiting Singapore Careers Newsroom About MFA ICJ Candidature Lee Kuan Yew Exchange Fellowship Courses at Singapore Coo",
+   "retrieved_at": "2026-07-24T07:41:28+00:00",
+   "content_sha256": "68244bcc229b77d3162b4bf734da317f4954e0557e51897560455a64e2982586",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=SGP|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-26|jur=default",
+   "original_url": "https://newyork-un.mfa.gov.sg",
+   "final_url": "https://newyork-un.mfa.gov.sg",
+   "redirect_chain": [
+    "https://www.mfa.gov.sg/Overseas-Mission/New-York",
+    "https://www.mfa.gov.sg/overseas-mission/new-york/",
+    "https://newyork-un.mfa.gov.sg"
+   ],
+   "final_hostname": "newyork-un.mfa.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Home | New York UN Skip to main content A Singapore Government Agency Website  How to identify Official website links end with .gov.sg Government agencies communicate via .gov.sg websites (e.g. go.gov.sg/open).  Trusted websites Secure websites use HTTPS Look for a lock ( ) or https:// as an added precaution. Share sensitive information only on official, secure websites. Government officials will never ask you to transfer money or disclose bank log-in details over a phone call. Call the 24/7 ScamShield Helpline at 1799 if you are unsure if something is a scam. For more information on how to protect yourself against scams, please visit the ScamShield website . Mission updates Consular services Procurement opportunities About the Mission About Singapore eRegister trip New York UN Important information Invest in Singapore New York UN Mission updates Consular services Procurement opportunities About the Mission About Singapore MFA Home Reach us Contact Feedback © 2026 Government of Singapore , last updated 20 July 2026 Report Vulnerability Privacy Statement Terms of Use REACH Made with Isomer Built by Open Government Products New York UN Mission updates Consular services Procurement opportunities About the Mission About Singapore MFA Home Reach us Contact Feedback © 2026 Government of Singapore , last updated 20 July 2026 Report Vulnerability Privacy Statement Terms of Use REACH Made with Isomer Built by Open Government Products",
+   "retrieved_at": "2026-07-24T07:41:29+00:00",
+   "content_sha256": "feee83014ae7df04032b68829bcffbe155e2fe247606f84ceef916438c5b465d",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=SGP|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-26|jur=default",
+   "original_url": "https://sanfrancisco.mfa.gov.sg",
+   "final_url": "https://sanfrancisco.mfa.gov.sg",
+   "redirect_chain": [
+    "https://www.mfa.gov.sg/Overseas-Mission/San-Francisco",
+    "https://www.mfa.gov.sg/overseas-mission/san-francisco/",
+    "https://sanfrancisco.mfa.gov.sg"
+   ],
+   "final_hostname": "sanfrancisco.mfa.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Home | Consulate-General of the Republic of Singapore in San Francisco Skip to main content A Singapore Government Agency Website  How to identify Official website links end with .gov.sg Government agencies communicate via .gov.sg websites (e.g. go.gov.sg/open).  Trusted websites Secure websites use HTTPS Look for a lock ( ) or https:// as an added precaution. Share sensitive information only on official, secure websites. Government officials will never ask you to transfer money or disclose bank log-in details over a phone call. Call the 24/7 ScamShield Helpline at 1799 if you are unsure if something is a scam. For more information on how to protect yourself against scams, please visit the ScamShield website . Mission updates Consular services Procurement opportunities About the Consulate-General About Singapore eRegister trip Consulate-General of the Republic of Singapore in San Francisco Mission updates Stay informed with the mission updates here. 27 May 2020 Letter to the Editor - Foreign Policy Articles 21 April 2020 PM Lee Hsien Loong on the COVID-19 situation in Singapore on 21 April 2020 Announcements 18 March 2020 Operating Status of the Singapore Consulate-General in San Francisco Related to COVID-19 Articles Find out more Important information Earthquake preparedness Active shooter prepardness Overseas travel - be informed and be safe Join the Singapore Global Network Invest in Singapore Office closure during Public Holidays Consular services from the Consulate-Gene",
+   "retrieved_at": "2026-07-24T07:41:30+00:00",
+   "content_sha256": "6b2e35a1d3a006f944dbd2605f117fdb78318387c45004086fda3b4f0146666c",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=SGP|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-26|jur=default",
+   "original_url": "https://www.ica.gov.sg/documents",
+   "final_url": "https://www.ica.gov.sg/documents",
+   "redirect_chain": [],
+   "final_hostname": "www.ica.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "ICA | Identity Card, Passport and other Documents\nIdentity Cards, Passport and other Documents\nEntering, Transiting and Departing\nReside, Study and Work in Singapore\ne-Services and Forms\nCheck Status / Make Appointment\nWho We Are\nVision, Mission &amp; Values\nOur Checkpoints\nOur People\nOur Heritage\nAwards &amp; Accolades\nOur Service Commitment\nNews &amp; Publications\nNewsroom\nStatistics\nICA Annuals\nPublic Education\nPublications\nCareers\nJoin Us\nScholarships, Sponsorships &amp; Internships\nMeet Our Officers\nCareer FAQs\nMyICA\nToggle search bar\nToggle mobile menu\nHome\nIdentity Card, Passport and other Documents\nIdentity Card, Passport and other Documents\nIdentity Card\nRegister for 15-year-olds\nRe-Register for 30/55-year-olds\nReport and Replace Lost IC\nReplace IC (Change IC Particulars/Damaged)\n- Information on Change of Race\nChange of Residential Address\nCollect\nCheck Validity\nSingapore Passport\nApply\nCollect\nReport Damage\nReport Loss\nForeign Passport\nReport Loss\nApply for/Renew Re-Entry Permit\nTransfer Re-Entry Permit/Update Travel Document\nOther Documents\nAPEC Business Travel Card\nApply Certificate of Identity\nChange of Particulars for Certificate of Identity\nLoss or Damage of Citizenship Certificate\nRight of Entry (ROE)\nIdentity Card, Passport and other Documents\nIdentity Card\nRegister for 15-year-olds\nRe-Register for 30/55-year-olds\nReport and Replace Lost IC\nReplace IC (Change IC Particulars/Damaged)\n- Information on Change of Race\nChange of Residential Address\nCollect\nCheck ",
+   "retrieved_at": "2026-07-24T07:41:30+00:00",
+   "content_sha256": "75c384c9974cac5ff8e8725fe1bdb95d6ba1a9ffbb463b6129dc9fc583a1273a",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=SGP|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-26|jur=default",
+   "original_url": "https://www.ica.gov.sg/check-status-make-appointment",
+   "final_url": "https://www.ica.gov.sg/check-status-make-appointment",
+   "redirect_chain": [],
+   "final_hostname": "www.ica.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "ICA | Check Status/Make Appointment\nIdentity Cards, Passport and other Documents\nEntering, Transiting and Departing\nReside, Study and Work in Singapore\ne-Services and Forms\nCheck Status / Make Appointment\nWho We Are\nVision, Mission &amp; Values\nOur Checkpoints\nOur People\nOur Heritage\nAwards &amp; Accolades\nOur Service Commitment\nNews &amp; Publications\nNewsroom\nStatistics\nICA Annuals\nPublic Education\nPublications\nCareers\nJoin Us\nScholarships, Sponsorships &amp; Internships\nMeet Our Officers\nCareer FAQs\nMyICA\nToggle search bar\nToggle mobile menu\nHome\nCheck Status/Make Appointment\nCheck Status of Online Application\nPassport\nIdentity Card\nBirth or Death Extract\nSingapore Citizenship\nPermanent Residence\nLong-Term Visit Pass\nApply for/Renew Re-Entry Permit\nTransfer Re-Entry Permit/Update Travel Document\nEntry Visa\ne-Pass Enquiry Portal\nExtension of Short-Term Visit Pass\nStudent&#39;s Pass for Institutes of Higher Learning\nStudent&#39;s Pass for Other Schools\nPre-Marriage Long-Term Visit Pass Assessment\nCheck Status of Online Application\nPassport\nIdentity Card\nBirth or Death Extract\nSingapore Citizenship\nPermanent Residence\nLong-Term Visit Pass\nApply for/Renew Re-Entry Permit\nTransfer Re-Entry Permit/Update Travel Document\nEntry Visa\ne-Pass Enquiry Portal\nExtension of Short-Term Visit Pass\nStudent&#39;s Pass for Institutes of Higher Learning\nStudent&#39;s Pass for Other Schools\nPre-Marriage Long-Term Visit Pass Assessment\nMake an Appointment\nBook/Change/Cancel Appointment\nMake an A",
+   "retrieved_at": "2026-07-24T07:41:30+00:00",
+   "content_sha256": "d928be8ced11a975b3eeee36807e2916b7176cab104d3cb7c93e56922963ff3e",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=SGP|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-26|jur=default",
+   "original_url": "https://eservices.ica.gov.sg/esvclandingpage/save",
+   "final_url": "https://eservices.ica.gov.sg/esvclandingpage/save",
+   "redirect_chain": [
+    "https://www.ica.gov.sg/check-status-make-appointment/check-status-of-online-application/entry-visa",
+    "https://eservices.ica.gov.sg/esvclandingpage/save",
+    "https://eservices.ica.gov.sg/esvclandingpage/save"
+   ],
+   "final_hostname": "eservices.ica.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "ICA - Visa Application\nMyICA Home\nICA will NEVER ask for money/bank log-in details by phone.\nSuspicious? Call ScamShield 24/7 helpline at 1799. For scam related advice, visit\nGovernment Officials Impersonation Scams.\nAttention:\nApply for Entry Visa\nThis facility allows you to apply for a Singapore entry visa as a local contact or authorised visa agent or strategic partner.\nInformation Required\nPlease have the following information ready when submitting the visa application:\nDuly completed Form 14A (PDF, 445KB)\nsigned by the applicant. The visa application shall be made based on the information declared in this form. ICA may request for the form to be submitted.\nDuly completed Form V39A (PDF, 191KB)\nsigned by the local contact (if applicable)\nApplicant's recent passport-sized colour photograph (taken within the last three months).\nPlease see Photo Guidelines for information on photo requirements.\nA photocopy of the applicant's passport bio-data page (valid for at least six months)\nfrom the date of his entry into Singapore\nVISA or Master Credit/Debit Card, American Express Card or Internet Banking Details.\nI want to...\nApply for Entry Visa as a Local Contact (Individual Users)\nApply for Entry Visa as a Local Contact (Business Users)\nApply for Entry Visa as an Authorised Visa Agent\nApply for Entry Visa as a Strategic Partner\nEnquire Application Status\nImportant Notes\nIf you are using a pop-up blocker, please add the following as your allowed sites. Otherwise, the relevant transa",
+   "retrieved_at": "2026-07-24T07:41:33+00:00",
+   "content_sha256": "2e31c49f9d9c63535538664466772e1f57c84d3393dd74d626301bc250e7aa59",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=SGP|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-26|jur=default",
+   "original_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/afghanistan",
+   "final_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/afghanistan",
+   "redirect_chain": [],
+   "final_hostname": "www.ica.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "ICA | Visa Detail Page\nIdentity Cards, Passport and other Documents\nEntering, Transiting and Departing\nReside, Study and Work in Singapore\ne-Services and Forms\nCheck Status / Make Appointment\nWho We Are\nVision, Mission &amp; Values\nOur Checkpoints\nOur People\nOur Heritage\nAwards &amp; Accolades\nOur Service Commitment\nNews &amp; Publications\nNewsroom\nStatistics\nICA Annuals\nPublic Education\nPublications\nCareers\nJoin Us\nScholarships, Sponsorships &amp; Internships\nMeet Our Officers\nCareer FAQs\nMyICA\nToggle search bar\nToggle mobile menu\nHome &gt;\nEntering, Transiting and Departing &gt;\nEntering Singapore &gt;\nCheck if You Need an Entry Visa &gt;\nAfghanistan Visa Requirements\nAfghanistan Visa Requirements\nYou will need a visa to enter Singapore if you are holding a travel document issued by this country.\nApply Online\nDocuments Required\nYou will need to provide original documents and official translations (for documents in languages other than English), as well as copies of the documents for ICA to retain. ICA accepts: Translations provided by the embassy of the country/ place that issued the document Translations produced by a notary public in Singapore or the country/ place that issued the document Privately created translations attested by the embassy of the country/ place that issued the document, or notarised by a notary public in Singapore or the country/ place that issued the document. ICA does not endorse any private translation companies or entities. Insufficient documentat",
+   "retrieved_at": "2026-07-24T07:41:34+00:00",
+   "content_sha256": "3ebf21f913acdd805287833963b2a50f787bd3b8f564dbca374d6642784f1468",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=SGP|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-26|jur=default",
+   "original_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/algeria",
+   "final_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/algeria",
+   "redirect_chain": [],
+   "final_hostname": "www.ica.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "ICA | Visa Detail Page\nIdentity Cards, Passport and other Documents\nEntering, Transiting and Departing\nReside, Study and Work in Singapore\ne-Services and Forms\nCheck Status / Make Appointment\nWho We Are\nVision, Mission &amp; Values\nOur Checkpoints\nOur People\nOur Heritage\nAwards &amp; Accolades\nOur Service Commitment\nNews &amp; Publications\nNewsroom\nStatistics\nICA Annuals\nPublic Education\nPublications\nCareers\nJoin Us\nScholarships, Sponsorships &amp; Internships\nMeet Our Officers\nCareer FAQs\nMyICA\nToggle search bar\nToggle mobile menu\nHome &gt;\nEntering, Transiting and Departing &gt;\nEntering Singapore &gt;\nCheck if You Need an Entry Visa &gt;\nAlgeria Visa Requirements\nAlgeria Visa Requirements\nYou will need a visa to enter Singapore if you are holding a travel document issued by this country.\nApply Online\nDocuments Required\nYou will need to provide original documents and official translations (for documents in languages other than English), as well as copies of the documents for ICA to retain. ICA accepts: Translations provided by the embassy of the country/ place that issued the document Translations produced by a notary public in Singapore or the country/ place that issued the document Privately created translations attested by the embassy of the country/ place that issued the document, or notarised by a notary public in Singapore or the country/ place that issued the document. ICA does not endorse any private translation companies or entities. Insufficient documentation may ",
+   "retrieved_at": "2026-07-24T07:41:34+00:00",
+   "content_sha256": "a8ce72575091ec5c201a3bf948474238d8624fbdc25c2cabd6b8cdd17e74dfd7",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=SGP|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-26|jur=default",
+   "original_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/armenia",
+   "final_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/armenia",
+   "redirect_chain": [],
+   "final_hostname": "www.ica.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "ICA | Visa Detail Page\nIdentity Cards, Passport and other Documents\nEntering, Transiting and Departing\nReside, Study and Work in Singapore\ne-Services and Forms\nCheck Status / Make Appointment\nWho We Are\nVision, Mission &amp; Values\nOur Checkpoints\nOur People\nOur Heritage\nAwards &amp; Accolades\nOur Service Commitment\nNews &amp; Publications\nNewsroom\nStatistics\nICA Annuals\nPublic Education\nPublications\nCareers\nJoin Us\nScholarships, Sponsorships &amp; Internships\nMeet Our Officers\nCareer FAQs\nMyICA\nToggle search bar\nToggle mobile menu\nHome &gt;\nEntering, Transiting and Departing &gt;\nEntering Singapore &gt;\nCheck if You Need an Entry Visa &gt;\nArmenia Visa Requirements\nArmenia Visa Requirements\nYou will need a visa to enter Singapore if you are holding a travel document issued by this country.&nbsp; However, please note that holders of diplomatic passports do not need a visa for entry.\nApply Online\nDocuments Required\nYou will need to provide original documents and official translations (for documents in languages other than English), as well as copies of the documents for ICA to retain. ICA accepts: Translations provided by the embassy of the country/ place that issued the document Translations produced by a notary public in Singapore or the country/ place that issued the document Privately created translations attested by the embassy of the country/ place that issued the document, or notarised by a notary public in Singapore or the country/ place that issued the document. ICA d",
+   "retrieved_at": "2026-07-24T07:41:34+00:00",
+   "content_sha256": "4b8682cc78ae6ad309f9e2970c5044820bbe8ca2250ddb91949b3264d2478740",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=SGP|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-26|jur=default",
+   "original_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/azerbaijan",
+   "final_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/azerbaijan",
+   "redirect_chain": [],
+   "final_hostname": "www.ica.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "ICA | Visa Detail Page\nIdentity Cards, Passport and other Documents\nEntering, Transiting and Departing\nReside, Study and Work in Singapore\ne-Services and Forms\nCheck Status / Make Appointment\nWho We Are\nVision, Mission &amp; Values\nOur Checkpoints\nOur People\nOur Heritage\nAwards &amp; Accolades\nOur Service Commitment\nNews &amp; Publications\nNewsroom\nStatistics\nICA Annuals\nPublic Education\nPublications\nCareers\nJoin Us\nScholarships, Sponsorships &amp; Internships\nMeet Our Officers\nCareer FAQs\nMyICA\nToggle search bar\nToggle mobile menu\nHome &gt;\nEntering, Transiting and Departing &gt;\nEntering Singapore &gt;\nCheck if You Need an Entry Visa &gt;\nAzerbaijan Visa Requirements\nAzerbaijan Visa Requirements\nYou will need a visa to enter Singapore if you are holding a travel document issued by this country.&nbsp; However, please note that holders of diplomatic, official and service passports do not need a visa for entry.\nApply Online\nDocuments Required\nYou will need to provide original documents and official translations (for documents in languages other than English), as well as copies of the documents for ICA to retain. ICA accepts: Translations provided by the embassy of the country/ place that issued the document Translations produced by a notary public in Singapore or the country/ place that issued the document Privately created translations attested by the embassy of the country/ place that issued the document, or notarised by a notary public in Singapore or the country/ place tha",
+   "retrieved_at": "2026-07-24T07:41:34+00:00",
+   "content_sha256": "d9efc8917dae7831c25d37bfeb1457916b6f1884d7352e926908b000653d3066",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=SGP|cat=tourist_visa|sub=any|pur=tourism|per=2026-07-26|jur=default",
+   "original_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/bangladesh",
+   "final_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/bangladesh",
+   "redirect_chain": [],
+   "final_hostname": "www.ica.gov.sg",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "ICA | Visa Detail Page\nIdentity Cards, Passport and other Documents\nEntering, Transiting and Departing\nReside, Study and Work in Singapore\ne-Services and Forms\nCheck Status / Make Appointment\nWho We Are\nVision, Mission &amp; Values\nOur Checkpoints\nOur People\nOur Heritage\nAwards &amp; Accolades\nOur Service Commitment\nNews &amp; Publications\nNewsroom\nStatistics\nICA Annuals\nPublic Education\nPublications\nCareers\nJoin Us\nScholarships, Sponsorships &amp; Internships\nMeet Our Officers\nCareer FAQs\nMyICA\nToggle search bar\nToggle mobile menu\nHome &gt;\nEntering, Transiting and Departing &gt;\nEntering Singapore &gt;\nCheck if You Need an Entry Visa &gt;\nBangladesh Visa Requirements\nBangladesh Visa Requirements\nYou will need a visa to enter Singapore if you are holding a travel document issued by this country. However, please note that holders of diplomatic, official and service passports do not need a visa for entry.\nApply Online\nDocuments Required\nYou will need to provide original documents and official translations (for documents in languages other than English), as well as copies of the documents for ICA to retain. ICA accepts: Translations provided by the embassy of the country/ place that issued the document Translations produced by a notary public in Singapore or the country/ place that issued the document Privately created translations attested by the embassy of the country/ place that issued the document, or notarised by a notary public in Singapore or the country/ place that issu",
+   "retrieved_at": "2026-07-24T07:41:34+00:00",
+   "content_sha256": "40bae48b7ffb9e669e0418423f82eae7b67f26f2d7465d064ba3513c05dceeed",
+   "page_language": "en"
+  }
+ ],
+ "dispositions": [
+  {
+   "nationalities": [
+    "CHN"
+   ],
+   "category": "visa_free_entry",
+   "disposition": "VISA_FREE",
+   "maximum_stay": "30 days",
+   "conditions": [
+    "Applies to holders of ordinary passports issued by the People's Republic of China, with effect from 9 February 2024 (mutual 30-day visa-exemption arrangement)",
+    "Holders of all other travel documents issued by the PRC (PRC Travel Document, etc.) must continue to apply for an entry visa before travel",
+    "SG Arrival Card must be submitted within 3 days (including the day of arrival) before arriving",
+    "Passport minimum validity of 6 months required"
+   ],
+   "source_urls": [
+    "https://www.ica.gov.sg/news-and-publications/newsroom/media-release/mutual-30-day-visa-exemption-arrangement-between-singapore-and-the-people-s-republic-of-china",
+    "https://beijing.mfa.gov.sg/consular-services/visa-information/"
+   ]
+  },
+  {
+   "nationalities": [
+    "USA",
+    "GBR",
+    "HKG",
+    "TWN",
+    "JPN",
+    "KOR",
+    "DEU",
+    "FRA",
+    "AUS",
+    "CAN",
+    "ARE",
+    "BRA"
+   ],
+   "category": "visa_free_entry",
+   "disposition": "VISA_FREE",
+   "maximum_stay": null,
+   "conditions": [
+    "These nationalities do not appear on ICA's list of visa-required countries/places, so no entry visa is required for social/tourist visits",
+    "US Passport Holders (regular, official and diplomatic) explicitly confirmed visa-free for business or social visit purposes by the Singapore Embassy in Washington DC",
+    "Period of stay is not fixed in advance: it is determined by the Visit Pass (e-Pass) granted by ICA at the checkpoint upon entry (extensions possible via ICA)",
+    "HKG = Hong Kong SAR passport holders; holders of the Hong Kong SAR Document of Identity DO require a visa",
+    "ARE = regular UAE passports; holders of temporary UAE passports DO require a visa",
+    "SG Arrival Card must be submitted within 3 days (including the day of arrival) before arriving",
+    "Passport minimum validity of 6 months, onward/return ticket and sufficient funds required"
+   ],
+   "source_urls": [
+    "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+    "https://washington.mfa.gov.sg/visa-and-entry-requirements/",
+    "https://www.ica.gov.sg/enter-transit-depart/entering-singapore"
+   ]
+  },
+  {
+   "nationalities": [
+    "SGP"
+   ],
+   "category": "visa_free_entry",
+   "disposition": "VISA_FREE",
+   "maximum_stay": null,
+   "conditions": [
+    "Singapore citizens entering their own country; not subject to entry visa or visit pass requirements",
+    "ICA exempts Singapore passport holders from the 6-month passport validity requirement"
+   ],
+   "source_urls": [
+    "https://www.ica.gov.sg/enter-transit-depart/entering-singapore"
+   ]
+  },
+  {
+   "nationalities": [
+    "AFG",
+    "DZA",
+    "ARM",
+    "AZE",
+    "BGD",
+    "BLR",
+    "PRK",
+    "EGY",
+    "GEO",
+    "IND",
+    "IRN",
+    "IRQ",
+    "JOR",
+    "KAZ",
+    "XKX",
+    "KGZ",
+    "LBN",
+    "LBY",
+    "MLI",
+    "MDA",
+    "MAR",
+    "NGA",
+    "PAK",
+    "RUS",
+    "SOM",
+    "SSD",
+    "SDN",
+    "SYR",
+    "TJK",
+    "TUN",
+    "TKM",
+    "UKR",
+    "UZB",
+    "YEM"
+   ],
+   "category": "tourist_visa",
+   "disposition": "EMBASSY_VISA_REQUIRED",
+   "maximum_stay": null,
+   "conditions": [
+    "Holders of travel documents issued by these countries/places require a valid Singapore entry visa before travel",
+    "Application channels: online via the SAVE e-Service through a local contact in Singapore or a strategic partner/authorised visa agent, or at the nearest Singapore Overseas Mission or through its authorised visa agent",
+    "ICA does not accept submission of visa applications over the immigration counters (no visa on arrival)",
+    "S$30 non-refundable processing fee; processing within three working days (excluding day of submission), some applications may take longer",
+    "The visa is pre-entry permission only; period of stay is determined by the Visit Pass (e-Pass) granted at the checkpoint upon entry",
+    "Also visa-required regardless of nationality: holders of refugee travel documents, alien's passports, Palestinian Authority passports, temporary UAE passports, Hong Kong SAR Documents of Identity, Macao SAR Travel Permits, and PRC Travel Documents",
+    "Nationals of the Commonwealth of Independent States, Georgia, India, Turkmenistan and Ukraine, and selected PRC nationals, may be eligible for the Visa-Free Transit Facility (transit only)"
+   ],
+   "source_urls": [
+    "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+    "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/india"
+   ]
+  },
+  {
+   "nationalities": [
+    "CHN",
+    "USA",
+    "GBR",
+    "HKG",
+    "TWN",
+    "JPN",
+    "KOR",
+    "DEU",
+    "FRA",
+    "AUS",
+    "CAN",
+    "ARE",
+    "BRA",
+    "SGP"
+   ],
+   "category": "tourist_visa",
+   "disposition": "NOT_APPLICABLE",
+   "maximum_stay": null,
+   "conditions": [
+    "No consular/entry visa needed for tourism or social visits: these nationalities are not on ICA's visa-required list (CHN ordinary passports exempt since 9 February 2024)"
+   ],
+   "source_urls": [
+    "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+    "https://www.ica.gov.sg/news-and-publications/newsroom/media-release/mutual-30-day-visa-exemption-arrangement-between-singapore-and-the-people-s-republic-of-china"
+   ]
+  },
+  {
+   "nationalities": [
+    "ALL_OTHERS"
+   ],
+   "category": "visa_free_entry",
+   "disposition": "VISA_FREE",
+   "maximum_stay": null,
+   "conditions": [
+    "ICA publishes an exhaustive list of visa-required countries/places (all reproduced in the dispositions above); holders of national passports NOT on that list do not require an entry visa for social/tourist visits",
+    "Exception regardless of nationality: holders of refugee travel documents, alien's passports, Palestinian Authority passports, temporary UAE passports, Hong Kong SAR Documents of Identity, Macao SAR Travel Permits, and PRC Travel Documents require a visa",
+    "Period of stay is determined by the Visit Pass (e-Pass) granted at the checkpoint upon entry",
+    "SG Arrival Card must be submitted within 3 days (including the day of arrival) before arriving; passport minimum validity of 6 months"
+   ],
+   "source_urls": [
+    "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+    "https://www.ica.gov.sg/enter-transit-depart/entering-singapore"
+   ]
+  },
+  {
+   "nationalities": [
+    "ALL"
+   ],
+   "category": "visa_on_arrival_tourist",
+   "disposition": "NOT_APPLICABLE",
+   "maximum_stay": null,
+   "conditions": [
+    "Singapore does not issue tourist visas on arrival: ICA states it does not accept submission of visa applications over the immigration counters; visa-required nationals must obtain the entry visa before travel"
+   ],
+   "source_urls": [
+    "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements"
+   ]
+  },
+  {
+   "nationalities": [
+    "ALL"
+   ],
+   "category": "eta",
+   "disposition": "NOT_APPLICABLE",
+   "maximum_stay": null,
+   "conditions": [
+    "Singapore operates no tourist eTA program: the official channels are the entry visa (pre-travel, for listed nationalities) or visa-free entry (all others)",
+    "The SG Arrival Card, required of all travellers within 3 days before arrival, is explicitly 'not a visa' per ICA and is a border-declaration form, not a travel authorization"
+   ],
+   "source_urls": [
+    "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
+    "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements"
+   ]
+  },
+  {
+   "nationalities": [
+    "USA"
+   ],
+   "category": "tourist_visa",
+   "disposition": "EMBASSY_VISA_REQUIRED",
+   "maximum_stay": null,
+   "conditions": [],
+   "source_urls": [
+    "https://www.mfa.gov.sg/visiting-singapore/check-if-you-need-a-singapore-visa/"
+   ]
+  }
+ ],
+ "policies": [
+  {
+   "policy_kind": "visa_exemption_list",
+   "policy_name": "Singapore entry visa requirement list (negative list; all others visa-exempt)",
+   "description": "ICA publishes the exhaustive list of countries/places whose travel-document holders require a Singapore entry visa (34 countries plus specified special travel documents). Nationals of all other countries do not require a visa for social/tourist visits. The period of stay is determined by the Visit Pass (e-Pass) issued at the checkpoint upon entry, not by any visa.",
+   "applies_to_nationalities": [
+    "ALL"
+   ],
+   "conditions": [
+    "Visa-required countries/places: Afghanistan, Algeria, Armenia, Azerbaijan, Bangladesh, Belarus, DPR Korea, Egypt, Georgia, India, Iran, Iraq, Jordan, Kazakhstan, Kosovo, Kyrgyzstan, Lebanon, Libya, Mali, Moldova, Morocco, Nigeria, Pakistan, Russia, Somalia, South Sudan, Sudan, Syria, Tajikistan, Tunisia, Turkmenistan, Ukraine, Uzbekistan, Yemen",
+    "Visa-required document types regardless of nationality: refugee travel documents, alien's passports, Palestinian Authority passports, temporary UAE passports, Hong Kong SAR Documents of Identity, Macao SAR Travel Permits, PRC Travel Documents"
+   ],
+   "maximum_stay": null,
+   "official_source_urls": [
+    "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements"
+   ],
+   "effective_from": null,
+   "effective_until": null
+  },
+  {
+   "policy_kind": "special_regime",
+   "policy_name": "Mutual 30-Day Visa-Exemption Arrangement between Singapore and the People's Republic of China",
+   "description": "With effect from 9 February 2024, holders of ordinary passports issued by the PRC are exempted from visa requirements for a stay of up to 30 days in Singapore. Holders of all other PRC-issued travel documents must continue to apply for an entry visa before travel.",
+   "applies_to_nationalities": [
+    "CHN"
+   ],
+   "conditions": [
+    "Ordinary PRC passports only",
+    "PRC diplomatic, public affairs and service passport holders were already exempt under long-standing agreements"
+   ],
+   "maximum_stay": "30 days",
+   "official_source_urls": [
+    "https://www.ica.gov.sg/news-and-publications/newsroom/media-release/mutual-30-day-visa-exemption-arrangement-between-singapore-and-the-people-s-republic-of-china"
+   ],
+   "effective_from": "2024-02-09",
+   "effective_until": null
+  },
+  {
+   "policy_kind": "consular_visa_regime",
+   "policy_name": "Singapore entry visa (pre-travel application; issued electronically)",
+   "description": "Visa-required nationals must obtain a Singapore entry visa before travel. Applications are submitted online via ICA's SAVE e-Service through a local contact in Singapore or an authorised strategic partner/visa agent, or at a Singapore Overseas Mission or through its authorised visa agent. ICA does not accept visa applications at the immigration counters. In China, missions have ceased walk-in applications since 8 December 2014 and applications go through Authorised Visa Agents.",
+   "applies_to_nationalities": [
+    "AFG",
+    "DZA",
+    "ARM",
+    "AZE",
+    "BGD",
+    "BLR",
+    "PRK",
+    "EGY",
+    "GEO",
+    "IND",
+    "IRN",
+    "IRQ",
+    "JOR",
+    "KAZ",
+    "XKX",
+    "KGZ",
+    "LBN",
+    "LBY",
+    "MLI",
+    "MDA",
+    "MAR",
+    "NGA",
+    "PAK",
+    "RUS",
+    "SOM",
+    "SSD",
+    "SDN",
+    "SYR",
+    "TJK",
+    "TUN",
+    "TKM",
+    "UKR",
+    "UZB",
+    "YEM"
+   ],
+   "conditions": [
+    "S$30 non-refundable processing fee (online, Visa or MasterCard credit/debit card)",
+    "Processing within three working days excluding day of submission; some applications may take longer",
+    "The visa is pre-entry permission; period of stay is set by the Visit Pass (e-Pass) issued on entry"
+   ],
+   "maximum_stay": null,
+   "official_source_urls": [
+    "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+    "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/india",
+    "https://beijing.mfa.gov.sg/consular-services/visa-information/"
+   ],
+   "effective_from": null,
+   "effective_until": null
+  },
+  {
+   "policy_kind": "transit_regime",
+   "policy_name": "Visa-Free Transit Facility (VFTF)",
+   "description": "Nationals of the Commonwealth of Independent States, Georgia, India, Turkmenistan and Ukraine, as well as selected nationals of the People's Republic of China, may be eligible for visa-free transit through Singapore for up to 96 hours under specific conditions (transit only; not a tourist-entry channel).",
+   "applies_to_nationalities": [
+    "ARM",
+    "AZE",
+    "BLR",
+    "GEO",
+    "IND",
+    "KAZ",
+    "KGZ",
+    "MDA",
+    "RUS",
+    "TJK",
+    "TKM",
+    "UKR",
+    "UZB",
+    "CHN"
+   ],
+   "conditions": [
+    "Transit to/from a third country; eligibility subject to specific conditions assessed by ICA",
+    "Stays under 96 hours"
+   ],
+   "maximum_stay": "96 hours",
+   "official_source_urls": [
+    "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+    "https://www.ica.gov.sg/enter-transit-depart/entering-singapore"
+   ],
+   "effective_from": null,
+   "effective_until": null
+  },
+  {
+   "policy_kind": "special_regime",
+   "policy_name": "SG Arrival Card (SGAC)",
+   "description": "All travellers are required to submit the SG Arrival Card within three days (including the day of arrival) before arriving in Singapore. The SG Arrival Card is not a visa. Exceptions apply to those transiting without immigration clearance and to citizens/residents entering via land checkpoints.",
+   "applies_to_nationalities": [
+    "ALL"
+   ],
+   "conditions": [
+    "Submit within 3 days (including day of arrival) before arriving",
+    "Not a visa; does not replace visa requirements"
+   ],
+   "maximum_stay": null,
+   "official_source_urls": [
+    "https://www.ica.gov.sg/enter-transit-depart/entering-singapore"
+   ],
+   "effective_from": null,
+   "effective_until": null
+  }
+ ],
+ "fees": [
+  {
+   "visa_category": "tourist_visa",
+   "visa_subtype": "entry visa (social visit) - ICA processing fee",
+   "applies_to_nationalities": null,
+   "government_fee_amount": 30,
+   "government_fee_currency": "SGD",
+   "refundability": "non-refundable",
+   "accepted_payment_methods": [
+    "Visa credit/debit card (online)",
+    "MasterCard credit/debit card (online)"
+   ],
+   "source_urls": [
+    "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/india"
+   ]
+  },
+  {
+   "visa_category": "tourist_visa",
+   "visa_subtype": "fixed all-in visa fee at Authorised Visa Agents in China (includes agent handling)",
+   "applies_to_nationalities": [
+    "CHN"
+   ],
+   "government_fee_amount": 300,
+   "government_fee_currency": "CNY",
+   "refundability": null,
+   "accepted_payment_methods": null,
+   "source_urls": [
+    "https://beijing.mfa.gov.sg/consular-services/visa-information/"
+   ]
+  }
+ ],
+ "portals": [
+  {
+   "portal_kind": "immigration_authority",
+   "url": "https://www.ica.gov.sg/",
+   "operator": "Immigration & Checkpoints Authority (ICA), Singapore",
+   "operator_kind": "government",
+   "official_linking_source": null,
+   "supported_categories": [
+    "tourist_visa",
+    "visa_free_entry",
+    "transit"
+   ],
+   "source_urls": [
+    "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+    "https://www.ica.gov.sg/enter-transit-depart/entering-singapore"
+   ]
+  },
+  {
+   "portal_kind": "foreign_ministry",
+   "url": "https://www.mfa.gov.sg/",
+   "operator": "Ministry of Foreign Affairs, Singapore",
+   "operator_kind": "government",
+   "official_linking_source": null,
+   "supported_categories": [
+    "tourist_visa",
+    "visa_free_entry"
+   ],
+   "source_urls": [
+    "https://www.mfa.gov.sg/visiting-singapore/check-if-you-need-a-singapore-visa/"
+   ]
+  },
+  {
+   "portal_kind": "evisa_portal",
+   "url": "https://eservices.ica.gov.sg/esvclandingpage/save",
+   "operator": "Immigration & Checkpoints Authority (ICA) - SAVE e-Service (Submission of Application for Visa Electronically)",
+   "operator_kind": "government",
+   "official_linking_source": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/india",
+   "supported_categories": [
+    "tourist_visa"
+   ],
+   "source_urls": [
+    "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/visa-detail-page/india"
+   ]
+  },
+  {
+   "portal_kind": "embassy_site",
+   "url": "https://washington.mfa.gov.sg/visa-and-entry-requirements/",
+   "operator": "Embassy of the Republic of Singapore in Washington DC",
+   "operator_kind": "government",
+   "official_linking_source": null,
+   "supported_categories": [
+    "tourist_visa",
+    "visa_free_entry"
+   ],
+   "source_urls": [
+    "https://washington.mfa.gov.sg/visa-and-entry-requirements/"
+   ]
+  },
+  {
+   "portal_kind": "embassy_site",
+   "url": "https://beijing.mfa.gov.sg/consular-services/visa-information/",
+   "operator": "Embassy of the Republic of Singapore in Beijing (maintains the Authorised Visa Agents list for China)",
+   "operator_kind": "government",
+   "official_linking_source": null,
+   "supported_categories": [
+    "tourist_visa"
+   ],
+   "source_urls": [
+    "https://beijing.mfa.gov.sg/consular-services/visa-information/"
+   ]
+  }
+ ],
+ "passport_validity": {
+  "rule_kind": "months_after_arrival",
+  "months": 6,
+  "min_blank_pages": null,
+  "condition_text": "ICA: 'All travellers, except Singapore passport holders, must ensure their passport has a minimum validity of 6 months.' MFA phrases it as a travel document with 'minimum validity of 6 months at the time of departure'. No blank-page rule stated on the fetched official pages.",
+  "source_urls": [
+   "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
+   "https://www.mfa.gov.sg/visiting-singapore/check-if-you-need-a-singapore-visa/"
   ]
+ },
+ "jurisdictions": [],
+ "unresolved": [
+  "Maximum stay for visa-free nationals (other than CHN's 30 days under the mutual arrangement) is not published by ICA as a per-nationality list; ICA/embassy pages state the period of stay is determined by the Visit Pass (e-Pass) granted at the checkpoint on entry (visit passes are typically issued for 14, 30 or 90 days per ICA extension pages, but no official per-country table was found). maximum_stay left null for those rows.",
+  "The SAVE e-Service portal (https://eservices.ica.gov.sg/esvclandingpage/save) was fetched but is a JavaScript application whose content could not be extracted; it is therefore listed in portals (evidenced by the official ICA linking page) but not in sources.",
+  "The Beijing embassy page references an Authorised Visa Agents list (updated 15 May 2026) but individual agent names/URLs were not extractable from the fetch, so no authorized_visa_center portal rows were recorded.",
+  "Blank-page requirement: not stated on the official pages fetched.",
+  "The official SG Arrival Card submission URL was not captured verbatim from a fetched official page, so it is not recorded as a portal.",
+  "Of the 16 nationalities requested for explicit answers, RUS and IND are visa-required (see the EMBASSY_VISA_REQUIRED row); all other 14 are covered by visa-free rows."
+ ]
 }

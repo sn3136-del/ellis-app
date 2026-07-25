@@ -1,279 +1,866 @@
 {
-  "destination": "JPN",
-  "retrieved_at": "2026-07-23T07:13:37Z",
-  "research_status": "research_incomplete",
-  "sources": [
-    {
-      "search_query": "査証免除 国・地域 短期滞在 90日 site list",
-      "original_url": "https://www.moj.go.jp/isa/immigration/procedures/ttp2_pre-check_pre-check_document03.html",
-      "final_url": "https://www.moj.go.jp/isa/immigration/procedures/ttp2_pre-check_pre-check_document03.html",
-      "redirect_chain": [],
-      "final_hostname": "www.moj.go.jp",
-      "source_authority": "destination_government",
-      "relevant_excerpt": "「特定国（日本が査証免除措置（査証免除措置の一次停止又は査証取得勧奨措置をとっている国を除く）をとっている国・地域）」とは、以下の特定国覧に記載する国・地域です。 [Page lists: Asia — Indonesia, Singapore, Thailand, Malaysia, Brunei, South Korea, Taiwan, Hong Kong, Macao; North America — United States, Canada; Central/South America — Argentina, Uruguay, El Salvador, Guatemala, Costa Rica, Suriname, Chile, Dominican Republic, Panama, Bahamas, Paraguay, Barbados, Brazil, Peru, Honduras, Mexico; Oceania — Australia, New Zealand; Middle East — UAE, Israel, Qatar, Turkey; Africa — Tunisia, Mauritius, Lesotho; Europe — Iceland, Ireland, Andorra, Italy, Estonia, Austria, Netherlands, North Macedonia, Cyprus, Greece, Croatia, United Kingdom, San Marino, Switzerland, Sweden, Spain, Slovakia, Slovenia, Serbia, Czech Republic, Denmark, Germany, Norway, Finland, France, Bulgaria, Belgium, Poland, Portugal, Malta, Monaco, Montenegro, Latvia, Lithuania, Liechtenstein, Romania, Luxembourg. Conditions noted: Indonesia and UAE passports require visa-exemption registration or travel authorization at overseas missions; UK limited to British citizens.]",
-      "retrieved_at": "2026-07-23T07:11:30Z",
-      "effective_date_evidence": null,
-      "page_language": "ja"
-    },
-    {
-      "search_query": "査証免除 国・地域 短期滞在 90日 site list",
-      "original_url": "https://www.moj.go.jp/isa/immigration/faq/kanri_qa.html",
-      "final_url": "https://www.moj.go.jp/isa/immigration/faq/kanri_qa.html",
-      "redirect_chain": [],
-      "final_hostname": "www.moj.go.jp",
-      "source_authority": "destination_government",
-      "relevant_excerpt": "我が国が承認した外国政府等の発行した有効な旅券 [a valid passport issued by a foreign government recognized by Japan is required] ... 査証免除国・地域の方であれば、査証は必要ありません [nationals of visa-exempt countries/regions do not need a visa; all other foreign nationals require a visa in addition to a valid passport].",
-      "retrieved_at": "2026-07-23T07:11:30Z",
-      "effective_date_evidence": null,
-      "page_language": "ja"
-    },
-    {
-      "search_query": "査証免除 国・地域 短期滞在 90日 site list",
-      "original_url": "https://www.moj.go.jp/isa/applications/status/temporaryvisitor.html",
-      "final_url": "https://www.moj.go.jp/isa/applications/status/temporaryvisitor.html",
-      "redirect_chain": [],
-      "final_hostname": "www.moj.go.jp",
-      "source_authority": "destination_government",
-      "relevant_excerpt": "観光、保養、スポーツ、親族の訪問、見学、講習又は会合への参加、業務連絡その他これらに類似する活動 [Temporary Visitor status covers tourism, recreation, sports, visiting relatives, sightseeing, courses/meetings, business liaison and similar activities] ... ９０日若しくは３０日又は１５日以内の日を単位とする期間 [period of stay granted in units of up to 90, 30 or 15 days].",
-      "retrieved_at": "2026-07-23T07:11:30Z",
-      "effective_date_evidence": null,
-      "page_language": "ja"
-    },
-    {
-      "search_query": "JESTA 電子渡航認証 出入国在留管理庁 開始時期",
-      "original_url": "https://www.moj.go.jp/isa/01_00643.html",
-      "final_url": "https://www.moj.go.jp/isa/01_00643.html",
-      "redirect_chain": [],
-      "final_hostname": "www.moj.go.jp",
-      "source_authority": "destination_government",
-      "relevant_excerpt": "ＪＥＳＴＡ（電子渡航認証制度）の創設に関する改正規定 → 令和１１年３月３１日までの間において政令で定める日 [The amendment provisions creating JESTA (electronic travel authorization system) take effect on a date to be set by cabinet order, no later than 31 March 2029 (Reiwa 11). JESTA is therefore not yet in operation as of the snapshot date.]",
-      "retrieved_at": "2026-07-23T07:12:10Z",
-      "effective_date_evidence": "改正規定の施行日は令和１１年３月３１日までの間において政令で定める日 (commencement by cabinet order no later than 2029-03-31; not in force as of 2026-07-23)",
-      "page_language": "ja"
-    },
-    {
-      "search_query": "Immigration Services Agency Japan English short-term stay tourism entry procedures",
-      "original_url": "https://www.isa.go.jp/en/index.html",
-      "final_url": "http://www.moj.go.jp/isa/",
-      "redirect_chain": [
-        "https://www.isa.go.jp/en/index.html",
-        "http://www.moj.go.jp/isa",
-        "http://www.moj.go.jp/isa/"
-      ],
-      "final_hostname": "www.moj.go.jp",
-      "source_authority": "destination_government",
-      "relevant_excerpt": "出入国在留管理庁は、法務省の外局、つまり、法務省に所属する組織で独自の任務を行っています [The Immigration Services Agency is an external bureau of the Ministry of Justice. Homepage covers entry/departure procedures, re-entry permits, the Trusted Traveler Program, and residence-status guidance. No mention of any currently operating electronic travel authorization.]",
-      "retrieved_at": "2026-07-23T07:08:40Z",
-      "effective_date_evidence": null,
-      "page_language": "ja"
-    },
-    {
-      "search_query": "Japan foreign ministry official visa exemption list tourist mofa.go.jp",
-      "original_url": "https://www.japan.travel/en/plan/visa-info/",
-      "final_url": "https://www.japan.travel/en/plan/visa-info/",
-      "redirect_chain": [],
-      "final_hostname": "www.japan.travel",
-      "source_authority": "destination_government",
-      "relevant_excerpt": "Passport holders from specific countries and regions can enter Japan visa-free for 90 days or less if engaging solely in tourism activities (complete list at the Japanese Ministry of Foreign Affairs website: mofa.go.jp/j_info/visit/visa/short/novisa.html). \"Most short-term stays allow up to 90 days. Some nationalities may be granted 15, 30, or 180 days.\" For visa applicants: \"Depending on your circumstances you may require: - Visa application form - Valid passport - Recent photo - Accommodation Reservation Confirmation or Itinerary - Proof of sufficient funds to cover your trip\"; processing typically takes around five business days. JNTO (Japan National Tourism Organization) is the Government of Japan's official tourism organization; the page links MOFA visa requirements (mofa.go.jp/j_info/visit/visa/index.html) and the MOFA embassy directory (mofa.go.jp/about/emb_cons/mofaserv.html).",
-      "retrieved_at": "2026-07-23T07:09:50Z",
-      "effective_date_evidence": null,
-      "page_language": "en"
-    }
-  ],
-  "dispositions": [
-    {
-      "nationalities": ["IDN", "SGP", "THA", "MYS", "BRN", "KOR", "TWN", "HKG", "MAC", "USA", "CAN", "ARG", "URY", "SLV", "GTM", "CRI", "SUR", "CHL", "DOM", "PAN", "BHS", "PRY", "BRB", "BRA", "PER", "HND", "MEX", "AUS", "NZL", "ARE", "ISR", "QAT", "TUR", "TUN", "MUS", "LSO", "ISL", "IRL", "AND", "ITA", "EST", "AUT", "NLD", "MKD", "CYP", "GRC", "HRV", "GBR", "SMR", "CHE", "SWE", "ESP", "SVK", "SVN", "SRB", "CZE", "DNK", "DEU", "NOR", "FIN", "FRA", "BGR", "BEL", "POL", "PRT", "MLT", "MCO", "MNE", "LVA", "LTU", "LIE", "ROU", "LUX"],
-      "category": "visa_free_entry",
-      "disposition": "VISA_FREE",
-      "maximum_stay": "up to 90 days",
-      "conditions": [
-        "Visa-free entry applies to short-term stays for tourism and similar Temporary Visitor activities only (no paid work).",
-        "Period of stay is granted in units of up to 90, 30 or 15 days depending on the nationality's arrangement; the per-nationality period could not be verified because MOFA's canonical exemption page was unreachable (HTTP 403). JNTO states most nationalities receive up to 90 days.",
-        "GBR: applies to British citizens only (per ISA specified-country list conditions).",
-        "IDN and ARE: ISA notes these passports are subject to visa-exemption registration or travel-authorization conditions at Japanese overseas missions; exact conditions unverified (MOFA unreachable).",
-        "TWN: Taiwan passport holders; HKG: Hong Kong SAR passport holders; MAC: Macao SAR passport holders.",
-        "List taken from the ISA specified-country list, defined as countries/regions for which Japan maintains visa-exemption measures excluding those whose exemption is suspended or subject to visa-obtainment-recommendation measures. One or more entries (e.g. Hungary, which appears on MOFA's published list) may be missing from this extraction — see unresolved."
-      ],
-      "source_urls": [
-        "https://www.moj.go.jp/isa/immigration/procedures/ttp2_pre-check_pre-check_document03.html",
-        "https://www.moj.go.jp/isa/applications/status/temporaryvisitor.html",
-        "https://www.japan.travel/en/plan/visa-info/"
-      ]
-    },
-    {
-      "nationalities": ["IDN", "SGP", "THA", "MYS", "BRN", "KOR", "TWN", "HKG", "MAC", "USA", "CAN", "ARG", "URY", "SLV", "GTM", "CRI", "SUR", "CHL", "DOM", "PAN", "BHS", "PRY", "BRB", "BRA", "PER", "HND", "MEX", "AUS", "NZL", "ARE", "ISR", "QAT", "TUR", "TUN", "MUS", "LSO", "ISL", "IRL", "AND", "ITA", "EST", "AUT", "NLD", "MKD", "CYP", "GRC", "HRV", "GBR", "SMR", "CHE", "SWE", "ESP", "SVK", "SVN", "SRB", "CZE", "DNK", "DEU", "NOR", "FIN", "FRA", "BGR", "BEL", "POL", "PRT", "MLT", "MCO", "MNE", "LVA", "LTU", "LIE", "ROU", "LUX"],
-      "category": "tourist_visa",
-      "disposition": "NOT_APPLICABLE",
-      "maximum_stay": null,
-      "conditions": [
-        "These nationalities are covered by Japan's visa-exemption measures for short-term tourism, so no tourist visa is required for an exempt short-term stay."
-      ],
-      "source_urls": [
-        "https://www.moj.go.jp/isa/immigration/procedures/ttp2_pre-check_pre-check_document03.html",
-        "https://www.moj.go.jp/isa/immigration/faq/kanri_qa.html"
-      ]
-    },
-    {
-      "nationalities": ["CHN", "IND", "RUS"],
-      "category": "tourist_visa",
-      "disposition": "EMBASSY_VISA_REQUIRED",
-      "maximum_stay": "granted in units of up to 90, 30 or 15 days (Temporary Visitor status)",
-      "conditions": [
-        "Not included in Japan's visa-exemption specified-country list; per ISA, foreign nationals other than those of visa-exempt countries/regions require a visa in addition to a valid passport.",
-        "Visas are applied for through Japanese embassies/consulates (JNTO describes the application documents and ~5 business days processing); office-level procedures, accredited-agency requirements (e.g. for Chinese nationals) and any mandated visa centers could not be verified because MOFA and emb-japan.go.jp sites returned HTTP 403.",
-        "An online JAPAN eVISA channel may exist for some of these nationalities/countries of residence, but it could not be verified from any reachable official source (evisa.mofa.go.jp returned HTTP 403) — see unresolved."
-      ],
-      "source_urls": [
-        "https://www.moj.go.jp/isa/immigration/procedures/ttp2_pre-check_pre-check_document03.html",
-        "https://www.moj.go.jp/isa/immigration/faq/kanri_qa.html",
-        "https://www.moj.go.jp/isa/applications/status/temporaryvisitor.html",
-        "https://www.japan.travel/en/plan/visa-info/"
-      ]
-    },
-    {
-      "nationalities": ["ALL_OTHERS"],
-      "category": "tourist_visa",
-      "disposition": "EMBASSY_VISA_REQUIRED",
-      "maximum_stay": "granted in units of up to 90, 30 or 15 days (Temporary Visitor status)",
-      "conditions": [
-        "Per ISA, a valid passport and a visa are required for entry except for nationals of visa-exempt countries/regions.",
-        "Application is made before travel through Japanese overseas missions; details unverified because MOFA/embassy sites returned HTTP 403.",
-        "An online JAPAN eVISA channel may exist for some nationalities/countries of residence but could not be verified from a reachable official source."
-      ],
-      "source_urls": [
-        "https://www.moj.go.jp/isa/immigration/faq/kanri_qa.html",
-        "https://www.moj.go.jp/isa/immigration/procedures/ttp2_pre-check_pre-check_document03.html"
-      ]
-    },
-    {
-      "nationalities": ["JPN"],
-      "category": "tourist_visa",
-      "disposition": "NOT_APPLICABLE",
-      "maximum_stay": null,
-      "conditions": [
-        "Japan is the destination; Japanese citizens are not subject to the visa regime for foreign nationals (ISA entry requirements apply to foreign nationals, 外国人)."
-      ],
-      "source_urls": [
-        "https://www.moj.go.jp/isa/immigration/faq/kanri_qa.html"
-      ]
-    },
-    {
-      "nationalities": ["ALL"],
-      "category": "eta",
-      "disposition": "NOT_APPLICABLE",
-      "maximum_stay": null,
-      "conditions": [
-        "Japan does not currently operate an electronic travel authorization for tourism. JESTA (電子渡航認証制度) was created by the Reiwa-8 (2026) immigration law amendment but its provisions take effect on a date to be set by cabinet order no later than 2029-03-31; it is not in operation as of 2026-07-23."
-      ],
-      "source_urls": [
-        "https://www.moj.go.jp/isa/01_00643.html"
-      ]
-    },
-    {
-      "nationalities": ["ALL"],
-      "category": "visa_on_arrival_tourist",
-      "disposition": "NOT_APPLICABLE",
-      "maximum_stay": null,
-      "conditions": [
-        "Official ISA guidance describes only two channels for short-term entry: visa-exempt entry for listed countries/regions, or a visa obtained before travel; no tourist visa-on-arrival program is described on any reachable official page."
-      ],
-      "source_urls": [
-        "https://www.moj.go.jp/isa/immigration/faq/kanri_qa.html",
-        "https://www.moj.go.jp/isa/immigration/procedures/ttp2_pre-check_pre-check_document03.html"
-      ]
-    }
-  ],
-  "policies": [
-    {
-      "policy_kind": "visa_exemption_list",
-      "policy_name": "Japan short-term stay visa exemption arrangements (査証免除措置)",
-      "description": "Japan maintains visa-exemption measures for nationals of listed countries/regions for short-term stays (Temporary Visitor status: tourism, recreation, visiting relatives, sightseeing, meetings, business liaison and similar activities; no paid work). The ISA 'specified country' list enumerates the countries/regions for which Japan currently maintains visa-exemption measures, excluding countries whose exemption is temporarily suspended or subject to visa-obtainment-recommendation measures. Period of stay is granted in units of up to 90, 30 or 15 days; JNTO states most nationalities receive up to 90 days.",
-      "applies_to_nationalities": ["IDN", "SGP", "THA", "MYS", "BRN", "KOR", "TWN", "HKG", "MAC", "USA", "CAN", "ARG", "URY", "SLV", "GTM", "CRI", "SUR", "CHL", "DOM", "PAN", "BHS", "PRY", "BRB", "BRA", "PER", "HND", "MEX", "AUS", "NZL", "ARE", "ISR", "QAT", "TUR", "TUN", "MUS", "LSO", "ISL", "IRL", "AND", "ITA", "EST", "AUT", "NLD", "MKD", "CYP", "GRC", "HRV", "GBR", "SMR", "CHE", "SWE", "ESP", "SVK", "SVN", "SRB", "CZE", "DNK", "DEU", "NOR", "FIN", "FRA", "BGR", "BEL", "POL", "PRT", "MLT", "MCO", "MNE", "LVA", "LTU", "LIE", "ROU", "LUX"],
-      "conditions": [
-        "Tourism and other Temporary Visitor activities only; no paid work, long-term study or residency.",
-        "GBR entry limited to British citizens.",
-        "IDN and ARE subject to registration/travel-authorization conditions per the ISA list; details unverified.",
-        "Canonical per-country stay periods are published by MOFA (novisa.html), which was unreachable (HTTP 403); list here may be missing entries (e.g. Hungary)."
-      ],
-      "maximum_stay": "up to 90 days (units of 90, 30 or 15 days depending on nationality)",
-      "official_source_urls": [
-        "https://www.moj.go.jp/isa/immigration/procedures/ttp2_pre-check_pre-check_document03.html",
-        "https://www.moj.go.jp/isa/applications/status/temporaryvisitor.html",
-        "https://www.japan.travel/en/plan/visa-info/"
-      ],
-      "effective_from": null,
-      "effective_until": null
-    },
-    {
-      "policy_kind": "consular_visa_regime",
-      "policy_name": "Short-term stay (Temporary Visitor) visa via Japanese overseas missions",
-      "description": "Foreign nationals not covered by a visa-exemption arrangement must hold a valid passport and obtain a visa before travel. Per ISA: nationals of visa-exempt countries/regions need no visa; all others require one. JNTO describes the application (form, valid passport, photo, accommodation/itinerary, proof of funds) with processing typically around five business days, and refers applicants to Japanese embassies/consulates via the MOFA directory.",
-      "applies_to_nationalities": ["ALL_OTHERS"],
-      "conditions": [
-        "Details of consular procedures, fees, accredited travel-agency requirements (e.g. for Chinese nationals) and any mandated visa application centers could not be verified: MOFA and emb-japan.go.jp sites returned HTTP 403."
-      ],
-      "maximum_stay": "granted in units of up to 90, 30 or 15 days (Temporary Visitor status)",
-      "official_source_urls": [
-        "https://www.moj.go.jp/isa/immigration/faq/kanri_qa.html",
-        "https://www.moj.go.jp/isa/applications/status/temporaryvisitor.html",
-        "https://www.japan.travel/en/plan/visa-info/"
-      ],
-      "effective_from": null,
-      "effective_until": null
-    },
-    {
-      "policy_kind": "eta_program",
-      "policy_name": "JESTA (Japan Electronic System for Travel Authorization) — enacted, not yet in force",
-      "description": "The Reiwa-8 (2026) amendment to the Immigration Control Act creates JESTA, an electronic travel authorization system. The creating provisions take effect on a date to be fixed by cabinet order no later than 31 March 2029 (令和11年3月31日). JESTA is NOT operational as of 2026-07-23; no traveler currently needs or can obtain a Japanese ETA.",
-      "applies_to_nationalities": ["ALL"],
-      "conditions": [
-        "Not yet in force; scope of covered nationalities (expected to target visa-exempt travelers) not specified on the fetched page."
-      ],
-      "maximum_stay": null,
-      "official_source_urls": [
-        "https://www.moj.go.jp/isa/01_00643.html"
-      ],
-      "effective_from": null,
-      "effective_until": null
-    }
-  ],
-  "fees": [],
-  "portals": [
-    {
-      "portal_kind": "immigration_authority",
-      "url": "https://www.moj.go.jp/isa/",
-      "operator": "Immigration Services Agency (出入国在留管理庁), Ministry of Justice",
-      "operator_kind": "government",
-      "official_linking_source": null,
-      "supported_categories": ["entry_and_landing_procedures", "temporary_visitor_status", "residence_procedures"],
-      "source_urls": ["https://www.moj.go.jp/isa/"]
-    },
-    {
-      "portal_kind": "foreign_ministry",
-      "url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
-      "operator": "Ministry of Foreign Affairs of Japan",
-      "operator_kind": "government",
-      "official_linking_source": "https://www.japan.travel/en/plan/visa-info/",
-      "supported_categories": ["tourist_visa", "visa_exemption_information"],
-      "source_urls": ["https://www.japan.travel/en/plan/visa-info/"]
-    }
-  ],
-  "passport_validity": {
-    "rule_kind": "valid_on_arrival",
-    "months": null,
-    "min_blank_pages": null,
-    "condition_text": "ISA requires 我が国が承認した外国政府等の発行した有効な旅券 (a valid passport issued by a foreign government recognized by Japan) for entry. No minimum validity period beyond the stay and no blank-page rule was found on any reachable official page; MOFA pages that might state more were unreachable (HTTP 403).",
-    "source_urls": ["https://www.moj.go.jp/isa/immigration/faq/kanri_qa.html"]
+ "destination": "JPN",
+ "retrieved_at": "2026-07-23T07:13:37Z",
+ "research_status": "research_incomplete",
+ "sources": [
+  {
+   "search_query": "査証免除 国・地域 短期滞在 90日 site list",
+   "original_url": "https://www.moj.go.jp/isa/immigration/procedures/ttp2_pre-check_pre-check_document03.html",
+   "final_url": "https://www.moj.go.jp/isa/immigration/procedures/ttp2_pre-check_pre-check_document03.html",
+   "redirect_chain": [],
+   "final_hostname": "www.moj.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "「特定国（日本が査証免除措置（査証免除措置の一次停止又は査証取得勧奨措置をとっている国を除く）をとっている国・地域）」とは、以下の特定国覧に記載する国・地域です。 [Page lists: Asia — Indonesia, Singapore, Thailand, Malaysia, Brunei, South Korea, Taiwan, Hong Kong, Macao; North America — United States, Canada; Central/South America — Argentina, Uruguay, El Salvador, Guatemala, Costa Rica, Suriname, Chile, Dominican Republic, Panama, Bahamas, Paraguay, Barbados, Brazil, Peru, Honduras, Mexico; Oceania — Australia, New Zealand; Middle East — UAE, Israel, Qatar, Turkey; Africa — Tunisia, Mauritius, Lesotho; Europe — Iceland, Ireland, Andorra, Italy, Estonia, Austria, Netherlands, North Macedonia, Cyprus, Greece, Croatia, United Kingdom, San Marino, Switzerland, Sweden, Spain, Slovakia, Slovenia, Serbia, Czech Republic, Denmark, Germany, Norway, Finland, France, Bulgaria, Belgium, Poland, Portugal, Malta, Monaco, Montenegro, Latvia, Lithuania, Liechtenstein, Romania, Luxembourg. Conditions noted: Indonesia and UAE passports require visa-exemption registration or travel authorization at overseas missions; UK limited to British citizens.]",
+   "retrieved_at": "2026-07-23T07:11:30Z",
+   "effective_date_evidence": null,
+   "page_language": "ja"
   },
-  "jurisdictions": [],
-  "unresolved": [
-    "MOFA (www.mofa.go.jp) returned HTTP 403 to every fetch attempt: /j_info/visit/visa/short/novisa.html, /j_info/visit/visa/, /j_info/visit/Visa/short/novisa.html, /j_info/visit/visa/short/novisa.html?p=1, /j_info/visit/visa/basics.html. The canonical visa-exemption list with per-country stay periods (90/30/15 days), visa fee schedule, and eVisa program pages could therefore not be verified directly.",
-    "JAPAN eVISA portal (https://www.evisa.mofa.go.jp/index) returned HTTP 403. The eVisa program's existence, eligible nationalities/countries of residence, stay length and fees could not be verified from any reachable official source, so NO evisa_tourist disposition rows were recorded. Some non-exempt nationalities may in fact have an online eVISA application channel; treat the EMBASSY_VISA_REQUIRED rows as the default channel only.",
-    "Embassy of Japan sites all returned HTTP 403 (us.emb-japan.go.jp/itpr_en/visa.html, uk.emb-japan.go.jp/itpr_en/visa.html, sg.emb-japan.go.jp/itpr_en/visa_top.html), so consular procedures, authorized visa application centers (e.g. JVAC/VFS in some jurisdictions) and accredited-agency requirements for specific nationalities (e.g. CHN) are unverified; no authorized_visa_center portal recorded.",
-    "Government visa fees (typically quoted by MOFA in local currency equivalent of JPY amounts for single/double/multiple-entry visas) are unverified — fees array left empty rather than guessed.",
-    "Per-nationality maximum stay under the exemption (e.g. shorter periods for THA, IDN, BRN, QAT, ARE) unverified; JNTO states most nationalities receive up to 90 days and some 15/30/180 days.",
-    "The exemption list was extracted from the ISA specified-country page (a TTP pre-check reference defined as countries with active visa-exemption measures). Hungary, which appears on MOFA's published exemption list per search-result snippets (not evidence), was absent from the extraction — possible extraction gap; the list may be missing one or more entries.",
-    "http://www.moj.go.jp/ENGLISH/information/bpic3rd-03.html (English statement of the passport+visa landing principle) returned 404; https://www.moj.go.jp/isa/en/ returned 404; https://www.moj.go.jp/isa/applications/guide/kanri_qa.html returned an effectively empty page. English-language ISA confirmation of the entry principle is therefore missing; the principle is sourced from the Japanese ISA Q&A page.",
-    "Visit Japan Web (services.digital.go.jp/en/visit-japan-web/, linked from JNTO) is an arrival-procedures service, not a visa/ETA, and per JNTO is not mandatory; not recorded as a portal since no matching portal_kind applies."
+  {
+   "search_query": "査証免除 国・地域 短期滞在 90日 site list",
+   "original_url": "https://www.moj.go.jp/isa/immigration/faq/kanri_qa.html",
+   "final_url": "https://www.moj.go.jp/isa/immigration/faq/kanri_qa.html",
+   "redirect_chain": [],
+   "final_hostname": "www.moj.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "我が国が承認した外国政府等の発行した有効な旅券 [a valid passport issued by a foreign government recognized by Japan is required] ... 査証免除国・地域の方であれば、査証は必要ありません [nationals of visa-exempt countries/regions do not need a visa; all other foreign nationals require a visa in addition to a valid passport].",
+   "retrieved_at": "2026-07-23T07:11:30Z",
+   "effective_date_evidence": null,
+   "page_language": "ja"
+  },
+  {
+   "search_query": "査証免除 国・地域 短期滞在 90日 site list",
+   "original_url": "https://www.moj.go.jp/isa/applications/status/temporaryvisitor.html",
+   "final_url": "https://www.moj.go.jp/isa/applications/status/temporaryvisitor.html",
+   "redirect_chain": [],
+   "final_hostname": "www.moj.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "観光、保養、スポーツ、親族の訪問、見学、講習又は会合への参加、業務連絡その他これらに類似する活動 [Temporary Visitor status covers tourism, recreation, sports, visiting relatives, sightseeing, courses/meetings, business liaison and similar activities] ... ９０日若しくは３０日又は１５日以内の日を単位とする期間 [period of stay granted in units of up to 90, 30 or 15 days].",
+   "retrieved_at": "2026-07-23T07:11:30Z",
+   "effective_date_evidence": null,
+   "page_language": "ja"
+  },
+  {
+   "search_query": "JESTA 電子渡航認証 出入国在留管理庁 開始時期",
+   "original_url": "https://www.moj.go.jp/isa/01_00643.html",
+   "final_url": "https://www.moj.go.jp/isa/01_00643.html",
+   "redirect_chain": [],
+   "final_hostname": "www.moj.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "ＪＥＳＴＡ（電子渡航認証制度）の創設に関する改正規定 → 令和１１年３月３１日までの間において政令で定める日 [The amendment provisions creating JESTA (electronic travel authorization system) take effect on a date to be set by cabinet order, no later than 31 March 2029 (Reiwa 11). JESTA is therefore not yet in operation as of the snapshot date.]",
+   "retrieved_at": "2026-07-23T07:12:10Z",
+   "effective_date_evidence": "改正規定の施行日は令和１１年３月３１日までの間において政令で定める日 (commencement by cabinet order no later than 2029-03-31; not in force as of 2026-07-23)",
+   "page_language": "ja"
+  },
+  {
+   "search_query": "Immigration Services Agency Japan English short-term stay tourism entry procedures",
+   "original_url": "https://www.isa.go.jp/en/index.html",
+   "final_url": "http://www.moj.go.jp/isa/",
+   "redirect_chain": [
+    "https://www.isa.go.jp/en/index.html",
+    "http://www.moj.go.jp/isa",
+    "http://www.moj.go.jp/isa/"
+   ],
+   "final_hostname": "www.moj.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "出入国在留管理庁は、法務省の外局、つまり、法務省に所属する組織で独自の任務を行っています [The Immigration Services Agency is an external bureau of the Ministry of Justice. Homepage covers entry/departure procedures, re-entry permits, the Trusted Traveler Program, and residence-status guidance. No mention of any currently operating electronic travel authorization.]",
+   "retrieved_at": "2026-07-23T07:08:40Z",
+   "effective_date_evidence": null,
+   "page_language": "ja"
+  },
+  {
+   "search_query": "Japan foreign ministry official visa exemption list tourist mofa.go.jp",
+   "original_url": "https://www.japan.travel/en/plan/visa-info/",
+   "final_url": "https://www.japan.travel/en/plan/visa-info/",
+   "redirect_chain": [],
+   "final_hostname": "www.japan.travel",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Passport holders from specific countries and regions can enter Japan visa-free for 90 days or less if engaging solely in tourism activities (complete list at the Japanese Ministry of Foreign Affairs website: mofa.go.jp/j_info/visit/visa/short/novisa.html). \"Most short-term stays allow up to 90 days. Some nationalities may be granted 15, 30, or 180 days.\" For visa applicants: \"Depending on your circumstances you may require: - Visa application form - Valid passport - Recent photo - Accommodation Reservation Confirmation or Itinerary - Proof of sufficient funds to cover your trip\"; processing typically takes around five business days. JNTO (Japan National Tourism Organization) is the Government of Japan's official tourism organization; the page links MOFA visa requirements (mofa.go.jp/j_info/visit/visa/index.html) and the MOFA embassy directory (mofa.go.jp/about/emb_cons/mofaserv.html).",
+   "retrieved_at": "2026-07-23T07:09:50Z",
+   "effective_date_evidence": null,
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=JPN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://www.moj.go.jp/isa/immigration/procedures/ttp2_pre-check_pre-check_document03.html",
+   "final_url": "https://www.moj.go.jp/isa/immigration/procedures/ttp2_pre-check_pre-check_document03.html",
+   "redirect_chain": [],
+   "final_hostname": "www.moj.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "特定国一覧 | 出入国在留管理庁\nこのページではJavaScriptを使用しています。\n本文へ\nMulti language\n文字サイズ\n標準\n拡大\nMENU\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\nMulti language\nトップページ\n出入国手続\n出入（帰）国手続について（解説）\nトラスティド・トラベラー・プログラム\n特定国一覧\n特定国一覧\n「特定国（日本が査証免除",
+   "retrieved_at": "2026-07-24T07:06:57+00:00",
+   "content_sha256": "669e6f25c78a93ec6fbc65755dde48e10cada71733a6c1d8f326ff109e0cbaf7",
+   "page_language": "zh"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=JPN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://www.moj.go.jp/isa/immigration/faq/kanri_qa.html",
+   "final_url": "https://www.moj.go.jp/isa/immigration/faq/kanri_qa.html",
+   "redirect_chain": [],
+   "final_hostname": "www.moj.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "出入国審査・在留審査Q&A | 出入国在留管理庁\nこのページではJavaScriptを使用しています。\n本文へ\nMulti language\n文字サイズ\n標準\n拡大\nMENU\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\nMulti language\nトップページ\n出入国手続\n出入国審査・在留審査Q&A\n出入国審査・在留審査Q&A\n日本に入国された外国人のみなさまへ～新規入国者向",
+   "retrieved_at": "2026-07-24T07:06:57+00:00",
+   "content_sha256": "be6b2c26beb6b6a74877228f66a465c973b70a12a7c268e1a1299172399559c5",
+   "page_language": "zh"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=JPN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://www.moj.go.jp/isa/applications/status/temporaryvisitor.html",
+   "final_url": "https://www.moj.go.jp/isa/applications/status/temporaryvisitor.html",
+   "redirect_chain": [],
+   "final_hostname": "www.moj.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "在留資格「短期滞在」 | 出入国在留管理庁\nこのページではJavaScriptを使用しています。\n本文へ\nMulti language\n文字サイズ\n標準\n拡大\nMENU\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\nMulti language\nトップページ\n在留手続\n在留資格から探す\n在留資格「短期滞在」\n在留資格「短期滞在」\n例：観光等\nこの在留資格に該当する活動\n本邦に短期",
+   "retrieved_at": "2026-07-24T07:06:57+00:00",
+   "content_sha256": "c527d0ea38997d282300f283365606fdd772efb5dc157fcb4bb2db6e1a9b244d",
+   "page_language": "zh"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=JPN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://www.moj.go.jp/isa/01_00643.html",
+   "final_url": "https://www.moj.go.jp/isa/01_00643.html",
+   "redirect_chain": [],
+   "final_hostname": "www.moj.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "令和８年入管法等改正法について | 出入国在留管理庁\nこのページではJavaScriptを使用しています。\n本文へ\nMulti language\n文字サイズ\n標準\n拡大\nMENU\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\nMulti language\nトップページ\n令和８年入管法等改正法について\n令和８年入管法等改正法について\n令和８年５月２９日、第２２１回特別国会において「",
+   "retrieved_at": "2026-07-24T07:06:58+00:00",
+   "content_sha256": "af702ce42fa8c65b14458ca4975c41c5c44b55e1dc879b677da8b922be9a813e",
+   "page_language": "zh"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=JPN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://www.moj.go.jp/isa/",
+   "final_url": "https://www.moj.go.jp/isa/",
+   "redirect_chain": [
+    "http://www.moj.go.jp/isa/",
+    "https://www.moj.go.jp/isa/"
+   ],
+   "final_hostname": "www.moj.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "出入国在留管理庁ホームページ\nこのページではJavaScriptを使用しています。\n本文へ\nMulti language\n文字サイズ\n標準\n拡大\nMENU\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\nMulti language\n再生ボタン\n停止ボタン\n▶　各種申請・届出\n各種申請・届出に関する必要書類等のご案内\nなるほど！\n出入国在留管理庁\n注目政策情報\nよくあるお問い合わせ",
+   "retrieved_at": "2026-07-24T07:06:58+00:00",
+   "content_sha256": "7ccd794655984845c5f62cb242ed6211c36b7d42cc6f35e3511a53416b1e4f66",
+   "page_language": "zh"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=JPN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+   "final_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+   "redirect_chain": [],
+   "final_hostname": "www.mofa.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "VISA | Ministry of Foreign Affairs of Japan\nThe Ministry of Foreign Affairs website uses JavaScript. Please turn on &quot;JavaScript&quot; and use it.\nSkip to main content\nFAQ\nSite Map\nLinks\nJapanese Other Languages\nSearch\nFont Size\nS\nM\nL\nAbout Us\nNews\nForeign Policy\nCountries &amp; Regions\nConsular Services\nTop &nbsp;&gt;&nbsp; Consular Services &nbsp;&gt;&nbsp;VISA\nVISA\nVISA\nJune 24, 2026\nJapanese\nThe information about the visa(*Note) required for foreigners visiting Japan is as follows. For details, please check the website of the Embassy, Consulate-General, Consular Office (the Diplomatic Missions abroad) of Japan that have jurisdiction over the country/region where the foreigner visiting Japan resides.\nFor visa inquiries, please contact “Foreign Residents Support Center (FRESC) MOFA Visa Information” or “Japan Visa Information Hotline” listed on the website of the Embassy/Consulate-General/Consular Office of Japan. You can find detailed information about visa on the website of the Diplomatic Mission of Japan with jurisdiction over your place of residence.\n1. Visa Application Procedures\n2. About Visa\n3. Visa Application Documents\n4. Frequently Asked Questions\n5. Announcements\n6. Inquiries about Visas\n(*Note) A visa is one of the requirements for entering Japan as defined by the \"Immigration Control and Refugee Recognition Act\", and it does not guarantee to enter Japan. Visas are issued at the Embassy, Consulate-General, Consular Office of Japan abroad. They cannot be obta",
+   "retrieved_at": "2026-07-24T07:07:03+00:00",
+   "content_sha256": "6a0be5d7e1a8e8b35c6030040ead0d581cdbd6387d3c5fe714458fab7809ea2e",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=JPN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+   "final_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+   "redirect_chain": [],
+   "final_hostname": "www.mofa.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Exemption of Visa (Short-Term Stay) | Ministry of Foreign Affairs of Japan\nThe Ministry of Foreign Affairs website uses JavaScript. Please turn on &quot;JavaScript&quot; and use it.\nSkip to main content\nFAQ\nSite Map\nLinks\nJapanese Other Languages\nSearch\nFont Size\nS\nM\nL\nAbout Us\nNews\nForeign Policy\nCountries &amp; Regions\nConsular Services\nTop &nbsp;&gt;&nbsp; Consular Services &nbsp;&gt;&nbsp; VISA &nbsp;&gt;&nbsp;Exemption of Visa (Short-Term Stay)\nVISA\nExemption of Visa (Short-Term Stay)\ne-mail\nPrint\nSeptember 1, 2025\nJapanese\nJapan has reciprocal visa exemption arrangements with 74 countries and regions listed in the table below.\n74 Countries and Regions for Visa Exemptions\nAsia\nEurope\nBrunei (30 days)\nAndorra\nIndonesia&nbsp; (Note 1)\nAustria&nbsp; (Note 8)\nMalaysia&nbsp; (Note 3)\nBelgium\nRepublic of Korea\nBulgaria\nSingapore\nCroatia\nThailand&nbsp; (Note 2) &nbsp;(15 days)\nCyprus\nHong Kong&nbsp; (Note 5)\nCzech Republic\nMacao&nbsp; (Note 6)\nDenmark\nTaiwan&nbsp; (Note 4)\nEstonia\nNorth America\nFinland\nCanada\nFrance\nUnited States\nGermany&nbsp; (Note 8)\nLatin America and the Caribbean\nGreece\nArgentina\nHungary\nBahamas\nIceland\nBarbados&nbsp; (Note 7)\nIreland&nbsp; (Note 8)\nBrazil&nbsp; (Note 2)\nItaly\nChile\nLatvia\nCosta Rica\nLiechtenstein&nbsp; (Note 8)\nDominican Republic\nLithuania\nEl Salvador\nLuxembourg\nGuatemala\nMalta\nHonduras\nMonaco\nPanama&nbsp; (Note 2)\nMontenegro (Note 2)\nParaguay&nbsp; (Note 2)\nNetherlands\nPeru (Note 2)\nNorth Macedonia\nMexico&nbsp; (Note 8)\nNorway\nSuriname\nPo",
+   "retrieved_at": "2026-07-24T07:07:08+00:00",
+   "content_sha256": "a8d64d3b0260e51c611c09c0432b502bf91c26ab9946c8c5f05a901cef67f3ef",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=JPN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://www.us.emb-japan.go.jp/itpr_en/visa.html",
+   "final_url": "https://www.us.emb-japan.go.jp/itpr_en/visa.html",
+   "redirect_chain": [],
+   "final_hostname": "www.us.emb-japan.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Not found",
+   "retrieved_at": "2026-07-24T07:07:14+00:00",
+   "content_sha256": "b08cebecd1b8ccf19006120baaf4338c40a2870c39fb7ccf210b53b90e3afc1b",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=JPN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://www.us.emb-japan.go.jp/itpr_en/",
+   "final_url": "https://www.us.emb-japan.go.jp/itpr_en/",
+   "redirect_chain": [],
+   "final_hostname": "www.us.emb-japan.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Foreign Policy News | Embassy of Japan in the United States of America\n本ホームページは「JavaScript」が使われております。 「JavaScript」をONにしてご利用ください。\nEmbassy of Japan in the United States of America\n在アメリカ合衆国日本国大使館\nSkip to main content\nJapanese\nSearch\nFont Size S M L\nAbout Us\nVISA &amp; Consular Services\nBilateral Relations\nJapan Info &amp; Culture\nJapan's Foreign Policy News\nPress Releases\nTop &nbsp;&gt;&nbsp;Foreign Policy News\nForeign Policy News\nMinistry of Foreign Affairs News\n2026/7/21\nForeign Minister MOTEGI's Attendance at the ASEAN-related Foreign Ministers' Meetings (July 21-24)\n2026/7/12\nTen years since the issuance of the Arbitral Tribunal’s award as to the disputes between the Republic of the Philippines and the People’s Republic of China regarding the South China Sea (Statement by Foreign Minister MOTEGI Toshimitsu)\n2026/7/7\nForeign Minister MOTEGI’s Visit to Türkiye on the occasion of the NATO Summit (July 6–9)\n2026/7/1\nPrime Minister TAKAICHI’s Visit to India (July 1-3)\n2026/6/15\nSituation in Iran (Agreement on a Memorandum of Understanding between the United States and Iran) (Statement by Foreign Minister MOTEGI Toshimitsu)\n2026/6/12\nPrime Minister TAKAICHI’s Visit to the United Kingdom and Italy and Her Attendance at the G7 Evian Summit (June 13-18)\n2026/5/25\nForeign Minister MOTEGI's Attendance at the Japan-Australia-India-U.S. (Quad) Foreign Ministers’ Meeting (May 25-27)\n2026/5/23\nThe 11th NPT Review Conference (Statement by Foreign Minister MOTEGI Toshimitsu)\n2026/5/19\nPrime ",
+   "retrieved_at": "2026-07-24T07:07:19+00:00",
+   "content_sha256": "3dd8c1056c8662331365eb8eaca16276bf23ae9a38f548ac13d895cf777b6532",
+   "page_language": "zh"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=JPN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://www.moj.go.jp/isa/",
+   "final_url": "https://www.moj.go.jp/isa/",
+   "redirect_chain": [
+    "https://www.isa.go.jp/en/",
+    "http://www.moj.go.jp/isa",
+    "https://www.moj.go.jp/isa",
+    "http://www.moj.go.jp/isa/",
+    "https://www.moj.go.jp/isa/"
+   ],
+   "final_hostname": "www.moj.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "出入国在留管理庁ホームページ\nこのページではJavaScriptを使用しています。\n本文へ\nMulti language\n文字サイズ\n標準\n拡大\nMENU\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\nMulti language\n再生ボタン\n停止ボタン\n▶　各種申請・届出\n各種申請・届出に関する必要書類等のご案内\nなるほど！\n出入国在留管理庁\n注目政策情報\nよくあるお問い合わせ",
+   "retrieved_at": "2026-07-24T07:07:21+00:00",
+   "content_sha256": "7ccd794655984845c5f62cb242ed6211c36b7d42cc6f35e3511a53416b1e4f66",
+   "page_language": "zh"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=JPN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://www.evisa.mofa.go.jp/index",
+   "final_url": "https://www.evisa.mofa.go.jp/index",
+   "redirect_chain": [
+    "https://www.evisa.mofa.go.jp/index"
+   ],
+   "final_hostname": "www.evisa.mofa.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "JAPAN eVISA_Top\n&lt;img src=\"/js/awstats_misc_tracker.js?nojs=y\" height=0 width=0 border=0 style=\"display: none\"&gt;\nlanguage：\nEnglish\nEnglish\nEnglish\nRecommended environment\nFrequently asked questions\nInquiries\nEligibility for application\nFlow of online visa application Check in advance\nRequired documents\nNotices on visa application\nVideo: How to apply\nCreated by modifying \"Mt.Fuji shining in the morning sun Yamanashi\"\n(© Koichi Hayakawa\n( Licensed under CC BY 4.0 ))\nRecommended environment\nFrequently asked questions\nInquiries\nOnline visa application for visiting Japan\nAttention! The payment method for an eVISA is limited to online payment. We only accept the payment by your credit card. If your application is incomplete or doesn't meet the requirements, it will be cancelled or returned without being processed. Please submit your application well in advance of your travel. Effective July 1, 2026, the visa fee has been revised to 15,000 JPY due to a regulatory amendment.\nEligibility for application\nFlow of online visa application Check in advance\nRequired documents\nNotices on visa application\nVideo: How to apply for visa on the JAPAN eVISA website (YouTube)\nWhat's the JAPAN eVISA system?\nJAPAN eVISA system provides a way to apply for a visa online and issues an electronic visa. Currently, applicants who apply for a single-entry short-term stay visa for the purpose of tourism may use the JAPAN eVISA system. (* You cannot apply through the system if your purpose of visit is vis",
+   "retrieved_at": "2026-07-24T07:07:25+00:00",
+   "content_sha256": "e3a361d1084b3fcf03bef79ca76247579b055aa6d1d1b118aed26ed4a09e2e57",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=JPN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://www.japan.travel/en/plan/visa-info/",
+   "final_url": "https://www.japan.travel/en/plan/visa-info/",
+   "redirect_chain": [],
+   "final_hostname": "www.japan.travel",
+   "source_authority": "non_authoritative",
+   "relevant_excerpt": "Japan Visa Requirements | Japan Travel Visa Information | JNTO\nTrade\nMeetings &amp; Events\nNewsletter Sign-up\nCoronavirus (COVID-19) Advisory Information\nSelect Language\n简体中文\n繁體中文（香港）\n繁體中文（臺灣）\nIndia (English)\nBahasa Indonesia\n한국어\nภาษาไทย\nTiếng Việt\nSingapore (English)\nPhilippines (English)\nMalaysia (English)\nAustralia/New Zealand (English)\nFrançais\nDeutsch\nItaliano\nEspañol\nUnited Kingdom (English)\nNordic countries（English）\nCanada (English)\nCanada (Français)\nUnited States (English)\nMexico (español)\nPortuguês\nالعربية\nGlobal (English)\n简体中文\n繁體中文（香港）\n繁體中文（臺灣）\nIndia (English)\nBahasa Indonesia\n한국어\nภาษาไทย\nTiếng Việt\nSingapore (English)\nPhilippines (English)\nMalaysia (English)\nAustralia/New Zealand (English)\nFrançais\nDeutsch\nItaliano\nEspañol\nUnited Kingdom (English)\nNordic countries（English）\nCanada (English)\nCanada (Français)\nUnited States (English)\nMexico (español)\nPortuguês\nالعربية\nGlobal (English)\nHOME\nBack\nDestinations\nAll\nHokkaido\nTohoku\nAomori\nAkita\nIwate\nYamagata\nMiyagi\nFukushima\nHokuriku Shinetsu\nNiigata\nToyama\nIshikawa\nFukui\nNagano\nKanto\nTokyo\nKanagawa\nChiba\nSaitama\nIbaraki\nTochigi\nGunma\nTokai\nYamanashi\nShizuoka\nGifu\nAichi\nMie\nKansai\nKyoto\nOsaka\nShiga\nHyogo\nNara\nWakayama\nChugoku\nTottori\nShimane\nOkayama\nHiroshima\nYamaguchi\nShikoku\nTokushima\nKagawa\nEhime\nKochi\nKyushu\nFukuoka\nSaga\nNagasaki\nOita\nKumamoto\nMiyazaki\nKagoshima\nOkinawa\nMajor cities\nHokkaido\nSapporo\nAsahikawa\nHakodate\nKushiro\nTohoku\nSendai\nAomori\nAkita\nMorioka\nTsuruoka\nFukushima\nHokuriku Shinetsu\nKanazawa\nNiigata\nToya",
+   "retrieved_at": "2026-07-24T07:07:36+00:00",
+   "content_sha256": "04d32533796581c3fb4b117e852b662f416e749a35f7b188f13ab4e7d7903196",
+   "page_language": "zh"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=JPN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://www.moj.go.jp/isa/applications/index.html",
+   "final_url": "https://www.moj.go.jp/isa/applications/index.html",
+   "redirect_chain": [],
+   "final_hostname": "www.moj.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "在留手続 | 出入国在留管理庁\nこのページではJavaScriptを使用しています。\n本文へ\nMulti language\n文字サイズ\n標準\n拡大\nMENU\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\nMulti language\nトップページ\n在留手続\n在留手続\n入国・在留手続の流れ\n手続の種類から探す\n在留申請\n申請取次制度\n在留カード\n特別永住者証明書\n届出関係\n特定技能",
+   "retrieved_at": "2026-07-24T07:07:36+00:00",
+   "content_sha256": "ab18c594028d6c55c17fc63e4dd9435bfa34f15fcb3c7f4406f750393f4af4ae",
+   "page_language": "zh"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=JPN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://www.moj.go.jp/isa/applications/status/index.html",
+   "final_url": "https://www.moj.go.jp/isa/applications/status/index.html",
+   "redirect_chain": [],
+   "final_hostname": "www.moj.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "在留資格から探す | 出入国在留管理庁\nこのページではJavaScriptを使用しています。\n本文へ\nMulti language\n文字サイズ\n標準\n拡大\nMENU\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\nMulti language\nトップページ\n在留手続\n在留資格から探す\n在留資格から探す\n本邦において行うことができる活動や該当例、在留期間は 在留資格一覧表 を御確認く",
+   "retrieved_at": "2026-07-24T07:07:37+00:00",
+   "content_sha256": "d3e1750f638ef9b684697a8bcb0afc54b3a3de630a07009141531531b67ba72a",
+   "page_language": "zh"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=JPN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://www.moj.go.jp/isa/applications/procedures/index.html",
+   "final_url": "https://www.moj.go.jp/isa/applications/procedures/index.html",
+   "redirect_chain": [],
+   "final_hostname": "www.moj.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "手続の種類から探す | 出入国在留管理庁\nこのページではJavaScriptを使用しています。\n本文へ\nMulti language\n文字サイズ\n標準\n拡大\nMENU\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\nMulti language\nトップページ\n在留手続\n手続の種類から探す\n手続の種類から探す\n申請書の書き方、必要書類等についての御質問は、「 外国人在留総合インフォメ",
+   "retrieved_at": "2026-07-24T07:07:38+00:00",
+   "content_sha256": "aab9af3ace2896d17fe0174acc1dabd6d3a6f538f11029fd498296c228a8e3a0",
+   "page_language": "zh"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=JPN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://www.moj.go.jp/isa/applications/online/onlineprocedures.html",
+   "final_url": "https://www.moj.go.jp/isa/applications/online/onlineprocedures.html",
+   "redirect_chain": [],
+   "final_hostname": "www.moj.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "出入国在留管理庁オンライン申請 | 出入国在留管理庁\nこのページではJavaScriptを使用しています。\n本文へ\nMulti language\n文字サイズ\n標準\n拡大\nMENU\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\nMulti language\nトップページ\n在留手続\n手続の種類から探す\n出入国在留管理庁オンライン申請\n出入国在留管理庁オンライン申請\nオンライン申請等が",
+   "retrieved_at": "2026-07-24T07:07:38+00:00",
+   "content_sha256": "a187345fdf3e554914a9cb147661ff5ae6bd1287191bc769276eb9f5cac99cee",
+   "page_language": "zh"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=JPN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://www.moj.go.jp/isa/applications/index_00005.html",
+   "final_url": "https://www.moj.go.jp/isa/applications/index_00005.html",
+   "redirect_chain": [],
+   "final_hostname": "www.moj.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "育成就労制度 | 出入国在留管理庁\nこのページではJavaScriptを使用しています。\n本文へ\nMulti language\n文字サイズ\n標準\n拡大\nMENU\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\nMulti language\nトップページ\n在留手続\n育成就労制度\n育成就労制度\n更新情報（UPDATE）\n2026.7.21「 育成就労制度運用要領 」に特定の分野に係る育",
+   "retrieved_at": "2026-07-24T07:07:39+00:00",
+   "content_sha256": "191507a82f3feb99b3b555764939b015c7d7ad8f2cb744774cbff3c089398cbd",
+   "page_language": "zh"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=JPN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://www.moj.go.jp/isa/applications/ssw/index.html",
+   "final_url": "https://www.moj.go.jp/isa/applications/ssw/index.html",
+   "redirect_chain": [],
+   "final_hostname": "www.moj.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "特定技能制度 | 出入国在留管理庁\nこのページではJavaScriptを使用しています。\n本文へ\nMulti language\n文字サイズ\n標準\n拡大\nMENU\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\nMulti language\nトップページ\n在留手続\n特定技能制度\n特定技能制度\n更新情報（UPDATE）\n2026.7.17　 「 特定技能１号（外食業分野）の在留諸申請の",
+   "retrieved_at": "2026-07-24T07:07:40+00:00",
+   "content_sha256": "d0e05e21a6f790a8179214e1e1c75739055a695f542091b6249af325a3d9bf61",
+   "page_language": "zh"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=JPN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://www.moj.go.jp/isa/applications/titp/nyuukokukanri05_00014.html",
+   "final_url": "https://www.moj.go.jp/isa/applications/titp/nyuukokukanri05_00014.html",
+   "redirect_chain": [],
+   "final_hostname": "www.moj.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "外国人技能実習制度 | 出入国在留管理庁\nこのページではJavaScriptを使用しています。\n本文へ\nMulti language\n文字サイズ\n標準\n拡大\nMENU\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\nMulti language\nトップページ\n在留手続\n外国人技能実習制度\n外国人技能実習制度\n平成２９年１１月１日、外国人の技能実習の適正な実施及び技能実習生の保護に関",
+   "retrieved_at": "2026-07-24T07:07:40+00:00",
+   "content_sha256": "f110d4f3541407cb8d58cf14e770be65d9d7fd1f67fc0ce8ebe9a7ceacd1587e",
+   "page_language": "zh"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=JPN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://www.moj.go.jp/isa/applications/resources/newimmiact_3_index.html",
+   "final_url": "https://www.moj.go.jp/isa/applications/resources/newimmiact_3_index.html",
+   "redirect_chain": [],
+   "final_hostname": "www.moj.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "高度人材ポイント制による出入国在留管理上の優遇制度 | 出入国在留管理庁\nこのページではJavaScriptを使用しています。\n本文へ\nMulti language\n文字サイズ\n標準\n拡大\nMENU\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\n組織・採用\n出入国在留管理庁の概要\n機構図\n幹部一覧\n地方出入国在留管理官署\n採用案内\n出入国手続\n出入（帰）国手続について（解説）\n再入国許可申請\nトラスティド・トラベラー・プログラム（TTP）\n乗員上陸許可申請（NACCS）\n各種公表資料\n出入国審査・在留審査Q&A\n在留手続\n在留資格から探す\n手続の種類から探す\nオンライン手続\n育成就労制度\n特定技能制度\n外国人技能実習制度\n高度人材ポイント制\nJ-Skip/J-Find\nスタートアップ関連施策\n留学生の就職\n各種公表資料\n在留支援\nロードマップ\n総合的対応策\nHarmoniUP!\n新規入国者向けガイダンスページ\n外国人生活支援ポータルサイト\n生活・就労ガイドブック\n外国人在留支援センター(FRESC／フレスク）\n相談窓口\n外国人との共生施策に係る御意見・御要望（御意見箱）\n退去強制手続\n退去強制手続と出国命令制度\n監理措置制度\n仮放免制度\n各種申請\n入管法違反者に関する情報提供\n各種公表資料\n退去強制手続・出国命令制度・上陸拒否期間の短縮決定Q&A\n難民の認定等\n難民認定手続・補完的保護対象者認定手続\n難民旅行証明書交付申請手続\n第三国定住による難民の受入れ\n一時庇護上陸許可\n各種公表資料\n政策情報（会議・統計等）\n会議・委員会等\n統計\n基本計画・白書・パンフレット\n関係法令\nその他政策情報\n広報・情報公開等\nプレスリリース\n更新情報\n広報\n調達情報\n情報公開・個人情報保護\n公文書管理\nご意見・情報提供\nその他の公表情報\nよくあるお問い合わせ（FAQ）\nMulti language\nトップページ\n在留手続\n高度人材ポイント制による出入国在留管理上の優遇制度\n高度人材ポイント制による出入国",
+   "retrieved_at": "2026-07-24T07:07:40+00:00",
+   "content_sha256": "fc5fc8a64776e44689d24044edd5688d8155ab833acf907127d8565632bc0ca5",
+   "page_language": "zh"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=JPN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+   "final_url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+   "redirect_chain": [],
+   "final_hostname": "www.mofa.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "Exemption of Visa (Short-Term Stay) | Ministry of Foreign Affairs of Japan\nThe Ministry of Foreign Affairs website uses JavaScript. Please turn on &quot;JavaScript&quot; and use it.\nSkip to main content\nFAQ\nSite Map\nLinks\nJapanese Other Languages\nSearch\nFont Size\nS\nM\nL\nAbout Us\nNews\nForeign Policy\nCountries &amp; Regions\nConsular Services\nTop &nbsp;&gt;&nbsp; Consular Services &nbsp;&gt;&nbsp; VISA &nbsp;&gt;&nbsp;Exemption of Visa (Short-Term Stay)\nVISA\nExemption of Visa (Short-Term Stay)\ne-mail\nPrint\nSeptember 1, 2025\nJapanese\nJapan has reciprocal visa exemption arrangements with 74 countries and regions listed in the table below.\n74 Countries and Regions for Visa Exemptions\nAsia\nEurope\nBrunei (30 days)\nAndorra\nIndonesia&nbsp; (Note 1)\nAustria&nbsp; (Note 8)\nMalaysia&nbsp; (Note 3)\nBelgium\nRepublic of Korea\nBulgaria\nSingapore\nCroatia\nThailand&nbsp; (Note 2) &nbsp;(15 days)\nCyprus\nHong Kong&nbsp; (Note 5)\nCzech Republic\nMacao&nbsp; (Note 6)\nDenmark\nTaiwan&nbsp; (Note 4)\nEstonia\nNorth America\nFinland\nCanada\nFrance\nUnited States\nGermany&nbsp; (Note 8)\nLatin America and the Caribbean\nGreece\nArgentina\nHungary\nBahamas\nIceland\nBarbados&nbsp; (Note 7)\nIreland&nbsp; (Note 8)\nBrazil&nbsp; (Note 2)\nItaly\nChile\nLatvia\nCosta Rica\nLiechtenstein&nbsp; (Note 8)\nDominican Republic\nLithuania\nEl Salvador\nLuxembourg\nGuatemala\nMalta\nHonduras\nMonaco\nPanama&nbsp; (Note 2)\nMontenegro (Note 2)\nParaguay&nbsp; (Note 2)\nNetherlands\nPeru (Note 2)\nNorth Macedonia\nMexico&nbsp; (Note 8)\nNorway\nSuriname\nPo",
+   "retrieved_at": "2026-07-24T07:08:53+00:00",
+   "content_sha256": "6d6d19d29401d13d9e35b154ee628c123838f3bcb4c7c51ea890cb7f4e932c27",
+   "page_language": "en"
+  },
+  {
+   "search_query": "on-demand:rk1|nat=USA|iss=USA|doc=ordinary_passport|res=USA|dest=JPN|cat=tourist_visa|sub=any|pur=tourism|per=2026-08-31|jur=default",
+   "original_url": "https://www.evisa.mofa.go.jp/index",
+   "final_url": "https://www.evisa.mofa.go.jp/index",
+   "redirect_chain": [
+    "https://www.evisa.mofa.go.jp/index"
+   ],
+   "final_hostname": "www.evisa.mofa.go.jp",
+   "source_authority": "destination_government",
+   "relevant_excerpt": "JAPAN eVISA_Top\n&lt;img src=\"/js/awstats_misc_tracker.js?nojs=y\" height=0 width=0 border=0 style=\"display: none\"&gt;\nlanguage：\nEnglish\nEnglish\nEnglish\nRecommended environment\nFrequently asked questions\nInquiries\nEligibility for application\nFlow of online visa application Check in advance\nRequired documents\nNotices on visa application\nVideo: How to apply\nCreated by modifying \"Mt.Fuji shining in the morning sun Yamanashi\"\n(© Koichi Hayakawa\n( Licensed under CC BY 4.0 ))\nRecommended environment\nFrequently asked questions\nInquiries\nOnline visa application for visiting Japan\nAttention! The payment method for an eVISA is limited to online payment. We only accept the payment by your credit card. If your application is incomplete or doesn't meet the requirements, it will be cancelled or returned without being processed. Please submit your application well in advance of your travel. Effective July 1, 2026, the visa fee has been revised to 15,000 JPY due to a regulatory amendment.\nEligibility for application\nFlow of online visa application Check in advance\nRequired documents\nNotices on visa application\nVideo: How to apply for visa on the JAPAN eVISA website (YouTube)\nWhat's the JAPAN eVISA system?\nJAPAN eVISA system provides a way to apply for a visa online and issues an electronic visa. Currently, applicants who apply for a single-entry short-term stay visa for the purpose of tourism may use the JAPAN eVISA system. (* You cannot apply through the system if your purpose of visit is vis",
+   "retrieved_at": "2026-07-24T07:09:11+00:00",
+   "content_sha256": "209f5fd38ea3c421dc9007ec6a53431f44cacb49efd7b2c427293598bd057bab",
+   "page_language": "en"
+  }
+ ],
+ "dispositions": [
+  {
+   "nationalities": [
+    "IDN",
+    "SGP",
+    "THA",
+    "MYS",
+    "BRN",
+    "KOR",
+    "TWN",
+    "HKG",
+    "MAC",
+    "USA",
+    "CAN",
+    "ARG",
+    "URY",
+    "SLV",
+    "GTM",
+    "CRI",
+    "SUR",
+    "CHL",
+    "DOM",
+    "PAN",
+    "BHS",
+    "PRY",
+    "BRB",
+    "BRA",
+    "PER",
+    "HND",
+    "MEX",
+    "AUS",
+    "NZL",
+    "ARE",
+    "ISR",
+    "QAT",
+    "TUR",
+    "TUN",
+    "MUS",
+    "LSO",
+    "ISL",
+    "IRL",
+    "AND",
+    "ITA",
+    "EST",
+    "AUT",
+    "NLD",
+    "MKD",
+    "CYP",
+    "GRC",
+    "HRV",
+    "GBR",
+    "SMR",
+    "CHE",
+    "SWE",
+    "ESP",
+    "SVK",
+    "SVN",
+    "SRB",
+    "CZE",
+    "DNK",
+    "DEU",
+    "NOR",
+    "FIN",
+    "FRA",
+    "BGR",
+    "BEL",
+    "POL",
+    "PRT",
+    "MLT",
+    "MCO",
+    "MNE",
+    "LVA",
+    "LTU",
+    "LIE",
+    "ROU",
+    "LUX"
+   ],
+   "category": "visa_free_entry",
+   "disposition": "VISA_FREE",
+   "maximum_stay": "up to 90 days",
+   "conditions": [
+    "Visa-free entry applies to short-term stays for tourism and similar Temporary Visitor activities only (no paid work).",
+    "Period of stay is granted in units of up to 90, 30 or 15 days depending on the nationality's arrangement; the per-nationality period could not be verified because MOFA's canonical exemption page was unreachable (HTTP 403). JNTO states most nationalities receive up to 90 days.",
+    "GBR: applies to British citizens only (per ISA specified-country list conditions).",
+    "IDN and ARE: ISA notes these passports are subject to visa-exemption registration or travel-authorization conditions at Japanese overseas missions; exact conditions unverified (MOFA unreachable).",
+    "TWN: Taiwan passport holders; HKG: Hong Kong SAR passport holders; MAC: Macao SAR passport holders.",
+    "List taken from the ISA specified-country list, defined as countries/regions for which Japan maintains visa-exemption measures excluding those whose exemption is suspended or subject to visa-obtainment-recommendation measures. One or more entries (e.g. Hungary, which appears on MOFA's published list) may be missing from this extraction — see unresolved."
+   ],
+   "source_urls": [
+    "https://www.moj.go.jp/isa/immigration/procedures/ttp2_pre-check_pre-check_document03.html",
+    "https://www.moj.go.jp/isa/applications/status/temporaryvisitor.html",
+    "https://www.japan.travel/en/plan/visa-info/"
+   ]
+  },
+  {
+   "nationalities": [
+    "IDN",
+    "SGP",
+    "THA",
+    "MYS",
+    "BRN",
+    "KOR",
+    "TWN",
+    "HKG",
+    "MAC",
+    "USA",
+    "CAN",
+    "ARG",
+    "URY",
+    "SLV",
+    "GTM",
+    "CRI",
+    "SUR",
+    "CHL",
+    "DOM",
+    "PAN",
+    "BHS",
+    "PRY",
+    "BRB",
+    "BRA",
+    "PER",
+    "HND",
+    "MEX",
+    "AUS",
+    "NZL",
+    "ARE",
+    "ISR",
+    "QAT",
+    "TUR",
+    "TUN",
+    "MUS",
+    "LSO",
+    "ISL",
+    "IRL",
+    "AND",
+    "ITA",
+    "EST",
+    "AUT",
+    "NLD",
+    "MKD",
+    "CYP",
+    "GRC",
+    "HRV",
+    "GBR",
+    "SMR",
+    "CHE",
+    "SWE",
+    "ESP",
+    "SVK",
+    "SVN",
+    "SRB",
+    "CZE",
+    "DNK",
+    "DEU",
+    "NOR",
+    "FIN",
+    "FRA",
+    "BGR",
+    "BEL",
+    "POL",
+    "PRT",
+    "MLT",
+    "MCO",
+    "MNE",
+    "LVA",
+    "LTU",
+    "LIE",
+    "ROU",
+    "LUX"
+   ],
+   "category": "tourist_visa",
+   "disposition": "NOT_APPLICABLE",
+   "maximum_stay": null,
+   "conditions": [
+    "These nationalities are covered by Japan's visa-exemption measures for short-term tourism, so no tourist visa is required for an exempt short-term stay."
+   ],
+   "source_urls": [
+    "https://www.moj.go.jp/isa/immigration/procedures/ttp2_pre-check_pre-check_document03.html",
+    "https://www.moj.go.jp/isa/immigration/faq/kanri_qa.html"
+   ]
+  },
+  {
+   "nationalities": [
+    "CHN",
+    "IND",
+    "RUS"
+   ],
+   "category": "tourist_visa",
+   "disposition": "EMBASSY_VISA_REQUIRED",
+   "maximum_stay": "granted in units of up to 90, 30 or 15 days (Temporary Visitor status)",
+   "conditions": [
+    "Not included in Japan's visa-exemption specified-country list; per ISA, foreign nationals other than those of visa-exempt countries/regions require a visa in addition to a valid passport.",
+    "Visas are applied for through Japanese embassies/consulates (JNTO describes the application documents and ~5 business days processing); office-level procedures, accredited-agency requirements (e.g. for Chinese nationals) and any mandated visa centers could not be verified because MOFA and emb-japan.go.jp sites returned HTTP 403.",
+    "An online JAPAN eVISA channel may exist for some of these nationalities/countries of residence, but it could not be verified from any reachable official source (evisa.mofa.go.jp returned HTTP 403) — see unresolved."
+   ],
+   "source_urls": [
+    "https://www.moj.go.jp/isa/immigration/procedures/ttp2_pre-check_pre-check_document03.html",
+    "https://www.moj.go.jp/isa/immigration/faq/kanri_qa.html",
+    "https://www.moj.go.jp/isa/applications/status/temporaryvisitor.html",
+    "https://www.japan.travel/en/plan/visa-info/"
+   ]
+  },
+  {
+   "nationalities": [
+    "ALL_OTHERS"
+   ],
+   "category": "tourist_visa",
+   "disposition": "EMBASSY_VISA_REQUIRED",
+   "maximum_stay": "granted in units of up to 90, 30 or 15 days (Temporary Visitor status)",
+   "conditions": [
+    "Per ISA, a valid passport and a visa are required for entry except for nationals of visa-exempt countries/regions.",
+    "Application is made before travel through Japanese overseas missions; details unverified because MOFA/embassy sites returned HTTP 403.",
+    "An online JAPAN eVISA channel may exist for some nationalities/countries of residence but could not be verified from a reachable official source."
+   ],
+   "source_urls": [
+    "https://www.moj.go.jp/isa/immigration/faq/kanri_qa.html",
+    "https://www.moj.go.jp/isa/immigration/procedures/ttp2_pre-check_pre-check_document03.html"
+   ]
+  },
+  {
+   "nationalities": [
+    "JPN"
+   ],
+   "category": "tourist_visa",
+   "disposition": "NOT_APPLICABLE",
+   "maximum_stay": null,
+   "conditions": [
+    "Japan is the destination; Japanese citizens are not subject to the visa regime for foreign nationals (ISA entry requirements apply to foreign nationals, 外国人)."
+   ],
+   "source_urls": [
+    "https://www.moj.go.jp/isa/immigration/faq/kanri_qa.html"
+   ]
+  },
+  {
+   "nationalities": [
+    "ALL"
+   ],
+   "category": "eta",
+   "disposition": "NOT_APPLICABLE",
+   "maximum_stay": null,
+   "conditions": [
+    "Japan does not currently operate an electronic travel authorization for tourism. JESTA (電子渡航認証制度) was created by the Reiwa-8 (2026) immigration law amendment but its provisions take effect on a date to be set by cabinet order no later than 2029-03-31; it is not in operation as of 2026-07-23."
+   ],
+   "source_urls": [
+    "https://www.moj.go.jp/isa/01_00643.html"
+   ]
+  },
+  {
+   "nationalities": [
+    "ALL"
+   ],
+   "category": "visa_on_arrival_tourist",
+   "disposition": "NOT_APPLICABLE",
+   "maximum_stay": null,
+   "conditions": [
+    "Official ISA guidance describes only two channels for short-term entry: visa-exempt entry for listed countries/regions, or a visa obtained before travel; no tourist visa-on-arrival program is described on any reachable official page."
+   ],
+   "source_urls": [
+    "https://www.moj.go.jp/isa/immigration/faq/kanri_qa.html",
+    "https://www.moj.go.jp/isa/immigration/procedures/ttp2_pre-check_pre-check_document03.html"
+   ]
+  },
+  {
+   "nationalities": [
+    "USA"
+   ],
+   "category": "tourist_visa",
+   "disposition": "VISA_FREE",
+   "maximum_stay": "90 days (period of stay granted upon landing permission for U.S. nationals; the 'Temporary Visitor' status of residence allows periods of 90, 30, or 15 days)",
+   "conditions": [],
+   "source_urls": [
+    "https://www.mofa.go.jp/j_info/visit/visa/index.html"
+   ]
+  }
+ ],
+ "policies": [
+  {
+   "policy_kind": "visa_exemption_list",
+   "policy_name": "Japan short-term stay visa exemption arrangements (査証免除措置)",
+   "description": "Japan maintains visa-exemption measures for nationals of listed countries/regions for short-term stays (Temporary Visitor status: tourism, recreation, visiting relatives, sightseeing, meetings, business liaison and similar activities; no paid work). The ISA 'specified country' list enumerates the countries/regions for which Japan currently maintains visa-exemption measures, excluding countries whose exemption is temporarily suspended or subject to visa-obtainment-recommendation measures. Period of stay is granted in units of up to 90, 30 or 15 days; JNTO states most nationalities receive up to 90 days.",
+   "applies_to_nationalities": [
+    "IDN",
+    "SGP",
+    "THA",
+    "MYS",
+    "BRN",
+    "KOR",
+    "TWN",
+    "HKG",
+    "MAC",
+    "USA",
+    "CAN",
+    "ARG",
+    "URY",
+    "SLV",
+    "GTM",
+    "CRI",
+    "SUR",
+    "CHL",
+    "DOM",
+    "PAN",
+    "BHS",
+    "PRY",
+    "BRB",
+    "BRA",
+    "PER",
+    "HND",
+    "MEX",
+    "AUS",
+    "NZL",
+    "ARE",
+    "ISR",
+    "QAT",
+    "TUR",
+    "TUN",
+    "MUS",
+    "LSO",
+    "ISL",
+    "IRL",
+    "AND",
+    "ITA",
+    "EST",
+    "AUT",
+    "NLD",
+    "MKD",
+    "CYP",
+    "GRC",
+    "HRV",
+    "GBR",
+    "SMR",
+    "CHE",
+    "SWE",
+    "ESP",
+    "SVK",
+    "SVN",
+    "SRB",
+    "CZE",
+    "DNK",
+    "DEU",
+    "NOR",
+    "FIN",
+    "FRA",
+    "BGR",
+    "BEL",
+    "POL",
+    "PRT",
+    "MLT",
+    "MCO",
+    "MNE",
+    "LVA",
+    "LTU",
+    "LIE",
+    "ROU",
+    "LUX"
+   ],
+   "conditions": [
+    "Tourism and other Temporary Visitor activities only; no paid work, long-term study or residency.",
+    "GBR entry limited to British citizens.",
+    "IDN and ARE subject to registration/travel-authorization conditions per the ISA list; details unverified.",
+    "Canonical per-country stay periods are published by MOFA (novisa.html), which was unreachable (HTTP 403); list here may be missing entries (e.g. Hungary)."
+   ],
+   "maximum_stay": "up to 90 days (units of 90, 30 or 15 days depending on nationality)",
+   "official_source_urls": [
+    "https://www.moj.go.jp/isa/immigration/procedures/ttp2_pre-check_pre-check_document03.html",
+    "https://www.moj.go.jp/isa/applications/status/temporaryvisitor.html",
+    "https://www.japan.travel/en/plan/visa-info/"
+   ],
+   "effective_from": null,
+   "effective_until": null
+  },
+  {
+   "policy_kind": "consular_visa_regime",
+   "policy_name": "Short-term stay (Temporary Visitor) visa via Japanese overseas missions",
+   "description": "Foreign nationals not covered by a visa-exemption arrangement must hold a valid passport and obtain a visa before travel. Per ISA: nationals of visa-exempt countries/regions need no visa; all others require one. JNTO describes the application (form, valid passport, photo, accommodation/itinerary, proof of funds) with processing typically around five business days, and refers applicants to Japanese embassies/consulates via the MOFA directory.",
+   "applies_to_nationalities": [
+    "ALL_OTHERS"
+   ],
+   "conditions": [
+    "Details of consular procedures, fees, accredited travel-agency requirements (e.g. for Chinese nationals) and any mandated visa application centers could not be verified: MOFA and emb-japan.go.jp sites returned HTTP 403."
+   ],
+   "maximum_stay": "granted in units of up to 90, 30 or 15 days (Temporary Visitor status)",
+   "official_source_urls": [
+    "https://www.moj.go.jp/isa/immigration/faq/kanri_qa.html",
+    "https://www.moj.go.jp/isa/applications/status/temporaryvisitor.html",
+    "https://www.japan.travel/en/plan/visa-info/"
+   ],
+   "effective_from": null,
+   "effective_until": null
+  },
+  {
+   "policy_kind": "eta_program",
+   "policy_name": "JESTA (Japan Electronic System for Travel Authorization) — enacted, not yet in force",
+   "description": "The Reiwa-8 (2026) amendment to the Immigration Control Act creates JESTA, an electronic travel authorization system. The creating provisions take effect on a date to be fixed by cabinet order no later than 31 March 2029 (令和11年3月31日). JESTA is NOT operational as of 2026-07-23; no traveler currently needs or can obtain a Japanese ETA.",
+   "applies_to_nationalities": [
+    "ALL"
+   ],
+   "conditions": [
+    "Not yet in force; scope of covered nationalities (expected to target visa-exempt travelers) not specified on the fetched page."
+   ],
+   "maximum_stay": null,
+   "official_source_urls": [
+    "https://www.moj.go.jp/isa/01_00643.html"
+   ],
+   "effective_from": null,
+   "effective_until": null
+  }
+ ],
+ "fees": [],
+ "portals": [
+  {
+   "portal_kind": "immigration_authority",
+   "url": "https://www.moj.go.jp/isa/",
+   "operator": "Immigration Services Agency (出入国在留管理庁), Ministry of Justice",
+   "operator_kind": "government",
+   "official_linking_source": null,
+   "supported_categories": [
+    "entry_and_landing_procedures",
+    "temporary_visitor_status",
+    "residence_procedures"
+   ],
+   "source_urls": [
+    "https://www.moj.go.jp/isa/"
+   ]
+  },
+  {
+   "portal_kind": "foreign_ministry",
+   "url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+   "operator": "Ministry of Foreign Affairs of Japan",
+   "operator_kind": "government",
+   "official_linking_source": "https://www.japan.travel/en/plan/visa-info/",
+   "supported_categories": [
+    "tourist_visa",
+    "visa_exemption_information"
+   ],
+   "source_urls": [
+    "https://www.japan.travel/en/plan/visa-info/"
+   ]
+  }
+ ],
+ "passport_validity": {
+  "rule_kind": "valid_on_arrival",
+  "months": null,
+  "min_blank_pages": null,
+  "condition_text": "ISA requires 我が国が承認した外国政府等の発行した有効な旅券 (a valid passport issued by a foreign government recognized by Japan) for entry. No minimum validity period beyond the stay and no blank-page rule was found on any reachable official page; MOFA pages that might state more were unreachable (HTTP 403).",
+  "source_urls": [
+   "https://www.moj.go.jp/isa/immigration/faq/kanri_qa.html"
   ]
+ },
+ "jurisdictions": [],
+ "unresolved": [
+  "MOFA (www.mofa.go.jp) returned HTTP 403 to every fetch attempt: /j_info/visit/visa/short/novisa.html, /j_info/visit/visa/, /j_info/visit/Visa/short/novisa.html, /j_info/visit/visa/short/novisa.html?p=1, /j_info/visit/visa/basics.html. The canonical visa-exemption list with per-country stay periods (90/30/15 days), visa fee schedule, and eVisa program pages could therefore not be verified directly.",
+  "JAPAN eVISA portal (https://www.evisa.mofa.go.jp/index) returned HTTP 403. The eVisa program's existence, eligible nationalities/countries of residence, stay length and fees could not be verified from any reachable official source, so NO evisa_tourist disposition rows were recorded. Some non-exempt nationalities may in fact have an online eVISA application channel; treat the EMBASSY_VISA_REQUIRED rows as the default channel only.",
+  "Embassy of Japan sites all returned HTTP 403 (us.emb-japan.go.jp/itpr_en/visa.html, uk.emb-japan.go.jp/itpr_en/visa.html, sg.emb-japan.go.jp/itpr_en/visa_top.html), so consular procedures, authorized visa application centers (e.g. JVAC/VFS in some jurisdictions) and accredited-agency requirements for specific nationalities (e.g. CHN) are unverified; no authorized_visa_center portal recorded.",
+  "Government visa fees (typically quoted by MOFA in local currency equivalent of JPY amounts for single/double/multiple-entry visas) are unverified — fees array left empty rather than guessed.",
+  "Per-nationality maximum stay under the exemption (e.g. shorter periods for THA, IDN, BRN, QAT, ARE) unverified; JNTO states most nationalities receive up to 90 days and some 15/30/180 days.",
+  "The exemption list was extracted from the ISA specified-country page (a TTP pre-check reference defined as countries with active visa-exemption measures). Hungary, which appears on MOFA's published exemption list per search-result snippets (not evidence), was absent from the extraction — possible extraction gap; the list may be missing one or more entries.",
+  "http://www.moj.go.jp/ENGLISH/information/bpic3rd-03.html (English statement of the passport+visa landing principle) returned 404; https://www.moj.go.jp/isa/en/ returned 404; https://www.moj.go.jp/isa/applications/guide/kanri_qa.html returned an effectively empty page. English-language ISA confirmation of the entry principle is therefore missing; the principle is sourced from the Japanese ISA Q&A page.",
+  "Visit Japan Web (services.digital.go.jp/en/visit-japan-web/, linked from JNTO) is an arrival-procedures service, not a visa/ETA, and per JNTO is not mandatory; not recorded as a portal since no matching portal_kind applies.",
+  "source unavailable: https://www.vjw.digital.go.jp/ (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.vjw.digital.go.jp/ (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.mofa.go.jp/j_info/visit/visa/index.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.us.emb-japan.go.jp/itpr_en/visa.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.us.emb-japan.go.jp/itpr_en/ (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.evisa.mofa.go.jp/index (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.mofa.go.jp/j_info/visit/visa/index.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.us.emb-japan.go.jp/itpr_en/visa.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.us.emb-japan.go.jp/itpr_en/ (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.evisa.mofa.go.jp/index (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.mofa.go.jp/j_info/visit/visa/index.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.us.emb-japan.go.jp/itpr_en/visa.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.us.emb-japan.go.jp/itpr_en/ (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.evisa.mofa.go.jp/index (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.mofa.go.jp/j_info/visit/visa/index.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.us.emb-japan.go.jp/itpr_en/visa.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.us.emb-japan.go.jp/itpr_en/ (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.evisa.mofa.go.jp/index (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.mofa.go.jp/j_info/visit/visa/index.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.us.emb-japan.go.jp/itpr_en/visa.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.us.emb-japan.go.jp/itpr_en/ (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.evisa.mofa.go.jp/index (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.mofa.go.jp/j_info/visit/visa/index.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.us.emb-japan.go.jp/itpr_en/visa.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.us.emb-japan.go.jp/itpr_en/ (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.evisa.mofa.go.jp/index (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.mofa.go.jp/j_info/visit/visa/index.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.us.emb-japan.go.jp/itpr_en/visa.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.us.emb-japan.go.jp/itpr_en/ (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.evisa.mofa.go.jp/index (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.mofa.go.jp/j_info/visit/visa/index.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.us.emb-japan.go.jp/itpr_en/visa.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.us.emb-japan.go.jp/itpr_en/ (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.evisa.mofa.go.jp/index (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.mofa.go.jp/j_info/visit/visa/index.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.us.emb-japan.go.jp/itpr_en/visa.html (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.us.emb-japan.go.jp/itpr_en/ (anti-bot/JS challenge shell)",
+  "source unavailable: https://www.evisa.mofa.go.jp/index (anti-bot/JS challenge shell)"
+ ]
 }
