@@ -15,7 +15,12 @@ class Base(DeclarativeBase):
 
 def _make_engine(url: str | None = None):
     url = url or settings().database_url
-    connect_args = {"check_same_thread": False} if url.startswith("sqlite") else {}
+    connect_args = {}
+    if url.startswith("sqlite"):
+        # SQLite allows a single writer. A long orchestrator build and a
+        # concurrent research job would otherwise fail immediately with
+        # "database is locked"; wait for the lock instead of dropping work.
+        connect_args = {"check_same_thread": False, "timeout": 60}
     return create_engine(url, future=True, connect_args=connect_args)
 
 
