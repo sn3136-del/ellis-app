@@ -421,20 +421,14 @@ def route_guidance(intake_id: str, background: BackgroundTasks,
 # approval exists anywhere on this path.
 
 def _continuation_summary(db, r, cg, case_row) -> dict:
-    from . import intake_flow
-    from .. import models as core_models
-    docs = db.execute(select(core_models.StoredDocument).where(
-        core_models.StoredDocument.application_id == case_row.id)).scalars().all()
-    status = intake_flow.apply_checklist_status(
-        cg.checklist or [],
-        [{"doc_type": d.doc_type,
-          "accepted_as_passport_identity": (d.page_classification or {}).get(
-              "accepted_as_passport_identity", True)} for d in docs])
+    from .. import checklist_intake
+    status = checklist_intake.checklist_state(db, case_row, cg)
     return {"case_id": case_row.id, "intake_id": r.id, "status": r.status,
             "case_state": case_row.state,
             "disposition": cg.disposition,
             "continuation_kind": cg.continuation_kind,
             "checklist": status["items"], "checklist_counts": status["counts"],
+            "intake_stage": status["intake_stage"],
             "guidance": cg.guidance,
             "verification": (cg.guidance or {}).get("verification") or {}}
 
@@ -547,6 +541,14 @@ def continue_intake(intake_id: str, background: BackgroundTasks,
             db.add(core_models.DocumentBlob(document_id=stored.id, org_id=p.org_id,
                                             mime=d.mime, content=d.content))
             d.content = None   # bytes now live (and are erased) with the case
+        # The applicant explicitly reviewed and applied the extracted profile
+        # at Step 1 ("Use these details") — record that confirmation as the
+        # passport requirement's submission. An unconfirmed carry-over is NOT
+        # seeded: it goes through the normal upload → review → Submit flow.
+        if confirmed:
+            from .. import checklist_intake
+            checklist_intake.seed_intake_confirmed_passport(
+                db, org_id=p.org_id, application_id=case_row.id, document=stored)
 
     guidance_saved = dict(g)
     guidance_saved.pop("intake_id", None)

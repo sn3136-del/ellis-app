@@ -161,17 +161,25 @@ def test_checklist_updates_after_travel_history_answer(client, db):
     health = [i for i in j2["checklist"] if i["id"].startswith("health:")]
     assert len(health) == 1 and "Yellow fever" in health[0]["label"]
 
-    # A vaccination-certificate upload satisfies the item.
+    # A vaccination-certificate upload bound to the item + the applicant's
+    # explicit Submit fulfils it (an upload alone never does).
     up = client.post(f"/cases/{case_id}/documents", headers=H, json={
         "name": "yellow-fever-card.pdf", "mime": "application/pdf",
         "size_bytes": 1024,
         "text": "International Certificate of Vaccination or Prophylaxis\n"
                 "Vaccine: Yellow fever\nDate of vaccination: 12 Jan 2026\n"
-                "Batch number: YF-1234"})
+                "Batch number: YF-1234",
+        "checklist_item_id": health[0]["id"]})
     assert up.json()["doc_type"] == "vaccination_certificate"
     j3 = client.get(f"/cases/{case_id}/checklist", headers=H).json()
     health3 = [i for i in j3["checklist"] if i["id"].startswith("health:")]
-    assert health3[0]["status"] == "provided"
+    assert health3[0]["status"] == "ready_to_submit"
+    s = client.post(f"/cases/{case_id}/checklist/{health[0]['id']}/submit",
+                    json={"document_id": up.json()["id"]}, headers=H)
+    assert s.status_code == 200 and s.json()["submitted"] is True
+    j4 = client.get(f"/cases/{case_id}/checklist", headers=H).json()
+    health4 = [i for i in j4["checklist"] if i["id"].startswith("health:")]
+    assert health4[0]["status"] == "submitted"
 
 
 def test_answered_no_keeps_checklist_clean(client, db):

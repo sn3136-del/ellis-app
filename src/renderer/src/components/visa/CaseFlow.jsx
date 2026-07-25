@@ -14,7 +14,7 @@ import {
 } from '../../lib/intake.js'
 import OcrReview from './OcrReview.jsx'
 import Preferences from './Preferences.jsx'
-import Checklist from './Checklist.jsx'
+import Checklist, { ContinuePanel } from './Checklist.jsx'
 import {
   SignatureModal, LiveViewModal, PaymentApprove, PaymentModal,
   AppointmentCalendar, RescheduleConfirm, DeclarationModal,
@@ -222,12 +222,17 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
           <JourneyHeader t={t} journey={journey} />
           <HealthQuestions t={t} client={client} caseId={caseId}
             questions={journey?.health_questions} onAnswered={refresh} />
-          <Checklist t={t} checklist={journey?.checklist}
+          <Checklist t={t} client={client} caseId={caseId}
+            checklist={journey?.checklist}
             counts={journey?.checklist_counts && {
-              required: (journey.checklist || []).filter((i) => i.required && i.kind === 'document').length,
+              required: journey.checklist_counts.required_documents ??
+                (journey.checklist || []).filter((i) => i.required && i.kind === 'document').length,
               missing: journey.checklist_counts.required_missing
-            }} />
+            }}
+            onChanged={refresh} />
           <OcrReview client={client} caseId={caseId} onChanged={refresh} />
+          <ContinuePanel t={t} client={client} caseId={caseId} journey={journey}
+            onAdvanced={() => { setTab('journey'); refresh() }} />
         </div>
       )}
 

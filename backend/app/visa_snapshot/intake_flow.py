@@ -565,32 +565,121 @@ def _slug(s: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", str(s or "").lower()).strip("_")[:40] or "item"
 
 
-def apply_checklist_status(checklist: list[dict], documents: list[dict]) -> dict:
-    """Compute per-item status from the case's classified documents.
-    documents: [{doc_type, approved, accepted_as_passport_identity}]."""
-    provided_types: set[str] = set()
-    passport_ok = False
-    for d in documents or []:
-        dt = str(d.get("doc_type") or "")
-        if dt:
-            provided_types.add(dt)
-        if dt == "passport" and d.get("accepted_as_passport_identity", True):
-            passport_ok = True
+# Manually assignable document types (safe whitelist for ambiguous uploads).
+# 'passport' is deliberately excluded — passport identity is only ever
+# established by the MRZ/biodata classifier, never by an applicant label.
+MANUAL_DOC_TYPES = (
+    "photo", "flight_itinerary", "hotel_booking", "bank_statement",
+    "employment_letter", "student_letter", "invitation_letter",
+    "travel_insurance", "residence_permit", "prior_visa", "destination_form",
+    "vaccination_certificate",
+)
+
+# Classifier provenance considered DETERMINISTIC (a different specific type
+# from one of these is a clear mismatch → Submit blocked). Semantic (kimi)
+# classifications are treated as low-confidence: mismatches surface but the
+# applicant may explicitly confirm the assignment.
+_STRONG_CLASSIFIERS = ("mrz", "keyword", "filename", "applicant")
+
+
+def match_document_to_item(item: dict, doc_type: str, *, classifier: str = "",
+                           rejected: bool = False) -> str:
+    """How well a classified upload satisfies one checklist requirement.
+      'match'      — the document can satisfy this requirement (Submit enabled)
+      'uncertain'  — could not be confidently identified / semantic-only guess
+                     (Submit requires the applicant's explicit confirmation)
+      'mismatch'   — confidently a DIFFERENT document type (Submit blocked)
+      'unreadable' — the upload was rejected as unreadable/unusable
+    """
+    if rejected:
+        return "unreadable"
+    dt = str(doc_type or "")
+    sat = set((item or {}).get("satisfied_by") or [])
+    if not sat or "document" in sat:
+        # Generic requirement ("police clearance", health evidence): any
+        # readable supporting document can satisfy it.
+        return "match"
+    if dt in sat:
+        return "match"
+    if dt in ("", "document", "unknown"):
+        return "uncertain"
+    # A specific known type that this requirement does not accept.
+    return "mismatch" if classifier in _STRONG_CLASSIFIERS else "uncertain"
+
+
+def apply_checklist_status(checklist: list[dict], documents: list[dict],
+                           submissions: list[dict] | None = None) -> dict:
+    """Compute per-item status from the case's documents AND the applicant's
+    explicit submissions. An upload alone never completes a requirement — only
+    a submitted binding (or an automatically-not-applicable/waived item) does.
+
+    documents:   [{id, name, doc_type, ocr_status, rejected,
+                   accepted_as_passport_identity, mime, size_bytes}]
+    submissions: [{item_id, document_id, status('bound'|'submitted'),
+                   match_verdict, confirmed_by_applicant, detected_type,
+                   submitted_at}]
+
+    Document-item statuses: pending (Needed) | processing | needs_review |
+    mismatch | unreadable | ready_to_submit | submitted | waived.
+    Non-document kinds keep 'auto' (check) and 'prepared_later' (form).
+    """
+    docs_by_id = {str(d.get("id") or ""): d for d in (documents or [])}
+    sub_by_item = {str(s.get("item_id") or ""): s for s in (submissions or [])}
     items = []
     required_missing = 0
+    required_docs = 0
+    fulfilled = 0
     for item in checklist or []:
         it = dict(item)
         if it["kind"] == "check":
             it["status"] = "auto"
-        elif it["id"] == "passport":
-            it["status"] = "provided" if passport_ok else "pending"
         elif it["kind"] == "form":
-            it["status"] = "provided" if "destination_form" in provided_types else "prepared_later"
+            it["status"] = "prepared_later"
+        elif it.get("waived"):
+            it["status"] = "waived"
         else:
-            sat = set(it.get("satisfied_by") or [])
-            it["status"] = "provided" if sat & provided_types else "pending"
-        if it["required"] and it["status"] == "pending":
-            required_missing += 1
+            sub = sub_by_item.get(str(it["id"]))
+            doc = docs_by_id.get(str(sub.get("document_id") or "")) if sub else None
+            if not sub or doc is None:
+                it["status"] = "pending"
+            else:
+                verdict = match_document_to_item(
+                    it, doc.get("doc_type"),
+                    classifier=str(doc.get("classifier") or ""),
+                    rejected=bool(doc.get("rejected")))
+                confirmed = bool(sub.get("confirmed_by_applicant"))
+                if str(doc.get("ocr_status") or "done") not in ("done", ""):
+                    it["status"] = "processing"
+                elif verdict == "unreadable":
+                    it["status"] = "unreadable"
+                elif sub.get("status") == "submitted":
+                    it["status"] = "submitted"
+                elif verdict == "match" or (verdict == "uncertain" and confirmed):
+                    it["status"] = "ready_to_submit"
+                elif verdict == "mismatch":
+                    it["status"] = "mismatch"
+                else:
+                    it["status"] = "needs_review"
+                it["binding"] = {
+                    "document_id": doc.get("id"),
+                    "document_name": doc.get("name"),
+                    "detected_type": doc.get("doc_type"),
+                    "match_verdict": verdict,
+                    "confirmed_by_applicant": confirmed,
+                    "submitted": sub.get("status") == "submitted",
+                    "submitted_at": sub.get("submitted_at"),
+                    "mime": doc.get("mime"),
+                    "size_bytes": doc.get("size_bytes"),
+                }
+        if it["kind"] == "document" and it.get("required") and not it.get("waived"):
+            required_docs += 1
+            if it["status"] == "submitted":
+                fulfilled += 1
+            else:
+                required_missing += 1
+        elif it["kind"] == "document" and it.get("waived"):
+            fulfilled += 1
         items.append(it)
     return {"items": items,
-            "counts": {"total": len(items), "required_missing": required_missing}}
+            "counts": {"total": len(items), "required_missing": required_missing,
+                       "required_documents": required_docs, "fulfilled": fulfilled}}

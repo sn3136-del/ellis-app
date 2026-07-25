@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from sqlalchemy import (String, Integer, BigInteger, Float, Boolean, ForeignKey, Text,
-                        JSON, DateTime, LargeBinary)
+                        JSON, DateTime, LargeBinary, UniqueConstraint)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base
@@ -162,6 +162,46 @@ class StoredDocument(Base, TimestampMixin):
     approved: Mapped[bool] = mapped_column(Boolean, default=False)
     quality_warnings: Mapped[list] = mapped_column(JSON, default=list)
     application: Mapped[VisaApplication] = relationship(back_populates="documents")
+
+
+class ChecklistSubmission(Base, TimestampMixin):
+    """The applicant's explicit binding of one uploaded document to one route
+    checklist requirement. An upload alone NEVER fulfils a requirement — only
+    the applicant's Submit (status='submitted') does. One binding per checklist
+    item; the bound document may serve additional items only when it genuinely
+    matches them (never two incompatible requirements)."""
+    __tablename__ = "checklist_submissions"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    org_id: Mapped[str] = mapped_column(String(64), index=True)
+    application_id: Mapped[str] = mapped_column(ForeignKey("visa_applications.id"), index=True)
+    item_id: Mapped[str] = mapped_column(String(120))
+    document_id: Mapped[str] = mapped_column(ForeignKey("stored_documents.id"))
+    status: Mapped[str] = mapped_column(String(20), default="bound")  # bound | submitted
+    submitted_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    match_verdict: Mapped[str] = mapped_column(String(20), default="")  # match | uncertain | mismatch | unreadable
+    detected_type: Mapped[str] = mapped_column(String(60), default="")
+    # True when the applicant explicitly confirmed a low-confidence assignment.
+    confirmed_by_applicant: Mapped[bool] = mapped_column(Boolean, default=False)
+    # Classification/confirmation provenance (classifier kind, source of the
+    # submission — e.g. intake_confirmed for the Step-1 passport). No PII.
+    provenance: Mapped[dict] = mapped_column(JSON, default=dict)
+    __table_args__ = (UniqueConstraint("application_id", "item_id",
+                                       name="uq_checklist_submission_item"),)
+
+
+class CaseStageProgress(Base, TimestampMixin):
+    """Durable per-case stage completion markers (e.g. the document-intake
+    stage completed by the applicant's Continue). Server-validated at write
+    time; survives refresh, backend and worker restarts."""
+    __tablename__ = "case_stage_progress"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    org_id: Mapped[str] = mapped_column(String(64), index=True)
+    application_id: Mapped[str] = mapped_column(ForeignKey("visa_applications.id"), index=True)
+    stage: Mapped[str] = mapped_column(String(40))  # document_intake
+    completed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    detail: Mapped[dict] = mapped_column(JSON, default=dict)
+    __table_args__ = (UniqueConstraint("application_id", "stage",
+                                       name="uq_case_stage"),)
 
 
 class WebhookDelivery(Base, TimestampMixin):

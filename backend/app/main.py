@@ -274,9 +274,15 @@ def document_content(doc_id: str, exp: int, sig: str, db=Depends(get_session)):
     if blob is None:
         raise HTTPException(404, "document content not found")
     from fastapi.responses import Response
+    # nosniff + a fully sandboxed CSP: preview bytes can never execute script
+    # or be reinterpreted as another type (HTML/active content is never
+    # rendered — the MIME allowlist at upload already excludes it).
     return Response(content=blob.content, media_type=blob.mime,
                     headers={"Cache-Control": "private, no-store",
-                             "Content-Disposition": "inline"})
+                             "Content-Disposition": "inline",
+                             "X-Content-Type-Options": "nosniff",
+                             "Content-Security-Policy":
+                                 "sandbox; default-src 'none'"})
 
 
 # ---- Email delivery (Phase 8) ----
@@ -632,6 +638,9 @@ class AddDocument(BaseModel):
     size_bytes: int = 1024
     text: str = ""          # embedded text layer / fixture for the local OCR provider
     content_b64: str = ""   # base64 image/PDF bytes → routed to Document AI / Kimi vision OCR
+    # Uploading from a checklist row binds the document to that exact
+    # requirement (never auto-fulfils it — the applicant's Submit does that).
+    checklist_item_id: str = ""
 
 
 class FieldEdit(BaseModel):
@@ -814,11 +823,22 @@ def mock_verification(application_id: str, db=Depends(get_session), p: Principal
     return {"token": None, "kind": "verification"}
 
 
+# Magic-byte structure check per accepted MIME type: a file whose bytes do not
+# match its declared type is refused honestly (never rendered, never OCR'd).
+_CONTENT_MAGIC = {
+    "application/pdf": (b"%PDF-",),
+    "image/jpeg": (b"\xff\xd8\xff",),
+    "image/png": (b"\x89PNG\r\n\x1a\n",),
+    "image/tiff": (b"II*\x00", b"MM\x00*"),
+}
+
+
 @app.post("/cases/{application_id}/documents")
 def add_document(application_id: str, body: AddDocument, db=Depends(get_session),
                  p: Principal = Depends(get_principal)):
     import base64
     import hashlib
+    from . import checklist_intake
     app_row = _owned(db, p, application_id)
     # File-type + size validation (MIME allowlist, 10 MB cap).
     if body.mime not in ("application/pdf", "image/jpeg", "image/png", "image/tiff"):
@@ -833,6 +853,31 @@ def add_document(application_id: str, body: AddDocument, db=Depends(get_session)
             raise HTTPException(400, "invalid content_b64")
         if len(content) > 10 * 1024 * 1024:
             raise HTTPException(413, "document too large")
+        if not any(content.startswith(m) for m in _CONTENT_MAGIC[body.mime]):
+            raise HTTPException(415, "file content does not match its declared type")
+    # Checklist-row upload: resolve the target requirement FIRST so the item's
+    # expected type informs classification (a portrait photo has no text; the
+    # photo requirement's context is what identifies it).
+    item_ctx = None
+    if body.checklist_item_id:
+        cg = checklist_intake.case_guidance(db, application_id)
+        if cg is not None:
+            item_ctx = checklist_intake.find_item(
+                checklist_intake.current_checklist(db, app_row, cg), body.checklist_item_id)
+        if item_ctx is None:
+            raise HTTPException(404, "checklist requirement not found")
+        if item_ctx.get("kind") != "document":
+            raise HTTPException(400, "this requirement does not take an upload")
+    item_types = set((item_ctx or {}).get("satisfied_by") or [])
+
+    def _bind(doc_row):
+        try:
+            return checklist_intake.bind_document(
+                db, p, app_row, body.checklist_item_id, doc_row.id,
+                provenance={"source": "checklist_upload"})
+        except checklist_intake.ChecklistError as e:
+            raise HTTPException(e.status_code, e.detail)
+
     sha = hashlib.sha256(content or body.text.encode()).hexdigest()
     # Duplicate upload (double click / re-drop of the same file): return the
     # existing record — a duplicate never creates a second document row.
@@ -841,20 +886,25 @@ def add_document(application_id: str, body: AddDocument, db=Depends(get_session)
         models.StoredDocument.sha256 == sha)).scalars().first()
     if dup is not None:
         pc = dup.page_classification or {}
-        return {"id": dup.id, "doc_type": dup.doc_type, "duplicate": True,
-                "mrz_valid": bool((dup.extracted_fields or {}).get("passport_number")),
-                "execution_class": dup.execution_class,
-                "page_type": pc.get("page_type", ""),
-                "accepted_as_passport_identity": pc.get("accepted_as_passport_identity", False),
-                "rejected": pc.get("reject", False), "message": "",
-                "extracted_fields": dup.extracted_fields,
-                "quality_warnings": dup.quality_warnings}
+        out = {"id": dup.id, "doc_type": dup.doc_type, "duplicate": True,
+               "mrz_valid": bool((dup.extracted_fields or {}).get("passport_number")),
+               "execution_class": dup.execution_class,
+               "page_type": pc.get("page_type", ""),
+               "accepted_as_passport_identity": pc.get("accepted_as_passport_identity", False),
+               "rejected": pc.get("reject", False), "message": "",
+               "extracted_fields": dup.extracted_fields,
+               "quality_warnings": dup.quality_warnings}
+        if body.checklist_item_id:
+            out["binding"] = _bind(dup)
+        return out
     # OCR hierarchy with recorded failover: Document AI → (flagged) Kimi vision → local.
-    # A filename that says "passport" opts into the passport recovery path
-    # (EXIF/rotation retries + multipage-PDF biodata-page selection).
+    # A filename that says "passport" (or the passport checklist row itself)
+    # opts into the passport recovery path (EXIF/rotation retries +
+    # multipage-PDF biodata-page selection).
     result, ocr_meta = ocr_provider.process_with_failover(
         content=content, text=body.text, mime=body.mime,
-        expect_passport=bool(re.search(r"passport", body.name or "", re.I)))
+        expect_passport=bool(re.search(r"passport", body.name or "", re.I))
+        or "passport" in item_types)
     ec = execution.classify_ocr(ocr_meta)
 
     # Phase 4 — passport biodata-page classification. Accept ONLY a validated
@@ -866,17 +916,25 @@ def add_document(application_id: str, body: AddDocument, db=Depends(get_session)
         text=result.recognized_text, mrz=mrz, has_image=bool(content),
         vision_hint=result.doc_type)
     doc_type = result.doc_type
+    # Classification provenance drives the mismatch confidence downstream:
+    # deterministic classifiers (mrz/keyword/filename/applicant) can BLOCK a
+    # wrong submission; semantic (kimi) results only warn.
+    classifier_kind = "mrz" if (classification["accepted_as_passport_identity"]
+                                or result.doc_type == "passport") else "none"
     # A passport PHOTOGRAPH legitimately has no readable text — when the file
-    # name says it's a photo, accept it as the checklist's photo document
-    # instead of rejecting it as an unreadable biodata page. It is never an
-    # identity source.
+    # name says it's a photo (or the upload targets the photo requirement),
+    # accept it as the checklist's photo document instead of rejecting it as an
+    # unreadable biodata page. It is never an identity source.
     if classification["reject"] and content and \
             classification["page_type"] in ("unreadable", "blank_page", "blurry") and \
-            re.search(r"photo|portrait|headshot", body.name or "", re.I):
+            (re.search(r"photo|portrait|headshot", body.name or "", re.I)
+             or "photo" in item_types):
         classification = {**classification, "reject": False, "message": "",
                           "page_type": "photo",
                           "accepted_as_passport_identity": False}
         doc_type = "photo"
+        classifier_kind = "filename" if re.search(
+            r"photo|portrait|headshot", body.name or "", re.I) else "applicant"
     fields_map = {f.key: {"value": f.value, "confidence": f.confidence, "page": f.page}
                   for f in result.fields}
     # Supporting documents (not passport pages, not rejected pages) get a
@@ -884,12 +942,17 @@ def add_document(application_id: str, body: AddDocument, db=Depends(get_session)
     # optional digit-masked Kimi call ONLY when the result stayed generic.
     if not classification["reject"] and \
             not classification["accepted_as_passport_identity"] and \
-            result.doc_type != "passport":
+            result.doc_type != "passport" and doc_type != "photo":
         from .providers import doc_classifier
         refined = doc_classifier.classify_supporting_document(
             result.recognized_text, body.name)
-        if refined == "document":
-            refined = doc_classifier.classify_with_kimi(result.recognized_text) or refined
+        if refined != "document":
+            classifier_kind = "keyword"
+        else:
+            kimi_refined = doc_classifier.classify_with_kimi(result.recognized_text)
+            if kimi_refined:
+                refined = kimi_refined
+                classifier_kind = "kimi"
         if refined != "document":
             doc_type = refined
     if classification["reject"]:
@@ -909,7 +972,8 @@ def add_document(application_id: str, body: AddDocument, db=Depends(get_session)
                                     "page_type": classification["page_type"],
                                     "accepted_as_passport_identity": classification["accepted_as_passport_identity"],
                                     "reject": classification["reject"],
-                                    "reasons": classification["reasons"]},
+                                    "reasons": classification["reasons"],
+                                    "classifier": classifier_kind},
                                 extracted_fields=fields_map)
     db.add(doc)
     db.commit()
@@ -930,13 +994,16 @@ def add_document(application_id: str, body: AddDocument, db=Depends(get_session)
                                action="document_ocr", ec=ec,
                                detail={"doc_type": doc_type, "mrz_valid": result.mrz_valid,
                                        "page_type": classification["page_type"]})
-    return {"id": doc.id, "doc_type": doc_type, "mrz_valid": result.mrz_valid,
-            "execution_class": str(ec),
-            "page_type": classification["page_type"],
-            "accepted_as_passport_identity": classification["accepted_as_passport_identity"],
-            "rejected": classification["reject"],
-            "message": classification["message"],
-            "extracted_fields": doc.extracted_fields, "quality_warnings": result.quality_warnings}
+    out = {"id": doc.id, "doc_type": doc_type, "mrz_valid": result.mrz_valid,
+           "execution_class": str(ec),
+           "page_type": classification["page_type"],
+           "accepted_as_passport_identity": classification["accepted_as_passport_identity"],
+           "rejected": classification["reject"],
+           "message": classification["message"],
+           "extracted_fields": doc.extracted_fields, "quality_warnings": result.quality_warnings}
+    if body.checklist_item_id:
+        out["binding"] = _bind(doc)
+    return out
 
 
 def _required_fields_for(country: str, visa_type: str) -> list[str]:
@@ -976,38 +1043,106 @@ def case_checklist(application_id: str, db=Depends(get_session),
     document checklist with live per-item status. No official-source audit
     exists on the applicant path."""
     app_row = _owned(db, p, application_id)
+    from . import checklist_intake
     from .visa_snapshot import intake_flow
-    from .visa_snapshot.models import CaseRouteGuidance
-    cg = db.execute(select(CaseRouteGuidance).where(
-        CaseRouteGuidance.case_id == application_id)).scalars().first()
+    cg = checklist_intake.case_guidance(db, application_id)
     if cg is None:
         return {"guidance": None, "disposition": None, "continuation_kind": None,
                 "checklist": [], "checklist_counts": {"total": 0, "required_missing": 0},
+                "intake_stage": {"completed": False, "completed_at": None},
                 "verification": None, "route_workflow_type": None}
-    docs = db.execute(select(models.StoredDocument).where(
-        models.StoredDocument.application_id == application_id)).scalars().all()
-    # Re-derive conditional items (health/vaccination) against the CURRENT case
-    # answers so an answered travel-history question updates the checklist.
-    checklist = cg.checklist or []
     g_inner = (cg.guidance or {}).get("guidance") or {}
-    if g_inner.get("health_requirements"):
-        checklist = intake_flow.derive_document_checklist(
-            g_inner, answers=app_row.answers or {})
-        if checklist != (cg.checklist or []):
-            cg.checklist = checklist
-            db.commit()
-    status = intake_flow.apply_checklist_status(
-        checklist,
-        [{"doc_type": d.doc_type,
-          "accepted_as_passport_identity": (d.page_classification or {}).get(
-              "accepted_as_passport_identity", True)} for d in docs])
+    # Per-item status now reflects the applicant's EXPLICIT submissions (an
+    # upload alone never fulfils a requirement) + the durable intake stage.
+    status = checklist_intake.checklist_state(db, app_row, cg)
     return {"guidance": cg.guidance, "disposition": cg.disposition,
             "continuation_kind": cg.continuation_kind, "intake_id": cg.intake_id,
             "checklist": status["items"], "checklist_counts": status["counts"],
+            "intake_stage": status["intake_stage"],
             "verification": (cg.guidance or {}).get("verification") or None,
             "route_workflow_type": g_inner.get("route_workflow_type"),
             "health_questions": intake_flow.pending_health_questions(
                 g_inner, answers=app_row.answers or {})}
+
+
+class ChecklistSubmit(BaseModel):
+    document_id: Optional[str] = None
+    # True = the applicant explicitly confirms a low-confidence assignment
+    # ("This appears to be X, but this requirement needs Y").
+    confirm: bool = False
+
+
+@app.post("/cases/{application_id}/checklist/{item_id}/submit")
+def submit_checklist_document(application_id: str, item_id: str,
+                              body: ChecklistSubmit = ChecklistSubmit(),
+                              db=Depends(get_session), p: Principal = Depends(get_principal)):
+    """The applicant's explicit Submit for one requirement: binds the document
+    permanently, marks the requirement fulfilled with a timestamp, preserves
+    classification provenance. Idempotent — repeated clicks never double-submit.
+    A confident mismatch is refused; an uncertain one needs confirm=true."""
+    from . import checklist_intake
+    app_row = _owned(db, p, application_id)
+    try:
+        out = checklist_intake.submit_document(
+            db, p, app_row, item_id, body.document_id, confirm=body.confirm)
+    except checklist_intake.ChecklistError as e:
+        raise HTTPException(e.status_code, e.detail)
+    state = checklist_intake.checklist_state(db, app_row)
+    out.update({"checklist": state["items"], "checklist_counts": state["counts"],
+                "intake_stage": state["intake_stage"]})
+    return out
+
+
+@app.post("/cases/{application_id}/checklist/{item_id}/withdraw")
+def withdraw_checklist_document(application_id: str, item_id: str,
+                                db=Depends(get_session), p: Principal = Depends(get_principal)):
+    """Withdraw the submission (or remove the upload) for one requirement —
+    it returns to Needed. The stored file stays on the case; idempotent."""
+    from . import checklist_intake
+    app_row = _owned(db, p, application_id)
+    try:
+        out = checklist_intake.withdraw_document(db, p, app_row, item_id)
+    except checklist_intake.ChecklistError as e:
+        raise HTTPException(e.status_code, e.detail)
+    state = checklist_intake.checklist_state(db, app_row)
+    out.update({"checklist": state["items"], "checklist_counts": state["counts"],
+                "intake_stage": state["intake_stage"]})
+    return out
+
+
+class DocTypeBody(BaseModel):
+    doc_type: str
+
+
+@app.post("/cases/{application_id}/documents/{doc_id}/set-type")
+def set_document_type(application_id: str, doc_id: str, body: DocTypeBody,
+                      db=Depends(get_session), p: Principal = Depends(get_principal)):
+    """Applicant-chosen document type for an AMBIGUOUS upload (safe whitelist
+    only; never overrides a confident classification, never 'passport')."""
+    from . import checklist_intake
+    app_row = _owned(db, p, application_id)
+    try:
+        out = checklist_intake.set_document_type(db, p, app_row, doc_id, body.doc_type)
+    except checklist_intake.ChecklistError as e:
+        raise HTTPException(e.status_code, e.detail)
+    state = checklist_intake.checklist_state(db, app_row)
+    out.update({"checklist": state["items"], "checklist_counts": state["counts"]})
+    return out
+
+
+@app.post("/cases/{application_id}/checklist/complete")
+def complete_document_intake(application_id: str, db=Depends(get_session),
+                             p: Principal = Depends(get_principal)):
+    """Server-validated Continue after documents: refuses while any mandatory
+    requirement is unfulfilled; records the completed stage durably; advances
+    the EXISTING case to its route's next stage (visa/authorization preparation,
+    entry preparation, or renewal preparation). Idempotent."""
+    from . import checklist_intake
+    app_row = _owned(db, p, application_id)
+    try:
+        return checklist_intake.complete_stage(db, p, app_row)
+    except checklist_intake.ChecklistError as e:
+        raise HTTPException(e.status_code, e.detail)
 
 
 class AnswersUpdate(BaseModel):
@@ -1577,7 +1712,20 @@ def _signal_or_gate_error(db, p: Principal, application_id: str, name: str, **kw
 
 @app.post("/cases/{application_id}/start")
 def start_case(application_id: str, db=Depends(get_session), p: Principal = Depends(get_principal)):
-    _owned(db, p, application_id)
+    app_row = _owned(db, p, application_id)
+    # Server-side enforcement for routed cases: the workflow may never start
+    # while mandatory checklist documents remain unsubmitted (frontend state is
+    # never trusted). Legacy cases without a route checklist are unaffected.
+    from . import checklist_intake
+    cg = checklist_intake.case_guidance(db, application_id)
+    if cg is not None:
+        remaining = checklist_intake.checklist_state(
+            db, app_row, cg)["counts"]["required_missing"]
+        if remaining > 0:
+            raise HTTPException(409, detail={
+                "reason": "documents_incomplete", "required_remaining": remaining,
+                "message": f"Submit {remaining} remaining required "
+                           f"document{'s' if remaining != 1 else ''} before starting."})
     return _signal_or_gate_error(db, p, application_id, "start")
 
 

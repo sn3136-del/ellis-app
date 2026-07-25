@@ -432,22 +432,51 @@ def test_guidance_saved_to_case_survives_cache_expiry(client, db):
 # Part 4 — document intake against the checklist
 # =========================================================================
 def test_uploaded_documents_are_classified_and_satisfy_checklist(client):
+    """Upload alone NEVER fulfils a requirement; binding + the applicant's
+    explicit Submit does."""
     iid, _ = _resolve_with_guidance(
         client, REQUIRED_ANSWER, dict(ANSWERS_SGP, destination_country="IND"))
     case_id = client.post(f"/intake/{iid}/continue", headers=H).json()["case_id"]
     before = client.get(f"/cases/{case_id}/checklist", headers=H).json()
     flight = next(i for i in before["checklist"] if i["id"] == "flight_itinerary")
     assert flight["status"] == "pending"
+    # An unbound upload classifies correctly but changes NO checklist status.
+    r = client.post(f"/cases/{case_id}/documents",
+                    json={"name": "loose.pdf",
+                          "text": "Flight itinerary\nAirline: Loose Air\n"
+                                  "Departure: SIN 27 JUL\nPNR: ZZZ999"},
+                    headers=H)
+    assert r.status_code == 200 and r.json()["doc_type"] == "flight_itinerary"
+    mid = client.get(f"/cases/{case_id}/checklist", headers=H).json()
+    flight = next(i for i in mid["checklist"] if i["id"] == "flight_itinerary")
+    assert flight["status"] == "pending"
+    assert mid["checklist_counts"]["required_missing"] == \
+        before["checklist_counts"]["required_missing"]
+    # A checklist-row upload binds to that exact requirement → ready to submit,
+    # still NOT fulfilled.
     r = client.post(f"/cases/{case_id}/documents",
                     json={"name": "trip.pdf",
                           "text": "Flight itinerary\nAirline: Example Air\n"
-                                  "Departure: SIN 26 JUL\nPNR: ABC123"},
+                                  "Departure: SIN 26 JUL\nPNR: ABC123",
+                          "checklist_item_id": "flight_itinerary"},
                     headers=H)
     assert r.status_code == 200
-    assert r.json()["doc_type"] == "flight_itinerary"
+    body = r.json()
+    assert body["doc_type"] == "flight_itinerary"
+    assert body["binding"]["match_verdict"] == "match"
+    mid = client.get(f"/cases/{case_id}/checklist", headers=H).json()
+    flight = next(i for i in mid["checklist"] if i["id"] == "flight_itinerary")
+    assert flight["status"] == "ready_to_submit"
+    assert mid["checklist_counts"]["required_missing"] == \
+        before["checklist_counts"]["required_missing"]
+    # The applicant's explicit Submit fulfils the requirement.
+    s = client.post(f"/cases/{case_id}/checklist/flight_itinerary/submit",
+                    json={"document_id": body["id"]}, headers=H)
+    assert s.status_code == 200 and s.json()["submitted"] is True
     after = client.get(f"/cases/{case_id}/checklist", headers=H).json()
     flight = next(i for i in after["checklist"] if i["id"] == "flight_itinerary")
-    assert flight["status"] == "provided"
+    assert flight["status"] == "submitted"
+    assert flight["binding"]["submitted_at"]
     assert after["checklist_counts"]["required_missing"] < \
         before["checklist_counts"]["required_missing"]
 
@@ -576,18 +605,27 @@ def test_passport_photo_upload_satisfies_photo_item(client):
     iid, _ = _resolve_with_guidance(
         client, REQUIRED_ANSWER, dict(ANSWERS_SGP, destination_country="BRA"))
     case_id = client.post(f"/intake/{iid}/continue", headers=H).json()["case_id"]
-    # A real photograph has bytes but no OCR-able text; the filename says photo.
+    # A real photograph has bytes but no OCR-able text; the checklist-row
+    # context (not the filename) identifies it as the photo requirement.
     r = client.post(f"/cases/{case_id}/documents",
-                    json={"name": "passport-photo.jpg", "mime": "image/jpeg",
+                    json={"name": "IMG_0042.jpg", "mime": "image/jpeg",
                           "size_bytes": 900,
-                          "content_b64": b64.b64encode(b"\xff\xd8\xff\xe0 fake").decode()},
+                          "content_b64": b64.b64encode(b"\xff\xd8\xff\xe0 fake").decode(),
+                          "checklist_item_id": "photo"},
                     headers=H)
     assert r.status_code == 200
     assert r.json()["rejected"] is False
     assert r.json()["doc_type"] == "photo"
+    assert r.json()["binding"]["match_verdict"] == "match"
+    mid = client.get(f"/cases/{case_id}/checklist", headers=H).json()
+    photo = next(i for i in mid["checklist"] if i["id"] == "photo")
+    assert photo["status"] == "ready_to_submit"   # upload alone never fulfils
+    s = client.post(f"/cases/{case_id}/checklist/photo/submit",
+                    json={"document_id": r.json()["id"]}, headers=H)
+    assert s.status_code == 200 and s.json()["submitted"] is True
     after = client.get(f"/cases/{case_id}/checklist", headers=H).json()
     photo = next(i for i in after["checklist"] if i["id"] == "photo")
-    assert photo["status"] == "provided"
+    assert photo["status"] == "submitted"
 
 
 def test_unconfirmed_passport_profile_is_not_auto_approved(client):

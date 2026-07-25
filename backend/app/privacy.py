@@ -22,7 +22,8 @@ from . import models
 # enforce ordering in SQLite; Postgres has no cross-table FKs here either).
 _CASE_CHILD_MODELS = [
     models.VisaApplicationVersion, models.ApplicantApproval, models.AuthorizationEnvelope,
-    models.PortalAccount, models.NativeSignature, models.SignatureEvent, models.StoredDocument,
+    models.PortalAccount, models.NativeSignature, models.SignatureEvent,
+    models.ChecklistSubmission, models.CaseStageProgress, models.StoredDocument,
     models.AppointmentPreference, models.Appointment, models.PaymentAttempt,
     models.SubmissionConfirmation, models.WorkflowExecution, models.HumanHandoff,
     models.EmailNotification, models.ApplicantStandingAuthorization,

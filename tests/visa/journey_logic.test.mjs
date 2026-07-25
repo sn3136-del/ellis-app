@@ -150,25 +150,82 @@ test('prefillWithEdits applies applicant corrections and re-derives age', () => 
 })
 
 // ---------------------------------------------------------------------------
-// Checklist helpers.
+// Checklist helpers. Only a SUBMITTED (or waived) item counts as complete —
+// uploads alone never do.
 test('checklist status meta + counts', () => {
-  assert.equal(checklistStatusMeta('provided').tone, 'ok')
+  assert.equal(checklistStatusMeta('submitted').tone, 'ok')
   assert.equal(checklistStatusMeta('pending').tone, 'pending')
+  assert.equal(checklistStatusMeta('mismatch').tone, 'blocked')
   assert.equal(checklistStatusMeta('whatever').i18nKey, 'checklist.pending') // fail-safe
   const items = [
-    { id: 'passport', kind: 'document', required: true, status: 'provided' },
-    { id: 'flight_itinerary', kind: 'document', required: true, status: 'pending' },
+    { id: 'passport', kind: 'document', required: true, status: 'submitted' },
+    { id: 'flight_itinerary', kind: 'document', required: true, status: 'ready_to_submit' },
     { id: 'photo', kind: 'document', required: false, status: 'pending' },
     { id: 'passport_validity', kind: 'check', required: true, status: 'auto' }
   ]
   const c = checklistCounts(items)
   assert.equal(c.required, 2)
-  assert.equal(c.missing, 1)
+  assert.equal(c.missing, 1)      // uploaded-but-not-submitted is still missing
   assert.equal(c.complete, false)
   assert.equal(checklistCounts([]).complete, false)   // empty is never "complete"
+  // Submitting the remaining item completes the required set.
+  items[1].status = 'submitted'
+  assert.equal(checklistCounts(items).complete, true)
+  // A waived item never blocks completion.
+  items[1].status = 'waived'
+  assert.equal(checklistCounts(items).complete, true)
   for (const lang of SUPPORTED) {
-    for (const s of ['provided', 'pending', 'auto', 'prepared_later']) {
+    for (const s of ['pending', 'processing', 'needs_review', 'mismatch', 'unreadable',
+                     'ready_to_submit', 'submitted', 'waived', 'auto', 'prepared_later']) {
       assert.ok(STRINGS[lang][checklistStatusMeta(s).i18nKey], `${lang} ${s}`)
+    }
+  }
+})
+
+// ---------------------------------------------------------------------------
+// Continue button (document intake → next stage). Disabled with an exact
+// remaining count while any mandatory item is unresolved; label follows the
+// route's continuation kind; backend re-validates server-side regardless.
+import { continueButtonMeta, docTypeLabelKey, MANUAL_DOC_TYPES } from '../../src/renderer/src/lib/intake.js'
+
+test('continue button stays disabled until every mandatory item is fulfilled', () => {
+  const blocked = continueButtonMeta({ continuation_kind: 'visa_application',
+    checklist_counts: { required_missing: 2 }, intake_stage: { completed: false } })
+  assert.equal(blocked.visible, true)
+  assert.equal(blocked.enabled, false)
+  assert.equal(blocked.remaining, 2)
+  const ready = continueButtonMeta({ continuation_kind: 'visa_application',
+    checklist_counts: { required_missing: 0 }, intake_stage: { completed: false } })
+  assert.equal(ready.enabled, true)
+  assert.equal(ready.labelKey, 'checklist.continue.visa')
+})
+
+test('continue button label follows the route kind; unknown journey hides it', () => {
+  assert.equal(continueButtonMeta({ continuation_kind: 'entry_preparation',
+    checklist_counts: { required_missing: 0 } }).labelKey, 'checklist.continue.exempt')
+  assert.equal(continueButtonMeta({ continuation_kind: 'authorization_application',
+    checklist_counts: { required_missing: 0 } }).labelKey, 'checklist.continue.eta')
+  assert.equal(continueButtonMeta({ continuation_kind: 'passport_renewal',
+    checklist_counts: { required_missing: 0 } }).labelKey, 'checklist.continue.renewal')
+  assert.equal(continueButtonMeta(null).visible, false)
+  assert.equal(continueButtonMeta({}).visible, false)
+  // Missing counts fail safe to disabled — never an enabled button on unknown state.
+  assert.equal(continueButtonMeta({ continuation_kind: 'visa_application' }).enabled, false)
+  // Every continue label exists in every locale.
+  for (const lang of SUPPORTED) {
+    for (const k of ['visa', 'eta', 'exempt', 'renewal']) {
+      assert.ok(STRINGS[lang][`checklist.continue.${k}`], `${lang} ${k}`)
+    }
+  }
+})
+
+test('doc-type labels are applicant-friendly and localized; whitelist excludes passport', () => {
+  assert.equal(docTypeLabelKey('flight_itinerary'), 'doctype.flight_itinerary')
+  assert.equal(docTypeLabelKey('weird_internal_thing'), 'doctype.document') // never internal ids
+  assert.ok(!MANUAL_DOC_TYPES.includes('passport'))
+  for (const lang of SUPPORTED) {
+    for (const dt of MANUAL_DOC_TYPES.concat(['passport', 'document'])) {
+      assert.ok(STRINGS[lang][docTypeLabelKey(dt)], `${lang} ${dt}`)
     }
   }
 })
@@ -282,6 +339,38 @@ test('the applicant renderer contains no MOCKLAND or fictional center', () => {
     if (!/\.(jsx?|css)$/.test(file)) continue
     const text = readFileSync(file, 'utf8')
     assert.ok(!text.includes('MOCKLAND'), `${file} contains MOCKLAND`)
+  }
+})
+
+// ---------------------------------------------------------------------------
+// Document preview security: bytes are fetched from the authenticated backend
+// and rendered from local blob: URLs only — the preview never embeds a
+// third-party page or a raw backend URL in an iframe/img.
+test('document preview renders only local blob URLs, never a framed page', () => {
+  const src = readFileSync(
+    new URL('../../src/renderer/src/components/visa/DocPreview.jsx', import.meta.url), 'utf8')
+  assert.ok(src.includes('URL.createObjectURL'), 'preview must render via blob URLs')
+  assert.ok(src.includes('URL.revokeObjectURL'), 'blob URLs must be revoked')
+  // Every iframe/img rendered by the preview uses the blob-backed state.url.
+  for (const m of src.matchAll(/<(iframe|img)\b[^>]*src=\{([^}]+)\}/g)) {
+    assert.equal(m[2].trim(), 'state.url', `unexpected ${m[1]} src: ${m[2]}`)
+  }
+  // No external origin appears anywhere in the preview component.
+  assert.ok(!/https?:\/\//.test(src), 'preview must not reference external origins')
+})
+
+// The page CSP allows blob: for the preview and never allowlists the raw
+// backend origin for frames/images (fetch + blob is the only path).
+test('web and electron CSPs permit blob preview, never backend-framed content', () => {
+  const webCfg = readFileSync(new URL('../../vite.web.config.mjs', import.meta.url), 'utf8')
+  const html = readFileSync(new URL('../../src/renderer/index.html', import.meta.url), 'utf8')
+  for (const [name, text] of [['web', webCfg], ['electron', html]]) {
+    const img = text.match(/img-src[^;"]*/)[0]
+    assert.ok(img.includes('blob:'), `${name} img-src must include blob:`)
+    assert.ok(!img.includes('http://'), `${name} img-src must not allowlist http origins`)
+    const frame = text.match(/frame-src[^;"]*/)[0]
+    assert.ok(frame.includes('blob:'), `${name} frame-src must include blob:`)
+    assert.ok(!frame.includes('http://'), `${name} frame-src must not allowlist http origins`)
   }
 })
 

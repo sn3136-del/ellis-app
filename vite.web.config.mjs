@@ -15,7 +15,10 @@ const PORT = 5199
 
 const webCsp = [
   "default-src 'self'",
-  "img-src 'self' data:",
+  // blob: carries the in-app document preview — bytes are fetched from the
+  // authenticated backend (connect-src) and rendered from a local blob URL,
+  // never by framing/hotlinking a cross-origin page.
+  "img-src 'self' data: blob:",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com",
   // Vite dev needs its module preamble; loopback backend + HMR websocket only.
@@ -23,7 +26,8 @@ const webCsp = [
   `connect-src 'self' ws://${HOST}:${PORT} http://${HOST}:8000 http://localhost:8000`,
   // Browserbase Live View is a real secure feature: the short-lived URL comes
   // from the trusted local backend and is embedded in a sandboxed iframe.
-  "frame-src 'self' https:"
+  // blob: is the local PDF preview (Chrome's built-in viewer).
+  "frame-src 'self' blob: https:"
 ].join('; ')
 
 function webCspPlugin() {

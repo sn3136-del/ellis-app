@@ -170,6 +170,18 @@ export function createVisaClient(session) {
     // Route journey state saved on the case (guidance + two-pass verification,
     // route workflow type, checklist, pending health questions).
     caseChecklist: (id) => call('GET', `/cases/${id}/checklist`, session),
+    // Document intake: the applicant's explicit Submit fulfils a requirement
+    // (idempotent server-side); withdraw returns it to Needed; set-type labels
+    // an ambiguous upload from the safe whitelist; complete validates the
+    // whole checklist server-side and advances the EXISTING case.
+    submitChecklistDoc: (id, itemId, documentId, confirm = false) =>
+      call('POST', `/cases/${id}/checklist/${encodeURIComponent(itemId)}/submit`, session,
+           { document_id: documentId, confirm }),
+    withdrawChecklistDoc: (id, itemId) =>
+      call('POST', `/cases/${id}/checklist/${encodeURIComponent(itemId)}/withdraw`, session, {}),
+    setDocumentType: (id, docId, docType) =>
+      call('POST', `/cases/${id}/documents/${docId}/set-type`, session, { doc_type: docType }),
+    completeDocuments: (id) => call('POST', `/cases/${id}/checklist/complete`, session, {}),
     // Passport renewal: create/reuse the linked renewal case.
     startRenewal: (id, manual = false) =>
       call('POST', `/cases/${id}/renewal`, session, { manual }),

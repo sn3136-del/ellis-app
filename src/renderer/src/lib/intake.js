@@ -551,9 +551,18 @@ export function verificationMeta(verification) {
 
 // ---------------------------------------------------------------------------
 // Route checklist display helpers (items come from the backend checklist).
+// Document items walk: pending (Needed) → processing → needs_review /
+// mismatch / unreadable → ready_to_submit → submitted (Fulfilled). Only a
+// submitted (or waived) item counts as complete — an upload alone never does.
 const CHECKLIST_STATUS = {
-  provided: { tone: 'ok', i18nKey: 'checklist.provided' },
   pending: { tone: 'pending', i18nKey: 'checklist.pending' },
+  processing: { tone: 'info', i18nKey: 'checklist.processing' },
+  needs_review: { tone: 'warn', i18nKey: 'checklist.needsReview' },
+  mismatch: { tone: 'blocked', i18nKey: 'checklist.mismatch' },
+  unreadable: { tone: 'blocked', i18nKey: 'checklist.unreadable' },
+  ready_to_submit: { tone: 'info', i18nKey: 'checklist.readyToSubmit' },
+  submitted: { tone: 'ok', i18nKey: 'checklist.submitted' },
+  waived: { tone: 'info', i18nKey: 'checklist.waived' },
   auto: { tone: 'info', i18nKey: 'checklist.auto' },
   prepared_later: { tone: 'info', i18nKey: 'checklist.preparedLater' }
 }
@@ -562,13 +571,64 @@ export function checklistStatusMeta(status) {
   return CHECKLIST_STATUS[status] || { tone: 'pending', i18nKey: 'checklist.pending' }
 }
 
+// A document item is complete ONLY when submitted (Fulfilled) or waived.
+export function itemComplete(item) {
+  return !!item && (item.status === 'submitted' || item.status === 'waived')
+}
+
 export function checklistCounts(items) {
   const list = Array.isArray(items) ? items : []
-  const required = list.filter((i) => i && i.required && i.kind === 'document')
-  const missing = required.filter((i) => i.status === 'pending')
+  const required = list.filter((i) => i && i.required && i.kind === 'document' && i.status !== 'waived')
+  const missing = required.filter((i) => !itemComplete(i))
   return { total: list.length, required: required.length, missing: missing.length,
     complete: required.length > 0 && missing.length === 0 }
 }
+
+// ---------------------------------------------------------------------------
+// Continue button after document intake (Part 6). The backend validates
+// completion again server-side — this only drives the button presentation.
+const CONTINUE_LABEL_BY_KIND = {
+  visa_application: 'checklist.continue.visa',
+  authorization_application: 'checklist.continue.eta',
+  entry_preparation: 'checklist.continue.exempt',
+  passport_renewal: 'checklist.continue.renewal',
+  conditional_guidance: 'checklist.continue.visa'
+}
+
+export function continueButtonMeta(journey) {
+  const kind = journey && journey.continuation_kind
+  if (!kind) return { visible: false, enabled: false, labelKey: null, remaining: 0, completed: false }
+  const counts = (journey && journey.checklist_counts) || {}
+  const remaining = typeof counts.required_missing === 'number' ? counts.required_missing : 1
+  const completed = !!(journey.intake_stage && journey.intake_stage.completed)
+  return {
+    visible: true,
+    enabled: remaining === 0,
+    completed,
+    remaining,
+    labelKey: CONTINUE_LABEL_BY_KIND[kind] || 'checklist.continue.visa'
+  }
+}
+
+// Applicant-friendly label key for a detected document type. Unknown types
+// fall back to the generic label — never an internal identifier.
+const KNOWN_DOC_TYPES = new Set([
+  'passport', 'photo', 'flight_itinerary', 'hotel_booking', 'bank_statement',
+  'employment_letter', 'student_letter', 'invitation_letter', 'travel_insurance',
+  'residence_permit', 'prior_visa', 'destination_form', 'vaccination_certificate'
+])
+
+export function docTypeLabelKey(docType) {
+  return KNOWN_DOC_TYPES.has(docType) ? `doctype.${docType}` : 'doctype.document'
+}
+
+// The safe whitelist an applicant may manually pick from for an ambiguous
+// upload (mirrors the backend whitelist; 'passport' deliberately excluded).
+export const MANUAL_DOC_TYPES = [
+  'photo', 'flight_itinerary', 'hotel_booking', 'bank_statement',
+  'employment_letter', 'student_letter', 'invitation_letter', 'travel_insurance',
+  'residence_permit', 'prior_visa', 'destination_form', 'vaccination_certificate'
+]
 
 export const RESIDENCE_STATUS_OPTIONS = [
   'citizen', 'permanent_resident', 'temporary_resident', 'student', 'worker',
