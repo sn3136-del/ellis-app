@@ -76,6 +76,10 @@ _EXTRACT_JS = r"""
 }
 """
 
+# Hard deadline for attaching to a remote browser session. Without it a
+# stalled Browserbase session hangs a build indefinitely.
+CONNECT_TIMEOUT_MS = 60_000
+
 _ALLOWED_TYPES = {"text", "email", "password", "date", "select", "checkbox",
                   "radio", "file", "button", "submit", "tel", "number", "link"}
 
@@ -141,7 +145,10 @@ class LiveBrowserSession:
         from playwright.sync_api import sync_playwright  # pragma: no cover
         self._pw = sync_playwright().start()             # pragma: no cover
         chromium = self._pw.chromium                     # pragma: no cover
-        browser = chromium.connect_over_cdp(connect)     # pragma: no cover
+        # A stalled Browserbase session would otherwise block the whole build
+        # forever — connect_over_cdp has no default deadline.
+        browser = chromium.connect_over_cdp(             # pragma: no cover
+            connect, timeout=CONNECT_TIMEOUT_MS)
         ctx = browser.contexts[0] if browser.contexts else browser.new_context()  # pragma: no cover
         self.page = ctx.pages[0] if ctx.pages else ctx.new_page()  # pragma: no cover
         return self.page
