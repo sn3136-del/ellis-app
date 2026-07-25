@@ -129,14 +129,26 @@ def _has_element(art, *keywords, types=()) -> bool:
     return False
 
 
+_ROLE_KEYS = ("home", "login", "application", "fees", "appointments", "submit")
+
+
 def _page_roles(by_page: dict) -> dict:
-    """Map the canonical flow roles onto OBSERVED pages. Literal page keys
-    (synthetic portals, standard paths) keep their role unchanged; otherwise
-    the role is inferred deterministically from observed structure — real
-    portals rarely use /login-style paths. Never invents a page."""
-    roles = {k: v for k, v in by_page.items()
-             if k in ("home", "login", "application", "fees", "appointments", "submit")}
-    remaining = {k: v for k, v in by_page.items() if k not in roles}
+    """Map the canonical flow roles onto OBSERVED pages. A literal page key
+    (synthetic portals, standard paths) claims its role only when that page
+    actually has content — a redirect/error shell answering /login with zero
+    elements must never beat the real login page discovered elsewhere. Roles
+    with no literal match are inferred deterministically from structure.
+    Never invents a page."""
+    roles: dict = {}
+    remaining = dict(by_page)
+    for key in _ROLE_KEYS:
+        art = remaining.get(key)
+        if art is not None and (art.structure or {}).get("elements"):
+            roles[key] = art
+            remaining.pop(key)
+    # Empty literal pages stay out of contention entirely.
+    remaining = {k: v for k, v in remaining.items()
+                 if (v.structure or {}).get("elements")}
     if "login" not in roles:
         for k, art in sorted(remaining.items()):
             if _has_element(art, "password", types=("password",)):

@@ -280,6 +280,29 @@ def representative_route_key(db, family: PortalFamily) -> str:
                      f"with a normalizable state nationality")
 
 
+def research_entry_urls(db, family: PortalFamily, limit: int = 6) -> list[str]:
+    """Official-source URLs already VERIFIED by route research that live on
+    this family's own hostnames. Real portals put the application form on a
+    localised deep path; starting recon there beats guessing '/application'.
+    Never widens the hostname allowlist — paths only, on verified hosts."""
+    from ..visa_snapshot.models import SourceEvidence
+    hosts = {h.lower() for h in (family.hostnames or [])}
+    if not hosts:
+        return []
+    urls: list[str] = []
+    rows = db.execute(select(SourceEvidence).where(
+        SourceEvidence.verification_status == "verified",
+        SourceEvidence.applicable_jurisdiction.in_(family.destinations or []))
+        .order_by(SourceEvidence.created_at.desc()).limit(200)).scalars().all()
+    for ev in rows:
+        url = ev.final_url or ev.original_url or ""
+        if (ev.final_hostname or "").lower() in hosts and url not in urls:
+            urls.append(url)
+        if len(urls) >= limit:
+            break
+    return urls
+
+
 def build_family_adapter(db, family_id: str, *, observer=None) -> dict:
     """Build (or resume) THE one adapter for a portal family and evaluate the
     deterministic release gates. Idempotent: an existing link is resumed."""
@@ -319,7 +342,8 @@ def build_family_adapter(db, family_id: str, *, observer=None) -> dict:
         visa_type=(pair.primary_category if pair else "evisa_tourist"),
         portal_evidence={"hostnames": family.hostnames or [],
                          "operator": family.operator,
-                         "portal_url": family.base_url},
+                         "portal_url": family.base_url,
+                         "entry_urls": research_entry_urls(db, family)},
         runtime_mode=settings().runtime_mode)
     # A national online portal is the destination's own single application
     # jurisdiction; residence-dependent consular routing does not apply.

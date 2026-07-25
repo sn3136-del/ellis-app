@@ -43,9 +43,19 @@ def get_or_create_candidate(db, *, build_request: fm.AdapterBuildRequest) -> fm.
         fm.AdapterCandidate.build_request_id == build_request.id)).scalars().first()
     if cand:
         return cand
+    # adapter_id is globally unique and derived from the route key, so a
+    # REBUILD of the same route (operator re-run after a disabled build, or a
+    # second tenant) would collide. Disambiguate deterministically instead of
+    # failing the build with an IntegrityError.
+    base = _safe_adapter_id(build_request.route_key, build_request.destination)
+    adapter_id, n = base, 1
+    while db.execute(select(fm.AdapterCandidate).where(
+            fm.AdapterCandidate.adapter_id == adapter_id)).scalars().first():
+        n += 1
+        adapter_id = f"{base}-r{n}"
     cand = fm.AdapterCandidate(
         build_request_id=build_request.id, route_key=build_request.route_key,
-        adapter_id=_safe_adapter_id(build_request.route_key, build_request.destination))
+        adapter_id=adapter_id)
     db.add(cand)
     db.commit()
     return cand

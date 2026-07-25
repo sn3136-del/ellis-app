@@ -311,13 +311,18 @@ _DEFAULT_RECON_PATHS = ("/", "/login", "/application", "/fees",
 
 
 def _recon_paths(req) -> tuple:
-    """Recon start paths: the standard probe set plus the exact path of the
-    officially verified portal URL from route research (so a real portal whose
-    entry page is not "/" is still observed). Hostname checks stay unchanged."""
+    """Recon start paths: the standard probe set, the exact path of the
+    officially verified portal URL from route research, and any additional
+    research-verified entry paths on the same verified hostnames (real portals
+    put their application form on a localised deep path, not "/application").
+    Hostname checks stay unchanged — these are paths only."""
     paths = list(_DEFAULT_RECON_PATHS)
-    portal_url = (req.portal_evidence or {}).get("portal_url", "")
-    if portal_url:
-        p = urlparse(portal_url).path
+    evidence = req.portal_evidence or {}
+    urls = [evidence.get("portal_url", "")] + list(evidence.get("entry_urls") or [])
+    for url in urls:
+        if not url:
+            continue
+        p = urlparse(url).path
         if p and p != "/" and p not in paths:
             paths.append(p)
     return tuple(paths)

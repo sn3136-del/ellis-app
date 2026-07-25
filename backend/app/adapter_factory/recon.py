@@ -103,9 +103,18 @@ def _assert_sanitized(obj, path="root"):
             raise ReconRefused(f"overlong text at {path} — free text must not survive recon")
 
 
+# Visa/application path markers. Real portals localise their URLs, so the
+# pattern covers the common non-English forms too (vi: thi-thuc/khai/ho-so,
+# es/pt: visado/solicitud/tramite, fr: demande/formulaire, de: antrag,
+# tr: basvuru, id/ms: permohonan, pl: wniosek).
 _LINK_FOLLOW_RE = re.compile(
-    r"appl(y|ication)|visa|e-?visa|eta\b|arrival|form|fee|appointment|register",
+    r"appl(y|ication)|visa|e-?visa|eta\b|arrival|form|fee|appointment|register"
+    r"|thi-?thuc|khai|ho-?so|visado|solicitud|tramite|demande|formulaire"
+    r"|antrag|basvuru|permohonan|wniosek|zayavlenie|shinsei",
     re.IGNORECASE)
+# Paths a portal serves for "this does not exist" — never a real flow page.
+_ERROR_PATH_RE = re.compile(r"/(errors?|404|not-?found|denied|forbidden)(/|$)",
+                            re.IGNORECASE)
 _MAX_FOLLOWED_LINKS = 8
 
 
@@ -137,6 +146,8 @@ def run_recon(db, *, build_request: fm.AdapterBuildRequest, observer,
     observed = 0
     followed: list[str] = []
 
+    seen_patterns: set[str] = set()
+
     def _observe_one(host: str, path: str, page_key: str) -> dict | None:
         nonlocal observed
         url = f"https://{host}{path}"
@@ -146,9 +157,18 @@ def run_recon(db, *, build_request: fm.AdapterBuildRequest, observer,
         if str(raw.get("hostname", host)).lower() not in hosts:
             return None         # never follow the portal off the verified hosts
         art = sanitize_structure(raw)
+        pattern = art.get("url_pattern", "")
+        # A portal that answers an unknown path with its error page (or with
+        # a page already recorded) has not revealed a new flow page — storing
+        # it would let an error shell claim a flow role.
+        if _ERROR_PATH_RE.search(pattern) and not _ERROR_PATH_RE.search(path):
+            return None
+        if pattern and pattern in seen_patterns:
+            return None
+        seen_patterns.add(pattern)
         db.add(fm.AdapterReconArtifact(
             recon_job_id=job.id, page_key=page_key,
-            hostname=art["hostname"], url_pattern=art["url_pattern"],
+            hostname=art["hostname"], url_pattern=pattern,
             structure=art))
         observed += 1
         return art

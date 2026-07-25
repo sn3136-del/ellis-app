@@ -292,3 +292,55 @@ def test_tampered_baseline_csv_refused(gdb, tmp_path, monkeypatch):
     monkeypatch.setattr(baseline, "BASELINE_CSV", fake)
     with pytest.raises(RuntimeError, match="sha256"):
         baseline.import_reference_baseline(gdb)
+
+
+def test_error_shell_pages_are_not_recorded_as_flow_pages(db):
+    """A portal that answers unknown paths with its error page must not
+    contribute artifacts — an error shell may never claim a flow role."""
+    from app.adapter_factory import recon
+    from app.adapter_factory import models as fm
+    from app.adapter_factory.build_workflow import create_request
+    req = create_request(db, org_id="orgE", user_id="u", application_id="",
+                         route_key="rk1|nat=CHN|iss=CHN|doc=ordinary_passport|res=CHN|"
+                                   "dest=VNM|cat=evisa_tourist|sub=any|pur=tourism|"
+                                   "per=2026-08-01|jur=default",
+                         destination="VNM", visa_type="evisa_tourist",
+                         portal_evidence={"hostnames": ["portal.gov.example"],
+                                          "verification": "synthetic_test_portal"},
+                         runtime_mode="test")
+
+    def observer(url):
+        path = url.split("portal.gov.example", 1)[1]
+        if path == "/":
+            return {"ok": True, "url": url, "hostname": "portal.gov.example",
+                    "status": 200, "title": "home",
+                    "elements": [{"selector": "#q", "name": "q", "label": "search",
+                                  "type": "text", "required": False}], "links": []}
+        # every other path redirects to the error shell
+        return {"ok": True, "url": "https://portal.gov.example/errors/",
+                "hostname": "portal.gov.example", "status": 200, "title": "error",
+                "elements": [{"selector": "#e", "name": "e", "label": "err",
+                              "type": "text", "required": False}], "links": []}
+
+    job = recon.run_recon(db, build_request=req, observer=observer)
+    arts = recon.artifacts(db, job.id)
+    assert [a.page_key for a in arts] == ["home"], [a.page_key for a in arts]
+
+
+def test_empty_literal_page_never_beats_real_page_for_a_role():
+    """A mirror host answering /login with zero elements must not claim the
+    login role over the real login page found elsewhere."""
+    from app.adapter_factory.specgen import _page_roles
+
+    class _A:
+        def __init__(self, key, structure):
+            self.page_key, self.structure = key, structure
+
+    empty = _A("login", {"elements": [], "url_pattern": "https://mirror/login"})
+    real = _A("login_7e93fb", {"elements": [
+        {"selector": "#pw", "name": "password", "label": "Password",
+         "type": "password", "sensitive": True},
+        {"selector": "#u", "name": "user", "label": "User", "type": "text"},
+    ], "url_pattern": "https://real/login"})
+    roles = _page_roles({"login": empty, "login_7e93fb": real})
+    assert roles.get("login") is real
