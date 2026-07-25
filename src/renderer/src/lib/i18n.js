@@ -486,6 +486,7 @@ export const STRINGS = {
     'connector.step.unavailable': 'Unavailable',
     // Admin adapter factory (§13/§30)
     'admin.tab.factory': 'Adapter factory',
+    'admin.tab.global': 'Global coverage',
     'admin.factory.loading': 'Loading the build queue…',
     'admin.factory.title': 'Adapter factory — internal release',
     'admin.factory.sub': 'Review generated connectors and release them by version and route. Applicants never see this; release requires an authenticated administrator.',
@@ -980,6 +981,7 @@ export const STRINGS = {
     'connector.step.manual_review': '人工审核',
     'connector.step.unavailable': '不可用',
     'admin.tab.factory': '适配器工厂',
+    'admin.tab.global': '全球覆盖',
     'admin.factory.loading': '正在加载构建队列…',
     'admin.factory.title': '适配器工厂 — 内部发布',
     'admin.factory.sub': '审核生成的连接器并按版本和路线发布。申请人从不会看到此界面；发布需要经过身份验证的管理员。',
@@ -1474,6 +1476,7 @@ export const STRINGS = {
     'connector.step.manual_review': '人工審核',
     'connector.step.unavailable': '不可用',
     'admin.tab.factory': '適配器工廠',
+    'admin.tab.global': '全球覆蓋',
     'admin.factory.loading': '正在載入建構佇列…',
     'admin.factory.title': '適配器工廠 — 內部發佈',
     'admin.factory.sub': '審核產生的連接器並按版本和路線發佈。申請人從不會看到此介面；發佈需要經過身分驗證的管理員。',

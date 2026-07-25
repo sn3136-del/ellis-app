@@ -28,6 +28,7 @@ function StateChip({ state, enabled, kill }) {
 // New snapshot-pipeline tabs (Trip.com snapshot admin). Labels are i18n keys;
 // the original adapter tabs keep their hardcoded labels for continuity.
 const SNAPSHOT_TABS = [
+  ['global', 'admin.tab.global'],
   ['snapshot', 'admin.tab.snapshot'],
   ['reviews', 'admin.tab.reviews'],
   ['conflicts', 'admin.tab.conflicts'],
@@ -136,6 +137,7 @@ export default function AdminConsole() {
           </div>
         )}
 
+        {tab === 'global' && <GlobalCoverageTab client={client} t={t} />}
         {tab === 'snapshot' && <SnapshotTab client={client} t={t} />}
         {tab === 'reviews' && <ReviewsTab client={client} t={t} />}
         {tab === 'conflicts' && <ConflictsTab client={client} t={t} />}
@@ -293,6 +295,110 @@ function AdapterFactoryTab({ client, t, isAdmin, toast }) {
 function pct(v) {
   const n = typeof v === 'number' && Number.isFinite(v) ? v : 0
   return (n * 100).toFixed(n > 0 && n < 0.001 ? 3 : 1) + '%'
+}
+
+function GlobalCoverageTab({ client, t }) {
+  const [cov, setCov] = useState(null)
+  const [unsupported, setUnsupported] = useState(null)
+  const [error, setError] = useState(null)
+  useEffect(() => {
+    client.adminGlobalCoverage().then(setCov).catch((e) => setError({ message: e.message }))
+    client.adminGlobalUnsupported(40).then(setUnsupported).catch(() => setUnsupported(null))
+  }, [])
+  if (error) return <div className="tabpanel"><ErrorNote error={error} /></div>
+  if (!cov) return <div className="tabpanel"><Loading label="Loading global coverage" /></div>
+  const totals = cov.totals || {}
+  const outcomes = cov.by_outcome || {}
+  const fams = cov.portal_families || {}
+  const adapters = cov.adapters || {}
+  const failureReasons = Object.entries(adapters.failure_reasons || {})
+  const tiles = [
+    ['total route combinations', totals.route_pair_combinations],
+    ['mapped', totals.mapped_combinations],
+    ['released (verified only)', totals.released_combinations],
+    ['released %', pct(totals.coverage_released_pct)],
+    ['visa-exempt', outcomes.visa_exempt],
+    ['entry preparation', outcomes.entry_preparation],
+    ['electronic routes', outcomes.electronic_routes],
+    ['visa on arrival', outcomes.visa_on_arrival],
+    ['physical / manual', outcomes.physical_or_manual_routes],
+    ['no lawful route', outcomes.no_available_tourist_route],
+    ['unresolved', outcomes.unresolved],
+    ['portal families', fams.total]
+  ]
+  return (
+    <div className="tabpanel">
+      <div className="eyebrow">global route coverage · {cov.snapshot_date}</div>
+      <div className="grid grid-4" style={{ gap: 12 }}>
+        {tiles.map(([k, v]) => (
+          <div key={k} className="card stat">
+            <div className="stat__num">{v ?? '—'}</div>
+            <div className="stat__cap" style={{ fontSize: 11.5 }}>{k}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="eyebrow" style={{ marginTop: 22 }}>verification &amp; provenance</div>
+      <div className="card" style={{ padding: 16 }}>
+        {Object.entries(cov.by_verification || {}).map(([k, v]) => (
+          <div className="kv" key={k}><div className="kv__k">{k}</div><div className="kv__v">{v}</div></div>
+        ))}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
+          {Object.entries(cov.by_release_status || {}).map(([k, v]) => (
+            <span key={k} className="chip">{k.replace(/_/g, ' ')}: {v}</span>
+          ))}
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--muted-2)', marginTop: 10 }}>{cov.honesty_note}</div>
+      </div>
+
+      <div className="eyebrow" style={{ marginTop: 22 }}>portal families &amp; adapters</div>
+      <div className="card" style={{ padding: 16 }}>
+        {Object.entries(fams.by_verification || {}).map(([k, v]) => (
+          <div className="kv" key={k}><div className="kv__k">{k.replace(/_/g, ' ')}</div><div className="kv__v">{v}</div></div>
+        ))}
+        <div className="kv"><div className="kv__k">stale families</div><div className="kv__v">{fams.stale ?? 0}</div></div>
+        <div className="kv"><div className="kv__k">adapters released / building / failed gates</div>
+          <div className="kv__v">{adapters.released ?? 0} / {adapters.building ?? 0} / {adapters.failed_gates ?? 0}</div></div>
+        <div className="kv"><div className="kv__k">last family verification</div>
+          <div className="kv__v">{cov.last_family_verification || 'never'}</div></div>
+      </div>
+
+      {failureReasons.length > 0 && (
+        <>
+          <div className="eyebrow" style={{ marginTop: 22 }}>exact failure reasons</div>
+          <div className="card" style={{ padding: 0, maxHeight: 260, overflowY: 'auto' }}>
+            {failureReasons.map(([fam, reason]) => (
+              <div key={fam} className="row" style={{ border: 0, borderBottom: '1px solid var(--line)', borderRadius: 0, margin: 0 }}>
+                <div className="row__main">
+                  <div className="row__title">{fam}</div>
+                  <div className="row__sub">{reason}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {unsupported && (
+        <>
+          <div className="eyebrow" style={{ marginTop: 22 }}>
+            unresolved {unsupported.unresolved_total} · legally unavailable {unsupported.legally_unavailable_total}
+          </div>
+          <div className="card" style={{ padding: 0, maxHeight: 260, overflowY: 'auto' }}>
+            {(unsupported.sample || []).map((r) => (
+              <div key={r.pair} className="row" style={{ border: 0, borderBottom: '1px solid var(--line)', borderRadius: 0, margin: 0 }}>
+                <div className="row__main">
+                  <div className="row__title">{r.pair}</div>
+                  <div className="row__sub">{r.outcome} · {r.reason}</div>
+                </div>
+                <span className="chip">{r.release_status.replace(/_/g, ' ')}</span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
 }
 
 function SnapshotTab({ client, t }) {

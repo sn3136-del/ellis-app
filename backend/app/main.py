@@ -58,6 +58,8 @@ from .adapter_factory.api import router as _factory_router  # noqa: E402
 
 app.include_router(_snapshot_router)
 app.include_router(_factory_router)
+from .global_routes.api import router as _global_router  # noqa: E402
+app.include_router(_global_router)
 
 
 @app.on_event("startup")

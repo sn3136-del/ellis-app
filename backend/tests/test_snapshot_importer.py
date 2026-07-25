@@ -123,7 +123,7 @@ def test_route_key_recomputed_never_trusted(db, tmp_path):
 
 
 def test_matrix_expected_count_formula():
-    n_nat = 206
+    n_nat = 207   # 194 states + HKG/MAC/TWN/PSE document classes + 5 GB* + 4 special
     n_dest = 249
     n_cat = 6
     n_odoc = 7

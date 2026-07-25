@@ -1,0 +1,28 @@
+{
+  "_comment": "Provenance for passport_index_baseline.csv. This is NON-OFFICIAL aggregated reference data used ONLY to give every nationality x destination pair a DEFINED, honestly-labelled PROVISIONAL outcome. It is never presented as verified, never counted as released coverage, and is superseded by any official-source research record.",
+  "file": "passport_index_baseline.csv",
+  "source": "passport-index-dataset (ilyankou), tidy ISO-3 form",
+  "source_url": "https://github.com/ilyankou/passport-index-dataset",
+  "upstream_data_origin": "passportindex.org (aggregated public information; not a government source)",
+  "license": "MIT",
+  "dataset_last_updated": "2025-01-12",
+  "retrieved_at": "2026-07-25",
+  "sha256": "8fda21d4075ea39cee1d76a50104fa4b0870cccdbc6fbdfbe98986e18d798b33",
+  "rows": 39601,
+  "value_semantics": {
+    "numeric 7-360": "visa-free stay in days",
+    "visa free": "visa-free entry, unspecified duration",
+    "visa on arrival": "visa on arrival",
+    "e-visa": "electronic visa required",
+    "eta": "electronic travel authorization required",
+    "visa required": "consular/embassy visa required",
+    "no admission": "no lawful tourist admission",
+    "-1": "passport equals destination (not applicable)"
+  },
+  "honesty_rules": [
+    "Imported rows carry source=reference_dataset and verification_status=provisional.",
+    "A provisional row is NEVER exported or displayed as verified and never releases an adapter or workflow on its own.",
+    "Official-source research (source=official_research, verification_status=verified) always takes precedence.",
+    "Dataset age (2025-01-12) predates the snapshot; rules may have changed. Every provisional row is subject to on-demand official research before any live action."
+  ]
+}

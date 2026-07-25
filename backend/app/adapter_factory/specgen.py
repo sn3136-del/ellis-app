@@ -113,6 +113,96 @@ def _live_kimi_mapper(artifacts: list[fm.AdapterReconArtifact]) -> list[dict]:
     return list((reply or {}).get("mappings", []))
 
 
+def _count_inputs(art) -> int:
+    return sum(1 for el in (art.structure or {}).get("elements", [])
+               if not el.get("sensitive")
+               and el.get("type") not in ("button", "checkbox", "submit"))
+
+
+def _has_element(art, *keywords, types=()) -> bool:
+    for el in (art.structure or {}).get("elements", []):
+        name = f"{el.get('name', '')} {el.get('label', '')}".lower()
+        if types and (el.get("type") or "") in types:
+            return True
+        if keywords and any(k in name for k in keywords):
+            return True
+    return False
+
+
+def _page_roles(by_page: dict) -> dict:
+    """Map the canonical flow roles onto OBSERVED pages. Literal page keys
+    (synthetic portals, standard paths) keep their role unchanged; otherwise
+    the role is inferred deterministically from observed structure — real
+    portals rarely use /login-style paths. Never invents a page."""
+    roles = {k: v for k, v in by_page.items()
+             if k in ("home", "login", "application", "fees", "appointments", "submit")}
+    remaining = {k: v for k, v in by_page.items() if k not in roles}
+    if "login" not in roles:
+        for k, art in sorted(remaining.items()):
+            if _has_element(art, "password", types=("password",)):
+                roles["login"] = art
+                remaining.pop(k)
+                break
+    if "application" not in roles:
+        best = None
+        for k, art in sorted(remaining.items()):
+            n = _count_inputs(art)
+            if n >= 3 and (best is None or n > _count_inputs(best[1])):
+                best = (k, art)
+        if best is not None:
+            roles["application"] = best[1]
+            remaining.pop(best[0])
+    if "fees" not in roles:
+        for k, art in sorted(remaining.items()):
+            if _has_element(art, "fee", "amount", "payment"):
+                roles["fees"] = art
+                remaining.pop(k)
+                break
+    return roles
+
+
+def _observed_selector(art, *keywords, clickable=False, fallback="") -> str:
+    """Selector of the first observed element matching keywords, else the
+    given fallback (which the contract layer will honestly reject if it was
+    never observed). clickable=True restricts candidates to actual action
+    elements (buttons/submitters) so a CLICK target can never resolve to a
+    text input whose label merely contains the keyword."""
+    if art is None:
+        return fallback
+    for el in (art.structure or {}).get("elements", []):
+        name = f"{el.get('name', '')} {el.get('label', '')} {el.get('submits', '')}".lower()
+        if el.get("sensitive"):
+            continue
+        if clickable and not (el.get("submits") or
+                              (el.get("type") or "") in ("button", "submit")):
+            continue
+        if any(k in name for k in keywords):
+            return el.get("selector") or fallback
+    return fallback
+
+
+def _observed_sensitive_kinds(by_page: dict) -> set[str]:
+    """Which personal-verification kinds (captcha/otp) the public pages
+    exposed — each MUST become an applicant handoff in the flow."""
+    kinds: set[str] = set()
+    for art in by_page.values():
+        for el in (art.structure or {}).get("elements", []):
+            if not el.get("sensitive"):
+                continue
+            name = f"{el.get('name', '')} {el.get('label', '')}".lower()
+            if "captcha" in name:
+                kinds.add("captcha")
+            if "otp" in name or "one-time" in name or "one time" in name:
+                kinds.add("otp")
+    return kinds
+
+
+def _nav_pattern(art, host: str, literal_path: str) -> str:
+    """Prefer the page's real observed URL pattern over the literal path."""
+    pattern = (art.structure or {}).get("url_pattern") if art is not None else ""
+    return pattern or f"https://{host}{literal_path}"
+
+
 def generate_specification(db, *, build_request: fm.AdapterBuildRequest,
                            recon_job: fm.AdapterReconJob,
                            artifacts: list[fm.AdapterReconArtifact],
@@ -153,7 +243,8 @@ def generate_specification(db, *, build_request: fm.AdapterBuildRequest,
                              "required": bool(m.get("required")),
                              "format": "", "confirmation_required": False})
 
-    flow = _skeleton_flow(hosts[0] if hosts else "", by_page, accepted)
+    flow = _skeleton_flow(hosts[0] if hosts else "", _page_roles(by_page), accepted,
+                          sensitive_kinds=_observed_sensitive_kinds(by_page))
     errs = validate_flow(flow, allowed_hostnames=hosts)
     if errs:
         raise ValueError(f"generated flow failed schema validation: {errs[:5]}")
@@ -191,9 +282,14 @@ def _document_mappings(by_page: dict) -> list[dict]:
     return out
 
 
-def _skeleton_flow(host: str, by_page: dict, mappings: list[dict]) -> list[dict]:
-    """The deterministic node graph. Sensitive structure observed on a page
-    ALWAYS becomes an applicant handoff; model output cannot change this."""
+def _skeleton_flow(host: str, roles: dict, mappings: list[dict],
+                   sensitive_kinds: set | None = None) -> list[dict]:
+    """The deterministic node graph over ROLE-mapped observed pages. Sensitive
+    structure observed on a page ALWAYS becomes an applicant handoff; model
+    output cannot change this. Selectors and navigation targets come from the
+    OBSERVED structure where available (real portals); the literal synthetic
+    selectors remain as fallbacks and are honestly rejected by the contract
+    layer whenever they were never observed."""
     nodes: list[dict] = []
 
     def node(node_id, action, **kw):
@@ -203,10 +299,11 @@ def _skeleton_flow(host: str, by_page: dict, mappings: list[dict]) -> list[dict]
 
     node("open_portal", "NAVIGATE", purpose="Open the official portal",
          allowed_url_patterns=[f"https://{host}/"], expected_state="home")
-    if "login" in by_page:
-        login = by_page["login"].structure or {}
+    if "login" in roles:
+        login_art = roles["login"]
+        login = login_art.structure or {}
         node("goto_login", "NAVIGATE", purpose="Open sign-in",
-             allowed_url_patterns=[f"https://{host}/login"])
+             allowed_url_patterns=[_nav_pattern(login_art, host, "/login")])
         if login.get("delayed_content"):
             node("wait_login", "WAIT_FOR_STATE", purpose="Wait for rendered login form",
                  expected_state="login_form_visible")
@@ -217,51 +314,73 @@ def _skeleton_flow(host: str, by_page: dict, mappings: list[dict]) -> list[dict]
         node("verify_login", "VERIFY_EVIDENCE",
              success_evidence=[{"kind": "session_state", "category": "session_authenticated"}],
              purpose="Confirm authenticated session via evidence, never banner text")
-    if "application" in by_page:
+    # Personal-verification steps the portal exposed on public pages are
+    # ALWAYS the applicant's own: one handoff node per observed kind.
+    for kind in sorted(sensitive_kinds or ()):
+        if kind in ("captcha", "otp"):
+            node(f"{kind}_handoff", "APPLICANT_HANDOFF", handoff_kind=kind,
+                 applicant_action=True, sensitive=True,
+                 purpose=f"The applicant completes the portal's {kind.upper()} "
+                         f"personally — Ellis never automates it")
+    if "application" in roles:
+        app_art = roles["application"]
         node("goto_form", "NAVIGATE", purpose="Open the application form",
-             allowed_url_patterns=[f"https://{host}/application"])
+             allowed_url_patterns=[_nav_pattern(app_art, host, "/application")])
         for m in mappings:
-            if m["page_key"] != "application":
+            if m["page_key"] != app_art.page_key:
                 continue
             extra = {"format": m["format"]} if m.get("format") else {}
             node(f"fill_{m['portal_field']}", "FILL_NON_SENSITIVE",
                  selector=m["selector"], input_source=m["ellis_field"],
                  purpose=f"Fill {m['portal_field']} from the case record",
                  **extra)
-        node("save_form", "CLICK", selector="#save-btn",
+        node("save_form", "CLICK",
+             selector=_observed_selector(app_art, "save", "continue", "next",
+                                         "submit", clickable=True,
+                                         fallback="#save-btn"),
              purpose="Save the application form",
              expected_network=[{"endpoint": "/api/application", "method": "POST"}],
              success_evidence=[{"kind": "network", "category": "form_saved"}])
-    if "fees" in by_page:
+    if "fees" in roles:
+        fees_art = roles["fees"]
         node("goto_fees", "NAVIGATE", purpose="Open the fees page",
-             allowed_url_patterns=[f"https://{host}/fees"])
-        node("read_fee", "READ_FEE", selector="#fee-amount",
+             allowed_url_patterns=[_nav_pattern(fees_art, host, "/fees")])
+        node("read_fee", "READ_FEE",
+             selector=_observed_selector(fees_art, "fee", "amount",
+                                         fallback="#fee-amount"),
              purpose="Read the current official fee for exact-amount confirmation")
         node("payment_handoff", "APPLICANT_HANDOFF", handoff_kind="payment_credentials",
              applicant_action=True, sensitive=True,
              purpose="The applicant confirms the exact amount and pays personally")
-    if "appointments" in by_page:
+    if "appointments" in roles:
+        appt_art = roles["appointments"]
+        book_sel = _observed_selector(appt_art, "book", "slot", "appointment",
+                                      clickable=True, fallback="#book-btn")
         node("goto_appointments", "NAVIGATE", purpose="Open the appointments page",
-             allowed_url_patterns=[f"https://{host}/appointments"])
-        node("read_slots", "READ_APPOINTMENT_INVENTORY", selector="#book-btn",
+             allowed_url_patterns=[_nav_pattern(appt_art, host, "/appointments")])
+        node("read_slots", "READ_APPOINTMENT_INVENTORY", selector=book_sel,
              purpose="Read actual official appointment inventory")
         node("reconcile_booking", "RECONCILE_OUTCOME",
              purpose="Never double-book: check official state first",
              retry_class="reconcile_first")
-        node("book", "CLICK", selector="#book-btn", purpose="Book within saved preferences",
+        node("book", "CLICK", selector=book_sel, purpose="Book within saved preferences",
              irreversibility="irreversible", retry_class="reconcile_first",
              success_evidence=[{"kind": "network", "category": "appointment_booked"}],
              max_retries=1)
-    if "submit" in by_page:
+    if "submit" in roles:
+        submit_art = roles["submit"]
         node("goto_submit", "NAVIGATE", purpose="Open the submission page",
-             allowed_url_patterns=[f"https://{host}/submit"])
+             allowed_url_patterns=[_nav_pattern(submit_art, host, "/submit")])
         node("declaration_handoff", "APPLICANT_HANDOFF",
              handoff_kind="legally_personal_declaration", applicant_action=True,
              sensitive=True, purpose="Only the applicant can make the declaration")
         node("reconcile_submission", "RECONCILE_OUTCOME",
              purpose="Never double-submit: check official state first",
              retry_class="reconcile_first")
-        node("submit", "CLICK", selector="#submit-btn", purpose="Submit the application",
+        node("submit", "CLICK",
+             selector=_observed_selector(submit_art, "submit", clickable=True,
+                                         fallback="#submit-btn"),
+             purpose="Submit the application",
              irreversibility="irreversible", retry_class="reconcile_first",
              success_evidence=[{"kind": "network", "category": "submission_accepted"}],
              max_retries=1)

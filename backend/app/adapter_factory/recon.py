@@ -103,14 +103,30 @@ def _assert_sanitized(obj, path="root"):
             raise ReconRefused(f"overlong text at {path} — free text must not survive recon")
 
 
+_LINK_FOLLOW_RE = re.compile(
+    r"appl(y|ication)|visa|e-?visa|eta\b|arrival|form|fee|appointment|register",
+    re.IGNORECASE)
+_MAX_FOLLOWED_LINKS = 8
+
+
+def _page_key_for(path: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "_", (path.strip("/") or "home").lower()).strip("_")
+    return slug[:60] or "home"
+
+
 def run_recon(db, *, build_request: fm.AdapterBuildRequest, observer,
               start_paths=("/", "/login", "/application", "/fees",
                            "/appointments", "/submit"),
-              hostnames: list[str] | None = None) -> fm.AdapterReconJob:
+              hostnames: list[str] | None = None,
+              follow_links: bool = False) -> fm.AdapterReconJob:
     """Observe the portal's public pages through `observer(url) -> observation`
     and persist sanitized artifacts. `observer` is the structural interface —
     SyntheticPortal.observe in tests, a Browserbase/Playwright structural probe
-    in live runs. It never receives credentials and never authenticates."""
+    in live runs. It never receives credentials and never authenticates.
+
+    With follow_links=True (live builds), one bounded second wave probes
+    same-host links whose sanitized pattern looks visa-relevant — real portals
+    rarely use the standard probe paths. Never leaves the verified hosts."""
     hosts = [h.lower() for h in (hostnames or (build_request.portal_evidence or {}).get("hostnames", []))]
     if not hosts:
         raise ReconRefused("no verified portal hostnames — recon may not guess where to look")
@@ -119,21 +135,66 @@ def run_recon(db, *, build_request: fm.AdapterBuildRequest, observer,
     db.add(job)
     db.flush()
     observed = 0
+    followed: list[str] = []
+
+    def _observe_one(host: str, path: str, page_key: str) -> dict | None:
+        nonlocal observed
+        url = f"https://{host}{path}"
+        raw = observer(url)
+        if not raw or not raw.get("ok"):
+            return None
+        if str(raw.get("hostname", host)).lower() not in hosts:
+            return None         # never follow the portal off the verified hosts
+        art = sanitize_structure(raw)
+        db.add(fm.AdapterReconArtifact(
+            recon_job_id=job.id, page_key=page_key,
+            hostname=art["hostname"], url_pattern=art["url_pattern"],
+            structure=art))
+        observed += 1
+        return art
+
     try:
+        probed: set[tuple[str, str]] = set()
+        used_keys: set[str] = set()
+
+        def _unique_key(base: str, path: str) -> str:
+            # Lossy slugs can collide across distinct paths — a collision must
+            # never silently overwrite an observed page's role/mappings.
+            if base not in used_keys:
+                used_keys.add(base)
+                return base
+            import hashlib
+            suffixed = f"{base[:52]}_{hashlib.sha256(path.encode()).hexdigest()[:6]}"
+            used_keys.add(suffixed)
+            return suffixed
+
+        link_candidates: list[tuple[str, str]] = []
         for host in hosts:
             for path in start_paths:
-                url = f"https://{host}{path}"
-                raw = observer(url)
-                if not raw or not raw.get("ok"):
+                probed.add((host, path))
+                art = _observe_one(host, path,
+                                   _unique_key(path.strip("/") or "home", path))
+                if art and follow_links:
+                    for pattern in art.get("links", []):
+                        m = re.match(r"https?://([^/]+)(/.*)?$", pattern)
+                        if not m:
+                            continue
+                        lhost, lpath = m.group(1).lower(), (m.group(2) or "/")
+                        if lhost in hosts and _LINK_FOLLOW_RE.search(lpath):
+                            link_candidates.append((lhost, lpath))
+        if follow_links:
+            attempts = 0
+            for lhost, lpath in link_candidates:
+                if attempts >= _MAX_FOLLOWED_LINKS:
+                    break       # budget counts ATTEMPTS, not successes — the
+                                # second wave is strictly bounded per build
+                if (lhost, lpath) in probed:
                     continue
-                if str(raw.get("hostname", host)).lower() not in hosts:
-                    continue    # never follow the portal off the verified hosts
-                art = sanitize_structure(raw)
-                db.add(fm.AdapterReconArtifact(
-                    recon_job_id=job.id, page_key=path.strip("/") or "home",
-                    hostname=art["hostname"], url_pattern=art["url_pattern"],
-                    structure=art))
-                observed += 1
+                probed.add((lhost, lpath))
+                attempts += 1
+                if _observe_one(lhost, lpath,
+                                _unique_key(_page_key_for(lpath), lpath)) is not None:
+                    followed.append(lpath)
         job.pages_observed = observed
         job.status = "complete" if observed else "failed"
         if not observed:

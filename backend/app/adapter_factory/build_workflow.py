@@ -205,8 +205,11 @@ def _run_build_stages(db, req, _obs, max_stages: int) -> fm.AdapterBuildRequest:
                     _review(db, req, "recon_unavailable",
                             "live structural reconnaissance is not yet wired for this portal")
                     break
+                live_portal = (req.portal_evidence or {}).get(
+                    "verification") != "synthetic_test_portal"
                 job = recon.run_recon(db, build_request=req, observer=obs,
-                                      start_paths=_recon_paths(req))
+                                      start_paths=_recon_paths(req),
+                                      follow_links=live_portal)
                 if job.status != "complete":
                     transition(req, "MANUAL_REVIEW_REQUIRED", f"recon: {job.error[:80]}")
                     _review(db, req, "recon_failed", job.error or "recon failed")

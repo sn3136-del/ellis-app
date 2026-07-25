@@ -291,7 +291,12 @@ export function createVisaClient(session) {
     adminResearchJobs: () => call('GET', '/admin/snapshot/research-jobs', session),
     // Manual snapshot reverification (admin session required). Body:
     // {destination_country, urls: [..], note, fee_confirmed, portal_confirmed}.
-    adminReverify: (body) => call('POST', '/admin/snapshot/reverify', session, body)
+    adminReverify: (body) => call('POST', '/admin/snapshot/reverify', session, body),
+
+    // Global route coverage (admin session required).
+    adminGlobalCoverage: () => call('GET', '/admin/global/coverage', session),
+    adminGlobalUnsupported: (limit = 100) =>
+      call('GET', `/admin/global/unsupported?limit=${limit}`, session)
   }
 }
 

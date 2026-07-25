@@ -111,9 +111,10 @@ def _territories(countries):
 def _nationalities(countries):
     entries = []
     for c in countries:
-        # Territories mostly do not confer a distinct nationality; SARs and
-        # Taiwan documents are handled as passport issuers + special classes.
-        if c["is_territory"] and c["alpha_2"] not in {"HK", "MO", "TW"}:
+        # Territories mostly do not confer a distinct nationality; SARs,
+        # Taiwan and Palestinian Authority documents are handled as passport
+        # issuers + distinct document classes.
+        if c["is_territory"] and c["alpha_2"] not in {"HK", "MO", "TW", "PS"}:
             continue
         entries.append({
             "code": c["alpha_3"],

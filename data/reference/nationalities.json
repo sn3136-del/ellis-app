@@ -1058,6 +1058,13 @@
       "notes": null
     },
     {
+      "alpha_2": "PS",
+      "code": "PSE",
+      "kind": "territory_document_class",
+      "name": "Palestine, State of",
+      "notes": null
+    },
+    {
       "alpha_2": "QA",
       "code": "QAT",
       "kind": "state_nationality",
@@ -1443,7 +1450,7 @@
       "notes": null
     }
   ],
-  "entry_count": 206,
+  "entry_count": 207,
   "generated_at": "2026-07-23",
   "notes": "State nationalities (ISO alpha-3) + SAR/Taiwan document classes + special classes (stateless, refugee, British nationality classes).",
   "registry": "nationalities",

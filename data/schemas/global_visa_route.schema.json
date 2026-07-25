@@ -35,7 +35,7 @@
     "visa_on_arrival": { "type": ["boolean", "null"] },
     "electronic_authorization_required": { "type": ["boolean", "null"] },
     "evisa_available": { "type": ["boolean", "null"] },
-    "disposition": { "type": "string", "enum": ["VISA_FREE", "ETA_REQUIRED", "EVISA_REQUIRED", "VISA_ON_ARRIVAL", "EMBASSY_VISA_REQUIRED", "AUTHORIZED_VISA_CENTER_REQUIRED", "TRANSIT_AUTHORIZATION_REQUIRED", "NOT_APPLICABLE", "RESEARCH_INCOMPLETE", "CONFLICTED", "HUMAN_REVIEW_REQUIRED"] },
+    "disposition": { "type": "string", "enum": ["VISA_FREE", "ETA_REQUIRED", "EVISA_REQUIRED", "VISA_ON_ARRIVAL", "EMBASSY_VISA_REQUIRED", "AUTHORIZED_VISA_CENTER_REQUIRED", "TRANSIT_AUTHORIZATION_REQUIRED", "NO_TOURIST_ROUTE", "NOT_APPLICABLE", "RESEARCH_INCOMPLETE", "CONFLICTED", "HUMAN_REVIEW_REQUIRED"] },
     "exemption_conditions": { "type": ["array", "null"], "items": { "type": "string" } },
     "required_documents": { "type": ["array", "null"], "items": { "type": "string" } },
     "conditional_documents": { "type": ["array", "null"], "items": { "type": "object", "additionalProperties": true } },
