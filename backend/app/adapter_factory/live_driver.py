@@ -17,6 +17,7 @@ Safety, enforced here (not by policy):
 """
 from __future__ import annotations
 
+import os
 import re
 from urllib.parse import urlparse
 
@@ -309,12 +310,40 @@ class BrowserbasePageDriver:
 
     def upload(self, selector: str, path: str) -> dict:
         """Attach an authorized document to a real file input. The path is a
-        backend-local temp copy of a case document the applicant approved."""
+        backend-local temp copy of a case document the applicant approved.
+
+        Format adaptation: e-visa upload fields (photo, passport biodata)
+        require images. When the applicant's file is a PDF and the portal's
+        own input does not declare PDF support in its accept attribute, the
+        first page is converted to JPEG and THAT is uploaded — same document,
+        the format the portal demands. A portal that genuinely takes PDFs
+        declares it and receives the original. Conversion failure falls back
+        to the original file so the portal's own validation stays the judge."""
+        converted = None
         try:
-            self.page.set_input_files(selector, path, timeout=30000)
-            return {"ok": True}
+            use_path = path
+            if str(path).lower().endswith(".pdf"):
+                accept = ""
+                try:
+                    accept = self.page.eval_on_selector(
+                        selector, "el => el.getAttribute('accept') || ''") or ""
+                except Exception:  # noqa: BLE001
+                    accept = ""
+                if "pdf" not in accept.lower():
+                    from ..providers.pdf_image import pdf_first_page_jpeg
+                    converted = pdf_first_page_jpeg(path)
+                    if converted:
+                        use_path = converted
+            self.page.set_input_files(selector, use_path, timeout=30000)
+            return {"ok": True, "converted_to_image": bool(converted)}
         except Exception as e:  # noqa: BLE001
             return {"ok": False, "code": "UPLOAD_FAILED", "detail": str(e)[:120]}
+        finally:
+            if converted:
+                try:    # Playwright reads the file during set_input_files;
+                    os.unlink(converted)   # the temp JPEG must not linger
+                except OSError:
+                    pass
 
     def network_events(self) -> list[dict]:
         return list(self._events)

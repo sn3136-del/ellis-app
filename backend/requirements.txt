@@ -27,3 +27,4 @@ pycountry==26.2.16
 playwright>=1.44
 Pillow>=10.0
 pypdf>=4.0
+pypdfium2>=4.30

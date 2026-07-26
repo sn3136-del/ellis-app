@@ -530,6 +530,85 @@ def test_checklist_submission_overrides_classifier_doc_type(client, db):
     drv._cleanup_tmp()
 
 
+# ---------- Part 15: PDF documents become JPEGs for image-only portals -------
+
+def _tiny_pdf(tmp_path):
+    """A real one-page PDF wrapping a small photo (Pillow writes the PDF)."""
+    from PIL import Image
+    img = Image.new("RGB", (320, 400), (200, 180, 160))
+    p = tmp_path / "photo.pdf"
+    img.save(p, format="PDF")
+    return str(p)
+
+
+def test_pdf_first_page_converts_to_real_jpeg(tmp_path):
+    from app.providers.pdf_image import pdf_first_page_jpeg
+    out = pdf_first_page_jpeg(_tiny_pdf(tmp_path))
+    assert out and out.endswith(".jpg")
+    try:
+        with open(out, "rb") as fh:
+            magic = fh.read(3)
+        assert magic == b"\xff\xd8\xff"          # a genuine JPEG
+        from PIL import Image
+        with Image.open(out) as img:
+            assert img.size[0] > 0
+    finally:
+        import os as _os
+        _os.unlink(out)
+
+
+def test_upload_converts_pdf_when_portal_accepts_images_only(tmp_path):
+    from app.adapter_factory.live_driver import BrowserbasePageDriver
+
+    uploaded = {}
+
+    class FakePage:
+        url = "https://evisa.gov.vn/"
+
+        def eval_on_selector(self, selector, js):
+            return ".jpg,.jpeg,.png"             # the portal's real constraint
+
+        def set_input_files(self, selector, path, timeout=0):
+            with open(path, "rb") as fh:
+                uploaded["magic"] = fh.read(3)
+            uploaded["path"] = path
+
+        def on(self, *_a, **_k):
+            pass
+
+    driver = BrowserbasePageDriver(FakePage(), allowed_hostnames=["evisa.gov.vn"])
+    res = driver.upload("#basic_anhMat", _tiny_pdf(tmp_path))
+    assert res["ok"] is True and res["converted_to_image"] is True
+    assert uploaded["path"].endswith(".jpg")
+    assert uploaded["magic"] == b"\xff\xd8\xff"  # the portal received a JPEG
+    import os as _os
+    assert not _os.path.exists(uploaded["path"])  # temp JPEG never lingers
+
+
+def test_upload_keeps_pdf_when_portal_declares_pdf_support(tmp_path):
+    from app.adapter_factory.live_driver import BrowserbasePageDriver
+
+    uploaded = {}
+
+    class FakePage:
+        url = "https://evisa.gov.vn/"
+
+        def eval_on_selector(self, selector, js):
+            return ".pdf,.jpg,.png"
+
+        def set_input_files(self, selector, path, timeout=0):
+            uploaded["path"] = path
+
+        def on(self, *_a, **_k):
+            pass
+
+    driver = BrowserbasePageDriver(FakePage(), allowed_hostnames=["evisa.gov.vn"])
+    src = _tiny_pdf(tmp_path)
+    res = driver.upload("#basic_anhHoChieu", src)
+    assert res["ok"] is True and res["converted_to_image"] is False
+    assert uploaded["path"] == src               # original PDF, untouched
+
+
 # ---------- envelope binding (Continue diagnosis) ----------------------------
 
 def test_signature_binds_to_the_prepared_envelope_not_the_newest(client, db):
