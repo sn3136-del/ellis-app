@@ -102,16 +102,78 @@ class BrowserbasePageDriver:
 
     def click(self, selector: str) -> dict:
         try:
+            # A still-open dropdown/date overlay from the previous field can
+            # cover the button and turn the click into a 15s timeout.
+            try:
+                self.page.keyboard.press("Escape")
+                self.page.wait_for_timeout(120)
+            except Exception:  # noqa: BLE001
+                pass
             # Text selectors can also match stale HIDDEN elements (e.g. a
             # dismissed modal's button still in the DOM) — click the first
             # VISIBLE match so the wait can't hang on an invisible node.
-            self.page.locator(f"{selector} >> visible=true").first.click(timeout=15000)
+            target = self.page.locator(f"{selector} >> visible=true").first
+            try:    # a button below the fold is not "unclickable"
+                target.scroll_into_view_if_needed(timeout=5000)
+            except Exception:  # noqa: BLE001
+                pass
+            target.click(timeout=15000)
             return {"ok": True}
         except Exception as e:  # noqa: BLE001
             msg = str(e).lower()
             if "timeout" in msg:
                 return {"ok": False, "code": "TIMEOUT"}
             return {"ok": False, "code": "NO_SUCH_ELEMENT", "detail": str(e)[:120]}
+
+    # Deterministic read of the PORTAL's own visible validation messages. Used
+    # only to explain an advance the portal refused — Ellis reports what the
+    # government form says instead of dead-ending the applicant.
+    _VALIDATION_JS = """() => {
+      const out = [];
+      const sel = '[class*="form-item-explain-error"], [class*="explain-error"],'
+                + '[class*="error-message"], [class*="invalid-feedback"],'
+                + '[role="alert"], [class*="ant-form-item-explain"]';
+      for (const el of document.querySelectorAll(sel)) {
+        if (el.offsetParent === null) continue;
+        const t = (el.textContent || '').trim();
+        if (t && t.length < 200 && !out.includes(t)) out.push(t);
+        if (out.length >= 12) break;
+      }
+      return out;
+    }"""
+
+    # A field carrying an error, paired with its own label — lets Ellis name
+    # the exact question the portal is objecting to.
+    _INVALID_FIELDS_JS = """() => {
+      const out = [];
+      const items = document.querySelectorAll(
+        '[class*="form-item-has-error"], [class*="has-error"]');
+      for (const item of items) {
+        if (item.offsetParent === null) continue;
+        const ctrl = item.querySelector('input,select,textarea');
+        const id = ctrl ? (ctrl.id || ctrl.name || '') : '';
+        const labelEl = item.querySelector('label');
+        const label = labelEl ? (labelEl.textContent || '').trim() : '';
+        const errEl = item.querySelector('[class*="explain"], [role="alert"]');
+        const message = errEl ? (errEl.textContent || '').trim() : '';
+        if (id || label || message) out.push({id, label, message});
+        if (out.length >= 12) break;
+      }
+      return out;
+    }"""
+
+    def read_validation_errors(self) -> dict:
+        """{messages: [...], fields: [{id,label,message}]} — the portal's own
+        complaints, verbatim. Empty when the page shows none."""
+        try:
+            messages = self.page.evaluate(self._VALIDATION_JS) or []
+        except Exception:  # noqa: BLE001
+            messages = []
+        try:
+            fields = self.page.evaluate(self._INVALID_FIELDS_JS) or []
+        except Exception:  # noqa: BLE001
+            fields = []
+        return {"ok": True, "messages": list(messages), "fields": list(fields)}
 
     def read_text(self, selector: str) -> dict:
         try:

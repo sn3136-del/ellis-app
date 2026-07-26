@@ -568,6 +568,95 @@ def test_empty_filtered_options_reharvest_full_list_instead_of_failing(db):
     assert q["options"] == ["Du lịch (Tourist)", "Business"]
 
 
+# ---------- one batch of questions: pre-validated selects, deferred lists ----
+
+def _flow_runner(db, nodes, driver, answers, app_id="c-batch"):
+    from app.adapter_factory import models as fm
+    from app.adapter_factory.compiler import CompiledFlow
+    from app.adapter_factory.runtime import FlowRunner
+    execution = fm.AdapterExecution(org_id="org1", application_id=app_id,
+                                    candidate_id="cand", candidate_version=1,
+                                    tier="sandbox", status="running")
+    db.add(execution); db.commit()
+    return FlowRunner(db, execution=execution,
+                      compiled=CompiledFlow(nodes, [n["node_id"] for n in nodes],
+                                            {"allowed_hostnames": ["evisa.gov.vn"]}),
+                      driver=driver, case_answers=answers)
+
+
+def test_first_batch_prevalidates_selects_and_defers_dependent_lists(db):
+    """The applicant is asked ONCE: an answered select whose value the portal
+    will reject is asked up front WITH the portal's list; a dependent list the
+    portal cannot show yet is deferred (never an empty 'choose from list'
+    text box); a select whose answer matches is not asked at all."""
+    class Driver:
+        def list_options(self, selector, max_options=300):
+            if selector == "#purpose":
+                return {"ok": True, "options": ["Du lịch (Tourist)", "Business"]}
+            if selector == "#sex":
+                return {"ok": True, "options": ["Male", "Female"]}
+            return {"ok": True, "options": []}     # dependent ward: not yet
+
+    nodes = [
+        {"node_id": "fill_religion", "action": "FILL_NON_SENSITIVE",
+         "selector": "#religion", "input_source": "religion",
+         "allowed_hostname": "evisa.gov.vn", "mandatory": True},
+        {"node_id": "pick_sex", "action": "SELECT_SEARCH", "selector": "#sex",
+         "input_source": "sex", "allowed_hostname": "evisa.gov.vn", "mandatory": True},
+        {"node_id": "pick_purpose", "action": "SELECT_SEARCH", "selector": "#purpose",
+         "input_source": "travel_purpose", "allowed_hostname": "evisa.gov.vn",
+         "mandatory": True},
+        {"node_id": "pick_ward", "action": "SELECT_SEARCH", "selector": "#ward",
+         "input_source": "vietnam_ward", "allowed_hostname": "evisa.gov.vn",
+         "mandatory": True},
+        {"node_id": "done", "action": "COMPLETE", "allowed_hostname": "evisa.gov.vn"},
+    ]
+    runner = _flow_runner(db, nodes, Driver(),
+                          {"sex": "Female", "travel_purpose": "tourism"})
+    res = runner.run()
+    assert res["status"] == "paused_applicant_action"
+    keys = {q["key"]: q for q in res["questions"]}
+    assert "religion" in keys                      # missing free-text: asked
+    assert "sex" not in keys                       # matches the portal list
+    assert keys["travel_purpose"]["options"] == ["Du lịch (Tourist)", "Business"]
+    assert "tourism" in keys["travel_purpose"]["why"]
+    assert "vietnam_ward" not in keys              # dependent list: deferred
+    assert any(q.get("deferred_followups") for q in res["questions"])
+
+
+def test_portal_validation_errors_become_questions_with_rewind(db):
+    """A reversible 'Next' the portal refuses while showing its own field
+    errors pauses with THOSE fields as questions (portal message verbatim)
+    and rewinds to the first flagged field for the refill."""
+    class Driver:
+        def fill(self, selector, value):
+            return {"ok": True}
+
+        def click(self, selector):
+            return {"ok": False, "code": "TIMEOUT"}
+
+        def read_validation_errors(self):
+            return {"ok": True, "messages": ["Email không hợp lệ"],
+                    "fields": [{"id": "basic_email", "label": "Email",
+                                "message": "Email không hợp lệ"}]}
+
+    nodes = [
+        {"node_id": "fill_email", "action": "FILL_NON_SENSITIVE",
+         "selector": "#basic_email", "input_source": "email",
+         "allowed_hostname": "evisa.gov.vn", "mandatory": True},
+        {"node_id": "next", "action": "CLICK", "selector": "#next",
+         "allowed_hostname": "evisa.gov.vn"},
+        {"node_id": "done", "action": "COMPLETE", "allowed_hostname": "evisa.gov.vn"},
+    ]
+    runner = _flow_runner(db, nodes, Driver(), {"email": "broken@@example"},
+                          app_id="c-valid")
+    res = runner.run()
+    assert res["status"] == "paused_applicant_action"
+    q = {x["key"]: x for x in res["questions"]}["email"]
+    assert "Email không hợp lệ" in q["why"]        # the portal's own words
+    assert runner.execution.current_node == "fill_email"   # refill on resume
+
+
 # ---------- reversible manual-review dead ends are applicant-releasable ------
 
 def _strand_in_manual_review(client, db):

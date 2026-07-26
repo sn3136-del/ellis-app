@@ -827,6 +827,12 @@ export function AdditionalInfoModal({ client, caseId, checklist, pending, onReso
           )}
         </div>
       ))}
+      {inputQuestions.some((q) => q.deferred_followups) && (
+        <div style={{ fontSize: 12.5, color: 'var(--muted)', margin: '2px 0 10px' }}
+          data-testid="deferred-note">
+          {t('addinfo.deferredNote')}
+        </div>
+      )}
       {documentQuestions.length > 0 && (
         <div className="card card--soft" style={{ padding: 14, marginTop: 4 }}>
           <div className="eyebrow">{t('addinfo.docsTitle')}</div>

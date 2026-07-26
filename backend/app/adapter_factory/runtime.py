@@ -91,6 +91,10 @@ class FlowRunner:
         # node_id -> the portal's own option labels, when a mapped answer was
         # not on the portal's fixed list (drives the applicant question).
         self.observed_options: dict[str, list] = {}
+        # Fill nodes the PORTAL's own validation flagged (re-asked even though
+        # an answer exists), and the portal's verbatim per-field complaints.
+        self._rejected_fills: set[str] = set()
+        self._portal_field_messages: dict[str, str] = {}
         # Optional applicant-safe progress recorder: called with the node's
         # semantic step (never a selector) before and after each node.
         self.on_progress = on_progress
@@ -147,7 +151,9 @@ class FlowRunner:
                            else outcome["status"])
             if outcome["status"] == "handoff":
                 self.execution.status = "paused_applicant_action"
-                self.execution.current_node = node_id
+                # A portal-validation pause rewinds to the FIRST flagged field
+                # so the resume refills from there (reversible fills only).
+                self.execution.current_node = outcome.get("resume_node") or node_id
                 self.db.commit()
                 result = {"status": "paused_applicant_action", "node": node_id,
                           "handoff_kind": outcome.get("handoff_kind")
@@ -156,7 +162,8 @@ class FlowRunner:
                 # ALL still-missing fields at once, so the applicant is asked
                 # one time instead of field by field.
                 if result["handoff_kind"] == "additional_information":
-                    result["questions"] = self._collect_missing_questions(node_id)
+                    result["questions"] = (outcome.get("questions")
+                                           or self._collect_missing_questions(node_id))
                 return result
             if outcome["status"] == "uncertain":
                 self.execution.status = "outcome_uncertain"
@@ -199,10 +206,16 @@ class FlowRunner:
                 code = res.get("code")
                 if code == "TIMEOUT":
                     # A timeout on an irreversible action is genuine uncertainty.
-                    return {"status": "uncertain",
-                            "detail": {"reason": "no response to an irreversible action"}} \
-                        if node.get("irreversibility") == "irreversible" else \
-                        {"status": "failed", "reason": "timeout"}
+                    if node.get("irreversibility") == "irreversible":
+                        return {"status": "uncertain",
+                                "detail": {"reason": "no response to an irreversible action"}}
+                    # A reversible advance the portal refuses often means the
+                    # FORM is objecting, not the network: surface the portal's
+                    # own validation as applicant questions, never a dead end.
+                    blocked = self._portal_validation_questions(node)
+                    if blocked is not None:
+                        return blocked
+                    return {"status": "failed", "reason": "timeout"}
                 if code == "FEE_CHANGED":
                     return {"status": "failed", "reason": "fee changed — new confirmation required"}
                 if code == "SLOT_GONE" and attempt < attempts - 1:
@@ -358,21 +371,52 @@ class FlowRunner:
                     "question": q.get("question") or f"Please add your {dt} on the Documents tab.",
                     "why": q.get("why") or "The official application form requires this upload.",
                     "format": q.get("format", ""), "mandatory": True, "kind": "document"}
+        nid = node.get("node_id", "")
+        prev = str(self.answers.get(key, "") or "")
+        why = q.get("why") or "The official application form requires this information."
+        portal_msg = self._portal_field_messages.get(nid, "")
+        if portal_msg:
+            # The government form's own words — the honest reason for a re-ask.
+            why = f"The official portal says: {portal_msg}"
+        elif observed and prev:
+            why = (f"The portal's list does not include “{prev}” — "
+                   "please choose one of its real options.")
         return {"key": key,
                 "question": label if label.endswith("?") else f"What is your {label}?"
                 if not q.get("question") else q["question"],
-                "why": q.get("why") or "The official application form requires this information.",
+                "why": why,
                 "format": q.get("format") or ("DD/MM/YYYY" if node.get("format") else "free text"),
                 "mandatory": bool(node.get("mandatory", True)),
                 "kind": q.get("kind") or ("date" if node.get("format") else
                                           "select" if node.get("action") == "SELECT_SEARCH" else "text"),
+                **({"previous_answer": prev} if prev else {}),
                 **({"options": observed or q.get("options")}
                    if (observed or q.get("options")) else {})}
 
+    @staticmethod
+    def _option_matches(value: str, options: list) -> bool:
+        """The same match rule select_search commits with: exact first, then
+        substring. Used to pre-validate an ANSWERED select against the
+        portal's real list."""
+        v = str(value).strip().lower()
+        if not v:
+            return False
+        lowered = [str(o).strip().lower() for o in options]
+        return v in lowered or any(v in o or o in v for o in lowered)
+
     def _collect_missing_questions(self, from_node_id: str) -> list:
-        """All still-unanswered mandatory questions from this node onward, so
-        the applicant is asked once, not one field at a time."""
+        """Every question the applicant must answer from this node onward, so
+        they are asked ONCE instead of one field per portal round-trip.
+
+        That includes selects whose stored answer the portal will reject: the
+        real list is read now (a read-only widget open — the form is not
+        modified) and a non-matching answer becomes a question with the
+        portal's own options. A dependent list that is still empty (e.g. a
+        ward before its province is set on the page) is NOT asked with an
+        empty option list — it is deferred honestly until the portal can
+        offer its choices."""
         out, seen, node_id = [], set(), from_node_id
+        deferred = 0
         while node_id and node_id not in seen and len(out) < 40:
             seen.add(node_id)
             node = self.flow.nodes.get(node_id)
@@ -381,10 +425,28 @@ class FlowRunner:
             act = node.get("action")
             if act in ("FILL_NON_SENSITIVE", "SELECT_SEARCH"):
                 v = self.answers.get(node.get("input_source", ""), "")
-                rejected = node.get("node_id", "") in self.observed_options
-                if (rejected or v in ("", None)) and bool(node.get("mandatory", True)):
-                    if act == "SELECT_SEARCH":
+                nid = node.get("node_id", "")
+                rejected = nid in self.observed_options or nid in self._rejected_fills
+                mandatory = bool(node.get("mandatory", True))
+                if mandatory and act == "SELECT_SEARCH":
+                    if not rejected:
                         self._harvest_options(node)
+                    opts = self.observed_options.get(nid) or []
+                    declared = (node.get("question") or {}).get("options") or []
+                    known = opts or declared
+                    if v not in ("", None) and known and self._option_matches(v, known):
+                        node_id = self.flow.next_of(node_id, "ok")
+                        continue          # the portal will accept this answer
+                    if not known:
+                        # No readable choices yet (dependent list). Asking with
+                        # an empty dropdown would be a dead end; ask when the
+                        # portal can actually offer its options.
+                        if v in ("", None) or rejected:
+                            deferred += 1
+                        node_id = self.flow.next_of(node_id, "ok")
+                        continue
+                    out.append(self._question_for(node))
+                elif (rejected or v in ("", None)) and mandatory:
                     out.append(self._question_for(node))
             elif act == "UPLOAD_AUTHORIZED_DOCUMENT":
                 if self._document_for(node.get("doc_type", "passport")) is None:
@@ -398,7 +460,66 @@ class FlowRunner:
             if q["key"] not in keys:
                 keys.add(q["key"])
                 uniq.append(q)
+        if deferred and uniq:
+            uniq[-1] = dict(uniq[-1], deferred_followups=deferred)
         return uniq
+
+    def _portal_validation_questions(self, node: dict):
+        """When the government form itself flags fields (the portal's own
+        validation messages are visible), those complaints become applicant
+        questions with the portal's verbatim message — and the flow rewinds to
+        the first flagged field so the resume refills it. Returns a handoff
+        outcome, or None when the page shows no validation state."""
+        reader = getattr(self.driver, "read_validation_errors", None)
+        if reader is None:
+            return None
+        try:
+            res = reader() or {}
+        except Exception:  # noqa: BLE001
+            return None
+        fields = res.get("fields") or []
+        if not fields:
+            return None
+        by_selector = {str(n.get("selector") or ""): n
+                       for n in self.flow.nodes.values()}
+        flagged: list[str] = []
+        for f in fields:
+            fid = str(f.get("id") or "").strip()
+            n = by_selector.get(f"#{fid}") if fid else None
+            if n is None:
+                continue
+            nid = n.get("node_id", "")
+            flagged.append(nid)
+            msg = str(f.get("message") or "").strip()
+            if msg:
+                self._portal_field_messages[nid] = msg[:160]
+            if n.get("action") == "SELECT_SEARCH":
+                # drop any stale (possibly empty) harvest so the collector
+                # re-reads the portal's current list for this field
+                self.observed_options.pop(nid, None)
+            else:
+                self._rejected_fills.add(nid)
+        if not flagged:
+            return None
+        # Rewind to the first flagged field, but never across a handoff or an
+        # irreversible node (only reversible refills may repeat).
+        resume = None
+        for nid in self.flow.order:
+            n = self.flow.nodes.get(nid) or {}
+            if nid == node.get("node_id"):
+                break
+            if n.get("action") in ("APPLICANT_HANDOFF", "PAUSE") or \
+                    n.get("irreversibility") == "irreversible":
+                resume = None    # cannot rewind past this point
+                continue
+            if resume is None and nid in flagged:
+                resume = nid
+        questions = self._collect_missing_questions(resume or node.get("node_id", ""))
+        if not questions:
+            return None
+        return {"status": "handoff", "handoff_kind": "additional_information",
+                "questions": questions, "resume_node": resume,
+                "detail": {"portal_validation_fields": len(flagged)}}
 
     def _harvest_options(self, node: dict) -> None:
         """For a missing select answer, read the portal's REAL option list so
