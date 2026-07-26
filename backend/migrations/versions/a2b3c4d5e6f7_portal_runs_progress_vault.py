@@ -2,7 +2,7 @@
 persistent encrypted vault backend.
 
 Revision ID: a2b3c4d5e6f7
-Revises: f1a2b3c4d5e6
+Revises: c5d6e7f8a9b0
 Create Date: 2026-07-25
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 revision = 'a2b3c4d5e6f7'
-down_revision = 'f1a2b3c4d5e6'
+down_revision = 'c5d6e7f8a9b0'
 branch_labels = None
 depends_on = None
 
