@@ -988,6 +988,61 @@ def test_a_case_with_no_pending_and_no_run_can_always_be_resumed(client, live_ro
     assert busy["resume_available"] is False        # a run is already working
 
 
+# ---------- the secure window shows the real page: restore + fee read -------
+
+def test_restore_portal_rebuilds_view_and_reads_fee_for_confirmation():
+    """After a session loss the secure window must show the real form, and a
+    fee READ off the restored page replaces the type-it-yourself pause with
+    an approve-this-exact-amount pause — read, never invented."""
+    class RestoringDriver:
+        def restore_view(self, **_kw):
+            return {"ok": True, "fee": {
+                "ok": True, "amount": 2500, "currency": "USD",
+                "display": "25.00 USD", "government_fee_cents": 2500,
+                "service_fee_cents": 0, "payee": "Vietnam Immigration Department",
+                "source": "portal_page_read"}}
+
+    wf = _wf(RestoringDriver(), "PAYMENT_APPROVAL_REQUIRED")
+    wf.pending = {"state": "PAYMENT_APPROVAL_REQUIRED",
+                  "reason": "Confirm the exact fee shown by the official portal.",
+                  "handoff": "fee_confirmation", "live_view": None}
+    wf.restore_portal()
+    assert wf.machine.state == "PAYMENT_APPROVAL_REQUIRED"    # state untouched
+    assert wf.fee["amount"] == 2500
+    assert wf.fee["source"] == "portal_page_read"
+    assert wf.pending["handoff"] == "payment_approval"        # now approve-exact
+    assert wf.pending["fee"]["display"] == "25.00 USD"
+
+
+def test_restore_portal_preserves_the_pause_when_no_fee_is_readable():
+    class RestoreOnly:
+        def restore_view(self, **_kw):
+            return {"ok": True}
+
+    wf = _wf(RestoreOnly(), "PAYMENT_APPROVAL_REQUIRED")
+    wf.pending = {"state": "PAYMENT_APPROVAL_REQUIRED", "reason": "r",
+                  "handoff": "fee_confirmation", "live_view": None}
+    wf.restore_portal()
+    assert wf.pending["handoff"] == "fee_confirmation"        # unchanged
+    assert wf.fee is None                                     # nothing invented
+
+
+def test_restore_endpoint_queues_a_run_and_fresh_sessions_say_so(client, live_route, db, monkeypatch):
+    from app.providers import browser as bb
+    case = _new_case(client)
+    monkeypatch.setattr(bb, "create_session",
+                        lambda: {"id": "s-1", "mode": "browserbase", "connect_url": "ws://x"})
+    monkeypatch.setattr(bb, "session_alive", lambda sid: True)
+    r = client.post(f"/cases/{case['id']}/browser-session", headers=AUTH)
+    assert r.json()["fresh"] is True                          # blank until restored
+    r2 = client.post(f"/cases/{case['id']}/browser-session", headers=AUTH)
+    assert r2.json()["fresh"] is False                        # reused, not blank
+    rr = client.post(f"/cases/{case['id']}/portal/restore", headers=AUTH)
+    assert rr.status_code == 200 and rr.json()["queued"] is True
+    run = portal_queue.latest_run(db, case["id"])
+    assert run.signal_name == "restore_portal"
+
+
 # ---------- the secure window must be REAL: liveness is reconciled ----------
 
 def test_expired_provider_session_is_reconciled_not_presented_as_open(client, db, monkeypatch):

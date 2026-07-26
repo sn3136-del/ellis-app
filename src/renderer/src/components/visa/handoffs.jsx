@@ -82,11 +82,18 @@ export function usePortalLiveView(client, caseId) {
   const [nonce, setNonce] = useState(0)
   const [busy, setBusy] = useState(false)
   const [note, setNote] = useState('')
+  const [restoring, setRestoring] = useState(false)
 
   async function open() {
     setBusy(true)
     try {
       const s = await client.createBrowserSession(caseId)
+      if (s && s.fresh) {
+        // A brand-new session shows a blank page. Ask Ellis to rebuild the
+        // portal view at the case's current step (background, reversible).
+        setRestoring(true)
+        client.restorePortal(caseId).catch(() => {}).finally(() => setRestoring(false))
+      }
       if (s && s.mode === 'browserbase' && s.live_view_available) {
         const lv = await client.browserLiveView(caseId)
         setUrl(lv.url); setNonce((n) => n + 1); setState('embedded'); setNote('')
@@ -114,7 +121,7 @@ export function usePortalLiveView(client, caseId) {
     return () => clearInterval(iv)
   }, [state, caseId])
 
-  return { state, url, nonce, busy, note, reconnect: open,
+  return { state, url, nonce, busy, note, restoring, reconnect: open,
            close: async () => {
              try { await client.closeBrowserSession(caseId) } catch { /* non-fatal */ }
              setUrl(null); setState('closed')
@@ -125,11 +132,20 @@ function LiveFrame({ view, height = '70vh' }) {
   if (view.state === 'connecting') return <Loading label="Opening the secure portal window" />
   if (view.state === 'embedded' && view.url) {
     return (
-      <iframe key={view.nonce} src={view.url} title="Ellis secure window"
-        sandbox="allow-same-origin allow-scripts allow-forms"
-        referrerPolicy="no-referrer"
-        style={{ width: '100%', height, border: '1px solid var(--line)',
-          borderRadius: 10, marginTop: 8, background: '#fff' }} />
+      <div>
+        {view.restoring && (
+          <div className="card card--soft" style={{ padding: '8px 12px', marginTop: 8,
+            fontSize: 12.5 }} data-testid="restoring-note">
+            Ellis is rebuilding the portal page at your current step — you can
+            watch it below. This takes a minute or two.
+          </div>
+        )}
+        <iframe key={view.nonce} src={view.url} title="Ellis secure window"
+          sandbox="allow-same-origin allow-scripts allow-forms"
+          referrerPolicy="no-referrer"
+          style={{ width: '100%', height, border: '1px solid var(--line)',
+            borderRadius: 10, marginTop: 8, background: '#fff' }} />
+      </div>
     )
   }
   return (

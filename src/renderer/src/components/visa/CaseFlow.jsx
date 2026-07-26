@@ -129,8 +129,11 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
   // While a background run is queued/running it is RESOLVING the recorded
   // pause: the case row still carries that pause until the run persists, so
   // showing it again would invite the applicant to answer a question Ellis
-  // is already acting on (and re-enter the same value twice).
-  const runBusy = !!progress && (progress.active || progress.queued)
+  // is already acting on (and re-enter the same value twice). Exception: a
+  // portal-view RESTORE preserves the pause — the open dialog stays put and
+  // its embedded window shows the page being rebuilt.
+  const restoreRun = progress?.run_signal === 'restore_portal'
+  const runBusy = !!progress && (progress.active || progress.queued) && !restoreRun
   const handoff = runBusy ? null : pending?.handoff
   const state = status?.state
   const terminal = isTerminal(state)

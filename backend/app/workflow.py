@@ -275,6 +275,38 @@ class VisaWorkflow:
         self._emit("cancelled", {"reason": reason})
         return self.status()
 
+    def restore_portal(self):
+        """Rebuild the applicant's live portal page after a session loss —
+        the secure window must show the real form at its current step, not a
+        blank tab. Reversible-only (the driver stops before any handoff or
+        irreversible node); the workflow state and the recorded pause stay
+        exactly as they were. When the restored page displays the fee and no
+        fee is bound yet, the READ amount replaces the type-it-yourself pause
+        with an approve-this-exact-amount pause — read, never invented."""
+        restore = getattr(self.adapter.driver, "restore_view", None)
+        if restore is None:
+            return self.status()
+        try:
+            res = restore()
+        except Exception as e:  # noqa: BLE001 — restoration is best-effort
+            self._emit("portal_view_restore_failed", {"code": str(e)[:120]})
+            return self.status()
+        if not res.get("ok"):
+            self._emit("portal_view_restore_incomplete",
+                       {"code": str(res.get("code", ""))[:60]})
+            return self.status()
+        fee = res.get("fee")
+        if (isinstance(fee, dict) and self.fee is None
+                and (self.pending or {}).get("handoff") == "fee_confirmation"):
+            self.fee = fee
+            self._emit("fee_read_from_portal_page",
+                       {"amount": fee["amount"], "currency": fee["currency"]})
+            self._pause(f"Approve the {fee['display']} fee.", "payment_approval",
+                        fee=self.fee, fee_context=self.fee_context)
+        else:
+            self._emit("portal_view_restored", {})
+        return self.status()
+
     def start(self):
         # A portal_form pause is confirmed by the applicant's "I completed
         # this step" (which re-drives via start): clear it so the flow

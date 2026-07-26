@@ -736,6 +736,7 @@ def create_browser_session(application_id: str, response: Response,
         audit.record(db, org_id=p.org_id, application_id=application_id,
                      action="browser_session_expired", detail={}, actor=p.user_id)
         row = None
+    fresh = False
     if row is None:
         sess = bb.create_session()
         row = models.BrowserSession(org_id=p.org_id, application_id=application_id,
@@ -743,11 +744,14 @@ def create_browser_session(application_id: str, response: Response,
                                     mode=sess.get("mode", "local"))
         db.add(row)
         db.commit()
+        fresh = True
         audit.record(db, org_id=p.org_id, application_id=application_id,
                      action="browser_session_opened",
                      detail={"mode": row.mode}, actor=p.user_id)  # no ids/urls in audit
     response.headers["Cache-Control"] = "no-store"
-    return {"id": row.id, "mode": row.mode, "status": row.status,
+    # fresh: a brand-new session shows a BLANK page until portal work runs —
+    # the client should ask Ellis to restore the portal view.
+    return {"id": row.id, "mode": row.mode, "status": row.status, "fresh": fresh,
             "live_view_available": row.mode == "browserbase",
             "browserbase_configured": bb.is_configured()}
 
@@ -2119,6 +2123,7 @@ def case_progress(application_id: str, db=Depends(get_session),
                              and state not in ("COMPLETED", "CANCELLED")),
         "browser_session_alive": session_row is not None,
         "run_status": run.status if run else "",
+        "run_signal": run.signal_name if run else "",
     }
 
 
@@ -2149,6 +2154,19 @@ def retry_portal(application_id: str, db=Depends(get_session),
     audit.record(db, org_id=p.org_id, application_id=application_id,
                  action="portal_retry_requested", detail={}, actor=p.user_id)
     return _queue_signal_response(db, p, app_row, "start", {})
+
+
+@app.post("/cases/{application_id}/portal/restore")
+def restore_portal_view(application_id: str, db=Depends(get_session),
+                        p: Principal = Depends(get_principal)):
+    """Rebuild the applicant's live portal page after a session loss: the
+    secure window must show the real form at its current step, never a blank
+    tab. Reversible work only; the case's recorded pause is preserved (and a
+    fee the restored page displays becomes an approve-this-amount pause)."""
+    app_row = _owned(db, p, application_id)
+    if not _live_background_route(db, app_row):
+        raise HTTPException(409, detail={"reason": "restore_unavailable"})
+    return _queue_signal_response(db, p, app_row, "restore_portal", {})
 
 
 class ContactBody(BaseModel):

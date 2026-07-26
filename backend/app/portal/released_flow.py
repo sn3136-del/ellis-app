@@ -534,6 +534,32 @@ class ReleasedFlowDriver:
                     "detail": "no official confirmation reference readable"}
         return {"ok": True, "confirmation": {"referenceNo": ref}}
 
+    def restore_view(self, **_kwargs) -> dict:
+        """Rebuild the live portal page at the persisted step after a session
+        loss (the applicant's secure window must show the real form, never a
+        blank tab). Reversible work only: _ensure_live's honest rewind plus
+        the resumable segment re-run, stopping before any handoff or
+        irreversible node. When the restored page displays the fee, it is
+        read deterministically and returned for the applicant to CONFIRM —
+        read from the real page, never invented."""
+        def boundary(node):
+            return node.get("action") in ("APPLICANT_HANDOFF", "PAUSE") or \
+                node.get("irreversibility") == "irreversible"
+        res = self._advance(stop_before=boundary)
+        out = self._result_from(res, ok_statuses=("boundary", "completed"))
+        if not out.get("ok"):
+            return out
+        fee = self._fee_from_page_text()
+        if isinstance(fee, dict):
+            out["fee"] = {"ok": True, "amount": fee["amount_cents"],
+                          "currency": fee["currency"],
+                          "display": f"{fee['amount_cents'] / 100:.2f} {fee['currency']}",
+                          "government_fee_cents": fee["amount_cents"],
+                          "service_fee_cents": 0,
+                          "payee": self.released.family.operator or self.released.family.name,
+                          "source": "portal_page_read"}
+        return out
+
     def get_application_state(self, **_kwargs) -> dict:
         """Reconciliation from recorded REAL evidence only — never assumed."""
         from ..adapter_factory import models as fm
