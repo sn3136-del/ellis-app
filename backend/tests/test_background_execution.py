@@ -661,6 +661,78 @@ def test_first_batch_prevalidates_selects_and_defers_dependent_lists(db):
     assert any(q.get("deferred_followups") for q in res["questions"])
 
 
+def test_portal_dropped_value_is_repaired_silently_not_re_asked(db):
+    """The live loop: Ellis fills the Vietnam address, the province/ward
+    selects that run AFTER it clear the field, and the portal then reports
+    'please enter …'. Ellis must REFILL from the answer it already holds and
+    advance — re-asking the applicant for a value it has is the loop."""
+    state = {"address": "138/1300A St. 26/3", "cleared": True, "clicks": 0,
+             "refills": []}
+
+    class DroppingPortal:
+        def fill(self, selector, value):
+            state["refills"].append((selector, value))
+            # The FIRST fill is wiped by the province/ward selects that run
+            # after it (the real portal behavior); the repair fill sticks.
+            state["cleared"] = len(state["refills"]) == 1
+            return {"ok": True}
+
+        def read_value(self, selector):
+            return {"ok": True, "value": "" if state["cleared"] else state["address"]}
+
+        def click(self, selector):
+            state["clicks"] += 1
+            if state["cleared"]:
+                return {"ok": False, "code": "TIMEOUT"}
+            return {"ok": True}
+
+        def read_validation_errors(self):
+            if state["cleared"]:
+                return {"ok": True, "messages": ["Please enter Residential address in Viet Nam"],
+                        "fields": [{"id": "basic_address", "label": "Address",
+                                    "message": "Please enter Residential address in Viet Nam"}]}
+            return {"ok": True, "messages": [], "fields": []}
+
+    nodes = [
+        {"node_id": "fill_address", "action": "FILL_NON_SENSITIVE",
+         "selector": "#basic_address", "input_source": "vietnam_address",
+         "allowed_hostname": "evisa.gov.vn", "mandatory": True},
+        {"node_id": "next", "action": "CLICK", "selector": "#next",
+         "allowed_hostname": "evisa.gov.vn"},
+        {"node_id": "done", "action": "COMPLETE", "allowed_hostname": "evisa.gov.vn"},
+    ]
+    runner = _flow_runner(db, nodes, DroppingPortal(),
+                          {"vietnam_address": state["address"]}, app_id="c-repair")
+    res = runner.run()
+    assert res["status"] == "completed"            # advanced, never paused
+    assert ("#basic_address", state["address"]) in state["refills"]
+    assert state["clicks"] == 2                    # refused once, then accepted
+
+
+def test_already_correct_field_is_not_refilled_on_resume(db):
+    """Resume speed: a field the portal already holds with the exact value is
+    skipped instead of retyped."""
+    touched = []
+
+    class Portal:
+        def read_value(self, selector):
+            return {"ok": True, "value": "Nguyen Van A"}
+
+        def fill(self, selector, value):
+            touched.append(selector)
+            return {"ok": True}
+
+    nodes = [
+        {"node_id": "fill_name", "action": "FILL_NON_SENSITIVE", "selector": "#name",
+         "input_source": "full_name", "allowed_hostname": "evisa.gov.vn"},
+        {"node_id": "done", "action": "COMPLETE", "allowed_hostname": "evisa.gov.vn"},
+    ]
+    runner = _flow_runner(db, nodes, Portal(), {"full_name": "Nguyen Van A"},
+                          app_id="c-skip")
+    assert runner.run()["status"] == "completed"
+    assert touched == []                            # nothing retyped
+
+
 def test_portal_validation_errors_become_questions_with_rewind(db):
     """A reversible 'Next' the portal refuses while showing its own field
     errors pauses with THOSE fields as questions (portal message verbatim)

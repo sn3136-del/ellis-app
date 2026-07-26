@@ -78,6 +78,17 @@ class BrowserbasePageDriver:
             return {"ok": False, "code": "SENSITIVE_FIELD_AUTOMATION"}
         try:
             self.page.fill(selector, str(value), timeout=15000)
+            # Framework forms (rc-field-form/Ant Design) commit a controlled
+            # input's value to their own store on blur. Without it the DOM
+            # shows the text while the form still considers the field empty —
+            # and the portal rejects the page with "please enter …".
+            try:
+                self.page.eval_on_selector(
+                    selector,
+                    "el => { el.dispatchEvent(new Event('change', {bubbles: true}));"
+                    " el.blur(); }")
+            except Exception:  # noqa: BLE001
+                pass
             return {"ok": True}
         except Exception as e:  # noqa: BLE001
             # Readonly picker inputs (e.g. Ant Design date pickers) refuse
@@ -175,6 +186,21 @@ class BrowserbasePageDriver:
             fields = []
         return {"ok": True, "messages": list(messages), "fields": list(fields)}
 
+    def read_value(self, selector: str) -> dict:
+        """The value the portal currently holds in a field. Used to detect a
+        value the FORM dropped (a dependent select can reset a field that was
+        filled earlier) so it can be repaired instead of re-asked."""
+        try:
+            val = self.page.eval_on_selector(
+                selector,
+                "el => { if (el.value !== undefined && el.value !== null) return el.value;"
+                " const w = el.closest('[class*=\"select\"]');"
+                " const s = w && w.querySelector('[class*=\"selection-item\"]');"
+                " return s ? s.innerText.trim() : ''; }")
+            return {"ok": True, "value": str(val or "")}
+        except Exception as e:  # noqa: BLE001
+            return {"ok": False, "code": "NO_SUCH_ELEMENT", "detail": str(e)[:120]}
+
     def read_text(self, selector: str) -> dict:
         try:
             el = self.page.query_selector(selector)
@@ -247,8 +273,8 @@ class BrowserbasePageDriver:
               return {chosen: hit[1]};
             }"""
             result = {}
-            for _ in range(16):     # up to ~8s for async option lists
-                self.page.wait_for_timeout(500)
+            for _ in range(16):     # ~4s: filtered lists render in a tick or two
+                self.page.wait_for_timeout(250)
                 result = self.page.evaluate(pick_js, want) or {}
                 if result.get("chosen") or len(result.get("labels") or []) > 1:
                     break
@@ -322,24 +348,30 @@ class BrowserbasePageDriver:
                 pass
             self.page.locator(f"{selector} >> visible=true").first.click(timeout=15000)
             labels: list = []
-            for _ in range(16):     # up to ~8s for async option lists
-                self.page.wait_for_timeout(500)
+            for _ in range(12):     # ~3s: options usually render in one tick
+                self.page.wait_for_timeout(250)
                 labels = self.page.evaluate(read_js, max_options) or []
                 if len(labels) > 1:
                     break
             seen = list(labels)
-            for _ in range(60):
+            barren = 0
+            for _ in range(40):
                 try:
                     moved = bool(self.page.evaluate(scroll_js))
                 except Exception:  # noqa: BLE001
                     break
                 if not moved:
                     break
-                self.page.wait_for_timeout(150)
+                self.page.wait_for_timeout(80)
                 more = self.page.evaluate(read_js, max_options) or []
                 fresh = [t for t in more if t not in set(seen)]
                 if fresh:
                     seen.extend(fresh)
+                    barren = 0
+                else:
+                    barren += 1
+                    if barren >= 2:     # the list stopped growing
+                        break
                 if len(seen) >= max_options:
                     break
             try:

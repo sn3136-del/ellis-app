@@ -95,6 +95,8 @@ class FlowRunner:
         # an answer exists), and the portal's verbatim per-field complaints.
         self._rejected_fills: set[str] = set()
         self._portal_field_messages: dict[str, str] = {}
+        # One silent repair pass per run: refill fields the portal dropped.
+        self._repair_attempted = False
         # Optional applicant-safe progress recorder: called with the node's
         # semantic step (never a selector) before and after each node.
         self.on_progress = on_progress
@@ -210,8 +212,18 @@ class FlowRunner:
                         return {"status": "uncertain",
                                 "detail": {"reason": "no response to an irreversible action"}}
                     # A reversible advance the portal refuses often means the
-                    # FORM is objecting, not the network: surface the portal's
-                    # own validation as applicant questions, never a dead end.
+                    # FORM is objecting, not the network. First try to REPAIR
+                    # it silently: a field the portal dropped (a dependent
+                    # select can reset one filled earlier) is refilled from
+                    # the answer the applicant already gave — asking again for
+                    # a value Ellis holds is the loop, not the fix. Only an
+                    # unrepairable complaint becomes an applicant question.
+                    if not self._repair_attempted:
+                        self._repair_attempted = True
+                        if self._repair_flagged_fields():
+                            res = self.driver.click(node["selector"])
+                            if res.get("ok"):
+                                break
                     blocked = self._portal_validation_questions(node)
                     if blocked is not None:
                         return blocked
@@ -259,6 +271,17 @@ class FlowRunner:
                             "reason": f"answer {node.get('input_source')!r} is not a "
                                       "canonical date — refusing to guess the portal format"}
                 value = formatted
+            # Resume speed: a field the portal ALREADY holds with this exact
+            # value needs no work. Re-typing every field on every resume is
+            # what made a repeat pass take minutes.
+            reader_v = getattr(self.driver, "read_value", None)
+            if reader_v is not None:
+                try:
+                    current = str((reader_v(node["selector"]) or {}).get("value", "")).strip()
+                except Exception:  # noqa: BLE001
+                    current = ""
+                if current and current.lower() == str(value).strip().lower():
+                    return {"status": "ok", "detail": {"already_set": True}}
             if action == "SELECT_SEARCH":
                 sel = getattr(self.driver, "select_search", None)
                 res = sel(node["selector"], str(value)) if sel else \
@@ -463,6 +486,61 @@ class FlowRunner:
         if deferred and uniq:
             uniq[-1] = dict(uniq[-1], deferred_followups=deferred)
         return uniq
+
+    def _repair_flagged_fields(self) -> int:
+        """Refill every portal-flagged field whose answer Ellis already holds
+        and whose value the portal has actually lost. Reversible fills only —
+        never a select that would need a fresh choice, never an upload, never
+        anything past a handoff. Returns how many fields were repaired."""
+        reader = getattr(self.driver, "read_validation_errors", None)
+        if reader is None:
+            return 0
+        try:
+            res = reader() or {}
+        except Exception:  # noqa: BLE001
+            return 0
+        fields = res.get("fields") or []
+        if not fields:
+            return 0
+        by_selector = {str(n.get("selector") or ""): n for n in self.flow.nodes.values()}
+        repaired = 0
+        for f in fields:
+            fid = str(f.get("id") or "").strip()
+            n = by_selector.get(f"#{fid}") if fid else None
+            if n is None or n.get("action") not in ("FILL_NON_SENSITIVE", "SELECT_SEARCH"):
+                continue
+            value = self.answers.get(n.get("input_source", ""), "")
+            if value in ("", None):
+                continue    # genuinely missing: the applicant must answer
+            fmt = n.get("format")
+            if fmt:
+                from .. import dates as dates_mod
+                value = dates_mod.to_portal(str(value), fmt) or ""
+                if not value:
+                    continue
+            # Only repair what the portal actually LOST — a value still
+            # present but rejected is a real question for the applicant.
+            reader_v = getattr(self.driver, "read_value", None)
+            if reader_v is not None:
+                try:
+                    cur = (reader_v(n["selector"]) or {}).get("value", "")
+                except Exception:  # noqa: BLE001
+                    cur = ""
+                if str(cur).strip():
+                    continue
+            try:
+                if n.get("action") == "SELECT_SEARCH":
+                    sel = getattr(self.driver, "select_search", None)
+                    out = sel(n["selector"], str(value)) if sel else {"ok": False}
+                else:
+                    out = self.driver.fill(n["selector"], str(value))
+            except Exception:  # noqa: BLE001
+                continue
+            if out.get("ok"):
+                repaired += 1
+                self._checkpoint(n.get("node_id", ""), "repaired",
+                                 {"reason": "portal dropped a filled value"})
+        return repaired
 
     def _portal_validation_questions(self, node: dict):
         """When the government form itself flags fields (the portal's own
