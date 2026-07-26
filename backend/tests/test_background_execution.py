@@ -976,6 +976,66 @@ def test_manual_review_with_irreversible_evidence_is_never_released(client, live
     assert db.get(models.VisaApplication, case["id"]).state == "MANUAL_REVIEW_REQUIRED"
 
 
+# ---------- the secure window must be REAL: liveness is reconciled ----------
+
+def test_expired_provider_session_is_reconciled_not_presented_as_open(client, db, monkeypatch):
+    """A session Ellis records as open but the provider already ended must
+    never be handed to the applicant as a working secure window — the live
+    run asked for a CAPTCHA and a card payment in a window that was gone."""
+    from app.providers import browser as bb
+    case = _new_case(client)
+    db.add(models.BrowserSession(org_id="org1", application_id=case["id"],
+                                 provider_session_id="dead-session",
+                                 mode="browserbase", status="open"))
+    db.commit()
+    monkeypatch.setattr(bb, "session_alive", lambda sid: sid != "dead-session")
+    monkeypatch.setattr(bb, "create_session",
+                        lambda: {"id": "fresh-session", "mode": "browserbase",
+                                 "connect_url": "ws://x"})
+    r = client.post(f"/cases/{case['id']}/browser-session", headers=AUTH)
+    assert r.status_code == 200
+    assert r.json()["live_view_available"] is True
+    rows = db.execute(select(models.BrowserSession).where(
+        models.BrowserSession.application_id == case["id"])).scalars().all()
+    by_sid = {x.provider_session_id: x.status for x in rows}
+    assert by_sid["dead-session"] == "closed"     # the corpse is retired
+    assert by_sid["fresh-session"] == "open"      # a real one replaced it
+
+
+def test_progress_does_not_claim_an_ended_session_is_active(client, db, monkeypatch):
+    from app.providers import browser as bb
+    case = _new_case(client)
+    db.add(models.BrowserSession(org_id="org1", application_id=case["id"],
+                                 provider_session_id="dead-session",
+                                 mode="browserbase", status="open"))
+    db.commit()
+    monkeypatch.setattr(bb, "session_alive", lambda sid: False)
+    pr = client.get(f"/cases/{case['id']}/progress", headers=AUTH).json()
+    assert pr["browser_session_alive"] is False
+
+
+def test_live_view_reports_session_ended_not_misconfiguration(client, db, monkeypatch):
+    """'Browserbase is not configured' was shown for a session that had simply
+    expired — a different problem with a different fix."""
+    from app.providers import browser as bb
+    case = _new_case(client)
+    db.add(models.BrowserSession(org_id="org1", application_id=case["id"],
+                                 provider_session_id="dead-session",
+                                 mode="browserbase", status="open"))
+    db.commit()
+    monkeypatch.setattr(bb, "live_view_url", lambda sid: None)
+    monkeypatch.setattr(bb, "session_alive", lambda sid: False)
+    r = client.get(f"/cases/{case['id']}/browser-session/live-view", headers=AUTH)
+    assert r.status_code == 404
+    assert r.json()["detail"]["reason"] == "session_ended"
+
+
+def test_portal_sessions_request_a_lifetime_that_outlives_human_steps():
+    """A provider-default session lifetime (minutes) strands every handoff."""
+    from app.providers import browser as bb
+    assert bb.SESSION_TIMEOUT_SECONDS >= 1800
+
+
 # ---------- Part 15: PDF documents become JPEGs for image-only portals -------
 
 def _tiny_pdf(tmp_path):

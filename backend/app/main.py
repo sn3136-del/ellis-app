@@ -726,6 +726,16 @@ def create_browser_session(application_id: str, response: Response,
     row = db.execute(select(models.BrowserSession).where(
         models.BrowserSession.application_id == application_id,
         models.BrowserSession.status == "open")).scalars().first()
+    # A session Ellis records as open may already have ended at the provider
+    # (lifetime elapsed). Reconcile before handing the applicant a window:
+    # a dead session is closed and a fresh one opened, never pretended.
+    if row is not None and row.mode == "browserbase" and not bb.session_alive(
+            row.provider_session_id):
+        row.status = "closed"
+        db.commit()
+        audit.record(db, org_id=p.org_id, application_id=application_id,
+                     action="browser_session_expired", detail={}, actor=p.user_id)
+        row = None
     if row is None:
         sess = bb.create_session()
         row = models.BrowserSession(org_id=p.org_id, application_id=application_id,
@@ -738,7 +748,8 @@ def create_browser_session(application_id: str, response: Response,
                      detail={"mode": row.mode}, actor=p.user_id)  # no ids/urls in audit
     response.headers["Cache-Control"] = "no-store"
     return {"id": row.id, "mode": row.mode, "status": row.status,
-            "live_view_available": row.mode == "browserbase"}
+            "live_view_available": row.mode == "browserbase",
+            "browserbase_configured": bb.is_configured()}
 
 
 @app.get("/cases/{application_id}/browser-session/live-view")
@@ -752,13 +763,26 @@ def browser_session_live_view(application_id: str, response: Response,
         models.BrowserSession.application_id == application_id,
         models.BrowserSession.status == "open")).scalars().first()
     if row is None:
-        raise HTTPException(404, "no open browser session for this case")
+        raise HTTPException(404, detail={"reason": "no_session",
+                                         "message": "no open browser session for this case"})
     if row.mode != "browserbase":
-        raise HTTPException(404, "live view unavailable: session is local mode "
-                                 "(Browserbase not configured)")
+        raise HTTPException(404, detail={
+            "reason": "not_configured",
+            "message": "live view unavailable: session is local mode "
+                       "(Browserbase not configured)"})
     url = bb.live_view_url(row.provider_session_id)
     if not url:
-        raise HTTPException(404, "live view URL unavailable from provider")
+        # The session ended at the provider: say so honestly (it is NOT a
+        # configuration problem) and mark it closed so the next open mints
+        # a fresh one.
+        if not bb.session_alive(row.provider_session_id):
+            row.status = "closed"
+            db.commit()
+            raise HTTPException(404, detail={
+                "reason": "session_ended",
+                "message": "the secure portal session ended; Ellis will open a new one"})
+        raise HTTPException(404, detail={"reason": "live_view_unavailable",
+                                         "message": "live view URL unavailable from provider"})
     response.headers["Cache-Control"] = "no-store"
     return {"url": url, "expires_hint_seconds": 300}
 
@@ -2057,9 +2081,14 @@ def case_progress(application_id: str, db=Depends(get_session),
         models.CaseProgressEvent.at.desc(),
         models.CaseProgressEvent.id.desc())).scalars().first()
     started = _aw(run.started_at) if run else None
+    from .providers import browser as bb_probe
     session_row = db.execute(select(models.BrowserSession).where(
         models.BrowserSession.application_id == application_id,
         models.BrowserSession.status == "open")).scalars().first()
+    # "Secure portal session active" must mean the PROVIDER still has it.
+    if session_row is not None and session_row.mode == "browserbase" and \
+            not bb_probe.session_alive(session_row.provider_session_id):
+        session_row = None
     retryable = portal_queue.retry_available(db, app_row, exec_row)
     failed = bool(run and run.status in ("failed", "stalled")) or state == "RECOVERABLE_FAILURE"
     return {

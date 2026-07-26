@@ -39,7 +39,7 @@ function Head({ title, sub, onClose }) {
 
 // ---- A safe "secure session" panel (Browserbase Live View stand-in) --------
 // Sensitive-session recording is disabled; the URL is shown but never logged.
-function SecureWindow({ live, label = 'secure portal window' }) {
+function SecureWindow({ live, label = 'secure portal window', onReconnect, reconnecting }) {
   const url = live && live.url
   return (
     <div className="card card--soft" style={{ padding: 16, marginTop: 12 }}>
@@ -54,8 +54,92 @@ function SecureWindow({ live, label = 'secure portal window' }) {
           Open secure window ↗
         </button>
       ) : (
-        <div className="chip" style={{ marginTop: 10 }}>Secure window ready (mock portal)</div>
+        // NEVER claim a window is "ready" when there is none — and never call
+        // the real government portal a mock.
+        <div style={{ marginTop: 10 }}>
+          <div style={{ fontSize: 13 }}>
+            The secure window is not open right now.
+          </div>
+          {onReconnect && (
+            <button className="btn btn--sm" style={{ marginTop: 8 }}
+              disabled={reconnecting} onClick={onReconnect} data-testid="reconnect-secure">
+              {reconnecting ? 'Reconnecting…' : 'Reconnect the secure window'}
+            </button>
+          )}
+        </div>
       )}
+    </div>
+  )
+}
+
+// Embedded live view of the case's isolated portal session, shared by every
+// handoff that needs the applicant to act ON the official page (CAPTCHA, OTP,
+// portal form items, PAYMENT). The URL is short-lived and sensitive: it lives
+// only in component state, is refreshed before it expires, and is never logged.
+export function usePortalLiveView(client, caseId) {
+  const [state, setState] = useState('connecting')  // connecting|embedded|unavailable|closed
+  const [url, setUrl] = useState(null)
+  const [nonce, setNonce] = useState(0)
+  const [busy, setBusy] = useState(false)
+  const [note, setNote] = useState('')
+
+  async function open() {
+    setBusy(true)
+    try {
+      const s = await client.createBrowserSession(caseId)
+      if (s && s.mode === 'browserbase' && s.live_view_available) {
+        const lv = await client.browserLiveView(caseId)
+        setUrl(lv.url); setNonce((n) => n + 1); setState('embedded'); setNote('')
+      } else {
+        setState('unavailable')
+        setNote(s && s.browserbase_configured === false
+          ? 'A secure in-app window needs Browserbase configured. Complete this step on the official site instead.'
+          : 'The secure window is not available right now.')
+      }
+    } catch (e) {
+      const reason = e && typeof e.detail === 'object' ? e.detail.reason : ''
+      setState('unavailable')
+      setNote(reason === 'session_ended'
+        ? 'The secure portal session ended. Reconnect to open a fresh one.'
+        : (e.detail && e.detail.message) || e.message || 'The secure window is not available.')
+    }
+    setBusy(false)
+  }
+
+  useEffect(() => { open() }, [caseId])
+  // Live-view links expire after a few minutes; refresh before they do.
+  useEffect(() => {
+    if (state !== 'embedded') return undefined
+    const iv = setInterval(() => { open() }, 210000)
+    return () => clearInterval(iv)
+  }, [state, caseId])
+
+  return { state, url, nonce, busy, note, reconnect: open,
+           close: async () => {
+             try { await client.closeBrowserSession(caseId) } catch { /* non-fatal */ }
+             setUrl(null); setState('closed')
+           } }
+}
+
+function LiveFrame({ view, height = '70vh' }) {
+  if (view.state === 'connecting') return <Loading label="Opening the secure portal window" />
+  if (view.state === 'embedded' && view.url) {
+    return (
+      <iframe key={view.nonce} src={view.url} title="Ellis secure window"
+        sandbox="allow-same-origin allow-scripts allow-forms"
+        referrerPolicy="no-referrer"
+        style={{ width: '100%', height, border: '1px solid var(--line)',
+          borderRadius: 10, marginTop: 8, background: '#fff' }} />
+    )
+  }
+  return (
+    <div className="card card--soft" style={{ padding: 14, marginTop: 12, fontSize: 13 }}>
+      {view.note || 'The secure window is not available right now.'}
+      <div style={{ marginTop: 8 }}>
+        <button className="btn btn--sm" disabled={view.busy} onClick={view.reconnect}>
+          {view.busy ? 'Reconnecting…' : 'Reconnect the secure window'}
+        </button>
+      </div>
     </div>
   )
 }
@@ -283,12 +367,10 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
   const [typedCode, setTypedCode] = useState('')
   const [maskedDest, setMaskedDest] = useState(null)
   const [error, setError] = useState(null)
-  // Live-view state: 'connecting' | 'embedded' | 'unavailable' | 'closed'.
-  // liveUrl is kept ONLY here (component state) — see privacy invariants above.
-  const [liveState, setLiveState] = useState('connecting')
-  const [liveUrl, setLiveUrl] = useState(null)
-  const [frameNonce, setFrameNonce] = useState(0)
-  const [refreshing, setRefreshing] = useState(false)
+  // The live view is owned by the shared hook: one isolated session per case,
+  // short-lived URL kept only in component state, auto-refreshed before it
+  // expires, and honest about a session that ended.
+  const view = usePortalLiveView(client, caseId)
   const [closing, setClosing] = useState(false)
   const handoff = pending?.handoff
   const live = pending?.live_view
@@ -304,62 +386,9 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
     }
   }, [handoff, caseId])
 
-  // On open: create/reuse the case's isolated browser session, then fetch a
-  // FRESH live-view URL (they expire quickly — never reuse a stale one).
-  useEffect(() => {
-    let alive = true
-    async function open() {
-      try {
-        const s = await client.createBrowserSession(caseId)
-        if (!alive) return
-        if (s && s.mode === 'browserbase' && s.live_view_available) {
-          const lv = await client.browserLiveView(caseId)
-          if (!alive) return
-          setLiveUrl(lv.url)
-          setLiveState('embedded')
-        } else {
-          setLiveState('unavailable')
-        }
-      } catch {
-        // No open session / local mode / provider URL unavailable → honest fallback.
-        if (alive) setLiveState('unavailable')
-      }
-    }
-    open()
-    return () => { alive = false }
-    // NOTE: the session is intentionally NOT deleted on unmount — it is the
-    // case's own isolated automation session; only the explicit
-    // "Close secure window" button tears it down.
-  }, [caseId])
-
-  async function refreshLiveView() {
-    setRefreshing(true)
-    try {
-      const lv = await client.browserLiveView(caseId) // always a FRESH url
-      setLiveUrl(lv.url)
-      setFrameNonce((n) => n + 1)
-      setLiveState('embedded')
-    } catch {
-      setLiveUrl(null)
-      setLiveState('unavailable')
-    }
-    setRefreshing(false)
-  }
-
-  // Live-view links expire after a few minutes ("WebSocket disconnected").
-  // Refresh the embed automatically before that happens so the applicant is
-  // never left staring at a dead debugger pane mid-CAPTCHA.
-  useEffect(() => {
-    if (liveState !== 'embedded') return undefined
-    const iv = setInterval(() => { refreshLiveView() }, 240000)
-    return () => clearInterval(iv)
-  }, [liveState, caseId])
-
   async function closeSecureWindow() {
     setClosing(true)
-    try { await client.closeBrowserSession(caseId) } catch { /* non-fatal */ }
-    setLiveUrl(null)
-    setLiveState('closed')
+    await view.close()
     setClosing(false)
   }
 
@@ -380,7 +409,7 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
     } catch (e) { setError({ message: e.message }); setBusy(false) }
   }
 
-  const embedded = liveState === 'embedded' && !!liveUrl
+  const embedded = view.state === 'embedded' && !!view.url
   return (
     <Overlay onClose={onClose} width={embedded ? 960 : 620}>
       <Head title={title} sub={sub} onClose={onClose} />
@@ -433,47 +462,22 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
         Ellis never sees your card and never solves CAPTCHAs.
       </div>
 
-      {liveState === 'connecting' && <Loading label={t('live.connecting')} />}
-
-      {embedded && (
-        <div style={{ marginTop: 12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-            <div className="eyebrow">{t('live.embedded')}</div>
-            <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-              <button className="btn btn--sm btn--ghost" disabled={refreshing} onClick={refreshLiveView}>
-                {refreshing ? '…' : t('live.refresh')}
-              </button>
+      <div style={{ marginTop: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+          <div className="eyebrow">{t('live.embedded')}</div>
+          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+            <button className="btn btn--sm btn--ghost" disabled={view.busy} onClick={view.reconnect}>
+              {view.busy ? '…' : t('live.refresh')}
+            </button>
+            {embedded && (
               <button className="btn btn--sm btn--ghost" disabled={closing} onClick={closeSecureWindow}>
                 {closing ? '…' : t('live.closeWindow')}
               </button>
-            </div>
+            )}
           </div>
-          <iframe
-            key={frameNonce}
-            src={liveUrl}
-            title="Ellis secure window"
-            sandbox="allow-same-origin allow-scripts allow-forms"
-            referrerPolicy="no-referrer"
-            style={{ width: '100%', height: '70vh', border: '1px solid var(--line)',
-              borderRadius: 10, marginTop: 8, background: '#fff' }}
-          />
         </div>
-      )}
-
-      {liveState === 'closed' && (
-        <div className="card card--soft" style={{ padding: 14, marginTop: 12, fontSize: 13 }}>
-          {t('live.closed')}
-        </div>
-      )}
-
-      {liveState === 'unavailable' && (
-        <>
-          <div className="card card--soft" style={{ padding: 14, marginTop: 12, fontSize: 13 }}>
-            {t('live.unavailable')}
-          </div>
-          <SecureWindow live={live} />
-        </>
-      )}
+        <LiveFrame view={view} />
+      </div>
 
       {error && <ErrorNote error={error} />}
       <div className="modal__foot">
@@ -509,7 +513,7 @@ export function parseExactAmountCents(text) {
 const FEE_CURRENCIES = ['USD', 'VND', 'EUR', 'CNY', 'KRW', 'GBP', 'JPY', 'SGD',
   'THB', 'INR', 'IDR', 'PHP', 'AUD', 'CAD', 'MYR', 'HKD', 'TWD', 'AED']
 
-export function PaymentApprove({ pending, onResolve, onClose }) {
+export function PaymentApprove({ client, caseId, pending, onResolve, onClose }) {
   const t = useT()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
@@ -540,8 +544,13 @@ export function PaymentApprove({ pending, onResolve, onClose }) {
       { label: t('pay.feeSource'), value: fee.source_url || ctx.source_url }
   ].filter(Boolean)
   const parsedCents = parseExactAmountCents(amount)
+  // In confirm mode the applicant must READ the fee off the official portal —
+  // so show them the portal, in the case's own isolated session.
+  const view = usePortalLiveView(client, caseId)
+  const showPortal = confirmMode && !!client && !!caseId
   return (
-    <Overlay onClose={onClose} width={520}>
+    <Overlay onClose={onClose}
+      width={showPortal && view.state === 'embedded' ? 960 : 520}>
       <Head title={confirmMode ? t('pay.feeConfirmTitle') : t('pay.confirmTitle')}
         onClose={onClose}
         sub={confirmMode ? t('pay.feeConfirmSub') : t('pay.confirmSub')} />
@@ -553,16 +562,26 @@ export function PaymentApprove({ pending, onResolve, onClose }) {
       )}
       {confirmMode && (
         <div style={{ marginTop: 12 }} data-testid="fee-confirm-entry">
-          {expected && (
-            <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 8 }}>
-              {t('pay.expectedFee', { fee: expected })}
-            </div>
-          )}
+          {/* Honesty: say whether this figure comes from an official source or
+              from nowhere at all. Ellis did not read it off the portal. */}
+          <div className="card card--soft" style={{ padding: '10px 12px', marginBottom: 10,
+            fontSize: 12.5 }}>
+            {expected
+              ? t('pay.expectedFee', { fee: expected })
+              : t('pay.noFeeRead')}
+          </div>
+        </div>
+      )}
+      {confirmMode && (
+        <div style={{ marginTop: 4 }}>
           <div style={{ display: 'flex', gap: 8 }}>
             <div className="field" style={{ flex: 1 }}>
               <label>{t('pay.amountShown')}</label>
+              {/* No example amount in the placeholder: a number here reads as
+                  "the fee", and Ellis has not read one from the portal. */}
               <input className="input" inputMode="decimal" value={amount}
-                placeholder="25.00" onChange={(e) => setAmount(e.target.value)} />
+                placeholder={t('pay.amountPlaceholder')}
+                onChange={(e) => setAmount(e.target.value)} />
             </div>
             <div className="field" style={{ width: 110 }}>
               <label>{t('pay.currency')}</label>
@@ -585,6 +604,17 @@ export function PaymentApprove({ pending, onResolve, onClose }) {
         </div>
       )}
       <KVList fields={rows} />
+      {showPortal && (
+        <div style={{ marginTop: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+            <div className="eyebrow">{t('pay.readOnPortal')}</div>
+            <button className="btn btn--sm btn--ghost" disabled={view.busy} onClick={view.reconnect}>
+              {view.busy ? '…' : t('live.refresh')}
+            </button>
+          </div>
+          <LiveFrame view={view} height="46vh" />
+        </div>
+      )}
       <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 10 }}>
         {t('pay.exactNote')}
       </div>
@@ -613,33 +643,48 @@ export function PaymentApprove({ pending, onResolve, onClose }) {
 }
 
 // ---- Applicant-controlled payment (handoff: payment / three_ds) ------------
-export function PaymentModal({ pending, onResolve, onClose }) {
+export function PaymentModal({ client, caseId, pending, onResolve, onClose }) {
   const toast = useToast()
+  const t = useT()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
+  // The applicant pays ON the official portal, inside the case's own isolated
+  // session, embedded here — no detour to a separate browser, and Ellis never
+  // sees the card (it cannot read what is typed in that session).
+  const view = usePortalLiveView(client, caseId)
   const fee = pending?.fee
+  const embedded = view.state === 'embedded' && !!view.url
   return (
-    <Overlay onClose={onClose}>
+    <Overlay onClose={onClose} width={embedded ? 960 : 620}>
       <Head title="Pay the official fee" onClose={onClose}
-            sub="Enter your card directly in the portal's secure window. Ellis never sees or stores your card." />
+            sub="Pay on the official portal in the secure window below. Ellis never sees or stores your card." />
       <div className="stat" style={{ marginTop: 4 }}>
         <div className="stat__num">{formatFee(fee) || '—'}</div>
         <div className="stat__cap">Amount due at the official portal</div>
       </div>
-      <SecureWindow live={pending?.live_view} label="secure payment window" />
+      <div style={{ marginTop: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+          <div className="eyebrow">{t('live.embedded')}</div>
+          <button className="btn btn--sm btn--ghost" disabled={view.busy} onClick={view.reconnect}>
+            {view.busy ? '…' : t('live.refresh')}
+          </button>
+        </div>
+        <LiveFrame view={view} />
+      </div>
       <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 10 }}>
         Supports payment pop-ups and 3-D Secure. If you leave, your case is kept
         safely and payment is reconciled with the portal before any retry — Ellis
-        never charges twice.
+        never charges twice. After you pay, Ellis reads the portal's own result;
+        it never records a payment the portal has not confirmed.
       </div>
       {error && <ErrorNote error={error} />}
       <div className="modal__foot">
         <button className="btn btn--ghost" onClick={onClose}>I'll finish later</button>
         <button className="btn" disabled={busy} onClick={async () => {
           setBusy(true); setError(null)
-          try { await onResolve('complete_payment'); toast('Payment confirmed') }
+          try { await onResolve('complete_payment'); toast('Checking the portal…') }
           catch (e) { setError({ message: e.message }); setBusy(false) }
-        }}>{busy ? 'Confirming…' : 'I completed payment'}</button>
+        }}>{busy ? 'Checking with the portal…' : 'I paid — check the portal'}</button>
       </div>
     </Overlay>
   )

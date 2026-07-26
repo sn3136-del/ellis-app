@@ -84,7 +84,10 @@ def test_local_mode_is_honest_no_liveview(client, case_id):
     assert r.json()["mode"] == "local" and r.json()["live_view_available"] is False
     lv = client.get(f"/cases/{case_id}/browser-session/live-view", headers=H)
     assert lv.status_code == 404
-    assert "local mode" in lv.json()["detail"]
+    # Structured detail: the renderer distinguishes "not configured" from a
+    # session that simply ENDED (they need different applicant wording).
+    assert lv.json()["detail"]["reason"] == "not_configured"
+    assert "local mode" in lv.json()["detail"]["message"]
 
 
 def test_live_view_url_never_in_audit_or_logs(client, case_id, fake_bb, db):

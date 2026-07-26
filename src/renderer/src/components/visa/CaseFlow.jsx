@@ -377,10 +377,12 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
           onClose={() => setModal(null)} />
       )}
       {(modal === 'payment_approval' || modal === 'fee_confirmation') && (
-        <PaymentApprove pending={pending} onResolve={resolve} onClose={() => setModal(null)} />
+        <PaymentApprove client={client} caseId={caseId} pending={pending}
+          onResolve={resolve} onClose={() => setModal(null)} />
       )}
       {(modal === 'payment' || modal === 'three_ds') && (
-        <PaymentModal pending={pending} onResolve={resolve} onClose={() => setModal(null)} />
+        <PaymentModal client={client} caseId={caseId} pending={pending}
+          onResolve={resolve} onClose={() => setModal(null)} />
       )}
       {(modal === 'appointment_selection' || modal === 'no_availability') && (
         <AppointmentCalendar pending={pending} prefs={prefs} onResolve={resolve} onClose={() => setModal(null)} />

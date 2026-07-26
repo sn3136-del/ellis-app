@@ -12,6 +12,7 @@ LLM in either mode.
 """
 from __future__ import annotations
 
+import os
 import secrets
 import time
 from dataclasses import dataclass
@@ -48,6 +49,11 @@ def is_configured() -> bool:
 
 _BB_BASE = "https://api.browserbase.com/v1"
 
+# How long one applicant's portal session may live. Human steps (CAPTCHA, an
+# emailed code, reading the fee, paying) happen inside it, so minutes are not
+# enough; the provider's per-project default is far shorter.
+SESSION_TIMEOUT_SECONDS = int(os.getenv("ELLIS_BROWSER_SESSION_TIMEOUT", "3600"))
+
 
 def create_session() -> dict:
     """Create an ISOLATED Browserbase session (one per applicant/case). Returns
@@ -57,21 +63,53 @@ def create_session() -> dict:
         return {"id": "local-" + secrets.token_hex(6), "mode": "local", "connect_url": None}
     import httpx
     proj = s.browserbase_project_id or _default_project()
-    # keepAlive: the applicant's in-progress portal session must survive
-    # handoff waits (CAPTCHA/OTP/payment) instead of expiring on idle. Plans
-    # without keep-alive support fall back to a standard session.
-    body = {"projectId": proj, "keepAlive": True}
-    r = httpx.post(f"{_BB_BASE}/sessions",
-                   headers={"X-BB-API-Key": s.browserbase_api_key, "content-type": "application/json"},
-                   json=body, timeout=30)
-    if r.status_code >= 400:
-        r = httpx.post(f"{_BB_BASE}/sessions",
-                       headers={"X-BB-API-Key": s.browserbase_api_key,
-                                "content-type": "application/json"},
-                       json={"projectId": proj}, timeout=30)
+    # The applicant's in-progress portal session must outlive the human
+    # steps: CAPTCHA, an emailed code, reading the fee, paying. A project's
+    # DEFAULT session timeout is minutes — long enough to strand every
+    # handoff and force a full form refill on the next resume — so the
+    # lifetime is requested explicitly (keepAlive stops idle disconnects
+    # from ending it). Plans that reject either option fall back honestly.
+    headers = {"X-BB-API-Key": s.browserbase_api_key, "content-type": "application/json"}
+    attempts = ({"projectId": proj, "keepAlive": True, "timeout": SESSION_TIMEOUT_SECONDS},
+                {"projectId": proj, "keepAlive": True},
+                {"projectId": proj})
+    r = None
+    for body in attempts:
+        r = httpx.post(f"{_BB_BASE}/sessions", headers=headers, json=body, timeout=30)
+        if r.status_code < 400:
+            break
     r.raise_for_status()
     data = r.json()
     return {"id": data.get("id"), "mode": "browserbase", "connect_url": data.get("connectUrl")}
+
+
+def session_status(session_id: str) -> str:
+    """The PROVIDER's own status for a session ('RUNNING', 'COMPLETED', …).
+    '' when unknown. A session Ellis believes is open may already be gone —
+    the applicant must never be sent to a window that no longer exists."""
+    s = settings()
+    if not s.browserbase_api_key or not session_id or session_id.startswith("local-"):
+        return ""
+    import httpx
+    try:
+        r = httpx.get(f"{_BB_BASE}/sessions/{session_id}",
+                      headers={"X-BB-API-Key": s.browserbase_api_key}, timeout=15)
+        if r.status_code == 200:
+            return str(r.json().get("status") or "")
+    except Exception:  # noqa: BLE001
+        pass
+    return ""
+
+
+def session_alive(session_id: str) -> bool:
+    """False ONLY when the provider explicitly reports the session is no longer
+    running. An unknown status (provider unreachable, no API key) counts as
+    alive: a probe that cannot see the truth must never destroy a working
+    session — the caller's own connect attempt remains the real test."""
+    status = session_status(session_id).upper()
+    if not status:
+        return True
+    return status == "RUNNING"
 
 
 def _default_project() -> str:

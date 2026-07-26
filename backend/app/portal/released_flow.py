@@ -198,6 +198,13 @@ class ReleasedFlowDriver:
         execution = self._execution()
         row = self._session_row()
         session = None
+        if row is not None and row.provider_session_id and not bb.session_alive(
+                row.provider_session_id):
+            # Ended at the provider (lifetime elapsed): don't waste a CDP
+            # connect on a corpse — close it and open a fresh one below.
+            row.status = "closed"
+            self.db.commit()
+            row = None
         if row is not None and row.provider_session_id:
             try:
                 info = bb.session_connect_info(row.provider_session_id)
