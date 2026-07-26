@@ -113,9 +113,18 @@ class FlowRunner:
         case-workflow driver uses this to align portal steps with the case
         state machine). The node itself is NOT executed."""
         node_id = resume_from or self.execution.current_node or self.flow.first()
+        abort = getattr(self.on_progress, "should_abort", None)
         for _ in range(max_nodes):
             if node_id is None:
                 return self._finish("completed", "flow exhausted")
+            # A fenced-out executor (lease lost to a stall verdict, or a
+            # cancel) stops HERE — before the next real portal action — so a
+            # zombie can never interleave with its replacement run.
+            if abort is not None and abort():
+                self.execution.current_node = node_id
+                self.db.commit()
+                return {"status": "failed", "node": node_id,
+                        "reason": "execution superseded — stopping before the next portal action"}
             node = self.flow.nodes.get(node_id)
             if node is None:
                 return self._fail_closed(node_id, "unknown node — failing closed")

@@ -165,6 +165,12 @@ def _make_progress_sink(application_id: str, run_id: str):
         try:
             run = db.get(models.PortalRun, run_id)
             if run is not None:
+                if run.status != "running":
+                    # This run was fenced out (stalled by lease expiry, or a
+                    # cancel landed): a zombie must stop at the next node
+                    # boundary instead of renewing a lease it no longer holds.
+                    sink.fenced = True
+                    return
                 run.current_step_key = step_key
                 run.last_checkpoint_at = _now()
                 run.lease_expires_at = _now() + timedelta(seconds=LEASE_SECONDS)
@@ -177,6 +183,9 @@ def _make_progress_sink(application_id: str, run_id: str):
             db.rollback()
         finally:
             db.close()
+
+    sink.fenced = False
+    sink.should_abort = lambda: bool(getattr(sink, "fenced", False))
     return sink
 
 
@@ -205,8 +214,26 @@ def claim_next(db, worker_id: str) -> str | None:
             models.PortalRun.id != run.id)).scalars().first()
         if sibling is not None:
             continue
-        if _claim(db, run.id, worker_id):
-            return run.id
+        if not _claim(db, run.id, worker_id):
+            continue
+        # Post-claim convergence: two executors can pass the sibling check
+        # concurrently and each claim a DIFFERENT queued run of one case.
+        # Deterministic tie-break — the earliest-created run wins; the loser
+        # releases its claim back to the queue and moves on.
+        db.expire_all()
+        running = db.execute(select(models.PortalRun).where(
+            models.PortalRun.application_id == run.application_id,
+            models.PortalRun.status == "running").order_by(
+            models.PortalRun.created_at.asc(),
+            models.PortalRun.id.asc())).scalars().all()
+        if len(running) > 1 and running[0].id != run.id:
+            mine = db.get(models.PortalRun, run.id)
+            mine.status = "queued"
+            mine.claimed_by = ""
+            mine.lease_expires_at = None
+            db.commit()
+            continue
+        return run.id
     return None
 
 
