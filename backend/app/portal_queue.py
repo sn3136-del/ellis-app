@@ -28,8 +28,12 @@ from sqlalchemy import select, update
 from . import models, progress, vault
 from .db import SessionLocal
 
-LEASE_SECONDS = 180          # renewed on every checkpoint
-STALL_AFTER_SECONDS = 120    # no checkpoint for this long -> shown as stalled
+# The lease must comfortably exceed the WORST single flow node (CDP connect
+# 60s + fresh session + entry-gate waits ~180s) — it renews on every
+# checkpoint, so only a genuinely wedged node can let it lapse.
+LEASE_SECONDS = 600
+STALL_AFTER_SECONDS = 150    # no checkpoint for this long -> shown as stalled
+MAX_QUEUED_PER_CASE = 3      # backlog cap: beyond this the case is "busy"
 
 _WAKE = threading.Event()
 _STOP = threading.Event()
@@ -59,13 +63,29 @@ def latest_run(db, application_id: str) -> models.PortalRun | None:
         models.PortalRun.created_at.desc())).scalars().first()
 
 
+class CaseBusy(Exception):
+    """Too many queued runs for one case — surfaced as an honest 409."""
+
+
 def enqueue(db, *, app_row, signal_name: str, kwargs: dict | None = None,
             allow_submit: bool = False) -> tuple[models.PortalRun, bool]:
-    """Record the applicant's signal exactly once. A second click while a run
-    is queued/running returns the existing run — the idempotency safeguard."""
-    existing = active_run(db, app_row.id)
-    if existing is not None:
-        return existing, False
+    """Record the applicant's signal exactly once.
+
+    - A repeat of the SAME signal while a run for it is queued/running reuses
+      that run (double-click safety).
+    - A DIFFERENT signal appends a new queued run — never silently dropped;
+      queued runs execute strictly one-at-a-time per case (claim_next refuses
+      a case with a running sibling), so portal work never overlaps.
+    """
+    active = db.execute(select(models.PortalRun).where(
+        models.PortalRun.application_id == app_row.id,
+        models.PortalRun.status.in_(("queued", "running"))).order_by(
+        models.PortalRun.created_at.asc())).scalars().all()
+    for run in active:
+        if run.signal_name == signal_name:
+            return run, False
+    if sum(1 for r in active if r.status == "queued") >= MAX_QUEUED_PER_CASE:
+        raise CaseBusy("Ellis is still working on your previous action.")
     kwargs = dict(kwargs or {})
     # Verification tokens must not persist in plaintext: vault them and pass
     # only the reference; the executor reveals once and destroys.
@@ -80,8 +100,49 @@ def enqueue(db, *, app_row, signal_name: str, kwargs: dict | None = None,
     db.add(models.CaseProgressEvent(application_id=app_row.id,
                                     step_key="queued", status="active"))
     db.commit()
+    # TOCTOU self-heal: no DB constraint enforces the single-queue invariant,
+    # so two concurrent enqueues of the same signal can both insert. The
+    # LOSER (newer row) cancels itself; the survivor is returned.
+    twins = db.execute(select(models.PortalRun).where(
+        models.PortalRun.application_id == app_row.id,
+        models.PortalRun.signal_name == signal_name,
+        models.PortalRun.status.in_(("queued", "running"))).order_by(
+        models.PortalRun.created_at.asc(),
+        models.PortalRun.id.asc())).scalars().all()
+    if len(twins) > 1 and twins[0].id != run.id:
+        _destroy_token_ref(run)
+        run.status = "cancelled"
+        run.finished_at = _now()
+        db.commit()
+        return twins[0], False
     _WAKE.set()
     return run, True
+
+
+def _destroy_token_ref(run) -> None:
+    """One-time tokens must never outlive their run, whatever ends it."""
+    ref = (run.signal_kwargs or {}).get("token_ref")
+    if ref:
+        try:
+            vault.destroy(ref)
+        except Exception:  # noqa: BLE001
+            pass
+
+
+def cancel_queued(db, application_id: str) -> int:
+    """Cancel every queued (unclaimed) run for a case, destroying any vaulted
+    one-time tokens they carry."""
+    n = 0
+    for run in db.execute(select(models.PortalRun).where(
+            models.PortalRun.application_id == application_id,
+            models.PortalRun.status == "queued")).scalars().all():
+        _destroy_token_ref(run)
+        run.status = "cancelled"
+        run.finished_at = _now()
+        n += 1
+    if n:
+        db.commit()
+    return n
 
 
 def record_event(db, application_id: str, step_key: str, status: str = "active"):
@@ -107,6 +168,10 @@ def _make_progress_sink(application_id: str, run_id: str):
                 run.current_step_key = step_key
                 run.last_checkpoint_at = _now()
                 run.lease_expires_at = _now() + timedelta(seconds=LEASE_SECONDS)
+                # Commit the lease renewal UNCONDITIONALLY — record_event may
+                # dedupe (and skip its commit), and a renewal lost to the
+                # session close would let a healthy run read as stalled.
+                db.commit()
             record_event(db, application_id, step_key, status)
         except Exception:  # noqa: BLE001 — progress must never break the run
             db.rollback()
@@ -132,6 +197,14 @@ def claim_next(db, worker_id: str) -> str | None:
         models.PortalRun.status == "queued").order_by(
         models.PortalRun.created_at.asc())).scalars().all()
     for run in rows:
+        # Strict per-case serialization: never start a run while another run
+        # for the same case is (or may still be) executing.
+        sibling = db.execute(select(models.PortalRun).where(
+            models.PortalRun.application_id == run.application_id,
+            models.PortalRun.status == "running",
+            models.PortalRun.id != run.id)).scalars().first()
+        if sibling is not None:
+            continue
         if _claim(db, run.id, worker_id):
             return run.id
     return None
@@ -150,6 +223,7 @@ def expire_stale_leases(db) -> int:
             run.status = "stalled"
             run.finished_at = _now()
             run.error = "no response from the official portal"
+            _destroy_token_ref(run)
             record_event(db, run.application_id, "stalled", "failed")
             n += 1
     if n:
@@ -201,7 +275,26 @@ def execute_run(run_id: str, worker_id: str) -> None:
             record_event(db, application_id, "recoverable_failure", "failed")
             db.commit()
             return
+        db.expire_all()
         run = db.get(models.PortalRun, run_id)
+        # Fencing: while this segment ran, the run may have been marked
+        # stalled (lease lapse) or a cancel may have landed. Never resurrect
+        # a superseded run's status when a successor exists — the successor
+        # owns the case now; our workflow results are already persisted and
+        # remain valid (reconcile-before-act protects irreversibles).
+        superseded = run.status not in ("running",) and active_run(db, application_id) is not None
+        if superseded:
+            run.finished_at = run.finished_at or _now()
+            db.commit()
+            return
+        # A cancel that landed mid-run wins: persist_workflow already refused
+        # to overwrite the CANCELLED case; the run ends as cancelled too.
+        app_row = db.get(models.VisaApplication, application_id)
+        if app_row is not None and app_row.state == "CANCELLED" and run.signal_name != "cancel":
+            run.status = "cancelled"
+            run.finished_at = _now()
+            db.commit()
+            return
         state = status.get("state", "")
         if status.get("pending"):
             run.status = "waiting_applicant"
@@ -220,6 +313,14 @@ def execute_run(run_id: str, worker_id: str) -> None:
                          "done" if state != "MANUAL_REVIEW_REQUIRED" else "failed")
         run.finished_at = _now()
         db.commit()
+        # Terminal bookkeeping the synchronous path does in the API layer:
+        # execution-class record + the Trip.com case-status webhook.
+        if state == "COMPLETED":
+            try:
+                from . import service as service_mod
+                service_mod.record_terminal_execution(db, run.org_id, application_id)
+            except Exception:  # noqa: BLE001 — bookkeeping never breaks a run
+                pass
     finally:
         db.close()
 

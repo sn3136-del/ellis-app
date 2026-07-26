@@ -28,6 +28,7 @@ _CASE_CHILD_MODELS = [
     models.SubmissionConfirmation, models.WorkflowExecution, models.HumanHandoff,
     models.EmailNotification, models.ApplicantStandingAuthorization,
     models.ApplicationReviewVersion, models.PaymentAuthorization,
+    models.PortalRun, models.CaseProgressEvent, models.BrowserSession,
 ]
 
 
@@ -90,6 +91,27 @@ def delete_case(db, application_id: str, *, actor: str = "applicant", reason: st
         if blob:
             db.delete(blob); blob_n += 1
     counts["document_blobs"] = blob_n
+    # Vaulted secrets referenced by this case's rows (portal credentials,
+    # session refs in the workflow snapshot, any one-time token still queued)
+    # are destroyed — ciphertext must not survive erasure.
+    from . import vault as vault_mod
+    vault_n = 0
+    for acct in _rows(db, models.PortalAccount, application_id):
+        for ref in (acct.credential_ref or "", acct.session_ref or ""):
+            if ref and vault_mod.destroy(ref):
+                vault_n += 1
+    exec_row = db.execute(select(models.WorkflowExecution).where(
+        models.WorkflowExecution.application_id == application_id)).scalars().first()
+    snap = (exec_row.snapshot or {}) if exec_row else {}
+    for key in ("credential_ref", "session_ref"):
+        ref = snap.get(key) or ""
+        if ref and vault_mod.destroy(ref):
+            vault_n += 1
+    for run in _rows(db, models.PortalRun, application_id):
+        ref = (run.signal_kwargs or {}).get("token_ref") or ""
+        if ref and vault_mod.destroy(ref):
+            vault_n += 1
+    counts["vault_secrets"] = vault_n
     for model in _CASE_CHILD_MODELS:
         rows = _rows(db, model, application_id)
         counts[model.__tablename__] = len(rows)

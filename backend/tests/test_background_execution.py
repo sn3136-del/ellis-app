@@ -125,6 +125,34 @@ def test_continue_returns_immediately_and_is_idempotent(client, live_route, db):
     assert len(active) == 1
 
 
+def test_a_different_signal_is_never_silently_dropped(client, live_route, db):
+    case = _new_case(client)
+    _confirm_contact(client, case["id"])
+    r1 = client.post(f"/cases/{case['id']}/start", headers=AUTH)
+    r2 = client.post(f"/cases/{case['id']}/signals/sign_authorization", headers=AUTH, json={})
+    assert r1.json()["run_id"] != r2.json()["run_id"]   # appended, not swallowed
+    runs = db.execute(select(models.PortalRun).where(
+        models.PortalRun.application_id == case["id"],
+        models.PortalRun.status == "queued").order_by(
+        models.PortalRun.created_at.asc())).scalars().all()
+    assert [r.signal_name for r in runs] == ["start", "sign_authorization"]
+    # Queued runs execute strictly one at a time per case.
+    executed = portal_queue.run_pending_once("test-exec")
+    assert executed >= 2
+
+
+def test_queue_backlog_is_capped_honestly(client, live_route, db):
+    case = _new_case(client)
+    _confirm_contact(client, case["id"])
+    for name in ("start", "sign_authorization", "approve_review"):
+        assert client.post(f"/cases/{case['id']}/signals/{name}" if name != "start"
+                           else f"/cases/{case['id']}/start",
+                           headers=AUTH, json={}).status_code == 200
+    r = client.post(f"/cases/{case['id']}/signals/complete_payment", headers=AUTH, json={})
+    assert r.status_code == 409
+    assert r.json()["detail"]["reason"] == "case_busy"
+
+
 def test_executor_drives_queued_run_outside_the_request(client, live_route, db):
     case = _new_case(client)
     _confirm_contact(client, case["id"])
@@ -270,10 +298,10 @@ def test_unreadable_fee_becomes_applicant_fee_confirmation_never_invented():
     assert wf.machine.state == "PAYMENT_APPROVAL_REQUIRED"
     assert wf.pending["handoff"] == "fee_confirmation"
     assert wf.fee is None                       # nothing invented
-    # Approving without an amount re-asks; a bogus currency re-asks.
+    # Approving without an amount re-asks; a malformed currency re-asks.
     wf.approve_payment()
     assert wf.pending["handoff"] == "fee_confirmation"
-    wf.approve_payment(amount_cents=2500, currency="XXX")
+    wf.approve_payment(amount_cents=2500, currency="US1")
     assert wf.pending["handoff"] == "fee_confirmation"
     # The applicant confirms the exact fee the official portal displayed.
     wf.approve_payment(amount_cents=2500, currency="USD")

@@ -143,8 +143,36 @@ def _wire_case_hooks(db, wf: VisaWorkflow, app_row):
     wf.submission_gate = submission_gate
 
 
+def record_terminal_execution(db, org_id: str, application_id: str):
+    """When a case reaches COMPLETED, persist the execution classification and
+    queue the typed Trip.com case-status webhook. Shared by the synchronous
+    API path and the background executor."""
+    from . import execution
+    app_row = db.get(models.VisaApplication, application_id)
+    if app_row is None or app_row.state != "COMPLETED":
+        return
+    wf = load_workflow(db, application_id)
+    ec = execution.classify_adapter(getattr(wf, "adapter", None))
+    execution.record_execution(db, org_id=org_id, application_id=application_id,
+                               action="case_completed", ec=ec,
+                               detail={"state": app_row.state}, government_outcome=True)
+    from .integrations import tripcom, tripcom_admin
+    event = tripcom.case_status_event(
+        tripcom_case_ref=(app_row.answers or {}).get("tripcom_case_ref", ""),
+        ellis_case_id=application_id, state=app_row.state)
+    event["execution_class"] = str(ec)
+    event["is_real_government_result"] = execution.is_real_government_result(ec)
+    tripcom_admin.queue_event(db, org_id=org_id, event=event)
+
+
 def persist_workflow(db, wf: VisaWorkflow):
     app = db.get(models.VisaApplication, wf.case_id)
+    # Cancellation fence: if the applicant cancelled while a background
+    # segment was executing, the cancel wins — a stale in-memory machine must
+    # never resurrect a CANCELLED case (last-writer-wins would otherwise).
+    db.refresh(app)
+    if app.state == "CANCELLED" and wf.machine.state != "CANCELLED":
+        return
     app.state = wf.machine.state
     exec_row = db.execute(
         select(models.WorkflowExecution).where(models.WorkflowExecution.application_id == wf.case_id)

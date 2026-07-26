@@ -91,8 +91,18 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
   const [standing, setStanding] = useState(null)  // standing-authorization state
   const [journey, setJourney] = useState(null)    // saved guidance + checklist + audit status
   const [progress, setProgress] = useState(null)  // live portal progress (polled)
+  const [everQueued, setEverQueued] = useState(false) // a background run exists
   const landedOnDocs = useRef(false)
   const progressSigRef = useRef('')
+
+  // A different case opened in-place (e.g. the renewal flow): reset every
+  // per-case piece of state so the previous case never bleeds through.
+  useEffect(() => {
+    setStatus(null); setProgress(null); setEverQueued(false)
+    setModal(null); setError(null); setJourney(null)
+    landedOnDocs.current = false
+    progressSigRef.current = ''
+  }, [caseId])
 
   async function refresh() {
     try {
@@ -126,7 +136,10 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
   // When the background run pauses for the applicant (or the state advances),
   // the full case is re-fetched so the matching handoff surface appears.
   useEffect(() => {
-    if (!startedNow || terminal) return undefined
+    // Poll while the case is started OR a background run exists (a queued
+    // 'start' leaves state DRAFT until the executor advances it — polling
+    // must engage immediately, not only after the state moves).
+    if ((!startedNow && !everQueued) || terminal) return undefined
     let live = true
     async function tick() {
       try {
@@ -141,7 +154,7 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
     tick()
     const iv = setInterval(tick, 2500)
     return () => { live = false; clearInterval(iv) }
-  }, [caseId, startedNow, terminal])
+  }, [caseId, startedNow, everQueued, terminal])
 
   async function retryPortal() {
     setBusy(true); setError(null)
@@ -156,8 +169,16 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
   }
 
   // Apply a workflow status response (from start/signals) to local state.
+  // A queued response means a background run is resolving the pause the
+  // applicant just answered: clear pending optimistically (the progress
+  // poll restores the real pause when the run reaches one) and start polling.
   function apply(res) {
-    setStatus((prev) => ({ ...prev, ...res }))
+    if (res && res.queued) {
+      setEverQueued(true)
+      setStatus((prev) => ({ ...prev, ...res, pending: null }))
+    } else {
+      setStatus((prev) => ({ ...prev, ...res }))
+    }
     client.audit(caseId).then((a) => setAudit(a.events || [])).catch(() => {})
     onNotify && onNotify()
   }

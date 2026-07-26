@@ -169,18 +169,24 @@ class VisaWorkflow:
 
     def verify_email(self, token):
         self.inputs["email_verify_token"] = token
-        return self._drive()
-
-    _FEE_CURRENCIES = ("USD", "VND", "EUR", "CNY", "KRW", "GBP", "JPY", "SGD")
+        try:
+            return self._drive()
+        finally:
+            # A one-time code must never persist in the durable snapshot —
+            # whatever path the drive took, it is gone after this signal.
+            self.inputs["email_verify_token"] = None
 
     def approve_payment(self, amount_cents=None, currency=None):
         # Portal displayed no machine-readable fee (fee_confirmation pause):
         # the applicant confirms the EXACT amount + currency the official
         # portal shows in the secure window. Ellis never invents an amount.
         if self.fee is None:
+            import re as _re
             amt = int(amount_cents or 0)
             cur = str(currency or "").upper().strip()
-            if amt <= 0 or cur not in self._FEE_CURRENCIES:
+            # Any ISO-4217-shaped code the portal displays is acceptable —
+            # a fixed whitelist would strand routes billed in other currencies.
+            if amt <= 0 or not _re.fullmatch(r"[A-Z]{3}", cur):
                 self._pause("Confirm the exact fee shown by the official portal.",
                             "fee_confirmation", fee_context=self.fee_context)
                 return self.status()
@@ -404,6 +410,13 @@ class VisaWorkflow:
             m.transition("APPLICATION_FILLING")
         elif st == "APPLICATION_FILLING":
             token = vault.reveal(self.session_ref)
+            # A mid-form OTP/verification pause is consumed HERE: the flow's
+            # handoff node must be stepped past (driver.verify_email) before
+            # resuming the fill, or the same pause would recur forever.
+            if self.inputs.get("email_verify_token"):
+                d.verify_email(token=self.inputs["email_verify_token"])
+                self.inputs["email_verify_token"] = None
+                self.pending = None
             # Released-flow drivers are resumable (they continue the SAME portal
             # session from the same step), so re-entering this state after a
             # question/CAPTCHA advances the form instead of creating a duplicate.
@@ -463,9 +476,17 @@ class VisaWorkflow:
                 return self._pause(f"Approve the {self.fee['display']} fee.", "payment_approval",
                                    fee=self.fee, fee_context=self.fee_context)
             mx = self.authorization.get("max_fee_cents")
-            if mx is not None and self.fee["amount"] > mx:
+            auth_cur = str(self.authorization.get("currency") or "").upper()
+            # The cap is only meaningful in its own currency: comparing raw
+            # integers across currencies would brick honest confirmations
+            # (e.g. a VND portal fee against a USD cap).
+            comparable = not auth_cur or auth_cur == self.fee["currency"]
+            if mx is not None and comparable and self.fee["amount"] > mx:
                 self.pending = None
                 return m.transition("MANUAL_REVIEW_REQUIRED", "fee exceeds authorized maximum")
+            if mx is not None and not comparable:
+                self._emit("fee_cap_not_comparable",
+                           {"cap_currency": auth_cur, "fee_currency": self.fee["currency"]})
             self.pending = None
             m.transition("PAYMENT_ACTION_REQUIRED")
         elif st == "PAYMENT_ACTION_REQUIRED":
@@ -484,6 +505,7 @@ class VisaWorkflow:
             if cur["ok"] and cur["paid"]:
                 self.receipt = cur.get("receipt") or self.receipt
                 self._consume_payment_authorization()
+                self._awaiting_payment_result = None
                 return m.transition("PAYMENT_COMPLETED", "already paid (reconciled)")
             # Final pre-charge check: the authorization must still match the
             # exact fee. A drift here voids it and returns to approval (§6).
@@ -491,7 +513,10 @@ class VisaWorkflow:
                 self._void_payment_authorization("authorization no longer matches the exact fee")
                 return m.transition("PAYMENT_APPROVAL_REQUIRED", "exact-amount re-approval required")
             res = d.pay(session_token=token, application_id=self.application_id, payment_ref=self.case_id)
+            if res["ok"]:
+                self._awaiting_payment_result = None
             if not res["ok"] and res.get("code") == "REQUIRES_3DS":
+                self._awaiting_payment_result = None
                 self.inputs["payment_completed"] = False
                 return m.transition("PAYMENT_ACTION_REQUIRED", "3DS required")
             if not res["ok"] and res.get("code") == "OUTCOME_UNCERTAIN":

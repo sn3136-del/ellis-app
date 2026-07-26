@@ -134,7 +134,10 @@ export function SignatureModal({ client, caseId, authorization, onDone, onClose 
       const res = await client.signAuthorization(caseId, {
         document_hash: prep.document_hash, consent_given: consent, intent_confirmed: intent,
         signature_method: method, signature_value: value, step_up_token: prep.step_up_token,
-        auth_method: 'email_otp'
+        auth_method: 'email_otp',
+        // Bind the signature to the EXACT envelope this modal prepared — a
+        // concurrently created envelope can never swap the terms.
+        envelope_id: prep.envelope_id || ''
       })
       setSigned(res)
       toast('Authorization signed')
@@ -384,8 +387,10 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
             </div>
           )}
           <div style={{ color: 'var(--muted)', marginTop: 4 }}>
-            Complete it in the secure window below, or type the code here — it
-            goes only to the official portal and is deleted immediately after use.
+            Complete the verification in the secure portal window below — that
+            is where the official portal accepts the code. If Ellis needs the
+            code itself, enter it here too: it is used once for the official
+            portal and deleted immediately after use, never stored or logged.
           </div>
           <input className="input" style={{ marginTop: 8, maxWidth: 220 }}
             inputMode="numeric" autoComplete="one-time-code"
@@ -462,14 +467,32 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
 // applicant confirms that EXACT amount. fee_confirmation: the portal shows
 // the fee only on its own pages — the applicant reads it there (secure
 // window) and enters the exact amount + currency; Ellis never invents one.
+// Exact-amount parsing: the typed value must be unambiguous. parseFloat would
+// silently truncate locale formats ('680.000' Vietnamese = 680,000 -> 680;
+// '35,000' -> 35) — a wrong recorded fee. Only plain amounts are accepted:
+// digits with an optional 1-2 digit decimal part.
+export function parseExactAmountCents(text) {
+  const s = String(text || '').trim().replace(/\s/g, '')
+  if (!/^\d+([.,]\d{1,2})?$/.test(s)) return null
+  const normalized = s.replace(',', '.')
+  return Math.round(parseFloat(normalized) * 100)
+}
+
+const FEE_CURRENCIES = ['USD', 'VND', 'EUR', 'CNY', 'KRW', 'GBP', 'JPY', 'SGD',
+  'THB', 'INR', 'IDR', 'PHP', 'AUD', 'CAD', 'MYR', 'HKD', 'TWD', 'AED']
+
 export function PaymentApprove({ pending, onResolve, onClose }) {
   const t = useT()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
   const [amount, setAmount] = useState('')
-  const [currency, setCurrency] = useState('USD')
   const fee = pending?.fee || {}
   const ctx = pending?.fee_context || {}
+  // Default the currency to the route's known official fee currency — the
+  // applicant confirms it rather than remembering to switch from USD.
+  const [currency, setCurrency] = useState((ctx.currency || 'USD').toUpperCase())
+  const currencyOptions = FEE_CURRENCIES.includes((ctx.currency || '').toUpperCase()) ||
+    !ctx.currency ? FEE_CURRENCIES : [ctx.currency.toUpperCase(), ...FEE_CURRENCIES]
   const confirmMode = pending?.handoff === 'fee_confirmation' || fee.amount == null
   const expected = ctx.available && ctx.total_cents != null
     ? `${(ctx.total_cents / 100).toFixed(2)} ${ctx.currency || ''}` : null
@@ -488,7 +511,7 @@ export function PaymentApprove({ pending, onResolve, onClose }) {
     (fee.source_url || ctx.source_url) &&
       { label: t('pay.feeSource'), value: fee.source_url || ctx.source_url }
   ].filter(Boolean)
-  const parsedCents = Math.round(parseFloat(amount || '0') * 100)
+  const parsedCents = parseExactAmountCents(amount)
   return (
     <Overlay onClose={onClose} width={520}>
       <Head title={confirmMode ? t('pay.feeConfirmTitle') : t('pay.confirmTitle')}
@@ -517,11 +540,20 @@ export function PaymentApprove({ pending, onResolve, onClose }) {
               <label>{t('pay.currency')}</label>
               <select className="select" value={currency}
                 onChange={(e) => setCurrency(e.target.value)}>
-                {['USD', 'VND', 'EUR', 'CNY', 'KRW', 'GBP', 'JPY', 'SGD'].map((c) =>
-                  <option key={c} value={c}>{c}</option>)}
+                {currencyOptions.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
           </div>
+          {amount.trim() !== '' && parsedCents == null && (
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--crit)' }}>
+              {t('pay.amountUnclear')}
+            </div>
+          )}
+          {parsedCents != null && parsedCents > 0 && (
+            <div style={{ fontSize: 12.5, color: 'var(--muted)' }} data-testid="fee-echo">
+              {t('pay.amountEcho', { fee: `${(parsedCents / 100).toFixed(2)} ${currency}` })}
+            </div>
+          )}
         </div>
       )}
       <KVList fields={rows} />
@@ -532,7 +564,8 @@ export function PaymentApprove({ pending, onResolve, onClose }) {
       <div className="modal__foot">
         <button className="btn btn--ghost" onClick={onClose}>{t('pay.cancel')}</button>
         <button className="btn"
-          disabled={busy || (confirmMode ? !(parsedCents > 0) : fee.amount == null)}
+          disabled={busy || (confirmMode ? !(parsedCents != null && parsedCents > 0)
+                                        : fee.amount == null)}
           onClick={async () => {
             setBusy(true); setError(null)
             try {

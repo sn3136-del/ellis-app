@@ -38,6 +38,8 @@ def run_forever(interval_seconds: float = 5.0):  # pragma: no cover - long-runni
         db = SessionLocal()
         try:
             tick_once(db)
+        except Exception:  # noqa: BLE001 — a transient DB error must not kill the worker
+            pass
         finally:
             db.close()
         time.sleep(_jitter(int(interval_seconds * 1000)))

@@ -37,6 +37,7 @@ def _db_put(ref: str, ciphertext: str, meta: dict | None) -> None:
         else:
             row.ciphertext = ciphertext
         db.commit()
+        _DB_SEEN.add(ref)
     except Exception:  # noqa: BLE001 — cache still holds it for this process
         db.rollback()
     finally:
@@ -72,10 +73,44 @@ def _db_delete(ref: str) -> bool:
         db.close()
 
 
+_DEFAULT_PASSPHRASE = "local-dev-passphrase"
+_INSTALL_SECRET: str | None = None
+
+
+def _passphrase() -> str:
+    """The vault passphrase. Ciphertext is now durable on disk, so the known
+    default passphrase would make every stored secret trivially decryptable
+    from a copied DB file. When no explicit ELLIS_VAULT_PASSPHRASE is set, a
+    random per-install secret is generated once and kept in a 0600 file next
+    to the app's data — never the hardcoded default."""
+    global _INSTALL_SECRET
+    configured = settings().vault_passphrase
+    if configured and configured != _DEFAULT_PASSPHRASE:
+        return configured
+    if _INSTALL_SECRET is not None:
+        return _INSTALL_SECRET
+    base_dir = os.path.expanduser(os.getenv(
+        "ELLIS_VAULT_KEY_DIR", "~/Library/Application Support/Ellis"))
+    path = os.path.join(base_dir, "vault.secret")
+    try:
+        with open(path, "r", encoding="utf-8") as fh:
+            _INSTALL_SECRET = fh.read().strip()
+    except OSError:
+        _INSTALL_SECRET = secrets.token_hex(32)
+        try:
+            os.makedirs(base_dir, exist_ok=True)
+            fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            with os.fdopen(fd, "w", encoding="utf-8") as fh:
+                fh.write(_INSTALL_SECRET)
+        except OSError:
+            pass  # unwritable dir: the secret still lives for this process
+    return _INSTALL_SECRET or configured
+
+
 def _key() -> bytes:
     # PBKDF2-HMAC-SHA256 (always available). Production uses AWS KMS/Secrets
     # Manager; this local key never leaves the process.
-    return hashlib.pbkdf2_hmac("sha256", settings().vault_passphrase.encode(),
+    return hashlib.pbkdf2_hmac("sha256", _passphrase().encode(),
                                b"ellis-vault", 200_000, dklen=32)
 
 
@@ -137,13 +172,28 @@ def store(secret_value: str, meta: dict | None = None) -> dict:
 
 
 def reveal(ref: str) -> str:
-    ct = _BACKENDS.get(ref)
+    # The DB is authoritative: a destroy() in ANOTHER process (worker vs API)
+    # must invalidate this process too, or a "destroyed" one-time token would
+    # stay revealable from a stale cache. The cache only serves refs the DB
+    # still holds (or that never persisted, e.g. DB unavailable at store time).
+    ct = _db_get(ref)
     if ct is None:
-        ct = _db_get(ref)   # restart survival: rehydrate from vault_secrets
-        if ct is None:
+        ct = _BACKENDS.get(ref)
+        if ct is None or _db_had_ref(ref):
+            _BACKENDS.pop(ref, None)
             raise KeyError("vault ref not found")
+    else:
         _BACKENDS[ref] = ct
     return _decrypt(ct)
+
+
+_DB_SEEN: set[str] = set()
+
+
+def _db_had_ref(ref: str) -> bool:
+    """True when this ref was previously persisted (so a missing row now
+    means DESTROYED, not never-persisted)."""
+    return ref in _DB_SEEN
 
 
 def rotate(ref: str, new_value: str) -> dict:

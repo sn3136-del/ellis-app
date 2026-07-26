@@ -1809,25 +1809,9 @@ class SignalBody(BaseModel):
 def _record_terminal_execution(db, p: Principal, application_id: str):
     """When a case reaches COMPLETED, persist the execution classification of the
     result so the audit trail proves whether it was a real government outcome or
-    a MOCK/sandbox run — the completed state alone must never imply 'real'."""
-    app_row = db.get(models.VisaApplication, application_id)
-    if app_row and app_row.state == "COMPLETED":
-        ec = _case_execution_class(app_row.destination_country, app_row.visa_type, db=db, app_row=app_row)
-        # A completed case IS a government-outcome action, so its record reflects
-        # whether the outcome was real (True only for verified LIVE_PRODUCTION).
-        execution.record_execution(db, org_id=p.org_id, application_id=application_id,
-                                   action="case_completed", ec=ec,
-                                   detail={"state": app_row.state}, government_outcome=True)
-        # Phase 15 (sandbox contract): queue the typed case-status webhook, with
-        # the execution class carried so Trip.com can never mistake a mock run
-        # for a production result.
-        from .integrations import tripcom, tripcom_admin
-        event = tripcom.case_status_event(
-            tripcom_case_ref=(app_row.answers or {}).get("tripcom_case_ref", ""),
-            ellis_case_id=application_id, state=app_row.state)
-        event["execution_class"] = str(ec)
-        event["is_real_government_result"] = execution.is_real_government_result(ec)
-        tripcom_admin.queue_event(db, org_id=p.org_id, event=event)
+    a MOCK/sandbox run — the completed state alone must never imply 'real'.
+    The background executor calls the same service helper for queued runs."""
+    service.record_terminal_execution(db, p.org_id, application_id)
 
 
 def _signal_or_gate_error(db, p: Principal, application_id: str, name: str, **kwargs):
@@ -1921,11 +1905,10 @@ def send_signal(application_id: str, name: str, body: Optional[SignalBody] = Non
     if name != "cancel" and _live_background_route(db, app_row):
         return _queue_signal_response(db, p, app_row, name, kwargs)
     if name == "cancel":
-        # Cancel any queued background work along with the case itself.
-        run = portal_queue.active_run(db, application_id)
-        if run is not None and run.status == "queued":
-            run.status = "cancelled"
-            db.commit()
+        # Cancel all queued background work along with the case itself. A run
+        # already executing finishes its segment, but persist_workflow's
+        # cancellation fence prevents it from resurrecting the CANCELLED case.
+        portal_queue.cancel_queued(db, application_id)
     return _signal_or_gate_error(db, p, application_id, name, **kwargs)
 
 
@@ -1973,15 +1956,18 @@ def _queue_signal_response(db, p: Principal, app_row, name: str, kwargs: dict):
     # moment the applicant acts — the applicant's explicit confirmation.
     rv = final_review.latest(db, application_id)
     allow_submit = bool(rv is not None and rv.signed and not getattr(rv, "invalidated", False))
-    run, created = portal_queue.enqueue(db, app_row=app_row, signal_name=name,
-                                        kwargs=kwargs, allow_submit=allow_submit)
+    try:
+        run, created = portal_queue.enqueue(db, app_row=app_row, signal_name=name,
+                                            kwargs=kwargs, allow_submit=allow_submit)
+    except portal_queue.CaseBusy as e:
+        raise HTTPException(409, detail={"reason": "case_busy", "message": str(e)})
     audit.record(db, org_id=p.org_id, application_id=application_id,
                  action="portal_run_enqueued" if created else "portal_run_reused",
                  detail={"signal": name, "run_id": run.id}, actor=p.user_id)
-    exec_row = db.execute(select(models.WorkflowExecution).where(
-        models.WorkflowExecution.application_id == application_id)).scalar_one_or_none()
-    return {"case_id": application_id, "state": app_row.state,
-            "pending": exec_row.pending if exec_row else None,
+    # pending is None here on purpose: the queued run is resolving the pause
+    # the applicant just answered — echoing the stale handoff would re-open
+    # its modal. The progress endpoint carries live state from here on.
+    return {"case_id": application_id, "state": app_row.state, "pending": None,
             "queued": True, "run_id": run.id, "run_reused": not created}
 
 
@@ -2053,12 +2039,16 @@ def case_progress(application_id: str, db=Depends(get_session),
     stalled = bool(run and (run.status == "stalled" or (
         run.status == "running" and last_cp is not None and
         (now - last_cp).total_seconds() > portal_queue.STALL_AFTER_SECONDS)))
-    if pending:
-        step = progress_vocab.step_for_state(state, pending)
-    elif stalled:
+    # While a run is queued/running it is RESOLVING the recorded pause — the
+    # applicant is not being waited on, Ellis is working. Only a pause with no
+    # active run is a real handoff.
+    waiting = bool(pending) and not active
+    if stalled:
         step = "stalled"
-    elif active and run.current_step_key:
-        step = run.current_step_key
+    elif active:
+        step = run.current_step_key or "queued"
+    elif pending:
+        step = progress_vocab.step_for_state(state, pending)
     else:
         step = progress_vocab.step_for_state(state, None)
     last_done = db.execute(select(models.CaseProgressEvent).where(
@@ -2076,9 +2066,9 @@ def case_progress(application_id: str, db=Depends(get_session),
         "state": state,
         "queued": bool(run and run.status == "queued"),
         "active": active and not stalled,
-        "waiting_for_applicant": bool(pending),
-        "handoff": (pending or {}).get("handoff", ""),
-        "purpose": (pending or {}).get("purpose", ""),
+        "waiting_for_applicant": waiting,
+        "handoff": (pending or {}).get("handoff", "") if waiting else "",
+        "purpose": (pending or {}).get("purpose", "") if waiting else "",
         "step": {"key": step, "message": progress_vocab.message_for(step)},
         "last_completed": ({"key": last_done.step_key,
                             "message": progress_vocab.message_for(last_done.step_key),
@@ -2126,7 +2116,9 @@ class ContactBody(BaseModel):
 
 def _mask_phone(ph: str) -> str:
     digits = re.sub(r"\D", "", ph or "")
-    return ("•••• " + digits[-4:]) if len(digits) >= 4 else ("••••" if digits else "")
+    # Only genuinely long numbers reveal a 4-digit tail; anything shorter
+    # would disclose most (or all) of the number.
+    return ("•••• " + digits[-4:]) if len(digits) >= 8 else ("••••" if digits else "")
 
 
 @app.get("/cases/{application_id}/contact-confirmation")
@@ -2187,6 +2179,11 @@ def confirm_contact(application_id: str, body: ContactBody, db=Depends(get_sessi
         db.commit()
         invalidate_signatures_if_changed(db, application_id)
     if body.confirm:
+        if not (answers.get("email") or (applicant.email if applicant else "")):
+            raise HTTPException(422, detail={
+                "reason": "email_required",
+                "message": "Add an email address before confirming — the portal "
+                           "needs one for verification."})
         from . import checklist_intake
         if checklist_intake.stage_progress(db, application_id,
                                            stage="contact_confirmed") is None:
