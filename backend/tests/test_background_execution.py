@@ -976,6 +976,18 @@ def test_manual_review_with_irreversible_evidence_is_never_released(client, live
     assert db.get(models.VisaApplication, case["id"]).state == "MANUAL_REVIEW_REQUIRED"
 
 
+def test_a_case_with_no_pending_and_no_run_can_always_be_resumed(client, live_route, db):
+    """A pause that was cleared (a reset, a voided confirmation) must never
+    leave the applicant with no way forward."""
+    case = _new_case(client)
+    pr = client.get(f"/cases/{case['id']}/progress", headers=AUTH).json()
+    assert pr["resume_available"] is True
+    _confirm_contact(client, case["id"])
+    client.post(f"/cases/{case['id']}/start", headers=AUTH)
+    busy = client.get(f"/cases/{case['id']}/progress", headers=AUTH).json()
+    assert busy["resume_available"] is False        # a run is already working
+
+
 # ---------- the secure window must be REAL: liveness is reconciled ----------
 
 def test_expired_provider_session_is_reconciled_not_presented_as_open(client, db, monkeypatch):

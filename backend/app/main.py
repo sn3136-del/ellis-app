@@ -2111,6 +2111,12 @@ def case_progress(application_id: str, db=Depends(get_session),
                                "The official portal did not respond as expected."),
                    "retryable": retryable} if failed else None),
         "retry_available": retryable,
+        # Nothing is running, nothing is waiting on the applicant, and the case
+        # is not finished: it can always be driven forward again. Without this
+        # a case whose pause was cleared (a reset, a voided confirmation) would
+        # sit with no way for the applicant to continue.
+        "resume_available": (not active and not pending
+                             and state not in ("COMPLETED", "CANCELLED")),
         "browser_session_alive": session_row is not None,
         "run_status": run.status if run else "",
     }

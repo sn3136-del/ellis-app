@@ -315,7 +315,7 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
 
           {started && !terminal && !handoff && (
             <ProgressCard progress={progress} busy={busy}
-              onRefresh={refresh} onRetry={retryPortal} />
+              onRefresh={refresh} onRetry={retryPortal} onResume={start} />
           )}
 
           {terminal && <ResultView status={status} />}
@@ -680,7 +680,7 @@ function formatElapsed(seconds) {
   return m > 0 ? `${m}m ${s}s` : `${s}s`
 }
 
-function ProgressCard({ progress, busy, onRefresh, onRetry }) {
+function ProgressCard({ progress, busy, onRefresh, onRetry, onResume }) {
   const pr = progress
   if (!pr) {
     return (
@@ -725,6 +725,12 @@ function ProgressCard({ progress, busy, onRefresh, onRetry }) {
           <button className="btn btn--sm" disabled={busy} onClick={onRetry}
             data-testid="progress-retry">
             {busy ? 'Retrying…' : 'Retry and continue my application'}
+          </button>
+        )}
+        {!pr.retry_available && pr.resume_available && (
+          <button className="btn btn--sm" disabled={busy} onClick={onResume}
+            data-testid="progress-resume">
+            {busy ? 'Continuing…' : 'Continue my application'}
           </button>
         )}
       </div>
