@@ -530,6 +530,84 @@ def test_checklist_submission_overrides_classifier_doc_type(client, db):
     drv._cleanup_tmp()
 
 
+# ---------- rejected answers fall back to the portal's FULL option list ------
+
+def test_empty_filtered_options_reharvest_full_list_instead_of_failing(db):
+    """'tourism' filtering the travel-purpose list to nothing must ask the
+    applicant with the portal's real (unfiltered) choices — never fail-closed
+    into terminal manual review."""
+    from app.adapter_factory import models as fm
+    from app.adapter_factory.compiler import CompiledFlow
+    from app.adapter_factory.runtime import FlowRunner
+
+    class FilteringDriver:
+        def select_search(self, selector, value):
+            return {"ok": False, "code": "NO_OPTIONS", "options": []}
+
+        def list_options(self, selector, max_options=300):
+            return {"ok": True, "options": ["Du lịch (Tourist)", "Business"]}
+
+    nodes = [
+        {"node_id": "fill_purpose", "action": "SELECT_SEARCH",
+         "selector": "#basic_ttcdMucDich", "input_source": "travel_purpose",
+         "allowed_hostname": "evisa.gov.vn", "mandatory": True},
+        {"node_id": "done", "action": "COMPLETE", "allowed_hostname": "evisa.gov.vn"},
+    ]
+    execution = fm.AdapterExecution(org_id="org1", application_id="c-opt2",
+                                    candidate_id="cand", candidate_version=1,
+                                    tier="sandbox", status="running")
+    db.add(execution); db.commit()
+    runner = FlowRunner(db, execution=execution,
+                        compiled=CompiledFlow(nodes, [n["node_id"] for n in nodes],
+                                              {"allowed_hostnames": ["evisa.gov.vn"]}),
+                        driver=FilteringDriver(),
+                        case_answers={"travel_purpose": "tourism"})
+    res = runner.run()
+    assert res["status"] == "paused_applicant_action"
+    q = {x["key"]: x for x in res["questions"]}["travel_purpose"]
+    assert q["options"] == ["Du lịch (Tourist)", "Business"]
+
+
+# ---------- reversible manual-review dead ends are applicant-releasable ------
+
+def _strand_in_manual_review(client, db):
+    case = _new_case(client)
+    exec_row = models.WorkflowExecution(
+        application_id=case["id"], state="MANUAL_REVIEW_REQUIRED",
+        snapshot={"inputs": {}}, pending=None,
+        history=[{"state": "APPLICATION_FILLING", "reason": ""},
+                 {"state": "RECOVERABLE_FAILURE", "reason": "NO_OPTIONS"},
+                 {"state": "MANUAL_REVIEW_REQUIRED", "reason": "repeated recoverable failures"}])
+    db.add(exec_row)
+    app_row = db.get(models.VisaApplication, case["id"])
+    app_row.state = "MANUAL_REVIEW_REQUIRED"
+    db.commit()
+    return case
+
+
+def test_reversible_manual_review_is_released_by_applicant_retry(client, live_route, db):
+    case = _strand_in_manual_review(client, db)
+    r = client.post(f"/cases/{case['id']}/portal/retry", headers=AUTH)
+    assert r.status_code == 200 and r.json()["queued"] is True
+    db.expire_all()
+    assert db.get(models.VisaApplication, case["id"]).state == "APPLICATION_FILLING"
+    run = portal_queue.latest_run(db, case["id"])
+    assert run is not None and run.status == "queued"
+
+
+def test_manual_review_with_irreversible_evidence_is_never_released(client, live_route, db):
+    case = _strand_in_manual_review(client, db)
+    db.add(models.SubmissionConfirmation(application_id=case["id"],
+                                         reference_no="REF-1"))
+    db.commit()
+    app_row = db.get(models.VisaApplication, case["id"])
+    assert portal_queue.manual_review_releasable(db, app_row) is False
+    r = client.post(f"/cases/{case['id']}/portal/retry", headers=AUTH)
+    assert r.status_code == 409
+    db.expire_all()
+    assert db.get(models.VisaApplication, case["id"]).state == "MANUAL_REVIEW_REQUIRED"
+
+
 # ---------- Part 15: PDF documents become JPEGs for image-only portals -------
 
 def _tiny_pdf(tmp_path):

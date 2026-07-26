@@ -759,11 +759,23 @@ export function AdditionalInfoModal({ client, caseId, checklist, pending, onReso
     }
   }
 
+  // The dialog can hold a dozen questions: a problem field may be scrolled
+  // far out of view, so a silent early-return would read as a dead button.
+  // Always scroll to the first problem AND summarize next to the button.
+  function showFieldErrors(errs) {
+    setErrors(errs)
+    const keys = Object.keys(errs)
+    setError({ message: t('addinfo.errSummary', { count: keys.length }) })
+    const el = document.getElementById('aiq-' + keys[0])
+    if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }
+
   async function submit() {
     setError(null)
     const { answers, errors: errs } = collectAnswers(inputQuestions, values)
     if (Object.keys(errs).length > 0) {
-      setErrors(Object.fromEntries(Object.entries(errs).map(([k, key]) => [k, t(key)])))
+      showFieldErrors(Object.fromEntries(
+        Object.entries(errs).map(([k, key]) => [k, t(key)])))
       return
     }
     if (Object.keys(answers).length === 0) {
@@ -777,10 +789,10 @@ export function AdditionalInfoModal({ client, caseId, checklist, pending, onReso
     try { await onResolve('provide_information', { answers }) }
     catch (e) {
       // 422 invalid_answer carries {key, message} — show it inline at the
-      // exact question; anything else shows as a general note.
+      // exact question (scrolled into view); anything else is a general note.
       const d = e && typeof e.detail === 'object' ? e.detail : null
       if (d && d.reason === 'invalid_answer' && d.key && d.message) {
-        setErrors((p) => ({ ...p, [d.key]: d.message }))
+        showFieldErrors({ [d.key]: d.message })
       } else {
         setError({ message: (d && d.message) || e.message })
       }
@@ -792,7 +804,7 @@ export function AdditionalInfoModal({ client, caseId, checklist, pending, onReso
     <Overlay onClose={onClose}>
       <Head title={t('addinfo.title')} onClose={onClose} sub={t('addinfo.sub')} />
       {inputQuestions.map((q) => (
-        <div key={q.key} className="field" style={{ marginBottom: 12 }}>
+        <div key={q.key} id={'aiq-' + q.key} className="field" style={{ marginBottom: 12 }}>
           <label>
             {q.question}{q.mandatory === false ? ` ${t('addinfo.optional')}` : ''}
           </label>

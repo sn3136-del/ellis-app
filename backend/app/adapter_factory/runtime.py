@@ -263,6 +263,19 @@ class FlowRunner:
                         # Ellis never picks a near-miss — it asks the applicant
                         # to choose from the portal's OWN options.
                         opts = res.get("options") or []
+                        if not opts:
+                            # The typed query filtered EVERYTHING out (or the
+                            # list loaded late): read the full unfiltered list
+                            # — those are the real choices to show the
+                            # applicant, not a dead-end failure.
+                            lister = getattr(self.driver, "list_options", None)
+                            if lister is not None:
+                                try:
+                                    listed = lister(node["selector"]) or {}
+                                    opts = [str(o) for o in (listed.get("options") or [])
+                                            if str(o).strip()]
+                                except Exception:  # noqa: BLE001
+                                    opts = []
                         if opts:
                             self.observed_options[node["node_id"]] = opts
                             return {"status": "handoff",

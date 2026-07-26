@@ -203,7 +203,12 @@ class ReleasedFlowDriver:
                 info = bb.session_connect_info(row.provider_session_id)
                 session = LiveBrowserSession(
                     allowed_hostnames=self._hosts(), session=info)
-                session._ensure_page()
+                page = session._ensure_page()
+                # Liveness ping: a reattach can return a page object whose
+                # target already died — every later action would fail with
+                # NO_SUCH_ELEMENT. A dead page routes to the fresh-session
+                # path (with its honest reversible rewind) instead.
+                page.evaluate("1")
             except Exception:  # noqa: BLE001 — stale session: fall through
                 if session is not None:
                     try:  # stop any half-started local Playwright before retrying

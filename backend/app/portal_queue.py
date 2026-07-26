@@ -394,15 +394,79 @@ def start_executor(threads: int = 2) -> None:
 
 def retry_available(db, app_row, exec_row) -> bool:
     """A safe applicant-triggered retry exists when the last run stalled or
-    failed, or the case sits in RECOVERABLE_FAILURE — and no run is active.
-    Irreversible steps stay guarded downstream by reconcile-before-act,
-    allow_submit, and the lost-session irreversibility check."""
+    failed, the case sits in RECOVERABLE_FAILURE, or it fell into
+    MANUAL_REVIEW_REQUIRED from purely REVERSIBLE work — and no run is
+    active. Irreversible steps stay guarded downstream by reconcile-before-
+    act, allow_submit, and the lost-session irreversibility check."""
     if active_run(db, app_row.id) is not None:
         return False
     state = exec_row.state if exec_row is not None else app_row.state
-    if state in ("COMPLETED", "CANCELLED", "MANUAL_REVIEW_REQUIRED"):
+    if state in ("COMPLETED", "CANCELLED"):
         return False
+    if state == "MANUAL_REVIEW_REQUIRED":
+        return manual_review_releasable(db, app_row)
     run = latest_run(db, app_row.id)
     if run is not None and run.status in ("stalled", "failed"):
         return True
     return state == "RECOVERABLE_FAILURE"
+
+
+def manual_review_releasable(db, app_row) -> bool:
+    """True when MANUAL_REVIEW_REQUIRED was reached with NO irreversible
+    action recorded anywhere: no submission confirmation, no receipt or
+    confirmation in the workflow snapshot, and no payment/submission/
+    appointment outcome evidence from any adapter execution. Exhausted
+    retries on reversible form work must not strand a case forever
+    ('stale retries do not force permanent manual-review states')."""
+    from .adapter_factory import models as fm
+    conf = db.execute(select(models.SubmissionConfirmation).where(
+        models.SubmissionConfirmation.application_id == app_row.id)).scalars().first()
+    if conf is not None:
+        return False
+    exec_row = db.execute(select(models.WorkflowExecution).where(
+        models.WorkflowExecution.application_id == app_row.id)).scalar_one_or_none()
+    snap = (exec_row.snapshot or {}) if exec_row else {}
+    if snap.get("receipt") or snap.get("confirmation") or snap.get("appointment"):
+        return False
+    exec_ids = [e.id for e in db.execute(select(fm.AdapterExecution).where(
+        fm.AdapterExecution.application_id == app_row.id)).scalars().all()]
+    if exec_ids:
+        for ev in db.execute(select(fm.AdapterOutcomeEvidence).where(
+                fm.AdapterOutcomeEvidence.execution_id.in_(exec_ids))).scalars().all():
+            cat = (ev.state_category or "").lower()
+            if any(w in cat for w in ("payment", "receipt", "submission", "appointment")):
+                return False
+    return True
+
+
+def release_manual_review(db, app_row) -> bool:
+    """Applicant-triggered release of a REVERSIBLE manual-review dead end:
+    the case returns to APPLICATION_FILLING (the portal execution resumes
+    from its persisted node — never a restart, never a duplicate) and the
+    failed adapter execution is reopened. Refuses when any irreversible
+    action was recorded. Never called automatically."""
+    from .adapter_factory import models as fm
+    if not manual_review_releasable(db, app_row):
+        return False
+    exec_row = db.execute(select(models.WorkflowExecution).where(
+        models.WorkflowExecution.application_id == app_row.id)).scalar_one_or_none()
+    if exec_row is None or exec_row.state != "MANUAL_REVIEW_REQUIRED":
+        return False
+    history = list(exec_row.history or [])
+    history.append({"state": "APPLICATION_FILLING",
+                    "reason": "manual review released by applicant retry "
+                              "(no irreversible action recorded)"})
+    exec_row.state = "APPLICATION_FILLING"
+    exec_row.history = history
+    exec_row.pending = None
+    app_row.state = "APPLICATION_FILLING"
+    stale = db.execute(select(fm.AdapterExecution).where(
+        fm.AdapterExecution.application_id == app_row.id,
+        fm.AdapterExecution.status == "failed").order_by(
+        fm.AdapterExecution.created_at.desc())).scalars().first()
+    if stale is not None:
+        stale.status = "running"   # resume from its persisted current_node
+        stale.error = ""
+    db.commit()
+    record_event(db, app_row.id, "queued", "active")
+    return True

@@ -167,7 +167,10 @@ class LiveBrowserSession:
         browser = chromium.connect_over_cdp(             # pragma: no cover
             connect, timeout=CONNECT_TIMEOUT_MS)
         ctx = browser.contexts[0] if browser.contexts else browser.new_context()  # pragma: no cover
-        self.page = ctx.pages[0] if ctx.pages else ctx.new_page()  # pragma: no cover
+        # Reattach to a LIVE page — pages[0] can be a closed leftover, and a
+        # dead page turns every later action into NO_SUCH_ELEMENT noise.
+        live = [p for p in ctx.pages if not p.is_closed()]  # pragma: no cover
+        self.page = live[0] if live else ctx.new_page()     # pragma: no cover
         return self.page
 
     def close(self):

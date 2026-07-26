@@ -2101,6 +2101,16 @@ def retry_portal(application_id: str, db=Depends(get_session),
         models.WorkflowExecution.application_id == application_id)).scalar_one_or_none()
     if not portal_queue.retry_available(db, app_row, exec_row):
         raise HTTPException(409, detail={"reason": "retry_unavailable"})
+    state = exec_row.state if exec_row is not None else app_row.state
+    if state == "MANUAL_REVIEW_REQUIRED":
+        # Reversible dead end (exhausted retries on form work, no irreversible
+        # action recorded): the applicant's retry releases it and the SAME
+        # portal execution resumes from its persisted node.
+        if not portal_queue.release_manual_review(db, app_row):
+            raise HTTPException(409, detail={"reason": "retry_unavailable"})
+        audit.record(db, org_id=p.org_id, application_id=application_id,
+                     action="manual_review_released_by_applicant", detail={},
+                     actor=p.user_id)
     audit.record(db, org_id=p.org_id, application_id=application_id,
                  action="portal_retry_requested", detail={}, actor=p.user_id)
     return _queue_signal_response(db, p, app_row, "start", {})

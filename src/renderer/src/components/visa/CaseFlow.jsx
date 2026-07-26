@@ -699,10 +699,10 @@ function ProgressCard({ progress, busy, onRefresh, onRetry }) {
       </div>
       <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
         <button className="btn btn--ghost btn--sm" onClick={onRefresh}>Refresh status</button>
-        {(pr.stalled || failed) && pr.retry_available && (
+        {pr.retry_available && !pr.active && !pr.queued && (
           <button className="btn btn--sm" disabled={busy} onClick={onRetry}
             data-testid="progress-retry">
-            {busy ? 'Retrying…' : 'Retry the connection'}
+            {busy ? 'Retrying…' : 'Retry and continue my application'}
           </button>
         )}
       </div>
