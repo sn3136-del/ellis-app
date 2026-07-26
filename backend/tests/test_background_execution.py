@@ -568,6 +568,43 @@ def test_empty_filtered_options_reharvest_full_list_instead_of_failing(db):
     assert q["options"] == ["Du lịch (Tourist)", "Business"]
 
 
+# ---------- portal questions pause cleanly at EVERY stage --------------------
+
+def test_upload_stage_question_pauses_instead_of_manual_review():
+    """A dynamic question raised during document upload (or fee discovery)
+    must pause for the applicant exactly like one raised during form filling
+    — the exact bug that dead-ended the live run: _pause() returned None, the
+    blocked-step check read it as an ordinary failure, and RECOVERABLE_FAILURE
+    had no legal way back to DOCUMENT_UPLOAD_PENDING → terminal manual review."""
+    class QuestionOnUpload:
+        def upload_document(self, **_kw):
+            return {"ok": False, "code": "ADDITIONAL_INFORMATION_REQUIRED",
+                    "questions": [{"key": "vietnam_address", "kind": "text",
+                                   "question": "What is your address in Vietnam?",
+                                   "mandatory": True}]}
+
+        def detach(self):
+            pass
+
+    wf = _wf(QuestionOnUpload(), "DOCUMENT_UPLOAD_PENDING")
+    wf.documents = [{"name": "photo.jpg", "mime": "image/jpeg", "size_bytes": 4}]
+    wf.session_ref = vault.store("session-token")["ref"]
+    wf.application_id = "app-1"
+    wf.start()
+    assert wf.machine.state == "DOCUMENT_UPLOAD_PENDING"      # not manual review
+    assert wf.pending["handoff"] == "additional_information"
+    assert wf.pending["questions"][0]["key"] == "vietnam_address"
+    # No failure-loop pollution: the pause never routed through
+    # RECOVERABLE_FAILURE at all.
+    assert all(h["state"] != "RECOVERABLE_FAILURE" for h in wf.machine.history)
+
+
+def test_recoverable_failure_can_resume_document_upload():
+    from app.statemachine import can_transition
+    assert can_transition("RECOVERABLE_FAILURE", "DOCUMENT_UPLOAD_PENDING")
+    assert can_transition("RECOVERABLE_FAILURE", "FEE_DISCOVERY_PENDING")
+
+
 # ---------- one batch of questions: pre-validated selects, deferred lists ----
 
 def _flow_runner(db, nodes, driver, answers, app_id="c-batch"):

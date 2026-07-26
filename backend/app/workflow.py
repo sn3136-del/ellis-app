@@ -138,6 +138,12 @@ class VisaWorkflow:
         self.pending = {"state": self.machine.state, "reason": reason, "handoff": handoff,
                         "live_view": lv, **extra}
         self._emit("handoff_requested", {"state": self.machine.state, "handoff": handoff})
+        # TRUTHY on purpose: callers use `return self._pause(...)` and several
+        # step branches test that return value (`if blocked is not None`) to
+        # distinguish "paused for the applicant" from an ordinary failure. A
+        # None here made an upload-stage question read as a failure and dead-
+        # ended reversible work into terminal manual review.
+        return self.status()
 
     # ---- signals ----
     def approve_review(self):
