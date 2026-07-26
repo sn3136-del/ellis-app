@@ -179,10 +179,8 @@ class ReleasedFlowDriver:
     # -- browser session (persistent across HTTP requests) ---------------------
 
     def _session_row(self):
-        return self.db.execute(select(models.BrowserSession).where(
-            models.BrowserSession.application_id == self.app_row.id,
-            models.BrowserSession.status == "open").order_by(
-            models.BrowserSession.created_at.desc())).scalars().first()
+        from ..portal_store import current_browser_session
+        return current_browser_session(self.db, self.app_row.id)
 
     def _ensure_live(self):
         """Attach to the case's open Browserbase session, or open a new one.
@@ -231,10 +229,16 @@ class ReleasedFlowDriver:
             session = LiveBrowserSession(allowed_hostnames=self._hosts())
             page = session._ensure_page()   # opens the real Browserbase session
             sid = (getattr(session, "session", None) or {}).get("id", "")
-            self.db.add(models.BrowserSession(
+            new_row = models.BrowserSession(
                 org_id=self.app_row.org_id, application_id=self.app_row.id,
-                provider_session_id=sid, mode="browserbase", status="open"))
+                provider_session_id=sid, mode="browserbase", status="open")
+            self.db.add(new_row)
             self.db.commit()
+            # Exactly one open session per case: the applicant's secure window
+            # must show the session Ellis is actually driving, never a stale
+            # blank one left open beside it.
+            from ..portal_store import retire_other_sessions
+            retire_other_sessions(self.db, self.app_row.id, new_row.id)
             if execution.current_node:
                 if self._passed_irreversible(execution.current_node):
                     raise _OutcomeUncertain(

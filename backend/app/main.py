@@ -723,9 +723,8 @@ def create_browser_session(application_id: str, response: Response,
                            db=Depends(get_session), p: Principal = Depends(get_principal)):
     _owned(db, p, application_id)
     from .providers import browser as bb
-    row = db.execute(select(models.BrowserSession).where(
-        models.BrowserSession.application_id == application_id,
-        models.BrowserSession.status == "open")).scalars().first()
+    from .portal_store import current_browser_session, retire_other_sessions
+    row = current_browser_session(db, application_id)
     # A session Ellis records as open may already have ended at the provider
     # (lifetime elapsed). Reconcile before handing the applicant a window:
     # a dead session is closed and a fresh one opened, never pretended.
@@ -746,22 +745,10 @@ def create_browser_session(application_id: str, response: Response,
         db.commit()
         fresh = True
         # Concurrent opens (two dialogs mounting at once) can each find no
-        # session and each create one. Keep the OLDEST and release the rest:
-        # one isolated session per case is the invariant.
-        twins = db.execute(select(models.BrowserSession).where(
-            models.BrowserSession.application_id == application_id,
-            models.BrowserSession.status == "open").order_by(
-            models.BrowserSession.created_at.asc(),
-            models.BrowserSession.id.asc())).scalars().all()
-        if len(twins) > 1 and twins[0].id != row.id:
-            try:
-                bb.close_session(row.provider_session_id)
-            except Exception:  # noqa: BLE001
-                pass
-            row.status = "closed"
-            db.commit()
-            row = twins[0]
-            fresh = False
+        # session and each create one. Exactly one open session per case: keep
+        # this newest row and release the rest, so the applicant's window and
+        # Ellis's driver can never end up on different sessions.
+        retire_other_sessions(db, application_id, row.id)
         audit.record(db, org_id=p.org_id, application_id=application_id,
                      action="browser_session_opened",
                      detail={"mode": row.mode}, actor=p.user_id)  # no ids/urls in audit
@@ -780,9 +767,8 @@ def browser_session_live_view(application_id: str, response: Response,
     stack runs without Browserbase (local mode has no Live View)."""
     _owned(db, p, application_id)
     from .providers import browser as bb
-    row = db.execute(select(models.BrowserSession).where(
-        models.BrowserSession.application_id == application_id,
-        models.BrowserSession.status == "open")).scalars().first()
+    from .portal_store import current_browser_session
+    row = current_browser_session(db, application_id)
     if row is None:
         raise HTTPException(404, detail={"reason": "no_session",
                                          "message": "no open browser session for this case"})
@@ -2103,9 +2089,8 @@ def case_progress(application_id: str, db=Depends(get_session),
         models.CaseProgressEvent.id.desc())).scalars().first()
     started = _aw(run.started_at) if run else None
     from .providers import browser as bb_probe
-    session_row = db.execute(select(models.BrowserSession).where(
-        models.BrowserSession.application_id == application_id,
-        models.BrowserSession.status == "open")).scalars().first()
+    from .portal_store import current_browser_session
+    session_row = current_browser_session(db, application_id)
     # "Secure portal session active" must mean the PROVIDER still has it.
     if session_row is not None and session_row.mode == "browserbase" and \
             not bb_probe.session_alive(session_row.provider_session_id):

@@ -1103,6 +1103,34 @@ def test_concurrent_session_opens_keep_exactly_one(client, db, monkeypatch):
     assert len(open_rows) == 1
 
 
+def test_driver_and_applicant_window_always_agree_on_the_session(client, db, monkeypatch):
+    """The live failure: the applicant's window watched one open session
+    while the driver opened and drove another, so the window stayed blank
+    forever. Exactly one open session per case, and one shared definition
+    of which it is."""
+    from app.providers import browser as bb
+    from app.portal_store import current_browser_session, retire_other_sessions
+    case = _new_case(client)
+    monkeypatch.setattr(bb, "session_alive", lambda sid: True)
+    monkeypatch.setattr(bb, "close_session", lambda sid: None)
+    # Two rows open at once (the race that actually happened).
+    for sid in ("older-session", "newer-session"):
+        db.add(models.BrowserSession(org_id="org1", application_id=case["id"],
+                                     provider_session_id=sid, mode="browserbase",
+                                     status="open"))
+        db.commit()
+    picked = current_browser_session(db, case["id"])
+    assert picked.provider_session_id == "newer-session"   # deterministic
+    retire_other_sessions(db, case["id"], picked.id)
+    open_rows = db.execute(select(models.BrowserSession).where(
+        models.BrowserSession.application_id == case["id"],
+        models.BrowserSession.status == "open")).scalars().all()
+    assert [r.provider_session_id for r in open_rows] == ["newer-session"]
+    # And the endpoint the applicant's window uses returns that same one.
+    r = client.post(f"/cases/{case['id']}/browser-session", headers=AUTH)
+    assert r.json()["id"] == picked.id
+
+
 def test_restore_portal_preserves_the_pause_when_no_fee_is_readable():
     class RestoreOnly:
         def restore_view(self, **_kw):

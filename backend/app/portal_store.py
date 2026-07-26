@@ -12,6 +12,43 @@ restart.
 """
 from __future__ import annotations
 
+from sqlalchemy import select as _select
+
+
+def current_browser_session(db, application_id: str):
+    """THE case's live portal session — one definition shared by the driver
+    and the applicant's secure window. They used to disagree (an unordered
+    'first open row' vs 'newest open row'), so the applicant watched one
+    session while Ellis drove another and the window stayed blank forever."""
+    from . import models
+    return db.execute(_select(models.BrowserSession).where(
+        models.BrowserSession.application_id == application_id,
+        models.BrowserSession.status == "open").order_by(
+        models.BrowserSession.created_at.desc(),
+        models.BrowserSession.id.desc())).scalars().first()
+
+
+def retire_other_sessions(db, application_id: str, keep_id: str) -> int:
+    """At most ONE open session per case: close every other open row (and
+    release it at the provider) so nothing can drift onto a stale window."""
+    from . import models
+    from .providers import browser as bb
+    n = 0
+    for row in db.execute(_select(models.BrowserSession).where(
+            models.BrowserSession.application_id == application_id,
+            models.BrowserSession.status == "open")).scalars().all():
+        if row.id == keep_id:
+            continue
+        try:
+            bb.close_session(row.provider_session_id)
+        except Exception:  # noqa: BLE001 — best effort at the provider
+            pass
+        row.status = "closed"
+        n += 1
+    if n:
+        db.commit()
+    return n
+
 from .db import SessionLocal, create_all
 from . import models
 from .portal.mock_portal import MockPortal
