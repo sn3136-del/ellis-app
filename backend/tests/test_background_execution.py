@@ -709,6 +709,102 @@ def test_portal_dropped_value_is_repaired_silently_not_re_asked(db):
     assert state["clicks"] == 2                    # refused once, then accepted
 
 
+def test_click_that_already_advanced_is_not_retried_forever(db):
+    """The live dead end: the portal HAD moved past the form, so the 'Next'
+    button was gone and every retry read as a timeout with no validation
+    error — four failures into terminal manual review. When the form's own
+    fields are no longer on screen, the step already succeeded."""
+    class AdvancedPortal:
+        def fill(self, selector, value):
+            return {"ok": True}
+
+        def click(self, selector):
+            return {"ok": False, "code": "TIMEOUT"}   # the button is gone
+
+        def read_validation_errors(self):
+            return {"ok": True, "messages": [], "fields": []}
+
+        def is_visible(self, selector):
+            return {"ok": True, "visible": False}     # the form page is gone
+
+    nodes = [
+        {"node_id": "fill_name", "action": "FILL_NON_SENSITIVE", "selector": "#name",
+         "input_source": "full_name", "allowed_hostname": "evisa.gov.vn"},
+        {"node_id": "next", "action": "CLICK", "selector": "#next",
+         "allowed_hostname": "evisa.gov.vn"},
+        {"node_id": "done", "action": "COMPLETE", "allowed_hostname": "evisa.gov.vn"},
+    ]
+    runner = _flow_runner(db, nodes, AdvancedPortal(), {"full_name": "A"},
+                          app_id="c-advanced")
+    assert runner.run()["status"] == "completed"
+
+
+def test_intercepted_click_falls_back_to_a_forced_click(db):
+    """An overlay swallowing a reversible navigation click is retried with a
+    forced click before anything fails — but only when the form is still on
+    screen (so a genuinely-advanced page is never re-clicked)."""
+    calls = {"force": 0}
+
+    class OverlayPortal:
+        def fill(self, selector, value):
+            return {"ok": True}
+
+        def click(self, selector):
+            return {"ok": False, "code": "TIMEOUT"}
+
+        def read_validation_errors(self):
+            return {"ok": True, "messages": [], "fields": []}
+
+        def is_visible(self, selector):
+            return {"ok": True, "visible": True}      # still on the form
+
+        def force_click(self, selector):
+            calls["force"] += 1
+            return {"ok": True, "method": "force"}
+
+    nodes = [
+        {"node_id": "fill_name", "action": "FILL_NON_SENSITIVE", "selector": "#name",
+         "input_source": "full_name", "allowed_hostname": "evisa.gov.vn"},
+        {"node_id": "next", "action": "CLICK", "selector": "#next",
+         "allowed_hostname": "evisa.gov.vn"},
+        {"node_id": "done", "action": "COMPLETE", "allowed_hostname": "evisa.gov.vn"},
+    ]
+    runner = _flow_runner(db, nodes, OverlayPortal(), {"full_name": "A"},
+                          app_id="c-overlay")
+    assert runner.run()["status"] == "completed"
+    assert calls["force"] == 1
+
+
+def test_irreversible_click_never_force_clicks_or_assumes_advance(db):
+    """The submit node keeps its strict contract: a timeout is UNCERTAIN —
+    never forced, never assumed to have advanced."""
+    forced = {"n": 0}
+
+    class SubmitPortal:
+        def click(self, selector):
+            return {"ok": False, "code": "TIMEOUT"}
+
+        def force_click(self, selector):
+            forced["n"] += 1
+            return {"ok": True}
+
+        def is_visible(self, selector):
+            return {"ok": True, "visible": False}
+
+        def official_state(self):
+            return {"known": False}
+
+    nodes = [
+        {"node_id": "submit", "action": "CLICK", "selector": "#submit",
+         "irreversibility": "irreversible", "allowed_hostname": "evisa.gov.vn",
+         "success_evidence": [{"kind": "network", "category": "submission_accepted"}]},
+        {"node_id": "done", "action": "COMPLETE", "allowed_hostname": "evisa.gov.vn"},
+    ]
+    runner = _flow_runner(db, nodes, SubmitPortal(), {}, app_id="c-irrev")
+    assert runner.run()["status"] == "outcome_uncertain"
+    assert forced["n"] == 0
+
+
 def test_already_correct_field_is_not_refilled_on_resume(db):
     """Resume speed: a field the portal already holds with the exact value is
     skipped instead of retyped."""

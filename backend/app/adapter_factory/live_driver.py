@@ -186,6 +186,31 @@ class BrowserbasePageDriver:
             fields = []
         return {"ok": True, "messages": list(messages), "fields": list(fields)}
 
+    def is_visible(self, selector: str) -> dict:
+        """Is any element matching this selector currently visible? Used to
+        tell 'the click never landed' from 'the page already moved on'."""
+        try:
+            n = self.page.locator(f"{selector} >> visible=true").count()
+            return {"ok": True, "visible": bool(n)}
+        except Exception as e:  # noqa: BLE001
+            return {"ok": False, "code": "READ_ERROR", "detail": str(e)[:120]}
+
+    def force_click(self, selector: str) -> dict:
+        """Last-resort click for a button an overlay intercepts: dispatch the
+        event on the element itself. Reversible navigation only — the runtime
+        never routes an irreversible node here."""
+        try:
+            loc = self.page.locator(f"{selector} >> visible=true").first
+            loc.click(timeout=8000, force=True)
+            return {"ok": True, "method": "force"}
+        except Exception:  # noqa: BLE001
+            try:
+                self.page.eval_on_selector(selector, "el => el.click()")
+                return {"ok": True, "method": "dispatch"}
+            except Exception as e2:  # noqa: BLE001
+                return {"ok": False, "code": "CLICK_INTERCEPTED",
+                        "detail": str(e2)[:120]}
+
     def read_value(self, selector: str) -> dict:
         """The value the portal currently holds in a field. Used to detect a
         value the FORM dropped (a dependent select can reset a field that was

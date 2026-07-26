@@ -227,6 +227,16 @@ class FlowRunner:
                     blocked = self._portal_validation_questions(node)
                     if blocked is not None:
                         return blocked
+                    # No complaint from the portal: either the page ALREADY
+                    # advanced past this step (a repeat attempt then finds no
+                    # button and "times out"), or an overlay is intercepting
+                    # the click. Check the first, then try the second.
+                    if self._advanced_past(node):
+                        return {"status": "ok", "detail": {"already_advanced": True}}
+                    forcer = getattr(self.driver, "force_click", None)
+                    if forcer is not None:
+                        if (forcer(node["selector"]) or {}).get("ok"):
+                            break
                     return {"status": "failed", "reason": "timeout"}
                 if code == "FEE_CHANGED":
                     return {"status": "failed", "reason": "fee changed — new confirmation required"}
@@ -486,6 +496,35 @@ class FlowRunner:
         if deferred and uniq:
             uniq[-1] = dict(uniq[-1], deferred_followups=deferred)
         return uniq
+
+    def _advanced_past(self, node: dict) -> bool:
+        """True when the portal has clearly moved beyond the page this node
+        acts on: the form fields filled before it are no longer on screen.
+        Prevents a step that ALREADY succeeded from being retried forever
+        (the click 'times out' only because its button is gone)."""
+        checker = getattr(self.driver, "is_visible", None)
+        if checker is None:
+            return False
+        target = node.get("node_id")
+        selectors: list[str] = []
+        for nid in self.flow.order:
+            if nid == target:
+                break
+            n = self.flow.nodes.get(nid) or {}
+            if n.get("action") in ("FILL_NON_SENSITIVE", "SELECT_SEARCH") and n.get("selector"):
+                selectors.append(n["selector"])
+        if not selectors:
+            return False
+        # Sample the first and last preceding fields: both gone = new page.
+        probes = [selectors[0], selectors[-1]] if len(selectors) > 1 else selectors
+        for sel in probes:
+            try:
+                res = checker(sel) or {}
+            except Exception:  # noqa: BLE001
+                return False
+            if not res.get("ok") or res.get("visible"):
+                return False
+        return True
 
     def _repair_flagged_fields(self) -> int:
         """Refill every portal-flagged field whose answer Ellis already holds
