@@ -40,6 +40,7 @@ STEP_MESSAGES = {
     "waiting_payment": "Waiting for your payment confirmation",
     "waiting_payment_result": "Waiting for the portal's payment result",
     "waiting_declaration": "Waiting for your government declaration",
+    "waiting_portal_form": "Waiting for you to finish items on the official form",
     "waiting_final_review": "Waiting for your final application review",
     "waiting_submit_confirmation": "Waiting for your final submission confirmation",
     "verifying_payment": "Verifying the payment with the official portal",
@@ -102,6 +103,7 @@ HANDOFF_STEPS = {
     "payment_verification": "waiting_payment_result",
     "personal_declaration": "waiting_declaration",
     "legally_personal_declaration": "waiting_declaration",
+    "portal_form": "waiting_portal_form",
     "final_review": "waiting_final_review",
     "review": "waiting_final_review",
 }

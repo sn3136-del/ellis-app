@@ -346,6 +346,15 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
     setRefreshing(false)
   }
 
+  // Live-view links expire after a few minutes ("WebSocket disconnected").
+  // Refresh the embed automatically before that happens so the applicant is
+  // never left staring at a dead debugger pane mid-CAPTCHA.
+  useEffect(() => {
+    if (liveState !== 'embedded') return undefined
+    const iv = setInterval(() => { refreshLiveView() }, 240000)
+    return () => clearInterval(iv)
+  }, [liveState, caseId])
+
   async function closeSecureWindow() {
     setClosing(true)
     try { await client.closeBrowserSession(caseId) } catch { /* non-fatal */ }
@@ -360,6 +369,8 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
       if (handoff === 'email_verification' || handoff === 'otp') {
         await onResolve('verify_email', { token: typedCode.trim() || token })
         setTypedCode('')                        // never retained after use
+      } else if (handoff === 'portal_form') {
+        await onResolve('start')  // re-drive: Ellis re-verifies the form page
       } else if (handoff === 'captcha') {
         await onResolve('solve_captcha')
       } else {
@@ -376,7 +387,22 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
       {/* Safety copy stays ABOVE the embedded window for the relevant kinds. */}
       {handoff === 'captcha' && (
         <div style={{ fontSize: 13, marginTop: 12 }}>
-          <strong>Ellis never solves CAPTCHAs.</strong> Complete it yourself in the secure window, then confirm below.
+          <strong>Ellis never solves CAPTCHAs.</strong> Complete it yourself in the
+          secure window, then confirm below. Ellis scrolled the portal page to the
+          CAPTCHA and outlined it in red — if you don't see it, use Refresh view.
+        </div>
+      )}
+      {handoff === 'portal_form' && (
+        <div style={{ fontSize: 13, marginTop: 12 }} data-testid="portal-form-items">
+          <strong>The government form needs these from you personally:</strong>
+          <ul style={{ margin: '6px 0 0 18px' }}>
+            {(pending?.portal_messages || ['See the highlighted fields on the form.'])
+              .map((m) => <li key={m} style={{ marginTop: 2 }}>{m}</li>)}
+          </ul>
+          <div style={{ color: 'var(--muted)', marginTop: 6 }}>
+            This includes any declaration only you may sign. Complete them in the
+            secure window below, then continue — Ellis takes it from there.
+          </div>
         </div>
       )}
       {(handoff === 'email_verification' || handoff === 'otp') && (
@@ -455,6 +481,7 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
         <button className="btn" disabled={busy} onClick={done}>
           {busy ? 'Confirming…'
             : handoff === 'captcha' ? 'CAPTCHA completed — continue'
+            : handoff === 'portal_form' ? 'I finished these items — continue'
             : (handoff === 'email_verification' || handoff === 'otp') ? 'Verify code and continue'
             : 'I completed this step'}
         </button>

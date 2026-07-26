@@ -125,7 +125,9 @@ class VisaWorkflow:
                                questions=res.get("questions") or [])
         if code == "APPLICANT_ACTION_REQUIRED":
             return self._pause("This step needs you in the secure portal window.",
-                               res.get("handoff") or "identity")
+                               res.get("handoff") or "identity",
+                               **({"portal_messages": res["portal_messages"]}
+                                  if res.get("portal_messages") else {}))
         if code == "OUTCOME_UNCERTAIN":
             return self.machine.transition("MANUAL_REVIEW_REQUIRED",
                                            "outcome uncertain — human check required")
@@ -274,6 +276,11 @@ class VisaWorkflow:
         return self.status()
 
     def start(self):
+        # A portal_form pause is confirmed by the applicant's "I completed
+        # this step" (which re-drives via start): clear it so the flow
+        # re-verifies the page instead of parking on the stale pause.
+        if self.pending and self.pending.get("handoff") == "portal_form":
+            self.pending = None
         return self._drive()
 
     # ---- driver ----

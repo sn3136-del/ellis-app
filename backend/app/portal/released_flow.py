@@ -378,11 +378,15 @@ class ReleasedFlowDriver:
         if st == "paused_applicant_action":
             kind = res.get("handoff_kind", "")
             if kind == "additional_information":
-                return {"ok": False, "code": "ADDITIONAL_INFORMATION_REQUIRED",
-                        "questions": res.get("questions") or []}
-            if kind == "captcha":
-                return {"ok": False, "code": "CAPTCHA_REQUIRED"}
-            return {"ok": False, "code": "APPLICANT_ACTION_REQUIRED", "handoff": kind}
+                out = {"ok": False, "code": "ADDITIONAL_INFORMATION_REQUIRED",
+                       "questions": res.get("questions") or []}
+            elif kind == "captcha":
+                out = {"ok": False, "code": "CAPTCHA_REQUIRED"}
+            else:
+                out = {"ok": False, "code": "APPLICANT_ACTION_REQUIRED", "handoff": kind}
+            if res.get("portal_messages"):
+                out["portal_messages"] = res["portal_messages"]
+            return out
         if st == "outcome_uncertain":
             return {"ok": False, "code": "OUTCOME_UNCERTAIN",
                     "detail": res.get("reason", "")}

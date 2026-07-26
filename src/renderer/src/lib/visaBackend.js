@@ -324,6 +324,7 @@ export const HANDOFF_UI = {
   otp: 'LiveViewModal',
   identity: 'LiveViewModal',
   login_challenge: 'LiveViewModal',
+  portal_form: 'LiveViewModal',     // finish form items only you may complete
   payment_approval: 'PaymentApprove', // approve_payment (shows fee)
   fee_confirmation: 'PaymentApprove', // applicant confirms the exact portal fee
   payment: 'PaymentModal',          // complete_payment (secure window; no card seen)
@@ -349,6 +350,7 @@ export const HANDOFF_SIGNAL = {
   reschedule_approval: 'approve_reschedule',
   personal_declaration: 'complete_declaration',
   final_review: 'start',
+  portal_form: 'start',
   additional_information: 'provide_information'
 }
 
@@ -361,6 +363,8 @@ export const HANDOFF_COPY = {
   otp: ['Enter the one-time code', 'Type the code from your authenticator or SMS in the secure window.'],
   identity: ['Identity check', 'Complete the identity step in the secure window.'],
   login_challenge: ['Portal login challenge', 'Complete the portal sign-in challenge in the secure window.'],
+  portal_form: ['Finish the highlighted items on the official form',
+    'A few items on the government form need your personal input — including any declaration only you may sign. Complete them in the secure window, then continue.'],
   payment_approval: ['Review and confirm payment', 'Confirm the official fee before payment begins.'],
   fee_confirmation: ['Confirm the official fee', 'Enter the exact fee the official portal shows, then confirm to continue to payment.'],
   payment: ['Pay the official fee', 'Enter your card directly in the portal — Ellis never sees it.'],

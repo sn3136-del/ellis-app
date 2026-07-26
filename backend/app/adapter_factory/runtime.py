@@ -166,6 +166,8 @@ class FlowRunner:
                 if result["handoff_kind"] == "additional_information":
                     result["questions"] = (outcome.get("questions")
                                            or self._collect_missing_questions(node_id))
+                if outcome.get("portal_messages"):
+                    result["portal_messages"] = outcome["portal_messages"]
                 return result
             if outcome["status"] == "uncertain":
                 self.execution.status = "outcome_uncertain"
@@ -257,6 +259,13 @@ class FlowRunner:
                         return {"status": "uncertain",
                                 "detail": {"reason": "no qualifying evidence after irreversible action"}}
                     return {"status": "failed", "reason": "expected evidence missing"}
+            elif node.get("irreversibility") != "irreversible":
+                # A CLICK can land perfectly and still not advance: the form
+                # rejects it and renders its own field errors. Clicking is not
+                # progressing — verify, repair once, and otherwise ask.
+                refused = self._advance_refused(node)
+                if refused is not None:
+                    return refused
             return {"status": "ok"}
         if action in ("FILL_NON_SENSITIVE", "SELECT_SEARCH"):
             value = self.answers.get(node.get("input_source", ""), "")
@@ -380,6 +389,24 @@ class FlowRunner:
             return {"status": "ok"} if ok else \
                 {"status": "failed", "reason": "declared evidence not found"}
         if action == "APPLICANT_HANDOFF":
+            if node.get("handoff_kind") == "captcha":
+                # Never send the applicant hunting for a CAPTCHA that is not
+                # there. The flow DECLARES where one may appear; the page
+                # decides whether one actually did.
+                probe = getattr(self.driver, "captcha_state", None)
+                if probe is not None:
+                    try:
+                        state = probe(True) or {}
+                    except Exception:  # noqa: BLE001
+                        state = {"ok": False}
+                    if state.get("ok") and not state.get("present"):
+                        # No challenge on this page: if the portal also
+                        # refused to advance, its own complaint is the real
+                        # blocker — surface that instead of a phantom CAPTCHA.
+                        blocked = self._portal_validation_questions(node)
+                        if blocked is not None:
+                            return blocked
+                        return {"status": "ok", "detail": {"no_captcha_present": True}}
             return {"status": "handoff"}
         if action == "RECONCILE_OUTCOME":
             self._official()
@@ -497,6 +524,37 @@ class FlowRunner:
             uniq[-1] = dict(uniq[-1], deferred_followups=deferred)
         return uniq
 
+    def _advance_refused(self, node: dict):
+        """After a click that LANDED, did the portal actually accept it? If
+        the page now shows its own field errors, the advance was refused:
+        repair what Ellis can (values the form dropped) and retry once, then
+        hand the portal's own complaints to the applicant. Returns an outcome
+        when the advance was refused, else None."""
+        reader = getattr(self.driver, "read_validation_errors", None)
+        if reader is None:
+            return None
+        try:
+            res = reader() or {}
+        except Exception:  # noqa: BLE001
+            return None
+        if not (res.get("fields") or []):
+            return None
+        if not self._repair_attempted:
+            self._repair_attempted = True
+            if self._repair_flagged_fields():
+                retry = self.driver.click(node["selector"])
+                if retry.get("ok"):
+                    try:
+                        again = reader() or {}
+                    except Exception:  # noqa: BLE001
+                        again = {}
+                    if not (again.get("fields") or []):
+                        return None      # accepted on the repaired retry
+        blocked = self._portal_validation_questions(node)
+        if blocked is not None:
+            return blocked
+        return {"status": "failed", "reason": "the portal did not accept this step"}
+
     def _advanced_past(self, node: dict) -> bool:
         """True when the portal has clearly moved beyond the page this node
         acts on: the form fields filled before it are no longer on screen.
@@ -600,10 +658,19 @@ class FlowRunner:
         by_selector = {str(n.get("selector") or ""): n
                        for n in self.flow.nodes.values()}
         flagged: list[str] = []
+        unmapped_msgs: list[str] = []
         for f in fields:
             fid = str(f.get("id") or "").strip()
             n = by_selector.get(f"#{fid}") if fid else None
             if n is None:
+                # A portal field the released flow has no node for (e.g. the
+                # form's own inline legal declaration, or an expenses section)
+                # — only the applicant can complete it, in the secure window.
+                label = str(f.get("label") or "").strip()
+                msg = str(f.get("message") or "").strip()
+                text = " — ".join(x for x in (label, msg) if x)[:160]
+                if text and text not in unmapped_msgs:
+                    unmapped_msgs.append(text)
                 continue
             nid = n.get("node_id", "")
             flagged.append(nid)
@@ -617,6 +684,10 @@ class FlowRunner:
             else:
                 self._rejected_fills.add(nid)
         if not flagged:
+            if unmapped_msgs:
+                return {"status": "handoff", "handoff_kind": "portal_form",
+                        "portal_messages": unmapped_msgs[:8],
+                        "detail": {"portal_unmapped_fields": len(unmapped_msgs)}}
             return None
         # Rewind to the first flagged field, but never across a handoff or an
         # irreversible node (only reversible refills may repeat).
@@ -633,10 +704,17 @@ class FlowRunner:
                 resume = nid
         questions = self._collect_missing_questions(resume or node.get("node_id", ""))
         if not questions:
+            if unmapped_msgs:
+                return {"status": "handoff", "handoff_kind": "portal_form",
+                        "portal_messages": unmapped_msgs[:8],
+                        "detail": {"portal_unmapped_fields": len(unmapped_msgs)}}
             return None
-        return {"status": "handoff", "handoff_kind": "additional_information",
-                "questions": questions, "resume_node": resume,
-                "detail": {"portal_validation_fields": len(flagged)}}
+        out = {"status": "handoff", "handoff_kind": "additional_information",
+               "questions": questions, "resume_node": resume,
+               "detail": {"portal_validation_fields": len(flagged)}}
+        if unmapped_msgs:
+            out["portal_messages"] = unmapped_msgs[:8]
+        return out
 
     def _harvest_options(self, node: dict) -> None:
         """For a missing select answer, read the portal's REAL option list so

@@ -362,10 +362,19 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
           onDone={() => resolve('sign_authorization')} />
       )}
       {(modal === 'captcha' || modal === 'email_verification' || modal === 'otp' ||
-        modal === 'identity' || modal === 'login_challenge') && (
+        modal === 'identity' || modal === 'login_challenge' || modal === 'portal_form') && (
         <LiveViewModal client={client} caseId={caseId} pending={pending}
           title={copy.title} sub={copy.sub}
-          onResolve={resolve} onClose={() => setModal(null)} />
+          onResolve={async (sig, body) => {
+            // portal_form resolves by re-driving the case (start), not a signal.
+            if (sig === 'start') {
+              const res = await client.start(caseId)
+              apply(res); setModal(null)
+              return res
+            }
+            return resolve(sig, body)
+          }}
+          onClose={() => setModal(null)} />
       )}
       {(modal === 'payment_approval' || modal === 'fee_confirmation') && (
         <PaymentApprove pending={pending} onResolve={resolve} onClose={() => setModal(null)} />

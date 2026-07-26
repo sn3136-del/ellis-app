@@ -186,6 +186,42 @@ class BrowserbasePageDriver:
             fields = []
         return {"ok": True, "messages": list(messages), "fields": list(fields)}
 
+    # Markers real portals use for a challenge widget. Static strings — the
+    # presence of a CAPTCHA is OBSERVED, never assumed from the flow.
+    _CAPTCHA_JS = """(highlight) => {
+      const sels = ['iframe[src*="recaptcha"]', 'iframe[src*="hcaptcha"]',
+                    'iframe[title*="captcha" i]', '.g-recaptcha', '.h-captcha',
+                    '[id*="captcha" i]', '[class*="captcha" i]',
+                    'img[src*="captcha" i]', 'input[name*="captcha" i]'];
+      for (const s of sels) {
+        for (const el of document.querySelectorAll(s)) {
+          const r = el.getBoundingClientRect();
+          if (r.width < 20 || r.height < 20) continue;
+          if (el.tagName !== 'IFRAME' && el.offsetParent === null) continue;
+          if (highlight) {
+            el.scrollIntoView({block: 'center', inline: 'center'});
+            const box = (el.closest('div') || el);
+            box.style.outline = '3px solid #e11d48';
+            box.style.outlineOffset = '4px';
+            box.setAttribute('data-ellis-focus', '1');
+          }
+          return {present: true, kind: s};
+        }
+      }
+      return {present: false};
+    }"""
+
+    def captcha_state(self, highlight: bool = False) -> dict:
+        """Is a challenge widget actually on the page right now? With
+        highlight, the applicant's own view is scrolled to it and it is
+        outlined — a visual aid only: no form value is touched."""
+        try:
+            res = self.page.evaluate(self._CAPTCHA_JS, bool(highlight)) or {}
+            return {"ok": True, "present": bool(res.get("present")),
+                    "kind": str(res.get("kind") or "")}
+        except Exception as e:  # noqa: BLE001
+            return {"ok": False, "code": "READ_ERROR", "detail": str(e)[:120]}
+
     def is_visible(self, selector: str) -> dict:
         """Is any element matching this selector currently visible? Used to
         tell 'the click never landed' from 'the page already moved on'."""

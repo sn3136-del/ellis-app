@@ -805,6 +805,80 @@ def test_irreversible_click_never_force_clicks_or_assumes_advance(db):
     assert forced["n"] == 0
 
 
+def test_captcha_handoff_skipped_when_no_challenge_is_on_the_page(db):
+    """The declared CAPTCHA node fires only when a challenge actually exists —
+    the live run sent the applicant hunting for a CAPTCHA that was not there."""
+    class NoChallenge:
+        def captcha_state(self, highlight=False):
+            return {"ok": True, "present": False}
+
+        def read_validation_errors(self):
+            return {"ok": True, "messages": [], "fields": []}
+
+    nodes = [
+        {"node_id": "captcha", "action": "APPLICANT_HANDOFF", "handoff_kind": "captcha",
+         "allowed_hostname": "evisa.gov.vn"},
+        {"node_id": "done", "action": "COMPLETE", "allowed_hostname": "evisa.gov.vn"},
+    ]
+    runner = _flow_runner(db, nodes, NoChallenge(), {}, app_id="c-nocaptcha")
+    assert runner.run()["status"] == "completed"
+
+
+def test_captcha_handoff_pauses_and_highlights_when_present(db):
+    highlighted = {"n": 0}
+
+    class Challenge:
+        def captcha_state(self, highlight=False):
+            if highlight:
+                highlighted["n"] += 1
+            return {"ok": True, "present": True, "kind": ".g-recaptcha"}
+
+    nodes = [
+        {"node_id": "captcha", "action": "APPLICANT_HANDOFF", "handoff_kind": "captcha",
+         "allowed_hostname": "evisa.gov.vn"},
+        {"node_id": "done", "action": "COMPLETE", "allowed_hostname": "evisa.gov.vn"},
+    ]
+    runner = _flow_runner(db, nodes, Challenge(), {}, app_id="c-captcha")
+    res = runner.run()
+    assert res["status"] == "paused_applicant_action"
+    assert res["handoff_kind"] == "captcha"
+    assert highlighted["n"] == 1               # scrolled + outlined for the applicant
+
+
+def test_unmapped_portal_fields_become_a_secure_window_handoff(db):
+    """Portal fields the released flow has no nodes for (its inline legal
+    declaration, an expenses section) go to the applicant in the secure
+    window with the portal's own wording — never a silent failure loop."""
+    class DeclarationPortal:
+        def fill(self, selector, value):
+            return {"ok": True}
+
+        def click(self, selector):
+            return {"ok": False, "code": "TIMEOUT"}
+
+        def is_visible(self, selector):
+            return {"ok": True, "visible": True}
+
+        def read_validation_errors(self):
+            return {"ok": True, "messages": [],
+                    "fields": [{"id": "declare_1", "label": "Declaration",
+                                "message": "Please confirm the declaration"}]}
+
+    nodes = [
+        {"node_id": "fill_name", "action": "FILL_NON_SENSITIVE", "selector": "#name",
+         "input_source": "full_name", "allowed_hostname": "evisa.gov.vn"},
+        {"node_id": "next", "action": "CLICK", "selector": "#next",
+         "allowed_hostname": "evisa.gov.vn"},
+        {"node_id": "done", "action": "COMPLETE", "allowed_hostname": "evisa.gov.vn"},
+    ]
+    runner = _flow_runner(db, nodes, DeclarationPortal(), {"full_name": "A"},
+                          app_id="c-declare")
+    res = runner.run()
+    assert res["status"] == "paused_applicant_action"
+    assert res["handoff_kind"] == "portal_form"
+    assert "Declaration — Please confirm the declaration" in res["portal_messages"]
+
+
 def test_already_correct_field_is_not_refilled_on_resume(db):
     """Resume speed: a field the portal already holds with the exact value is
     skipped instead of retyped."""

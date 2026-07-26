@@ -21,6 +21,10 @@ from ..config import settings
 HANDOFF_KINDS = {
     "captcha", "otp", "email_verification", "login_challenge", "identity",
     "payment", "three_ds", "personal_declaration",
+    # The government form needs items only the applicant may complete in the
+    # secure window (e.g. its own inline legal declaration, or fields the
+    # released flow does not cover).
+    "portal_form",
 }
 
 

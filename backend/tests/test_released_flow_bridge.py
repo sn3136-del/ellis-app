@@ -165,6 +165,11 @@ class FakePage:
         # the combobox picker: echo the requested value as the chosen option
         if "select-item" in str(js):
             return {"chosen": arg} if arg else {"labels": []}
+        # the CAPTCHA-presence probe: this fake portal DOES show a challenge
+        # (the flow's captcha handoff is the behavior under test — a page
+        # without one is now honestly skipped)
+        if "recaptcha" in str(js):
+            return {"present": True, "kind": ".g-recaptcha"}
         return None
 
     def on(self, *_a, **_k):
