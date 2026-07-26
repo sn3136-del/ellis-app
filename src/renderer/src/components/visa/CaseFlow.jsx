@@ -29,6 +29,33 @@ const JOURNEY = [
   'APPOINTMENT_BOOKING', 'PERSONAL_DECLARATION_REQUIRED', 'SUBMITTING', 'COMPLETED'
 ]
 
+// Applicant-friendly stage labels: internal state names never surface raw
+// (a truncated "PAYMENT_APPROVAL_REQUIRED" chip reads as gibberish).
+const STAGE_LABELS = {
+  DRAFT: 'application details',
+  APPLICANT_REVIEW_REQUIRED: 'review your details',
+  AUTHORIZATION_PENDING: 'authorize Ellis',
+  PORTAL_ACCOUNT_CREATING: 'portal account',
+  PORTAL_VERIFICATION_REQUIRED: 'verification',
+  PORTAL_LOGIN_REQUIRED: 'portal connection',
+  APPLICATION_FILLING: 'official form',
+  DOCUMENT_UPLOAD_PENDING: 'document upload',
+  FEE_DISCOVERY_PENDING: 'official fee',
+  PAYMENT_APPROVAL_REQUIRED: 'confirm the fee',
+  PAYMENT_ACTION_REQUIRED: 'payment',
+  PAYMENT_PROCESSING: 'payment check',
+  APPOINTMENT_BOOKING: 'appointment',
+  PERSONAL_DECLARATION_REQUIRED: 'your declaration',
+  FINAL_REVIEW_REQUIRED: 'final review',
+  READY_TO_SUBMIT: 'submit',
+  SUBMITTING: 'submitting',
+  COMPLETED: 'submitted',
+}
+
+function stageLabel(s) {
+  return STAGE_LABELS[s] || s.replace(/_/g, ' ').toLowerCase()
+}
+
 function Timeline({ state, journey }) {
   // Route-specific stages from the Kimi workflow plan; [] = no submission
   // timeline for this route at all (entry preparation / renewal prep).
@@ -43,8 +70,8 @@ function Timeline({ state, journey }) {
       data-testid="journey-timeline">
       {stages.map((s, i) => (
         <span key={s} className={'chip' + (i <= idx && idx >= 0 ? ' chip--ink' : '')}
-              style={{ fontSize: 10 }} title={s}>
-          {s.replace(/_/g, ' ').toLowerCase()}
+              style={{ fontSize: 10 }} title={stageLabel(s)}>
+          {stageLabel(s)}
         </span>
       ))}
     </div>
@@ -63,7 +90,9 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
   const [busy, setBusy] = useState(false)
   const [standing, setStanding] = useState(null)  // standing-authorization state
   const [journey, setJourney] = useState(null)    // saved guidance + checklist + audit status
+  const [progress, setProgress] = useState(null)  // live portal progress (polled)
   const landedOnDocs = useRef(false)
+  const progressSigRef = useRef('')
 
   async function refresh() {
     try {
@@ -90,6 +119,41 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
   const handoff = pending?.handoff
   const state = status?.state
   const terminal = isTerminal(state)
+  const startedNow = state && state !== 'DRAFT'
+
+  // Live progress polling while Ellis works in the background: the backend
+  // persists every real checkpoint, so refresh/restart shows the same state.
+  // When the background run pauses for the applicant (or the state advances),
+  // the full case is re-fetched so the matching handoff surface appears.
+  useEffect(() => {
+    if (!startedNow || terminal) return undefined
+    let live = true
+    async function tick() {
+      try {
+        const pr = await client.caseProgress(caseId)
+        if (!live) return
+        setProgress(pr)
+        const sig = `${pr.state}|${pr.waiting_for_applicant}|${pr.handoff}|${pr.run_status}`
+        if (progressSigRef.current && progressSigRef.current !== sig) refresh()
+        progressSigRef.current = sig
+      } catch { /* endpoint missing/offline: the manual Refresh still works */ }
+    }
+    tick()
+    const iv = setInterval(tick, 2500)
+    return () => { live = false; clearInterval(iv) }
+  }, [caseId, startedNow, terminal])
+
+  async function retryPortal() {
+    setBusy(true); setError(null)
+    try {
+      await client.retryPortal(caseId)
+      toast('Retrying from your last saved step')
+      refresh()
+    } catch (e) {
+      setError({ message: (e.detail && e.detail.message) || e.message })
+    }
+    setBusy(false)
+  }
 
   // Apply a workflow status response (from start/signals) to local state.
   function apply(res) {
@@ -182,7 +246,7 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
               {standing?.granted && !standing?.revoked ? (
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                   <span className="chip chip--ink" title={standing.text_hash}>
-                    Standing authorization v{standing.version} granted
+                    Your authorization is signed
                   </span>
                   <button className="btn" disabled={busy} onClick={start}>
                     {busy ? 'Starting…' : 'Start application'}
@@ -191,12 +255,13 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
               ) : (
                 <div>
                   <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 8 }}>
-                    First, grant Ellis its one-time standing authorization: it covers
-                    routine portal steps only. Payment always needs your separate,
-                    exact-amount confirmation.
+                    First, authorize Ellis to fill the official form for you. This
+                    covers routine portal steps only — it never replaces government
+                    declarations, CAPTCHA, verification codes, payment approval, or
+                    your final submission confirmation.
                   </div>
                   <button className="btn" onClick={() => setModal('standing_auth')}>
-                    Review & grant authorization
+                    Review and authorize Ellis
                   </button>
                 </div>
               )}
@@ -217,10 +282,8 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
           )}
 
           {started && !terminal && !handoff && (
-            <div className="card" style={{ padding: 22 }}>
-              <Loading label="Ellis is working through the portal" />
-              <button className="btn btn--ghost btn--sm" style={{ marginTop: 10 }} onClick={refresh}>Refresh status</button>
-            </div>
+            <ProgressCard progress={progress} busy={busy}
+              onRefresh={refresh} onRetry={retryPortal} />
           )}
 
           {terminal && <ResultView status={status} />}
@@ -272,7 +335,7 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
           title={copy.title} sub={copy.sub}
           onResolve={resolve} onClose={() => setModal(null)} />
       )}
-      {modal === 'payment_approval' && (
+      {(modal === 'payment_approval' || modal === 'fee_confirmation') && (
         <PaymentApprove pending={pending} onResolve={resolve} onClose={() => setModal(null)} />
       )}
       {(modal === 'payment' || modal === 'three_ds') && (
@@ -562,6 +625,69 @@ function HealthQuestions({ t, client, caseId, questions, onAnswered }) {
   )
 }
 
+// Live portal progress: every message derives from a REAL persisted checkpoint
+// (workflow state, per-field flow step, or a pending handoff) — the backend
+// never fabricates progress and never mentions Kimi for portal work (the
+// portal is driven by a secure browser session, not by Kimi).
+function formatElapsed(seconds) {
+  if (seconds == null || seconds < 0) return ''
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return m > 0 ? `${m}m ${s}s` : `${s}s`
+}
+
+function ProgressCard({ progress, busy, onRefresh, onRetry }) {
+  const pr = progress
+  if (!pr) {
+    return (
+      <div className="card" style={{ padding: 22 }} data-testid="portal-progress">
+        <Loading label="Checking your application status" />
+        <button className="btn btn--ghost btn--sm" style={{ marginTop: 10 }} onClick={onRefresh}>Refresh status</button>
+      </div>
+    )
+  }
+  const message = pr.step?.message || 'Working on your application'
+  const failed = !!pr.error && !pr.active && !pr.queued
+  return (
+    <div className="card" style={{ padding: 22 }} data-testid="portal-progress">
+      {pr.stalled ? (
+        <>
+          <div style={{ fontWeight: 700, marginBottom: 4 }}>Connection to the portal stalled</div>
+          <div style={{ fontSize: 13, color: 'var(--muted)' }}>{pr.stall_message}</div>
+        </>
+      ) : failed ? (
+        <>
+          <div style={{ fontWeight: 700, marginBottom: 4 }}>Paused</div>
+          <div style={{ fontSize: 13, color: 'var(--muted)' }}>
+            {pr.error.message} Your application data is saved.
+          </div>
+        </>
+      ) : (
+        <Loading label={message} />
+      )}
+      <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 10, display: 'flex',
+        gap: 12, flexWrap: 'wrap' }}>
+        {pr.elapsed_seconds != null && (
+          <span data-testid="progress-elapsed">Working for {formatElapsed(pr.elapsed_seconds)}</span>
+        )}
+        {pr.last_completed && (
+          <span data-testid="progress-last">Last completed: {pr.last_completed.message}</span>
+        )}
+        {pr.browser_session_alive && <span className="chip">Secure portal session active</span>}
+      </div>
+      <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+        <button className="btn btn--ghost btn--sm" onClick={onRefresh}>Refresh status</button>
+        {(pr.stalled || failed) && pr.retry_available && (
+          <button className="btn btn--sm" disabled={busy} onClick={onRetry}
+            data-testid="progress-retry">
+            {busy ? 'Retrying…' : 'Retry the connection'}
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function ReviewPanel({ answers, onApprove, busy }) {
   // Calendar dates display as U.S. MM/DD/YYYY; the answer values stay ISO.
   const fields = Object.entries(answers || {}).map(([label, value]) => ({
@@ -570,7 +696,7 @@ function ReviewPanel({ answers, onApprove, busy }) {
     <div className="card" style={{ padding: 14, background: '#fff' }}>
       <KVList fields={fields.length ? fields : [{ label: 'No answers yet', value: '' }]} />
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
-        <button className="btn" disabled={busy} onClick={onApprove}>{busy ? 'Approving…' : 'Approve & continue'}</button>
+        <button className="btn" disabled={busy} onClick={onApprove}>{busy ? 'Confirming…' : 'Confirm and continue'}</button>
       </div>
     </div>
   )
@@ -614,8 +740,15 @@ function ResultView({ status }) {
         {d.isReal ? '✓' : '⚠'}
       </div>
       <div style={{ fontSize: 18, fontWeight: 700 }}>
-        {d.isReal ? 'Application submitted' : d.displayStatus}
+        {d.isReal ? 'Application submitted — pending government decision' : d.displayStatus}
       </div>
+      {d.isReal && (
+        <div style={{ fontSize: 12.5, color: 'var(--muted)', margin: '4px 0 6px' }}>
+          The government will review your application. Submission does not
+          guarantee approval; Ellis will show the official decision when the
+          portal publishes it.
+        </div>
+      )}
       {!d.isReal && (
         <div style={{ fontSize: 13, color: '#9a3412', background: '#fff7ed',
           border: '1px solid #f59e0b', borderRadius: 8, padding: '8px 10px', margin: '8px 0' }}>

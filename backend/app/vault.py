@@ -1,9 +1,14 @@
 """Encrypted secrets vault. Portal passwords and session tokens are stored only
-as ciphertext keyed by an opaque reference; the DB persists just the reference.
+as ciphertext keyed by an opaque reference; the rest of the DB persists just
+the reference.
 
-Production backend: AWS Secrets Manager (activation: set AWS_SECRETS_PREFIX +
-credentials). Local/dev/test: AES-256-GCM with a key derived from
-ELLIS_VAULT_PASSPHRASE. Plaintext is never written to the DB, logs, or email.
+Ciphertext is persisted to the vault_secrets table (write-through cache in
+front), so a backend/worker restart can still reveal a persisted session or
+credential reference — the workflow no longer loses its portal session refs on
+restart. Production backend: AWS Secrets Manager (activation: set
+AWS_SECRETS_PREFIX + credentials). Encryption: AES-256-GCM with a key derived
+from ELLIS_VAULT_PASSPHRASE. Plaintext is never written to the DB, logs, or
+email.
 """
 from __future__ import annotations
 
@@ -14,7 +19,57 @@ import secrets
 
 from .config import settings
 
-_BACKENDS = {}  # ref -> ciphertext (in-memory here; AWS/Secrets table in prod)
+_BACKENDS = {}  # ref -> ciphertext (write-through cache over vault_secrets)
+
+
+def _db_session():
+    from .db import SessionLocal
+    return SessionLocal()
+
+
+def _db_put(ref: str, ciphertext: str, meta: dict | None) -> None:
+    from . import models
+    db = _db_session()
+    try:
+        row = db.get(models.VaultSecret, ref)
+        if row is None:
+            db.add(models.VaultSecret(ref=ref, ciphertext=ciphertext, meta=meta or {}))
+        else:
+            row.ciphertext = ciphertext
+        db.commit()
+    except Exception:  # noqa: BLE001 — cache still holds it for this process
+        db.rollback()
+    finally:
+        db.close()
+
+
+def _db_get(ref: str) -> str | None:
+    from . import models
+    db = _db_session()
+    try:
+        row = db.get(models.VaultSecret, ref)
+        return row.ciphertext if row is not None else None
+    except Exception:  # noqa: BLE001
+        return None
+    finally:
+        db.close()
+
+
+def _db_delete(ref: str) -> bool:
+    from . import models
+    db = _db_session()
+    try:
+        row = db.get(models.VaultSecret, ref)
+        if row is None:
+            return False
+        db.delete(row)
+        db.commit()
+        return True
+    except Exception:  # noqa: BLE001
+        db.rollback()
+        return False
+    finally:
+        db.close()
 
 
 def _key() -> bytes:
@@ -75,25 +130,35 @@ def _decrypt(blob: str) -> str:
 
 def store(secret_value: str, meta: dict | None = None) -> dict:
     ref = "vault://local/" + secrets.token_hex(16)
-    _BACKENDS[ref] = _encrypt(secret_value)
+    ct = _encrypt(secret_value)
+    _BACKENDS[ref] = ct
+    _db_put(ref, ct, meta)
     return {"ref": ref, "provider": "local_encrypted", "meta": meta or {}}
 
 
 def reveal(ref: str) -> str:
-    if ref not in _BACKENDS:
-        raise KeyError("vault ref not found")
-    return _decrypt(_BACKENDS[ref])
+    ct = _BACKENDS.get(ref)
+    if ct is None:
+        ct = _db_get(ref)   # restart survival: rehydrate from vault_secrets
+        if ct is None:
+            raise KeyError("vault ref not found")
+        _BACKENDS[ref] = ct
+    return _decrypt(ct)
 
 
 def rotate(ref: str, new_value: str) -> dict:
-    if ref not in _BACKENDS:
+    if _BACKENDS.get(ref) is None and _db_get(ref) is None:
         raise KeyError("vault ref not found")
-    _BACKENDS[ref] = _encrypt(new_value)
+    ct = _encrypt(new_value)
+    _BACKENDS[ref] = ct
+    _db_put(ref, ct, None)
     return {"ref": ref, "rotated": True}
 
 
 def destroy(ref: str) -> bool:
-    return _BACKENDS.pop(ref, None) is not None
+    in_cache = _BACKENDS.pop(ref, None) is not None
+    in_db = _db_delete(ref)
+    return in_cache or in_db
 
 
 def persists_plaintext() -> bool:

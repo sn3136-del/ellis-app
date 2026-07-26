@@ -14,9 +14,10 @@ from fastapi import FastAPI, Depends, HTTPException, Header, Request, Response
 from pydantic import BaseModel
 from sqlalchemy import select
 
-from .config import capabilities
+from .config import capabilities, settings
 from .db import get_session, create_all
-from . import models, audit, service, execution
+from . import models, audit, service, execution, portal_queue
+from . import progress as progress_vocab
 from .security import (Principal, get_principal, require_owner, require_admin,
                        issue_action_token, verify_action_token)
 from .providers import ocr as ocr_provider
@@ -67,6 +68,9 @@ def _startup():
     create_all()
     _init_sentry()
     _init_otel()
+    # Background portal-run executor (no-op in test runtime): live portal work
+    # never runs inside an HTTP request.
+    portal_queue.start_executor()
 
 
 @app.get("/healthz")
@@ -1478,6 +1482,9 @@ class SignBody(BaseModel):
     signature_value: str = ""
     step_up_token: str                # short-lived action token proving step-up auth
     auth_method: str = "email_otp"
+    # Binds the signature to the EXACT envelope the prepare step returned, so
+    # a concurrently created envelope can never swap the document terms.
+    envelope_id: str = ""
 
 
 @app.post("/cases/{application_id}/authorization/prepare")
@@ -1513,7 +1520,7 @@ def prepare_authorization(application_id: str, body: Authorization, db=Depends(g
                  detail={"document_hash": dh, "app_snapshot_hash": snap}, actor=p.user_id)
     return {"document_text": text, "document_hash": dh, "app_snapshot_hash": snap,
             "step_up_token": token, "consent_version": esign.CONSENT_VERSION,
-            "template_version": esign.TEMPLATE_VERSION}
+            "template_version": esign.TEMPLATE_VERSION, "envelope_id": env.id}
 
 
 @app.post("/cases/{application_id}/authorization/sign")
@@ -1526,16 +1533,27 @@ def sign_authorization_doc(application_id: str, body: SignBody, request: Request
     verify_action_token(body.step_up_token, "esign", application_id)
     docs = [d.name for d in db.execute(select(models.StoredDocument).where(
         models.StoredDocument.application_id == application_id)).scalars().all()]
+    # The envelope the applicant actually prepared — never "whichever row is
+    # newest": a concurrently created envelope must not swap the terms between
+    # prepare and sign (duplicate envelope rows are routine and harmless now).
+    env = None
+    if body.envelope_id:
+        env = db.get(models.AuthorizationEnvelope, body.envelope_id)
+        if env is None or env.application_id != application_id:
+            raise HTTPException(404, "authorization envelope not found")
+    env = env or _latest_env(db, application_id)
+    if env is None:
+        raise HTTPException(409, "prepare the authorization before signing")
     text = esign.build_authorization_text(
         applicant={"full_name": applicant.full_name, "email": applicant.email},
         org_id=app_row.org_id, case_id=application_id, app_version=app_row.current_version,
         destination=app_row.destination_country, visa_type=app_row.visa_type,
         portal=app_row.destination_country,
-        max_fee_cents=_latest_env(db, application_id).max_fee_cents,
-        currency=_latest_env(db, application_id).currency,
-        allow_auto_book=_latest_env(db, application_id).allow_auto_book,
-        allow_auto_reschedule=_latest_env(db, application_id).allow_auto_reschedule,
-        allow_representative_submit=_latest_env(db, application_id).allow_representative_submit)
+        max_fee_cents=env.max_fee_cents,
+        currency=env.currency,
+        allow_auto_book=env.allow_auto_book,
+        allow_auto_reschedule=env.allow_auto_reschedule,
+        allow_representative_submit=env.allow_representative_submit)
     req = esign.SignatureRequest(
         applicant={"full_name": applicant.full_name, "email": applicant.email},
         org_id=app_row.org_id, case_id=application_id, app_version=app_row.current_version,
@@ -1558,11 +1576,10 @@ def sign_authorization_doc(application_id: str, body: SignBody, request: Request
     db.add(sig)
     db.flush()
     _sig_event(db, sig.id, application_id, "signed", {"artifact_hash": result["artifact_hash"]})
-    # Mark the envelope completed so the workflow authorization gate is satisfied.
-    env = _latest_env(db, application_id)
-    if env:
-        env.status = "completed"
-        env.artifact_hash = result["artifact_hash"]
+    # Mark the SAME envelope completed so the workflow authorization gate is
+    # satisfied — the one whose terms were signed, not the newest row.
+    env.status = "completed"
+    env.artifact_hash = result["artifact_hash"]
     db.commit()
     audit.record(db, org_id=p.org_id, application_id=application_id, action="authorization_signed_native",
                  detail={"artifact_hash": result["artifact_hash"], "method": result["signature_method"]},
@@ -1862,6 +1879,8 @@ def start_case(application_id: str, db=Depends(get_session), p: Principal = Depe
                 "reason": "documents_incomplete", "required_remaining": remaining,
                 "message": f"Submit {remaining} remaining required "
                            f"document{'s' if remaining != 1 else ''} before starting."})
+    if _live_background_route(db, app_row):
+        return _queue_signal_response(db, p, app_row, "start", {})
     return _signal_or_gate_error(db, p, application_id, "start")
 
 
@@ -1898,7 +1917,78 @@ def send_signal(application_id: str, name: str, body: Optional[SignalBody] = Non
                      detail={"keys": sorted(answers.keys()),
                              "signatures_invalidated": invalidated}, actor=p.user_id)
         kwargs["answers"] = answers
+    app_row = db.get(models.VisaApplication, application_id)
+    if name != "cancel" and _live_background_route(db, app_row):
+        return _queue_signal_response(db, p, app_row, name, kwargs)
+    if name == "cancel":
+        # Cancel any queued background work along with the case itself.
+        run = portal_queue.active_run(db, application_id)
+        if run is not None and run.status == "queued":
+            run.status = "cancelled"
+            db.commit()
     return _signal_or_gate_error(db, p, application_id, name, **kwargs)
+
+
+def _live_background_route(db, app_row) -> bool:
+    """True when this case executes on a live released-flow adapter: portal
+    work must then run as a durable background run, never inside the HTTP
+    request. Mock/local portals stay synchronous (they are instant)."""
+    if settings().mock_portal_allowed:
+        return False
+    from .portal.released_flow import resolve_released_route
+    try:
+        return resolve_released_route(db, app_row) is not None
+    except Exception:  # noqa: BLE001 — resolution failure = classic sync path
+        return False
+
+
+def _queue_signal_response(db, p: Principal, app_row, name: str, kwargs: dict):
+    """Record the applicant's signal as a durable PortalRun and return
+    immediately. Repeated clicks reuse the active run (idempotent). The same
+    safety gates as the synchronous path are checked here for an honest 409;
+    the executor re-checks them via enforce_safety before any portal work."""
+    from . import personal_gate, passport_validity, final_review
+    from .execution import ExecutionClass
+    application_id = app_row.id
+    try:
+        personal_gate.assert_ready_for_live_action(db, app_row, ExecutionClass.LIVE_PRODUCTION)
+    except personal_gate.PreparationOnlyMode as e:
+        audit.record(db, org_id=p.org_id, application_id=application_id,
+                     action="live_action_blocked_preparation_mode",
+                     detail={"missing_gates": e.missing_gates, "missing_info": e.missing_info,
+                             "signal": name}, actor=p.user_id)
+        raise HTTPException(409, str(e))
+    verdict = passport_validity.check_case_passport(db, app_row)
+    if verdict.get("blocking"):
+        passport_validity.enforce_and_notify(db, app_row, verdict)
+        raise HTTPException(409, detail={"reason": "passport_validity", "verdict": verdict})
+    # Live portals can send verification codes: the applicant must have
+    # confirmed their contact details before Ellis starts portal execution.
+    if name == "sign_authorization" and not _contact_confirmed(db, application_id):
+        raise HTTPException(409, detail={
+            "reason": "contact_unconfirmed",
+            "message": "Confirm your email and phone number before Ellis "
+                       "opens the official portal."})
+    # A run may submit only when a CURRENT signed final review exists at the
+    # moment the applicant acts — the applicant's explicit confirmation.
+    rv = final_review.latest(db, application_id)
+    allow_submit = bool(rv is not None and rv.signed and not getattr(rv, "invalidated", False))
+    run, created = portal_queue.enqueue(db, app_row=app_row, signal_name=name,
+                                        kwargs=kwargs, allow_submit=allow_submit)
+    audit.record(db, org_id=p.org_id, application_id=application_id,
+                 action="portal_run_enqueued" if created else "portal_run_reused",
+                 detail={"signal": name, "run_id": run.id}, actor=p.user_id)
+    exec_row = db.execute(select(models.WorkflowExecution).where(
+        models.WorkflowExecution.application_id == application_id)).scalar_one_or_none()
+    return {"case_id": application_id, "state": app_row.state,
+            "pending": exec_row.pending if exec_row else None,
+            "queued": True, "run_id": run.id, "run_reused": not created}
+
+
+def _contact_confirmed(db, application_id: str) -> bool:
+    from . import checklist_intake
+    return checklist_intake.stage_progress(db, application_id,
+                                           stage="contact_confirmed") is not None
 
 
 def _validated_information_answers(db, application_id: str, raw: dict) -> dict:
@@ -1935,8 +2025,181 @@ def _validated_information_answers(db, application_id: str, raw: dict) -> dict:
 @app.get("/cases/{application_id}/audit")
 def get_audit(application_id: str, db=Depends(get_session), p: Principal = Depends(get_principal)):
     _owned(db, p, application_id)
-    return {"events": [{"seq": e.seq, "action": e.action, "detail": e.detail, "actor": e.actor}
+    return {"events": [{"seq": e.seq, "action": e.action, "detail": e.detail, "actor": e.actor,
+                        "at": e.at.isoformat() if e.at else None}
                        for e in audit.for_application(db, application_id)]}
+
+
+@app.get("/cases/{application_id}/progress")
+def case_progress(application_id: str, db=Depends(get_session),
+                  p: Principal = Depends(get_principal)):
+    """Applicant-safe live progress: real checkpoints only (workflow state,
+    per-field flow steps, handoffs). Never selectors, secrets, stack traces,
+    document contents, or PII."""
+    from datetime import datetime, timezone
+    app_row = _owned(db, p, application_id)
+    exec_row = db.execute(select(models.WorkflowExecution).where(
+        models.WorkflowExecution.application_id == application_id)).scalar_one_or_none()
+    state = exec_row.state if exec_row else app_row.state
+    pending = exec_row.pending if exec_row else None
+    run = portal_queue.latest_run(db, application_id)
+    now = datetime.now(timezone.utc)
+
+    def _aw(dt):
+        return None if dt is None else (dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc))
+
+    active = run is not None and run.status in ("queued", "running")
+    last_cp = _aw(run.last_checkpoint_at) if run else None
+    stalled = bool(run and (run.status == "stalled" or (
+        run.status == "running" and last_cp is not None and
+        (now - last_cp).total_seconds() > portal_queue.STALL_AFTER_SECONDS)))
+    if pending:
+        step = progress_vocab.step_for_state(state, pending)
+    elif stalled:
+        step = "stalled"
+    elif active and run.current_step_key:
+        step = run.current_step_key
+    else:
+        step = progress_vocab.step_for_state(state, None)
+    last_done = db.execute(select(models.CaseProgressEvent).where(
+        models.CaseProgressEvent.application_id == application_id,
+        models.CaseProgressEvent.status == "done").order_by(
+        models.CaseProgressEvent.at.desc(),
+        models.CaseProgressEvent.id.desc())).scalars().first()
+    started = _aw(run.started_at) if run else None
+    session_row = db.execute(select(models.BrowserSession).where(
+        models.BrowserSession.application_id == application_id,
+        models.BrowserSession.status == "open")).scalars().first()
+    retryable = portal_queue.retry_available(db, app_row, exec_row)
+    failed = bool(run and run.status in ("failed", "stalled")) or state == "RECOVERABLE_FAILURE"
+    return {
+        "state": state,
+        "queued": bool(run and run.status == "queued"),
+        "active": active and not stalled,
+        "waiting_for_applicant": bool(pending),
+        "handoff": (pending or {}).get("handoff", ""),
+        "purpose": (pending or {}).get("purpose", ""),
+        "step": {"key": step, "message": progress_vocab.message_for(step)},
+        "last_completed": ({"key": last_done.step_key,
+                            "message": progress_vocab.message_for(last_done.step_key),
+                            "at": _aw(last_done.at).isoformat()} if last_done else None),
+        "elapsed_seconds": (int((now - started).total_seconds())
+                            if started and active else None),
+        "last_checkpoint_at": last_cp.isoformat() if last_cp else None,
+        "stalled": stalled,
+        "stall_message": progress_vocab.STEP_MESSAGES["stalled"] if stalled else "",
+        "error": ({"message": (run.error if run and run.error else
+                               "The official portal did not respond as expected."),
+                   "retryable": retryable} if failed else None),
+        "retry_available": retryable,
+        "browser_session_alive": session_row is not None,
+        "run_status": run.status if run else "",
+    }
+
+
+@app.post("/cases/{application_id}/portal/retry")
+def retry_portal(application_id: str, db=Depends(get_session),
+                 p: Principal = Depends(get_principal)):
+    """Applicant-triggered retry from the last safe checkpoint. Available only
+    for stalled/failed reversible work; irreversible steps stay guarded by
+    reconcile-before-act, allow_submit and the lost-session check. Never runs
+    automatically."""
+    app_row = _owned(db, p, application_id)
+    if not _live_background_route(db, app_row):
+        raise HTTPException(409, detail={"reason": "retry_unavailable"})
+    exec_row = db.execute(select(models.WorkflowExecution).where(
+        models.WorkflowExecution.application_id == application_id)).scalar_one_or_none()
+    if not portal_queue.retry_available(db, app_row, exec_row):
+        raise HTTPException(409, detail={"reason": "retry_unavailable"})
+    audit.record(db, org_id=p.org_id, application_id=application_id,
+                 action="portal_retry_requested", detail={}, actor=p.user_id)
+    return _queue_signal_response(db, p, app_row, "start", {})
+
+
+class ContactBody(BaseModel):
+    email: str = ""
+    phone: str = ""
+    phone_country_code: str = ""
+    otp_preference: str = ""   # email | sms, when the portal offers a choice
+    confirm: bool = False
+
+
+def _mask_phone(ph: str) -> str:
+    digits = re.sub(r"\D", "", ph or "")
+    return ("•••• " + digits[-4:]) if len(digits) >= 4 else ("••••" if digits else "")
+
+
+@app.get("/cases/{application_id}/contact-confirmation")
+def get_contact_confirmation(application_id: str, db=Depends(get_session),
+                             p: Principal = Depends(get_principal)):
+    """The applicant-controlled email + masked phone the portal will use for
+    verification codes — confirmed explicitly before portal execution."""
+    app_row = _owned(db, p, application_id)
+    applicant = db.get(models.Applicant, app_row.applicant_id)
+    answers = app_row.answers or {}
+    email = (answers.get("email") or (applicant.email if applicant else "") or "").strip()
+    phone = (answers.get("phone") or (applicant.phone if applicant else "") or "").strip()
+    return {"email": email, "phone_masked": _mask_phone(phone),
+            "has_email": bool(email), "has_phone": bool(phone),
+            "phone_country_code": str(answers.get("phone_country_code") or ""),
+            "otp_preference": str(answers.get("otp_preference") or ""),
+            "confirmed": _contact_confirmed(db, application_id)}
+
+
+@app.post("/cases/{application_id}/contact-confirmation")
+def confirm_contact(application_id: str, body: ContactBody, db=Depends(get_session),
+                    p: Principal = Depends(get_principal)):
+    """Edit and/or confirm the contact details before the portal can send a
+    code. Edits are material changes (signatures invalidate per §7). Audit
+    records masked values only — never the full email or phone."""
+    app_row = _owned(db, p, application_id)
+    applicant = db.get(models.Applicant, app_row.applicant_id)
+    answers = dict(app_row.answers or {})
+    changed = False
+    if body.email.strip():
+        email = body.email.strip()
+        if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email):
+            raise HTTPException(422, detail={"reason": "invalid_email",
+                                             "message": "Enter a valid email address."})
+        if email != answers.get("email"):
+            answers["email"] = email
+            if applicant:
+                applicant.email = email
+            changed = True
+    if body.phone.strip():
+        digits = re.sub(r"\D", "", body.phone)
+        if len(digits) < 5 or len(digits) > 15:
+            raise HTTPException(422, detail={"reason": "invalid_phone",
+                                             "message": "Enter a valid phone number."})
+        if body.phone.strip() != answers.get("phone"):
+            answers["phone"] = body.phone.strip()
+            if applicant:
+                applicant.phone = body.phone.strip()
+            changed = True
+    if body.phone_country_code.strip():
+        answers["phone_country_code"] = body.phone_country_code.strip()
+        changed = True
+    if body.otp_preference in ("email", "sms"):
+        answers["otp_preference"] = body.otp_preference
+        changed = True
+    if changed:
+        app_row.answers = answers
+        db.commit()
+        invalidate_signatures_if_changed(db, application_id)
+    if body.confirm:
+        from . import checklist_intake
+        if checklist_intake.stage_progress(db, application_id,
+                                           stage="contact_confirmed") is None:
+            db.add(models.CaseStageProgress(org_id=app_row.org_id,
+                                            application_id=application_id,
+                                            stage="contact_confirmed"))
+            db.commit()
+    audit.record(db, org_id=p.org_id, application_id=application_id,
+                 action="contact_details_confirmed" if body.confirm else "contact_details_updated",
+                 detail={"changed": changed,
+                         "phone_masked": _mask_phone(answers.get("phone", ""))},
+                 actor=p.user_id)
+    return get_contact_confirmation(application_id, db, p)
 
 
 @app.get("/cases/{application_id}/appointment")

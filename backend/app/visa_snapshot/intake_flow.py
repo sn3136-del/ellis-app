@@ -399,6 +399,25 @@ def is_health_label(label: str) -> bool:
     return any(w in low for w in _HEALTH_LABEL_WORDS)
 
 
+# A payment method is NEVER a document: it belongs to the payment stage of the
+# workflow, where the applicant sees the real fee and chooses among the
+# portal's actual payment options. A guidance label like "Payment method
+# (credit/debit card)" must not become an uploadable checklist requirement —
+# checklist completion can never depend on it.
+_PAYMENT_LABEL_WORDS = ("payment method", "payment card", "credit card",
+                        "debit card", "method of payment", "means of payment",
+                        "payment of the fee", "visa fee payment", "fee payment")
+
+
+def is_payment_label(label: str) -> bool:
+    low = str(label or "").lower()
+    if any(w in low for w in _PAYMENT_LABEL_WORDS):
+        return True
+    # A bare "payment"-titled item with no document-ish qualifier is the
+    # payment stage, not a document (e.g. "Payment", "Online payment").
+    return bool(re.fullmatch(r"(online |e-?)?payment( method)?s?", low.strip()))
+
+
 def doc_type_for_label(label: str) -> str:
     low = str(label or "").lower()
     for doc_type, keys in _DOC_TYPE_KEYWORDS:
@@ -507,6 +526,8 @@ def derive_document_checklist(guidance: dict, *, answers: dict | None = None) ->
     for label in (g.get("required_documents") or []):
         if is_health_label(label):
             continue  # handled via structured health_requirements only
+        if is_payment_label(label):
+            continue  # payment is a workflow stage, never a document (Part 1)
         dt = doc_type_for_label(label)
         if dt == "passport":
             continue

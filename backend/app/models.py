@@ -290,6 +290,59 @@ class WorkflowExecution(Base, TimestampMixin):
     history: Mapped[list] = mapped_column(JSON, default=list)
 
 
+class PortalRun(Base, TimestampMixin):
+    """One durable background portal-execution work item. The API records the
+    applicant's signal here and returns immediately; an executor (in-process
+    thread or the worker) claims the run atomically and drives the workflow.
+    At most one queued/running row exists per case — repeated clicks reuse it,
+    so duplicate portal runs are structurally impossible."""
+    __tablename__ = "portal_runs"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    org_id: Mapped[str] = mapped_column(String(64), index=True)
+    application_id: Mapped[str] = mapped_column(ForeignKey("visa_applications.id"), index=True)
+    # queued | running | waiting_applicant | completed | failed | stalled | cancelled
+    status: Mapped[str] = mapped_column(String(24), default="queued", index=True)
+    signal_name: Mapped[str] = mapped_column(String(40), default="start")
+    # Sanitized signal arguments. OTP/verification tokens are NEVER stored here
+    # — they travel as a vault reference destroyed on first use.
+    signal_kwargs: Mapped[dict] = mapped_column(JSON, default=dict)
+    # True only for runs enqueued by an explicit applicant action taken AFTER a
+    # current signed final review exists — the only runs allowed to submit.
+    allow_submit: Mapped[bool] = mapped_column(Boolean, default=False)
+    claimed_by: Mapped[str] = mapped_column(String(80), default="")
+    lease_expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    started_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    finished_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    # Applicant-safe progress pointer (progress-vocabulary key, never selectors).
+    current_step_key: Mapped[str] = mapped_column(String(64), default="")
+    last_checkpoint_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    error: Mapped[str] = mapped_column(String(300), default="")
+
+
+class CaseProgressEvent(Base):
+    """Applicant-safe progress checkpoints (step key + status only — never a
+    selector, secret, or document content). Persisted so refresh shows the
+    same progress and elapsed/last-completed are accurate."""
+    __tablename__ = "case_progress_events"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    application_id: Mapped[str] = mapped_column(String(32), index=True)
+    step_key: Mapped[str] = mapped_column(String(64))
+    status: Mapped[str] = mapped_column(String(16), default="active")  # active|done|failed|handoff
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class VaultSecret(Base, TimestampMixin):
+    """Encrypted vault backend: ciphertext only, keyed by the opaque reference
+    the rest of the system stores. Survives backend/worker restarts so a
+    persisted session/credential ref can still be revealed. Plaintext never
+    touches this table."""
+    __tablename__ = "vault_secrets"
+    ref: Mapped[str] = mapped_column(String(120), primary_key=True)
+    ciphertext: Mapped[str] = mapped_column(Text)
+    meta: Mapped[dict] = mapped_column(JSON, default=dict)
+
+
 class HumanHandoff(Base, TimestampMixin):
     __tablename__ = "human_handoffs"
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)

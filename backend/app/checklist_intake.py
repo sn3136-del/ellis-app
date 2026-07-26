@@ -63,7 +63,9 @@ def case_guidance(db, application_id: str) -> CaseRouteGuidance | None:
 def current_checklist(db, app_row, cg: CaseRouteGuidance | None = None) -> list[dict]:
     """The case's current checklist items, re-derived against the CURRENT
     answers when conditional (health) requirements exist — an item Kimi later
-    deems irrelevant disappears here. Persists the refresh."""
+    deems irrelevant disappears here. Persists the refresh. Also heals any
+    previously saved checklist that contains a payment-labeled item: payment
+    is a workflow stage, never a document requirement (Part 1)."""
     cg = cg or case_guidance(db, app_row.id)
     if cg is None:
         return []
@@ -72,10 +74,12 @@ def current_checklist(db, app_row, cg: CaseRouteGuidance | None = None) -> list[
     if g_inner.get("health_requirements"):
         checklist = intake_flow.derive_document_checklist(
             g_inner, answers=app_row.answers or {})
-        if checklist != (cg.checklist or []):
-            cg.checklist = checklist
-            db.commit()
-    return checklist
+    healed = [item for item in checklist
+              if not intake_flow.is_payment_label(item.get("label", ""))]
+    if healed != (cg.checklist or []):
+        cg.checklist = healed
+        db.commit()
+    return healed
 
 
 def document_rows(db, application_id: str) -> list[dict]:

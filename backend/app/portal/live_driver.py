@@ -141,8 +141,11 @@ class BrowserbaseLiveViewDriver:
                                "no Browserbase connect URL for the session")
         from playwright.sync_api import sync_playwright  # pragma: no cover
         self._pw = sync_playwright().start()             # pragma: no cover
-        browser = self._pw.chromium.connect_over_cdp(connect)  # pragma: no cover
-        self.page = browser.contexts[0].pages[0]         # pragma: no cover
+        # Bounded connect: a stalled Browserbase session must never hang the
+        # caller indefinitely (same 60s cap as live_browser).
+        browser = self._pw.chromium.connect_over_cdp(connect, timeout=60_000)  # pragma: no cover
+        ctx = browser.contexts[0] if browser.contexts else browser.new_context()  # pragma: no cover
+        self.page = ctx.pages[0] if ctx.pages else ctx.new_page()  # pragma: no cover
         return self.page
 
     def _goto(self, url: str):

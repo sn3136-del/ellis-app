@@ -71,8 +71,40 @@ export function SignatureModal({ client, caseId, authorization, onDone, onClose 
   const [typed, setTyped] = useState('')
   const [signed, setSigned] = useState(null)
   const [busy, setBusy] = useState(false)
+  const [continuing, setContinuing] = useState(false)
+  const [continued, setContinued] = useState(false)
+  const [contact, setContact] = useState(null)   // {email, phone_masked, confirmed}
+  const [editingContact, setEditingContact] = useState(false)
+  const [contactEmail, setContactEmail] = useState('')
+  const [contactPhone, setContactPhone] = useState('')
   const canvasRef = useRef(null)
   const drawnRef = useRef('')
+
+  // The portal may send verification codes: the applicant confirms (or edits)
+  // the email + masked phone BEFORE Ellis opens the official portal.
+  useEffect(() => {
+    let live = true
+    client.getContactConfirmation(caseId)
+      .then((c) => { if (live) setContact(c) })
+      .catch(() => { if (live) setContact({ missing_endpoint: true, confirmed: true }) })
+    return () => { live = false }
+  }, [caseId])
+
+  async function saveContact(confirm) {
+    try {
+      const body = { confirm: !!confirm }
+      if (editingContact) {
+        if (contactEmail.trim()) body.email = contactEmail.trim()
+        if (contactPhone.trim()) body.phone = contactPhone.trim()
+      }
+      const c = await client.confirmContact(caseId, body)
+      setContact(c)
+      setEditingContact(false)
+      if (confirm) toast('Contact details confirmed')
+    } catch (e) {
+      setError({ message: (e.detail && e.detail.message) || e.message })
+    }
+  }
 
   useEffect(() => {
     let live = true
@@ -155,15 +187,76 @@ export function SignatureModal({ client, caseId, authorization, onDone, onClose 
       {signed && (
         <div className="result" style={{ marginTop: 12 }}>
           <div className="sevbadge sevbadge--ok" style={{ marginBottom: 8 }}>✓</div>
-          <div style={{ fontWeight: 700 }}>Signed and recorded</div>
+          <div style={{ fontWeight: 700 }}>Your authorization is signed</div>
+          <div style={{ fontSize: 12.5, color: 'var(--muted)', margin: '4px 0 8px' }}>
+            Ellis can now help complete the official form. CAPTCHA, verification
+            codes, payment approval and the final submission always stay with you.
+          </div>
           <KVList fields={[
             { label: 'Signature ID', value: signed.signature_id },
-            { label: 'Artifact hash', value: (signed.artifact_hash || '').slice(0, 24) + '…' },
             { label: 'Signed at', value: signed.signed_at }
           ]} />
+          {contact && !contact.missing_endpoint && (
+            <div className="card card--soft" style={{ padding: 12, marginTop: 10 }}
+              data-testid="contact-confirm">
+              <div className="eyebrow">Where the portal can reach you</div>
+              <div style={{ fontSize: 13, marginTop: 4 }}>
+                Verification codes from the official portal will go to:
+              </div>
+              {!editingContact ? (
+                <>
+                  <KVList fields={[
+                    { label: 'Email', value: contact.email || '— add an email —' },
+                    { label: 'Phone', value: contact.phone_masked || '— add a phone number —' }
+                  ]} />
+                  <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                    {!contact.confirmed && (
+                      <button className="btn btn--sm" disabled={!contact.has_email}
+                        onClick={() => saveContact(true)}
+                        data-testid="confirm-contact">These are correct</button>
+                    )}
+                    {contact.confirmed && <span className="chip chip--ink">Confirmed</span>}
+                    <button className="btn btn--sm btn--ghost"
+                      onClick={() => { setEditingContact(true); setContactEmail(contact.email || ''); setContactPhone('') }}>
+                      Edit
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div style={{ marginTop: 8 }}>
+                  <div className="field"><label>Email</label>
+                    <input className="input" value={contactEmail}
+                      onChange={(e) => setContactEmail(e.target.value)} /></div>
+                  <div className="field"><label>Phone (with country code)</label>
+                    <input className="input" value={contactPhone} placeholder="+86 …"
+                      onChange={(e) => setContactPhone(e.target.value)} /></div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="btn btn--sm" onClick={() => saveContact(true)}>Save and confirm</button>
+                    <button className="btn btn--sm btn--ghost" onClick={() => setEditingContact(false)}>Cancel</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          {error && <ErrorNote error={error} />}
           <div className="modal__foot">
             {signed.download && <button className="btn btn--ghost" onClick={() => window.ellis?.openExternal?.(client.base ? client.base + signed.download : signed.download)}>Download signed PDF</button>}
-            <button className="btn" onClick={() => onDone && onDone(signed)}>Continue</button>
+            <button className="btn" data-testid="continue-to-portal"
+              disabled={continuing || continued || (contact && !contact.missing_endpoint && !contact.confirmed)}
+              onClick={async () => {
+                // One accepted click only: disable immediately, await the
+                // (fast, queued) signal, and surface failures honestly.
+                setContinuing(true); setError(null)
+                try {
+                  await (onDone && onDone(signed))
+                  setContinued(true)
+                } catch (e) {
+                  setError({ message: (e.detail && e.detail.message) || e.message })
+                  setContinuing(false)
+                }
+              }}>
+              {continued ? 'Continuing…' : continuing ? 'Starting…' : 'Continue to the official application'}
+            </button>
           </div>
         </div>
       )}
@@ -183,6 +276,8 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
   const t = useT()
   const [busy, setBusy] = useState(false)
   const [token, setToken] = useState(null)
+  const [typedCode, setTypedCode] = useState('')
+  const [maskedDest, setMaskedDest] = useState(null)
   const [error, setError] = useState(null)
   // Live-view state: 'connecting' | 'embedded' | 'unavailable' | 'closed'.
   // liveUrl is kept ONLY here (component state) — see privacy invariants above.
@@ -197,6 +292,11 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
   useEffect(() => {
     if (handoff === 'email_verification' || handoff === 'otp') {
       client.mockVerification(caseId).then((r) => setToken(r.token)).catch(() => {})
+      // Masked destination only — the full email/phone never renders here.
+      client.getContactConfirmation(caseId).then((c) => {
+        setMaskedDest(handoff === 'otp' && c.phone_masked ? c.phone_masked
+          : (c.email ? c.email.replace(/^(.).*(@.*)$/, '$1•••$2') : null))
+      }).catch(() => {})
     }
   }, [handoff, caseId])
 
@@ -254,7 +354,8 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
     setBusy(true); setError(null)
     try {
       if (handoff === 'email_verification' || handoff === 'otp') {
-        await onResolve('verify_email', { token })
+        await onResolve('verify_email', { token: typedCode.trim() || token })
+        setTypedCode('')                        // never retained after use
       } else if (handoff === 'captcha') {
         await onResolve('solve_captcha')
       } else {
@@ -275,10 +376,24 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
         </div>
       )}
       {(handoff === 'email_verification' || handoff === 'otp') && (
-        <div style={{ fontSize: 13, marginTop: 12 }}>
-          The portal emailed you a verification link. Open it (or, in this demo,
-          Ellis detected the code from the mock inbox), then confirm below.
-          {token && <div className="chip" style={{ marginTop: 8 }}>Verification detected</div>}
+        <div style={{ fontSize: 13, marginTop: 12 }} data-testid="otp-panel">
+          <strong>Enter the verification code sent by the visa portal.</strong>
+          {maskedDest && (
+            <div style={{ color: 'var(--muted)', marginTop: 4 }}>
+              The portal sent it to {maskedDest}.
+            </div>
+          )}
+          <div style={{ color: 'var(--muted)', marginTop: 4 }}>
+            Complete it in the secure window below, or type the code here — it
+            goes only to the official portal and is deleted immediately after use.
+          </div>
+          <input className="input" style={{ marginTop: 8, maxWidth: 220 }}
+            inputMode="numeric" autoComplete="one-time-code"
+            placeholder="Verification code" value={typedCode}
+            onChange={(e) => setTypedCode(e.target.value)} />
+          {token && !typedCode && (
+            <div className="chip" style={{ marginTop: 8 }}>Verification detected</div>
+          )}
         </div>
       )}
       <div style={{ fontSize: 11, color: 'var(--muted-2)', marginTop: 10 }}>
@@ -331,34 +446,84 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
       {error && <ErrorNote error={error} />}
       <div className="modal__foot">
         <button className="btn btn--ghost" onClick={onClose}>Not now</button>
-        <button className="btn" disabled={busy} onClick={done}>{busy ? 'Confirming…' : 'I completed this step'}</button>
+        <button className="btn" disabled={busy} onClick={done}>
+          {busy ? 'Confirming…'
+            : handoff === 'captcha' ? 'CAPTCHA completed — continue'
+            : (handoff === 'email_verification' || handoff === 'otp') ? 'Verify code and continue'
+            : 'I completed this step'}
+        </button>
       </div>
     </Overlay>
   )
 }
 
-// ---- Payment approval (handoff: payment_approval) --------------------------
+// ---- Payment approval (handoffs: payment_approval / fee_confirmation) ------
+// payment_approval: the portal displayed a machine-readable fee — the
+// applicant confirms that EXACT amount. fee_confirmation: the portal shows
+// the fee only on its own pages — the applicant reads it there (secure
+// window) and enters the exact amount + currency; Ellis never invents one.
 export function PaymentApprove({ pending, onResolve, onClose }) {
   const t = useT()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
+  const [amount, setAmount] = useState('')
+  const [currency, setCurrency] = useState('USD')
   const fee = pending?.fee || {}
+  const ctx = pending?.fee_context || {}
+  const confirmMode = pending?.handoff === 'fee_confirmation' || fee.amount == null
+  const expected = ctx.available && ctx.total_cents != null
+    ? `${(ctx.total_cents / 100).toFixed(2)} ${ctx.currency || ''}` : null
   const rows = [
     fee.government_fee_cents != null &&
       { label: t('pay.governmentFee'), value: `${(fee.government_fee_cents / 100).toFixed(2)} ${fee.currency || ''}` },
     fee.service_fee_cents != null && fee.service_fee_cents > 0 &&
       { label: t('pay.serviceFee'), value: `${(fee.service_fee_cents / 100).toFixed(2)} ${fee.currency || ''}` },
+    ctx.available && ctx.service_fee_cents === 0 && fee.service_fee_cents == null &&
+      { label: t('pay.serviceFee'), value: t('pay.noServiceFee') },
     { label: t('pay.payee'), value: fee.payee || pending?.payee || t('pay.officialPortal') },
-    { label: t('pay.refundability'), value: fee.refundability || t('pay.refundUnknown') },
-    fee.source_url && { label: t('pay.feeSource'), value: fee.source_url }
+    { label: t('pay.refundability'),
+      value: fee.refundability || ctx.refundability || t('pay.refundUnknown') },
+    Array.isArray(ctx.payment_methods) && ctx.payment_methods.length > 0 &&
+      { label: t('pay.methods'), value: ctx.payment_methods.join(' · ') },
+    (fee.source_url || ctx.source_url) &&
+      { label: t('pay.feeSource'), value: fee.source_url || ctx.source_url }
   ].filter(Boolean)
+  const parsedCents = Math.round(parseFloat(amount || '0') * 100)
   return (
     <Overlay onClose={onClose} width={520}>
-      <Head title={t('pay.confirmTitle')} onClose={onClose} sub={t('pay.confirmSub')} />
-      <div className="stat" style={{ marginTop: 12 }}>
-        <div className="stat__num">{formatFee(fee) || '—'}</div>
-        <div className="stat__cap">{t('pay.exactAmount')}</div>
-      </div>
+      <Head title={confirmMode ? t('pay.feeConfirmTitle') : t('pay.confirmTitle')}
+        onClose={onClose}
+        sub={confirmMode ? t('pay.feeConfirmSub') : t('pay.confirmSub')} />
+      {!confirmMode && (
+        <div className="stat" style={{ marginTop: 12 }}>
+          <div className="stat__num">{formatFee(fee) || '—'}</div>
+          <div className="stat__cap">{t('pay.exactAmount')}</div>
+        </div>
+      )}
+      {confirmMode && (
+        <div style={{ marginTop: 12 }} data-testid="fee-confirm-entry">
+          {expected && (
+            <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 8 }}>
+              {t('pay.expectedFee', { fee: expected })}
+            </div>
+          )}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <div className="field" style={{ flex: 1 }}>
+              <label>{t('pay.amountShown')}</label>
+              <input className="input" inputMode="decimal" value={amount}
+                placeholder="25.00" onChange={(e) => setAmount(e.target.value)} />
+            </div>
+            <div className="field" style={{ width: 110 }}>
+              <label>{t('pay.currency')}</label>
+              <select className="select" value={currency}
+                onChange={(e) => setCurrency(e.target.value)}>
+                {['USD', 'VND', 'EUR', 'CNY', 'KRW', 'GBP', 'JPY', 'SGD'].map((c) =>
+                  <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
       <KVList fields={rows} />
       <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 10 }}>
         {t('pay.exactNote')}
@@ -366,14 +531,19 @@ export function PaymentApprove({ pending, onResolve, onClose }) {
       {error && <ErrorNote error={error} />}
       <div className="modal__foot">
         <button className="btn btn--ghost" onClick={onClose}>{t('pay.cancel')}</button>
-        <button className="btn" disabled={busy || fee.amount == null} onClick={async () => {
-          setBusy(true); setError(null)
-          try {
-            // Echo the EXACT amount shown so a stale display can never approve
-            // a different figure — the backend refuses a mismatch (§6).
-            await onResolve('approve_payment', { amount_cents: fee.amount, currency: fee.currency })
-          } catch (e) { setError({ message: e.message }); setBusy(false) }
-        }}>
+        <button className="btn"
+          disabled={busy || (confirmMode ? !(parsedCents > 0) : fee.amount == null)}
+          onClick={async () => {
+            setBusy(true); setError(null)
+            try {
+              // Echo the EXACT amount (shown by Ellis, or read by the
+              // applicant from the official portal) so a stale display can
+              // never approve a different figure — a mismatch is refused (§6).
+              await onResolve('approve_payment', confirmMode
+                ? { amount_cents: parsedCents, currency }
+                : { amount_cents: fee.amount, currency: fee.currency })
+            } catch (e) { setError({ message: e.message }); setBusy(false) }
+          }}>
           {busy ? t('pay.confirming') : t('pay.confirmCta')}
         </button>
       </div>

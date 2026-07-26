@@ -142,6 +142,10 @@ class ReleasedFlowDriver:
         self._page_driver = None      # BrowserbasePageDriver
         self._compiled = None
         self._tmp_files: list[str] = []
+        self._progress_sink = None    # applicant-safe (step_key, status) recorder
+
+    def set_progress_sink(self, sink) -> None:
+        self._progress_sink = sink
 
     # -- flow plumbing ---------------------------------------------------------
 
@@ -282,7 +286,8 @@ class ReleasedFlowDriver:
         driver = self._ensure_live()
         return FlowRunner(self.db, execution=execution, compiled=self._flow(),
                           driver=driver, case_answers=dict(self.app_row.answers or {}),
-                          documents=self._documents())
+                          documents=self._documents(),
+                          on_progress=self._progress_sink)
 
     def _advance(self, stop_before=None) -> dict:
         try:
@@ -414,6 +419,8 @@ class ReleasedFlowDriver:
             return out
         fee = runner.fee_seen if runner is not None else None
         if not isinstance(fee, dict):
+            fee = self._fee_from_page_text()
+        if not isinstance(fee, dict):
             return {"ok": False, "code": "FEE_NOT_DISPLAYED",
                     "detail": "the portal did not display a readable fee"}
         display = f"{fee['amount_cents'] / 100:.2f} {fee['currency']}"
@@ -497,19 +504,85 @@ class ReleasedFlowDriver:
 
     def _read_extract(self, kind: str):
         """Read a confirmation/receipt reference via the adapter's declared
-        extraction selector, from the LIVE page. None = not verifiable."""
+        extraction selector, from the LIVE page. When the manifest declares no
+        selector, fall back to a deterministic labeled-reference parse of the
+        page's visible text — exactly one unambiguous match or nothing.
+        None = not verifiable (the caller stays honest)."""
         sel = ((self.released.version_row.manifest or {}).get(kind) or "").strip()
-        if not sel:
-            return None
         try:
             driver = self._ensure_live()
-            res = driver.read_text(sel)
+        except Exception:  # noqa: BLE001
+            return None
+        if sel:
+            try:
+                res = driver.read_text(sel)
+            except Exception:  # noqa: BLE001
+                return None
+            if not res.get("ok"):
+                return None
+            text = (res.get("text") or "").strip()
+            return text or None
+        return self._labeled_reference_from_page(driver, kind)
+
+    # Labels the official portals themselves print next to the reference —
+    # static strings, never inferred. Vietnamese labels are the eVisa portal's.
+    _REFERENCE_LABELS = {
+        "confirmation_extraction": (
+            "registration code", "application code", "dossier code",
+            "reference number", "application number", "mã hồ sơ", "mã đăng ký"),
+        "receipt_extraction": (
+            "receipt", "transaction", "payment reference", "mã giao dịch",
+            "số biên lai"),
+    }
+
+    def _labeled_reference_from_page(self, driver, kind: str):
+        """Deterministic parse: a known label followed by a code-shaped token
+        in the page's visible text. Requires exactly ONE distinct candidate;
+        any ambiguity returns None (fail closed, never a guess)."""
+        import re
+        labels = self._REFERENCE_LABELS.get(kind) or ()
+        if not labels:
+            return None
+        try:
+            res = driver.read_text("body")
         except Exception:  # noqa: BLE001
             return None
         if not res.get("ok"):
             return None
-        text = (res.get("text") or "").strip()
-        return text or None
+        text = res.get("text") or ""
+        found: set[str] = set()
+        for label in labels:
+            for m in re.finditer(
+                    re.escape(label) + r"[^A-Za-z0-9\n]{0,8}([A-Z0-9][A-Z0-9-]{5,24})",
+                    text, re.IGNORECASE):
+                found.add(m.group(1).strip())
+        return found.pop() if len(found) == 1 else None
+
+    def _fee_from_page_text(self):
+        """Deterministic fee parse from the live page's visible text when the
+        flow declares no READ_FEE node: fee-labeled lines run through the same
+        strict parse_fee_text used everywhere. Exactly one distinct amount or
+        nothing — an ambiguous page never becomes a charge."""
+        from ..adapter_factory.runtime import parse_fee_text
+        try:
+            driver = self._ensure_live()
+            res = driver.read_text("body")
+        except Exception:  # noqa: BLE001
+            return None
+        if not res.get("ok"):
+            return None
+        keywords = ("fee", "phí", "lệ phí", "payment amount", "amount to pay")
+        seen: dict[tuple, dict] = {}
+        for line in (res.get("text") or "").splitlines():
+            low = line.lower()
+            if not any(k in low for k in keywords):
+                continue
+            parsed = parse_fee_text(line)
+            if parsed:
+                seen[(parsed["amount_cents"], parsed["currency"])] = parsed
+        if len(seen) != 1:
+            return None
+        return next(iter(seen.values()))
 
     # Appointments never apply to e-visa flows (adapter declares none).
     def search_appointments(self, **_kwargs) -> dict:

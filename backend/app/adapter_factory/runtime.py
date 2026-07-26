@@ -78,7 +78,8 @@ def parse_fee_text(text: str, *, currency_hint: str = "") -> dict | None:
 
 class FlowRunner:
     def __init__(self, db, *, execution: fm.AdapterExecution, compiled: CompiledFlow,
-                 driver, case_answers: dict | None = None, documents: list | None = None):
+                 driver, case_answers: dict | None = None, documents: list | None = None,
+                 on_progress=None):
         self.db = db
         self.execution = execution
         self.flow = compiled
@@ -90,6 +91,18 @@ class FlowRunner:
         # node_id -> the portal's own option labels, when a mapped answer was
         # not on the portal's fixed list (drives the applicant question).
         self.observed_options: dict[str, list] = {}
+        # Optional applicant-safe progress recorder: called with the node's
+        # semantic step (never a selector) before and after each node.
+        self.on_progress = on_progress
+
+    def _progress(self, node: dict, status: str):
+        if self.on_progress is None:
+            return
+        try:
+            from .. import progress as progress_vocab
+            self.on_progress(progress_vocab.step_for_node(node), status)
+        except Exception:  # noqa: BLE001 — progress must never break the flow
+            pass
 
     # -- entry ---------------------------------------------------------------
     def run(self, *, resume_from: str | None = None, max_nodes: int = 200,
@@ -118,8 +131,11 @@ class FlowRunner:
                 self.db.commit()
                 self._audit("adapter_execution_killed", {"node": node_id})
                 return {"status": "killed", "node": node_id}
+            self._progress(node, "active")
             outcome = self._step(node)
             self._checkpoint(node_id, outcome["status"], outcome.get("detail", {}))
+            self._progress(node, "done" if outcome["status"] == "ok"
+                           else outcome["status"])
             if outcome["status"] == "handoff":
                 self.execution.status = "paused_applicant_action"
                 self.execution.current_node = node_id

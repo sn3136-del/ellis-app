@@ -45,6 +45,17 @@ class VisaWorkflow:
         # Injected by the service layer (DB-backed); None in pure unit tests.
         self.payments_hook = None      # (event, payload) -> None
         self.submission_gate = None    # () -> (ok, reason)
+        # Route fee context (official fee record: methods/refundability) for
+        # the applicant's fee/payment confirmation screens. Display-only.
+        self.fee_context = None
+        # Foreground mode: an HTTP request never performs live portal work —
+        # _drive parks before any state that needs the live driver and the
+        # caller queues a durable background run instead (deferred_live=True).
+        self.defer_live = False
+        self.deferred_live = False
+        # Background runs may only enter SUBMITTING when the enqueuing action
+        # was the applicant's explicit post-final-review confirmation.
+        self.block_submit = False
 
         if exec_row and exec_row.get("snapshot"):
             snap = exec_row["snapshot"]
@@ -52,7 +63,7 @@ class VisaWorkflow:
             self.inputs = snap.get("inputs", self._fresh_inputs())
             for k in ("credential_ref", "session_ref", "application_id", "receipt",
                       "appointment", "confirmation", "reschedules", "fee", "target_slot",
-                      "_captcha_return_state"):
+                      "_captcha_return_state", "_awaiting_payment_result"):
                 setattr(self, k, snap.get(k))
             self.payment_authorization = snap.get("payment_authorization")
             # Searched slots must survive the reload between signals, else the
@@ -69,6 +80,7 @@ class VisaWorkflow:
             self._last_slots = []
             self.pending = None
             self.payment_authorization = None
+            self._awaiting_payment_result = None
         self.artifacts = []
 
     def _fresh_inputs(self):
@@ -85,7 +97,8 @@ class VisaWorkflow:
                 "fee": self.fee, "target_slot": self.target_slot,
                 "last_slots": getattr(self, "_last_slots", []),
                 "payment_authorization": getattr(self, "payment_authorization", None),
-                "_captcha_return_state": getattr(self, "_captcha_return_state", None)}
+                "_captcha_return_state": getattr(self, "_captcha_return_state", None),
+                "_awaiting_payment_result": getattr(self, "_awaiting_payment_result", None)}
 
     def status(self) -> dict:
         return {"case_id": self.case_id, "state": self.machine.state, "pending": self.pending,
@@ -158,11 +171,29 @@ class VisaWorkflow:
         self.inputs["email_verify_token"] = token
         return self._drive()
 
+    _FEE_CURRENCIES = ("USD", "VND", "EUR", "CNY", "KRW", "GBP", "JPY", "SGD")
+
     def approve_payment(self, amount_cents=None, currency=None):
+        # Portal displayed no machine-readable fee (fee_confirmation pause):
+        # the applicant confirms the EXACT amount + currency the official
+        # portal shows in the secure window. Ellis never invents an amount.
+        if self.fee is None:
+            amt = int(amount_cents or 0)
+            cur = str(currency or "").upper().strip()
+            if amt <= 0 or cur not in self._FEE_CURRENCIES:
+                self._pause("Confirm the exact fee shown by the official portal.",
+                            "fee_confirmation", fee_context=self.fee_context)
+                return self.status()
+            self.fee = {"ok": True, "amount": amt, "currency": cur,
+                        "display": f"{amt / 100:.2f} {cur}",
+                        "government_fee_cents": amt, "service_fee_cents": 0,
+                        "payee": self.adapter.portal_operator,
+                        "source": "portal_display_confirmed_by_applicant"}
+            self._emit("fee_confirmed_by_applicant", {"amount": amt, "currency": cur})
         # The approval binds to the EXACT fee shown at pause time (§6): amount,
         # currency, payee. When the client echoes the amount it saw, a mismatch
         # with the current fee means the display was stale — refuse and re-show.
-        if amount_cents is not None and self.fee and (
+        elif amount_cents is not None and self.fee and (
                 int(amount_cents) != self.fee["amount"]
                 or (currency or self.fee["currency"]) != self.fee["currency"]):
             self._emit("payment_approval_rejected_stale_amount",
@@ -239,11 +270,32 @@ class VisaWorkflow:
         return (self.adapter.channel != "agency"
                 and self.adapter.appointment_booking == "prohibited")
 
+    # States whose _step invokes the live portal driver (given current inputs).
+    def _state_needs_driver(self, st: str) -> bool:
+        if st in ("PORTAL_ACCOUNT_CREATING", "PORTAL_LOGIN_REQUIRED",
+                  "APPLICATION_FILLING", "DOCUMENT_UPLOAD_PENDING",
+                  "FEE_DISCOVERY_PENDING", "PAYMENT_PROCESSING",
+                  "APPOINTMENT_SEARCHING", "APPOINTMENT_BOOKING",
+                  "APPOINTMENT_RESCHEDULING", "SUBMITTING"):
+            return True
+        if st == "CAPTCHA_ACTION_REQUIRED":
+            return bool(self.inputs.get("captcha_solved"))
+        if st == "PORTAL_VERIFICATION_REQUIRED":
+            return bool(self.inputs.get("email_verify_token"))
+        if st == "PERSONAL_DECLARATION_REQUIRED":
+            return bool(self.inputs.get("declaration_completed"))
+        return False
+
     def _drive(self):
         for _ in range(200):
             st = self.machine.state
             if is_terminal(st):
                 self.pending = None
+                return self.status()
+            if self.defer_live and self._state_needs_driver(st):
+                # Foreground callers stop here; a background run continues
+                # from this exact persisted state.
+                self.deferred_live = True
                 return self.status()
             before = st
             try:
@@ -384,6 +436,14 @@ class VisaWorkflow:
             token = vault.reveal(self.session_ref)
             fee = d.discover_fee(session_token=token, application_id=self.application_id)
             if not fee["ok"]:
+                if fee.get("code") == "FEE_NOT_DISPLAYED":
+                    # The portal did not display a machine-readable fee. Never
+                    # invent one: the applicant confirms the exact fee shown in
+                    # the secure portal window at the approval step instead.
+                    self.fee = None
+                    self._emit("fee_not_machine_readable", {})
+                    return m.transition("PAYMENT_APPROVAL_REQUIRED",
+                                        "fee to be confirmed by the applicant")
                 blocked = self._portal_step_blocked(fee, return_state="FEE_DISCOVERY_PENDING")
                 if blocked is not None:
                     return blocked
@@ -396,7 +456,12 @@ class VisaWorkflow:
             if self.inputs["payment_approved"] and not self._payment_authorization_matches_fee():
                 self._void_payment_authorization("fee changed since approval")
             if not self.inputs["payment_approved"]:
-                return self._pause(f"Approve the {self.fee['display']} fee.", "payment_approval", fee=self.fee)
+                if not self.fee:
+                    return self._pause(
+                        "Confirm the exact fee shown by the official portal.",
+                        "fee_confirmation", fee_context=self.fee_context)
+                return self._pause(f"Approve the {self.fee['display']} fee.", "payment_approval",
+                                   fee=self.fee, fee_context=self.fee_context)
             mx = self.authorization.get("max_fee_cents")
             if mx is not None and self.fee["amount"] > mx:
                 self.pending = None
@@ -429,6 +494,41 @@ class VisaWorkflow:
             if not res["ok"] and res.get("code") == "REQUIRES_3DS":
                 self.inputs["payment_completed"] = False
                 return m.transition("PAYMENT_ACTION_REQUIRED", "3DS required")
+            if not res["ok"] and res.get("code") == "OUTCOME_UNCERTAIN":
+                # The portal's payment result is not machine-readable here.
+                # Never assume success: ask the applicant what the OFFICIAL
+                # portal actually showed, and record it as applicant-reported.
+                reported = (self.answers.get("payment_result", "")
+                            if getattr(self, "_awaiting_payment_result", None) else "")
+                if reported == "The portal confirmed my payment":
+                    ref = str(self.answers.get("payment_receipt_reference", "") or "")[:80]
+                    self._awaiting_payment_result = None
+                    self.receipt = {"receiptNo": ref, "source": "applicant_reported"}
+                    self._consume_payment_authorization()
+                    self._emit("payment_reported_by_applicant", {"has_reference": bool(ref)})
+                    return m.transition("PAYMENT_COMPLETED",
+                                        "applicant-verified payment (portal result not machine-readable)")
+                if reported == "Payment failed or was cancelled":
+                    self._awaiting_payment_result = None
+                    self.inputs["payment_completed"] = False
+                    return m.transition("PAYMENT_ACTION_REQUIRED",
+                                        "applicant reported payment failure")
+                self._awaiting_payment_result = True
+                return self._pause(
+                    "Tell Ellis what the official portal showed for your payment.",
+                    "additional_information", purpose="payment_verification",
+                    questions=[
+                        {"key": "payment_result", "kind": "select", "mandatory": True,
+                         "question": "What did the official portal show for your payment?",
+                         "why": ("The portal's payment result was not readable automatically. "
+                                 "Ellis never assumes a payment succeeded."),
+                         "options": ["The portal confirmed my payment",
+                                     "Payment failed or was cancelled",
+                                     "The portal is still processing"]},
+                        {"key": "payment_receipt_reference", "kind": "text", "mandatory": False,
+                         "question": "Receipt or transaction reference shown by the portal (if any)",
+                         "why": "Saved with your case as part of the official record.",
+                         "format": "exactly as the portal shows it"}])
             if not res["ok"]:
                 return m.transition("RECOVERABLE_FAILURE", res.get("code", "pay"))
             self.receipt = res["receipt"]
@@ -547,6 +647,12 @@ class VisaWorkflow:
                 if not ok:
                     return self._pause(why or "Final review and signature required.",
                                        "final_review")
+            # A background run may cross into SUBMITTING only when it was
+            # enqueued by the applicant's explicit submission confirmation —
+            # a worker on its own can never submit.
+            if self.block_submit:
+                return self._pause("Review and confirm your submission to continue.",
+                                   "final_review")
             self.pending = None
             m.transition("SUBMITTING")
         elif st == "SUBMITTING":
@@ -555,6 +661,11 @@ class VisaWorkflow:
             if cur["ok"] and cur["submitted"]:
                 self.confirmation = cur["confirmation"]
                 return m.transition("SUBMITTED", "already submitted (reconciled)")
+            # Not yet submitted: a retry/background run without the applicant's
+            # explicit confirmation stops here — reconcile only, never the click.
+            if self.block_submit:
+                return self._pause("Review and confirm your submission to continue.",
+                                   "final_review")
             res = d.submit(session_token=token, application_id=self.application_id)
             if not res["ok"]:
                 return m.transition("RECOVERABLE_FAILURE", res.get("code", "submit"))

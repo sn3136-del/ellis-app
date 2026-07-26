@@ -53,9 +53,18 @@ def create_session() -> dict:
         return {"id": "local-" + secrets.token_hex(6), "mode": "local", "connect_url": None}
     import httpx
     proj = s.browserbase_project_id or _default_project()
+    # keepAlive: the applicant's in-progress portal session must survive
+    # handoff waits (CAPTCHA/OTP/payment) instead of expiring on idle. Plans
+    # without keep-alive support fall back to a standard session.
+    body = {"projectId": proj, "keepAlive": True}
     r = httpx.post(f"{_BB_BASE}/sessions",
                    headers={"X-BB-API-Key": s.browserbase_api_key, "content-type": "application/json"},
-                   json={"projectId": proj}, timeout=30)
+                   json=body, timeout=30)
+    if r.status_code >= 400:
+        r = httpx.post(f"{_BB_BASE}/sessions",
+                       headers={"X-BB-API-Key": s.browserbase_api_key,
+                                "content-type": "application/json"},
+                       json={"projectId": proj}, timeout=30)
     r.raise_for_status()
     data = r.json()
     return {"id": data.get("id"), "mode": "browserbase", "connect_url": data.get("connectUrl")}

@@ -53,13 +53,21 @@ def load_workflow(db, application_id: str) -> VisaWorkflow:
         register_runtime_adapters(portal)
         adapter = select_runtime_adapter(app.destination_country, app.visa_type)
 
-    # A case can accumulate several envelopes (e.g. re-prepared signatures);
-    # the newest one carries the operative authorization.
+    # A case can accumulate several envelopes (each modal open prepares one);
+    # the operative authorization is the newest COMPLETED (signed) envelope —
+    # an unsigned row prepared later must never swap the signed terms.
     auth = db.execute(
         select(models.AuthorizationEnvelope)
-        .where(models.AuthorizationEnvelope.application_id == application_id)
+        .where(models.AuthorizationEnvelope.application_id == application_id,
+               models.AuthorizationEnvelope.status == "completed")
         .order_by(models.AuthorizationEnvelope.created_at.desc())
     ).scalars().first()
+    if auth is None:
+        auth = db.execute(
+            select(models.AuthorizationEnvelope)
+            .where(models.AuthorizationEnvelope.application_id == application_id)
+            .order_by(models.AuthorizationEnvelope.created_at.desc())
+        ).scalars().first()
     authorization = {}
     if auth:
         authorization = {"max_fee_cents": auth.max_fee_cents, "currency": auth.currency,
@@ -91,7 +99,19 @@ def load_workflow(db, application_id: str) -> VisaWorkflow:
 def _wire_case_hooks(db, wf: VisaWorkflow, app_row):
     """DB-backed enforcement hooks: exact-amount payment authorization rows
     (payments.py) and the §25 submission gate (final_review.py)."""
-    from . import payments, final_review
+    from . import payments, final_review, fees
+
+    # Official route-fee record (methods/refundability/source) for the
+    # applicant's fee and payment confirmation screens. Display-only —
+    # the binding amount always comes from the portal or the applicant.
+    try:
+        nat = (app_row.answers or {}).get("passport_nationality") or \
+              (app_row.answers or {}).get("nationality") or ""
+        rec = fees.verified_current_fee(db, destination=app_row.destination_country,
+                                        visa_type=app_row.visa_type, nationality=nat)
+        wf.fee_context = fees.fee_breakdown(rec) if rec is not None else None
+    except Exception:  # noqa: BLE001 — fee context is advisory, never blocking
+        wf.fee_context = None
 
     def payments_hook(event, payload):
         if event == "authorized":
@@ -196,10 +216,24 @@ def enforce_safety(db, application_id: str, wf) -> None:
         raise passport_validity.PassportBlocked(verdict)
 
 
-def signal(db, application_id: str, name: str, **kwargs):
+def signal(db, application_id: str, name: str, *, defer_live=False,
+           block_submit=False, progress_sink=None, **kwargs):
     """Load → enforce safety → apply a signal → persist. The single durable
-    transition point; the safety gate here covers every caller."""
+    transition point; the safety gate here covers every caller.
+
+    defer_live: foreground callers (HTTP) — never perform live portal work in
+    this call; park before the first driver-needing state so the caller can
+    queue a background run (wf.deferred_live tells it to).
+    block_submit: background runs without the applicant's explicit submission
+    confirmation can never cross into SUBMITTING.
+    progress_sink: applicant-safe checkpoint recorder (step_key, status)."""
     wf = load_workflow(db, application_id)
+    wf.defer_live = bool(defer_live)
+    wf.block_submit = bool(block_submit)
+    if progress_sink is not None:
+        set_sink = getattr(getattr(wf.adapter, "driver", None), "set_progress_sink", None)
+        if callable(set_sink):
+            set_sink(progress_sink)
     try:
         enforce_safety(db, application_id, wf)
         method = getattr(wf, name)

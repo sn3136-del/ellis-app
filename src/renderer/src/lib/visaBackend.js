@@ -109,6 +109,16 @@ export function createVisaClient(session) {
     appointment: (id) => call('GET', `/cases/${id}/appointment`, session),
     audit: (id) => call('GET', `/cases/${id}/audit`, session),
 
+    // Live portal progress (applicant-safe: real checkpoints only, never
+    // selectors/PII). Polled while Ellis works in the background.
+    caseProgress: (id) => call('GET', `/cases/${id}/progress`, session),
+    // Applicant-triggered retry from the last safe reversible checkpoint.
+    retryPortal: (id) => call('POST', `/cases/${id}/portal/retry`, session, {}),
+    // Contact details the portal will use for verification codes — confirmed
+    // explicitly before Ellis opens the official portal.
+    getContactConfirmation: (id) => call('GET', `/cases/${id}/contact-confirmation`, session),
+    confirmContact: (id, body) => call('POST', `/cases/${id}/contact-confirmation`, session, body),
+
     // Adapter administration (Phase 2)
     adminListAdapters: () => call('GET', '/admin/adapters', session),
     adminCoverage: () => call('GET', '/admin/coverage', session),
@@ -315,6 +325,7 @@ export const HANDOFF_UI = {
   identity: 'LiveViewModal',
   login_challenge: 'LiveViewModal',
   payment_approval: 'PaymentApprove', // approve_payment (shows fee)
+  fee_confirmation: 'PaymentApprove', // applicant confirms the exact portal fee
   payment: 'PaymentModal',          // complete_payment (secure window; no card seen)
   three_ds: 'PaymentModal',
   appointment_selection: 'AppointmentCalendar', // select_appointment(slot_id)
@@ -332,6 +343,7 @@ export const HANDOFF_SIGNAL = {
   email_verification: 'verify_email',
   otp: 'verify_email',
   payment_approval: 'approve_payment',
+  fee_confirmation: 'approve_payment',
   payment: 'complete_payment',
   appointment_selection: 'select_appointment',
   reschedule_approval: 'approve_reschedule',
@@ -349,7 +361,8 @@ export const HANDOFF_COPY = {
   otp: ['Enter the one-time code', 'Type the code from your authenticator or SMS in the secure window.'],
   identity: ['Identity check', 'Complete the identity step in the secure window.'],
   login_challenge: ['Portal login challenge', 'Complete the portal sign-in challenge in the secure window.'],
-  payment_approval: ['Approve the fee', 'Confirm the official fee before payment begins.'],
+  payment_approval: ['Review and confirm payment', 'Confirm the official fee before payment begins.'],
+  fee_confirmation: ['Confirm the official fee', 'Enter the exact fee the official portal shows, then confirm to continue to payment.'],
   payment: ['Pay the official fee', 'Enter your card directly in the portal — Ellis never sees it.'],
   three_ds: ['Confirm 3-D Secure', 'Approve the bank verification in the secure window.'],
   appointment_selection: ['Choose an appointment', 'Pick a qualifying slot from your calendar.'],
