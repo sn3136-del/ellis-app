@@ -222,6 +222,12 @@ class BrowserbasePageDriver:
         except Exception as e:  # noqa: BLE001
             return {"ok": False, "code": "READ_ERROR", "detail": str(e)[:120]}
 
+    def current_url(self) -> dict:
+        try:
+            return {"ok": True, "url": str(self.page.url or "")}
+        except Exception as e:  # noqa: BLE001
+            return {"ok": False, "code": "READ_ERROR", "detail": str(e)[:120]}
+
     def is_visible(self, selector: str) -> dict:
         """Is any element matching this selector currently visible? Used to
         tell 'the click never landed' from 'the page already moved on'."""

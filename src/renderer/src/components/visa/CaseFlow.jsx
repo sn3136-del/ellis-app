@@ -155,7 +155,15 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
         if (!live) return
         setProgress(pr)
         const sig = `${pr.state}|${pr.waiting_for_applicant}|${pr.handoff}|${pr.run_status}`
-        if (progressSigRef.current && progressSigRef.current !== sig) refresh()
+        if (progressSigRef.current && progressSigRef.current !== sig) {
+          refresh()
+          // A restore that READ the fee turns fee_confirmation into
+          // payment_approval: follow the pause so the open dialog swaps from
+          // "type the amount" to "approve this exact amount".
+          if (pr.waiting_for_applicant && pr.handoff && modal && pr.handoff !== modal) {
+            setModal(pr.handoff)
+          }
+        }
         progressSigRef.current = sig
       } catch { /* endpoint missing/offline: the manual Refresh still works */ }
     }

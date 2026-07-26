@@ -545,6 +545,33 @@ class ReleasedFlowDriver:
         def boundary(node):
             return node.get("action") in ("APPLICANT_HANDOFF", "PAUSE") or \
                 node.get("irreversibility") == "irreversible"
+        # A session that is blank (or off the portal entirely) has NO page to
+        # resume: advancing from the persisted cursor would stop at the next
+        # handoff without ever navigating — the applicant keeps staring at
+        # about:blank. Rewind the REVERSIBLE cursor so the flow re-enters the
+        # application from the start. Refused outright once anything
+        # irreversible has been passed (reconciliation owns that case).
+        try:
+            driver = self._ensure_live()
+            url = str(((getattr(driver, "current_url", None) or (lambda: {}))() or {})
+                      .get("url") or "")
+            hosts = [h.lower() for h in self._hosts()]
+            from urllib.parse import urlparse
+            host = urlparse(url).netloc.lower()
+            on_portal = bool(host) and any(host == h or host.endswith("." + h) for h in hosts)
+            if not on_portal:
+                execution = self._execution()
+                if execution.current_node and self._passed_irreversible(execution.current_node):
+                    return {"ok": False, "code": "OUTCOME_UNCERTAIN",
+                            "detail": "the portal session was lost after an "
+                                      "irreversible step; Ellis will not replay it"}
+                if execution.current_node:
+                    execution.current_node = ""
+                    self.db.commit()
+        except _OutcomeUncertain as e:
+            return {"ok": False, "code": "OUTCOME_UNCERTAIN", "detail": str(e)}
+        except Exception:  # noqa: BLE001 — fall through to the normal advance
+            pass
         res = self._advance(stop_before=boundary)
         out = self._result_from(res, ok_statuses=("boundary", "completed"))
         if not out.get("ok"):

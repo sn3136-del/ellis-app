@@ -745,6 +745,23 @@ def create_browser_session(application_id: str, response: Response,
         db.add(row)
         db.commit()
         fresh = True
+        # Concurrent opens (two dialogs mounting at once) can each find no
+        # session and each create one. Keep the OLDEST and release the rest:
+        # one isolated session per case is the invariant.
+        twins = db.execute(select(models.BrowserSession).where(
+            models.BrowserSession.application_id == application_id,
+            models.BrowserSession.status == "open").order_by(
+            models.BrowserSession.created_at.asc(),
+            models.BrowserSession.id.asc())).scalars().all()
+        if len(twins) > 1 and twins[0].id != row.id:
+            try:
+                bb.close_session(row.provider_session_id)
+            except Exception:  # noqa: BLE001
+                pass
+            row.status = "closed"
+            db.commit()
+            row = twins[0]
+            fresh = False
         audit.record(db, org_id=p.org_id, application_id=application_id,
                      action="browser_session_opened",
                      detail={"mode": row.mode}, actor=p.user_id)  # no ids/urls in audit

@@ -90,9 +90,17 @@ export function usePortalLiveView(client, caseId) {
       const s = await client.createBrowserSession(caseId)
       if (s && s.fresh) {
         // A brand-new session shows a blank page. Ask Ellis to rebuild the
-        // portal view at the case's current step (background, reversible).
+        // portal view at the case's current step (background, reversible),
+        // and keep the notice up until the run finishes so the applicant is
+        // never told to read a fee off an empty tab.
         setRestoring(true)
-        client.restorePortal(caseId).catch(() => {}).finally(() => setRestoring(false))
+        client.restorePortal(caseId)
+          .then(() => waitForRestore())
+          .catch((e) => {
+            setRestoring(false)
+            setNote((e.detail && e.detail.message) || e.message ||
+                    'Ellis could not rebuild the portal page.')
+          })
       }
       if (s && s.mode === 'browserbase' && s.live_view_available) {
         const lv = await client.browserLiveView(caseId)
@@ -111,6 +119,23 @@ export function usePortalLiveView(client, caseId) {
         : (e.detail && e.detail.message) || e.message || 'The secure window is not available.')
     }
     setBusy(false)
+  }
+
+  // Poll until the rebuild run finishes, then refresh the embed so the
+  // applicant sees the restored page (and any fee Ellis read from it).
+  async function waitForRestore() {
+    for (let i = 0; i < 90; i++) {
+      await new Promise((r) => setTimeout(r, 3000))
+      try {
+        const pr = await client.caseProgress(caseId)
+        if (pr.run_signal !== 'restore_portal' || (!pr.active && !pr.queued)) break
+      } catch { break }
+    }
+    setRestoring(false)
+    try {
+      const lv = await client.browserLiveView(caseId)
+      setUrl(lv.url); setNonce((n) => n + 1); setState('embedded')
+    } catch { /* the panel keeps its current state */ }
   }
 
   useEffect(() => { open() }, [caseId])
@@ -571,10 +596,18 @@ export function PaymentApprove({ client, caseId, pending, onResolve, onClose }) 
         onClose={onClose}
         sub={confirmMode ? t('pay.feeConfirmSub') : t('pay.confirmSub')} />
       {!confirmMode && (
-        <div className="stat" style={{ marginTop: 12 }}>
-          <div className="stat__num">{formatFee(fee) || '—'}</div>
-          <div className="stat__cap">{t('pay.exactAmount')}</div>
-        </div>
+        <>
+          <div className="stat" style={{ marginTop: 12 }}>
+            <div className="stat__num">{formatFee(fee) || '—'}</div>
+            <div className="stat__cap">{t('pay.exactAmount')}</div>
+          </div>
+          {fee.source === 'portal_page_read' && (
+            <div className="card card--soft" style={{ padding: '10px 12px', marginTop: 8,
+              fontSize: 12.5 }} data-testid="fee-read-banner">
+              {t('pay.feeReadFromPortal', { fee: formatFee(fee) })}
+            </div>
+          )}
+        </>
       )}
       {confirmMode && (
         <div style={{ marginTop: 12 }} data-testid="fee-confirm-entry">
@@ -585,6 +618,11 @@ export function PaymentApprove({ client, caseId, pending, onResolve, onClose }) 
             {expected
               ? t('pay.expectedFee', { fee: expected })
               : t('pay.noFeeRead')}
+            {view.restoring && (
+              <div style={{ marginTop: 6 }} data-testid="fee-reading">
+                {t('pay.readingFee')}
+              </div>
+            )}
           </div>
         </div>
       )}

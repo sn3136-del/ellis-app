@@ -1014,6 +1014,95 @@ def test_restore_portal_rebuilds_view_and_reads_fee_for_confirmation():
     assert wf.pending["fee"]["display"] == "25.00 USD"
 
 
+def test_restore_rewinds_a_blank_session_instead_of_parking_on_the_cursor(db):
+    """The live failure: the fresh session was blank, but the flow cursor said
+    'you are at the payment handoff', so restore hit that boundary instantly
+    and navigated nothing — the applicant kept staring at about:blank."""
+    from app.portal.released_flow import ReleasedFlowDriver
+
+    class BlankPageDriver:
+        def current_url(self):
+            return {"ok": True, "url": "about:blank"}
+
+    class Execution:
+        current_node = "payment_handoff"
+
+    drv = ReleasedFlowDriver.__new__(ReleasedFlowDriver)
+    execution = Execution()
+    advanced = {"ran": False}
+
+    class FakeDb:
+        def commit(self):
+            pass
+
+    drv.db = FakeDb()
+    drv._ensure_live = lambda: BlankPageDriver()
+    drv._execution = lambda: execution
+    drv._hosts = lambda: ["evisa.gov.vn"]
+    drv._passed_irreversible = lambda n: False
+    drv._fee_from_page_text = lambda: None
+
+    def fake_advance(stop_before=None):
+        advanced["ran"] = True
+        return {"status": "boundary"}
+
+    drv._advance = fake_advance
+    drv._result_from = lambda res, ok_statuses=(): {"ok": True}
+    out = drv.restore_view()
+    assert out["ok"] is True
+    assert execution.current_node == ""     # reversible cursor rewound
+    assert advanced["ran"] is True          # and the flow actually re-ran
+
+
+def test_restore_refuses_to_replay_after_an_irreversible_step(db):
+    from app.portal.released_flow import ReleasedFlowDriver
+
+    class BlankPageDriver:
+        def current_url(self):
+            return {"ok": True, "url": "about:blank"}
+
+    class Execution:
+        current_node = "submit"
+
+    drv = ReleasedFlowDriver.__new__(ReleasedFlowDriver)
+    drv.db = type("D", (), {"commit": lambda self: None})()
+    drv._ensure_live = lambda: BlankPageDriver()
+    drv._execution = lambda: Execution()
+    drv._hosts = lambda: ["evisa.gov.vn"]
+    drv._passed_irreversible = lambda n: True
+    drv._advance = lambda stop_before=None: (_ for _ in ()).throw(
+        AssertionError("must not replay past an irreversible step"))
+    out = drv.restore_view()
+    assert out["ok"] is False and out["code"] == "OUTCOME_UNCERTAIN"
+
+
+def test_concurrent_session_opens_keep_exactly_one(client, db, monkeypatch):
+    """Two dialogs mounting at once each found no session and each created
+    one — the case must keep exactly one isolated session."""
+    from app.providers import browser as bb
+    case = _new_case(client)
+    made = []
+
+    def fake_create():
+        made.append(len(made))
+        return {"id": f"s-{len(made)}", "mode": "browserbase", "connect_url": "ws://x"}
+
+    monkeypatch.setattr(bb, "create_session", fake_create)
+    monkeypatch.setattr(bb, "session_alive", lambda sid: True)
+    monkeypatch.setattr(bb, "close_session", lambda sid: None)
+    # Simulate the race: a second create that also saw no open row.
+    db.add(models.BrowserSession(org_id="org1", application_id=case["id"],
+                                 provider_session_id="s-early", mode="browserbase",
+                                 status="open"))
+    db.commit()
+    r = client.post(f"/cases/{case['id']}/browser-session", headers=AUTH)
+    assert r.status_code == 200
+    open_rows = db.execute(select(models.BrowserSession).where(
+        models.BrowserSession.application_id == case["id"],
+        models.BrowserSession.status == "open")).scalars().all()
+    assert len(open_rows) == 1
+
+
 def test_restore_portal_preserves_the_pause_when_no_fee_is_readable():
     class RestoreOnly:
         def restore_view(self, **_kw):
