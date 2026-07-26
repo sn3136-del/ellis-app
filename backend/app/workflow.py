@@ -307,6 +307,31 @@ class VisaWorkflow:
             self._emit("portal_view_restored", {})
         return self.status()
 
+    def read_fee(self):
+        """Applicant-requested read of the fee from the portal's CURRENT page
+        (after they walked it to the step that shows the amount). A read fee
+        replaces the type-it-yourself pause with an approve-this-exact-amount
+        pause — read, never invented. Everything else stays untouched."""
+        reader = getattr(self.adapter.driver, "read_current_fee", None)
+        if reader is None:
+            return self.status()
+        try:
+            res = reader()
+        except Exception as e:  # noqa: BLE001 — the read is best-effort
+            self._emit("fee_page_read_failed", {"code": str(e)[:120]})
+            return self.status()
+        fee = (res or {}).get("fee")
+        if (res.get("ok") and isinstance(fee, dict) and self.fee is None
+                and (self.pending or {}).get("handoff") == "fee_confirmation"):
+            self.fee = fee
+            self._emit("fee_read_from_portal_page",
+                       {"amount": fee["amount"], "currency": fee["currency"]})
+            self._pause(f"Approve the {fee['display']} fee.", "payment_approval",
+                        fee=self.fee, fee_context=self.fee_context)
+        else:
+            self._emit("fee_page_read_empty", {})
+        return self.status()
+
     def start(self):
         # A portal_form pause is confirmed by the applicant's "I completed
         # this step" (which re-drives via start): clear it so the flow

@@ -117,6 +117,8 @@ export function createVisaClient(session) {
     // Rebuild the live portal page after a session loss (secure window must
     // show the real form, never a blank tab). Reversible work only.
     restorePortal: (id) => call('POST', `/cases/${id}/portal/restore`, session, {}),
+    // Applicant-requested fee read from the portal's CURRENT page.
+    readPortalFee: (id) => call('POST', `/cases/${id}/portal/read-fee`, session, {}),
     // Contact details the portal will use for verification codes — confirmed
     // explicitly before Ellis opens the official portal.
     getContactConfirmation: (id) => call('GET', `/cases/${id}/contact-confirmation`, session),

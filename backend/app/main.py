@@ -2177,6 +2177,17 @@ def restore_portal_view(application_id: str, db=Depends(get_session),
     return _queue_signal_response(db, p, app_row, "restore_portal", {})
 
 
+@app.post("/cases/{application_id}/portal/read-fee")
+def read_portal_fee(application_id: str, db=Depends(get_session),
+                    p: Principal = Depends(get_principal)):
+    """Applicant-requested fee read from the portal's current page (queued —
+    live work never runs inside an HTTP request)."""
+    app_row = _owned(db, p, application_id)
+    if not _live_background_route(db, app_row):
+        raise HTTPException(409, detail={"reason": "read_unavailable"})
+    return _queue_signal_response(db, p, app_row, "read_fee", {})
+
+
 class ContactBody(BaseModel):
     email: str = ""
     phone: str = ""

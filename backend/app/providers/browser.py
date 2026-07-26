@@ -70,7 +70,12 @@ def create_session() -> dict:
     # lifetime is requested explicitly (keepAlive stops idle disconnects
     # from ending it). Plans that reject either option fall back honestly.
     headers = {"X-BB-API-Key": s.browserbase_api_key, "content-type": "application/json"}
-    attempts = ({"projectId": proj, "keepAlive": True, "timeout": SESSION_TIMEOUT_SECONDS},
+    # A modest viewport keeps the applicant's embedded live view close to 1:1
+    # — the provider's default is large and scales down to unreadable.
+    viewport = {"browserSettings": {"viewport": {"width": 1280, "height": 900}}}
+    attempts = ({"projectId": proj, "keepAlive": True,
+                 "timeout": SESSION_TIMEOUT_SECONDS, **viewport},
+                {"projectId": proj, "keepAlive": True, "timeout": SESSION_TIMEOUT_SECONDS},
                 {"projectId": proj, "keepAlive": True},
                 {"projectId": proj})
     r = None

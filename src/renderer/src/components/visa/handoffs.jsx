@@ -452,7 +452,7 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
 
   const embedded = view.state === 'embedded' && !!view.url
   return (
-    <Overlay onClose={onClose} width={embedded ? 960 : 620}>
+    <Overlay onClose={onClose} width={embedded ? 1360 : 620}>
       <Head title={title} sub={sub} onClose={onClose} />
       {/* Safety copy stays ABOVE the embedded window for the relevant kinds. */}
       {handoff === 'captcha' && (
@@ -589,9 +589,33 @@ export function PaymentApprove({ client, caseId, pending, onResolve, onClose }) 
   // so show them the portal, in the case's own isolated session.
   const view = usePortalLiveView(client, caseId)
   const showPortal = confirmMode && !!client && !!caseId
+  const [reading, setReading] = useState(false)
+
+  // On-demand fee read: once the applicant has walked the portal to the step
+  // that displays the amount, Ellis reads it off that page and the dialog
+  // swaps to a simple approval (via the progress poll in CaseFlow).
+  async function readFeeNow() {
+    setReading(true)
+    try {
+      await client.readPortalFee(caseId)
+    } catch (e) {
+      setError({ message: (e.detail && e.detail.message) || e.message })
+      setReading(false)
+      return
+    }
+    for (let i = 0; i < 20; i++) {
+      await new Promise((r) => setTimeout(r, 3000))
+      try {
+        const pr = await client.caseProgress(caseId)
+        if (pr.run_signal !== 'read_fee' || (!pr.active && !pr.queued)) break
+      } catch { break }
+    }
+    setReading(false)
+  }
+
   return (
     <Overlay onClose={onClose}
-      width={showPortal && view.state === 'embedded' ? 960 : 520}>
+      width={showPortal && view.state === 'embedded' ? 1360 : 520}>
       <Head title={confirmMode ? t('pay.feeConfirmTitle') : t('pay.confirmTitle')}
         onClose={onClose}
         sub={confirmMode ? t('pay.feeConfirmSub') : t('pay.confirmSub')} />
@@ -662,11 +686,20 @@ export function PaymentApprove({ client, caseId, pending, onResolve, onClose }) 
         <div style={{ marginTop: 12 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
             <div className="eyebrow">{t('pay.readOnPortal')}</div>
-            <button className="btn btn--sm btn--ghost" disabled={view.busy} onClick={view.reconnect}>
-              {view.busy ? '…' : t('live.refresh')}
-            </button>
+            <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+              <button className="btn btn--sm" disabled={reading} onClick={readFeeNow}
+                data-testid="read-fee-now">
+                {reading ? t('pay.readingNow') : t('pay.readFeeCta')}
+              </button>
+              <button className="btn btn--sm btn--ghost" disabled={view.busy} onClick={view.reconnect}>
+                {view.busy ? '…' : t('live.refresh')}
+              </button>
+            </div>
           </div>
-          <LiveFrame view={view} height="46vh" />
+          <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 6 }}>
+            {t('pay.walkToFee')}
+          </div>
+          <LiveFrame view={view} height="66vh" />
         </div>
       )}
       <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 10 }}>
@@ -709,7 +742,7 @@ export function PaymentModal({ client, caseId, pending, onResolve, onClose }) {
   const fee = pending?.fee
   const embedded = view.state === 'embedded' && !!view.url
   return (
-    <Overlay onClose={onClose} width={embedded ? 960 : 620}>
+    <Overlay onClose={onClose} width={embedded ? 1360 : 620}>
       <Head title="Pay the official fee" onClose={onClose}
             sub="Pay on the official portal in the secure window below. Ellis never sees or stores your card." />
       <div className="stat" style={{ marginTop: 4 }}>

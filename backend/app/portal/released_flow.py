@@ -591,6 +591,21 @@ class ReleasedFlowDriver:
                           "source": "portal_page_read"}
         return out
 
+    def read_current_fee(self, **_kwargs) -> dict:
+        """Read the fee from the page the portal is showing RIGHT NOW —
+        no navigation, no form work. Used on demand once the applicant has
+        walked the portal to the step that displays the amount."""
+        fee = self._fee_from_page_text()
+        if not isinstance(fee, dict):
+            return {"ok": False, "code": "FEE_NOT_DISPLAYED",
+                    "detail": "no single readable fee on the current page"}
+        return {"ok": True, "fee": {
+            "ok": True, "amount": fee["amount_cents"], "currency": fee["currency"],
+            "display": f"{fee['amount_cents'] / 100:.2f} {fee['currency']}",
+            "government_fee_cents": fee["amount_cents"], "service_fee_cents": 0,
+            "payee": self.released.family.operator or self.released.family.name,
+            "source": "portal_page_read"}}
+
     def get_application_state(self, **_kwargs) -> dict:
         """Reconciliation from recorded REAL evidence only — never assumed."""
         from ..adapter_factory import models as fm

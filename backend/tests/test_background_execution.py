@@ -1131,6 +1131,46 @@ def test_driver_and_applicant_window_always_agree_on_the_session(client, db, mon
     assert r.json()["id"] == picked.id
 
 
+def test_on_demand_fee_read_binds_the_amount_from_the_current_page():
+    """The applicant walks the portal to its payment step, presses 'Read the
+    fee from the page', and the READ amount becomes a simple approval."""
+    class PageWithFee:
+        def read_current_fee(self, **_kw):
+            return {"ok": True, "fee": {
+                "ok": True, "amount": 2500, "currency": "USD",
+                "display": "25.00 USD", "government_fee_cents": 2500,
+                "service_fee_cents": 0, "payee": "Vietnam Immigration Department",
+                "source": "portal_page_read"}}
+
+    wf = _wf(PageWithFee(), "PAYMENT_APPROVAL_REQUIRED")
+    wf.pending = {"state": "PAYMENT_APPROVAL_REQUIRED", "reason": "r",
+                  "handoff": "fee_confirmation", "live_view": None}
+    wf.read_fee()
+    assert wf.fee["amount"] == 2500 and wf.fee["source"] == "portal_page_read"
+    assert wf.pending["handoff"] == "payment_approval"
+
+
+def test_on_demand_fee_read_stays_honest_when_the_page_shows_none():
+    class NoFeePage:
+        def read_current_fee(self, **_kw):
+            return {"ok": False, "code": "FEE_NOT_DISPLAYED"}
+
+    wf = _wf(NoFeePage(), "PAYMENT_APPROVAL_REQUIRED")
+    wf.pending = {"state": "PAYMENT_APPROVAL_REQUIRED", "reason": "r",
+                  "handoff": "fee_confirmation", "live_view": None}
+    wf.read_fee()
+    assert wf.fee is None                                   # nothing invented
+    assert wf.pending["handoff"] == "fee_confirmation"
+
+
+def test_read_fee_endpoint_queues_a_run(client, live_route, db):
+    case = _new_case(client)
+    r = client.post(f"/cases/{case['id']}/portal/read-fee", headers=AUTH)
+    assert r.status_code == 200 and r.json()["queued"] is True
+    run = portal_queue.latest_run(db, case["id"])
+    assert run.signal_name == "read_fee"
+
+
 def test_restore_portal_preserves_the_pause_when_no_fee_is_readable():
     class RestoreOnly:
         def restore_view(self, **_kw):
