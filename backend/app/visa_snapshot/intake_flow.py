@@ -92,7 +92,7 @@ _DATE_VALUE = r"([0-9]{1,2}[^\n]{0,24}[0-9]{4}|[0-9]{4}-[0-9]{2}-[0-9]{2}|[0-9]{
 def _vz_pattern(label: str, value: str) -> re.Pattern:
     # After the label line: optionally skip ONE line consisting ENTIRELY of
     # native script (Chinese passports print the local value above the Latin
-    # one — a mixed line like "河北/HEBEI" is NOT skipped, its Latin part is
+    # one — a mixed line like "湖南/HUNAN" is NOT skipped, its Latin part is
     # the value), then an optional "native/" prefix on the value's own line.
     return re.compile(
         r"(?i:" + label + r")[^\n]*?(?:[:：]\s*|\n)\s*"

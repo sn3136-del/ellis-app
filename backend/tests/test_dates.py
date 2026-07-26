@@ -20,7 +20,7 @@ TODAY = date(2026, 7, 24)
 
 # ---- MRZ YYMMDD century resolution (contextual — never a fixed pivot) --------
 def test_birth_century_resolves_to_a_plausible_past_date():
-    assert dates.parse_mrz_date("880613", kind="birth", today=TODAY) == date(1988, 6, 13)
+    assert dates.parse_mrz_date("900215", kind="birth", today=TODAY) == date(1990, 2, 15)
     assert dates.parse_mrz_date("940812", kind="birth", today=TODAY) == date(1994, 8, 12)
     # A child born in the 2000s stays in the 2000s.
     assert dates.parse_mrz_date("190301", kind="birth", today=TODAY) == date(2019, 3, 1)
@@ -32,7 +32,7 @@ def test_birth_century_resolves_to_a_plausible_past_date():
 
 
 def test_expiry_century_resolves_near_the_present():
-    assert dates.parse_mrz_date("270517", kind="expiry", today=TODAY) == date(2027, 5, 17)
+    assert dates.parse_mrz_date("280320", kind="expiry", today=TODAY) == date(2028, 3, 20)
     assert dates.parse_mrz_date("310504", kind="expiry", today=TODAY) == date(2031, 5, 4)
     # A long-expired 1999 document is 1999, not 2099.
     assert dates.parse_mrz_date("990101", kind="expiry", today=TODAY) == date(1999, 1, 1)
@@ -40,8 +40,8 @@ def test_expiry_century_resolves_near_the_present():
 
 
 def test_issue_century_never_lands_in_the_future():
-    assert dates.parse_mrz_date("040518", kind="issue", today=TODAY) == date(2004, 5, 18)
-    assert dates.parse_mrz_date("170518", kind="issue", today=TODAY) == date(2017, 5, 18)
+    assert dates.parse_mrz_date("040321", kind="issue", today=TODAY) == date(2004, 3, 21)
+    assert dates.parse_mrz_date("180321", kind="issue", today=TODAY) == date(2018, 3, 21)
     # yy=30 as an issue year cannot be 2030 (future) — it is 1930.
     assert dates.parse_mrz_date("300101", kind="issue", today=TODAY) == date(1930, 1, 1)
 
@@ -53,28 +53,28 @@ def test_malformed_or_impossible_mrz_dates_rejected():
 
 # ---- printed-zone parsing ----------------------------------------------------
 def test_printed_dd_mon_yyyy_forms_normalize():
-    assert dates.parse_printed_date("13 JUN 1988") == date(1988, 6, 13)
+    assert dates.parse_printed_date("15 FEB 1990") == date(1990, 2, 15)
     assert dates.parse_printed_date("12 Aug 1994") == date(1994, 8, 12)
     assert dates.parse_printed_date("01 OCT 1988") == date(1988, 10, 1)
     assert dates.parse_printed_date("5 May 2021") == date(2021, 5, 5)
     assert dates.parse_printed_date("May 5, 2021") == date(2021, 5, 5)
-    assert dates.parse_printed_date("13 June 1988") == date(1988, 6, 13)
+    assert dates.parse_printed_date("15 February 1990") == date(1990, 2, 15)
 
 
 def test_chinese_passport_date_layouts_normalize():
-    # PRC passports print "18 5月/MAY 2017" (day, numeric month + 月, month name).
-    assert dates.parse_printed_date("18 5月/MAY 2017") == date(2017, 5, 18)
+    # PRC passports print "21 3月/MAR 2018" (day, numeric month + 月, month name).
+    assert dates.parse_printed_date("21 3月/MAR 2018") == date(2018, 3, 21)
     assert dates.parse_printed_date("24 4月/APR 2019") == date(2019, 4, 24)
-    assert dates.parse_printed_date("2017年5月18日") == date(2017, 5, 18)
+    assert dates.parse_printed_date("2018年3月21日") == date(2018, 3, 21)
     # Numeric month and month name disagreeing is rejected, never guessed.
-    assert dates.parse_printed_date("18 5月/JUN 2017") is None
+    assert dates.parse_printed_date("21 3月/APR 2018") is None
 
 
 def test_ambiguous_numeric_dates_are_rejected_never_guessed():
     assert dates.parse_printed_date("05/04/2031") is None       # DD/MM or MM/DD?
-    assert dates.parse_printed_date("18/05/2017") == date(2017, 5, 18)   # day > 12
-    assert dates.parse_printed_date("05/18/2017") == date(2017, 5, 18)   # month pos 1
-    assert dates.parse_printed_date("2017-05-18") == date(2017, 5, 18)   # ISO
+    assert dates.parse_printed_date("21/03/2018") == date(2018, 3, 21)   # day > 12
+    assert dates.parse_printed_date("03/21/2018") == date(2018, 3, 21)   # month pos 1
+    assert dates.parse_printed_date("2018-03-21") == date(2018, 3, 21)   # ISO
     assert dates.parse_printed_date("31 FEB 2020") is None       # impossible
     assert dates.parse_printed_date("garbage") is None
 
@@ -87,31 +87,31 @@ def test_leap_day_parses_and_non_leap_rejected():
 
 # ---- normalize_any / display / portal ---------------------------------------
 def test_normalize_any_accepts_every_canonical_input():
-    assert dates.normalize_any("1988-06-13", kind="birth", today=TODAY) == "1988-06-13"
-    assert dates.normalize_any("880613", kind="birth", today=TODAY) == "1988-06-13"
-    assert dates.normalize_any("13 JUN 1988", kind="birth", today=TODAY) == "1988-06-13"
+    assert dates.normalize_any("1990-02-15", kind="birth", today=TODAY) == "1990-02-15"
+    assert dates.normalize_any("900215", kind="birth", today=TODAY) == "1990-02-15"
+    assert dates.normalize_any("15 FEB 1990", kind="birth", today=TODAY) == "1990-02-15"
     assert dates.normalize_any("garbage", kind="birth", today=TODAY) == ""
     # MM/DD/YYYY only in the explicit U.S.-entry context.
-    assert dates.normalize_any("06/13/1988", kind="birth", us_numeric=True) == "1988-06-13"
+    assert dates.normalize_any("02/15/1990", kind="birth", us_numeric=True) == "1990-02-15"
     assert dates.normalize_any("05/04/2031", kind="expiry") == ""            # ambiguous
     assert dates.normalize_any("05/04/2031", kind="expiry", us_numeric=True) == "2031-05-04"
 
 
 def test_display_is_us_format_and_a_pure_string_transform():
-    assert dates.to_display("1988-06-13") == "06/13/1988"
+    assert dates.to_display("1990-02-15") == "02/15/1990"
     assert dates.to_display("2031-05-04") == "05/04/2031"
     assert dates.to_display("") == ""
     assert dates.to_display("not a date") == "not a date"   # unchanged, never guessed
 
 
 def test_portal_formats_are_route_specific_and_fail_closed():
-    assert dates.to_portal("1988-06-13", "DD/MM/YYYY") == "13/06/1988"
-    assert dates.to_portal("1988-06-13", "MM/DD/YYYY") == "06/13/1988"
-    assert dates.to_portal("1988-06-13", "YYYYMMDD") == "19880613"
-    assert dates.to_portal("1988-06-13", "DD-MON-YYYY") == "13-JUN-1988"
-    assert dates.to_portal("1988-06-13", "DD MONTH YYYY") == "13 June 1988"
-    assert dates.to_portal("880613", "DD/MM/YYYY") == ""     # non-canonical: refused
-    assert dates.to_portal("1988-06-13", "") == ""
+    assert dates.to_portal("1990-02-15", "DD/MM/YYYY") == "15/02/1990"
+    assert dates.to_portal("1990-02-15", "MM/DD/YYYY") == "02/15/1990"
+    assert dates.to_portal("1990-02-15", "YYYYMMDD") == "19900215"
+    assert dates.to_portal("1990-02-15", "DD-MON-YYYY") == "15-FEB-1990"
+    assert dates.to_portal("1990-02-15", "DD MONTH YYYY") == "15 February 1990"
+    assert dates.to_portal("900215", "DD/MM/YYYY") == ""     # non-canonical: refused
+    assert dates.to_portal("1990-02-15", "") == ""
 
 
 def test_no_timezone_machinery_exists_in_the_date_module():
@@ -133,9 +133,9 @@ def test_no_timezone_machinery_exists_in_the_date_module():
 
 # ---- age ---------------------------------------------------------------------
 def test_age_is_calculated_before_and_after_the_birthday():
-    assert dates.derive_age("1988-06-13", today=date(2026, 6, 12)) == 37
-    assert dates.derive_age("1988-06-13", today=date(2026, 6, 13)) == 38
-    assert dates.derive_age("1988-06-13", today=date(2026, 6, 14)) == 38
+    assert dates.derive_age("1990-02-15", today=date(2026, 2, 14)) == 35
+    assert dates.derive_age("1990-02-15", today=date(2026, 2, 15)) == 36
+    assert dates.derive_age("1990-02-15", today=date(2026, 2, 16)) == 36
     # Leap-day birthday: age ticks on Mar 1 in non-leap years.
     assert dates.derive_age("2000-02-29", today=date(2026, 2, 28)) == 25
     assert dates.derive_age("2000-02-29", today=date(2026, 3, 1)) == 26
@@ -144,10 +144,10 @@ def test_age_is_calculated_before_and_after_the_birthday():
 
 
 # ---- extraction produces canonical ISO --------------------------------------
-def _mrz_text(birth="880613", expiry="270517"):
+def _mrz_text(birth="900215", expiry="280320"):
     from app.providers.ocr import mrz_check_digit
     pn = "X1234567<"
-    l1 = "P<CHNCAO<<XIANGWEI".ljust(44, "<")[:44]
+    l1 = "P<CHNSPECIMEN<<FICTIONAL".ljust(44, "<")[:44]
     l2 = (pn + mrz_check_digit(pn) + "CHN" + birth + mrz_check_digit(birth)
           + "F" + expiry + mrz_check_digit(expiry) + "<" * 14
           + mrz_check_digit("<" * 14) + "0")
@@ -157,8 +157,8 @@ def _mrz_text(birth="880613", expiry="270517"):
 def test_extracted_fields_carry_iso_dates_not_raw_mrz():
     res = ocr.LocalOcrProvider().process(text=_mrz_text())
     fields = {f.key: f.value for f in res.fields}
-    assert fields["birth_date"] == "1988-06-13"
-    assert fields["expiry_date"] == "2027-05-17"
+    assert fields["birth_date"] == "1990-02-15"
+    assert fields["expiry_date"] == "2028-03-20"
     assert res.mrz_valid is True
 
 
@@ -168,23 +168,23 @@ def test_profile_dates_are_iso_and_age_derived():
         ocr_fields={}, mrz=mrz, recognized_text=_mrz_text(),
         mrz_valid=True, today=TODAY)
     f = profile["fields"]
-    assert f["birth_date"]["value"] == "1988-06-13"
-    assert f["expiry_date"]["value"] == "2027-05-17"
-    assert profile["prefill"]["birth_date"] == "1988-06-13"
-    assert profile["prefill"]["passport_expiry_date"] == "2027-05-17"
-    assert profile["prefill"]["age"] == 38
+    assert f["birth_date"]["value"] == "1990-02-15"
+    assert f["expiry_date"]["value"] == "2028-03-20"
+    assert profile["prefill"]["birth_date"] == "1990-02-15"
+    assert profile["prefill"]["passport_expiry_date"] == "2028-03-20"
+    assert profile["prefill"]["age"] == 36
     assert f["document_type"]["value"] == "P"
 
 
 # ---- printed-zone vs MRZ cross-check ----------------------------------------
-def _cn_style_text(printed_birth="13 JUN 1988", printed_issue="18 5月/MAY 2017"):
+def _cn_style_text(printed_birth="15 FEB 1990", printed_issue="21 3月/MAR 2018"):
     return (
         "PEOPLE'S REPUBLIC OF CHINA\n护照\nPASSPORT\n"
-        "姓名/Name\nCAO, XIANGWEI\n"
+        "姓名/Name\nSPECIMEN, FICTIONAL\n"
         f"出生日期/Date of birth\n{printed_birth}\n"
         f"签发日期/Date of issue\n{printed_issue}\n"
-        "出生地点/Place of birth\n河北/HEBEI\n"
-        "签发地点/Place of issue\n香港/HONG KONG\n"
+        "出生地点/Place of birth\n湖南/HUNAN\n"
+        "签发地点/Place of issue\n上海/SHANGHAI\n"
         + _mrz_text())
 
 
@@ -193,34 +193,34 @@ def test_printed_zone_agreement_passes_without_conflicts():
     profile = intake_flow.build_passport_profile(
         ocr_fields={}, mrz=mrz, recognized_text=_cn_style_text(),
         mrz_valid=True, today=TODAY)
-    assert profile["fields"]["birth_date"]["value"] == "1988-06-13"
+    assert profile["fields"]["birth_date"]["value"] == "1990-02-15"
     assert not any(c["field"] == "birth_date" for c in profile["conflicts"])
     # The printed issue date (which the MRZ cannot supply) is normalized to ISO.
-    assert profile["fields"]["issue_date"]["value"] == "2017-05-18"
-    assert profile["prefill"]["passport_issue_date"] == "2017-05-18"
+    assert profile["fields"]["issue_date"]["value"] == "2018-03-21"
+    assert profile["prefill"]["passport_issue_date"] == "2018-03-21"
     # Chinese-layout places extract from the Latin line.
-    assert profile["fields"]["place_of_birth"]["value"].startswith("HEBEI")
-    assert profile["fields"]["place_of_issue"]["value"].startswith("HONG KONG")
+    assert profile["fields"]["place_of_birth"]["value"].startswith("HUNAN")
+    assert profile["fields"]["place_of_issue"]["value"].startswith("SHANGHAI")
 
 
 def test_printed_zone_disagreement_requires_applicant_confirmation():
-    mrz = ocr.parse_mrz(_mrz_text())          # MRZ birth 1988-06-13
+    mrz = ocr.parse_mrz(_mrz_text())          # MRZ birth 1990-02-15
     profile = intake_flow.build_passport_profile(
         ocr_fields={}, mrz=mrz,
-        recognized_text=_cn_style_text(printed_birth="14 JUN 1988"),
+        recognized_text=_cn_style_text(printed_birth="16 FEB 1990"),
         mrz_valid=True, today=TODAY)
     bd = profile["fields"]["birth_date"]
-    assert bd["value"] == "1988-06-13"        # MRZ never silently overwritten
+    assert bd["value"] == "1990-02-15"        # MRZ never silently overwritten
     assert bd["needs_confirmation"] is True
-    assert any(c["field"] == "birth_date" and c["visual"] == "1988-06-14"
+    assert any(c["field"] == "birth_date" and c["visual"] == "1990-02-16"
                for c in profile["conflicts"])
 
 
 def test_multilingual_label_runs_never_fake_a_name_conflict():
     """'Surname/Nom/Apellidos' must never capture 'Nom' as the printed surname
     (the source of a false MRZ-vs-printed conflict on U.S. passports)."""
-    text = ("PASSPORT\nSurname/Nom/Apellidos\nCAO\n"
-            "Given Names/Prénoms/Nombres\nXIANGWEI\n" + _mrz_text())
+    text = ("PASSPORT\nSurname/Nom/Apellidos\nSPECIMEN\n"
+            "Given Names/Prénoms/Nombres\nFICTIONAL\n" + _mrz_text())
     mrz = ocr.parse_mrz(_mrz_text())
     profile = intake_flow.build_passport_profile(
         ocr_fields={}, mrz=mrz, recognized_text=text, mrz_valid=True, today=TODAY)
@@ -264,12 +264,12 @@ def test_generated_flow_fill_applies_declared_portal_format():
             "selector": "#dob", "input_source": "birth_date",
             "format": "DD/MM/YYYY"}
     runner = FlowRunner.__new__(FlowRunner)
-    runner.answers = {"birth_date": "1988-06-13"}
+    runner.answers = {"birth_date": "1990-02-15"}
     runner.driver = Driver()
     runner._from_driver = lambda n, r: {"status": "ok"}
     out = FlowRunner._step(runner, node)
     assert out["status"] == "ok"
-    assert runner.driver.filled == {"#dob": "13/06/1988"}
+    assert runner.driver.filled == {"#dob": "15/02/1990"}
 
 
 def test_generated_flow_fill_refuses_non_canonical_date_for_formatted_field():
@@ -287,7 +287,7 @@ def test_generated_flow_fill_refuses_non_canonical_date_for_formatted_field():
             "selector": "#dob", "input_source": "birth_date",
             "format": "DD/MM/YYYY"}
     runner = FlowRunner.__new__(FlowRunner)
-    runner.answers = {"birth_date": "06/13/1988"}    # not canonical ISO
+    runner.answers = {"birth_date": "02/15/1990"}    # not canonical ISO
     runner.driver = Driver()
     runner._from_driver = lambda n, r: {"status": "ok"}
     out = FlowRunner._step(runner, node)
@@ -313,12 +313,12 @@ def test_approve_merge_normalizes_us_and_mrz_dates(client=None):
     doc_id = up.json()["id"]
     # The applicant edits the expiry in U.S. display format.
     ap = c.post(f"/cases/{case['id']}/documents/{doc_id}/approve", headers=H,
-                json=[{"key": "expiry_date", "value": "05/17/2027"},
-                      {"key": "issue_date", "value": "18 5月/MAY 2017"}])
+                json=[{"key": "expiry_date", "value": "03/20/2028"},
+                      {"key": "issue_date", "value": "21 3月/MAR 2018"}])
     ans = ap.json()["answers"]
-    assert ans["expiry_date"] == "2027-05-17"        # canonical ISO in answers
-    assert ans["issue_date"] == "2017-05-18"
-    assert ans["birth_date"] == "1988-06-13"          # from extraction, ISO
+    assert ans["expiry_date"] == "2028-03-20"        # canonical ISO in answers
+    assert ans["issue_date"] == "2018-03-21"
+    assert ans["birth_date"] == "1990-02-15"          # from extraction, ISO
 
 
 # ---- validity uses display format in prose, ISO in structure ----------------
@@ -344,8 +344,8 @@ def test_corrupted_mrz_name_is_flagged_by_the_printed_comma_name_line():
     """MRZ name characters carry NO check digit — a noisy scan can corrupt
     them while every checksum still validates. The printed 'SURNAME, GIVEN'
     line must flag the disagreement for applicant confirmation."""
-    corrupted = _mrz_text().replace("CAO<<XIANGWEI", "CAO<<XIANGWEIKQZV")
-    text = "PASSPORT\n姓名/Name\nCAO, XIANGWEI\n" + corrupted
+    corrupted = _mrz_text().replace("SPECIMEN<<FICTIONAL", "SPECIMEN<<FICTIONALKQZV")
+    text = "PASSPORT\n姓名/Name\nSPECIMEN, FICTIONAL\n" + corrupted
     mrz = ocr.parse_mrz(corrupted)
     assert mrz["mrz_valid"] is True                    # checksums still pass
     profile = intake_flow.build_passport_profile(
@@ -355,7 +355,7 @@ def test_corrupted_mrz_name_is_flagged_by_the_printed_comma_name_line():
 
 
 def test_agreeing_printed_comma_name_line_creates_no_conflict():
-    text = "PASSPORT\n姓名/Name\nCAO, XIANGWEI\n" + _mrz_text()
+    text = "PASSPORT\n姓名/Name\nSPECIMEN, FICTIONAL\n" + _mrz_text()
     mrz = ocr.parse_mrz(_mrz_text())
     profile = intake_flow.build_passport_profile(
         ocr_fields={}, mrz=mrz, recognized_text=text, mrz_valid=True, today=TODAY)

@@ -98,7 +98,7 @@ def _shift_years(d: date, years: int) -> date:
 # ---------------------------------------------------------------------------
 # Printed-zone parsing (deterministic; ambiguity is rejected, never guessed).
 
-# 13 JUN 1988 / 12 Aug 1994 / 01 OCT 1988 / 5 May 2021
+# 15 FEB 1990 / 12 Aug 1994 / 01 OCT 1988 / 5 May 2021
 _D_MON_Y = re.compile(
     r"\b(\d{1,2})\s*[.\-/ ]\s*(" + "|".join(_MONTH_FULL + _MONTH_ABBR) +
     r")[a-z]*\s*[.\-/, ]\s*(\d{4})\b", re.IGNORECASE)
@@ -106,10 +106,10 @@ _D_MON_Y = re.compile(
 _MON_D_Y = re.compile(
     r"\b(" + "|".join(_MONTH_FULL + _MONTH_ABBR) +
     r")[a-z]*\s*[.\- ]\s*(\d{1,2})\s*[,\s]\s*(\d{4})\b", re.IGNORECASE)
-# Chinese passport layout: 18 5月/MAY 2017  (day, numeric month + 月, /, month name, year)
+# Chinese passport layout: 21 3月/MAR 2018  (day, numeric month + 月, /, month name, year)
 _CN_D_MY = re.compile(
     r"\b(\d{1,2})\s+(\d{1,2})月\s*/?\s*([A-Za-z]{3,9})?\s*(\d{4})\b")
-# Chinese full form: 2017年5月18日
+# Chinese full form: 2018年3月21日
 _CN_YMD = re.compile(r"\b(\d{4})年\s*(\d{1,2})月\s*(\d{1,2})日")
 # All-numeric with 4-digit year: 18/05/2017, 05-18-2017, 2017.05.18
 _NUM_DMY_OR_MDY = re.compile(r"\b(\d{1,2})[./-](\d{1,2})[./-](\d{4})\b")

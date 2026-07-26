@@ -499,7 +499,7 @@ import {
 import { fieldRows } from '../../src/renderer/src/lib/visaSession.js'
 
 test('applicant-facing dates format as MM/DD/YYYY from canonical ISO', () => {
-  assert.equal(formatDateUS('1988-06-13'), '06/13/1988')
+  assert.equal(formatDateUS('1990-02-15'), '02/15/1990')
   assert.equal(formatDateUS('2031-05-04'), '05/04/2031')
   assert.equal(formatDateUS(''), '')
   assert.equal(formatDateUS('940812'), '940812')       // non-canonical untouched
@@ -510,16 +510,16 @@ test('date display is a pure string transform — no timezone can shift it', () 
   // Would be 05/03/2031 in any negative-UTC zone if new Date() were involved.
   assert.equal(formatDateUS('2031-05-04'), '05/04/2031')
   assert.equal(parseUSDate(formatDateUS('2031-05-04')), '2031-05-04')  // round trip
-  for (const iso of ['2000-02-29', '1988-06-13', '2027-01-01', '1926-12-25']) {
+  for (const iso of ['2000-02-29', '1990-02-15', '2027-01-01', '1926-12-25']) {
     assert.equal(parseUSDate(formatDateUS(iso)), iso)
   }
 })
 
 test('applicant date entry parses US format back to canonical ISO', () => {
-  assert.equal(parseUSDate('06/13/1988'), '1988-06-13')
+  assert.equal(parseUSDate('02/15/1990'), '1990-02-15')
   assert.equal(parseUSDate('6/3/1988'), '1988-06-03')
-  assert.equal(parseUSDate('1988-06-13'), '1988-06-13')  // ISO passes through
-  assert.equal(parseUSDate('13/06/1988'), '')            // not a US date
+  assert.equal(parseUSDate('1990-02-15'), '1990-02-15')  // ISO passes through
+  assert.equal(parseUSDate('16/03/1990'), '')            // not a US date
   assert.equal(parseUSDate('02/30/2020'), '')            // impossible
   assert.equal(parseUSDate('02/29/2020'), '2020-02-29')  // leap day
   assert.equal(parseUSDate('garbage'), '')
@@ -536,34 +536,34 @@ test('localTodayIso uses the LOCAL calendar day, never UTC', () => {
 
 test('profileRows and fieldRows display dates as MM/DD/YYYY over ISO values', () => {
   const rows = profileRows({ fields: {
-    birth_date: { value: '1988-06-13', confidence: 0.98, source: 'mrz' },
-    expiry_date: { value: '2027-05-17', confidence: 0.98, source: 'mrz' },
+    birth_date: { value: '1990-02-15', confidence: 0.98, source: 'mrz' },
+    expiry_date: { value: '2028-03-20', confidence: 0.98, source: 'mrz' },
     surname: { value: 'CAO', confidence: 0.99, source: 'mrz' }
   } })
   const byKey = Object.fromEntries(rows.map((r) => [r.key, r]))
-  assert.equal(byKey.birth_date.value, '1988-06-13')     // canonical underneath
-  assert.equal(byKey.birth_date.display, '06/13/1988')   // applicant-facing
-  assert.equal(byKey.expiry_date.display, '05/17/2027')
+  assert.equal(byKey.birth_date.value, '1990-02-15')     // canonical underneath
+  assert.equal(byKey.birth_date.display, '02/15/1990')   // applicant-facing
+  assert.equal(byKey.expiry_date.display, '03/20/2028')
   assert.equal(byKey.surname.display, 'CAO')             // non-dates untouched
 
-  const fr = fieldRows({ birth_date: { value: '1988-06-13', confidence: 0.98 },
+  const fr = fieldRows({ birth_date: { value: '1990-02-15', confidence: 0.98 },
                          passport_number: { value: 'X1234567', confidence: 0.99 } })
   const fby = Object.fromEntries(fr.map((r) => [r.key, r]))
-  assert.equal(fby.birth_date.display, '06/13/1988')
-  assert.equal(fby.birth_date.value, '1988-06-13')
+  assert.equal(fby.birth_date.display, '02/15/1990')
+  assert.equal(fby.birth_date.value, '1990-02-15')
   assert.equal(fby.passport_number.display, 'X1234567')
 })
 
 test('a US-format date edit becomes canonical ISO in the prefill', () => {
-  const profile = { prefill: { birth_date: '1988-06-13', passport_number: 'X1' } }
-  const out = prefillWithEdits(profile, { birth_date: '06/14/1988' })
-  assert.equal(out.birth_date, '1988-06-14')             // parsed, canonical
+  const profile = { prefill: { birth_date: '1990-02-15', passport_number: 'X1' } }
+  const out = prefillWithEdits(profile, { birth_date: '03/16/1990' })
+  assert.equal(out.birth_date, '1990-03-16')             // parsed, canonical
   // An unparseable date edit never overwrites the extracted value.
   const kept = prefillWithEdits(profile, { birth_date: 'not a date' })
-  assert.equal(kept.birth_date, '1988-06-13')
+  assert.equal(kept.birth_date, '1990-02-15')
   // ISO typed directly also accepted.
-  assert.equal(prefillWithEdits(profile, { birth_date: '1988-06-15' }).birth_date,
-    '1988-06-15')
+  assert.equal(prefillWithEdits(profile, { birth_date: '1990-03-17' }).birth_date,
+    '1990-03-17')
 })
 
 test('isDateKey covers passport and trip date keys only', () => {
