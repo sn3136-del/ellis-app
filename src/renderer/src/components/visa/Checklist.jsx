@@ -13,10 +13,10 @@ import {
 } from '../../lib/intake.js'
 import DocPreview from './DocPreview.jsx'
 
-const ALLOWED = { 'application/pdf': 1, 'image/jpeg': 1, 'image/png': 1, 'image/tiff': 1 }
-const MAX_BYTES = 10 * 1024 * 1024
+export const ALLOWED = { 'application/pdf': 1, 'image/jpeg': 1, 'image/png': 1, 'image/tiff': 1 }
+export const MAX_BYTES = 10 * 1024 * 1024
 
-function readAsBase64(file) {
+export function readAsBase64(file) {
   return new Promise((resolve, reject) => {
     const r = new FileReader()
     r.onload = () => resolve(String(r.result).split(',')[1] || '')

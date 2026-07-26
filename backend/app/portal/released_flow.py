@@ -250,15 +250,24 @@ class ReleasedFlowDriver:
 
     def _documents(self) -> list[dict]:
         """Approved case documents as temp files for real uploads. Temp copies
-        live outside the repo with 0600 permissions and are deleted on close."""
+        live outside the repo with 0600 permissions and are deleted on close.
+
+        The applicant's explicit checklist submission OVERRIDES the automatic
+        classifier: a file they submitted against the 'photo' requirement IS
+        the photo for portal-upload purposes, even when OCR classified it as a
+        generic document — and that explicit submission also stands in for the
+        OCR approval gate (a photo has no extractable fields to approve)."""
         out = []
+        submitted_types = self._checklist_submitted_types()
         docs = self.db.execute(select(models.StoredDocument).where(
             models.StoredDocument.application_id == self.app_row.id)).scalars().all()
         for d in docs:
             blob = self.db.execute(select(models.DocumentBlob).where(
                 models.DocumentBlob.document_id == d.id)).scalar_one_or_none()
-            entry = {"doc_type": d.doc_type, "name": d.name, "mime": d.mime, "path": ""}
-            if blob is not None and getattr(d, "approved", False):
+            entry = {"doc_type": submitted_types.get(d.id, d.doc_type),
+                     "name": d.name, "mime": d.mime, "path": ""}
+            if blob is not None and (getattr(d, "approved", False)
+                                     or d.id in submitted_types):
                 suffix = {"image/jpeg": ".jpg", "image/png": ".png",
                           "application/pdf": ".pdf"}.get(d.mime, "")
                 fd, path = tempfile.mkstemp(prefix="ellis-doc-", suffix=suffix)
@@ -268,6 +277,31 @@ class ReleasedFlowDriver:
                 self._tmp_files.append(path)
                 entry["path"] = path
             out.append(entry)
+        return out
+
+    def _checklist_submitted_types(self) -> dict:
+        """document_id -> effective doc type, from the applicant's explicit
+        checklist submissions (status 'submitted'). Generic items keep the
+        classifier's verdict; typed requirements (photo, passport, …) impose
+        theirs."""
+        from .. import checklist_intake
+        out: dict = {}
+        try:
+            cg = checklist_intake.case_guidance(self.db, self.app_row.id)
+            if cg is None:
+                return out
+            items = {i.get("id"): i for i in
+                     (checklist_intake.current_checklist(self.db, self.app_row, cg) or [])}
+            for sub in checklist_intake.submission_rows(self.db, self.app_row.id):
+                if sub.get("status") != "submitted" or not sub.get("document_id"):
+                    continue
+                item = items.get(sub.get("item_id")) or {}
+                satisfied = [s for s in (item.get("satisfied_by") or []) if s]
+                eff = satisfied[0] if satisfied else str(item.get("id") or "")
+                if eff and eff != "document":
+                    out[sub["document_id"]] = eff
+        except Exception:  # noqa: BLE001 — never break uploads on lookup issues
+            return {}
         return out
 
     def _cleanup_tmp(self):

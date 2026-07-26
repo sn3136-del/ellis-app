@@ -216,6 +216,81 @@ class BrowserbasePageDriver:
         except Exception as e:  # noqa: BLE001
             return {"ok": False, "code": "NO_SUCH_ELEMENT", "detail": str(e)[:120]}
 
+    def list_options(self, selector: str, max_options: int = 300) -> dict:
+        """Read a search-combobox's REAL option labels WITHOUT selecting
+        anything — powering applicant questions for missing answers (Part 7:
+        the applicant chooses from the portal's actual list, never a blank
+        field). Opens the widget, waits for the async list, harvests visible
+        non-placeholder labels, scrolls the virtualized list until no new
+        rows appear, then closes with Escape; the form state is unchanged."""
+        if _SENSITIVE_SELECTOR.search(selector or ""):
+            return {"ok": False, "code": "SENSITIVE_FIELD_AUTOMATION"}
+        read_js = """(max) => {
+          const seen = new Set(), labels = [];
+          for (const el of document.querySelectorAll(
+                 '[class*="select-item"], [class*="option-content"]')) {
+            if (el.offsetParent === null) continue;
+            const cls = (el.className || '') + ' ' +
+                        ((el.closest('[class*="select-item"]') || {}).className || '');
+            if (/empty|disabled/i.test(cls)) continue;
+            const t = (el.textContent || '').trim();
+            if (!t || seen.has(t)) continue;
+            seen.add(t);
+            labels.push(t);
+            if (labels.length >= max) break;
+          }
+          return labels;
+        }"""
+        # Ant Design virtualizes long lists — only visible rows exist in the
+        # DOM. Scroll the dropdown's holder to pull the rest in.
+        scroll_js = """() => {
+          const h = document.querySelector(
+            '.rc-virtual-list-holder, [class*="dropdown"]:not([class*="hidden"]) [class*="list-holder"]');
+          if (!h) return false;
+          const before = h.scrollTop;
+          h.scrollTop = before + Math.max(80, h.clientHeight - 20);
+          return h.scrollTop !== before;
+        }"""
+        try:
+            try:
+                self.page.keyboard.press("Escape")
+                self.page.wait_for_timeout(120)
+            except Exception:  # noqa: BLE001
+                pass
+            self.page.locator(f"{selector} >> visible=true").first.click(timeout=15000)
+            labels: list = []
+            for _ in range(16):     # up to ~8s for async option lists
+                self.page.wait_for_timeout(500)
+                labels = self.page.evaluate(read_js, max_options) or []
+                if len(labels) > 1:
+                    break
+            seen = list(labels)
+            for _ in range(60):
+                try:
+                    moved = bool(self.page.evaluate(scroll_js))
+                except Exception:  # noqa: BLE001
+                    break
+                if not moved:
+                    break
+                self.page.wait_for_timeout(150)
+                more = self.page.evaluate(read_js, max_options) or []
+                fresh = [t for t in more if t not in set(seen)]
+                if fresh:
+                    seen.extend(fresh)
+                if len(seen) >= max_options:
+                    break
+            try:
+                self.page.keyboard.press("Escape")
+            except Exception:  # noqa: BLE001
+                pass
+            return {"ok": True, "options": seen[:max_options]}
+        except Exception as e:  # noqa: BLE001
+            try:
+                self.page.keyboard.press("Escape")
+            except Exception:  # noqa: BLE001
+                pass
+            return {"ok": False, "code": "NO_SUCH_ELEMENT", "detail": str(e)[:120]}
+
     def scroll_bottom(self, selector: str = "") -> dict:
         """Scroll a container (or the window) to its bottom and emit a scroll
         event — some portals gate their Continue buttons on a full read."""

@@ -370,6 +370,8 @@ class FlowRunner:
                 v = self.answers.get(node.get("input_source", ""), "")
                 rejected = node.get("node_id", "") in self.observed_options
                 if (rejected or v in ("", None)) and bool(node.get("mandatory", True)):
+                    if act == "SELECT_SEARCH":
+                        self._harvest_options(node)
                     out.append(self._question_for(node))
             elif act == "UPLOAD_AUTHORIZED_DOCUMENT":
                 if self._document_for(node.get("doc_type", "passport")) is None:
@@ -384,6 +386,27 @@ class FlowRunner:
                 keys.add(q["key"])
                 uniq.append(q)
         return uniq
+
+    def _harvest_options(self, node: dict) -> None:
+        """For a missing select answer, read the portal's REAL option list so
+        the applicant chooses from actual choices — never a blank field and
+        never a guess. Best-effort: a dependent list (e.g. ward before its
+        province) may be empty now and re-harvests on the next pass."""
+        nid = node.get("node_id", "")
+        if not nid or nid in self.observed_options:
+            return
+        if (node.get("question") or {}).get("options"):
+            return    # the released flow already declares the choices
+        lister = getattr(self.driver, "list_options", None)
+        if lister is None:
+            return
+        try:
+            res = lister(node["selector"]) or {}
+        except Exception:  # noqa: BLE001 — harvesting must never break a pause
+            return
+        opts = [str(o) for o in (res.get("options") or []) if str(o).strip()]
+        if opts:
+            self.observed_options[nid] = opts
 
     def _document_for(self, doc_type: str):
         for d in self.documents:

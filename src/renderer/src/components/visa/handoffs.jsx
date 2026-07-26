@@ -13,6 +13,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useToast, Loading, ErrorNote, KVList } from '../ui.jsx'
 import { useT } from '../../lib/locale.jsx'
 import { formatFee, formatSlot, splitQuestions, collectAnswers } from '../../lib/visaSession.js'
+import { ALLOWED, MAX_BYTES, readAsBase64 } from './Checklist.jsx'
 
 function Overlay({ children, onClose, width = 620 }) {
   return (
@@ -703,18 +704,59 @@ export function DeclarationModal({ onResolve, onClose }) {
 // it paused. Document-kind questions are resolved on the Documents tab first;
 // when there is nothing to type, Continue re-drives the case the same way the
 // final-review handoff resumes (the Journey tab's start).
-export function AdditionalInfoModal({ pending, onResolve, onGoToDocuments,
-                                      onContinueWithoutAnswers, onClose }) {
+export function AdditionalInfoModal({ client, caseId, checklist, pending, onResolve,
+                                      onGoToDocuments, onContinueWithoutAnswers, onClose }) {
   const t = useT()
   const { inputQuestions, documentQuestions } = splitQuestions(pending?.questions)
   const [values, setValues] = useState({})
   const [errors, setErrors] = useState({})     // question key -> display message
   const [error, setError] = useState(null)     // non-field backend rejection
   const [busy, setBusy] = useState(false)
+  const [uploads, setUploads] = useState({})   // doc question key -> 'busy'|'done'|error
 
   function set(key, v) {
     setValues((p) => ({ ...p, [key]: v }))
     setErrors((p) => (p[key] ? { ...p, [key]: null } : p))
+  }
+
+  // The checklist requirement a document question maps to ('document:photo'
+  // -> the item whose id or satisfied_by covers 'photo').
+  function checklistItemFor(docType) {
+    const list = Array.isArray(checklist) ? checklist : []
+    return list.find((i) => i.id === docType) ||
+      list.find((i) => Array.isArray(i.satisfied_by) && i.satisfied_by.includes(docType)) ||
+      null
+  }
+
+  // Inline fulfilment: upload + bind + explicit submit in one step, right in
+  // the question dialog — no detour through the Documents tab.
+  async function uploadFor(q, file) {
+    if (!file || !client) return
+    if (!ALLOWED[file.type]) {
+      setUploads((p) => ({ ...p, [q.key]: t('checklist.unsupportedType') })); return
+    }
+    if (file.size > MAX_BYTES) {
+      setUploads((p) => ({ ...p, [q.key]: t('checklist.tooLarge') })); return
+    }
+    setUploads((p) => ({ ...p, [q.key]: 'busy' }))
+    try {
+      const docType = (q.key || '').split(':')[1] || ''
+      const item = checklistItemFor(docType)
+      const b64 = await readAsBase64(file)
+      const res = await client.addDocument(caseId, {
+        name: file.name, mime: file.type, size_bytes: file.size,
+        content_b64: b64, ...(item ? { checklist_item_id: item.id } : {})
+      })
+      if (res && res.rejected) throw new Error(res.message || t('checklist.unreadableToast'))
+      if (item && res && res.id) {
+        await client.submitChecklistDoc(caseId, item.id, res.id, true)
+      }
+      setUploads((p) => ({ ...p, [q.key]: 'done' }))
+    } catch (e) {
+      setUploads((p) => ({
+        ...p, [q.key]: (e.detail && e.detail.message) || e.message || 'upload failed'
+      }))
+    }
   }
 
   async function submit() {
@@ -777,10 +819,30 @@ export function AdditionalInfoModal({ pending, onResolve, onGoToDocuments,
         <div className="card card--soft" style={{ padding: 14, marginTop: 4 }}>
           <div className="eyebrow">{t('addinfo.docsTitle')}</div>
           {documentQuestions.map((q) => (
-            <div key={q.key} style={{ marginTop: 8 }}>
+            <div key={q.key} style={{ marginTop: 8 }} data-testid={`doc-question-${q.key}`}>
               <div style={{ fontSize: 13.5, fontWeight: 600 }}>{q.question}</div>
               {q.why && (
                 <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{q.why}</div>
+              )}
+              {uploads[q.key] === 'done' ? (
+                <span className="chip chip--ink" style={{ marginTop: 8 }}>
+                  {t('addinfo.uploadedHere')}
+                </span>
+              ) : (
+                <div style={{ marginTop: 8 }}>
+                  <label className="btn btn--sm" style={{ cursor: 'pointer' }}>
+                    {uploads[q.key] === 'busy' ? t('addinfo.uploading') : t('addinfo.uploadHere')}
+                    <input type="file" accept=".pdf,.jpg,.jpeg,.png,.tiff"
+                      style={{ display: 'none' }}
+                      disabled={uploads[q.key] === 'busy'}
+                      onChange={(e) => uploadFor(q, e.target.files && e.target.files[0])} />
+                  </label>
+                  {uploads[q.key] && uploads[q.key] !== 'busy' && uploads[q.key] !== 'done' && (
+                    <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--crit)', marginTop: 4 }}>
+                      {uploads[q.key]}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           ))}
@@ -788,7 +850,7 @@ export function AdditionalInfoModal({ pending, onResolve, onGoToDocuments,
             {t('addinfo.docsNote')}
           </div>
           {onGoToDocuments && (
-            <button className="btn btn--sm" style={{ marginTop: 10 }} onClick={onGoToDocuments}>
+            <button className="btn btn--sm btn--ghost" style={{ marginTop: 10 }} onClick={onGoToDocuments}>
               {t('addinfo.docsCta')}
             </button>
           )}

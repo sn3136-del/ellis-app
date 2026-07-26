@@ -457,6 +457,79 @@ def test_saved_payment_checklist_items_are_healed_away(client, db):
     assert not any("payment" in l for l in labels)
 
 
+# ---------- Part 7: real portal options for missing select answers -----------
+
+def test_missing_select_questions_carry_harvested_portal_options(db):
+    """A missing select answer must reach the applicant WITH the portal's real
+    option list — never a blank 'choose from list' field."""
+    from app.adapter_factory import models as fm
+    from app.adapter_factory.compiler import CompiledFlow
+    from app.adapter_factory.runtime import FlowRunner
+
+    class OptionDriver:
+        def list_options(self, selector, max_options=300):
+            assert selector == "#basic_ttcdNcCuaKhau"
+            return {"ok": True, "options": ["Noi Bai Int Airport", "Tan Son Nhat Int Airport"]}
+
+    nodes = [
+        {"node_id": "pick_entry", "action": "SELECT_SEARCH",
+         "selector": "#basic_ttcdNcCuaKhau", "input_source": "entry_checkpoint",
+         "allowed_hostname": "evisa.gov.vn", "mandatory": True,
+         "question": {"question": "Through which border checkpoint will you enter?",
+                      "kind": "select", "format": "choose from list"}},
+        {"node_id": "done", "action": "COMPLETE", "allowed_hostname": "evisa.gov.vn"},
+    ]
+    execution = fm.AdapterExecution(org_id="org1", application_id="c-opt",
+                                    candidate_id="cand", candidate_version=1,
+                                    tier="sandbox", status="running")
+    db.add(execution); db.commit()
+    compiled = CompiledFlow(nodes, [n["node_id"] for n in nodes],
+                            {"allowed_hostnames": ["evisa.gov.vn"]})
+    runner = FlowRunner(db, execution=execution, compiled=compiled,
+                        driver=OptionDriver(), case_answers={})
+    res = runner.run()
+    assert res["status"] == "paused_applicant_action"
+    q = {x["key"]: x for x in res["questions"]}["entry_checkpoint"]
+    assert q["options"] == ["Noi Bai Int Airport", "Tan Son Nhat Int Airport"]
+
+
+# ---------- Part 7/15: applicant's checklist submission beats the classifier --
+
+def test_checklist_submission_overrides_classifier_doc_type(client, db):
+    """A file explicitly submitted against the 'photo' requirement IS the
+    photo for portal uploads — even when OCR classified it 'document' and no
+    OCR approval exists (a photo has no fields to approve)."""
+    from app.portal.released_flow import ReleasedFlowDriver
+    from app.visa_snapshot.models import CaseRouteGuidance
+    case = _new_case(client)
+    doc = models.StoredDocument(org_id="org1", application_id=case["id"],
+                                name="photo.jpg", mime="image/jpeg",
+                                size_bytes=4, doc_type="document", approved=False)
+    db.add(doc); db.flush()
+    db.add(models.DocumentBlob(document_id=doc.id, org_id="org1",
+                               mime="image/jpeg", content=b"\xff\xd8\xff\xd9"))
+    db.add(CaseRouteGuidance(case_id=case["id"], org_id="org1",
+                             guidance={"guidance": {}}, checklist=[
+                                 {"id": "photo", "label": "digital passport photo",
+                                  "kind": "document", "required": True,
+                                  "satisfied_by": ["photo"]}]))
+    db.add(models.ChecklistSubmission(org_id="org1", application_id=case["id"],
+                                      item_id="photo", document_id=doc.id,
+                                      status="submitted", match_verdict="uncertain",
+                                      detected_type="document",
+                                      confirmed_by_applicant=True))
+    db.commit()
+    drv = ReleasedFlowDriver.__new__(ReleasedFlowDriver)
+    drv.db = db
+    drv.app_row = db.get(models.VisaApplication, case["id"])
+    drv._tmp_files = []
+    docs = drv._documents()
+    photo = next((d for d in docs if d["doc_type"] == "photo"), None)
+    assert photo is not None, "checklist submission must impose doc_type photo"
+    assert photo["path"], "explicit submission stands in for the OCR approval gate"
+    drv._cleanup_tmp()
+
+
 # ---------- envelope binding (Continue diagnosis) ----------------------------
 
 def test_signature_binds_to_the_prepared_envelope_not_the_newest(client, db):

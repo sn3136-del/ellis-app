@@ -383,6 +383,7 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
       )}
       {modal === 'additional_information' && (
         <AdditionalInfoModal pending={pending}
+          client={client} caseId={caseId} checklist={journey?.checklist}
           onResolve={resolve}
           onGoToDocuments={() => { setModal(null); setTab('documents') }}
           onContinueWithoutAnswers={async () => {
