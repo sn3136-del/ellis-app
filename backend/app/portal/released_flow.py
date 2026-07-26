@@ -201,6 +201,12 @@ class ReleasedFlowDriver:
                     allowed_hostnames=self._hosts(), session=info)
                 session._ensure_page()
             except Exception:  # noqa: BLE001 — stale session: fall through
+                if session is not None:
+                    try:  # stop any half-started local Playwright before retrying
+                        session._owns_session = False
+                        session.close()
+                    except Exception:  # noqa: BLE001
+                        pass
                 session = None
                 row.status = "closed"
                 self.db.commit()
@@ -281,11 +287,21 @@ class ReleasedFlowDriver:
     def _advance(self, stop_before=None) -> dict:
         try:
             runner = self._runner()
-            return runner.run(stop_before=stop_before)
+            res = runner.run(stop_before=stop_before)
         except _OutcomeUncertain as e:
+            self.detach()   # broken attachment: never reuse it for a retry
             return {"status": "outcome_uncertain", "reason": str(e)}
+        except Exception:
+            self.detach()
+            raise
         finally:
             self._cleanup_tmp()
+        if res.get("status") == "failed":
+            # A failed step often means the page/session went bad; drop the
+            # local attachment so an in-request retry starts clean instead of
+            # stacking a second Playwright onto this thread.
+            self.detach()
+        return res
 
     def _consume_handoff(self, kind: str) -> bool:
         """After the applicant completed a handoff (in the live view), step the

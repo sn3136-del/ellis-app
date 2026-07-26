@@ -200,8 +200,19 @@ def signal(db, application_id: str, name: str, **kwargs):
     """Load → enforce safety → apply a signal → persist. The single durable
     transition point; the safety gate here covers every caller."""
     wf = load_workflow(db, application_id)
-    enforce_safety(db, application_id, wf)
-    method = getattr(wf, name)
-    status = method(**kwargs) if kwargs else method()
-    persist_workflow(db, wf)
-    return status, wf
+    try:
+        enforce_safety(db, application_id, wf)
+        method = getattr(wf, name)
+        status = method(**kwargs) if kwargs else method()
+        persist_workflow(db, wf)
+        return status, wf
+    finally:
+        # Live released-flow drivers hold a local Playwright attachment; it
+        # must stop at request end (the REMOTE portal session stays open) or
+        # the next signal's attach in this thread fails.
+        detach = getattr(getattr(wf.adapter, "driver", None), "detach", None)
+        if callable(detach):
+            try:
+                detach()
+            except Exception:  # noqa: BLE001 — cleanup must never mask results
+                pass

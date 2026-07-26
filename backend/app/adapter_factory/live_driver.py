@@ -165,6 +165,11 @@ class BrowserbasePageDriver:
               for (const el of document.querySelectorAll(
                      '[class*="select-item"], [class*="option-content"]')) {
                 if (el.offsetParent === null) continue;
+                // Skip the widget's own "no data"/empty placeholder row — it
+                // is not a choice, and treating it as one would be a guess.
+                const cls = (el.className || '') + ' ' +
+                            ((el.closest('[class*="select-item"]') || {}).className || '');
+                if (/empty|disabled/i.test(cls)) continue;
                 const t = (el.textContent || '').trim();
                 if (!t || seen.has(t)) continue;
                 seen.add(t);
@@ -182,7 +187,7 @@ class BrowserbasePageDriver:
             for _ in range(16):     # up to ~8s for async option lists
                 self.page.wait_for_timeout(500)
                 result = self.page.evaluate(pick_js, want) or {}
-                if result.get("chosen") or result.get("labels"):
+                if result.get("chosen") or len(result.get("labels") or []) > 1:
                     break
             chosen_text = result.get("chosen")
             if not chosen_text:
