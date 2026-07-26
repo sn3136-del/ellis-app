@@ -752,9 +752,15 @@ def create_browser_session(application_id: str, response: Response,
         audit.record(db, org_id=p.org_id, application_id=application_id,
                      action="browser_session_opened",
                      detail={"mode": row.mode}, actor=p.user_id)  # no ids/urls in audit
+    # Retire duplicates on EVERY open, not only on creation: a case that
+    # already accumulated extra open rows must converge on one, or the
+    # applicant's window can still land on a session Ellis is not driving.
+    retire_other_sessions(db, application_id, row.id)
     response.headers["Cache-Control"] = "no-store"
     # fresh: a brand-new session shows a BLANK page until portal work runs —
     # the client should ask Ellis to restore the portal view.
+    # The PROVIDER's session id is never exposed to the client (pinned by
+    # test_browser_sessions) — only Ellis's own opaque row id.
     return {"id": row.id, "mode": row.mode, "status": row.status, "fresh": fresh,
             "live_view_available": row.mode == "browserbase",
             "browserbase_configured": bb.is_configured()}
