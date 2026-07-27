@@ -4,10 +4,15 @@
 //
 // Privacy invariants enforced here:
 //  - Ellis never solves CAPTCHAs and never auto-signs a government declaration.
-//  - No password, OTP value, card number, CAPTCHA answer, security answer, or
-//    declaration content is ever collected by Ellis — the applicant enters those
-//    directly in the portal's own secure window. These modals only CONFIRM that
-//    the applicant completed the step.
+//  - No password, OTP secret, CAPTCHA answer, security answer, or declaration
+//    content is ever collected by Ellis — the applicant enters those directly
+//    in the portal's own secure window. These modals only CONFIRM that the
+//    applicant completed the step.
+//  - Payment details are collected ONLY in PaymentDetailsModal, at the
+//    applicant's explicit request, so Ellis can fill the official portal's
+//    payment form: sent once over a vaulted one-time reference, never stored
+//    or logged, and the portal's own payment confirmation click always stays
+//    with the applicant.
 //  - Live View URLs are treated as sensitive: shown, never logged or emailed.
 import { useEffect, useRef, useState } from 'react'
 import { useToast, Loading, ErrorNote, KVList } from '../ui.jsx'
@@ -153,7 +158,7 @@ export function usePortalLiveView(client, caseId) {
            } }
 }
 
-function LiveFrame({ view, height = '70vh' }) {
+export function LiveFrame({ view, height = '70vh' }) {
   if (view.state === 'connecting') return <Loading label="Opening the secure portal window" />
   if (view.state === 'embedded' && view.url) {
     return (
@@ -181,6 +186,27 @@ function LiveFrame({ view, height = '70vh' }) {
           {view.busy ? 'Reconnecting…' : 'Reconnect the secure window'}
         </button>
       </div>
+    </div>
+  )
+}
+
+// A compact view of the case's own secure portal window, shown beside ANY
+// waiting surface so the applicant watches what Ellis is doing on the
+// official site instead of a bare spinner. Same isolated session as every
+// other surface (one per case); the URL stays short-lived and unlogged.
+export function PortalWatch({ client, caseId, height = '40vh', label }) {
+  const t = useT()
+  const view = usePortalLiveView(client, caseId)
+  if (!client || !caseId) return null
+  return (
+    <div style={{ marginTop: 12 }} data-testid="portal-watch">
+      <div style={{ display: 'flex', justifyContent: 'space-between',
+        alignItems: 'center', gap: 10 }}>
+        <div className="eyebrow">{label || t('live.watch')}</div>
+        <button className="btn btn--sm btn--ghost" disabled={view.busy}
+          onClick={view.reconnect}>{view.busy ? '…' : t('live.refresh')}</button>
+      </div>
+      <LiveFrame view={view} height={height} />
     </div>
   )
 }
@@ -408,6 +434,11 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
   const [typedCode, setTypedCode] = useState('')
   const [maskedDest, setMaskedDest] = useState(null)
   const [error, setError] = useState(null)
+  // In-Ellis captcha solving: the pause carries captures of the challenge
+  // widget and of the full portal page (the application review as the portal
+  // shows it). The HUMAN reads and solves; Ellis only transcribes the code.
+  const [capImg, setCapImg] = useState(null)
+  const [reviewImg, setReviewImg] = useState(null)
   // The live view is owned by the shared hook: one isolated session per case,
   // short-lived URL kept only in component state, auto-refreshed before it
   // expires, and honest about a session that ended.
@@ -427,6 +458,28 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
     }
   }, [handoff, caseId])
 
+  useEffect(() => {
+    let alive = true
+    const objects = []
+    async function load(docId, set) {
+      if (!docId) return
+      try {
+        const r = await client.documentPreviewUrl(caseId, docId)
+        if (!r?.url) return
+        const res = await fetch(client.base + r.url)
+        if (!res.ok) return
+        const u = URL.createObjectURL(await res.blob())
+        objects.push(u)
+        if (alive) set(u)
+      } catch { /* the live view remains the fallback */ }
+    }
+    if (handoff === 'captcha') {
+      load(pending?.captcha_document_id, setCapImg)
+      load(pending?.review_document_id, setReviewImg)
+    }
+    return () => { alive = false; objects.forEach((u) => URL.revokeObjectURL(u)) }
+  }, [handoff, pending?.captcha_document_id, pending?.review_document_id, caseId])
+
   async function closeSecureWindow() {
     setClosing(true)
     await view.close()
@@ -442,7 +495,12 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
       } else if (handoff === 'portal_form') {
         await onResolve('start')  // re-drive: Ellis re-verifies the form page
       } else if (handoff === 'captcha') {
-        await onResolve('solve_captcha')
+        // The applicant's typed solution rides along (vault-transported,
+        // used once): Ellis enters it on the portal and continues. Without a
+        // typed code, the applicant solved it in the secure window directly.
+        const code = typedCode.trim()
+        await onResolve('solve_captcha', code ? { token: code } : undefined)
+        setTypedCode('')                        // never retained after use
       } else {
         await onResolve('solve_captcha') // login_challenge/identity share the confirm-only path
       }
@@ -456,10 +514,38 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
       <Head title={title} sub={sub} onClose={onClose} />
       {/* Safety copy stays ABOVE the embedded window for the relevant kinds. */}
       {handoff === 'captcha' && (
-        <div style={{ fontSize: 13, marginTop: 12 }}>
-          <strong>Ellis never solves CAPTCHAs.</strong> Complete it yourself in the
-          secure window, then confirm below. Ellis scrolled the portal page to the
-          CAPTCHA and outlined it in red — if you don't see it, use Refresh view.
+        <div style={{ fontSize: 13, marginTop: 12 }} data-testid="captcha-panel">
+          <strong>Ellis never solves CAPTCHAs.</strong> Read the code from the
+          official page below, type it here, and Ellis enters it, presses Next,
+          and continues for you — or solve it directly in the secure window.
+          {pending?.captcha_retry && (
+            <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--crit)',
+              marginTop: 6 }} data-testid="captcha-retry-note">
+              The code wasn't accepted — type the new code shown below.
+            </div>
+          )}
+          {reviewImg && (
+            <div style={{ marginTop: 10 }} data-testid="captcha-review-shot">
+              <div className="eyebrow">Your application as the portal shows it</div>
+              <div style={{ maxHeight: '32vh', overflowY: 'auto', marginTop: 6,
+                border: '1px solid var(--line)', borderRadius: 10 }}>
+                <img src={reviewImg} alt="The portal's review of your application"
+                  style={{ width: '100%', display: 'block' }} />
+              </div>
+            </div>
+          )}
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 10,
+            flexWrap: 'wrap' }}>
+            {capImg && (
+              <img src={capImg} alt="The portal's CAPTCHA challenge"
+                data-testid="captcha-shot"
+                style={{ height: 56, border: '1px solid var(--line)', borderRadius: 8 }} />
+            )}
+            <input className="input" style={{ maxWidth: 220 }}
+              inputMode="numeric" autoComplete="off"
+              placeholder="Type the code shown" value={typedCode}
+              onChange={(e) => setTypedCode(e.target.value)} />
+          </div>
         </div>
       )}
       {handoff === 'portal_form' && (
@@ -499,8 +585,9 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
         </div>
       )}
       <div style={{ fontSize: 11, color: 'var(--muted-2)', marginTop: 10 }}>
-        Ellis collects no passwords, one-time codes, card details, or CAPTCHA answers.
-        Ellis never sees your card and never solves CAPTCHAs.
+        Ellis collects no passwords or CAPTCHA answers and never solves CAPTCHAs.
+        One-time codes and payment details are used only when you explicitly
+        provide them for the official portal — once, then deleted, never stored.
       </div>
 
       <div style={{ marginTop: 12 }}>
@@ -525,7 +612,9 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
         <button className="btn btn--ghost" onClick={onClose}>Not now</button>
         <button className="btn" disabled={busy} onClick={done}>
           {busy ? 'Confirming…'
-            : handoff === 'captcha' ? 'CAPTCHA completed — continue'
+            : handoff === 'captcha' ? (typedCode.trim()
+              ? 'Enter my code on the portal and continue'
+              : 'CAPTCHA completed — continue')
             : handoff === 'portal_form' ? 'I finished these items — continue'
             : (handoff === 'email_verification' || handoff === 'otp') ? 'Verify code and continue'
             : 'I completed this step'}
@@ -590,6 +679,7 @@ export function PaymentApprove({ client, caseId, pending, onResolve, onClose }) 
   const view = usePortalLiveView(client, caseId)
   const showPortal = confirmMode && !!client && !!caseId
   const [reading, setReading] = useState(false)
+  const autoReadRef = useRef(false)
 
   // On-demand fee read: once the applicant has walked the portal to the step
   // that displays the amount, Ellis reads it off that page and the dialog
@@ -612,6 +702,18 @@ export function PaymentApprove({ client, caseId, pending, onResolve, onClose }) 
     }
     setReading(false)
   }
+
+  // Self-healing on open: a fee-confirmation pause recorded while the live
+  // page was really elsewhere (unanswered questions, the declaration, a
+  // CAPTCHA) reclassifies itself the moment this dialog opens — the read-fee
+  // run re-reads the page and the progress poll swaps this dialog for the
+  // real ask. Once per open; the manual button stays for later re-reads.
+  useEffect(() => {
+    if (confirmMode && !autoReadRef.current) {
+      autoReadRef.current = true
+      readFeeNow()
+    }
+  }, [confirmMode])
 
   return (
     <Overlay onClose={onClose}
@@ -729,49 +831,191 @@ export function PaymentApprove({ client, caseId, pending, onResolve, onClose }) 
   )
 }
 
-// ---- Applicant-controlled payment (handoff: payment / three_ds) ------------
-export function PaymentModal({ client, caseId, pending, onResolve, onClose }) {
+// ---- Applicant-provided payment details (handoff: payment_credentials) -----
+// The applicant gives Ellis their card details IN ELLIS; Ellis fills them on
+// the official portal's own payment form. The details are sent once, travel
+// as a one-time vault reference, and are never stored or logged. Ellis never
+// clicks Pay — the filled page comes back to the applicant (payment handoff)
+// for their own confirmation click in the secure window.
+export function PaymentDetailsModal({ client, caseId, pending, onResolve, onClose }) {
+  const t = useT()
+  const [busy, setBusy] = useState('')      // 'fill' | 'manual'
+  const [error, setError] = useState(null)
+  const [errors, setErrors] = useState({})
+  const [holder, setHolder] = useState('')
+  const [number, setNumber] = useState('')
+  const [expiry, setExpiry] = useState('')
+  const [cvv, setCvv] = useState('')
+  const fee = pending?.fee
+
+  function luhnOk(digits) {
+    let sum = 0
+    for (let i = 0; i < digits.length; i++) {
+      let d = digits.charCodeAt(digits.length - 1 - i) - 48
+      if (i % 2 === 1) { d *= 2; if (d > 9) d -= 9 }
+      sum += d
+    }
+    return sum % 10 === 0
+  }
+
+  function validate() {
+    const errs = {}
+    if (!holder.trim()) errs.holder = t('paydetails.errHolder')
+    const digits = number.replace(/[\s-]/g, '')
+    if (!/^\d{12,19}$/.test(digits) || !luhnOk(digits)) errs.number = t('paydetails.errNumber')
+    if (!/^(0?[1-9]|1[0-2])\s*\/\s*(\d{2}|\d{4})$/.test(expiry.trim())) errs.expiry = t('paydetails.errExpiry')
+    if (!/^\d{3,4}$/.test(cvv.trim())) errs.cvv = t('paydetails.errCvv')
+    setErrors(errs)
+    return Object.keys(errs).length === 0
+  }
+
+  async function submit() {
+    if (!validate()) return
+    setBusy('fill'); setError(null)
+    try {
+      await onResolve('provide_payment_details', {
+        card: { holder: holder.trim(), number: number.replace(/[\s-]/g, ''),
+                expiry: expiry.trim(), cvv: cvv.trim() }
+      })
+      // Never retained after the send — the backend vaults, uses once, destroys.
+      setNumber(''); setCvv(''); setExpiry(''); setHolder('')
+    } catch (e) {
+      const d = e && typeof e.detail === 'object' ? e.detail : null
+      if (d && d.reason === 'invalid_payment_details' && d.key) {
+        // Localize known validation keys; the raw server message is the
+        // fallback for anything unmapped.
+        const known = { holder: 'errHolder', number: 'errNumber',
+                        expiry: 'errExpiry', cvv: 'errCvv' }[d.key]
+        setErrors({ [d.key]: known ? t('paydetails.' + known) : d.message })
+      } else {
+        setError({ message: (d && d.message) || e.message })
+      }
+      setBusy('')
+    }
+  }
+
+  async function manual() {
+    setBusy('manual'); setError(null)
+    try { await onResolve('provide_payment_details', { manual: true }) }
+    catch (e) { setError({ message: e.message }); setBusy('') }
+  }
+
+  const field = (label, value, set, key, props = {}) => (
+    <div className="field" style={{ marginBottom: 10 }}>
+      <label>{label}</label>
+      <input className="input" value={value} autoComplete="off"
+        onChange={(e) => { set(e.target.value); setErrors((p) => (p[key] ? { ...p, [key]: null } : p)) }}
+        {...props} />
+      {errors[key] && (
+        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--crit)' }}>{errors[key]}</div>
+      )}
+    </div>
+  )
+
+  return (
+    <Overlay onClose={onClose} width={client && caseId ? 1200 : 520}>
+      <Head title={t('paydetails.title')} onClose={onClose} sub={t('paydetails.sub')} />
+      {/* The live payment page: the applicant sees where their details are
+          about to go, and watches Ellis fill the official form. */}
+      <PortalWatch client={client} caseId={caseId} height="34vh" />
+      <div className="stat" style={{ marginTop: 4 }}>
+        <div className="stat__num">{formatFee(fee) || '—'}</div>
+        <div className="stat__cap">{t('paydetails.amountCap')}</div>
+      </div>
+      <div style={{ marginTop: 12 }}>
+        {field(t('paydetails.holder'), holder, setHolder, 'holder',
+          { placeholder: t('paydetails.holderPh') })}
+        {field(t('paydetails.number'), number, setNumber, 'number',
+          { inputMode: 'numeric', autoComplete: 'off', placeholder: '4111 1111 1111 1111' })}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ flex: 1 }}>
+            {field(t('paydetails.expiry'), expiry, setExpiry, 'expiry',
+              { inputMode: 'numeric', placeholder: 'MM/YY' })}
+          </div>
+          <div style={{ width: 140 }}>
+            {field(t('paydetails.cvv'), cvv, setCvv, 'cvv',
+              { inputMode: 'numeric', type: 'password', maxLength: 4, placeholder: '•••' })}
+          </div>
+        </div>
+      </div>
+      <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
+        {t('paydetails.privacy')}
+      </div>
+      {error && <ErrorNote error={error} />}
+      <div className="modal__foot">
+        <button className="btn btn--ghost" disabled={!!busy} onClick={manual}
+          data-testid="payment-manual">
+          {busy === 'manual' ? '…' : t('paydetails.manualCta')}
+        </button>
+        <button className="btn" disabled={!!busy} onClick={submit}
+          data-testid="payment-fill">
+          {busy === 'fill' ? t('paydetails.filling') : t('paydetails.fillCta')}
+        </button>
+      </div>
+    </Overlay>
+  )
+}
+
+// ---- Applicant-confirmed payment (handoff: payment / three_ds) --------------
+export function PaymentModal({ client, caseId, pending, onResolve, onProvideDetails, onClose }) {
   const toast = useToast()
   const t = useT()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
-  // The applicant pays ON the official portal, inside the case's own isolated
-  // session, embedded here — no detour to a separate browser, and Ellis never
-  // sees the card (it cannot read what is typed in that session).
+  // The payment is confirmed ON the official portal, inside the case's own
+  // isolated session, embedded here — no detour to a separate browser. When
+  // Ellis pre-filled the applicant's details (payment_prefilled), the
+  // applicant reviews them on the page and clicks the portal's own confirm;
+  // otherwise they enter the card in the window personally. payment_fillable
+  // routes offer the card ask (again) — a rebuilt session shows an empty
+  // form, and a declined attempt may need a different card.
   const view = usePortalLiveView(client, caseId)
   const fee = pending?.fee
+  const prefilled = !!pending?.payment_prefilled
+  const fillable = !!pending?.payment_fillable
   const embedded = view.state === 'embedded' && !!view.url
   return (
     <Overlay onClose={onClose} width={embedded ? 1360 : 620}>
-      <Head title="Pay the official fee" onClose={onClose}
-            sub="Pay on the official portal in the secure window below. Ellis never sees or stores your card." />
+      <Head title={prefilled ? t('paywin.titlePrefilled') : t('paywin.title')} onClose={onClose}
+            sub={prefilled ? t('paywin.subPrefilled') : t('paywin.sub')} />
       <div className="stat" style={{ marginTop: 4 }}>
         <div className="stat__num">{formatFee(fee) || '—'}</div>
-        <div className="stat__cap">Amount due at the official portal</div>
+        <div className="stat__cap">{t('paywin.amountCap')}</div>
       </div>
+      {prefilled && (
+        <div className="card card--soft" style={{ padding: '10px 12px', marginTop: 10,
+          fontSize: 12.5 }} data-testid="payment-prefilled-note">
+          {t('paywin.prefilledNote')}
+        </div>
+      )}
       <div style={{ marginTop: 12 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
           <div className="eyebrow">{t('live.embedded')}</div>
-          <button className="btn btn--sm btn--ghost" disabled={view.busy} onClick={view.reconnect}>
-            {view.busy ? '…' : t('live.refresh')}
-          </button>
+          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+            {fillable && onProvideDetails && (
+              <button className="btn btn--sm btn--ghost" onClick={onProvideDetails}
+                data-testid="provide-details-again">
+                {t('paywin.provideDetails')}
+              </button>
+            )}
+            <button className="btn btn--sm btn--ghost" disabled={view.busy} onClick={view.reconnect}>
+              {view.busy ? '…' : t('live.refresh')}
+            </button>
+          </div>
         </div>
         <LiveFrame view={view} />
       </div>
       <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 10 }}>
-        Supports payment pop-ups and 3-D Secure. If you leave, your case is kept
-        safely and payment is reconciled with the portal before any retry — Ellis
-        never charges twice. After you pay, Ellis reads the portal's own result;
-        it never records a payment the portal has not confirmed.
+        {t('paywin.reconcileNote')}
       </div>
       {error && <ErrorNote error={error} />}
       <div className="modal__foot">
-        <button className="btn btn--ghost" onClick={onClose}>I'll finish later</button>
+        <button className="btn btn--ghost" onClick={onClose}>{t('paywin.later')}</button>
         <button className="btn" disabled={busy} onClick={async () => {
           setBusy(true); setError(null)
-          try { await onResolve('complete_payment'); toast('Checking the portal…') }
+          try { await onResolve('complete_payment'); toast(t('paywin.checking')) }
           catch (e) { setError({ message: e.message }); setBusy(false) }
-        }}>{busy ? 'Checking with the portal…' : 'I paid — check the portal'}</button>
+        }}>{busy ? t('paywin.checking') : t('paywin.paidCta')}</button>
       </div>
     </Overlay>
   )
@@ -834,21 +1078,46 @@ export function RescheduleConfirm({ pending, onResolve, onClose }) {
 }
 
 // ---- Personal government declaration (handoff: personal_declaration) --------
-export function DeclarationModal({ onResolve, onClose }) {
+// The declaration is always MADE by the applicant, here in Ellis, against the
+// portal's own verbatim statement when the run read one off the form
+// (pending.portal_messages). Ellis then transcribes the recorded declaration
+// onto the official form and clicks the portal's Next — it never declares on
+// its own initiative.
+export function DeclarationModal({ client, caseId, pending, onResolve, onClose }) {
   const [agree, setAgree] = useState(false)
   const [busy, setBusy] = useState(false)
+  const portalStatements = pending?.portal_messages || []
   return (
-    <Overlay onClose={onClose}>
-      <Head title="Sign the government declaration" onClose={onClose}
-            sub="Only you can make this declaration, under penalty of perjury. Ellis and its AI never sign it for you." />
+    <Overlay onClose={onClose} width={client && caseId ? 1360 : 620}>
+      <Head title="Make the official declaration" onClose={onClose}
+            sub="Only you can make this declaration. Ellis records it, marks it on the official form for you, and continues to the next step — it never declares on its own." />
+      {portalStatements.length > 0 && (
+        <div className="card card--soft" style={{ padding: 14, fontSize: 13, marginTop: 8 }}
+          data-testid="portal-declaration-text">
+          <div className="eyebrow">
+            {portalStatements.length > 1 ? "The official form's declarations"
+              : "The official form's declaration"}
+          </div>
+          {portalStatements.map((s) => (
+            <div key={s} style={{ marginTop: 6, whiteSpace: 'pre-wrap' }}>{s}</div>
+          ))}
+        </div>
+      )}
       <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', margin: '10px 0', fontSize: 13 }}>
         <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
-        <span>I personally declare that the information in this application is true and complete, under penalty of perjury.</span>
+        <span>
+          {portalStatements.length > 0
+            ? 'I personally make the declaration shown above, exactly as the official form states it.'
+            : 'I personally declare that the information in this application is true and complete, under penalty of perjury.'}
+        </span>
       </label>
+      {/* The live page: the applicant sees the declaration on the official
+          form, and watches Ellis mark it after they declare. */}
+      <PortalWatch client={client} caseId={caseId} height="34vh" />
       <div className="modal__foot">
         <button className="btn btn--ghost" onClick={onClose}>Cancel</button>
         <button className="btn" disabled={!agree || busy} onClick={async () => { setBusy(true); await onResolve('complete_declaration') }}>
-          {busy ? 'Submitting…' : 'I personally declare'}
+          {busy ? 'Recording…' : 'I personally declare'}
         </button>
       </div>
     </Overlay>
@@ -867,7 +1136,13 @@ export function AdditionalInfoModal({ client, caseId, checklist, pending, onReso
                                       onGoToDocuments, onContinueWithoutAnswers, onClose }) {
   const t = useT()
   const { inputQuestions, documentQuestions } = splitQuestions(pending?.questions)
-  const [values, setValues] = useState({})
+  // A re-asked question (the portal rejected the stored value, or its list
+  // changed) starts from the applicant's PREVIOUS answer — never a blank
+  // field that reads as "Ellis forgot what I already told it".
+  const [values, setValues] = useState(() => Object.fromEntries(
+    (pending?.questions || [])
+      .filter((q) => q.key && q.previous_answer != null && q.previous_answer !== '')
+      .map((q) => [q.key, String(q.previous_answer)])))
   const [errors, setErrors] = useState({})     // question key -> display message
   const [error, setError] = useState(null)     // non-field backend rejection
   const [busy, setBusy] = useState(false)
@@ -960,6 +1235,8 @@ export function AdditionalInfoModal({ client, caseId, checklist, pending, onReso
   }
 
   return (
+    // No portal preview here on purpose: this dialog is a form to fill in,
+    // not a wait — an embedded live window is noise while typing answers.
     <Overlay onClose={onClose}>
       <Head title={t('addinfo.title')} onClose={onClose} sub={t('addinfo.sub')} />
       {inputQuestions.map((q) => (

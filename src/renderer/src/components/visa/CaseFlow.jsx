@@ -17,8 +17,9 @@ import Preferences from './Preferences.jsx'
 import Checklist, { ContinuePanel } from './Checklist.jsx'
 import {
   SignatureModal, LiveViewModal, PaymentApprove, PaymentModal,
-  AppointmentCalendar, RescheduleConfirm, DeclarationModal,
-  StandingAuthModal, FinalReviewModal, AdditionalInfoModal
+  PaymentDetailsModal, AppointmentCalendar, RescheduleConfirm, DeclarationModal,
+  StandingAuthModal, FinalReviewModal, AdditionalInfoModal,
+  PortalWatch
 } from './handoffs.jsx'
 
 // Legacy full stage list — used ONLY for cases without a saved route journey
@@ -94,6 +95,8 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
   const [everQueued, setEverQueued] = useState(false) // a background run exists
   const landedOnDocs = useRef(false)
   const progressSigRef = useRef('')
+  const autoSkipRef = useRef(false)
+  const autoRecheckRef = useRef(false)
 
   // A different case opened in-place (e.g. the renewal flow): reset every
   // per-case piece of state so the previous case never bleeds through.
@@ -102,6 +105,8 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
     setModal(null); setError(null); setJourney(null)
     landedOnDocs.current = false
     progressSigRef.current = ''
+    autoSkipRef.current = false
+    autoRecheckRef.current = false
   }, [caseId])
 
   async function refresh() {
@@ -157,11 +162,14 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
         const sig = `${pr.state}|${pr.waiting_for_applicant}|${pr.handoff}|${pr.run_status}`
         if (progressSigRef.current && progressSigRef.current !== sig) {
           refresh()
-          // A restore that READ the fee turns fee_confirmation into
-          // payment_approval: follow the pause so the open dialog swaps from
-          // "type the amount" to "approve this exact amount".
-          if (pr.waiting_for_applicant && pr.handoff && modal && pr.handoff !== modal) {
-            setModal(pr.handoff)
+          // A reclassified pause must swap the OPEN dialog (fee_confirmation
+          // -> payment_approval after a fee read, or -> additional_information
+          // / captcha when the page showed the real blocker). Functional
+          // update: this effect's closure over `modal` is stale (deps exclude
+          // it), so the current value must come from the setter itself.
+          if (pr.waiting_for_applicant && pr.handoff) {
+            setModal((cur) =>
+              cur && cur !== 'standing_auth' && cur !== pr.handoff ? pr.handoff : cur)
           }
         }
         progressSigRef.current = sig
@@ -205,10 +213,46 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
     onNotify && onNotify()
   }
 
-  async function start() {
+  // Optional-only asks are never shown: fields the portal does not mark
+  // required are skipped automatically and the case re-drives itself — the
+  // portal's own validation asks precisely if something was needed after all.
+  // One shot per case load, so a genuine backend re-ask (auto-advance failed)
+  // still surfaces instead of looping.
+  useEffect(() => {
+    const qs = pending?.questions
+    if (autoSkipRef.current || runBusy || busy) return
+    if (pending?.handoff !== 'additional_information' || !Array.isArray(qs) || qs.length === 0) return
+    const allSkippable = qs.every((q) =>
+      q.mandatory === false && q.kind !== 'document' &&
+      !String(q.key || '').startsWith('document:'))
+    if (allSkippable) {
+      autoSkipRef.current = true
+      start(true)
+    }
+  }, [pending, runBusy])
+
+  // A recorded portal_form pause re-checks itself ONCE per case load: the
+  // page may have moved on (or a newer Ellis can now read the portal's own
+  // complaints and ask in-app instead). A pause that survives the re-check is
+  // genuine — the secure window stays the answer, with no further auto-runs.
+  useEffect(() => {
+    if (autoRecheckRef.current || runBusy || busy) return
+    if (pending?.handoff !== 'portal_form') return
+    autoRecheckRef.current = true
+    start('recheck')
+  }, [pending, runBusy])
+
+  async function start(autoMode) {
+    // `start` doubles as an onClick handler (which passes an event object):
+    // only the literal values from the auto effects change the toast.
+    const mode = autoMode === true ? 'skip' : autoMode === 'recheck' ? 'recheck' : null
     setBusy(true); setError(null)
-    try { apply(await client.start(caseId)); toast('Application started') }
-    catch (e) {
+    try {
+      apply(await client.start(caseId))
+      toast(mode === 'skip' ? 'Skipping the optional items — continuing your application'
+        : mode === 'recheck' ? 'Re-checking the official form for you…'
+        : 'Application started')
+    } catch (e) {
       // Honest fail-closed reasons get applicant-facing copy — never a bare
       // HTTP status. real_only_stop = no approved live portal connection for
       // this route; Ellis never simulates a government submission.
@@ -325,11 +369,11 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
           )}
 
           {started && !terminal && !handoff && (
-            <ProgressCard progress={progress} busy={busy}
+            <ProgressCard client={client} caseId={caseId} progress={progress} busy={busy}
               onRefresh={refresh} onRetry={retryPortal} onResume={start} />
           )}
 
-          {terminal && <ResultView status={status} />}
+          {terminal && <ResultView status={status} client={client} caseId={caseId} />}
         </div>
       )}
 
@@ -391,9 +435,15 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
         <PaymentApprove client={client} caseId={caseId} pending={pending}
           onResolve={resolve} onClose={() => setModal(null)} />
       )}
+      {modal === 'payment_credentials' && (
+        <PaymentDetailsModal client={client} caseId={caseId} pending={pending}
+          onResolve={resolve} onClose={() => setModal(null)} />
+      )}
       {(modal === 'payment' || modal === 'three_ds') && (
         <PaymentModal client={client} caseId={caseId} pending={pending}
-          onResolve={resolve} onClose={() => setModal(null)} />
+          onResolve={resolve}
+          onProvideDetails={() => setModal('payment_credentials')}
+          onClose={() => setModal(null)} />
       )}
       {(modal === 'appointment_selection' || modal === 'no_availability') && (
         <AppointmentCalendar pending={pending} prefs={prefs} onResolve={resolve} onClose={() => setModal(null)} />
@@ -402,7 +452,8 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
         <RescheduleConfirm pending={pending} onResolve={resolve} onClose={() => setModal(null)} />
       )}
       {modal === 'personal_declaration' && (
-        <DeclarationModal onResolve={resolve} onClose={() => setModal(null)} />
+        <DeclarationModal client={client} caseId={caseId} pending={pending}
+          onResolve={resolve} onClose={() => setModal(null)} />
       )}
       {modal === 'standing_auth' && (
         <StandingAuthModal client={client} caseId={caseId}
@@ -691,12 +742,13 @@ function formatElapsed(seconds) {
   return m > 0 ? `${m}m ${s}s` : `${s}s`
 }
 
-function ProgressCard({ progress, busy, onRefresh, onRetry, onResume }) {
+function ProgressCard({ client, caseId, progress, busy, onRefresh, onRetry, onResume }) {
   const pr = progress
   if (!pr) {
     return (
       <div className="card" style={{ padding: 22 }} data-testid="portal-progress">
         <Loading label="Checking your application status" />
+        <PortalWatch client={client} caseId={caseId} height="44vh" />
         <button className="btn btn--ghost btn--sm" style={{ marginTop: 10 }} onClick={onRefresh}>Refresh status</button>
       </div>
     )
@@ -720,6 +772,10 @@ function ProgressCard({ progress, busy, onRefresh, onRetry, onResume }) {
       ) : (
         <Loading label={message} />
       )}
+      {/* The portal window accompanies EVERY waiting state — working,
+          stalled, or paused after a failure — so the applicant always sees
+          what the official site is showing rather than a bare spinner. */}
+      <PortalWatch client={client} caseId={caseId} height="44vh" />
       <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 10, display: 'flex',
         gap: 12, flexWrap: 'wrap' }}>
         {pr.elapsed_seconds != null && (
@@ -779,10 +835,30 @@ function ExecutionBanner({ status }) {
   )
 }
 
-function ResultView({ status }) {
+function ResultView({ status, client, caseId }) {
   const c = status.confirmation
   const a = status.appointment
   const d = resultDisposition(status)
+  // The official confirmation page, captured at submission: shown here so the
+  // applicant sees exactly what the government portal said. The signed URL is
+  // short-lived; the bytes are fetched once into an object URL.
+  const [shotUrl, setShotUrl] = useState(null)
+  useEffect(() => {
+    let alive = true
+    let obj = null
+    const docId = c?.screenshot_document_id
+    if (!docId || !client) return undefined
+    client.documentPreviewUrl(caseId, docId)
+      .then(async (r) => {
+        if (!alive || !r?.url) return
+        const res = await fetch(client.base + r.url)
+        if (!res.ok) return
+        obj = URL.createObjectURL(await res.blob())
+        if (alive) setShotUrl(obj)
+      })
+      .catch(() => {})
+    return () => { alive = false; if (obj) URL.revokeObjectURL(obj) }
+  }, [c?.screenshot_document_id, caseId])
   if (status.state !== 'COMPLETED') {
     return <div className="card" style={{ padding: 22 }}>
       <div style={{ fontWeight: 700 }}>{status.state.replace(/_/g, ' ')}</div>
@@ -822,6 +898,20 @@ function ResultView({ status }) {
         a && { label: 'Appointment', value: a.start_utc ? formatSlot(a.start_utc) + ' · ' + a.location_id : a.confirmation_no },
         a && { label: d.isReal ? 'Appointment confirmation' : 'Mock appointment confirmation', value: a.confirmation_no }
       ].filter(Boolean)} />
+      {shotUrl && (
+        <div style={{ marginTop: 14 }} data-testid="confirmation-screenshot">
+          <div className="eyebrow">The official portal's confirmation page</div>
+          <img src={shotUrl} alt="Official confirmation page"
+            style={{ width: '100%', border: '1px solid var(--line)', borderRadius: 10,
+              marginTop: 6 }} />
+        </div>
+      )}
+      {d.isReal && (
+        <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 10 }}
+          data-testid="confirmation-email-note">
+          A confirmation email with these details has been sent to you.
+        </div>
+      )}
     </div>
   )
 }

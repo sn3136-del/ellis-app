@@ -5,9 +5,12 @@ Automated: Stripe Issuing single-use virtual card (activation: STRIPE_SECRET_KEY
 payment and the applicant approved the exact amount.
 
 Applicant-controlled: the default fallback. The Browserbase session navigates to
-the official payment page and a Live View modal lets the applicant enter their
-own card. Ellis/Kimi never see card data; only a non-sensitive success signal
-is observed. This mode is a first-class path, not a placeholder.
+the official payment page; the applicant either enters their own card in the
+Live View modal, or — only at their explicit request for a specific payment —
+provides the details once (vault-transported, never persisted or logged) so
+Ellis fills the official form for them. Kimi never sees card data, and the
+portal's own payment confirmation click always stays with the applicant. This
+mode is a first-class path, not a placeholder.
 """
 from __future__ import annotations
 

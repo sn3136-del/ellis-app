@@ -25,6 +25,7 @@ No model is consulted anywhere on this path.
 from __future__ import annotations
 
 import os
+import re
 import tempfile
 
 from sqlalchemy import select
@@ -142,7 +143,13 @@ class ReleasedFlowDriver:
         self._page_driver = None      # BrowserbasePageDriver
         self._compiled = None
         self._tmp_files: list[str] = []
+        self._docs_cache = None       # materialized documents (per attachment)
         self._progress_sink = None    # applicant-safe (step_key, status) recorder
+        # Silent page-refill bookkeeping for portal_form pauses over fields
+        # whose answers Ellis already holds (see _portal_form_to_questions):
+        # allowed only inside the discover loop, once per page signature.
+        self._allow_refill_retry = False
+        self._portal_form_refilled_sigs: set[str] = set()
 
     def set_progress_sink(self, sink) -> None:
         self._progress_sink = sink
@@ -273,10 +280,17 @@ class ReleasedFlowDriver:
         the photo for portal-upload purposes, even when OCR classified it as a
         generic document — and that explicit submission also stands in for the
         OCR approval gate (a photo has no extractable fields to approve)."""
+        if getattr(self, "_docs_cache", None) is not None:
+            # Re-materializing every blob (megabytes each) on every segment
+            # was a large share of the "checking the form" wall-clock.
+            return self._docs_cache
         out = []
         submitted_types = self._checklist_submitted_types()
+        # Newest first: a re-uploaded photo must win over the one the portal
+        # rejected (the runner picks the first matching document).
         docs = self.db.execute(select(models.StoredDocument).where(
-            models.StoredDocument.application_id == self.app_row.id)).scalars().all()
+            models.StoredDocument.application_id == self.app_row.id).order_by(
+            models.StoredDocument.created_at.desc())).scalars().all()
         for d in docs:
             blob = self.db.execute(select(models.DocumentBlob).where(
                 models.DocumentBlob.document_id == d.id)).scalar_one_or_none()
@@ -293,6 +307,7 @@ class ReleasedFlowDriver:
                 self._tmp_files.append(path)
                 entry["path"] = path
             out.append(entry)
+        self._docs_cache = out
         return out
 
     def _checklist_submitted_types(self) -> dict:
@@ -327,6 +342,7 @@ class ReleasedFlowDriver:
             except OSError:
                 pass
         self._tmp_files = []
+        self._docs_cache = None
 
     # -- segment runner --------------------------------------------------------
 
@@ -394,6 +410,15 @@ class ReleasedFlowDriver:
             elif kind == "captcha":
                 out = {"ok": False, "code": "CAPTCHA_REQUIRED"}
             else:
+                if kind == "portal_form":
+                    # The portal rejected the advance over fields the flow has
+                    # no nodes for. Those are exactly what the page classifier
+                    # can ask IN ELLIS (portal-flagged = mandatory, portal
+                    # wording as the reason) — the secure window is the
+                    # fallback, not the first resort.
+                    upgraded = self._portal_form_to_questions(res)
+                    if upgraded is not None:
+                        return upgraded
                 out = {"ok": False, "code": "APPLICANT_ACTION_REQUIRED", "handoff": kind}
             if res.get("portal_messages"):
                 out["portal_messages"] = res["portal_messages"]
@@ -425,21 +450,87 @@ class ReleasedFlowDriver:
     def _account_required(self) -> bool:
         return bool(getattr(self.released.family, "account_required", False))
 
+    def _result_retrying_refills(self, res, advance,
+                                 *, ok_statuses=("boundary", "completed")) -> dict:
+        """_result_from with refill-and-retry: when the portal_form upgrade
+        filled held answers into the page (PORTAL_STEP_REFILLED — eVisa's
+        passport "Type" from intake), re-run the SAME segment immediately.
+        The cursor still sits at the refused node, so the walk resumes with
+        the form now complete. Bounded by the per-page-signature refill
+        guard plus a hard cap. Enabled ONLY for segments whose re-run is a
+        plain resume (create/upload/submit and the discover loop) — never
+        the captcha/pay/restore arms, whose workflow branches cannot retry
+        a stray code and would dead-end in manual review."""
+        self._allow_refill_retry = True
+        try:
+            out = self._result_from(res, ok_statuses=ok_statuses)
+            for _ in range(3):
+                if out.get("code") != "PORTAL_STEP_REFILLED":
+                    break
+                out = self._result_from(advance(), ok_statuses=ok_statuses)
+            return out
+        finally:
+            self._allow_refill_retry = False
+
     def create_application(self, **_kwargs) -> dict:
         res = self._advance(stop_before=self._fill_boundary)
-        out = self._result_from(res)
+        out = self._result_retrying_refills(
+            res, lambda: self._advance(stop_before=self._fill_boundary))
         if out["ok"]:
             out["applicationId"] = self._execution().id
         return out
 
-    def submit_captcha(self, **_kwargs) -> dict:
-        # The human solved the CAPTCHA in the live portal view. Ellis records
-        # the marker and moves past the declared handoff node — it never sees,
-        # transcribes, or automates the CAPTCHA itself.
-        if not self._consume_handoff("captcha"):
-            return {"ok": False, "code": "NO_CAPTCHA_PENDING"}
-        res = self._advance(stop_before=self._fill_boundary)
-        return self._result_from(res)
+    def submit_captcha(self, answer=None, **_kwargs) -> dict:
+        # The human solved the CAPTCHA — either directly in the live portal
+        # view, or by typing the solution in Ellis (answer), which Ellis
+        # transcribes into the portal's own captcha input, then presses the
+        # page's Next FOR the applicant (their typed code is the go-ahead).
+        # Ellis never reads, interprets, or automates the challenge itself.
+        if answer:
+            try:
+                driver = self._ensure_live()
+                applier = getattr(driver, "apply_captcha_answer", None)
+                if applier is not None and (applier(str(answer)) or {}).get("ok"):
+                    clicker = getattr(driver, "click_next_button", None)
+                    if clicker is not None:
+                        clicker()
+                    if hasattr(driver, "settle"):
+                        driver.settle(1500)
+                    # A blocking notice (the registration/document-code
+                    # NOTICE) means the code was ACCEPTED: preserve it, note
+                    # the reference for the applicant, confirm, and move on.
+                    notice = getattr(driver, "notice_state", None)
+                    if notice is not None and (notice() or {}).get("present"):
+                        self._capture_registration_notice(driver)
+                        confirm = getattr(driver, "confirm_notice", None)
+                        if confirm is not None:
+                            confirm()
+                        if hasattr(driver, "settle"):
+                            driver.settle(800)
+                    else:
+                        # No notice and the challenge still on screen: the
+                        # portal rejected the code — ask for the fresh one.
+                        probe = getattr(driver, "captcha_state", None)
+                        state = probe() if probe is not None else {}
+                        if state.get("ok") and state.get("present"):
+                            return {"ok": False, "code": "CAPTCHA_WRONG"}
+            except Exception:  # noqa: BLE001 — the advance verifies honestly
+                pass
+        if self._consume_handoff("captcha"):
+            res = self._advance(stop_before=self._fill_boundary)
+            return self._result_from(res)
+        # No declared CAPTCHA node: this was an OBSERVED mid-flow challenge
+        # (pause classification spotted it on the live page). Confirm it is
+        # actually gone; the resumed state re-runs its own segment next.
+        try:
+            driver = self._ensure_live()
+            state = driver.captcha_state() if hasattr(driver, "captcha_state") \
+                else {"ok": False}
+        except Exception:  # noqa: BLE001 — unreadable page: let the resume decide
+            state = {"ok": False}
+        if state.get("ok") and state.get("present"):
+            return {"ok": False, "code": "CAPTCHA_STILL_PRESENT"}
+        return {"ok": True, "note": "observed challenge cleared by the applicant"}
 
     def verify_email(self, **_kwargs) -> dict:
         if self._consume_handoff("otp") or self._consume_handoff("email_verification"):
@@ -454,27 +545,267 @@ class ReleasedFlowDriver:
             return a == "APPLICANT_HANDOFF" and \
                 node.get("handoff_kind") in _FILL_BOUNDARY_HANDOFFS
         res = self._advance(stop_before=boundary)
-        return self._result_from(res)
+        return self._result_retrying_refills(
+            res, lambda: self._advance(stop_before=boundary))
 
-    def discover_fee(self, **_kwargs) -> dict:
+    def discover_fee(self, page_fill=None, declaration_fill=None,
+                     refresh_uploads=False, **_kwargs) -> dict:
         def boundary(node):
             return node.get("action") == "APPLICANT_HANDOFF" and \
                 node.get("handoff_kind") in _FILL_BOUNDARY_HANDOFFS
-        runner = None
+        # A document was re-provided after the portal rejected it (photo
+        # banner): re-run the upload nodes so the NEW file reaches the form.
+        if refresh_uploads:
+            self._rewind_to_uploads()
+        # Answers to PAGE-observed questions (fields the released flow has no
+        # node for) are applied first, then the flow resumes FROM its own
+        # advance click (guarded rewind) — Ellis fills and clicks Next; the
+        # applicant never re-types on the form.
+        if page_fill:
+            try:
+                self._apply_page_fill(page_fill)
+            except _OutcomeUncertain as e:
+                return {"ok": False, "code": "OUTCOME_UNCERTAIN", "detail": str(e)}
+        # The applicant declared IN ELLIS (recorded, verbatim statement):
+        # transcribe the tick onto the portal's own declaration checkbox and
+        # resume from the flow's advance click.
+        if declaration_fill:
+            try:
+                self._apply_declaration(declaration_fill)
+            except _OutcomeUncertain as e:
+                return {"ok": False, "code": "OUTCOME_UNCERTAIN", "detail": str(e)}
+        repaired = False
+        advance_attempted = False
+        attempted_optional_keys: set = set()
         try:
-            runner = self._runner()
-            res = runner.run(stop_before=boundary)
-        except _OutcomeUncertain as e:
-            return {"ok": False, "code": "OUTCOME_UNCERTAIN", "detail": str(e)}
+            return self._discover_fee_loop(boundary, repaired, advance_attempted,
+                                           attempted_optional_keys)
         finally:
+            # One cleanup for the WHOLE discovery call: per-iteration cleanup
+            # re-materialized every document blob on every pass.
             self._cleanup_tmp()
-        out = self._result_from(res)
-        if not out["ok"]:
-            return out
-        fee = runner.fee_seen if runner is not None else None
-        if not isinstance(fee, dict):
-            fee = self._fee_from_page_text()
-        if not isinstance(fee, dict):
+
+    def _tick_declaration_and_advance(self) -> bool:
+        """Tick the page's own declaration checkbox and press Next — the
+        single action a completed form is usually waiting on. Returns True
+        only when the page ACTUALLY moved (the declaration box is gone or
+        the advance button is no longer offered); a disabled Next or an
+        unmoved page returns False so the caller classifies properly."""
+        try:
+            driver = self._ensure_live()
+        except Exception:  # noqa: BLE001
+            return False
+        finder = getattr(driver, "find_declaration_checkbox", None)
+        if finder is None:
+            return False
+        try:
+            found = finder() or {}
+        except Exception:  # noqa: BLE001
+            return False
+        boxes = [b for b in (found.get("boxes") or []) if b.get("selector")]
+        if not found.get("found") or not boxes:
+            return False
+        # The form must be COMPLETE before the declaration is ticked and Next
+        # pressed. Fields the flow has no nodes for can still be empty here —
+        # eVisa's passport "Type" (intake's travel_document_type) is exactly
+        # that — and pressing Next against them dead-ends the run. Fill every
+        # empty field whose answer Ellis already holds; if genuinely
+        # unanswered mandatory fields remain, this is not the fast path's
+        # page — classification must ask them first.
+        try:
+            blockers = self._page_blockers()
+        except Exception:  # noqa: BLE001
+            blockers = {}
+        refills = blockers.get("refill") or []
+        if refills:
+            try:
+                if not self._fill_observed_values(refills):
+                    return False
+            except Exception:  # noqa: BLE001
+                return False
+        if any(q.get("mandatory") for q in (blockers.get("questions") or [])):
+            return False
+        if self._progress_sink:
+            try:
+                self._progress_sink("confirming_declaration", "active")
+            except Exception:  # noqa: BLE001
+                pass
+        try:
+            # EVERY unchecked declaration on the page — the form gates Next on
+            # all of them, and an unverified tick is never counted as done.
+            ticked = []
+            for box in boxes:
+                if (driver.check(box["selector"]) or {}).get("ok"):
+                    ticked.append(box.get("text", ""))
+            if not ticked:
+                return False
+            # FAIL CLOSED: only a readable, present, ENABLED advance button may
+            # be pressed by this fast path. An unreadable state or a button the
+            # driver doesn't recognize must NOT fall through to a blind click —
+            # the flow's own declared CLICK node handles those pages under the
+            # runtime's full guards.
+            state = driver.next_button_state() if hasattr(driver, "next_button_state") else {}
+            if not state.get("ok") or not state.get("present") or state.get("disabled"):
+                return False
+            sig_before = driver.page_signature() if hasattr(driver, "page_signature") else ""
+            if not (driver.click_next_button() or {}).get("ok"):
+                return False
+            driver.settle(1500)
+            # Proof of movement: the page's IDENTITY changed. The old check
+            # ("the boxes we ticked are gone") was circular — the finder only
+            # reports UNCHECKED boxes, so a refused advance read as moved.
+            sig_after = driver.page_signature() if hasattr(driver, "page_signature") else ""
+            if sig_before and sig_after:
+                moved = sig_after != sig_before
+            else:
+                still = finder() or {}
+                moved = not still.get("found")
+        except Exception:  # noqa: BLE001
+            return False
+        if moved:
+            for text in ticked:
+                self._emit_declaration_audit(text)
+        return bool(moved)
+
+    def _emit_declaration_audit(self, text: str) -> None:
+        try:
+            from .. import audit
+            audit.record(self.db, org_id=self.app_row.org_id,
+                         application_id=self.app_row.id,
+                         action="declaration_confirmed_on_portal",
+                         detail={"statement": str(text)[:200]}, actor="ellis")
+        except Exception:  # noqa: BLE001
+            pass
+
+    def _discover_fee_loop(self, boundary, repaired, advance_attempted,
+                           attempted_optional_keys) -> dict:
+        declaration_tried = False
+        incomplete_classified = False
+        # Refill-and-retry is safe HERE (this loop re-walks after a refill);
+        # scope the permission to this call so other _result_from callers
+        # keep their pause/upgrade behavior.
+        self._allow_refill_retry = True
+        try:
+            return self._discover_fee_iterations(
+                boundary, repaired, advance_attempted, attempted_optional_keys,
+                declaration_tried, incomplete_classified)
+        finally:
+            self._allow_refill_retry = False
+
+    def _discover_fee_iterations(self, boundary, repaired, advance_attempted,
+                                 attempted_optional_keys, declaration_tried,
+                                 incomplete_classified) -> dict:
+        while True:
+            runner = None
+            try:
+                runner = self._runner()
+                res = runner.run(stop_before=boundary)
+            except _OutcomeUncertain as e:
+                return {"ok": False, "code": "OUTCOME_UNCERTAIN", "detail": str(e)}
+            out = self._result_from(res)
+            if not out["ok"]:
+                if out.get("code") == "PORTAL_STEP_REFILLED":
+                    # The portal_form upgrade just filled held answers into
+                    # the page and rewound to the flow's advance click —
+                    # re-walk immediately instead of pausing the applicant.
+                    continue
+                from ..adapter_factory.runtime import FORM_INCOMPLETE_REASON
+                if FORM_INCOMPLETE_REASON in str(out.get("code") or "") \
+                        and not incomplete_classified:
+                    # The flow's own Next is disabled and the runtime could not
+                    # complete the form from flow NODES alone. The page
+                    # classifier below can: it also sees fields the flow does
+                    # not model and refills the ones whose answers Ellis
+                    # already holds (eVisa's passport "Type"). Only a page
+                    # that stays incomplete AFTER that pass is a real failure.
+                    incomplete_classified = True
+                else:
+                    return out
+            fee = runner.fee_seen if runner is not None else None
+            if not isinstance(fee, dict):
+                fee = self._fee_from_page_text()
+            if isinstance(fee, dict):
+                break
+            # FIRST, the cheap and overwhelmingly common case: the form is
+            # complete and the page is only waiting for its own declaration
+            # box to be ticked and Next pressed. Do exactly that — one page
+            # read, one tick, one click — instead of a full classification
+            # sweep that costs seconds and asks the applicant for nothing.
+            if not declaration_tried:
+                declaration_tried = True
+                if self._tick_declaration_and_advance():
+                    continue
+            # Otherwise read what the live page ACTUALLY shows: a CAPTCHA,
+            # fields whose answers Ellis already holds (repair silently,
+            # once), or still-unanswered questions must pause as themselves —
+            # a mislabeled pause sends the applicant to the wrong step.
+            blockers = self._page_blockers()
+            if blockers.get("captcha"):
+                return {"ok": False, "code": "CAPTCHA_REQUIRED"}
+            if blockers.get("refill") and not repaired:
+                repaired = True
+                try:
+                    self._apply_page_fill(blockers["refill"])
+                except _OutcomeUncertain as e:
+                    return {"ok": False, "code": "OUTCOME_UNCERTAIN", "detail": str(e)}
+                continue
+            questions = blockers.get("questions") or []
+            mandatory_qs = [q for q in questions if q.get("mandatory")]
+            if mandatory_qs:
+                # Ask ONLY what the portal marks required. Optional fields are
+                # never prompted — if the portal actually needs one, its own
+                # validation flags it after the advance click and THAT ask
+                # comes back precise, with the portal's own message.
+                out = {"ok": False, "code": "ADDITIONAL_INFORMATION_REQUIRED",
+                       "questions": mandatory_qs,
+                       "page_field_map": blockers.get("page_field_map") or {}}
+                if blockers.get("portal_messages"):
+                    out["portal_messages"] = blockers["portal_messages"]
+                if blockers.get("declaration_map"):
+                    out["declaration_map"] = blockers["declaration_map"]
+                return out
+            if blockers.get("declaration"):
+                # Every required field is in: the portal's own declaration is
+                # the remaining step. The applicant declares it verbatim in
+                # Ellis; the confirmed statement comes back as declaration_fill.
+                return {"ok": False, "code": "APPLICANT_ACTION_REQUIRED",
+                        "handoff": "personal_declaration",
+                        "portal_messages": list(blockers["declaration"]),
+                        "declaration_map": blockers.get("declaration_map") or {}}
+            if questions and not advance_attempted:
+                # Only optional (unmarked) fields remain: don't prompt — click
+                # the flow's own Next and let the portal's validation be the
+                # judge. One attempt; a refused advance surfaces the portal's
+                # real complaints (which promote exactly the truly-required
+                # fields to mandatory asks on the next pass).
+                advance_attempted = True
+                attempted_optional_keys = {q.get("key") for q in questions}
+                self._rewind_to_advance_click()
+                continue
+            if questions:
+                if {q.get("key") for q in questions} == attempted_optional_keys:
+                    # The page did not move and the portal raised no readable
+                    # complaint — asking the SAME skippable questions again is
+                    # a circle, not progress. Hand the step to the applicant's
+                    # own window honestly.
+                    return {"ok": False, "code": "APPLICANT_ACTION_REQUIRED",
+                            "handoff": "portal_form",
+                            "portal_messages": [
+                                "Ellis pressed the form's Next button, but the "
+                                "official portal did not move on and reported no "
+                                "readable reason. Check the highlighted items in "
+                                "the secure window and press Next there."]}
+                # A different set after the advance: a genuine new ask.
+                return {"ok": False, "code": "ADDITIONAL_INFORMATION_REQUIRED",
+                        "questions": questions,
+                        "page_field_map": blockers.get("page_field_map") or {}}
+            if blockers.get("portal_messages"):
+                # Only items the applicant must complete personally remain
+                # (signatures, security answers): the existing portal_form
+                # handoff owns that, honestly.
+                return {"ok": False, "code": "APPLICANT_ACTION_REQUIRED",
+                        "handoff": "portal_form",
+                        "portal_messages": blockers["portal_messages"]}
             return {"ok": False, "code": "FEE_NOT_DISPLAYED",
                     "detail": "the portal did not display a readable fee"}
         display = f"{fee['amount_cents'] / 100:.2f} {fee['currency']}"
@@ -482,6 +813,590 @@ class ReleasedFlowDriver:
                 "display": display,
                 "government_fee_cents": fee["amount_cents"], "service_fee_cents": 0,
                 "payee": self.released.family.operator or self.released.family.name}
+
+    def _portal_form_to_questions(self, res: dict) -> dict | None:
+        """A portal_form pause caused by validation on fields WITHOUT flow
+        nodes: re-read the page. Fields whose answers Ellis ALREADY HOLDS are
+        filled right here (never sent to the applicant's window — eVisa's
+        passport "Type" is intake's travel_document_type) and the step
+        retries; the rest classify as mandatory questions Ellis asks in its
+        own UI. Returns PORTAL_STEP_REFILLED (retry the advance), the
+        upgraded ADDITIONAL_INFORMATION result, or None to keep the
+        portal_form pause (personal items, unreadable fields)."""
+        try:
+            blockers = self._page_blockers()
+        except Exception:  # noqa: BLE001
+            return None
+        refills = blockers.get("refill") or []
+        # Refill-and-retry ONLY where the caller can actually retry (the fee
+        # discovery loop sets the flag around its walk). Elsewhere — e.g. the
+        # captcha branch, whose workflow arm cannot re-enter — a leaked
+        # PORTAL_STEP_REFILLED would dead-end the case, so those callers keep
+        # the question-upgrade/pause behavior unchanged.
+        if refills and getattr(self, "_allow_refill_retry", False):
+            # One refill pass per PAGE (identity signature): a later page's
+            # first refill must not be blocked by an earlier page's, while a
+            # page that comes back incomplete after Ellis filled it needs a
+            # human, not another silent loop.
+            sig = ""
+            try:
+                live = self._ensure_live()
+                sig = live.page_signature() if hasattr(live, "page_signature") else ""
+            except Exception:  # noqa: BLE001
+                sig = ""
+            done = getattr(self, "_portal_form_refilled_sigs", set())
+            key = sig or "__once__"
+            if key not in done:
+                self._portal_form_refilled_sigs = done | {key}
+                try:
+                    if self._fill_observed_values(refills):
+                        # NO rewind: a paused_applicant_action keeps the
+                        # cursor AT the refused CLICK node (runtime run():
+                        # resume_node or node_id), so resuming re-runs
+                        # exactly that click — a rewind here would land on
+                        # the PREVIOUS page's advance and double-click it.
+                        return {"ok": False, "code": "PORTAL_STEP_REFILLED"}
+                except Exception:  # noqa: BLE001
+                    pass
+        mandatory_qs = [q for q in (blockers.get("questions") or [])
+                        if q.get("mandatory")]
+        if not mandatory_qs:
+            return None
+        out = {"ok": False, "code": "ADDITIONAL_INFORMATION_REQUIRED",
+               "questions": mandatory_qs,
+               "page_field_map": blockers.get("page_field_map") or {}}
+        if blockers.get("declaration_map"):
+            out["declaration_map"] = blockers["declaration_map"]
+        if res.get("portal_messages"):
+            out["portal_messages"] = res["portal_messages"]
+        return out
+
+    # -- pause classification (page truth) --------------------------------------
+
+    # Fields only the applicant may act on personally: declarations,
+    # signatures, security questions. Never asked in Ellis, never auto-filled
+    # — they surface as portal_form items for the secure window.
+    _PERSONAL_ACTION_RE = re.compile(
+        r"(declar|signature|\bsign\b|security\s*(question|answer)|"
+        r"secret\s*(question|answer)|perjury|oath|\bagree\b|terms\s*(and|&)\s*conditions)",
+        re.IGNORECASE)
+
+    # Placeholder that IS a date format ("DD/MM/YYYY", "MM-DD-YYYY", …).
+    _DATE_FORMAT_RE = re.compile(r"^[DMY]{1,4}([./\- ][DMY]{1,4}){1,2}$", re.IGNORECASE)
+
+    # A portal complaint about the submitted photo/portrait: the fix is a NEW
+    # upload through Ellis (asked as a document question), never a free-text
+    # answer. Deterministic wording match — no model touches the portal path.
+    _PHOTO_ISSUE_RE = re.compile(
+        r"(portrait|photo(graph)?|\bimage\b|ảnh)", re.IGNORECASE)
+
+    # A checkbox whose text IS the application's own TRUTHFULNESS declaration
+    # (the applicant declares it verbatim in Ellis; Ellis transcribes the
+    # tick). Deliberately narrow: only genuine "I declare … true/complete"
+    # style attestations qualify. Bare "hereby" is excluded on purpose — a
+    # "hereby authorize/consent/agree to the terms" box is NOT a truthfulness
+    # declaration and must never be swept into the auto-ticked bundle; those
+    # route to portal_form for the applicant to complete in the secure window.
+    _DECLARATION_RE = re.compile(
+        r"(declar|perjury|\boath\b|"
+        r"(information|statements?|details|answers?|above|foregoing)[^.]{0,60}"
+        r"(true|complete|correct|accurate)|"
+        r"(true|complete|correct|accurate)[^.]{0,40}(and|&)[^.]{0,20}"
+        r"(complete|correct|accurate|true)|"
+        r"cam\s*đoan)",
+        re.IGNORECASE)
+
+    @staticmethod
+    def _field_selector(field: dict) -> str:
+        """Deterministic selector for a page-observed field. Attribute form
+        [id="…"] survives JSF-style ids with colons; the tag comes from the
+        page so an id-less <select>/<textarea> is still reachable. Fields
+        whose id/name embed quotes or backslashes are refused (unbuildable
+        without escaping games — fail closed)."""
+        fid = str(field.get("id") or "").strip()
+        fname = str(field.get("name") or "").strip()
+        tag = str(field.get("tag") or "input").strip().lower() or "input"
+        if any(c in fid + fname for c in ('"', "\\")):
+            return ""
+        if fid:
+            return f'[id="{fid}"]'
+        if fname:
+            return f'{tag}[name="{fname}"]'
+        return ""
+
+    def _page_blockers(self) -> dict:
+        """What the LIVE page is actually waiting on: an observed CAPTCHA;
+        fields whose answers Ellis already holds (silent `refill`); visible
+        required fields with no value (`questions` for the applicant, plus a
+        server-side selector map); and applicant-personal items
+        (`portal_messages` — declarations, choices only they may make).
+        Questions carry NO selectors — the applicant payload stays
+        applicant-safe; the selector map travels separately."""
+        # Classification can take a while (harvesting real option lists off
+        # virtualized widgets): checkpoint honestly so the applicant sees
+        # "checking the form", not a stale step — and the lease stays renewed.
+        if self._progress_sink:
+            try:
+                self._progress_sink("checking_form", "active")
+            except Exception:  # noqa: BLE001
+                pass
+        try:
+            driver = self._ensure_live()
+        except Exception:  # noqa: BLE001 — no page truth: report nothing
+            return {}
+        # ONE page round-trip for challenge + fields + validation (three
+        # separate reads were three round-trips on every pass).
+        probe = None
+        if hasattr(driver, "page_probe"):
+            try:
+                probe = driver.page_probe() or {}
+            except Exception:  # noqa: BLE001
+                probe = None
+        if probe is not None:
+            if (probe.get("captcha") or {}).get("present"):
+                return {"captcha": True}
+            if not probe.get("ok"):
+                return {}
+            form = {"ok": True, "fields": probe.get("fields") or []}
+            validation = probe.get("validation") or {}
+        else:
+            try:
+                cap = driver.captcha_state() if hasattr(driver, "captcha_state") else {}
+            except Exception:  # noqa: BLE001
+                cap = {}
+            if cap.get("ok") and cap.get("present"):
+                return {"captcha": True}
+            if not hasattr(driver, "read_form_state"):
+                return {}
+            try:
+                form = driver.read_form_state() or {}
+            except Exception:  # noqa: BLE001
+                return {}
+            if not form.get("ok"):
+                return {}
+            validation = None
+        # The portal's OWN validation complaints are the ground truth for
+        # requiredness — DOM markers are often absent (hidden required marks).
+        # A flagged field is required no matter what its attributes claim.
+        flagged: dict[str, str] = {}
+        banners: list[str] = []
+        try:
+            ve = validation if validation is not None else (
+                driver.read_validation_errors()
+                if hasattr(driver, "read_validation_errors") else {})
+            for fdef in (ve or {}).get("fields") or []:
+                fid = str(fdef.get("id") or "").strip()
+                if fid:
+                    flagged[fid] = str(fdef.get("message") or "").strip()
+            # Page-level banners (alerts not tied to a field): the portal's
+            # own words about what it rejected — Ellis reads them so the
+            # applicant never has to hunt for error boxes on the form.
+            for msg in (ve or {}).get("messages") or []:
+                m = str(msg).strip()[:200]
+                if m and m not in banners and m not in flagged.values():
+                    banners.append(m)
+        except Exception:  # noqa: BLE001
+            flagged, banners = {}, []
+        flow_nodes = list(self._flow().nodes.values())
+        nodes_by_input = {str(n.get("input_source") or ""): n for n in flow_nodes
+                          if n.get("input_source")}
+        answers = dict(self.app_row.answers or {})
+        questions, field_map, refill, messages = [], {}, [], []
+        declarations: list[dict] = []
+        seen_keys: set[str] = set()
+        unreadable = 0
+        harvested = 0
+        for f in form.get("fields") or []:
+            if not f.get("empty") or f.get("sensitive"):
+                continue
+            ftype = str(f.get("type") or "text")
+            label = str(f.get("label") or "").strip()
+            clean_label = label.rstrip(":：*＊ ").strip()
+            fname = str(f.get("name") or "").strip()
+            personal = bool(self._PERSONAL_ACTION_RE.search(f"{label} {fname}"))
+            if ftype == "checkbox":
+                selector = self._field_selector(f)
+                if selector and self._DECLARATION_RE.search(label):
+                    # The portal's own declaration statement(s): the applicant
+                    # declares them personally IN ELLIS (verbatim text shown),
+                    # and Ellis transcribes the tick(s) + the advance click.
+                    # No DOM 'required' marker needed — portals rarely set one
+                    # on the declaration box.
+                    declarations.append({"selector": selector,
+                                         "label": clean_label[:300] or "I hereby declare"})
+                elif clean_label and clean_label[:160] not in messages:
+                    messages.append(clean_label[:160])
+                continue
+            if personal:
+                # Signature/security-answer style items stay personal: the
+                # applicant completes them in the secure window.
+                if clean_label and clean_label[:160] not in messages:
+                    messages.append(clean_label[:160])
+                continue
+            selector = self._field_selector(f)
+            if not selector:
+                unreadable += 1
+                continue
+            fid = str(f.get("id") or "").strip()
+            # Match the node that ADDRESSES this field in any selector form
+            # ('#id', '[id="id"]', 'tag[name="…"]', with ':visible'/'>> nth='):
+            # a literal-string lookup loses every non-'#id' flow.
+            from ..adapter_factory.runtime import FlowRunner as _FR
+            node = None
+            for cand in flow_nodes:
+                if fid and _FR._selector_targets_field(cand.get("selector") or "", fid):
+                    node = cand
+                    break
+                if fname and _FR._selector_targets_field(cand.get("selector") or "", fname):
+                    node = cand
+                    break
+            kind = "select" if ftype == "select" else \
+                "combobox" if ftype == "combobox" else \
+                "radio" if ftype == "radio" else \
+                "date" if ftype == "date" else "text"
+            if node is not None and node.get("action") == "SELECT_SEARCH":
+                kind = "combobox"
+            if kind == "radio":
+                # A radio GROUP is addressed by name (an id would reach only
+                # its first option); the option itself is picked by label.
+                if not fname or any(c in fname for c in ('"', "\\")):
+                    unreadable += 1
+                    continue
+                selector = f'input[name="{fname}"]'
+            # Portal date format: the flow node's declared format wins; a
+            # placeholder that IS a format string ("DD/MM/YYYY") is the page's
+            # own statement of what it wants.
+            fmt = str((node or {}).get("format") or "")
+            placeholder = str(f.get("placeholder") or "").strip()
+            if not fmt and self._DATE_FORMAT_RE.fullmatch(placeholder):
+                fmt = placeholder.upper()
+            key, question = self._page_question(f, node)
+            if key and node is None and key in nodes_by_input:
+                # The page field IS a flow field whose selector drifted:
+                # adopt the flow's key and wording so an answer already given
+                # under that key is never asked for twice.
+                node = nodes_by_input[key]
+                _, question = self._page_question(f, node)
+                key = question.get("key") or key
+                fmt = str(node.get("format") or "") or fmt
+            if not key or key in seen_keys:
+                if not key:
+                    unreadable += 1
+                continue
+            seen_keys.add(key)
+            # Portal-flagged = REQUIRED, whatever the DOM claimed; the
+            # portal's verbatim complaint is the honest reason for the ask.
+            portal_msg = flagged.get(fid) if fid else None
+            if portal_msg is None and fname:
+                portal_msg = flagged.get(fname)
+            if portal_msg is not None:
+                question["mandatory"] = True
+                if portal_msg:
+                    question["why"] = f"The official portal says: {portal_msg[:160]}"
+            held = str(answers.get(key) or "")
+            if not held and key in ("type", "passport_type", "type_of_passport"):
+                # The portal's "Type" is the passport type Ellis already knows
+                # from intake (travel_document_type): fill it, never re-ask.
+                doc_t = str(answers.get("passport_type")
+                            or answers.get("travel_document_type") or "").strip()
+                if doc_t:
+                    held = doc_t.replace("_", " ").strip().capitalize()
+            if held:
+                # Ellis already holds this answer (the applicant gave it, or
+                # the portal dropped a filled value): repair silently instead
+                # of ever re-asking for data in hand.
+                refill.append({"selector": selector, "kind": kind,
+                               "value": held, "format": fmt})
+                continue
+            # Harvesting a virtualized widget's real option list costs seconds
+            # per field: do it only for questions that will actually be ASKED
+            # (mandatory). Optional fields are auto-skipped by fee discovery,
+            # so their options would be minutes of work for nothing.
+            if kind == "combobox" and question.get("mandatory") \
+                    and not question.get("options") and harvested < 3:
+                try:
+                    # Bounded harvest: opening and scrolling a virtualized list
+                    # costs SECONDS per field (measured 174s in one pass).
+                    # Only the first few asks get real option lists; the rest
+                    # stay free text, which the portal validates anyway.
+                    harvested += 1
+                    listed = driver.list_options(selector, max_options=60) or {}
+                    opts = [str(o) for o in (listed.get("options") or [])
+                            if str(o).strip()][:60]
+                    if opts:
+                        question["options"] = opts
+                except Exception:  # noqa: BLE001 — an unlistable widget stays free text
+                    pass
+            questions.append(question)
+            entry = {"selector": selector, "kind": kind}
+            if fmt:
+                entry["format"] = fmt
+            field_map[key] = entry
+            if len(questions) >= 40:
+                break
+        if len(questions) > 20:
+            # Never crowd out the fields the portal marks required.
+            ordered = [q for q in questions if q.get("mandatory")] + \
+                      [q for q in questions if not q.get("mandatory")]
+            questions = ordered[:20]
+            keep = {q["key"] for q in questions}
+            field_map = {k: v for k, v in field_map.items() if k in keep}
+        # Photo/portrait banner complaints become a DOCUMENT ask: the applicant
+        # uploads the new photo in Ellis, Ellis re-uploads it to the portal and
+        # re-advances. Anything else the banners say rides along verbatim.
+        photo_issues = [m for m in banners if self._PHOTO_ISSUE_RE.search(m)]
+        for m in banners:
+            if m not in photo_issues and m not in messages:
+                messages.append(m[:160])
+        if photo_issues:
+            questions.insert(0, {
+                "key": "document:photo", "kind": "document", "mandatory": True,
+                "question": " ".join(photo_issues)[:300],
+                "why": "Upload a new photo here — Ellis places it on the "
+                       "official form and continues for you.",
+                "format": ""})
+        out: dict = {}
+        if questions:
+            out["questions"] = questions
+            out["page_field_map"] = field_map
+        if refill:
+            out["refill"] = refill
+        if declarations:
+            out["declaration"] = [d["label"] for d in declarations]
+            out["declaration_map"] = {"selectors": [d["selector"] for d in declarations],
+                                      "label": declarations[0]["label"]}
+        if unreadable and not out and not messages:
+            messages.append("The official form still has required items on this "
+                            "page — complete them in the secure window.")
+        if messages:
+            out["portal_messages"] = messages[:8]
+        return out
+
+    @staticmethod
+    def _page_question(field: dict, node: dict | None) -> tuple[str, dict]:
+        """One applicant-friendly question for a page field. Node-mapped fields
+        keep their flow key (input_source) and declared wording; unmapped ones
+        derive a readable key from the label — never a selector."""
+        import re as _re
+        label = str(field.get("label") or "").strip().rstrip(":：*＊ ").strip()
+        if node is not None:
+            declared = dict(node.get("question") or {})
+            key = node.get("input_source") or declared.get("key") or ""
+            text = declared.get("question") or (
+                f"What is your {label}?" if label else "")
+            q = {"key": key, "question": text or f"What is your {key.replace('_', ' ')}?",
+                 "why": declared.get("why") or
+                 "The official application form requires this information.",
+                 "format": declared.get("format", ""),
+                 "mandatory": bool(node.get("mandatory", True)),
+                 "kind": declared.get("kind") or
+                 ("date" if node.get("format") else
+                  "select" if node.get("action") == "SELECT_SEARCH" else "text")}
+            if declared.get("options"):
+                q["options"] = declared["options"]
+            return key, q
+        # An unmapped field with no human label has no honest wording to ask
+        # with (a name attribute like 'txtFld7' is portal-internal jargon):
+        # skip it — the portal_form path covers what Ellis cannot phrase.
+        if not label:
+            return "", {}
+        key = _re.sub(r"[^a-z0-9]+", "_", label.lower()).strip("_")[:40]
+        if not key:
+            return "", {}
+        ftype = str(field.get("type") or "text")
+        # A label that already IS a question ("Who will cover the trip's
+        # expenses…", "Did you buy insurance") stays verbatim — wrapping it in
+        # "What is your …?" reads as nonsense.
+        interrogative = bool(_re.match(
+            r"(?i)\s*(who|what|when|where|which|why|how|do|does|did|have|has|is|are|will)\b",
+            label))
+        q = {"key": key,
+             "question": label if label.endswith("?") else
+             (f"{label}?" if interrogative else
+              f"What is your {label}?" if label else f"What is your {key.replace('_', ' ')}?"),
+             "why": "The official form still needs this on the current page."
+             if field.get("required") else
+             "This field on the official form is still blank — answer it, or "
+             "leave it empty to skip.",
+             "format": "",
+             "mandatory": bool(field.get("required", False)),
+             "kind": "select" if ftype in ("select", "combobox", "radio") else
+             "date" if ftype == "date" else "text"}
+        opts = [str(o) for o in (field.get("options") or []) if str(o).strip()]
+        if opts:
+            q["options"] = opts
+        return key, q
+
+    def _apply_page_fill(self, fills: list) -> None:
+        """Fill the applicant's answers into the PAGE-observed fields the flow
+        has no nodes for, then REWIND the persisted cursor to the flow's own
+        advance CLICK so the next segment re-runs that click under every
+        FlowRunner guard (validation re-check, evidence, kill switch) — never
+        a page-blind direct click that could land on a control the flow never
+        validated."""
+        if self._fill_observed_values(fills):
+            self._rewind_to_advance_click()
+
+    def _fill_observed_values(self, fills: list) -> int:
+        """The fill core alone (no cursor rewind): used by _apply_page_fill
+        (which rewinds so the RUNNER re-clicks the advance) and by the
+        declaration fast path (which presses Next itself right after and must
+        not leave a rewound cursor behind). Returns how many fields landed."""
+        driver = self._ensure_live()
+        filler = getattr(driver, "fill_observed_field", None)
+        if filler is None:
+            return 0
+        applied = 0
+        for f in fills or []:
+            sel = str((f or {}).get("selector") or "")
+            val = str((f or {}).get("value") or "")
+            if not sel or not val:
+                continue
+            fmt = str((f or {}).get("format") or "")
+            if fmt:
+                # The same single date authority every flow fill uses: a
+                # canonical ISO answer renders in the portal's own format; a
+                # non-date value passes through unchanged.
+                from .. import dates as dates_mod
+                converted = dates_mod.to_portal(val, fmt)
+                if converted:
+                    val = converted
+            try:
+                res = filler(sel, val, kind=str(f.get("kind") or "text")) or {}
+            except Exception:  # noqa: BLE001 — one bad field never stops the rest
+                continue
+            if res.get("ok"):
+                applied += 1
+        return applied
+
+    def _apply_declaration(self, spec: dict) -> None:
+        """Transcribe the applicant's in-Ellis declaration onto the portal's
+        own checkbox(es), then resume from the flow's advance click (guarded
+        rewind — the click runs under every FlowRunner guard)."""
+        driver = self._ensure_live()
+        marker = getattr(driver, "apply_declaration_mark", None)
+        spec = spec or {}
+        selectors = [str(s) for s in (spec.get("selectors") or []) if s]
+        if not selectors and spec.get("selector"):
+            selectors = [str(spec["selector"])]
+        if marker is None or not selectors:
+            return
+        marked = 0
+        for selector in selectors:
+            try:
+                if (marker(selector) or {}).get("ok"):
+                    marked += 1
+            except Exception:  # noqa: BLE001 — the classifier re-reads the page
+                continue
+        if marked:
+            self._rewind_to_advance_click()
+
+    def _rewind_to_uploads(self) -> None:
+        """A re-provided document must actually REACH the portal: move the
+        cursor back to the first upload node in the latest reversible window
+        so the segment re-uploads (newest document wins) and re-advances —
+        all under FlowRunner guards."""
+        execution = self._execution()
+        flow = self._flow()
+        current = execution.current_node or ""
+        if not current or current not in flow.order:
+            return
+        candidate = None
+        for nid in flow.order:
+            if nid == current:
+                break
+            node = flow.nodes.get(nid) or {}
+            if node.get("action") in ("APPLICANT_HANDOFF", "PAUSE") or \
+                    node.get("irreversibility") not in (None, "", "reversible"):
+                candidate = None
+                continue
+            if node.get("action") == "UPLOAD_AUTHORIZED_DOCUMENT" and candidate is None:
+                candidate = nid
+        if candidate is not None:
+            execution.current_node = candidate
+            execution.status = "running"
+            self.db.commit()
+
+    def _rewind_to_advance_click(self) -> None:
+        """Move the persisted cursor back to the nearest preceding PLAINLY
+        reversible CLICK node so the flow itself re-clicks its own Next with
+        all runtime guards. Never rewinds across a handoff, PAUSE, or any
+        non-reversible node, and only acts when the cursor is a real node of
+        this flow (a blank cursor means the flow replays from the start under
+        the same guards anyway)."""
+        execution = self._execution()
+        flow = self._flow()
+        current = execution.current_node or ""
+        if not current or current not in flow.order:
+            return
+        candidate = None
+        for nid in flow.order:
+            if nid == current:
+                break
+            node = flow.nodes.get(nid) or {}
+            if node.get("action") in ("APPLICANT_HANDOFF", "PAUSE") or \
+                    node.get("irreversibility") not in (None, "", "reversible"):
+                candidate = None
+                continue
+            if node.get("action") == "CLICK":
+                candidate = nid
+        if candidate is not None:
+            execution.current_node = candidate
+            execution.status = "running"
+            self.db.commit()
+
+    def payment_fill_allowed(self) -> bool:
+        """The same fail-closed gates that govern a DECLARED payment_credentials
+        handoff apply to the Ellis-fills path: the route's payment_preparation
+        capability must be auto-released AND the case's standing authorization
+        must cover its action. Without both, the applicant types their card in
+        the secure window personally — exactly the pre-redesign behavior."""
+        try:
+            from ..adapter_factory import auto_release
+            from ..adapter_factory.runtime import _standing_auth_covers
+            if auto_release.capability_released(
+                    self.db, route_key=self.released.route_key,
+                    capability="payment_preparation") is None:
+                return False
+            action = auto_release.CAPABILITY_ACTIONS["payment_preparation"]
+            return bool(_standing_auth_covers(self.db, self.app_row.id, action))
+        except Exception:  # noqa: BLE001 — any doubt fails closed
+            return False
+
+    def fill_payment_details(self, card: dict, **_kwargs) -> dict:
+        """Fill the applicant's OWN payment details (explicitly provided for
+        this, vault-transported, used once) into the official portal's payment
+        form. Ellis never clicks Pay — the applicant reviews the filled page
+        in their secure window and confirms the payment personally. Values
+        never persist and never reach any error message or checkpoint."""
+        if not self.payment_fill_allowed():
+            return {"ok": False, "code": "PAYMENT_FILL_NOT_RELEASED"}
+        if self._progress_sink:
+            try:
+                self._progress_sink("filling_payment_details", "active")
+            except Exception:  # noqa: BLE001
+                pass
+        try:
+            driver = self._ensure_live()
+        except _OutcomeUncertain as e:
+            return {"ok": False, "code": "OUTCOME_UNCERTAIN", "detail": str(e)}
+        if not hasattr(driver, "read_payment_form"):
+            return {"ok": False, "code": "PAYMENT_FILL_UNSUPPORTED"}
+        try:
+            form = driver.read_payment_form() or {}
+        except Exception:  # noqa: BLE001
+            form = {}
+        if not form.get("present"):
+            return {"ok": False, "code": "PAYMENT_FORM_NOT_FOUND"}
+        try:
+            res = driver.fill_payment_fields(form, card) or {}
+        except Exception:  # noqa: BLE001 — code only, never a value
+            return {"ok": False, "code": "PAYMENT_FILL_ERROR"}
+        if not res.get("ok"):
+            return {"ok": False, "code": "PAYMENT_FILL_INCOMPLETE",
+                    "filled": res.get("filled") or [],
+                    "missing": res.get("missing") or []}
+        return {"ok": True, "filled": res.get("filled") or []}
 
     def pay(self, **_kwargs) -> dict:
         # The applicant already completed payment in the portal's own secure
@@ -529,14 +1444,107 @@ class ReleasedFlowDriver:
         except RuntimeRefused as e:
             return {"ok": False, "code": "SUBMISSION_BLOCKED", "detail": str(e)[:300]}
         res = self._advance(stop_before=None)   # run to COMPLETE
-        out = self._result_from(res, ok_statuses=("completed",))
+        out = self._result_retrying_refills(
+            res, lambda: self._advance(stop_before=None),
+            ok_statuses=("completed",))
         if not out["ok"]:
             return out
         ref = self._read_extract("confirmation_extraction")
         if ref is None:
             return {"ok": False, "code": "OUTCOME_UNCERTAIN",
                     "detail": "no official confirmation reference readable"}
+        self._store_confirmation_screenshot()
         return {"ok": True, "confirmation": {"referenceNo": ref}}
+
+    def _store_page_document(self, png, *, doc_type: str, name: str):
+        """Persist a page capture as a case document (served only through the
+        signed preview endpoint). Returns the document id, or None."""
+        import hashlib
+        if not png:
+            return None
+        try:
+            doc = models.StoredDocument(
+                org_id=self.app_row.org_id, application_id=self.app_row.id,
+                name=name, mime="image/png",
+                size_bytes=len(png), sha256=hashlib.sha256(png).hexdigest(),
+                doc_type=doc_type, ocr_status="skipped",
+                execution_class=self.execution_class)
+            self.db.add(doc)
+            self.db.flush()
+            self.db.add(models.DocumentBlob(document_id=doc.id, content=png))
+            self.db.commit()
+            return doc.id
+        except Exception:  # noqa: BLE001
+            self.db.rollback()
+            return None
+
+    def _store_confirmation_screenshot(self) -> None:
+        """Preserve the portal's own confirmation page as a case document —
+        shown on the Ellis result screen and included in the data export.
+        Best-effort: a failed capture never degrades a successful submission."""
+        try:
+            driver = self._ensure_live()
+            shot = getattr(driver, "screenshot_png", None)
+            png = shot() if shot else None
+        except Exception:  # noqa: BLE001
+            png = None
+        self._store_page_document(png, doc_type="submission_confirmation",
+                                  name="submission-confirmation.png")
+
+    def _capture_registration_notice(self, driver) -> None:
+        """The portal's registration NOTICE carries the e-Visa document code
+        the applicant is told to note. Ellis notes it FOR them: screenshot the
+        notice as a case document and record the code as the case's portal
+        reference before confirming past it."""
+        try:
+            shot = getattr(driver, "screenshot_png", None)
+            self._store_page_document(shot() if shot else None,
+                                      doc_type="registration_notice",
+                                      name="registration-notice.png")
+        except Exception:  # noqa: BLE001
+            pass
+        try:
+            code = self._labeled_reference_from_page(driver, "confirmation_extraction")
+            if code and not (self.app_row.portal_reference or ""):
+                self.app_row.portal_reference = code
+                self.db.commit()
+                from .. import audit
+                audit.record(self.db, org_id=self.app_row.org_id,
+                             application_id=self.app_row.id,
+                             action="registration_code_recorded",
+                             detail={"reference": code}, actor="ellis")
+        except Exception:  # noqa: BLE001
+            pass
+
+    def captcha_context(self) -> dict:
+        """Everything the applicant needs to solve the portal's challenge
+        WITHOUT leaving Ellis: a capture of the challenge widget (the digits
+        image) and of the full current page (the review of their application
+        as the portal shows it). Ellis displays them; the human solves."""
+        try:
+            driver = self._ensure_live()
+        except Exception:  # noqa: BLE001
+            return {}
+        out: dict = {}
+        try:
+            cap = getattr(driver, "captcha_screenshot_png", None)
+            doc_id = self._store_page_document(
+                cap() if cap else None,
+                doc_type="captcha_challenge", name="captcha.png")
+            if doc_id:
+                out["captcha_document_id"] = doc_id
+        except Exception:  # noqa: BLE001
+            pass
+        try:
+            shot = getattr(driver, "screenshot_png", None)
+            doc_id = self._store_page_document(
+                shot() if shot else None,
+                doc_type="portal_review", name="portal-review.png")
+            if doc_id:
+                out["review_document_id"] = doc_id
+        except Exception:  # noqa: BLE001
+            pass
+        return out
 
     def restore_view(self, **_kwargs) -> dict:
         """Rebuild the live portal page at the persisted step after a session
@@ -589,16 +1597,34 @@ class ReleasedFlowDriver:
                           "service_fee_cents": 0,
                           "payee": self.released.family.operator or self.released.family.name,
                           "source": "portal_page_read"}
+        else:
+            # The restored page shows no fee — report what it DOES show so a
+            # mislabeled fee pause can swap to the real ask.
+            try:
+                blockers = self._page_blockers()
+            except Exception:  # noqa: BLE001
+                blockers = {}
+            if blockers:
+                out["blockers"] = blockers
         return out
 
     def read_current_fee(self, **_kwargs) -> dict:
         """Read the fee from the page the portal is showing RIGHT NOW —
         no navigation, no form work. Used on demand once the applicant has
-        walked the portal to the step that displays the amount."""
+        walked the portal to the step that displays the amount. When no fee is
+        readable, the page's real blockers (CAPTCHA / unanswered questions)
+        ride along so a mislabeled fee pause can reclassify itself."""
         fee = self._fee_from_page_text()
         if not isinstance(fee, dict):
-            return {"ok": False, "code": "FEE_NOT_DISPLAYED",
-                    "detail": "no single readable fee on the current page"}
+            out = {"ok": False, "code": "FEE_NOT_DISPLAYED",
+                   "detail": "no single readable fee on the current page"}
+            try:
+                blockers = self._page_blockers()
+            except Exception:  # noqa: BLE001
+                blockers = {}
+            if blockers:
+                out["blockers"] = blockers
+            return out
         return {"ok": True, "fee": {
             "ok": True, "amount": fee["amount_cents"], "currency": fee["currency"],
             "display": f"{fee['amount_cents'] / 100:.2f} {fee['currency']}",
@@ -651,7 +1677,8 @@ class ReleasedFlowDriver:
     _REFERENCE_LABELS = {
         "confirmation_extraction": (
             "registration code", "application code", "dossier code",
-            "reference number", "application number", "mã hồ sơ", "mã đăng ký"),
+            "reference number", "application number", "mã hồ sơ", "mã đăng ký",
+            "electronic document code", "e-visa app no"),
         "receipt_extraction": (
             "receipt", "transaction", "payment reference", "mã giao dịch",
             "số biên lai"),

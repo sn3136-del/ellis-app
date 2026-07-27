@@ -105,6 +105,14 @@ export function createVisaClient(session) {
     // `answers` = {questionKey: value}; dates may be MM/DD/YYYY (backend canonicalizes).
     provideInformation: (id, answers) =>
       call('POST', `/cases/${id}/signals/provide_information`, session, { answers }),
+    // Payment details for Ellis to fill on the OFFICIAL portal (handoff:
+    // payment_credentials). card = {holder, number, expiry: 'MM/YY', cvv} —
+    // sent once, vault-transported server-side, never stored; the applicant
+    // always clicks the portal's own payment confirmation personally.
+    // {manual: true} instead: the applicant will type the card in the secure
+    // window personally.
+    providePaymentDetails: (id, body) =>
+      call('POST', `/cases/${id}/signals/provide_payment_details`, session, body),
 
     appointment: (id) => call('GET', `/cases/${id}/appointment`, session),
     audit: (id) => call('GET', `/cases/${id}/audit`, session),
@@ -332,7 +340,8 @@ export const HANDOFF_UI = {
   portal_form: 'LiveViewModal',     // finish form items only you may complete
   payment_approval: 'PaymentApprove', // approve_payment (shows fee)
   fee_confirmation: 'PaymentApprove', // applicant confirms the exact portal fee
-  payment: 'PaymentModal',          // complete_payment (secure window; no card seen)
+  payment_credentials: 'PaymentDetailsModal', // provide_payment_details (Ellis fills the portal)
+  payment: 'PaymentModal',          // complete_payment (applicant confirms on the portal)
   three_ds: 'PaymentModal',
   appointment_selection: 'AppointmentCalendar', // select_appointment(slot_id)
   no_availability: 'AppointmentCalendar',
@@ -350,6 +359,7 @@ export const HANDOFF_SIGNAL = {
   otp: 'verify_email',
   payment_approval: 'approve_payment',
   fee_confirmation: 'approve_payment',
+  payment_credentials: 'provide_payment_details',
   payment: 'complete_payment',
   appointment_selection: 'select_appointment',
   reschedule_approval: 'approve_reschedule',
@@ -372,7 +382,9 @@ export const HANDOFF_COPY = {
     'A few items on the government form need your personal input — including any declaration only you may sign. Complete them in the secure window, then continue.'],
   payment_approval: ['Review and confirm payment', 'Confirm the official fee before payment begins.'],
   fee_confirmation: ['Confirm the official fee', 'Enter the exact fee the official portal shows, then confirm to continue to payment.'],
-  payment: ['Pay the official fee', 'Enter your card directly in the portal — Ellis never sees it.'],
+  payment_credentials: ['Enter your payment details',
+    'Ellis fills them on the official portal for you — used once, never stored. You review the filled page and confirm the payment yourself.'],
+  payment: ['Confirm the payment', 'Review the payment page in the secure window and confirm it on the official portal yourself.'],
   three_ds: ['Confirm 3-D Secure', 'Approve the bank verification in the secure window.'],
   appointment_selection: ['Choose an appointment', 'Pick a qualifying slot from your calendar.'],
   no_availability: ['No slots yet', 'Nothing matches your preferences yet — Ellis keeps watching.'],

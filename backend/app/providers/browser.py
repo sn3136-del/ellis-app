@@ -26,6 +26,10 @@ HANDOFF_KINDS = {
     # secure window (e.g. its own inline legal declaration, or fields the
     # released flow does not cover).
     "portal_form",
+    # The applicant provides payment details IN ELLIS and Ellis fills them on
+    # the official portal; the live view accompanies the ask so the applicant
+    # can always see (or use) the portal's own payment page instead.
+    "payment_credentials",
 }
 
 

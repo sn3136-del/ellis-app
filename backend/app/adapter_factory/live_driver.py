@@ -25,6 +25,16 @@ _SENSITIVE_SELECTOR = re.compile(
     r"(password|passcode|otp|one[-_]?time|cvv|cvc|card|pan|secret|token|captcha|pin|3ds|passkey)",
     re.IGNORECASE)
 
+# Timeout budget, split by PURPOSE. Waiting for an element to exist deserves
+# patience (pages and dialogs load); ACTING on an element that already exists
+# does not — a control that refuses the action refuses it immediately, and a
+# long action timeout only burns wall-clock before the fallback that works.
+# Measured on a real run: ~15s wasted per readonly picker field, ~20 such
+# fields per application.
+_WAIT_MS = 8000      # element must appear
+_ACT_MS = 2500       # element exists: fill / select / check it
+_CLICK_MS = 6000     # click (navigation-bearing, slightly longer)
+
 
 def sanitize_network_event(method: str, url: str, status: int, content_type: str,
                            body_text: str | None) -> dict:
@@ -76,8 +86,17 @@ class BrowserbasePageDriver:
         # here too (defense in depth) so a mis-generated node fails closed.
         if _SENSITIVE_SELECTOR.search(selector or ""):
             return {"ok": False, "code": "SENSITIVE_FIELD_AUTOMATION"}
+        # Timeout budget: WAIT for the element (pages load), then act fast.
+        # A readonly picker input rejects fill() immediately — a long fill
+        # timeout only burns wall-clock before the keyboard fallback that
+        # actually works (measured: 15s wasted on ~20 fields per run).
         try:
-            self.page.fill(selector, str(value), timeout=15000)
+            self.page.locator(selector).first.wait_for(state="attached",
+                                                       timeout=_WAIT_MS)
+        except Exception:  # noqa: BLE001 — let fill report the real failure
+            pass
+        try:
+            self.page.fill(selector, str(value), timeout=_ACT_MS)
             # Framework forms (rc-field-form/Ant Design) commit a controlled
             # input's value to their own store on blur. Without it the DOM
             # shows the text while the form still considers the field empty —
@@ -95,11 +114,11 @@ class BrowserbasePageDriver:
             # fill(); they accept focused keyboard entry. Type, commit with
             # Enter, then READ BACK the value — success only on exact echo.
             try:
-                self.page.click(selector, timeout=10000)
+                self.page.click(selector, timeout=_CLICK_MS)
                 self.page.keyboard.type(str(value), delay=25)
                 self.page.keyboard.press("Enter")
                 self.page.wait_for_timeout(300)
-                got = self.page.input_value(selector, timeout=5000)
+                got = self.page.input_value(selector, timeout=_ACT_MS)
                 # A picker panel can linger after Enter and swallow the next
                 # element's clicks — dismiss it before moving on.
                 self.page.keyboard.press("Escape")
@@ -125,10 +144,19 @@ class BrowserbasePageDriver:
             # VISIBLE match so the wait can't hang on an invisible node.
             target = self.page.locator(f"{selector} >> visible=true").first
             try:    # a button below the fold is not "unclickable"
-                target.scroll_into_view_if_needed(timeout=5000)
+                target.scroll_into_view_if_needed(timeout=_ACT_MS)
             except Exception:  # noqa: BLE001
                 pass
-            target.click(timeout=15000)
+            # A DISABLED control cannot be clicked — and must never be
+            # reported as clicked. The portal disables its Next until the form
+            # is valid; a "successful" click there sent the run onward
+            # believing the page had advanced when it had not moved at all.
+            try:
+                if target.is_disabled(timeout=_ACT_MS):
+                    return {"ok": False, "code": "DISABLED"}
+            except Exception:  # noqa: BLE001 — unreadable: let the click judge
+                pass
+            target.click(timeout=_CLICK_MS)
             return {"ok": True}
         except Exception as e:  # noqa: BLE001
             msg = str(e).lower()
@@ -222,6 +250,671 @@ class BrowserbasePageDriver:
         except Exception as e:  # noqa: BLE001
             return {"ok": False, "code": "READ_ERROR", "detail": str(e)[:120]}
 
+    # Page-truth form probe: every visible form field with its label, type,
+    # required flag, and whether the PORTAL currently holds a value for it —
+    # emptiness only, never the value itself. Powers pause classification
+    # ("why did we stop here?"): unanswered questions on the live page become
+    # in-Ellis applicant questions instead of a misleading fee pause.
+    _FORM_STATE_JS = """() => {
+      const sensitive = /(password|passcode|otp|one[-_]?time|cvv|cvc|card|\\bpan\\b|secret|token|captcha|\\bpin\\b|3ds|passkey)/i;
+      const labelFor = (el) => {
+        if (el.getAttribute('aria-label')) return el.getAttribute('aria-label');
+        if (el.id) {
+          const l = document.querySelector('label[for="' + CSS.escape(el.id) + '"]');
+          if (l) return l.innerText;
+        }
+        const item = el.closest('[class*="form-item"], .form-group, .field');
+        if (item) { const l = item.querySelector('label'); if (l) return l.innerText; }
+        const p = el.closest('label'); if (p) return p.innerText;
+        return el.placeholder || '';
+      };
+      const requiredFor = (el) => {
+        if (el.required || el.getAttribute('aria-required') === 'true') return true;
+        const item = el.closest('[class*="form-item"], .form-group, .field');
+        if (!item) return false;
+        if (item.querySelector('[class*="required"]')) return true;
+        const l = item.querySelector('label');
+        return !!(l && /[*＊]/.test(l.innerText || ''));
+      };
+      const optionLabelFor = (el) => {
+        const wrap = el.closest('label');
+        if (wrap) return (wrap.innerText || '').trim();
+        if (el.id) {
+          const l = document.querySelector('label[for="' + CSS.escape(el.id) + '"]');
+          if (l) return (l.innerText || '').trim();
+        }
+        return (el.value || '').trim();
+      };
+      const out = [];
+      const radioGroups = {};
+      for (const el of document.querySelectorAll('input, select, textarea')) {
+        const tag = el.tagName.toLowerCase();
+        let type = (el.type || tag).toLowerCase();
+        if (['hidden', 'button', 'submit', 'reset', 'file', 'image'].includes(type)) continue;
+        if (el.disabled) continue;
+        if (el.offsetParent === null) {
+          // Custom-styled checkboxes/radios hide the native input and render
+          // a styled twin: the control is REAL if its label/wrapper is
+          // visible. Everything else hidden stays skipped.
+          const widgetVisible = (type === 'checkbox' || type === 'radio') &&
+            (() => { const w = el.closest('label, [class*="checkbox"], [class*="radio"], [class*="form-check"]');
+                     return !!(w && w.offsetParent !== null); })();
+          if (!widgetVisible) continue;
+        }
+        if (tag === 'input' && (type === 'text' || type === 'search' || type === '')) {
+          if (el.getAttribute('role') === 'combobox' ||
+              el.getAttribute('aria-autocomplete') === 'list' ||
+              el.closest('[role="combobox"]')) type = 'combobox';
+        }
+        if (tag === 'select') type = 'select';
+        const name = (el.name || '').slice(0, 80);
+        const id = (el.id || '').slice(0, 80);
+        if (type === 'radio') {
+          // One entry per GROUP: the group's question label, every option's
+          // own label, and whether any member is selected yet.
+          if (!name) continue;
+          const g = radioGroups[name] || (radioGroups[name] = {
+            id, name, options: [], checked: false, required: false, label: '' });
+          g.options.push(optionLabelFor(el).replace(/\\s+/g, ' ').slice(0, 80));
+          g.checked = g.checked || el.checked;
+          g.required = g.required || requiredFor(el);
+          if (!g.label) {
+            // The group's QUESTION label — a legend, or a label/heading that
+            // is NOT one of the options' own wrapping labels (those would
+            // give us "Yes" instead of "Did you buy insurance?").
+            const item = el.closest('[class*="form-item"], .form-group, .field, fieldset');
+            let l = item && item.querySelector('legend');
+            if (!l && item) {
+              for (const cand of item.querySelectorAll('label, [class*="label"]')) {
+                if (!cand.querySelector('input') && (cand.innerText || '').trim()) { l = cand; break; }
+              }
+            }
+            g.label = l ? (l.innerText || '').trim().replace(/\\s+/g, ' ').slice(0, 120) : '';
+          }
+          continue;
+        }
+        let label = (labelFor(el) || '').trim().replace(/\\s+/g, ' ').slice(0, 120);
+        if (!label && type === 'checkbox') {
+          // Declaration/consent statements usually sit NEXT to the box, not in
+          // a <label>. Read the text bound to THIS box only — never a shared
+          // container's full text (that would cross-attribute one box's
+          // statement to a neighbour and could auto-tick the wrong box).
+          const own = (el.closest('label') || null);
+          let box = own;
+          if (!box) {
+            const cand = el.closest('[class*="form-check"], [class*="checkbox-item"], li');
+            // Only trust a container that holds exactly ONE checkbox.
+            if (cand && cand.querySelectorAll('input[type="checkbox"]').length === 1) box = cand;
+          }
+          if (box) {
+            label = (box.innerText || '').trim().replace(/\\s+/g, ' ').slice(0, 220);
+          } else {
+            // Fall back to the immediate sibling text next to the box.
+            const sib = el.nextElementSibling || el.parentElement;
+            if (sib && (sib.innerText || '').length < 260)
+              label = (sib.innerText || '').trim().replace(/\\s+/g, ' ').slice(0, 220);
+          }
+        }
+        const placeholder = (el.placeholder || '').slice(0, 40);
+        let empty = true;
+        let options = [];
+        if (type === 'select') {
+          const sel = el.selectedIndex >= 0 ? el.options[el.selectedIndex] : null;
+          empty = !sel || !(sel.value || '').trim() || sel.disabled;
+          options = Array.from(el.options)
+            .filter((o) => (o.value || '').trim() && !o.disabled)
+            .map((o) => (o.label || o.text || '').trim()).filter(Boolean).slice(0, 60);
+        } else if (type === 'combobox') {
+          // The chosen value lives in the widget ROOT, and EVERY layer down
+          // to the input carries 'select' in its class
+          // (ant-select > ant-select-selector > ant-select-selection-search >
+          //  input.ant-select-selection-search-input). A closest() match
+          //  therefore lands on an inner layer that holds no value node, and
+          //  the search input's own value is always '' — so every filled
+          //  combobox read as permanently EMPTY (Ellis refilled and re-asked
+          //  fields the applicant had already answered). Climb to the
+          //  OUTERMOST select-ish ancestor and read the value there.
+          let root = null, n = el.parentElement, hops = 0;
+          while (n && hops < 6) {
+            if (/select|combobox|dropdown/i.test((n.className || '').toString())) root = n;
+            else if (root) break;
+            n = n.parentElement; hops++;
+          }
+          const s = root && root.querySelector(
+            '[class*="selection-item"], [class*="single-value"], [class*="selected-value"]');
+          empty = !(s && (s.innerText || '').trim()) && !(el.value || '').trim();
+        } else if (type === 'checkbox') {
+          // ANCESTOR wrapper only (an Ant input's own class contains
+          // 'checkbox'), and when a framework wrapper exists ITS state is
+          // the truth — a raw-set input.checked with an unregistered
+          // framework model must still classify as unticked.
+          const wrap = el.parentElement ? el.parentElement.closest(
+            '[class*="checkbox"], [class*="form-check"], [role="checkbox"]') : null;
+          const ariaEl = (wrap && wrap.getAttribute('aria-checked') !== null) ? wrap
+                         : (el.getAttribute('aria-checked') !== null ? el : null);
+          if (ariaEl) empty = ariaEl.getAttribute('aria-checked') !== 'true';
+          else if (wrap) empty = !/checked/i.test(wrap.className || '');
+          else empty = !el.checked;
+        } else {
+          empty = !(el.value || '').trim();
+        }
+        // A checkbox's LABEL is a statement sentence, not a value: matching it
+        // against the sensitive-value regex would drop a real declaration that
+        // merely mentions "card"/"secret". Sensitivity for a checkbox rests on
+        // its name/id only (a checkbox never carries a card/OTP value).
+        const sens = type === 'password' || sensitive.test(name) || sensitive.test(id) ||
+                     (type !== 'checkbox' && sensitive.test(label));
+        out.push({ id, name, label, type, options, placeholder,
+                   tag: tag,
+                   required: requiredFor(el), empty,
+                   sensitive: sens });
+        if (out.length >= 80) break;
+      }
+      for (const name of Object.keys(radioGroups)) {
+        const g = radioGroups[name];
+        if (out.length >= 80) break;
+        out.push({ id: g.id, name: g.name, label: g.label || g.options[0] || '',
+                   type: 'radio', options: g.options.filter(Boolean).slice(0, 20),
+                   placeholder: '', tag: 'input',
+                   required: g.required, empty: !g.checked,
+                   sensitive: sensitive.test(g.name) || sensitive.test(g.label || '') });
+      }
+      return out;
+    }"""
+
+    def page_probe(self) -> dict:
+        """Everything pause-classification needs, in ONE round-trip: the
+        challenge state, every visible field's shape/emptiness, and the
+        portal's own validation complaints. Three separate evaluates cost
+        three page round-trips on every classification pass."""
+        combined = (
+            "() => ({"
+            f"  captcha: ({self._CAPTCHA_JS})(false),"
+            f"  fields: ({self._FORM_STATE_JS})(),"
+            f"  validation: {{messages: ({self._VALIDATION_JS})(),"
+            f"                fields: ({self._INVALID_FIELDS_JS})()}}"
+            "})")
+        try:
+            res = self.page.evaluate(combined) or {}
+        except Exception:  # noqa: BLE001 — a bad page yields no classification
+            return {"ok": False, "captcha": {"present": False}, "fields": [],
+                    "validation": {"messages": [], "fields": []}}
+        return {"ok": True,
+                "captcha": {"present": bool((res.get("captcha") or {}).get("present"))},
+                "fields": list(res.get("fields") or []),
+                "validation": {
+                    "messages": list((res.get("validation") or {}).get("messages") or []),
+                    "fields": list((res.get("validation") or {}).get("fields") or [])}}
+
+    def read_form_state(self) -> dict:
+        """{fields: [{id,name,label,type,required,empty,sensitive,options}]}
+        for every visible form control — presence and emptiness only, values
+        are never read back."""
+        try:
+            fields = self.page.evaluate(self._FORM_STATE_JS) or []
+        except Exception as e:  # noqa: BLE001
+            return {"ok": False, "code": "READ_ERROR", "detail": str(e)[:120]}
+        return {"ok": True, "fields": list(fields)}
+
+    def fill_observed_field(self, selector: str, value: str, kind: str = "text") -> dict:
+        """Fill one field the PAGE (not the flow) told us about, with an
+        answer the applicant just provided. Same sensitivity refusal as every
+        other automated fill — payment fields go through the dedicated
+        applicant-authorized path, never this one."""
+        if _SENSITIVE_SELECTOR.search(selector or ""):
+            return {"ok": False, "code": "SENSITIVE_FIELD_AUTOMATION"}
+        if kind == "select":
+            try:
+                self.page.select_option(selector, label=str(value), timeout=_ACT_MS)
+                return {"ok": True}
+            except Exception:  # noqa: BLE001 — fall back to value match
+                try:
+                    self.page.select_option(selector, value=str(value), timeout=_ACT_MS)
+                    return {"ok": True}
+                except Exception as e2:  # noqa: BLE001
+                    return {"ok": False, "code": "NO_SUCH_OPTION", "detail": str(e2)[:120]}
+        if kind == "combobox":
+            return self.select_search(selector, str(value))
+        if kind == "radio":
+            # Pick the group option whose OWN label matches the applicant's
+            # choice (exact first, then containment) — never a positional guess.
+            pick_js = """(args) => {
+              const {sel, want} = args;
+              const w = want.trim().toLowerCase();
+              let fallback = null;
+              for (const r of document.querySelectorAll(sel)) {
+                if (r.type !== 'radio' || r.offsetParent === null) continue;
+                const wrap = r.closest('label');
+                const forLbl = r.id ? document.querySelector('label[for="' + CSS.escape(r.id) + '"]') : null;
+                const t = ((wrap && wrap.innerText) || (forLbl && forLbl.innerText) ||
+                           r.value || '').trim().toLowerCase();
+                if (!t) continue;
+                if (t === w) { r.click(); return {ok: true}; }
+                if (!fallback && (t.includes(w) || w.includes(t))) fallback = r;
+              }
+              if (fallback) { fallback.click(); return {ok: true}; }
+              return {ok: false};
+            }"""
+            try:
+                res = self.page.evaluate(pick_js, {"sel": selector, "want": str(value)}) or {}
+                if res.get("ok"):
+                    return {"ok": True}
+                return {"ok": False, "code": "NO_SUCH_OPTION"}
+            except Exception as e:  # noqa: BLE001
+                return {"ok": False, "code": "READ_ERROR", "detail": str(e)[:120]}
+        return self.fill(selector, str(value))
+
+    def apply_declaration_mark(self, selector: str) -> dict:
+        """Tick the portal's declaration checkbox AFTER the applicant made the
+        declaration themselves in Ellis (the signed in-app statement). This is
+        transcription of the applicant's own recorded act — Ellis never
+        declares on its own initiative. Uses the same human-mimicking,
+        render-verified commit as every checkbox tick."""
+        return self._commit_checkbox(selector)
+
+    # ---- applicant-authorized payment fill ----------------------------------
+    # Detection first tries the standards-track autocomplete tokens (cc-*),
+    # then conservative name/id/label patterns. Field KINDS and selectors only
+    # — never a value — cross this boundary.
+    _PAYMENT_FORM_JS = """() => {
+      const pats = {
+        number: /(card.?(number|no)\\b|\\bpan\\b|cc.?num)/i,
+        cvv: /(cvv|cvc|csc|security.?code)/i,
+        expiry: /(exp|valid.?(thru|until))/i,
+        holder: /(card.?holder|holder.?name|name.{0,12}on.{0,6}card)/i,
+      };
+      const auto = { 'cc-number': 'number', 'cc-csc': 'cvv', 'cc-exp': 'expiry',
+                     'cc-exp-month': 'expiry_month', 'cc-exp-year': 'expiry_year',
+                     'cc-name': 'holder' };
+      const labelFor = (el) => {
+        if (el.getAttribute('aria-label')) return el.getAttribute('aria-label');
+        if (el.id) {
+          const l = document.querySelector('label[for="' + CSS.escape(el.id) + '"]');
+          if (l) return l.innerText;
+        }
+        const p = el.closest('label'); if (p) return p.innerText;
+        return el.placeholder || '';
+      };
+      const fields = {};
+      for (const el of document.querySelectorAll('input, select')) {
+        if (el.offsetParent === null || el.disabled) continue;
+        const type = (el.type || '').toLowerCase();
+        if (['hidden', 'button', 'submit', 'checkbox', 'radio', 'file'].includes(type)) continue;
+        const sel = el.id ? '#' + CSS.escape(el.id)
+          : (el.name ? el.tagName.toLowerCase() + '[name="' + el.name + '"]' : '');
+        if (!sel) continue;
+        const hay = (el.name || '') + ' ' + (el.id || '') + ' ' + (labelFor(el) || '')
+                    + ' ' + (el.placeholder || '');
+        let kind = auto[(el.getAttribute('autocomplete') || '').toLowerCase()] || '';
+        if (!kind) {
+          if (pats.number.test(hay)) kind = 'number';
+          else if (pats.cvv.test(hay)) kind = 'cvv';
+          else if (pats.holder.test(hay)) kind = 'holder';
+          else if (pats.expiry.test(hay)) {
+            // A combined 'MM/YY' text input mentions BOTH month and year —
+            // it must stay 'expiry' or it would be filled with the month only.
+            const hasM = /month|\\bmm\\b/i.test(hay);
+            const hasY = /year|\\byy(yy)?\\b/i.test(hay);
+            if (el.tagName === 'SELECT') kind = (hasY && !hasM) ? 'expiry_year' : 'expiry_month';
+            else if (hasM && hasY) kind = 'expiry';
+            else if (hasY) kind = 'expiry_year';
+            else if (hasM) kind = 'expiry_month';
+            else kind = 'expiry';
+          }
+        }
+        if (!kind || fields[kind]) continue;
+        fields[kind] = { selector: sel, tag: el.tagName.toLowerCase(),
+                         placeholder: (el.placeholder || '').slice(0, 20) };
+      }
+      return { present: !!fields.number, fields };
+    }"""
+
+    def _payment_frames(self) -> list:
+        """Frames card details may EVER be typed into: the page itself plus
+        child frames whose URL passes the adapter hostname allowlist. A
+        cross-origin/injected/blank frame is refused outright — the same
+        fail-closed boundary goto() enforces for navigation."""
+        frames = [self.page]
+        try:
+            for f in self.page.frames:
+                if f == self.page.main_frame:
+                    continue
+                try:
+                    if self._host_ok(str(f.url or "")):
+                        frames.append(f)
+                except Exception:  # noqa: BLE001 — unreadable URL: refuse
+                    continue
+        except Exception:  # noqa: BLE001 — frame enumeration is best-effort
+            pass
+        return frames
+
+    def read_payment_form(self) -> dict:
+        """Locate the portal's own payment-card fields on the current page
+        (top document first, then allowlisted child frames only). Returns
+        field KINDS and selectors only. present=false when no card-number
+        field exists — the caller then falls back to the applicant typing in
+        the live view."""
+        for idx, frame in enumerate(self._payment_frames()):
+            try:
+                res = frame.evaluate(self._PAYMENT_FORM_JS) or {}
+            except Exception:  # noqa: BLE001
+                continue
+            if res.get("present"):
+                return {"ok": True, "present": True, "frame": idx,
+                        "fields": res.get("fields") or {}}
+        return {"ok": True, "present": False, "fields": {}}
+
+    def fill_payment_fields(self, form: dict, card: dict) -> dict:
+        """Fill the applicant's OWN card details (provided explicitly for this
+        purpose, transported via a one-time vault reference) into the portal's
+        payment form. Deliberately bypasses the sensitive-selector refusal —
+        this is the single applicant-authorized entry path, and it only ever
+        types into the page or an ALLOWLISTED child frame (_payment_frames).
+        Ellis never clicks Pay, never stores the values, and no value ever
+        reaches an error message, checkpoint, or log. ok requires every
+        critical detected field (number, cvv, an expiry) actually filled —
+        a partial fill must never be reported as 'your details are entered'.
+        Returns filled/missing field KINDS only."""
+        fields = (form or {}).get("fields") or {}
+        frame_idx = int((form or {}).get("frame") or 0)
+        frames = self._payment_frames()
+        if frame_idx >= len(frames):
+            return {"ok": False, "filled": [], "missing": sorted(fields),
+                    "code": "PAYMENT_FRAME_GONE"}
+        target = frames[frame_idx]
+        number = re.sub(r"\D", "", str(card.get("number") or ""))
+        month = str(card.get("expiry_month") or "").zfill(2)
+        year4 = str(card.get("expiry_year") or "")
+        values: dict[str, str] = {}
+        if number:
+            values["number"] = number
+        if card.get("cvv"):
+            values["cvv"] = str(card["cvv"])
+        if card.get("holder"):
+            values["holder"] = str(card["holder"])
+        if month and year4:
+            values["expiry_month"] = month
+            values["expiry_year"] = year4
+            # Combined expiry inputs: MM/YY unless the placeholder shows YYYY.
+            ph = str((fields.get("expiry") or {}).get("placeholder") or "")
+            yy = year4 if "yyyy" in ph.lower() else year4[-2:]
+            values["expiry"] = f"{month}/{yy}"
+        # Select widgets label options unpredictably ('05', '5', '2033', '33'):
+        # try each equivalent representation; the readback stays the judge.
+        candidates = {
+            "expiry_month": [month, month.lstrip("0") or month],
+            "expiry_year": [year4, year4[-2:]],
+        }
+        filled, missing = [], []
+        for kind, spec in fields.items():
+            value = values.get(kind)
+            if value is None:
+                continue
+            sel = spec.get("selector") or ""
+            try:
+                if spec.get("tag") == "select":
+                    done = False
+                    for cand in candidates.get(kind, [value]):
+                        for by in ("value", "label"):
+                            try:
+                                target.select_option(sel, **{by: cand}, timeout=4000)
+                                done = True
+                                break
+                            except Exception:  # noqa: BLE001 — next candidate
+                                continue
+                        if done:
+                            break
+                    if not done:
+                        raise RuntimeError("no matching option")
+                else:
+                    target.fill(sel, value, timeout=_ACT_MS)
+                    try:
+                        target.eval_on_selector(
+                            sel,
+                            "el => { el.dispatchEvent(new Event('change', {bubbles: true}));"
+                            " el.blur(); }")
+                    except Exception:  # noqa: BLE001
+                        pass
+                filled.append(kind)
+            except Exception:  # noqa: BLE001 — kind only, never the value
+                missing.append(kind)
+        # Every critical field the PAGE declares must be filled: number always;
+        # cvv when detected; and when any expiry field is detected, the whole
+        # expiry must have landed (combined, or month+year together).
+        expiry_kinds = [k for k in ("expiry", "expiry_month", "expiry_year")
+                        if k in fields]
+        ok = "number" in filled \
+            and not ("cvv" in fields and "cvv" not in filled) \
+            and all(k in filled for k in expiry_kinds)
+        return {"ok": ok, "filled": sorted(filled), "missing": sorted(missing)}
+
+    # An UNCHECKED declaration/consent checkbox and a stable selector for it.
+    # Text-matched on the box's own label (ancestor label / adjacent text),
+    # so the "I hereby declare …" statement is found wherever it renders.
+    _FIND_DECLARATION_JS = r"""() => {
+      // TRUTHFULNESS declarations only — mirrors released_flow._DECLARATION_RE.
+      // Bare 'hereby' is excluded on purpose: a 'hereby authorize/consent/
+      // agree to the terms' box is the APPLICANT's to give, never auto-ticked,
+      // and any consent/T&C language disqualifies a box outright (fail closed:
+      // a refused box routes to the applicant's secure window, not to a tick).
+      const re = /(declar|perjury|\boath\b|cam\s*đoan|(information|statements?|details|answers?|above|foregoing)[^.]{0,60}(true|complete|correct|accurate)|(true|complete|correct|accurate)[^.]{0,40}(and|&)[^.]{0,20}(complete|correct|accurate|true))/i;
+      const consent = /(agree|consent|authoriz|terms|privacy|marketing|newsletter|subscribe|third[-\s]*part)/i;
+      const out = [];
+      const all = document.querySelectorAll('input[type="checkbox"]');
+      all.forEach((el, idx) => {
+        if (out.length >= 6) return;
+        const wrap = el.parentElement ? el.parentElement.closest(
+          '[class*="checkbox"], [class*="form-check"], [role="checkbox"]') : null;
+        const ariaEl = (wrap && wrap.getAttribute('aria-checked') !== null) ? wrap
+                       : (el.getAttribute('aria-checked') !== null ? el : null);
+        let checked;
+        if (ariaEl) checked = ariaEl.getAttribute('aria-checked') === 'true';
+        else if (wrap) checked = /checked/i.test(wrap.className || '');
+        else checked = !!el.checked;
+        if (checked) return;
+        // The statement can sit several ancestors up (label > span > text):
+        // climb until text appears — exactly how a human's eye finds it.
+        let text = '', n = el, hops = 0;
+        while (n && hops < 4 && text.length < 30) {
+          text = (n.innerText || '').trim(); n = n.parentElement; hops++;
+        }
+        if (!re.test(text) || consent.test(text)) return;
+        const lab = el.closest('label');
+        const vis = (lab && lab.offsetParent !== null) || el.offsetParent !== null;
+        if (!vis) return;
+        // The eVisa 'I hereby declare' box has NO id and NO name — requiring
+        // one silently skipped it (the exact box the applicant kept pointing
+        // at). The engine-syntax nth selector addresses ANY checkbox.
+        let sel = '';
+        if (el.id) sel = '[id="' + el.id + '"]';
+        else if (el.name) sel = 'input[name="' + el.name + '"]';
+        else sel = 'input[type="checkbox"] >> nth=' + idx;
+        out.push({selector: sel, text: text.slice(0, 200)});
+      });
+      return {found: out.length > 0, boxes: out};
+    }"""
+
+    def find_declaration_checkbox(self) -> dict:
+        """EVERY unchecked declaration box on the page. The eVisa form carries
+        more than one ("Committed to declare temporary residence…" and the
+        final "I hereby declare that the above statements are true…"): ticking
+        only the first leaves Next disabled forever."""
+        try:
+            return self.page.evaluate(self._FIND_DECLARATION_JS) or {"found": False}
+        except Exception:  # noqa: BLE001
+            return {"found": False}
+
+    def tick_declarations(self) -> int:
+        """Tick every unchecked declaration box on the page, verified. No
+        Next click here — the caller's own declared CLICK node retries the
+        advance under all runtime guards. Returns how many committed."""
+        found = self.find_declaration_checkbox()
+        ticked = 0
+        for box in (found.get("boxes") or []):
+            sel = box.get("selector") or ""
+            if not sel:
+                continue
+            try:
+                if (self._commit_checkbox(sel) or {}).get("ok"):
+                    ticked += 1
+            except Exception:  # noqa: BLE001
+                continue
+        return ticked
+
+    def page_signature(self) -> str:
+        """A cheap identity fingerprint of the CURRENT page/step: URL plus the
+        fields it renders. Two reads of an unmoved page (even one that just
+        re-rendered validation errors) match; a real step change does not.
+        Checked state is deliberately excluded — ticking a box must not read
+        as movement. Empty string when unreadable (callers fall back)."""
+        try:
+            return str(self.page.evaluate("""() => {
+              const ids = [];
+              for (const el of document.querySelectorAll('input, select, textarea')) {
+                if (ids.length >= 40) break;
+                ids.push(el.id || el.name || el.type || el.tagName);
+              }
+              const h = document.querySelector('h1, h2, h3, [class*="title"]');
+              return location.href + '|' +
+                     (h ? (h.innerText || '').trim().slice(0, 80) : '') + '|' +
+                     ids.join(',');
+            }""") or "")
+        except Exception:  # noqa: BLE001
+            return ""
+
+    def next_button_state(self) -> dict:
+        """Is the page's advance button present, and can it act?"""
+        try:
+            res = self.page.evaluate("""() => {
+              for (const b of document.querySelectorAll('button, input[type="submit"]')) {
+                if (b.offsetParent === null) continue;
+                const t = ((b.innerText || b.value || '')).trim().toLowerCase();
+                if (t === 'next' || t === 'tiếp tục' || t === 'tiep tuc')
+                  return {present: true, disabled: !!b.disabled};
+              }
+              return {present: false};
+            }""") or {}
+            return {"ok": True, **res}
+        except Exception:  # noqa: BLE001
+            return {"ok": False}
+
+    def click_next_button(self) -> dict:
+        """Click the page's own advance button (Next / Tiếp tục) — used only
+        on the applicant's explicit instruction paths (their typed captcha is
+        the go-ahead for THIS page's advance)."""
+        # NEVER a bare input[type=submit]: a text-blind submit click can fire
+        # an arbitrary control (a Pay button, a search widget). Only controls
+        # that SAY they advance qualify.
+        for sel in ('button:has-text("Next")', 'button:has-text("Tiếp tục")',
+                    'button:has-text("Tiep tuc")',
+                    'input[type="submit"][value="Next" i]',
+                    'input[type="submit"][value="Tiếp tục" i]',
+                    'input[type="submit"][value="Tiep tuc" i]'):
+            try:
+                loc = self.page.locator(f"{sel} >> visible=true").first
+                if loc.count() == 0:
+                    continue
+                loc.click(timeout=8000)
+                return {"ok": True}
+            except Exception:  # noqa: BLE001
+                continue
+        return {"ok": False, "code": "NEXT_NOT_FOUND"}
+
+    # A blocking notice/confirmation dialog with its own Confirm control
+    # (e.g. the eVisa "DECLARATION COMPLETED" notice carrying the document code).
+    _NOTICE_JS = """() => {
+      for (const b of document.querySelectorAll('button, a[role="button"]')) {
+        if (b.offsetParent === null) continue;
+        const t = (b.innerText || '').trim().toLowerCase();
+        if (t === 'confirm' || t === 'xác nhận' || t === 'xac nhan') {
+          const r = b.getBoundingClientRect();
+          return {present: true, x: r.left + r.width / 2, y: r.top + r.height / 2};
+        }
+      }
+      return {present: false};
+    }"""
+
+    def notice_state(self) -> dict:
+        """Is a Confirm-style notice on screen right now?"""
+        try:
+            res = self.page.evaluate(self._NOTICE_JS) or {}
+            return {"ok": True, "present": bool(res.get("present"))}
+        except Exception as e:  # noqa: BLE001
+            return {"ok": False, "code": "READ_ERROR", "detail": str(e)[:120]}
+
+    def confirm_notice(self) -> dict:
+        """Click the notice's Confirm — a routine acknowledgement the
+        applicant's flow explicitly continues through."""
+        try:
+            res = self.page.evaluate(self._NOTICE_JS) or {}
+            if not res.get("present"):
+                return {"ok": False, "code": "NO_NOTICE"}
+            self.page.mouse.click(res["x"], res["y"])
+            return {"ok": True}
+        except Exception as e:  # noqa: BLE001
+            return {"ok": False, "code": "CLICK_FAILED", "detail": str(e)[:120]}
+
+    def screenshot_png(self):
+        """Full-page PNG of the CURRENT page — used once, at submission, to
+        preserve the official confirmation exactly as the portal showed it."""
+        try:
+            return self.page.screenshot(full_page=True)
+        except Exception:  # noqa: BLE001
+            return None
+
+    # The same static challenge markers _CAPTCHA_JS observes, as locators.
+    _CAPTCHA_WIDGETS = ('img[src*="captcha" i]', '.g-recaptcha', '.h-captcha',
+                        '[id*="captcha" i]', '[class*="captcha" i]',
+                        'iframe[src*="recaptcha"]', 'iframe[src*="hcaptcha"]')
+
+    def captcha_screenshot_png(self):
+        """PNG of the challenge widget itself (e.g. the digits image), so the
+        applicant can read and solve it INSIDE Ellis. The image is shown, the
+        HUMAN solves — Ellis never interprets it."""
+        for sel in self._CAPTCHA_WIDGETS:
+            try:
+                loc = self.page.locator(f"{sel} >> visible=true").first
+                if loc.count() == 0:
+                    continue
+                return loc.screenshot(timeout=8000)
+            except Exception:  # noqa: BLE001
+                continue
+        return None
+
+    def apply_captcha_answer(self, answer: str) -> dict:
+        """Type the HUMAN's solved captcha answer into the portal's own
+        captcha input — pure transcription of the applicant's solution
+        (identical in kind to the declaration tick and the OTP code path).
+        Ellis never reads, interprets, or solves the challenge itself. The
+        value never reaches an error message or checkpoint."""
+        for sel in ('input[name*="captcha" i]', 'input[id*="captcha" i]',
+                    'input[placeholder*="captcha" i]'):
+            try:
+                loc = self.page.locator(f"{sel} >> visible=true").first
+                if loc.count() == 0:
+                    continue
+                loc.fill(str(answer), timeout=8000)
+                try:
+                    self.page.eval_on_selector(
+                        sel,
+                        "el => { el.dispatchEvent(new Event('change', {bubbles: true}));"
+                        " el.blur(); }")
+                except Exception:  # noqa: BLE001
+                    pass
+                return {"ok": True}
+            except Exception:  # noqa: BLE001 — code only, never the value
+                continue
+        return {"ok": False, "code": "CAPTCHA_INPUT_NOT_FOUND"}
+
+    def settle(self, ms: int = 700) -> None:
+        """Give the page a beat — framework validation (Ant explain-error)
+        renders asynchronously after a refused click; reading too early sees
+        a clean page and mistakes a silent refusal for success."""
+        try:
+            self.page.wait_for_timeout(int(ms))
+        except Exception:  # noqa: BLE001
+            pass
+
     def current_url(self) -> dict:
         try:
             return {"ok": True, "url": str(self.page.url or "")}
@@ -240,13 +933,26 @@ class BrowserbasePageDriver:
     def force_click(self, selector: str) -> dict:
         """Last-resort click for a button an overlay intercepts: dispatch the
         event on the element itself. Reversible navigation only — the runtime
-        never routes an irreversible node here."""
+        never routes an irreversible node here.
+
+        force=True bypasses Playwright's actionability checks — INCLUDING
+        'enabled' — and eval click() ignores them entirely. Neither may be
+        aimed at a DISABLED control: that reports a successful click on a
+        button which cannot act, and the run proceeds believing the page
+        advanced when it never moved."""
         try:
             loc = self.page.locator(f"{selector} >> visible=true").first
-            loc.click(timeout=8000, force=True)
+            if loc.is_disabled(timeout=_ACT_MS):
+                return {"ok": False, "code": "DISABLED"}
+        except Exception:  # noqa: BLE001 — unreadable: let the click judge
+            loc = self.page.locator(f"{selector} >> visible=true").first
+        try:
+            loc.click(timeout=_CLICK_MS, force=True)
             return {"ok": True, "method": "force"}
         except Exception:  # noqa: BLE001
             try:
+                if self.page.eval_on_selector(selector, "el => !!el.disabled"):
+                    return {"ok": False, "code": "DISABLED"}
                 self.page.eval_on_selector(selector, "el => el.click()")
                 return {"ok": True, "method": "dispatch"}
             except Exception as e2:  # noqa: BLE001
@@ -277,16 +983,153 @@ class BrowserbasePageDriver:
         except Exception as e:  # noqa: BLE001
             return {"ok": False, "code": "READ_ERROR", "detail": str(e)[:120]}
 
+    # The VISUAL/framework truth of a checkbox — never just the input's DOM
+    # property. page.check can set input.checked=true while the framework
+    # model (which paints the box and validates the form) stays unchecked:
+    # reading input.checked back is circular and reported false success.
+    # Wrapper class ('…-checked' / 'is-checked') or aria-checked is the state
+    # the PAGE actually renders; input.checked counts only for plain native
+    # checkboxes with no framework wrapper.
+    # Evaluated against a RESOLVED element (locator.evaluate), never against a
+    # selector string: flow selectors use Playwright syntax (':visible',
+    # '>> nth=0') that document.querySelector cannot parse — passing one here
+    # threw and read as "element missing" on a page that plainly had it.
+    _CHECKBOX_STATE_JS = """(el) => {
+      if (!el) return null;
+      // ANCESTORS ONLY. An Ant input's own class is 'ant-checkbox-input',
+      // so closest() from the element matches the INPUT — we would then read
+      // the input's class as if it were the framework wrapper's and never
+      // see 'ant-checkbox-checked'. Start the search at the parent.
+      const wrap = el.parentElement ? el.parentElement.closest(
+        '[class*="checkbox"], [class*="form-check"], [role="checkbox"]') : null;
+      const ariaEl = (wrap && wrap.getAttribute('aria-checked') !== null) ? wrap
+                     : (el.getAttribute('aria-checked') !== null ? el : null);
+      // RAW signals — the caller decides. A framework widget shows truth in
+      // the wrapper class/aria; a plain native checkbox shows it in .checked.
+      const signals = {
+        input: !!el.checked,
+        wrapChecked: wrap ? /checked/i.test(wrap.className || '') : null,
+        aria: ariaEl ? ariaEl.getAttribute('aria-checked') === 'true' : null,
+      };
+      // Where a HUMAN would click: the visible wrapper/label, else the input.
+      const clickEl = (wrap && wrap.offsetParent !== null) ? wrap
+        : (el.closest('label') && el.closest('label').offsetParent !== null)
+          ? el.closest('label')
+          : (el.offsetParent !== null ? el : null);
+      const r = clickEl ? clickEl.getBoundingClientRect() : null;
+      return { ...signals,
+               clickX: r ? r.left + Math.min(14, r.width / 2) : null,
+               clickY: r ? r.top + r.height / 2 : null };
+    }"""
+
+    def _checkbox_state(self, selector: str):
+        """Resolve the selector through Playwright's OWN engine (it understands
+        ':visible' / '>> nth=' flow selectors), then read the raw signals off
+        the resolved element."""
+        try:
+            loc = self.page.locator(selector).first
+            if loc.count() == 0:
+                return None
+            return loc.evaluate(self._CHECKBOX_STATE_JS)
+        except Exception:  # noqa: BLE001
+            return None
+
+    @staticmethod
+    def _checkbox_committed_strict(state) -> bool:
+        """Did the FRAMEWORK register the tick? When a framework wrapper is
+        present, only its own state counts — a raw click can set the hidden
+        input's .checked while React never runs its handler, leaving the box
+        visually empty and the page's Next disabled (observed on evisa).
+        A plain native checkbox has no wrapper: its .checked is the truth."""
+        if not state:
+            return False
+        if state.get("aria") is not None:
+            return bool(state.get("aria"))
+        if state.get("wrapChecked") is not None:
+            return bool(state.get("wrapChecked"))
+        return bool(state.get("input"))
+
+    @staticmethod
+    def _checkbox_committed(state) -> bool:
+        """ANY rendered-or-native checked signal counts. The union is safe
+        because commits happen via HUMAN-equivalent clicks first: a real click
+        that flips any signal is exactly what the applicant's own click does.
+        (The old failure modes: trusting input.checked after a PROGRAMMATIC
+        page.check — false positive on framework widgets; trusting only the
+        wrapper class — false negative on native boxes inside a
+        'checkbox'-classed wrapper.)"""
+        if not state:
+            return False
+        return bool(state.get("aria") or state.get("wrapChecked") or state.get("input"))
+
+    def _commit_checkbox(self, selector: str) -> dict:
+        """Tick a checkbox the way a HUMAN does. WAITS for the element first
+        (entry-gate dialogs render late — an instant querySelector miss must
+        not fail the node), then: real mouse click on the visible widget →
+        verify → page.check fallback → verify. Only a verified CHECKED state
+        is success."""
+        try:
+            # Locator wait (not page.wait_for_selector): the same engine that
+            # will resolve the selector for the click and the state read.
+            self.page.locator(selector).first.wait_for(state="attached", timeout=_WAIT_MS)
+        except Exception:  # noqa: BLE001
+            return {"ok": False, "code": "NO_SUCH_ELEMENT"}
+        state = self._checkbox_state(selector)
+        if state is None:
+            return {"ok": False, "code": "NO_SUCH_ELEMENT"}
+        if self._checkbox_committed_strict(state):
+            return {"ok": True, "already": True}
+        base = self.page.locator(selector).first
+        # Click targets a HUMAN would use, in order. A framework checkbox is
+        # driven by its label/wrapper: a real Playwright click there fires the
+        # React handler that actually commits the value. Raw coordinate clicks
+        # can flip the hidden input without the framework ever noticing.
+        targets = [
+            ("label", base.locator("xpath=ancestor::label[1]")),
+            ("wrapper", base.locator("xpath=ancestor::*[contains(@class,'checkbox')][1]")),
+            ("input", base),
+        ]
+        for name, loc in targets:
+            try:
+                if loc.count() == 0:
+                    continue
+                # A label embedding a link ('read the <a>terms</a>…') can
+                # swallow the center-point click and navigate the live session
+                # off the form — drive the wrapper/input targets instead.
+                if name == "label" and loc.first.locator("a").count() > 0:
+                    continue
+                loc.first.click(timeout=_ACT_MS)
+            except Exception:  # noqa: BLE001 — try the next target
+                continue
+            self.settle(250)
+            if self._checkbox_committed_strict(self._checkbox_state(selector)):
+                return {"ok": True, "method": f"click_{name}"}
+        # Playwright's own check() — actionability-aware, handles plain inputs.
+        try:
+            self.page.check(selector, timeout=_ACT_MS)
+        except Exception:  # noqa: BLE001
+            pass
+        self.settle(250)
+        if self._checkbox_committed_strict(self._checkbox_state(selector)):
+            return {"ok": True, "method": "check"}
+        # Last resort: dispatch a native click on the element itself.
+        try:
+            base.evaluate("el => el.click()")
+        except Exception:  # noqa: BLE001
+            pass
+        self.settle(250)
+        if self._checkbox_committed_strict(self._checkbox_state(selector)):
+            return {"ok": True, "method": "dispatch"}
+        return {"ok": False, "code": "CHECK_NOT_COMMITTED"}
+
     def check(self, selector: str) -> dict:
-        """Real checkbox tick. Refuses anything resembling a sensitive control
-        (final declarations are APPLICANT_HANDOFF nodes, never automated)."""
+        """Real checkbox tick, verified against the state the page RENDERS
+        (wrapper class / aria-checked), not the input property page.check
+        mutates — a framework widget that ignores the hidden input's DOM flag
+        must never read as ticked when its box is visually empty."""
         if _SENSITIVE_SELECTOR.search(selector or ""):
             return {"ok": False, "code": "SENSITIVE_FIELD_AUTOMATION"}
-        try:
-            self.page.check(selector, timeout=15000)
-            return {"ok": True}
-        except Exception as e:  # noqa: BLE001
-            return {"ok": False, "code": "NO_SUCH_ELEMENT", "detail": str(e)[:120]}
+        return self._commit_checkbox(selector)
 
     def select_search(self, selector: str, value: str) -> dict:
         """Search-combobox selection (verified live against Ant Design selects):
@@ -304,7 +1147,7 @@ class BrowserbasePageDriver:
                 self.page.wait_for_timeout(150)
             except Exception:  # noqa: BLE001
                 pass
-            self.page.locator(f"{selector} >> visible=true").first.click(timeout=15000)
+            self.page.locator(f"{selector} >> visible=true").first.click(timeout=_CLICK_MS)
             try:  # clear any previous query so filters start clean
                 self.page.keyboard.press("Control+A")
                 self.page.keyboard.press("Delete")
@@ -340,8 +1183,8 @@ class BrowserbasePageDriver:
               return {chosen: hit[1]};
             }"""
             result = {}
-            for _ in range(16):     # ~4s: filtered lists render in a tick or two
-                self.page.wait_for_timeout(250)
+            for _ in range(14):     # ~2.5s: filtered lists render in a tick or two
+                self.page.wait_for_timeout(180)
                 result = self.page.evaluate(pick_js, want) or {}
                 if result.get("chosen") or len(result.get("labels") or []) > 1:
                     break
@@ -354,7 +1197,7 @@ class BrowserbasePageDriver:
                 return {"ok": False, "code": "NO_OPTIONS", "options": labels,
                         "detail": (f"{len(labels)} options, none match {want[:30]!r}"
                                    if labels else f"no option matches {want[:40]!r}")}
-            self.page.wait_for_timeout(400)
+            self.page.wait_for_timeout(250)
             shown = ""
             try:
                 shown = self.page.eval_on_selector(
@@ -413,23 +1256,23 @@ class BrowserbasePageDriver:
                 self.page.wait_for_timeout(120)
             except Exception:  # noqa: BLE001
                 pass
-            self.page.locator(f"{selector} >> visible=true").first.click(timeout=15000)
+            self.page.locator(f"{selector} >> visible=true").first.click(timeout=_CLICK_MS)
             labels: list = []
-            for _ in range(12):     # ~3s: options usually render in one tick
-                self.page.wait_for_timeout(250)
+            for _ in range(10):     # ~1.8s: options usually render in one tick
+                self.page.wait_for_timeout(180)
                 labels = self.page.evaluate(read_js, max_options) or []
                 if len(labels) > 1:
                     break
             seen = list(labels)
             barren = 0
-            for _ in range(40):
+            for _ in range(12):   # bounded: 60 options is plenty to choose from
                 try:
                     moved = bool(self.page.evaluate(scroll_js))
                 except Exception:  # noqa: BLE001
                     break
                 if not moved:
                     break
-                self.page.wait_for_timeout(80)
+                self.page.wait_for_timeout(60)
                 more = self.page.evaluate(read_js, max_options) or []
                 fresh = [t for t in more if t not in set(seen)]
                 if fresh:

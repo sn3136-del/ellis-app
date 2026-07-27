@@ -239,21 +239,39 @@ class LiveBrowserSession:
             raise RuntimeError(f"entry gate refused: CLICK target {selector!r} "
                                f"is a form input")
 
+    # Applied to a RESOLVED element, never to a selector string: entry-gate
+    # selectors are Playwright syntax (':visible', '>> nth=N', ':has-text()')
+    # which document.querySelectorAll cannot parse.
+    _SCROLL_ONE_JS = """(t) => {
+         if (!t) return;
+         t.scrollTop = t.scrollHeight;
+         t.dispatchEvent(new Event('scroll', {bubbles: true}));
+       }"""
+
     @staticmethod
     def _scroll_container_to_bottom(page, selector: str):
         """Set scrollTop to max on every matching container (window when the
         selector is empty) and dispatch a scroll event — SPAs enable their
-        'Next' button on the scroll event, not on scrollTop alone."""
-        page.evaluate(
-            """(sel) => {
-                 const targets = sel ? Array.from(document.querySelectorAll(sel))
-                                     : [document.scrollingElement];
-                 for (const t of targets) {
-                   if (!t) continue;
-                   t.scrollTop = t.scrollHeight;
-                   t.dispatchEvent(new Event('scroll', {bubbles: true}));
-                 }
-               }""", selector or "")
+        'Next' button on the scroll event, not on scrollTop alone.
+
+        Resolution goes through Playwright's selector engine so a declared
+        entry-gate selector behaves identically here and at runtime (the
+        runtime path uses eval_on_selector_all)."""
+        if not selector:
+            page.evaluate(
+                """() => {
+                     const t = document.scrollingElement;
+                     if (!t) return;
+                     t.scrollTop = t.scrollHeight;
+                     t.dispatchEvent(new Event('scroll', {bubbles: true}));
+                   }""")
+            return
+        loc = page.locator(selector)
+        for i in range(min(loc.count(), 20)):
+            try:
+                loc.nth(i).evaluate(LiveBrowserSession._SCROLL_ONE_JS)
+            except Exception:  # noqa: BLE001 — one container never blocks the rest
+                continue
 
     def observe_with_entry_gate(self, base_url: str, entry_gate: dict) -> dict:
         """Replay a DECLARED entry gate from base_url and observe the
@@ -313,16 +331,24 @@ class LiveBrowserSession:
                 if ready:
                     page.wait_for_selector(ready, state="attached", timeout=90000)
                 if count_sel and count_min:
-                    page.wait_for_function(
-                        "([sel, n]) => document.querySelectorAll(sel).length >= n",
-                        arg=[count_sel, count_min], timeout=60000)
+                    # Poll through Playwright's engine — a declared selector
+                    # with ':visible'/'>> nth=' must count here exactly as it
+                    # does everywhere else, not SyntaxError in a CSS parser.
+                    deadline = 60.0
+                    while True:
+                        if page.locator(count_sel).count() >= count_min:
+                            break
+                        if deadline <= 0:
+                            raise TimeoutError(
+                                f"form_ready_all: fewer than {count_min} matches")
+                        page.wait_for_timeout(500)
+                        deadline -= 0.5
                 elif not ready:
                     page.wait_for_load_state("networkidle", timeout=30000)
             except Exception as e:  # noqa: BLE001 — honest, diagnosable failure
                 probe = count_sel or ready or "*"
                 try:
-                    have = page.evaluate(
-                        "(sel) => document.querySelectorAll(sel).length", probe)
+                    have = page.locator(probe).count()
                 except Exception:  # noqa: BLE001
                     have = -1
                 return {"ok": False, "status": status, "url": page.url,

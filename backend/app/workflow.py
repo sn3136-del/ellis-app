@@ -63,8 +63,10 @@ class VisaWorkflow:
             self.inputs = snap.get("inputs", self._fresh_inputs())
             for k in ("credential_ref", "session_ref", "application_id", "receipt",
                       "appointment", "confirmation", "reschedules", "fee", "target_slot",
-                      "_captcha_return_state", "_awaiting_payment_result"):
+                      "_captcha_return_state", "_awaiting_payment_result",
+                      "_page_field_map", "_page_declaration", "_page_refresh_uploads"):
                 setattr(self, k, snap.get(k))
+            self._declaration_attempts = snap.get("_declaration_attempts", 0) or 0
             self.payment_authorization = snap.get("payment_authorization")
             # Searched slots must survive the reload between signals, else the
             # APPOINTMENT_AVAILABLE step sees an empty list after select/book and
@@ -81,12 +83,17 @@ class VisaWorkflow:
             self.pending = None
             self.payment_authorization = None
             self._awaiting_payment_result = None
+            self._page_field_map = None
+            self._page_declaration = None
+            self._page_refresh_uploads = None
+            self._declaration_attempts = 0
         self.artifacts = []
 
     def _fresh_inputs(self):
         return {"review_approved": False, "authorization_signed": False, "captcha_solved": False,
                 "email_verify_token": None, "payment_approved": False, "payment_completed": False,
-                "selected_slot_id": None, "reschedule_approved": False, "declaration_completed": False}
+                "selected_slot_id": None, "reschedule_approved": False, "declaration_completed": False,
+                "payment_details_provided": False, "payment_manual": False}
 
     # ---- persistence ----
     def snapshot(self) -> dict:
@@ -98,7 +105,11 @@ class VisaWorkflow:
                 "last_slots": getattr(self, "_last_slots", []),
                 "payment_authorization": getattr(self, "payment_authorization", None),
                 "_captcha_return_state": getattr(self, "_captcha_return_state", None),
-                "_awaiting_payment_result": getattr(self, "_awaiting_payment_result", None)}
+                "_awaiting_payment_result": getattr(self, "_awaiting_payment_result", None),
+                "_page_field_map": getattr(self, "_page_field_map", None),
+                "_page_declaration": getattr(self, "_page_declaration", None),
+                "_page_refresh_uploads": getattr(self, "_page_refresh_uploads", None),
+                "_declaration_attempts": getattr(self, "_declaration_attempts", 0)}
 
     def status(self) -> dict:
         return {"case_id": self.case_id, "state": self.machine.state, "pending": self.pending,
@@ -120,10 +131,53 @@ class VisaWorkflow:
             self._captcha_return_state = return_state
             return self.machine.transition("CAPTCHA_ACTION_REQUIRED", "portal CAPTCHA")
         if code == "ADDITIONAL_INFORMATION_REQUIRED":
+            # Fresh questions mean the page moved on — a prior declaration
+            # struggle (if any) is behind us; reset its attempt counter.
+            self._declaration_attempts = 0
+            # Page-observed questions carry a server-side selector map so the
+            # answers can be filled back onto the live page. It rides the
+            # snapshot, NEVER the applicant-facing pending payload.
+            if res.get("page_field_map"):
+                self._page_field_map = res["page_field_map"]
+            if res.get("declaration_map"):
+                self._page_declaration = res["declaration_map"]
+            questions = res.get("questions") or []
+            # A document ask (the portal rejected a photo): once the applicant
+            # re-uploads, the next drive re-runs the flow's upload nodes so
+            # the NEW file reaches the official form.
+            if any(str(q.get("kind")) == "document"
+                   or str(q.get("key", "")).startswith("document:")
+                   for q in questions):
+                self._page_refresh_uploads = True
             return self._pause("Additional information required",
                                "additional_information",
-                               questions=res.get("questions") or [])
+                               questions=questions)
         if code == "APPLICANT_ACTION_REQUIRED":
+            if (res.get("handoff") or "") == "personal_declaration":
+                # The declaration is still on the page. If Ellis has already
+                # tried and failed to tick it repeatedly (a custom widget it
+                # cannot operate), stop looping the applicant through the same
+                # ask — hand it to the secure window honestly.
+                if getattr(self, "_declaration_attempts", 0) >= 2:
+                    self._page_declaration = None
+                    self._declaration_attempts = 0
+                    self._emit("declaration_transcription_gave_up", {})
+                    return self._pause(
+                        "Please tick the declaration yourself in the secure "
+                        "window, then continue.",
+                        "portal_form",
+                        portal_messages=res.get("portal_messages")
+                        or ["Complete the declaration on the official form."])
+                if res.get("declaration_map"):
+                    self._page_declaration = res["declaration_map"]
+                return self._pause(
+                    "Make the official form's declaration — Ellis marks your "
+                    "recorded declaration on the form and continues.",
+                    "personal_declaration",
+                    **({"portal_messages": res["portal_messages"]}
+                       if res.get("portal_messages") else {}))
+            if res.get("declaration_map"):
+                self._page_declaration = res["declaration_map"]
             return self._pause("This step needs you in the secure portal window.",
                                res.get("handoff") or "identity",
                                **({"portal_messages": res["portal_messages"]}
@@ -132,6 +186,23 @@ class VisaWorkflow:
             return self.machine.transition("MANUAL_REVIEW_REQUIRED",
                                            "outcome uncertain — human check required")
         return None
+
+    def _pause_captcha(self, reason, retry=False):
+        """A captcha pause carries captures of the challenge widget and the
+        full current page (the portal's own review of the application), so
+        the applicant can read, verify, and solve WITHOUT leaving Ellis. The
+        captures are stored as case documents; only their opaque ids ride the
+        pending payload. retry=True marks a rejected code — the captures are
+        re-taken so the applicant sees the portal's FRESH challenge."""
+        extra = {"captcha_retry": True} if retry else {}
+        ctx = getattr(self.adapter.driver, "captcha_context", None)
+        if ctx is not None:
+            try:
+                extra.update({k: v for k, v in (ctx() or {}).items()
+                              if k in ("captcha_document_id", "review_document_id")})
+            except Exception:  # noqa: BLE001 — captures are best-effort
+                pass
+        return self._pause(reason, "captcha", **extra)
 
     def _pause(self, reason, handoff, **extra):
         lv = None
@@ -158,10 +229,20 @@ class VisaWorkflow:
         self._emit("authorization_signed", {"mode": self.authorization.get("mode", "in_app_authorization")})
         return self._drive()
 
-    def solve_captcha(self):
+    def solve_captcha(self, token=None):
+        """token: the HUMAN's typed captcha solution (optional). Transported
+        like an OTP (vault reference, revealed once); Ellis transcribes it
+        into the portal's own input and never lets it persist anywhere."""
         self.inputs["captcha_solved"] = True
+        if token:
+            self.inputs["captcha_answer"] = str(token)
         self._emit("captcha_solved_by_applicant")
-        return self._drive()
+        try:
+            return self._drive()
+        finally:
+            # One-time value: whatever path the drive took, it is gone before
+            # the snapshot persists.
+            self.inputs["captcha_answer"] = None
 
     def provide_information(self, answers=None):
         """Dynamic missing-information answers (Part 4). The answers were
@@ -185,6 +266,14 @@ class VisaWorkflow:
             self.inputs["email_verify_token"] = None
 
     def approve_payment(self, amount_cents=None, currency=None):
+        # State guard: a fee approval is only meaningful at the fee/approval
+        # step. If the pause was reclassified away (the live page really showed
+        # questions / a declaration / a CAPTCHA, so we rewound to fee
+        # discovery), a stale "confirm the fee" click must NOT set a fee or
+        # re-walk the portal — surface the real current pause instead.
+        if self.machine.state != "PAYMENT_APPROVAL_REQUIRED":
+            self._emit("stale_fee_approval_ignored", {"state": self.machine.state})
+            return self.status()
         # Portal displayed no machine-readable fee (fee_confirmation pause):
         # the applicant confirms the EXACT amount + currency the official
         # portal shows in the secure window. Ellis never invents an amount.
@@ -239,10 +328,22 @@ class VisaWorkflow:
     def _void_payment_authorization(self, why: str):
         self.inputs["payment_approved"] = False
         self.payment_authorization = None
+        # A voided approval restarts the payment conversation: any earlier
+        # "details are filled in" claim is stale (the portal page will be
+        # rebuilt/re-walked), so the card ask must be offered afresh.
+        self._reset_payment_details("payment authorization voided")
         if self.payments_hook and self.fee:
             self.payments_hook("invalidated", {"amount_cents": self.fee["amount"],
                                                "currency": self.fee["currency"]})
         self._emit("payment_authorization_invalidated", {"reason": why[:120]})
+
+    def _reset_payment_details(self, why: str):
+        """Forget the fill/manual choice so the payment_credentials ask is
+        offered again — the values themselves were never retained anywhere."""
+        if self.inputs.get("payment_details_provided") or self.inputs.get("payment_manual"):
+            self.inputs["payment_details_provided"] = False
+            self.inputs["payment_manual"] = False
+            self._emit("payment_details_reset", {"reason": why[:120]})
 
     def _consume_payment_authorization(self):
         pa = getattr(self, "payment_authorization", None)
@@ -254,6 +355,58 @@ class VisaWorkflow:
     def complete_payment(self):
         self.inputs["payment_completed"] = True
         self._emit("payment_completed_by_applicant")
+        return self._drive()
+
+    def _payment_fill_available(self) -> bool:
+        """Ellis may offer to fill payment details only when the driver
+        supports it AND its own release/authorization gates pass (a driver
+        without the checker — unit fakes — is trusted as-is)."""
+        driver = self.adapter.driver
+        if getattr(driver, "fill_payment_details", None) is None:
+            return False
+        checker = getattr(driver, "payment_fill_allowed", None)
+        try:
+            return checker is None or bool(checker())
+        except Exception:  # noqa: BLE001 — any doubt fails closed
+            return False
+
+    def provide_payment_details(self, card=None, manual=False):
+        """The applicant's own payment details, provided explicitly so Ellis
+        fills them on the OFFICIAL portal's payment form. Transport is a
+        one-time vault reference (like OTP tokens); the values are used once
+        here and never stored, snapshotted, audited, or logged. Ellis never
+        clicks Pay — the filled page is confirmed by the applicant in the
+        secure window. manual=True: the applicant chose to type the details
+        into the portal window personally instead. Re-invokable from the
+        payment pause (e.g. after a session loss emptied the rebuilt page or
+        a declined attempt): a successful re-fill clears any earlier manual
+        latch."""
+        self.pending = None
+        if manual or not card or not self._payment_fill_available():
+            self.inputs["payment_manual"] = True
+            self._emit("payment_manual_entry_chosen",
+                       {"reason": "applicant choice" if manual or not card
+                        else "portal fill unavailable on this route"})
+            return self._drive()
+        filler = getattr(self.adapter.driver, "fill_payment_details", None)
+        try:
+            res = filler(card=card) or {}
+        except Exception:  # noqa: BLE001 — never let a value near an error path
+            res = {"ok": False, "code": "PAYMENT_FILL_ERROR"}
+        finally:
+            card = None
+        if res.get("ok"):
+            self.inputs["payment_details_provided"] = True
+            self.inputs["payment_manual"] = False
+            self._emit("payment_details_filled_on_portal",
+                       {"fields": list(res.get("filled") or [])})
+        else:
+            # Honest fallback: the portal's payment form was not fillable —
+            # the applicant completes it personally in the secure window.
+            self.inputs["payment_details_provided"] = False
+            self.inputs["payment_manual"] = True
+            self._emit("payment_fill_unavailable",
+                       {"code": str(res.get("code", ""))[:60]})
         return self._drive()
 
     def select_appointment(self, slot_id):
@@ -275,6 +428,91 @@ class VisaWorkflow:
         self._emit("cancelled", {"reason": reason})
         return self.status()
 
+    def _reclassify_fee_pause(self, blockers: dict) -> bool:
+        """A fee_confirmation pause recorded while the live page still shows a
+        CAPTCHA, unanswered form questions, or applicant-personal items is a
+        MISLABELED pause: swap it for the real ask. Rewinds
+        PAYMENT_APPROVAL_REQUIRED -> FEE_DISCOVERY_PENDING (reversible; no
+        portal action taken) so the resumed drive re-runs fee discovery once
+        the blocker clears. Returns True when a swap paused for the applicant,
+        "resume" when only skippable fields were blocking (caller should
+        _drive() — never prompt for optional fields), and False for no swap.
+        Guarded by the state machine's own legality checks — a pause recorded
+        at any other state is left untouched rather than forced through an
+        illegal edge."""
+        from .statemachine import can_transition
+        blockers = blockers or {}
+        if (self.pending or {}).get("handoff") != "fee_confirmation" or self.fee is not None:
+            return False
+        if not (blockers.get("captcha") or blockers.get("questions")
+                or blockers.get("declaration") or blockers.get("portal_messages")):
+            return False
+        if self.machine.state not in ("PAYMENT_APPROVAL_REQUIRED", "FEE_DISCOVERY_PENDING"):
+            return False
+        if self.machine.state == "PAYMENT_APPROVAL_REQUIRED":
+            self.machine.transition("FEE_DISCOVERY_PENDING",
+                                    "fee pause reclassified from the live page")
+        if blockers.get("captcha"):
+            if not can_transition(self.machine.state, "CAPTCHA_ACTION_REQUIRED"):
+                return False
+            self._captcha_return_state = self.machine.state
+            self.machine.transition("CAPTCHA_ACTION_REQUIRED", "portal CAPTCHA")
+            self._emit("fee_pause_reclassified", {"to": "captcha"})
+            self._pause_captcha("Complete the CAPTCHA. Ellis never solves it.")
+            return True
+        questions = blockers.get("questions") or []
+        mandatory_qs = [q for q in questions if q.get("mandatory")]
+        if mandatory_qs:
+            if blockers.get("page_field_map"):
+                self._page_field_map = blockers["page_field_map"]
+            if blockers.get("declaration_map"):
+                self._page_declaration = blockers["declaration_map"]
+            self._emit("fee_pause_reclassified",
+                       {"to": "additional_information",
+                        "questions": len(mandatory_qs)})
+            self._pause("The official form still needs a few answers.",
+                        "additional_information", questions=mandatory_qs)
+            return True
+        if blockers.get("declaration"):
+            # The form only awaits its own declaration: the applicant makes it
+            # verbatim in Ellis; Ellis transcribes the tick and clicks Next.
+            self._page_declaration = blockers.get("declaration_map") or {}
+            self._emit("fee_pause_reclassified", {"to": "personal_declaration"})
+            self._pause("Make the official form's declaration — Ellis marks your "
+                        "recorded declaration on the form and continues.",
+                        "personal_declaration",
+                        portal_messages=list(blockers["declaration"]))
+            return True
+        if questions:
+            # Only optional (unmarked) fields: never prompt — clear the wrong
+            # pause and RESUME the drive; fee discovery auto-advances and the
+            # portal's own validation asks precisely if something was needed.
+            if blockers.get("page_field_map"):
+                self._page_field_map = blockers["page_field_map"]
+            self.pending = None
+            self._emit("fee_pause_reclassified", {"to": "auto_advance"})
+            return "resume"
+        self._emit("fee_pause_reclassified", {"to": "portal_form"})
+        self._pause("This step needs you in the secure portal window.",
+                    "portal_form", portal_messages=blockers["portal_messages"])
+        return True
+
+    def _page_fill_values(self) -> list:
+        """Answers the applicant provided for PAGE-observed questions, joined
+        with the server-side selector map — what discover_fee fills back onto
+        the live page before retrying the advance."""
+        out = []
+        for key, spec in (getattr(self, "_page_field_map", None) or {}).items():
+            value = self.answers.get(key)
+            if value in ("", None) or not (spec or {}).get("selector"):
+                continue
+            entry = {"selector": spec["selector"],
+                     "kind": spec.get("kind", "text"), "value": str(value)}
+            if spec.get("format"):
+                entry["format"] = spec["format"]
+            out.append(entry)
+        return out
+
     def restore_portal(self):
         """Rebuild the applicant's live portal page after a session loss —
         the secure window must show the real form at its current step, not a
@@ -282,7 +520,9 @@ class VisaWorkflow:
         irreversible node); the workflow state and the recorded pause stay
         exactly as they were. When the restored page displays the fee and no
         fee is bound yet, the READ amount replaces the type-it-yourself pause
-        with an approve-this-exact-amount pause — read, never invented."""
+        with an approve-this-exact-amount pause — read, never invented. When
+        it instead shows a CAPTCHA or unanswered questions, the mislabeled
+        fee pause swaps to the real ask."""
         restore = getattr(self.adapter.driver, "restore_view", None)
         if restore is None:
             return self.status()
@@ -303,7 +543,12 @@ class VisaWorkflow:
                        {"amount": fee["amount"], "currency": fee["currency"]})
             self._pause(f"Approve the {fee['display']} fee.", "payment_approval",
                         fee=self.fee, fee_context=self.fee_context)
-        else:
+            return self.status()
+        swapped = self._reclassify_fee_pause(res.get("blockers") or {})
+        if swapped == "resume":
+            # Only skippable fields were blocking: keep moving automatically.
+            return self._drive()
+        if not swapped:
             self._emit("portal_view_restored", {})
         return self.status()
 
@@ -328,7 +573,12 @@ class VisaWorkflow:
                        {"amount": fee["amount"], "currency": fee["currency"]})
             self._pause(f"Approve the {fee['display']} fee.", "payment_approval",
                         fee=self.fee, fee_context=self.fee_context)
-        else:
+            return self.status()
+        swapped = self._reclassify_fee_pause((res or {}).get("blockers") or {})
+        if swapped == "resume":
+            # Only skippable fields were blocking: keep moving automatically.
+            return self._drive()
+        if not swapped:
             self._emit("fee_page_read_empty", {})
         return self.status()
 
@@ -442,12 +692,29 @@ class VisaWorkflow:
             m.transition("PORTAL_ACCOUNT_READY")
         elif st == "CAPTCHA_ACTION_REQUIRED":
             if not self.inputs["captcha_solved"]:
-                return self._pause("Complete the CAPTCHA. Ellis never solves it.", "captcha")
+                return self._pause_captcha("Complete the CAPTCHA. Ellis never solves it.")
+            answer = self.inputs.get("captcha_answer")
+            self.inputs["captcha_answer"] = None      # one-time, never snapshotted
+            # `answer` only travels when the applicant typed one in Ellis —
+            # classic drivers (mock portal) keep their strict signature.
             ok = d.submit_captcha(captcha_token=getattr(self, "_pending_captcha", None),
-                                  human_answer=browser.HUMAN_MARKERS["captcha"])
+                                  human_answer=browser.HUMAN_MARKERS["captcha"],
+                                  **({"answer": answer} if answer else {}))
             self.inputs["captcha_solved"] = False
             self.pending = None
             if not ok["ok"]:
+                if ok.get("code") == "CAPTCHA_WRONG":
+                    # The portal rejected the typed code: say so plainly and
+                    # show the FRESH challenge — never a silent dead end.
+                    self._emit("captcha_code_rejected", {})
+                    return self._pause_captcha(
+                        "The security code wasn't accepted — enter the new "
+                        "code shown.", retry=True)
+                if ok.get("code") == "CAPTCHA_STILL_PRESENT":
+                    # The live page still shows the challenge: re-ask honestly
+                    # instead of failing a step the applicant can complete.
+                    return self._pause_captcha("The CAPTCHA still appears unsolved — "
+                                               "solve it and send the code again.")
                 return m.transition("RECOVERABLE_FAILURE", "CAPTCHA_FAILED")
             # A CAPTCHA can appear mid-form (application filling) as well as at
             # account creation; return to wherever it interrupted.
@@ -517,13 +784,38 @@ class VisaWorkflow:
             m.transition("FEE_DISCOVERY_PENDING")
         elif st == "FEE_DISCOVERY_PENDING":
             token = vault.reveal(self.session_ref)
-            fee = d.discover_fee(session_token=token, application_id=self.application_id)
+            kwargs = {"session_token": token, "application_id": self.application_id}
+            # Answers to page-observed questions flow back onto the live page
+            # (Ellis fills and clicks Next) before fee discovery retries.
+            page_fill = self._page_fill_values()
+            if page_fill:
+                kwargs["page_fill"] = page_fill
+            # The applicant made the portal's declaration IN ELLIS: hand the
+            # recorded act to the driver ONCE for transcription onto the form.
+            if getattr(self, "_page_refresh_uploads", None):
+                kwargs["refresh_uploads"] = True
+                self._page_refresh_uploads = None
+            declaration = getattr(self, "_page_declaration", None)
+            if self.inputs.get("declaration_completed") and declaration:
+                kwargs["declaration_fill"] = declaration
+                self.inputs["declaration_completed"] = False
+                self._page_declaration = None
+                # Count the attempt: if the box still shows unticked after
+                # this pass, _portal_step_blocked routes to the secure window
+                # rather than re-asking forever.
+                self._declaration_attempts = getattr(self, "_declaration_attempts", 0) + 1
+                self._emit("declaration_transcribed_to_portal",
+                           {"label": str(declaration.get("label", ""))[:120],
+                            "attempt": self._declaration_attempts})
+            fee = d.discover_fee(**kwargs)
             if not fee["ok"]:
                 if fee.get("code") == "FEE_NOT_DISPLAYED":
-                    # The portal did not display a machine-readable fee. Never
-                    # invent one: the applicant confirms the exact fee shown in
-                    # the secure portal window at the approval step instead.
+                    # The boundary was reached, the live page shows no blocker
+                    # (discover_fee classified it) and no machine-readable fee.
+                    # Never invent one: the applicant confirms the exact fee
+                    # shown in the secure portal window at the approval step.
                     self.fee = None
+                    self._page_field_map = None
                     self._emit("fee_not_machine_readable", {})
                     return m.transition("PAYMENT_APPROVAL_REQUIRED",
                                         "fee to be confirmed by the applicant")
@@ -532,9 +824,24 @@ class VisaWorkflow:
                     return blocked
                 return m.transition("RECOVERABLE_FAILURE", "fee")
             self.fee = fee
+            self._page_field_map = None
+            self._page_declaration = None
+            self._declaration_attempts = 0
             self._emit("fee_discovered", {"amount": fee["amount"], "currency": fee["currency"]})
             m.transition("PAYMENT_APPROVAL_REQUIRED")
         elif st == "PAYMENT_APPROVAL_REQUIRED":
+            # Live routes: the applicant reviews and signs their COMPLETE
+            # application BEFORE any money moves — on e-visa portals the
+            # payment is effectively the submission, so §7's signed review
+            # must come first. (The §25 gate still re-verifies at SUBMITTING;
+            # a material change after signing re-opens the review there.)
+            if getattr(self.adapter, "channel", "") == "released_flow" \
+                    and self.submission_gate and not self.inputs["payment_approved"]:
+                ok, why = self.submission_gate()
+                if not ok:
+                    return self._pause(
+                        why or "Review and sign your complete application before payment.",
+                        "final_review")
             # An approval is valid only for the EXACT amount + currency shown.
             if self.inputs["payment_approved"] and not self._payment_authorization_matches_fee():
                 self._void_payment_authorization("fee changed since approval")
@@ -565,8 +872,29 @@ class VisaWorkflow:
                                amount_cents=self.fee["amount"], currency=self.fee["currency"],
                                applicant_approved=self.inputs["payment_approved"])
             if plan.mode == "applicant_window" and not self.inputs["payment_completed"]:
-                return self._pause("Complete the payment in the secure window. Ellis never sees your card.",
-                                   "payment", fee=self.fee)
+                # Routes whose driver can fill the portal's payment form first
+                # ask the applicant for their details IN ELLIS: Ellis enters
+                # them on the official page, the applicant reviews the filled
+                # page in the secure window and clicks the portal's own
+                # confirm — that final click is never automated. The fill path
+                # is additionally gated by the driver's own capability checks
+                # (payment_preparation release + standing authorization); a
+                # driver without the checker (unit fakes) is trusted as-is.
+                can_fill = self._payment_fill_available()
+                if can_fill and not self.inputs.get("payment_details_provided") \
+                        and not self.inputs.get("payment_manual"):
+                    return self._pause(
+                        "Provide your payment details and Ellis fills them on the "
+                        "official portal — you review and confirm the payment yourself.",
+                        "payment_credentials", fee=self.fee)
+                prefilled = bool(self.inputs.get("payment_details_provided"))
+                return self._pause(
+                    "Your payment details are filled in on the official portal — "
+                    "review them in the secure window and confirm the payment yourself."
+                    if prefilled else
+                    "Complete the payment in the secure window on the official portal.",
+                    "payment", fee=self.fee, payment_prefilled=prefilled,
+                    payment_fillable=can_fill)
             self.pending = None
             m.transition("PAYMENT_PROCESSING")
         elif st == "PAYMENT_PROCESSING":
@@ -606,6 +934,10 @@ class VisaWorkflow:
                 if reported == "Payment failed or was cancelled":
                     self._awaiting_payment_result = None
                     self.inputs["payment_completed"] = False
+                    # A declined/cancelled attempt clears the portal's form:
+                    # offer the card ask again (possibly a different card)
+                    # instead of claiming details are still filled in.
+                    self._reset_payment_details("applicant reported payment failure")
                     return m.transition("PAYMENT_ACTION_REQUIRED",
                                         "applicant reported payment failure")
                 self._awaiting_payment_result = True

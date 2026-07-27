@@ -63,18 +63,28 @@ c.post(f"/cases/{cid}/preferences", headers=AUTH, json={"prefs": {
 auth = c.post(f"/cases/{cid}/authorization", headers=AUTH,
               json={"max_fee_cents": 10000, "currency": "USD", "allow_auto_book": True}).json()
 
-# Ensure required answers present for the Mockland adapter.
+# Ensure required answers present for the Mockland adapter. The specimen MRZ
+# passport expired 2012-04-15 and step 4's approval copied that expiry_date
+# into the answers — correct it (as the applicant would after renewing) or
+# the validity gate 409s /start honestly and the demo cannot proceed.
 db = SessionLocal()
 app_row = db.get(models.VisaApplication, cid)
 app_row.answers = {**app_row.answers, "passport_number": "L898902C3", "nationality": "UTO",
-                   "birth_date": "740812"}
+                   "birth_date": "740812", "expiry_date": "2033-04-15",
+                   "passport_expiry": "2033-04-15"}
 db.commit(); db.close()
 
-# 5. Sign authorization (DocuSign or in-app fallback).
+# 5. Sign authorization (DocuSign or in-app fallback) + the §5 standing
+# authorization — submission is gated on both (§25).
+c.post(f"/cases/{cid}/standing-authorization", headers=AUTH, json={})
 show("Sign authorization", f"provider={auth['provider']} production_equivalent={auth['production_equivalent']}")
 
 # Start the durable workflow and walk each human handoff via the API.
-status = c.post(f"/cases/{cid}/start", headers=AUTH).json()
+r = c.post(f"/cases/{cid}/start", headers=AUTH)
+status = r.json()
+if "state" not in status:
+    # An honest gate refusal (409 detail) must read as such, not a KeyError.
+    raise SystemExit(f"start refused ({r.status_code}): {status.get('detail')}")
 
 
 def latest_token():
@@ -111,6 +121,31 @@ for _ in range(40):
                         json={"token": latest_token()}).json()
     elif h == "payment_approval":
         status = c.post(f"/cases/{cid}/signals/approve_payment", headers=AUTH).json()
+    elif h == "additional_information":
+        # The portal asked mid-flight questions: answer each one honestly-
+        # shaped (first real option / a valid date / a placeholder) so the
+        # walker never stalls on the new pause kinds.
+        answers = {}
+        for q in pend.get("questions") or []:
+            key = str(q.get("key", ""))
+            if not key or key.startswith("document:") or q.get("kind") == "document":
+                continue
+            if not q.get("mandatory", True):
+                continue
+            if q.get("options"):
+                answers[key] = str(q["options"][0])
+            elif q.get("kind") == "date":
+                answers[key] = "01/01/2030"
+            else:
+                answers[key] = "Demo answer"
+        if not answers:
+            break
+        status = c.post(f"/cases/{cid}/signals/provide_information", headers=AUTH,
+                        json={"answers": answers}).json()
+    elif h == "payment_credentials":
+        # Demo chooses the applicant-types-it-personally path — no card data.
+        status = c.post(f"/cases/{cid}/signals/provide_payment_details", headers=AUTH,
+                        json={"manual": True}).json()
     elif h == "payment":
         if "pay" not in seen:
             show("Applicant-controlled payment", f"{pend['fee']['display']} in the secure window "
@@ -126,6 +161,18 @@ for _ in range(40):
             show("Final applicant declaration", "applicant personally declares (Ellis never clicks it)")
             seen.add("decl")
         status = c.post(f"/cases/{cid}/signals/complete_declaration", headers=AUTH).json()
+    elif h == "final_review":
+        # §7: review + sign the EXACT final version over the API, then re-drive.
+        rv = c.post(f"/cases/{cid}/final-review", headers=AUTH).json()
+        c.post(f"/cases/{cid}/final-review/sign", headers=AUTH, json={
+            "review_version_id": rv["id"], "content_hash": rv["content_hash"],
+            "consent_given": True, "intent_confirmed": True,
+            "signature_method": "typed", "signature_value": "Anna Eriksson",
+            "step_up_token": rv["step_up_token"]})
+        if "final" not in seen:
+            show("Final review signed", f"version={rv['version']} hash={rv['content_hash'][:12]}…")
+            seen.add("final")
+        status = c.post(f"/cases/{cid}/start", headers=AUTH).json()
     else:
         break
 

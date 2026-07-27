@@ -27,6 +27,13 @@ class RuntimeRefused(Exception):
     """Fail-closed refusal: unreleased version, kill switch, scope breach."""
 
 
+# The honest DISABLED-advance failure. A stable marker: released_flow routes
+# this specific reason into page classification (fields the flow has no nodes
+# for can complete the form) instead of surfacing it as a dead failure.
+FORM_INCOMPLETE_REASON = ("the portal's Next button is still disabled — "
+                          "the form is not complete")
+
+
 _FEE_RE = None
 
 
@@ -97,6 +104,8 @@ class FlowRunner:
         self._portal_field_messages: dict[str, str] = {}
         # One silent repair pass per run: refill fields the portal dropped.
         self._repair_attempted = False
+        # One declaration-tick pass per run when an advance is disabled.
+        self._declaration_ticked_nodes = set()
         # Optional applicant-safe progress recorder: called with the node's
         # semantic step (never a selector) before and after each node.
         self.on_progress = on_progress
@@ -106,7 +115,16 @@ class FlowRunner:
             return
         try:
             from .. import progress as progress_vocab
-            self.on_progress(progress_vocab.step_for_node(node), status)
+            step = progress_vocab.step_for_node(node)
+            # A handoff node being ENTERED (probe) or STEPPED PAST (no
+            # challenge present) is Ellis checking whether the applicant is
+            # really needed — a "Waiting for you to …" message there (or as
+            # "last completed") tells the applicant to act on nothing. The
+            # waiting_* key is honest only when the pause actually happens.
+            if status != "handoff" and step.startswith("waiting_") and \
+                    node.get("action") in ("APPLICANT_HANDOFF", "PAUSE"):
+                step = "checking_form"
+            self.on_progress(step, status)
         except Exception:  # noqa: BLE001 — progress must never break the flow
             pass
 
@@ -208,6 +226,51 @@ class FlowRunner:
                 if res.get("ok"):
                     break
                 code = res.get("code")
+                if code == "DISABLED":
+                    # The portal keeps its advance button disabled until the
+                    # form satisfies it. The overwhelmingly common reason on
+                    # e-visa forms: an unticked declaration box — tick every
+                    # one (verified) and retry THIS declared click, once,
+                    # INLINE (a `continue` would die with the attempts loop).
+                    # Guarded PER NODE, burned only by a pass that actually
+                    # ticked something: a portal family with declaration boxes
+                    # on two different pages gets the fast path on each, and
+                    # an empty/failed find doesn't consume the one chance.
+                    _ticked_nodes = getattr(self, "_declaration_ticked_nodes", set())
+                    if node["node_id"] not in _ticked_nodes:
+                        ticker = getattr(self.driver, "tick_declarations", None)
+                        try:
+                            ticked = ticker() if ticker is not None else 0
+                        except Exception:  # noqa: BLE001
+                            ticked = 0
+                        if ticked:
+                            self._declaration_ticked_nodes = _ticked_nodes | {node["node_id"]}
+                            res = self.driver.click(node["selector"])
+                            if res.get("ok"):
+                                break
+                            # The re-click's failure is the truth now: a
+                            # TIMEOUT here must reach the TIMEOUT recovery
+                            # below, not be reported as "still disabled".
+                            code = res.get("code")
+                    if code == "DISABLED" and not self._repair_attempted:
+                        self._repair_attempted = True
+                        if self._repair_flagged_fields():
+                            # Re-click INLINE — the attempts loop may already
+                            # be spent, and exhausting it after a clean repair
+                            # lets the post-loop check report a phantom ok.
+                            res = self.driver.click(node["selector"])
+                            if res.get("ok"):
+                                break
+                            code = res.get("code")
+                    if code == "DISABLED":
+                        # A REAL blocker to explain — never a click to force
+                        # (forcing reports success on a button that cannot
+                        # act) and never an advance.
+                        blocked = self._portal_validation_questions(node)
+                        if blocked is not None:
+                            return blocked
+                        return {"status": "failed",
+                                "reason": FORM_INCOMPLETE_REASON}
                 if code == "TIMEOUT":
                     # A timeout on an irreversible action is genuine uncertainty.
                     if node.get("irreversibility") == "irreversible":
@@ -538,7 +601,19 @@ class FlowRunner:
         except Exception:  # noqa: BLE001
             return None
         if not (res.get("fields") or []):
-            return None
+            # Framework validation renders a beat AFTER the click: a clean
+            # immediate read can hide a silent refusal (the click "lands",
+            # the page stays, and the flow sails on believing it advanced).
+            settle = getattr(self.driver, "settle", None)
+            if settle is None:
+                return None
+            try:
+                settle(700)
+                res = reader() or {}
+            except Exception:  # noqa: BLE001
+                return None
+            if not (res.get("fields") or []):
+                return None
         if not self._repair_attempted:
             self._repair_attempted = True
             if self._repair_flagged_fields():
@@ -584,6 +659,38 @@ class FlowRunner:
                 return False
         return True
 
+    @staticmethod
+    def _selector_targets_field(selector: str, fid: str) -> bool:
+        """Does this node selector address the portal field the page flagged?
+        The portal reports a field by its id or name; a node may address it as
+        '#id', '[id="id"]', 'tag[name="name"]', with a ':visible' /
+        '>> nth=' qualifier, or by a longer path ending in that id. Matching on
+        the literal '#'+id alone silently loses every other form — and a lost
+        match means the applicant is never asked about a field the government
+        form is actively rejecting."""
+        import re as _re
+        sel = str(selector or "")
+        fid = str(fid or "").strip()
+        if not sel or not fid:
+            return False
+        esc = _re.escape(fid)
+        return bool(
+            _re.search(rf'#{esc}(?![\w-])', sel) or
+            _re.search(rf'\[\s*id\s*=\s*["\']?{esc}["\']?\s*\]', sel) or
+            _re.search(rf'\[\s*name\s*=\s*["\']?{esc}["\']?\s*\]', sel))
+
+    def _node_for_flagged_field(self, fid: str):
+        """The flow node that fills the portal-flagged field, or None."""
+        if not fid:
+            return None
+        for n in self.flow.nodes.values():
+            if n.get("action") not in ("FILL_NON_SENSITIVE", "SELECT_SEARCH",
+                                       "SELECT", "CHECK"):
+                continue
+            if self._selector_targets_field(n.get("selector") or "", fid):
+                return n
+        return None
+
     def _repair_flagged_fields(self) -> int:
         """Refill every portal-flagged field whose answer Ellis already holds
         and whose value the portal has actually lost. Reversible fills only —
@@ -599,11 +706,10 @@ class FlowRunner:
         fields = res.get("fields") or []
         if not fields:
             return 0
-        by_selector = {str(n.get("selector") or ""): n for n in self.flow.nodes.values()}
         repaired = 0
         for f in fields:
             fid = str(f.get("id") or "").strip()
-            n = by_selector.get(f"#{fid}") if fid else None
+            n = self._node_for_flagged_field(fid)
             if n is None or n.get("action") not in ("FILL_NON_SENSITIVE", "SELECT_SEARCH"):
                 continue
             value = self.answers.get(n.get("input_source", ""), "")
@@ -655,13 +761,11 @@ class FlowRunner:
         fields = res.get("fields") or []
         if not fields:
             return None
-        by_selector = {str(n.get("selector") or ""): n
-                       for n in self.flow.nodes.values()}
         flagged: list[str] = []
         unmapped_msgs: list[str] = []
         for f in fields:
             fid = str(f.get("id") or "").strip()
-            n = by_selector.get(f"#{fid}") if fid else None
+            n = self._node_for_flagged_field(fid)
             if n is None:
                 # A portal field the released flow has no node for (e.g. the
                 # form's own inline legal declaration, or an expenses section)

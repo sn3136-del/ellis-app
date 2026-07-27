@@ -83,6 +83,25 @@ def enqueue(db, *, app_row, signal_name: str, kwargs: dict | None = None,
         models.PortalRun.created_at.asc())).scalars().all()
     for run in active:
         if run.signal_name == signal_name:
+            if (kwargs or {}).get("card"):
+                # Payment details are NEVER silently deduped: a corrected card
+                # must replace a still-queued one (destroy the old reference,
+                # vault the new payload), and while the old one is already
+                # being typed the applicant gets an honest busy instead of a
+                # false "sent".
+                if run.status == "queued":
+                    import json as _json
+                    _destroy_token_ref(run)
+                    stored = vault.store(_json.dumps(kwargs["card"]),
+                                         {"kind": "one_time_payment_details"})
+                    new_kwargs = {k: v for k, v in (run.signal_kwargs or {}).items()
+                                  if k not in ("card_ref", "token_ref")}
+                    new_kwargs["card_ref"] = stored["ref"]
+                    run.signal_kwargs = new_kwargs
+                    db.commit()
+                    return run, False
+                raise CaseBusy("Ellis is still entering the details you just "
+                               "provided — try again in a moment.")
             return run, False
     if sum(1 for r in active if r.status == "queued") >= MAX_QUEUED_PER_CASE:
         raise CaseBusy("Ellis is still working on your previous action.")
@@ -92,6 +111,14 @@ def enqueue(db, *, app_row, signal_name: str, kwargs: dict | None = None,
     if kwargs.get("token"):
         stored = vault.store(str(kwargs.pop("token")), {"kind": "one_time_token"})
         kwargs["token_ref"] = stored["ref"]
+    # Payment details follow the same one-time hygiene: the card payload never
+    # persists in the queue row — only a vault reference, revealed exactly
+    # once by the executor and destroyed immediately.
+    if kwargs.get("card"):
+        import json as _json
+        stored = vault.store(_json.dumps(kwargs.pop("card")),
+                             {"kind": "one_time_payment_details"})
+        kwargs["card_ref"] = stored["ref"]
     run = models.PortalRun(org_id=app_row.org_id, application_id=app_row.id,
                            status="queued", signal_name=signal_name,
                            signal_kwargs=kwargs, allow_submit=bool(allow_submit),
@@ -120,13 +147,15 @@ def enqueue(db, *, app_row, signal_name: str, kwargs: dict | None = None,
 
 
 def _destroy_token_ref(run) -> None:
-    """One-time tokens must never outlive their run, whatever ends it."""
-    ref = (run.signal_kwargs or {}).get("token_ref")
-    if ref:
-        try:
-            vault.destroy(ref)
-        except Exception:  # noqa: BLE001
-            pass
+    """One-time secrets (tokens, payment details) must never outlive their
+    run, whatever ends it."""
+    for key in ("token_ref", "card_ref"):
+        ref = (run.signal_kwargs or {}).get(key)
+        if ref:
+            try:
+                vault.destroy(ref)
+            except Exception:  # noqa: BLE001
+                pass
 
 
 def cancel_queued(db, application_id: str) -> int:
@@ -240,7 +269,9 @@ def claim_next(db, worker_id: str) -> str | None:
 def expire_stale_leases(db) -> int:
     """Running runs whose lease lapsed (dead executor, hung call past every
     timeout): mark STALLED so the applicant sees the honest message + Retry
-    instead of an endless spinner. Never auto-retried."""
+    instead of an endless spinner. Never auto-retried. Queued runs no
+    executor ever claimed also expire after a day — their one-time secrets
+    (tokens, payment details) must not sit vaulted indefinitely."""
     n = 0
     rows = db.execute(select(models.PortalRun).where(
         models.PortalRun.status == "running")).scalars().all()
@@ -252,6 +283,15 @@ def expire_stale_leases(db) -> int:
             run.error = "no response from the official portal"
             _destroy_token_ref(run)
             record_event(db, run.application_id, "stalled", "failed")
+            n += 1
+    for run in db.execute(select(models.PortalRun).where(
+            models.PortalRun.status == "queued")).scalars().all():
+        created = _aware(run.created_at)
+        if created is not None and created < _now() - timedelta(hours=24):
+            run.status = "cancelled"
+            run.finished_at = _now()
+            run.error = "queued run expired unclaimed"
+            _destroy_token_ref(run)
             n += 1
     if n:
         db.commit()
@@ -286,6 +326,15 @@ def execute_run(run_id: str, worker_id: str) -> None:
                 pass
             finally:
                 vault.destroy(token_ref)   # one-time use, gone immediately
+        card_ref = kwargs.pop("card_ref", None)
+        if card_ref:
+            import json as _json
+            try:
+                kwargs["card"] = _json.loads(vault.reveal(card_ref))
+            except (KeyError, ValueError):
+                pass
+            finally:
+                vault.destroy(card_ref)    # one-time use, gone immediately
         sink = _make_progress_sink(application_id, run_id)
         sink("connecting", "active")
         try:

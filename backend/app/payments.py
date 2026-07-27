@@ -5,8 +5,11 @@ applicant sees the exact amount, currency, payee, fee breakdown, refundability
 and source, then presses "Confirm and continue to secure payment". The
 resulting PaymentAuthorization covers ONLY that displayed amount + currency +
 payee: any change invalidates it and requires a fresh confirmation. An
-authorization is consumed at most once; card details never touch Ellis — the
-applicant enters them personally in the embedded secure browser.
+authorization is consumed at most once. Card details are entered by the
+applicant in the embedded secure browser — or, only at their explicit request
+for a specific payment, provided once (vault-transported, never persisted or
+logged) so Ellis can fill the official payment form; the portal's own payment
+confirmation click always stays with the applicant.
 """
 from __future__ import annotations
 

@@ -108,9 +108,10 @@ def delete_case(db, application_id: str, *, actor: str = "applicant", reason: st
         if ref and vault_mod.destroy(ref):
             vault_n += 1
     for run in _rows(db, models.PortalRun, application_id):
-        ref = (run.signal_kwargs or {}).get("token_ref") or ""
-        if ref and vault_mod.destroy(ref):
-            vault_n += 1
+        for key in ("token_ref", "card_ref"):
+            ref = (run.signal_kwargs or {}).get(key) or ""
+            if ref and vault_mod.destroy(ref):
+                vault_n += 1
     counts["vault_secrets"] = vault_n
     for model in _CASE_CHILD_MODELS:
         rows = _rows(db, model, application_id)

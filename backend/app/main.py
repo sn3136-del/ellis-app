@@ -8,7 +8,7 @@ from __future__ import annotations
 import json
 import re
 
-from typing import Optional
+from typing import Any, Optional
 
 from fastapi import FastAPI, Depends, HTTPException, Header, Request, Response
 from pydantic import BaseModel
@@ -831,6 +831,12 @@ def get_case(application_id: str, db=Depends(get_session), p: Principal = Depend
         models.Appointment.application_id == application_id)).scalar_one_or_none()
     conf = db.execute(select(models.SubmissionConfirmation).where(
         models.SubmissionConfirmation.application_id == application_id)).scalar_one_or_none()
+    # The portal's own confirmation page, captured at submission (shown on the
+    # result screen so the applicant sees exactly what the government said).
+    conf_doc = db.execute(select(models.StoredDocument).where(
+        models.StoredDocument.application_id == application_id,
+        models.StoredDocument.doc_type == "submission_confirmation").order_by(
+        models.StoredDocument.created_at.desc())).scalars().first() if conf else None
     ec = _case_execution_class(app_row.destination_country, app_row.visa_type, db=db, app_row=app_row)
     # The disposition is the display guard: it refuses to present submitted/paid/
     # booked/confirmed as REAL unless an approved LIVE_PRODUCTION adapter produced
@@ -849,6 +855,7 @@ def get_case(application_id: str, db=Depends(get_session), p: Principal = Depend
                              "is_real": disposition["is_real_government_result"]} if appt else None),
             "confirmation": ({"reference_no": conf.reference_no, "receipt_no": conf.receipt_no,
                               "execution_class": str(ec),
+                              "screenshot_document_id": conf_doc.id if conf_doc else None,
                               "is_real_government_confirmation": disposition["is_real_government_result"]}
                              if conf else None)}
 
@@ -1828,7 +1835,7 @@ def invalidate_signatures_if_changed(db, application_id: str):
 _SIGNALS = {"approve_review", "sign_authorization", "solve_captcha", "verify_email",
             "approve_payment", "complete_payment", "select_appointment",
             "approve_reschedule", "complete_declaration", "cancel",
-            "provide_information"}
+            "provide_information", "provide_payment_details"}
 
 
 class SignalBody(BaseModel):
@@ -1841,6 +1848,62 @@ class SignalBody(BaseModel):
     # provide_information: answers to the dynamic missing-information questions
     # the portal execution paused on (Part 4).
     answers: Optional[dict] = None
+    # provide_payment_details: the applicant's own card details, provided so
+    # Ellis fills the OFFICIAL portal's payment form. Vault-transported
+    # (one-time reference), used once, never persisted or logged; the final
+    # payment confirmation click always stays with the applicant. Typed as
+    # Any on purpose: a shape mismatch must fail in OUR validator (which
+    # never echoes values) — a pydantic type error would reflect the raw
+    # payload back in the 422 body.
+    card: Optional[Any] = None
+    # provide_payment_details with manual=true: the applicant chose to type
+    # the details into the portal's secure window personally instead.
+    manual: Optional[bool] = None
+
+
+def _validated_payment_card(raw: dict) -> dict:
+    """Strict validation of applicant-provided payment details. Error messages
+    NEVER echo a submitted value. Returns the normalized card payload."""
+    import re as _re
+    from datetime import datetime, timezone
+
+    def _bad(key: str, message: str):
+        return HTTPException(422, detail={"reason": "invalid_payment_details",
+                                          "key": key, "message": message})
+    if not isinstance(raw, dict):
+        raise _bad("card", "Invalid payment details.")
+    raw = raw or {}
+    holder = str(raw.get("holder") or "").strip()
+    if not holder or len(holder) > 80:
+        raise _bad("holder", "Enter the name exactly as it appears on the card.")
+    number = _re.sub(r"[\s-]", "", str(raw.get("number") or ""))
+    if not _re.fullmatch(r"\d{12,19}", number):
+        raise _bad("number", "Enter the card number (12–19 digits).")
+    digits = [int(c) for c in number]
+    checksum = 0
+    for i, dgt in enumerate(reversed(digits)):
+        if i % 2 == 1:
+            dgt *= 2
+            if dgt > 9:
+                dgt -= 9
+        checksum += dgt
+    if checksum % 10 != 0:
+        raise _bad("number", "That card number does not look valid — check for a typo.")
+    expiry = str(raw.get("expiry") or "").strip()
+    m = _re.fullmatch(r"(0?[1-9]|1[0-2])\s*/\s*(\d{2}|\d{4})", expiry)
+    if not m:
+        raise _bad("expiry", "Enter the expiry as MM/YY.")
+    month = int(m.group(1))
+    year = int(m.group(2))
+    year += 2000 if year < 100 else 0
+    now = datetime.now(timezone.utc)
+    if year < now.year or (year == now.year and month < now.month) or year > now.year + 30:
+        raise _bad("expiry", "That expiry date is not valid.")
+    cvv = str(raw.get("cvv") or "").strip()
+    if not _re.fullmatch(r"\d{3,4}", cvv):
+        raise _bad("cvv", "Enter the 3–4 digit security code.")
+    return {"holder": holder, "number": number, "cvv": cvv,
+            "expiry_month": f"{month:02d}", "expiry_year": str(year)}
 
 
 def _record_terminal_execution(db, p: Principal, application_id: str):
@@ -1915,6 +1978,10 @@ def send_signal(application_id: str, name: str, body: Optional[SignalBody] = Non
     kwargs = {}
     if name == "verify_email":
         kwargs["token"] = body.token
+    if name == "solve_captcha" and body.token:
+        # The HUMAN's typed captcha solution: same one-time vault transport
+        # as OTP codes — revealed once by the executor, then destroyed.
+        kwargs["token"] = body.token
     if name == "select_appointment":
         kwargs["slot_id"] = body.slot_id
     if name == "approve_payment" and body.amount_cents is not None:
@@ -1938,15 +2005,36 @@ def send_signal(application_id: str, name: str, body: Optional[SignalBody] = Non
                      detail={"keys": sorted(answers.keys()),
                              "signatures_invalidated": invalidated}, actor=p.user_id)
         kwargs["answers"] = answers
+    if name == "provide_payment_details":
+        if body.manual:
+            kwargs["manual"] = True
+        else:
+            # Validated card payload — NEVER audited, logged, or persisted in
+            # plaintext (the queue vaults it as a one-time reference).
+            kwargs["card"] = _validated_payment_card(body.card)
+
+    def _audit_payment_details():
+        # Recorded only AFTER the signal was actually accepted (queued or
+        # applied) — a CaseBusy/gate refusal must not leave a trail claiming
+        # details were provided when they were dropped.
+        if name == "provide_payment_details":
+            audit.record(db, org_id=p.org_id, application_id=application_id,
+                         action="payment_details_provided",
+                         detail={"manual": bool(body.manual)}, actor=p.user_id)
+
     app_row = db.get(models.VisaApplication, application_id)
     if name != "cancel" and _live_background_route(db, app_row):
-        return _queue_signal_response(db, p, app_row, name, kwargs)
+        res = _queue_signal_response(db, p, app_row, name, kwargs)
+        _audit_payment_details()
+        return res
     if name == "cancel":
         # Cancel all queued background work along with the case itself. A run
         # already executing finishes its segment, but persist_workflow's
         # cancellation fence prevents it from resurrecting the CANCELLED case.
         portal_queue.cancel_queued(db, application_id)
-    return _signal_or_gate_error(db, p, application_id, name, **kwargs)
+    res = _signal_or_gate_error(db, p, application_id, name, **kwargs)
+    _audit_payment_details()
+    return res
 
 
 def _live_background_route(db, app_row) -> bool:

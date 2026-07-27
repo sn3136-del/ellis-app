@@ -24,7 +24,7 @@ from . import models, audit
 
 # Bump when the authorization text materially changes; old grants keep the
 # version they were shown and remain auditable verbatim via text_hash.
-TEXT_VERSION = "sa-1"
+TEXT_VERSION = "sa-2"
 
 # The canonical routine actions a standing authorization may cover.
 PERMITTED_ACTIONS = [
@@ -84,8 +84,12 @@ def build_text(*, locale: str, applicant_name: str, destination: str,
         "You remain responsible for the truth of submitted information.",
         "You must review and sign the exact final application before submission.",
         "Payment always requires a separate confirmation of the exact amount.",
-        "CAPTCHA, one-time codes, passkeys, credentials and card details may "
-        "require your secure participation.",
+        "CAPTCHA, one-time codes, passkeys and credentials always require "
+        "your secure participation.",
+        "Payment card details are entered by you in the secure window — or, "
+        "only at your explicit request for a specific payment, provided to "
+        "Ellis once so it can fill the official payment form. Ellis never "
+        "stores them and never confirms a payment for you.",
         "Some government declarations or final actions may legally or "
         "technically require you to act personally.",
         "You may revoke this authorization before an irreversible action "

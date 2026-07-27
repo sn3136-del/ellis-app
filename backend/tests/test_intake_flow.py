@@ -236,11 +236,17 @@ def test_no_passport_pii_in_audit_log(client, db):
     iid = _new_intake(client)
     client.post(f"/intake/{iid}/passport",
                 json={"name": "p.pdf", "text": _passport_text()}, headers=H)
-    events = db.execute(select(core_models.AuditEvent).where(
+    # Scope to THIS test's intake: the audit table is session-global, and
+    # events from other tests would make this a cross-pollution trap.
+    events = [e for e in db.execute(select(core_models.AuditEvent).where(
         core_models.AuditEvent.action == "intake_passport_ocr")).scalars().all()
+        if (e.detail or {}).get("intake_id") == iid]
     assert events
     for e in events:
-        blob = str(e.detail)
+        # Opaque ids are random hex, and a digest can contain a short needle
+        # like "1990" by pure chance (~0.1%/digest — a real observed flake).
+        # Every VALUE-carrying key is still scanned.
+        blob = str({k: v for k, v in (e.detail or {}).items() if k != "intake_id"})
         for pii in ("X1234567", "DOE", "JOHN", "1990", "900115"):
             assert pii not in blob
 
