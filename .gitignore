@@ -3,6 +3,9 @@
 *.env
 !.env.example
 backend/.env
+# Never commit credentials in ANY form — not even encrypted (2026-07-28).
+.env.enc
+*.env.enc
 **/application_default_credentials.json
 *.pem
 *.key
