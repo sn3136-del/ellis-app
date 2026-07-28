@@ -23,10 +23,23 @@ from __future__ import annotations
 import hashlib
 import re
 
-# Supported UI languages. Traditional Chinese is included; deployments may hide
-# it via config, but the translation path supports it.
-SUPPORTED_LANGS = ("en", "zh-CN", "zh-Hant")
-LANGUAGE_NAMES = {"en": "English", "zh-CN": "简体中文", "zh-Hant": "繁體中文"}
+# Supported UI languages. en / zh-CN / zh-Hant ship as maintained static
+# catalogs in the renderer; every other language here is served DYNAMICALLY —
+# the renderer's English catalog is translated on the backend by Kimi K3
+# (masked + cached, never fabricated) via translate_catalog below.
+LANGUAGE_NAMES = {
+    "en": "English", "zh-CN": "简体中文", "zh-Hant": "繁體中文",
+    "fr": "Français", "es": "Español", "ar": "العربية", "de": "Deutsch",
+    "it": "Italiano", "pt": "Português", "ru": "Русский", "ja": "日本語",
+    "ko": "한국어", "hi": "हिन्दी", "th": "ไทย", "vi": "Tiếng Việt",
+    "id": "Bahasa Indonesia", "ms": "Bahasa Melayu", "tr": "Türkçe",
+    "nl": "Nederlands", "pl": "Polski", "fil": "Filipino", "ur": "اردو",
+    "fa": "فارسی", "he": "עברית", "sw": "Kiswahili", "bn": "বাংলা",
+    "ta": "தமிழ்", "el": "Ελληνικά", "sv": "Svenska", "uk": "Українська",
+}
+SUPPORTED_LANGS = tuple(LANGUAGE_NAMES)
+# Right-to-left scripts — the renderer flips document direction for these.
+RTL_LANGS = ("ar", "ur", "fa", "he")
 
 # The assistant's identity — the single source of truth used by the identity
 # guard and injected into every live model call so the model can never present
@@ -179,6 +192,102 @@ def translate(text: str, target_lang: str, source_lang: str = "auto", *, transla
     _CACHE[key] = translated
     return {"original": text, "translated": translated, "source_lang": source_lang,
             "target_lang": target_lang, "status": "ok", "cached": False}
+
+
+def _kimi_batch_translator(items: dict, target: str, source: str) -> dict:
+    """Default batch translator: one Kimi K3 call per chunk of masked strings.
+    Raises TranslationUnavailable when no live provider is configured."""
+    from .providers import kimi
+    provider = kimi.get_provider()
+    if getattr(provider, "name", "") == "local_test_provider":
+        raise TranslationUnavailable("live Kimi translation not configured")
+    if not hasattr(provider, "translate_batch"):
+        raise TranslationUnavailable("provider has no batch translate capability")
+    return provider.translate_batch(items, target, source)  # pragma: no cover - needs key
+
+
+_CATALOG_CHUNK = 40
+# Chunks are independent model calls — run them concurrently.
+_CATALOG_WORKERS = 16
+
+
+def translate_catalog(entries: dict, target_lang: str, *,
+                      source_lang: str = "en", batch_translator=None) -> dict:
+    """Translate a whole UI catalog {key: english_text} into target_lang.
+
+    Per-string masking + cache (so a repeat visit costs zero model calls);
+    uncached strings go to Kimi in chunks. Honest degradation: any string the
+    model round-trip loses keeps its ENGLISH original — never a fabrication,
+    never a hole in the UI. Returns {status, entries}; status 'ok' when every
+    string translated, 'partial' when some stayed English, 'unavailable' when
+    live translation is not configured, 'passthrough'/'unsupported_language'
+    as in translate().
+    """
+    entries = {str(k): str(v) for k, v in (entries or {}).items() if str(v).strip()}
+    if target_lang not in SUPPORTED_LANGS:
+        return {"status": "unsupported_language", "entries": entries}
+    if target_lang == source_lang:
+        return {"status": "passthrough", "entries": entries}
+
+    out: dict[str, str] = {}
+    todo: dict[str, str] = {}
+    for key, text in entries.items():
+        ck = _cache_key(source_lang, target_lang, text)
+        if ck in _CACHE:
+            out[key] = _CACHE[ck]
+        else:
+            todo[key] = text
+    fn = batch_translator or _kimi_batch_translator
+    missed = 0
+    keys = list(todo)
+    chunks = [keys[i:i + _CATALOG_CHUNK] for i in range(0, len(keys), _CATALOG_CHUNK)]
+
+    # Mask every chunk up front (pure, cheap), then translate the chunks
+    # CONCURRENTLY. A UI catalog is ~600 strings = ~15 model calls; running
+    # them one after another took minutes and made the language switch look
+    # broken. The calls are independent, so wall-clock collapses to roughly
+    # the slowest chunk.
+    prepared = []
+    for chunk_keys in chunks:
+        masked_chunk: dict[str, str] = {}
+        mappings: dict[str, dict] = {}
+        for k in chunk_keys:
+            masked, mapping = protect_tokens(todo[k])
+            masked_chunk[k] = masked
+            mappings[k] = mapping
+        prepared.append((chunk_keys, masked_chunk, mappings))
+
+    results: list = [None] * len(prepared)
+    unavailable = False
+    if prepared:
+        from concurrent.futures import ThreadPoolExecutor
+        workers = min(_CATALOG_WORKERS, len(prepared))
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = {pool.submit(fn, masked, target_lang, source_lang): idx
+                       for idx, (_, masked, _m) in enumerate(prepared)}
+            for fut, idx in futures.items():
+                try:
+                    results[idx] = fut.result()
+                except TranslationUnavailable:
+                    unavailable = True
+                except Exception:  # noqa: BLE001 — one bad chunk stays English
+                    results[idx] = None
+
+    if unavailable and not out:
+        return {"status": "unavailable", "entries": entries}
+
+    for (chunk_keys, _masked, mappings), translated in zip(prepared, results):
+        for k in chunk_keys:
+            got = str((translated or {}).get(k) or "").strip()
+            # A lost/emptied string or a mangled sentinel keeps its original.
+            if not got or any(s not in got for s in mappings[k]):
+                out[k] = todo[k]
+                missed += 1
+                continue
+            restored = restore_tokens(got, mappings[k])
+            _CACHE[_cache_key(source_lang, target_lang, todo[k])] = restored
+            out[k] = restored
+    return {"status": "partial" if missed else "ok", "entries": out}
 
 
 def clear_cache():

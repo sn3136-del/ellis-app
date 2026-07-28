@@ -27,7 +27,7 @@ ROUTE_ANSWERS = {
     "destination_country": "KH", "visa_category": "evisa_tourist",
     "travel_purpose": "tourism", "arrival_date": "2026-10-01",
     "departure_date": "2026-10-08", "age": 30, "email": "od@example.com",
-    "preferred_language": "en",
+    "preferred_language": "en", "prior_refusals": "no",
 }
 
 

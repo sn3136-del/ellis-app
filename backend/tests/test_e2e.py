@@ -67,7 +67,7 @@ def _latest_verify_token(wf):
     return None
 
 
-def _new_case(db, org="org1", user="user1", country="Mockland"):
+def _new_case(db, org="org1", user="user1", country="Mockland", grant=True):
     a = models.Applicant(org_id=org, user_id=user, full_name="Anna Eriksson",
                          email="anna@example.com", time_zone="UTC")
     db.add(a); db.flush()
@@ -90,8 +90,9 @@ def _new_case(db, org="org1", user="user1", country="Mockland"):
                                         max_fee_cents=10000, currency="USD", allow_auto_book=True))
     db.commit()
     # Standing authorization (§5) — granted once at onboarding.
-    from app import authorization as standing
-    standing.grant(db, app_row=app_row, principal_user=user)
+    if grant:
+        from app import authorization as standing
+        standing.grant(db, app_row=app_row, principal_user=user)
     return app_row.id
 
 
@@ -117,6 +118,26 @@ def test_vietnam_evisa_skips_appointment(db):
     appt = db.execute(select(models.Appointment).where(
         models.Appointment.application_id == app_id)).scalar_one_or_none()
     assert appt is None
+
+
+def test_signed_ceremony_reconciles_a_lost_authorization_signal(db):
+    """Regression (2026-07-28): the applicant's signature ceremony completed
+    (standing authorization granted) but the sign-time workflow signal was
+    rejected by a preflight gate, leaving the machine paused at the
+    authorization handoff. Any later signal must reconcile the durable input
+    mirror from the DB ceremony records — never re-ask for a signature that
+    already exists."""
+    app_id = _new_case(db, grant=False)
+    status, wf = service.signal(db, app_id, "start")
+    assert status["pending"]["handoff"] == "authorization"
+    # The ceremony completes, but its workflow signal never arrives.
+    from app import authorization as standing
+    standing.grant(db, app_row=db.get(models.VisaApplication, app_id),
+                   principal_user="user1")
+    status, wf = service.signal(db, app_id, "start")
+    assert wf.inputs["authorization_signed"] is True
+    pending = status.get("pending") or {}
+    assert pending.get("handoff") != "authorization"
 
 
 def test_captcha_is_a_human_handoff(db):

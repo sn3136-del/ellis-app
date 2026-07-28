@@ -75,6 +75,10 @@ export function createVisaClient(session) {
     base: BASE,
     capabilities: () => call('GET', '/capabilities', session),
     listAdapters: () => call('GET', '/adapters', session),
+    // Dynamic UI language: the backend translates the English catalog via
+    // Kimi K3 (masked + cached; honest English fallback).
+    i18nCatalog: (target, entries) =>
+      call('POST', '/i18n/catalog', session, { target_lang: target, entries }),
 
     createCase: (payload) => call('POST', '/cases', session, payload),
     getCase: (id) => call('GET', `/cases/${id}`, session),
@@ -249,12 +253,11 @@ export function createVisaClient(session) {
     browserLiveView: (id) => call('GET', `/cases/${id}/browser-session/live-view`, session),
     closeBrowserSession: (id) => call('DELETE', `/cases/${id}/browser-session`, session),
 
-    // Standing authorization (§5): one versioned grant at onboarding covers
-    // routine actions; payment always stays a separate exact-amount approval.
+    // Standing authorization (§5): granted only inside the signature ceremony
+    // (signAuthorization) — read and revoke are the applicant's actions here;
+    // payment always stays a separate exact-amount approval.
     getStandingAuthorization: (id, locale = 'en') =>
       call('GET', `/cases/${id}/standing-authorization?locale=${encodeURIComponent(locale)}`, session),
-    grantStandingAuthorization: (id, body = {}) =>
-      call('POST', `/cases/${id}/standing-authorization`, session, body),
     revokeStandingAuthorization: (id, reason = '') =>
       call('DELETE', `/cases/${id}/standing-authorization`, session, { reason }),
 

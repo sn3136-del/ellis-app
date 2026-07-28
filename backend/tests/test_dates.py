@@ -361,3 +361,18 @@ def test_agreeing_printed_comma_name_line_creates_no_conflict():
         ocr_fields={}, mrz=mrz, recognized_text=text, mrz_valid=True, today=TODAY)
     assert profile["conflicts"] == []
     assert profile["fields"]["given_names"]["needs_confirmation"] is False
+
+
+def test_date_kind_for_key_shared_vocabulary():
+    from app.dates import date_kind_for_key
+    assert date_kind_for_key("birth_date") == "birth"
+    assert date_kind_for_key("date_of_birth") == "birth"
+    assert date_kind_for_key("passport_expiry") == "expiry"
+    assert date_kind_for_key("date_of_issue") == "issue"
+    assert date_kind_for_key("intended_arrival") == "expiry"
+    assert date_kind_for_key("intended_departure") == "expiry"
+    # Non-date keys are left alone — a religion answer of "12/12" must
+    # never be "normalized".
+    assert date_kind_for_key("religion") is None
+    assert date_kind_for_key("permanent_address") is None
+    assert date_kind_for_key("") is None

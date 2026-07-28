@@ -118,12 +118,42 @@ _VZ_PATTERNS = {
 }
 
 
+# An issuing authority routinely WRAPS across printed lines ("OFFICE OF THE
+# COMMISSIONER OF" / "MFA OF P.R.CHINA IN H.K.SAR" on HK-SAR passports) — a
+# single-line capture silently keeps only the first line. Continuation lines
+# are uppercase-led value lines that are NOT another field's label.
+_VALUE_CONT_RE = re.compile(r"^[A-Z][A-Za-z0-9 ,.'&/\-]{2,70}$")
+_LABEL_HINT_RE = re.compile(
+    r"(signature|date\s*of|place\s*of|passport|nationality|birth|expiry|"
+    r"issue\b|\bsex\b|\btype\b|country\s*code|bearer|holder)", re.IGNORECASE)
+
+
+def _join_wrapped_value(text: str, first: str) -> str:
+    """Extend a captured value with its wrapped continuation lines."""
+    lines = (text or "").splitlines()
+    for i, line in enumerate(lines):
+        if first not in line:
+            continue
+        parts = [first]
+        for nxt in lines[i + 1:i + 3]:
+            nxt = nxt.strip()
+            if not _VALUE_CONT_RE.fullmatch(nxt) or _LABEL_HINT_RE.search(nxt) \
+                    or re.search(r"[^\x00-\x7F]", nxt):
+                break
+            parts.append(nxt)
+        return " ".join(parts)
+    return first
+
+
 def _visual_zone(text: str) -> dict:
     out = {}
     for key, pat in _VZ_PATTERNS.items():
         m = pat.search(text or "")
         if m:
             out[key] = m.group(1).strip()
+    if out.get("issuing_authority"):
+        out["issuing_authority"] = _join_wrapped_value(text or "",
+                                                       out["issuing_authority"])
     return out
 
 
@@ -278,14 +308,25 @@ def build_passport_profile(*, ocr_fields: dict, mrz: dict | None,
         exp["note"] = "passport appears expired"
 
     # ---- intake-wizard prefill (answer keys) --------------------------------
-    # Deliberately NOT prefilled: travel_document_type — the applicant may have
-    # picked a non-ordinary document manually and the preview does not show
-    # this field, so overwriting it silently is never allowed.
     prefill: dict = {}
 
     def take(key):
         f = fields.get(key)
         return f["value"] if f else None
+
+    # Passport TYPE from the checksum-valid MRZ document code: ICAO makes the
+    # first character 'P' for every passport; the country-assigned second
+    # letter distinguishes diplomatic (D) and service/official (S) books —
+    # anything else (PO on Chinese ordinary passports, plain P<, PA, PC…) is
+    # an ordinary passport. The visible dropdown stays editable, so a wrong
+    # read is one click to correct — never a silent lock-in.
+    if mrz and mrz_valid:
+        code = str(mrz.get("document_code") or "").strip("<").upper()
+        if code.startswith("P"):
+            prefill["travel_document_type"] = {
+                "D": "diplomatic_passport",
+                "S": "service_passport",
+            }.get(code[1:2], "ordinary_passport")
 
     # Country codes go through the ICAO->ISO3 map + registry check; an
     # unverifiable code stays visible in the profile (flagged) but never
@@ -301,6 +342,10 @@ def build_passport_profile(*, ocr_fields: dict, mrz: dict | None,
     if iss:
         prefill["passport_issuing_country"] = iss
         fields["issuing_country"]["value"] = iss
+        # The passport's country also drives the address/residence defaults —
+        # the applicant edits them only when they actually live elsewhere.
+        prefill["address_country"] = iss
+        prefill["lawful_country_of_residence"] = iss
     elif "issuing_country" in fields:
         fields["issuing_country"]["needs_confirmation"] = True
         fields["issuing_country"]["note"] = "could not verify this country code — please select it"

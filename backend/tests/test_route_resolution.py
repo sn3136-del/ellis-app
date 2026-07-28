@@ -49,6 +49,9 @@ ANSWERS = {
     "destination_country": "JP", "visa_category": "tourist_visa",
     "travel_purpose": "tourism", "arrival_date": "2026-09-01",
     "departure_date": "2026-09-10", "age": 30, "preferred_language": "en",
+    # Required in truth (it becomes a statement on the government form and can
+    # never be defaulted) — a completed intake always carries an answer.
+    "prior_refusals": "no",
     "email": "t@example.com",
 }
 

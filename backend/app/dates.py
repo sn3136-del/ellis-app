@@ -235,3 +235,21 @@ def derive_age(birth_iso, *, today: date | None = None) -> int | None:
     by, bm, bd = int(m.group(1)), int(m.group(2)), int(m.group(3))
     age = today.year - by - (1 if (today.month, today.day) < (bm, bd) else 0)
     return age if 0 <= age <= 130 else None
+
+
+# ---------------------------------------------------------------------------
+# Answer-key vocabulary — form answers arrive through several endpoints
+# (document approval edits, POST /answers, mid-run provide_information) and
+# every one must store canonical ISO. One shared rule for which keys hold
+# calendar dates and which century pivot applies.
+
+def date_kind_for_key(key: str) -> str | None:
+    """``birth`` | ``issue`` | ``expiry`` for a date-like answer key, else
+    None. ``expiry`` doubles as the pivot for travel dates (its ±30y window
+    is the right plausibility band for arrivals/departures)."""
+    k = str(key or "").lower()
+    if not (k.endswith("_date") or k.endswith("_expiry")
+            or k in ("date_of_birth", "date_of_expiry", "date_of_issue",
+                     "intended_arrival", "intended_departure")):
+        return None
+    return "birth" if "birth" in k else "issue" if "issue" in k else "expiry"

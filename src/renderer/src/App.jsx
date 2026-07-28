@@ -1,24 +1,27 @@
-// Ellis for Trip.com — single-product shell.
+// Ellis for Trip.com — single-product shell, Trip.com themed.
 //
 // The app boots directly into the applicant intake surface (the Visa
-// Platform, backed by the FastAPI backend over HTTP). The simulated local
-// demo portal (TripPortal) is reachable ONLY when the backend reports
-// runtime_mode === 'local_mock_demo'; in every other mode the demo surface is
-// refused outright (never silently redirected into simulation), and mode
-// detection fails safe to 'production'.
+// Platform, backed by the FastAPI backend over HTTP) wearing the Trip.com
+// brand: logo top-left, language picker top-right, no operator chrome. The
+// simulated local demo portal (TripPortal) is reachable ONLY when the backend
+// reports runtime_mode === 'local_mock_demo'; in every other mode the demo
+// surface is refused outright (never silently redirected into simulation),
+// and mode detection fails safe to 'production'. Operator surfaces (admin
+// console, setup, settings) are HIDDEN from applicants — an operator reveals
+// them out-of-band via `#admin` in the URL or a persisted local flag.
 import { useState, useEffect } from 'react'
-import { LocaleProvider, useLocale } from './lib/locale.jsx'
+import { LocaleProvider, useLocale, LanguagePicker } from './lib/locale.jsx'
 import { ToastProvider } from './components/ui.jsx'
-import Sidebar from './components/Sidebar.jsx'
 import Settings from './screens/Settings.jsx'
 import TripPortal from './screens/TripPortal.jsx'
 import VisaConsole from './screens/VisaConsole.jsx'
 import AdminConsole from './screens/AdminConsole.jsx'
 import SetupWizard from './screens/SetupWizard.jsx'
 import { fetchRuntimeMode } from './lib/visaBackend.js'
+import { tripcomLogo } from './assets/logos.js'
 
 export default function App() {
-  // LocaleProvider wraps everything so the language toggle + t() work in the
+  // LocaleProvider wraps everything so the language picker + t() work in the
   // shell, every view, and the simulated-portal banner alike.
   return <LocaleProvider><AppInner /></LocaleProvider>
 }
@@ -69,6 +72,25 @@ function detectAdminMode() {
   }
 }
 
+// Operator-only nav strip: never rendered for applicants.
+function AdminNav({ view, onNav, demoMode }) {
+  const items = [
+    ['visa', 'Visa Platform'], ['admin', 'Adapter Admin'],
+    ['setup', 'Setup'], ['settings', 'Settings'],
+  ]
+  if (demoMode) items.push(['demo', 'Demo portal'])
+  return (
+    <nav style={{ display: 'flex', gap: 6 }} aria-label="Operator">
+      {items.map(([id, label]) => (
+        <button key={id} type="button" onClick={() => onNav(id)}
+                className={'btn btn--sm' + (view === id ? '' : ' btn--ghost')}>
+          {label}
+        </button>
+      ))}
+    </nav>
+  )
+}
+
 function AppInner() {
   const [view, setView] = useState('visa')
   const [adminMode] = useState(detectAdminMode)
@@ -97,19 +119,23 @@ function AppInner() {
     <ToastProvider>
       <div className={'app' + (demoMode ? ' app--banner' : '')}>
         {demoMode && <SimulatedBanner />}
-        <div className="shell">
-          <Sidebar view={view} onNav={setView} runtimeMode={runtimeMode} adminMode={adminMode} />
-          <main className="main">
-            {view === 'visa' && <VisaConsole onNotify={() => {}} adminMode={adminMode} />}
-            {/* Admin console is operator-only; an applicant can never route here. */}
-            {view === 'admin' && (adminMode ? <AdminConsole /> : <VisaConsole onNotify={() => {}} adminMode={adminMode} />)}
-            {view === 'setup' && <SetupWizard />}
-            {view === 'settings' && <Settings />}
-            {view === 'demo' && (demoMode
-              ? <TripPortal onSwitchRole={() => setView('visa')} />
-              : <DemoDisabled />)}
-          </main>
-        </div>
+        <header className="triptop" data-testid="triptop">
+          <img className="triptop__logo" src={tripcomLogo} alt="Trip.com" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {adminMode && <AdminNav view={view} onNav={setView} demoMode={demoMode} />}
+            <LanguagePicker />
+          </div>
+        </header>
+        <main className="main main--top">
+          {view === 'visa' && <VisaConsole onNotify={() => {}} adminMode={adminMode} />}
+          {/* Admin console is operator-only; an applicant can never route here. */}
+          {view === 'admin' && (adminMode ? <AdminConsole /> : <VisaConsole onNotify={() => {}} adminMode={adminMode} />)}
+          {view === 'setup' && (adminMode ? <SetupWizard /> : <VisaConsole onNotify={() => {}} adminMode={adminMode} />)}
+          {view === 'settings' && (adminMode ? <Settings /> : <VisaConsole onNotify={() => {}} adminMode={adminMode} />)}
+          {view === 'demo' && (demoMode
+            ? <TripPortal onSwitchRole={() => setView('visa')} />
+            : <DemoDisabled />)}
+        </main>
       </div>
     </ToastProvider>
   )

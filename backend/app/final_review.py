@@ -122,6 +122,39 @@ def record_signature(db, review_row, *, signature_id: str, actor: str):
                  actor=actor)
 
 
+def _fee_within_authorized_ceiling(db, app_row) -> bool:
+    """Does the CURRENT total fee sit within the ceiling the applicant signed?
+    No readable fee yet, or no envelope, is not a breach — the payment gates
+    still apply later; only a fee that exceeds the signed ceiling blocks
+    advance consent."""
+    env = db.execute(select(models.AuthorizationEnvelope).where(
+        models.AuthorizationEnvelope.application_id == app_row.id,
+        models.AuthorizationEnvelope.status == "completed",
+    ).order_by(models.AuthorizationEnvelope.created_at.desc())).scalars().first()
+    ceiling = int(getattr(env, "max_fee_cents", 0) or 0) if env is not None else 0
+    if ceiling <= 0:
+        return True
+    fee_rec = fees.verified_current_fee(
+        db, destination=app_row.destination_country, visa_type=app_row.visa_type)
+    if fee_rec is None:
+        return True
+    total = int(fee_rec.government_fee_cents or 0) + int(fee_rec.service_fee_cents or 0)
+    return total <= ceiling
+
+
+def _is_authorization_signature(db, application_id: str, sig) -> bool:
+    """True when this NativeSignature is the applicant's AUTHORIZATION
+    signature (the one bound to a completed authorization envelope), as
+    opposed to a signature made in a dedicated final-review ceremony."""
+    if sig is None or not getattr(sig, "artifact_hash", ""):
+        return False
+    env = db.execute(select(models.AuthorizationEnvelope).where(
+        models.AuthorizationEnvelope.application_id == application_id,
+        models.AuthorizationEnvelope.artifact_hash == sig.artifact_hash,
+    )).scalars().first()
+    return env is not None
+
+
 def check_and_invalidate(db, app_row, *, reason: str = "material change") -> bool:
     """Compare the signed review version against the CURRENT material state.
     On mismatch: invalidate the review + its signature and audit it. Returns
@@ -136,11 +169,17 @@ def check_and_invalidate(db, app_row, *, reason: str = "material change") -> boo
     row.invalidated_reason = reason[:300]
     if row.signature_id:
         sig = db.get(models.NativeSignature, row.signature_id)
-        if sig:
+        # A review version signed by ADVANCE CONSENT reuses the applicant's
+        # single AUTHORIZATION signature. Only the stale review VERSION dies
+        # here — cascading into that signature would revoke the applicant's
+        # authorization itself on the first mid-run answer, permanently
+        # dead-ending the case (nothing could re-sign it without a second
+        # ceremony, which the single-ceremony flow does not have).
+        if sig is not None and not _is_authorization_signature(db, app_row.id, sig):
             sig.invalidated = True
-        db.add(models.SignatureEvent(signature_id=row.signature_id,
-                                     application_id=app_row.id, event="invalidated",
-                                     detail={"reason": reason[:120]}))
+            db.add(models.SignatureEvent(signature_id=row.signature_id,
+                                         application_id=app_row.id, event="invalidated",
+                                         detail={"reason": reason[:120]}))
     db.commit()
     audit.record(db, org_id=app_row.org_id, application_id=app_row.id,
                  action="final_review_signature_invalidated",
@@ -160,13 +199,56 @@ def signed_current(db, app_row) -> models.ApplicationReviewVersion | None:
     return row
 
 
+def ensure_advance_signed(db, app_row, *,
+                          actor: str = "ellis") -> models.ApplicationReviewVersion | None:
+    """Single-ceremony advance consent (product decision 2026-07-27): the
+    applicant signs ONCE — the authorization ceremony — and that signature
+    stands as their consent to submit the application they completed. When a
+    valid standing authorization permits submit_after_signed_final_review AND
+    a completed, uninvalidated authorization signature exists, the CURRENT
+    material state is frozen into a review version recorded as signed by that
+    same signature (every version and hash still audited — the records are
+    identical to a manual re-sign). Returns the signed-current row, or None
+    when the preconditions are absent (signal-driven tests, revoked grants) —
+    those flows keep the explicit final-review signature ceremony."""
+    from . import authorization
+    try:
+        authorization.require(db, app_row.id, "submit_after_signed_final_review")
+    except Exception:  # noqa: BLE001 — no/insufficient grant: no advance path
+        return None
+    sig = db.execute(select(models.NativeSignature).where(
+        models.NativeSignature.application_id == app_row.id,
+        models.NativeSignature.invalidated.is_(False),
+    ).order_by(models.NativeSignature.created_at.desc())).scalars().first()
+    if sig is None:
+        return None
+    row = signed_current(db, app_row)
+    if row is not None:
+        return row
+    # Advance consent covers the money the applicant actually authorized. The
+    # signed authorization carries a fee CEILING; a fee above it was never
+    # consented to, so the case falls back to an explicit review rather than
+    # freezing a bigger amount under the old signature.
+    if not _fee_within_authorized_ceiling(db, app_row):
+        return None
+    row = create_review_version(db, app_row, actor=actor)
+    record_signature(db, row, signature_id=sig.id, actor=actor)
+    audit.record(db, org_id=app_row.org_id, application_id=app_row.id,
+                 action="final_review_signed_by_advance_consent",
+                 detail={"version": row.version, "content_hash": row.content_hash,
+                         "signature_id": sig.id}, actor=actor)
+    return row
+
+
 def verify_ready_to_submit(db, app_row) -> models.ApplicationReviewVersion:
     """§25: valid standing authorization + valid exact-version signature +
-    no material change since signature. Raises ReviewRequired otherwise."""
+    no material change since signature. The single-ceremony advance consent
+    (ensure_advance_signed) satisfies it without a second signing step.
+    Raises ReviewRequired otherwise."""
     from . import authorization
     authorization.require(db, app_row.id, "submit_after_signed_final_review")
     check_and_invalidate(db, app_row)
-    row = signed_current(db, app_row)
+    row = signed_current(db, app_row) or ensure_advance_signed(db, app_row)
     if row is None:
         raise ReviewRequired(
             "final review and signature required: the applicant must review "

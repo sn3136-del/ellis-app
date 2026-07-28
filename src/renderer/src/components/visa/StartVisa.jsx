@@ -9,13 +9,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocale } from '../../lib/locale.jsx'
 import { useToast, Loading, ErrorNote } from '../ui.jsx'
-import { SUPPORTED, LANGUAGE_NAMES } from '../../lib/i18n.js'
 import {
   conditionField, missingRequired, readinessMeta, checksSummary,
   validEmail, datesOrdered, RESIDENCE_STATUS_OPTIONS,
   researchStageMeta, researchTerminal, researchStatusMeta, RESEARCH_STEP_KEYS,
-  guidanceDispositionMeta, guidanceStepMeta, guidanceIsUsable, verificationMeta,
-  continuationMeta, deriveAge, formatDateUS, localTodayIso, formatAddress
+  guidanceIsUsable,
+  continuationMeta, deriveAge, localTodayIso
 } from '../../lib/intake.js'
 import ConnectorBuild from './ConnectorBuild.jsx'
 import PassportIntake from './PassportIntake.jsx'
@@ -52,24 +51,43 @@ function newestProgressAt(job) {
   return newest
 }
 
-// Which wizard step each intake field lives on (for the 422 missing-field jump).
+// Which wizard step each intake field lives on (for the 422 missing-field
+// jump). TWO pages only (2026-07-27): "Your passport" (identity + address +
+// email + prior refusals) and "Your trip" (destination + dates). Everything
+// else is auto-derived: visa category/purpose from the route, country/
+// residence from the passport, age from the birth date, language from the
+// top-bar picker.
 const STEP_FIELDS = [
   ['passport_nationality', 'passport_issuing_country', 'travel_document_type',
     'lawful_country_of_residence', 'residence_status',
-    'address_line1', 'address_line2', 'address_city', 'address_region',
-    'address_postal_code', 'address_country', 'mailing_address_same'],
-  // visa_category/visa_subtype are determined automatically by Ellis from the
-  // route — the applicant never picks a category before the route is known.
-  ['destination_country', 'travel_purpose',
-    'arrival_date', 'departure_date', 'transit_countries'],
-  ['birth_date', 'age', 'dependants', 'existing_destination_visas', 'existing_residence_permits',
-    'prior_refusals', 'existing_portal_account', 'preferred_language', 'email']
+    'address_line1', 'address_city', 'address_region',
+    'address_postal_code', 'address_country', 'mailing_address_same',
+    'birth_date', 'age', 'email'],
+  ['destination_country', 'travel_purpose', 'arrival_date', 'departure_date',
+    'prior_refusals', 'prior_refusals_detail'],
 ]
 
 function stepForField(key) {
   for (let i = 0; i < STEP_FIELDS.length; i++) if (STEP_FIELDS[i].includes(key)) return i
   return 0
 }
+
+// Address affordances are COUNTRY-AWARE: a postal-code box is only offered
+// where the country actually uses postal codes, and a state/province box only
+// where addresses customarily carry one. Wrong-country edge cases stay safe:
+// both fields are optional server-side either way.
+const NO_POSTAL_ISO3 = new Set([
+  'HKG', 'MAC', 'ARE', 'QAT', 'AGO', 'ATG', 'ABW', 'BHS', 'BLZ', 'BEN', 'BWA',
+  'BFA', 'BDI', 'CMR', 'CAF', 'TCD', 'COM', 'COG', 'COD', 'CIV', 'DJI', 'DMA',
+  'GNQ', 'ERI', 'FJI', 'GAB', 'GMB', 'GHA', 'GRD', 'GIN', 'GUY', 'KIR', 'LBY',
+  'MWI', 'MLI', 'MRT', 'NRU', 'NIU', 'KNA', 'LCA', 'PAN', 'RWA', 'STP', 'SYC',
+  'SLE', 'SLB', 'SOM', 'SUR', 'TGO', 'TKL', 'TON', 'TTO', 'TUV', 'UGA', 'VUT',
+  'YEM', 'ZWE', 'TLS',
+])
+const REGION_ISO3 = new Set([
+  'USA', 'CAN', 'AUS', 'BRA', 'MEX', 'IND', 'CHN', 'ARG', 'NGA', 'MYS', 'IDN',
+  'PHL', 'VNM', 'THA', 'JPN', 'KOR', 'RUS', 'PAK', 'EGY', 'ZAF',
+])
 
 function openUrl(url) {
   if (typeof window === 'undefined' || !url) return
@@ -291,11 +309,32 @@ export default function StartVisa({ client, onOpenCase }) {
 
   // ---- resolve -------------------------------------------------------------
   function localProblems() {
+    const a = answersRef.current
     const fields = info?.intake_fields || []
+    // Fields Ellis derives rather than asks for must be materialized BEFORE
+    // validation, or a resumed draft can block on a key with no visible input
+    // (address_country/lawful residence come from the passport; age from the
+    // birth date; language from the top-bar picker).
+    const derived = {}
+    const home = a.address_country || a.passport_issuing_country
+    if (!a.address_country && home) derived.address_country = home
+    if (!a.lawful_country_of_residence && home) derived.lawful_country_of_residence = home
+    if (a.age == null && a.birth_date) {
+      const age = deriveAge(a.birth_date, localTodayIso())
+      if (age != null) derived.age = age
+    }
+    if (!a.preferred_language) derived.preferred_language = lang
+    if (Object.keys(derived).length) {
+      for (const [k, v] of Object.entries(derived)) setAnswer(k, v)
+      Object.assign(answersRef.current, derived)
+    }
     const bad = missingRequired(fields, answersRef.current)
     if (!datesOrdered(answersRef.current.arrival_date, answersRef.current.departure_date)) bad.push('departure_date')
     if (answersRef.current.email && !validEmail(answersRef.current.email)) bad.push('email')
-    return [...new Set(bad)]
+    // A missing age with no birth date must point at the field the applicant
+    // can actually fill.
+    return [...new Set(bad.map((k) => (k === 'age' && !answersRef.current.birth_date)
+      ? 'birth_date' : k))]
   }
   async function resolve() {
     setResolveError(null); setGuidanceError(null)
@@ -363,13 +402,12 @@ export default function StartVisa({ client, onOpenCase }) {
   }
   const isMissing = (key) => missing.includes(key)
 
-  // ---- shared header (permanent snapshot line + disclaimer) ---------------
-  const header = (
-    <div className="card card--soft" style={{ padding: '11px 15px', marginBottom: 18 }} data-testid="snapshot-header">
-      <div style={{ fontSize: 13, fontWeight: 600 }}>{t('snapshot.displayLine')}</div>
-      <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{t('snapshot.disclaimer')}</div>
-    </div>
-  )
+  // The snapshot date + disclaimer are no longer shown as a standing banner
+  // (product decision 2026-07-27 — it sat above every screen). The same
+  // honesty still reaches the applicant where it is actually load-bearing:
+  // the route result panel prints the snapshot date and disclaimer next to
+  // the requirements it is describing.
+  const header = null
 
   if (phase === 'loading') {
     return loadError
@@ -378,33 +416,65 @@ export default function StartVisa({ client, onOpenCase }) {
   }
 
   if (phase === 'hero') {
+    // The Trip.com landing look: one big headline over two side-by-side
+    // actions — continue what you already started, or start fresh. "Continue"
+    // resumes a converted case when one exists, otherwise the saved draft;
+    // with neither, there is nothing to continue, so only "start" shows.
+    const resumeCase = () => onOpenCase && onOpenCase({ id: converted.case_id,
+      destination_country: (converted.answers || {}).destination_country || '',
+      full_name: (converted.answers || {}).full_name || '', visa_type: 'tourist' })
+    // "Continue" resumes the applicant's MOST RECENT work — the in-flight
+    // case OR an unfinished draft, whichever they touched last. Preferring
+    // the case unconditionally stranded a newer draft with no way back to it.
+    const resumeNewest = (() => {
+      if (converted && draft) {
+        const c = String(converted.updated_at || '')
+        const d = String(draft.updated_at || '')
+        return d.localeCompare(c) > 0 ? resumeDraft : resumeCase
+      }
+      return converted ? resumeCase : resumeDraft
+    })()
+    const canContinue = !!(converted || draft)
+    const arrow = (
+      <svg className="trip-cta__arrow" width="19" height="19" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" strokeWidth="2.4"
+           strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M5 12h14M13 6l6 6-6 6" />
+      </svg>
+    )
     return (
       <div>
-        {header}
         {loadError && <ErrorNote error={loadError} />}
-        <div className="card" style={{ padding: 32, textAlign: 'center' }}>
-          <div className="h-serif" style={{ fontSize: 34 }}>{t('start.hero.title')}</div>
-          <p style={{ fontSize: 14.5, color: 'var(--muted)', maxWidth: 520, margin: '12px auto 22px', lineHeight: 1.55 }}>
-            {t('start.hero.sub')}
-          </p>
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
-            {converted && (
-              <button className="btn" data-testid="resume-case"
-                onClick={() => onOpenCase && onOpenCase({ id: converted.case_id,
-                  destination_country: (converted.answers || {}).destination_country || '',
-                  full_name: (converted.answers || {}).full_name || '', visa_type: 'tourist' })}>
-                {t('case.resume')}
+        <div className="trip-home" data-testid="hero">
+          {/* The closing phrase is the promise — it gets Trip.com blue and an
+              underline that draws itself in. Split on the LAST comma so the
+              accent works in every locale (zh has no comma: the whole line
+              stays plain rather than guessing a break). */}
+          <h1 className="trip-home__title">
+            {(() => {
+              const full = t('start.hero.title')
+              const at = full.lastIndexOf(',')
+              if (at < 0 || at >= full.length - 1) return full
+              return (
+                <>
+                  {full.slice(0, at + 1)}{' '}
+                  <span className="trip-home__accent">{full.slice(at + 1).trim()}</span>
+                </>
+              )
+            })()}
+          </h1>
+          <div className="trip-home__actions">
+            {canContinue && (
+              <button className="trip-cta" data-testid="resume-newest"
+                onClick={resumeNewest}>
+                {t('case.resume')}{arrow}
               </button>
             )}
-            {draft && (
-              <button className={'btn' + (converted ? ' btn--ghost' : '')} onClick={resumeDraft}>{t('start.resume.title')}</button>
-            )}
-            <button className={'btn' + (draft || converted ? ' btn--ghost' : '')} onClick={startNew}>
-              {draft || converted ? t('start.resume.new') : t('start.hero.cta')}
+            <button className={'trip-cta' + (canContinue ? ' trip-cta--ghost' : '')}
+              onClick={startNew} data-testid="start-new">
+              {t('start.hero.startCta')}{arrow}
             </button>
           </div>
-          {converted && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 12 }}>{t('case.resumeSub')}</div>}
-          {draft && !converted && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 12 }}>{t('start.resume.sub')}</div>}
         </div>
       </div>
     )
@@ -419,7 +489,7 @@ export default function StartVisa({ client, onOpenCase }) {
           answers={answers}
           onAnswerHealth={(countries) => { setAnswer('recent_travel_countries', countries); flushSave() }}
           onContinue={continueToCase} continuing={continuing} continueError={continueError}
-          onEdit={() => { setPhase('wizard'); setStep(3) }}
+          onEdit={() => { setPhase('wizard'); setStep(0) }}
           onNew={startNew} />
       </div>
     )
@@ -430,7 +500,7 @@ export default function StartVisa({ client, onOpenCase }) {
       <div>
         {header}
         <ResearchPanel client={client} t={t} intakeId={intakeId} initialJob={researchJob}
-          onEdit={() => { setPhase('wizard'); setStep(3) }}
+          onEdit={() => { setPhase('wizard'); setStep(0) }}
           onNew={startNew} />
       </div>
     )
@@ -441,28 +511,65 @@ export default function StartVisa({ client, onOpenCase }) {
       <div>
         {header}
         <ResultPanel client={client} t={t} result={result}
-          onEdit={() => { setPhase('wizard'); setStep(3) }}
+          onEdit={() => { setPhase('wizard'); setStep(0) }}
           onNew={startNew} />
       </div>
     )
   }
 
   // ---- wizard --------------------------------------------------------------
-  const stepTitles = [t('start.step.passport'), t('start.step.trip'), t('start.step.about'), t('start.step.review')]
+  // Two pages, then straight to the route — no "About you", no review page.
+  const stepTitles = [t('start.step.passport'), t('start.step.trip')]
+  const lastStep = stepTitles.length - 1
+  // The passport's country drives the address + residence defaults.
+  const setIssuingCountry = (v) => {
+    setAnswer('passport_issuing_country', v)
+    if (v) {
+      if (!answersRef.current.address_country) setAnswer('address_country', v)
+      if (!answersRef.current.lawful_country_of_residence) setAnswer('lawful_country_of_residence', v)
+    }
+  }
+  const addrCountry = answers.address_country || answers.passport_issuing_country || ''
+  const showPostal = !addrCountry || !NO_POSTAL_ISO3.has(addrCountry)
+  const showRegion = !!addrCountry && REGION_ISO3.has(addrCountry)
+  // Page-0 gate: the trip page opens only once the passport page is complete
+  // (required fields present + a valid email). Auto-derived keys are
+  // materialized the same way resolve() does it, so a passport upload alone
+  // satisfies its share of the page.
+  const step0Missing = (() => {
+    const fields = info?.intake_fields || []
+    const a = { ...answers }
+    const home = a.address_country || a.passport_issuing_country
+    if (!a.address_country && home) a.address_country = home
+    if (!a.lawful_country_of_residence && home) a.lawful_country_of_residence = home
+    if (a.age == null && a.birth_date) a.age = deriveAge(a.birth_date, localTodayIso())
+    if (!a.preferred_language) a.preferred_language = lang
+    const bad = missingRequired(fields, a)
+      .map((k) => (k === 'age' && !a.birth_date) ? 'birth_date' : k)
+    const onPage = bad.filter((k) => STEP_FIELDS[0].includes(k))
+    if (!a.email || !validEmail(a.email)) onPage.push('email')
+    return [...new Set(onPage)]
+  })()
+  const step0Complete = step0Missing.length === 0
+  const goToStep = (i) => {
+    if (i > 0 && !step0Complete) {
+      setMissing((m) => [...new Set([...m, ...step0Missing])])
+      toast(t('start.finishPassportFirst'))
+      setStep(0)
+      return
+    }
+    flushSave()
+    setStep(i)
+  }
 
   return (
     <div>
       {header}
-      <div className="card" style={{ padding: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {stepTitles.map((s, i) => (
-              <button key={s} className={'chip' + (i === step ? ' chip--ink' : '')}
-                style={{ cursor: 'pointer' }} onClick={() => { flushSave(); setStep(i) }}>
-                {i + 1}. {s}
-              </button>
-            ))}
-          </div>
+      <div className="card wizcard">
+        {/* No step chips: the wizard is short and the Back/Next buttons carry
+            navigation. The gate still applies — the trip page opens only once
+            the passport page is complete (see goToStep). */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', minHeight: 16 }}>
           <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
             {saveState === 'saving' ? t('start.saving') : saveState === 'saved' ? t('start.saved') : ''}
           </span>
@@ -494,7 +601,7 @@ export default function StartVisa({ client, onOpenCase }) {
           </div>
         )}
         {step === 0 && entryMode === 'manual' && (
-          <div className="grid grid-2" style={{ gap: 12 }}>
+          <div className="wiz-grid" style={{ marginTop: 8 }}>
             <Field label={t('field.passport_nationality')} invalid={isMissing('passport_nationality')}>
               <SearchSelect t={t} value={answers.passport_nationality} options={nationalityOpts}
                 invalid={isMissing('passport_nationality')}
@@ -503,7 +610,7 @@ export default function StartVisa({ client, onOpenCase }) {
             <Field label={t('field.passport_issuing_country')} invalid={isMissing('passport_issuing_country')}>
               <SearchSelect t={t} value={answers.passport_issuing_country} options={countryOpts}
                 invalid={isMissing('passport_issuing_country')}
-                onChange={(v) => setAnswer('passport_issuing_country', v)} />
+                onChange={setIssuingCountry} />
             </Field>
             <Field label={t('field.travel_document_type')} invalid={isMissing('travel_document_type')}>
               <select className="select" value={answers.travel_document_type || 'ordinary_passport'}
@@ -515,6 +622,18 @@ export default function StartVisa({ client, onOpenCase }) {
               <SearchSelect t={t} value={answers.lawful_country_of_residence} options={countryOpts}
                 invalid={isMissing('lawful_country_of_residence')}
                 onChange={(v) => setAnswer('lawful_country_of_residence', v)} />
+            </Field>
+            <Field label={t('field.birth_date')} invalid={isMissing('birth_date')}>
+              <input type="date" className="input" value={answers.birth_date || ''}
+                style={isMissing('birth_date') ? INVALID_STYLE : undefined}
+                onChange={(e) => {
+                  const dob = e.target.value || undefined
+                  setAnswer('birth_date', dob)
+                  // Age is ALWAYS derived from the date of birth, using the
+                  // applicant's LOCAL calendar day.
+                  const age = dob ? deriveAge(dob, localTodayIso()) : null
+                  setAnswer('age', age == null ? undefined : age)
+                }} />
             </Field>
             {visible('residence_status') && (
               <Field label={t('field.residence_status')} invalid={isMissing('residence_status')}>
@@ -533,39 +652,39 @@ export default function StartVisa({ client, onOpenCase }) {
             line 1 / city / country are required; no U.S. format is assumed).
             Renders in BOTH entry modes. */}
         {step === 0 && (
-          <div style={{ marginTop: 16 }} data-testid="address-section">
+          <section className="wiz-section" data-testid="address-section">
             <div className="eyebrow">{t('address.title')}</div>
-            <div style={{ fontSize: 12.5, color: 'var(--muted)', margin: '2px 0 10px' }}>
+            <div style={{ fontSize: 12.5, color: 'var(--muted)', margin: '2px 0 12px' }}>
               {t('address.sub')}
+              {addrCountry && (
+                <span className="chip" style={{ marginLeft: 8 }} data-testid="auto-country">
+                  {countryName(addrCountry)} · {t('address.autoFromPassport')}
+                </span>
+              )}
             </div>
-            <div className="grid grid-2" style={{ gap: 12 }}>
+            <div className="wiz-grid">
               <Field label={t('field.address_line1')} invalid={isMissing('address_line1')}>
                 <input className="input" value={answers.address_line1 || ''}
                   style={isMissing('address_line1') ? INVALID_STYLE : undefined}
                   onChange={(e) => setAnswer('address_line1', e.target.value)} />
-              </Field>
-              <Field label={t('field.address_line2')}>
-                <input className="input" value={answers.address_line2 || ''}
-                  onChange={(e) => setAnswer('address_line2', e.target.value)} />
               </Field>
               <Field label={t('field.address_city')} invalid={isMissing('address_city')}>
                 <input className="input" value={answers.address_city || ''}
                   style={isMissing('address_city') ? INVALID_STYLE : undefined}
                   onChange={(e) => setAnswer('address_city', e.target.value)} />
               </Field>
-              <Field label={t('field.address_region')}>
-                <input className="input" value={answers.address_region || ''}
-                  onChange={(e) => setAnswer('address_region', e.target.value)} />
-              </Field>
-              <Field label={t('field.address_postal_code')}>
-                <input className="input" value={answers.address_postal_code || ''}
-                  onChange={(e) => setAnswer('address_postal_code', e.target.value)} />
-              </Field>
-              <Field label={t('field.address_country')} invalid={isMissing('address_country')}>
-                <SearchSelect t={t} value={answers.address_country} options={countryOpts}
-                  invalid={isMissing('address_country')}
-                  onChange={(v) => setAnswer('address_country', v)} />
-              </Field>
+              {showRegion && (
+                <Field label={t('field.address_region')}>
+                  <input className="input" value={answers.address_region || ''}
+                    onChange={(e) => setAnswer('address_region', e.target.value)} />
+                </Field>
+              )}
+              {showPostal && (
+                <Field label={t('field.address_postal_code')}>
+                  <input className="input" value={answers.address_postal_code || ''}
+                    onChange={(e) => setAnswer('address_postal_code', e.target.value)} />
+                </Field>
+              )}
             </div>
             <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 10,
                             fontSize: 13, cursor: 'pointer' }}>
@@ -573,31 +692,39 @@ export default function StartVisa({ client, onOpenCase }) {
                 onChange={(e) => setAnswer('mailing_address_same', e.target.checked)} />
               {t('field.mailing_address_same')}
             </label>
-          </div>
+          </section>
         )}
 
+        {/* Contact + history — on the SAME page as the passport (no separate
+            "About you" step). */}
+        {step === 0 && (
+          <section className="wiz-section" data-testid="contact-section">
+            <div className="eyebrow">{t('start.contactTitle')}</div>
+            <div className="wiz-grid" style={{ marginTop: 10 }}>
+              <Field label={t('field.email')} invalid={isMissing('email')}>
+                <input type="email" className="input" style={isMissing('email') ? INVALID_STYLE : undefined}
+                  value={answers.email || ''} onChange={(e) => setAnswer('email', e.target.value)}
+                  onBlur={flushSave} />
+                {answers.email && !validEmail(answers.email) && (
+                  <div style={{ fontSize: 12, color: 'var(--crit)', fontWeight: 600, marginTop: 4 }}>
+                    {t('start.invalidEmail')}
+                  </div>
+                )}
+              </Field>
+            </div>
+          </section>
+        )}
+
+        {/* "Your trip" — three fields, spacious. Visa category and purpose
+            are determined automatically (tourism); transit is never asked. */}
         {step === 1 && (
-          <div className="grid grid-2" style={{ gap: 12 }}>
+          <div className="wiz-grid" style={{ marginTop: 8 }}>
             <Field label={t('field.destination_country')} invalid={isMissing('destination_country')}>
               <SearchSelect t={t} value={answers.destination_country} options={countryOpts}
                 invalid={isMissing('destination_country')}
                 onChange={(v) => setAnswer('destination_country', v)} />
             </Field>
-            {/* The visa/entry category is determined automatically by Ellis
-                once the route is known — the applicant never has to pick
-                "Tourist visa (consular)" before Ellis knows whether a visa is
-                even required. */}
-            <Field label={t('field.visa_category')}>
-              <div className="input" style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-soft)',
-                fontSize: 13, color: 'var(--muted)' }} data-testid="auto-category">
-                {t('start.autoCategory')}
-              </div>
-            </Field>
-            <Field label={t('field.travel_purpose')}>
-              <div className="input" style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-soft)' }}>
-                {t('purpose.tourism')}
-              </div>
-            </Field>
+            <div />
             <Field label={t('field.arrival_date')} invalid={isMissing('arrival_date')}>
               <input type="date" className="input" style={isMissing('arrival_date') ? INVALID_STYLE : undefined}
                 value={answers.arrival_date || ''} onChange={(e) => setAnswer('arrival_date', e.target.value)} />
@@ -606,56 +733,12 @@ export default function StartVisa({ client, onOpenCase }) {
               <input type="date" className="input" style={isMissing('departure_date') ? INVALID_STYLE : undefined}
                 value={answers.departure_date || ''} onChange={(e) => setAnswer('departure_date', e.target.value)} />
               {!datesOrdered(answers.arrival_date, answers.departure_date) && (
-                <div style={{ fontSize: 12, color: 'var(--ink)', fontWeight: 600, marginTop: 4 }}>
+                <div style={{ fontSize: 12, color: 'var(--crit)', fontWeight: 600, marginTop: 4 }}>
                   {t('start.departAfterArrive')}
                 </div>
               )}
             </Field>
-            <Field label={t('field.transit_countries')} optional t={t}>
-              <MultiSelect t={t} values={answers.transit_countries || []} options={countryOpts}
-                onChange={(v) => setAnswer('transit_countries', v.length ? v : undefined)} />
-            </Field>
-          </div>
-        )}
-
-        {step === 2 && (
-          <div className="grid grid-2" style={{ gap: 12 }}>
-            <Field label={t('field.birth_date')} invalid={isMissing('birth_date')}>
-              <input type="date" className="input" value={answers.birth_date || ''}
-                onChange={(e) => {
-                  const dob = e.target.value || undefined
-                  setAnswer('birth_date', dob)
-                  // Age is ALWAYS derived from the date of birth — never typed
-                  // independently once a birth date exists. "Today" is the
-                  // applicant's LOCAL calendar day (UTC would flip the age on
-                  // birthdays west of Greenwich).
-                  const age = dob ? deriveAge(dob, localTodayIso()) : null
-                  setAnswer('age', age == null ? undefined : age)
-                }} />
-            </Field>
-            <Field label={t('field.age')} invalid={isMissing('age')}>
-              {answers.birth_date
-                ? <div className="input" style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-soft)' }}
-                    data-testid="derived-age">
-                    {answers.age ?? '—'} · {t('passport.source.derived')}
-                  </div>
-                : <input type="number" min="0" max="130" className="input" style={isMissing('age') ? INVALID_STYLE : undefined}
-                    value={answers.age ?? ''}
-                    onChange={(e) => setAnswer('age', e.target.value === '' ? undefined : Number(e.target.value))} />}
-            </Field>
-            <Field label={t('field.dependants')} optional t={t}>
-              <input type="number" min="0" max="20" className="input" value={answers.dependants ?? ''}
-                onChange={(e) => setAnswer('dependants', e.target.value === '' ? undefined : Number(e.target.value))} />
-            </Field>
-            <Field label={t('field.existing_destination_visas')} optional t={t}>
-              <input className="input" value={answers.existing_destination_visas || ''}
-                onChange={(e) => setAnswer('existing_destination_visas', e.target.value)} />
-            </Field>
-            <Field label={t('field.existing_residence_permits')} optional t={t}>
-              <input className="input" value={answers.existing_residence_permits || ''}
-                onChange={(e) => setAnswer('existing_residence_permits', e.target.value)} />
-            </Field>
-            <Field label={t('field.prior_refusals')}>
+            <Field label={t('field.prior_refusals')} invalid={isMissing('prior_refusals')}>
               <select className="select" value={answers.prior_refusals || ''}
                 onChange={(e) => setAnswer('prior_refusals', e.target.value || undefined)}>
                 <option value="">{t('start.select')}</option>
@@ -669,50 +752,29 @@ export default function StartVisa({ client, onOpenCase }) {
                   onChange={(e) => setAnswer('prior_refusals_detail', e.target.value)} />
               </Field>
             )}
-            <Field label={t('field.existing_portal_account')}>
-              <select className="select" value={answers.existing_portal_account || ''}
-                onChange={(e) => setAnswer('existing_portal_account', e.target.value || undefined)}>
-                <option value="">{t('start.select')}</option>
-                <option value="no">{t('opt.no')}</option>
-                <option value="yes">{t('opt.yes')}</option>
-              </select>
-            </Field>
-            <Field label={t('field.preferred_language')} invalid={isMissing('preferred_language')}>
-              <select className="select" value={answers.preferred_language || lang}
-                onChange={(e) => setAnswer('preferred_language', e.target.value)}>
-                {SUPPORTED.map((c) => <option key={c} value={c}>{LANGUAGE_NAMES[c]}</option>)}
-              </select>
-            </Field>
-            <Field label={t('field.email')} invalid={isMissing('email')}>
-              <input type="email" className="input" style={isMissing('email') ? INVALID_STYLE : undefined}
-                value={answers.email || ''} onChange={(e) => setAnswer('email', e.target.value)}
-                onBlur={flushSave} />
-              {answers.email && !validEmail(answers.email) && (
-                <div style={{ fontSize: 12, color: 'var(--ink)', fontWeight: 600, marginTop: 4 }}>
-                  {t('start.invalidEmail')}
-                </div>
-              )}
-            </Field>
           </div>
         )}
 
-        {step === 3 && (
-          <ReviewStep t={t} answers={answers} info={info} missing={missing}
-            display={{
-              countryName, nationalityName,
-              docName: (c) => docTypes.find((d) => d.code === c)?.name || c,
-              catName: (c) => categories.find((x) => x.code === c)?.name || c
-            }}
-            onJump={(k) => setStep(stepForField(k))} />
-        )}
+        {/* Birth date (usually auto-read from the passport) lives on page 0's
+            manual grid via the OCR prefill; if it is still missing at resolve
+            time the 422 jump lands the applicant back on page 0. */}
 
         {resolveError && <ErrorNote error={resolveError} />}
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 32, paddingTop: 22, borderTop: '1px solid var(--line)' }}>
           <button className="btn btn--sm btn--ghost" disabled={step === 0}
             onClick={() => { flushSave(); setStep(step - 1) }}>{t('start.back')}</button>
-          {step < 3
-            ? <button className="btn btn--sm" onClick={() => { flushSave(); setStep(step + 1) }}>{t('start.next')}</button>
+          {/* The disabled Next carries the gate on its own — no standing
+              hint line. If the applicant clicks it anyway (or presses the
+              chip-less keyboard path), goToStep highlights the exact fields
+              that are still missing. */}
+          {step < lastStep
+            ? <button className="btn" disabled={!step0Complete}
+                data-testid="wizard-next"
+                title={!step0Complete ? t('start.finishPassportFirst') : undefined}
+                onClick={() => goToStep(step + 1)}>
+                {t('start.next')}
+              </button>
             : <button className="btn" disabled={resolving} onClick={resolve}>
                 {resolving ? t('start.resolving') : t('start.resolve')}
               </button>}
@@ -771,85 +833,13 @@ function SearchSelect({ value, options, onChange, invalid, t }) {
   )
 }
 
-// Multi-select (transit countries): selected chips + a search box to add more.
-function MultiSelect({ values, options, onChange, t }) {
-  return (
-    <div>
-      {values.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
-          {values.map((v) => (
-            <span key={v} className="chip chip--ink" style={{ cursor: 'pointer' }}
-              onClick={() => onChange(values.filter((x) => x !== v))}>
-              {options.find((o) => o.value === v)?.label || v} ✕
-            </span>
-          ))}
-        </div>
-      )}
-      <SearchSelect t={t} value={undefined}
-        options={options.filter((o) => !values.includes(o.value))}
-        onChange={(v) => onChange([...values, v])} />
-    </div>
-  )
-}
-
-// Review step: every answer with its display value; missing ones jump back.
-function ReviewStep({ t, answers, info, missing, display, onJump }) {
-  const rows = []
-  const push = (key, value, labelKey) => rows.push({ key, value, labelKey })
-  push('passport_nationality', display.nationalityName(answers.passport_nationality))
-  push('passport_issuing_country', display.countryName(answers.passport_issuing_country))
-  push('travel_document_type', display.docName(answers.travel_document_type || 'ordinary_passport'))
-  push('lawful_country_of_residence', display.countryName(answers.lawful_country_of_residence))
-  if (answers.residence_status) push('residence_status', t('res.' + answers.residence_status))
-  // Structured home address — the jump key lands on the address section.
-  push('address_line1', formatAddress({ ...answers,
-    address_country: display.countryName(answers.address_country) }), 'address.title')
-  push('mailing_address_same',
-    answers.mailing_address_same === false ? t('opt.no') : t('opt.yes'))
-  push('destination_country', display.countryName(answers.destination_country))
-  // The category is determined automatically by Ellis, never picked upfront.
-  push('visa_category', t('start.autoCategory'))
-  push('travel_purpose', t('purpose.tourism'))
-  // Applicant-facing dates are always U.S. MM/DD/YYYY (values stay ISO).
-  push('arrival_date', formatDateUS(answers.arrival_date))
-  push('departure_date', formatDateUS(answers.departure_date))
-  if (Array.isArray(answers.transit_countries) && answers.transit_countries.length)
-    push('transit_countries', answers.transit_countries.map(display.countryName).join(', '))
-  if (answers.birth_date) push('birth_date', formatDateUS(answers.birth_date))
-  push('age', answers.age)
-  if (answers.dependants != null) push('dependants', answers.dependants)
-  if (answers.existing_destination_visas) push('existing_destination_visas', answers.existing_destination_visas)
-  if (answers.existing_residence_permits) push('existing_residence_permits', answers.existing_residence_permits)
-  if (answers.prior_refusals) push('prior_refusals', t('opt.' + answers.prior_refusals) + (answers.prior_refusals === 'yes' && answers.prior_refusals_detail ? ` — ${answers.prior_refusals_detail}` : ''))
-  if (answers.existing_portal_account) push('existing_portal_account', t('opt.' + answers.existing_portal_account))
-  push('preferred_language', LANGUAGE_NAMES[answers.preferred_language] || answers.preferred_language)
-  push('email', answers.email)
-
-  return (
-    <div>
-      {rows.map(({ key, value, labelKey }) => {
-        const bad = missing.includes(key)
-        return (
-          <div className="kv" key={key} style={{ cursor: 'pointer' }} onClick={() => onJump(key)}>
-            <div className="kv__k" style={bad ? { color: 'var(--ink)', fontWeight: 700 } : undefined}>
-              {t(labelKey || 'field.' + key)}{bad ? ' •' : ''}
-            </div>
-            <div className="kv__v">{value == null || value === '' ? '—' : String(value)}</div>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-// ---------------------------------------------------------------------------
 // The honest result panel: ONE readiness status, the disposition, the
 // verification-check rows, expandable sources, snapshot date + disclaimer.
 const TONE_STYLES = {
-  ok: { background: 'var(--ink)', color: '#fff', border: '1px solid var(--ink)' },
-  warn: { background: 'var(--bg)', border: '2px solid var(--ink)' },
+  ok: { background: 'var(--trip-blue)', color: '#fff', border: 'none' },
+  warn: { background: '#fff8ec', border: '1px solid #f5d9a6' },
   info: { background: 'var(--bg-soft)', border: '1px solid var(--line)' },
-  blocked: { background: 'var(--bg)', border: '2px solid var(--ink)' }
+  blocked: { background: '#fff', border: '2px solid var(--trip-navy)' }
 }
 const STATUS_NOTE_KEY = {
   NOT_READY: 'result.notReadySaved',
@@ -885,38 +875,6 @@ function GuidanceCountdown({ t }) {
 
 // The conditional health question, asked at the guidance stage ONLY when the
 // verified route carries a conditional rule and the applicant has not
-// answered the travel-history question yet.
-function GuidanceHealthQuestion({ t, guidance, answers, onAnswer }) {
-  const [selecting, setSelecting] = useState(false)
-  const [picked, setPicked] = useState([])
-  const reqs = ((guidance || {}).guidance || {}).health_requirements || []
-  const conditional = reqs.filter((r) => r && r.applicability === 'conditional')
-  if (conditional.length === 0) return null
-  if (answers && Object.prototype.hasOwnProperty.call(answers, 'recent_travel_countries')) return null
-  const q = conditional[0]
-  return (
-    <div className="note" style={{ marginTop: 12 }} data-testid="guidance-health-question">
-      <div style={{ fontWeight: 600, fontSize: 13 }}>{t('health.questionTitle')}</div>
-      <div style={{ fontSize: 13, marginTop: 4 }}>
-        {q.question || `${t('health.questionTitle')}: ${q.name}`}
-      </div>
-      {q.trigger && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{q.trigger}</div>}
-      {!selecting ? (
-        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-          <button className="btn btn--sm" onClick={() => setSelecting(true)}>{t('health.yes')}</button>
-          <button className="btn btn--sm btn--ghost" onClick={() => onAnswer([])}>{t('health.no')}</button>
-        </div>
-      ) : (
-        <CountryAnswer t={t} options={q.trigger_countries || []}
-          picked={picked} setPicked={setPicked}
-          onSubmit={() => onAnswer(picked)} />
-      )}
-    </div>
-  )
-}
-
-// Country selection for a travel-history answer: chips when the rule names its
-// risk countries, a free entry when it does not (never a fictional default).
 function CountryAnswer({ t, options, picked, setPicked, onSubmit }) {
   const [text, setText] = useState('')
   const useChips = options.length > 0
@@ -982,112 +940,100 @@ function GuidancePanel({ t, guidance, loading, error, onEdit, onNew, onRetry,
   }
   if (!guidance) return null
   const g = guidance.guidance || {}
-  const disp = guidanceDispositionMeta(g.disposition)
   const usable = guidanceIsUsable(guidance)
-  const plan = Array.isArray(guidance.workflow_plan) ? guidance.workflow_plan : []
-  const irreversible = plan.map(guidanceStepMeta).filter((s) => s.requiresConfirmation)
   const fee = g.government_fee || {}
-  // The decision chip needs no verification verdict — a valid Kimi decision
-  // (usable KIMI_PRIMARY result, verification {passes: 1}) is enough.
-  const verified = usable || verificationMeta(guidance.verification).verified
   const advisories = Array.isArray(guidance.advisories) ? guidance.advisories : []
-  // The primary continuation: no normal route ends at this page.
   const cont = continuationMeta(guidance)
-  return (
-    <div className="card" style={{ padding: 24 }}>
-      {/* AI-generated indicator — always visible with guidance-driven flow. */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, flexWrap: 'wrap' }}>
-        <span className="badge badge--ai">{t('guidance.aiBadge')}</span>
-        {verified && (
-          <span className="chip chip--sm" data-testid="guidance-verified-chip">
-            {t('guidance.verified')}
-          </span>
-        )}
-        {guidance.cached && <span className="chip chip--sm">{t('guidance.cached')}</span>}
-        {guidance.stale && <span className="chip chip--sm">{t('guidance.refreshing')}</span>}
-      </div>
-      <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 14 }}>
-        {t('guidance.disclaimer')}
-      </div>
-      {advisories.length > 0 && (
-        <div className="note note--warn" style={{ marginBottom: 12 }} data-testid="guidance-advisories">
-          {advisories.map((a, i) => <div key={i} style={{ fontSize: 13 }}>• {a}</div>)}
-        </div>
-      )}
+  const docs = Array.isArray(g.required_documents) ? g.required_documents : []
+  // The four numbers an applicant actually scans for. Everything else is
+  // detail that belongs below the fold, not competing with them.
+  const tiles = [
+    g.visa_category && { label: t('guidance.t.category'), value: g.visa_category },
+    g.permitted_stay && { label: t('guidance.t.stay'), value: g.permitted_stay },
+    g.processing_time && { label: t('guidance.t.processing'), value: g.processing_time },
+    fee.amount != null && { label: t('guidance.t.fee'), value: `${fee.amount} ${fee.currency || ''}`.trim() },
+  ].filter(Boolean)
 
+  return (
+    <div className="card guidance fadeup">
       {usable ? (
         <>
-          <div className={'result__disp result__disp--' + disp.tone} style={{ marginBottom: 8 }}>
-            {t(disp.i18nKey)}
-          </div>
-          <div className="grid grid-2" style={{ gap: 8, marginBottom: 12 }}>
-            {g.visa_category && <GField label={t('guidance.f.category')} value={g.visa_category} />}
-            {g.permitted_stay && <GField label={t('guidance.f.stay')} value={g.permitted_stay} />}
-            {g.passport_validity && <GField label={t('guidance.f.passport')} value={g.passport_validity} />}
-            {g.processing_time && <GField label={t('guidance.f.processing')} value={g.processing_time} />}
-            {(fee.amount != null) && <GField label={t('guidance.f.fee')} value={`${fee.amount} ${fee.currency || ''}`} />}
-            {g.application_channel && <GField label={t('guidance.f.channel')} value={String(g.application_channel).replace(/_/g, ' ')} />}
-          </div>
-          {Array.isArray(g.required_documents) && g.required_documents.length > 0 && (
-            <div style={{ marginBottom: 12 }}>
-              <div className="eyebrow">{t('guidance.f.documents')}</div>
-              <ul style={{ margin: '6px 0 0', paddingLeft: 18 }}>
-                {g.required_documents.map((d, i) => <li key={i} style={{ fontSize: 13.5 }}>{d}</li>)}
-              </ul>
+          {tiles.length > 0 && (
+            <div className="guidance__tiles">
+              {tiles.map((x) => (
+                <div className="gtile" key={x.label}>
+                  <div className="gtile__label">{x.label}</div>
+                  <div className="gtile__value">{x.value}</div>
+                </div>
+              ))}
             </div>
           )}
-          {/* The safety boundary, shown plainly. */}
-          {irreversible.length > 0 && (
-            <div className="note note--warn" style={{ marginTop: 8 }}>
-              {t('guidance.confirmBoundary')}
+
+          {docs.length > 0 && (
+            <section className="guidance__section">
+              <div className="eyebrow">{t('guidance.f.documents')}</div>
+              <ul className="gdocs">
+                {docs.map((d, i) => (
+                  <li key={i} className="gdocs__item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6"
+                      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M5 12.5l4.6 4.6L19 7.6" />
+                    </svg>
+                    {d}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {advisories.length > 0 && (
+            <div className="note note--warn guidance__note" data-testid="guidance-advisories">
+              {advisories.map((a, i) => <div key={i}>{a}</div>)}
             </div>
           )}
         </>
       ) : (
-        <div className="note note--warn">
-          <div style={{ fontWeight: 600, marginBottom: 6 }}>{t('guidance.uncertainTitle')}</div>
-          {Array.isArray(guidance.missing_fields) && guidance.missing_fields.length > 0 && (
-            <div style={{ fontSize: 13 }}>{t('guidance.uncertainMissing')}: {guidance.missing_fields.join(', ')}</div>
-          )}
-          {Array.isArray(guidance.contradictions) && guidance.contradictions.map((c, i) => (
-            <div key={i} style={{ fontSize: 13 }}>• {c}</div>
-          ))}
-        </div>
+        <>
+          <h2 className="guidance__title" style={{ marginBottom: 18 }}>
+            {t('guidance.uncertainTitle')}
+          </h2>
+          <div className="note note--warn guidance__note">
+            {Array.isArray(guidance.missing_fields) && guidance.missing_fields.length > 0 && (
+              <div>{t('guidance.uncertainMissing')}: {guidance.missing_fields.join(', ')}</div>
+            )}
+            {Array.isArray(guidance.contradictions) && guidance.contradictions.map((c, i) => (
+              <div key={i}>{c}</div>
+            ))}
+          </div>
+        </>
       )}
 
-      {/* Travel-history question, asked ONLY when a conditional health rule
-          needs it — never a generic vaccination request. */}
-      <GuidanceHealthQuestion t={t} guidance={guidance} answers={answers}
-        onAnswer={onAnswerHealth} />
-
-      {/* Continuation. A blocked CONDITIONAL route shows the precise blocker
-          instead of a CTA; everything else continues into the journey. */}
       {cont.blocked ? (
-        <div className="note note--warn" style={{ marginTop: 12 }} data-testid="guidance-blocked">
-          <div style={{ fontWeight: 600 }}>{t('guidance.continue.blockedTitle')}</div>
+        <div className="note note--warn guidance__note" data-testid="guidance-blocked">
+          <div style={{ fontWeight: 700 }}>{t('guidance.continue.blockedTitle')}</div>
           {cont.blockers.map((b, i) => (
-            <div key={i} style={{ fontSize: 13 }}>• {String(b).replace(/_/g, ' ')}</div>
+            <div key={i}>{String(b).replace(/_/g, ' ')}</div>
           ))}
         </div>
       ) : (
-        <div style={{ marginTop: 16 }}>
+        <div className="guidance__actions">
           {cont.partial && cont.blockers.length > 0 && (
-            <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 8 }}>
+            <div className="guidance__partial">
               {t('guidance.uncertainMissing')}: {cont.blockers.map((b) => String(b).replace(/_/g, ' ')).join(', ')}
             </div>
           )}
-          <button className="btn" disabled={continuing} onClick={onContinue}
+          <button className="trip-cta" disabled={continuing} onClick={onContinue}
             data-testid="guidance-continue" data-kind={cont.kind}>
             {continuing ? t('guidance.continuing') : t(cont.ctaKey)}
+            <svg className="trip-cta__arrow" width="19" height="19" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" strokeWidth="2.4"
+              strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
           </button>
         </div>
       )}
       {continueError && <ErrorNote error={continueError} />}
-
-      <div style={{ marginTop: 14, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-        <button className="btn btn--ghost btn--sm" onClick={onEdit}>{t('start.editAnswers')}</button>
-        <button className="btn btn--ghost btn--sm" onClick={onNew}>{t('start.resume.new')}</button>
-      </div>
     </div>
   )
 }

@@ -79,8 +79,13 @@ def test_missing_applicant_info_detection(db):
     missing = {m["key"] for m in personal_gate.missing_applicant_info(app_row)}
     assert "passport_nationality" not in missing        # provided
     assert "prior_visa_refusals" not in missing         # "none" is a valid answer
+    # RETIRED question (2026-07-28): the wizard no longer asks about an
+    # existing portal account — its absence means "no" (a fresh applicant has
+    # none; account creation is covered by the signed authorization) and must
+    # never block a live start. An explicit answer still satisfies it too.
+    assert "has_portal_account" not in missing
     assert {"current_residence", "visa_subtype", "travel_purpose", "intended_arrival",
-            "intended_departure", "birth_date", "has_portal_account",
+            "intended_departure", "birth_date",
             "representative_submission_permitted"} <= missing
 
 
@@ -145,3 +150,67 @@ def test_worker_does_not_start_a_passport_blocked_case_regression(db):
     worker.tick_once(db)                       # must NOT advance the blocked case
     db.refresh(app_row)
     assert app_row.state == "DRAFT"
+
+
+def test_every_required_applicant_fact_has_a_source():
+    """CONTRACT (2026-07-28 regression): the live preflight blocks a start on
+    any REQUIRED_APPLICANT_INFO key with no answer. Every key must therefore
+    have a REAL source — the intake wizard, a documented synonym, a runtime
+    derivation, or an explicit retirement default. Removing a wizard question
+    without doing one of those broke "Start application" for every case while
+    the whole suite stayed green (the UI and the gate had no test that knew
+    about each other).
+
+    If this fails: either restore the question in INTAKE_FIELDS, add a synonym,
+    or retire the key in _RETIRED_INFO_DEFAULTS — never delete the check.
+    Retiring is only for operational facts; an answer that becomes a statement
+    on a government form (prior refusals) must stay a real question."""
+    from app import personal_gate
+    from app.visa_snapshot.api import CASE_ANSWER_ALIASES, INTAKE_FIELDS
+    from app.visa_snapshot.intake_flow import PROFILE_FIELDS
+
+    # A source only counts when it GUARANTEES a value: an intake field that is
+    # required, or that carries a product default. A `required: False` field
+    # with no default is exactly the hole that broke every live start on
+    # 2026-07-28 — the wizard happened to ask it, so the gate passed, until a
+    # UI change stopped asking and nothing failed until runtime.
+    collected = {f["key"] for f in INTAKE_FIELDS
+                 if f.get("required") or "default" in f}
+    # A required fact may reach the case answers by any of four routes:
+    #   1. the wizard asks for it by name            (INTAKE_FIELDS)
+    #   2. the wizard asks under another name        (CASE_ANSWER_ALIASES)
+    #   3. a documented gate-side synonym            (_INFO_SYNONYMS)
+    #   4. the passport itself supplies it           (PROFILE_FIELDS — the
+    #      passport upload is a mandatory checklist item on every route)
+    # ...or the gate derives it at runtime from a verified source.
+    for case_key, intake_key in CASE_ANSWER_ALIASES.items():
+        if intake_key in collected:
+            collected.add(case_key)
+    collected |= set(PROFILE_FIELDS)
+    derived = {
+        "visa_subtype",                       # from the verified route guidance
+        "representative_submission_permitted",  # from the signed authorization
+    }
+    unsourced = []
+    for key in personal_gate.REQUIRED_APPLICANT_INFO:
+        names = {key, *(personal_gate._INFO_SYNONYMS.get(key) or ())}
+        if names & collected or key in derived:
+            continue
+        if key in personal_gate._RETIRED_INFO_DEFAULTS:
+            continue
+        unsourced.append(key)
+    assert not unsourced, (
+        f"required applicant info with no source: {unsourced} — the wizard no "
+        "longer collects it and it is neither derived nor retired, so every "
+        "live start will 409 on it")
+
+    # A retired key must genuinely be gone from the wizard's REQUIRED set:
+    # retiring one the wizard still asks would hide a real unanswered question.
+    required_keys = {f["key"] for f in INTAKE_FIELDS if f.get("required")}
+    for key in personal_gate._RETIRED_INFO_DEFAULTS:
+        names = {key, *(personal_gate._INFO_SYNONYMS.get(key) or ())}
+        assert not (names & required_keys), (
+            f"{key} is marked retired but the wizard still requires it")
+
+    # Government-form statements are never defaulted away.
+    assert "prior_visa_refusals" not in personal_gate._RETIRED_INFO_DEFAULTS

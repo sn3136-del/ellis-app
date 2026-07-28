@@ -31,7 +31,24 @@ export default function PassportIntake({ client, intakeId, t, confirmed, onApply
   const [result, setResult] = useState(null)    // accepted upload response
   const [rejection, setRejection] = useState(null)
   const [edits, setEdits] = useState({})        // profile key -> edited value
+  const [editingKey, setEditingKey] = useState(null)  // per-field inline edit
   const [error, setError] = useState(null)
+  const autoApplied = useRef(false)
+
+  // The extracted details apply THEMSELVES — no "Use these details" ceremony.
+  // The applicant gets an Edit button instead; edits re-apply on save.
+  // Keyed by the document id so a REPLACEMENT upload also applies (the old
+  // guard latched after the first profile and silently kept the first
+  // passport's values while displaying the new one's).
+  useEffect(() => {
+    if (stage !== 'preview' || !result?.profile) return
+    const key = result.document_id || result.profile_id ||
+      JSON.stringify(result.profile.prefill || {})
+    if (autoApplied.current === key) return
+    autoApplied.current = key
+    setEdits({})
+    onApply(prefillWithEdits(result.profile, {}))
+  }, [stage, result])  // eslint-disable-line react-hooks/exhaustive-deps
 
   // Refresh-resume: a previously extracted profile reopens in the preview.
   useEffect(() => {
@@ -72,12 +89,6 @@ export default function PassportIntake({ client, intakeId, t, confirmed, onApply
     }
   }
 
-  function apply() {
-    const prefill = prefillWithEdits(result?.profile, Object.fromEntries(
-      Object.entries(edits).map(([k, v]) => [k, v])))
-    onApply(prefill)
-  }
-
   if (stage === 'loading') return <Loading label={t('common.loading')} />
 
   if (stage === 'busy') {
@@ -105,83 +116,143 @@ export default function PassportIntake({ client, intakeId, t, confirmed, onApply
 
   if (stage === 'preview' && result) {
     const rows = profileRows(result.profile)
-    const needsAny = rows.some((r) => r.needsConfirm)
+    const commit = (key, value) => {
+      const next = { ...edits, [key]: value }
+      setEdits(next)
+      setEditingKey(null)
+      onApply(prefillWithEdits(result.profile, next))
+    }
     return (
-      <div className="card" style={{ padding: 18, marginBottom: 14 }} data-testid="passport-preview">
+      <div className="card fadeup" style={{ padding: 22, marginBottom: 16 }} data-testid="passport-preview">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-          <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span className="uptick" style={{ width: 34, height: 34 }}>
+              <svg viewBox="0 0 24 24" style={{ width: 18, height: 18 }}><path d="M5 12.5l4.6 4.6L19 7.6" /></svg>
+            </span>
             <div style={{ fontWeight: 700 }}>{t('passport.previewTitle')}</div>
-            <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{t('passport.previewSub')}</div>
           </div>
-          <span className={'chip' + (result.mrz_valid ? ' chip--ink' : '')}>
-            {result.mrz_valid ? t('passport.mrzValid') : t('passport.mrzInvalid')}
-          </span>
-        </div>
-        <div style={{ marginTop: 12 }}>
-          {rows.map((r) => (
-            <div key={r.key} className="row" style={{ alignItems: 'center', gap: 10, padding: '6px 8px',
-              borderRadius: 8, background: r.needsConfirm ? 'rgba(200,120,0,0.08)' : undefined }}>
-              <span className={'sevbadge ' + (r.level === 'ok' ? 'sevbadge--ok' : r.level === 'bad' ? 'sevbadge--bad' : 'sevbadge--mid')}>
-                {r.level === 'ok' ? '✓' : r.needsConfirm ? '!' : '~'}
-              </span>
-              <div className="row__main" style={{ minWidth: 0 }}>
-                <div className="row__title">{t(r.labelKey)}</div>
-                <div className="row__sub">
-                  {t(SOURCE_KEY[r.source])} · {Math.round(r.confidence * 100)}%
-                  {r.needsConfirm && <strong style={{ color: '#9a3412' }}> · {t('passport.needsConfirm')}</strong>}
-                  {r.note && <span> · {r.note}</span>}
-                </div>
-              </div>
-              {r.key === '_age'
-                ? <div style={{ fontSize: 14 }}>{edits.birth_date != null
-                    ? (prefillWithEdits(result.profile, edits).age ?? '—') : r.value}</div>
-                : <input className="input" style={{ maxWidth: 220 }}
-                    value={edits[r.key] ?? r.display}
-                    onChange={(e) => setEdits((m) => ({ ...m, [r.key]: e.target.value }))} />}
-            </div>
-          ))}
-        </div>
-        {error && <ErrorNote error={error} />}
-        <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
-          <button className="btn" onClick={apply} data-testid="passport-apply">
-            {confirmed ? t('passport.reapply') : t('passport.apply')}
-          </button>
           <button className="btn btn--sm btn--ghost" onClick={() => inputRef.current?.click()}>
             {t('passport.reupload')}
           </button>
-          <button className="btn btn--sm btn--ghost" onClick={onManual}>{t('start.entry.manual')}</button>
         </div>
-        {needsAny && (
-          <div style={{ fontSize: 12.5, color: '#9a3412', marginTop: 8 }}>{t('passport.confirmHint')}</div>
-        )}
+        {/* Every field carries its OWN pencil — the applicant edits exactly
+            the value that looks wrong, in place, instead of flipping the whole
+            card into a form. Age stays derived from the date of birth. */}
+        <div className="ppf-grid">
+          {rows.map((r) => {
+            const editable = r.key !== '_age'
+            const shown = r.key === '_age'
+              ? (edits.birth_date != null
+                  ? (prefillWithEdits(result.profile, edits).age ?? '—') : r.value)
+              : (edits[r.key] ?? r.display)
+            const isEditing = editingKey === r.key
+            return (
+              <div key={r.key} className="ppf" data-testid={'ppf-' + r.key}>
+                <div className="ppf__label">{t(r.labelKey)}</div>
+                {isEditing ? (
+                  <input className="input" autoFocus defaultValue={String(shown)}
+                    data-testid={'ppf-input-' + r.key}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') commit(r.key, e.currentTarget.value)
+                      if (e.key === 'Escape') setEditingKey(null)
+                    }}
+                    onBlur={(e) => commit(r.key, e.currentTarget.value)} />
+                ) : (
+                  <div className="ppf__row">
+                    <span className="ppf__value" title={String(shown)}>{shown}</span>
+                    {editable && (
+                      <button type="button" className="ppf__pencil"
+                        data-testid={'ppf-edit-' + r.key}
+                        aria-label={`${t('passport.edit')} — ${t(r.labelKey)}`}
+                        title={t('passport.edit')}
+                        onClick={() => setEditingKey(r.key)}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                          strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 20h9" />
+                          <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+        {error && <ErrorNote error={error} />}
         <FileInput inputRef={inputRef} onFiles={onFiles} />
       </div>
     )
   }
 
-  // choice: upload vs manual entry
+  // choice: upload vs manual entry — two illustrated cards. The passport
+  // booklet wears the Trip.com livery; the manual card is a form-and-pen.
   return (
-    <div style={{ marginBottom: 14 }} data-testid="passport-choice">
-      <div style={{ fontSize: 13.5, fontWeight: 600, marginBottom: 8 }}>{t('start.entry.title')}</div>
-      <div className="grid grid-2" style={{ gap: 10 }}>
-        <div className="card card--soft" role="button" tabIndex={0} data-testid="passport-upload-option"
-          style={{ padding: 18, textAlign: 'center', border: '1.5px dashed var(--line-strong)', cursor: 'pointer' }}
+    <div style={{ marginBottom: 18 }} data-testid="passport-choice">
+      <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 14 }}>{t('start.entry.title')}</div>
+      <div className="grid grid-2 choicegrid">
+        <div className="choicecard" role="button" tabIndex={0} data-testid="passport-upload-option"
           onClick={() => inputRef.current?.click()}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') inputRef.current?.click() }}
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => { e.preventDefault(); onFiles(e.dataTransfer.files) }}>
-          <div style={{ fontWeight: 700 }}>{t('start.entry.upload')}</div>
-          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>{t('start.entry.uploadSub')}</div>
+          <PassportArt />
+          <div className="choicecard__name">{t('start.entry.upload')}</div>
         </div>
-        <div className="card card--soft" role="button" tabIndex={0} data-testid="passport-manual-option"
-          style={{ padding: 18, textAlign: 'center', cursor: 'pointer' }}
-          onClick={onManual}>
-          <div style={{ fontWeight: 700 }}>{t('start.entry.manual')}</div>
-          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>{t('start.entry.manualSub')}</div>
+        <div className="choicecard" role="button" tabIndex={0} data-testid="passport-manual-option"
+          onClick={onManual}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onManual() }}>
+          <ManualArt />
+          <div className="choicecard__name">{t('start.entry.manual')}</div>
         </div>
       </div>
       {error && <ErrorNote error={error} />}
       <FileInput inputRef={inputRef} onFiles={onFiles} />
     </div>
+  )
+}
+
+// A Trip.com-liveried passport booklet.
+function PassportArt() {
+  return (
+    <svg className="choicecard__art" viewBox="0 0 150 108" fill="none" aria-hidden="true">
+      {/* booklet */}
+      <rect x="37" y="8" width="76" height="94" rx="8" fill="#0f294d" />
+      <rect x="37" y="8" width="76" height="94" rx="8" stroke="#0a1f3c" strokeWidth="2" />
+      <rect x="41" y="8" width="3" height="94" fill="rgba(255,255,255,0.12)" />
+      {/* globe emblem */}
+      <circle cx="75" cy="42" r="15" stroke="#fcaf17" strokeWidth="2.2" />
+      <ellipse cx="75" cy="42" rx="6.5" ry="15" stroke="#fcaf17" strokeWidth="1.6" />
+      <path d="M60 42h30M62.5 34.5h25M62.5 49.5h25" stroke="#fcaf17" strokeWidth="1.6" />
+      {/* livery */}
+      <text x="75" y="72" textAnchor="middle" fontFamily="Inter, system-ui, sans-serif"
+        fontSize="12.5" fontWeight="800" fill="#ffffff">Trip<tspan fill="#fcaf17">.</tspan>com</text>
+      <text x="75" y="88" textAnchor="middle" fontFamily="Inter, system-ui, sans-serif"
+        fontSize="7" letterSpacing="2.6" fill="rgba(255,255,255,0.75)">PASSPORT</text>
+    </svg>
+  )
+}
+
+// A form-and-pen card for typing the details yourself.
+function ManualArt() {
+  return (
+    <svg className="choicecard__art" viewBox="0 0 150 108" fill="none" aria-hidden="true">
+      {/* sheet */}
+      <rect x="41" y="10" width="68" height="88" rx="7" fill="#ffffff" stroke="#c9d7ec" strokeWidth="2" />
+      <rect x="50" y="22" width="34" height="7" rx="3.5" fill="#287dfa" opacity="0.85" />
+      <rect x="50" y="38" width="50" height="5" rx="2.5" fill="#dbe6f5" />
+      <rect x="50" y="50" width="50" height="5" rx="2.5" fill="#dbe6f5" />
+      <rect x="50" y="62" width="36" height="5" rx="2.5" fill="#dbe6f5" />
+      {/* checkbox tick */}
+      <rect x="50" y="74" width="10" height="10" rx="2.5" stroke="#287dfa" strokeWidth="2" />
+      <path d="M52.5 79l2.6 2.6 4.6-5" stroke="#287dfa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      {/* pen */}
+      <g transform="rotate(38 104 66)">
+        <rect x="98" y="40" width="11" height="42" rx="3" fill="#287dfa" />
+        <rect x="98" y="40" width="11" height="9" rx="3" fill="#1c66d9" />
+        <path d="M98 82l5.5 12 5.5-12z" fill="#fcaf17" />
+      </g>
+    </svg>
   )
 }
 

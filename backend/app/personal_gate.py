@@ -239,6 +239,16 @@ _INFO_SYNONYMS: dict[str, tuple] = {
     "has_portal_account": ("existing_portal_account",),
 }
 
+# Retired questions with a documented product default (2026-07-28). The wizard
+# no longer asks whether a portal account already exists: a fresh applicant
+# has none, and creating/connecting one is exactly what the signed
+# authorization covers — so its absence means "no", never a blocker. Only
+# operational facts belong here; an answer that becomes a statement on a
+# government form (e.g. prior refusals) is NEVER defaulted.
+_RETIRED_INFO_DEFAULTS: dict[str, str] = {
+    "has_portal_account": "no",
+}
+
 
 def missing_applicant_info(app_row: models.VisaApplication, db=None) -> list[dict]:
     """Which of the brief's required applicant fields are still missing."""
@@ -254,6 +264,8 @@ def missing_applicant_info(app_row: models.VisaApplication, db=None) -> list[dic
     missing = []
     for key, label in REQUIRED_APPLICANT_INFO.items():
         if present(key):
+            continue
+        if key in _RETIRED_INFO_DEFAULTS:
             continue
         if db is not None and key == "visa_subtype":
             # The verified route guidance pins the exact category (e.g. e-visa

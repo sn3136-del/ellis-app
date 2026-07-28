@@ -392,6 +392,8 @@ class FlowRunner:
                                     listed = lister(node["selector"]) or {}
                                     opts = [str(o) for o in (listed.get("options") or [])
                                             if str(o).strip()]
+                                    self._remember_options(
+                                        node, opts, complete=bool(listed.get("complete")))
                                 except Exception:  # noqa: BLE001
                                     opts = []
                         if opts:
@@ -540,6 +542,7 @@ class FlowRunner:
         offer its choices."""
         out, seen, node_id = [], set(), from_node_id
         deferred = 0
+        harvested = 0
         while node_id and node_id not in seen and len(out) < 40:
             seen.add(node_id)
             node = self.flow.nodes.get(node_id)
@@ -552,20 +555,32 @@ class FlowRunner:
                 rejected = nid in self.observed_options or nid in self._rejected_fills
                 mandatory = bool(node.get("mandatory", True))
                 if mandatory and act == "SELECT_SEARCH":
-                    if not rejected:
+                    # Live option harvests are CAPPED per pause (same bound the
+                    # page classifier uses): opening every remaining combobox
+                    # delayed the applicant's prompt by seconds per list
+                    # (measured ~13s on a real run, 2026-07-28). Within the
+                    # cap, answered selects are still pre-validated so a value
+                    # the portal will reject is re-asked in THIS batch.
+                    if not rejected and harvested < 3:
                         self._harvest_options(node)
+                        harvested += 1
                     opts = self.observed_options.get(nid) or []
                     declared = (node.get("question") or {}).get("options") or []
                     known = opts or declared
                     if v not in ("", None) and known and self._option_matches(v, known):
                         node_id = self.flow.next_of(node_id, "ok")
                         continue          # the portal will accept this answer
+                    if v not in ("", None) and not known and not rejected:
+                        # Past the harvest cap (or an unreadable list): the
+                        # fill step verifies this answer when the run resumes;
+                        # a genuine mismatch re-asks with the portal's list.
+                        node_id = self.flow.next_of(node_id, "ok")
+                        continue
                     if not known:
-                        # No readable choices yet (dependent list). Asking with
-                        # an empty dropdown would be a dead end; ask when the
-                        # portal can actually offer its options.
-                        if v in ("", None) or rejected:
-                            deferred += 1
+                        # No readable choices yet (dependent list, or past the
+                        # cap). Asking with an empty dropdown would be a dead
+                        # end; ask when the portal can offer its options.
+                        deferred += 1
                         node_id = self.flow.next_of(node_id, "ok")
                         continue
                     out.append(self._question_for(node))
@@ -840,6 +855,27 @@ class FlowRunner:
         opts = [str(o) for o in (res.get("options") or []) if str(o).strip()]
         if opts:
             self.observed_options[nid] = opts
+            self._remember_options(node, opts, complete=bool(res.get("complete")))
+
+    def _remember_options(self, node: dict, options: list,
+                          complete: bool = False) -> None:
+        """Cache what the portal actually offered, keyed to this adapter
+        version, so the NEXT applicant is asked with a real dropdown before a
+        browser session opens. Best-effort: caching must never break a pause,
+        and the live page stays the authority (a value the portal no longer
+        offers is caught by the fill step and re-asked with the real list)."""
+        field_key = str(node.get("input_source") or "").strip()
+        if not field_key:
+            return
+        try:
+            from ..portal.released_flow import remember_field_options
+            remember_field_options(
+                self.db, candidate_id=self.execution.candidate_id,
+                candidate_version=int(self.execution.candidate_version),
+                field_key=field_key, node_id=str(node.get("node_id") or ""),
+                options=options, complete=complete)
+        except Exception:  # noqa: BLE001 — a cache write is never load-bearing
+            pass
 
     def _document_for(self, doc_type: str):
         for d in self.documents:

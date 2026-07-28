@@ -89,11 +89,13 @@ def _wf(driver, state, **snapshot):
 
 # ---------- Part 2: fast Continue, idempotent queue --------------------------
 
-def test_contact_confirmation_required_before_portal_start(client, live_route):
+def test_no_contact_confirmation_gate_before_portal_start(client, live_route):
+    # Product decision 2026-07-27: the intake email IS the portal contact —
+    # signing must never 409 on a separate contact-confirmation step.
     case = _new_case(client)
     r = client.post(f"/cases/{case['id']}/signals/sign_authorization", headers=AUTH, json={})
-    assert r.status_code == 409
-    assert r.json()["detail"]["reason"] == "contact_unconfirmed"
+    assert r.status_code == 200
+    assert r.json().get("queued") is True
 
 
 def test_contact_endpoint_masks_phone_and_confirms(client):
@@ -1362,3 +1364,122 @@ def test_signature_binds_to_the_prepared_envelope_not_the_newest(client, db):
     # The operative workflow authorization is the SIGNED envelope's terms.
     wf = service.load_workflow(db, case["id"])
     assert wf.authorization["max_fee_cents"] == 5000
+
+
+def test_question_collection_caps_live_option_harvests(db):
+    """Regression (2026-07-28): collecting the applicant's question batch used
+    to open EVERY remaining combobox to pre-validate stored answers — seconds
+    per list on the real portal (~13s measured before the applicant saw the
+    prompt). Harvests are capped per pause (same bound as the page
+    classifier); selects past the cap are verified by the fill step instead,
+    and unanswered ones are deferred to the next pause — never asked with an
+    empty list."""
+    harvested = []
+
+    class Driver:
+        def list_options(self, selector, max_options=300):
+            harvested.append(selector)
+            return {"ok": True, "options": ["A", "B"]}
+
+    def sel(i, key, answered):
+        return {"node_id": f"pick_{i}", "action": "SELECT_SEARCH",
+                "selector": f"#s{i}", "input_source": key,
+                "allowed_hostname": "evisa.gov.vn", "mandatory": True}
+
+    nodes = [sel(i, f"k{i}", False) for i in range(5)] + [
+        {"node_id": "done", "action": "COMPLETE", "allowed_hostname": "evisa.gov.vn"}]
+    answers = {"k3": "A", "k4": "ZZZ"}      # k0-k2 unanswered, k3 matches, k4 wrong
+    runner = _flow_runner(db, nodes, Driver(), answers, app_id="c-cap")
+    res = runner.run()
+    assert res["status"] == "paused_applicant_action"
+    # Exactly 3 live harvests, in flow order — never one per combobox.
+    assert harvested == ["#s0", "#s1", "#s2"]
+    keys = {q["key"] for q in res["questions"]}
+    # Within the cap: unanswered selects are asked with the portal's options.
+    assert {"k0", "k1", "k2"} <= keys
+    # Past the cap: the answered selects are left to fill-time verification —
+    # not asked now, and the WRONG one (k4) will be re-asked by the rejected-
+    # fill path with the portal's real list.
+    assert "k3" not in keys and "k4" not in keys
+
+
+def test_a_live_harvest_caches_the_portals_own_options(db):
+    """The loop that makes pre-run dropdowns real: when the runner reads a
+    portal's option list during a pause, that list is remembered against the
+    adapter version so the NEXT applicant is asked with a real dropdown before
+    any browser session opens."""
+    from app.adapter_factory import models as fm
+
+    class Driver:
+        def list_options(self, selector, max_options=300):
+            return {"ok": True, "options": ["Noi Bai", "Tan Son Nhat"]}
+
+    nodes = [
+        {"node_id": "pick_entry", "action": "SELECT_SEARCH", "selector": "#entry",
+         "input_source": "entry_checkpoint", "allowed_hostname": "evisa.gov.vn",
+         "mandatory": True},
+        {"node_id": "done", "action": "COMPLETE", "allowed_hostname": "evisa.gov.vn"},
+    ]
+    runner = _flow_runner(db, nodes, Driver(), {}, app_id="c-optcache")
+    res = runner.run()
+    assert res["status"] == "paused_applicant_action"
+    row = db.execute(select(fm.PortalFieldOptionCache).where(
+        fm.PortalFieldOptionCache.candidate_id == runner.execution.candidate_id,
+        fm.PortalFieldOptionCache.candidate_version == runner.execution.candidate_version,
+        fm.PortalFieldOptionCache.node_id == "pick_entry")).scalars().first()
+    assert row is not None
+    assert row.options == ["Noi Bai", "Tan Son Nhat"]
+    assert row.field_key == "entry_checkpoint"
+    # The driver did not report the widget as exhausted, so the read is
+    # recorded as INCOMPLETE and can never be served as the portal's whole list.
+    assert row.complete is False
+    assert row.observations == 1
+
+
+def test_verified_official_fee_record_spares_the_applicant_typing_the_amount():
+    """When the portal renders no machine-readable amount, the route's VERIFIED
+    official fee record is used instead of asking the applicant to transcribe a
+    figure. That is the authority's own published schedule (versioned,
+    source-cited) — not an invention — so the applicant goes straight to a
+    single "pay the fee" step. The exact-amount confirmation still happens
+    there, and a fee READ off the live page always outranks the record."""
+    class NoFee:
+        def discover_fee(self, **_kw):
+            return {"ok": False, "code": "FEE_NOT_DISPLAYED"}
+
+        def detach(self):
+            pass
+
+    wf = _fee_wf(NoFee(), "FEE_DISCOVERY_PENDING")
+    wf.fee_context = {"available": True, "total_cents": 2500, "currency": "USD",
+                      "source_url": "https://evisa.gov.vn/", "version": 1,
+                      "source_authority": "Immigration Department"}
+    wf.start()
+    assert wf.machine.state == "PAYMENT_APPROVAL_REQUIRED"
+    # No "type the amount you see" step: the amount is already bound.
+    assert wf.pending["handoff"] == "payment_approval"
+    assert wf.fee["amount"] == 2500 and wf.fee["currency"] == "USD"
+    assert wf.fee["source"] == "verified_official_fee_record"
+    assert wf.fee["source_url"] == "https://evisa.gov.vn/"
+    # The applicant still confirms that exact amount before anything is paid.
+    wf.approve_payment(amount_cents=2500, currency="USD")
+    assert wf.machine.state == "PAYMENT_ACTION_REQUIRED"
+
+
+def test_a_route_with_no_verified_fee_record_still_asks_the_applicant():
+    """The 'never invent a fee' rule is untouched: no verified record means no
+    amount, so the applicant is still asked rather than shown a guess."""
+    class NoFee:
+        def discover_fee(self, **_kw):
+            return {"ok": False, "code": "FEE_NOT_DISPLAYED"}
+
+        def detach(self):
+            pass
+
+    for ctx in (None, {"available": False}, {"available": True, "total_cents": 0,
+                                             "currency": "USD"}):
+        wf = _fee_wf(NoFee(), "FEE_DISCOVERY_PENDING")
+        wf.fee_context = ctx
+        wf.start()
+        assert wf.fee is None
+        assert wf.pending["handoff"] == "fee_confirmation"

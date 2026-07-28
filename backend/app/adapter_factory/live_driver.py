@@ -77,9 +77,22 @@ class BrowserbasePageDriver:
             status = resp.status if resp else 200
             if not self._host_ok(self.page.url):
                 return {"ok": False, "code": "REDIRECTED_OFF_ALLOWLIST"}
-            return {"ok": 200 <= int(status) < 400, "status": int(status)}
+            status = int(status)
+            if status >= 500:
+                # The government site itself is failing (502/503 from its own
+                # front door). Nothing about this application is wrong and no
+                # retry of OUR work can fix it — say which it is, so the
+                # applicant is never told their case "needs a closer look"
+                # when the portal is simply down.
+                return {"ok": False, "code": "PORTAL_UNAVAILABLE", "status": status,
+                        "detail": f"the official portal returned HTTP {status}"}
+            return {"ok": 200 <= status < 400, "status": status}
         except Exception as e:  # noqa: BLE001
-            return {"ok": False, "code": "NAV_ERROR", "detail": str(e)[:120]}
+            msg = str(e)[:120]
+            if "ERR_CONNECTION" in msg or "ERR_NAME_NOT_RESOLVED" in msg or \
+                    "Timeout" in msg or "ERR_EMPTY_RESPONSE" in msg:
+                return {"ok": False, "code": "PORTAL_UNAVAILABLE", "detail": msg}
+            return {"ok": False, "code": "NAV_ERROR", "detail": msg}
 
     def fill(self, selector: str, value: str) -> dict:
         # The deterministic runtime never fills a sensitive field, but refuse
@@ -136,7 +149,7 @@ class BrowserbasePageDriver:
             # cover the button and turn the click into a 15s timeout.
             try:
                 self.page.keyboard.press("Escape")
-                self.page.wait_for_timeout(120)
+                self.page.wait_for_timeout(60)
             except Exception:  # noqa: BLE001
                 pass
             # Text selectors can also match stale HIDDEN elements (e.g. a
@@ -1144,7 +1157,7 @@ class BrowserbasePageDriver:
         try:
             try:  # dismiss any lingering overlay (e.g. an open date picker)
                 self.page.keyboard.press("Escape")
-                self.page.wait_for_timeout(150)
+                self.page.wait_for_timeout(60)
             except Exception:  # noqa: BLE001
                 pass
             self.page.locator(f"{selector} >> visible=true").first.click(timeout=_CLICK_MS)
@@ -1183,8 +1196,12 @@ class BrowserbasePageDriver:
               return {chosen: hit[1]};
             }"""
             result = {}
-            for _ in range(14):     # ~2.5s: filtered lists render in a tick or two
-                self.page.wait_for_timeout(180)
+            # Read FIRST — fast lists are already rendered — then poll on a
+            # short beat. Same ~2.5s settle budget, reached only when the
+            # portal is genuinely slow to render its options.
+            for i in range(26):
+                if i:
+                    self.page.wait_for_timeout(100)
                 result = self.page.evaluate(pick_js, want) or {}
                 if result.get("chosen") or len(result.get("labels") or []) > 1:
                     break
@@ -1215,18 +1232,35 @@ class BrowserbasePageDriver:
         except Exception as e:  # noqa: BLE001
             return {"ok": False, "code": "NO_SUCH_ELEMENT", "detail": str(e)[:120]}
 
-    def list_options(self, selector: str, max_options: int = 300) -> dict:
+    def list_options(self, selector: str, max_options: int = 300,
+                     max_scrolls: int = 12) -> dict:
         """Read a search-combobox's REAL option labels WITHOUT selecting
         anything — powering applicant questions for missing answers (Part 7:
         the applicant chooses from the portal's actual list, never a blank
         field). Opens the widget, waits for the async list, harvests visible
         non-placeholder labels, scrolls the virtualized list until no new
-        rows appear, then closes with Escape; the form state is unchanged."""
+        rows appear, then closes with Escape; the form state is unchanged.
+
+        Returns `complete`: True only when the widget itself ran out of
+        options. `max_scrolls` is the read budget — mid-run harvests keep it
+        small (an applicant is waiting); a dedicated warm-up pass raises it to
+        capture a long list (e.g. Vietnam's 83 border gates) in full."""
         if _SENSITIVE_SELECTOR.search(selector or ""):
             return {"ok": False, "code": "SENSITIVE_FIELD_AUTOMATION"}
-        read_js = """(max) => {
+        # Every select on the page keeps its OWN dropdown in the DOM. Only the
+        # open one may be read or scrolled: targeting the document's first
+        # match read — and declared "finished" — a different, closed list,
+        # which is how an 83-entry list came back looking like 10 complete ones.
+        open_dd = """
+          const _dds = Array.from(document.querySelectorAll(
+              '[class*="select-dropdown"], [class*="dropdown"]'))
+            .filter(d => d.offsetParent !== null &&
+                         !/hidden/.test(String(d.className || '')));
+          const dd = _dds.length ? _dds[_dds.length - 1] : null;
+        """
+        read_js = """(max) => {""" + open_dd + """
           const seen = new Set(), labels = [];
-          for (const el of document.querySelectorAll(
+          for (const el of (dd || document).querySelectorAll(
                  '[class*="select-item"], [class*="option-content"]')) {
             if (el.offsetParent === null) continue;
             const cls = (el.className || '') + ' ' +
@@ -1242,35 +1276,58 @@ class BrowserbasePageDriver:
         }"""
         # Ant Design virtualizes long lists — only visible rows exist in the
         # DOM. Scroll the dropdown's holder to pull the rest in.
-        scroll_js = """() => {
-          const h = document.querySelector(
-            '.rc-virtual-list-holder, [class*="dropdown"]:not([class*="hidden"]) [class*="list-holder"]');
-          if (!h) return false;
+        # Reports WHY it stopped, not just that it did: "did not move" means
+        # end-of-list only when a scroller was found and is already at its
+        # bottom. No scroller + content that fits = a genuinely short list.
+        # Anything else is an incomplete read, and an incomplete list must
+        # never be offered to an applicant as the portal's whole list.
+        scroll_js = """() => {""" + open_dd + """
+          const h = (dd || document).querySelector(
+            '.rc-virtual-list-holder, [class*="list-holder"]');
+          // No holder inside the OPEN dropdown: completeness is unknown, so
+          // the read is reported partial rather than guessed complete.
+          if (!h) return {found: false, moved: false, atEnd: false, fits: false};
           const before = h.scrollTop;
           h.scrollTop = before + Math.max(80, h.clientHeight - 20);
-          return h.scrollTop !== before;
+          const fits = h.scrollHeight <= h.clientHeight + 2;
+          const atEnd = h.scrollTop + h.clientHeight >= h.scrollHeight - 2;
+          return {found: true, moved: h.scrollTop !== before, atEnd, fits};
         }"""
         try:
             try:
                 self.page.keyboard.press("Escape")
-                self.page.wait_for_timeout(120)
+                self.page.wait_for_timeout(60)
             except Exception:  # noqa: BLE001
                 pass
             self.page.locator(f"{selector} >> visible=true").first.click(timeout=_CLICK_MS)
             labels: list = []
-            for _ in range(10):     # ~1.8s: options usually render in one tick
-                self.page.wait_for_timeout(180)
+            # Read first, then poll on a short beat — same ~1.8s settle
+            # budget, paid only when the options genuinely render late.
+            for i in range(19):
+                if i:
+                    self.page.wait_for_timeout(100)
                 labels = self.page.evaluate(read_js, max_options) or []
                 if len(labels) > 1:
                     break
             seen = list(labels)
             barren = 0
-            for _ in range(12):   # bounded: 60 options is plenty to choose from
+            # `complete` = the WIDGET ran out of options, not this read running
+            # out of budget. A partial list must never be offered as if it were
+            # the portal's whole list (a virtualized dropdown of 83 border
+            # gates yields ~10 rows on its first screen).
+            complete = False
+            for _ in range(max_scrolls):
                 try:
-                    moved = bool(self.page.evaluate(scroll_js))
+                    st = self.page.evaluate(scroll_js) or {}
                 except Exception:  # noqa: BLE001
                     break
-                if not moved:
+                if not st.get("found"):
+                    # No scroller at all: complete only if everything already
+                    # rendered fits (a short list like Yes/No or occupations).
+                    complete = bool(st.get("fits"))
+                    break
+                if not st.get("moved"):
+                    complete = bool(st.get("atEnd") or st.get("fits"))
                     break
                 self.page.wait_for_timeout(60)
                 more = self.page.evaluate(read_js, max_options) or []
@@ -1280,15 +1337,17 @@ class BrowserbasePageDriver:
                     barren = 0
                 else:
                     barren += 1
-                    if barren >= 2:     # the list stopped growing
+                    if barren >= 2:     # the list stopped yielding new rows
+                        complete = bool(st.get("atEnd"))
                         break
                 if len(seen) >= max_options:
-                    break
+                    break               # hit the read budget: partial
             try:
                 self.page.keyboard.press("Escape")
             except Exception:  # noqa: BLE001
                 pass
-            return {"ok": True, "options": seen[:max_options]}
+            return {"ok": True, "options": seen[:max_options],
+                    "complete": bool(complete) and len(seen) < max_options}
         except Exception as e:  # noqa: BLE001
             try:
                 self.page.keyboard.press("Escape")

@@ -58,11 +58,32 @@ INTAKE_FIELDS = [
     {"key": "dependants", "required": False},
     {"key": "existing_destination_visas", "required": False},
     {"key": "existing_residence_permits", "required": False},
-    {"key": "prior_refusals", "required": False},
-    {"key": "existing_portal_account", "required": False},
+    # Required in truth: the live preflight blocks a start without it, and it
+    # becomes a statement on the government form, so it can never be defaulted
+    # away — the applicant answers it ("no" is a valid answer, not a blank).
+    {"key": "prior_refusals", "required": True},
+    # The wizard no longer asks this (2026-07-28): a fresh applicant has no
+    # portal account, and creating/connecting one is exactly what the signed
+    # authorization covers. The default satisfies the live-preflight gate.
+    {"key": "existing_portal_account", "required": False, "default": "no"},
     {"key": "preferred_language", "required": True, "default": "en"},
     {"key": "email", "required": True},
 ]
+
+# Case-answer aliases: the intake wizard stores some facts under its own field
+# names; the case pipeline (validity checks, adapters, personal_gate) reads the
+# canonical ones. case_key -> intake_key. Module-level and NOT inline, because
+# this is the second half of the wizard->gate contract that
+# test_personal_gate.test_every_required_applicant_fact_has_a_source checks:
+# a required fact may be sourced through here instead of by name.
+CASE_ANSWER_ALIASES: dict[str, str] = {
+    "nationality": "passport_nationality",
+    "issuing_country": "passport_issuing_country",
+    "current_residence": "lawful_country_of_residence",
+    "expiry_date": "passport_expiry_date",
+    "intended_arrival": "arrival_date",
+    "intended_departure": "departure_date",
+}
 
 
 @router.get("/snapshot/info")
@@ -521,13 +542,8 @@ def continue_intake(intake_id: str, background: BackgroundTasks,
     case_answers = dict(answers)
     case_answers.setdefault("full_name", full_name)
     case_answers.setdefault("email", email)
-    # Canonical aliases the case pipeline reads (validity checks, adapters).
-    alias = {"nationality": answers.get("passport_nationality"),
-             "issuing_country": answers.get("passport_issuing_country"),
-             "current_residence": answers.get("lawful_country_of_residence"),
-             "expiry_date": answers.get("passport_expiry_date"),
-             "intended_arrival": answers.get("arrival_date"),
-             "intended_departure": answers.get("departure_date")}
+    alias = {case_key: answers.get(intake_key)
+             for case_key, intake_key in CASE_ANSWER_ALIASES.items()}
     for k, v in alias.items():
         if v and not case_answers.get(k):
             case_answers[k] = v
@@ -548,9 +564,18 @@ def continue_intake(intake_id: str, background: BackgroundTasks,
     if intake_docs:
         d = intake_docs[0]
         pre = (d.passport_profile or {}).get("prefill") or {}
-        confirmed = all(
-            k in pre and str(answers.get(k, "")) == str(pre[k])
-            for k in ("passport_number", "birth_date"))
+        # Confirmed = the applicant carried IDENTITY ANSWERS from this
+        # document into the intake (the extracted profile auto-applies and
+        # every field offers an inline edit — an edited value is the
+        # applicant's own correction, not a reason to re-ask). The old
+        # exact-equality gate re-requested the passport at the case stage
+        # whenever a single misread field had been corrected. A doc that
+        # produced no prefill at all still goes through normal review.
+        def _norm_id(v):
+            return str(v or "").replace(" ", "").upper()
+        confirmed = bool(pre) and bool(
+            _norm_id(answers.get("passport_number"))
+            and str(answers.get("birth_date") or "").strip())
         stored = core_models.StoredDocument(
             org_id=p.org_id, application_id=case_row.id, name=d.name,
             mime=d.mime, size_bytes=d.size_bytes, sha256=d.sha256,

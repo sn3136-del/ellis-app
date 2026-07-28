@@ -24,7 +24,7 @@ from . import models, audit
 
 # Bump when the authorization text materially changes; old grants keep the
 # version they were shown and remain auditable verbatim via text_hash.
-TEXT_VERSION = "sa-2"
+TEXT_VERSION = "sa-3"
 
 # The canonical routine actions a standing authorization may cover.
 PERMITTED_ACTIONS = [
@@ -48,7 +48,7 @@ DISCLOSURES = [
     "never_invents_answers",
     "not_every_portal_automatable",
     "applicant_responsible_for_truth",
-    "exact_final_review_and_signature",
+    "one_signature_covers_filing",
     "payment_separate_confirmation",
     "secure_participation_may_be_required",
     "some_actions_legally_personal",
@@ -82,7 +82,10 @@ def build_text(*, locale: str, applicant_name: str, destination: str,
         "Ellis will never invent answers on your behalf.",
         "Ellis may not be able to automate every portal.",
         "You remain responsible for the truth of submitted information.",
-        "You must review and sign the exact final application before submission.",
+        "Your one signature on the Ellis authorization covers preparing, "
+        "completing and filing this application; Ellis records the exact "
+        "application version it files against that signature, and re-records "
+        "it whenever your answers change.",
         "Payment always requires a separate confirmation of the exact amount.",
         "CAPTCHA, one-time codes, passkeys and credentials always require "
         "your secure participation.",

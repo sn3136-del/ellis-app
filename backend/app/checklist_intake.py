@@ -282,6 +282,11 @@ def submit_document(db, p, app_row, item_id: str, document_id: str | None,
     sub.detected_type = doc.doc_type
     if verdict != "match":
         sub.confirmed_by_applicant = True
+    # The applicant's explicit Submit IS their approval of this document —
+    # record it so the document enters the signed material state. Without
+    # this the review version hashes an EMPTY document list and replacing a
+    # submitted file after signature would not invalidate the signed version.
+    doc.approved = True
     db.commit()
     audit.record(db, org_id=p.org_id, application_id=app_row.id,
                  action="checklist_document_submitted",

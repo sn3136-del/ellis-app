@@ -4,6 +4,7 @@ Kimi-guidance continuation into a case per disposition, route checklist,
 duplicate-safety, refresh-resume, and the non-blocking official-source audit.
 No administrator approval exists anywhere on this path."""
 import base64
+from datetime import date
 
 import pytest
 from fastapi.testclient import TestClient
@@ -49,6 +50,9 @@ ANSWERS_SGP = {
     "visa_category": "tourist_visa", "travel_purpose": "tourism",
     "arrival_date": "2026-07-26", "departure_date": "2026-08-26",
     "age": 36, "preferred_language": "en", "email": "us@example.com",
+    # Required in truth: it becomes a statement on the government form, so it
+    # is answered ("no" is an answer), never defaulted away.
+    "prior_refusals": "no",
 }
 
 EXEMPT_ANSWER = {
@@ -132,9 +136,12 @@ def test_passport_upload_prefills_all_passport_fields(client):
     assert pre["passport_expiry_date"] == "2033-01-01"
     assert pre["surname"] == "DOE" and pre["given_names"] == "JOHN"
     assert pre["full_name"] == "JOHN DOE"
-    # travel_document_type is deliberately NOT prefilled: the applicant may
-    # have picked a non-ordinary document and the preview doesn't show it.
-    assert "travel_document_type" not in pre
+    # The MRZ document code prefills the (editable) passport-type dropdown —
+    # a 'P…' code that is not diplomatic (PD) or service (PS) is ordinary.
+    assert pre["travel_document_type"] == "ordinary_passport"
+    # The passport's country drives the address/residence defaults.
+    assert pre["address_country"] == "USA"
+    assert pre["lawful_country_of_residence"] == "USA"
     # Every field carries provenance + confidence; MRZ-valid identity fields
     # do not demand re-confirmation.
     fields = body["profile"]["fields"]
@@ -679,6 +686,73 @@ def test_intake_erasure_removes_documents_and_answers(client, db):
 
 
 # =========================================================================
+# Wrapped issuing authority (HK-SAR Chinese passports)
+# =========================================================================
+def test_wrapped_issuing_authority_is_read_in_full():
+    # The HK-SAR authority prints across TWO lines; a single-line capture
+    # silently kept only the first (user-reported on a real upload).
+    text = (
+        "签发机关/Authority\n"
+        "中华人民共和国外交部驻香港特派员公署\n"
+        "OFFICE OF THE COMMISSIONER OF\n"
+        "MFA OF P.R.CHINA IN H.K.SAR\n"
+        "持照人签名/Bearer's signature\n"
+    )
+    vz = intake_flow._visual_zone(text)
+    assert vz["issuing_authority"] == \
+        "OFFICE OF THE COMMISSIONER OF MFA OF P.R.CHINA IN H.K.SAR"
+
+
+def test_single_line_authority_is_untouched_and_stops_at_labels():
+    text = (
+        "Authority: MINISTRY OF FOREIGN AFFAIRS\n"
+        "Date of issue\n"
+        "18 MAY 2017\n"
+    )
+    vz = intake_flow._visual_zone(text)
+    # The continuation reader must never swallow the next field's label.
+    assert vz["issuing_authority"] == "MINISTRY OF FOREIGN AFFAIRS"
+
+
+# =========================================================================
+# Passport-derived prefills (type + country defaults)
+# =========================================================================
+def test_passport_type_and_country_defaults_prefill_from_valid_mrz():
+    profile = intake_flow.build_passport_profile(
+        ocr_fields={},
+        mrz={"document_code": "PO", "surname": "CAO", "given_names": "XIANGWEI",
+             "passport_number": "E99361457", "nationality": "CHN",
+             "issuing_country": "CHN", "sex": "F",
+             "birth_date": "880613", "expiry_date": "270517"},
+        recognized_text="", mrz_valid=True, today=date(2026, 7, 27))
+    p = profile["prefill"]
+    # 'PO' (Chinese ordinary passport) -> ordinary; the dropdown stays editable.
+    assert p["travel_document_type"] == "ordinary_passport"
+    assert p["address_country"] == "CHN"
+    assert p["lawful_country_of_residence"] == "CHN"
+
+
+def test_diplomatic_mrz_code_prefills_diplomatic_and_invalid_mrz_never_prefills_type():
+    dip = intake_flow.build_passport_profile(
+        ocr_fields={},
+        mrz={"document_code": "PD", "surname": "A", "given_names": "B",
+             "passport_number": "X1", "nationality": "CHN",
+             "issuing_country": "CHN", "sex": "M",
+             "birth_date": "880613", "expiry_date": "270517"},
+        recognized_text="", mrz_valid=True, today=date(2026, 7, 27))
+    assert dip["prefill"]["travel_document_type"] == "diplomatic_passport"
+    bad = intake_flow.build_passport_profile(
+        ocr_fields={},
+        mrz={"document_code": "PO", "surname": "A", "given_names": "B",
+             "passport_number": "X1", "nationality": "CHN",
+             "issuing_country": "CHN", "sex": "M",
+             "birth_date": "880613", "expiry_date": "270517"},
+        recognized_text="", mrz_valid=False, today=date(2026, 7, 27))
+    # A checksum-INVALID MRZ never silently picks the document type.
+    assert "travel_document_type" not in bad["prefill"]
+
+
+# =========================================================================
 # Continuation metadata mirrors (backend authoritative)
 # =========================================================================
 def test_continuation_meta_mapping():
@@ -693,3 +767,53 @@ def test_continuation_meta_mapping():
                  "missing_fields": ["disposition"]})
     assert blocked["blocked"] is True and blocked["blockers"]
     assert m({})["blocked"] is True
+
+
+# =========================================================================
+# Intake passport carries to the case even after a pencil-edit
+# =========================================================================
+def test_edited_passport_details_still_carry_the_upload_into_the_case(client, db):
+    # The applicant uploads their passport at intake, then corrects ONE
+    # misread field inline (the per-field pencil). The case must still treat
+    # the passport requirement as satisfied by that upload — the old
+    # exact-equality gate re-requested the passport whenever any identity
+    # answer differed from the raw OCR prefill.
+    kimi_primary.set_provider(_single_pass(REQUIRED_ANSWER))
+    iid = _new_intake(client, dict(ANSWERS_SGP, destination_country="CHN"))
+    up = client.post(f"/intake/{iid}/passport",
+                     json={"name": "p.pdf", "text": _passport_text()}, headers=H)
+    assert up.json()["accepted"] is True
+    # The applicant fixes the misread passport number (OCR said X1234567).
+    edited = dict(up.json()["prefill"], passport_number="X1234568")
+    client.put(f"/intake/{iid}", headers=H,
+               json={"answers": dict(ANSWERS_SGP, destination_country="CHN", **edited)})
+    assert client.post(f"/intake/{iid}/guidance", headers=H).status_code == 200
+    body = client.post(f"/intake/{iid}/continue", headers=H).json()
+    passport_item = next(i for i in body["checklist"] if i["id"] == "passport")
+    assert passport_item["status"] == "submitted", \
+        "an edited field must never force a second passport upload"
+    # The carried document keeps its extracted info for the case.
+    from app.models import StoredDocument
+    docs = db.execute(select(StoredDocument).where(
+        StoredDocument.application_id == body["case_id"])).scalars().all()
+    assert docs and docs[0].approved is True
+    assert docs[0].passport_profile
+
+
+def test_a_profileless_upload_still_goes_through_normal_review(client):
+    # No extracted profile (nothing auto-applied) -> the carry-over is NOT
+    # auto-submitted; the normal upload -> review -> Submit flow applies.
+    kimi_primary.set_provider(_single_pass(REQUIRED_ANSWER))
+    iid = _new_intake(client, dict(ANSWERS_SGP, destination_country="CHN"))
+    up = client.post(f"/intake/{iid}/passport",
+                     json={"name": "p.pdf", "text": _passport_text()}, headers=H)
+    assert up.status_code == 200
+    # Simulate a carried doc with no prefill: blank the identity answers so
+    # the confirmation signal is absent.
+    base = dict(ANSWERS_SGP, destination_country="CHN")
+    base.pop("passport_number", None)
+    client.put(f"/intake/{iid}", headers=H, json={"answers": base})
+    assert client.post(f"/intake/{iid}/guidance", headers=H).status_code == 200
+    body = client.post(f"/intake/{iid}/continue", headers=H).json()
+    passport_item = next(i for i in body["checklist"] if i["id"] == "passport")
+    assert passport_item["status"] != "submitted"

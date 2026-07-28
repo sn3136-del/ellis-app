@@ -63,9 +63,78 @@ def test_translate_caches_repeats():
 
 
 def test_translate_unsupported_language():
-    out = i18n.translate("hello", "fr", "en", translator=_fake_translator)
+    # French is a SUPPORTED dynamic language now (2026-07-27); a made-up code
+    # is still refused honestly.
+    out = i18n.translate("hello", "xx-QQ", "en", translator=_fake_translator)
     assert out["status"] == "unsupported_language"
     assert out["translated"] == "hello"
+    assert "fr" in i18n.SUPPORTED_LANGS and "ar" in i18n.SUPPORTED_LANGS
+
+
+def test_translate_catalog_masks_caches_and_degrades_honestly():
+    i18n.clear_cache()
+    calls = []
+
+    def batch(items, target, source):
+        calls.append(dict(items))
+        out = {}
+        for k, v in items.items():
+            if k == "drops":
+                continue                     # the model lost this one
+            out[k] = f"[{target}] {v}"       # sentinels preserved verbatim
+        return out
+
+    entries = {"hello": "Hello {name}", "go": "Continue", "drops": "Lost in space"}
+    r = i18n.translate_catalog(entries, "fr", batch_translator=batch)
+    # Lost string keeps its ENGLISH original and the status says so.
+    assert r["status"] == "partial"
+    assert r["entries"]["drops"] == "Lost in space"
+    # The {name} placeholder survived masking + restore byte-for-byte.
+    assert "{name}" in r["entries"]["hello"]
+    assert r["entries"]["go"].startswith("[fr] ")
+    # Second call: everything translated comes from cache — no model calls
+    # for those strings.
+    r2 = i18n.translate_catalog({"hello": "Hello {name}", "go": "Continue"}, "fr",
+                                batch_translator=batch)
+    assert r2["status"] == "ok" and len(calls) == 1
+
+
+def test_translate_catalog_chunks_large_catalogs():
+    # Chunks run CONCURRENTLY (a 600-string catalog took minutes when they
+    # were sequential), so assert the PARTITION, never the call order.
+    i18n.clear_cache()
+    import threading
+    lock = threading.Lock()
+    sizes = []
+
+    def batch(items, target, source):
+        with lock:
+            sizes.append(len(items))
+        return {k: f"[{target}] {v}" for k, v in items.items()}
+
+    entries = {f"k{i}": f"String number {i}" for i in range(95)}
+    r = i18n.translate_catalog(entries, "es", batch_translator=batch)
+    assert r["status"] == "ok" and len(r["entries"]) == 95
+    assert sorted(sizes) == [15, 40, 40]
+    # Every key survives the concurrent merge exactly once.
+    assert r["entries"]["k94"] == "[es] String number 94"
+
+
+def test_translate_catalog_survives_one_failing_chunk():
+    # One chunk erroring must not lose the others: its strings stay English
+    # and the status says 'partial' rather than pretending success.
+    i18n.clear_cache()
+
+    def batch(items, target, source):
+        if "k0" in items:
+            raise RuntimeError("model hiccup")
+        return {k: f"[{target}] {v}" for k, v in items.items()}
+
+    entries = {f"k{i}": f"String number {i}" for i in range(95)}
+    r = i18n.translate_catalog(entries, "es", batch_translator=batch)
+    assert r["status"] == "partial"
+    assert r["entries"]["k0"] == "String number 0"          # honest English
+    assert r["entries"]["k94"] == "[es] String number 94"   # others translated
 
 
 def test_translate_passthrough_same_language():
@@ -111,7 +180,9 @@ def test_system_identity_forbids_model_disclosure_and_official_claims():
 # ---- endpoints ----
 def test_languages_endpoint(client):
     langs = client.get("/i18n/languages", headers=AUTH).json()["languages"]
-    assert {l["code"] for l in langs} == {"en", "zh-CN", "zh-Hant"}
+    codes = {l["code"] for l in langs}
+    # The dynamic-language rollout (2026-07-27) supersets the static three.
+    assert {"en", "zh-CN", "zh-Hant", "fr", "es", "ar"} <= codes
 
 
 def test_identity_endpoint(client):

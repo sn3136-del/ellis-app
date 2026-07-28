@@ -74,10 +74,22 @@ app_row.answers = {**app_row.answers, "passport_number": "L898902C3", "nationali
                    "passport_expiry": "2033-04-15"}
 db.commit(); db.close()
 
-# 5. Sign authorization (DocuSign or in-app fallback) + the §5 standing
-# authorization — submission is gated on both (§25).
-c.post(f"/cases/{cid}/standing-authorization", headers=AUTH, json={})
-show("Sign authorization", f"provider={auth['provider']} production_equivalent={auth['production_equivalent']}")
+# 5. Sign the authorization — the REAL single ceremony (prepare → step-up →
+# sign). The one signature also grants the §5 standing authorization; the
+# bare grant endpoint no longer exists (ceremony-less grants were an
+# authorization bypass).
+prep = c.post(f"/cases/{cid}/authorization/prepare", headers=AUTH,
+              json={"max_fee_cents": 10000, "currency": "USD",
+                    "allow_auto_book": True}).json()
+sig = c.post(f"/cases/{cid}/authorization/sign", headers=AUTH, json={
+    "document_hash": prep["document_hash"], "consent_given": True,
+    "intent_confirmed": True, "signature_method": "typed",
+    "signature_value": "Anna Eriksson", "step_up_token": prep["step_up_token"],
+    "auth_method": "email_otp", "envelope_id": prep["envelope_id"]})
+if sig.status_code != 200:
+    raise SystemExit(f"authorization sign refused ({sig.status_code}): {sig.text}")
+show("Sign authorization", f"provider={auth['provider']} production_equivalent={auth['production_equivalent']} "
+                           f"signature={sig.json()['signature_id'][:8]}")
 
 # Start the durable workflow and walk each human handoff via the API.
 r = c.post(f"/cases/{cid}/start", headers=AUTH)

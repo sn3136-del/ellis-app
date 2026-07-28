@@ -8,6 +8,33 @@ export const SUPPORTED = ['en', 'zh-CN', 'zh-Hant']
 export const LANGUAGE_NAMES = { en: 'English', 'zh-CN': '简体中文', 'zh-Hant': '繁體中文' }
 export const DEFAULT_LANG = 'en'
 
+// DYNAMIC languages (2026-07-27): every language beyond the static three is
+// served by translating the English catalog on the BACKEND via Kimi K3
+// (masked + cached + honest fallback to English) — still never a provider key
+// in the client. The list mirrors backend/app/i18n.py LANGUAGE_NAMES.
+export const DYNAMIC_LANGS = {
+  fr: 'Français', es: 'Español', ar: 'العربية', de: 'Deutsch', it: 'Italiano',
+  pt: 'Português', ru: 'Русский', ja: '日本語', ko: '한국어', hi: 'हिन्दी',
+  th: 'ไทย', vi: 'Tiếng Việt', id: 'Bahasa Indonesia', ms: 'Bahasa Melayu',
+  tr: 'Türkçe', nl: 'Nederlands', pl: 'Polski', fil: 'Filipino', ur: 'اردو',
+  fa: 'فارسی', he: 'עברית', sw: 'Kiswahili', bn: 'বাংলা', ta: 'தமிழ்',
+  el: 'Ελληνικά', sv: 'Svenska', uk: 'Українська',
+}
+export const ALL_LANGUAGE_NAMES = { ...LANGUAGE_NAMES, ...DYNAMIC_LANGS }
+export const RTL_LANGS = ['ar', 'ur', 'fa', 'he']
+
+// Backend-translated catalog overlays, keyed by language code. Loaded by the
+// LocaleProvider; a key missing from the overlay falls back to English.
+const DYNAMIC_CATALOGS = {}
+
+export function setDynamicCatalog(lang, entries) {
+  DYNAMIC_CATALOGS[lang] = entries || {}
+}
+
+export function hasDynamicCatalog(lang) {
+  return !!DYNAMIC_CATALOGS[lang]
+}
+
 // Every locale MUST define the same keys as `en` (enforced by a test).
 export const STRINGS = {
   en: {
@@ -47,9 +74,10 @@ export const STRINGS = {
     'visa.tab.start': 'Start your visa',
     'visa.tab.cases': 'Cases & tools',
     // Start-your-visa wizard
-    'start.hero.title': 'Start your visa',
-    'start.hero.sub': 'Answer a few questions about your passport and trip. Ellis checks its verified snapshot and tells you honestly what it can and cannot do for this route.',
-    'start.hero.cta': 'Begin',
+    'start.hero.title': 'Process your visa, in one click.',
+    'start.hero.sub': 'A few questions about your passport and trip — then Ellis tells you honestly what it can and cannot do for your route.',
+    'start.hero.cta': 'Get started',
+    'start.hero.startCta': 'Start your application',
     'start.resume.title': 'Resume where you left off',
     'start.resume.sub': 'You have a saved application in progress.',
     'start.resume.new': 'Start a new application',
@@ -139,6 +167,10 @@ export const STRINGS = {
     'guidance.disp.eta': 'Electronic travel authorization required',
     'guidance.disp.conditional': 'Conditional — depends on your details',
     'guidance.disp.unknown': 'Not yet determined',
+    'guidance.t.category': 'Visa type',
+    'guidance.t.stay': 'Permitted stay',
+    'guidance.t.processing': 'Processing',
+    'guidance.t.fee': 'Government fee',
     'guidance.f.category': 'Visa / entry category',
     'guidance.f.stay': 'Permitted stay',
     'guidance.f.passport': 'Passport validity',
@@ -179,6 +211,14 @@ export const STRINGS = {
     'passport.reapply': 'Update my details',
     'passport.reupload': 'Upload a different photo',
     'passport.applied': 'Passport details filled in',
+    'passport.edit': 'Edit',
+    'passport.doneEditing': 'Cancel',
+    'passport.saveEdits': 'Save changes',
+    'passport.autoAppliedSub': 'Details read from your passport and filled in automatically — edit anything that looks off.',
+    'passport.checkFlagged': 'Filled in automatically — a couple of values were hard to read, please glance over them.',
+    'address.autoFromPassport': 'from your passport',
+    'start.finishPassportFirst': 'Finish your passport details first',
+    'start.contactTitle': 'How to reach you',
     'passport.prefilledChip': 'Prefilled from your passport',
     'passport.confirmHint': 'Please check the highlighted values before continuing — correct anything that looks wrong.',
     'ppf.full_name': 'Full name',
@@ -234,6 +274,24 @@ export const STRINGS = {
     'health.no': 'No',
     'health.whichCountries': 'Which countries? (select all that apply)',
     'health.saved': 'Answer saved',
+    'formq.title': 'A few more details',
+    'formq.sub': 'The official application form will ask for these. Answering now lets Ellis file without stopping to ask later.',
+    'formq.choose': 'Choose…',
+    'formq.save': 'Save answers',
+    'formq.saving': 'Saving…',
+    'formq.saved': 'Saved — Ellis will use these on the official form',
+    'formq.optionsPending': "The official form offers a set list here. Ellis reads it from the portal when it files and will ask you to pick if your answer isn't on it.",
+    'formq.optionsPartial': 'Suggestions from the official form — it offers more than these, so type yours if you do not see it.',
+    'doccard.detectedAs': 'Ellis read this as: {type}',
+    'doccard.useAnyway': 'Use it anyway',
+    'doccard.replace': 'Upload a different file',
+    'doccard.change': 'Change this document',
+    'doccard.view': 'View',
+    'doccard.translate': 'Translate',
+    'doccard.tapToUpload': 'Tap to upload — PDF or photo',
+    'doccard.uploaded': 'uploaded',
+    'doccard.confirm': 'Confirm this document',
+    'doccard.sub': 'Tap a card to add each document. Ellis reads and files them for you.',
     'checklist.title': 'Your document checklist',
     'checklist.sub': 'Tailored to your route. Upload each document, check it, then submit it.',
     'checklist.provided': 'Provided',
@@ -393,23 +451,6 @@ export const STRINGS = {
     'admin.reverify.gov': 'government domain',
     'admin.reverify.nonGov': 'not a government domain',
     'admin.reverify.reminder': 'Reverification is required before any payment, booking, or submission.',
-    // Standing authorization (§5)
-    'standing.title': 'Standing authorization',
-    'standing.sub': 'One clear grant covers routine steps. Payment always needs your separate exact-amount confirmation.',
-    'standing.loading': 'Preparing your authorization…',
-    'standing.agree': 'I have read this authorization (version {version}) and I grant it.',
-    'standing.later': 'Not now',
-    'standing.grant': 'Grant authorization',
-    'standing.granting': 'Granting…',
-    'standing.d.official': 'Ellis uses official or authorized visa portals only.',
-    'standing.d.routine': 'Ellis may complete routine steps automatically.',
-    'standing.d.noInvent': 'Ellis never invents answers on your behalf.',
-    'standing.d.notAll': 'Ellis may not be able to automate every portal.',
-    'standing.d.truth': 'You remain responsible for the truth of submitted information.',
-    'standing.d.sign': 'You must review and sign the exact final application.',
-    'standing.d.payment': 'Payment always requires a separate confirmation.',
-    'standing.d.secure': 'CAPTCHA, one-time codes, passkeys and credentials always need your secure participation. Card details are entered by you in the secure window — or, only at your explicit request, provided to Ellis once to fill the official payment form, never stored.',
-    'standing.d.personal': 'Some government declarations or final actions may legally require you to act personally.',
     // Exact-amount payment confirmation (§6)
     'pay.confirmTitle': 'Confirm the exact payment',
     'pay.confirmSub': 'Review the exact amount before payment begins. Depending on the route, you enter the card in the secure window yourself, or can ask Ellis to fill it for you. The final payment confirmation is always yours.',
@@ -466,6 +507,8 @@ export const STRINGS = {
     'paywin.subPrefilled': 'Ellis filled your payment details on the official portal. Review them in the secure window below and click the portal’s own confirm button yourself.',
     'paywin.prefilledNote': 'Your card details were entered on the official page and immediately deleted from Ellis. Check them on the page below, then confirm the payment there — the final click is always yours. If the page no longer shows them (for example after a reconnect), use “Provide my details again” or type them directly.',
     'paywin.amountCap': 'Amount due at the official portal',
+    'paywin.payTitle': 'Pay the fee — {fee}',
+    'paywin.feeFromSchedule': "This is the official published fee for this route. The portal shows what it charges on the page below — if it differs, pay what the portal shows and tell Ellis.",
     'paywin.reconcileNote': 'Supports payment pop-ups and 3-D Secure. If you leave, your case is kept safely and payment is reconciled with the portal before any retry — Ellis never charges twice. After you pay, Ellis reads the portal’s own result; it never records a payment the portal has not confirmed.',
     'paywin.later': 'I’ll finish later',
     'paywin.paidCta': 'I paid — check the portal',
@@ -621,9 +664,10 @@ export const STRINGS = {
     'snapshot.disclaimer': '这些要求截至2026年7月23日采集，可能已发生变化。',
     'visa.tab.start': '开始办理签证',
     'visa.tab.cases': '案件与工具',
-    'start.hero.title': '开始办理签证',
-    'start.hero.sub': '回答几个关于您的护照和行程的问题。Ellis 会根据已验证的快照，如实告诉您此路线上它能做什么、不能做什么。',
-    'start.hero.cta': '开始',
+    'start.hero.title': '一键办理您的签证。',
+    'start.hero.sub': '只需几个关于护照与行程的问题 — Ellis 会如实告诉您此路线上它能做什么、不能做什么。',
+    'start.hero.cta': '立即开始',
+    'start.hero.startCta': '开始您的申请',
     'start.resume.title': '从上次中断处继续',
     'start.resume.sub': '您有一份已保存的申请草稿。',
     'start.resume.new': '开始新的申请',
@@ -708,6 +752,10 @@ export const STRINGS = {
     'guidance.disp.eta': '需要电子旅行授权',
     'guidance.disp.conditional': '视情况而定 — 取决于您的具体信息',
     'guidance.disp.unknown': '尚未确定',
+    'guidance.t.category': '签证类型',
+    'guidance.t.stay': '可停留',
+    'guidance.t.processing': '办理时长',
+    'guidance.t.fee': '官方费用',
     'guidance.f.category': '签证 / 入境类别',
     'guidance.f.stay': '允许停留',
     'guidance.f.passport': '护照有效期',
@@ -748,6 +796,14 @@ export const STRINGS = {
     'passport.reapply': '更新我的信息',
     'passport.reupload': '上传另一张照片',
     'passport.applied': '护照信息已填入',
+    'passport.edit': '编辑',
+    'passport.doneEditing': '取消',
+    'passport.saveEdits': '保存修改',
+    'passport.autoAppliedSub': '已自动读取并填入您的护照信息 — 如有不符可直接编辑。',
+    'passport.checkFlagged': '已自动填入 — 个别字段识别欠清晰，请顺带确认。',
+    'address.autoFromPassport': '来自您的护照',
+    'start.finishPassportFirst': '请先完成护照信息',
+    'start.contactTitle': '联系方式',
     'passport.prefilledChip': '已从您的护照预填',
     'passport.confirmHint': '继续之前请检查高亮的值 — 如有错误请更正。',
     'ppf.full_name': '全名',
@@ -803,6 +859,24 @@ export const STRINGS = {
     'health.no': '否',
     'health.whichCountries': '哪些国家？（可多选）',
     'health.saved': '回答已保存',
+    'formq.title': '还需要几项信息',
+    'formq.sub': '官方申请表将需要这些信息。现在填写，Ellis 提交时就无需中途再询问。',
+    'formq.choose': '请选择…',
+    'formq.save': '保存回答',
+    'formq.saving': '保存中…',
+    'formq.saved': '已保存 — Ellis 将在官方表格中使用这些信息',
+    'formq.optionsPending': '此项在官方表格中为固定选项。Ellis 提交时会从官方网站读取该列表；若您填写的内容不在其中，会请您重新选择。',
+    'formq.optionsPartial': '以下为官方表格中的部分选项 — 官方列表更长，若没有您需要的，请直接输入。',
+    'doccard.detectedAs': 'Ellis 识别为：{type}',
+    'doccard.useAnyway': '仍然使用此文件',
+    'doccard.replace': '上传其他文件',
+    'doccard.change': '更换此文件',
+    'doccard.view': '查看',
+    'doccard.translate': '翻译',
+    'doccard.tapToUpload': '点击上传 — PDF 或照片',
+    'doccard.uploaded': '已上传',
+    'doccard.confirm': '确认此文件',
+    'doccard.sub': '点击卡片添加相应材料，Ellis 会为您读取并归档。',
     'checklist.title': '您的文件清单',
     'checklist.sub': '根据您的路线定制。上传每份文件，核对后提交。',
     'checklist.provided': '已提供',
@@ -958,22 +1032,6 @@ export const STRINGS = {
     'admin.reverify.gov': '政府域名',
     'admin.reverify.nonGov': '非政府域名',
     'admin.reverify.reminder': '在进行任何付款、预约或提交之前，必须先完成重新核验。',
-    'standing.title': '长期授权',
-    'standing.sub': '一次明确授权即涵盖例行步骤。付款始终需要您单独确认准确金额。',
-    'standing.loading': '正在准备您的授权…',
-    'standing.agree': '我已阅读本授权（版本 {version}）并予以授予。',
-    'standing.later': '暂不',
-    'standing.grant': '授予授权',
-    'standing.granting': '授予中…',
-    'standing.d.official': 'Ellis 仅使用官方或经授权的签证门户。',
-    'standing.d.routine': 'Ellis 可自动完成例行步骤。',
-    'standing.d.noInvent': 'Ellis 绝不会替您编造答案。',
-    'standing.d.notAll': 'Ellis 可能无法自动化所有门户。',
-    'standing.d.truth': '您仍对所提交信息的真实性负责。',
-    'standing.d.sign': '您必须审阅并签署最终申请的确切版本。',
-    'standing.d.payment': '付款始终需要单独确认。',
-    'standing.d.secure': '验证码、一次性密码、通行密钥和凭据始终需要您亲自参与。银行卡信息由您在安全窗口中亲自输入 — 或仅在您明确要求时，一次性提供给 Ellis 以填写官方付款表单，绝不存储。',
-    'standing.d.personal': '某些政府声明或最终操作可能依法要求您亲自完成。',
     'pay.confirmTitle': '确认准确付款金额',
     'pay.confirmSub': '付款开始前请核对准确金额。视路线而定，您在安全窗口中亲自输入银行卡信息，或可请 Ellis 代为填写。最终付款确认始终由您完成。',
     'pay.exactAmount': '授权的准确金额',
@@ -1029,6 +1087,8 @@ export const STRINGS = {
     'paywin.subPrefilled': 'Ellis 已在官方门户上填写您的付款信息。请在下方安全窗口中核对，并亲自点击门户自己的确认按钮。',
     'paywin.prefilledNote': '您的银行卡信息已填入官方页面，并已立即从 Ellis 中删除。请在下方页面上核对后在门户上确认付款 — 最后一步始终由您完成。若页面不再显示这些信息（例如重新连接后），请使用“再次提供我的信息”或直接在页面中输入。',
     'paywin.amountCap': '官方门户应付金额',
+    'paywin.payTitle': '支付费用 — {fee}',
+    'paywin.feeFromSchedule': '这是该路线的官方公布费用。下方页面显示官方实际收取的金额；如有不同，请按官方页面支付并告知 Ellis。',
     'paywin.reconcileNote': '支持付款弹窗和 3-D Secure 验证。若您中途离开，案件会被安全保留，任何重试前都会先与门户核对付款 — Ellis 绝不重复扣款。付款后 Ellis 读取门户自身的结果；未经门户确认的付款绝不会被记录。',
     'paywin.later': '稍后完成',
     'paywin.paidCta': '我已付款 — 与门户核对',
@@ -1180,9 +1240,10 @@ export const STRINGS = {
     'snapshot.disclaimer': '這些要求截至2026年7月23日擷取，可能已有變動。',
     'visa.tab.start': '開始辦理簽證',
     'visa.tab.cases': '案件與工具',
-    'start.hero.title': '開始辦理簽證',
-    'start.hero.sub': '回答幾個關於您的護照與行程的問題。Ellis 會根據已驗證的快照，如實告訴您此路線上它能做什麼、不能做什麼。',
-    'start.hero.cta': '開始',
+    'start.hero.title': '一鍵辦理您的簽證。',
+    'start.hero.sub': '只需幾個關於護照與行程的問題 — Ellis 會如實告訴您此路線上它能做什麼、不能做什麼。',
+    'start.hero.cta': '立即開始',
+    'start.hero.startCta': '開始您的申請',
     'start.resume.title': '從上次中斷處繼續',
     'start.resume.sub': '您有一份已儲存的申請草稿。',
     'start.resume.new': '開始新的申請',
@@ -1267,6 +1328,10 @@ export const STRINGS = {
     'guidance.disp.eta': '需要電子旅行授權',
     'guidance.disp.conditional': '視情況而定 — 取決於您的具體資訊',
     'guidance.disp.unknown': '尚未確定',
+    'guidance.t.category': '簽證類型',
+    'guidance.t.stay': '可停留',
+    'guidance.t.processing': '辦理時長',
+    'guidance.t.fee': '官方費用',
     'guidance.f.category': '簽證 / 入境類別',
     'guidance.f.stay': '允許停留',
     'guidance.f.passport': '護照有效期',
@@ -1307,6 +1372,14 @@ export const STRINGS = {
     'passport.reapply': '更新我的資訊',
     'passport.reupload': '上傳另一張照片',
     'passport.applied': '護照資訊已填入',
+    'passport.edit': '編輯',
+    'passport.doneEditing': '取消',
+    'passport.saveEdits': '儲存修改',
+    'passport.autoAppliedSub': '已自動讀取並填入您的護照資訊 — 如有不符可直接編輯。',
+    'passport.checkFlagged': '已自動填入 — 個別欄位辨識欠清晰，請順帶確認。',
+    'address.autoFromPassport': '來自您的護照',
+    'start.finishPassportFirst': '請先完成護照資訊',
+    'start.contactTitle': '聯絡方式',
     'passport.prefilledChip': '已從您的護照預填',
     'passport.confirmHint': '繼續之前請檢查標示的值 — 如有錯誤請更正。',
     'ppf.full_name': '全名',
@@ -1362,6 +1435,24 @@ export const STRINGS = {
     'health.no': '否',
     'health.whichCountries': '哪些國家？（可複選）',
     'health.saved': '回答已儲存',
+    'formq.title': '還需要幾項資料',
+    'formq.sub': '官方申請表將需要這些資料。現在填寫，Ellis 提交時就無需中途再詢問。',
+    'formq.choose': '請選擇…',
+    'formq.save': '儲存回答',
+    'formq.saving': '儲存中…',
+    'formq.saved': '已儲存 — Ellis 將在官方表格中使用這些資料',
+    'formq.optionsPending': '此項在官方表格中為固定選項。Ellis 提交時會從官方網站讀取該列表；若您填寫的內容不在其中，會請您重新選擇。',
+    'formq.optionsPartial': '以下為官方表格中的部分選項 — 官方列表更長，若沒有您需要的，請直接輸入。',
+    'doccard.detectedAs': 'Ellis 辨識為：{type}',
+    'doccard.useAnyway': '仍然使用此文件',
+    'doccard.replace': '上傳其他文件',
+    'doccard.change': '更換此文件',
+    'doccard.view': '檢視',
+    'doccard.translate': '翻譯',
+    'doccard.tapToUpload': '點擊上傳 — PDF 或照片',
+    'doccard.uploaded': '已上傳',
+    'doccard.confirm': '確認此文件',
+    'doccard.sub': '點擊卡片新增相應資料，Ellis 會為您讀取並歸檔。',
     'checklist.title': '您的文件清單',
     'checklist.sub': '根據您的路線客製。上傳每份文件，核對後提交。',
     'checklist.provided': '已提供',
@@ -1517,22 +1608,6 @@ export const STRINGS = {
     'admin.reverify.gov': '政府網域',
     'admin.reverify.nonGov': '非政府網域',
     'admin.reverify.reminder': '在進行任何付款、預約或提交之前，必須先完成重新核驗。',
-    'standing.title': '長期授權',
-    'standing.sub': '一次明確授權即涵蓋例行步驟。付款始終需要您單獨確認準確金額。',
-    'standing.loading': '正在準備您的授權…',
-    'standing.agree': '我已閱讀本授權（版本 {version}）並予以授予。',
-    'standing.later': '暫不',
-    'standing.grant': '授予授權',
-    'standing.granting': '授予中…',
-    'standing.d.official': 'Ellis 僅使用官方或經授權的簽證入口網站。',
-    'standing.d.routine': 'Ellis 可自動完成例行步驟。',
-    'standing.d.noInvent': 'Ellis 絕不會替您編造答案。',
-    'standing.d.notAll': 'Ellis 可能無法自動化所有入口網站。',
-    'standing.d.truth': '您仍對所提交資訊的真實性負責。',
-    'standing.d.sign': '您必須審閱並簽署最終申請的確切版本。',
-    'standing.d.payment': '付款始終需要單獨確認。',
-    'standing.d.secure': '驗證碼、一次性密碼、通行金鑰和憑證始終需要您親自參與。銀行卡資訊由您在安全視窗中親自輸入 — 或僅在您明確要求時，一次性提供給 Ellis 以填寫官方付款表單，絕不儲存。',
-    'standing.d.personal': '某些政府聲明或最終操作可能依法要求您親自完成。',
     'pay.confirmTitle': '確認準確付款金額',
     'pay.confirmSub': '付款開始前請核對準確金額。視路線而定，您在安全視窗中親自輸入銀行卡資訊，或可請 Ellis 代為填寫。最終付款確認始終由您完成。',
     'pay.exactAmount': '授權的準確金額',
@@ -1588,6 +1663,8 @@ export const STRINGS = {
     'paywin.subPrefilled': 'Ellis 已在官方入口網站上填寫您的付款資訊。請在下方安全視窗中核對，並親自點擊入口網站自己的確認按鈕。',
     'paywin.prefilledNote': '您的銀行卡資訊已填入官方頁面，並已立即從 Ellis 中刪除。請在下方頁面上核對後在入口網站上確認付款 — 最後一步始終由您完成。若頁面不再顯示這些資訊（例如重新連線後），請使用「再次提供我的資訊」或直接在頁面中輸入。',
     'paywin.amountCap': '官方入口網站應付金額',
+    'paywin.payTitle': '支付費用 — {fee}',
+    'paywin.feeFromSchedule': '這是該路線的官方公布費用。下方頁面顯示官方實際收取的金額；如有不同，請按官方頁面支付並告知 Ellis。',
     'paywin.reconcileNote': '支援付款彈窗和 3-D Secure 驗證。若您中途離開，案件會被安全保留，任何重試前都會先與入口網站核對付款 — Ellis 絕不重複扣款。付款後 Ellis 讀取入口網站自身的結果；未經入口網站確認的付款絕不會被記錄。',
     'paywin.later': '稍後完成',
     'paywin.paidCta': '我已付款 — 與入口網站核對',
@@ -1710,8 +1787,14 @@ export const STRINGS = {
 // Translate a key for a language, interpolating {vars}. Falls back to English,
 // then to the raw key — never throws, never shows blank.
 export function t(lang, key, vars) {
-  const table = STRINGS[lang] || STRINGS[DEFAULT_LANG]
-  let s = table[key]
+  // Kimi's dynamic catalog OVERLAYS the static one for EVERY language:
+  // Chinese switches instantly on its shipped static strings, then upgrades
+  // key-by-key to the Kimi K3 translation when the catalog lands. Dynamic-only
+  // languages have no static table and read the overlay directly; anything
+  // still missing falls back to English, never a blank.
+  const dyn = DYNAMIC_CATALOGS[lang]
+  const table = STRINGS[lang] || {}
+  let s = (dyn && dyn[key] != null) ? dyn[key] : table[key]
   if (s == null) s = STRINGS[DEFAULT_LANG][key]
   if (s == null) return key
   if (vars) {
@@ -1721,5 +1804,5 @@ export function t(lang, key, vars) {
 }
 
 export function isSupported(lang) {
-  return SUPPORTED.includes(lang)
+  return SUPPORTED.includes(lang) || Object.prototype.hasOwnProperty.call(DYNAMIC_LANGS, lang)
 }

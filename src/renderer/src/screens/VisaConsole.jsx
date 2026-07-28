@@ -66,16 +66,20 @@ export default function VisaConsole({ profile, onNotify, adminMode }) {
 
   return (
     <div>
-      <div className="topbar">
-        <h1>Visa Platform</h1>
-        <div className="topbar__actions">
-          <span className={'chip' + (reachable ? ' chip--ink' : '')}>
-            {reachable === null ? 'connecting…' : reachable ? 'backend online' : 'backend offline'}
-          </span>
+      {/* No "Visa Platform" chrome for applicants — the Trip.com top bar is
+          the only header. Operators still see the reachability chip. */}
+      {adminMode && (
+        <div className="topbar">
+          <h1>Visa Platform</h1>
+          <div className="topbar__actions">
+            <span className={'chip' + (reachable ? ' chip--ink' : '')}>
+              {reachable === null ? 'connecting…' : reachable ? 'backend online' : 'backend offline'}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="page page--wide">
+      <div className="page page--wide" style={{ margin: '0 auto' }}>
         {reachable === false && (
           <ErrorNote error={{ message: 'Cannot reach the Ellis backend at localhost:8000. Start it with `docker compose up` in backend/.' }} />
         )}

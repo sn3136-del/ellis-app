@@ -350,3 +350,40 @@ class PortalAutomationPolicyReview(Base, _Stamped):
     basis: Mapped[dict] = mapped_column(JSON, default=dict)   # cited evidence
     reviewed_by: Mapped[str] = mapped_column(String(64), default="")
     notes: Mapped[str] = mapped_column(Text, default="")
+
+
+class PortalFieldOptionCache(Base, _Stamped):
+    """The option list a portal's OWN page offered for one select field, read
+    live during an earlier run of this exact adapter version.
+
+    Purpose: ask the applicant with a real dropdown BEFORE any browser session
+    opens, instead of making them wait a minute into a run to learn what the
+    government form will accept. Never a hand-authored list — an empty cache
+    simply means the portal has not been read yet, and the applicant types a
+    free-text answer that the fill step verifies against the live page.
+
+    Version-keyed on purpose: a new adapter version re-reads the portal rather
+    than inheriting a list that may no longer match the form.
+    """
+    __tablename__ = "portal_field_option_cache"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    candidate_id: Mapped[str] = mapped_column(String(32), index=True)
+    candidate_version: Mapped[int] = mapped_column(Integer)
+    # The Ellis answer key (node input_source) — never a selector.
+    field_key: Mapped[str] = mapped_column(String(80), index=True)
+    # The flow node this list belongs to: one answer key can be collected by
+    # two widgets on different pages, whose lists must not overwrite each other.
+    node_id: Mapped[str] = mapped_column(String(120), default="", index=True)
+    options: Mapped[list] = mapped_column(JSON, default=list)
+    # True only when the portal's widget itself ran out of options. A PARTIAL
+    # read is still recorded (it improves on nothing) but is never presented as
+    # the portal's whole list — the applicant would be unable to pick a value
+    # the form really offers.
+    complete: Mapped[bool] = mapped_column(Boolean, default=False)
+    # How many times this EXACT list was seen. A list that depends on another
+    # answer (wards of the province this applicant chose) or on who is signed
+    # in never repeats, so it never reaches the corroboration bar and is never
+    # re-served to a different applicant.
+    observations: Mapped[int] = mapped_column(Integer, default=1)
+    captured_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

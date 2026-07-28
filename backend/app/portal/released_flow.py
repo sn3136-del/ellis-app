@@ -27,6 +27,7 @@ from __future__ import annotations
 import os
 import re
 import tempfile
+from datetime import datetime, timezone
 
 from sqlalchemy import select
 
@@ -1767,6 +1768,159 @@ class ReleasedFlowDriver:
 
 class _OutcomeUncertain(Exception):
     pass
+
+
+def known_missing_questions(db, app_row) -> list[dict]:
+    """The form questions Ellis ALREADY KNOWS the portal will ask, computed
+    from the released flow's stored nodes — no browser, no portal round-trip.
+
+    Surfaced when the case page opens so the applicant answers BEFORE the run
+    instead of a minute into it (measured 2026-07-28: start-click → mid-run
+    'additional information' pause took ~65s on the real Vietnam portal).
+    Wording/format/mandatory ride the nodes' baked-in question metadata (the
+    same metadata FlowRunner._question_for uses mid-run). Live-only context —
+    the portal's real option lists, its own validation messages — still comes
+    from the mid-run pause path, which remains the fallback and the authority
+    (page truth) for anything the stored flow does not know."""
+    released = resolve_released_route(db, app_row)
+    if released is None:
+        return []
+    answers = app_row.answers or {}
+    cached = cached_option_lists(db, released)
+    out: list[dict] = []
+    seen: set[str] = set()
+    for node in (released.version_row.flow or []):
+        act = node.get("action")
+        if act not in ("FILL_NON_SENSITIVE", "SELECT_SEARCH"):
+            continue
+        if not bool(node.get("mandatory", True)):
+            continue
+        key = str(node.get("input_source") or "").strip()
+        if not key or key in seen:
+            continue
+        if str(answers.get(key, "") or "").strip():
+            continue
+        seen.add(key)
+        q = dict(node.get("question") or {})
+        label = (q.get("question")
+                 or (node.get("label") or key.replace("_", " ")).strip())
+        entry = {
+            "key": key,
+            "question": q.get("question")
+            or (label if label.endswith("?") else f"What is your {label}?"),
+            "why": q.get("why")
+            or "The official application form requires this information.",
+            "format": q.get("format")
+            or ("DD/MM/YYYY" if node.get("format") else "free text"),
+            "mandatory": True,
+            "kind": q.get("kind") or ("date" if node.get("format") else
+                                      "select" if act == "SELECT_SEARCH" else "text"),
+        }
+        options = list(q.get("options") or [])
+        row = None
+        if not options and entry["kind"] == "select":
+            row = cached.get(node.get("node_id") or "") or cached.get(key)
+            if row is not None:
+                options = list(row.options or [])
+        if options:
+            entry["options"] = options
+            # Only a COMPLETE list may be presented as the portal's own set of
+            # choices. A partial read is offered as suggestions on a field the
+            # applicant can still type into — otherwise a traveller whose real
+            # border gate sits past the rows Ellis managed to read would have
+            # no way to enter it.
+            if row is not None and not row.complete:
+                entry["options_partial"] = True
+                entry["format"] = ""
+        elif entry["kind"] == "select":
+            # A select with no known choices must NOT claim "choose from list"
+            # over a free-text box (the portal's real list is only readable on
+            # its page). Say so honestly: the applicant types an answer, and
+            # the fill step verifies it against the live list, re-asking with
+            # the real options if it does not match.
+            entry["format"] = ""
+            entry["options_pending"] = True
+        out.append(entry)
+    return out
+
+
+def cached_option_lists(db, released: ReleasedRoute) -> dict:
+    """Every option list read from THIS adapter version's live pages, by node
+    id and by answer key. One query, because the case page waits on it.
+
+    Only corroborated lists are returned. A list that depends on another answer
+    (the wards of the province THIS applicant chose) or on who is signed in
+    never repeats between applicants, so it never reaches the bar and is never
+    re-served to someone else. A long list (25+) is trusted on first sight —
+    a personalized list is never that long.
+
+    The live page always remains the authority: a cached value the portal no
+    longer offers is caught by the fill step and re-asked with the real list
+    (runtime._option_matches / _rejected_fills)."""
+    from ..adapter_factory import models as fm
+    rows = db.execute(select(fm.PortalFieldOptionCache).where(
+        fm.PortalFieldOptionCache.candidate_id == released.binding.candidate_id,
+        fm.PortalFieldOptionCache.candidate_version == int(
+            released.binding.candidate_version))).scalars().all()
+    out: dict = {}
+    for r in rows:
+        if not (r.observations >= 2 or len(r.options or []) >= 25):
+            continue          # not corroborated: may be applicant-specific
+        if r.node_id:
+            out[r.node_id] = r
+        out.setdefault(r.field_key, r)
+    return out
+
+
+def cached_field_options(db, released: ReleasedRoute, field_key: str) -> list[str]:
+    """The portal's own list for one field (see cached_option_lists)."""
+    row = cached_option_lists(db, released).get(field_key)
+    return list(row.options or []) if row is not None else []
+
+
+def remember_field_options(db, *, candidate_id: str, candidate_version: int,
+                           field_key: str, options: list, node_id: str = "",
+                           complete: bool = False, deliberate: bool = False) -> None:
+    """Record what the portal actually offered for a field, so the NEXT
+    applicant on this adapter version is asked with the portal's real list
+    before any browser session opens.
+
+    Keyed to the exact version (a new adapter version re-reads the portal
+    rather than inheriting a list that may no longer match the form) and to
+    the node (one answer key can be collected by two widgets whose lists must
+    not overwrite each other). Repeating an identical list corroborates it;
+    a changed list replaces it and starts counting again."""
+    from ..adapter_factory import models as fm
+    values = [str(o).strip() for o in (options or []) if str(o).strip()]
+    if not values or not field_key:
+        return
+    q = select(fm.PortalFieldOptionCache).where(
+        fm.PortalFieldOptionCache.candidate_id == candidate_id,
+        fm.PortalFieldOptionCache.candidate_version == int(candidate_version))
+    q = q.where(fm.PortalFieldOptionCache.node_id == node_id) if node_id else \
+        q.where(fm.PortalFieldOptionCache.field_key == field_key)
+    row = db.execute(q).scalars().first()
+    # A deliberate warm-up read happens on an UNTOUCHED form with no applicant
+    # answers set, so its list cannot be specific to anyone — it is
+    # corroborated on its own (option_warmup.warm_option_lists).
+    first_count = 2 if deliberate else 1
+    if row is None:
+        db.add(fm.PortalFieldOptionCache(
+            candidate_id=candidate_id, candidate_version=int(candidate_version),
+            field_key=field_key, node_id=node_id, options=values,
+            complete=bool(complete), observations=first_count))
+    elif list(row.options or []) == values:
+        row.observations = int(row.observations or 1) + 1
+        row.complete = bool(row.complete or complete)
+        row.captured_at = datetime.now(timezone.utc)
+    else:
+        # The portal's list changed (or this read saw more of it). A longer
+        # read supersedes a truncated one; anything else starts over.
+        row.options = values
+        row.complete = bool(complete)
+        row.observations = first_count
+        row.captured_at = datetime.now(timezone.utc)
+    db.commit()
 
 
 def build_released_adapter(db, app_row, released: ReleasedRoute) -> PortalAdapter:

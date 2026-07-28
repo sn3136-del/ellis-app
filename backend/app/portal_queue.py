@@ -306,6 +306,16 @@ _SAFE_GATE_ERRORS = {
 }
 
 
+def _last_reason(wf) -> str:
+    """The state machine's own reason for the state it stopped in — used to
+    tell an APPLICATION problem apart from the portal simply being down."""
+    try:
+        hist = (wf.machine.history or [])[-4:]
+        return " | ".join(str((h or {}).get("reason") or "") for h in hist)
+    except Exception:  # noqa: BLE001 — messaging must never break a run
+        return ""
+
+
 def execute_run(run_id: str, worker_id: str) -> None:
     """Drive one claimed run to its next pause/terminal state. All workflow
     mutation happens here — never in the HTTP request."""
@@ -379,11 +389,14 @@ def execute_run(run_id: str, worker_id: str) -> None:
             record_event(db, application_id, step, "handoff")
         elif state == "RECOVERABLE_FAILURE":
             run.status = "failed"
-            run.error = "the official portal did not respond as expected"
-            record_event(db, application_id, "recoverable_failure", "failed")
+            step = progress.step_for_state(state, None, _last_reason(wf))
+            run.error = (progress.STEP_MESSAGES.get(step)
+                         if step == "portal_unavailable"
+                         else "the official portal did not respond as expected")
+            record_event(db, application_id, step, "failed")
         else:
             run.status = "completed"
-            step = progress.step_for_state(state, None)
+            step = progress.step_for_state(state, None, _last_reason(wf))
             run.current_step_key = step
             record_event(db, application_id, step,
                          "done" if state != "MANUAL_REVIEW_REQUIRED" else "failed")

@@ -125,6 +125,24 @@ def i18n_translate(body: TranslateBody, _: Principal = Depends(get_principal)):
     return i18n.translate(body.text, body.target_lang, body.source_lang)
 
 
+class CatalogBody(BaseModel):
+    target_lang: str
+    entries: dict
+
+
+@app.post("/i18n/catalog")
+def i18n_catalog(body: CatalogBody, _: Principal = Depends(get_principal)):
+    """Dynamic UI-language support: translate the renderer's English string
+    catalog into any supported language via Kimi K3 (masked, cached, chunked).
+    Strings the model round-trip loses stay ENGLISH — never fabricated, never
+    a hole in the UI. Bounded: at most 800 short strings per call."""
+    from . import i18n
+    entries = {str(k)[:80]: str(v)[:400] for k, v in list((body.entries or {}).items())[:800]}
+    out = i18n.translate_catalog(entries, body.target_lang)
+    out["rtl"] = body.target_lang in i18n.RTL_LANGS
+    return out
+
+
 @app.get("/assistant/identity")
 def assistant_identity(lang: str = "en", _: Principal = Depends(get_principal)):
     """The assistant always identifies as Ellis, in any supported language, and
@@ -1165,7 +1183,8 @@ def case_checklist(application_id: str, db=Depends(get_session),
         return {"guidance": None, "disposition": None, "continuation_kind": None,
                 "checklist": [], "checklist_counts": {"total": 0, "required_missing": 0},
                 "intake_stage": {"completed": False, "completed_at": None},
-                "verification": None, "route_workflow_type": None}
+                "verification": None, "route_workflow_type": None,
+                "form_questions": _known_form_questions(db, app_row)}
     # Serve-time normalization: stored two-pass-era guidance rows carry a label
     # claiming a retired second-pass check — it must never reach the UI.
     from .visa_snapshot import kimi_primary
@@ -1187,7 +1206,19 @@ def case_checklist(application_id: str, db=Depends(get_session),
             "verification": (guidance or {}).get("verification") or None,
             "route_workflow_type": g_inner.get("route_workflow_type"),
             "health_questions": intake_flow.pending_health_questions(
-                g_inner, answers=app_row.answers or {})}
+                g_inner, answers=app_row.answers or {}),
+            # Form answers the released flow is KNOWN to need but the case
+            # lacks — asked here, at case open, so the applicant never waits
+            # for a live portal run to rediscover them one pause at a time.
+            "form_questions": _known_form_questions(db, app_row)}
+
+
+def _known_form_questions(db, app_row) -> list[dict]:
+    from .portal import released_flow as released_mod
+    try:
+        return released_mod.known_missing_questions(db, app_row)
+    except Exception:  # noqa: BLE001 — a broken route must not break the page
+        return []
 
 
 class ChecklistSubmit(BaseModel):
@@ -1335,13 +1366,32 @@ def update_answers(application_id: str, body: AnswersUpdate, db=Depends(get_sess
     """Merge applicant-supplied answers (the 'missing information' step). A
     material change invalidates any prior signature, exactly like approving a
     document field."""
+    from . import dates as dates_mod
     app_row = _owned(db, p, application_id)
     ans = dict(app_row.answers or {})
-    changed = {k: v for k, v in (body.answers or {}).items() if ans.get(k) != v}
-    ans.update({k: v for k, v in (body.answers or {}).items()})
+    incoming = {}
+    for k, v in (body.answers or {}).items():
+        # Same canonicalization the mid-run answer path applies: date-like
+        # answers are stored ISO, whatever format the applicant typed. An
+        # unparseable date is kept verbatim (visible, confirmable) rather
+        # than silently guessed — the portal fill will surface it honestly.
+        kind = dates_mod.date_kind_for_key(k)
+        if kind and isinstance(v, str):
+            iso = dates_mod.normalize_any(v.strip(), kind=kind, us_numeric=True)
+            if iso:
+                v = iso
+        incoming[k] = v
+    changed = {k: v for k, v in incoming.items() if ans.get(k) != v}
+    ans.update(incoming)
     app_row.answers = ans
     db.commit()
-    invalidated = invalidate_signatures_if_changed(db, application_id)
+    # Answers the applicant TYPES INTO ELLIS are consented by construction —
+    # they stale the frozen review VERSION (re-frozen under advance consent at
+    # the next enqueue) but never void the ONE authorization signature
+    # (single-ceremony product decision 2026-07-27; same policy as the
+    # provide_information signal path).
+    invalidated = invalidate_signatures_if_changed(db, application_id,
+                                                   protect_authorization=True)
     audit.record(db, org_id=p.org_id, application_id=application_id, action="answers_updated",
                  detail={"keys": list(changed.keys()), "signatures_invalidated": invalidated}, actor=p.user_id)
     required = _required_fields_for(app_row.destination_country, app_row.visa_type)
@@ -1628,6 +1678,20 @@ def sign_authorization_doc(application_id: str, body: SignBody, request: Request
     audit.record(db, org_id=p.org_id, application_id=application_id, action="authorization_signed_native",
                  detail={"artifact_hash": result["artifact_hash"], "method": result["signature_method"]},
                  actor=p.user_id)
+    # SINGLE CEREMONY (product decision 2026-07-27): this one signature also
+    # (a) grants the standing authorization (versioned, hash-bound, same
+    # limits as before — Ellis still never confirms a payment), and (b)
+    # records the intake email as the confirmed portal contact. The applicant
+    # signs once; everything after runs without another signing step.
+    from . import authorization as _standing
+    _standing.grant(db, app_row=app_row, principal_user=p.user_id)
+    from . import checklist_intake as _ci
+    if (app_row.answers or {}).get("email") or (applicant.email or ""):
+        if _ci.stage_progress(db, application_id, stage="contact_confirmed") is None:
+            db.add(models.CaseStageProgress(org_id=app_row.org_id,
+                                            application_id=application_id,
+                                            stage="contact_confirmed"))
+            db.commit()
     return {"signature_id": sig.id, "artifact_hash": result["artifact_hash"],
             "signed_at": result["signed_at"], "download": f"/cases/{application_id}/authorization/{sig.id}/pdf"}
 
@@ -1639,12 +1703,11 @@ def _latest_env(db, application_id: str):
 
 
 # ---- Standing authorization (brief §5) ----
-class StandingAuthBody(BaseModel):
-    locale: str = "en"
-    appointment_preferences: Optional[dict] = None
-    route_key: str = ""
-
-
+# Granted ONLY inside the signature ceremony (/authorization/sign) — the
+# single-ceremony product decision (2026-07-27). The bare POST grant endpoint
+# was removed 2026-07-28: with service.signal treating a valid grant as proof
+# the ceremony happened, a ceremony-less grant would be an authorization
+# bypass. Reading (GET) and revoking (DELETE) remain applicant actions.
 class RevokeBody(BaseModel):
     reason: str = ""
 
@@ -1662,18 +1725,6 @@ def get_standing_authorization(application_id: str, locale: str = "en",
             "text_version": standing.TEXT_VERSION,
             "permitted_actions": standing.PERMITTED_ACTIONS,
             "disclosures": standing.DISCLOSURES}
-
-
-@app.post("/cases/{application_id}/standing-authorization")
-def grant_standing_authorization(application_id: str, body: StandingAuthBody,
-                                 db=Depends(get_session), p: Principal = Depends(get_principal)):
-    from . import authorization as standing
-    app_row = _owned(db, p, application_id)
-    row = standing.grant(db, app_row=app_row, principal_user=p.user_id,
-                         locale=body.locale,
-                         appointment_preferences=body.appointment_preferences,
-                         route_key=body.route_key)
-    return standing.to_dict(row)
 
 
 @app.delete("/cases/{application_id}/standing-authorization")
@@ -1807,9 +1858,17 @@ def _sig_event(db, signature_id: str, application_id: str, event: str, detail: d
     db.commit()
 
 
-def invalidate_signatures_if_changed(db, application_id: str):
+def invalidate_signatures_if_changed(db, application_id: str,
+                                     protect_authorization: bool = False):
     """Any material change to answers/documents invalidates completed signatures
-    AND the signed final-review version (§7 — back to review + new signature)."""
+    AND the signed final-review version (§7 — back to review + new signature).
+
+    protect_authorization=True is the single-ceremony policy for answers the
+    applicant TYPES INTO ELLIS (consented by construction): the frozen review
+    version still goes stale, but the ONE authorization signature survives —
+    the same rule the provide_information signal path applies. Document-edit
+    callers keep the strict §7 behavior (a changed passport field is a change
+    to the very material the signature covered)."""
     from .providers import esign
     from . import final_review
     app_row = db.get(models.VisaApplication, application_id)
@@ -1820,6 +1879,9 @@ def invalidate_signatures_if_changed(db, application_id: str):
     for sig in db.execute(select(models.NativeSignature).where(
             models.NativeSignature.application_id == application_id,
             models.NativeSignature.invalidated == False)).scalars().all():  # noqa: E712
+        if protect_authorization and final_review._is_authorization_signature(
+                db, application_id, sig):
+            continue
         if sig.app_snapshot_hash and sig.app_snapshot_hash != current:
             sig.invalidated = True
             _sig_event(db, sig.id, application_id, "invalidated", {"reason": "material_change"})
@@ -1999,7 +2061,14 @@ def send_signal(application_id: str, name: str, body: Optional[SignalBody] = Non
         merged.update(answers)
         app_row.answers = merged
         db.commit()
-        invalidated = invalidate_signatures_if_changed(db, application_id)
+        # Answers the applicant TYPES INTO ELLIS during the run are consented
+        # by construction — they must never void the applicant's one
+        # authorization signature (single-ceremony product decision
+        # 2026-07-27). Only the frozen review VERSION goes stale; it is
+        # re-frozen under the standing advance consent at the next enqueue.
+        from . import final_review as _fr
+        invalidated = 1 if _fr.check_and_invalidate(
+            db, app_row, reason="applicant provided additional answers") else 0
         audit.record(db, org_id=p.org_id, application_id=application_id,
                      action="additional_information_provided",
                      detail={"keys": sorted(answers.keys()),
@@ -2070,17 +2139,16 @@ def _queue_signal_response(db, p: Principal, app_row, name: str, kwargs: dict):
     if verdict.get("blocking"):
         passport_validity.enforce_and_notify(db, app_row, verdict)
         raise HTTPException(409, detail={"reason": "passport_validity", "verdict": verdict})
-    # Live portals can send verification codes: the applicant must have
-    # confirmed their contact details before Ellis starts portal execution.
-    if name == "sign_authorization" and not _contact_confirmed(db, application_id):
-        raise HTTPException(409, detail={
-            "reason": "contact_unconfirmed",
-            "message": "Confirm your email and phone number before Ellis "
-                       "opens the official portal."})
+    # Contact is reachable by construction: the intake email IS the portal
+    # contact (product decision 2026-07-27 — no separate confirmation step).
     # A run may submit only when a CURRENT signed final review exists at the
-    # moment the applicant acts — the applicant's explicit confirmation.
-    rv = final_review.latest(db, application_id)
-    allow_submit = bool(rv is not None and rv.signed and not getattr(rv, "invalidated", False))
+    # moment the applicant acts. Under the single-ceremony flow the one
+    # authorization signature carries advance submit consent: the review
+    # version is (re)frozen and recorded against that signature here.
+    rv = final_review.ensure_advance_signed(db, app_row) \
+        or final_review.latest(db, application_id)
+    allow_submit = bool(rv is not None and rv.signed and not getattr(rv, "invalidated", False)
+                        and final_review.signed_current(db, app_row) is not None)
     try:
         run, created = portal_queue.enqueue(db, app_row=app_row, signal_name=name,
                                             kwargs=kwargs, allow_submit=allow_submit)
@@ -2172,10 +2240,12 @@ def case_progress(application_id: str, db=Depends(get_session),
         step = "stalled"
     elif active:
         step = run.current_step_key or "queued"
-    elif pending:
-        step = progress_vocab.step_for_state(state, pending)
     else:
-        step = progress_vocab.step_for_state(state, None)
+        # The machine's own reason for this state distinguishes "the portal is
+        # down" from "this application needs a look" — see progress.py.
+        hist = ((exec_row.history if exec_row else None) or [])[-4:]
+        why = " | ".join(str((h or {}).get("reason") or "") for h in hist)
+        step = progress_vocab.step_for_state(state, pending or None, why)
     last_done = db.execute(select(models.CaseProgressEvent).where(
         models.CaseProgressEvent.application_id == application_id,
         models.CaseProgressEvent.status == "done").order_by(
@@ -2347,7 +2417,9 @@ def confirm_contact(application_id: str, body: ContactBody, db=Depends(get_sessi
     if changed:
         app_row.answers = answers
         db.commit()
-        invalidate_signatures_if_changed(db, application_id)
+        # Contact preferences typed into Ellis: same single-ceremony policy.
+        invalidate_signatures_if_changed(db, application_id,
+                                         protect_authorization=True)
     if body.confirm:
         if not (answers.get("email") or (applicant.email if applicant else "")):
             raise HTTPException(422, detail={

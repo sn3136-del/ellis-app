@@ -319,6 +319,30 @@ class VisaWorkflow:
             "max_fee_cents": self.authorization.get("max_fee_cents")})
         return self._drive()
 
+    def _fee_from_verified_record(self) -> dict | None:
+        """The route's official published fee, from its VERIFIED FeeRecord —
+        used only when the portal renders no machine-readable amount.
+
+        This is the authority's own schedule (versioned, source-cited, and
+        blocked when stale by fees.verified_current_fee), never a guess and
+        never a constant in the code. The applicant still confirms this exact
+        amount before paying, and pays on the portal's own page, where the
+        government displays what it is actually charging."""
+        ctx = self.fee_context or {}
+        if not ctx.get("available"):
+            return None
+        total = int(ctx.get("total_cents") or 0)
+        currency = str(ctx.get("currency") or "").upper()
+        if total <= 0 or len(currency) != 3:
+            return None
+        return {"ok": True, "amount": total, "currency": currency,
+                "display": f"{total / 100:.2f} {currency}",
+                "payee": getattr(self.adapter, "portal_operator", ""),
+                "source": "verified_official_fee_record",
+                "source_url": str(ctx.get("source_url") or ""),
+                "source_authority": str(ctx.get("source_authority") or ""),
+                "fee_version": ctx.get("version")}
+
     def _payment_authorization_matches_fee(self) -> bool:
         pa = getattr(self, "payment_authorization", None)
         return bool(pa and pa.get("status") == "authorized" and self.fee
@@ -653,8 +677,10 @@ class VisaWorkflow:
         elif st == "READY_FOR_REVIEW":
             m.transition("APPLICANT_REVIEW_REQUIRED")
         elif st == "APPLICANT_REVIEW_REQUIRED":
-            if not self.inputs["review_approved"]:
-                return self._pause("Review every answer and approve.", "review")
+            # Product decision (2026-07-27): the answers the applicant just
+            # typed ARE the review — no separate review-and-approve ceremony.
+            # The state remains for machine legality but never pauses.
+            self.inputs["review_approved"] = True
             self.pending = None
             m.transition("AUTHORIZATION_REQUIRED")
         elif st == "AUTHORIZATION_REQUIRED":
@@ -812,13 +838,27 @@ class VisaWorkflow:
                 if fee.get("code") == "FEE_NOT_DISPLAYED":
                     # The boundary was reached, the live page shows no blocker
                     # (discover_fee classified it) and no machine-readable fee.
-                    # Never invent one: the applicant confirms the exact fee
-                    # shown in the secure portal window at the approval step.
-                    self.fee = None
+                    # Never invent one — but the route's VERIFIED official fee
+                    # record is not an invention: it is a versioned amount taken
+                    # from the authority's own published schedule, which is what
+                    # FeeRecord exists for. Using it here spares the applicant a
+                    # "type the amount you see" step for a fee the portal simply
+                    # renders in a way no parser can read. A figure read off the
+                    # live page still WINS — this branch only runs when there is
+                    # none — and the applicant still confirms the exact amount
+                    # before anything is paid.
+                    self.fee = self._fee_from_verified_record()
                     self._page_field_map = None
-                    self._emit("fee_not_machine_readable", {})
+                    if self.fee is None:
+                        self._emit("fee_not_machine_readable", {})
+                        return m.transition("PAYMENT_APPROVAL_REQUIRED",
+                                            "fee to be confirmed by the applicant")
+                    self._emit("fee_from_verified_record",
+                               {"amount": self.fee["amount"],
+                                "currency": self.fee["currency"],
+                                "source_url": self.fee.get("source_url", "")})
                     return m.transition("PAYMENT_APPROVAL_REQUIRED",
-                                        "fee to be confirmed by the applicant")
+                                        "official published fee for this route")
                 blocked = self._portal_step_blocked(fee, return_state="FEE_DISCOVERY_PENDING")
                 if blocked is not None:
                     return blocked
@@ -1048,8 +1088,13 @@ class VisaWorkflow:
                 prior = "PORTAL_LOGIN_REQUIRED"
             from .statemachine import can_transition
             if retries > 3 or not prior or not can_transition(st, prior):
-                return m.transition("MANUAL_REVIEW_REQUIRED",
-                                    "repeated recoverable failures")
+                # Carry the CAUSE forward: a stop because the government site
+                # is down must not read to the applicant as a problem with
+                # their application (progress.step_for_state reads this).
+                return m.transition(
+                    "MANUAL_REVIEW_REQUIRED",
+                    f"repeated recoverable failures: {last_reason}"[:200]
+                    if last_reason else "repeated recoverable failures")
             m.transition(prior, "automatic retry after recoverable failure")
         elif st == "FINAL_REVIEW_REQUIRED":
             m.transition("PERSONAL_DECLARATION_REQUIRED" if self.adapter.personal_declaration_required

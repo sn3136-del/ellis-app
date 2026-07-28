@@ -9,80 +9,21 @@ import { useLocale } from '../../lib/locale.jsx'
 import { HANDOFF_COPY } from '../../lib/visaBackend.js'
 import { handoffCopy, isTerminal, formatSlot, resultDisposition } from '../../lib/visaSession.js'
 import {
-  applicableStages, showExecutionBanner, preferencesTabVisible,
-  validityMeta, verificationMeta, formatDateUS, isDateKey
+  showExecutionBanner, preferencesTabVisible,
+  validityMeta, formatDateUS, isDateKey
 } from '../../lib/intake.js'
-import OcrReview from './OcrReview.jsx'
 import Preferences from './Preferences.jsx'
-import Checklist, { ContinuePanel } from './Checklist.jsx'
+import { ContinuePanel, DocCards } from './Checklist.jsx'
 import {
   SignatureModal, LiveViewModal, PaymentApprove, PaymentModal,
   PaymentDetailsModal, AppointmentCalendar, RescheduleConfirm, DeclarationModal,
-  StandingAuthModal, FinalReviewModal, AdditionalInfoModal,
+  FinalReviewModal, AdditionalInfoModal,
   PortalWatch
 } from './handoffs.jsx'
-
-// Legacy full stage list — used ONLY for cases without a saved route journey
-// (no continuation kind). Routed cases render just their applicable stages.
-const JOURNEY = [
-  'DRAFT', 'APPLICANT_REVIEW_REQUIRED', 'AUTHORIZATION_PENDING', 'PORTAL_ACCOUNT_CREATING',
-  'PORTAL_VERIFICATION_REQUIRED', 'PAYMENT_APPROVAL_REQUIRED', 'PAYMENT_ACTION_REQUIRED',
-  'APPOINTMENT_BOOKING', 'PERSONAL_DECLARATION_REQUIRED', 'SUBMITTING', 'COMPLETED'
-]
-
-// Applicant-friendly stage labels: internal state names never surface raw
-// (a truncated "PAYMENT_APPROVAL_REQUIRED" chip reads as gibberish).
-const STAGE_LABELS = {
-  DRAFT: 'application details',
-  APPLICANT_REVIEW_REQUIRED: 'review your details',
-  AUTHORIZATION_PENDING: 'authorize Ellis',
-  PORTAL_ACCOUNT_CREATING: 'portal account',
-  PORTAL_VERIFICATION_REQUIRED: 'verification',
-  PORTAL_LOGIN_REQUIRED: 'portal connection',
-  APPLICATION_FILLING: 'official form',
-  DOCUMENT_UPLOAD_PENDING: 'document upload',
-  FEE_DISCOVERY_PENDING: 'official fee',
-  PAYMENT_APPROVAL_REQUIRED: 'confirm the fee',
-  PAYMENT_ACTION_REQUIRED: 'payment',
-  PAYMENT_PROCESSING: 'payment check',
-  APPOINTMENT_BOOKING: 'appointment',
-  PERSONAL_DECLARATION_REQUIRED: 'your declaration',
-  FINAL_REVIEW_REQUIRED: 'final review',
-  READY_TO_SUBMIT: 'submit',
-  SUBMITTING: 'submitting',
-  COMPLETED: 'submitted',
-}
-
-function stageLabel(s) {
-  return STAGE_LABELS[s] || s.replace(/_/g, ' ').toLowerCase()
-}
-
-function Timeline({ state, journey }) {
-  // Route-specific stages from the Kimi workflow plan; [] = no submission
-  // timeline for this route at all (entry preparation / renewal prep).
-  const stages = applicableStages(
-    journey?.continuation_kind,
-    (journey?.guidance || {}).workflow_plan
-  ) ?? JOURNEY
-  if (stages.length === 0) return null
-  const idx = stages.indexOf(state)
-  return (
-    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', margin: '4px 0 14px' }}
-      data-testid="journey-timeline">
-      {stages.map((s, i) => (
-        <span key={s} className={'chip' + (i <= idx && idx >= 0 ? ' chip--ink' : '')}
-              style={{ fontSize: 10 }} title={stageLabel(s)}>
-          {stageLabel(s)}
-        </span>
-      ))}
-    </div>
-  )
-}
 
 export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
   const toast = useToast()
   const { t } = useLocale()
-  const [tab, setTab] = useState('journey')
   const [status, setStatus] = useState(null)
   const [prefs, setPrefs] = useState(null)
   const [audit, setAudit] = useState([])
@@ -94,6 +35,7 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
   const [progress, setProgress] = useState(null)  // live portal progress (polled)
   const [everQueued, setEverQueued] = useState(false) // a background run exists
   const landedOnDocs = useRef(false)
+  const docsRef = useRef(null)          // scroll target for "go to documents"
   const progressSigRef = useRef('')
   const autoSkipRef = useRef(false)
   const autoRecheckRef = useRef(false)
@@ -123,7 +65,7 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
         if (!landedOnDocs.current && c.state === 'DRAFT' &&
             j && (j.checklist_counts || {}).required_missing > 0) {
           landedOnDocs.current = true
-          setTab('documents')
+          /* single-page: documents are already in view */
         }
       }).catch(() => {})
     } catch (e) { setError({ message: e.message }) }
@@ -134,11 +76,18 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
   // While a background run is queued/running it is RESOLVING the recorded
   // pause: the case row still carries that pause until the run persists, so
   // showing it again would invite the applicant to answer a question Ellis
-  // is already acting on (and re-enter the same value twice). Exception: a
-  // portal-view RESTORE preserves the pause — the open dialog stays put and
-  // its embedded window shows the page being rebuilt.
-  const restoreRun = progress?.run_signal === 'restore_portal'
-  const runBusy = !!progress && (progress.active || progress.queued) && !restoreRun
+  // is already acting on (and re-enter the same value twice).
+  //
+  // Exception — runs an OPEN dialog started and is itself waiting on: a
+  // portal-view RESTORE (its embedded window shows the page being rebuilt)
+  // and an on-demand FEE READ. Treating those as "Ellis is busy" closed the
+  // very dialog that launched them, dropping the applicant back to the
+  // "Confirm the official fee" card; pressing Continue re-opened it, which
+  // auto-started another read, which closed it again — an endless loop
+  // (2026-07-28).
+  const selfRun = progress?.run_signal === 'restore_portal' ||
+                  progress?.run_signal === 'read_fee'
+  const runBusy = !!progress && (progress.active || progress.queued) && !selfRun
   const handoff = runBusy ? null : pending?.handoff
   const state = status?.state
   const terminal = isTerminal(state)
@@ -168,8 +117,7 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
           // update: this effect's closure over `modal` is stale (deps exclude
           // it), so the current value must come from the setter itself.
           if (pr.waiting_for_applicant && pr.handoff) {
-            setModal((cur) =>
-              cur && cur !== 'standing_auth' && cur !== pr.handoff ? pr.handoff : cur)
+            setModal((cur) => cur && cur !== pr.handoff ? pr.handoff : cur)
           }
         }
         progressSigRef.current = sig
@@ -183,7 +131,7 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
   // A handoff modal left open when the background run starts must close —
   // its question is already being acted on.
   useEffect(() => {
-    if (runBusy && modal && modal !== 'standing_auth') setModal(null)
+    if (runBusy && modal) setModal(null)
   }, [runBusy, modal])
 
   async function retryPortal() {
@@ -206,6 +154,10 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
     if (res && res.queued) {
       setEverQueued(true)
       setStatus((prev) => ({ ...prev, ...res, pending: null }))
+      // The signature ceremony grants the standing authorization server-side;
+      // pull it straight away so no surface can still offer to authorize.
+      client.getStandingAuthorization(caseId)
+        .then((s) => setStanding(s.current)).catch(() => {})
     } else {
       setStatus((prev) => ({ ...prev, ...res }))
     }
@@ -279,140 +231,156 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
   if (!status) return <Loading label="Loading your application" />
 
   const copy = handoff ? handoffCopy(HANDOFF_COPY, handoff) : null
-  const started = state && state !== 'DRAFT'
+  // A QUEUED run has started the application even though the case row still
+  // reads DRAFT: the executor advances the state a moment later. Without
+  // `everQueued` the page fell back to its pre-authorization view for that
+  // window — showing "Authorize & start" again right after a successful
+  // signature, which invited a second signing ceremony (2026-07-28).
+  const started = (state && state !== 'DRAFT') || everQueued
   const kind = journey?.continuation_kind
-  // The Preferences tab is appointment configuration: only for routes whose
-  // verified guidance requires an appointment / in-person submission.
-  const tabs = ['journey', 'documents']
-  if (preferencesTabVisible(journey)) tabs.push('preferences')
-  tabs.push('activity')
-  const tabLabel = (id) => id === 'preferences'
-    ? t('case.tab.appointmentPrefs')
-    : id[0].toUpperCase() + id.slice(1)
+  // One flowing Trip.com-style page — no tabs, no stage strip, no route
+  // summary bar: the applicant sees the CURRENT step only.
+  const docsPending = !started && (journey?.checklist_counts?.required_missing ?? 0) > 0
 
   return (
     <div>
-      <div className="tabs">
-        {tabs.map((tb) => (
-          <button key={tb} className={'tab' + (tab === tb ? ' is-active' : '')} onClick={() => setTab(tb)}>
-            {tabLabel(tb)}
-          </button>
-        ))}
-      </div>
+      {/* The execution-honesty banner stays — it guards against a simulated
+          result ever reading as a real government outcome. */}
+      {showExecutionBanner(journey) && (started || !kind) && <ExecutionBanner status={status} />}
+      {error && <ErrorNote error={error} />}
 
-      {tab === 'journey' && (
-        <div className="tabpanel">
-          <Timeline state={state} journey={journey} />
-          {/* The realness banner guards EXECUTED results. A routed case that
-              has not started yet shows precise provider/capability errors at
-              start time instead of a blanket warning; a route with no
-              submission at all never shows it. Legacy cases keep it always. */}
-          {showExecutionBanner(journey) && (started || !kind) && <ExecutionBanner status={status} />}
-          <JourneyHeader t={t} journey={journey} />
-          {error && <ErrorNote error={error} />}
-
-          {!started && kind === 'entry_preparation' && (
-            <EntryPrep t={t} client={client} caseId={caseId} journey={journey}
-              onOpenCase={onOpenCase}
-              onToDocuments={() => setTab('documents')} />
-          )}
-
-          {!started && kind === 'passport_renewal' && (
-            <RenewalPrep t={t} journey={journey}
-              onToDocuments={() => setTab('documents')} />
-          )}
-
-          {!started && kind !== 'entry_preparation' && kind !== 'passport_renewal' && (
-            <div className="card" style={{ padding: 22 }}>
-              <CaseValidity t={t} client={client} caseId={caseId} onOpenCase={onOpenCase} />
-              <div style={{ fontWeight: 700, marginBottom: 6 }}>Ready to submit?</div>
-              <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>
-                Add and approve your documents, then start. Ellis will pause for
-                you at every step that needs you.
-              </div>
-              {standing?.granted && !standing?.revoked ? (
-                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                  <span className="chip chip--ink" title={standing.text_hash}>
-                    Your authorization is signed
-                  </span>
-                  <button className="btn" disabled={busy} onClick={start}>
-                    {busy ? 'Starting…' : 'Start application'}
-                  </button>
-                </div>
-              ) : (
-                <div>
-                  <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 8 }}>
-                    First, authorize Ellis to fill the official form for you. This
-                    covers routine portal steps only — it never replaces government
-                    declarations, CAPTCHA, verification codes, payment approval, or
-                    your final submission confirmation.
-                  </div>
-                  <button className="btn" onClick={() => setModal('standing_auth')}>
-                    Review and authorize Ellis
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {started && !terminal && handoff && (
-            <div className="card card--ink" style={{ padding: 22 }}>
-              <div className="eyebrow" style={{ color: 'rgba(255,255,255,0.7)' }}>Action needed</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: '#fff', margin: '4px 0' }}>{copy.title}</div>
-              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', marginBottom: 14 }}>{copy.sub}</div>
-              {handoff === 'review'
-                ? <ReviewPanel answers={status.answers} busy={busy} onApprove={async () => {
-                    setBusy(true); try { await resolve('approve_review') } finally { setBusy(false) } }} />
-                : <button className="btn" style={{ background: '#fff', color: '#0a0a0a' }}
-                          onClick={() => setModal(handoff)}>Continue</button>}
-            </div>
-          )}
-
-          {started && !terminal && !handoff && (
-            <ProgressCard client={client} caseId={caseId} progress={progress} busy={busy}
-              onRefresh={refresh} onRetry={retryPortal} onResume={start} />
-          )}
-
-          {terminal && <ResultView status={status} client={client} caseId={caseId} />}
-        </div>
+      {!started && kind === 'entry_preparation' && (
+        <EntryPrep t={t} client={client} caseId={caseId} journey={journey}
+          onOpenCase={onOpenCase}
+          onToDocuments={() => docsRef.current?.scrollIntoView({ behavior: 'smooth' })} />
       )}
 
-      {tab === 'documents' && (
-        <div className="tabpanel">
-          <JourneyHeader t={t} journey={journey} />
+      {!started && kind === 'passport_renewal' && (
+        <RenewalPrep t={t} journey={journey}
+          onToDocuments={() => docsRef.current?.scrollIntoView({ behavior: 'smooth' })} />
+      )}
+
+      {/* Document upload — illustrated cards. EVERY continuation kind has a
+          document surface (entry preparation and renewal have their own
+          checklists; hiding it left their primary CTA pointing nowhere). */}
+      {!started && (
+        <div ref={docsRef}>
+          {/* Form answers the released flow is KNOWN to need — asked here,
+              the moment the case opens, so the applicant never waits for a
+              live portal run to rediscover them one pause at a time. */}
+          <FormQuestions t={t} client={client} caseId={caseId}
+            questions={journey?.form_questions} onAnswered={refresh} />
           <HealthQuestions t={t} client={client} caseId={caseId}
             questions={journey?.health_questions} onAnswered={refresh} />
-          <Checklist t={t} client={client} caseId={caseId}
-            checklist={journey?.checklist}
-            counts={journey?.checklist_counts && {
-              required: journey.checklist_counts.required_documents ??
-                (journey.checklist || []).filter((i) => i.required && i.kind === 'document').length,
-              missing: journey.checklist_counts.required_missing
-            }}
-            translation={journey?.translation}
+          <DocCards t={t} client={client} caseId={caseId}
+            checklist={journey?.checklist} translation={journey?.translation}
             onChanged={refresh} />
-          <OcrReview client={client} caseId={caseId} onChanged={refresh} />
-          <ContinuePanel t={t} client={client} caseId={caseId} journey={journey}
-            onAdvanced={() => { setTab('journey'); refresh() }} />
+          {/* One primary action at a time: the Continue panel only while
+              documents are still missing (it explains what remains) or on
+              routes with no authorize step; otherwise the Authorize card
+              below is the single button and consumes this stage itself. */}
+          {(docsPending || kind === 'entry_preparation' || kind === 'passport_renewal') && (
+            <ContinuePanel t={t} client={client} caseId={caseId} journey={journey}
+              onAdvanced={refresh} />
+          )}
         </div>
       )}
 
-      {tab === 'preferences' && tabs.includes('preferences') && (
-        <div className="tabpanel">
+      {!started && !docsPending && kind !== 'entry_preparation' && kind !== 'passport_renewal' && (
+        <div className="card fadeup-1" style={{ padding: 24 }}>
+          <CaseValidity t={t} client={client} caseId={caseId} onOpenCase={onOpenCase} />
+          <div style={{ fontWeight: 700, marginBottom: 6 }}>Ready to go?</div>
+          <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>
+            One signature authorizes Trip.com's Ellis to file for you — then
+            everything runs automatically, pausing only where you are needed.
+          </div>
+          {standing?.granted && !standing?.revoked ? (
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <span className="chip chip--ink" title={standing.text_hash}>
+                Your authorization is signed
+              </span>
+              <button className="btn" disabled={busy} onClick={start}>
+                {busy ? 'Starting…' : 'Start application'}
+              </button>
+            </div>
+          ) : (
+            <button className="btn" data-testid="authorize-and-start"
+              disabled={busy || modal === 'authorization'}
+              onClick={async () => {
+                if (busy) return
+                setBusy(true)
+                try {
+                  // Consume the documents stage (idempotent, server-validated)
+                  // so authorize-and-start is truly ONE button, then sign.
+                  try { await client.completeDocuments(caseId) } catch { /* stage may already be complete */ }
+                  setModal('authorization')
+                } finally { setBusy(false) }
+              }}>
+              Authorize & start my application
+            </button>
+          )}
+        </div>
+      )}
+
+      {started && !terminal && handoff && (
+        <div className="card card--ink fadeup" style={{ padding: 24 }}>
+          <div className="eyebrow" style={{ color: 'rgba(255,255,255,0.7)' }}>Action needed</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: '#fff', margin: '4px 0' }}>{copy.title}</div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', marginBottom: 14 }}>{copy.sub}</div>
+          {/* A case paused at the legacy 'review' handoff (before the review
+              step was removed) must still be resolvable — it has no modal. */}
+          {handoff === 'review'
+            ? <ReviewPanel answers={status.answers} busy={busy} onApprove={async () => {
+                setBusy(true); try { await resolve('approve_review') } finally { setBusy(false) } }} />
+            : <button className="btn" style={{ background: '#fff', color: 'var(--trip-navy)' }}
+                disabled={busy}
+                onClick={async () => {
+                  // Single ceremony: if the authorization is already signed,
+                  // this pause is a stale mirror of a pre-signature run —
+                  // resolve it with the signal, never a second signing pad.
+                  if (handoff === 'authorization' && standing?.granted && !standing?.revoked) {
+                    setBusy(true)
+                    try { await resolve('sign_authorization') } finally { setBusy(false) }
+                    return
+                  }
+                  setModal(handoff)
+                }}>Continue</button>}
+        </div>
+      )}
+
+      {started && !terminal && !handoff && (
+        <ProgressCard client={client} caseId={caseId} progress={progress} busy={busy}
+          onRefresh={refresh} onRetry={retryPortal} onResume={start} />
+      )}
+
+      {terminal && <ResultView status={status} client={client} caseId={caseId} />}
+
+      {/* Appointment preferences whenever the verified route needs them. */}
+      {preferencesTabVisible(journey) && (
+        <div style={{ marginTop: 16 }}>
           <Preferences client={client} caseId={caseId} initial={prefs} onSaved={(p) => { setPrefs(p); toast('Saved') }} />
         </div>
       )}
 
-      {tab === 'activity' && (
-        <div className="tabpanel">
+      {/* Activity + privacy — discreet, always reachable. */}
+      <details style={{ margin: '22px 4px 8px' }}>
+        <summary style={{ fontSize: 12.5, color: 'var(--muted)', cursor: 'pointer' }}>
+          Activity, privacy & your data
+        </summary>
+        <div style={{ marginTop: 10 }}>
           <AuditTrail events={audit} />
           <PrivacyPanel client={client} caseId={caseId} onDeleted={() => onNotify && onNotify()} />
         </div>
-      )}
+      </details>
 
       {/* Handoff modals */}
+      {/* The signed instrument must state what Ellis actually does. Under the
+          single-ceremony flow Ellis DOES file the application, so the
+          authorization is prepared with representative submit — otherwise the
+          PDF would read "NOT submit on your behalf" while Ellis files. */}
       {modal === 'authorization' && (
-        <SignatureModal client={client} caseId={caseId} authorization={{}}
+        <SignatureModal client={client} caseId={caseId}
+          authorization={{ allow_representative_submit: true }}
           onClose={() => setModal(null)}
           onDone={() => resolve('sign_authorization')} />
       )}
@@ -431,7 +399,9 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
           }}
           onClose={() => setModal(null)} />
       )}
-      {(modal === 'payment_approval' || modal === 'fee_confirmation') && (
+      {/* No verified fee for the route and none readable on the page: the
+          applicant transcribes the exact amount (the honest last resort). */}
+      {modal === 'fee_confirmation' && (
         <PaymentApprove client={client} caseId={caseId} pending={pending}
           onResolve={resolve} onClose={() => setModal(null)} />
       )}
@@ -439,8 +409,14 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
         <PaymentDetailsModal client={client} caseId={caseId} pending={pending}
           onResolve={resolve} onClose={() => setModal(null)} />
       )}
-      {(modal === 'payment' || modal === 'three_ds') && (
+      {/* ONE pay step: the amount on top, the portal's own payment page in the
+          window below it. The applicant pays there and confirms here — their
+          confirmation IS the exact-amount approval, so there is no separate
+          "approve the fee" screen before it. */}
+      {(modal === 'payment' || modal === 'three_ds' ||
+        modal === 'payment_approval') && (
         <PaymentModal client={client} caseId={caseId} pending={pending}
+          needsApproval={pending?.handoff === 'payment_approval'}
           onResolve={resolve}
           onProvideDetails={() => setModal('payment_credentials')}
           onClose={() => setModal(null)} />
@@ -455,11 +431,6 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
         <DeclarationModal client={client} caseId={caseId} pending={pending}
           onResolve={resolve} onClose={() => setModal(null)} />
       )}
-      {modal === 'standing_auth' && (
-        <StandingAuthModal client={client} caseId={caseId}
-          onClose={() => setModal(null)}
-          onDone={(res) => { setStanding(res); setModal(null); toast('Authorization granted') }} />
-      )}
       {modal === 'final_review' && (
         <FinalReviewModal client={client} caseId={caseId}
           onClose={() => setModal(null)}
@@ -469,7 +440,10 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
         <AdditionalInfoModal pending={pending}
           client={client} caseId={caseId} checklist={journey?.checklist}
           onResolve={resolve}
-          onGoToDocuments={() => { setModal(null); setTab('documents') }}
+          onGoToDocuments={() => {
+            setModal(null)
+            setTimeout(() => docsRef.current?.scrollIntoView({ behavior: 'smooth' }), 60)
+          }}
           onContinueWithoutAnswers={async () => {
             // Document-only ask: nothing to type. Close the modal and re-drive
             // the paused case the same way final_review resumes (start()); the
@@ -478,27 +452,6 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
           }}
           onClose={() => setModal(null)} />
       )}
-    </div>
-  )
-}
-
-// Route summary + the Kimi route-decision chip. No official-source audit
-// exists on the applicant path — deterministic validation is the check.
-function JourneyHeader({ t, journey }) {
-  if (!journey || !journey.continuation_kind) return null
-  const g = (journey.guidance || {}).guidance || {}
-  const ver = verificationMeta(journey.verification)
-  return (
-    <div className="card card--soft" style={{ padding: '10px 14px', marginBottom: 12 }}
-      data-testid="journey-header" data-kind={journey.continuation_kind}>
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-        <span className="badge badge--ai">{t('guidance.aiBadge')}</span>
-        {g.visa_category && <span className="chip">{g.visa_category}</span>}
-        {g.permitted_stay && <span className="chip">{g.permitted_stay}</span>}
-        {ver.verified && (
-          <span className="chip" data-testid="verification-chip">{t(ver.i18nKey)}</span>
-        )}
-      </div>
     </div>
   )
 }
@@ -667,6 +620,81 @@ function RenewalPrep({ t, journey, onToDocuments }) {
 // Travel-history question asked ONLY when a conditional health rule needs it
 // (e.g. yellow fever after presence in a risk country). Answering updates the
 // case answers; the checklist re-derives server-side.
+function FormQuestions({ t, client, caseId, questions, onAnswered }) {
+  // Known-in-advance form answers (from the released flow's stored nodes) —
+  // collected up front so the live run never has to pause to ask for them.
+  const toast = useToast()
+  const [vals, setVals] = useState({})
+  const [busy, setBusy] = useState(false)
+  const list = Array.isArray(questions) ? questions : []
+  if (list.length === 0) return null
+  const filled = list.filter((q) => String(vals[q.key] || '').trim())
+  async function save() {
+    const answers = {}
+    for (const q of filled) answers[q.key] = String(vals[q.key]).trim()
+    if (Object.keys(answers).length === 0) return
+    setBusy(true)
+    try {
+      await client.updateAnswers(caseId, answers)
+      toast(t('formq.saved'))
+      setVals({})
+      onAnswered && onAnswered()
+    } catch (e) { toast(e.message) } finally { setBusy(false) }
+  }
+  return (
+    <div className="card fadeup" style={{ padding: 20, marginBottom: 14 }}
+      data-testid="form-questions">
+      <div style={{ fontWeight: 700, marginBottom: 2 }}>{t('formq.title')}</div>
+      <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 12 }}>
+        {t('formq.sub')}
+      </div>
+      <div className="grid grid-2" style={{ gap: 12 }}>
+        {list.map((q) => (
+          <div className="field" key={q.key}>
+            <label title={q.why || ''}>{q.question}</label>
+            {(q.options || []).length > 0 && !q.options_partial ? (
+              /* The portal's OWN list, read in full from the official form. */
+              <select className="select" value={vals[q.key] || ''}
+                onChange={(e) => setVals((p) => ({ ...p, [q.key]: e.target.value }))}>
+                <option value="" disabled>{t('formq.choose')}</option>
+                {q.options.map((o) => <option key={o} value={o}>{o}</option>)}
+              </select>
+            ) : (
+              <>
+                <input className="input" value={vals[q.key] || ''}
+                  list={(q.options || []).length > 0 ? 'opts-' + q.key : undefined}
+                  placeholder={q.format && q.format !== 'free text' ? q.format : ''}
+                  onChange={(e) => setVals((p) => ({ ...p, [q.key]: e.target.value }))} />
+                {/* Only PART of the official list is known (long lists load a
+                    screen at a time). Offering it as a closed dropdown would
+                    strand anyone whose real answer sits further down it, so
+                    the known values become suggestions on a field they can
+                    still type into. */}
+                {q.options_partial && (
+                  <datalist id={'opts-' + q.key}>
+                    {q.options.map((o) => <option key={o} value={o} />)}
+                  </datalist>
+                )}
+                {(q.options_pending || q.options_partial) && (
+                  <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 4 }}>
+                    {t(q.options_partial ? 'formq.optionsPartial' : 'formq.optionsPending')}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
+        <button className="btn" disabled={busy || filled.length === 0} onClick={save}
+          data-testid="save-form-answers">
+          {busy ? t('formq.saving') : t('formq.save')}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function HealthQuestions({ t, client, caseId, questions, onAnswered }) {
   const toast = useToast()
   const [selecting, setSelecting] = useState(null)   // question id while picking countries
@@ -774,8 +802,11 @@ function ProgressCard({ client, caseId, progress, busy, onRefresh, onRetry, onRe
       )}
       {/* The portal window accompanies EVERY waiting state — working,
           stalled, or paused after a failure — so the applicant always sees
-          what the official site is showing rather than a bare spinner. */}
-      <PortalWatch client={client} caseId={caseId} height="44vh" />
+          what the official site is showing rather than a bare spinner. It is
+          watch-only WHILE Ellis drives; when the run stalled or failed, Ellis
+          is not driving, so the applicant regains control of the page. */}
+      <PortalWatch client={client} caseId={caseId} height="44vh"
+        interactive={!!pr.stalled || failed} />
       <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 10, display: 'flex',
         gap: 12, flexWrap: 'wrap' }}>
         {pr.elapsed_seconds != null && (

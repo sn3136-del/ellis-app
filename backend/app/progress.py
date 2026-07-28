@@ -55,6 +55,14 @@ STEP_MESSAGES = {
     "recoverable_failure": ("The official portal did not respond as expected. "
                             "Your application data is saved."),
     "manual_review": "This application needs a closer look before continuing.",
+    # The GOVERNMENT site is down (it answered with a server error or refused
+    # the connection). Nothing is wrong with the application and no amount of
+    # retrying by Ellis can fix it, so say that plainly instead of implying
+    # the applicant's case is at fault.
+    "portal_unavailable": ("The official portal is temporarily unavailable — it is "
+                           "returning an error for everyone, not just this "
+                           "application. Nothing you submitted is lost; Ellis will "
+                           "continue as soon as the portal is back."),
 }
 
 # input_source -> step key for FILL/SELECT nodes (grouped, applicant-friendly).
@@ -176,13 +184,22 @@ def step_for_node(node: dict) -> str:
     return "checking_form"
 
 
-def step_for_state(state: str, pending: dict | None = None) -> str:
-    """Coarse fallback: the workflow state (and any pending handoff kind)."""
+def step_for_state(state: str, pending: dict | None = None,
+                   last_reason: str = "") -> str:
+    """Coarse fallback: the workflow state (and any pending handoff kind).
+
+    `last_reason` is the state machine's own reason for the current state. A
+    stop caused by the PORTAL being down reads as an outage, never as "this
+    application needs a closer look" — the applicant did nothing wrong."""
     if pending and pending.get("handoff"):
         key = HANDOFF_STEPS.get(str(pending.get("handoff")))
         if key:
             return key
-    return STATE_STEPS.get(str(state or ""), "checking_form")
+    key = STATE_STEPS.get(str(state or ""), "checking_form")
+    if key in ("manual_review", "recoverable_failure") and \
+            "PORTAL_UNAVAILABLE" in str(last_reason or "").upper():
+        return "portal_unavailable"
+    return key
 
 
 def message_for(step_key: str) -> str:

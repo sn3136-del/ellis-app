@@ -158,9 +158,17 @@ export function usePortalLiveView(client, caseId) {
            } }
 }
 
-export function LiveFrame({ view, height = '70vh' }) {
+export function LiveFrame({ view, height = '70vh', watchOnly = false }) {
   if (view.state === 'connecting') return <Loading label="Opening the secure portal window" />
   if (view.state === 'embedded' && view.url) {
+    const frame = (
+      <iframe key={view.nonce} src={view.url} title="Ellis secure window"
+        sandbox="allow-same-origin allow-scripts allow-forms"
+        referrerPolicy="no-referrer"
+        style={{ width: '100%', height, border: '1px solid var(--line)',
+          borderRadius: 10, marginTop: 8, background: '#fff',
+          ...(watchOnly ? { pointerEvents: 'none' } : {}) }} />
+    )
     return (
       <div>
         {view.restoring && (
@@ -170,11 +178,15 @@ export function LiveFrame({ view, height = '70vh' }) {
             watch it below. This takes a minute or two.
           </div>
         )}
-        <iframe key={view.nonce} src={view.url} title="Ellis secure window"
-          sandbox="allow-same-origin allow-scripts allow-forms"
-          referrerPolicy="no-referrer"
-          style={{ width: '100%', height, border: '1px solid var(--line)',
-            borderRadius: 10, marginTop: 8, background: '#fff' }} />
+        {watchOnly ? (
+          // Watch-only: the applicant sees Ellis work but cannot click into
+          // the session while it is driving — a stray click mid-fill could
+          // change portal state under the runner.
+          <div className="watchonly" data-testid="watch-only">
+            {frame}
+            <span className="watchonly__note">View only — Ellis is working on this page</span>
+          </div>
+        ) : frame}
       </div>
     )
   }
@@ -192,9 +204,12 @@ export function LiveFrame({ view, height = '70vh' }) {
 
 // A compact view of the case's own secure portal window, shown beside ANY
 // waiting surface so the applicant watches what Ellis is doing on the
-// official site instead of a bare spinner. Same isolated session as every
-// other surface (one per case); the URL stays short-lived and unlogged.
-export function PortalWatch({ client, caseId, height = '40vh', label }) {
+// official site instead of a bare spinner. ALWAYS watch-only: while Ellis is
+// the one driving, the applicant can see but not touch. Same isolated
+// session as every other surface (one per case); the URL stays short-lived
+// and unlogged. Surfaces where the applicant must act on the portal
+// (payment, portal_form) embed LiveFrame directly, which stays interactive.
+export function PortalWatch({ client, caseId, height = '40vh', label, interactive = false }) {
   const t = useT()
   const view = usePortalLiveView(client, caseId)
   if (!client || !caseId) return null
@@ -206,7 +221,7 @@ export function PortalWatch({ client, caseId, height = '40vh', label }) {
         <button className="btn btn--sm btn--ghost" disabled={view.busy}
           onClick={view.reconnect}>{view.busy ? '…' : t('live.refresh')}</button>
       </div>
-      <LiveFrame view={view} height={height} />
+      <LiveFrame view={view} height={height} watchOnly={!interactive} />
     </div>
   )
 }
@@ -225,38 +240,11 @@ export function SignatureModal({ client, caseId, authorization, onDone, onClose 
   const [busy, setBusy] = useState(false)
   const [continuing, setContinuing] = useState(false)
   const [continued, setContinued] = useState(false)
-  const [contact, setContact] = useState(null)   // {email, phone_masked, confirmed}
-  const [editingContact, setEditingContact] = useState(false)
-  const [contactEmail, setContactEmail] = useState('')
-  const [contactPhone, setContactPhone] = useState('')
+  const [showText, setShowText] = useState(false)
   const canvasRef = useRef(null)
   const drawnRef = useRef('')
-
-  // The portal may send verification codes: the applicant confirms (or edits)
-  // the email + masked phone BEFORE Ellis opens the official portal.
-  useEffect(() => {
-    let live = true
-    client.getContactConfirmation(caseId)
-      .then((c) => { if (live) setContact(c) })
-      .catch(() => { if (live) setContact({ missing_endpoint: true, confirmed: true }) })
-    return () => { live = false }
-  }, [caseId])
-
-  async function saveContact(confirm) {
-    try {
-      const body = { confirm: !!confirm }
-      if (editingContact) {
-        if (contactEmail.trim()) body.email = contactEmail.trim()
-        if (contactPhone.trim()) body.phone = contactPhone.trim()
-      }
-      const c = await client.confirmContact(caseId, body)
-      setContact(c)
-      setEditingContact(false)
-      if (confirm) toast('Contact details confirmed')
-    } catch (e) {
-      setError({ message: (e.detail && e.detail.message) || e.message })
-    }
-  }
+  // Contact confirmation is automatic: the intake email IS the portal
+  // contact (recorded server-side when the authorization is signed).
 
   useEffect(() => {
     let live = true
@@ -293,6 +281,16 @@ export function SignatureModal({ client, caseId, authorization, onDone, onClose 
       })
       setSigned(res)
       toast('Authorization signed')
+      // SINGLE CEREMONY: granting the authorization IS the go-ahead — the
+      // application starts immediately, no second button.
+      try {
+        await (onDone && onDone(res))
+      } catch (e2) {
+        setError({ message: (e2.detail && e2.detail.message) || e2.message })
+        setBusy(false)
+        return
+      }
+      onClose && onClose()
     } catch (e) {
       setError({ message: e.message }); setBusy(false)
     }
@@ -306,23 +304,28 @@ export function SignatureModal({ client, caseId, authorization, onDone, onClose 
       {error && <ErrorNote error={error} />}
       {prep && !signed && (
         <>
-          <div style={{ display: 'flex', gap: 10, fontSize: 12, color: 'var(--muted)', margin: '4px 0 8px' }}>
-            <span className="chip">Template {prep.template_version}</span>
-            <span className="chip">Consent {prep.consent_version}</span>
-          </div>
-          <div className="card card--soft" style={{ padding: 14, maxHeight: 200, overflow: 'auto', whiteSpace: 'pre-wrap', fontSize: 13 }}>
-            {prep.document_text}
-          </div>
-          <div style={{ fontSize: 11, color: 'var(--muted-2)', margin: '8px 0' }}>
-            Document hash: <code>{prep.document_hash?.slice(0, 32)}…</code>
-          </div>
+          <button type="button" className="btn btn--sm btn--ghost" data-testid="read-authorization"
+            onClick={() => setShowText((v) => !v)} aria-expanded={showText}
+            style={{ margin: '4px 0 10px' }}>
+            {showText ? 'Hide the authorization text' : 'Read the authorization'}
+          </button>
+          {showText && (
+            <div className="card card--soft fadeup" style={{ padding: 14, maxHeight: 240,
+              overflow: 'auto', whiteSpace: 'pre-wrap', fontSize: 13 }} data-testid="authorization-text">
+              {prep.document_text}
+              <div style={{ fontSize: 11, color: 'var(--muted-2)', marginTop: 10 }}>
+                Template {prep.template_version} · Consent {prep.consent_version} ·
+                Document hash <code>{prep.document_hash?.slice(0, 32)}…</code>
+              </div>
+            </div>
+          )}
           <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', margin: '6px 0', fontSize: 13 }}>
-            <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
-            <span>I consent to sign this authorization electronically and to receive records electronically.</span>
-          </label>
-          <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', margin: '6px 0', fontSize: 13 }}>
-            <input type="checkbox" checked={intent} onChange={(e) => setIntent(e.target.checked)} />
-            <span>I intend this to be my signature and I authorize Ellis as described above.</span>
+            <input type="checkbox" checked={consent && intent}
+              onChange={(e) => { setConsent(e.target.checked); setIntent(e.target.checked) }} />
+            <span>I have had the chance to read this authorization; I consent to sign it
+              electronically, I intend this to be my signature, and I authorize
+              Trip.com's Ellis to act as described. One signature covers everything —
+              CAPTCHA, verification codes and the final payment confirmation always stay with me.</span>
           </label>
           <div className="tabs" style={{ marginTop: 8 }}>
             <button className={'tab' + (method === 'typed' ? ' is-active' : '')} onClick={() => setMethod('typed')}>Type</button>
@@ -335,83 +338,52 @@ export function SignatureModal({ client, caseId, authorization, onDone, onClose 
                       style={{ border: '1px solid var(--line)', borderRadius: 10, width: '100%', marginTop: 8, cursor: 'crosshair' }} />}
           <div className="modal__foot">
             <button className="btn btn--ghost" onClick={onClose}>Cancel</button>
-            <button className="btn" disabled={busy} onClick={sign}>{busy ? 'Signing…' : 'Sign authorization'}</button>
+            <button className="btn" disabled={busy} onClick={sign} data-testid="grant-authorization">
+              {busy ? 'Starting your application…' : 'Grant authorization'}
+            </button>
           </div>
         </>
       )}
       {signed && (
-        <div className="result" style={{ marginTop: 12 }}>
-          <div className="sevbadge sevbadge--ok" style={{ marginBottom: 8 }}>✓</div>
-          <div style={{ fontWeight: 700 }}>Your authorization is signed</div>
+        <div className="result fadeup" style={{ marginTop: 12 }}>
+          <div className={'sevbadge ' + (error ? 'sevbadge--mid' : 'sevbadge--ok')}
+            style={{ marginBottom: 8 }}>{error ? '!' : '✓'}</div>
+          <div style={{ fontWeight: 700 }}>
+            {error
+              ? 'Your authorization is signed — but starting the application failed'
+              : 'Authorization granted — starting your application'}
+          </div>
           <div style={{ fontSize: 12.5, color: 'var(--muted)', margin: '4px 0 8px' }}>
-            Ellis can now help complete the official form. CAPTCHA, verification
-            codes, payment approval and the final submission always stay with you.
+            Ellis is opening the official portal for you now. CAPTCHA,
+            verification codes and the final payment confirmation always stay
+            with you. Updates from the portal go to your email.
           </div>
           <KVList fields={[
             { label: 'Signature ID', value: signed.signature_id },
             { label: 'Signed at', value: signed.signed_at }
           ]} />
-          {contact && !contact.missing_endpoint && (
-            <div className="card card--soft" style={{ padding: 12, marginTop: 10 }}
-              data-testid="contact-confirm">
-              <div className="eyebrow">Where the portal can reach you</div>
-              <div style={{ fontSize: 13, marginTop: 4 }}>
-                Verification codes from the official portal will go to:
-              </div>
-              {!editingContact ? (
-                <>
-                  <KVList fields={[
-                    { label: 'Email', value: contact.email || '— add an email —' },
-                    { label: 'Phone', value: contact.phone_masked || '— add a phone number —' }
-                  ]} />
-                  <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                    {!contact.confirmed && (
-                      <button className="btn btn--sm" disabled={!contact.has_email}
-                        onClick={() => saveContact(true)}
-                        data-testid="confirm-contact">These are correct</button>
-                    )}
-                    {contact.confirmed && <span className="chip chip--ink">Confirmed</span>}
-                    <button className="btn btn--sm btn--ghost"
-                      onClick={() => { setEditingContact(true); setContactEmail(contact.email || ''); setContactPhone('') }}>
-                      Edit
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <div style={{ marginTop: 8 }}>
-                  <div className="field"><label>Email</label>
-                    <input className="input" value={contactEmail}
-                      onChange={(e) => setContactEmail(e.target.value)} /></div>
-                  <div className="field"><label>Phone (with country code)</label>
-                    <input className="input" value={contactPhone} placeholder="+86 …"
-                      onChange={(e) => setContactPhone(e.target.value)} /></div>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button className="btn btn--sm" onClick={() => saveContact(true)}>Save and confirm</button>
-                    <button className="btn btn--sm btn--ghost" onClick={() => setEditingContact(false)}>Cancel</button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
           {error && <ErrorNote error={error} />}
           <div className="modal__foot">
-            {signed.download && <button className="btn btn--ghost" onClick={() => window.ellis?.openExternal?.(client.base ? client.base + signed.download : signed.download)}>Download signed PDF</button>}
-            <button className="btn" data-testid="continue-to-portal"
-              disabled={continuing || continued || (contact && !contact.missing_endpoint && !contact.confirmed)}
-              onClick={async () => {
-                // One accepted click only: disable immediately, await the
-                // (fast, queued) signal, and surface failures honestly.
-                setContinuing(true); setError(null)
-                try {
-                  await (onDone && onDone(signed))
-                  setContinued(true)
-                } catch (e) {
-                  setError({ message: (e.detail && e.detail.message) || e.message })
-                  setContinuing(false)
-                }
-              }}>
-              {continued ? 'Continuing…' : continuing ? 'Starting…' : 'Continue to the official application'}
-            </button>
+            {signed.download && (
+              <button className="btn btn--ghost" onClick={() => window.ellis?.openExternal?.(client.base ? client.base + signed.download : signed.download)}>Download signed PDF</button>
+            )}
+            {error && (
+              <button className="btn" disabled={busy} data-testid="retry-continue"
+                onClick={async () => {
+                  // The signature stands; only the start leg failed. Retry it
+                  // WITHOUT signing again.
+                  setBusy(true); setError(null)
+                  try {
+                    await (onDone && onDone(signed))
+                    onClose && onClose()
+                  } catch (e) {
+                    setError({ message: (e.detail && e.detail.message) || e.message })
+                    setBusy(false)
+                  }
+                }}>
+                {busy ? 'Starting…' : 'Start my application'}
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -957,7 +929,8 @@ export function PaymentDetailsModal({ client, caseId, pending, onResolve, onClos
 }
 
 // ---- Applicant-confirmed payment (handoff: payment / three_ds) --------------
-export function PaymentModal({ client, caseId, pending, onResolve, onProvideDetails, onClose }) {
+export function PaymentModal({ client, caseId, pending, onResolve, onProvideDetails,
+                               onClose, needsApproval = false }) {
   const toast = useToast()
   const t = useT()
   const [busy, setBusy] = useState(false)
@@ -971,17 +944,28 @@ export function PaymentModal({ client, caseId, pending, onResolve, onProvideDeta
   // form, and a declined attempt may need a different card.
   const view = usePortalLiveView(client, caseId)
   const fee = pending?.fee
+  const feeLabel = formatFee(fee)
   const prefilled = !!pending?.payment_prefilled
   const fillable = !!pending?.payment_fillable
   const embedded = view.state === 'embedded' && !!view.url
   return (
     <Overlay onClose={onClose} width={embedded ? 1360 : 620}>
-      <Head title={prefilled ? t('paywin.titlePrefilled') : t('paywin.title')} onClose={onClose}
+      <Head title={feeLabel ? t('paywin.payTitle', { fee: feeLabel })
+                            : (prefilled ? t('paywin.titlePrefilled') : t('paywin.title'))}
+            onClose={onClose}
             sub={prefilled ? t('paywin.subPrefilled') : t('paywin.sub')} />
       <div className="stat" style={{ marginTop: 4 }}>
-        <div className="stat__num">{formatFee(fee) || '—'}</div>
+        <div className="stat__num">{feeLabel || '—'}</div>
         <div className="stat__cap">{t('paywin.amountCap')}</div>
       </div>
+      {/* Where the amount came from — the portal's own page, or the route's
+          published official schedule. Never presented as more than it is. */}
+      {fee?.source === 'verified_official_fee_record' && (
+        <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: -2 }}
+          data-testid="fee-source-note">
+          {t('paywin.feeFromSchedule')}
+        </div>
+      )}
       {prefilled && (
         <div className="card card--soft" style={{ padding: '10px 12px', marginTop: 10,
           fontSize: 12.5 }} data-testid="payment-prefilled-note">
@@ -1013,8 +997,23 @@ export function PaymentModal({ client, caseId, pending, onResolve, onProvideDeta
         <button className="btn btn--ghost" onClick={onClose}>{t('paywin.later')}</button>
         <button className="btn" disabled={busy} onClick={async () => {
           setBusy(true); setError(null)
-          try { await onResolve('complete_payment'); toast(t('paywin.checking')) }
-          catch (e) { setError({ message: e.message }); setBusy(false) }
+          try {
+            // The applicant paid on the portal's own page in the window above.
+            // Pressing this IS their confirmation of the exact amount shown —
+            // it records the exact-amount authorization (approve_payment) and
+            // then reports the payment (complete_payment), so the two are one
+            // action rather than two screens. Ellis still never clicks Pay:
+            // the money moved by the applicant's own hand on the portal.
+            if (needsApproval) {
+              if (!fee?.amount || !fee?.currency) {
+                throw new Error('The fee amount is not available yet — reopen this step.')
+              }
+              await onResolve('approve_payment',
+                { amount_cents: fee.amount, currency: fee.currency })
+            }
+            await onResolve('complete_payment')
+            toast(t('paywin.checking'))
+          } catch (e) { setError({ message: e.message }); setBusy(false) }
         }}>{busy ? t('paywin.checking') : t('paywin.paidCta')}</button>
       </div>
     </Overlay>
@@ -1321,61 +1320,8 @@ export function AdditionalInfoModal({ client, caseId, checklist, pending, onReso
   )
 }
 
-// ---- Standing authorization (brief §5) -------------------------------------
-// One versioned grant at onboarding covers routine actions (portal selection,
-// forms, uploads, booking within preferences, post-signature submission).
-// Payment always remains a separate exact-amount confirmation.
-export function StandingAuthModal({ client, caseId, locale = 'en', onDone, onClose }) {
-  const t = useT()
-  const [data, setData] = useState(null)
-  const [agree, setAgree] = useState(false)
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState(null)
-  useEffect(() => {
-    client.getStandingAuthorization(caseId, locale)
-      .then(setData).catch((e) => setError({ message: e.message }))
-  }, [caseId, locale])
-  return (
-    <Overlay onClose={onClose}>
-      <Head title={t('standing.title')} onClose={onClose} sub={t('standing.sub')} />
-      {!data && !error && <Loading label={t('standing.loading')} />}
-      {data && (
-        <>
-          <div className="card card--soft" style={{ padding: 14, maxHeight: 260, overflowY: 'auto',
-            whiteSpace: 'pre-wrap', fontSize: 12.5, fontFamily: 'ui-monospace, monospace' }}>
-            {data.text}
-          </div>
-          <ul style={{ fontSize: 12.5, color: 'var(--muted)', margin: '10px 0 0 18px' }}>
-            <li>{t('standing.d.official')}</li>
-            <li>{t('standing.d.routine')}</li>
-            <li>{t('standing.d.noInvent')}</li>
-            <li>{t('standing.d.notAll')}</li>
-            <li>{t('standing.d.truth')}</li>
-            <li>{t('standing.d.sign')}</li>
-            <li>{t('standing.d.payment')}</li>
-            <li>{t('standing.d.secure')}</li>
-            <li>{t('standing.d.personal')}</li>
-          </ul>
-          <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', margin: '12px 0', fontSize: 13 }}>
-            <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
-            <span>{t('standing.agree', { version: data.text_version })}</span>
-          </label>
-        </>
-      )}
-      {error && <ErrorNote error={error} />}
-      <div className="modal__foot">
-        <button className="btn btn--ghost" onClick={onClose}>{t('standing.later')}</button>
-        <button className="btn" disabled={!agree || busy || !data} onClick={async () => {
-          setBusy(true); setError(null)
-          try {
-            const res = await client.grantStandingAuthorization(caseId, { locale })
-            onDone && onDone(res)
-          } catch (e) { setError({ message: e.message }); setBusy(false) }
-        }}>{busy ? t('standing.granting') : t('standing.grant')}</button>
-      </div>
-    </Overlay>
-  )
-}
+// (StandingAuthModal removed 2026-07-28: the standing authorization is granted
+// only inside the signature ceremony — SignatureModal — never by a checkbox.)
 
 // ---- Final review + exact-version signature (brief §7) ---------------------
 // The applicant reviews the complete final package, then signs that EXACT

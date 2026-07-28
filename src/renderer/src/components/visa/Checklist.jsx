@@ -6,7 +6,7 @@
 // is fulfilled by merely selecting a file. Applicant-facing only — no
 // operator terminology, no internal identifiers.
 import { useRef, useState } from 'react'
-import { useToast, Loading } from '../ui.jsx'
+import { useToast, Loading, UploadTick } from '../ui.jsx'
 import {
   checklistStatusMeta, checklistCounts, continueButtonMeta, docTypeLabelKey,
   MANUAL_DOC_TYPES
@@ -383,6 +383,244 @@ export function ContinuePanel({ t, client, caseId, journey, onAdvanced }) {
         data-testid="continue-case">
         {busy ? '…' : t(meta.labelKey)}
       </button>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Illustrated document cards (2026-07-27) — the applicant-facing upload
+// surface: one picture-card per requirement, click (or drop) to upload, a
+// green-tick pop + "uploaded" when it lands. No OCR percentages, no binding
+// internals. The explicit-submit doctrine is preserved: when a document
+// needs the applicant's confirmation, the card offers exactly that choice —
+// nothing is fulfilled by merely selecting a file.
+const DOC_ART = [
+  [/passport.*photo|photo|portrait|picture/i, '🤳'],
+  [/passport|biodata/i, '🛂'],
+  [/ticket|flight|onward|return|itinerar/i, '✈️'],
+  [/hotel|accommodation|stay|booking/i, '🏨'],
+  [/insurance/i, '🛡️'],
+  [/fund|bank|statement|financ/i, '💳'],
+  [/invitation|letter/i, '✉️'],
+  [/employment|work|job/i, '💼'],
+  [/vaccin|health|medical/i, '💉'],
+]
+
+function artFor(item) {
+  const hay = `${item.id || ''} ${item.label || ''} ${item.doc_type || ''}`
+  for (const [re, emoji] of DOC_ART) if (re.test(hay)) return emoji
+  return '📄'
+}
+
+function DocCard({ t, client, caseId, item, translation, onChanged }) {
+  const toast = useToast()
+  const inputRef = useRef(null)
+  const [busy, setBusy] = useState('')
+  const [justUploaded, setJustUploaded] = useState(false)
+  const [preview, setPreview] = useState(false)
+  const [askTranslate, setAskTranslate] = useState(false)
+  const binding = item.binding || null
+  const status = item.status
+  const done = status === 'submitted'
+  const uploaded = !!binding
+  const language = (binding && binding.language) || {}
+  const target = translation || {}
+  // Consent-gated machine translation stays available: the extracted TEXT
+  // (never the file bytes) goes to Kimi K3, only on an explicit click.
+  const canTranslate = !!binding && binding.has_text && language.code &&
+    target.target && language.code !== target.target &&
+    binding.detected_type !== 'translation' && !binding.translation_document_id
+
+  async function translate() {
+    setAskTranslate(false)
+    setBusy('translate')
+    try {
+      await client.translateDocument(caseId, binding.document_id)
+      toast(t('checklist.translatedToast'))
+      onChanged && onChanged()
+    } catch (e) {
+      toast(typeof e.detail === 'object' && e.detail?.message ? e.detail.message : e.message)
+    }
+    setBusy('')
+  }
+
+  async function onFile(file) {
+    if (!file) return
+    if (!ALLOWED[file.type]) { toast(t('checklist.unsupportedType')); return }
+    if (file.size > MAX_BYTES) { toast(t('checklist.tooLarge')); return }
+    setBusy('upload')
+    try {
+      const b64 = await readAsBase64(file)
+      const res = await client.addDocument(caseId, {
+        name: file.name, mime: file.type, size_bytes: file.size,
+        content_b64: b64, checklist_item_id: item.id
+      })
+      if (res && res.rejected) toast(res.message || t('checklist.unreadableToast'))
+      else { setJustUploaded(true); setTimeout(() => setJustUploaded(false), 2400) }
+      onChanged && onChanged()
+    } catch (e) {
+      toast(typeof e.detail === 'object' && e.detail?.message ? e.detail.message : e.message)
+    }
+    setBusy('')
+    if (inputRef.current) inputRef.current.value = ''
+  }
+
+  async function submit(confirm = false) {
+    setBusy('submit')
+    try {
+      await client.submitChecklistDoc(caseId, item.id, binding?.document_id, confirm)
+      toast(t('checklist.submittedToast'))
+      onChanged && onChanged()
+    } catch (e) {
+      toast(typeof e.detail === 'object' && e.detail?.message ? e.detail.message : e.message)
+    }
+    setBusy('')
+  }
+
+  // Status honesty: a green tick means SUBMITTED. An uploaded-but-unconfirmed
+  // document shows its real state, and mismatch/unreadable documents keep the
+  // portal's own words plus the explicit "use it anyway" choice — the
+  // applicant's decision always wins, but never silently.
+  const meta = checklistStatusMeta(status)
+  const blocked = status === 'mismatch' || status === 'unreadable'
+  const awaiting = uploaded && !done && !blocked &&
+    (status === 'ready_to_submit' || status === 'needs_review')
+  const clickable = !done && busy !== 'upload'
+  const detected = binding && binding.detected_type
+    ? t(docTypeLabelKey(binding.detected_type)) : ''
+  return (
+    <div className={'doccard' + (done ? ' doccard--done' : '')}
+      data-testid={'doccard-' + item.id} data-status={status}
+      role={clickable ? 'button' : undefined} tabIndex={clickable ? 0 : undefined}
+      onClick={() => clickable && inputRef.current?.click()}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => { e.preventDefault(); if (clickable) onFile(e.dataTransfer.files?.[0]) }}>
+      <div className="doccard__art">
+        {busy === 'upload'
+          ? <span className="spinner spinner--ink" />
+          : done ? <UploadTick />
+          : blocked ? <span aria-hidden="true">⚠️</span>
+          : <span aria-hidden="true">{artFor(item)}</span>}
+      </div>
+      <div className="doccard__name">{item.label}</div>
+      {!uploaded && !done && (
+        <div className="doccard__sub">{t('doccard.tapToUpload')}</div>
+      )}
+      {done && (
+        <div data-testid={'uploaded-' + item.id}>
+          <div className="doccard__file" title={binding?.document_name || ''}>
+            {binding?.document_name || item.label}
+          </div>
+          <span className="doccard__pill">✓ {t('doccard.uploaded')}</span>
+        </div>
+      )}
+      {uploaded && !done && (
+        <div className="doccard__sub" data-testid={'status-' + item.id}
+          style={{ color: blocked ? '#9a3412' : 'var(--muted)', fontWeight: blocked ? 700 : 500 }}>
+          {binding?.document_name ? binding.document_name + ' · ' : ''}{t(meta.i18nKey)}
+        </div>
+      )}
+      {/* What the confirmation is ABOUT: the portal's detected type when it
+          differs from the requirement. Hiding it would make the confirm
+          button a blind click. */}
+      {uploaded && !done && detected && (status === 'needs_review' || blocked) && (
+        <div className="doccard__sub" style={{ marginTop: 4 }}>
+          {t('doccard.detectedAs', { type: detected })}
+        </div>
+      )}
+      {(awaiting || blocked) && (
+        <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 6 }}
+          onClick={(e) => e.stopPropagation()}>
+          <button className="btn btn--sm" disabled={busy === 'submit'}
+            data-testid={'submit-' + item.id}
+            onClick={() => submit(status !== 'ready_to_submit')}>
+            {busy === 'submit' ? '…'
+              : blocked ? t('doccard.useAnyway') : t('doccard.confirm')}
+          </button>
+          <button className="btn btn--sm btn--ghost" disabled={busy === 'upload'}
+            data-testid={'replace-' + item.id}
+            onClick={() => inputRef.current?.click()}>
+            {t('doccard.replace')}
+          </button>
+        </div>
+      )}
+      {done && (
+        <div style={{ marginTop: 8 }} onClick={(e) => e.stopPropagation()}>
+          <button className="btn btn--sm btn--ghost" disabled={busy === 'withdraw'}
+            data-testid={'withdraw-' + item.id}
+            onClick={async () => {
+              setBusy('withdraw')
+              try {
+                await client.withdrawChecklistDoc(caseId, item.id)
+                onChanged && onChanged()
+              } catch (e) {
+                toast(typeof e.detail === 'object' && e.detail?.message ? e.detail.message : e.message)
+              }
+              setBusy('')
+            }}>
+            {busy === 'withdraw' ? '…' : t('doccard.change')}
+          </button>
+        </div>
+      )}
+      {uploaded && (
+        <div style={{ marginTop: 8, display: 'flex', gap: 10, justifyContent: 'center',
+          flexWrap: 'wrap' }} onClick={(e) => e.stopPropagation()}>
+          <button className="doccard__link" data-testid={'view-' + item.id}
+            onClick={() => setPreview(true)}>{t('doccard.view')}</button>
+          {canTranslate && (
+            <button className="doccard__link" disabled={busy === 'translate'}
+              data-testid={'translate-' + item.id}
+              onClick={() => setAskTranslate(true)}>
+              {busy === 'translate' ? '…' : t('doccard.translate')}</button>
+          )}
+        </div>
+      )}
+      {askTranslate && (
+        <div className="card card--soft" style={{ padding: 10, marginTop: 8, fontSize: 12,
+          textAlign: 'left' }} onClick={(e) => e.stopPropagation()}>
+          <div>{t('checklist.translateConsent')}</div>
+          {target.certified_note && (
+            <div style={{ marginTop: 6, color: 'var(--muted)' }}>{target.certified_note}</div>
+          )}
+          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+            <button className="btn btn--sm" onClick={translate}>{t('checklist.translateConfirm')}</button>
+            <button className="btn btn--sm btn--ghost"
+              onClick={() => setAskTranslate(false)}>{t('checklist.translateCancel')}</button>
+          </div>
+        </div>
+      )}
+      {preview && binding && (
+        <div onClick={(e) => e.stopPropagation()}>
+          <DocPreview client={client} caseId={caseId}
+            doc={{ id: binding.document_id, name: binding.document_name }}
+            onClose={() => setPreview(false)} />
+        </div>
+      )}
+      <input ref={inputRef} type="file" hidden accept=".pdf,.jpg,.jpeg,.png,.tiff"
+        onChange={(e) => { onFile(e.target.files?.[0]); }} />
+    </div>
+  )
+}
+
+export function DocCards({ t, client, caseId, checklist, translation, onChanged }) {
+  const items = (checklist || []).filter((i) => i.kind === 'document')
+  const infos = (checklist || []).filter((i) => i.kind !== 'document')
+  if (!items.length && !infos.length) return null
+  return (
+    <div className="card fadeup" style={{ padding: 24, marginBottom: 16 }} data-testid="doc-cards">
+      <div style={{ fontWeight: 800, fontSize: 17, marginBottom: 4 }}>{t('checklist.title')}</div>
+      <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 18 }}>{t('doccard.sub')}</div>
+      <div className="docgrid">
+        {items.map((item) => (
+          <DocCard key={item.id} t={t} client={client} caseId={caseId}
+            item={item} translation={translation} onChanged={onChanged} />
+        ))}
+      </div>
+      {infos.length > 0 && (
+        <div style={{ marginTop: 16, fontSize: 12.5, color: 'var(--muted)' }}>
+          {infos.map((i) => <div key={i.id} style={{ margin: '3px 0' }}>◦ {i.label}</div>)}
+        </div>
+      )}
     </div>
   )
 }

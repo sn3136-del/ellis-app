@@ -155,3 +155,41 @@ def test_request_log_carries_no_query_string(client):
     rec = obs.log_event("http_request", method="GET",
                         path="/documents/x/content", status=200, duration_ms=1.0)
     assert "sig" not in json.dumps(rec)
+
+
+def test_a_portal_outage_never_reads_as_a_problem_with_the_application():
+    """When the GOVERNMENT site is down (502/refused connection), the applicant
+    is told the portal is unavailable — not that their application "needs a
+    closer look". Regression 2026-07-28: evisa.gov.vn returned HTTP 502 and
+    Ellis reported it as a case problem."""
+    from app import progress
+
+    # The driver classifies a server error as an outage, not a generic failure.
+    class _Resp:
+        status = 502
+
+    class _Page:
+        url = "https://evisa.gov.vn/"
+
+        def goto(self, *_a, **_kw):
+            return _Resp()
+
+    from app.adapter_factory.live_driver import BrowserbasePageDriver
+    d = BrowserbasePageDriver(_Page(), allowed_hostnames=["evisa.gov.vn"])
+    res = d.goto("https://evisa.gov.vn/")
+    assert res["ok"] is False
+    assert res["code"] == "PORTAL_UNAVAILABLE"
+
+    # And that cause survives into the applicant-facing message, both while
+    # the failure is still recoverable and after it escalates.
+    outage = "open_portal: PORTAL_UNAVAILABLE (the official portal returned HTTP 502)"
+    for state in ("RECOVERABLE_FAILURE", "MANUAL_REVIEW_REQUIRED"):
+        step = progress.step_for_state(state, None, outage)
+        assert step == "portal_unavailable"
+        msg = progress.STEP_MESSAGES[step]
+        assert "temporarily unavailable" in msg
+        assert "closer look" not in msg
+
+    # A genuine application problem still says so.
+    assert progress.step_for_state(
+        "MANUAL_REVIEW_REQUIRED", None, "fee exceeds authorized maximum") == "manual_review"

@@ -210,6 +210,22 @@ class LiveKimiProvider:  # pragma: no cover - needs a real key/network
             text)
         return out.get("translated", text)
 
+    def translate_batch(self, items: dict, target: str, source: str) -> dict:  # pragma: no cover - needs key
+        """One call per catalog chunk: translate every VALUE of a JSON object
+        of short UI strings, keys untouched. K3 is a reasoning model — the
+        generous max_tokens keeps the answer out of reasoning_content."""
+        from ..i18n import LANGUAGE_NAMES
+        tgt = LANGUAGE_NAMES.get(target, target)
+        out = self._chat(
+            f"Translate every VALUE of the user's JSON object into {tgt}. These "
+            f"are short UI strings for a visa-application product. Keep each "
+            f"translation faithful, natural, and about as short as the original. "
+            f"Keys must stay EXACTLY as given. Preserve every ⟦T…⟧ sentinel "
+            f"EXACTLY as written. Reply as a JSON object with the SAME keys.",
+            json.dumps(items, ensure_ascii=False),
+            max_tokens=8000, timeout=120)
+        return {str(k): str(v) for k, v in (out or {}).items()}
+
     def run(self, goal: str, context: dict) -> AgentResult:
         # A bounded tool-calling loop would live here; every proposed call is
         # passed back to the backend for validate_tool_call + execution.

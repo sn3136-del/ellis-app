@@ -26,7 +26,8 @@ ROUTE = {"address_line1": "12 Harbor Lane", "address_city": "Springfield",
          "lawful_country_of_residence": "USA", "destination_country": "JPN",
          "visa_category": "tourist_visa", "travel_purpose": "tourism",
          "arrival_date": "2026-09-10", "departure_date": "2026-09-20",
-         "age": 30, "email": "kp@example.com", "preferred_language": "en"}
+         "age": 30, "email": "kp@example.com", "preferred_language": "en",
+         "prior_refusals": "no"}
 
 GOOD_ANSWER = {
     "disposition": "VISA_EXEMPT", "visa_category": "Temporary visitor (tourism)",

@@ -258,6 +258,15 @@ def signal(db, application_id: str, name: str, *, defer_live=False,
     wf = load_workflow(db, application_id)
     wf.defer_live = bool(defer_live)
     wf.block_submit = bool(block_submit)
+    # Reconcile the durable input mirror with the ceremony records: a valid
+    # (unrevoked) standing authorization exists only after the applicant's
+    # signature ceremony completed, so the machine must never pause to re-ask
+    # for it. The mirror can lag when the sign-time signal was rejected by a
+    # preflight gate — the ceremony is DB truth, the input is just a cache.
+    if not wf.inputs.get("authorization_signed"):
+        from . import authorization
+        if authorization.valid(db, application_id) is not None:
+            wf.inputs["authorization_signed"] = True
     if progress_sink is not None:
         set_sink = getattr(getattr(wf.adapter, "driver", None), "set_progress_sink", None)
         if callable(set_sink):

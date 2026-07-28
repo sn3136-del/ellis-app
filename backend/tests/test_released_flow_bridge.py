@@ -19,6 +19,7 @@ from sqlalchemy import select
 from app import config, models
 from app.adapter_factory import models as fm
 from app.adapter_factory.runtime import FlowRunner, parse_fee_text
+from app.portal import released_flow
 from app.global_routes.models import (FamilyAdapterLink, PortalFamily,
                                       RoutePairPolicy, pair_key)
 
@@ -503,3 +504,166 @@ def test_failed_gate_report_derives_nothing(db):
     rep = readiness(db, destination="Vietnam", visa_type="tourist",
                     nationality="CHN", residence="CHN")
     assert len(rep["missing_gates"]) == 15
+
+
+# ---------- known_missing_questions: pre-run prompt, no browser --------------
+
+def test_known_missing_questions_come_from_stored_flow_without_a_browser(db):
+    """The applicant is asked for known form fields when the CASE PAGE opens —
+    computed purely from the released flow's stored nodes (measured 2026-07-28:
+    discovering them via the live portal took ~65s from the start click)."""
+    _mk_released_route(db)
+    app_row = _case(db)
+    qs = released_flow.known_missing_questions(db, app_row)
+    keys = [q["key"] for q in qs]
+    # surname is already answered; religion + entry_checkpoint are not.
+    assert keys == ["religion", "entry_checkpoint"]
+    religion = qs[0]
+    assert religion["question"] == "What is your religion?"
+    assert religion["mandatory"] is True and religion["kind"] == "text"
+    assert qs[1]["kind"] == "select"
+    # Applicant-facing payload: never selectors or element ids.
+    import json as _json
+    dumped = _json.dumps(qs)
+    assert "basic_" not in dumped and "#" not in dumped
+    # Once answered, the question disappears.
+    app_row.answers = dict(app_row.answers, religion="None",
+                           entry_checkpoint="Noi Bai")
+    db.commit()
+    assert released_flow.known_missing_questions(db, app_row) == []
+
+
+def test_known_missing_questions_fail_closed_without_a_released_route(db):
+    app_row = _case(db)          # no released chain rows exist for this pair
+    app_row.answers = dict(app_row.answers, passport_nationality="SWE",
+                           nationality="SWE")
+    db.commit()
+    assert released_flow.known_missing_questions(db, app_row) == []
+
+
+def test_option_less_select_is_honest_not_a_fake_choose_from_list(db):
+    """A select whose real list Ellis has not read yet must NOT be presented
+    as "choose from list" over a free-text box. It says so honestly and the
+    fill step verifies the typed answer against the live page."""
+    _mk_released_route(db)
+    app_row = _case(db)
+    qs = {q["key"]: q for q in released_flow.known_missing_questions(db, app_row)}
+    entry = qs["entry_checkpoint"]
+    assert entry["kind"] == "select"
+    assert "options" not in entry
+    assert entry["options_pending"] is True
+    assert entry["format"] == ""          # never a misleading placeholder
+
+
+def test_harvested_options_become_a_real_dropdown_for_the_next_applicant(db):
+    """What the portal actually offered on one run is asked as a REAL dropdown
+    before the next applicant's browser session opens — the whole point of the
+    pre-run questions. Corroboration first: a list seen only ONCE may be
+    specific to that applicant, so it is not re-served until it repeats."""
+    cand, ver, link = _mk_released_route(db)
+    app_row = _case(db)
+    gates = ["Noi Bai Intl Airport", "Tan Son Nhat Intl Airport"]
+
+    def ask():
+        return {q["key"]: q
+                for q in released_flow.known_missing_questions(db, app_row)}
+
+    released_flow.remember_field_options(
+        db, candidate_id=cand.id, candidate_version=1,
+        field_key="entry_checkpoint", node_id="pick_entry_gate",
+        options=gates, complete=True)
+    assert "options" not in ask()["entry_checkpoint"]      # seen once: not yet
+    released_flow.remember_field_options(
+        db, candidate_id=cand.id, candidate_version=1,
+        field_key="entry_checkpoint", node_id="pick_entry_gate",
+        options=gates, complete=True)
+    entry = ask()["entry_checkpoint"]                       # same list twice
+    assert entry["options"] == gates
+    assert "options_pending" not in entry and "options_partial" not in entry
+
+    # A DIFFERENT adapter version never inherits the list — it re-reads the
+    # portal rather than trusting a form that may have changed.
+    from app.adapter_factory import models as fm
+    binding = db.execute(select(fm.AdapterRuntimeBinding).where(
+        fm.AdapterRuntimeBinding.candidate_id == cand.id)).scalars().first()
+    binding.candidate_version = 2
+    db.add(fm.AdapterCandidateVersion(
+        candidate_id=cand.id, version=2, manifest=ver.manifest, flow=ver.flow,
+        field_mappings=[], document_mappings=[],
+        evidence_rules={"banner_text_sufficient": False}, kill_switch_key="ks2"))
+    db.commit()
+    assert "options" not in ask()["entry_checkpoint"]
+    assert ask()["entry_checkpoint"]["options_pending"] is True
+
+
+def test_a_truncated_list_is_offered_as_suggestions_never_as_the_whole_list(db):
+    """Vietnam's portal offers 83 border gates behind a virtualized dropdown;
+    a mid-run read that reaches only the first rows must NEVER be presented as
+    the portal's whole list — a traveller whose real gate sits past those rows
+    would have no way to enter it. It is offered as suggestions on a field they
+    can still type into."""
+    cand, _v, _l = _mk_released_route(db)
+    app_row = _case(db)
+    partial = ["An Thoi Port Border Gate", "Ben Luc Port Border Gate"]
+    for _ in range(2):        # corroborated, but still an INCOMPLETE read
+        released_flow.remember_field_options(
+            db, candidate_id=cand.id, candidate_version=1,
+            field_key="entry_checkpoint", node_id="pick_entry_gate",
+            options=partial, complete=False)
+    entry = {q["key"]: q
+             for q in released_flow.known_missing_questions(db, app_row)}["entry_checkpoint"]
+    assert entry["options"] == partial
+    assert entry["options_partial"] is True
+    assert entry["format"] == ""      # never "choose from list"
+
+
+def test_a_longer_read_supersedes_a_truncated_one(db):
+    cand, _v, _l = _mk_released_route(db)
+    app_row = _case(db)
+    released_flow.remember_field_options(
+        db, candidate_id=cand.id, candidate_version=1,
+        field_key="entry_checkpoint", node_id="pick_entry_gate",
+        options=["A", "B"], complete=False)
+    full = [f"Gate {i}" for i in range(30)]     # 25+ is trusted on sight
+    released_flow.remember_field_options(
+        db, candidate_id=cand.id, candidate_version=1,
+        field_key="entry_checkpoint", node_id="pick_entry_gate",
+        options=full, complete=True)
+    entry = {q["key"]: q
+             for q in released_flow.known_missing_questions(db, app_row)}["entry_checkpoint"]
+    assert entry["options"] == full
+    assert "options_partial" not in entry
+
+
+def test_cached_options_are_trimmed_and_carry_no_selectors(db):
+    cand, _v, _l = _mk_released_route(db)
+    app_row = _case(db)
+    raw = ["  Noi Bai Intl Airport  ", "", "   ", "Da Nang Intl Airport"]
+    clean = ["Noi Bai Intl Airport", "Da Nang Intl Airport"]
+    for _ in range(2):
+        released_flow.remember_field_options(
+            db, candidate_id=cand.id, candidate_version=1,
+            field_key="entry_checkpoint", node_id="pick_entry_gate",
+            options=raw, complete=True)
+    entry = {q["key"]: q
+             for q in released_flow.known_missing_questions(db, app_row)}["entry_checkpoint"]
+    assert entry["options"] == clean
+    import json as _json
+    assert "#" not in _json.dumps(entry)
+
+    # A blank-only harvest never wipes a good list.
+    released_flow.remember_field_options(
+        db, candidate_id=cand.id, candidate_version=1,
+        field_key="entry_checkpoint", node_id="pick_entry_gate",
+        options=["", "  "], complete=True)
+    entry2 = {q["key"]: q
+              for q in released_flow.known_missing_questions(db, app_row)}["entry_checkpoint"]
+    assert entry2["options"] == clean
+
+    # An empty/blank-only harvest never overwrites a good list with nothing.
+    released_flow.remember_field_options(
+        db, candidate_id=cand.id, candidate_version=1,
+        field_key="entry_checkpoint", options=["", "  "])
+    qs2 = {q["key"]: q for q in released_flow.known_missing_questions(db, app_row)}
+    assert qs2["entry_checkpoint"]["options"] == [
+        "Noi Bai Intl Airport", "Da Nang Intl Airport"]
