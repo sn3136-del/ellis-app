@@ -40,7 +40,8 @@ BUNDLE_VERSION = 1
 # list is short, explicit, and covered by test_route_bundle.
 _TABLES = ("portal_families", "portal_family_adapters", "global_route_pair_policies",
            "adapter_candidates", "adapter_candidate_versions", "adapter_releases",
-           "adapter_runtime_bindings", "fee_records", "portal_field_option_cache")
+           "adapter_runtime_bindings", "adapter_capability_releases",
+           "fee_records", "portal_field_option_cache")
 
 # Columns that must never appear in a bundle even if a table gains them.
 _FORBIDDEN_COLS = ("applicant_id", "application_id", "user_id", "email", "phone",
@@ -114,6 +115,13 @@ def export_routes(db, *, match: str = "") -> list[dict]:
                                               "candidate_id = :c", {"c": b.candidate_id})
         t["portal_field_option_cache"] = _rows(db, "portal_field_option_cache",
                                                "candidate_id = :c", {"c": b.candidate_id})
+        # What the adapter is PERMITTED to do at runtime (e.g. submission
+        # execution). Without it a restored route resolves but is blocked from
+        # submitting — the capability release is part of "it works", not
+        # metadata. Revoked rows travel too, so a revocation is never undone
+        # by a restore.
+        t["adapter_capability_releases"] = _rows(db, "adapter_capability_releases",
+                                                 "candidate_id = :c", {"c": b.candidate_id})
         # The route's official fee, matched on the destination the family serves.
         dests = set()
         for row in t["portal_families"]:

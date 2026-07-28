@@ -75,6 +75,32 @@ def test_bundle_restores_a_working_route_into_an_empty_database(db, route, tmp_p
     assert sum(rep["skipped"].values()) > 0
 
 
+def test_bundle_carries_what_a_LIVE_run_needs_not_just_route_resolution(db, route):
+    """Resolving the route is not the bar — a restored Ellis must also be
+    ALLOWED to run it. The capability release (e.g. submission_execution) is
+    part of "it works"; without it the route resolves and then refuses to
+    submit. Regression 2026-07-28: it was missing from the first bundle."""
+    from app.adapter_factory import models as fm2
+    db.add(fm2.AdapterCapabilityRelease(
+        route_key=route.route_key, capability="submission_execution",
+        candidate_id=route.candidate_id, candidate_version=route.candidate_version,
+        released_by="test", evidence={}, active=True))
+    db.commit()
+    caps = _bundle(db)["tables"]["adapter_capability_releases"]
+    assert [c["capability"] for c in caps] == ["submission_execution"]
+    assert caps[0]["active"] in (True, 1)
+
+    # A REVOKED capability travels too — a restore must never silently
+    # re-grant something an operator took away.
+    row = db.execute(select(fm2.AdapterCapabilityRelease)).scalars().first()
+    row.active = False
+    row.revoked_reason = "test revocation"
+    db.commit()
+    caps = _bundle(db)["tables"]["adapter_capability_releases"]
+    assert caps[0]["active"] in (False, 0)
+    assert caps[0]["revoked_reason"] == "test revocation"
+
+
 def test_bundle_never_carries_applicant_data(db, route):
     """It is committed to a git remote — prove nothing personal rides along."""
     app_row = _case(db)
