@@ -40,13 +40,14 @@
       "action": "TERMS_CHOICE",
       "selector": "#confirmBtn",
       "purpose": "'CONFIRM & CONTINUE' in the 'SECURITY NOTIFICATION' modal #confirmModal (DHS system-use notice). CONDITIONAL STEP: it is gated on sessionStorage['estaNoticeAccept'] !== 'true', so it appears exactly once per browser session - on the first Apply click of a fresh context. Treat as optional/if-present rather than a hard-fail step. Verified: appeared on my first pass with #confirmModal visible and buttons #cancelBtn / #confirmBtn; clicking #confirmBtn landed on /disclaimer. On my second pass in the same session it was skipped and sessionStorage read back {'estaNoticeAccept':'true'}.",
-      "terms_text_selector": "#confirmModal"
+      "terms_text_selector": "#confirmModal",
+      "optional": true
      },
      {
       "action": "TERMS_CHOICE",
       "selector": "#optionsRadios1",
       "purpose": "Disclaimer panel, 'Yes, I have read and understand the information and agree to these terms.' (the 'No' option is #optionsRadios2, which opens an info modal). Verified: after the click input.checked === true and the MDL label gained class 'is-checked'. Side effect: this auto-expands the second accordion panel #2collapseTwo ('panel-collapse collapse' -> 'panel-collapse collapse in'), so #travelRadios1 has a zero-size rect until this step runs.",
-      "terms_text_selector": "[id=\"1collapseOne\"]"
+      "terms_text_selector": "[id=\"2collapseOne\"]"
      },
      {
       "action": "TERMS_CHOICE",

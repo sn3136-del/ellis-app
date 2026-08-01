@@ -327,6 +327,58 @@ class LiveBrowserSession:
        }"""
 
     @staticmethod
+    def _click_possibly_styled(page, loc, selector: str):
+        """Click a control that may be a STYLED custom widget whose native
+        input is 0x0 (Material/MDL radios and checkboxes paint a wrapper and
+        hide the real input). Click the visible label the human clicks; fall
+        back to the element itself. Never a blind coordinate press: every
+        path targets this exact element or its own label."""
+        # A control below the fold is not unclickable — bring it into view
+        # first, exactly as a person scrolling the page would.
+        try:
+            loc.scroll_into_view_if_needed(timeout=8000)
+        except Exception:  # noqa: BLE001 — a 0x0 input cannot be scrolled to;
+            try:            # scroll its painted label instead
+                loc.evaluate("el => el.scrollIntoView({block: 'center'})")
+            except Exception:  # noqa: BLE001
+                pass
+        try:
+            box = loc.bounding_box()
+        except Exception:  # noqa: BLE001
+            box = None
+        if box and box.get("width", 0) > 0 and box.get("height", 0) > 0:
+            loc.click(timeout=15000)
+            return
+        # Zero-sized: click its <label for=…>, which is what paints the control.
+        el_id = ""
+        try:
+            el_id = loc.evaluate("el => el.id || ''") or ""
+        except Exception:  # noqa: BLE001
+            pass
+        if el_id:
+            label = page.locator(f'label[for="{el_id}"]').first
+            try:
+                if label.count():
+                    label.scroll_into_view_if_needed(timeout=5000)
+                    label.click(timeout=15000)
+                    return
+            except Exception:  # noqa: BLE001
+                pass
+        # A styled control may also WRAP its input in an unlabelled <label>.
+        try:
+            wrapper = loc.locator("xpath=ancestor::label[1]").first
+            if wrapper.count():
+                wrapper.scroll_into_view_if_needed(timeout=5000)
+                wrapper.click(timeout=15000)
+                return
+        except Exception:  # noqa: BLE001
+            pass
+        # Last resort: a real DOM click on the element ITSELF — still exactly
+        # the declared target, never a different control, and independent of
+        # viewport geometry that a 0x0 styled input does not have.
+        loc.evaluate("el => el.click()")
+
+    @staticmethod
     def _scroll_container_to_bottom(page, selector: str):
         """Set scrollTop to max on every matching container (window when the
         selector is empty) and dispatch a scroll event — SPAs enable their
@@ -386,6 +438,12 @@ class LiveBrowserSession:
             if self.allowed and not self._host_ok(page.url):
                 return {"ok": False, "status": status, "url": page.url,
                         "error": "entry gate landing left the allowlist"}
+            # domcontentloaded fires long before a client-rendered portal has
+            # drawn its first gate control, so acting immediately clicks at a
+            # page that is not there yet (ESTA's splash modal and its DHS
+            # security notice both mount after hydration). Settle exactly as
+            # the read-only observer does before touching anything.
+            self._settle_for_render(page)
             for a in actions:
                 act = a["action"]
                 sel = str(a.get("selector") or "")
@@ -447,14 +505,19 @@ class LiveBrowserSession:
                         "text": text.strip()[:20000],
                         "selector": sel, "source_url": page.url[:500]})
                     loc = page.locator(sel).first
-                    loc.wait_for(state="visible",
+                    # Material/MDL radios and checkboxes render the NATIVE
+                    # input at 0x0 and paint a styled wrapper, so waiting for
+                    # it to be "visible" never succeeds. Wait for it to exist,
+                    # then click what the human actually clicks: its label.
+                    loc.wait_for(state="attached",
                                  timeout=int(a.get("timeout_ms") or 30000))
                     self._assert_gate_target_safe(loc, "CLICK", sel)
-                    loc.click(timeout=15000)
+                    self._click_possibly_styled(page, loc, sel)
                     # An SPA gate routes client-side: give the next step's DOM
-                    # a moment to exist before we look for it, or a correct
-                    # gate reads as "element missing" purely on timing.
-                    page.wait_for_timeout(1500)
+                    # time to exist before we look for it, or a correct gate
+                    # reads as "element missing" purely on timing. A modal that
+                    # mounts on click needs the same grace a fresh page does.
+                    page.wait_for_timeout(2500)
                     performed.append({"action": act, "selector": sel, "ok": True})
                     continue
                 loc = page.locator(sel).first
