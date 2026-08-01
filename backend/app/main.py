@@ -310,6 +310,71 @@ def document_content(doc_id: str, exp: int, sig: str, db=Depends(get_session)):
 
 
 # ---- Email delivery (Phase 8) ----
+@app.get("/cases/{application_id}/consular-form")
+def get_consular_form(application_id: str, download: bool = False,
+                      db=Depends(get_session),
+                      p: Principal = Depends(get_principal)):
+    """The consular application form for an in-person route (Schengen uniform,
+    US DS-160 preparation), filled from the applicant's OWN answers plus the
+    verified passport they uploaded.
+
+    Honest by construction: unanswered fields stay blank and are reported as
+    `missing_required` so the applicant is asked BEFORE they travel to an
+    appointment, and Ellis returns the government's own filled PDF only when
+    its official blank is on file — never a fabricated look-alike."""
+    from . import consular_forms
+    app_row = _owned(db, p, application_id)
+    dest = _iso3_for(db, app_row.destination_country)
+    form_key = consular_forms.form_for_destination(dest)
+    if form_key is None:
+        return {"available": False,
+                "reason": "this route has no consular form Ellis prepares"}
+    profile = _latest_passport_profile(db, app_row)
+    answers = consular_forms.answers_from_documents(app_row.answers or {}, profile)
+    built = consular_forms.build(form_key, answers,
+                                 applicant_name=str(answers.get("full_name") or ""))
+    prepared = built["prepared"]
+    if not download:
+        return {"available": True, "form_key": form_key,
+                "title": prepared["title"], "kind": built["kind"],
+                "filled": prepared["filled"], "total": prepared["total"],
+                "missing_required": prepared["missing_required"],
+                "submission": prepared["submission"], "note": prepared["note"],
+                "lines": prepared["lines"]}
+    from fastapi.responses import Response
+    audit.record(db, org_id=p.org_id, application_id=application_id,
+                 action="consular_form_downloaded",
+                 detail={"form_key": form_key, "kind": built["kind"]},
+                 actor=p.user_id)
+    return Response(content=built["pdf"], media_type="application/pdf",
+                    headers={"Content-Disposition":
+                             f'attachment; filename="{form_key}.pdf"'})
+
+
+def _iso3_for(db, destination: str) -> str:
+    from .visa_snapshot.registry import _country_index
+    d = (destination or "").strip()
+    if len(d) == 3 and d.isalpha():
+        return d.upper()
+    for code, entry in (_country_index() or {}).items():
+        names = {str(entry.get("name") or "").lower(),
+                 str(entry.get("common_name") or "").lower()}
+        if d.lower() in names:
+            return code.upper()
+    return d.upper()
+
+
+def _latest_passport_profile(db, app_row) -> dict:
+    """The verified passport profile from the applicant's own uploaded biodata
+    page, if they uploaded one."""
+    from .visa_snapshot.models import RouteIntakeDocument
+    row = db.execute(select(RouteIntakeDocument).where(
+        RouteIntakeDocument.doc_type == "passport",
+        RouteIntakeDocument.user_id == app_row.user_id).order_by(
+        RouteIntakeDocument.created_at.desc())).scalars().first()
+    return (row.passport_profile or {}) if row is not None else {}
+
+
 @app.get("/cases/{application_id}/portal-account")
 def get_portal_account(application_id: str, reveal: bool = False,
                        db=Depends(get_session),

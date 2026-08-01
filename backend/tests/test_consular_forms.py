@@ -1,0 +1,123 @@
+"""Consular forms: Ellis fills the applicant's Schengen / DS-160 form from what
+they actually told it, and never invents a value or fabricates an official form.
+
+A consular form is signed under penalty of perjury and handed to a government
+officer. The invariants that make it safe for Ellis to prepare one:
+  * every value comes from the applicant's own answer or a checksum-verified
+    document reading — a gap is a visible blank, never a plausible guess;
+  * missing REQUIRED fields are reported so the case asks before the applicant
+    travels to an appointment with an incomplete form;
+  * Ellis renders the government's own blank PDF when it has it, otherwise a
+    clearly-labelled preparation sheet — it never draws a look-alike of an
+    official form;
+  * a machine reading never overwrites what the applicant explicitly typed.
+"""
+from __future__ import annotations
+
+import pytest
+
+from app import consular_forms as cf
+
+
+ANSWERS = {
+    "surname": "ELIAS", "given_names": "NOEMI", "birth_date": "1994-08-12",
+    "nationality": "USA", "sex": "F", "place_of_birth": "CALIFORNIA",
+    "passport_number": "X0000000", "passport_issue_date": "2021-05-05",
+    "passport_expiry_date": "2031-05-04", "issuing_country": "USA",
+    "address_line1": "1 Market St", "address_city": "San Francisco",
+    "address_country": "USA", "email": "a@example.com", "phone": "+1 555 0100",
+    "travel_purpose": "Tourism", "arrival_date": "2026-09-20",
+    "departure_date": "2026-09-30", "accommodation": "Hotel Lutetia",
+    "destination_country": "FRA", "travel_document_type": "ordinary_passport",
+    "marital_status": "Single",
+}
+
+
+def test_every_schengen_state_maps_to_the_uniform_form():
+    for iso3 in ("AUT", "BEL", "BGR", "HRV", "CZE", "DNK", "EST", "FIN", "FRA",
+                 "DEU", "GRC", "HUN", "ISL", "ITA", "LVA", "LIE", "LTU", "LUX",
+                 "MLT", "NLD", "NOR", "POL", "PRT", "ROU", "SVK", "SVN", "ESP",
+                 "SWE", "CHE"):
+        assert cf.form_for_destination(iso3) == "schengen_uniform", iso3
+    assert cf.form_for_destination("USA") == "ds160_prep"
+
+
+def test_a_route_with_no_verified_form_gets_none_not_a_wrong_form():
+    """No form is better than another country's form."""
+    assert cf.form_for_destination("VNM") is None
+    assert cf.form_for_destination("") is None
+
+
+def test_unanswered_fields_stay_blank_and_are_reported():
+    sparse = {"surname": "ELIAS", "given_names": "NOEMI"}
+    p = cf.prepare("schengen_uniform", sparse)
+    joined = "\n".join(p["lines"])
+    assert "ELIAS" in joined
+    # Nothing invented: the unanswered required fields render as blanks...
+    assert cf.BLANK in joined
+    # ...and are named so the case can ask the applicant.
+    for key in ("passport_number", "birth_date", "email"):
+        assert key in p["missing_required"]
+    assert p["filled"] == 2
+
+
+def test_a_complete_application_reports_no_missing_required():
+    p = cf.prepare("schengen_uniform", ANSWERS)
+    assert p["missing_required"] == []
+    assert p["filled"] >= 20
+
+
+@pytest.mark.parametrize("form_key", ["schengen_uniform", "ds160_prep"])
+def test_no_answer_value_is_ever_fabricated(form_key):
+    """With NO answers at all, not one field may carry invented content."""
+    p = cf.prepare(form_key, {})
+    for line in p["lines"]:
+        assert line.endswith(cf.BLANK), line
+    assert p["filled"] == 0
+
+
+def test_without_the_official_blank_ellis_never_claims_an_official_form():
+    """No government template on file -> a clearly-labelled preparation sheet,
+    never a fabricated official form."""
+    out = cf.build("schengen_uniform", ANSWERS, applicant_name="NOEMI ELIAS")
+    assert out["kind"] == "preparation_sheet"
+    assert out["pdf"][:4] == b"%PDF"
+    # It never guesses which government field is which without a real map.
+    assert cf.fill_official_template("schengen_uniform", ANSWERS) is None
+
+
+def test_generated_pdf_is_deterministic():
+    """Same answers -> identical bytes, so the artifact is hashable and
+    comparable across case versions."""
+    a = cf.build("ds160_prep", ANSWERS)["pdf"]
+    b = cf.build("ds160_prep", ANSWERS)["pdf"]
+    assert a == b
+
+
+# --- document-driven filling ----------------------------------------------
+
+def test_verified_passport_fills_gaps_but_never_overrides_the_applicant():
+    profile = {
+        "surname": {"value": "ELIAS", "needs_confirmation": False},
+        "passport_number": {"value": "667490664", "needs_confirmation": False},
+        "birth_date": {"value": "1994-08-12", "needs_confirmation": False},
+    }
+    typed = {"surname": "ELIAS-SMITH"}          # the applicant's own answer
+    merged = cf.answers_from_documents(typed, profile)
+    assert merged["surname"] == "ELIAS-SMITH"   # never overwritten by OCR
+    assert merged["passport_number"] == "667490664"   # gap filled from passport
+    assert merged["birth_date"] == "1994-08-12"
+
+
+def test_low_confidence_reading_is_a_question_not_a_fact():
+    profile = {"passport_number": {"value": "MAYBE123", "needs_confirmation": True}}
+    merged = cf.answers_from_documents({}, profile)
+    assert "passport_number" not in merged
+    # ...so the form reports it as still required.
+    p = cf.prepare("schengen_uniform", merged)
+    assert "passport_number" in p["missing_required"]
+
+
+def test_no_uploaded_passport_changes_nothing():
+    assert cf.answers_from_documents(ANSWERS, None) == ANSWERS
+    assert cf.answers_from_documents(ANSWERS, {}) == ANSWERS
