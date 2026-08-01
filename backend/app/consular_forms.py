@@ -247,6 +247,67 @@ def template_field_names(form_key: str) -> list[str]:
         return []
 
 
+def _map_path(form_key: str):
+    return _template_path(form_key).with_suffix(".map.json")
+
+
+def load_field_map(form_key: str) -> dict:
+    """Operator-supplied mapping: the official PDF's own AcroForm field name ->
+    the Ellis answer key. Kept beside the template as <form_key>.map.json so
+    adding a country's real form is a data step, never a code change."""
+    import json
+    path = _map_path(form_key)
+    if not path.is_file():
+        return {}
+    try:
+        data = json.loads(path.read_text())
+    except ValueError:
+        return {}
+    fields = data.get("fields", data) if isinstance(data, dict) else {}
+    return {str(k): str(v) for k, v in fields.items()
+            if isinstance(v, str) and v in _KNOWN_ANSWER_KEYS}
+
+
+def validate_template(form_key: str) -> dict:
+    """Check an operator-supplied template + map before it is ever used on a
+    real case: does the PDF exist, is it a fillable AcroForm, does every
+    mapped field actually exist in it, and does every mapped answer key exist
+    in Ellis's vocabulary? Returns a report; empty `problems` means ready."""
+    problems: list[str] = []
+    path = _template_path(form_key)
+    if form_key not in FORMS:
+        problems.append(f"unknown form {form_key!r}")
+    if not path.is_file():
+        problems.append(f"no official blank at {path}")
+        return {"form_key": form_key, "ready": False, "problems": problems,
+                "template_fields": [], "mapped": 0}
+    template_fields = template_field_names(form_key)
+    if not template_fields:
+        problems.append("template has no AcroForm fields (not a fillable PDF) — "
+                        "a flattened scan cannot be filled")
+    fmap = load_field_map(form_key)
+    if not fmap:
+        problems.append(f"no field map at {_map_path(form_key)}")
+    for field_name, ellis_key in fmap.items():
+        if template_fields and field_name not in template_fields:
+            problems.append(f"mapped field {field_name!r} is not in the template")
+        if ellis_key not in _KNOWN_ANSWER_KEYS:
+            problems.append(f"mapped answer key {ellis_key!r} is not an Ellis field")
+    return {"form_key": form_key, "ready": not problems, "problems": problems,
+            "template_fields": template_fields, "mapped": len(fmap)}
+
+
+def _known_answer_keys() -> set:
+    keys = set()
+    for spec in FORMS.values():
+        for _label, key, _req in spec["fields"]:
+            keys.add(key)
+    return keys
+
+
+_KNOWN_ANSWER_KEYS = _known_answer_keys()
+
+
 def fill_official_template(form_key: str, answers: dict,
                            field_map: dict | None = None) -> bytes | None:
     """Fill the government's own blank PDF with the applicant's answers.
@@ -261,10 +322,7 @@ def fill_official_template(form_key: str, answers: dict,
         return None
     from io import BytesIO
     from pypdf import PdfReader, PdfWriter
-    spec = FORMS.get(form_key) or {}
-    # Default mapping: the form spec's own (label, key) pairs keyed by the
-    # template's field names when the operator supplied an explicit map.
-    mapping = field_map or spec.get("template_field_map") or {}
+    mapping = field_map or load_field_map(form_key)
     if not mapping:
         return None          # never guess which government field is which
     values = {}
@@ -320,6 +378,43 @@ def render_pdf(prepared: dict, *, applicant_name: str = "") -> bytes:
     return pdfgen.text_pdf(head + body + tail, title=prepared["title"])
 
 
+def main(argv: list[str] | None = None) -> int:
+    """Operator CLI for adding a government form template:
+        python -m app.consular_forms inspect  <form_key>   # list its real fields
+        python -m app.consular_forms validate <form_key>   # check before use
+        python -m app.consular_forms forms                 # what Ellis prepares
+    """
+    import sys
+    args = list(argv if argv is not None else sys.argv[1:])
+    cmd = args[0] if args else "forms"
+    if cmd == "forms":
+        for key, spec in FORMS.items():
+            state = "official blank present" if official_template_available(key) \
+                else "preparation sheet (no official blank on file)"
+            print(f"{key:20} {spec['title']:42} {state}")
+        return 0
+    if cmd in ("inspect", "validate") and len(args) > 1:
+        key = args[1]
+        if cmd == "inspect":
+            names = template_field_names(key)
+            if not names:
+                print(f"{key}: no fillable AcroForm fields found "
+                      f"(is {_template_path(key)} present and not flattened?)")
+                return 1
+            print(f"{key}: {len(names)} AcroForm field(s)")
+            for n in names:
+                print(f"  {n}")
+            return 0
+        report = validate_template(key)
+        print(f"{key}: {'READY' if report['ready'] else 'NOT READY'} "
+              f"({report['mapped']} field(s) mapped)")
+        for p in report["problems"]:
+            print(f"  - {p}")
+        return 0 if report["ready"] else 1
+    print(main.__doc__)
+    return 2
+
+
 def _wrap(text: str, width: int) -> list[str]:
     words, out, line = str(text).split(), [], ""
     for w in words:
@@ -331,3 +426,7 @@ def _wrap(text: str, width: int) -> list[str]:
     if line:
         out.append(line)
     return out
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

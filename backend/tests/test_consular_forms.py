@@ -121,3 +121,40 @@ def test_low_confidence_reading_is_a_question_not_a_fact():
 def test_no_uploaded_passport_changes_nothing():
     assert cf.answers_from_documents(ANSWERS, None) == ANSWERS
     assert cf.answers_from_documents(ANSWERS, {}) == ANSWERS
+
+
+# --- official template infrastructure --------------------------------------
+
+def test_missing_official_blank_is_reported_not_silently_skipped():
+    """An operator must be told the template is absent — a silent fallback to
+    the preparation sheet would look like the official form succeeded."""
+    report = cf.validate_template("schengen_uniform")
+    assert report["ready"] is False
+    assert any("no official blank" in p for p in report["problems"])
+
+
+def test_a_field_map_may_only_use_real_ellis_answer_keys(tmp_path, monkeypatch):
+    """A map naming a field Ellis does not know is rejected, so a typo can
+    never silently leave a government field blank on a filed form."""
+    import json
+    forms_dir = tmp_path / "reference" / "forms"
+    forms_dir.mkdir(parents=True)
+    (forms_dir / "schengen_uniform.pdf").write_bytes(b"%PDF-1.4\n")
+    (forms_dir / "schengen_uniform.map.json").write_text(json.dumps(
+        {"fields": {"Nachname": "surname", "Bogus": "not_an_ellis_field"}}))
+    monkeypatch.setattr(cf, "_template_path",
+                        lambda k: forms_dir / f"{k}.pdf")
+    loaded = cf.load_field_map("schengen_uniform")
+    assert loaded == {"Nachname": "surname"}   # the unknown key is dropped
+
+
+def test_a_flattened_pdf_is_refused_as_a_template(tmp_path, monkeypatch):
+    """A scanned/flattened PDF has no AcroForm fields and cannot be filled —
+    Ellis must say so instead of returning an unfilled 'official form'."""
+    forms_dir = tmp_path / "reference" / "forms"
+    forms_dir.mkdir(parents=True)
+    (forms_dir / "schengen_uniform.pdf").write_bytes(b"%PDF-1.4\n%not a form\n")
+    monkeypatch.setattr(cf, "_template_path", lambda k: forms_dir / f"{k}.pdf")
+    report = cf.validate_template("schengen_uniform")
+    assert report["ready"] is False
+    assert any("AcroForm" in p or "field map" in p for p in report["problems"])
