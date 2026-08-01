@@ -23,7 +23,46 @@
    "supported_outcomes": [
     "ELECTRONIC_AUTHORIZATION"
    ],
-   "account_required": false
+   "account_required": false,
+   "entry_gate": {
+    "actions": [
+     {
+      "action": "CLICK",
+      "selector": "#splashModal .modal-footer button.btn-primary",
+      "purpose": "Close the 'DOWNLOAD THE ESTA APP' splash modal that opens on every fresh load of https://esta.cbp.dhs.gov/. Its .modal-backdrop swallows all clicks until dismissed. TIMING GOTCHA: the modal's vertical position shifts by ~140 CSS px as its two QR-code images finish loading, so wait for network idle / re-measure the element rect immediately before clicking, or click via element handle rather than a cached coordinate. Verified: selector matches exactly 1 element (text 'CLOSE'); after the click #splashModal computed display went 'block' -> 'none' and .modal-backdrop count went 1 -> 0."
+     },
+     {
+      "action": "CLICK",
+      "selector": "#create-app-btn",
+      "purpose": "'Start New Individual Application' button inside #what-section on the home page (below the fold, ~y=1410 at 1280x900). Verified: unique id, innerText 'START NEW INDIVIDUAL APPLICATION', click navigated the SPA to https://esta.cbp.dhs.gov/disclaimer. EQUIVALENT VERIFIED ALTERNATIVE (above the fold, 2 clicks): CLICK '.btn-group:has(> .create-app-dropdown-menu) > button.dropdown-toggle' then CLICK '.create-app-dropdown-menu li:first-child a' (text 'Individual Application')."
+     },
+     {
+      "action": "TERMS_CHOICE",
+      "selector": "#confirmBtn",
+      "purpose": "'CONFIRM & CONTINUE' in the 'SECURITY NOTIFICATION' modal #confirmModal (DHS system-use notice). CONDITIONAL STEP: it is gated on sessionStorage['estaNoticeAccept'] !== 'true', so it appears exactly once per browser session - on the first Apply click of a fresh context. Treat as optional/if-present rather than a hard-fail step. Verified: appeared on my first pass with #confirmModal visible and buttons #cancelBtn / #confirmBtn; clicking #confirmBtn landed on /disclaimer. On my second pass in the same session it was skipped and sessionStorage read back {'estaNoticeAccept':'true'}.",
+      "terms_text_selector": "#confirmModal .modal-body"
+     },
+     {
+      "action": "TERMS_CHOICE",
+      "selector": "#optionsRadios1",
+      "purpose": "Disclaimer panel, 'Yes, I have read and understand the information and agree to these terms.' (the 'No' option is #optionsRadios2, which opens an info modal). Verified: after the click input.checked === true and the MDL label gained class 'is-checked'. Side effect: this auto-expands the second accordion panel #2collapseTwo ('panel-collapse collapse' -> 'panel-collapse collapse in'), so #travelRadios1 has a zero-size rect until this step runs.",
+      "terms_text_selector": "#1collapseOne"
+     },
+     {
+      "action": "TERMS_CHOICE",
+      "selector": "#travelRadios1",
+      "purpose": "'The Travel Promotion Act of 2009' panel, 'Yes, I have read and understand the information and agree to these terms.' ('No' is #travelRadios2). Verified: after the click input.checked === true and the NEXT button became actionable. Both radios are MDL custom controls with a 0x0 native input - click the wrapping label / element handle, not the input rect.",
+      "terms_text_selector": "#2collapseTwo"
+     },
+     {
+      "action": "CLICK",
+      "selector": "button.btn-block.btn-lg.btn-primary",
+      "purpose": "'NEXT' at the bottom of /disclaimer. Verified: selector matches exactly 1 element on that page with innerText 'NEXT' (the sibling EXIT button is btn-default). Click navigated to https://esta.cbp.dhs.gov/applicantInfo. An invisible reCAPTCHA v3 (textarea[name='g-recaptcha-response']) is armed on this page and passed silently on both of my runs - no visual challenge was presented."
+     }
+    ],
+    "expect_path": "/applicantInfo",
+    "form_ready_selector": "#applicantLastName"
+   }
   },
   {
    "family_id": "usa-ceac",
@@ -663,19 +702,15 @@
    ],
    "account_required": false,
    "entry_gate": {
-    "description": "TDAC landing page (SPA route #/home) shows two cards: 'Arrival Card' (new submission) and 'Update Arrival Card'. A single click on the Arrival Card card (targeted by its unique subtitle text, since 'Arrival Card' is a substring of the Update button) routes directly to the public application form at #/tac/arrival-card/add with ~39 visible Angular Material fields. No language select, instructions page, login, or legal-acceptance gate was encountered. Cloudflare Turnstile is present on the landing page but resolved invisibly in both probe runs; declared as a captcha handoff in case it interactively challenges.",
     "actions": [
      {
       "action": "CLICK",
-      "selector": "button:has-text(\"Provide your Thailand Digital Arrival\")",
-      "purpose": "Choose the new Arrival Card flow from the landing page (unique subtitle text avoids matching the 'Update Arrival Card' button)"
+      "selector": "div.col-lg.text-center:nth-of-type(1) button[mat-raised-button]",
+      "purpose": "The 'Arrival Card' tile on #/home. Verified live: this selector resolves to exactly 1 element whose innerText starts 'Arrival Card / Provide your Thailand Digital Arrival Card details for your coming trip.' (the sibling tile is 'Update Arrival Card'). IMPORTANT: this click is a silent no-op until the home page's invisible Cloudflare Turnstile has self-populated input[name=\"cf-turnstile-response\"]. Wait for that hidden input to have a non-empty value (observed ~10-13s after a real document load, 794 chars, no user interaction and no visible challenge) before clicking, then re-click if the route did not change."
      }
     ],
     "expect_path": "/arrival-card/#/tac/arrival-card/add",
-    "form_ready_selector": "#mat-input-0",
-    "declared_handoffs": [
-     "captcha"
-    ]
+    "form_ready_selector": "input[formcontrolname=\"familyName\"]"
    }
   },
   {
@@ -1699,7 +1734,10 @@
     "declared_handoffs": [
      "captcha"
     ]
-   }
+   },
+   "form_paths": [
+    "/Auth/TravelRegister/"
+   ]
   },
   {
    "family_id": "colombia-checkmig",
