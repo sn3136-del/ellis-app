@@ -239,28 +239,32 @@ def test_released_status_requires_verified_policy(gdb):
 
 
 def test_no_synthetic_release_in_real_only_mode(gdb, monkeypatch):
-    """Gate 3: synthetic evidence cannot release in a real-only runtime."""
+    """Gate 3: synthetic evidence cannot release in a real-only runtime — and
+    the gate reads the ACTUAL behavioral layer (SYNTHETIC_TESTED vs
+    LIVE_STRUCTURAL_TESTED), not a self-declared flag a build could omit.
+    india-evisa was built in this module against SyntheticPortal, so its
+    behavioral evidence is synthetic; evaluated in a real-only mode it must
+    fail gate 3 regardless of any portal_evidence flag."""
     import app.config as config
     monkeypatch.setenv("ELLIS_RUNTIME_MODE", "local_real_services")
     config.settings.cache_clear()
     try:
         fam = gdb.execute(select(PortalFamily).where(
-            PortalFamily.family_id == "turkey-evisa")).scalars().one()
+            PortalFamily.family_id == "india-evisa")).scalars().one()
         link = gdb.execute(select(FamilyAdapterLink).where(
-            FamilyAdapterLink.family_id == "turkey-evisa")).scalars().one()
+            FamilyAdapterLink.family_id == "india-evisa")).scalars().one()
         from app.adapter_factory import models as fm
         req = gdb.get(fm.AdapterBuildRequest, link.build_request_id)
         cand = gdb.get(fm.AdapterCandidate, link.candidate_id)
         version = gdb.execute(select(fm.AdapterCandidateVersion).where(
             fm.AdapterCandidateVersion.candidate_id == cand.id)
             .order_by(fm.AdapterCandidateVersion.version.desc())).scalars().first()
-        # Simulate a synthetic-marked build evaluated in a real-only mode.
-        req.portal_evidence = dict(req.portal_evidence or {},
-                                   verification="synthetic_test_portal")
+        # No flag is set — provenance comes from the real test-layer evidence.
         r = release_gates.evaluate_gates(gdb, build_request=req, candidate=cand,
                                         version=version, family=fam)
         assert r["passed"] is False
-        assert any("synthetic evidence is forbidden" in m for m in r["missing"])
+        assert any("real portal driver" in m and "synthetic" in m
+                   for m in r["missing"]), r["missing"]
     finally:
         monkeypatch.setenv("ELLIS_RUNTIME_MODE", "test")
         config.settings.cache_clear()

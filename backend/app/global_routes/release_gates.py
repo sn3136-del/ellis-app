@@ -94,12 +94,25 @@ def evaluate_gates(db, *, build_request, candidate, version, family) -> dict:
          f"missing: portal family does not serve destination "
          f"{build_request.destination} — cross-destination contamination refused")
 
-    # 3. No mock/synthetic driver outside mock-allowed modes.
-    mock_ok = synthetic is False or not settings().real_only_mode
+    # 3. No mock/synthetic driver in a real-only runtime — read from the
+    #    ACTUAL behavioral evidence, never a self-declared flag. In a real-only
+    #    mode the behavioral layer must be the LIVE structural layer; a
+    #    SYNTHETIC_TESTED row (or the absence of any live layer) means the
+    #    observations came from SyntheticPortal and must never release. The
+    #    self-declared `synthetic` flag can only RELAX gates in mock-allowed
+    #    modes; it can never let a real-mode build skip this check.
+    synthetic_layer = bool(layers.get("SYNTHETIC_TESTED"))
+    live_layer = bool(layers.get("LIVE_STRUCTURAL_TESTED"))
+    if settings().real_only_mode:
+        mock_ok = live_layer and not synthetic_layer
+    else:
+        mock_ok = True
     gate("no_mock_or_synthetic_driver", mock_ok,
-         "driver class matches runtime mode" if mock_ok else
-         f"missing: real portal driver — synthetic evidence is forbidden in "
-         f"runtime mode {mode}")
+         "live driver evidence (LIVE_STRUCTURAL_TESTED), no synthetic layer"
+         if mock_ok else
+         f"missing: real portal driver — behavioral evidence is "
+         f"{'synthetic' if synthetic_layer else 'absent'}, forbidden in runtime "
+         f"mode {mode}")
 
     # 4. Safe read-only navigation succeeded (recon observed real pages).
     #    A portal that DECLARES an entry gate must additionally have reached
@@ -135,7 +148,11 @@ def evaluate_gates(db, *, build_request, candidate, version, family) -> dict:
     #    re-observes every selector in a FRESH session after recon mapped it.
     #    Live evidence must show TWO independent sessions (the recon session
     #    is never one of them); the synthetic corpus re-drives per scenario.
-    synthetic_ok = "SYNTHETIC_TESTED" in layers and layers["SYNTHETIC_TESTED"]
+    # In a real-only runtime the synthetic corpus can NEVER satisfy this gate:
+    # only two independent LIVE sessions count (a synthetic pass there means
+    # the observations were fabricated, which gate 3 already refuses).
+    synthetic_ok = (bool(layers.get("SYNTHETIC_TESTED"))
+                    and not settings().real_only_mode)
     live_ok = "LIVE_STRUCTURAL_TESTED" in layers and layers["LIVE_STRUCTURAL_TESTED"]
     live_sessions = _live_structural_sessions(db, version.id) if live_ok else 0
     if synthetic_ok:
