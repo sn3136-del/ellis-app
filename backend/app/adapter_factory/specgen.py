@@ -544,7 +544,13 @@ _SAVE_WORDS = (
     "procesar", "continuer", "suivant", "enregistrer", "weiter", "speichern",
     "avanti", "salva", "devam", "ileri", "kaydet", "lanjut", "selanjutnya",
     "simpan", "далее", "продолжить", "сохранить", "tiếp tục", "tiep tuc",
-    "次へ", "保存", "다음", "저장", "下一步", "保存", "ถัดไป", "التالي", "حفظ")
+    # Romanian (Moldova's form advances with "Completeaza dosar")
+    "continuă", "continua", "salvează", "salveaza", "următorul", "urmatorul",
+    "completeaza", "completează", "înainte", "inainte",
+    # Polish / Czech / Dutch / Nordic
+    "dalej", "zapisz", "pokračovat", "pokracovat", "uložit", "ulozit",
+    "volgende", "opslaan", "fortsæt", "fortsett", "fortsätt", "nästa", "neste",
+    "次へ", "保存", "다음", "저장", "下一步", "ถัดไป", "التالي", "حفظ")
 _SUBMIT_WORDS = (
     "submit", "enviar", "soumettre", "absenden", "einreichen", "invia",
     "gönder", "kirim", "отправить", "подать", "gửi", "提出", "送信", "提交",
