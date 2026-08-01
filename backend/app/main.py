@@ -741,6 +741,28 @@ def _owned(db, p: Principal, application_id: str) -> models.VisaApplication:
     return app_row
 
 
+def _adapter_verified_result(db, application_id: str) -> bool:
+    """Did an approved live adapter actually retrieve and verify an official
+    result for THIS case? True only when a real completed execution produced
+    government-domain submission evidence — never merely because the route
+    resolves to a released adapter. This is what lets result_disposition
+    refuse to present submitted/paid/confirmed as real without proof."""
+    from .adapter_factory import models as fm
+    from .visa_snapshot.authority import is_government_host
+    exec_row = db.execute(select(fm.AdapterExecution).where(
+        fm.AdapterExecution.application_id == application_id,
+        fm.AdapterExecution.status == "completed").order_by(
+        fm.AdapterExecution.created_at.desc())).scalars().first()
+    if exec_row is None:
+        return False
+    evidence = db.execute(select(fm.AdapterOutcomeEvidence).where(
+        fm.AdapterOutcomeEvidence.execution_id == exec_row.id)).scalars().all()
+    return any(
+        e.state_category in ("submitted", "submission_accepted", "appointment_booked")
+        and e.hostname and is_government_host(e.hostname)
+        for e in evidence)
+
+
 def _case_execution_class(country: str, visa_type: str, db=None, app_row=None):
     """Classify what running this case's route ACTUALLY produces. Mock-allowed
     modes bind the MockPortal driver (class MOCK). Real-only modes register no
@@ -886,10 +908,16 @@ def get_case(application_id: str, db=Depends(get_session), p: Principal = Depend
         models.StoredDocument.created_at.desc())).scalars().first() if conf else None
     ec = _case_execution_class(app_row.destination_country, app_row.visa_type, db=db, app_row=app_row)
     # The disposition is the display guard: it refuses to present submitted/paid/
-    # booked/confirmed as REAL unless an approved LIVE_PRODUCTION adapter produced
-    # them. Clients render disposition.display_status, not raw state, for anything
-    # user-facing, and check is_real_government_result before claiming a real visa.
-    disposition = execution.result_disposition(app_row.state, ec)
+    # booked/confirmed as REAL unless an approved LIVE_PRODUCTION adapter actually
+    # RETRIEVED AND VERIFIED the result from the official portal. That is not the
+    # same as the route merely resolving to a released adapter: it requires a
+    # real completed execution that produced official submission evidence for
+    # THIS case. Without it, is_real_government_result is False even in a live
+    # runtime — the applicant is never shown a government outcome Ellis did not
+    # witness on the portal.
+    adapter_verified = _adapter_verified_result(db, application_id)
+    disposition = execution.result_disposition(app_row.state, ec,
+                                               adapter_verified=adapter_verified)
     return {"id": app_row.id, "state": app_row.state, "answers": app_row.answers,
             "pending": exec_row.pending if exec_row else None,
             "portal_reference": app_row.portal_reference,

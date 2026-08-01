@@ -497,11 +497,16 @@ class ReleasedFlowDriver:
                         clicker()
                     if hasattr(driver, "settle"):
                         driver.settle(1500)
-                    # A blocking notice (the registration/document-code
-                    # NOTICE) means the code was ACCEPTED: preserve it, note
-                    # the reference for the applicant, confirm, and move on.
+                    # A blocking notice may mean the code was ACCEPTED (the
+                    # registration/document-code notice) OR REJECTED (an
+                    # "invalid security code" error dialog also carries a
+                    # Confirm button). Presence alone is NOT acceptance: an
+                    # error notice must never be scraped for a reference or
+                    # treated as success.
                     notice = getattr(driver, "notice_state", None)
                     if notice is not None and (notice() or {}).get("present"):
+                        if self._notice_is_error(driver):
+                            return {"ok": False, "code": "CAPTCHA_WRONG"}
                         self._capture_registration_notice(driver)
                         confirm = getattr(driver, "confirm_notice", None)
                         if confirm is not None:
@@ -1435,11 +1440,16 @@ class ReleasedFlowDriver:
         out = self._result_from(res)
         if not out["ok"]:
             return out
-        receipt_no = self._read_extract("receipt_extraction")
-        if receipt_no is None:
-            return {"ok": False, "code": "OUTCOME_UNCERTAIN",
-                    "detail": "payment result not verifiable from the portal"}
-        return {"ok": True, "receipt": {"receiptNo": receipt_no}}
+        # The portal advancing PAST the payment page to the next step is the
+        # real signal the payment step was accepted. A receipt code is optional
+        # metadata, taken ONLY from a builder-declared receipt selector — never
+        # scraped from body text, which cannot distinguish a captured payment
+        # from a declined/pending transaction id on the same page.
+        receipt_no = self._read_extract("receipt_extraction", declared_only=True)
+        result = {"ok": True}
+        if receipt_no:
+            result["receipt"] = {"receiptNo": receipt_no}
+        return result
 
     def declare_personally(self, *, human_confirmed: str = "", **_kwargs) -> dict:
         from ..providers import browser as bb
@@ -1522,6 +1532,38 @@ class ReleasedFlowDriver:
             png = None
         self._store_page_document(png, doc_type="submission_confirmation",
                                   name="submission-confirmation.png")
+
+    # Rejection language a portal prints in its own error dialog, across the
+    # seeded families' languages. Presence of any of these means the notice
+    # is a REJECTION, never an acceptance — so it is never scraped for a
+    # reference nor confirmed past as success.
+    _NOTICE_ERROR_RE = re.compile(
+        r"(invalid|incorrect|wrong|failed|error|not\s+match|does\s+not\s+match|"
+        r"try\s+again|expired|"
+        r"không\s+đúng|không\s+hợp\s+lệ|sai|"          # vi
+        r"inválid|incorrect|error|fall|"               # es
+        r"invalide|incorrect|erreur|échou|"            # fr
+        r"ungültig|falsch|fehler|"                     # de
+        r"hatal|geçersiz|yanlış|"                      # tr
+        r"tidak\s+valid|salah|gagal|"                  # id
+        r"неверн|ошибк|недейств|"                      # ru
+        r"غير\s+صالح|خطأ|خاطئ)",                        # ar
+        re.IGNORECASE)
+
+    def _notice_is_error(self, driver) -> bool:
+        """Is the on-screen notice a rejection/error dialog rather than a
+        success notice? Reads the notice/page text and matches portal error
+        vocabulary. Fail-safe: if the text can't be read, treat it as an error
+        (never scrape or confirm an unreadable dialog as success)."""
+        reader = getattr(driver, "notice_text", None) or \
+            (lambda: driver.read_text("body") if hasattr(driver, "read_text") else {})
+        try:
+            res = reader()
+        except Exception:  # noqa: BLE001
+            return True
+        if not isinstance(res, dict) or not res.get("ok"):
+            return True
+        return bool(self._NOTICE_ERROR_RE.search(res.get("text") or ""))
 
     def _capture_registration_notice(self, driver) -> None:
         """The portal's registration NOTICE carries the e-Visa document code
@@ -1682,12 +1724,17 @@ class ReleasedFlowDriver:
             out["receipt"] = {"receiptNo": rec or ""}
         return out
 
-    def _read_extract(self, kind: str):
+    def _read_extract(self, kind: str, *, declared_only: bool = False):
         """Read a confirmation/receipt reference via the adapter's declared
         extraction selector, from the LIVE page. When the manifest declares no
         selector, fall back to a deterministic labeled-reference parse of the
         page's visible text — exactly one unambiguous match or nothing.
-        None = not verifiable (the caller stays honest)."""
+        None = not verifiable (the caller stays honest).
+
+        declared_only=True refuses the page-text fallback: a scraped label
+        cannot tell an accepted result from a rejected one ('Transaction:
+        X — declined' matches the same regex as a success), so a PAYMENT claim
+        may only come from a builder-declared selector, never body text."""
         sel = ((self.released.version_row.manifest or {}).get(kind) or "").strip()
         try:
             driver = self._ensure_live()
@@ -1702,6 +1749,8 @@ class ReleasedFlowDriver:
                 return None
             text = (res.get("text") or "").strip()
             return text or None
+        if declared_only:
+            return None
         return self._labeled_reference_from_page(driver, kind)
 
     # Labels the official portals themselves print next to the reference —
