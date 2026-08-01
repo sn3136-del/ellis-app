@@ -1497,12 +1497,18 @@ def test_declaration_finder_never_matches_consent_or_terms_language():
 def test_click_next_button_never_presses_a_text_blind_submit():
     # A bare input[type=submit] candidate clicks the FIRST visible submit on
     # the page — on a drifted page that can be a Pay control. Only controls
-    # whose text/value says they advance may qualify.
+    # whose FULL trimmed text is one of the advance words may qualify.
     import inspect
     from app.adapter_factory.live_driver import BrowserbasePageDriver
     src = inspect.getsource(BrowserbasePageDriver.click_next_button)
-    assert "'input[type=\"submit\"]'" not in src
-    assert 'value="Next" i' in src
+    assert "'input[type=\"submit\"]'" not in src   # no locator-based blind click
+    assert "words.includes(t)" in src              # exact membership, not substring
+    assert "_ADVANCE_WORDS" in src
+    words = BrowserbasePageDriver._ADVANCE_WORDS
+    assert "next" in words and "tiếp tục" in words
+    # Words that appear on dangerous controls must never count as "advance".
+    for bad in ("pay", "submit", "confirm", "pagar", "payer", "ok"):
+        assert bad not in words
 
 
 def test_disabled_next_ticks_declarations_then_retries_the_same_click():

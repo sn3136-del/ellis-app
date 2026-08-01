@@ -233,8 +233,26 @@ def _run_build_stages(db, req, _obs, max_stages: int) -> fm.AdapterBuildRequest:
                 spec = db.get(fm.AdapterSpecification,
                               (req.portal_evidence or {}).get("spec_id", ""))
                 if spec is None:
-                    transition(req, "MANUAL_REVIEW_REQUIRED", "specification missing")
-                    _review(db, req, "spec_missing", "specification row disappeared")
+                    # A crash between announcing this state and persisting the
+                    # spec id strands the build with no spec. The recon
+                    # evidence is still on record — regenerate the spec
+                    # deterministically from it; staleness is caught
+                    # downstream by the live structural layer and the gates.
+                    job = db.get(fm.AdapterReconJob,
+                                 (req.portal_evidence or {}).get("recon_job_id", ""))
+                    arts = recon.artifacts(db, job.id) if job is not None else []
+                    if not arts:
+                        transition(req, "MANUAL_REVIEW_REQUIRED", "specification missing")
+                        _review(db, req, "spec_missing", "specification row disappeared")
+                    else:
+                        spec = specgen.generate_specification(
+                            db, build_request=req, recon_job=job, artifacts=arts,
+                            generator_name="kimi-k3+deterministic-skeleton")
+                        req.portal_evidence = dict(req.portal_evidence or {},
+                                                   spec_id=spec.id)
+                        db.commit()
+                        generator.generate_candidate_version(db, build_request=req, spec=spec)
+                        transition(req, "CODE_GENERATED")
                 else:
                     generator.generate_candidate_version(db, build_request=req, spec=spec)
                     transition(req, "CODE_GENERATED")

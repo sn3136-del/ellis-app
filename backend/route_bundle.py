@@ -56,6 +56,18 @@ _FORBIDDEN_COLS = ("applicant_id", "application_id", "user_id", "email", "phone"
 _LOCAL_PATH_COLS = ("storage_dir",)
 
 
+# Business identity per table. A restore must replace the row OCCUPYING the
+# same identity slot even when its surrogate id differs — a quarantined local
+# rebuild of the same family/pair/adapter otherwise blocks the restore with a
+# UNIQUE violation instead of being replaced.
+_UNIQUE_KEYS = {
+    "portal_families": ("family_id",),
+    "portal_family_adapters": ("family_id",),
+    "global_route_pair_policies": ("pair_key",),
+    "adapter_candidates": ("adapter_id",),
+}
+
+
 def _jsonable(v):
     if isinstance(v, (datetime, date)):
         return v.isoformat()
@@ -83,12 +95,20 @@ def export_routes(db, *, match: str = "") -> list[dict]:
     """One bundle per runtime binding — the thing that actually makes a route
     live. Everything the binding depends on travels with it."""
     bundles = []
-    for b in db.execute(select(fm.AdapterRuntimeBinding)).scalars().all():
+    for b in db.execute(select(fm.AdapterRuntimeBinding).where(
+            fm.AdapterRuntimeBinding.active.is_(True))).scalars().all():
+        # Only ACTIVE bindings are a route's live truth — a deactivated
+        # binding (quarantined/superseded) must never masquerade as a
+        # restorable release.
         if match and match.upper() not in (b.route_key or "").upper():
             continue
         link = db.execute(select(FamilyAdapterLink).where(
             FamilyAdapterLink.candidate_id == b.candidate_id)).scalars().first()
         family_id = getattr(link, "family_id", "") or ""
+        if not family_id:
+            # No family link means no scoping key: exporting would sweep every
+            # family-less pair-policy row into the bundle. Skip honestly.
+            continue
         bundle = {
             "bundle_version": BUNDLE_VERSION,
             "route_key": b.route_key,
@@ -185,31 +205,60 @@ def import_bundle(db, bundle: dict, *, overwrite: bool = False) -> dict:
     overwrite=True — a restore must never silently replace a live binding."""
     assert_no_personal_data(bundle)
     report = {"inserted": {}, "skipped": {}}
+    # Reflect every table BEFORE the first write: inspect() opens a second
+    # connection, and doing that mid-transaction deadlocks on SQLite's
+    # database-level write lock.
+    insp = inspect(db.bind)
+    cols_by_table = {t: {c["name"] for c in insp.get_columns(t)} for t in _TABLES}
+    inserted_binding_ids: set = set()
     for table in _TABLES:
         rows = bundle.get("tables", {}).get(table) or []
         ins = skip = 0
-        cols_present = {c["name"] for c in inspect(db.bind).get_columns(table)}
+        cols_present = cols_by_table[table]
         for row in rows:
             row = {k: v for k, v in row.items() if k in cols_present}
             pk = "family_id" if table == "portal_families" else "id"
             if pk not in row:
                 pk = next(iter(row))
-            exists = db.execute(
-                text(f"SELECT 1 FROM {table} WHERE {pk} = :v"),
-                {"v": row[pk]}).first()
+            # A row "exists" when either its surrogate id or its business
+            # identity slot is taken; overwrite clears both.
+            preds = [(f"{pk} = :v0", {"v0": row[pk]})]
+            uq = _UNIQUE_KEYS.get(table)
+            if uq and all(c in row for c in uq) and tuple(uq) != (pk,):
+                cond = " AND ".join(f"{c} = :u{i}" for i, c in enumerate(uq))
+                preds.append((cond, {f"u{i}": row[c] for i, c in enumerate(uq)}))
+            exists = any(
+                db.execute(text(f"SELECT 1 FROM {table} WHERE {cond}"),
+                           params).first()
+                for cond, params in preds)
             if exists and not overwrite:
                 skip += 1
                 continue
             if exists:
-                db.execute(text(f"DELETE FROM {table} WHERE {pk} = :v"), {"v": row[pk]})
+                for cond, params in preds:
+                    db.execute(text(f"DELETE FROM {table} WHERE {cond}"), params)
             names = ", ".join(row)
             binds = ", ".join(f":{k}" for k in row)
             payload = {k: (json.dumps(v) if isinstance(v, (dict, list)) else v)
                        for k, v in row.items()}
             db.execute(text(f"INSERT INTO {table} ({names}) VALUES ({binds})"), payload)
             ins += 1
+            if table == "adapter_runtime_bindings":
+                inserted_binding_ids.add(row.get("id"))
         report["inserted"][table] = ins
         report["skipped"][table] = skip
+    # Exactly one active binding per (route_key, tier): a binding this import
+    # actually INSERTED takes its slot, so any other binding occupying it is
+    # deactivated rather than left to race the restored one. A skipped row
+    # (already present, or not overwritten) must never deactivate the live
+    # binding it failed to replace.
+    for row in bundle.get("tables", {}).get("adapter_runtime_bindings") or []:
+        if row.get("active") and row.get("id") in inserted_binding_ids:
+            db.execute(text(
+                "UPDATE adapter_runtime_bindings SET active = 0 "
+                "WHERE route_key = :r AND tier = :t AND id != :i"),
+                {"r": row.get("route_key"), "t": row.get("tier"),
+                 "i": row.get("id")})
     db.commit()
     return report
 
@@ -228,6 +277,10 @@ def _write(bundles: list[dict]) -> list[Path]:
 
 def main() -> int:
     cmd = sys.argv[1] if len(sys.argv) > 1 else "export"
+    # Heal schema first: importing into a cold DB whose tables lag the models
+    # would otherwise silently drop the missing columns from restored rows.
+    from app.db import create_all
+    create_all()
     db = SessionLocal()
     try:
         if cmd == "export":

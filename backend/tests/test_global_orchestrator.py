@@ -217,10 +217,18 @@ def test_contaminated_portal_records_are_downgraded(gdb):
 def test_released_status_requires_verified_policy(gdb):
     """A released family adapter upgrades ONLY verified pairs to
     released_adapter; provisional pairs stay defined_provisional."""
+    def _released():
+        return {l.family_id for l in gdb.execute(
+            select(FamilyAdapterLink).where(
+                FamilyAdapterLink.released.is_(True))).scalars()}
+    if not _released():   # self-sufficient: no reliance on module test order
+        fam = gdb.execute(select(PortalFamily).where(
+            PortalFamily.family_id == "india-evisa")).scalars().one()
+        orchestrator.build_family_adapter(
+            gdb, "india-evisa", observer=_obs(fam.hostnames[0]))
     orchestrator.recompute_release_statuses(gdb)
-    released_families = {l.family_id for l in gdb.execute(
-        select(FamilyAdapterLink).where(FamilyAdapterLink.released.is_(True))).scalars()}
-    assert released_families, "expected at least one released family from earlier tests"
+    released_families = _released()
+    assert released_families, "a released family is required for this property"
     rows = gdb.execute(select(RoutePairPolicy).where(
         RoutePairPolicy.portal_family_id.in_(released_families))).scalars().all()
     for p in rows:

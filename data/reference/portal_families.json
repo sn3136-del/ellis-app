@@ -1,1785 +1,1929 @@
 {
-  "registry": "portal_families",
-  "version": 1,
-  "generated_at": "2026-07-25",
-  "snapshot_date": "2026-07-23",
-  "source": "curated seed list of real official portals/platforms; every entry starts seed_unverified and is upgraded ONLY by deterministic government-domain verification and/or live credential-free recon. Entries that fail verification stay unreleased.",
-  "notes": "One family per real platform. A family may serve many destinations, nationalities and jurisdictions — adapters are built per family and reused. No entry may be invented; uncertain platforms are omitted (their routes stay honestly unresolved).",
-  "entry_count": 91,
-  "entries": [
-    {
-      "family_id": "usa-esta",
-      "name": "U.S. ESTA (Electronic System for Travel Authorization)",
-      "kind": "eta_portal",
-      "operator": "U.S. Customs and Border Protection",
-      "operator_kind": "government",
-      "base_url": "https://esta.cbp.dhs.gov/",
-      "hostnames": [
-        "esta.cbp.dhs.gov"
-      ],
-      "destinations": [
-        "USA"
-      ],
-      "supported_outcomes": [
-        "ELECTRONIC_AUTHORIZATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "usa-ceac",
-      "name": "U.S. CEAC (DS-160 nonimmigrant visa application)",
-      "kind": "immigration_authority",
-      "operator": "U.S. Department of State",
-      "operator_kind": "government",
-      "base_url": "https://ceac.state.gov/",
-      "hostnames": [
-        "ceac.state.gov"
-      ],
-      "destinations": [
-        "USA"
-      ],
-      "supported_outcomes": [
-        "EMBASSY_OR_CONSULATE_APPLICATION"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "usa-usvisa-appointments",
-      "name": "U.S. visa appointment services (contracted)",
-      "kind": "appointment_portal",
-      "operator": "CGI / Applied Materials (contracted by U.S. DoS)",
-      "operator_kind": "contracted_visa_center",
-      "base_url": "https://ais.usvisa-info.com/",
-      "hostnames": [
-        "ais.usvisa-info.com",
-        "www.usvisa-info.com"
-      ],
-      "destinations": [
-        "USA"
-      ],
-      "supported_outcomes": [
-        "APPOINTMENT_REQUIRED"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "canada-ircc",
-      "name": "Canada eTA / IRCC online services",
-      "kind": "eta_portal",
-      "operator": "Immigration, Refugees and Citizenship Canada",
-      "operator_kind": "government",
-      "base_url": "https://onlineservices-servicesenligne.cic.gc.ca/eta/welcome?lang=en",
-      "hostnames": [
-        "onlineservices-servicesenligne.cic.gc.ca",
-        "www.canada.ca"
-      ],
-      "destinations": [
-        "CAN"
-      ],
-      "supported_outcomes": [
-        "ELECTRONIC_AUTHORIZATION",
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "uk-eta",
-      "name": "UK Electronic Travel Authorisation",
-      "kind": "eta_portal",
-      "operator": "UK Home Office",
-      "operator_kind": "government",
-      "base_url": "https://www.gov.uk/guidance/apply-for-an-electronic-travel-authorisation-eta",
-      "hostnames": [
-        "www.gov.uk",
-        "apply-for-an-eta.homeoffice.gov.uk"
-      ],
-      "destinations": [
-        "GBR"
-      ],
-      "supported_outcomes": [
-        "ELECTRONIC_AUTHORIZATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "uk-visas",
-      "name": "UK visas and immigration online application",
-      "kind": "evisa_portal",
-      "operator": "UK Home Office",
-      "operator_kind": "government",
-      "base_url": "https://www.gov.uk/apply-to-come-to-the-uk",
-      "hostnames": [
-        "www.gov.uk",
-        "visas-immigration.service.gov.uk"
-      ],
-      "destinations": [
-        "GBR"
-      ],
-      "supported_outcomes": [
-        "EMBASSY_OR_CONSULATE_APPLICATION"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "australia-immi",
-      "name": "Australia ImmiAccount / eVisitor / ETA",
-      "kind": "eta_portal",
-      "operator": "Department of Home Affairs",
-      "operator_kind": "government",
-      "base_url": "https://online.immi.gov.au/",
-      "hostnames": [
-        "online.immi.gov.au",
-        "immi.homeaffairs.gov.au"
-      ],
-      "destinations": [
-        "AUS"
-      ],
-      "supported_outcomes": [
-        "ELECTRONIC_AUTHORIZATION",
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "nz-nzeta",
-      "name": "New Zealand NZeTA",
-      "kind": "eta_portal",
-      "operator": "Immigration New Zealand",
-      "operator_kind": "government",
-      "base_url": "https://nzeta.immigration.govt.nz/",
-      "hostnames": [
-        "nzeta.immigration.govt.nz",
-        "www.immigration.govt.nz"
-      ],
-      "destinations": [
-        "NZL"
-      ],
-      "supported_outcomes": [
-        "ELECTRONIC_AUTHORIZATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "korea-keta",
-      "name": "K-ETA (Korea Electronic Travel Authorization)",
-      "kind": "eta_portal",
-      "operator": "Korea Immigration Service",
-      "operator_kind": "government",
-      "base_url": "https://www.k-eta.go.kr/",
-      "hostnames": [
-        "www.k-eta.go.kr"
-      ],
-      "destinations": [
-        "KOR"
-      ],
-      "supported_outcomes": [
-        "ELECTRONIC_AUTHORIZATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "korea-visa-portal",
-      "name": "Korea Visa Portal (e-visa)",
-      "kind": "evisa_portal",
-      "operator": "Ministry of Justice (Korea)",
-      "operator_kind": "government",
-      "base_url": "https://www.visa.go.kr/",
-      "hostnames": [
-        "www.visa.go.kr"
-      ],
-      "destinations": [
-        "KOR"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "korea-earrival",
-      "name": "Korea e-Arrival Card",
-      "kind": "arrival_card",
-      "operator": "Korea Immigration Service",
-      "operator_kind": "government",
-      "base_url": "https://www.e-arrivalcard.go.kr/",
-      "hostnames": [
-        "www.e-arrivalcard.go.kr"
-      ],
-      "destinations": [
-        "KOR"
-      ],
-      "supported_outcomes": [
-        "ENTRY_PREPARATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "japan-evisa",
-      "name": "Japan eVISA",
-      "kind": "evisa_portal",
-      "operator": "Ministry of Foreign Affairs of Japan",
-      "operator_kind": "government",
-      "base_url": "https://www.evisa.mofa.go.jp/",
-      "hostnames": [
-        "www.evisa.mofa.go.jp"
-      ],
-      "destinations": [
-        "JPN"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "japan-visit-japan-web",
-      "name": "Visit Japan Web (arrival procedures)",
-      "kind": "arrival_card",
-      "operator": "Digital Agency (Japan)",
-      "operator_kind": "government",
-      "base_url": "https://services.digital.go.jp/en/visit-japan-web/",
-      "hostnames": [
-        "services.digital.go.jp",
-        "vjw-lp.digital.go.jp"
-      ],
-      "destinations": [
-        "JPN"
-      ],
-      "supported_outcomes": [
-        "ENTRY_PREPARATION"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "china-cova",
-      "name": "China Online Visa Application (COVA)",
-      "kind": "immigration_authority",
-      "operator": "Ministry of Foreign Affairs of China",
-      "operator_kind": "government",
-      "base_url": "https://cova.mfa.gov.cn/",
-      "hostnames": [
-        "cova.mfa.gov.cn"
-      ],
-      "destinations": [
-        "CHN"
-      ],
-      "supported_outcomes": [
-        "EMBASSY_OR_CONSULATE_APPLICATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "china-avas",
-      "name": "China visa appointment system (AVAS)",
-      "kind": "appointment_portal",
-      "operator": "Ministry of Foreign Affairs of China",
-      "operator_kind": "government",
-      "base_url": "https://avas.mfa.gov.cn/",
-      "hostnames": [
-        "avas.mfa.gov.cn"
-      ],
-      "destinations": [
-        "CHN"
-      ],
-      "supported_outcomes": [
-        "APPOINTMENT_REQUIRED"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "taiwan-evisa",
-      "name": "Taiwan eVisa (BOCA)",
-      "kind": "evisa_portal",
-      "operator": "Bureau of Consular Affairs (Taiwan)",
-      "operator_kind": "government",
-      "base_url": "https://visawebapp.boca.gov.tw/",
-      "hostnames": [
-        "visawebapp.boca.gov.tw"
-      ],
-      "destinations": [
-        "TWN"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "hongkong-immd",
-      "name": "Hong Kong Immigration Department e-services",
-      "kind": "immigration_authority",
-      "operator": "Hong Kong Immigration Department",
-      "operator_kind": "government",
-      "base_url": "https://www.immd.gov.hk/",
-      "hostnames": [
-        "www.immd.gov.hk"
-      ],
-      "destinations": [
-        "HKG"
-      ],
-      "supported_outcomes": [
-        "EMBASSY_OR_CONSULATE_APPLICATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "india-evisa",
-      "name": "India e-Visa (Indian Visa Online)",
-      "kind": "evisa_portal",
-      "operator": "Bureau of Immigration (India)",
-      "operator_kind": "government",
-      "base_url": "https://indianvisaonline.gov.in/",
-      "hostnames": [
-        "indianvisaonline.gov.in"
-      ],
-      "destinations": [
-        "IND"
-      ],
-      "supported_outcomes": [
-        "EVISA",
-        "EMBASSY_OR_CONSULATE_APPLICATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "pakistan-nadra-visa",
-      "name": "Pakistan Online Visa System",
-      "kind": "evisa_portal",
-      "operator": "NADRA / Ministry of Interior (Pakistan)",
-      "operator_kind": "government",
-      "base_url": "https://visa.nadra.gov.pk/",
-      "hostnames": [
-        "visa.nadra.gov.pk"
-      ],
-      "destinations": [
-        "PAK"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "srilanka-eta",
-      "name": "Sri Lanka ETA",
-      "kind": "eta_portal",
-      "operator": "Department of Immigration and Emigration (Sri Lanka)",
-      "operator_kind": "government",
-      "base_url": "https://eta.gov.lk/",
-      "hostnames": [
-        "eta.gov.lk",
-        "www.eta.gov.lk"
-      ],
-      "destinations": [
-        "LKA"
-      ],
-      "supported_outcomes": [
-        "ELECTRONIC_AUTHORIZATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "nepal-immigration",
-      "name": "Nepal Immigration online services",
-      "kind": "immigration_authority",
-      "operator": "Department of Immigration (Nepal)",
-      "operator_kind": "government",
-      "base_url": "https://nepaliport.immigration.gov.np/",
-      "hostnames": [
-        "nepaliport.immigration.gov.np",
-        "www.immigration.gov.np"
-      ],
-      "destinations": [
-        "NPL"
-      ],
-      "supported_outcomes": [
-        "VISA_ON_ARRIVAL",
-        "ENTRY_PREPARATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "bhutan-doi",
-      "name": "Bhutan Department of Immigration e-permit",
-      "kind": "evisa_portal",
-      "operator": "Department of Immigration (Bhutan)",
-      "operator_kind": "government",
-      "base_url": "https://visit.doi.gov.bt/",
-      "hostnames": [
-        "visit.doi.gov.bt"
-      ],
-      "destinations": [
-        "BTN"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "maldives-imuga",
-      "name": "Maldives IMUGA traveller declaration",
-      "kind": "arrival_card",
-      "operator": "Maldives Immigration",
-      "operator_kind": "government",
-      "base_url": "https://imuga.immigration.gov.mv/",
-      "hostnames": [
-        "imuga.immigration.gov.mv"
-      ],
-      "destinations": [
-        "MDV"
-      ],
-      "supported_outcomes": [
-        "ENTRY_PREPARATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "vietnam-evisa",
-      "name": "Vietnam e-Visa",
-      "kind": "evisa_portal",
-      "operator": "Vietnam Immigration Department",
-      "operator_kind": "government",
-      "base_url": "https://evisa.gov.vn/",
-      "hostnames": [
-        "evisa.gov.vn",
-        "evisa.xuatnhapcanh.gov.vn"
-      ],
-      "destinations": [
-        "VNM"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false,
-      "entry_gate": {
-        "description": "The application form (/e-visa/foreigners) is gated behind an in-session instruction modal: Apply now -> scroll both instruction containers to the bottom -> tick the two acknowledgment checkboxes (the only visible checkboxes in the modal) -> Next. Direct navigation redirects to the home page. Verified live 2026-07-25.",
-        "actions": [
-          {
-            "action": "CLICK",
-            "selector": "button:has-text(\"Apply now\")",
-            "purpose": "Entry gate: open the declaration-instructions modal"
-          },
-          {
-            "action": "SCROLL_TO_BOTTOM",
-            "selector": "div[class*=\"overflow-y-scroll\"]",
-            "purpose": "Entry gate: scroll the outer instruction container to the bottom"
-          },
-          {
-            "action": "SCROLL_TO_BOTTOM",
-            "selector": "div[class*=\"overflow-auto\"]",
-            "purpose": "Entry gate: scroll the inner instruction container to the bottom"
-          },
-          {
-            "action": "CHECK",
-            "selector": "input[type=\"checkbox\"]:visible >> nth=0",
-            "purpose": "Entry gate: acknowledge compliance with Vietnamese laws upon entry"
-          },
-          {
-            "action": "CHECK",
-            "selector": "input[type=\"checkbox\"]:visible >> nth=1",
-            "purpose": "Entry gate: confirm the instructions were read carefully"
-          },
-          {
-            "action": "CLICK",
-            "selector": "button:has-text(\"Next\")",
-            "purpose": "Entry gate: continue to the application form"
-          }
-        ],
-        "expect_path": "/e-visa/foreigners",
-        "form_ready_selector": "#basic_ttcnHo",
-        "form_ready_all": {
-          "selector": "[id^=\"basic_\"]",
-          "min": 20
-        },
-        "declared_handoffs": [
-          "captcha"
-        ]
-      }
-    },
-    {
-      "family_id": "cambodia-evisa",
-      "name": "Cambodia e-Visa",
-      "kind": "evisa_portal",
-      "operator": "Ministry of Foreign Affairs (Cambodia)",
-      "operator_kind": "government",
-      "base_url": "https://www.evisa.gov.kh/",
-      "hostnames": [
-        "www.evisa.gov.kh"
-      ],
-      "destinations": [
-        "KHM"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "cambodia-earrival",
-      "name": "Cambodia e-Arrival",
-      "kind": "arrival_card",
-      "operator": "General Department of Immigration (Cambodia)",
-      "operator_kind": "government",
-      "base_url": "https://arrival.gov.kh/",
-      "hostnames": [
-        "arrival.gov.kh"
-      ],
-      "destinations": [
-        "KHM"
-      ],
-      "supported_outcomes": [
-        "ENTRY_PREPARATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "laos-evisa",
-      "name": "Lao PDR official eVisa",
-      "kind": "evisa_portal",
-      "operator": "Ministry of Foreign Affairs (Laos)",
-      "operator_kind": "government",
-      "base_url": "https://laoevisa.gov.la/",
-      "hostnames": [
-        "laoevisa.gov.la",
-        "application.visalaos.com"
-      ],
-      "destinations": [
-        "LAO"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "myanmar-evisa",
-      "name": "Myanmar eVisa",
-      "kind": "evisa_portal",
-      "operator": "Ministry of Immigration and Population (Myanmar)",
-      "operator_kind": "government",
-      "base_url": "https://evisa.moip.gov.mm/",
-      "hostnames": [
-        "evisa.moip.gov.mm"
-      ],
-      "destinations": [
-        "MMR"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "thailand-evisa",
-      "name": "Thailand e-Visa",
-      "kind": "evisa_portal",
-      "operator": "Ministry of Foreign Affairs (Thailand)",
-      "operator_kind": "government",
-      "base_url": "https://www.thaievisa.go.th/",
-      "hostnames": [
-        "www.thaievisa.go.th"
-      ],
-      "destinations": [
-        "THA"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "thailand-tdac",
-      "name": "Thailand Digital Arrival Card (TDAC)",
-      "kind": "arrival_card",
-      "operator": "Immigration Bureau (Thailand)",
-      "operator_kind": "government",
-      "base_url": "https://tdac.immigration.go.th/",
-      "hostnames": [
-        "tdac.immigration.go.th"
-      ],
-      "destinations": [
-        "THA"
-      ],
-      "supported_outcomes": [
-        "ENTRY_PREPARATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "malaysia-evisa",
-      "name": "Malaysia eVISA",
-      "kind": "evisa_portal",
-      "operator": "Immigration Department of Malaysia",
-      "operator_kind": "government",
-      "base_url": "https://malaysiavisa.imi.gov.my/",
-      "hostnames": [
-        "malaysiavisa.imi.gov.my"
-      ],
-      "destinations": [
-        "MYS"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "malaysia-mdac",
-      "name": "Malaysia Digital Arrival Card (MDAC)",
-      "kind": "arrival_card",
-      "operator": "Immigration Department of Malaysia",
-      "operator_kind": "government",
-      "base_url": "https://imigresen-online.imi.gov.my/mdac/main",
-      "hostnames": [
-        "imigresen-online.imi.gov.my"
-      ],
-      "destinations": [
-        "MYS"
-      ],
-      "supported_outcomes": [
-        "ENTRY_PREPARATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "singapore-sgac",
-      "name": "Singapore Arrival Card (SGAC)",
-      "kind": "arrival_card",
-      "operator": "Immigration & Checkpoints Authority (Singapore)",
-      "operator_kind": "government",
-      "base_url": "https://eservices.ica.gov.sg/sgarrivalcard/",
-      "hostnames": [
-        "eservices.ica.gov.sg"
-      ],
-      "destinations": [
-        "SGP"
-      ],
-      "supported_outcomes": [
-        "ENTRY_PREPARATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "indonesia-evisa",
-      "name": "Indonesia e-Visa (Molina)",
-      "kind": "evisa_portal",
-      "operator": "Directorate General of Immigration (Indonesia)",
-      "operator_kind": "government",
-      "base_url": "https://evisa.imigrasi.go.id/",
-      "hostnames": [
-        "evisa.imigrasi.go.id"
-      ],
-      "destinations": [
-        "IDN"
-      ],
-      "supported_outcomes": [
-        "EVISA",
-        "VISA_ON_ARRIVAL"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "philippines-etravel",
-      "name": "Philippines eTravel",
-      "kind": "arrival_card",
-      "operator": "Bureau of Immigration (Philippines)",
-      "operator_kind": "government",
-      "base_url": "https://etravel.gov.ph/",
-      "hostnames": [
-        "etravel.gov.ph"
-      ],
-      "destinations": [
-        "PHL"
-      ],
-      "supported_outcomes": [
-        "ENTRY_PREPARATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "philippines-evisa",
-      "name": "Philippines e-Visa",
-      "kind": "evisa_portal",
-      "operator": "Department of Foreign Affairs (Philippines)",
-      "operator_kind": "government",
-      "base_url": "https://evisa.gov.ph/",
-      "hostnames": [
-        "evisa.gov.ph"
-      ],
-      "destinations": [
-        "PHL"
-      ],
-      "nationality_scope": [
-        "CHN"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "png-ica",
-      "name": "Papua New Guinea ICA eVisa",
-      "kind": "evisa_portal",
-      "operator": "Immigration & Citizenship Authority (PNG)",
-      "operator_kind": "government",
-      "base_url": "https://ica.gov.pg/",
-      "hostnames": [
-        "ica.gov.pg",
-        "evisa.ica.gov.pg"
-      ],
-      "destinations": [
-        "PNG"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "mongolia-evisa",
-      "name": "Mongolia eVisa",
-      "kind": "evisa_portal",
-      "operator": "Mongolian Immigration Agency",
-      "operator_kind": "government",
-      "base_url": "https://evisa.mn/",
-      "hostnames": [
-        "evisa.mn"
-      ],
-      "destinations": [
-        "MNG"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "russia-evisa",
-      "name": "Russia unified e-visa",
-      "kind": "evisa_portal",
-      "operator": "Consular Department, MFA of Russia",
-      "operator_kind": "government",
-      "base_url": "https://evisa.kdmid.ru/",
-      "hostnames": [
-        "evisa.kdmid.ru"
-      ],
-      "destinations": [
-        "RUS"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "ukraine-evisa",
-      "name": "Ukraine e-Visa",
-      "kind": "evisa_portal",
-      "operator": "Ministry of Foreign Affairs (Ukraine)",
-      "operator_kind": "government",
-      "base_url": "https://evisa.mfa.gov.ua/",
-      "hostnames": [
-        "evisa.mfa.gov.ua"
-      ],
-      "destinations": [
-        "UKR"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "moldova-evisa",
-      "name": "Moldova e-Visa",
-      "kind": "evisa_portal",
-      "operator": "Ministry of Foreign Affairs (Moldova)",
-      "operator_kind": "government",
-      "base_url": "https://evisa.gov.md/",
-      "hostnames": [
-        "evisa.gov.md"
-      ],
-      "destinations": [
-        "MDA"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "albania-evisa",
-      "name": "Albania e-Visa",
-      "kind": "evisa_portal",
-      "operator": "Ministry for Europe and Foreign Affairs (Albania)",
-      "operator_kind": "government",
-      "base_url": "https://e-visa.al/",
-      "hostnames": [
-        "e-visa.al"
-      ],
-      "destinations": [
-        "ALB"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "turkey-evisa",
-      "name": "Türkiye e-Visa",
-      "kind": "evisa_portal",
-      "operator": "Ministry of Foreign Affairs (Türkiye)",
-      "operator_kind": "government",
-      "base_url": "https://www.evisa.gov.tr/",
-      "hostnames": [
-        "www.evisa.gov.tr"
-      ],
-      "destinations": [
-        "TUR"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "georgia-evisa",
-      "name": "Georgia e-VISA",
-      "kind": "evisa_portal",
-      "operator": "Ministry of Foreign Affairs (Georgia)",
-      "operator_kind": "government",
-      "base_url": "https://www.evisa.gov.ge/",
-      "hostnames": [
-        "www.evisa.gov.ge"
-      ],
-      "destinations": [
-        "GEO"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "azerbaijan-evisa",
-      "name": "Azerbaijan ASAN Visa",
-      "kind": "evisa_portal",
-      "operator": "State Migration Service (Azerbaijan)",
-      "operator_kind": "government",
-      "base_url": "https://evisa.gov.az/",
-      "hostnames": [
-        "evisa.gov.az"
-      ],
-      "destinations": [
-        "AZE"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "armenia-evisa",
-      "name": "Armenia e-Visa",
-      "kind": "evisa_portal",
-      "operator": "Ministry of Foreign Affairs (Armenia)",
-      "operator_kind": "government",
-      "base_url": "https://evisa.mfa.am/",
-      "hostnames": [
-        "evisa.mfa.am"
-      ],
-      "destinations": [
-        "ARM"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "uzbekistan-evisa",
-      "name": "Uzbekistan e-Visa",
-      "kind": "evisa_portal",
-      "operator": "Ministry of Foreign Affairs (Uzbekistan)",
-      "operator_kind": "government",
-      "base_url": "https://e-visa.gov.uz/",
-      "hostnames": [
-        "e-visa.gov.uz"
-      ],
-      "destinations": [
-        "UZB"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "tajikistan-evisa",
-      "name": "Tajikistan e-Visa",
-      "kind": "evisa_portal",
-      "operator": "Consular Department, MFA (Tajikistan)",
-      "operator_kind": "government",
-      "base_url": "https://www.evisa.tj/",
-      "hostnames": [
-        "www.evisa.tj",
-        "evisa.tj"
-      ],
-      "destinations": [
-        "TJK"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "kyrgyzstan-evisa",
-      "name": "Kyrgyzstan e-Visa",
-      "kind": "evisa_portal",
-      "operator": "Ministry of Foreign Affairs (Kyrgyz Republic)",
-      "operator_kind": "government",
-      "base_url": "https://www.evisa.e-gov.kg/",
-      "hostnames": [
-        "www.evisa.e-gov.kg",
-        "evisa.e-gov.kg"
-      ],
-      "destinations": [
-        "KGZ"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "kazakhstan-vmp",
-      "name": "Kazakhstan visa-migration portal",
-      "kind": "immigration_authority",
-      "operator": "Ministry of Internal Affairs (Kazakhstan)",
-      "operator_kind": "government",
-      "base_url": "https://www.vmp.gov.kz/",
-      "hostnames": [
-        "www.vmp.gov.kz",
-        "vmp.gov.kz"
-      ],
-      "destinations": [
-        "KAZ"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "israel-etail",
-      "name": "Israel ETA-IL",
-      "kind": "eta_portal",
-      "operator": "Population and Immigration Authority (Israel)",
-      "operator_kind": "government",
-      "base_url": "https://israel-entry.piba.gov.il/",
-      "hostnames": [
-        "israel-entry.piba.gov.il"
-      ],
-      "destinations": [
-        "ISR"
-      ],
-      "supported_outcomes": [
-        "ELECTRONIC_AUTHORIZATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "saudi-evisa",
-      "name": "Saudi Arabia tourist eVisa (Visit Saudi)",
-      "kind": "evisa_portal",
-      "operator": "Ministry of Tourism (Saudi Arabia)",
-      "operator_kind": "government",
-      "base_url": "https://visa.visitsaudi.com/",
-      "hostnames": [
-        "visa.visitsaudi.com",
-        "ksavisa.sa"
-      ],
-      "destinations": [
-        "SAU"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "qatar-hayya",
-      "name": "Qatar Hayya platform",
-      "kind": "eta_portal",
-      "operator": "Ministry of Interior (Qatar)",
-      "operator_kind": "government",
-      "base_url": "https://hayya.qa/",
-      "hostnames": [
-        "hayya.qa",
-        "www.hayya.qa"
-      ],
-      "destinations": [
-        "QAT"
-      ],
-      "supported_outcomes": [
-        "ELECTRONIC_AUTHORIZATION",
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "uae-icp",
-      "name": "UAE ICP smart services",
-      "kind": "immigration_authority",
-      "operator": "Federal Authority for Identity, Citizenship, Customs and Port Security (UAE)",
-      "operator_kind": "government",
-      "base_url": "https://smartservices.icp.gov.ae/",
-      "hostnames": [
-        "smartservices.icp.gov.ae",
-        "icp.gov.ae"
-      ],
-      "destinations": [
-        "ARE"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "oman-evisa",
-      "name": "Oman eVisa (Royal Oman Police)",
-      "kind": "evisa_portal",
-      "operator": "Royal Oman Police",
-      "operator_kind": "government",
-      "base_url": "https://evisa.rop.gov.om/",
-      "hostnames": [
-        "evisa.rop.gov.om"
-      ],
-      "destinations": [
-        "OMN"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "bahrain-evisa",
-      "name": "Bahrain eVisa",
-      "kind": "evisa_portal",
-      "operator": "Nationality, Passports & Residence Affairs (Bahrain)",
-      "operator_kind": "government",
-      "base_url": "https://www.evisa.gov.bh/",
-      "hostnames": [
-        "www.evisa.gov.bh"
-      ],
-      "destinations": [
-        "BHR"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "kuwait-evisa",
-      "name": "Kuwait eVisa",
-      "kind": "evisa_portal",
-      "operator": "Ministry of Interior (Kuwait)",
-      "operator_kind": "government",
-      "base_url": "https://evisa.moi.gov.kw/",
-      "hostnames": [
-        "evisa.moi.gov.kw"
-      ],
-      "destinations": [
-        "KWT"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "iran-evisa",
-      "name": "Iran e-Visa (MFA traveller portal)",
-      "kind": "evisa_portal",
-      "operator": "Ministry of Foreign Affairs (Iran)",
-      "operator_kind": "government",
-      "base_url": "https://evisatraveller.mfa.ir/",
-      "hostnames": [
-        "evisatraveller.mfa.ir"
-      ],
-      "destinations": [
-        "IRN"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "egypt-evisa",
-      "name": "Egypt e-Visa",
-      "kind": "evisa_portal",
-      "operator": "Ministry of Interior (Egypt)",
-      "operator_kind": "government",
-      "base_url": "https://visa2egypt.gov.eg/",
-      "hostnames": [
-        "visa2egypt.gov.eg",
-        "www.visa2egypt.gov.eg"
-      ],
-      "destinations": [
-        "EGY"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "morocco-evisa",
-      "name": "Morocco e-Visa (Accès Maroc)",
-      "kind": "evisa_portal",
-      "operator": "Ministry of Foreign Affairs (Morocco)",
-      "operator_kind": "government",
-      "base_url": "https://www.acces-maroc.ma/",
-      "hostnames": [
-        "www.acces-maroc.ma",
-        "acces-maroc.ma"
-      ],
-      "destinations": [
-        "MAR"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "ethiopia-evisa",
-      "name": "Ethiopia e-Visa",
-      "kind": "evisa_portal",
-      "operator": "Immigration and Citizenship Service (Ethiopia)",
-      "operator_kind": "government",
-      "base_url": "https://www.evisa.gov.et/",
-      "hostnames": [
-        "www.evisa.gov.et",
-        "evisa.gov.et"
-      ],
-      "destinations": [
-        "ETH"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "kenya-eta",
-      "name": "Kenya eTA",
-      "kind": "eta_portal",
-      "operator": "Directorate of Immigration Services (Kenya)",
-      "operator_kind": "government",
-      "base_url": "https://www.etakenya.go.ke/",
-      "hostnames": [
-        "www.etakenya.go.ke",
-        "etakenya.go.ke"
-      ],
-      "destinations": [
-        "KEN"
-      ],
-      "supported_outcomes": [
-        "ELECTRONIC_AUTHORIZATION"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "uganda-evisa",
-      "name": "Uganda e-Visa",
-      "kind": "evisa_portal",
-      "operator": "Directorate of Citizenship and Immigration Control (Uganda)",
-      "operator_kind": "government",
-      "base_url": "https://visas.immigration.go.ug/",
-      "hostnames": [
-        "visas.immigration.go.ug"
-      ],
-      "destinations": [
-        "UGA"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "tanzania-evisa",
-      "name": "Tanzania e-Visa",
-      "kind": "evisa_portal",
-      "operator": "Immigration Services Department (Tanzania)",
-      "operator_kind": "government",
-      "base_url": "https://visa.immigration.go.tz/",
-      "hostnames": [
-        "visa.immigration.go.tz"
-      ],
-      "destinations": [
-        "TZA"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "rwanda-irembo",
-      "name": "Rwanda Irembo (visa e-services)",
-      "kind": "evisa_portal",
-      "operator": "Government of Rwanda / Irembo",
-      "operator_kind": "government",
-      "base_url": "https://irembo.gov.rw/",
-      "hostnames": [
-        "irembo.gov.rw",
-        "www.irembo.gov.rw"
-      ],
-      "destinations": [
-        "RWA"
-      ],
-      "supported_outcomes": [
-        "EVISA",
-        "VISA_ON_ARRIVAL"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "zambia-evisa",
-      "name": "Zambia immigration e-services",
-      "kind": "evisa_portal",
-      "operator": "Department of Immigration (Zambia)",
-      "operator_kind": "government",
-      "base_url": "https://eservices.zambiaimmigration.gov.zm/",
-      "hostnames": [
-        "eservices.zambiaimmigration.gov.zm"
-      ],
-      "destinations": [
-        "ZMB"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "zimbabwe-evisa",
-      "name": "Zimbabwe eVisa",
-      "kind": "evisa_portal",
-      "operator": "Department of Immigration (Zimbabwe)",
-      "operator_kind": "government",
-      "base_url": "https://www.evisa.gov.zw/",
-      "hostnames": [
-        "www.evisa.gov.zw",
-        "evisa.gov.zw"
-      ],
-      "destinations": [
-        "ZWE"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "malawi-evisa",
-      "name": "Malawi eVisa",
-      "kind": "evisa_portal",
-      "operator": "Department of Immigration (Malawi)",
-      "operator_kind": "government",
-      "base_url": "https://www.evisa.gov.mw/",
-      "hostnames": [
-        "www.evisa.gov.mw",
-        "evisa.gov.mw"
-      ],
-      "destinations": [
-        "MWI"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "mozambique-evisa",
-      "name": "Mozambique eVisa",
-      "kind": "evisa_portal",
-      "operator": "National Migration Service (Mozambique)",
-      "operator_kind": "government",
-      "base_url": "https://evisa.gov.mz/",
-      "hostnames": [
-        "evisa.gov.mz",
-        "www.evisa.gov.mz"
-      ],
-      "destinations": [
-        "MOZ"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "madagascar-evisa",
-      "name": "Madagascar eVisa",
-      "kind": "evisa_portal",
-      "operator": "Ministry of Interior (Madagascar)",
-      "operator_kind": "government",
-      "base_url": "https://evisa.gov.mg/",
-      "hostnames": [
-        "evisa.gov.mg",
-        "www.evisa.gov.mg"
-      ],
-      "destinations": [
-        "MDG"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "southafrica-ehome",
-      "name": "South Africa eVisa (eHomeAffairs)",
-      "kind": "evisa_portal",
-      "operator": "Department of Home Affairs (South Africa)",
-      "operator_kind": "government",
-      "base_url": "https://ehome.dha.gov.za/",
-      "hostnames": [
-        "ehome.dha.gov.za"
-      ],
-      "destinations": [
-        "ZAF"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "nigeria-immigration",
-      "name": "Nigeria Immigration Service portal",
-      "kind": "evisa_portal",
-      "operator": "Nigeria Immigration Service",
-      "operator_kind": "government",
-      "base_url": "https://portal.immigration.gov.ng/",
-      "hostnames": [
-        "portal.immigration.gov.ng"
-      ],
-      "destinations": [
-        "NGA"
-      ],
-      "supported_outcomes": [
-        "EVISA",
-        "VISA_ON_ARRIVAL"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "angola-smevisa",
-      "name": "Angola SME visa portal",
-      "kind": "evisa_portal",
-      "operator": "Migration and Foreigners Service (Angola)",
-      "operator_kind": "government",
-      "base_url": "https://smevisa.gov.ao/",
-      "hostnames": [
-        "smevisa.gov.ao",
-        "www.smevisa.gov.ao"
-      ],
-      "destinations": [
-        "AGO"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "djibouti-evisa",
-      "name": "Djibouti eVisa",
-      "kind": "evisa_portal",
-      "operator": "Ministry of Interior (Djibouti)",
-      "operator_kind": "government",
-      "base_url": "https://www.evisa.gouv.dj/",
-      "hostnames": [
-        "www.evisa.gouv.dj",
-        "evisa.gouv.dj"
-      ],
-      "destinations": [
-        "DJI"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "togo-voyage",
-      "name": "Togo Voyage e-visa",
-      "kind": "evisa_portal",
-      "operator": "Government of Togo",
-      "operator_kind": "government",
-      "base_url": "https://voyage.gouv.tg/",
-      "hostnames": [
-        "voyage.gouv.tg"
-      ],
-      "destinations": [
-        "TGO"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "benin-evisa",
-      "name": "Benin e-Visa",
-      "kind": "evisa_portal",
-      "operator": "Government of Benin",
-      "operator_kind": "government",
-      "base_url": "https://evisa.bj/",
-      "hostnames": [
-        "evisa.bj",
-        "www.evisa.bj"
-      ],
-      "destinations": [
-        "BEN"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "southsudan-evisa",
-      "name": "South Sudan eVisa",
-      "kind": "evisa_portal",
-      "operator": "Directorate of Nationality, Passports and Immigration (South Sudan)",
-      "operator_kind": "government",
-      "base_url": "https://evisa.gov.ss/",
-      "hostnames": [
-        "evisa.gov.ss",
-        "www.evisa.gov.ss"
-      ],
-      "destinations": [
-        "SSD"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "capeverde-ease",
-      "name": "Cabo Verde EASE travel registration",
-      "kind": "arrival_card",
-      "operator": "Government of Cabo Verde",
-      "operator_kind": "government",
-      "base_url": "https://www.ease.gov.cv/",
-      "hostnames": [
-        "www.ease.gov.cv",
-        "ease.gov.cv"
-      ],
-      "destinations": [
-        "CPV"
-      ],
-      "supported_outcomes": [
-        "ENTRY_PREPARATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "seychelles-tas",
-      "name": "Seychelles Travel Authorization (Travizory)",
-      "kind": "eta_portal",
-      "operator": "Travizory (authorized by Government of Seychelles)",
-      "operator_kind": "contracted_visa_center",
-      "base_url": "https://seychelles.govtas.com/",
-      "hostnames": [
-        "seychelles.govtas.com"
-      ],
-      "destinations": [
-        "SYC"
-      ],
-      "supported_outcomes": [
-        "ELECTRONIC_AUTHORIZATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "mexico-fmme",
-      "name": "Mexico FMM digital (INM)",
-      "kind": "arrival_card",
-      "operator": "Instituto Nacional de Migración (Mexico)",
-      "operator_kind": "government",
-      "base_url": "https://www.inm.gob.mx/fmme/publico/solicitud.html",
-      "hostnames": [
-        "www.inm.gob.mx"
-      ],
-      "destinations": [
-        "MEX"
-      ],
-      "supported_outcomes": [
-        "ENTRY_PREPARATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "dominicanrep-eticket",
-      "name": "Dominican Republic e-Ticket",
-      "kind": "arrival_card",
-      "operator": "Dirección General de Migración (Dominican Republic)",
-      "operator_kind": "government",
-      "base_url": "https://eticket.migracion.gob.do/",
-      "hostnames": [
-        "eticket.migracion.gob.do"
-      ],
-      "destinations": [
-        "DOM"
-      ],
-      "supported_outcomes": [
-        "ENTRY_PREPARATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "colombia-checkmig",
-      "name": "Colombia Check-Mig",
-      "kind": "arrival_card",
-      "operator": "Migración Colombia",
-      "operator_kind": "government",
-      "base_url": "https://apps.migracioncolombia.gov.co/",
-      "hostnames": [
-        "apps.migracioncolombia.gov.co"
-      ],
-      "destinations": [
-        "COL"
-      ],
-      "supported_outcomes": [
-        "ENTRY_PREPARATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "brazil-vfs-evisa",
-      "name": "Brazil e-Visa (VFS, authorized)",
-      "kind": "evisa_portal",
-      "operator": "VFS Global (authorized by Brazil MFA)",
-      "operator_kind": "contracted_visa_center",
-      "base_url": "https://brazil.vfsevisa.com/",
-      "hostnames": [
-        "brazil.vfsevisa.com"
-      ],
-      "destinations": [
-        "BRA"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "suriname-vfs-ecard",
-      "name": "Suriname e-Tourist Card (VFS, authorized)",
-      "kind": "evisa_portal",
-      "operator": "VFS Global (authorized by Suriname)",
-      "operator_kind": "contracted_visa_center",
-      "base_url": "https://suriname.vfsevisa.com/",
-      "hostnames": [
-        "suriname.vfsevisa.com"
-      ],
-      "destinations": [
-        "SUR"
-      ],
-      "supported_outcomes": [
-        "ELECTRONIC_AUTHORIZATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "cuba-evisa",
-      "name": "Cuba eVisa",
-      "kind": "evisa_portal",
-      "operator": "Government of Cuba",
-      "operator_kind": "government",
-      "base_url": "https://evisacuba.cu/",
-      "hostnames": [
-        "evisacuba.cu",
-        "www.evisacuba.cu"
-      ],
-      "destinations": [
-        "CUB"
-      ],
-      "supported_outcomes": [
-        "EVISA"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "france-visas",
-      "name": "France-Visas official portal",
-      "kind": "immigration_authority",
-      "operator": "Ministère de l'Europe et des Affaires étrangères (France)",
-      "operator_kind": "government",
-      "base_url": "https://france-visas.gouv.fr/",
-      "hostnames": [
-        "france-visas.gouv.fr"
-      ],
-      "destinations": [
-        "FRA"
-      ],
-      "supported_outcomes": [
-        "EMBASSY_OR_CONSULATE_APPLICATION"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "germany-videx",
-      "name": "Germany VIDEX visa application",
-      "kind": "immigration_authority",
-      "operator": "Auswärtiges Amt (Germany)",
-      "operator_kind": "government",
-      "base_url": "https://videx.diplo.de/",
-      "hostnames": [
-        "videx.diplo.de"
-      ],
-      "destinations": [
-        "DEU"
-      ],
-      "supported_outcomes": [
-        "EMBASSY_OR_CONSULATE_APPLICATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "italy-esteri",
-      "name": "Italy visa application (Esteri)",
-      "kind": "immigration_authority",
-      "operator": "Ministero degli Affari Esteri (Italy)",
-      "operator_kind": "government",
-      "base_url": "https://vistoperitalia.esteri.it/",
-      "hostnames": [
-        "vistoperitalia.esteri.it"
-      ],
-      "destinations": [
-        "ITA"
-      ],
-      "supported_outcomes": [
-        "EMBASSY_OR_CONSULATE_APPLICATION"
-      ],
-      "account_required": false
-    },
-    {
-      "family_id": "vfs-global",
-      "name": "VFS Global visa application centers",
-      "kind": "visa_center_portal",
-      "operator": "VFS Global",
-      "operator_kind": "contracted_visa_center",
-      "base_url": "https://visa.vfsglobal.com/",
-      "hostnames": [
-        "visa.vfsglobal.com",
-        "www.vfsglobal.com"
-      ],
-      "destinations": [
-        "AUT",
-        "BEL",
-        "HRV",
-        "CZE",
-        "DNK",
-        "EST",
-        "FIN",
-        "DEU",
-        "GRC",
-        "HUN",
-        "ISL",
-        "ITA",
-        "LVA",
-        "LTU",
-        "LUX",
-        "MLT",
-        "NLD",
-        "NOR",
-        "POL",
-        "PRT",
-        "SVK",
-        "SVN",
-        "ESP",
-        "SWE",
-        "CHE",
-        "GBR",
-        "CAN",
-        "AUS",
-        "NZL",
-        "ZAF",
-        "IND",
-        "CHN",
-        "JPN",
-        "KOR",
-        "SAU",
-        "ARE"
-      ],
-      "supported_outcomes": [
-        "AUTHORIZED_VISA_CENTER",
-        "APPOINTMENT_REQUIRED"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "tlscontact",
-      "name": "TLScontact visa application centers",
-      "kind": "visa_center_portal",
-      "operator": "TLScontact",
-      "operator_kind": "contracted_visa_center",
-      "base_url": "https://www.tlscontact.com/",
-      "hostnames": [
-        "www.tlscontact.com",
-        "visas-fr.tlscontact.com",
-        "visas-de.tlscontact.com",
-        "visas-be.tlscontact.com",
-        "visas-ch.tlscontact.com"
-      ],
-      "destinations": [
-        "FRA",
-        "DEU",
-        "BEL",
-        "CHE",
-        "GBR"
-      ],
-      "supported_outcomes": [
-        "AUTHORIZED_VISA_CENTER",
-        "APPOINTMENT_REQUIRED"
-      ],
-      "account_required": true
-    },
-    {
-      "family_id": "bls-international",
-      "name": "BLS International visa centers",
-      "kind": "visa_center_portal",
-      "operator": "BLS International",
-      "operator_kind": "contracted_visa_center",
-      "base_url": "https://www.blsinternational.com/",
-      "hostnames": [
-        "www.blsinternational.com"
-      ],
-      "destinations": [
-        "ESP",
-        "IND"
-      ],
-      "supported_outcomes": [
-        "AUTHORIZED_VISA_CENTER",
-        "APPOINTMENT_REQUIRED"
-      ],
-      "account_required": true
-    }
-  ]
+ "registry": "portal_families",
+ "version": 1,
+ "generated_at": "2026-07-25",
+ "snapshot_date": "2026-07-23",
+ "source": "curated seed list of real official portals/platforms; every entry starts seed_unverified and is upgraded ONLY by deterministic government-domain verification and/or live credential-free recon. Entries that fail verification stay unreleased.",
+ "notes": "One family per real platform. A family may serve many destinations, nationalities and jurisdictions — adapters are built per family and reused. No entry may be invented; uncertain platforms are omitted (their routes stay honestly unresolved).",
+ "entry_count": 91,
+ "entries": [
+  {
+   "family_id": "usa-esta",
+   "name": "U.S. ESTA (Electronic System for Travel Authorization)",
+   "kind": "eta_portal",
+   "operator": "U.S. Customs and Border Protection",
+   "operator_kind": "government",
+   "base_url": "https://esta.cbp.dhs.gov/",
+   "hostnames": [
+    "esta.cbp.dhs.gov"
+   ],
+   "destinations": [
+    "USA"
+   ],
+   "supported_outcomes": [
+    "ELECTRONIC_AUTHORIZATION"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "usa-ceac",
+   "name": "U.S. CEAC (DS-160 nonimmigrant visa application)",
+   "kind": "immigration_authority",
+   "operator": "U.S. Department of State",
+   "operator_kind": "government",
+   "base_url": "https://ceac.state.gov/",
+   "hostnames": [
+    "ceac.state.gov"
+   ],
+   "destinations": [
+    "USA"
+   ],
+   "supported_outcomes": [
+    "EMBASSY_OR_CONSULATE_APPLICATION"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "usa-usvisa-appointments",
+   "name": "U.S. visa appointment services (contracted)",
+   "kind": "appointment_portal",
+   "operator": "CGI / Applied Materials (contracted by U.S. DoS)",
+   "operator_kind": "contracted_visa_center",
+   "base_url": "https://ais.usvisa-info.com/",
+   "hostnames": [
+    "ais.usvisa-info.com",
+    "www.usvisa-info.com"
+   ],
+   "destinations": [
+    "USA"
+   ],
+   "supported_outcomes": [
+    "APPOINTMENT_REQUIRED"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "canada-ircc",
+   "name": "Canada eTA / IRCC online services",
+   "kind": "eta_portal",
+   "operator": "Immigration, Refugees and Citizenship Canada",
+   "operator_kind": "government",
+   "base_url": "https://eta.onlineservices-servicesenligne.apps.cic.gc.ca/eta/welcome?lang=en",
+   "hostnames": [
+    "onlineservices-servicesenligne.cic.gc.ca",
+    "www.canada.ca",
+    "eta.onlineservices-servicesenligne.apps.cic.gc.ca"
+   ],
+   "destinations": [
+    "CAN"
+   ],
+   "supported_outcomes": [
+    "ELECTRONIC_AUTHORIZATION",
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "uk-eta",
+   "name": "UK Electronic Travel Authorisation",
+   "kind": "eta_portal",
+   "operator": "UK Home Office",
+   "operator_kind": "government",
+   "base_url": "https://apply-for-an-eta.homeoffice.gov.uk/apply/electronic-travel-authorisation",
+   "hostnames": [
+    "www.gov.uk",
+    "apply-for-an-eta.homeoffice.gov.uk"
+   ],
+   "destinations": [
+    "GBR"
+   ],
+   "supported_outcomes": [
+    "ELECTRONIC_AUTHORIZATION"
+   ],
+   "account_required": false,
+   "entry_gate": {
+    "description": "UK ETA is app-first: the start URL renders an 'easier on the app' interstitial (React SPA). Click the 'I cannot apply on the UK ETA app.' escape link to the help-downloading page, then 'Continue application online' to the how-to-apply page, then the 'Continue' button, which calls the service's /start/v1 endpoint and hands over to the forms UI at /electronic-travel-authorisation/{session-id}/electronic-travel-authorisation/enter-email-address — the first question of the guest application wizard (GOV.UK one-question-per-page, so exactly one field with a stable id is the expected form-ready state). No login, no account, no captcha on this path.",
+    "actions": [
+     {
+      "action": "CLICK",
+      "selector": "a:has-text(\"I cannot apply on the UK ETA app\")",
+      "purpose": "Leave the app-first interstitial for the web application help page"
+     },
+     {
+      "action": "CLICK",
+      "selector": "a:has-text(\"Continue application online\")",
+      "purpose": "Choose the online (web) application route"
+     },
+     {
+      "action": "CLICK",
+      "selector": "button:has-text(\"Continue\")",
+      "purpose": "Start the online application and hand over to the forms UI"
+     }
+    ],
+    "expect_path": "/enter-email-address",
+    "form_ready_selector": "#enter-email-address-value",
+    "declared_handoffs": [
+     "otp"
+    ]
+   }
+  },
+  {
+   "family_id": "uk-visas",
+   "name": "UK visas and immigration online application",
+   "kind": "evisa_portal",
+   "operator": "UK Home Office",
+   "operator_kind": "government",
+   "base_url": "https://www.gov.uk/apply-to-come-to-the-uk",
+   "hostnames": [
+    "www.gov.uk",
+    "visas-immigration.service.gov.uk"
+   ],
+   "destinations": [
+    "GBR"
+   ],
+   "supported_outcomes": [
+    "EMBASSY_OR_CONSULATE_APPLICATION"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "australia-immi",
+   "name": "Australia ImmiAccount / eVisitor / ETA",
+   "kind": "eta_portal",
+   "operator": "Department of Home Affairs",
+   "operator_kind": "government",
+   "base_url": "https://online.immi.gov.au/",
+   "hostnames": [
+    "online.immi.gov.au",
+    "immi.homeaffairs.gov.au"
+   ],
+   "destinations": [
+    "AUS"
+   ],
+   "supported_outcomes": [
+    "ELECTRONIC_AUTHORIZATION",
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "nz-nzeta",
+   "name": "New Zealand NZeTA",
+   "kind": "eta_portal",
+   "operator": "Immigration New Zealand",
+   "operator_kind": "government",
+   "base_url": "https://nzeta.immigration.govt.nz/",
+   "hostnames": [
+    "nzeta.immigration.govt.nz",
+    "www.immigration.govt.nz"
+   ],
+   "destinations": [
+    "NZL"
+   ],
+   "supported_outcomes": [
+    "ELECTRONIC_AUTHORIZATION"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "korea-keta",
+   "name": "K-ETA (Korea Electronic Travel Authorization)",
+   "kind": "eta_portal",
+   "operator": "Korea Immigration Service",
+   "operator_kind": "government",
+   "base_url": "https://www.k-eta.go.kr/",
+   "hostnames": [
+    "www.k-eta.go.kr"
+   ],
+   "destinations": [
+    "KOR"
+   ],
+   "supported_outcomes": [
+    "ELECTRONIC_AUTHORIZATION"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "korea-visa-portal",
+   "name": "Korea Visa Portal (e-visa)",
+   "kind": "evisa_portal",
+   "operator": "Ministry of Justice (Korea)",
+   "operator_kind": "government",
+   "base_url": "https://www.visa.go.kr/",
+   "hostnames": [
+    "www.visa.go.kr"
+   ],
+   "destinations": [
+    "KOR"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "korea-earrival",
+   "name": "Korea e-Arrival Card",
+   "kind": "arrival_card",
+   "operator": "Korea Immigration Service",
+   "operator_kind": "government",
+   "base_url": "https://www.e-arrivalcard.go.kr/",
+   "hostnames": [
+    "www.e-arrivalcard.go.kr"
+   ],
+   "destinations": [
+    "KOR"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "japan-evisa",
+   "name": "Japan eVISA",
+   "kind": "evisa_portal",
+   "operator": "Ministry of Foreign Affairs of Japan",
+   "operator_kind": "government",
+   "base_url": "https://www.evisa.mofa.go.jp/",
+   "hostnames": [
+    "www.evisa.mofa.go.jp"
+   ],
+   "destinations": [
+    "JPN"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "japan-visit-japan-web",
+   "name": "Visit Japan Web (arrival procedures)",
+   "kind": "arrival_card",
+   "operator": "Digital Agency (Japan)",
+   "operator_kind": "government",
+   "base_url": "https://www.vjw.digital.go.jp/",
+   "hostnames": [
+    "services.digital.go.jp",
+    "vjw-lp.digital.go.jp"
+   ],
+   "destinations": [
+    "JPN"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "china-cova",
+   "name": "China Online Visa Application (COVA)",
+   "kind": "immigration_authority",
+   "operator": "Ministry of Foreign Affairs of China",
+   "operator_kind": "government",
+   "base_url": "https://cova.mfa.gov.cn/",
+   "hostnames": [
+    "cova.mfa.gov.cn"
+   ],
+   "destinations": [
+    "CHN"
+   ],
+   "supported_outcomes": [
+    "EMBASSY_OR_CONSULATE_APPLICATION"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "china-avas",
+   "name": "China visa appointment system (AVAS)",
+   "kind": "appointment_portal",
+   "operator": "Ministry of Foreign Affairs of China",
+   "operator_kind": "government",
+   "base_url": "https://avas.mfa.gov.cn/",
+   "hostnames": [
+    "avas.mfa.gov.cn"
+   ],
+   "destinations": [
+    "CHN"
+   ],
+   "supported_outcomes": [
+    "APPOINTMENT_REQUIRED"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "taiwan-evisa",
+   "name": "Taiwan eVisa (BOCA)",
+   "kind": "evisa_portal",
+   "operator": "Bureau of Consular Affairs (Taiwan)",
+   "operator_kind": "government",
+   "base_url": "https://visawebapp.boca.gov.tw/",
+   "hostnames": [
+    "visawebapp.boca.gov.tw"
+   ],
+   "destinations": [
+    "TWN"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "hongkong-immd",
+   "name": "Hong Kong Immigration Department e-services",
+   "kind": "immigration_authority",
+   "operator": "Hong Kong Immigration Department",
+   "operator_kind": "government",
+   "base_url": "https://www.immd.gov.hk/",
+   "hostnames": [
+    "www.immd.gov.hk"
+   ],
+   "destinations": [
+    "HKG"
+   ],
+   "supported_outcomes": [
+    "EMBASSY_OR_CONSULATE_APPLICATION"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "india-evisa",
+   "name": "India e-Visa (Indian Visa Online)",
+   "kind": "evisa_portal",
+   "operator": "Bureau of Immigration (India)",
+   "operator_kind": "government",
+   "base_url": "https://indianvisaonline.gov.in/",
+   "hostnames": [
+    "indianvisaonline.gov.in"
+   ],
+   "destinations": [
+    "IND"
+   ],
+   "supported_outcomes": [
+    "EVISA",
+    "EMBASSY_OR_CONSULATE_APPLICATION"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "pakistan-nadra-visa",
+   "name": "Pakistan Online Visa System",
+   "kind": "evisa_portal",
+   "operator": "NADRA / Ministry of Interior (Pakistan)",
+   "operator_kind": "government",
+   "base_url": "https://visa.nadra.gov.pk/",
+   "hostnames": [
+    "visa.nadra.gov.pk"
+   ],
+   "destinations": [
+    "PAK"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "srilanka-eta",
+   "name": "Sri Lanka ETA",
+   "kind": "eta_portal",
+   "operator": "Department of Immigration and Emigration (Sri Lanka)",
+   "operator_kind": "government",
+   "base_url": "https://eta.gov.lk/",
+   "hostnames": [
+    "eta.gov.lk",
+    "www.eta.gov.lk"
+   ],
+   "destinations": [
+    "LKA"
+   ],
+   "supported_outcomes": [
+    "ELECTRONIC_AUTHORIZATION"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "nepal-immigration",
+   "name": "Nepal Immigration online services",
+   "kind": "immigration_authority",
+   "operator": "Department of Immigration (Nepal)",
+   "operator_kind": "government",
+   "base_url": "https://nepaliport.immigration.gov.np/",
+   "hostnames": [
+    "nepaliport.immigration.gov.np",
+    "www.immigration.gov.np"
+   ],
+   "destinations": [
+    "NPL"
+   ],
+   "supported_outcomes": [
+    "VISA_ON_ARRIVAL",
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "bhutan-doi",
+   "name": "Bhutan Department of Immigration e-permit",
+   "kind": "evisa_portal",
+   "operator": "Department of Immigration (Bhutan)",
+   "operator_kind": "government",
+   "base_url": "https://visit.doi.gov.bt/",
+   "hostnames": [
+    "visit.doi.gov.bt"
+   ],
+   "destinations": [
+    "BTN"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "maldives-imuga",
+   "name": "Maldives IMUGA traveller declaration",
+   "kind": "arrival_card",
+   "operator": "Maldives Immigration",
+   "operator_kind": "government",
+   "base_url": "https://imuga.immigration.gov.mv/",
+   "hostnames": [
+    "imuga.immigration.gov.mv"
+   ],
+   "destinations": [
+    "MDV"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "vietnam-evisa",
+   "name": "Vietnam e-Visa",
+   "kind": "evisa_portal",
+   "operator": "Vietnam Immigration Department",
+   "operator_kind": "government",
+   "base_url": "https://evisa.gov.vn/",
+   "hostnames": [
+    "evisa.gov.vn",
+    "evisa.xuatnhapcanh.gov.vn"
+   ],
+   "destinations": [
+    "VNM"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false,
+   "entry_gate": {
+    "description": "The application form (/e-visa/foreigners) is gated behind an in-session instruction modal: Apply now -> scroll both instruction containers to the bottom -> tick the two acknowledgment checkboxes (the only visible checkboxes in the modal) -> Next. Direct navigation redirects to the home page. Verified live 2026-07-25.",
+    "actions": [
+     {
+      "action": "CLICK",
+      "selector": "button:has-text(\"Apply now\")",
+      "purpose": "Entry gate: open the declaration-instructions modal"
+     },
+     {
+      "action": "SCROLL_TO_BOTTOM",
+      "selector": "div[class*=\"overflow-y-scroll\"]",
+      "purpose": "Entry gate: scroll the outer instruction container to the bottom"
+     },
+     {
+      "action": "SCROLL_TO_BOTTOM",
+      "selector": "div[class*=\"overflow-auto\"]",
+      "purpose": "Entry gate: scroll the inner instruction container to the bottom"
+     },
+     {
+      "action": "CHECK",
+      "selector": "input[type=\"checkbox\"]:visible >> nth=0",
+      "purpose": "Entry gate: acknowledge compliance with Vietnamese laws upon entry"
+     },
+     {
+      "action": "CHECK",
+      "selector": "input[type=\"checkbox\"]:visible >> nth=1",
+      "purpose": "Entry gate: confirm the instructions were read carefully"
+     },
+     {
+      "action": "CLICK",
+      "selector": "button:has-text(\"Next\")",
+      "purpose": "Entry gate: continue to the application form"
+     }
+    ],
+    "expect_path": "/e-visa/foreigners",
+    "form_ready_selector": "#basic_ttcnHo",
+    "form_ready_all": {
+     "selector": "[id^=\"basic_\"]",
+     "min": 20
+    },
+    "declared_handoffs": [
+     "captcha"
+    ]
+   }
+  },
+  {
+   "family_id": "cambodia-evisa",
+   "name": "Cambodia e-Visa",
+   "kind": "evisa_portal",
+   "operator": "Ministry of Foreign Affairs (Cambodia)",
+   "operator_kind": "government",
+   "base_url": "https://www.evisa.gov.kh/",
+   "hostnames": [
+    "www.evisa.gov.kh"
+   ],
+   "destinations": [
+    "KHM"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "cambodia-earrival",
+   "name": "Cambodia e-Arrival",
+   "kind": "arrival_card",
+   "operator": "General Department of Immigration (Cambodia)",
+   "operator_kind": "government",
+   "base_url": "https://arrival.gov.kh/",
+   "hostnames": [
+    "arrival.gov.kh"
+   ],
+   "destinations": [
+    "KHM"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false,
+   "entry_gate": {
+    "description": "Angular SPA. Landing hero 'Submit e-Arrival' opens a Material dialog offering 'Sign in as Guest' / 'Sign In With Gmail' / QR scan. Clicking the explicit 'Sign in as Guest' anchor (no credentials, creates an anonymous profile) routes straight to the public foreigner individual e-Arrival form at /e-arrival/foreigner/individual-form/draft. Deep links to /e-arrival/* redirect back to / until the guest profile exists, so the click path is mandatory. The two trailing scrolls are settle time: the form is a lazy-loaded module and needs ~5s after navigation before its ~29 Material fields render. If a prior guest session persists in the browser profile the dialog is skipped and the first click navigates directly, which still lands on the same expect_path.",
+    "actions": [
+     {
+      "action": "CLICK",
+      "selector": "a:has-text(\"Submit e-Arrival\")",
+      "purpose": "open the submission entry dialog from the landing hero"
+     },
+     {
+      "action": "CLICK",
+      "selector": ".cdk-overlay-container a:has-text(\"Sign in as Guest\")",
+      "purpose": "continue as guest (explicit no-account option) to reach the public form"
+     },
+     {
+      "action": "SCROLL_TO_BOTTOM",
+      "selector": "body",
+      "purpose": "allow lazy-loaded form module to render"
+     },
+     {
+      "action": "SCROLL_TO_BOTTOM",
+      "selector": "body",
+      "purpose": "settle wait before final field snapshot"
+     }
+    ],
+    "expect_path": "/e-arrival/foreigner/individual-form",
+    "form_ready_selector": "input[formcontrolname=\"passportNumber\"]",
+    "declared_handoffs": []
+   }
+  },
+  {
+   "family_id": "laos-evisa",
+   "name": "Lao PDR official eVisa",
+   "kind": "evisa_portal",
+   "operator": "Ministry of Foreign Affairs (Laos)",
+   "operator_kind": "government",
+   "base_url": "https://laoevisa.gov.la/",
+   "hostnames": [
+    "laoevisa.gov.la",
+    "application.visalaos.com"
+   ],
+   "destinations": [
+    "LAO"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "myanmar-evisa",
+   "name": "Myanmar eVisa",
+   "kind": "evisa_portal",
+   "operator": "Ministry of Immigration and Population (Myanmar)",
+   "operator_kind": "government",
+   "base_url": "https://evisa.moip.gov.mm/",
+   "hostnames": [
+    "evisa.moip.gov.mm"
+   ],
+   "destinations": [
+    "MMR"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "thailand-evisa",
+   "name": "Thailand e-Visa",
+   "kind": "evisa_portal",
+   "operator": "Ministry of Foreign Affairs (Thailand)",
+   "operator_kind": "government",
+   "base_url": "https://www.thaievisa.go.th/",
+   "hostnames": [
+    "www.thaievisa.go.th"
+   ],
+   "destinations": [
+    "THA"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "thailand-tdac",
+   "name": "Thailand Digital Arrival Card (TDAC)",
+   "kind": "arrival_card",
+   "operator": "Immigration Bureau (Thailand)",
+   "operator_kind": "government",
+   "base_url": "https://tdac.immigration.go.th/",
+   "hostnames": [
+    "tdac.immigration.go.th"
+   ],
+   "destinations": [
+    "THA"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false,
+   "entry_gate": {
+    "description": "TDAC landing page (SPA route #/home) shows two cards: 'Arrival Card' (new submission) and 'Update Arrival Card'. A single click on the Arrival Card card (targeted by its unique subtitle text, since 'Arrival Card' is a substring of the Update button) routes directly to the public application form at #/tac/arrival-card/add with ~39 visible Angular Material fields. No language select, instructions page, login, or legal-acceptance gate was encountered. Cloudflare Turnstile is present on the landing page but resolved invisibly in both probe runs; declared as a captcha handoff in case it interactively challenges.",
+    "actions": [
+     {
+      "action": "CLICK",
+      "selector": "button:has-text(\"Provide your Thailand Digital Arrival\")",
+      "purpose": "Choose the new Arrival Card flow from the landing page (unique subtitle text avoids matching the 'Update Arrival Card' button)"
+     }
+    ],
+    "expect_path": "/arrival-card/#/tac/arrival-card/add",
+    "form_ready_selector": "#mat-input-0",
+    "declared_handoffs": [
+     "captcha"
+    ]
+   }
+  },
+  {
+   "family_id": "malaysia-evisa",
+   "name": "Malaysia eVISA",
+   "kind": "evisa_portal",
+   "operator": "Immigration Department of Malaysia",
+   "operator_kind": "government",
+   "base_url": "https://malaysiavisa.imi.gov.my/",
+   "hostnames": [
+    "malaysiavisa.imi.gov.my"
+   ],
+   "destinations": [
+    "MYS"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "malaysia-mdac",
+   "name": "Malaysia Digital Arrival Card (MDAC)",
+   "kind": "arrival_card",
+   "operator": "Immigration Department of Malaysia",
+   "operator_kind": "government",
+   "base_url": "https://imigresen-online.imi.gov.my/mdac/main",
+   "hostnames": [
+    "imigresen-online.imi.gov.my"
+   ],
+   "destinations": [
+    "MYS"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "singapore-sgac",
+   "name": "Singapore Arrival Card (SGAC)",
+   "kind": "arrival_card",
+   "operator": "Immigration & Checkpoints Authority (Singapore)",
+   "operator_kind": "government",
+   "base_url": "https://eservices.ica.gov.sg/sgarrivalcard/",
+   "hostnames": [
+    "eservices.ica.gov.sg"
+   ],
+   "destinations": [
+    "SGP"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "indonesia-evisa",
+   "name": "Indonesia e-Visa (Molina)",
+   "kind": "evisa_portal",
+   "operator": "Directorate General of Immigration (Indonesia)",
+   "operator_kind": "government",
+   "base_url": "https://evisa.imigrasi.go.id/",
+   "hostnames": [
+    "evisa.imigrasi.go.id"
+   ],
+   "destinations": [
+    "IDN"
+   ],
+   "supported_outcomes": [
+    "EVISA",
+    "VISA_ON_ARRIVAL"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "philippines-etravel",
+   "name": "Philippines eTravel",
+   "kind": "arrival_card",
+   "operator": "Bureau of Immigration (Philippines)",
+   "operator_kind": "government",
+   "base_url": "https://etravel.gov.ph/",
+   "hostnames": [
+    "etravel.gov.ph"
+   ],
+   "destinations": [
+    "PHL"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "philippines-evisa",
+   "name": "Philippines e-Visa",
+   "kind": "evisa_portal",
+   "operator": "Department of Foreign Affairs (Philippines)",
+   "operator_kind": "government",
+   "base_url": "https://evisa.gov.ph/",
+   "hostnames": [
+    "evisa.gov.ph"
+   ],
+   "destinations": [
+    "PHL"
+   ],
+   "nationality_scope": [
+    "CHN"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "png-ica",
+   "name": "Papua New Guinea ICA eVisa",
+   "kind": "evisa_portal",
+   "operator": "Immigration & Citizenship Authority (PNG)",
+   "operator_kind": "government",
+   "base_url": "https://ica.gov.pg/",
+   "hostnames": [
+    "ica.gov.pg",
+    "evisa.ica.gov.pg"
+   ],
+   "destinations": [
+    "PNG"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "mongolia-evisa",
+   "name": "Mongolia eVisa",
+   "kind": "evisa_portal",
+   "operator": "Mongolian Immigration Agency",
+   "operator_kind": "government",
+   "base_url": "https://evisa.mn/",
+   "hostnames": [
+    "evisa.mn"
+   ],
+   "destinations": [
+    "MNG"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "russia-evisa",
+   "name": "Russia unified e-visa",
+   "kind": "evisa_portal",
+   "operator": "Consular Department, MFA of Russia",
+   "operator_kind": "government",
+   "base_url": "https://evisa.kdmid.ru/",
+   "hostnames": [
+    "evisa.kdmid.ru"
+   ],
+   "destinations": [
+    "RUS"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "ukraine-evisa",
+   "name": "Ukraine e-Visa",
+   "kind": "evisa_portal",
+   "operator": "Ministry of Foreign Affairs (Ukraine)",
+   "operator_kind": "government",
+   "base_url": "https://evisa.mfa.gov.ua/",
+   "hostnames": [
+    "evisa.mfa.gov.ua"
+   ],
+   "destinations": [
+    "UKR"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "moldova-evisa",
+   "name": "Moldova e-Visa",
+   "kind": "evisa_portal",
+   "operator": "Ministry of Foreign Affairs (Moldova)",
+   "operator_kind": "government",
+   "base_url": "https://evisa.gov.md/",
+   "hostnames": [
+    "evisa.gov.md"
+   ],
+   "destinations": [
+    "MDA"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "albania-evisa",
+   "name": "Albania e-Visa",
+   "kind": "evisa_portal",
+   "operator": "Ministry for Europe and Foreign Affairs (Albania)",
+   "operator_kind": "government",
+   "base_url": "https://e-visa.al/",
+   "hostnames": [
+    "e-visa.al"
+   ],
+   "destinations": [
+    "ALB"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "turkey-evisa",
+   "name": "Türkiye e-Visa",
+   "kind": "evisa_portal",
+   "operator": "Ministry of Foreign Affairs (Türkiye)",
+   "operator_kind": "government",
+   "base_url": "https://www.evisa.gov.tr/",
+   "hostnames": [
+    "www.evisa.gov.tr"
+   ],
+   "destinations": [
+    "TUR"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "georgia-evisa",
+   "name": "Georgia e-VISA",
+   "kind": "evisa_portal",
+   "operator": "Ministry of Foreign Affairs (Georgia)",
+   "operator_kind": "government",
+   "base_url": "https://www.evisa.gov.ge/GeoVisa/en/VisaApp",
+   "hostnames": [
+    "www.evisa.gov.ge"
+   ],
+   "destinations": [
+    "GEO"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "azerbaijan-evisa",
+   "name": "Azerbaijan ASAN Visa",
+   "kind": "evisa_portal",
+   "operator": "State Migration Service (Azerbaijan)",
+   "operator_kind": "government",
+   "base_url": "https://evisa.gov.az/",
+   "hostnames": [
+    "evisa.gov.az"
+   ],
+   "destinations": [
+    "AZE"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "armenia-evisa",
+   "name": "Armenia e-Visa",
+   "kind": "evisa_portal",
+   "operator": "Ministry of Foreign Affairs (Armenia)",
+   "operator_kind": "government",
+   "base_url": "https://evisa.mfa.am/",
+   "hostnames": [
+    "evisa.mfa.am"
+   ],
+   "destinations": [
+    "ARM"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "uzbekistan-evisa",
+   "name": "Uzbekistan e-Visa",
+   "kind": "evisa_portal",
+   "operator": "Ministry of Foreign Affairs (Uzbekistan)",
+   "operator_kind": "government",
+   "base_url": "https://e-visa.gov.uz/",
+   "hostnames": [
+    "e-visa.gov.uz"
+   ],
+   "destinations": [
+    "UZB"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "tajikistan-evisa",
+   "name": "Tajikistan e-Visa",
+   "kind": "evisa_portal",
+   "operator": "Consular Department, MFA (Tajikistan)",
+   "operator_kind": "government",
+   "base_url": "https://www.evisa.tj/",
+   "hostnames": [
+    "www.evisa.tj",
+    "evisa.tj"
+   ],
+   "destinations": [
+    "TJK"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "kyrgyzstan-evisa",
+   "name": "Kyrgyzstan e-Visa",
+   "kind": "evisa_portal",
+   "operator": "Ministry of Foreign Affairs (Kyrgyz Republic)",
+   "operator_kind": "government",
+   "base_url": "https://www.evisa.e-gov.kg/",
+   "hostnames": [
+    "www.evisa.e-gov.kg",
+    "evisa.e-gov.kg"
+   ],
+   "destinations": [
+    "KGZ"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "kazakhstan-vmp",
+   "name": "Kazakhstan visa-migration portal",
+   "kind": "immigration_authority",
+   "operator": "Ministry of Internal Affairs (Kazakhstan)",
+   "operator_kind": "government",
+   "base_url": "https://www.vmp.gov.kz/",
+   "hostnames": [
+    "www.vmp.gov.kz",
+    "vmp.gov.kz"
+   ],
+   "destinations": [
+    "KAZ"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "israel-etail",
+   "name": "Israel ETA-IL",
+   "kind": "eta_portal",
+   "operator": "Population and Immigration Authority (Israel)",
+   "operator_kind": "government",
+   "base_url": "https://israel-entry.piba.gov.il/",
+   "hostnames": [
+    "israel-entry.piba.gov.il"
+   ],
+   "destinations": [
+    "ISR"
+   ],
+   "supported_outcomes": [
+    "ELECTRONIC_AUTHORIZATION"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "saudi-evisa",
+   "name": "Saudi Arabia tourist eVisa (Visit Saudi)",
+   "kind": "evisa_portal",
+   "operator": "Ministry of Tourism (Saudi Arabia)",
+   "operator_kind": "government",
+   "base_url": "https://visa.visitsaudi.com/",
+   "hostnames": [
+    "visa.visitsaudi.com",
+    "ksavisa.sa"
+   ],
+   "destinations": [
+    "SAU"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "qatar-hayya",
+   "name": "Qatar Hayya platform",
+   "kind": "eta_portal",
+   "operator": "Ministry of Interior (Qatar)",
+   "operator_kind": "government",
+   "base_url": "https://hayya.qa/",
+   "hostnames": [
+    "hayya.qa",
+    "www.hayya.qa"
+   ],
+   "destinations": [
+    "QAT"
+   ],
+   "supported_outcomes": [
+    "ELECTRONIC_AUTHORIZATION",
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "uae-icp",
+   "name": "UAE ICP smart services",
+   "kind": "immigration_authority",
+   "operator": "Federal Authority for Identity, Citizenship, Customs and Port Security (UAE)",
+   "operator_kind": "government",
+   "base_url": "https://smartservices.icp.gov.ae/",
+   "hostnames": [
+    "smartservices.icp.gov.ae",
+    "icp.gov.ae"
+   ],
+   "destinations": [
+    "ARE"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "oman-evisa",
+   "name": "Oman eVisa (Royal Oman Police)",
+   "kind": "evisa_portal",
+   "operator": "Royal Oman Police",
+   "operator_kind": "government",
+   "base_url": "https://evisa.rop.gov.om/",
+   "hostnames": [
+    "evisa.rop.gov.om"
+   ],
+   "destinations": [
+    "OMN"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "bahrain-evisa",
+   "name": "Bahrain eVisa",
+   "kind": "evisa_portal",
+   "operator": "Nationality, Passports & Residence Affairs (Bahrain)",
+   "operator_kind": "government",
+   "base_url": "https://www.evisa.gov.bh/",
+   "hostnames": [
+    "www.evisa.gov.bh"
+   ],
+   "destinations": [
+    "BHR"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "kuwait-evisa",
+   "name": "Kuwait eVisa",
+   "kind": "evisa_portal",
+   "operator": "Ministry of Interior (Kuwait)",
+   "operator_kind": "government",
+   "base_url": "https://evisa.moi.gov.kw/",
+   "hostnames": [
+    "evisa.moi.gov.kw"
+   ],
+   "destinations": [
+    "KWT"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "iran-evisa",
+   "name": "Iran e-Visa (MFA traveller portal)",
+   "kind": "evisa_portal",
+   "operator": "Ministry of Foreign Affairs (Iran)",
+   "operator_kind": "government",
+   "base_url": "https://evisatraveller.mfa.ir/",
+   "hostnames": [
+    "evisatraveller.mfa.ir"
+   ],
+   "destinations": [
+    "IRN"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "egypt-evisa",
+   "name": "Egypt e-Visa",
+   "kind": "evisa_portal",
+   "operator": "Ministry of Interior (Egypt)",
+   "operator_kind": "government",
+   "base_url": "https://visa2egypt.gov.eg/",
+   "hostnames": [
+    "visa2egypt.gov.eg",
+    "www.visa2egypt.gov.eg"
+   ],
+   "destinations": [
+    "EGY"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "morocco-evisa",
+   "name": "Morocco e-Visa (Accès Maroc)",
+   "kind": "evisa_portal",
+   "operator": "Ministry of Foreign Affairs (Morocco)",
+   "operator_kind": "government",
+   "base_url": "https://www.acces-maroc.ma/",
+   "hostnames": [
+    "www.acces-maroc.ma",
+    "acces-maroc.ma"
+   ],
+   "destinations": [
+    "MAR"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "ethiopia-evisa",
+   "name": "Ethiopia e-Visa",
+   "kind": "evisa_portal",
+   "operator": "Immigration and Citizenship Service (Ethiopia)",
+   "operator_kind": "government",
+   "base_url": "https://www.evisa.gov.et/",
+   "hostnames": [
+    "www.evisa.gov.et",
+    "evisa.gov.et"
+   ],
+   "destinations": [
+    "ETH"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false,
+   "entry_gate": {
+    "description": "Landing page -> scroll to footer -> click the stable 'E-Visa Application' footer link (a.footer-link[href=\"/visa\"]) -> /visa, which is the full application wizard (Visa Category / Arrival Information / Personal Information / Passport Information / Review / Attachments) rendered as a single SPA page. No login or account exists anywhere in the flow. IMPORTANT: do NOT use the hero 'Apply Now' buttons — they sit inside an animating carousel (.evisa-courasel-btn) and never pass Playwright's stability check, so clicks time out; the footer link is the deterministic entry. Wizard step 1 (VISA SELECTION) shows a visaType select plus an 'I agree to the terms and conditions' checkbox; the gate deliberately does not tick it (true T&C consent, not an instructions acknowledgment) — visa-type selection and the consent are fill-tier/user actions. All later-step fields (arrivalDate, departureCountry, departureCity, airline, flightNumber, accommodation*, firstName, surname, citizenship, gender, countryOfBirth, dateOfBirth, placeOfBirth, emailAddress, emailAddressConfirmation, phoneNumber, occupation, streetAddress, addressCity, addressCountry, passportType, passportNumber, passportExpireDate, issuingCountry, passportIssuingAuthority) are already present in the /visa page DOM, hidden until their wizard step activates; native inputs are visually masked by custom-styled widgets, so strict is_visible() fails on them — hence the container-based form_ready_selector.",
+    "actions": [
+     {
+      "action": "SCROLL_TO_BOTTOM",
+      "selector": "body",
+      "purpose": "bring stable footer links into view"
+     },
+     {
+      "action": "CLICK",
+      "selector": "a.footer-link[href=\"/visa\"]",
+      "purpose": "open E-Visa Application wizard via stable footer link"
+     }
+    ],
+    "expect_path": "/visa",
+    "form_ready_selector": "div:has(select[name=\"visaType\"])",
+    "declared_handoffs": []
+   }
+  },
+  {
+   "family_id": "kenya-eta",
+   "name": "Kenya eTA",
+   "kind": "eta_portal",
+   "operator": "Directorate of Immigration Services (Kenya)",
+   "operator_kind": "government",
+   "base_url": "https://www.etakenya.go.ke/",
+   "hostnames": [
+    "www.etakenya.go.ke",
+    "etakenya.go.ke"
+   ],
+   "destinations": [
+    "KEN"
+   ],
+   "supported_outcomes": [
+    "ELECTRONIC_AUTHORIZATION"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "uganda-evisa",
+   "name": "Uganda e-Visa",
+   "kind": "evisa_portal",
+   "operator": "Directorate of Citizenship and Immigration Control (Uganda)",
+   "operator_kind": "government",
+   "base_url": "https://visas.immigration.go.ug/",
+   "hostnames": [
+    "visas.immigration.go.ug"
+   ],
+   "destinations": [
+    "UGA"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "tanzania-evisa",
+   "name": "Tanzania e-Visa",
+   "kind": "evisa_portal",
+   "operator": "Immigration Services Department (Tanzania)",
+   "operator_kind": "government",
+   "base_url": "https://visa.immigration.go.tz/",
+   "hostnames": [
+    "visa.immigration.go.tz"
+   ],
+   "destinations": [
+    "TZA"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "rwanda-irembo",
+   "name": "Rwanda Irembo (visa e-services)",
+   "kind": "evisa_portal",
+   "operator": "Government of Rwanda / Irembo",
+   "operator_kind": "government",
+   "base_url": "https://irembo.gov.rw/",
+   "hostnames": [
+    "irembo.gov.rw",
+    "www.irembo.gov.rw"
+   ],
+   "destinations": [
+    "RWA"
+   ],
+   "supported_outcomes": [
+    "EVISA",
+    "VISA_ON_ARRIVAL"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "zambia-evisa",
+   "name": "Zambia immigration e-services",
+   "kind": "evisa_portal",
+   "operator": "Department of Immigration (Zambia)",
+   "operator_kind": "government",
+   "base_url": "https://eservices.zambiaimmigration.gov.zm/",
+   "hostnames": [
+    "eservices.zambiaimmigration.gov.zm"
+   ],
+   "destinations": [
+    "ZMB"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "zimbabwe-evisa",
+   "name": "Zimbabwe eVisa",
+   "kind": "evisa_portal",
+   "operator": "Department of Immigration (Zimbabwe)",
+   "operator_kind": "government",
+   "base_url": "https://www.evisa.gov.zw/",
+   "hostnames": [
+    "www.evisa.gov.zw",
+    "evisa.gov.zw"
+   ],
+   "destinations": [
+    "ZWE"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "malawi-evisa",
+   "name": "Malawi eVisa",
+   "kind": "evisa_portal",
+   "operator": "Department of Immigration (Malawi)",
+   "operator_kind": "government",
+   "base_url": "https://www.evisa.gov.mw/",
+   "hostnames": [
+    "www.evisa.gov.mw",
+    "evisa.gov.mw"
+   ],
+   "destinations": [
+    "MWI"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "mozambique-evisa",
+   "name": "Mozambique eVisa",
+   "kind": "evisa_portal",
+   "operator": "National Migration Service (Mozambique)",
+   "operator_kind": "government",
+   "base_url": "https://evisa.gov.mz/",
+   "hostnames": [
+    "evisa.gov.mz",
+    "www.evisa.gov.mz"
+   ],
+   "destinations": [
+    "MOZ"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "madagascar-evisa",
+   "name": "Madagascar eVisa",
+   "kind": "evisa_portal",
+   "operator": "Ministry of Interior (Madagascar)",
+   "operator_kind": "government",
+   "base_url": "https://evisa.gov.mg/",
+   "hostnames": [
+    "evisa.gov.mg",
+    "www.evisa.gov.mg"
+   ],
+   "destinations": [
+    "MDG"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "southafrica-ehome",
+   "name": "South Africa eVisa (eHomeAffairs)",
+   "kind": "evisa_portal",
+   "operator": "Department of Home Affairs (South Africa)",
+   "operator_kind": "government",
+   "base_url": "https://ehome.dha.gov.za/",
+   "hostnames": [
+    "ehome.dha.gov.za"
+   ],
+   "destinations": [
+    "ZAF"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "nigeria-immigration",
+   "name": "Nigeria Immigration Service portal",
+   "kind": "evisa_portal",
+   "operator": "Nigeria Immigration Service",
+   "operator_kind": "government",
+   "base_url": "https://portal.immigration.gov.ng/",
+   "hostnames": [
+    "portal.immigration.gov.ng"
+   ],
+   "destinations": [
+    "NGA"
+   ],
+   "supported_outcomes": [
+    "EVISA",
+    "VISA_ON_ARRIVAL"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "angola-smevisa",
+   "name": "Angola SME visa portal",
+   "kind": "evisa_portal",
+   "operator": "Migration and Foreigners Service (Angola)",
+   "operator_kind": "government",
+   "base_url": "https://smevisa.gov.ao/",
+   "hostnames": [
+    "smevisa.gov.ao",
+    "www.smevisa.gov.ao"
+   ],
+   "destinations": [
+    "AGO"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false,
+   "entry_gate": {
+    "description": "From the SME e-Visa landing page, click 'Apply for Visa' in the left nav (#btnOnlineVisa) to expand the application sub-menu, then click the sub-menu 'Apply for Visa' entry (#btnRegister — despite the id, it starts the public application wizard, not an account signup). This lands on /Consulate.aspx, page 1 of the application: a destination-consulate dropdown (#ctl00_contentMain_ddlDestination) plus a Telerik RadCaptcha image-text challenge (#ctl00_contentMain_RadCaptcha1_CaptchaTextBox) that must be answered before Continue advances to the personal-details form. No login or registration exists anywhere in the flow. The captcha is a human handoff; the gate never touches it. The URL carries a timestamp query param (?t=...), so match on path only.",
+    "actions": [
+     {
+      "action": "CLICK",
+      "selector": "#btnOnlineVisa",
+      "purpose": "Expand the 'Apply for Visa' section in the landing-page navigation"
+     },
+     {
+      "action": "CLICK",
+      "selector": "#btnRegister",
+      "purpose": "Open the application wizard start page (button text 'Apply for Visa'; id is btnRegister but it is the application, not an account signup)"
+     }
+    ],
+    "expect_path": "/Consulate.aspx",
+    "form_ready_selector": "#ctl00_contentMain_ddlDestination",
+    "declared_handoffs": [
+     "captcha"
+    ]
+   }
+  },
+  {
+   "family_id": "djibouti-evisa",
+   "name": "Djibouti eVisa",
+   "kind": "evisa_portal",
+   "operator": "Ministry of Interior (Djibouti)",
+   "operator_kind": "government",
+   "base_url": "https://www.evisa.gouv.dj/",
+   "hostnames": [
+    "www.evisa.gouv.dj",
+    "evisa.gouv.dj"
+   ],
+   "destinations": [
+    "DJI"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "togo-voyage",
+   "name": "Togo Voyage e-visa",
+   "kind": "evisa_portal",
+   "operator": "Government of Togo",
+   "operator_kind": "government",
+   "base_url": "https://voyage.gouv.tg/",
+   "hostnames": [
+    "voyage.gouv.tg"
+   ],
+   "destinations": [
+    "TGO"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "benin-evisa",
+   "name": "Benin e-Visa",
+   "kind": "evisa_portal",
+   "operator": "Government of Benin",
+   "operator_kind": "government",
+   "base_url": "https://evisa.bj/",
+   "hostnames": [
+    "evisa.bj",
+    "www.evisa.bj"
+   ],
+   "destinations": [
+    "BEN"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "southsudan-evisa",
+   "name": "South Sudan eVisa",
+   "kind": "evisa_portal",
+   "operator": "Directorate of Nationality, Passports and Immigration (South Sudan)",
+   "operator_kind": "government",
+   "base_url": "https://evisa.gov.ss/",
+   "hostnames": [
+    "evisa.gov.ss",
+    "www.evisa.gov.ss"
+   ],
+   "destinations": [
+    "SSD"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "capeverde-ease",
+   "name": "Cabo Verde EASE travel registration",
+   "kind": "arrival_card",
+   "operator": "Government of Cabo Verde",
+   "operator_kind": "government",
+   "base_url": "https://www.ease.gov.cv/",
+   "hostnames": [
+    "www.ease.gov.cv",
+    "ease.gov.cv"
+   ],
+   "destinations": [
+    "CPV"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "seychelles-tas",
+   "name": "Seychelles Travel Authorization (Travizory)",
+   "kind": "eta_portal",
+   "operator": "Travizory (authorized by Government of Seychelles)",
+   "operator_kind": "contracted_visa_center",
+   "base_url": "https://seychelles.govtas.com/",
+   "hostnames": [
+    "seychelles.govtas.com"
+   ],
+   "destinations": [
+    "SYC"
+   ],
+   "supported_outcomes": [
+    "ELECTRONIC_AUTHORIZATION"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "mexico-fmme",
+   "name": "Mexico FMM digital (INM)",
+   "kind": "arrival_card",
+   "operator": "Instituto Nacional de Migración (Mexico)",
+   "operator_kind": "government",
+   "base_url": "https://www.inm.gob.mx/fmme/publico/solicitud.html",
+   "hostnames": [
+    "www.inm.gob.mx"
+   ],
+   "destinations": [
+    "MEX"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "dominicanrep-eticket",
+   "name": "Dominican Republic e-Ticket",
+   "kind": "arrival_card",
+   "operator": "Dirección General de Migración (Dominican Republic)",
+   "operator_kind": "government",
+   "base_url": "https://eticket.gob.do/",
+   "hostnames": [
+    "eticket.migracion.gob.do",
+    "eticket.gob.do"
+   ],
+   "destinations": [
+    "DOM"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false,
+   "entry_gate": {
+    "description": "From eticket.gob.do landing: continue as guest, choose NUEVO ETICKET (lands on /new-request where an invisible Cloudflare Turnstile validates), then CREAR NUEVO creates a new application (an application number is issued) and opens the public form at /Eticket-application. First form step shows the three mandatory migratory questions (leaving DR? / layovers? / DR resident?) as styled radio groups plus a selectbox, with REGRESAR/CONTINUAR wizard buttons. The two SCROLL_TO_BOTTOM steps are deliberate dwell time: CREAR NUEVO stays disabled until the invisible Turnstile on /new-request auto-validates, and clicking too early times out.",
+    "actions": [
+     {
+      "action": "CLICK",
+      "selector": "button:has-text(\"O CONTINUAR COMO INVITADO\")",
+      "purpose": "continue as guest (no account)"
+     },
+     {
+      "action": "CLICK",
+      "selector": "button:has-text(\"NUEVO ETICKET\")",
+      "purpose": "start a new e-ticket; navigates to /new-request"
+     },
+     {
+      "action": "SCROLL_TO_BOTTOM",
+      "selector": "html",
+      "purpose": "dwell while invisible Cloudflare Turnstile on /new-request validates and enables CREAR NUEVO"
+     },
+     {
+      "action": "SCROLL_TO_BOTTOM",
+      "selector": "html",
+      "purpose": "additional dwell for Turnstile validation (click flakes without it)"
+     },
+     {
+      "action": "CLICK",
+      "selector": "button:has-text(\"CREAR NUEVO\")",
+      "purpose": "create new application; issues application number and opens form at /Eticket-application"
+     }
+    ],
+    "expect_path": "/Eticket-application",
+    "form_ready_selector": "#dominican-no",
+    "declared_handoffs": [
+     "captcha"
+    ]
+   }
+  },
+  {
+   "family_id": "colombia-checkmig",
+   "name": "Colombia Check-Mig",
+   "kind": "arrival_card",
+   "operator": "Migración Colombia",
+   "operator_kind": "government",
+   "base_url": "https://apps.migracioncolombia.gov.co/pre-registro/es/Home/IniciarCheckmig",
+   "hostnames": [
+    "apps.migracioncolombia.gov.co"
+   ],
+   "destinations": [
+    "COL"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false,
+   "notes": "PRODUCT CONSENT REQUIRED: the portal home gates its start button on a personal-data/biometric processing consent checkbox (#aceptaCondiciones) that is client-side only; the factory NEVER ticks consent, and the direct start endpoint bypasses that screen — Ellis must present Migración Colombia's data-processing consent to the applicant in-product before running this family."
+  },
+  {
+   "family_id": "brazil-vfs-evisa",
+   "name": "Brazil e-Visa (VFS, authorized)",
+   "kind": "evisa_portal",
+   "operator": "VFS Global (authorized by Brazil MFA)",
+   "operator_kind": "contracted_visa_center",
+   "base_url": "https://brazil.vfsevisa.com/",
+   "hostnames": [
+    "brazil.vfsevisa.com"
+   ],
+   "destinations": [
+    "BRA"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "suriname-vfs-ecard",
+   "name": "Suriname e-Tourist Card (VFS, authorized)",
+   "kind": "evisa_portal",
+   "operator": "VFS Global (authorized by Suriname)",
+   "operator_kind": "contracted_visa_center",
+   "base_url": "https://suriname.vfsevisa.com/",
+   "hostnames": [
+    "suriname.vfsevisa.com"
+   ],
+   "destinations": [
+    "SUR"
+   ],
+   "supported_outcomes": [
+    "ELECTRONIC_AUTHORIZATION"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "cuba-evisa",
+   "name": "Cuba eVisa",
+   "kind": "evisa_portal",
+   "operator": "Government of Cuba",
+   "operator_kind": "government",
+   "base_url": "https://evisacuba.cu/",
+   "hostnames": [
+    "evisacuba.cu",
+    "www.evisacuba.cu"
+   ],
+   "destinations": [
+    "CUB"
+   ],
+   "supported_outcomes": [
+    "EVISA"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "france-visas",
+   "name": "France-Visas official portal",
+   "kind": "immigration_authority",
+   "operator": "Ministère de l'Europe et des Affaires étrangères (France)",
+   "operator_kind": "government",
+   "base_url": "https://france-visas.gouv.fr/",
+   "hostnames": [
+    "france-visas.gouv.fr"
+   ],
+   "destinations": [
+    "FRA"
+   ],
+   "supported_outcomes": [
+    "EMBASSY_OR_CONSULATE_APPLICATION"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "germany-videx",
+   "name": "Germany VIDEX visa application",
+   "kind": "immigration_authority",
+   "operator": "Auswärtiges Amt (Germany)",
+   "operator_kind": "government",
+   "base_url": "https://videx.diplo.de/",
+   "hostnames": [
+    "videx.diplo.de"
+   ],
+   "destinations": [
+    "DEU"
+   ],
+   "supported_outcomes": [
+    "EMBASSY_OR_CONSULATE_APPLICATION"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "italy-esteri",
+   "name": "Italy visa application (Esteri)",
+   "kind": "immigration_authority",
+   "operator": "Ministero degli Affari Esteri (Italy)",
+   "operator_kind": "government",
+   "base_url": "https://vistoperitalia.esteri.it/",
+   "hostnames": [
+    "vistoperitalia.esteri.it"
+   ],
+   "destinations": [
+    "ITA"
+   ],
+   "supported_outcomes": [
+    "EMBASSY_OR_CONSULATE_APPLICATION"
+   ],
+   "account_required": false
+  },
+  {
+   "family_id": "vfs-global",
+   "name": "VFS Global visa application centers",
+   "kind": "visa_center_portal",
+   "operator": "VFS Global",
+   "operator_kind": "contracted_visa_center",
+   "base_url": "https://visa.vfsglobal.com/",
+   "hostnames": [
+    "visa.vfsglobal.com",
+    "www.vfsglobal.com"
+   ],
+   "destinations": [
+    "AUT",
+    "BEL",
+    "HRV",
+    "CZE",
+    "DNK",
+    "EST",
+    "FIN",
+    "DEU",
+    "GRC",
+    "HUN",
+    "ISL",
+    "ITA",
+    "LVA",
+    "LTU",
+    "LUX",
+    "MLT",
+    "NLD",
+    "NOR",
+    "POL",
+    "PRT",
+    "SVK",
+    "SVN",
+    "ESP",
+    "SWE",
+    "CHE",
+    "GBR",
+    "CAN",
+    "AUS",
+    "NZL",
+    "ZAF",
+    "IND",
+    "CHN",
+    "JPN",
+    "KOR",
+    "SAU",
+    "ARE"
+   ],
+   "supported_outcomes": [
+    "AUTHORIZED_VISA_CENTER",
+    "APPOINTMENT_REQUIRED"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "tlscontact",
+   "name": "TLScontact visa application centers",
+   "kind": "visa_center_portal",
+   "operator": "TLScontact",
+   "operator_kind": "contracted_visa_center",
+   "base_url": "https://www.tlscontact.com/",
+   "hostnames": [
+    "www.tlscontact.com",
+    "visas-fr.tlscontact.com",
+    "visas-de.tlscontact.com",
+    "visas-be.tlscontact.com",
+    "visas-ch.tlscontact.com"
+   ],
+   "destinations": [
+    "FRA",
+    "DEU",
+    "BEL",
+    "CHE",
+    "GBR"
+   ],
+   "supported_outcomes": [
+    "AUTHORIZED_VISA_CENTER",
+    "APPOINTMENT_REQUIRED"
+   ],
+   "account_required": true
+  },
+  {
+   "family_id": "bls-international",
+   "name": "BLS International visa centers",
+   "kind": "visa_center_portal",
+   "operator": "BLS International",
+   "operator_kind": "contracted_visa_center",
+   "base_url": "https://www.blsinternational.com/",
+   "hostnames": [
+    "www.blsinternational.com"
+   ],
+   "destinations": [
+    "ESP",
+    "IND"
+   ],
+   "supported_outcomes": [
+    "AUTHORIZED_VISA_CENTER",
+    "APPOINTMENT_REQUIRED"
+   ],
+   "account_required": true
+  }
+ ]
 }

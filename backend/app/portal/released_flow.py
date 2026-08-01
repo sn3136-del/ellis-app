@@ -889,7 +889,8 @@ class ReleasedFlowDriver:
     # upload through Ellis (asked as a document question), never a free-text
     # answer. Deterministic wording match — no model touches the portal path.
     _PHOTO_ISSUE_RE = re.compile(
-        r"(portrait|photo(graph)?|\bimage\b|ảnh)", re.IGNORECASE)
+        r"(portrait|photo(graph)?|\bimage\b|ảnh|foto|retrato|фото|الصورة)",
+        re.IGNORECASE)
 
     # A checkbox whose text IS the application's own TRUTHFULNESS declaration
     # (the applicant declares it verbatim in Ellis; Ellis transcribes the
@@ -898,13 +899,31 @@ class ReleasedFlowDriver:
     # "hereby authorize/consent/agree to the terms" box is NOT a truthfulness
     # declaration and must never be swept into the auto-ticked bundle; those
     # route to portal_form for the applicant to complete in the secure window.
+    # Non-English stems are FIRST-PERSON anchored ("je déclare", "ich
+    # erkläre") — a bare stem like "erklär" matches every German "-erklärung"
+    # compound (Datenschutzerklärung = privacy policy), which names a document
+    # to accept, not a truthfulness declaration.
     _DECLARATION_RE = re.compile(
-        r"(declar|perjury|\boath\b|"
+        r"(declar|je\s+déclare|ich\s+erkläre|erkläre\s+ich|perjury|\boath\b|"
         r"(information|statements?|details|answers?|above|foregoing)[^.]{0,60}"
         r"(true|complete|correct|accurate)|"
         r"(true|complete|correct|accurate)[^.]{0,40}(and|&)[^.]{0,20}"
         r"(complete|correct|accurate|true)|"
-        r"cam\s*đoan)",
+        r"cam\s*đoan|beyan\s*ederim|dengan\s+ini\s+menyatakan|заявляю|أقر)",
+        re.IGNORECASE)
+
+    # Consent/privacy/T&C language DISQUALIFIES a checkbox from the
+    # declarations bundle outright: those boxes are the applicant's to give
+    # in the secure window, never transcribed by Ellis. Mirrors the consent
+    # regex in live_driver._FIND_DECLARATION_JS.
+    _CONSENT_RE = re.compile(
+        r"(agree|consent|authoriz|autoris|autoriz|acept|accept|terms|términos|"
+        r"condiciones|conditions|termos|bedingungen|zustimm|einverstanden|"
+        r"einverständnis|einwillig|datenschutz|akzept|confidentialit|"
+        r"privacidad|privacidade|gizlilik|kvkk|rıza|şart|koşul|syarat|"
+        r"persetujuan|menyetuju|setuju|privasi|согласен|согласи|условия|"
+        r"конфиденциальн|أوافق|موافق|الشروط|خصوصية|privacy|marketing|"
+        r"newsletter|subscribe|third[-\s]*part)",
         re.IGNORECASE)
 
     @staticmethod
@@ -1017,7 +1036,8 @@ class ReleasedFlowDriver:
             personal = bool(self._PERSONAL_ACTION_RE.search(f"{label} {fname}"))
             if ftype == "checkbox":
                 selector = self._field_selector(f)
-                if selector and self._DECLARATION_RE.search(label):
+                if selector and self._DECLARATION_RE.search(label) \
+                        and not self._CONSENT_RE.search(label):
                     # The portal's own declaration statement(s): the applicant
                     # declares them personally IN ELLIS (verbatim text shown),
                     # and Ellis transcribes the tick(s) + the advance click.
@@ -1438,10 +1458,21 @@ class ReleasedFlowDriver:
         the case workflow ever reaches READY_TO_SUBMIT; the node itself is
         reconcile-before-act with evidence-only success."""
         from ..adapter_factory.runtime import assert_execution_allowed, RuntimeRefused
+        compiled = self._flow()
+        # A flow that never MAPPED a submission (no node carrying
+        # submission_accepted success evidence) cannot submit anything:
+        # running it to COMPLETE and then scraping a reference off the page
+        # would report SUBMITTED for an application the portal never
+        # received. Fail closed before any irreversible-path bookkeeping.
+        if not any("submission_accepted" in str(n.get("success_evidence") or "")
+                   for n in compiled.nodes.values()):
+            return {"ok": False, "code": "SUBMISSION_NOT_MAPPED",
+                    "detail": "this adapter observed no submission control on "
+                              "the portal; submission stays with the applicant"}
         try:
             assert_execution_allowed(
                 self.db, route_key=self.released.route_key,
-                application_id=self.app_row.id, compiled=self._flow())
+                application_id=self.app_row.id, compiled=compiled)
         except RuntimeRefused as e:
             return {"ok": False, "code": "SUBMISSION_BLOCKED", "detail": str(e)[:300]}
         res = self._advance(stop_before=None)   # run to COMPLETE
@@ -1674,15 +1705,31 @@ class ReleasedFlowDriver:
         return self._labeled_reference_from_page(driver, kind)
 
     # Labels the official portals themselves print next to the reference —
-    # static strings, never inferred. Vietnamese labels are the eVisa portal's.
+    # static strings, never inferred, covering the portal languages of the
+    # seeded families (the single-candidate rule below keeps a broad list
+    # safe: any ambiguity still returns None).
     _REFERENCE_LABELS = {
         "confirmation_extraction": (
             "registration code", "application code", "dossier code",
             "reference number", "application number", "mã hồ sơ", "mã đăng ký",
-            "electronic document code", "e-visa app no"),
+            "electronic document code", "e-visa app no",
+            "número de solicitud", "código de solicitud", "folio",
+            "numéro de demande", "numéro de dossier", "numéro de référence",
+            "número do pedido", "código do pedido", "número de referência",
+            "antragsnummer", "vorgangsnummer", "referenznummer",
+            "başvuru numarası", "referans numarası",
+            "nomor permohonan", "nomor referensi",
+            "номер заявления", "номер заявки", "رقم الطلب"),
         "receipt_extraction": (
             "receipt", "transaction", "payment reference", "mã giao dịch",
-            "số biên lai"),
+            "số biên lai",
+            "comprobante", "número de transacción", "referencia de pago",
+            "numéro de transaction", "référence de paiement",
+            "número da transação", "recibo",
+            "transaktionsnummer", "zahlungsreferenz",
+            "işlem numarası", "makbuz",
+            "nomor transaksi", "bukti pembayaran",
+            "номер транзакции", "квитанция", "رقم المعاملة"),
     }
 
     def _labeled_reference_from_page(self, driver, kind: str):
@@ -1721,7 +1768,12 @@ class ReleasedFlowDriver:
             return None
         if not res.get("ok"):
             return None
-        keywords = ("fee", "phí", "lệ phí", "payment amount", "amount to pay")
+        # Keyword gating only selects LINES for the strict parse; ambiguity
+        # (two distinct amounts) still returns None, so breadth is safe.
+        keywords = ("fee", "phí", "lệ phí", "payment amount", "amount to pay",
+                    "tasa", "tarifa", "monto a pagar", "frais", "montant",
+                    "taxa", "valor a pagar", "gebühr", "zu zahlen", "ücret",
+                    "biaya", "сбор", "стоимость", "к оплате", "الرسوم")
         seen: dict[tuple, dict] = {}
         for line in (res.get("text") or "").splitlines():
             low = line.lower()

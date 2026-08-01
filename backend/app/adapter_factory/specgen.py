@@ -581,17 +581,65 @@ def generate_specification(db, *, build_request: fm.AdapterBuildRequest,
     return spec
 
 
+_DOC_TYPE_HINTS = (
+    ("photo", ("photo", "portrait", "face", "selfie", "picture")),
+    ("passport", ("passport", "travel document", "travel_document", "mrz")),
+)
+
+# Nouns naming OTHER documents: "a photo of your return ticket" is a ticket
+# upload, not a portrait — any of these in the label disqualifies inference.
+_DOC_OTHER_RE = re.compile(
+    r"(ticket|itinerar|booking|reservation|hotel|invitation|insurance|"
+    r"certificate|vaccin|yellow\s*fever|bank|statement|visa\b|permit|card)",
+    re.IGNORECASE)
+
+
+def _inferred_doc_type(el: dict) -> str | None:
+    """Document type of a file input from its own name/label, only when
+    exactly one type's vocabulary matches and no OTHER document is named;
+    any ambiguity yields None."""
+    text = f"{el.get('name', '')} {el.get('label', '')}".lower()
+    if _DOC_OTHER_RE.search(text):
+        return None
+    hits = [dt for dt, kws in _DOC_TYPE_HINTS if any(k in text for k in kws)]
+    return hits[0] if len(hits) == 1 else None
+
+
 def _document_mappings(by_page: dict) -> list[dict]:
+    """Upload targets whose document type is actually known — curated
+    semantics first, else an unambiguous name/label match. A file input
+    whose type cannot be identified stays unmapped (fail closed): the
+    applicant uploads it personally rather than Ellis guessing which
+    document a portal control expects."""
     out = []
     for page_key, art in by_page.items():
         for el in (art.structure or {}).get("elements", []):
-            if el.get("type") == "file":
-                sem = KNOWN_FIELD_SEMANTICS.get(el.get("name", ""), {})
-                doc_type = sem.get("doc_type", "passport") \
-                    if sem.get("kind") == "file" else "passport"
-                out.append({"doc_type": doc_type, "portal_field": el["name"],
-                            "selector": el["selector"], "page_key": page_key})
+            if el.get("type") != "file":
+                continue
+            sem = KNOWN_FIELD_SEMANTICS.get(el.get("name", ""), {})
+            doc_type = sem.get("doc_type") if sem.get("kind") == "file" else None
+            doc_type = doc_type or _inferred_doc_type(el)
+            if not doc_type:
+                continue
+            out.append({"doc_type": doc_type, "portal_field": el["name"],
+                        "selector": el["selector"], "page_key": page_key})
     return out
+
+
+_NODE_SLUG_RE = re.compile(r"[^a-z0-9_-]+")
+
+
+def _unique_node_slug(name: str, used: set[str]) -> str:
+    """Schema-safe node-id fragment from a raw portal field name. Real portals
+    use camelCase and punctuation (fechaNacimiento, applicant[0].name) that the
+    lowercase-only node-id grammar refuses; distinct fields that collapse to
+    the same slug get a numeric suffix so no field silently loses its node."""
+    base = _NODE_SLUG_RE.sub("_", str(name).lower()).strip("_")[:100] or "field"
+    slug, n = base, 2
+    while slug in used:
+        slug, n = f"{base}_{n}", n + 1
+    used.add(slug)
+    return slug
 
 
 def _skeleton_flow(host: str, roles: dict, mappings: list[dict],
@@ -600,10 +648,10 @@ def _skeleton_flow(host: str, roles: dict, mappings: list[dict],
                    document_mappings: list[dict] | None = None) -> list[dict]:
     """The deterministic node graph over ROLE-mapped observed pages. Sensitive
     structure observed on a page ALWAYS becomes an applicant handoff; model
-    output cannot change this. Selectors and navigation targets come from the
-    OBSERVED structure where available (real portals); the literal synthetic
-    selectors remain as fallbacks and are honestly rejected by the contract
-    layer whenever they were never observed."""
+    output cannot change this. Selectors and navigation targets come only from
+    the OBSERVED structure: an action node whose control was never observed is
+    not emitted at all (same fail-closed rule as _entry_gated_flow), never
+    emitted with an invented selector for the contract layer to reject."""
     if entry_gate:
         return _entry_gated_flow(host, roles, mappings, entry_gate,
                                  sensitive_kinds=sensitive_kinds,
@@ -642,70 +690,88 @@ def _skeleton_flow(host: str, roles: dict, mappings: list[dict],
                          f"personally — Ellis never automates it")
     if "application" in roles:
         app_art = roles["application"]
-        node("goto_form", "NAVIGATE", purpose="Open the application form",
-             allowed_url_patterns=[_nav_pattern(app_art, host, "/application")])
-        for m in mappings:
-            if m["page_key"] != app_art.page_key:
-                continue
-            extra = {"format": m["format"]} if m.get("format") else {}
-            node(f"fill_{m['portal_field']}", "FILL_NON_SENSITIVE",
-                 selector=m["selector"], input_source=m["ellis_field"],
-                 purpose=f"Fill {m['portal_field']} from the case record",
-                 **extra)
-        node("save_form", "CLICK",
-             selector=_observed_selector(app_art, "save", "continue", "next",
-                                         "submit", clickable=True,
-                                         fallback="#save-btn"),
-             purpose="Save the application form",
-             expected_network=[{"endpoint": "/api/application", "method": "POST"}],
-             success_evidence=[{"kind": "network", "category": "form_saved"}])
+        page_mappings = [m for m in mappings
+                         if m["page_key"] == app_art.page_key]
+        save_sel = _observed_selector(app_art, "save", "continue", "next",
+                                      "submit", clickable=True)
+        # A fillable form whose save/advance control was never observed is
+        # UNBUILDABLE, not partially buildable: filling and then navigating
+        # away would abandon the unsaved form while reporting success. Drop
+        # the whole segment so required_fields_mapped fails honestly.
+        if page_mappings and not save_sel:
+            page_mappings = []
+        if page_mappings:
+            node("goto_form", "NAVIGATE", purpose="Open the application form",
+                 allowed_url_patterns=[_nav_pattern(app_art, host, "/application")])
+            seen_fields: set[str] = set()
+            used_slugs: set[str] = set()
+            for m in page_mappings:
+                if m["portal_field"].lower() in seen_fields:
+                    continue    # one deterministic node per portal field
+                seen_fields.add(m["portal_field"].lower())
+                extra = {"format": m["format"]} if m.get("format") else {}
+                node(f"fill_{_unique_node_slug(m['portal_field'], used_slugs)}",
+                     "FILL_NON_SENSITIVE",
+                     selector=m["selector"], input_source=m["ellis_field"],
+                     purpose=f"Fill {m['portal_field']} from the case record",
+                     **extra)
+            node("save_form", "CLICK", selector=save_sel,
+                 purpose="Save the application form",
+                 expected_network=[{"endpoint": "/api/application", "method": "POST"}],
+                 success_evidence=[{"kind": "network", "category": "form_saved"}])
     if "fees" in roles:
         fees_art = roles["fees"]
-        node("goto_fees", "NAVIGATE", purpose="Open the fees page",
-             allowed_url_patterns=[_nav_pattern(fees_art, host, "/fees")])
-        node("read_fee", "READ_FEE",
-             selector=_observed_selector(fees_art, "fee", "amount",
-                                         fallback="#fee-amount"),
-             purpose="Read the current official fee for exact-amount confirmation")
-        node("payment_handoff", "APPLICANT_HANDOFF", handoff_kind="payment_credentials",
-             applicant_action=True, sensitive=True,
-             purpose="The applicant confirms the exact amount and pays personally")
+        fee_sel = _observed_selector(fees_art, "fee", "amount")
+        # No observed fee element -> no fees segment at all. A payment
+        # handoff with no fee context is incoherent; fee discovery then
+        # rides the runtime's page-text fallback and the applicant payment
+        # window, both fail-closed.
+        if fee_sel:
+            node("goto_fees", "NAVIGATE", purpose="Open the fees page",
+                 allowed_url_patterns=[_nav_pattern(fees_art, host, "/fees")])
+            node("read_fee", "READ_FEE", selector=fee_sel,
+                 purpose="Read the current official fee for exact-amount confirmation")
+            node("payment_handoff", "APPLICANT_HANDOFF", handoff_kind="payment_credentials",
+                 applicant_action=True, sensitive=True,
+                 purpose="The applicant confirms the exact amount and pays personally")
     if "appointments" in roles:
         appt_art = roles["appointments"]
         book_sel = _observed_selector(appt_art, "book", "slot", "appointment",
-                                      clickable=True, fallback="#book-btn")
-        node("goto_appointments", "NAVIGATE", purpose="Open the appointments page",
-             allowed_url_patterns=[_nav_pattern(appt_art, host, "/appointments")])
-        node("read_slots", "READ_APPOINTMENT_INVENTORY", selector=book_sel,
-             purpose="Read actual official appointment inventory")
-        node("reconcile_booking", "RECONCILE_OUTCOME",
-             purpose="Never double-book: check official state first",
-             retry_class="reconcile_first")
-        node("book", "CLICK", selector=book_sel, purpose="Book within saved preferences",
-             irreversibility="irreversible", retry_class="reconcile_first",
-             success_evidence=[{"kind": "network", "category": "appointment_booked"}],
-             max_retries=1)
+                                      clickable=True)
+        if book_sel:
+            node("goto_appointments", "NAVIGATE", purpose="Open the appointments page",
+                 allowed_url_patterns=[_nav_pattern(appt_art, host, "/appointments")])
+            node("read_slots", "READ_APPOINTMENT_INVENTORY", selector=book_sel,
+                 purpose="Read actual official appointment inventory")
+            node("reconcile_booking", "RECONCILE_OUTCOME",
+                 purpose="Never double-book: check official state first",
+                 retry_class="reconcile_first")
+            node("book", "CLICK", selector=book_sel,
+                 purpose="Book within saved preferences",
+                 irreversibility="irreversible", retry_class="reconcile_first",
+                 success_evidence=[{"kind": "network", "category": "appointment_booked"}],
+                 max_retries=1)
     if "submit" in roles:
         submit_art = roles["submit"]
-        node("goto_submit", "NAVIGATE", purpose="Open the submission page",
-             allowed_url_patterns=[_nav_pattern(submit_art, host, "/submit")])
-        node("declaration_handoff", "APPLICANT_HANDOFF",
-             handoff_kind="legally_personal_declaration", applicant_action=True,
-             sensitive=True, purpose="Only the applicant can make the declaration")
-        node("reconcile_submission", "RECONCILE_OUTCOME",
-             purpose="Never double-submit: check official state first",
-             retry_class="reconcile_first")
-        node("submit", "CLICK",
-             selector=_observed_selector(submit_art, "submit", clickable=True,
-                                         fallback="#submit-btn"),
-             purpose="Submit the application",
-             irreversibility="irreversible", retry_class="reconcile_first",
-             success_evidence=[{"kind": "network", "category": "submission_accepted"}],
-             max_retries=1)
-        node("verify_submission", "VERIFY_EVIDENCE",
-             success_evidence=[{"kind": "network", "category": "submission_accepted"},
-                               {"kind": "official_record", "category": "submitted"}],
-             purpose="Submission is proven by official evidence, never a banner")
+        submit_sel = _observed_selector(submit_art, "submit", clickable=True)
+        if submit_sel:
+            node("goto_submit", "NAVIGATE", purpose="Open the submission page",
+                 allowed_url_patterns=[_nav_pattern(submit_art, host, "/submit")])
+            node("declaration_handoff", "APPLICANT_HANDOFF",
+                 handoff_kind="legally_personal_declaration", applicant_action=True,
+                 sensitive=True, purpose="Only the applicant can make the declaration")
+            node("reconcile_submission", "RECONCILE_OUTCOME",
+                 purpose="Never double-submit: check official state first",
+                 retry_class="reconcile_first")
+            node("submit", "CLICK", selector=submit_sel,
+                 purpose="Submit the application",
+                 irreversibility="irreversible", retry_class="reconcile_first",
+                 success_evidence=[{"kind": "network", "category": "submission_accepted"}],
+                 max_retries=1)
+            node("verify_submission", "VERIFY_EVIDENCE",
+                 success_evidence=[{"kind": "network", "category": "submission_accepted"},
+                                   {"kind": "official_record", "category": "submitted"}],
+                 purpose="Submission is proven by official evidence, never a banner")
     node("done", "COMPLETE", purpose="Flow complete")
     return nodes
 
@@ -804,6 +870,7 @@ def _entry_gated_flow(host: str, roles: dict, mappings: list[dict],
     continue_sel = ""
     if form_art is not None:
         seen_fields: set[str] = set()
+        used_slugs: set[str] = set()
         for m in mappings:
             if m.get("page_key") != form_key:
                 continue
@@ -818,23 +885,26 @@ def _entry_gated_flow(host: str, roles: dict, mappings: list[dict],
                 extra["format"] = m["format"]
             if isinstance(m.get("question"), dict):
                 extra["question"] = m["question"]
-            node(f"fill_{m['portal_field'].lower()}", action,
+            node(f"fill_{_unique_node_slug(m['portal_field'], used_slugs)}", action,
                  selector=m["selector"], input_source=m["ellis_field"],
                  mandatory=bool(m.get("mandatory", True)),
                  purpose=f"Fill {m['portal_field']} from the case record "
                          f"(pauses with an applicant question when unanswered)",
                  **extra)
+        upload_slugs: set[str] = set()
         for d in (document_mappings or []):
             if d.get("page_key") != form_key:
                 continue
-            node(f"upload_{d['portal_field'].lower()}", "UPLOAD_AUTHORIZED_DOCUMENT",
+            node(f"upload_{_unique_node_slug(d['portal_field'], upload_slugs)}",
+                 "UPLOAD_AUTHORIZED_DOCUMENT",
                  selector=d["selector"], doc_type=d.get("doc_type", "passport"),
                  purpose=f"Upload the case's approved "
                          f"{d.get('doc_type', 'document').replace('_', ' ')}")
         for el in (form_art.structure or {}).get("elements", []):
             if KNOWN_FIELD_SEMANTICS.get(el.get("name", ""), {}).get("kind") \
                     == "commitment_checkbox" and not el.get("sensitive"):
-                node(f"check_{el['name'].lower()}", "CHECK", selector=el["selector"],
+                node(f"check_{_unique_node_slug(el['name'], set())}", "CHECK",
+                     selector=el["selector"],
                      purpose="Confirm the form's temporary-residence declaration "
                              "commitment (form field, not the final legal declaration)")
                 break

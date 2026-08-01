@@ -2,7 +2,7 @@
   "bundle_version": 1,
   "candidate_id": "fa1e0bf29f124eb1ac39238c09440d29",
   "candidate_version": 1,
-  "exported_at": "2026-07-28T08:40:03.750389-04:00",
+  "exported_at": "2026-07-31T23:36:48.846023-04:00",
   "family_id": "vietnam-evisa",
   "route_key": "rk1|nat=AFG|iss=AFG|doc=ordinary_passport|res=AFG|dest=VNM|cat=evisa_tourist|sub=any|pur=tourism|per=2026-07-23|jur=default",
   "tables": {
@@ -883,7 +883,7 @@
         "source": "official_research",
         "source_ref": "route:rk1|nat=CHN|iss=CHN|doc=ordinary_passport|res=CHN|dest=VNM|cat=evisa_tourist|sub=any|pur=tourism|per=2026-07-23|jur=default",
         "travel_document_type": "ordinary_passport",
-        "updated_at": "2026-07-25 21:40:32.097073",
+        "updated_at": "2026-08-01 01:19:10.934925",
         "verification_status": "verified"
       },
       {

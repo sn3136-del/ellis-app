@@ -19,14 +19,20 @@ def route(db):
     """The db fixture is shared across a session and the released chain is
     unique-constrained (adapter_id, pair_key), so build it at most once — and
     tear down anything THIS module created, so a released route never leaks
-    into a test that asserts no route exists (order-independence)."""
+    into a test that asserts no route exists (order-independence). Only a
+    VNM binding satisfies this module: another module's leaked binding
+    (e.g. a Testland release) must not stand in for it."""
     from app.global_routes.models import FamilyAdapterLink, PortalFamily, RoutePairPolicy
-    pre = db.execute(select(fm.AdapterRuntimeBinding)).scalars().first()
+    pre = next((b for b in db.execute(
+        select(fm.AdapterRuntimeBinding)).scalars().all()
+        if "VNM" in (b.route_key or "").upper()), None)
     if pre is not None:
         yield pre
         return
     _mk_released_route(db)
-    binding = db.execute(select(fm.AdapterRuntimeBinding)).scalars().first()
+    binding = next(b for b in db.execute(
+        select(fm.AdapterRuntimeBinding)).scalars().all()
+        if "VNM" in (b.route_key or "").upper())
     try:
         yield binding
     finally:
@@ -92,13 +98,57 @@ def test_bundle_carries_what_a_LIVE_run_needs_not_just_route_resolution(db, rout
 
     # A REVOKED capability travels too — a restore must never silently
     # re-grant something an operator took away.
-    row = db.execute(select(fm2.AdapterCapabilityRelease)).scalars().first()
+    row = db.execute(select(fm2.AdapterCapabilityRelease).where(
+        fm2.AdapterCapabilityRelease.candidate_id == route.candidate_id
+    )).scalars().first()
     row.active = False
     row.revoked_reason = "test revocation"
     db.commit()
     caps = _bundle(db)["tables"]["adapter_capability_releases"]
     assert caps[0]["active"] in (False, 0)
     assert caps[0]["revoked_reason"] == "test revocation"
+
+
+def test_restore_replaces_a_quarantined_link_occupying_the_family_slot(db, route):
+    """Regression 2026-07-31: after a failed local rebuild the live DB held a
+    QUARANTINED link for the SAME family under a DIFFERENT surrogate id, and
+    import died on uq_family_adapter (with and without overwrite) — the
+    advertised recovery path could not restore route #1 in place. Overwrite
+    must claim the family's identity slot, not just the row id."""
+    from app.global_routes.models import FamilyAdapterLink
+    bundle = json.loads(json.dumps(_bundle(db)))
+    [link_row] = bundle["tables"]["portal_family_adapters"]
+    live = db.execute(select(FamilyAdapterLink).where(
+        FamilyAdapterLink.family_id == link_row["family_id"])).scalars().one()
+    db.delete(live)
+    db.commit()
+    db.add(FamilyAdapterLink(
+        family_id=link_row["family_id"], candidate_id="0" * 32,
+        status="QUARANTINED", released=False, last_error="failed rebuild"))
+    db.commit()
+
+    rep = rb.import_bundle(db, bundle, overwrite=True)
+    assert rep["inserted"]["portal_family_adapters"] == 1
+    restored = db.execute(select(FamilyAdapterLink).where(
+        FamilyAdapterLink.family_id == link_row["family_id"])).scalars().one()
+    assert restored.id == link_row["id"]
+    assert bool(restored.released) is True
+
+    # Without overwrite the occupied slot is honestly SKIPPED, never a crash.
+    db.delete(restored)
+    db.commit()
+    db.add(FamilyAdapterLink(
+        family_id=link_row["family_id"], candidate_id="0" * 32,
+        status="QUARANTINED", released=False))
+    db.commit()
+    rep = rb.import_bundle(db, bundle)
+    assert rep["skipped"]["portal_family_adapters"] == 1
+    left = db.execute(select(FamilyAdapterLink).where(
+        FamilyAdapterLink.family_id == link_row["family_id"])).scalars().one()
+    assert left.status == "QUARANTINED"
+    # Leave the released link in place for later tests in this module.
+    rep = rb.import_bundle(db, bundle, overwrite=True)
+    assert rep["inserted"]["portal_family_adapters"] == 1
 
 
 def test_bundle_never_carries_applicant_data(db, route):

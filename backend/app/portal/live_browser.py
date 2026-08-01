@@ -21,6 +21,28 @@ from urllib.parse import urlparse
 
 from ..providers import browser as bb
 
+
+def path_reaches_expected(url: str, expect_path: str) -> bool:
+    """Whether a URL (or bare path) has REACHED a declared expect_path. An SPA
+    is free to append its own step segment (…/individual-form/draft), prefix a
+    per-session id, or route in the fragment (…/#/form), so the declared path
+    is matched at a path-segment boundary — never a bare substring, so /visa
+    never matches /visa-information. The single source of truth for this rule;
+    both the live entry-gate replay and the recon artifact check use it."""
+    want = (expect_path or "").rstrip("/")
+    if not want:
+        return True
+    parsed = urlparse(url)
+    candidates = [parsed.path.rstrip("/")]
+    if parsed.fragment:
+        candidates.append("/" + parsed.fragment.lstrip("/#").rstrip("/"))
+    if not parsed.scheme and not parsed.netloc:
+        # A bare path/pattern was passed (recon's sanitized url_pattern).
+        candidates.append((url or "").split("#")[0].rstrip("/"))
+    return any(p == want or p.startswith(want + "/")
+               or p.endswith(want) or (want + "/") in p
+               for p in candidates)
+
 # Extraction runs IN the page and returns JSON-serializable structure only.
 # It deliberately never reads element .value, cookies, or storage.
 _EXTRACT_JS = r"""
@@ -291,8 +313,22 @@ class LiveBrowserSession:
         page = self._ensure_page()
         performed: list[dict] = []
         try:                                                                     # pragma: no cover
-            resp = page.goto(base_url, wait_until="domcontentloaded", timeout=45000)
+            # A single-page portal often redirects its own landing route
+            # while the first navigation is still settling, which aborts
+            # goto() with "interrupted by another navigation". That is the
+            # app routing, not a failure: settle and navigate once more.
+            # The allowlist still governs where we end up.
+            try:
+                resp = page.goto(base_url, wait_until="domcontentloaded", timeout=45000)
+            except Exception as nav:  # noqa: BLE001
+                if "interrupted by another navigation" not in str(nav):
+                    raise
+                page.wait_for_timeout(2000)
+                resp = page.goto(base_url, wait_until="domcontentloaded", timeout=45000)
             status = resp.status if resp else 200
+            if self.allowed and not self._host_ok(page.url):
+                return {"ok": False, "status": status, "url": page.url,
+                        "error": "entry gate landing left the allowlist"}
             for a in actions:
                 act = a["action"]
                 sel = str(a.get("selector") or "")
@@ -312,8 +348,7 @@ class LiveBrowserSession:
             expect_path = str(gate.get("expect_path") or "")
             if expect_path:
                 page.wait_for_url(
-                    lambda u: urlparse(u).path.rstrip("/") == expect_path.rstrip("/"),
-                    timeout=30000)
+                    lambda u: path_reaches_expected(u, expect_path), timeout=30000)
             # SPA render readiness (declared, portal-agnostic):
             #  1. the destination path is already confirmed (wait_for_url);
             #  2. wait for the declared concrete control ATTACHED — not
@@ -360,7 +395,9 @@ class LiveBrowserSession:
             if self.allowed and not self._host_ok(final):
                 return {"ok": False, "status": status, "url": final,
                         "error": "entry gate left the allowlist"}
-            if expect_path and urlparse(final).path.rstrip("/") != expect_path.rstrip("/"):
+            # Same tolerance as the wait above: a final URL that carries the
+            # declared path at a segment boundary IS the declared destination.
+            if expect_path and not path_reaches_expected(final, expect_path):
                 return {"ok": False, "status": status, "url": final,
                         "error": f"entry gate ended at {urlparse(final).path!r}, "
                                  f"expected {expect_path!r}"}

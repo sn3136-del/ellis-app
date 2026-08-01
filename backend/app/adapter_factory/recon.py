@@ -287,9 +287,13 @@ def _observe_entry_gated_form(db, job, *, build_request, observer, hosts,
         job.error = "entry gate replay ended off the verified hosts"[:400]
         return False
     art = sanitize_structure(raw)
-    expect = str(entry_gate.get("expect_path") or "").rstrip("/")
+    expect = str(entry_gate.get("expect_path") or "")
     pattern = art.get("url_pattern", "")
-    if expect and not pattern.rstrip("/").endswith(expect):
+    # Same segment-boundary tolerance the live replay used to accept the page
+    # (SPA step suffixes like …/individual-form/draft). The single source of
+    # truth lives in live_browser so the two checks can never disagree again.
+    from ..portal.live_browser import path_reaches_expected
+    if expect and not path_reaches_expected(pattern, expect):
         job.error = (f"entry gate replay ended at {pattern[:120]!r}, "
                      f"expected path {expect!r}")[:400]
         return False

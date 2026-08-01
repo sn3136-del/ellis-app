@@ -710,8 +710,12 @@ class BrowserbasePageDriver:
       // agree to the terms' box is the APPLICANT's to give, never auto-ticked,
       // and any consent/T&C language disqualifies a box outright (fail closed:
       // a refused box routes to the applicant's secure window, not to a tick).
-      const re = /(declar|perjury|\boath\b|cam\s*đoan|(information|statements?|details|answers?|above|foregoing)[^.]{0,60}(true|complete|correct|accurate)|(true|complete|correct|accurate)[^.]{0,40}(and|&)[^.]{0,20}(complete|correct|accurate|true))/i;
-      const consent = /(agree|consent|authoriz|terms|privacy|marketing|newsletter|subscribe|third[-\s]*part)/i;
+      // Non-English declaration stems are FIRST-PERSON anchored ("je déclare",
+      // "ich erkläre") — a bare stem like "erklär" matches every German
+      // "-erklärung" compound (Datenschutzerklärung = privacy policy), which
+      // names a document to accept, not a truthfulness declaration.
+      const re = /(declar|je\s+déclare|ich\s+erkläre|erkläre\s+ich|perjury|\boath\b|cam\s*đoan|beyan\s*ederim|dengan\s+ini\s+menyatakan|заявляю|أقر|(information|statements?|details|answers?|above|foregoing)[^.]{0,60}(true|complete|correct|accurate)|(true|complete|correct|accurate)[^.]{0,40}(and|&)[^.]{0,20}(complete|correct|accurate|true))/i;
+      const consent = /(agree|consent|authoriz|autoris|autoriz|acept|accept|terms|términos|condiciones|conditions|termos|bedingungen|zustimm|einverstanden|einverständnis|einwillig|datenschutz|akzept|confidentialit|privacidad|privacidade|gizlilik|kvkk|rıza|şart|koşul|syarat|persetujuan|menyetuju|setuju|privasi|согласен|согласи|условия|конфиденциальн|أوافق|موافق|الشروط|خصوصية|privacy|marketing|newsletter|subscribe|third[-\s]*part)/i;
       const out = [];
       const all = document.querySelectorAll('input[type="checkbox"]');
       all.forEach((el, idx) => {
@@ -795,51 +799,91 @@ class BrowserbasePageDriver:
         except Exception:  # noqa: BLE001
             return ""
 
+    # Words a portal's own advance control uses, exact-match on the control's
+    # full trimmed text (never substring: "Next of kin" must not qualify).
+    # Covers the portal languages of the seeded families.
+    _ADVANCE_WORDS = (
+        "next", "continue", "tiếp tục", "tiep tuc",
+        "siguiente", "continuar", "suivant", "continuer",
+        "próximo", "proximo", "seguinte", "weiter",
+        "devam", "devam et", "ileri", "lanjut", "selanjutnya",
+        "далее", "продолжить", "التالي", "次へ", "다음", "下一步", "ถัดไป")
+
+    # Text normalization shared by the advance/notice matchers: lowercase,
+    # then strip U+0307 — JS lowercases Turkish dotted İ to 'i' + combining
+    # dot, which never equals the plain-ascii word ('İleri' vs 'ileri').
+    _NORM_JS = "(s) => s.trim().toLowerCase().replace(/\\u0307/g, '')"
+
     def next_button_state(self) -> dict:
         """Is the page's advance button present, and can it act?"""
         try:
-            res = self.page.evaluate("""() => {
+            res = self.page.evaluate("""(words) => {
+              const norm = %s;
               for (const b of document.querySelectorAll('button, input[type="submit"]')) {
                 if (b.offsetParent === null) continue;
-                const t = ((b.innerText || b.value || '')).trim().toLowerCase();
-                if (t === 'next' || t === 'tiếp tục' || t === 'tiep tuc')
+                const t = norm((b.innerText || b.value || ''));
+                if (words.includes(t))
                   return {present: true, disabled: !!b.disabled};
               }
               return {present: false};
-            }""") or {}
+            }""" % self._NORM_JS, list(self._ADVANCE_WORDS)) or {}
             return {"ok": True, **res}
         except Exception:  # noqa: BLE001
             return {"ok": False}
 
     def click_next_button(self) -> dict:
-        """Click the page's own advance button (Next / Tiếp tục) — used only
-        on the applicant's explicit instruction paths (their typed captcha is
-        the go-ahead for THIS page's advance)."""
+        """Click the page's own advance button (Next / Tiếp tục / Weiter /
+        Suivant …) — used only on the applicant's explicit instruction paths
+        (their typed captcha is the go-ahead for THIS page's advance)."""
         # NEVER a bare input[type=submit]: a text-blind submit click can fire
         # an arbitrary control (a Pay button, a search widget). Only controls
-        # that SAY they advance qualify.
-        for sel in ('button:has-text("Next")', 'button:has-text("Tiếp tục")',
-                    'button:has-text("Tiep tuc")',
-                    'input[type="submit"][value="Next" i]',
-                    'input[type="submit"][value="Tiếp tục" i]',
-                    'input[type="submit"][value="Tiep tuc" i]'):
-            try:
-                loc = self.page.locator(f"{sel} >> visible=true").first
-                if loc.count() == 0:
-                    continue
-                loc.click(timeout=8000)
-                return {"ok": True}
-            except Exception:  # noqa: BLE001
-                continue
-        return {"ok": False, "code": "NEXT_NOT_FOUND"}
+        # whose FULL trimmed text is an advance word qualify. The control is
+        # scrolled into view and the click point is hit-tested — a click that
+        # would land on an overlay is an honest NEXT_NOT_FOUND, never a blind
+        # coordinate press.
+        try:
+            res = self.page.evaluate("""(words) => {
+              const norm = %s;
+              for (const b of document.querySelectorAll('button, input[type="submit"]')) {
+                if (b.offsetParent === null) continue;
+                const t = norm((b.innerText || b.value || ''));
+                if (!words.includes(t)) continue;
+                b.scrollIntoView({block: 'center'});
+                const r = b.getBoundingClientRect();
+                const x = r.left + r.width / 2, y = r.top + r.height / 2;
+                const hit = document.elementFromPoint(x, y);
+                if (!hit || !(b === hit || b.contains(hit)))
+                  return {present: false, blocked: true};
+                return {present: true, x, y};
+              }
+              return {present: false};
+            }""" % self._NORM_JS, list(self._ADVANCE_WORDS)) or {}
+            if not res.get("present"):
+                return {"ok": False, "code": "NEXT_NOT_FOUND"}
+            self.page.mouse.click(res["x"], res["y"])
+            return {"ok": True}
+        except Exception as e:  # noqa: BLE001
+            return {"ok": False, "code": "CLICK_FAILED", "detail": str(e)[:120]}
 
     # A blocking notice/confirmation dialog with its own Confirm control
-    # (e.g. the eVisa "DECLARATION COMPLETED" notice carrying the document code).
+    # (e.g. the eVisa "DECLARATION COMPLETED" notice carrying the document
+    # code). Exact full-text match across the seeded families' portal
+    # languages — never a substring — and ONLY inside a dialog-like
+    # container: a page-wide scan would happily press a payment screen's
+    # standalone "Confirmar" button, which is no notice at all.
     _NOTICE_JS = """() => {
+      const words = ['confirm', 'xác nhận', 'xac nhan', 'confirmar',
+                     'confirmer', 'bestätigen', 'onayla', 'konfirmasi',
+                     'подтвердить', 'تأكيد', '確認', '확인', '确认'];
+      const norm = (s) => s.trim().toLowerCase().replace(/\\u0307/g, '');
+      const DIALOG = '[role="dialog"], [role="alertdialog"], .modal, ' +
+                     '[class*="modal"], [class*="dialog"], [class*="notice"], ' +
+                     '[class*="popup"], [class*="swal"], [class*="overlay"]';
       for (const b of document.querySelectorAll('button, a[role="button"]')) {
         if (b.offsetParent === null) continue;
-        const t = (b.innerText || '').trim().toLowerCase();
-        if (t === 'confirm' || t === 'xác nhận' || t === 'xac nhan') {
+        if (!b.closest(DIALOG)) continue;
+        const t = norm(b.innerText || '');
+        if (words.includes(t)) {
           const r = b.getBoundingClientRect();
           return {present: true, x: r.left + r.width / 2, y: r.top + r.height / 2};
         }

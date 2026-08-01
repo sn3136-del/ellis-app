@@ -374,6 +374,38 @@ def _structured_errors_ok(build_request) -> bool:
     return True
 
 
+# Capabilities with NO safe applicant fallback: if the flow drives one of
+# these and its gate fails, the route resolves and then dead-ends at exactly
+# the step the applicant is waiting on. payment_preparation and
+# account_registration are deliberately EXCLUDED — when their gate does not
+# pass the capability simply is not granted and the applicant does that step
+# personally in the secure window (this is exactly how the released Vietnam
+# route works: it carries a payment handoff, no READ_FEE, and ships with only
+# submission_execution granted).
+_NO_FALLBACK_CAPABILITIES = ("submission_execution", "appointment_booking")
+
+
+def _capability_mismatches(db, *, build_request, version) -> list[str]:
+    """No-fallback capabilities the flow EXERCISES but whose own structural
+    gate fails. Releasing such a route would produce a live adapter that the
+    runtime refuses at a step with no manual escape."""
+    from ..adapter_factory.compiler import compile_flow
+    from ..adapter_factory.runtime import _required_capabilities
+    try:
+        compiled = compile_flow(version)
+    except Exception as e:  # noqa: BLE001 — an uncompilable flow never releases
+        return [f"capability_runtime_consistency: flow does not compile ({str(e)[:80]})"]
+    out: list[str] = []
+    for cap in sorted(_required_capabilities(compiled)):
+        if cap not in _NO_FALLBACK_CAPABILITIES:
+            continue
+        ok, problems, _ = auto_release.capability_gate(version, cap)
+        if not ok:
+            out.append(f"capability_runtime_consistency: flow exercises {cap} "
+                       f"but its gate fails: {'; '.join(problems)[:200]}")
+    return out
+
+
 def evaluate_and_release(db, *, build_request, family) -> dict:
     """Run all gates; release automatically when every gate passes. Fail
     closed otherwise, recording each missing capability verbatim."""
@@ -394,6 +426,15 @@ def evaluate_and_release(db, *, build_request, family) -> dict:
                             version=version, family=family)
     if not result["passed"]:
         return dict(result, released=False)
+    # Cross-check: a released route must be one the RUNTIME can actually
+    # execute. Every irreversible capability the flow exercises has to clear
+    # its own capability gate, or the 16 gates would bless a route that is
+    # permanently refused at the last step.
+    unrunnable = _capability_mismatches(db, build_request=build_request,
+                                        version=version)
+    if unrunnable:
+        return dict(result, passed=False, released=False,
+                    missing=list(result.get("missing") or []) + unrunnable)
     auto = auto_release.evaluate_build(db, build_request.id)
     binding = release.active_binding(db, route_key=build_request.route_key, tier="sandbox")
     # The binding must be for THIS candidate — a stale binding from an older

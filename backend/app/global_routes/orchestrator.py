@@ -84,16 +84,30 @@ def _checkpoint(db, run: GlobalBuildRun, **kw) -> None:
 # ---------------------------------------------------------------- tasks
 
 def enqueue(db, run: GlobalBuildRun, kind: str, subject: str,
-            max_attempts: int = 3) -> GlobalBuildTask | None:
+            max_attempts: int = 3, *, force: bool = False) -> GlobalBuildTask | None:
     """Queue one unit of work. dedup_key is platform-wide: a task for the same
     (kind, subject) is never duplicated across runs unless it FAILED with a
-    transient error and retry is requested."""
+    transient error and retry is requested.
+
+    force=True is the operator's explicit "run THIS one again" (a scoped
+    build-family/-destination): it requeues even a task that exhausted its
+    attempts or failed permanently, and resets the attempt counter, so an
+    explicitly targeted build never silently no-ops against a spent task.
+    A build already released/completed is still left alone."""
     dedup = f"{kind}:{subject}"
     existing = db.execute(select(GlobalBuildTask).where(
         GlobalBuildTask.dedup_key == dedup)).scalars().first()
     if existing is not None:
-        if existing.status == "failed" and existing.error_class == "transient" \
-                and existing.attempts < existing.max_attempts:
+        if existing.status == "complete":
+            return None
+        transient_retry = (existing.status == "failed"
+                           and existing.error_class == "transient"
+                           and existing.attempts < existing.max_attempts)
+        if force or transient_retry:
+            if force:
+                existing.attempts = 0
+                existing.error = ""
+                existing.error_class = ""
             existing.status = "queued"
             existing.run_id = run.id
             db.commit()
@@ -303,9 +317,16 @@ def research_entry_urls(db, family: PortalFamily, limit: int = 6) -> list[str]:
     return urls
 
 
-def build_family_adapter(db, family_id: str, *, observer=None) -> dict:
+def build_family_adapter(db, family_id: str, *, observer=None,
+                         allow_quarantine_rebuild: bool = False) -> dict:
     """Build (or resume) THE one adapter for a portal family and evaluate the
-    deterministic release gates. Idempotent: an existing link is resumed."""
+    deterministic release gates. Idempotent: an existing link is resumed.
+
+    allow_quarantine_rebuild is the operator's explicit single-family reset:
+    a build that was quarantined (its candidate failed the layers) is walked
+    back to fresh research+recon instead of re-scoring a stale candidate. This
+    resets the BUILD, never a runtime kill switch or a released version's
+    quarantine — those stay admin-only."""
     from . import release_gates
     family = db.execute(select(PortalFamily).where(
         PortalFamily.family_id == family_id)).scalars().first()
@@ -350,12 +371,17 @@ def build_family_adapter(db, family_id: str, *, observer=None) -> dict:
         visa_type=(pair.primary_category if pair else "evisa_tourist"),
         portal_evidence=portal_evidence,
         runtime_mode=settings().runtime_mode)
-    if family.entry_gate and not (req.portal_evidence or {}).get("entry_gate"):
-        # A pre-existing (resumed) request predating the family's entry-gate
-        # declaration still gets it — the resumed build must not re-run recon
-        # without the gate and honestly fail on a stale evidence shape.
-        req.portal_evidence = dict(req.portal_evidence or {},
-                                   entry_gate=family.entry_gate)
+    # A pre-existing (resumed) request carries the family evidence of ITS
+    # build time; the family record is the live truth (a portal may have
+    # moved hosts, gained an entry gate, or corrected its base URL since).
+    # Refresh identity evidence from the record — recon/spec keys survive so
+    # an in-flight resume still finds its artifacts.
+    refreshed = dict(req.portal_evidence or {})
+    refreshed.update(portal_evidence)
+    if family.entry_gate:
+        refreshed["entry_gate"] = family.entry_gate
+    if refreshed != (req.portal_evidence or {}):
+        req.portal_evidence = refreshed
         db.commit()
     # A national online portal is the destination's own single application
     # jurisdiction; residence-dependent consular routing does not apply.
@@ -368,27 +394,72 @@ def build_family_adapter(db, family_id: str, *, observer=None) -> dict:
     link.build_request_id = req.id
     db.commit()
 
-    req = build_workflow.run_build(db, req.id, observer=observer)
-    cand = db.execute(select(fm.AdapterCandidate).where(
-        fm.AdapterCandidate.build_request_id == req.id)).scalars().first()
-    link.candidate_id = cand.id if cand else ""
-    link.status = req.state
-    db.commit()
+    def _attempt():
+        r = build_workflow.run_build(db, req.id, observer=observer)
+        cand = db.execute(select(fm.AdapterCandidate).where(
+            fm.AdapterCandidate.build_request_id == r.id)).scalars().first()
+        link.candidate_id = cand.id if cand else ""
+        link.status = r.state
+        db.commit()
+        g = release_gates.evaluate_and_release(db, build_request=r, family=family)
+        link.gate_report = {"passed": g.get("passed", False),
+                           "missing": g.get("missing", []),
+                           "gates": {k: v for k, v in (g.get("gates") or {}).items()}}
+        link.released = bool(g.get("released"))
+        link.release_tier = "sandbox" if link.released else ""
+        link.status = r.state if not link.released else "released"
+        if not link.released:
+            link.last_error = "; ".join(g.get("missing", []))[:1900] or r.error or r.state
+        else:
+            link.last_error = ""
+        db.commit()
+        return r, g
 
-    gates = release_gates.evaluate_and_release(db, build_request=req, family=family)
-    link.gate_report = {"passed": gates.get("passed", False),
-                        "missing": gates.get("missing", []),
-                        "gates": {k: v for k, v in (gates.get("gates") or {}).items()}}
-    link.released = bool(gates.get("released"))
-    link.release_tier = "sandbox" if link.released else ""
-    link.status = req.state if not link.released else "released"
-    if not link.released:
-        link.last_error = "; ".join(gates.get("missing", []))[:1900] or req.error or req.state
-    else:
-        link.last_error = ""
-    db.commit()
+    entry_state = req.state
+    if allow_quarantine_rebuild and req.state == "QUARANTINED":
+        # Explicit operator reset of THIS family's build: the machine's own
+        # escape (QUARANTINED -> MANUAL_REVIEW_REQUIRED) then the full
+        # verification chain from research. The gates alone decide release.
+        from ..adapter_factory.statemachine import transition
+        transition(req, "MANUAL_REVIEW_REQUIRED", "operator-invoked rebuild")
+        _unpark_for_rebuild(db, req)
+        entry_state = req.state
+    req, gates = _attempt()
+    if (not link.released and entry_state in _PARKED_BUILD_STATES
+            and req.state in _PARKED_BUILD_STATES):
+        # The request entered this invocation ALREADY parked (a prior run's
+        # honest stop): an explicitly invoked orchestrator build is the
+        # operator's "try again with the current factory", so give it ONE
+        # fresh attempt through the full verification chain. A build that
+        # parked DURING this invocation just ran with current code — retrying
+        # it immediately would only repeat the same live work. Release still
+        # rests solely on the gates.
+        _unpark_for_rebuild(db, req)
+        req, gates = _attempt()
     return {"family_id": family_id, "build_state": req.state,
             "released": link.released, "missing": gates.get("missing", [])}
+
+
+# Build-request states an orchestrator-invoked rebuild may walk back to the
+# start of the verification chain. QUARANTINED is deliberately ABSENT: the
+# repair loop quarantines only for stop-class failures, and leaving
+# quarantine is an explicit admin decision, never a batch-run side effect.
+_PARKED_BUILD_STATES = ("MANUAL_REVIEW_REQUIRED", "TESTS_FAILED",
+                        "AWAITING_INTERNAL_RELEASE")
+
+
+def _unpark_for_rebuild(db, req) -> None:
+    """Walk a parked build request back to ROUTE_RESEARCH_PENDING along the
+    state machine's own escape path — NOT straight to recon: the full chain
+    (portal verification, jurisdiction, automation-policy review) must re-run
+    and may honestly re-park the build."""
+    from ..adapter_factory.statemachine import transition
+    if req.state in ("TESTS_FAILED", "AWAITING_INTERNAL_RELEASE"):
+        transition(req, "MANUAL_REVIEW_REQUIRED", "orchestrator rebuild requested")
+    if req.state == "MANUAL_REVIEW_REQUIRED":
+        transition(req, "ROUTE_RESEARCH_PENDING",
+                   "rebuild: re-run verification chain and fresh recon")
+    db.commit()
 
 
 class PermanentBuildStop(RuntimeError):
@@ -422,12 +493,16 @@ def run_adapter_phase(db, run: GlobalBuildRun, *, observer_factory=None,
     log = log or (lambda *_: None)
     _recover_orphaned_tasks(db, run)
     todo = families_needing_adapters(db)
+    scoped = bool(only_family or only_destination)
     if only_family:
         todo = [f for f in todo if f.family_id == only_family]
     if only_destination:
         todo = [f for f in todo if only_destination in (f.destinations or [])]
+    # A scoped run is the operator explicitly targeting these families: force
+    # a requeue so a task that already spent its attempts still runs, instead
+    # of a silent zero-work "complete".
     for fam in todo:
-        enqueue(db, run, "family_adapter", fam.family_id)
+        enqueue(db, run, "family_adapter", fam.family_id, force=scoped)
 
     allowed_subjects = {f.family_id for f in todo} if (only_family or only_destination) else None
     executed = released = failed = 0
@@ -449,7 +524,11 @@ def run_adapter_phase(db, run: GlobalBuildRun, *, observer_factory=None,
 
         def _work(fid=fam_id, obs=observer):
             try:
-                out = build_family_adapter(db, fid, observer=obs)
+                # Naming ONE family on the CLI is the operator's explicit
+                # reset for that family's parked build, quarantine included.
+                out = build_family_adapter(
+                    db, fid, observer=obs,
+                    allow_quarantine_rebuild=bool(only_family))
             except PermanentBuildStop as exc:
                 raise RuntimeError(f"permanent: {exc}") from exc
             if not out.get("released") and out.get("status") != "already_released":

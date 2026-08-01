@@ -8,6 +8,7 @@ import { useToast, Loading, ErrorNote, Empty } from '../components/ui.jsx'
 import { Icon } from '../components/icons.jsx'
 import { useLocale } from '../lib/locale.jsx'
 import { createVisaClient } from '../lib/visaBackend.js'
+import { COUNTRIES } from '../lib/api.js'
 import { newSession } from '../lib/visaSession.js'
 import CaseFlow from '../components/visa/CaseFlow.jsx'
 import StartVisa from '../components/visa/StartVisa.jsx'
@@ -153,11 +154,12 @@ function NewCaseForm({ client, onCreated, busy, setBusy, caps }) {
   // The Mockland test destination exists ONLY in mock-allowed runtime modes;
   // real-services deployments never see a fictional destination anywhere.
   const mockAllowed = caps?.execution_classification?.mock_portal_allowed === true
-  const [f, setF] = useState({ full_name: '', email: '', phone: '', destination_country: mockAllowed ? 'Mockland' : 'Vietnam', visa_type: 'tourist', time_zone: 'UTC' })
+  const [f, setF] = useState({ full_name: '', email: '', phone: '', destination_country: mockAllowed ? 'Mockland' : '', visa_type: 'tourist', time_zone: 'UTC' })
   const [error, setError] = useState(null)
   const set = (k, v) => setF((p) => ({ ...p, [k]: v }))
   async function create() {
     if (!f.full_name || !f.email) { setError({ message: 'Name and email are required' }); return }
+    if (!f.destination_country) { setError({ message: 'Pick a destination' }); return }
     setBusy(true); setError(null)
     try {
       const res = await client.createCase(f)
@@ -174,7 +176,9 @@ function NewCaseForm({ client, onCreated, busy, setBusy, caps }) {
         <div className="field"><label>Time zone</label><input className="input" value={f.time_zone} onChange={(e) => set('time_zone', e.target.value)} /></div>
         <div className="field"><label>Destination</label>
           <select className="select" value={f.destination_country} onChange={(e) => set('destination_country', e.target.value)}>
-            {mockAllowed && <option>Mockland</option>}<option>Vietnam</option>
+            <option value="">Select destination…</option>
+            {mockAllowed && <option>Mockland</option>}
+            {COUNTRIES.filter((c) => c !== 'Other').map((c) => <option key={c}>{c}</option>)}
           </select></div>
         <div className="field"><label>Visa type</label>
           <select className="select" value={f.visa_type} onChange={(e) => set('visa_type', e.target.value)}>

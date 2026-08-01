@@ -56,6 +56,7 @@ class FakeLiveObserver:
         self.calls = []
         self.host = host
         self.fail_selector = fail_selector
+        self.app_calls = 0
 
     def _page(self, url, elements):
         return {"ok": True, "status": 200, "url": url, "hostname": self.host,
@@ -70,6 +71,7 @@ class FakeLiveObserver:
                  "type": "button", "required": False, "sensitive": False,
                  "submits": "start"}])
         if url == f"https://{self.host}/application":
+            self.app_calls += 1
             els = [
                 {"selector": "input[name=\"full_name\"]", "name": "full_name",
                  "label": "Full name", "type": "text", "required": True,
@@ -81,8 +83,12 @@ class FakeLiveObserver:
                  "type": "button", "required": False, "sensitive": False,
                  "submits": "save"},
             ]
-            if self.fail_selector:
-                els = els[:1]   # save button + one field vanish live
+            if self.fail_selector and self.app_calls > 1:
+                # Recon saw the full page; the LIVE portal then drifted — the
+                # save button and one field vanish for every later observation
+                # (the flow only ever maps observed selectors now, so a
+                # live-structural failure requires genuine recon/live drift).
+                els = els[:1]
             return self._page(url, els)
         return {"ok": False, "status": 404, "url": url, "error": "not found"}
 

@@ -52,7 +52,10 @@ _T = {
     "AUTOMATION_POLICY_REVIEW": ["RECON_PENDING", "MANUAL_REVIEW_REQUIRED"],
     "RECON_PENDING": ["RECON_RUNNING"],
     "RECON_RUNNING": ["SPECIFICATION_GENERATED", "MANUAL_REVIEW_REQUIRED"],
-    "SPECIFICATION_GENERATED": ["CODE_GENERATED"],
+    # MANUAL_REVIEW_REQUIRED is the stage's honest escape when its spec row is
+    # missing (a crash between announcing the state and persisting the spec id
+    # once left builds stranded here with no legal exit).
+    "SPECIFICATION_GENERATED": ["CODE_GENERATED", "MANUAL_REVIEW_REQUIRED"],
     "CODE_GENERATED": ["STATIC_VALIDATION_RUNNING"],
     "STATIC_VALIDATION_RUNNING": ["CONTRACT_TESTING", "TESTS_FAILED"],
     "CONTRACT_TESTING": ["SYNTHETIC_TESTING", "TESTS_FAILED"],

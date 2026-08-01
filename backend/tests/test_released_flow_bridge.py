@@ -225,17 +225,25 @@ def _mk_released_route(db, *, suffix=""):
                              gate_report={"passed": True, "missing": [],
                                           "gates": gates})
     db.add(link)
-    pol = RoutePairPolicy(snapshot_date="2026-07-23",
-                          pair_key=pair_key("CHN", "ordinary_passport", "VNM"),
-                          passport_nationality="CHN",
-                          travel_document_type="ordinary_passport",
-                          destination_country="VNM",
-                          disposition="EVISA_REQUIRED", route_outcome="EVISA",
-                          primary_category="evisa_tourist",
-                          portal_family_id=fam_id, source="official_research",
-                          verification_status="verified",
-                          release_status="released_adapter")
-    db.add(pol)
+    # pair_key is unique: another module's baseline import may already own
+    # this row (the db fixture is session-shared), so bind the EXISTING row
+    # to this family rather than inserting a duplicate.
+    pk = pair_key("CHN", "ordinary_passport", "VNM")
+    pol = db.execute(select(RoutePairPolicy).where(
+        RoutePairPolicy.pair_key == pk)).scalars().first()
+    if pol is None:
+        pol = RoutePairPolicy(snapshot_date="2026-07-23", pair_key=pk,
+                              passport_nationality="CHN",
+                              travel_document_type="ordinary_passport",
+                              destination_country="VNM")
+        db.add(pol)
+    pol.disposition = "EVISA_REQUIRED"
+    pol.route_outcome = "EVISA"
+    pol.primary_category = "evisa_tourist"
+    pol.portal_family_id = fam_id
+    pol.source = "official_research"
+    pol.verification_status = "verified"
+    pol.release_status = "released_adapter"
     db.commit()
     return cand, ver, link
 
