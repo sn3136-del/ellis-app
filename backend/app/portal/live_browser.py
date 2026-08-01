@@ -402,13 +402,42 @@ class LiveBrowserSession:
                     # so the form behind the gate can be structurally
                     # observed.
                     tsel = str(a.get("terms_text_selector") or "")
+                    # The terms container may still be rendering (an SPA modal
+                    # fades in). Wait for it to ATTACH before snapshotting —
+                    # locator.all() on an unattached selector is always empty,
+                    # which reads as "no terms" on a page that plainly has them.
+                    try:
+                        page.locator(tsel).first.wait_for(
+                            state="attached",
+                            timeout=int(a.get("timeout_ms") or 15000))
+                    except Exception:  # noqa: BLE001 — absence handled below
+                        pass
                     text = ""
                     for one in page.locator(tsel).all()[:6]:
                         try:
-                            text += (one.inner_text(timeout=8000) or "") + "\n\n"
+                            # inner_text returns only VISIBLE text, and portals
+                            # routinely keep their terms in a collapsed
+                            # accordion until the applicant expands it. The
+                            # terms are the same either way, so fall back to
+                            # text_content — Ellis shows the applicant the full
+                            # verbatim text regardless of how the page folds it.
+                            got = (one.inner_text(timeout=8000) or "").strip()
+                            if not got:
+                                got = (one.text_content(timeout=8000) or "").strip()
+                            if got:
+                                text += got + "\n\n"
                         except Exception:  # noqa: BLE001
                             continue
                     if not text.strip():
+                        # A step DECLARED optional may legitimately be absent:
+                        # portals gate first-visit notices on session storage
+                        # (ESTA's DHS security notice appears once per browser
+                        # session). Skip it honestly and record that it was not
+                        # shown — never treat an absent notice as agreed.
+                        if a.get("optional"):
+                            performed.append({"action": act, "selector": sel,
+                                              "ok": True, "skipped": "not_shown"})
+                            continue
                         return {"ok": False, "status": status, "url": page.url,
                                 "error": f"TERMS_CHOICE captured no terms text "
                                          f"via {tsel[:60]!r} — refusing to "
@@ -422,6 +451,10 @@ class LiveBrowserSession:
                                  timeout=int(a.get("timeout_ms") or 30000))
                     self._assert_gate_target_safe(loc, "CLICK", sel)
                     loc.click(timeout=15000)
+                    # An SPA gate routes client-side: give the next step's DOM
+                    # a moment to exist before we look for it, or a correct
+                    # gate reads as "element missing" purely on timing.
+                    page.wait_for_timeout(1500)
                     performed.append({"action": act, "selector": sel, "ok": True})
                     continue
                 loc = page.locator(sel).first
