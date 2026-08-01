@@ -1795,6 +1795,14 @@ class _CaptchaPage:
     def notice_state(self):
         return {"ok": True, "present": self.accept}
 
+    def read_text(self, selector):
+        # The success notice carries the registration code, no error language;
+        # a rejection would instead say "invalid security code".
+        return {"ok": True,
+                "text": ("Registration code: E260727CHNEG108503764. "
+                         "Please note this document code.")
+                        if self.accept else "Invalid security code. Try again."}
+
     def confirm_notice(self):
         self.log.append(("confirm",))
         return {"ok": True}
