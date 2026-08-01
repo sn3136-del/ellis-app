@@ -48,9 +48,23 @@ def path_reaches_expected(url: str, expect_path: str) -> bool:
 _EXTRACT_JS = r"""
 () => {
   const sensitive = /(password|passcode|otp|one[-_]?time|cvv|cvc|card|pan|secret|token|captcha|pin|3ds|passkey)/i;
+  // Framework-generated ids change on every render (Angular Material
+  // mat-input-7, React useId :r3:, Vue v-123, ASP.NET ctl00_...), so a
+  // selector built on one cannot re-verify in a second session — the exact
+  // failure that blocks Angular portals at the repeated-sessions gate.
+  // Stable authoring attributes are preferred over any volatile id.
+  const volatileId = /^(mat-|cdk-|ng-|:r[0-9a-z]+:|v-|react-|radix-|headlessui-|ember|ctl[0-9]|MainContent_|[0-9a-f]{8}-[0-9a-f]{4})/i;
+  const STABLE_ATTRS = ['formcontrolname', 'data-testid', 'data-test',
+                        'data-cy', 'data-qa', 'ng-reflect-name'];
   const cssPath = (el) => {
-    if (el.id) return '#' + CSS.escape(el.id);
-    if (el.name) return el.tagName.toLowerCase() + '[name="' + el.name + '"]';
+    const tagl = el.tagName.toLowerCase();
+    for (const a of STABLE_ATTRS) {
+      const v = el.getAttribute && el.getAttribute(a);
+      if (v) return tagl + '[' + a + '="' + v.replace(/"/g, '') + '"]';
+    }
+    if (el.id && !volatileId.test(el.id)) return '#' + CSS.escape(el.id);
+    if (el.name) return tagl + '[name="' + el.name + '"]';
+    if (el.id) return '#' + CSS.escape(el.id);   // volatile, but better than a path
     if (el.tagName === 'BUTTON') {
       // A button with stable visible text gets a bounded, deterministic
       // text selector instead of a brittle deep ancestor path.

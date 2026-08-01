@@ -131,6 +131,22 @@ _LINK_FOLLOW_RE = re.compile(
 # Paths a portal serves for "this does not exist" — never a real flow page.
 _ERROR_PATH_RE = re.compile(r"/(errors?|404|not-?found|denied|forbidden)(/|$)",
                             re.IGNORECASE)
+
+# A control whose own visible text says it STARTS an application. Modern
+# portals route these client-side from a <button> with no href, so link
+# following never reaches the form (Myanmar "Apply Visa", Cambodia "Apply
+# Now", K-ETA "Apply from the beginning"). Intent words only — never
+# "check status", "track", "sign in".
+_APPLY_CTA_RE = re.compile(
+    r"\b(apply|application|start|begin|new applicant|get (your )?(visa|eta)"
+    r"|solicitar|solicitud|nueva solicitud|demander|nouvelle demande"
+    r"|beantragen|antrag stellen|richiedi|solicitar visto|başvur"
+    r"|permohonan baru|ajukan|подать|оформить|申請|申请|신청|ยื่นคำขอ"
+    r"|nộp hồ sơ|xin thị thực)\b", re.IGNORECASE)
+_APPLY_CTA_EXCLUDE_RE = re.compile(
+    r"(status|track|check|enquir|verify|sign\s?in|log\s?in|retrieve|resume"
+    r"|download|help|faq|contact|consulta|estado|suivi|prüfen)", re.IGNORECASE)
+_MAX_APPLY_CTA_ATTEMPTS = 2
 _MAX_FOLLOWED_LINKS = 8
 
 
@@ -246,6 +262,27 @@ def run_recon(db, *, build_request: fm.AdapterBuildRequest, observer,
                                          entry_gate=entry_gate,
                                          unique_key=_unique_key):
                 observed += 1
+        elif follow_links and observed:
+            # URL probing and link-following found pages but maybe no FORM:
+            # modern portals start the application from a BUTTON that routes
+            # client-side, which no <a href> sweep can follow. If nothing
+            # observed so far renders like a form, click an observed
+            # apply-intent control and record only what genuinely renders.
+            def _renders_form(a) -> bool:
+                els = (a or {}).get("elements", [])
+                return sum(1 for e in els if (e.get("type") or "") in
+                           ("text", "email", "date", "tel", "number",
+                            "select", "combobox", "search-combobox")) >= 3 \
+                    and not any((e.get("type") or "") == "password" for e in els)
+            db.flush()   # make this job's pending artifacts queryable
+            all_arts = [a.structure for a in
+                        db.query(fm.AdapterReconArtifact)
+                        .filter_by(recon_job_id=job.id).all()]
+            if not any(_renders_form(a) for a in all_arts):
+                if _discover_application_form(
+                        db, job, build_request=build_request, observer=observer,
+                        hosts=hosts, artifacts=all_arts, unique_key=_unique_key):
+                    observed += 1
         job.pages_observed = observed
         job.status = "complete" if observed else "failed"
         if not observed:
@@ -259,6 +296,91 @@ def run_recon(db, *, build_request: fm.AdapterBuildRequest, observer,
                  detail={"job": job.id, "pages": observed, "status": job.status},
                  actor="ellis")
     return job
+
+
+def _apply_cta_candidates(artifacts: list[dict]) -> list[dict]:
+    """Observed clickable controls whose OWN visible text says they start an
+    application, with a deterministic selector. Ordered by how strongly the
+    page looks like an entry point, best first."""
+    from .schema import deterministic_selector
+    out: list[dict] = []
+    for art in artifacts:
+        for el in (art or {}).get("elements", []):
+            if el.get("sensitive"):
+                continue
+            if not (el.get("submits") or (el.get("type") or "") in ("button", "submit")):
+                continue
+            text = f"{el.get('name', '')} {el.get('label', '')}".strip()
+            if not text or _APPLY_CTA_EXCLUDE_RE.search(text):
+                continue
+            if not _APPLY_CTA_RE.search(text):
+                continue
+            sel = (el.get("selector") or "").strip()
+            if not sel or not deterministic_selector(sel):
+                continue
+            out.append({"selector": sel, "text": text[:60],
+                        "hostname": art.get("hostname", ""),
+                        "url_pattern": art.get("url_pattern", "")})
+    return out
+
+
+def _discover_application_form(db, job, *, build_request, observer, hosts,
+                               artifacts: list[dict], unique_key) -> bool:
+    """No form was reachable by URL probing or link following: click an
+    OBSERVED control whose own text says it starts an application, then
+    observe whatever the portal actually shows.
+
+    This is discovery, not fabrication — the click target is a real observed
+    element, the replay runs through the same restricted (CLICK-only,
+    sensitive-refusing) entry-gate machinery, and the destination is recorded
+    as an application form ONLY if it genuinely renders form inputs. A page
+    that turns out to be marketing or a login wall is recorded honestly and
+    claims nothing."""
+    replay = getattr(observer, "observe_with_entry_gate", None)
+    if replay is None:
+        return False
+    tried = 0
+    for cta in _apply_cta_candidates(artifacts):
+        if tried >= _MAX_APPLY_CTA_ATTEMPTS:
+            break
+        tried += 1
+        base = cta.get("url_pattern") or \
+            (build_request.portal_evidence or {}).get("portal_url") or \
+            (f"https://{hosts[0]}/" if hosts else "")
+        gate = {"actions": [{"action": "CLICK", "selector": cta["selector"],
+                             "purpose": f"discovered application entry: {cta['text']}"}]}
+        try:
+            raw = replay(base, gate)
+        except Exception:  # noqa: BLE001 — a refused/failed click is just a miss
+            continue
+        if not raw or not raw.get("ok"):
+            continue
+        if str(raw.get("hostname", "")).lower() not in hosts:
+            continue        # never leave the verified hosts
+        art = sanitize_structure(raw)
+        inputs = [e for e in art.get("elements", [])
+                  if (e.get("type") or "") in
+                  ("text", "email", "date", "tel", "number", "select",
+                   "combobox", "search-combobox")]
+        if len(inputs) < 3:
+            continue        # not a form — claim nothing
+        key = unique_key("discovered_application_form",
+                         art.get("url_pattern", "") or cta["selector"])
+        db.add(fm.AdapterReconArtifact(
+            recon_job_id=job.id, page_key=key, hostname=art.get("hostname", ""),
+            url_pattern=art.get("url_pattern", ""),
+            content_class="application_form", structure=art))
+        # The click that reached the form becomes the build's entry gate, so
+        # specgen, the generator manifest and the live test layer all replay
+        # the identical, already-proven sequence — a discovered gate is held
+        # to exactly the same evidence as a curated one.
+        gate["expect_path"] = art.get("url_pattern", "") or ""
+        gate["discovered"] = True
+        build_request.portal_evidence = dict(build_request.portal_evidence or {},
+                                             entry_gate=gate)
+        db.commit()
+        return True
+    return False
 
 
 def _observe_entry_gated_form(db, job, *, build_request, observer, hosts,
