@@ -213,6 +213,19 @@ class FlowRunner:
         if action == "WAIT_FOR_STATE":
             return {"status": "ok"}
         if action == "CLICK":
+            if node.get("requires_signed_terms"):
+                # Ellis records the applicant's agreement to the portal's own
+                # terms ONLY when they have signed the exact terms text in
+                # Ellis. No matching signature -> fail closed to the consent
+                # handoff; never enact agreement the applicant did not give.
+                from .. import portal_terms as _pt
+                consent = _pt.signed_consent(
+                    self.db, application_id=self.execution.application_id,
+                    portal_family_id=node.get("consent_family_id", ""),
+                    expected_hash=node.get("consent_terms_hash", ""))
+                if consent is None:
+                    return {"status": "handoff",
+                            "handoff_kind": "portal_terms_consent"}
             attempts = int(node.get("max_retries", 0)) + 1
             for attempt in range(attempts):
                 if node.get("irreversibility") == "irreversible":

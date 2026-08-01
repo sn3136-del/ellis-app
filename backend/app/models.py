@@ -644,3 +644,28 @@ class PaymentAuthorization(Base, TimestampMixin):
     approved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     consumed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     invalidated_reason: Mapped[str] = mapped_column(String(300), default="")
+
+
+class PortalTermsConsent(Base, TimestampMixin):
+    """The applicant's SIGNED acceptance of a specific portal's own terms —
+    the exact verbatim text the portal shows at its terms gate, captured at
+    build time and displayed in Ellis. The signature binds to terms_hash:
+    if the portal's terms text changes, the stored consent no longer matches
+    and a fresh signature is required before Ellis may transcribe the
+    applicant's "agree" choice on the portal. Ellis never accepts terms
+    nobody signed; revocation flips revoked, never deletes."""
+    __tablename__ = "portal_terms_consents"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    org_id: Mapped[str] = mapped_column(String(64), index=True)
+    application_id: Mapped[str] = mapped_column(ForeignKey("visa_applications.id"), index=True)
+    applicant_id: Mapped[str] = mapped_column(String(32), default="")
+    portal_family_id: Mapped[str] = mapped_column(String(120), index=True)
+    terms_title: Mapped[str] = mapped_column(String(300), default="")
+    terms_text: Mapped[str] = mapped_column(Text)               # verbatim portal text shown
+    terms_hash: Mapped[str] = mapped_column(String(64), index=True)  # sha256 of terms_text
+    terms_source_url: Mapped[str] = mapped_column(String(500), default="")
+    signed: Mapped[bool] = mapped_column(Boolean, default=False)
+    signature_id: Mapped[str] = mapped_column(String(32), default="")
+    signed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    revoked: Mapped[bool] = mapped_column(Boolean, default=False)
+    revoked_reason: Mapped[str] = mapped_column(String(300), default="")

@@ -46,6 +46,12 @@ ELLIS_FIELDS = [
     "emergency_contact_phone", "emergency_contact_relationship",
     "occupation", "employer", "position", "employer_address",
     "vietnam_address", "vietnam_province", "vietnam_ward", "days_of_stay",
+    # Itinerary / arrival-card group (Mexico FMM, Colombia Check-Mig,
+    # Ethiopia, most ETAs and digital arrival cards ask for these).
+    "travel_direction", "transport_mode", "flight_type", "flight_number",
+    "airline", "vessel_name", "origin_city", "origin_country",
+    "destination_city", "destination_region", "port_of_entry",
+    "travel_date", "marital_status", "mother_name", "father_name",
 ]
 
 
@@ -201,23 +207,90 @@ KNOWN_FIELD_SEMANTICS = {
 
 # Portal-name heuristics used by the deterministic fallback mapper (tests and
 # offline runs); the live path proposes via Kimi and is validated identically.
+# Multilingual token hints per Ellis field. Matching is TOKEN-based (see
+# _tokenize): a hint fires when it is one of the element's own name/label
+# tokens, so "female" never matches "email" and "surname" never matches
+# "name". Covers the portal languages of the seeded families (en/es/pt/fr/de).
+# Order matters: earlier, more-specific fields win a control before a broader
+# field can claim it.
 _NAME_HINTS = {
-    "full_name": ("full_name", "name", "fullname", "applicant_name"),
-    "email": ("email", "email_address", "username"),
-    "passport_number": ("passport_number", "passport", "document_number"),
-    "arrival_date": ("arrival_date", "arrival", "entry_date"),
-    "departure_date": ("departure_date", "departure", "exit_date"),
-    "birth_date": ("birth_date", "dob", "date_of_birth"),
-    "prior_refusals": ("prior_refusals", "refusals"),
-    "address_line1": ("address_line1", "address1", "street_address", "address",
-                      "street"),
-    "address_line2": ("address_line2", "address2", "apartment", "unit"),
-    "address_city": ("address_city", "city", "town"),
-    "address_region": ("address_region", "state", "province", "region"),
-    "address_postal_code": ("address_postal_code", "postal_code", "zip",
-                            "zip_code", "postcode"),
-    "address_country": ("address_country", "country_of_residence",
-                        "residence_country"),
+    "surname": ("surname", "lastname", "apellidos", "apellido", "sobrenome",
+                "nom", "nachname", "familyname", "family"),
+    "given_names": ("givennames", "givenname", "firstname", "forename",
+                    "nombre", "nombres", "prenom", "prenoms", "vorname",
+                    "primeiro"),
+    "full_name": ("fullname", "applicantname", "name", "nombrecompleto",
+                  "nomecompleto"),
+    "email": ("email", "emailaddress", "correo", "correoelectronico",
+              "courriel"),
+    "phone": ("phone", "telephone", "mobile", "telefono", "celular",
+              "telefone", "handy"),
+    "passport_number": ("passportnumber", "passport", "documentnumber",
+                        "numerodocumento", "numeropasaporte", "numeropasseport",
+                        "reisepassnummer", "docnumber"),
+    "passport_issue_date": ("issuedate", "passportissue", "fechaexpedicion",
+                            "dateofissue", "fechaemision"),
+    "passport_expiry_date": ("expirydate", "expiration", "passportexpiry",
+                             "fechaexpiracion", "fechavencimiento",
+                             "dateexpiration"),
+    "issuing_country": ("issuingcountry", "paisexpedicion", "issuedby",
+                        "paisemisor", "paysdelivrance"),
+    "nationality": ("nationality", "nacionalidad", "nationalite",
+                    "staatsangehorigkeit", "citizenship", "ciudadania"),
+    "birth_date": ("birthdate", "dob", "dateofbirth", "fechanacimiento",
+                   "datenaissance", "geburtsdatum", "nacimiento"),
+    "place_of_birth": ("placeofbirth", "birthplace", "lugarnacimiento",
+                       "lieunaissance", "geburtsort", "paisnacimiento",
+                       "countryofbirth"),
+    "sex": ("sex", "gender", "sexo", "genero", "geschlecht"),
+    "marital_status": ("maritalstatus", "estadocivil", "etatcivil"),
+    "occupation": ("occupation", "profession", "ocupacion", "profesion",
+                   "beruf", "job"),
+    "mother_name": ("mothername", "nombremadre", "mother"),
+    "father_name": ("fathername", "nombrepadre", "father"),
+    "arrival_date": ("arrivaldate", "arrival", "entrydate", "fechallegada",
+                     "datearrivee"),
+    "departure_date": ("departuredate", "departure", "exitdate", "fechasalida",
+                       "datedepart"),
+    "travel_date": ("traveldate", "fechaviaje", "fechavuelo", "datevoyage"),
+    "flight_number": ("flightnumber", "numerovuelo", "numvuelo", "numerovol",
+                      "flugnummer"),
+    "airline": ("airline", "aerolinea", "compagnie", "carrier"),
+    "vessel_name": ("vessel", "shipname", "embarcacion"),
+    "transport_mode": ("transportmode", "mediotransporte", "modetransport",
+                       "meansoftransport"),
+    "travel_direction": ("traveldirection", "tipomovimiento", "movementtype",
+                         "direction"),
+    "flight_type": ("flighttype", "tipovuelo", "hasstops", "escalas"),
+    "origin_city": ("origincity", "departurecity", "ciudadorigen",
+                    "ciudadsalida", "villedepart"),
+    "origin_country": ("origincountry", "departurecountry", "paisorigen"),
+    "destination_city": ("destinationcity", "arrivalcity", "ciudaddestino",
+                         "villearrivee"),
+    "destination_region": ("destinationregion", "region", "provinciadestino",
+                           "state", "provincia", "estado"),
+    "port_of_entry": ("portofentry", "puntocontrol", "puntointernacion",
+                      "pointdentree", "checkpoint", "puntointernacion"),
+    "travel_purpose": ("travelpurpose", "purposeoftravel", "motivoviaje",
+                       "motifvoyage", "reisezweck", "purpose"),
+    "accommodation": ("accommodation", "accommodationname", "hotel",
+                      "alojamiento", "hebergement", "unterkunft", "lodging",
+                      "domiciliomexico", "stayplace"),
+    "prior_refusals": ("priorrefusals", "refusals"),
+    "address_line1": ("addressline1", "address1", "streetaddress", "address",
+                      "street", "direccion", "domicilio", "adresse",
+                      "streetname", "direccionresidencia"),
+    "address_line2": ("addressline2", "address2", "apartment", "unit"),
+    "address_city": ("addresscity", "city", "town", "ciudad", "ville", "stadt"),
+    "address_region": ("addressregion", "province", "region", "departamento"),
+    "address_postal_code": ("addresspostalcode", "postalcode", "zip",
+                            "zipcode", "postcode", "codigopostal"),
+    "address_country": ("addresscountry", "countryofresidence",
+                        "residencecountry", "paisresidencia", "pais",
+                        "country", "pays", "land"),
+    "national_id": ("nationalid", "idnumber", "cedula", "curp", "dni"),
+    "employer": ("employer", "empleador", "empresa", "company", "arbeitgeber"),
+    "position": ("position", "cargo", "jobtitle", "puesto"),
 }
 
 _mapper = None
@@ -230,18 +303,56 @@ def set_field_mapper(fn):
     _mapper = fn
 
 
+_TOKEN_SPLIT_RE = re.compile(r"[^a-z0-9]+")
+_CAMEL_RE = re.compile(r"(?<=[a-z0-9])(?=[A-Z])")
+
+
+def _tokenize(*parts: str) -> set[str]:
+    """Normalized token set of a control's name/label: camelCase and
+    punctuation are boundaries, everything lowercased and stripped of
+    accents, so 'fechaNacimiento', 'fecha_nacimiento', 'Fecha Nacimiento' and
+    'Fecha de Nacimiento' all yield {'fecha','nacimiento'} plus the joined
+    'fechanacimiento'. Diacritics are folded so 'año'->'ano'."""
+    import unicodedata
+    toks: set[str] = set()
+    for p in parts:
+        if not p:
+            continue
+        p = _CAMEL_RE.sub(" ", str(p))
+        p = "".join(c for c in unicodedata.normalize("NFKD", p)
+                    if not unicodedata.combining(c))
+        pieces = [t for t in _TOKEN_SPLIT_RE.split(p.lower()) if t]
+        toks.update(pieces)
+        toks.add("".join(pieces))          # joined form (fechanacimiento)
+    return {t for t in toks if t}
+
+
 def _deterministic_mapper(artifacts: list[fm.AdapterReconArtifact]) -> list[dict]:
+    """Ground each fillable control to at most one Ellis field by token match
+    against a multilingual hint set. Fully deterministic; a control that
+    matches no field stays unmapped (fail closed, never a guess), and a field
+    already claimed on a page is not double-mapped."""
     out = []
     for art in artifacts:
+        claimed: set[str] = set()
         for el in (art.structure or {}).get("elements", []):
-            if el.get("sensitive") or el.get("type") in ("button", "checkbox"):
+            if el.get("sensitive") or el.get("type") in (
+                    "button", "submit", "checkbox", "link"):
+                continue
+            toks = _tokenize(el.get("name", ""), el.get("label", ""),
+                             el.get("placeholder", ""))
+            if not toks:
                 continue
             for ellis_field, hints in _NAME_HINTS.items():
-                if el.get("name", "").lower() in hints:
-                    out.append({"ellis_field": ellis_field, "portal_field": el["name"],
+                if ellis_field in claimed:
+                    continue
+                if any(h in toks for h in hints):
+                    out.append({"ellis_field": ellis_field,
+                                "portal_field": el["name"],
                                 "selector": el["selector"], "page_key": art.page_key,
                                 "artifact_id": art.id,
                                 "required": bool(el.get("required"))})
+                    claimed.add(ellis_field)
                     break
     return out
 
@@ -542,9 +653,17 @@ def generate_specification(db, *, build_request: fm.AdapterBuildRequest,
 
     roles = _page_roles(by_page, entry_gated=bool(entry_gate))
     doc_mappings = _document_mappings(by_page)
+    # Verbatim portal terms captured at a TERMS_CHOICE gate travel on the form
+    # artifact; the family id lets the flow bind the applicant's signature to
+    # this exact portal.
+    portal_terms = []
+    for art in by_page.values():
+        portal_terms.extend((art.structure or {}).get("portal_terms") or [])
+    family_id = (build_request.portal_evidence or {}).get("family_id", "")
     flow = _skeleton_flow(hosts[0] if hosts else "", roles, accepted,
                           sensitive_kinds=_observed_sensitive_kinds(by_page),
-                          entry_gate=entry_gate, document_mappings=doc_mappings)
+                          entry_gate=entry_gate, document_mappings=doc_mappings,
+                          portal_terms=portal_terms, family_id=family_id)
     errs = validate_flow(flow, allowed_hostnames=hosts)
     if errs:
         raise ValueError(f"generated flow failed schema validation: {errs[:5]}")
@@ -645,7 +764,9 @@ def _unique_node_slug(name: str, used: set[str]) -> str:
 def _skeleton_flow(host: str, roles: dict, mappings: list[dict],
                    sensitive_kinds: set | None = None,
                    entry_gate: dict | None = None,
-                   document_mappings: list[dict] | None = None) -> list[dict]:
+                   document_mappings: list[dict] | None = None,
+                   portal_terms: list[dict] | None = None,
+                   family_id: str = "") -> list[dict]:
     """The deterministic node graph over ROLE-mapped observed pages. Sensitive
     structure observed on a page ALWAYS becomes an applicant handoff; model
     output cannot change this. Selectors and navigation targets come only from
@@ -655,7 +776,8 @@ def _skeleton_flow(host: str, roles: dict, mappings: list[dict],
     if entry_gate:
         return _entry_gated_flow(host, roles, mappings, entry_gate,
                                  sensitive_kinds=sensitive_kinds,
-                                 document_mappings=document_mappings)
+                                 document_mappings=document_mappings,
+                                 portal_terms=portal_terms, family_id=family_id)
     nodes: list[dict] = []
 
     def node(node_id, action, **kw):
@@ -826,7 +948,9 @@ _GATE_ACTION_PURPOSES = {
 
 def _entry_gated_flow(host: str, roles: dict, mappings: list[dict],
                       entry_gate: dict, *, sensitive_kinds: set | None = None,
-                      document_mappings: list[dict] | None = None) -> list[dict]:
+                      document_mappings: list[dict] | None = None,
+                      portal_terms: list[dict] | None = None,
+                      family_id: str = "") -> list[dict]:
     """Flow skeleton for portals whose application form sits behind a DECLARED
     entry gate (curated reversible click/scroll/acknowledge sequence):
 
@@ -848,17 +972,48 @@ def _entry_gated_flow(host: str, roles: dict, mappings: list[dict],
     node("open_portal", "NAVIGATE", purpose="Open the official portal",
          allowed_url_patterns=[f"https://{host}/"], expected_state="home")
 
+    import hashlib
+    terms_text = "\n\n".join((t.get("text") or "") for t in (portal_terms or [])).strip()
+    terms_hash = hashlib.sha256(terms_text.encode("utf-8")).hexdigest() if terms_text else ""
+    consent_emitted = False
+
     actions = list(entry_gate.get("actions") or [])
     expect_path = str(entry_gate.get("expect_path") or "")
     for i, a in enumerate(actions, start=1):
         act = str(a.get("action") or "")
+        if act == "TERMS_CHOICE":
+            # The applicant reviews and signs the portal's VERBATIM terms in
+            # Ellis (one handoff), and only then does Ellis transcribe the
+            # agree-choice — bound to the exact terms hash. Without a matching
+            # signature the runtime fails closed back to this handoff.
+            if not terms_hash:
+                continue    # no captured terms to sign against — never emitted
+            if not consent_emitted:
+                node("portal_terms_consent", "APPLICANT_HANDOFF",
+                     handoff_kind="portal_terms_consent", applicant_action=True,
+                     sensitive=True,
+                     purpose="The applicant reads the portal's own terms and "
+                             "signs them in Ellis before Ellis records the choice")
+                consent_emitted = True
+            extra = {}
+            if i == len(actions) and expect_path:
+                extra["expected_transition"] = expect_path
+            node(f"entry_gate_{i}_terms", "CLICK",
+                 selector=str(a.get("selector") or ""),
+                 purpose=str(a.get("purpose") or "Record the applicant's "
+                             "signed agreement to the portal's terms"),
+                 requires_signed_terms=True, consent_terms_hash=terms_hash,
+                 consent_family_id=family_id or (host or "portal"), **extra)
+            continue
         if act not in ("CLICK", "SCROLL_TO_BOTTOM", "CHECK"):
             continue    # outside the declared vocabulary — never emitted
         extra = {}
         if act == "CLICK" and i == len(actions) and expect_path:
             extra["expected_transition"] = expect_path
-        node(f"entry_gate_{i}_{act.lower()}", act,
-             selector=str(a.get("selector") or ""),
+        sel = str(a.get("selector") or "")
+        if act == "SCROLL_TO_BOTTOM" and sel.strip().lower() in ("html", "body"):
+            sel = ""    # the whole-page scroll target IS the window
+        node(f"entry_gate_{i}_{act.lower()}", act, selector=sel,
              purpose=str(a.get("purpose") or _GATE_ACTION_PURPOSES[act]),
              **extra)
     node("wait_form", "WAIT_FOR_STATE",

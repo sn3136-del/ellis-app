@@ -360,6 +360,7 @@ def build_family_adapter(db, family_id: str, *, observer=None,
     portal_evidence = {"hostnames": family.hostnames or [],
                        "operator": family.operator,
                        "portal_url": family.base_url,
+                       "family_id": family.family_id,
                        "entry_urls": research_entry_urls(db, family)}
     if family.entry_gate:
         # Curated entry-gate declaration rides on the build's portal evidence:

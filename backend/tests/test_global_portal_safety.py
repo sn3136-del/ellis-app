@@ -220,3 +220,75 @@ def test_node_ids_from_camelcase_and_punctuated_fields_are_schema_valid():
         slug = specgen._unique_node_slug(raw, used)
         assert _NODE_ID_RE.match(f"fill_{slug}"), slug
     assert len(used) == 4, "distinct fields must get distinct node ids"
+
+
+# --- portal-terms consent: signed in Ellis, transcribed by Ellis -----------
+
+def test_terms_transcription_requires_signed_consent_at_runtime(db):
+    """A requires_signed_terms CLICK must fail closed to the consent handoff
+    when no matching signed consent exists, and proceed once the applicant
+    has signed the EXACT terms text (hash-bound)."""
+    from types import SimpleNamespace
+    from app import models, portal_terms
+    from app.adapter_factory.runtime import FlowRunner
+    from app.adapter_factory.compiler import CompiledFlow
+    from app.adapter_factory import models as fm
+
+    applicant = models.Applicant(org_id="o", user_id="u", full_name="T",
+                                 email="t@example.com")
+    db.add(applicant); db.flush()
+    app_row = models.VisaApplication(
+        org_id="o", user_id="u", applicant_id=applicant.id,
+        destination_country="United States", visa_type="tourist", answers={})
+    db.add(app_row); db.flush()
+    execution = fm.AdapterExecution(org_id="o", application_id=app_row.id,
+                                    candidate_id="c1", candidate_version=1)
+    db.add(execution); db.commit()
+
+    terms_text = "I have read and understand the information and agree to these terms."
+    h = portal_terms.terms_hash(terms_text)
+    node = {"node_id": "agree", "action": "CLICK", "selector": "#yes",
+            "allowed_hostname": "esta.cbp.dhs.gov",
+            "requires_signed_terms": True, "consent_terms_hash": h,
+            "consent_family_id": "usa-esta"}
+    compiled = CompiledFlow([node,
+                             {"node_id": "done", "action": "COMPLETE",
+                              "allowed_hostname": "esta.cbp.dhs.gov"}],
+                            ["agree", "done"],
+                            {"allowed_hostnames": ["esta.cbp.dhs.gov"]})
+    clicks = []
+    driver = SimpleNamespace(click=lambda sel: (clicks.append(sel) or {"ok": True}))
+    runner = FlowRunner(db, execution=execution, compiled=compiled, driver=driver)
+
+    # 1. No consent -> handoff, no click.
+    out = runner._step(compiled.nodes["agree"])
+    assert out["status"] == "handoff"
+    assert out["handoff_kind"] == "portal_terms_consent"
+    assert clicks == []
+
+    # 2. Consent staged but UNSIGNED -> still refused.
+    consent = portal_terms.create_consent_request(
+        db, app_row, portal_family_id="usa-esta",
+        terms_title="ESTA disclaimer", terms_text=terms_text)
+    out = runner._step(compiled.nodes["agree"])
+    assert out["status"] == "handoff" and clicks == []
+
+    # 3. Signed for DIFFERENT text -> refused (hash mismatch).
+    other = portal_terms.create_consent_request(
+        db, app_row, portal_family_id="usa-esta",
+        terms_title="Old terms", terms_text="Some other terms text entirely.")
+    portal_terms.record_signature(db, other, signature_id="sig-old", actor="applicant")
+    out = runner._step(compiled.nodes["agree"])
+    assert out["status"] == "handoff" and clicks == []
+
+    # 4. Signed for the exact text -> transcribed.
+    portal_terms.record_signature(db, consent, signature_id="sig-1", actor="applicant")
+    out = runner._step(compiled.nodes["agree"])
+    assert out["status"] == "ok", out
+    assert clicks == ["#yes"]
+
+    # 5. Revoked -> refused again.
+    portal_terms.revoke(db, consent, reason="applicant withdrew", actor="applicant")
+    clicks.clear()
+    out = runner._step(compiled.nodes["agree"])
+    assert out["status"] == "handoff" and clicks == []

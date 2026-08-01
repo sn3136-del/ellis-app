@@ -38,7 +38,13 @@ _OUTCOME_TO_KINDS = {
 }
 
 
-_ENTRY_GATE_VOCAB = ("CLICK", "SCROLL_TO_BOTTOM", "CHECK")
+# TERMS_CHOICE marks the portal's own terms/agreement gate: the declared
+# agree-control is only ever transcribed at RUNTIME after the applicant has
+# SIGNED the verbatim terms in Ellis (portal_terms_consent handoff). During
+# recon the replay CAPTURES the terms text as evidence and, to observe the
+# form behind the gate, replays the choice in a throwaway observation session
+# that never carries applicant data and never submits anything.
+_ENTRY_GATE_VOCAB = ("CLICK", "SCROLL_TO_BOTTOM", "CHECK", "TERMS_CHOICE")
 
 
 def _validate_entry_gate(family_id: str, gate: dict) -> None:
@@ -55,11 +61,15 @@ def _validate_entry_gate(family_id: str, gate: dict) -> None:
         if a.get("action") != "SCROLL_TO_BOTTOM" and not str(a.get("selector") or "").strip():
             raise ValueError(f"portal family {family_id}: entry_gate "
                              f"{a['action']} needs a selector")
+        if a.get("action") == "TERMS_CHOICE" and not str(
+                a.get("terms_text_selector") or "").strip():
+            raise ValueError(f"portal family {family_id}: TERMS_CHOICE needs a "
+                             f"terms_text_selector capturing the verbatim terms")
     if not str(gate.get("expect_path") or "").startswith("/"):
         raise ValueError(f"portal family {family_id}: entry_gate needs an "
                          f"absolute expect_path")
     for k in gate.get("declared_handoffs") or []:
-        if k not in ("captcha", "otp"):
+        if k not in ("captcha", "otp", "portal_terms_consent"):
             raise ValueError(f"portal family {family_id}: entry_gate declared "
                              f"handoff {k!r} unknown")
 

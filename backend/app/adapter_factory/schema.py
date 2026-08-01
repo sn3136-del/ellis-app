@@ -23,9 +23,13 @@ ACTION_TYPES = [
 ]
 
 # Steps that must ALWAYS be an applicant handoff, never automated (§16).
+# portal_terms_consent: the portal's own terms/agreement gate — the applicant
+# signs the verbatim terms INSIDE Ellis and Ellis transcribes the choice,
+# exactly like legally_personal_declaration transcribes the truthfulness tick.
 SENSITIVE_HANDOFF_KINDS = [
     "credentials", "otp", "captcha", "passkey", "payment_credentials",
     "portal_native_signature", "legally_personal_declaration",
+    "portal_terms_consent",
     "representative_prohibited_action",
 ]
 
@@ -66,6 +70,14 @@ NODE_DEFAULTS = {
     "recording_policy": "never",
     "logging_policy": "redacted",
     "redaction_policy": "strict",
+    # Portal-terms transcription: a CHECK/CLICK node that ENACTS the
+    # applicant's agreement to the portal's own terms. It runs only after the
+    # applicant has SIGNED the verbatim terms in Ellis (a preceding
+    # portal_terms_consent handoff); the runtime binds their signature to
+    # consent_terms_hash before it may act.
+    "requires_signed_terms": False,
+    "consent_terms_hash": "",
+    "consent_family_id": "",
     "next": [],
 }
 
@@ -129,7 +141,12 @@ def validate_node(raw: dict, *, allowed_hostnames: list[str]) -> list[str]:
             errs.append(f"{nid}: selector {sel!r} is not a deterministic CSS selector")
     if action == "SCROLL_TO_BOTTOM":
         # Selector-or-empty (empty scrolls the window); always reversible.
+        # 'html'/'body' ARE the window in every document — treat them as the
+        # whole-page target rather than rejecting them as non-deterministic
+        # (a curated gate that dwells on the page declares exactly those).
         sel = (node.get("selector") or "").strip()
+        if sel.lower() in ("html", "body"):
+            sel = ""
         if sel and not sel.startswith(_SELECTOR_OK):
             errs.append(f"{nid}: selector {sel!r} is not a deterministic CSS selector")
         if node.get("irreversibility") != "reversible":
@@ -150,6 +167,17 @@ def validate_node(raw: dict, *, allowed_hostnames: list[str]) -> list[str]:
         if _SENSITIVE_FIELD_RE.search(probe) or node.get("sensitive"):
             errs.append(f"{nid}: sensitive checkbox may never be automated — "
                         f"use APPLICANT_HANDOFF")
+    if node.get("requires_signed_terms"):
+        # A terms-transcription node must bind to the EXACT text the
+        # applicant will sign, and must be an enactment action.
+        if action not in ("CLICK", "CHECK"):
+            errs.append(f"{nid}: requires_signed_terms only applies to "
+                        f"CLICK/CHECK transcription nodes")
+        if not (node.get("consent_terms_hash") or "").strip():
+            errs.append(f"{nid}: requires_signed_terms needs consent_terms_hash "
+                        f"binding the exact terms text")
+        if not (node.get("consent_family_id") or "").strip():
+            errs.append(f"{nid}: requires_signed_terms needs consent_family_id")
     if action == "UPLOAD_AUTHORIZED_DOCUMENT" and not (node.get("doc_type") or "").strip():
         errs.append(f"{nid}: UPLOAD_AUTHORIZED_DOCUMENT requires a declared doc_type")
     if action == "APPLICANT_HANDOFF":
@@ -194,6 +222,19 @@ def validate_flow(flow: list, *, allowed_hostnames: list[str]) -> list[str]:
     if any(normalize_node(n).get("irreversibility") == "irreversible" for n in flow):
         if not any(n.get("action") == "RECONCILE_OUTCOME" for n in flow):
             errs.append("flow with irreversible actions must include RECONCILE_OUTCOME")
+    # A terms-transcription node may never appear without a portal_terms_consent
+    # handoff earlier in the flow — Ellis never enacts agreement the applicant
+    # was not first shown and asked to sign.
+    if any(normalize_node(n).get("requires_signed_terms") for n in flow):
+        seen_consent = False
+        for n in flow:
+            nn = normalize_node(n)
+            if nn.get("action") == "APPLICANT_HANDOFF" \
+                    and nn.get("handoff_kind") == "portal_terms_consent":
+                seen_consent = True
+            if nn.get("requires_signed_terms") and not seen_consent:
+                errs.append(f"{nn.get('node_id')}: terms transcription precedes "
+                            f"its portal_terms_consent handoff")
     return errs
 
 

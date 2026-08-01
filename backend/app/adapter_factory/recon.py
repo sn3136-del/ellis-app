@@ -297,6 +297,18 @@ def _observe_entry_gated_form(db, job, *, build_request, observer, hosts,
         job.error = (f"entry gate replay ended at {pattern[:120]!r}, "
                      f"expected path {expect!r}")[:400]
         return False
+    # Verbatim portal terms captured at a TERMS_CHOICE gate ride into the
+    # artifact structure as evidence: the flow's portal_terms_consent handoff
+    # shows the applicant exactly this text, and the runtime binds their
+    # signature to its hash. Structural only — no applicant data.
+    captured = raw.get("terms_captured") or []
+    if captured:
+        art = dict(art, portal_terms=[{
+            "title": str(t.get("title") or "")[:300],
+            "text": str(t.get("text") or "")[:20000],
+            "text_selector": str(t.get("selector") or "")[:200],
+            "source_url": str(t.get("source_url") or "")[:500]}
+            for t in captured])
     db.add(fm.AdapterReconArtifact(
         recon_job_id=job.id,
         page_key=unique_key(ENTRY_GATED_FORM_PAGE_KEY, pattern or ENTRY_GATED_FORM_PAGE_KEY),

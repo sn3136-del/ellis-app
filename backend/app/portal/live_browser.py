@@ -303,10 +303,11 @@ class LiveBrowserSession:
         gate = entry_gate or {}
         actions = list(gate.get("actions") or [])[: self.ENTRY_GATE_MAX_ACTIONS]
         for a in actions:
-            if (a or {}).get("action") not in self.ENTRY_GATE_ACTIONS:
+            if (a or {}).get("action") not in self.ENTRY_GATE_ACTIONS + ("TERMS_CHOICE",):
                 return {"ok": False, "status": 0, "url": base_url,
                         "error": f"entry gate action {(a or {}).get('action')!r} "
                                  f"not in the declared vocabulary"}
+        terms_captured: list[dict] = []
         if self.allowed and not self._host_ok(base_url):
             return {"ok": False, "status": 0, "url": base_url,
                     "error": "off-allowlist host refused"}
@@ -334,6 +335,37 @@ class LiveBrowserSession:
                 sel = str(a.get("selector") or "")
                 if act == "SCROLL_TO_BOTTOM":
                     self._scroll_container_to_bottom(page, sel)
+                    performed.append({"action": act, "selector": sel, "ok": True})
+                    continue
+                if act == "TERMS_CHOICE":
+                    # The portal's own terms gate. This OBSERVATION session
+                    # carries no applicant and submits nothing: capture the
+                    # VERBATIM terms text as evidence (the applicant signs
+                    # exactly this text in Ellis before any live run may
+                    # transcribe the choice), then take the declared control
+                    # so the form behind the gate can be structurally
+                    # observed.
+                    tsel = str(a.get("terms_text_selector") or "")
+                    text = ""
+                    for one in page.locator(tsel).all()[:6]:
+                        try:
+                            text += (one.inner_text(timeout=8000) or "") + "\n\n"
+                        except Exception:  # noqa: BLE001
+                            continue
+                    if not text.strip():
+                        return {"ok": False, "status": status, "url": page.url,
+                                "error": f"TERMS_CHOICE captured no terms text "
+                                         f"via {tsel[:60]!r} — refusing to "
+                                         f"proceed past unread terms"}
+                    terms_captured.append({
+                        "title": str(a.get("purpose") or "Portal terms")[:300],
+                        "text": text.strip()[:20000],
+                        "selector": sel, "source_url": page.url[:500]})
+                    loc = page.locator(sel).first
+                    loc.wait_for(state="visible",
+                                 timeout=int(a.get("timeout_ms") or 30000))
+                    self._assert_gate_target_safe(loc, "CLICK", sel)
+                    loc.click(timeout=15000)
                     performed.append({"action": act, "selector": sel, "ok": True})
                     continue
                 loc = page.locator(sel).first
@@ -409,7 +441,7 @@ class LiveBrowserSession:
         # as structural elements so downstream contract checks can ground the
         # flow's entry-gate node selectors in recorded observation.
         for i, st in enumerate(performed):                                       # pragma: no cover
-            if st["action"] in ("CLICK", "CHECK"):
+            if st["action"] in ("CLICK", "CHECK", "TERMS_CHOICE"):
                 raw.setdefault("elements", []).append({
                     "selector": st["selector"],
                     "name": f"entry_gate_step_{i + 1}",
@@ -418,6 +450,10 @@ class LiveBrowserSession:
                     "required": False, "sensitive": False})
         obs = normalize_observation(final, status, urlparse(final).netloc, raw)   # pragma: no cover
         obs["entry_gate_replayed"] = performed                                    # pragma: no cover
+        if terms_captured:                                                        # pragma: no cover
+            # The portal's own public terms text, verbatim — the exact words
+            # the applicant must sign in Ellis before any live transcription.
+            obs["terms_captured"] = terms_captured
         return obs                                                                # pragma: no cover
 
 
