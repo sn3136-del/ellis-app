@@ -183,7 +183,10 @@
    "supported_outcomes": [
     "ELECTRONIC_AUTHORIZATION"
    ],
-   "account_required": false
+   "account_required": false,
+   "form_paths": [
+    "/"
+   ]
   },
   {
    "family_id": "korea-keta",
@@ -876,7 +879,10 @@
    "supported_outcomes": [
     "EVISA"
    ],
-   "account_required": false
+   "account_required": false,
+   "form_paths": [
+    "/VisaFile/Inregistrare?c=en-US"
+   ]
   },
   {
    "family_id": "albania-evisa",

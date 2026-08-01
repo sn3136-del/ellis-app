@@ -80,6 +80,10 @@ class PortalFamily(Base, TimestampMixin):
     # {actions: [{action: CLICK|SCROLL_TO_BOTTOM|CHECK, selector}], expect_path,
     #  form_ready_selector?, declared_handoffs?}. Empty dict = no gate.
     entry_gate: Mapped[dict] = mapped_column(JSON, default=dict)
+    # Curated paths on this family's own hostnames that render the real
+    # applicant form (verified live). Recon probes these FIRST — real portals
+    # rarely serve their form at a guessable '/application'.
+    form_paths: Mapped[list] = mapped_column(JSON, default=list)
     verification_status: Mapped[str] = mapped_column(String(32), default="seed_unverified", index=True)  # FAMILY_VERIFICATION
     verification_evidence: Mapped[dict] = mapped_column(JSON, default=dict)
     last_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

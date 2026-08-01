@@ -294,6 +294,20 @@ def representative_route_key(db, family: PortalFamily) -> str:
                      f"with a normalizable state nationality")
 
 
+def _family_form_urls(family: PortalFamily) -> list[str]:
+    """Curated application-form URLs for this family: paths an operator (or a
+    live curation pass) VERIFIED render the real applicant form. Always on the
+    family's own verified hostnames — a curated path never widens the
+    allowlist, it only tells recon where to look."""
+    paths = list(getattr(family, "form_paths", None) or [])
+    if not paths:
+        return []
+    host = (family.hostnames or [None])[0]
+    if not host:
+        return []
+    return [f"https://{host}{p if p.startswith('/') else '/' + p}" for p in paths]
+
+
 def research_entry_urls(db, family: PortalFamily, limit: int = 6) -> list[str]:
     """Official-source URLs already VERIFIED by route research that live on
     this family's own hostnames. Real portals put the application form on a
@@ -362,7 +376,13 @@ def build_family_adapter(db, family_id: str, *, observer=None,
                        "portal_url": family.base_url,
                        "family_id": family.family_id,
                        "account_required": bool(getattr(family, "account_required", False)),
-                       "entry_urls": research_entry_urls(db, family)}
+                       # Curated form paths (verified live on the real portal)
+                       # go FIRST: a portal that puts its application form on a
+                       # deep localised path is otherwise never found by probing
+                       # '/application', which is the single biggest cause of
+                       # "no form page was mappable".
+                       "entry_urls": _family_form_urls(family)
+                       + research_entry_urls(db, family)}
     if family.entry_gate:
         # Curated entry-gate declaration rides on the build's portal evidence:
         # recon replays it, specgen emits its nodes, testing re-replays it.

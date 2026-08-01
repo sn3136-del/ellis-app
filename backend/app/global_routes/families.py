@@ -117,6 +117,10 @@ def sync_families(db) -> dict:
         fam.supported_outcomes = e.get("supported_outcomes") or []
         fam.account_required = bool(e.get("account_required"))
         fam.entry_gate = e.get("entry_gate") or {}
+        # Curated form paths are PATHS ONLY — they tell recon where this
+        # family's real form lives and can never widen the hostname allowlist.
+        fam.form_paths = [str(p) for p in (e.get("form_paths") or [])
+                          if isinstance(p, str) and p.startswith("/")]
         fam.notes = e.get("notes", "")
         # Deterministic identity verification — never invented, never assumed.
         # A live_verified family keeps its stronger status; conflicted/
