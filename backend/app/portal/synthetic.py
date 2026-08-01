@@ -92,6 +92,31 @@ class SyntheticPortal:
             return self.goto(f"https://{self.hostname}{target}")
         return {"ok": True}
 
+    # ---- appointment inventory + booking (mirrors the live driver) ---------
+    def read_appointment_slots(self, node: dict) -> dict:
+        """Read-only view of the portal's remaining bookable slots — the same
+        shape the live browser driver returns."""
+        return {"ok": True,
+                "slots": [{"slotId": s["slot_id"], "startUtc": s["start_utc"],
+                           "locationId": s.get("location", "default"),
+                           "label": str(s["start_utc"])}
+                          for s in self.slots]}
+
+    def book_appointment_slot(self, node: dict, slot_id: str) -> dict:
+        """Book the EXACT slot the applicant chose (never 'the earliest')."""
+        chosen = next((s for s in self.slots if s["slot_id"] == slot_id), None)
+        if chosen is None:
+            return {"ok": False, "code": "SLOT_GONE"}
+        if self.scenario == "appointment_race" and next(self._clicks) == 0:
+            self.slots.remove(chosen)      # someone else took it first
+            return {"ok": False, "code": "SLOT_GONE"}
+        self.slots.remove(chosen)
+        booking = {"booking_id": _uid("APT"), **chosen}
+        self.ledger["bookings"].append(booking)
+        self._net("POST", f"https://{self.hostname}/api/appointments", 200,
+                  keys=["booking_id", "slot_id"], category="appointment_booked")
+        return {"ok": True, "booking": booking}
+
     def read_text(self, selector: str) -> dict:
         page = self._page_for(self.current)
         if page is None:
@@ -306,8 +331,20 @@ def _build_pages(scenario: str, hostname: str) -> dict:
             {"selector": "#pay-btn", "name": "pay", "label": "Pay fee",
              "type": "button", "submits": "pay"}],
             "readable": {"#fee-amount": "USD 80.00", "#fee-refund": "Non-refundable"}},
+        # A real calendar: bookable slot rows the applicant chooses FROM, plus
+        # the confirm control. Ellis reads the rows, the applicant picks one,
+        # Ellis books that exact slot — never "book earliest" on their behalf.
         "/appointments": {"title": "Book appointment", "requires_auth": True, "elements": [
-            {"selector": "#book-btn", "name": "book", "label": "Book earliest",
+            {"selector": '[data-slot="S0"]', "name": "slot_s0",
+             "label": "2026-09-15 09:00", "type": "button",
+             "attrs": {"data-slot": "S0", "data-datetime": "2026-09-15T09:00"}},
+            {"selector": '[data-slot="S1"]', "name": "slot_s1",
+             "label": "2026-09-16 09:00", "type": "button",
+             "attrs": {"data-slot": "S1", "data-datetime": "2026-09-16T09:00"}},
+            {"selector": '[data-slot="S2"]', "name": "slot_s2",
+             "label": "2026-09-17 09:00", "type": "button",
+             "attrs": {"data-slot": "S2", "data-datetime": "2026-09-17T09:00"}},
+            {"selector": "#book-btn", "name": "book", "label": "Confirm booking",
              "type": "button", "submits": "book"}]},
         "/submit": {"title": "Submit application", "requires_auth": True,
                     "text": ("Application submitted successfully!"

@@ -458,8 +458,22 @@ class FlowRunner:
                             "reason": "displayed fee could not be read exactly"}
             return self._from_driver(node, res)
         if action == "READ_APPOINTMENT_INVENTORY":
-            self.slots_seen = getattr(self.driver, "slots", [])
+            # Read the portal's live calendar through the driver's declared
+            # selectors. A driver that exposes read_appointment_slots (the live
+            # browser) reads the real DOM; a mock exposes a `.slots` list. Both
+            # are read-only — observing availability reserves nothing.
+            reader = getattr(self.driver, "read_appointment_slots", None)
+            if reader is not None:
+                res = reader(node)
+                if not res.get("ok"):
+                    return {"status": "failed",
+                            "reason": f"{node['node_id']}: {res.get('code', 'slot read failed')}"}
+                self.slots_seen = res.get("slots", [])
+            else:
+                self.slots_seen = getattr(self.driver, "slots", [])
             return {"status": "ok", "detail": {"slot_count": len(self.slots_seen)}}
+        if action == "BOOK_APPOINTMENT":
+            return self._book_appointment(node)
         if action == "WAIT_FOR_NETWORK":
             return {"status": "ok"}
         if action == "VERIFY_EVIDENCE":
@@ -958,6 +972,48 @@ class FlowRunner:
             if not all(str(k).lower() in have for k in need_keys):
                 return False
         return True
+
+    # Case answer key the applicant's explicit slot choice is written under
+    # when they pick a slot in the calendar UI. Booking NEVER proceeds without
+    # it — Ellis never auto-reserves a government appointment.
+    CHOSEN_SLOT_KEY = "chosen_appointment_slot_id"
+
+    def _book_appointment(self, node: dict) -> dict:
+        """Book the applicant's EXPLICITLY CHOSEN slot. Reconcile-first (never
+        double-book) and never auto-pick: without a stored choice the flow
+        pauses to the calendar handoff. Success is proven by the flow's
+        VERIFY_EVIDENCE node, not by this click."""
+        # 1. Reconcile: if the portal already shows a booked appointment for
+        #    this applicant, use it — never create a second reservation.
+        if self._already_done(node, self._official()):
+            self._evidence(node, kind="official_record",
+                           category="reconciled_prior_success", strength=2)
+            return {"status": "ok", "detail": {"reconciled": True}}
+        # 2. The applicant's own choice is required. No choice -> pause and ask
+        #    (the handoff carries the slots the runner just read).
+        chosen = str(self.answers.get(self.CHOSEN_SLOT_KEY) or "").strip()
+        if not chosen:
+            return {"status": "handoff", "handoff_kind": "appointment_selection",
+                    "detail": {"slots": self.slots_seen}}
+        # 3. The chosen slot must be one Ellis actually observed as bookable —
+        #    never book a handle the applicant did not pick from real inventory.
+        if not any(str(s.get("slotId")) == chosen for s in (self.slots_seen or [])):
+            return {"status": "handoff", "handoff_kind": "appointment_selection",
+                    "detail": {"slots": self.slots_seen,
+                               "reason": "chosen slot is no longer available"}}
+        booker = getattr(self.driver, "book_appointment_slot", None)
+        if booker is None:
+            return {"status": "failed",
+                    "reason": "driver cannot book appointments in this runtime"}
+        res = booker(node, chosen)
+        if not res.get("ok"):
+            code = res.get("code", "BOOK_FAILED")
+            if code == "SLOT_GONE":
+                # Someone took it first — re-ask with fresh inventory next pass.
+                return {"status": "handoff", "handoff_kind": "appointment_selection",
+                        "detail": {"reason": "slot_gone", "slots": self.slots_seen}}
+            return {"status": "failed", "reason": f"appointment booking: {code}"}
+        return {"status": "ok", "detail": {"booked_slot": chosen}}
 
     def _register_account(self, node: dict) -> dict:
         """Create the applicant's portal account: their OWN email plus a FRESH

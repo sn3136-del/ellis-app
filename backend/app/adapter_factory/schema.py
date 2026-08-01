@@ -18,7 +18,8 @@ ACTION_TYPES = [
     "NAVIGATE", "WAIT_FOR_STATE", "CLICK", "FILL_NON_SENSITIVE", "SELECT",
     "SELECT_SEARCH", "CHECK", "SCROLL_TO_BOTTOM", "UPLOAD_AUTHORIZED_DOCUMENT",
     "READ_TEXT", "READ_FEE",
-    "READ_APPOINTMENT_INVENTORY", "WAIT_FOR_NETWORK", "VERIFY_EVIDENCE",
+    "READ_APPOINTMENT_INVENTORY", "BOOK_APPOINTMENT",
+    "WAIT_FOR_NETWORK", "VERIFY_EVIDENCE",
     "REGISTER_ACCOUNT",
     "APPLICANT_HANDOFF", "RECONCILE_OUTCOME", "PAUSE", "COMPLETE",
 ]
@@ -31,6 +32,10 @@ SENSITIVE_HANDOFF_KINDS = [
     "credentials", "otp", "captcha", "passkey", "payment_credentials",
     "portal_native_signature", "legally_personal_declaration",
     "portal_terms_consent",
+    # Reserving a government appointment commits the applicant to attend on a
+    # specific date at a specific consulate: the slot is ALWAYS theirs to
+    # choose, never auto-picked from their preferences.
+    "appointment_selection",
     "representative_prohibited_action",
 ]
 
@@ -205,6 +210,28 @@ def validate_node(raw: dict, *, allowed_hostnames: list[str]) -> list[str]:
                    for e in (node.get("success_evidence") or [])):
             errs.append(f"{nid}: REGISTER_ACCOUNT must declare success_evidence "
                         f"(account_registration_submitted)")
+    if action == "READ_APPOINTMENT_INVENTORY":
+        # Read-only calendar observation: the slot rows must be a DECLARED,
+        # observed selector — recon proves it exists; nothing here is guessed.
+        if not (node.get("slot_selector") or "").strip():
+            errs.append(f"{nid}: READ_APPOINTMENT_INVENTORY requires slot_selector")
+    if action == "BOOK_APPOINTMENT":
+        # Reserving a government appointment for a named person is
+        # irreversible: reconcile-first (never double-book), bounded retries,
+        # and success proven only by official booking evidence. The slot the
+        # applicant chose is clicked by its portal handle attribute.
+        if not (node.get("handle_attr") or "").strip():
+            errs.append(f"{nid}: BOOK_APPOINTMENT requires handle_attr "
+                        f"(the portal attribute carrying each slot's handle)")
+        if node.get("irreversibility") != "irreversible":
+            errs.append(f"{nid}: BOOK_APPOINTMENT must be declared irreversible")
+        if node.get("retry_class") != "reconcile_first":
+            errs.append(f"{nid}: BOOK_APPOINTMENT must be reconcile_first "
+                        f"(never create a duplicate booking)")
+        if not any(e.get("category") == "appointment_booked"
+                   for e in (node.get("success_evidence") or [])):
+            errs.append(f"{nid}: BOOK_APPOINTMENT must declare success_evidence "
+                        f"(appointment_booked)")
     if action == "APPLICANT_HANDOFF":
         if node.get("handoff_kind") not in SENSITIVE_HANDOFF_KINDS:
             errs.append(f"{nid}: APPLICANT_HANDOFF requires a declared handoff_kind")

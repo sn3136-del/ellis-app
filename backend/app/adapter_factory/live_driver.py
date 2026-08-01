@@ -36,6 +36,37 @@ _ACT_MS = 2500       # element exists: fill / select / check it
 _CLICK_MS = 6000     # click (navigation-bearing, slightly longer)
 
 
+def _parse_slot_datetime(raw: str) -> int | None:
+    """Parse a portal slot's start time to a UTC epoch-ms integer, or None.
+    Accepts ISO-8601 (with or without timezone/offset — a bare local time is
+    read as UTC, which qualifying_slots then re-localises to the applicant's
+    zone) and common 'YYYY-MM-DD HH:MM' forms. Deterministic; never guesses a
+    date from a bare time, so an unparseable slot is dropped rather than
+    booked at the wrong moment."""
+    from datetime import datetime, timezone
+    s = (raw or "").strip()
+    if not s:
+        return None
+    # Normalise a trailing 'Z' and a space separator to ISO 'T'.
+    iso = s.replace("Z", "+00:00")
+    if " " in iso and "T" not in iso:
+        iso = iso.replace(" ", "T", 1)
+    for parse in (
+        lambda: datetime.fromisoformat(iso),
+        lambda: datetime.strptime(s, "%Y-%m-%dT%H:%M"),
+        lambda: datetime.strptime(s, "%Y-%m-%d %H:%M"),
+        lambda: datetime.strptime(s, "%d/%m/%Y %H:%M"),
+    ):
+        try:
+            dt = parse()
+        except (ValueError, TypeError):
+            continue
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return int(dt.timestamp() * 1000)
+    return None
+
+
 def sanitize_network_event(method: str, url: str, status: int, content_type: str,
                            body_text: str | None) -> dict:
     """Reduce a response to §20-permitted evidence. Top-level JSON key NAMES are
@@ -1039,6 +1070,92 @@ class BrowserbasePageDriver:
             return {"ok": True, "text": (el.inner_text() or "")[:200]}
         except Exception as e:  # noqa: BLE001
             return {"ok": False, "code": "READ_ERROR", "detail": str(e)[:120]}
+
+    # ---- appointment inventory (read-only) + booking -----------------------
+    # Reads bookable slots from the portal's OWN calendar/list DOM using the
+    # adapter's DECLARED selectors — never guessed. Read-only: observing
+    # available slots reserves nothing. Each slot carries the portal's own
+    # slot handle (a data-attr / value the book step later clicks), the
+    # location id/label, and a parsed start time — enough for qualifying_slots
+    # to rank and for the applicant to choose.
+    _SLOT_READ_JS = r"""(cfg) => {
+      const rows = Array.from(document.querySelectorAll(cfg.slotSelector || ''));
+      const out = [];
+      for (const el of rows) {
+        if (el.offsetParent === null) continue;              // not visible
+        const disabled = el.matches('[disabled], [aria-disabled="true"], '
+          + '.disabled, [class*="disabled"], [class*="unavailable"], '
+          + '[class*="booked"], [class*="full"]');
+        if (disabled) continue;                              // not bookable
+        const handle = (cfg.handleAttr && el.getAttribute(cfg.handleAttr))
+          || el.getAttribute('data-slot') || el.getAttribute('data-datetime')
+          || el.getAttribute('data-time') || el.getAttribute('value') || '';
+        const dt = el.getAttribute('data-datetime') || el.getAttribute('data-date')
+          || el.getAttribute('datetime')
+          || (el.querySelector('time') && el.querySelector('time').getAttribute('datetime'))
+          || '';
+        const loc = cfg.locationSelector
+          ? ((document.querySelector(cfg.locationSelector) || {}).value
+             || (document.querySelector(cfg.locationSelector) || {}).getAttribute?.('data-location')
+             || '')
+          : (el.getAttribute('data-location') || el.getAttribute('data-center') || '');
+        out.push({handle: String(handle).slice(0, 200),
+                  datetime: String(dt).slice(0, 40),
+                  text: (el.innerText || '').trim().slice(0, 80),
+                  location: String(loc).slice(0, 120)});
+        if (out.length >= 400) break;                        // bounded read
+      }
+      return out;
+    }"""
+
+    def read_appointment_slots(self, node: dict) -> dict:
+        """Read bookable slots from the portal's live calendar. `node` carries
+        the adapter's declared slot_selector (+ optional handle_attr,
+        location_selector). No selector -> nothing observed (fail closed);
+        a slot is emitted only if its start time parses to a real timestamp."""
+        sel = str(node.get("slot_selector") or "").strip()
+        if not sel:
+            return {"ok": True, "slots": []}
+        cfg = {"slotSelector": sel,
+               "handleAttr": node.get("handle_attr") or "",
+               "locationSelector": node.get("location_selector") or ""}
+        try:
+            raw = self.page.evaluate(self._SLOT_READ_JS, cfg) or []
+        except Exception as e:  # noqa: BLE001
+            return {"ok": False, "code": "SLOT_READ_ERROR", "detail": str(e)[:120]}
+        slots = []
+        for r in raw:
+            start = _parse_slot_datetime(r.get("datetime") or r.get("text") or "")
+            if start is None or not r.get("handle"):
+                continue        # only offer a slot Ellis can actually book
+            slots.append({"slotId": r["handle"], "startUtc": start,
+                          "locationId": (r.get("location") or "").strip() or "default",
+                          "label": r.get("text") or ""})
+        return {"ok": True, "slots": slots}
+
+    def book_appointment_slot(self, node: dict, slot_id: str) -> dict:
+        """Click the applicant's CHOSEN slot by its portal handle and confirm.
+        Reconcile-first is enforced by the caller (the flow's RECONCILE node);
+        here we click ONLY the slot whose handle the applicant selected, then
+        the declared confirm control, and report success solely from evidence
+        the caller verifies — never from a banner."""
+        handle_attr = node.get("handle_attr") or "data-slot"
+        # Escape the handle for an attribute selector; refuse quotes/backslashes
+        # rather than build an unsafe selector.
+        if any(c in slot_id for c in '"\\'):
+            return {"ok": False, "code": "UNSAFE_SLOT_HANDLE"}
+        slot_sel = f'[{handle_attr}="{slot_id}"]'
+        picked = self.click(slot_sel)
+        if not picked.get("ok"):
+            # The chosen slot is gone (someone booked it first) — honest signal.
+            return {"ok": False, "code": "SLOT_GONE", "detail": picked.get("code")}
+        confirm_sel = str(node.get("confirm_selector") or "").strip()
+        if confirm_sel:
+            conf = self.click(confirm_sel)
+            if not conf.get("ok"):
+                return {"ok": False, "code": "BOOK_CONFIRM_FAILED",
+                        "detail": conf.get("code")}
+        return {"ok": True}
 
     # The VISUAL/framework truth of a checkbox — never just the input's DOM
     # property. page.check can set input.checked=true while the framework

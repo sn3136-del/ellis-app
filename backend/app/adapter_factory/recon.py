@@ -72,6 +72,20 @@ def sanitize_structure(observation: dict) -> dict:
             clean["submits"] = re.sub(r"[^a-z_]", "", str(el.get("submits", "")))[:40]
         if el.get("navigates_to"):
             clean["navigates_to"] = str(el.get("navigates_to", ""))[:200]
+        # Appointment-slot handles: portal STRUCTURE (a slot id or its
+        # datetime), never applicant data. Only the fixed allowlist survives,
+        # each value length-bounded and stripped of anything but the safe
+        # id/timestamp character set.
+        attrs = el.get("attrs") or {}
+        if isinstance(attrs, dict):
+            keep = {}
+            for k in ("data-slot", "data-slot-id", "data-datetime",
+                      "data-date", "data-time", "data-appointment"):
+                v = attrs.get(k)
+                if v:
+                    keep[k] = re.sub(r"[^A-Za-z0-9:_+\-./ ]", "", str(v))[:60]
+            if keep:
+                clean["attrs"] = keep
         elements.append(clean)
     out = {
         "url_pattern": _pattern(observation.get("url", "")),

@@ -179,7 +179,14 @@ def capability_gate(version_row, capability: str) -> tuple[bool, list, dict]:
             problems.append("no booking reconciliation (duplicate-booking guard)")
         if book and not all(_bounded_reconcile_first(n) for n in book):
             problems.append("booking is not reconcile-first / retry-bounded")
+        # The applicant must choose their own slot: a flow that reserves a
+        # government appointment without an explicit selection handoff is
+        # auto-booking on their behalf and never releases.
+        if not _has_handoff(flow, "appointment_selection"):
+            problems.append("no applicant appointment-selection handoff "
+                            "(the slot is always the applicant's own choice)")
         ev = {"inventory_read": _has_action(flow, "READ_APPOINTMENT_INVENTORY"),
+              "applicant_chooses": _has_handoff(flow, "appointment_selection"),
               "reconcile": _has_reconcile(flow), "booking_nodes": len(book)}
     elif capability == "payment_preparation":
         # Ellis reads the official fee for an EXACT-amount confirmation; the

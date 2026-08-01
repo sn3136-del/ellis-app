@@ -595,6 +595,29 @@ def _observed_selector(art, *keywords, clickable=False, fallback="") -> str:
     return fallback
 
 
+# Attributes a portal calendar uses to carry each slot's own handle — the
+# value the booking step later clicks. Ordered by how explicitly each names a
+# slot, so the most specific observed attribute wins.
+_SLOT_HANDLE_ATTRS = ("data-slot", "data-slot-id", "data-datetime",
+                      "data-date", "data-time", "data-appointment")
+
+
+def _observed_slot_rows(art) -> tuple[str, str]:
+    """The selector matching the portal's OBSERVED slot rows plus the
+    attribute carrying each slot's handle, or ('','') when the page shows no
+    slot list. Grounded: an element only counts as a slot if recon actually
+    saw it carrying one of the slot-handle attributes, so a page with a
+    'Book' button but no visible calendar yields nothing (fail closed)."""
+    els = (art.structure or {}).get("elements", []) if art is not None else []
+    for attr in _SLOT_HANDLE_ATTRS:
+        # Count elements that declare this attribute; a real calendar shows
+        # many, and a single stray element is not an inventory.
+        n = sum(1 for e in els if (e.get("attrs") or {}).get(attr))
+        if n >= 2:
+            return f"[{attr}]", attr
+    return "", ""
+
+
 def _observed_sensitive_kinds(by_page: dict) -> set[str]:
     """Which personal-verification kinds (captcha/otp) the public pages
     exposed — each MUST become an applicant handoff in the flow."""
@@ -952,19 +975,34 @@ def _skeleton_flow(host: str, roles: dict, mappings: list[dict],
     if "appointments" in roles:
         appt_art = roles["appointments"]
         book_sel = _observed_selector(appt_art, *_BOOK_WORDS, clickable=True)
-        if book_sel:
+        slot_sel, handle_attr = _observed_slot_rows(appt_art)
+        # An appointment segment needs BOTH a readable slot list and a way to
+        # click a chosen slot. Without observed slot rows Ellis cannot show the
+        # applicant real availability, so the segment is dropped entirely
+        # rather than emitting a booking step that guesses (fail closed).
+        if book_sel and slot_sel:
             node("goto_appointments", "NAVIGATE", purpose="Open the appointments page",
                  allowed_url_patterns=[_nav_pattern(appt_art, host, "/appointments")])
-            node("read_slots", "READ_APPOINTMENT_INVENTORY", selector=book_sel,
-                 purpose="Read actual official appointment inventory")
+            node("read_slots", "READ_APPOINTMENT_INVENTORY",
+                 slot_selector=slot_sel, handle_attr=handle_attr,
+                 purpose="Read the portal's real bookable inventory (read-only)")
+            node("appointment_selection", "APPLICANT_HANDOFF",
+                 handoff_kind="appointment_selection", applicant_action=True,
+                 sensitive=True,
+                 purpose="The applicant chooses their own date, time and centre")
             node("reconcile_booking", "RECONCILE_OUTCOME",
                  purpose="Never double-book: check official state first",
                  retry_class="reconcile_first")
-            node("book", "CLICK", selector=book_sel,
-                 purpose="Book within saved preferences",
+            node("book", "BOOK_APPOINTMENT", handle_attr=handle_attr,
+                 confirm_selector=book_sel,
+                 purpose="Reserve the exact slot the applicant chose",
                  irreversibility="irreversible", retry_class="reconcile_first",
                  success_evidence=[{"kind": "network", "category": "appointment_booked"}],
                  max_retries=1)
+            node("verify_booking", "VERIFY_EVIDENCE",
+                 success_evidence=[{"kind": "network", "category": "appointment_booked"},
+                                   {"kind": "official_record", "category": "appointment_booked"}],
+                 purpose="The booking is proven by official evidence, never a banner")
     if "submit" in roles:
         submit_art = roles["submit"]
         submit_sel = _observed_selector(submit_art, *_SUBMIT_WORDS, clickable=True)

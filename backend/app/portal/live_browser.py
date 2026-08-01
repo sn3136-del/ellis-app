@@ -93,7 +93,11 @@ _EXTRACT_JS = r"""
     return el.name || '';
   };
   const els = [];
-  document.querySelectorAll('input, select, textarea, button, a[href]').forEach((el) => {
+  // Form controls PLUS appointment-calendar slot elements, which are usually
+  // plain div/td/li carrying a slot handle attribute rather than form inputs.
+  document.querySelectorAll('input, select, textarea, button, a[href], '
+    + '[data-slot], [data-slot-id], [data-datetime], [data-appointment]'
+  ).forEach((el) => {
     const tag = el.tagName.toLowerCase();
     let type = (el.type || (tag === 'a' ? 'link' : tag)).toLowerCase();
     // Search-combobox detection (ARIA-based): SPA select widgets whose entry
@@ -112,6 +116,16 @@ _EXTRACT_JS = r"""
     if (tag === 'button' || type === 'submit') rec.submits = (name || 'submit').replace(/[^a-z_]/gi, '').toLowerCase().slice(0, 40);
     if (tag === 'a' && el.getAttribute('href')) {
       try { rec.navigates_to = new URL(el.href, location.href).pathname.slice(0, 200); } catch (e) {}
+    }
+    // STRUCTURAL slot handles only: the attributes an appointment calendar
+    // uses to identify each bookable slot. Names/values here are portal
+    // structure (a slot id or its datetime), never applicant data — and only
+    // this fixed allowlist is ever read.
+    const SLOT_ATTRS = ['data-slot', 'data-slot-id', 'data-datetime',
+                        'data-date', 'data-time', 'data-appointment'];
+    for (const a of SLOT_ATTRS) {
+      const v = el.getAttribute && el.getAttribute(a);
+      if (v) { (rec.attrs = rec.attrs || {})[a] = String(v).slice(0, 60); }
     }
     els.push(rec);
   });

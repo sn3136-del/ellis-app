@@ -93,6 +93,8 @@ def simulate_applicant(portal: SyntheticPortal, handoff_kind: str):
         portal.human_pay()
     elif handoff_kind == "legally_personal_declaration":
         pass  # confirmation only; the submit node performs the portal action
+    elif handoff_kind == "appointment_selection":
+        pass  # the applicant's pick is injected into answers by the caller
 
 
 def drive_flow_against_portal(db, version_row, portal: SyntheticPortal, *,
@@ -113,8 +115,23 @@ def drive_flow_against_portal(db, version_row, portal: SyntheticPortal, *,
     for _ in range(max_handoffs):
         if result.get("status") != "paused_applicant_action":
             break
-        simulate_applicant(portal, result.get("handoff_kind", ""))
-        nxt = compiled.next_of(result["node"], "ok")
+        kind = result.get("handoff_kind", "")
+        simulate_applicant(portal, kind)
+        paused_node = compiled.nodes.get(result.get("node") or "") or {}
+        if kind == "appointment_selection":
+            # The applicant picks a slot from the inventory Ellis just read —
+            # the booking node refuses to proceed without their explicit choice.
+            offered = (result.get("detail") or {}).get("slots") or []
+            if not offered:
+                offered = runner.slots_seen or []
+            if offered:
+                runner.answers[FlowRunner.CHOSEN_SLOT_KEY] = offered[0]["slotId"]
+        # A booking node that paused to ask for the slot must RE-RUN once the
+        # choice exists — resuming at the next node would skip the reservation.
+        if paused_node.get("action") == "BOOK_APPOINTMENT":
+            nxt = result["node"]
+        else:
+            nxt = compiled.next_of(result["node"], "ok")
         result = runner.run(resume_from=nxt)
     return {"result": result, "ledger": portal.ledger,
             "network": portal.network_events()}

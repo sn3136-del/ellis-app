@@ -1835,15 +1835,84 @@ class ReleasedFlowDriver:
             return None
         return next(iter(seen.values()))
 
-    # Appointments never apply to e-visa flows (adapter declares none).
+    # ---- appointments -------------------------------------------------------
+    # An e-visa flow declares no appointment nodes, so these correctly report
+    # "not applicable". A flow that DOES declare them (a visa-centre/consular
+    # route) reads the portal's real calendar and books the applicant's chosen
+    # slot through the same evidence-gated FlowRunner as every other step.
+
+    def _appointment_nodes(self) -> tuple[dict | None, dict | None]:
+        read_node = book_node = None
+        for n in self._flow().nodes.values():
+            if n.get("action") == "READ_APPOINTMENT_INVENTORY":
+                read_node = read_node or n
+            if n.get("action") == "BOOK_APPOINTMENT":
+                book_node = book_node or n
+        return read_node, book_node
+
     def search_appointments(self, **_kwargs) -> dict:
-        return {"ok": True, "slots": []}
+        """Read the portal's REAL bookable inventory (read-only; reserves
+        nothing), then annotate each slot with its distance from the
+        applicant's address and rank nearest-first."""
+        read_node, _ = self._appointment_nodes()
+        if read_node is None:
+            return {"ok": True, "slots": []}     # this route has no appointments
+        try:
+            driver = self._ensure_live()
+        except Exception:  # noqa: BLE001
+            return {"ok": False, "code": "PORTAL_UNAVAILABLE"}
+        reader = getattr(driver, "read_appointment_slots", None)
+        if reader is None:
+            return {"ok": False, "code": "NOT_SUPPORTED"}
+        res = reader(read_node)
+        if not res.get("ok"):
+            return {"ok": False, "code": res.get("code", "SLOT_READ_FAILED")}
+        from .. import appointments as appt
+        centers = (self.released.version_row.manifest or {}).get("appointment_centers") or {}
+        slots = appt.annotate_distance(res.get("slots", []), centers,
+                                       self._applicant_location())
+        return {"ok": True, "slots": appt.rank_by_nearest(slots, self._appt_prefs())}
 
-    def book_appointment(self, **_kwargs) -> dict:
-        return {"ok": False, "code": "NOT_APPLICABLE"}
+    def _applicant_location(self) -> dict | None:
+        """The applicant's own coordinates, if their case carries them (set
+        when they gave Ellis an address). Never inferred from IP or guessed."""
+        a = self.app_row.answers or {}
+        lat, lon = a.get("address_lat"), a.get("address_lon")
+        if lat is None or lon is None:
+            return None
+        try:
+            return {"lat": float(lat), "lon": float(lon)}
+        except (TypeError, ValueError):
+            return None
 
-    def reschedule_appointment(self, **_kwargs) -> dict:
-        return {"ok": False, "code": "NOT_APPLICABLE"}
+    def _appt_prefs(self) -> dict:
+        a = self.app_row.answers or {}
+        return {"maxTravelKm": a.get("max_travel_km")}
+
+    def book_appointment(self, *, slot_id: str = "", **_kwargs) -> dict:
+        """Book the slot the APPLICANT chose. Their explicit choice is recorded
+        on the case and the flow's BOOK_APPOINTMENT node (reconcile-first,
+        evidence-verified) performs the reservation — Ellis never auto-books."""
+        _, book_node = self._appointment_nodes()
+        if book_node is None:
+            return {"ok": False, "code": "NOT_APPLICABLE"}
+        if not slot_id:
+            return {"ok": False, "code": "NO_SLOT_CHOSEN"}
+        from ..adapter_factory.runtime import FlowRunner
+        self.app_row.answers = dict(self.app_row.answers or {},
+                                    **{FlowRunner.CHOSEN_SLOT_KEY: str(slot_id)})
+        self.db.commit()
+        res = self._advance(stop_before=None)
+        out = self._result_from(res)
+        if not out["ok"]:
+            return out
+        return {"ok": True, "appointment": {"slot_id": slot_id}}
+
+    def reschedule_appointment(self, *, slot_id: str = "", **_kwargs) -> dict:
+        """Rescheduling is a fresh booking of a newly chosen slot; the flow's
+        reconcile-first booking node replaces the existing reservation rather
+        than creating a second one."""
+        return self.book_appointment(slot_id=slot_id)
 
     def close(self):
         self._cleanup_tmp()
@@ -2024,6 +2093,13 @@ def remember_field_options(db, *, candidate_id: str, candidate_version: int,
     db.commit()
 
 
+def _has_action(flow: list, action: str) -> bool:
+    """Does the released typed flow declare this action? Capabilities are read
+    from the flow itself, never asserted — a route can only claim to book
+    appointments if its adapter actually carries a booking node."""
+    return any((n or {}).get("action") == action for n in (flow or []))
+
+
 def build_released_adapter(db, app_row, released: ReleasedRoute) -> PortalAdapter:
     """A contract.PortalAdapter over the released typed flow, honestly labeled
     production-approved (it passed the deterministic release gates) and driven
@@ -2057,8 +2133,15 @@ def build_released_adapter(db, app_row, released: ReleasedRoute) -> PortalAdapte
         password_requirements={"minLength": 12},
         payment_policy="applicant",
         third_party_payment_policy="applicant",
-        appointment_search="none", appointment_booking="prohibited",
-        reschedule_policy="prohibited",
+        # Appointment ability follows the FLOW: a route whose adapter declares
+        # calendar/booking nodes really can read and book; every other route
+        # honestly reports none/prohibited (an e-visa flow has no appointment).
+        appointment_search=("automated" if _has_action(flow, "READ_APPOINTMENT_INVENTORY")
+                            else "none"),
+        appointment_booking=("applicant_selected"
+                             if _has_action(flow, "BOOK_APPOINTMENT") else "prohibited"),
+        reschedule_policy=("applicant_selected"
+                           if _has_action(flow, "BOOK_APPOINTMENT") else "prohibited"),
         representative_submission="automated",
         personal_declaration_required=declaration_required,
         fee_discovery="portal",
