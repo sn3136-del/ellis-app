@@ -310,6 +310,35 @@ def document_content(doc_id: str, exp: int, sig: str, db=Depends(get_session)):
 
 
 # ---- Email delivery (Phase 8) ----
+@app.get("/cases/{application_id}/portal-account")
+def get_portal_account(application_id: str, reveal: bool = False,
+                       db=Depends(get_session),
+                       p: Principal = Depends(get_principal)):
+    """The portal account Ellis created FOR this applicant (their own email,
+    a fresh generated password). The password lives only in the vault; it is
+    revealed to the case owner on explicit request (?reveal=true) and never
+    logged. This is the applicant's account — Ellis surfaces it so they can
+    sign in to the government portal themselves at any time."""
+    _owned(db, p, application_id)
+    acct = db.execute(select(models.PortalAccount).where(
+        models.PortalAccount.application_id == application_id)
+        .order_by(models.PortalAccount.created_at.desc())).scalars().first()
+    if acct is None:
+        return {"exists": False}
+    out = {"exists": True, "email": acct.username, "verified": bool(acct.verified),
+           "adapter_id": acct.adapter_id}
+    if reveal and acct.credential_ref:
+        from . import vault, audit
+        try:
+            out["password"] = vault.reveal(acct.credential_ref)
+            audit.record(db, org_id=p.org_id, application_id=application_id,
+                         action="portal_account_password_revealed",
+                         detail={"adapter_id": acct.adapter_id}, actor=p.user_id)
+        except Exception:  # noqa: BLE001 — vault miss is honest, never a 500
+            out["password_unavailable"] = True
+    return out
+
+
 @app.get("/cases/{application_id}/emails")
 def list_case_emails(application_id: str, db=Depends(get_session),
                      p: Principal = Depends(get_principal)):

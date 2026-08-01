@@ -464,6 +464,16 @@ class FlowRunner:
             return {"status": "ok"}
         if action == "VERIFY_EVIDENCE":
             ok = self._verify_evidence(node)
+            if ok and any((e or {}).get("category") == "session_authenticated"
+                          for e in (node.get("success_evidence") or [])):
+                # The account Ellis registered is now proven to sign in:
+                # mark the applicant's stored portal account verified.
+                from .. import models as core_models
+                for acct in self.db.execute(select(core_models.PortalAccount).where(
+                        core_models.PortalAccount.application_id
+                        == self.execution.application_id)).scalars().all():
+                    acct.verified = True
+                self.db.commit()
             return {"status": "ok"} if ok else \
                 {"status": "failed", "reason": "declared evidence not found"}
         if action == "REGISTER_ACCOUNT":
@@ -997,6 +1007,24 @@ class FlowRunner:
         # own record) can reveal the credential; never the plaintext.
         self.execution.error = ""      # not an error state
         self._account_password_ref = stored["ref"]
+        # The account belongs to the APPLICANT: persist it on their case so
+        # Ellis can show them their portal sign-in (email + revealed password)
+        # any time after this run — the portal account outlives the flow.
+        from .. import models as core_models
+        adapter_id = (self.flow.manifest or {}).get("adapter_id", "")
+        acct = self.db.execute(select(core_models.PortalAccount).where(
+            core_models.PortalAccount.application_id == self.execution.application_id,
+            core_models.PortalAccount.adapter_id == adapter_id)).scalars().first()
+        if acct is None:
+            acct = core_models.PortalAccount(
+                application_id=self.execution.application_id,
+                adapter_id=adapter_id, username=email,
+                credential_ref=stored["ref"])
+            self.db.add(acct)
+        else:
+            acct.username = email
+            acct.credential_ref = stored["ref"]
+        self.db.commit()
         self._evidence(node, kind="network",
                        category="account_registration_submitted", strength=3,
                        event=res.get("evidence") or {})
