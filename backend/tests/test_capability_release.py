@@ -211,3 +211,34 @@ def test_navigation_only_flow_needs_no_irreversible_capability(db):
     # No capabilities required -> no gate blockers even without a case.
     runtime.assert_execution_allowed(db, route_key="rk1|nav", application_id="x",
                                      compiled=nav)
+
+
+def test_applicant_pays_personally_needs_no_payment_capability(db):
+    """Regression 2026-08-01: a payment HANDOFF is the applicant paying in
+    their own secure window — Ellis performs no payment action, so it needs
+    no payment_preparation capability. Requiring it (from the bare handoff)
+    refused submission on every applicant-pays route, Vietnam included, at the
+    final step. payment_preparation is required ONLY when the flow reads the
+    fee (READ_FEE) to prepare an exact-amount payment itself."""
+    from app.adapter_factory.compiler import CompiledFlow
+    handoff_only = CompiledFlow(
+        nodes=[{"node_id": "open", "action": "NAVIGATE", "allowed_hostname": HOST},
+               {"node_id": "pay", "action": "APPLICANT_HANDOFF",
+                "handoff_kind": "payment_credentials", "allowed_hostname": HOST},
+               {"node_id": "rec", "action": "RECONCILE_OUTCOME"},
+               {"node_id": "submit", "action": "CLICK", "allowed_hostname": HOST,
+                "irreversibility": "irreversible", "retry_class": "reconcile_first",
+                "success_evidence": [{"kind": "network", "category": "submission_accepted"}]},
+               {"node_id": "done", "action": "COMPLETE"}],
+        order=["open", "pay", "rec", "submit", "done"], manifest={})
+    # Only submission_execution — NOT payment_preparation.
+    assert runtime._required_capabilities(handoff_only) == {"submission_execution"}
+
+    # When Ellis reads the fee itself, the capability IS required.
+    ellis_pays = CompiledFlow(
+        nodes=[{"node_id": "fee", "action": "READ_FEE", "allowed_hostname": HOST},
+               {"node_id": "pay", "action": "APPLICANT_HANDOFF",
+                "handoff_kind": "payment_credentials", "allowed_hostname": HOST},
+               {"node_id": "done", "action": "COMPLETE"}],
+        order=["fee", "pay", "done"], manifest={})
+    assert "payment_preparation" in runtime._required_capabilities(ellis_pays)

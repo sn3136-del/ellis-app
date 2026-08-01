@@ -1147,13 +1147,23 @@ def start_execution(db, *, org_id: str, application_id: str, route_key: str,
 
 def _required_capabilities(compiled) -> set:
     """The irreversible capabilities a compiled flow would exercise, from its
-    handoff kinds and irreversible-node success evidence."""
+    handoff kinds and irreversible-node success evidence.
+
+    A payment HANDOFF is the applicant paying personally in their own secure
+    window — Ellis performs no payment action, so it needs no capability. The
+    payment_preparation capability governs the path where ELLIS acts: reading
+    the official fee (READ_FEE) for exact-amount confirmation and autofilling.
+    Requiring it for a bare handoff refused submission on every
+    applicant-pays-personally route (Vietnam, UK, Ethiopia, Angola) at the
+    applicant's final step, because the capability gate needs a READ_FEE node
+    those flows correctly do not have."""
     caps: set[str] = set()
+    reads_fee = any(n.get("action") == "READ_FEE" for n in compiled.nodes.values())
     for n in compiled.nodes.values():
         if n.get("action") == "APPLICANT_HANDOFF":
             if n.get("handoff_kind") == "credentials":
                 caps.add("account_registration")
-            if n.get("handoff_kind") == "payment_credentials":
+            if n.get("handoff_kind") == "payment_credentials" and reads_fee:
                 caps.add("payment_preparation")
         if n.get("irreversibility") == "irreversible":
             for e in (n.get("success_evidence") or []):
