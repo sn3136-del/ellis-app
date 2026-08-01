@@ -224,10 +224,38 @@ class LiveBrowserSession:
             if self.allowed and not self._host_ok(final):                        # pragma: no cover
                 return {"ok": False, "status": status, "url": final,
                         "error": "redirected off allowlist"}
+            self._settle_for_render(page)                                       # pragma: no cover
             raw = page.evaluate(_EXTRACT_JS)                                     # pragma: no cover
         except Exception as e:  # noqa: BLE001                                    # pragma: no cover
             return {"ok": False, "status": 0, "url": url, "error": str(e)[:200]}
         return normalize_observation(final, status, urlparse(final).netloc, raw)  # pragma: no cover
+
+    def _settle_for_render(self, page) -> None:  # pragma: no cover
+        """domcontentloaded fires before a client-rendered (React/Angular/Vue)
+        portal has drawn its form, so extracting immediately captures an empty
+        shell — the root cause of 'no form page was mappable' on SPA e-visa
+        portals. Wait, bounded, for the network to go idle and the framework
+        to paint real inputs, then stop the moment they appear. Purely a
+        capture-more wait: it changes nothing about how the structure is used,
+        and every step degrades gracefully so a slow/never-idle page still
+        yields whatever is on screen."""
+        try:
+            page.wait_for_load_state("networkidle", timeout=12000)
+        except Exception:  # noqa: BLE001 — some portals poll forever; that is fine
+            pass
+        try:
+            # Real form fields appearing is the signal to proceed; a content
+            # page that never grows one just burns the short budget once.
+            page.wait_for_function(
+                "() => document.querySelectorAll("
+                "'input:not([type=hidden]), select, textarea').length >= 3",
+                timeout=6000)
+        except Exception:  # noqa: BLE001 — not every page is a form; extract as-is
+            pass
+        try:
+            page.wait_for_timeout(600)   # a final paint tick for late hydration
+        except Exception:  # noqa: BLE001
+            pass
 
     # ---- declarative entry-gate replay (credential-free, reversible) --------
     # Some SPA portals gate their application form behind an in-session
