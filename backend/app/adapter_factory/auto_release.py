@@ -146,14 +146,27 @@ def capability_gate(version_row, capability: str) -> tuple[bool, list, dict]:
     problems: list[str] = []
     ev: dict = {}
     if capability == "account_registration":
-        # Registration/login observed, personal credentials are a handoff, and
-        # an authenticated session is proven by evidence — which also reconciles
-        # a duplicate account (an existing session is used, never re-created).
-        if not _has_handoff(flow, "credentials"):
-            problems.append("no credentials handoff — registration/login not observed")
+        # An authenticated session must be reached and proven by evidence, and
+        # a duplicate is reconciled (an existing session is used, never
+        # re-created). Two shapes qualify: the applicant signs in personally
+        # (credentials handoff), OR Ellis creates the account itself
+        # (REGISTER_ACCOUNT: applicant email + fresh vaulted password,
+        # reconcile-first, emailed code as an OTP handoff).
+        has_register = any(n.get("action") == "REGISTER_ACCOUNT" for n in flow)
+        if not (_has_handoff(flow, "credentials") or has_register):
+            problems.append("no credentials handoff or REGISTER_ACCOUNT — "
+                            "registration/login not observed")
+        if has_register:
+            if not _has_reconcile(flow):
+                problems.append("REGISTER_ACCOUNT without reconcile (duplicate-"
+                                "account guard)")
+            if not _has_handoff(flow, "otp"):
+                problems.append("REGISTER_ACCOUNT without an OTP handoff for the "
+                                "emailed verification code")
         if not _verify_has(flow, "session_authenticated"):
             problems.append("no authenticated-session success evidence")
         ev = {"credentials_handoff": _has_handoff(flow, "credentials"),
+              "ellis_registers": has_register,
               "session_evidence": _verify_has(flow, "session_authenticated"),
               "duplicate_reconciliation": "verify_authenticated_session_before_create"}
     elif capability == "appointment_booking":

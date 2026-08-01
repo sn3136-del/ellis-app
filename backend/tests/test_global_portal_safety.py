@@ -292,3 +292,92 @@ def test_terms_transcription_requires_signed_consent_at_runtime(db):
     clicks.clear()
     out = runner._step(compiled.nodes["agree"])
     assert out["status"] == "handoff" and clicks == []
+
+
+# --- Ellis-driven account creation: email + vaulted password + applicant OTP -
+
+def test_register_account_generates_vaults_and_never_double_registers(db):
+    """REGISTER_ACCOUNT fills the applicant's OWN email plus a FRESH password
+    Ellis generates and vaults (never the applicant's secret), reconciles an
+    existing session instead of making a second account, and never reads the
+    emailed code (that stays an applicant OTP handoff)."""
+    from types import SimpleNamespace
+    from app import models, vault
+    from app.adapter_factory.runtime import FlowRunner
+    from app.adapter_factory.compiler import CompiledFlow
+    from app.adapter_factory import models as fm
+
+    applicant = models.Applicant(org_id="o", user_id="u", full_name="T",
+                                 email="applicant@example.com")
+    db.add(applicant); db.flush()
+    app_row = models.VisaApplication(org_id="o", user_id="u",
+                                     applicant_id=applicant.id,
+                                     destination_country="Japan", visa_type="tourist",
+                                     answers={"email": "applicant@example.com"})
+    db.add(app_row); db.flush()
+    execution = fm.AdapterExecution(org_id="o", application_id=app_row.id,
+                                    candidate_id="c1", candidate_version=1)
+    db.add(execution); db.commit()
+
+    node = {"node_id": "register_account", "action": "REGISTER_ACCOUNT",
+            "allowed_hostname": "evisa.example", "retry_class": "reconcile_first",
+            "email_selector": "#email", "password_selector": "#password",
+            "confirm_password_selector": "#confirm", "submit_selector": "#register",
+            "success_evidence": [{"kind": "network",
+                                  "category": "account_registration_submitted"}]}
+    compiled = CompiledFlow([node, {"node_id": "done", "action": "COMPLETE",
+                                    "allowed_hostname": "evisa.example"}],
+                            ["register_account", "done"],
+                            {"allowed_hostnames": ["evisa.example"]})
+
+    calls = {"register": []}
+    authed = {"v": False}
+    driver = SimpleNamespace(
+        session_authenticated=lambda: authed["v"],
+        register_account=lambda **kw: (calls["register"].append(kw) or
+                                       {"ok": True, "evidence": {"status": 200}}))
+    runner = FlowRunner(db, execution=execution, compiled=compiled, driver=driver,
+                        case_answers={"email": "applicant@example.com"})
+
+    # 1. Fresh: registers with the applicant's email + a generated password.
+    out = runner._step(compiled.nodes["register_account"])
+    assert out["status"] == "ok", out
+    assert len(calls["register"]) == 1
+    kw = calls["register"][0]
+    assert kw["email"] == "applicant@example.com"
+    assert kw["password"] and len(kw["password"]) >= 16
+    generated_pw = kw["password"]
+    ref = out["detail"]["password_vault_ref"]
+    assert vault.reveal(ref) == generated_pw       # vaulted, revealable by ref
+    # The plaintext password is NEVER in the evidence/detail surface.
+    assert generated_pw not in str(out["detail"].get("account_email", ""))
+
+    # 2. Reconcile: an already-authenticated session makes NO second account.
+    authed["v"] = True
+    out2 = runner._step(compiled.nodes["register_account"])
+    assert out2["status"] == "ok"
+    assert out2["detail"].get("reconciled_existing") is True
+    assert len(calls["register"]) == 1             # still exactly one registration
+
+
+def test_register_account_flow_requires_otp_handoff_and_reconcile():
+    """A REGISTER_ACCOUNT flow must carry the OTP handoff and a reconcile, or
+    the account_registration capability gate refuses it."""
+    from app.adapter_factory import auto_release, schema
+    base = [
+        {"node_id": "reg", "action": "REGISTER_ACCOUNT",
+         "allowed_hostname": "h", "retry_class": "reconcile_first",
+         "email_selector": "#e", "password_selector": "#p", "submit_selector": "#s",
+         "success_evidence": [{"kind": "network",
+                               "category": "account_registration_submitted"}]},
+        {"node_id": "verify", "action": "VERIFY_EVIDENCE", "allowed_hostname": "h",
+         "success_evidence": [{"kind": "session_state",
+                               "category": "session_authenticated"}]},
+    ]
+
+    class V:
+        flow = [schema.normalize_node(n) for n in base]      # no reconcile, no otp
+    ok, problems, _ = auto_release.capability_gate(V, "account_registration")
+    assert not ok
+    assert any("reconcile" in p for p in problems)
+    assert any("OTP" in p for p in problems)

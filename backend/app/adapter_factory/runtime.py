@@ -466,6 +466,8 @@ class FlowRunner:
             ok = self._verify_evidence(node)
             return {"status": "ok"} if ok else \
                 {"status": "failed", "reason": "declared evidence not found"}
+        if action == "REGISTER_ACCOUNT":
+            return self._register_account(node)
         if action == "APPLICANT_HANDOFF":
             if node.get("handoff_kind") == "captcha":
                 # Never send the applicant hunting for a CAPTCHA that is not
@@ -946,6 +948,60 @@ class FlowRunner:
             if not all(str(k).lower() in have for k in need_keys):
                 return False
         return True
+
+    def _register_account(self, node: dict) -> dict:
+        """Create the applicant's portal account: their OWN email plus a FRESH
+        password Ellis generates and vaults. Reconcile-first — an already
+        authenticated session is used, never a second account. The emailed
+        verification code is NEVER read by Ellis: the flow's next node is the
+        applicant's OTP handoff. The password is stored encrypted and never
+        logged; only the applicant's email is a case value."""
+        from .. import vault
+        # 1. Reconcile: an existing authenticated session means the account
+        # already exists — use it, never register again.
+        session_probe = getattr(self.driver, "session_authenticated", None)
+        if session_probe is not None:
+            try:
+                if session_probe():
+                    self._evidence(node, kind="session_state",
+                                   category="session_authenticated", strength=2)
+                    return {"status": "ok", "detail": {"reconciled_existing": True}}
+            except Exception:  # noqa: BLE001
+                pass
+        # 2. The applicant's own email is required; without it, ask.
+        email = str(self.answers.get("email") or "").strip()
+        if not email:
+            return {"status": "handoff", "handoff_kind": "additional_information",
+                    "detail": {"need": "email"}}
+        # 3. Generate + vault a fresh password bound to this case.
+        password = vault.generate_password({"minLength": 16})
+        stored = vault.store(password, meta={"purpose": "portal_account",
+                                             "application_id": self.execution.application_id,
+                                             "candidate_id": self.execution.candidate_id})
+        register = getattr(self.driver, "register_account", None)
+        if register is None:
+            return {"status": "failed",
+                    "reason": "driver cannot create accounts in this runtime"}
+        try:
+            res = register(email=email, password=password,
+                           email_selector=node.get("email_selector", ""),
+                           password_selector=node.get("password_selector", ""),
+                           confirm_selector=node.get("confirm_password_selector", ""),
+                           submit_selector=node.get("submit_selector", ""))
+        finally:
+            password = None    # drop the plaintext promptly; vault holds it
+        if not res or not res.get("ok"):
+            code = (res or {}).get("code", "REGISTER_FAILED")
+            return {"status": "failed", "reason": f"account registration: {code}"}
+        # Remember the vault ref on the case so later steps (and the applicant's
+        # own record) can reveal the credential; never the plaintext.
+        self.execution.error = ""      # not an error state
+        self._account_password_ref = stored["ref"]
+        self._evidence(node, kind="network",
+                       category="account_registration_submitted", strength=3,
+                       event=res.get("evidence") or {})
+        return {"status": "ok",
+                "detail": {"account_email": email, "password_vault_ref": stored["ref"]}}
 
     def _evidence(self, node, *, kind, category, strength, event=None):
         ev = event or {}

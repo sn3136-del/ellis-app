@@ -660,10 +660,12 @@ def generate_specification(db, *, build_request: fm.AdapterBuildRequest,
     for art in by_page.values():
         portal_terms.extend((art.structure or {}).get("portal_terms") or [])
     family_id = (build_request.portal_evidence or {}).get("family_id", "")
+    account_required = bool((build_request.portal_evidence or {}).get("account_required"))
     flow = _skeleton_flow(hosts[0] if hosts else "", roles, accepted,
                           sensitive_kinds=_observed_sensitive_kinds(by_page),
                           entry_gate=entry_gate, document_mappings=doc_mappings,
-                          portal_terms=portal_terms, family_id=family_id)
+                          portal_terms=portal_terms, family_id=family_id,
+                          account_required=account_required)
     errs = validate_flow(flow, allowed_hostnames=hosts)
     if errs:
         raise ValueError(f"generated flow failed schema validation: {errs[:5]}")
@@ -761,12 +763,54 @@ def _unique_node_slug(name: str, used: set[str]) -> str:
     return slug
 
 
+_PASSWORD_TOKENS = ("password", "passwd", "pwd", "contrasena", "contrasenya",
+                    "motdepasse", "passwort", "senha", "kata sandi")
+_EMAIL_TOKENS = ("email", "emailaddress", "correo", "courriel", "e-mail")
+
+
+def _registration_controls(login_art) -> dict | None:
+    """Observed email + password (+ confirm + submit) controls for creating an
+    account. Returns the selectors, or None when the page has no password
+    field to fill (a pure sign-in page, or credentials not observable) — in
+    which case the applicant signs in personally. Never guesses selectors."""
+    from .schema import deterministic_selector
+    email_sel = pwd_sel = confirm_sel = submit_sel = ""
+    pwd_seen = 0
+    for el in (login_art.structure or {}).get("elements", []):
+        toks = _tokenize(el.get("name", ""), el.get("label", ""),
+                         el.get("placeholder", ""))
+        sel = (el.get("selector") or "").strip()
+        if not sel or not deterministic_selector(sel):
+            continue
+        typ = (el.get("type") or "").lower()
+        if (typ == "password" or any(t in toks for t in _PASSWORD_TOKENS)):
+            pwd_seen += 1
+            if not pwd_sel:
+                pwd_sel = sel
+            elif not confirm_sel:
+                confirm_sel = sel
+        elif (typ == "email" or any(t in toks for t in _EMAIL_TOKENS)) and not email_sel:
+            email_sel = sel
+        elif (el.get("submits") or typ in ("button", "submit")) and not submit_sel:
+            text = f"{el.get('name','')} {el.get('label','')}".lower()
+            if any(k in text for k in ("register", "sign up", "signup", "create",
+                                       "registrar", "crear", "next", "continue")):
+                submit_sel = sel
+    if not (email_sel and pwd_sel and submit_sel):
+        return None
+    out = {"email_selector": email_sel, "password_selector": pwd_sel,
+           "submit_selector": submit_sel}
+    if confirm_sel:
+        out["confirm_password_selector"] = confirm_sel
+    return out
+
+
 def _skeleton_flow(host: str, roles: dict, mappings: list[dict],
                    sensitive_kinds: set | None = None,
                    entry_gate: dict | None = None,
                    document_mappings: list[dict] | None = None,
                    portal_terms: list[dict] | None = None,
-                   family_id: str = "") -> list[dict]:
+                   family_id: str = "", account_required: bool = False) -> list[dict]:
     """The deterministic node graph over ROLE-mapped observed pages. Sensitive
     structure observed on a page ALWAYS becomes an applicant handoff; model
     output cannot change this. Selectors and navigation targets come only from
@@ -795,10 +839,33 @@ def _skeleton_flow(host: str, roles: dict, mappings: list[dict],
         if login.get("delayed_content"):
             node("wait_login", "WAIT_FOR_STATE", purpose="Wait for rendered login form",
                  expected_state="login_form_visible")
-        # Credentials (and any OTP/CAPTCHA the portal adds) are personal steps.
-        node("login_handoff", "APPLICANT_HANDOFF", handoff_kind="credentials",
-             applicant_action=True, sensitive=True,
-             purpose="The applicant signs in personally in the secure browser")
+        # If the portal REQUIRES an account and one can be created from the
+        # observed registration form, Ellis creates it: the applicant's own
+        # email + a fresh vaulted password, reconcile-first so it never makes
+        # a second account. The emailed code and any CAPTCHA stay personal
+        # steps. Otherwise (or when the register controls were not observed)
+        # the applicant signs in personally.
+        reg = _registration_controls(login_art)
+        if account_required and reg:
+            node("reconcile_account", "RECONCILE_OUTCOME",
+                 purpose="Never double-register: use an existing session first",
+                 retry_class="reconcile_first")
+            node("register_account", "REGISTER_ACCOUNT",
+                 purpose="Create the portal account (applicant email + a fresh "
+                         "password Ellis generates and vaults)",
+                 retry_class="reconcile_first",
+                 irreversibility="conditionally_reversible",
+                 success_evidence=[{"kind": "network",
+                                    "category": "account_registration_submitted"}],
+                 **reg)
+            node("account_otp_handoff", "APPLICANT_HANDOFF", handoff_kind="otp",
+                 applicant_action=True, sensitive=True,
+                 purpose="The applicant enters the verification code the portal "
+                         "emailed them (Ellis never reads their inbox)")
+        else:
+            node("login_handoff", "APPLICANT_HANDOFF", handoff_kind="credentials",
+                 applicant_action=True, sensitive=True,
+                 purpose="The applicant signs in personally in the secure browser")
         node("verify_login", "VERIFY_EVIDENCE",
              success_evidence=[{"kind": "session_state", "category": "session_authenticated"}],
              purpose="Confirm authenticated session via evidence, never banner text")

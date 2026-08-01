@@ -19,6 +19,7 @@ ACTION_TYPES = [
     "SELECT_SEARCH", "CHECK", "SCROLL_TO_BOTTOM", "UPLOAD_AUTHORIZED_DOCUMENT",
     "READ_TEXT", "READ_FEE",
     "READ_APPOINTMENT_INVENTORY", "WAIT_FOR_NETWORK", "VERIFY_EVIDENCE",
+    "REGISTER_ACCOUNT",
     "APPLICANT_HANDOFF", "RECONCILE_OUTCOME", "PAUSE", "COMPLETE",
 ]
 
@@ -78,6 +79,13 @@ NODE_DEFAULTS = {
     "requires_signed_terms": False,
     "consent_terms_hash": "",
     "consent_family_id": "",
+    # REGISTER_ACCOUNT field selectors: Ellis fills the applicant's OWN email
+    # and a FRESH password it generates and vaults (never the applicant's
+    # existing secret, never an authentication into a pre-existing account).
+    "email_selector": "",
+    "password_selector": "",
+    "confirm_password_selector": "",
+    "submit_selector": "",
     "next": [],
 }
 
@@ -180,6 +188,23 @@ def validate_node(raw: dict, *, allowed_hostnames: list[str]) -> list[str]:
             errs.append(f"{nid}: requires_signed_terms needs consent_family_id")
     if action == "UPLOAD_AUTHORIZED_DOCUMENT" and not (node.get("doc_type") or "").strip():
         errs.append(f"{nid}: UPLOAD_AUTHORIZED_DOCUMENT requires a declared doc_type")
+    if action == "REGISTER_ACCOUNT":
+        # Ellis creates a NEW account: applicant email + a fresh vaulted
+        # password. It must be reconcile-first (never double-register), name
+        # the observed email + password + submit controls, and prove success
+        # only by an authenticated-session evidence transition — never a
+        # banner. The emailed verification code stays an applicant handoff.
+        for f in ("email_selector", "password_selector", "submit_selector"):
+            if not (node.get(f) or "").strip():
+                errs.append(f"{nid}: REGISTER_ACCOUNT requires {f}")
+        if node.get("retry_class") != "reconcile_first":
+            errs.append(f"{nid}: REGISTER_ACCOUNT must be reconcile_first "
+                        f"(never create a duplicate account)")
+        ok_cats = {"account_registration_submitted", "session_authenticated"}
+        if not any(e.get("category") in ok_cats
+                   for e in (node.get("success_evidence") or [])):
+            errs.append(f"{nid}: REGISTER_ACCOUNT must declare success_evidence "
+                        f"(account_registration_submitted)")
     if action == "APPLICANT_HANDOFF":
         if node.get("handoff_kind") not in SENSITIVE_HANDOFF_KINDS:
             errs.append(f"{nid}: APPLICANT_HANDOFF requires a declared handoff_kind")

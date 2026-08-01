@@ -361,6 +361,7 @@ def build_family_adapter(db, family_id: str, *, observer=None,
                        "operator": family.operator,
                        "portal_url": family.base_url,
                        "family_id": family.family_id,
+                       "account_required": bool(getattr(family, "account_required", False)),
                        "entry_urls": research_entry_urls(db, family)}
     if family.entry_gate:
         # Curated entry-gate declaration rides on the build's portal evidence:
