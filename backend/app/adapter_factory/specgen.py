@@ -533,6 +533,33 @@ def _page_roles(by_page: dict, entry_gated: bool = False) -> dict:
     return roles
 
 
+# Build-time control vocabularies. A government portal writes its buttons in
+# its OWN language: matching only English silently loses the control and the
+# whole segment drops (Mexico's save button is "Guardar"/#procesar). Kept
+# strictly separate by function — SAVE never contains a submit/pay synonym, so
+# a form-save click can never fire the irreversible action.
+_SAVE_WORDS = (
+    "save", "continue", "next",
+    "guardar", "salvar", "continuar", "siguiente", "próximo", "proximo",
+    "procesar", "continuer", "suivant", "enregistrer", "weiter", "speichern",
+    "avanti", "salva", "devam", "ileri", "kaydet", "lanjut", "selanjutnya",
+    "simpan", "далее", "продолжить", "сохранить", "tiếp tục", "tiep tuc",
+    "次へ", "保存", "다음", "저장", "下一步", "保存", "ถัดไป", "التالي", "حفظ")
+_SUBMIT_WORDS = (
+    "submit", "enviar", "soumettre", "absenden", "einreichen", "invia",
+    "gönder", "kirim", "отправить", "подать", "gửi", "提出", "送信", "提交",
+    "제출", "ส่ง", "إرسال", "تقديم")
+_FEE_WORDS = (
+    "fee", "amount", "tarifa", "tasa", "costo", "importe", "monto",
+    "frais", "montant", "gebühr", "betrag", "taxa", "valor", "ücret",
+    "tutar", "biaya", "сбор", "стоимость", "сумма", "phí", "lệ phí",
+    "手数料", "金額", "수수료", "费用", "ค่าธรรมเนียม", "الرسوم")
+_BOOK_WORDS = (
+    "book", "slot", "appointment", "cita", "agendar", "reservar", "turno",
+    "rendez-vous", "réserver", "termin", "buchen", "marcação", "agendamento",
+    "randevu", "janji", "запись", "записаться", "予約", "예약", "预约", "นัดหมาย")
+
+
 def _observed_selector(art, *keywords, clickable=False, fallback="") -> str:
     """Selector of the first observed element matching keywords, else the
     given fallback (which the contract layer will honestly reject if it was
@@ -881,8 +908,7 @@ def _skeleton_flow(host: str, roles: dict, mappings: list[dict],
         app_art = roles["application"]
         page_mappings = [m for m in mappings
                          if m["page_key"] == app_art.page_key]
-        save_sel = _observed_selector(app_art, "save", "continue", "next",
-                                      "submit", clickable=True)
+        save_sel = _observed_selector(app_art, *_SAVE_WORDS, clickable=True)
         # A fillable form whose save/advance control was never observed is
         # UNBUILDABLE, not partially buildable: filling and then navigating
         # away would abandon the unsaved form while reporting success. Drop
@@ -910,7 +936,7 @@ def _skeleton_flow(host: str, roles: dict, mappings: list[dict],
                  success_evidence=[{"kind": "network", "category": "form_saved"}])
     if "fees" in roles:
         fees_art = roles["fees"]
-        fee_sel = _observed_selector(fees_art, "fee", "amount")
+        fee_sel = _observed_selector(fees_art, *_FEE_WORDS)
         # No observed fee element -> no fees segment at all. A payment
         # handoff with no fee context is incoherent; fee discovery then
         # rides the runtime's page-text fallback and the applicant payment
@@ -925,8 +951,7 @@ def _skeleton_flow(host: str, roles: dict, mappings: list[dict],
                  purpose="The applicant confirms the exact amount and pays personally")
     if "appointments" in roles:
         appt_art = roles["appointments"]
-        book_sel = _observed_selector(appt_art, "book", "slot", "appointment",
-                                      clickable=True)
+        book_sel = _observed_selector(appt_art, *_BOOK_WORDS, clickable=True)
         if book_sel:
             node("goto_appointments", "NAVIGATE", purpose="Open the appointments page",
                  allowed_url_patterns=[_nav_pattern(appt_art, host, "/appointments")])
@@ -942,7 +967,7 @@ def _skeleton_flow(host: str, roles: dict, mappings: list[dict],
                  max_retries=1)
     if "submit" in roles:
         submit_art = roles["submit"]
-        submit_sel = _observed_selector(submit_art, "submit", clickable=True)
+        submit_sel = _observed_selector(submit_art, *_SUBMIT_WORDS, clickable=True)
         if submit_sel:
             node("goto_submit", "NAVIGATE", purpose="Open the submission page",
                  allowed_url_patterns=[_nav_pattern(submit_art, host, "/submit")])
