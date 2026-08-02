@@ -245,6 +245,34 @@ INDIA_ONLINE_PREP = [
     ("Reference in India - Phone", "india_reference_phone", False),
 ]
 
+JAPAN_VJW_PREP = [
+    # Visit Japan Web covers ENTRY (immigration + customs), not a visa — most
+    # passports need no visa for Japan tourism, and VJW is how the arrival
+    # paperwork moves online. Sections follow the site's own flow: register a
+    # trip, the disembarkation card, then the customs declaration.
+    ("Trip Registration - Surname (as in passport)", "surname", True),
+    ("Trip Registration - Given names (as in passport)", "given_names", True),
+    ("Trip Registration - Date of birth", "birth_date", True),
+    ("Trip Registration - Nationality", "nationality", True),
+    ("Trip Registration - Passport number", "passport_number", True),
+    ("Trip Registration - Passport expiry date", "passport_expiry_date", True),
+    ("Trip Registration - Arrival date in Japan", "arrival_date", True),
+    ("Trip Registration - Arrival flight number", "flight_number", True),
+    ("Trip Registration - Intended length of stay (days)", "stay_length_days", True),
+    ("Disembarkation Card - Purpose of visit", "travel_purpose", True),
+    ("Disembarkation Card - Accommodation name in Japan", "accommodation", True),
+    ("Disembarkation Card - Accommodation address in Japan", "accommodation_address", True),
+    ("Disembarkation Card - Accommodation phone in Japan", "accommodation_phone", True),
+    ("Disembarkation Card - Ever deported or refused entry to Japan?", "deported_before", True),
+    ("Disembarkation Card - Any criminal conviction (any country)?", "criminal_record", True),
+    ("Disembarkation Card - Carrying controlled drugs, guns or swords?", "restricted_items", True),
+    ("Customs Declaration - Goods exceeding the duty-free allowance?", "customs_over_allowance", True),
+    ("Customs Declaration - Commercial goods or samples?", "commercial_goods", True),
+    ("Customs Declaration - Cash or securities over 1,000,000 yen?", "cash_over_1m_jpy", True),
+    ("Customs Declaration - Unaccompanied baggage sent separately?", "unaccompanied_baggage", True),
+    ("Customs Declaration - Email for the QR codes", "email", True),
+]
+
 FORMS = {
     "schengen_uniform": {
         "title": "Schengen Uniform Visa Application",
@@ -254,6 +282,17 @@ FORMS = {
                  "bring it to your appointment with your passport, photo and "
                  "supporting documents. Ellis cannot submit a Schengen visa "
                  "application: it is decided in person, with biometrics."),
+    },
+    "japan_vjw_prep": {
+        "title": "Visit Japan Web Preparation Sheet (arrival, not a visa)",
+        "fields": JAPAN_VJW_PREP,
+        "submission": "applicant_online",
+        "note": ("Complete Visit Japan Web at vjw-lp.digital.go.jp before you "
+                 "fly — it needs an account, so you register and enter these "
+                 "answers yourself, then show the QR codes at immigration and "
+                 "customs. Skipping it is allowed: paper cards on arrival "
+                 "remain accepted. This is entry paperwork; if your passport "
+                 "is visa-exempt for Japan, there is no visa to apply for."),
     },
     "china_cova_prep": {
         "title": "China Visa (COVA) Preparation Sheet",
@@ -315,7 +354,7 @@ def form_for_destination(dest_iso3: str) -> str | None:
         return "schengen_uniform"
     # Destinations that abolished the paper form: what Ellis can give is a
     # complete set of answers in the portal's own screen order.
-    return {"USA": "ds160_prep", "CHN": "china_cova_prep",
+    return {"USA": "ds160_prep", "CHN": "china_cova_prep", "JPN": "japan_vjw_prep",
             "GBR": "uk_online_prep", "IND": "india_online_prep"}.get(d)
 
 

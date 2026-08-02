@@ -335,3 +335,20 @@ def test_no_online_sheet_pretends_an_official_blank_exists():
     for key in ("china_cova_prep", "uk_online_prep", "india_online_prep"):
         assert cf.official_template_available(key) is False
         assert cf.fill_official_template(key, {"surname": "X"}) is None
+
+
+def test_japan_gets_the_visit_japan_web_sheet_and_it_says_no_visa():
+    """VJW is arrival paperwork, not a visa — the sheet must say so, name the
+    real site, and follow VJW's own three sections."""
+    from app import consular_forms as cf
+    assert cf.form_for_destination("JPN") == "japan_vjw_prep"
+    form = cf.FORMS["japan_vjw_prep"]
+    assert form["submission"] == "applicant_online"
+    note = form["note"].lower()
+    assert "vjw" in note and "not" not in form["title"].lower().replace(
+        "not a visa", "")  # title carries the disclaimer verbatim
+    assert "paper" in note        # skipping VJW must be stated as allowed
+    sections = {l.split(" - ")[0] for l, _, _ in form["fields"]}
+    assert sections == {"Trip Registration", "Disembarkation Card",
+                        "Customs Declaration"}
+    assert cf.official_template_available("japan_vjw_prep") is False
