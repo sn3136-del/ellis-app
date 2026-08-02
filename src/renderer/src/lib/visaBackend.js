@@ -231,6 +231,9 @@ export function createVisaClient(session) {
     findConsularPost: (id) => call('POST', `/cases/${id}/find-consular-post`, session),
     // Government calendars that have NO account (Germany RK-Termin, Poland
     // e-Konsulat): walk the applicant's own secure window to the month view.
+    // Every mission the system serves, by NAME — an applicant knows 'Beijing',
+    // not that their consulate's code is 'peki'.
+    calendarMissions: (id) => call('GET', `/cases/${id}/calendar/missions`, session),
     calendarOpen: (id, locationCode, categoryId = '') =>
       call('POST', `/cases/${id}/calendar/open?location_code=${encodeURIComponent(locationCode)}` +
            (categoryId ? `&category_id=${encodeURIComponent(categoryId)}` : ''), session, {}),

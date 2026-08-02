@@ -37,6 +37,31 @@ class CalendarUnavailable(Exception):
     could not reach the month view)."""
 
 
+def rk_termin_missions(driver) -> list[dict]:
+    """Every mission RK-Termin serves, by NAME.
+
+    An applicant does not know their consulate is 'peki'; they know it is in
+    Beijing. The list is read live rather than pinned because missions open,
+    close and are renamed, and a stale code sends someone to a page that no
+    longer exists.
+    """
+    driver.goto(f"{RK_BASE}choose_locationList.do")
+    rows = driver.evaluate(
+        "() => [...document.querySelectorAll('a')]"
+        ".filter(a => /locationCode=/.test(a.href))"
+        ".map(a => ({name:(a.innerText||'').replace(/\\s+/g,' ').trim().slice(0,60),"
+        "            code:(a.href.match(/locationCode=([^&]+)/)||[])[1]}))") or []
+    seen, out = set(), []
+    for r in rows:
+        code = (r.get("code") or "").strip()
+        name = (r.get("name") or "").strip()
+        if code and name and code not in seen:
+            seen.add(code)
+            out.append({"code": code, "name": name})
+    out.sort(key=lambda m: m["name"])
+    return out
+
+
 def rk_termin_walk(driver, *, location_code: str, realm_id: str = "",
                    category_id: str = "") -> dict:
     """Walk RK-Termin from a mission's realm list to its calendar gate.

@@ -1519,6 +1519,23 @@ class _WindowDriver:
         return self.page.evaluate(js, *a) if a else self.page.evaluate(js)
 
 
+@app.get("/cases/{application_id}/calendar/missions")
+def case_calendar_missions(application_id: str, db=Depends(get_session),
+                           p: Principal = Depends(get_principal)):
+    """Every mission this appointment system serves, by name, so the applicant
+    picks 'Beijing' instead of knowing their consulate's code is 'peki'."""
+    _owned(db, p, application_id)
+    from . import gov_calendar as gc
+    sess = _attach_applicant_window(db, application_id, ["service2.diplo.de"])
+    try:
+        return {"missions": gc.rk_termin_missions(_WindowDriver(sess._ensure_page()))}
+    except Exception as e:  # noqa: BLE001 — an unreachable list is honest
+        raise HTTPException(409, detail={"reason": "missions_unavailable",
+                                         "detail": str(e)[:200]})
+    finally:
+        sess.close()
+
+
 @app.post("/cases/{application_id}/calendar/open")
 def case_calendar_open(application_id: str, location_code: str = "",
                        category_id: str = "", db=Depends(get_session),

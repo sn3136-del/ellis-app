@@ -872,6 +872,18 @@ function GovCalendar({ t, client, caseId }) {
   const [month, setMonth] = useState(null)   // month summary once readable
   const [busy, setBusy] = useState(false)
   const [loc, setLoc] = useState('')
+  const [missions, setMissions] = useState(null)
+  const [search, setSearch] = useState('')
+
+  async function loadMissions() {
+    setBusy(true)
+    try {
+      const out = await client.calendarMissions(caseId)
+      setMissions(out.missions || [])
+      if ((out.missions || []).length) setLoc(out.missions[0].code)
+    } catch (e) { toast(e.detail?.detail || e.message) }
+    setBusy(false)
+  }
 
   async function openCalendar() {
     if (!loc.trim()) { toast(t('cal.needLocation')); return }
@@ -898,16 +910,36 @@ function GovCalendar({ t, client, caseId }) {
         {t('cal.sub')}
       </div>
       {!open ? (
-        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
-          <div className="field" style={{ flex: 1 }}>
+        <div>
+          <div className="field">
             <label>{t('cal.location')}</label>
-            <input className="input" value={loc} placeholder="peki"
-              onChange={(e) => setLoc(e.target.value)} />
+            {missions === null ? (
+              <button className="btn btn--ghost" onClick={loadMissions} disabled={busy}
+                data-testid="cal-load-missions">
+                {busy ? t('cal.loadingMissions') : t('cal.loadMissions')}
+              </button>
+            ) : (
+              <>
+                <input className="input" value={search} placeholder={t('cal.searchMission')}
+                  onChange={(e) => setSearch(e.target.value)} data-testid="cal-search" />
+                <select className="select" value={loc} size={6} style={{ marginTop: 6 }}
+                  onChange={(e) => setLoc(e.target.value)} data-testid="cal-mission">
+                  {missions
+                    .filter((m) => !search ||
+                      m.name.toLowerCase().includes(search.toLowerCase()))
+                    .map((m) => (
+                      <option key={m.code} value={m.code}>{m.name}</option>
+                    ))}
+                </select>
+              </>
+            )}
           </div>
-          <button className="btn" onClick={openCalendar} disabled={busy}
-            data-testid="cal-open">
-            {busy ? t('cal.opening') : t('cal.open')}
-          </button>
+          {missions !== null && (
+            <button className="btn" onClick={openCalendar} disabled={busy || !loc}
+              data-testid="cal-open" style={{ marginTop: 8 }}>
+              {busy ? t('cal.opening') : t('cal.open')}
+            </button>
+          )}
         </div>
       ) : (
         <>
