@@ -44,7 +44,17 @@ _OUTCOME_TO_KINDS = {
 # recon the replay CAPTURES the terms text as evidence and, to observe the
 # form behind the gate, replays the choice in a throwaway observation session
 # that never carries applicant data and never submits anything.
-_ENTRY_GATE_VOCAB = ("CLICK", "SCROLL_TO_BOTTOM", "CHECK", "TERMS_CHOICE")
+# SELECT_OPTION and WAIT_FOR_SELECTOR are the two shapes several real gates
+# need and could not express. Canada's eTA asks three <select> questions
+# (representative? travel document type? citizenship?) before it will render
+# its 34-field form, and puts a virtual waiting room in front of the whole
+# thing; New Zealand, Uzbekistan, Georgia and Uganda each hide their form
+# behind a required dropdown too. Both stay strictly reversible: the option is
+# a DECLARED literal (never applicant data — a value_from would make the gate
+# carry a person, which curated gates must never do) and the wait only
+# observes.
+_ENTRY_GATE_VOCAB = ("CLICK", "SCROLL_TO_BOTTOM", "CHECK", "TERMS_CHOICE",
+                     "SELECT_OPTION", "WAIT_FOR_SELECTOR")
 
 
 def _validate_entry_gate(family_id: str, gate: dict) -> None:
@@ -65,6 +75,19 @@ def _validate_entry_gate(family_id: str, gate: dict) -> None:
                 a.get("terms_text_selector") or "").strip():
             raise ValueError(f"portal family {family_id}: TERMS_CHOICE needs a "
                              f"terms_text_selector capturing the verbatim terms")
+        if a.get("action") == "SELECT_OPTION":
+            if not (str(a.get("option_value") or "").strip()
+                    or str(a.get("option_label") or "").strip()):
+                raise ValueError(
+                    f"portal family {family_id}: SELECT_OPTION needs a declared "
+                    f"option_value or option_label")
+            # An applicant-derived option would make a curated gate carry a
+            # person into a throwaway observation session. Refuse at seed load.
+            if a.get("value_from"):
+                raise ValueError(
+                    f"portal family {family_id}: SELECT_OPTION may not take "
+                    f"value_from — a gate choice is declared data, never the "
+                    f"applicant's")
     if not str(gate.get("expect_path") or "").startswith("/"):
         raise ValueError(f"portal family {family_id}: entry_gate needs an "
                          f"absolute expect_path")

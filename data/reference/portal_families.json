@@ -108,11 +108,11 @@
    "kind": "eta_portal",
    "operator": "Immigration, Refugees and Citizenship Canada",
    "operator_kind": "government",
-   "base_url": "https://eta.onlineservices-servicesenligne.apps.cic.gc.ca/eta/welcome?lang=en",
+   "base_url": "https://eta.onlineservices-servicesenligne.apps.cic.gc.ca/eta/?lang=en",
    "hostnames": [
+    "eta.onlineservices-servicesenligne.apps.cic.gc.ca",
     "onlineservices-servicesenligne.cic.gc.ca",
-    "www.canada.ca",
-    "eta.onlineservices-servicesenligne.apps.cic.gc.ca"
+    "www.canada.ca"
    ],
    "destinations": [
     "CAN"
@@ -121,7 +121,39 @@
     "ELECTRONIC_AUTHORIZATION",
     "EVISA"
    ],
-   "account_required": false
+   "account_required": false,
+   "entry_gate": {
+    "description": "Canada's eTA form (34 fields) is public: no account, no CAPTCHA. Reaching it needs three declared <select> answers and a wait for the virtual waiting room ('You're in line to apply'), which clears on its own. Mapped live 2026-08-02; the destination is a hash route, so it cannot be a form_path and must be replayed.",
+    "actions": [
+     {
+      "action": "WAIT_FOR_SELECTOR",
+      "selector": "select#welcome_isRepresentative",
+      "timeout_ms": 180000,
+      "purpose": "The virtual waiting room holds the entry for a bounded time and clears with no interaction; the first real control appearing is the signal that it has."
+     },
+     {
+      "action": "SELECT_OPTION",
+      "selector": "select#welcome_isRepresentative",
+      "option_value": "no",
+      "purpose": "'Are you a representative applying on someone's behalf?' — No. Ellis files as the applicant, never as a paid agent, so this answer is a property of the route, not of the person."
+     },
+     {
+      "action": "SELECT_OPTION",
+      "selector": "select[name=\"travelDocumentType\"]",
+      "option_label": "Passport - Ordinary/Regular",
+      "purpose": "Travel document type. Ordinary passport is the tourist route Ellis serves; a diplomatic or refugee document is a different route with different rules and must not be assumed here."
+     },
+     {
+      "action": "CLICK",
+      "selector": "button[type=\"submit\"]",
+      "timeout_ms": 45000,
+      "purpose": "Advance from the eligibility questions to the application form itself."
+     }
+    ],
+    "expect_path": "/eta/#/application",
+    "form_ready_selector": "input[name=\"passportNumber\"]",
+    "declared_handoffs": []
+   }
   },
   {
    "family_id": "uk-eta",

@@ -338,7 +338,8 @@ class LiveBrowserSession:
     # acknowledgment checkboxes, continue). The sequence is DECLARED, curated
     # data — never inferred from page content — and only these reversible
     # navigation/acknowledgment actions are permitted.
-    ENTRY_GATE_ACTIONS = ("CLICK", "SCROLL_TO_BOTTOM", "CHECK")
+    ENTRY_GATE_ACTIONS = ("CLICK", "SCROLL_TO_BOTTOM", "CHECK",
+                          "SELECT_OPTION", "WAIT_FOR_SELECTOR")
     ENTRY_GATE_MAX_ACTIONS = 12
 
     # Georgia names its CAPTCHA input "SecurityCode" — no 'captcha', no 'otp',
@@ -557,6 +558,46 @@ class LiveBrowserSession:
                 if act == "SCROLL_TO_BOTTOM":
                     self._scroll_container_to_bottom(page, sel)
                     performed.append({"action": act, "selector": sel, "ok": True})
+                    continue
+                if act == "WAIT_FOR_SELECTOR":
+                    # Purely observational: a bounded wait for something the
+                    # page will render on its own. Canada's eTA puts a virtual
+                    # waiting room ("You're in line to apply") in front of the
+                    # form, and the queue clears without any interaction.
+                    try:
+                        page.locator(sel).first.wait_for(
+                            state="attached",
+                            timeout=int(a.get("timeout_ms") or 120000))
+                        ok = True
+                    except Exception as e:  # noqa: BLE001
+                        if not a.get("optional"):
+                            return {"ok": False, "status": status, "url": page.url,
+                                    "error": f"entry gate WAIT_FOR_SELECTOR {sel[:60]!r} "
+                                             f"never appeared: {str(e)[:120]}"}
+                        ok = False
+                    performed.append({"action": act, "selector": sel, "ok": ok})
+                    continue
+                if act == "SELECT_OPTION":
+                    # A DECLARED choice on a declared control. The value is
+                    # curated data (an eligibility answer the whole route
+                    # depends on: "not a representative", "ordinary passport"),
+                    # never the applicant's — families.py refuses value_from at
+                    # seed load, so nothing personal can reach this session.
+                    loc = page.locator(sel).first
+                    loc.wait_for(state="attached",
+                                 timeout=int(a.get("timeout_ms") or 30000))
+                    self._assert_gate_target_safe(loc, "SELECT_OPTION", sel)
+                    try:
+                        if a.get("option_value"):
+                            loc.select_option(value=str(a["option_value"]))
+                        else:
+                            loc.select_option(label=str(a["option_label"]))
+                    except Exception as e:  # noqa: BLE001
+                        return {"ok": False, "status": status, "url": page.url,
+                                "error": f"entry gate SELECT_OPTION on {sel[:60]!r} "
+                                         f"failed: {str(e)[:140]}"}
+                    performed.append({"action": act, "selector": sel, "ok": True})
+                    page.wait_for_timeout(int(a.get("settle_ms") or 900))
                     continue
                 if act == "TERMS_CHOICE":
                     # The portal's own terms gate. This OBSERVATION session

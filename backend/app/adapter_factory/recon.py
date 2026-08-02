@@ -36,7 +36,8 @@ _ALLOWED_TYPES = {"text", "email", "password", "date", "select", "checkbox",
 # only to observe the form behind the gate (and to capture the verbatim terms
 # as evidence) in a throwaway observation session — at RUNTIME it is never
 # enacted until the applicant has signed those exact terms in Ellis.
-_ENTRY_GATE_ACTIONS = {"CLICK", "SCROLL_TO_BOTTOM", "CHECK", "TERMS_CHOICE"}
+_ENTRY_GATE_ACTIONS = {"CLICK", "SCROLL_TO_BOTTOM", "CHECK", "TERMS_CHOICE",
+                       "SELECT_OPTION", "WAIT_FOR_SELECTOR"}
 ENTRY_GATED_FORM_PAGE_KEY = "application_form"
 ENTRY_GATED_FORM_CLASS = "application_form"
 

@@ -287,3 +287,52 @@ def test_verification_code_fields_are_sensitive_in_both_halves_of_the_rule():
     # challenge field as an ordinary fillable input.
     for token in ("securit", "verif", "turnstile", "recaptcha"):
         assert token in _EXTRACT_JS
+
+
+# ---- gate vocabulary: SELECT_OPTION and WAIT_FOR_SELECTOR ------------------
+
+def test_select_option_must_declare_its_own_value_and_never_the_applicants():
+    """A gate choice is curated data ('not a representative', 'ordinary
+    passport') — an applicant-derived one would carry a person into a
+    throwaway observation session."""
+    import pytest
+    from app.global_routes.families import _validate_entry_gate
+    ok = {"actions": [{"action": "SELECT_OPTION", "selector": "select#x",
+                       "option_value": "no"}],
+          "expect_path": "/form"}
+    _validate_entry_gate("fam", ok)          # declared literal: fine
+
+    with pytest.raises(ValueError, match="option_value or option_label"):
+        _validate_entry_gate("fam", {"actions": [
+            {"action": "SELECT_OPTION", "selector": "select#x"}],
+            "expect_path": "/form"})
+
+    with pytest.raises(ValueError, match="never the applicant"):
+        _validate_entry_gate("fam", {"actions": [
+            {"action": "SELECT_OPTION", "selector": "select#x",
+             "option_value": "x", "value_from": "route.nationality"}],
+            "expect_path": "/form"})
+
+
+def test_all_three_vocabularies_agree_on_the_gate_actions():
+    """A gate valid at seed load must not be refused by recon's sanitizer or
+    the live replay — the three lists drifting is how a correct curation dies
+    silently downstream."""
+    from app.global_routes.families import _ENTRY_GATE_VOCAB
+    from app.adapter_factory.recon import _ENTRY_GATE_ACTIONS
+    from app.portal.live_browser import LiveBrowserSession
+    live = set(LiveBrowserSession.ENTRY_GATE_ACTIONS) | {"TERMS_CHOICE"}
+    assert set(_ENTRY_GATE_VOCAB) == set(_ENTRY_GATE_ACTIONS) == live
+
+
+def test_canadas_gate_is_expressible_now():
+    """Canada's 34-field eTA form is public — no account, no CAPTCHA — and was
+    unreachable purely because the vocabulary had no way to answer a <select>
+    or wait out a virtual waiting room."""
+    from app.global_routes.families import load_seed
+    ca = next(f for f in load_seed() if f["family_id"] == "canada-ircc")
+    acts = [a["action"] for a in ca["entry_gate"]["actions"]]
+    assert "WAIT_FOR_SELECTOR" in acts and acts.count("SELECT_OPTION") == 2
+    # The form host must be the one probe URLs get built from.
+    assert ca["hostnames"][0].startswith("eta.onlineservices")
+    assert "#/application" in ca["entry_gate"]["expect_path"]
