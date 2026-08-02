@@ -549,6 +549,35 @@ class LiveBrowserSession:
                 continue
 
     def observe_with_entry_gate(self, base_url: str, entry_gate: dict) -> dict:
+        """Replay the gate, retrying ONCE on a first-pass failure.
+
+        A gated SPA's first visit in a fresh browser is routinely the slow one:
+        Thailand's TDAC swallows the tile click until its invisible Turnstile
+        self-populates (~10-13s), Cambodia's guest dialog mounts behind a
+        Cloudflare interstitial, and Angular routes are still hydrating. The
+        SECOND independent session the repeated-sessions gate requires is
+        always a fresh browser, so it always paid that cost and always failed
+        first — which read as "these selectors are unstable" when the truth was
+        "this page was not ready yet".
+
+        One retry in the SAME session, after a settle. Nothing is clicked twice
+        that had an effect: a gate that got partway simply replays from the
+        portal's own start page, which is where a failed replay leaves it.
+        """
+        out = self._observe_with_entry_gate_once(base_url, entry_gate)
+        if out and out.get("ok"):
+            return out
+        try:  # pragma: no cover — live path
+            self._ensure_page().wait_for_timeout(6000)
+        except Exception:  # noqa: BLE001
+            pass
+        retry = self._observe_with_entry_gate_once(base_url, entry_gate)
+        if retry and retry.get("ok"):
+            retry["replay_attempt"] = 2
+            return retry
+        return retry or out
+
+    def _observe_with_entry_gate_once(self, base_url: str, entry_gate: dict) -> dict:
         """Replay a DECLARED entry gate from base_url and observe the
         destination page's structure. Actions are restricted to the reversible
         navigation/acknowledgment vocabulary; the observer still never

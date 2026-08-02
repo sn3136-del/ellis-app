@@ -426,3 +426,44 @@ def test_a_dns_failure_is_transient_not_a_portal_verdict():
     for msg in ("no form page was mappable from public observation",
                 "portal family is not officially verified"):
         assert classify_error(msg) == "permanent", msg
+
+
+def test_the_entry_gate_replay_retries_once_in_the_same_session():
+    """The SECOND independent session the repeated-sessions gate requires is
+    always a fresh browser, so it always paid the cold-start cost — Turnstile
+    self-populating, Cloudflare interstitials, Angular hydration — and always
+    failed first. That read as 'these selectors are unstable' when the truth
+    was 'this page was not ready yet'."""
+    from app.portal.live_browser import LiveBrowserSession
+    calls = {"n": 0}
+
+    class _S(LiveBrowserSession):
+        def _observe_with_entry_gate_once(self, base_url, entry_gate):
+            calls["n"] += 1
+            return ({"ok": False, "error": "not ready"} if calls["n"] == 1
+                    else {"ok": True, "elements": [], "hostname": "x.gov"})
+
+        def _ensure_page(self):
+            class _P:
+                def wait_for_timeout(self, _ms): pass
+            return _P()
+
+    out = _S(allowed_hostnames=["x.gov"]).observe_with_entry_gate("https://x.gov/", {})
+    assert out["ok"] is True and out["replay_attempt"] == 2 and calls["n"] == 2
+
+
+def test_a_gate_that_fails_twice_still_reports_the_failure():
+    """A retry must never turn a real refusal into silence."""
+    from app.portal.live_browser import LiveBrowserSession
+
+    class _S(LiveBrowserSession):
+        def _observe_with_entry_gate_once(self, base_url, entry_gate):
+            return {"ok": False, "error": "off-allowlist host refused"}
+
+        def _ensure_page(self):
+            class _P:
+                def wait_for_timeout(self, _ms): pass
+            return _P()
+
+    out = _S(allowed_hostnames=["x.gov"]).observe_with_entry_gate("https://x.gov/", {})
+    assert out["ok"] is False and "off-allowlist" in out["error"]
