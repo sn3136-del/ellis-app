@@ -806,6 +806,60 @@ def _owned(db, p: Principal, application_id: str) -> models.VisaApplication:
     return app_row
 
 
+def _explain_no_live_adapter(db, app_row, fallback: str) -> str:
+    """Why can't Ellis drive a portal for THIS case? The internal reason ('no
+    live driver is bound') is true but useless to an applicant, and reads like
+    a broken install. Resolve the traveller's real route and say the honest,
+    specific thing instead — most often that their nationality's route is
+    decided in person and there is no website for anyone to drive."""
+    from .global_routes import resolver
+    from .global_routes.resolver import RegistryError
+    answers = app_row.answers or {}
+    try:
+        rec = resolver.resolve_route(
+            db,
+            nationality=answers.get("passport_nationality") or "",
+            destination=app_row.destination_country or "",
+            issuing_country=answers.get("passport_issuing_country") or None,
+            travel_document_type=answers.get("travel_document_type") or "ordinary_passport",
+            residence=answers.get("lawful_country_of_residence") or None)
+    except (RegistryError, Exception):  # noqa: BLE001 — never hide the stop
+        return fallback
+    outcome = (rec or {}).get("route_outcome") or ""
+    dest = app_row.destination_country or "this destination"
+    IN_PERSON = {
+        "AUTHORIZED_VISA_CENTER": (
+            f"Travellers on your passport apply for {dest} at an authorised visa "
+            f"centre in person, with biometrics — there is no government website "
+            f"to submit through. Ellis prepares your application, forms and "
+            f"document checklist for that appointment."),
+        "EMBASSY_OR_CONSULATE_APPLICATION": (
+            f"Travellers on your passport apply for {dest} at an embassy or "
+            f"consulate in person — there is no government website to submit "
+            f"through. Ellis prepares your application, forms and document "
+            f"checklist for that appointment."),
+        "APPOINTMENT_REQUIRED": (
+            f"This {dest} route requires an in-person appointment; Ellis "
+            f"prepares everything you bring to it."),
+        "MAIL_APPLICATION": (
+            f"This {dest} route is filed by post; Ellis prepares the forms and "
+            f"checklist you send."),
+    }
+    if outcome in IN_PERSON:
+        return IN_PERSON[outcome]
+    if outcome in ("VISA_EXEMPT", "VISA_ON_ARRIVAL"):
+        return (f"Your passport does not need a visa applied for in advance for "
+                f"{dest}, so there is nothing for Ellis to submit.")
+    if outcome == "NO_AVAILABLE_TOURIST_ROUTE":
+        return f"There is no tourist route to {dest} on record for your passport."
+    if outcome in ("EVISA", "ELECTRONIC_AUTHORIZATION", "ENTRY_PREPARATION"):
+        return (f"{dest} has an official online application, but Ellis does not "
+                f"yet have an approved connection to that portal for your "
+                f"nationality. Your case and documents are saved; nothing was "
+                f"submitted.")
+    return fallback
+
+
 def _adapter_verified_result(db, application_id: str) -> bool:
     """Did an approved live adapter actually retrieve and verify an official
     result for THIS case? True only when a real completed execution produced
@@ -2114,8 +2168,15 @@ def _signal_or_gate_error(db, p: Principal, application_id: str, name: str, **kw
                      action="real_only_stop",
                      detail={"status": e.status, "detail": e.detail, "signal": name},
                      actor=p.user_id)
+        # The internal reason is kept for the audit trail above; the applicant
+        # is told the honest, route-specific reason instead of driver internals.
+        applicant_detail = e.detail
+        if e.status == "PORTAL_UNAVAILABLE":
+            row = db.get(models.VisaApplication, application_id)
+            if row is not None:
+                applicant_detail = _explain_no_live_adapter(db, row, e.detail)
         raise HTTPException(409, detail={"reason": "real_only_stop", "status": e.status,
-                                         "detail": e.detail})
+                                         "detail": applicant_detail})
     except execution.MockAsProductionError as e:
         raise HTTPException(409, detail={"reason": "real_only_stop", "status": "UNSUPPORTED",
                                          "detail": str(e)})
