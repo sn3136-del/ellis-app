@@ -260,6 +260,14 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
           onToDocuments={() => docsRef.current?.scrollIntoView({ behavior: 'smooth' })} />
       )}
 
+      {/* Routes decided in person: Ellis assembles the folder rather than
+          submitting. Self-hiding — the endpoint 409s for routes Ellis files
+          itself, so this never appears where it would invent work. */}
+      {!started && (
+        <AppointmentPacket t={t} client={client} caseId={caseId}
+          onToDocuments={() => docsRef.current?.scrollIntoView({ behavior: 'smooth' })} />
+      )}
+
       {/* Document upload — illustrated cards. EVERY continuation kind has a
           document surface (entry preparation and renewal have their own
           checklists; hiding it left their primary CTA pointing nowhere). */}
@@ -581,6 +589,82 @@ function EntryPrep({ t, client, caseId, journey, onToDocuments, onOpenCase }) {
       <button className="btn" onClick={onToDocuments} data-testid="entry-prep-docs">
         {done ? t('case.entryPrep.review') : t('case.docsFirst')}
       </button>
+    </div>
+  )
+}
+
+// The carry-in folder for a route decided in person. Ellis cannot submit these
+// — it assembles what the applicant walks in with: the filled official form,
+// their documents, where to go, and what is still missing. Absent (409) for
+// routes Ellis files itself, so it never invents work for the applicant.
+function AppointmentPacket({ t, client, caseId, onToDocuments }) {
+  const toast = useToast()
+  const [packet, setPacket] = useState(null)
+  const [busy, setBusy] = useState(false)
+  useEffect(() => {
+    let live = true
+    client.appointmentPacket(caseId)
+      .then((p) => { if (live) setPacket(p) })
+      .catch(() => { if (live) setPacket(null) })   // 409: not an in-person route
+    return () => { live = false }
+  }, [caseId])
+  if (!packet) return null
+
+  const missingDocs = packet.missing_documents || []
+  const missingFields = packet.missing_form_fields || []
+  const post = packet.route_outcome === 'AUTHORIZED_VISA_CENTER'
+    ? t('packet.visaCentre') : t('packet.consulate')
+
+  async function download() {
+    setBusy(true)
+    try {
+      const blob = await client.downloadAppointmentPacket(caseId)
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'ellis-appointment-packet.zip'
+      document.body.appendChild(a); a.click(); a.remove()
+      URL.revokeObjectURL(url)
+    } catch (e) { toast(e.message) }
+    setBusy(false)
+  }
+
+  return (
+    <div className="card" style={{ padding: 22 }} data-testid="appointment-packet">
+      <div style={{ fontWeight: 700, marginBottom: 4 }}>{t('packet.title')}</div>
+      <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>
+        {t('packet.sub', { post })}
+      </div>
+      {packet.official_form_included && (
+        <div className="kv"><div className="kv__k">{t('packet.form')}</div>
+          <div className="kv__v">{t('packet.formFilled')}</div></div>
+      )}
+      <div className="kv"><div className="kv__k">{t('packet.documents')}</div>
+        <div className="kv__v">{(packet.documents || []).length}</div></div>
+      {(missingDocs.length > 0 || missingFields.length > 0) ? (
+        <div className="note" style={{ margin: '10px 0' }} data-testid="packet-missing">
+          <div style={{ fontWeight: 600, marginBottom: 4 }}>{t('packet.beforeYouGo')}</div>
+          <ul style={{ margin: 0, paddingLeft: 18 }}>
+            {missingDocs.map((m) => <li key={`d-${m}`}>{m}</li>)}
+            {missingFields.map((m) => <li key={`f-${m}`}>{m}</li>)}
+          </ul>
+        </div>
+      ) : (
+        <div className="note" style={{ margin: '10px 0' }} data-testid="packet-ready">
+          {t('packet.ready')}
+        </div>
+      )}
+      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+        <button className="btn" onClick={download} disabled={busy}
+          data-testid="packet-download">
+          {busy ? t('packet.preparing') : t('packet.download')}
+        </button>
+        {missingDocs.length > 0 && (
+          <button className="btn btn--ghost" onClick={onToDocuments}>
+            {t('case.docsFirst')}
+          </button>
+        )}
+      </div>
     </div>
   )
 }

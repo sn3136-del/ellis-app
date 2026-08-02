@@ -214,6 +214,17 @@ export function createVisaClient(session) {
     // Route journey state saved on the case (guidance + two-pass verification,
     // route workflow type, checklist, pending health questions).
     caseChecklist: (id) => call('GET', `/cases/${id}/checklist`, session),
+    // The carry-in folder for an in-person route: what is in it, what is still
+    // missing. 409 (packet_not_applicable) means Ellis files this route itself.
+    appointmentPacket: (id) => call('GET', `/cases/${id}/appointment-packet`, session),
+    // The folder itself, as one download. Kept out of `call` because the body
+    // is a zip, not JSON — same auth headers, raw blob back.
+    downloadAppointmentPacket: async (id) => {
+      const res = await fetch(`${BASE}/cases/${id}/appointment-packet?format=zip`,
+                              { headers: authHeaders(session) })
+      if (!res.ok) throw new Error(`packet download failed (HTTP ${res.status})`)
+      return await res.blob()
+    },
     // Document intake: the applicant's explicit Submit fulfils a requirement
     // (idempotent server-side); withdraw returns it to Needed; set-type labels
     // an ambiguous upload from the safe whitelist; complete validates the
