@@ -1232,6 +1232,23 @@ def _entry_gated_flow(host: str, roles: dict, mappings: list[dict],
                  selector=d["selector"], doc_type=d.get("doc_type", "passport"),
                  purpose=f"Upload the case's approved "
                          f"{d.get('doc_type', 'document').replace('_', ' ')}")
+        # An upload whose document type could NOT be identified is not a gap
+        # in the flow — it is a step that belongs to the applicant. Thailand's
+        # TDAC labels its file input "JPG, JPEG, PNG and PDF files, maximum
+        # size 5MB": a format hint, not a document name, so nothing can say
+        # which document it wants. Ellis refuses to guess (a passport where a
+        # photo was wanted is a rejected application), and hands the applicant
+        # the control instead of silently dropping it.
+        mapped_sel = {d["selector"] for d in (document_mappings or [])
+                      if d.get("page_key") == form_key}
+        for el in (form_art.structure or {}).get("elements", []):
+            if el.get("type") == "file" and el.get("selector") not in mapped_sel:
+                node("upload_handoff", "APPLICANT_HANDOFF",
+                     handoff_kind="document_upload", applicant_action=True,
+                     purpose="This portal does not say which document its "
+                             "upload expects, so the applicant attaches it "
+                             "personally — Ellis never guesses a document type")
+                break
         for el in (form_art.structure or {}).get("elements", []):
             if KNOWN_FIELD_SEMANTICS.get(el.get("name", ""), {}).get("kind") \
                     == "commitment_checkbox" and not el.get("sensitive"):

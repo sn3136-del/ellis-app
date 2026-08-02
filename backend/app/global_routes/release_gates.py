@@ -220,7 +220,16 @@ def evaluate_gates(db, *, build_request, candidate, version, family) -> dict:
     if uploads_observed:
         upload_nodes = [n for n in nodes
                         if n.get("action") == "UPLOAD_AUTHORIZED_DOCUMENT"]
-        upload_ok = bool(upload_nodes) or bool(version.document_mappings)
+        # An upload the portal does not NAME cannot be mapped without guessing
+        # which document it wants, and guessing wrong is a rejected
+        # application. The flow handing that control to the applicant is a
+        # complete answer, not a missing one — it is the same doctrine as
+        # payment and the final declaration.
+        upload_handoff = [n for n in nodes
+                          if n.get("action") == "APPLICANT_HANDOFF"
+                          and n.get("handoff_kind") == "document_upload"]
+        upload_ok = (bool(upload_nodes) or bool(version.document_mappings)
+                     or bool(upload_handoff))
         doc_types = sorted({n.get("doc_type", "") for n in upload_nodes if n.get("doc_type")}
                            or {d.get("doc_type", "") for d in (version.document_mappings or [])})
         gate("upload_flow_mapped_where_applicable", upload_ok,

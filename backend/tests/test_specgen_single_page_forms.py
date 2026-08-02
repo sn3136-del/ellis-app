@@ -545,3 +545,27 @@ def test_the_gate_settles_until_the_action_bar_stops_growing():
     assert 'button, input[type=submit]' in src, "no action-bar settle"
     assert "stable >= 2" in src, "settle must require an unchanged count"
     assert "range(16)" in src, "the settle must be bounded"
+
+
+def test_an_unnamed_upload_becomes_the_applicant_s_step():
+    """Thailand's TDAC labels its file input 'JPG, JPEG, PNG and PDF files,
+    maximum size 5MB' — a format hint, not a document name. Nothing can say
+    which document it wants, and guessing wrong is a rejected application. The
+    flow hands that control to the applicant rather than dropping it."""
+    import inspect
+    from app.adapter_factory import schema, specgen
+    assert "document_upload" in schema.SENSITIVE_HANDOFF_KINDS
+    src = inspect.getsource(specgen)
+    assert 'handoff_kind="document_upload"' in src
+    # It only fires for uploads that were NOT identified.
+    assert "el.get(\"selector\") not in mapped_sel" in src
+
+
+def test_the_upload_gate_accepts_an_applicant_handoff():
+    """Handing the applicant an unnamed upload is a complete answer, not a
+    missing one — the same doctrine as payment and the final declaration."""
+    import inspect
+    from app.global_routes import release_gates
+    src = inspect.getsource(release_gates.evaluate_gates)
+    assert 'n.get("handoff_kind") == "document_upload"' in src
+    assert "upload_handoff" in src

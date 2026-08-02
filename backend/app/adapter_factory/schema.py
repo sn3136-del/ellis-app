@@ -37,6 +37,10 @@ SENSITIVE_HANDOFF_KINDS = [
     # choose, never auto-picked from their preferences.
     "appointment_selection",
     "representative_prohibited_action",
+    # An upload the portal does not NAME. Ellis will not guess which document
+    # a control expects — attaching a passport where a photo was wanted is a
+    # rejected application — so the applicant attaches it themselves.
+    "document_upload",
 ]
 
 # Field-name patterns whose values must never be automated by FILL_NON_SENSITIVE.
