@@ -108,6 +108,11 @@ class Settings:
         # --- Browserbase ---
         self.browserbase_api_key = os.getenv("BROWSERBASE_API_KEY", "")
         self.browserbase_project_id = os.getenv("BROWSERBASE_PROJECT_ID", "")
+        # Residential proxying for portals that refuse datacenter egress
+        # (Germany's RK-Termin among them). On by default: a plan without it
+        # falls back to a plain session rather than failing.
+        self.browserbase_proxies = os.getenv(
+            "BROWSERBASE_PROXIES", "true").strip().lower() not in ("0", "false", "no")
 
         # --- Stripe Issuing ---
         self.stripe_secret_key = os.getenv("STRIPE_SECRET_KEY", "")

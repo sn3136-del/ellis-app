@@ -77,7 +77,17 @@ def create_session() -> dict:
     # A modest viewport keeps the applicant's embedded live view close to 1:1
     # — the provider's default is large and scales down to unreadable.
     viewport = {"browserSettings": {"viewport": {"width": 1280, "height": 900}}}
+    # Some government portals refuse datacenter egress outright: Germany's
+    # RK-Termin (service2.diplo.de, the booking system for 190+ German
+    # missions) times out from a plain Browserbase session while loading
+    # normally from an ordinary browser. Residential proxying is requested
+    # FIRST so those portals are reachable at all; a plan without proxies
+    # simply falls through to the next attempt, exactly as the timeout and
+    # viewport options already do.
+    proxied = {"proxies": True} if s.browserbase_proxies else {}
     attempts = ({"projectId": proj, "keepAlive": True,
+                 "timeout": SESSION_TIMEOUT_SECONDS, **viewport, **proxied},
+                {"projectId": proj, "keepAlive": True,
                  "timeout": SESSION_TIMEOUT_SECONDS, **viewport},
                 {"projectId": proj, "keepAlive": True, "timeout": SESSION_TIMEOUT_SECONDS},
                 {"projectId": proj, "keepAlive": True},
