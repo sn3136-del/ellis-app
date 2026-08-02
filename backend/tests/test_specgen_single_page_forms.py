@@ -405,7 +405,11 @@ def test_a_file_input_takes_its_caption_from_the_upload_widget():
     block = _EXTRACT_JS[_EXTRACT_JS.index("const labelFor"):_EXTRACT_JS.index("const els")]
     assert "el.type === 'file'" in block, "no file-input caption rule"
     # Bounded: a few ancestors, a short string — never a whole page of prose.
-    assert "i < 4" in block and "t.length <= 120" in block
+    assert "i < 6" in block and "t.length <= 120" in block
+    # innerText is VISIBLE text only, and upload widgets are routinely
+    # collapsed (Thailand's TDAC keeps Browse hidden), so every ancestor read
+    # back empty. textContent sees the same authored caption either way.
+    assert "n.textContent" in block
     # And ONLY for file inputs: a text field must keep its own label rules.
     assert block.index("el.type === 'file'") > block.index("el.placeholder")
 

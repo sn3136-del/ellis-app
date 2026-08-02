@@ -133,8 +133,15 @@ _EXTRACT_JS = r"""
     // alternative is refusing to identify the upload at all.
     if (el.type === 'file') {
       let n = el.parentElement;
-      for (let i = 0; i < 4 && n; i++, n = n.parentElement) {
-        const t = (n.innerText || '').replace(/\s+/g, ' ').trim();
+      for (let i = 0; i < 6 && n; i++, n = n.parentElement) {
+        // innerText returns only VISIBLE text, and an upload widget is
+        // routinely collapsed until its section opens — Thailand's TDAC keeps
+        // its Browse control hidden, so every ancestor read back empty and the
+        // document could not be identified at all. textContent sees the
+        // caption either way; it is the same authored words a human reads
+        // once the section expands.
+        const t = ((n.innerText || n.textContent || '')
+                   .replace(/\s+/g, ' ').trim());
         if (t && t.length >= 3 && t.length <= 120) return t;
       }
     }
