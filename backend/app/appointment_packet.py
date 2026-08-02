@@ -67,11 +67,11 @@ def _post_lines(jurisdiction: dict | None) -> list[str]:
     is stated as unresolved, with what Ellis needs to resolve it."""
     j = jurisdiction or {}
     status = j.get("status") or ""
-    if status == "resolved":
+    if status in ("verified", "resolved"):
         out = [f"  Post:      {j.get('competent_post_name') or UNKNOWN}"]
-        for label, key in (("Address", "address"), ("City", "city"),
-                           ("Country", "country"), ("Booking", "booking_url"),
-                           ("Phone", "phone")):
+        for label, key in (("Kind", "competent_post_kind"), ("Address", "address"),
+                           ("City", "city"), ("Country", "country"),
+                           ("Booking", "competent_post_url"), ("Phone", "phone")):
             val = str(j.get(key) or "").strip()
             if val:
                 out.append(f"  {label + ':':10} {val}")
@@ -99,7 +99,8 @@ def _fee_line(verified_fee: dict | None) -> str:
 def build(*, applicant_name: str, destination: str, route: dict,
           checklist: list[dict], documents: list[dict],
           answers: dict, form_key: str | None = None,
-          form_prepared: dict | None = None) -> dict:
+          form_prepared: dict | None = None,
+          appointment: dict | None = None) -> dict:
     """Assemble the packet's CONTENT (no bytes yet), so the caller can render
     it, inspect it, or test it. Returns the cover text plus the manifest of
     what should be in the folder and what is still missing."""
@@ -125,6 +126,16 @@ def build(*, applicant_name: str, destination: str, route: dict,
     lines.append(f"  Route:     {outcome.replace('_', ' ').title() or UNKNOWN}")
     lines.extend(_post_lines(route.get("jurisdiction")))
     lines.append(_fee_line(route.get("verified_fee")))
+    if appointment:
+        lines.append(f"  APPOINTMENT: {appointment.get('when_utc') or UNKNOWN}")
+        if appointment.get("location"):
+            lines.append(f"             {appointment['location']}")
+        if appointment.get("confirmation_no"):
+            lines.append(f"             confirmation {appointment['confirmation_no']}")
+    else:
+        lines.append("  APPOINTMENT: not booked yet — book it in Ellis's secure "
+                     "window before")
+        lines.append("             you print this folder.")
     lines.append("")
 
     lines.append("BEFORE YOU GO")
@@ -246,14 +257,17 @@ def build_for_case(db, app_row) -> dict:
         merged = cf.answers_from_documents(answers, passport)
         prepared = cf.prepare(form_key, merged)
 
+    from . import assisted_booking
     packet = build(
         applicant_name=str(answers.get("full_name") or
                            f"{answers.get('given_names','')} {answers.get('surname','')}".strip()),
         destination=dest_name, route=route, checklist=checklist,
         documents=documents, answers=answers, form_key=form_key,
-        form_prepared=prepared)
+        form_prepared=prepared,
+        appointment=assisted_booking.summary(db, app_row))
     packet["_form_prepared"] = prepared
     packet["_application_id"] = app_row.id
+    packet["_route"] = route
     return packet
 
 

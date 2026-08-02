@@ -1376,6 +1376,60 @@ def case_appointment_packet(application_id: str, format: str = "json",
     return {k: v for k, v in packet.items() if not k.startswith("_")}
 
 
+class AppointmentRecord(BaseModel):
+    start_utc: int
+    location: str = ""
+    confirmation_no: str = ""
+
+
+@app.get("/cases/{application_id}/appointment-booking")
+def case_appointment_booking(application_id: str, db=Depends(get_session),
+                             p: Principal = Depends(get_principal)):
+    """Where this applicant books, and what they have booked so far.
+
+    Every booking system keeps its slots behind the applicant's own account, so
+    Ellis opens the OFFICIAL booking site in its secure window and the applicant
+    picks the slot themselves. This endpoint says where that window should go —
+    from verified route data only — and returns any appointment already
+    recorded. 409 when the route needs no appointment."""
+    app_row = _owned(db, p, application_id)
+    from . import appointment_packet, assisted_booking
+    try:
+        route = appointment_packet.build_for_case(db, app_row).get("_route") or {}
+    except appointment_packet.PacketNotApplicable as e:
+        raise HTTPException(409, detail={"reason": "no_appointment_needed",
+                                         "detail": str(e)})
+    if not assisted_booking.needs_appointment(route.get("route_outcome") or ""):
+        raise HTTPException(409, detail={"reason": "no_appointment_needed",
+                                         "detail": "this route needs no appointment"})
+    booked = assisted_booking.summary(db, app_row)
+    try:
+        target = assisted_booking.booking_target(route)
+    except assisted_booking.BookingUnavailable as e:
+        return {"bookable": False, "reason": str(e), "appointment": booked}
+    return {"bookable": True, "booking_url": target["url"],
+            "post_name": target["post_name"], "appointment": booked}
+
+
+@app.post("/cases/{application_id}/appointment-booking")
+def case_record_appointment(application_id: str, body: AppointmentRecord,
+                            db=Depends(get_session),
+                            p: Principal = Depends(get_principal)):
+    """Record the appointment the applicant just booked in the secure window.
+    Ellis never chooses a slot; this is the applicant confirming what they
+    chose, so the date reaches their packet and reminders."""
+    app_row = _owned(db, p, application_id)
+    from . import assisted_booking
+    try:
+        return assisted_booking.record(
+            db, app_row, start_utc=int(body.start_utc),
+            location=body.location or "", confirmation_no=body.confirmation_no or "",
+            actor=p.user_id)
+    except ValueError as e:
+        raise HTTPException(422, detail={"reason": "invalid_appointment",
+                                         "detail": str(e)})
+
+
 @app.get("/cases/{application_id}/checklist")
 def case_checklist(application_id: str, db=Depends(get_session),
                    p: Principal = Depends(get_principal)):
