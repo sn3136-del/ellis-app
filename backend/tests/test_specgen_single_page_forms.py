@@ -527,3 +527,17 @@ def test_schema_accepts_only_a_declared_unobservable_submit():
         {"node_id": "f", "action": "FILL_NON_SENSITIVE", "selector": "",
          "selector_source": "runtime_primary_action"}, allowed_hostnames=["x.gov"])
     assert any("deterministic selector" in e for e in bad2)
+
+
+def test_the_gate_settles_until_the_action_bar_stops_growing():
+    """A form is 'ready' when its FIRST field exists, but Angular finishes
+    mounting its action bar after that. Thailand's TDAC still had Continue,
+    Preview and Add Other Travelers unrendered when familyName appeared, so
+    one session captured the advance control and the other did not — and the
+    repeated-sessions gate called a perfectly stable button 'unstable'."""
+    import inspect
+    from app.portal import live_browser
+    src = inspect.getsource(live_browser.LiveBrowserSession._observe_with_entry_gate_once)
+    assert 'button, input[type=submit]' in src, "no action-bar settle"
+    assert "stable >= 2" in src, "settle must require an unchanged count"
+    assert "range(16)" in src, "the settle must be bounded"

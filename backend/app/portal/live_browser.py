@@ -798,6 +798,25 @@ class LiveBrowserSession:
                         deadline -= 0.5
                 elif not ready:
                     page.wait_for_load_state("networkidle", timeout=30000)
+                # A form is "ready" the moment its FIRST field exists, but an
+                # Angular/React form finishes mounting its action bar after
+                # that — Thailand's TDAC still had Continue, Preview and Add
+                # Other Travelers unrendered when familyName appeared. The
+                # extraction that follows would then miss the advance control,
+                # and the repeated-sessions gate would call it "unstable"
+                # because one session raced ahead of the other. Settle until
+                # the button count stops growing, briefly and bounded.
+                seen, stable = -1, 0
+                for _ in range(16):          # <= 8s
+                    try:
+                        now = page.locator("button, input[type=submit]").count()
+                    except Exception:  # noqa: BLE001
+                        break
+                    stable = stable + 1 if now == seen else 0
+                    seen = now
+                    if stable >= 2:          # unchanged across two polls
+                        break
+                    page.wait_for_timeout(500)
             except Exception as e:  # noqa: BLE001 — honest, diagnosable failure
                 probe = count_sel or ready or "*"
                 try:
