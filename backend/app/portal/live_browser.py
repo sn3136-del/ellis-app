@@ -85,6 +85,20 @@ _EXTRACT_JS = r"""
     // A NAME survives a re-render where a generated id does not, so it is
     // preferred over any volatile/generated id, not just over a path.
     if (el.name) return tagl + '[name="' + el.name + '"]';
+    // An id that is a STABLE prefix plus a per-render stamp is still precise
+    // if we anchor on the prefix. Indonesia's arrival card ships
+    // spi_passport_no_1785696463523 — the field is 'spi_passport_no_', only
+    // the stamp moves. A prefix selector beats a deep ancestor path in both
+    // stability and meaning; it is only emitted when the prefix is long
+    // enough to be a real field name and it matches exactly one element.
+    if (el.id) {
+      const m = el.id.match(/^(.*?[a-z])[_-]?\d{10,}$/i);
+      if (m && m[1].length >= 4) {
+        const pref = tagl + '[id^="' + m[1].replace(/"/g, '') + '"]';
+        try { if (document.querySelectorAll(pref).length === 1) return pref; }
+        catch (e) {}
+      }
+    }
     if (el.id && !generatedId.test(el.id)) return '#' + CSS.escape(el.id);   // volatile prefix, still addressable
     if (el.tagName === 'BUTTON') {
       // A button with stable visible text gets a bounded, deterministic
@@ -111,6 +125,19 @@ _EXTRACT_JS = r"""
     if (el.placeholder) return el.placeholder;
     const p = el.closest('label'); if (p) return p.innerText;
     if (el.tagName === 'BUTTON' || el.type === 'submit') return el.innerText || el.value || '';
+    // A FILE input routinely has no label of its own: custom upload widgets
+    // hide the native control and put the caption ("Passport bio page",
+    // "Photo") in a wrapper. That caption is what a human reads to know which
+    // document is wanted, so read it the same way — bounded to a few
+    // ancestors and to a short string, and only for file inputs, where the
+    // alternative is refusing to identify the upload at all.
+    if (el.type === 'file') {
+      let n = el.parentElement;
+      for (let i = 0; i < 4 && n; i++, n = n.parentElement) {
+        const t = (n.innerText || '').replace(/\s+/g, ' ').trim();
+        if (t && t.length >= 3 && t.length <= 120) return t;
+      }
+    }
     return el.name || '';
   };
   const els = [];

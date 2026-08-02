@@ -377,3 +377,34 @@ def test_a_name_is_preferred_over_a_generated_id():
     assert id_first < name_line, "a clean id may still win"
     # …but the fallback id line must come AFTER the name line.
     assert chain.rindex("'#' + CSS.escape(el.id)") > name_line
+
+
+def test_a_stable_id_prefix_beats_a_deep_css_path():
+    """Indonesia ships spi_passport_no_1785696463523: the field name is
+    'spi_passport_no_' and only the render stamp moves. Anchoring on the
+    prefix keeps both precision and meaning, where a deep ancestor path keeps
+    neither."""
+    from app.portal.live_browser import _EXTRACT_JS
+    assert 'id^=' in _EXTRACT_JS, "no prefix-anchored selector emitted"
+    # The prefix rule must sit AFTER the name rule (a name is still better)
+    # and BEFORE the ancestor-path fallback (a path is still worse).
+    chain = _EXTRACT_JS[_EXTRACT_JS.index("const cssPath"):_EXTRACT_JS.index("const labelFor")]
+    assert chain.index("[name=") < chain.index("id^=") < chain.index("parts.join")
+    # And it only fires when the prefix is a real field name, not one letter.
+    assert "m[1].length >= 4" in chain
+    # It must confirm the selector is unique before trusting it.
+    assert "querySelectorAll(pref).length === 1" in chain
+
+
+def test_a_file_input_takes_its_caption_from_the_upload_widget():
+    """Custom upload widgets hide the native input and put the caption
+    ('Passport bio page') in a wrapper. That caption is what tells Ellis which
+    document is wanted — without it the upload cannot be identified and the
+    portal fails upload_flow_mapped forever (Thailand's TDAC)."""
+    from app.portal.live_browser import _EXTRACT_JS
+    block = _EXTRACT_JS[_EXTRACT_JS.index("const labelFor"):_EXTRACT_JS.index("const els")]
+    assert "el.type === 'file'" in block, "no file-input caption rule"
+    # Bounded: a few ancestors, a short string — never a whole page of prose.
+    assert "i < 4" in block and "t.length <= 120" in block
+    # And ONLY for file inputs: a text field must keep its own label rules.
+    assert block.index("el.type === 'file'") > block.index("el.placeholder")
