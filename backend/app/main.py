@@ -1345,6 +1345,37 @@ def review(application_id: str, db=Depends(get_session), p: Principal = Depends(
             "required_fields": required, "missing_fields": missing, "answers": answers}
 
 
+@app.get("/cases/{application_id}/appointment-packet")
+def case_appointment_packet(application_id: str, format: str = "json",
+                            db=Depends(get_session),
+                            p: Principal = Depends(get_principal)):
+    """The carry-in folder for an in-person route: the cover sheet (where to
+    go, the fee, what is still missing, what to do on the day), the filled
+    official form, and every document the applicant uploaded.
+
+    format=json  -> the manifest (what is in the folder, what is missing)
+    format=zip   -> the folder itself, as one download
+    409 when the route is one Ellis files itself: a carry-in folder there
+    would tell the applicant to do work they do not have to do."""
+    app_row = _owned(db, p, application_id)
+    from . import appointment_packet
+    try:
+        packet = appointment_packet.build_for_case(db, app_row)
+    except appointment_packet.PacketNotApplicable as e:
+        raise HTTPException(409, detail={"reason": "packet_not_applicable",
+                                         "detail": str(e)})
+    if format == "zip":
+        data = appointment_packet.render_zip(db, app_row, packet)
+        audit.record(db, org_id=app_row.org_id, application_id=application_id,
+                     action="appointment_packet_downloaded",
+                     detail={"documents": len(packet.get("documents") or []),
+                             "ready": packet.get("ready")}, actor=p.user_id)
+        return Response(content=data, media_type="application/zip",
+                        headers={"Content-Disposition":
+                                 f'attachment; filename="ellis-appointment-packet.zip"'})
+    return {k: v for k, v in packet.items() if not k.startswith("_")}
+
+
 @app.get("/cases/{application_id}/checklist")
 def case_checklist(application_id: str, db=Depends(get_session),
                    p: Principal = Depends(get_principal)):
