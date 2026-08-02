@@ -715,6 +715,7 @@ function AppointmentBooking({ t, client, caseId }) {
     <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--line)' }}
       data-testid="appointment-booking">
       <div style={{ fontWeight: 600, marginBottom: 6 }}>{t('booking.title')}</div>
+      <GovCalendar t={t} client={client} caseId={caseId} />
       {appt && !editing ? (
         <div data-testid="appointment-booked">
           <div className="kv">
@@ -779,6 +780,98 @@ function AppointmentBooking({ t, client, caseId }) {
             data-testid="booking-find">
             {finding ? t('booking.finding') : t('booking.find')}
           </button>
+        </>
+      )}
+    </div>
+  )
+}
+
+// The two government systems with a REAL readable calendar and no accounts
+// (Germany's RK-Termin — 190+ missions — and Poland's e-Konsulat). The
+// applicant completes the portal's image check in their own secure window;
+// only then can Ellis read the month. Ellis never solves the check and never
+// clicks a day, because on these systems a click reserves a real slot.
+function GovCalendar({ t, client, caseId }) {
+  const toast = useToast()
+  const [open, setOpen] = useState(null)     // walk result (categories, gate)
+  const [month, setMonth] = useState(null)   // month summary once readable
+  const [busy, setBusy] = useState(false)
+  const [loc, setLoc] = useState('')
+
+  async function openCalendar() {
+    if (!loc.trim()) { toast(t('cal.needLocation')); return }
+    setBusy(true)
+    try {
+      const out = await client.calendarOpen(caseId, loc.trim())
+      setOpen(out); setMonth(null)
+    } catch (e) { toast(e.detail?.detail || e.message) }
+    setBusy(false)
+  }
+
+  async function readMonth() {
+    setBusy(true)
+    try { setMonth(await client.calendarMonth(caseId)) }
+    catch (e) { toast(e.detail?.detail || e.message) }
+    setBusy(false)
+  }
+
+  return (
+    <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--line)' }}
+      data-testid="gov-calendar">
+      <div style={{ fontWeight: 600, marginBottom: 4 }}>{t('cal.title')}</div>
+      <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 8 }}>
+        {t('cal.sub')}
+      </div>
+      {!open ? (
+        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+          <div className="field" style={{ flex: 1 }}>
+            <label>{t('cal.location')}</label>
+            <input className="input" value={loc} placeholder="peki"
+              onChange={(e) => setLoc(e.target.value)} />
+          </div>
+          <button className="btn" onClick={openCalendar} disabled={busy}
+            data-testid="cal-open">
+            {busy ? t('cal.opening') : t('cal.open')}
+          </button>
+        </div>
+      ) : (
+        <>
+          {open.captcha_required && !month && (
+            <div className="note" style={{ marginBottom: 8 }} data-testid="cal-captcha">
+              {t('cal.captcha')}
+            </div>
+          )}
+          {Array.isArray(open.categories) && open.categories.length > 0 && (
+            <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 8 }}>
+              {t('cal.categories')}: {open.categories.slice(0, 4)
+                .map((c) => c.label).join(' · ')}
+            </div>
+          )}
+          <button className="btn btn--ghost" onClick={readMonth} disabled={busy}
+            data-testid="cal-read">
+            {busy ? t('cal.reading') : t('cal.read')}
+          </button>
+          {month && (
+            <div style={{ marginTop: 10 }} data-testid="cal-month">
+              {!month.readable ? (
+                <div className="note">{month.reason}</div>
+              ) : month.none_available ? (
+                <div className="note">{t('cal.none')}</div>
+              ) : (
+                <>
+                  <div style={{ fontSize: 13, marginBottom: 6 }}>
+                    {t('cal.found', { n: month.bookable_count })}
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {(month.days || []).map((d) => (
+                      <a key={d.href} className="chip" href={d.href} target="_blank"
+                        rel="noreferrer" title={d.title || ''}>{d.label}</a>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </>
       )}
     </div>

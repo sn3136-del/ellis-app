@@ -1452,6 +1452,96 @@ def _schedule_consular_lookup(application_id: str, org_id: str) -> None:
     threading.Thread(target=_run, daemon=True).start()
 
 
+def _attach_applicant_window(db, application_id: str, hostnames: list[str]):
+    """Attach to the applicant's OWN secure window, so the calendar they are
+    shown is the session they will book in — not a second browser whose
+    CAPTCHA answer and slot hold would belong to nobody."""
+    from .portal.live_browser import LiveBrowserSession
+    from .portal_store import current_browser_session
+    from .providers import browser as bb
+    row = current_browser_session(db, application_id)
+    if row is None or row.mode != "browserbase":
+        raise HTTPException(409, detail={
+            "reason": "no_secure_window",
+            "detail": "open the secure window first"})
+    if not bb.session_alive(row.provider_session_id):
+        row.status = "closed"
+        db.commit()
+        raise HTTPException(409, detail={
+            "reason": "session_ended",
+            "detail": "the secure window closed; open it again"})
+    # session_connect_info mints the CDP URL for an EXISTING session — the
+    # same helper the released flow reattaches with.
+    return LiveBrowserSession(
+        allowed_hostnames=hostnames,
+        session=bb.session_connect_info(row.provider_session_id))
+
+
+class _WindowDriver:
+    """The tiny surface gov_calendar needs, over a live page."""
+    def __init__(self, page):
+        self.page = page
+    def goto(self, url):
+        self.page.goto(url, wait_until="domcontentloaded", timeout=60000)
+        self.page.wait_for_timeout(2200)
+    def evaluate(self, js, *a):
+        return self.page.evaluate(js, *a) if a else self.page.evaluate(js)
+
+
+@app.post("/cases/{application_id}/calendar/open")
+def case_calendar_open(application_id: str, location_code: str = "",
+                       category_id: str = "", db=Depends(get_session),
+                       p: Principal = Depends(get_principal)):
+    """Walk the applicant's secure window to a government appointment calendar.
+
+    Only for the systems that HAVE a readable calendar (no accounts, one image
+    check): Germany's RK-Termin today. Returns the real category list and
+    whether the applicant still has to complete the portal's image check —
+    which only they may do."""
+    app_row = _owned(db, p, application_id)
+    from . import gov_calendar as gc
+    if not location_code:
+        raise HTTPException(422, detail={"reason": "location_required",
+                                         "detail": "which mission to open"})
+    sess = _attach_applicant_window(db, application_id, ["service2.diplo.de"])
+    try:
+        drv = _WindowDriver(sess._ensure_page())
+        out = gc.rk_termin_walk(drv, location_code=location_code,
+                                category_id=category_id)
+    except gc.CalendarUnavailable as e:
+        raise HTTPException(409, detail={"reason": "calendar_unavailable",
+                                         "detail": str(e)})
+    finally:
+        # close() stops OUR playwright attachment; the applicant's remote
+        # window stays alive because we did not create it.
+        sess.close()
+    audit.record(db, org_id=app_row.org_id, application_id=application_id,
+                 action="calendar_opened",
+                 detail={"location": location_code[:20],
+                         "captcha_required": out.get("captcha_required")},
+                 actor=p.user_id)
+    return out
+
+
+@app.get("/cases/{application_id}/calendar/month")
+def case_calendar_month(application_id: str, db=Depends(get_session),
+                        p: Principal = Depends(get_principal)):
+    """Read the month the applicant's window is showing — after THEY have
+    completed the portal's image check. Ellis reads the grid and never clicks a
+    day: on these systems a click reserves a real slot."""
+    _owned(db, p, application_id)
+    from . import gov_calendar as gc
+    sess = _attach_applicant_window(db, application_id,
+                                    ["service2.diplo.de", "secure.e-konsulat.gov.pl",
+                                     "secure2.e-konsulat.gov.pl"])
+    try:
+        return gc.month_summary(_WindowDriver(sess._ensure_page()))
+    finally:
+        # close() stops OUR playwright attachment; the applicant's remote
+        # window stays alive because we did not create it.
+        sess.close()
+
+
 @app.post("/cases/{application_id}/find-consular-post")
 def case_find_consular_post(application_id: str, db=Depends(get_session),
                             p: Principal = Depends(get_principal)):

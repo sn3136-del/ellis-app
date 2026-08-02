@@ -226,6 +226,13 @@ export function createVisaClient(session) {
     // Find the consular post that serves this applicant's address (official
     // sources, verified before it can become a booking link).
     findConsularPost: (id) => call('POST', `/cases/${id}/find-consular-post`, session),
+    // Government calendars that have NO account (Germany RK-Termin, Poland
+    // e-Konsulat): walk the applicant's own secure window to the month view.
+    calendarOpen: (id, locationCode, categoryId = '') =>
+      call('POST', `/cases/${id}/calendar/open?location_code=${encodeURIComponent(locationCode)}` +
+           (categoryId ? `&category_id=${encodeURIComponent(categoryId)}` : ''), session, {}),
+    // Read the month AFTER the applicant completed the portal's image check.
+    calendarMonth: (id) => call('GET', `/cases/${id}/calendar/month`, session),
     // The folder itself, as one download. Kept out of `call` because the body
     // is a zip, not JSON — same auth headers, raw blob back.
     downloadAppointmentPacket: async (id) => {
