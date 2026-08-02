@@ -795,7 +795,10 @@
    "supported_outcomes": [
     "ENTRY_PREPARATION"
    ],
-   "account_required": false
+   "account_required": false,
+   "form_paths": [
+    "/mdac/main?registerMain"
+   ]
   },
   {
    "family_id": "singapore-sgac",
@@ -993,7 +996,8 @@
    "operator_kind": "government",
    "base_url": "https://www.evisa.gov.tr/",
    "hostnames": [
-    "www.evisa.gov.tr"
+    "www.evisa.gov.tr",
+    "evisa.gov.tr"
    ],
    "destinations": [
     "TUR"

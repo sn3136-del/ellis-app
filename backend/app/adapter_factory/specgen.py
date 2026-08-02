@@ -530,6 +530,13 @@ def _page_roles(by_page: dict, entry_gated: bool = False) -> dict:
                 roles["fees"] = art
                 remaining.pop(k)
                 break
+    # Single-page portals put Submit ON the application form (Malaysia's MDAC:
+    # one page, one Submit). The submission still happens — behind the same
+    # declaration handoff and reconcile-first guard — it just has no page of
+    # its own, so the form page carries the role too.
+    if "submit" not in roles and "application" in roles and \
+            _observed_selector(roles["application"], *_SUBMIT_WORDS, clickable=True):
+        roles["submit"] = roles["application"]
     return roles
 
 
@@ -925,6 +932,19 @@ def _skeleton_flow(host: str, roles: dict, mappings: list[dict],
         node("verify_login", "VERIFY_EVIDENCE",
              success_evidence=[{"kind": "session_state", "category": "session_authenticated"}],
              purpose="Confirm authenticated session via evidence, never banner text")
+    elif account_required:
+        # The family DECLARES an account, but recon saw no password page —
+        # UAE's ICP signs in through UAE PASS, an external identity provider
+        # public pages never render. The step still exists and it is the
+        # applicant's: declaring the handoff is what keeps the account gate
+        # honest instead of silently absent (uae-icp, 2026-08-02).
+        node("login_handoff", "APPLICANT_HANDOFF", handoff_kind="credentials",
+             applicant_action=True, sensitive=True,
+             purpose="The applicant signs in personally in the secure browser "
+                     "(this portal's sign-in lives outside its public pages)")
+        node("verify_login", "VERIFY_EVIDENCE",
+             success_evidence=[{"kind": "session_state", "category": "session_authenticated"}],
+             purpose="Confirm authenticated session via evidence, never banner text")
     # Personal-verification steps the portal exposed on public pages are
     # ALWAYS the applicant's own: one handoff node per observed kind.
     for kind in sorted(sensitive_kinds or ()):
@@ -942,7 +962,18 @@ def _skeleton_flow(host: str, roles: dict, mappings: list[dict],
         # UNBUILDABLE, not partially buildable: filling and then navigating
         # away would abandon the unsaved form while reporting success. Drop
         # the whole segment so required_fields_mapped fails honestly.
-        if page_mappings and not save_sel:
+        #
+        # EXCEPT the single-step form, which has no save control BY DESIGN:
+        # Malaysia's MDAC (and most arrival cards) are one page whose only
+        # control is Submit. Those pages are not unbuildable — they are the
+        # simplest kind. The fills are emitted and the segment simply ends
+        # there; the irreversible click is never borrowed from here, it stays
+        # in the submit segment behind its declaration handoff and
+        # reconcile-first guard. `submit_only_form` marks the shape so a
+        # reader can see the save step is absent on purpose.
+        submit_only = bool(page_mappings) and not save_sel and bool(
+            _observed_selector(app_art, *_SUBMIT_WORDS, clickable=True))
+        if page_mappings and not save_sel and not submit_only:
             page_mappings = []
         if page_mappings:
             node("goto_form", "NAVIGATE", purpose="Open the application form",
@@ -959,10 +990,20 @@ def _skeleton_flow(host: str, roles: dict, mappings: list[dict],
                      selector=m["selector"], input_source=m["ellis_field"],
                      purpose=f"Fill {m['portal_field']} from the case record",
                      **extra)
-            node("save_form", "CLICK", selector=save_sel,
-                 purpose="Save the application form",
-                 expected_network=[{"endpoint": "/api/application", "method": "POST"}],
-                 success_evidence=[{"kind": "network", "category": "form_saved"}])
+            if save_sel:
+                node("save_form", "CLICK", selector=save_sel,
+                     purpose="Save the application form",
+                     expected_network=[{"endpoint": "/api/application", "method": "POST"}],
+                     success_evidence=[{"kind": "network", "category": "form_saved"}])
+            else:
+                # Single-step form: nothing to save, and Ellis must NOT press
+                # the page's only button here — that button submits.
+                node("form_filled", "VERIFY_EVIDENCE",
+                     success_evidence=[{"kind": "page", "category": "form_filled"}],
+                     submit_only_form=True,
+                     purpose="The form is filled in one page; its only control "
+                             "is the irreversible submit, which happens later "
+                             "with the applicant's declaration")
     if "fees" in roles:
         fees_art = roles["fees"]
         fee_sel = _observed_selector(fees_art, *_FEE_WORDS)
