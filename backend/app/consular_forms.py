@@ -251,6 +251,79 @@ def _map_path(form_key: str):
     return _template_path(form_key).with_suffix(".map.json")
 
 
+def load_checkbox_map(form_key: str) -> dict:
+    """Checkbox groups: {ellis_answer_key: {answer_value: pdf_field_name}}.
+
+    A consular form asks most of its questions as tick-boxes — marital status,
+    purpose of travel, who is paying. Ellis asks the applicant the plain
+    question and ticks the box THEY chose, so they receive a form that needs
+    nothing further, rather than one they must finish by hand.
+    """
+    import json
+    path = _map_path(form_key)
+    if not path.is_file():
+        return {}
+    try:
+        data = json.loads(path.read_text())
+    except ValueError:
+        return {}
+    groups = (data or {}).get("checkboxes") or {}
+    out = {}
+    for key, options in groups.items():
+        if isinstance(options, dict):
+            out[str(key)] = {str(k): str(v) for k, v in options.items()
+                             if isinstance(v, str)}
+    return out
+
+
+def checkbox_questions(form_key: str) -> list[dict]:
+    """The tick-box questions this form needs, as plain choices Ellis can ask.
+    The applicant answers once and the correct box is ticked for them."""
+    labels = CHECKBOX_LABELS.get(form_key, {})
+    out = []
+    for key, options in load_checkbox_map(form_key).items():
+        meta = labels.get(key) or {}
+        out.append({
+            "key": key,
+            "label": meta.get("label") or key.replace("_", " ").capitalize(),
+            "multi": bool(meta.get("multi")),
+            "options": [{"value": v,
+                         "label": (meta.get("options") or {}).get(v)
+                         or v.replace("_", " ").capitalize()}
+                        for v in options],
+        })
+    return out
+
+
+# Applicant-facing wording for the tick-box questions. The form's own phrasing
+# is legalese ("Cost of travelling and living during the applicant's stay is
+# covered by"); the applicant is asked something they can actually answer.
+CHECKBOX_LABELS = {
+    "schengen_uniform": {
+        "marital_status": {"label": "Marital status", "options": {
+            "single": "Single", "married": "Married",
+            "registered_partnership": "Registered partnership",
+            "divorced": "Divorced", "widowed": "Widowed", "other": "Other"}},
+        "travel_purpose": {"label": "Main purpose of your journey", "options": {
+            "tourism": "Tourism", "business": "Business",
+            "visiting_family_or_friends": "Visiting family or friends",
+            "cultural": "Cultural", "sports": "Sports",
+            "official_visit": "Official visit", "medical": "Medical treatment",
+            "study": "Study", "airport_transit": "Airport transit",
+            "other": "Other"}},
+        "costs_covered_by": {"label": "Who is paying for your trip?", "options": {
+            "self": "I am paying for myself",
+            "sponsor": "A sponsor, host or company is paying"}},
+        "means_of_support": {"label": "How will you cover your costs?",
+                             "multi": True, "options": {
+            "cash": "Cash", "travellers_cheques": "Traveller's cheques",
+            "credit_card": "Credit card",
+            "prepaid_accommodation": "Accommodation already paid",
+            "prepaid_transport": "Transport already paid"}},
+    },
+}
+
+
 def load_field_map(form_key: str) -> dict:
     """Operator-supplied mapping: the official PDF's own AcroForm field name ->
     the Ellis answer key. Kept beside the template as <form_key>.map.json so
@@ -330,7 +403,21 @@ def fill_official_template(form_key: str, answers: dict,
         raw = (answers or {}).get(ellis_key)
         if raw not in (None, ""):
             values[field_name] = str(raw)
-    if not values:
+    # Tick-boxes the applicant answered: their choice becomes the /On state of
+    # exactly the box they picked. A group they did not answer is left entirely
+    # untouched — this form is signed under penalty of perjury, so a guessed
+    # tick is never a convenience worth taking.
+    ticks = {}
+    for group_key, options in load_checkbox_map(form_key).items():
+        chosen = (answers or {}).get(group_key)
+        if chosen in (None, "", []):
+            continue
+        picks = chosen if isinstance(chosen, (list, tuple, set)) else [chosen]
+        for pick in picks:
+            field = options.get(str(pick))
+            if field:
+                ticks[field] = "/On"
+    if not values and not ticks:
         # An official blank with nothing written on it is worse than no form:
         # it looks like Ellis produced the applicant's application when it
         # produced an empty government document. Fall back to the preparation
@@ -340,8 +427,12 @@ def fill_official_template(form_key: str, answers: dict,
         reader = PdfReader(str(path))
         writer = PdfWriter()
         writer.append(reader)
+        # Checkbox appearances only render when the viewer is told to rebuild
+        # them; without this the tick is in the data but invisible on paper,
+        # which on a printed consular form means it was never ticked.
+        writer.set_need_appearances_writer(True)
         for page in writer.pages:
-            writer.update_page_form_field_values(page, values)
+            writer.update_page_form_field_values(page, {**values, **ticks})
         buf = BytesIO()
         writer.write(buf)
         return buf.getvalue()

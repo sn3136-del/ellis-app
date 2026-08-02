@@ -2,7 +2,7 @@
   "_source": "https://ambmanila.esteri.it/wp-content/uploads/2023/11/Nuovo-Modello-Visto-Uniforme-EN-Application-form-for-Schengen-fillable-Short-Term.pdf",
   "_authority": "Italian Ministry of Foreign Affairs (esteri.it) — the harmonised Schengen form, identical in content across all Schengen states",
   "_retrieved": "2026-08-02",
-  "_note": "Only unambiguous text fields are mapped. Checkbox groups (sex, marital status, purpose of travel, entry count, who pays) are deliberately LEFT BLANK for the applicant to tick by hand — a wrongly-ticked box on a form signed under penalty of perjury is the applicant's problem, not a convenience worth taking.",
+  "_note": "Text fields map name -> Ellis answer key. Checkbox groups map an Ellis answer key -> {answer value: PDF checkbox field}, so the applicant answers a plain question in Ellis and the right box is ticked. Only unambiguously-named boxes are mapped; the form is signed under penalty of perjury, so a guessed tick is never worth it.",
   "fields": {
     "1 Surname Family name": "surname",
     "2 Surname at birth Former family names": "surname_at_birth",
@@ -21,5 +21,38 @@
     "25 Member State of main destination and other Member States of destination if applicable": "destination_country",
     " 22 Employer and employers address and telephone number For students name and address of educational establishment": "employer",
     " 30 Surname and first name of the inviting persons in the Member States If not applicable name of hotels or temporary accommodations in the Member States": "accommodation"
+  },
+  "checkboxes": {
+    "marital_status": {
+      "single": "Single",
+      "married": "Married",
+      "registered_partnership": "Registered Partnership",
+      "divorced": "Divorced",
+      "widowed": "Widower",
+      "other": "Other please"
+    },
+    "travel_purpose": {
+      "tourism": "Tourism",
+      "business": "Business",
+      "visiting_family_or_friends": "Visiting family or friends",
+      "cultural": "Cultural",
+      "sports": "Sports",
+      "official_visit": "Official visit",
+      "medical": "Medical reasons",
+      "study": "Study",
+      "airport_transit": "Airport transit",
+      "other": "Other please specify"
+    },
+    "costs_covered_by": {
+      "self": "by the applicant himselfherself",
+      "sponsor": "by a sponsor host company"
+    },
+    "means_of_support": {
+      "cash": "Cash",
+      "travellers_cheques": "Travellers cheques",
+      "credit_card": "Credit card",
+      "prepaid_accommodation": "Prepaid accommodation",
+      "prepaid_transport": "Prepaid transport"
+    }
   }
 }

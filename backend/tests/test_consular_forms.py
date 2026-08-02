@@ -209,3 +209,51 @@ def test_unanswered_fields_are_left_blank_not_invented():
     assert fields.get("1 Surname Family name") == "CHEN"
     assert not fields.get("13 Number of travel document"), \
         "a passport number nobody gave must never appear on a sworn form"
+
+
+# --- tick-boxes the applicant answers, Ellis ticks --------------------------
+
+def test_checkbox_questions_are_asked_in_plain_words():
+    """The form says 'Cost of travelling and living during the applicant's stay
+    is covered by'; the applicant is asked who is paying."""
+    from app import consular_forms as cf
+    qs = {q["key"]: q for q in cf.checkbox_questions("schengen_uniform")}
+    assert set(qs) >= {"marital_status", "travel_purpose", "costs_covered_by",
+                       "means_of_support"}
+    assert qs["costs_covered_by"]["label"] == "Who is paying for your trip?"
+    assert qs["means_of_support"]["multi"] is True
+    assert any(o["label"] == "Married" for o in qs["marital_status"]["options"])
+
+
+def test_the_applicants_answers_tick_the_right_boxes():
+    from io import BytesIO
+    from pypdf import PdfReader
+    from app import consular_forms as cf
+    pdf = cf.fill_official_template("schengen_uniform", {
+        "surname": "CHEN", "marital_status": "married",
+        "travel_purpose": "tourism", "costs_covered_by": "self",
+        "means_of_support": ["cash", "credit_card"]})
+    fields = PdfReader(BytesIO(pdf)).get_fields() or {}
+    on = {k.strip() for k, v in fields.items() if str(v.get("/V")) in ("/On", "On")}
+    assert {"Married", "Tourism", "by the applicant himselfherself",
+            "Cash", "Credit card"} <= on
+    assert "Single" not in on and "Business" not in on
+
+
+def test_an_unanswered_group_is_left_untouched():
+    """This form is sworn: a box nobody ticked must stay empty, never guessed."""
+    from io import BytesIO
+    from pypdf import PdfReader
+    from app import consular_forms as cf
+    pdf = cf.fill_official_template("schengen_uniform", {"surname": "CHEN"})
+    fields = PdfReader(BytesIO(pdf)).get_fields() or {}
+    on = {k.strip() for k, v in fields.items() if str(v.get("/V")) in ("/On", "On")}
+    assert on == set(), f"nothing should be ticked, got {on}"
+
+
+def test_checkbox_appearances_are_regenerated():
+    """A tick present in the data but not rendered is, on a printed consular
+    form, a box that was never ticked."""
+    import inspect
+    from app import consular_forms as cf
+    assert "set_need_appearances_writer" in inspect.getsource(cf.fill_official_template)

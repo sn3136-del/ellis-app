@@ -1345,6 +1345,37 @@ def review(application_id: str, db=Depends(get_session), p: Principal = Depends(
             "required_fields": required, "missing_fields": missing, "answers": answers}
 
 
+@app.get("/cases/{application_id}/form-questions")
+def case_form_questions(application_id: str, db=Depends(get_session),
+                        p: Principal = Depends(get_principal)):
+    """The tick-box questions this applicant's consular form needs.
+
+    A consular form asks most of its questions as boxes — marital status,
+    purpose of travel, who is paying. Ellis asks them in plain words here and
+    ticks the box the applicant chose, so the form they download needs nothing
+    finished by hand. Returns which are already answered."""
+    app_row = _owned(db, p, application_id)
+    from . import consular_forms as cf
+    from .visa_snapshot.registry import _country_index
+    dest = app_row.destination_country or ""
+    iso = ""
+    for code, e in (_country_index() or {}).items():
+        if dest and dest.lower() in (str(e.get("name") or "").lower(),
+                                     str(e.get("common_name") or "").lower()):
+            iso = code
+            break
+    form_key = cf.form_for_destination(iso) if iso else None
+    if not form_key:
+        return {"form_key": None, "questions": []}
+    answers = app_row.answers or {}
+    qs = cf.checkbox_questions(form_key)
+    for q in qs:
+        q["answer"] = answers.get(q["key"])
+    return {"form_key": form_key, "title": cf.FORMS[form_key]["title"],
+            "questions": qs,
+            "unanswered": [q["key"] for q in qs if q.get("answer") in (None, "", [])]}
+
+
 @app.get("/cases/{application_id}/appointment-packet")
 def case_appointment_packet(application_id: str, format: str = "json",
                             db=Depends(get_session),

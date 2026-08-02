@@ -715,6 +715,7 @@ function AppointmentBooking({ t, client, caseId }) {
     <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--line)' }}
       data-testid="appointment-booking">
       <div style={{ fontWeight: 600, marginBottom: 6 }}>{t('booking.title')}</div>
+      <ConsularFormQuestions t={t} client={client} caseId={caseId} onSaved={() => {}} />
       <GovCalendar t={t} client={client} caseId={caseId} />
       {appt && !editing ? (
         <div data-testid="appointment-booked">
@@ -782,6 +783,80 @@ function AppointmentBooking({ t, client, caseId }) {
           </button>
         </>
       )}
+    </div>
+  )
+}
+
+// A consular form asks most of its questions as tick-boxes. Ellis asks them in
+// plain words and ticks the box the applicant chose, so the form they download
+// is complete — nothing left to fill in by hand. Ellis never guesses an answer:
+// the form is signed under penalty of perjury, so an unanswered group stays
+// untouched rather than assumed.
+function ConsularFormQuestions({ t, client, caseId, onSaved }) {
+  const toast = useToast()
+  const [data, setData] = useState(null)
+  const [busy, setBusy] = useState(false)
+  const [draft, setDraft] = useState({})
+  const load = () => client.consularFormQuestions(caseId)
+    .then((d) => {
+      setData(d)
+      const seed = {}
+      for (const q of d.questions || []) if (q.answer != null) seed[q.key] = q.answer
+      setDraft(seed)
+    }).catch(() => setData(null))
+  useEffect(() => { load() }, [caseId])
+  if (!data || !data.form_key || !(data.questions || []).length) return null
+
+  function pick(q, value) {
+    setDraft((prev) => {
+      if (!q.multi) return { ...prev, [q.key]: value }
+      const cur = Array.isArray(prev[q.key]) ? prev[q.key] : []
+      return { ...prev, [q.key]: cur.includes(value)
+        ? cur.filter((v) => v !== value) : [...cur, value] }
+    })
+  }
+  const chosen = (q, v) => q.multi
+    ? (Array.isArray(draft[q.key]) && draft[q.key].includes(v))
+    : draft[q.key] === v
+
+  async function save() {
+    setBusy(true)
+    try {
+      await client.updateAnswers(caseId, draft)
+      await load()
+      onSaved && onSaved()
+      toast(t('formq.saved'))
+    } catch (e) { toast(e.detail?.detail || e.message) }
+    setBusy(false)
+  }
+
+  const left = (data.unanswered || []).length
+  return (
+    <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--line)' }}
+      data-testid="consular-form-questions">
+      <div style={{ fontWeight: 600, marginBottom: 4 }}>{t('formq.title')}</div>
+      <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 10 }}>
+        {left > 0 ? t('formq.sub', { n: left }) : t('formq.complete')}
+      </div>
+      {(data.questions || []).map((q) => (
+        <div key={q.key} style={{ marginBottom: 12 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 5 }}>
+            {q.label}{q.multi ? ` — ${t('formq.chooseAny')}` : ''}
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {q.options.map((o) => (
+              <button key={o.value} type="button"
+                className={'chip' + (chosen(q, o.value) ? ' chip--ink' : '')}
+                onClick={() => pick(q, o.value)}
+                aria-pressed={chosen(q, o.value)}>{o.label}</button>
+            ))}
+          </div>
+        </div>
+      ))}
+      <button className="btn" onClick={save} disabled={busy}
+        data-testid="formq-save">
+        {busy ? t('formq.saving') : t('formq.save')}
+      </button>
     </div>
   )
 }

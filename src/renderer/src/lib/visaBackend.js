@@ -216,6 +216,9 @@ export function createVisaClient(session) {
     caseChecklist: (id) => call('GET', `/cases/${id}/checklist`, session),
     // The carry-in folder for an in-person route: what is in it, what is still
     // missing. 409 (packet_not_applicable) means Ellis files this route itself.
+    // Tick-box questions the consular form needs, in plain words. Answering
+    // them means the downloaded form needs nothing finished by hand.
+    consularFormQuestions: (id) => call('GET', `/cases/${id}/form-questions`, session),
     appointmentPacket: (id) => call('GET', `/cases/${id}/appointment-packet`, session),
     // Where this applicant books, and what they have already booked. Ellis
     // never picks a slot: the applicant chooses in the secure window.
