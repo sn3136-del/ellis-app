@@ -295,7 +295,37 @@
    "account_required": false,
    "form_paths": [
     "/"
-   ]
+   ],
+   "entry_gate": {
+    "description": "NZeTA discloses progressively: the landing form renders ONE control (#qCitizenship, an Angular Material mat-select with no native <select> anywhere on the page) and the remaining ~47 fields mount only after a nationality is committed. Recon therefore saw a one-field page and reported the form unmappable. Choosing a nationality is applicant data, so the gate states a DECLARED literal purely to reveal structure in a session that submits nothing; at runtime the flow fills the applicant's real nationality from the passport they uploaded. Recon sees one nationality's view — if NZeTA varies its fields by nationality, that is a reason for an attended run, not a guess.",
+    "actions": [
+     {
+      "action": "WAIT_FOR_SELECTOR",
+      "selector": "#qCitizenship",
+      "timeout_ms": 60000,
+      "purpose": "The citizenship control mounts before anything else exists."
+     },
+     {
+      "action": "CLICK",
+      "selector": "#qCitizenship",
+      "timeout_ms": 45000,
+      "purpose": "mat-select opens its option list in a CDK overlay; there is no native <select> to set directly."
+     },
+     {
+      "action": "CLICK",
+      "selector": ".cdk-overlay-container mat-option",
+      "timeout_ms": 45000,
+      "settle_ms": 4000,
+      "purpose": "RECON ONLY: take the first offered nationality to commit the control and mount the rest of the form. Nothing is submitted."
+     }
+    ],
+    "declared_handoffs": [],
+    "expect_path": "/",
+    "form_ready_all": {
+     "selector": "input:not([type=\"hidden\"]), mat-select, select",
+     "min": 5
+    }
+   }
   },
   {
    "family_id": "korea-keta",

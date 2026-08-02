@@ -506,3 +506,24 @@ def test_a_rebuild_drops_the_cached_specification():
     # Recon evidence must SURVIVE: re-observing is expensive and was not the
     # thing that changed.
     assert "recon_job_id" not in src
+
+
+def test_schema_accepts_only_a_declared_unobservable_submit():
+    """A missing selector is normally a broken node. The single exception is a
+    control that provably cannot be observed at build time — the final submit,
+    which lives past the applicant's own review step where recon must stop."""
+    from app.adapter_factory import schema
+    ok = schema.validate_node(
+        {"node_id": "submit", "action": "CLICK", "selector": "",
+         "selector_source": "runtime_primary_action"}, allowed_hostnames=["x.gov"])
+    assert not [e for e in ok if "deterministic selector" in e]
+    # Without the declaration, an empty selector is still a broken node.
+    bad = schema.validate_node(
+        {"node_id": "submit", "action": "CLICK", "selector": ""},
+        allowed_hostnames=["x.gov"])
+    assert any("deterministic selector" in e for e in bad)
+    # And the exception is CLICK-only: a FILL with no selector stays invalid.
+    bad2 = schema.validate_node(
+        {"node_id": "f", "action": "FILL_NON_SENSITIVE", "selector": "",
+         "selector_source": "runtime_primary_action"}, allowed_hostnames=["x.gov"])
+    assert any("deterministic selector" in e for e in bad2)

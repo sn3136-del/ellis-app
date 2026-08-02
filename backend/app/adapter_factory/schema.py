@@ -149,7 +149,18 @@ def validate_node(raw: dict, *, allowed_hostnames: list[str]) -> list[str]:
                   "CHECK", "READ_TEXT", "READ_FEE", "UPLOAD_AUTHORIZED_DOCUMENT"):
         sel = (node.get("selector") or "").strip()
         if not sel:
-            errs.append(f"{nid}: {action} requires a deterministic selector")
+            # ONE honest exception: a control that provably cannot be observed
+            # at build time. A portal's final submit lives past the applicant's
+            # own review step, which is exactly where credential-free recon
+            # must stop, so no selector for it can exist. The node declares
+            # that with selector_source, and the runtime resolves the portal's
+            # primary action where the page finally shows it — failing closed
+            # if there is none. The alternative was specgen writing down a
+            # plausible '#submit-btn' it had never seen, which is worse in
+            # every way: it looks valid here and misleads downstream.
+            if not (action == "CLICK"
+                    and node.get("selector_source") == "runtime_primary_action"):
+                errs.append(f"{nid}: {action} requires a deterministic selector")
         elif not sel.startswith(_SELECTOR_OK):
             errs.append(f"{nid}: selector {sel!r} is not a deterministic CSS selector")
     if action == "SCROLL_TO_BOTTOM":
