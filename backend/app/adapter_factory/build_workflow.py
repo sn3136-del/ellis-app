@@ -209,7 +209,8 @@ def _run_build_stages(db, req, _obs, max_stages: int) -> fm.AdapterBuildRequest:
                     "verification") != "synthetic_test_portal"
                 job = recon.run_recon(db, build_request=req, observer=obs,
                                       start_paths=_recon_paths(req),
-                                      follow_links=live_portal)
+                                      follow_links=live_portal,
+                                      curated_paths=_curated_paths(req))
                 if job.status != "complete":
                     transition(req, "MANUAL_REVIEW_REQUIRED", f"recon: {job.error[:80]}")
                     _review(db, req, "recon_failed", job.error or "recon failed")
@@ -349,6 +350,19 @@ def _recon_paths(req) -> tuple:
         if p and p != "/" and p not in paths:
             paths.append(p)
     return tuple(paths)
+
+
+def _curated_paths(req) -> tuple:
+    """Paths an operator VERIFIED live render this portal's form. They get one
+    retry when they come back empty (see recon._observe_one); the standard
+    probe paths do not, since an empty /application is just an absent page."""
+    out = []
+    for url in (req.portal_evidence or {}).get("entry_urls") or []:
+        parsed = urlparse(url)
+        p = parsed.path + (f"?{parsed.query}" if parsed.query else "")
+        if p and p != "/":
+            out.append(p)
+    return tuple(out)
 
 
 def _policy_review(db, req) -> str:

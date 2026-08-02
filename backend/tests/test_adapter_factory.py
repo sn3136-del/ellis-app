@@ -67,8 +67,10 @@ def test_recon_artifacts_are_sanitized(db):
         for forbidden in ("cookie", "bearer", "authorization", "set-cookie",
                           "session_id", "access_token"):
             assert forbidden not in blob
-        # No query strings anywhere — query VALUES are personal data.
-        assert "?" not in art.url_pattern
+        # Query VALUES are personal data and never survive; query KEYS are
+        # structure (a portal route name) and may, so a form selected by a
+        # flag stays reachable. Either way: no "=" and no value text.
+        assert "=" not in art.url_pattern
         for el in art.structure.get("elements", []):
             assert "value" not in el   # element values are never captured
             if el.get("type") == "password":

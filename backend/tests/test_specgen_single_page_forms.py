@@ -123,3 +123,98 @@ def test_shape_key_carries_no_values():
     art = {"elements": [{"name": "passport", "type": "text",
                          "value": "L898902C3", "label": "Passport"}]}
     assert "L898902C3" not in _shape_key("https://x.gov/apply", art)
+
+
+def test_a_curated_form_path_gets_one_retry_when_it_renders_empty(db):
+    """MDAC renders 22 fields on a good load and a bare shell on a bad one.
+    Without a retry, one flaky load costs the whole portal."""
+    from app.adapter_factory import recon
+    from app.adapter_factory.build_workflow import create_request, record_consent
+    HOST = "portal.gov.retry"
+    FORM = {"ok": True, "status": 200, "url": f"https://{HOST}/apply?form",
+            "hostname": HOST, "title": "Apply", "links": [], "iframes": [],
+            "elements": [{"selector": "#a", "name": "a", "label": "A", "type": "text"},
+                         {"selector": "#b", "name": "b", "label": "B", "type": "text"},
+                         {"selector": "#c", "name": "c", "label": "C", "type": "select"}]}
+    SHELL = dict(FORM, elements=[])
+    calls = {"n": 0}
+
+    def flaky(url):
+        if url.endswith("?form"):
+            calls["n"] += 1
+            return SHELL if calls["n"] == 1 else FORM     # first load empty
+        return {"ok": False, "status": 404, "url": url, "hostname": HOST}
+
+    req = create_request(db, org_id="orgRT", user_id="u", application_id="",
+                         route_key="rt|1", destination="Testland",
+                         visa_type="tourist",
+                         portal_evidence={"hostnames": [HOST],
+                                          "entry_urls": [f"https://{HOST}/apply?form"]},
+                         runtime_mode="local_mock_demo")
+    record_consent(db, req, user_id="u")
+    job = recon.run_recon(db, build_request=req, observer=flaky,
+                          start_paths=("/apply?form",),
+                          curated_paths=("/apply?form",))
+    assert calls["n"] == 2, "the curated path must be retried once"
+    arts = recon.artifacts(db, job.id)
+    assert any(len((a.structure or {}).get("elements", [])) >= 3 for a in arts)
+
+
+def test_a_standard_probe_path_is_never_retried(db):
+    """An empty /application is an absent page, not a flaky one — retrying
+    every probe would double every build's live traffic."""
+    from app.adapter_factory import recon
+    from app.adapter_factory.build_workflow import create_request, record_consent
+    HOST = "portal.gov.noretry"
+    calls = {"n": 0}
+
+    def counting(url):
+        calls["n"] += 1
+        return {"ok": True, "status": 200, "url": url, "hostname": HOST,
+                "title": "", "elements": [], "links": [], "iframes": []}
+
+    req = create_request(db, org_id="orgNR", user_id="u", application_id="",
+                         route_key="nr|1", destination="Testland",
+                         visa_type="tourist", portal_evidence={"hostnames": [HOST]},
+                         runtime_mode="local_mock_demo")
+    record_consent(db, req, user_id="u")
+    recon.run_recon(db, build_request=req, observer=counting,
+                    start_paths=("/application",), curated_paths=())
+    assert calls["n"] == 1
+
+
+def test_url_pattern_keeps_query_keys_but_never_values():
+    """The address must survive sanitization; the data must not."""
+    from app.adapter_factory.recon import _pattern
+    assert _pattern("https://x.gov.my/mdac/main?registerMain") == \
+        "https://x.gov.my/mdac/main?registerMain"
+    assert _pattern("https://x.gov/apply?email=real@example.com&ref=L898902C3") == \
+        "https://x.gov/apply?email&ref"
+    assert _pattern("https://x.gov/apply") == "https://x.gov/apply"
+
+
+def test_sanitized_structure_still_carries_no_query_values():
+    from app.adapter_factory.recon import sanitize_structure
+    art = sanitize_structure({
+        "url": "https://x.gov/apply?passport=L898902C3&token=abc123",
+        "hostname": "x.gov", "status": 200, "title": "Apply", "elements": []})
+    assert "L898902C3" not in art["url_pattern"]
+    assert "abc123" not in art["url_pattern"]
+    assert art["url_pattern"] == "https://x.gov/apply?passport&token"
+
+
+# ---- live layer: transient vs real failures ------------------------------
+
+def test_live_layer_retries_a_timeout_but_never_a_refusal():
+    """A mapped page that times out is the network; a 404/403 is the portal's
+    answer and must stand — retrying refusals is how a gate stops meaning
+    anything."""
+    from app.adapter_factory.testing import _transient_failure
+    assert _transient_failure({"ok": False, "status": 0,
+                               "error": "Page.goto: Timeout 30000ms exceeded."})
+    assert _transient_failure({"ok": False, "status": 503})
+    assert _transient_failure(None)
+    assert not _transient_failure({"ok": False, "status": 404})
+    assert not _transient_failure({"ok": False, "status": 403})
+    assert not _transient_failure({"ok": False, "status": 0,
+                                   "error": "off-allowlist host refused"})

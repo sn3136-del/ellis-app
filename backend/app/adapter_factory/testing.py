@@ -209,6 +209,27 @@ _INTERACTIVE_ACTIONS = ("CLICK", "FILL_NON_SENSITIVE", "SELECT", "SELECT_SEARCH"
                         "UPLOAD_AUTHORIZED_DOCUMENT")
 
 
+def _transient_failure(obs) -> bool:
+    """Is this failure the network's fault rather than the portal's answer?
+
+    Timeouts, connection resets and 5xx are transient. A 404 or 403 is the
+    portal telling the truth about that URL and must never be retried away —
+    retrying a refusal until it passes is exactly how a gate stops meaning
+    anything.
+    """
+    if obs is None:
+        return True
+    status = int(obs.get("status") or 0)
+    if status >= 500:
+        return True
+    if status:                      # any other real HTTP answer stands
+        return False
+    err = str(obs.get("error") or "").lower()
+    return any(k in err for k in ("timeout", "econnreset", "err_connection",
+                                  "err_network", "socket hang up",
+                                  "err_tunnel_connection_failed"))
+
+
 def _observe_flow_structure(compiled, observer, problems: list[str],
                             prefix: str = "") -> tuple[set[str], int]:
     """One session's worth of safe, reversible, credential-free observation:
@@ -228,6 +249,15 @@ def _observe_flow_structure(compiled, observer, problems: list[str],
                 continue
             obs = observer(url)
             ok = bool(obs and obs.get("ok"))
+            # A page recon reached and mapped is a page that exists. When
+            # re-observation times out or 5xxs, that is the network or a slow
+            # government SPA, not a vanished portal — one retry, only for
+            # transient failures, never for a 404/403 (a real answer that must
+            # stand). Malaysia's MDAC form times out on roughly one load in
+            # three and was failing the whole live layer for it.
+            if not ok and _transient_failure(obs):
+                obs = observer(url)
+                ok = bool(obs and obs.get("ok"))
             visited[url] = ok
             if not ok:
                 err = (obs or {}).get("error") or f"status {(obs or {}).get('status')}"

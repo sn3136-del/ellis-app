@@ -121,10 +121,26 @@ def sanitize_structure(observation: dict) -> dict:
 
 
 def _pattern(url: str) -> str:
-    """URLs are reduced to a pattern: query VALUES never survive."""
+    """URLs are reduced to a pattern: query VALUES never survive.
+
+    Query KEYS do. A portal that selects its form with a bare flag — Malaysia's
+    MDAC serves the arrival form at /mdac/main?registerMain and an empty shell
+    at /mdac/main — is otherwise unreachable from its own recorded pattern, so
+    the live layer re-navigated the shell and every mapped selector "vanished".
+    Keys are portal structure (a route name), values are data: `?email=a@b`
+    becomes `?email`, never the address itself.
+    """
     url = str(url or "")
-    base = url.split("?")[0]
-    return base[:300]
+    base, _, query = url.partition("?")
+    base = base[:300]
+    if not query:
+        return base
+    keys = []
+    for part in query.split("&"):
+        key = re.sub(r"[^A-Za-z0-9_\-]", "", part.split("=")[0])[:40]
+        if key and key not in keys:
+            keys.append(key)
+    return f"{base}?{'&'.join(keys)}"[:300] if keys else base
 
 
 def _assert_sanitized(obj, path="root"):
@@ -174,6 +190,16 @@ _MAX_APPLY_CTA_ATTEMPTS = 2
 _MAX_FOLLOWED_LINKS = 8
 
 
+_FORM_INPUT_TYPES = ("text", "email", "date", "tel", "number", "select",
+                     "checkbox", "radio", "search-combobox")
+
+
+def _form_input_count(observation: dict) -> int:
+    """How many real applicant-fillable controls a page rendered."""
+    return sum(1 for e in (observation or {}).get("elements", [])
+               if (e.get("type") or "") in _FORM_INPUT_TYPES)
+
+
 def _shape_key(pattern: str, art: dict) -> str:
     """Identity of an observed page: its sanitized pattern PLUS the controls it
     renders. Structure only — names and types the sanitizer already cleared,
@@ -195,7 +221,8 @@ def run_recon(db, *, build_request: fm.AdapterBuildRequest, observer,
                            "/appointments", "/submit"),
               hostnames: list[str] | None = None,
               follow_links: bool = False,
-              entry_gate: dict | None = None) -> fm.AdapterReconJob:
+              entry_gate: dict | None = None,
+              curated_paths: tuple = ()) -> fm.AdapterReconJob:
     """Observe the portal's public pages through `observer(url) -> observation`
     and persist sanitized artifacts. `observer` is the structural interface —
     SyntheticPortal.observe in tests, a Browserbase/Playwright structural probe
@@ -228,6 +255,17 @@ def run_recon(db, *, build_request: fm.AdapterBuildRequest, observer,
         nonlocal observed
         url = f"https://{host}{path}"
         raw = observer(url)
+        # A CURATED form path is known to render a form — an operator verified
+        # it live. When it comes back empty, the portal was slow, not wrong
+        # (Malaysia's MDAC renders 22 fields on a good load and a bare shell on
+        # a bad one). One retry, only for curated paths, only when the page
+        # rendered no form: without it a single flaky load silently costs the
+        # whole portal and reports "no form page was mappable".
+        if path in curated_paths and (
+                not raw or not raw.get("ok") or _form_input_count(raw) < 3):
+            retry = observer(url)
+            if retry and retry.get("ok") and _form_input_count(retry) >= 3:
+                raw = retry
         if not raw or not raw.get("ok"):
             return None
         if str(raw.get("hostname", host)).lower() not in hosts:
