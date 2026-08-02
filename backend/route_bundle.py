@@ -41,6 +41,12 @@ BUNDLE_VERSION = 1
 _TABLES = ("portal_families", "portal_family_adapters", "global_route_pair_policies",
            "adapter_candidates", "adapter_candidate_versions", "adapter_releases",
            "adapter_runtime_bindings", "adapter_capability_releases",
+           # The PROOF the adapter was tested against the real portal: which
+           # layers ran, what they classified, whether they passed. Without it
+           # a restored route asserts it was verified and cannot show it, and
+           # "prove this was tested live" is the first question anyone asks.
+           # No applicant-scoped column exists on this table.
+           "adapter_test_runs",
            "fee_records", "portal_field_option_cache")
 
 # Columns that must never appear in a bundle even if a table gains them.
@@ -129,6 +135,18 @@ def export_routes(db, *, match: str = "") -> list[dict]:
                                         "id = :c", {"c": b.candidate_id})
         t["adapter_candidate_versions"] = _rows(db, "adapter_candidate_versions",
                                                 "candidate_id = :c", {"c": b.candidate_id})
+        # Test runs hang off the VERSION, not the candidate, so they are
+        # selected by the version ids this bundle already carries — the
+        # evidence and the thing it vouches for always travel together.
+        version_ids = [r["id"] for r in t["adapter_candidate_versions"] if r.get("id")]
+        if version_ids:
+            placeholders = ", ".join(f":v{i}" for i in range(len(version_ids)))
+            t["adapter_test_runs"] = _rows(
+                db, "adapter_test_runs",
+                f"candidate_version_id IN ({placeholders})",
+                {f"v{i}": vid for i, vid in enumerate(version_ids)})
+        else:
+            t["adapter_test_runs"] = []
         t["adapter_releases"] = _rows(db, "adapter_releases",
                                       "candidate_id = :c", {"c": b.candidate_id})
         t["adapter_runtime_bindings"] = _rows(db, "adapter_runtime_bindings",

@@ -2,7 +2,7 @@
   "bundle_version": 1,
   "candidate_id": "52dbf6ed65c24e10aae09d0ca529d8b2",
   "candidate_version": 1,
-  "exported_at": "2026-08-02T05:34:23.349746-04:00",
+  "exported_at": "2026-08-02T05:41:30.367681-04:00",
   "family_id": "usa-esta",
   "route_key": "rk1|nat=AND|iss=AND|doc=ordinary_passport|res=AND|dest=USA|cat=eta|sub=any|pur=tourism|per=2026-07-23|jur=default",
   "tables": {
@@ -89,6 +89,41 @@
         "route_key": "rk1|nat=AND|iss=AND|doc=ordinary_passport|res=AND|dest=USA|cat=eta|sub=any|pur=tourism|per=2026-07-23|jur=default",
         "tier": "sandbox",
         "updated_at": "2026-08-01 10:36:32.067497"
+      }
+    ],
+    "adapter_test_runs": [
+      {
+        "candidate_version_id": "d30d2141a95a4f539da071bb7c32aa56",
+        "classification": "STATIC_VALIDATED",
+        "created_at": "2026-08-01 10:34:43.896295",
+        "executed_by": "ellis-factory",
+        "id": "12e5c8653bda4a87a75b2fe8cfcdae8e",
+        "layer": "static",
+        "passed": 1,
+        "summary": "{\"checks\": {\"manifest\": true, \"hostnames\": true, \"flow\": true, \"mappings\": true, \"evidence_rules\": true, \"recovery\": true, \"forbidden_patterns\": true, \"sensitive_boundaries\": true}, \"detail\": {}}",
+        "updated_at": "2026-08-01 10:34:43.896295"
+      },
+      {
+        "candidate_version_id": "d30d2141a95a4f539da071bb7c32aa56",
+        "classification": "CONTRACT_TESTED",
+        "created_at": "2026-08-01 10:34:43.898199",
+        "executed_by": "ellis-factory",
+        "id": "9f1d8b4a6ccc48cab439ac08bf2ac35b",
+        "layer": "contract",
+        "passed": 1,
+        "summary": "{\"selectors_checked\": true, \"problems\": []}",
+        "updated_at": "2026-08-01 10:34:43.898200"
+      },
+      {
+        "candidate_version_id": "d30d2141a95a4f539da071bb7c32aa56",
+        "classification": "LIVE_STRUCTURAL_TESTED",
+        "created_at": "2026-08-01 10:36:31.352411",
+        "executed_by": "ellis-factory",
+        "id": "42e4cbc7841e48dea0577f511950e852",
+        "layer": "live_structural",
+        "passed": 1,
+        "summary": "{\"pages_observed\": 2, \"selectors_live\": 80, \"independent_sessions\": 2, \"problems\": []}",
+        "updated_at": "2026-08-01 10:36:31.352419"
       }
     ],
     "fee_records": [],

@@ -188,3 +188,28 @@ def test_destinations_json_string_still_matches_the_fee(db):
     assert rb._as_list(None) == []
     assert rb._dest_matches("Vietnam", {"VNM"}) is True
     assert rb._dest_matches("Vietnam", {"K", "H", "M"}) is False
+
+
+def test_the_bundle_carries_its_own_test_evidence(db, route):
+    """A restored route must be able to SHOW it was tested against the real
+    portal, not merely assert it. Before this, the app database held nine
+    released adapters and the evidence for none of them — 'prove this was
+    tested live' is the first question anyone doing diligence asks."""
+    from app.adapter_factory import models as fm2
+    ver = db.execute(select(fm.AdapterCandidateVersion).where(
+        fm.AdapterCandidateVersion.candidate_id == route.candidate_id)).scalars().first()
+    db.add(fm2.AdapterTestRun(candidate_version_id=ver.id, layer="live_structural",
+                              classification="LIVE_STRUCTURAL_TESTED", passed=True,
+                              summary={"sessions": 2}, executed_by="test"))
+    db.commit()
+    runs = _bundle(db)["tables"]["adapter_test_runs"]
+    assert runs, "the evidence must travel with the route it vouches for"
+    assert any(r["classification"] == "LIVE_STRUCTURAL_TESTED" for r in runs)
+
+
+def test_test_evidence_carries_no_applicant_data(db, route):
+    """It is committed to git like the rest of the bundle."""
+    import json as _json
+    blob = _json.dumps(_bundle(db)["tables"]["adapter_test_runs"])
+    for forbidden in ("passport_number", "applicant_id", "email", "vault://"):
+        assert forbidden not in blob

@@ -2,7 +2,7 @@
   "bundle_version": 1,
   "candidate_id": "5d5e87b6ebf4473cb0a46aae50bcdbe5",
   "candidate_version": 3,
-  "exported_at": "2026-08-02T05:34:23.273845-04:00",
+  "exported_at": "2026-08-02T05:41:30.355568-04:00",
   "family_id": "uk-eta",
   "route_key": "rk1|nat=AND|iss=AND|doc=ordinary_passport|res=AND|dest=GBR|cat=eta|sub=any|pur=tourism|per=2026-07-23|jur=default",
   "tables": {
@@ -135,6 +135,96 @@
         "route_key": "rk1|nat=AND|iss=AND|doc=ordinary_passport|res=AND|dest=GBR|cat=eta|sub=any|pur=tourism|per=2026-07-23|jur=default",
         "tier": "sandbox",
         "updated_at": "2026-08-01 03:32:58.579418"
+      }
+    ],
+    "adapter_test_runs": [
+      {
+        "candidate_version_id": "6b2f1cec5bc245b388027319a9a886db",
+        "classification": "STATIC_VALIDATED",
+        "created_at": "2026-08-01 02:56:42.425672",
+        "executed_by": "ellis-factory",
+        "id": "7a50344fdac745a59d42c51553b6da2f",
+        "layer": "static",
+        "passed": 1,
+        "summary": "{\"checks\": {\"manifest\": true, \"hostnames\": true, \"flow\": true, \"mappings\": true, \"evidence_rules\": true, \"recovery\": true, \"forbidden_patterns\": true, \"sensitive_boundaries\": true}, \"detail\": {}}",
+        "updated_at": "2026-08-01 02:56:42.425675"
+      },
+      {
+        "candidate_version_id": "6b2f1cec5bc245b388027319a9a886db",
+        "classification": "CONTRACT_FAILED",
+        "created_at": "2026-08-01 02:56:42.429092",
+        "executed_by": "ellis-factory",
+        "id": "686241e42abb402996da1d131bf6aa35",
+        "layer": "contract",
+        "passed": 0,
+        "summary": "{\"selectors_checked\": true, \"problems\": [\"entry_gate_1_click: selector 'a:has-text(\\\"I cannot apply on the UK ETA app\\\")' was never observed\", \"entry_gate_2_click: selector 'a:has-text(\\\"Continue application online\\\")' was never observed\", \"entry_gate_3_click: selector 'button:has-text(\\\"Continue\\\")' was never observed\", \"submit: selector '#submit-btn' was never observed\"]}",
+        "updated_at": "2026-08-01 02:56:42.429095"
+      },
+      {
+        "candidate_version_id": "a52e2870549844fda44179a5e349e0d1",
+        "classification": "STATIC_VALIDATED",
+        "created_at": "2026-08-01 03:19:27.337288",
+        "executed_by": "ellis-factory",
+        "id": "ec15c9ca04ca4cd79e143aaeb9be661b",
+        "layer": "static",
+        "passed": 1,
+        "summary": "{\"checks\": {\"manifest\": true, \"hostnames\": true, \"flow\": true, \"mappings\": true, \"evidence_rules\": true, \"recovery\": true, \"forbidden_patterns\": true, \"sensitive_boundaries\": true}, \"detail\": {}}",
+        "updated_at": "2026-08-01 03:19:27.337290"
+      },
+      {
+        "candidate_version_id": "a52e2870549844fda44179a5e349e0d1",
+        "classification": "CONTRACT_TESTED",
+        "created_at": "2026-08-01 03:19:27.340157",
+        "executed_by": "ellis-factory",
+        "id": "00c3659c20c04b87bb0aa9ef79532b61",
+        "layer": "contract",
+        "passed": 1,
+        "summary": "{\"selectors_checked\": true, \"problems\": []}",
+        "updated_at": "2026-08-01 03:19:27.340158"
+      },
+      {
+        "candidate_version_id": "a52e2870549844fda44179a5e349e0d1",
+        "classification": "LIVE_STRUCTURAL_TESTED",
+        "created_at": "2026-08-01 03:20:19.470784",
+        "executed_by": "ellis-factory",
+        "id": "1836cc59112e43cc8e58b549cb4915dc",
+        "layer": "live_structural",
+        "passed": 1,
+        "summary": "{\"pages_observed\": 2, \"selectors_live\": 54, \"independent_sessions\": 2, \"problems\": []}",
+        "updated_at": "2026-08-01 03:20:19.470794"
+      },
+      {
+        "candidate_version_id": "f6184f852a9744dfacbe038fbcada41b",
+        "classification": "STATIC_VALIDATED",
+        "created_at": "2026-08-01 02:56:59.622946",
+        "executed_by": "ellis-factory",
+        "id": "b66f1b6bea024790ada766070fdafb15",
+        "layer": "static",
+        "passed": 1,
+        "summary": "{\"checks\": {\"manifest\": true, \"hostnames\": true, \"flow\": true, \"mappings\": true, \"evidence_rules\": true, \"recovery\": true, \"forbidden_patterns\": true, \"sensitive_boundaries\": true}, \"detail\": {}}",
+        "updated_at": "2026-08-01 02:56:59.622947"
+      },
+      {
+        "candidate_version_id": "f6184f852a9744dfacbe038fbcada41b",
+        "classification": "CONTRACT_FAILED",
+        "created_at": "2026-08-01 02:56:59.623704",
+        "executed_by": "ellis-factory",
+        "id": "6ce5f453def3435ab111ad147295b5cf",
+        "layer": "contract",
+        "passed": 0,
+        "summary": "{\"selectors_checked\": true, \"problems\": [\"entry_gate_1_click: selector 'a:has-text(\\\"I cannot apply on the UK ETA app\\\")' was never observed\", \"entry_gate_2_click: selector 'a:has-text(\\\"Continue application online\\\")' was never observed\", \"entry_gate_3_click: selector 'button:has-text(\\\"Continue\\\")' was never observed\", \"submit: selector '#submit-btn' was never observed\"]}",
+        "updated_at": "2026-08-01 02:56:59.623706"
+      },
+      {
+        "candidate_version_id": "f6184f852a9744dfacbe038fbcada41b",
+        "classification": "LIVE_STRUCTURAL_FAILED",
+        "created_at": "2026-08-01 02:57:22.735692",
+        "executed_by": "ellis-factory",
+        "id": "59a193029e2944a6a90909510899257b",
+        "layer": "live_structural",
+        "passed": 0,
+        "summary": "{\"pages_observed\": 1, \"selectors_live\": 41, \"independent_sessions\": 2, \"problems\": [\"entry_gate: replay failed (entry gate ended at '/electronic-travel-authorisation/2021-2608-0109-2273/electronic-travel-authorisation/enter-email-ad)\", \"session2: entry_gate: replay failed (entry gate ended at '/electronic-travel-authorisation/2021-2608-0151-5559/electronic-travel-authorisation/enter-email-ad)\", \"entry_gate_1_click: selector 'a:has-text(\\\"I cannot apply on the UK ETA app\\\")' not present in live structure\", \"entry_gate_2_click: selector 'a:has-text(\\\"Continue application online\\\")' not present in live structure\", \"entry_gate_3_click: selector 'button:has-text(\\\"Continue\\\")' not present in live structure\", \"submit: selector '#submit-btn' not present in live structure\"]}",
+        "updated_at": "2026-08-01 02:57:22.735698"
       }
     ],
     "fee_records": [],

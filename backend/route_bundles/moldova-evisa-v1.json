@@ -2,7 +2,7 @@
   "bundle_version": 1,
   "candidate_id": "b6b7c756b877442caec8caa46fe9faf8",
   "candidate_version": 1,
-  "exported_at": "2026-08-02T05:34:23.332720-04:00",
+  "exported_at": "2026-08-02T05:41:30.365665-04:00",
   "family_id": "moldova-evisa",
   "route_key": "rk1|nat=AFG|iss=AFG|doc=ordinary_passport|res=AFG|dest=MDA|cat=evisa_tourist|sub=any|pur=tourism|per=2026-07-23|jur=default",
   "tables": {
@@ -73,6 +73,41 @@
         "route_key": "rk1|nat=AFG|iss=AFG|doc=ordinary_passport|res=AFG|dest=MDA|cat=evisa_tourist|sub=any|pur=tourism|per=2026-07-23|jur=default",
         "tier": "sandbox",
         "updated_at": "2026-08-01 09:05:09.074740"
+      }
+    ],
+    "adapter_test_runs": [
+      {
+        "candidate_version_id": "b874fc8891fd49368c12f4f53756b264",
+        "classification": "STATIC_VALIDATED",
+        "created_at": "2026-08-01 09:04:42.155116",
+        "executed_by": "ellis-factory",
+        "id": "679c45f2766e4fc4b9b95304b57606b0",
+        "layer": "static",
+        "passed": 1,
+        "summary": "{\"checks\": {\"manifest\": true, \"hostnames\": true, \"flow\": true, \"mappings\": true, \"evidence_rules\": true, \"recovery\": true, \"forbidden_patterns\": true, \"sensitive_boundaries\": true}, \"detail\": {}}",
+        "updated_at": "2026-08-01 09:04:42.155117"
+      },
+      {
+        "candidate_version_id": "b874fc8891fd49368c12f4f53756b264",
+        "classification": "CONTRACT_TESTED",
+        "created_at": "2026-08-01 09:04:42.157705",
+        "executed_by": "ellis-factory",
+        "id": "5f2876c167cc47dca1bac1a17a194b51",
+        "layer": "contract",
+        "passed": 1,
+        "summary": "{\"selectors_checked\": true, \"problems\": []}",
+        "updated_at": "2026-08-01 09:04:42.157706"
+      },
+      {
+        "candidate_version_id": "b874fc8891fd49368c12f4f53756b264",
+        "classification": "LIVE_STRUCTURAL_TESTED",
+        "created_at": "2026-08-01 09:05:08.341687",
+        "executed_by": "ellis-factory",
+        "id": "62455bc091e94ea8a3a1f4438d10aaa2",
+        "layer": "live_structural",
+        "passed": 1,
+        "summary": "{\"pages_observed\": 2, \"selectors_live\": 33, \"independent_sessions\": 2, \"problems\": []}",
+        "updated_at": "2026-08-01 09:05:08.341698"
       }
     ],
     "fee_records": [],

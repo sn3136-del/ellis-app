@@ -2,7 +2,7 @@
   "bundle_version": 1,
   "candidate_id": "e7b37b7851bf4a19b22d3b06d4640482",
   "candidate_version": 7,
-  "exported_at": "2026-08-02T05:34:23.313929-04:00",
+  "exported_at": "2026-08-02T05:41:30.363374-04:00",
   "family_id": "colombia-checkmig",
   "route_key": "rk1|nat=ALB|iss=ALB|doc=ordinary_passport|res=ALB|dest=COL|cat=visa_free_entry|sub=any|pur=tourism|per=2026-07-23|jur=default",
   "tables": {
@@ -211,6 +211,239 @@
         "route_key": "rk1|nat=ALB|iss=ALB|doc=ordinary_passport|res=ALB|dest=COL|cat=visa_free_entry|sub=any|pur=tourism|per=2026-07-23|jur=default",
         "tier": "sandbox",
         "updated_at": "2026-08-01 05:58:56.837505"
+      }
+    ],
+    "adapter_test_runs": [
+      {
+        "candidate_version_id": "0c18d08488144d0eb31b05f3293d28a6",
+        "classification": "STATIC_VALIDATED",
+        "created_at": "2026-08-01 01:57:09.027260",
+        "executed_by": "ellis-factory",
+        "id": "19c78db5d40c46dca0763290af63ef36",
+        "layer": "static",
+        "passed": 1,
+        "summary": "{\"checks\": {\"manifest\": true, \"hostnames\": true, \"flow\": true, \"mappings\": true, \"evidence_rules\": true, \"recovery\": true, \"forbidden_patterns\": true, \"sensitive_boundaries\": true}, \"detail\": {}}",
+        "updated_at": "2026-08-01 01:57:09.027262"
+      },
+      {
+        "candidate_version_id": "0c18d08488144d0eb31b05f3293d28a6",
+        "classification": "CONTRACT_TESTED",
+        "created_at": "2026-08-01 01:57:09.029476",
+        "executed_by": "ellis-factory",
+        "id": "717890aa1d68442fa110c8c04e07a886",
+        "layer": "contract",
+        "passed": 1,
+        "summary": "{\"selectors_checked\": true, \"problems\": []}",
+        "updated_at": "2026-08-01 01:57:09.029477"
+      },
+      {
+        "candidate_version_id": "0c18d08488144d0eb31b05f3293d28a6",
+        "classification": "LIVE_STRUCTURAL_TESTED",
+        "created_at": "2026-08-01 01:57:12.705933",
+        "executed_by": "ellis-factory",
+        "id": "3c23d7af7a554d7bb8999d0d52abe26f",
+        "layer": "live_structural",
+        "passed": 1,
+        "summary": "{\"pages_observed\": 1, \"selectors_live\": 1, \"independent_sessions\": 2, \"problems\": []}",
+        "updated_at": "2026-08-01 01:57:12.705942"
+      },
+      {
+        "candidate_version_id": "36f5db130b4148069e0728da95a07ade",
+        "classification": "STATIC_VALIDATED",
+        "created_at": "2026-08-01 03:04:40.693622",
+        "executed_by": "ellis-factory",
+        "id": "4faeaf922c454b038e96050ffe1286b5",
+        "layer": "static",
+        "passed": 1,
+        "summary": "{\"checks\": {\"manifest\": true, \"hostnames\": true, \"flow\": true, \"mappings\": true, \"evidence_rules\": true, \"recovery\": true, \"forbidden_patterns\": true, \"sensitive_boundaries\": true}, \"detail\": {}}",
+        "updated_at": "2026-08-01 03:04:40.693624"
+      },
+      {
+        "candidate_version_id": "36f5db130b4148069e0728da95a07ade",
+        "classification": "CONTRACT_TESTED",
+        "created_at": "2026-08-01 03:04:40.695562",
+        "executed_by": "ellis-factory",
+        "id": "630df199870340bcbcdf72eb419e444a",
+        "layer": "contract",
+        "passed": 1,
+        "summary": "{\"selectors_checked\": true, \"problems\": []}",
+        "updated_at": "2026-08-01 03:04:40.695563"
+      },
+      {
+        "candidate_version_id": "36f5db130b4148069e0728da95a07ade",
+        "classification": "LIVE_STRUCTURAL_TESTED",
+        "created_at": "2026-08-01 03:04:44.281872",
+        "executed_by": "ellis-factory",
+        "id": "3092257d09454545a6f9d11f2df57f52",
+        "layer": "live_structural",
+        "passed": 1,
+        "summary": "{\"pages_observed\": 1, \"selectors_live\": 1, \"independent_sessions\": 2, \"problems\": []}",
+        "updated_at": "2026-08-01 03:04:44.281879"
+      },
+      {
+        "candidate_version_id": "89655ed69bbe4a0bb7b4ed5198a01cba",
+        "classification": "STATIC_VALIDATED",
+        "created_at": "2026-07-25 08:43:57.619140",
+        "executed_by": "ellis-factory",
+        "id": "3f7b572b8e334921b87e5867f4006228",
+        "layer": "static",
+        "passed": 1,
+        "summary": "{\"checks\": {\"manifest\": true, \"hostnames\": true, \"flow\": true, \"mappings\": true, \"evidence_rules\": true, \"recovery\": true, \"forbidden_patterns\": true, \"sensitive_boundaries\": true}, \"detail\": {}}",
+        "updated_at": "2026-07-25 08:43:57.619142"
+      },
+      {
+        "candidate_version_id": "89655ed69bbe4a0bb7b4ed5198a01cba",
+        "classification": "CONTRACT_TESTED",
+        "created_at": "2026-07-25 08:43:57.621522",
+        "executed_by": "ellis-factory",
+        "id": "2a298387e55a4e808a7a46d666d38a29",
+        "layer": "contract",
+        "passed": 1,
+        "summary": "{\"selectors_checked\": true, \"problems\": []}",
+        "updated_at": "2026-07-25 08:43:57.621524"
+      },
+      {
+        "candidate_version_id": "89655ed69bbe4a0bb7b4ed5198a01cba",
+        "classification": "LIVE_STRUCTURAL_TESTED",
+        "created_at": "2026-07-25 08:43:58.047253",
+        "executed_by": "ellis-factory",
+        "id": "ec3270731e7747f79d62ca61db83dfff",
+        "layer": "live_structural",
+        "passed": 1,
+        "summary": "{\"pages_observed\": 1, \"selectors_live\": 1, \"problems\": []}",
+        "updated_at": "2026-07-25 08:43:58.047263"
+      },
+      {
+        "candidate_version_id": "a7f46df212f3415aba2486f1b06e92f2",
+        "classification": "STATIC_VALIDATED",
+        "created_at": "2026-08-01 04:16:21.096556",
+        "executed_by": "ellis-factory",
+        "id": "78b8525bada34c8a856ea5cfbaac9b09",
+        "layer": "static",
+        "passed": 1,
+        "summary": "{\"checks\": {\"manifest\": true, \"hostnames\": true, \"flow\": true, \"mappings\": true, \"evidence_rules\": true, \"recovery\": true, \"forbidden_patterns\": true, \"sensitive_boundaries\": true}, \"detail\": {}}",
+        "updated_at": "2026-08-01 04:16:21.096559"
+      },
+      {
+        "candidate_version_id": "a7f46df212f3415aba2486f1b06e92f2",
+        "classification": "CONTRACT_TESTED",
+        "created_at": "2026-08-01 04:16:21.099279",
+        "executed_by": "ellis-factory",
+        "id": "cad35caeb2a34fbb8adb4497c2222f62",
+        "layer": "contract",
+        "passed": 1,
+        "summary": "{\"selectors_checked\": true, \"problems\": []}",
+        "updated_at": "2026-08-01 04:16:21.099280"
+      },
+      {
+        "candidate_version_id": "a7f46df212f3415aba2486f1b06e92f2",
+        "classification": "LIVE_STRUCTURAL_TESTED",
+        "created_at": "2026-08-01 04:16:24.677126",
+        "executed_by": "ellis-factory",
+        "id": "fee8801fc75546b398cb51b88c7f0d2e",
+        "layer": "live_structural",
+        "passed": 1,
+        "summary": "{\"pages_observed\": 1, \"selectors_live\": 1, \"independent_sessions\": 2, \"problems\": []}",
+        "updated_at": "2026-08-01 04:16:24.677133"
+      },
+      {
+        "candidate_version_id": "ca94922d7f864540aa7d7a00915386c9",
+        "classification": "STATIC_VALIDATED",
+        "created_at": "2026-08-01 01:28:34.040312",
+        "executed_by": "ellis-factory",
+        "id": "1adbb67854034352a9d92218aeef28f7",
+        "layer": "static",
+        "passed": 1,
+        "summary": "{\"checks\": {\"manifest\": true, \"hostnames\": true, \"flow\": true, \"mappings\": true, \"evidence_rules\": true, \"recovery\": true, \"forbidden_patterns\": true, \"sensitive_boundaries\": true}, \"detail\": {}}",
+        "updated_at": "2026-08-01 01:28:34.040315"
+      },
+      {
+        "candidate_version_id": "ca94922d7f864540aa7d7a00915386c9",
+        "classification": "CONTRACT_TESTED",
+        "created_at": "2026-08-01 01:28:34.043341",
+        "executed_by": "ellis-factory",
+        "id": "d06f0e6dc05b4615b455c63838e9b8ed",
+        "layer": "contract",
+        "passed": 1,
+        "summary": "{\"selectors_checked\": true, \"problems\": []}",
+        "updated_at": "2026-08-01 01:28:34.043344"
+      },
+      {
+        "candidate_version_id": "ca94922d7f864540aa7d7a00915386c9",
+        "classification": "LIVE_STRUCTURAL_TESTED",
+        "created_at": "2026-08-01 01:28:37.548384",
+        "executed_by": "ellis-factory",
+        "id": "50128255a3aa449498bd60ea195b3edc",
+        "layer": "live_structural",
+        "passed": 1,
+        "summary": "{\"pages_observed\": 1, \"selectors_live\": 1, \"independent_sessions\": 2, \"problems\": []}",
+        "updated_at": "2026-08-01 01:28:37.548395"
+      },
+      {
+        "candidate_version_id": "cb9a202105a24672b44b0d667915e3f0",
+        "classification": "STATIC_VALIDATED",
+        "created_at": "2026-08-01 03:25:41.852022",
+        "executed_by": "ellis-factory",
+        "id": "d61c9ee4719a4c30ae7cf4fe714872f5",
+        "layer": "static",
+        "passed": 1,
+        "summary": "{\"checks\": {\"manifest\": true, \"hostnames\": true, \"flow\": true, \"mappings\": true, \"evidence_rules\": true, \"recovery\": true, \"forbidden_patterns\": true, \"sensitive_boundaries\": true}, \"detail\": {}}",
+        "updated_at": "2026-08-01 03:25:41.852023"
+      },
+      {
+        "candidate_version_id": "cb9a202105a24672b44b0d667915e3f0",
+        "classification": "CONTRACT_TESTED",
+        "created_at": "2026-08-01 03:25:41.854413",
+        "executed_by": "ellis-factory",
+        "id": "fbc014cc329a44bb920341e9f2afee7c",
+        "layer": "contract",
+        "passed": 1,
+        "summary": "{\"selectors_checked\": true, \"problems\": []}",
+        "updated_at": "2026-08-01 03:25:41.854414"
+      },
+      {
+        "candidate_version_id": "cb9a202105a24672b44b0d667915e3f0",
+        "classification": "LIVE_STRUCTURAL_TESTED",
+        "created_at": "2026-08-01 03:25:45.262044",
+        "executed_by": "ellis-factory",
+        "id": "b86440291b7d4646a2b1b0ffc603cc27",
+        "layer": "live_structural",
+        "passed": 1,
+        "summary": "{\"pages_observed\": 1, \"selectors_live\": 1, \"independent_sessions\": 2, \"problems\": []}",
+        "updated_at": "2026-08-01 03:25:45.262053"
+      },
+      {
+        "candidate_version_id": "e322ebb0232048aaae2e5517d795ddcd",
+        "classification": "STATIC_VALIDATED",
+        "created_at": "2026-08-01 05:58:33.600671",
+        "executed_by": "ellis-factory",
+        "id": "c295aa34e7944adc889a4590369402ee",
+        "layer": "static",
+        "passed": 1,
+        "summary": "{\"checks\": {\"manifest\": true, \"hostnames\": true, \"flow\": true, \"mappings\": true, \"evidence_rules\": true, \"recovery\": true, \"forbidden_patterns\": true, \"sensitive_boundaries\": true}, \"detail\": {}}",
+        "updated_at": "2026-08-01 05:58:33.600672"
+      },
+      {
+        "candidate_version_id": "e322ebb0232048aaae2e5517d795ddcd",
+        "classification": "CONTRACT_TESTED",
+        "created_at": "2026-08-01 05:58:33.602851",
+        "executed_by": "ellis-factory",
+        "id": "e0b8a9713e0d4f9b91c88d73aa11a20b",
+        "layer": "contract",
+        "passed": 1,
+        "summary": "{\"selectors_checked\": true, \"problems\": []}",
+        "updated_at": "2026-08-01 05:58:33.602852"
+      },
+      {
+        "candidate_version_id": "e322ebb0232048aaae2e5517d795ddcd",
+        "classification": "LIVE_STRUCTURAL_TESTED",
+        "created_at": "2026-08-01 05:58:56.115608",
+        "executed_by": "ellis-factory",
+        "id": "b3431bdda14d4b40a1d370bd81c67137",
+        "layer": "live_structural",
+        "passed": 1,
+        "summary": "{\"pages_observed\": 2, \"selectors_live\": 31, \"independent_sessions\": 2, \"problems\": []}",
+        "updated_at": "2026-08-01 05:58:56.115621"
       }
     ],
     "fee_records": [],

@@ -2,7 +2,7 @@
   "bundle_version": 1,
   "candidate_id": "9b341da5c9414fb09e9ccafb241e5168",
   "candidate_version": 5,
-  "exported_at": "2026-08-02T05:34:23.287283-04:00",
+  "exported_at": "2026-08-02T05:41:30.357670-04:00",
   "family_id": "ethiopia-evisa",
   "route_key": "rk1|nat=AFG|iss=AFG|doc=ordinary_passport|res=AFG|dest=ETH|cat=evisa_tourist|sub=any|pur=tourism|per=2026-07-23|jur=default",
   "tables": {
@@ -181,6 +181,173 @@
         "route_key": "rk1|nat=AFG|iss=AFG|doc=ordinary_passport|res=AFG|dest=ETH|cat=evisa_tourist|sub=any|pur=tourism|per=2026-07-23|jur=default",
         "tier": "sandbox",
         "updated_at": "2026-08-01 04:11:23.676475"
+      }
+    ],
+    "adapter_test_runs": [
+      {
+        "candidate_version_id": "360f25f096e7465387cc2ab34b820fc1",
+        "classification": "STATIC_VALIDATED",
+        "created_at": "2026-08-01 01:31:43.707517",
+        "executed_by": "ellis-factory",
+        "id": "dafe048c5db549df8b29b59e7b11c282",
+        "layer": "static",
+        "passed": 1,
+        "summary": "{\"checks\": {\"manifest\": true, \"hostnames\": true, \"flow\": true, \"mappings\": true, \"evidence_rules\": true, \"recovery\": true, \"forbidden_patterns\": true, \"sensitive_boundaries\": true}, \"detail\": {}}",
+        "updated_at": "2026-08-01 01:31:43.707518"
+      },
+      {
+        "candidate_version_id": "360f25f096e7465387cc2ab34b820fc1",
+        "classification": "CONTRACT_TESTED",
+        "created_at": "2026-08-01 01:31:43.710607",
+        "executed_by": "ellis-factory",
+        "id": "4da17b6476ec414599038b3e5b1e7563",
+        "layer": "contract",
+        "passed": 1,
+        "summary": "{\"selectors_checked\": true, \"problems\": []}",
+        "updated_at": "2026-08-01 01:31:43.710608"
+      },
+      {
+        "candidate_version_id": "360f25f096e7465387cc2ab34b820fc1",
+        "classification": "LIVE_STRUCTURAL_TESTED",
+        "created_at": "2026-08-01 01:31:51.440750",
+        "executed_by": "ellis-factory",
+        "id": "cbbbbaf40f294ceab83da55362deee68",
+        "layer": "live_structural",
+        "passed": 1,
+        "summary": "{\"pages_observed\": 4, \"selectors_live\": 24, \"independent_sessions\": 2, \"problems\": []}",
+        "updated_at": "2026-08-01 01:31:51.440764"
+      },
+      {
+        "candidate_version_id": "71034a0d1f8146c2a1e1aea83e5c3156",
+        "classification": "STATIC_VALIDATED",
+        "created_at": "2026-08-01 01:59:26.432971",
+        "executed_by": "ellis-factory",
+        "id": "1229669c861241959e493d76c6286223",
+        "layer": "static",
+        "passed": 1,
+        "summary": "{\"checks\": {\"manifest\": true, \"hostnames\": true, \"flow\": true, \"mappings\": true, \"evidence_rules\": true, \"recovery\": true, \"forbidden_patterns\": true, \"sensitive_boundaries\": true}, \"detail\": {}}",
+        "updated_at": "2026-08-01 01:59:26.432974"
+      },
+      {
+        "candidate_version_id": "71034a0d1f8146c2a1e1aea83e5c3156",
+        "classification": "CONTRACT_TESTED",
+        "created_at": "2026-08-01 01:59:26.437262",
+        "executed_by": "ellis-factory",
+        "id": "40eb69ddda834aa2990c36a45a8d661d",
+        "layer": "contract",
+        "passed": 1,
+        "summary": "{\"selectors_checked\": true, \"problems\": []}",
+        "updated_at": "2026-08-01 01:59:26.437264"
+      },
+      {
+        "candidate_version_id": "71034a0d1f8146c2a1e1aea83e5c3156",
+        "classification": "LIVE_STRUCTURAL_TESTED",
+        "created_at": "2026-08-01 01:59:39.854451",
+        "executed_by": "ellis-factory",
+        "id": "792d50a2e241491a9052ebe0c143f9b0",
+        "layer": "live_structural",
+        "passed": 1,
+        "summary": "{\"pages_observed\": 2, \"selectors_live\": 24, \"independent_sessions\": 2, \"problems\": []}",
+        "updated_at": "2026-08-01 01:59:39.854461"
+      },
+      {
+        "candidate_version_id": "cc755410a4e648e0beb425e88bbcf3f6",
+        "classification": "STATIC_VALIDATED",
+        "created_at": "2026-08-01 01:34:43.106442",
+        "executed_by": "ellis-factory",
+        "id": "fac5756e976b41d1b103e54fb1224050",
+        "layer": "static",
+        "passed": 1,
+        "summary": "{\"checks\": {\"manifest\": true, \"hostnames\": true, \"flow\": true, \"mappings\": true, \"evidence_rules\": true, \"recovery\": true, \"forbidden_patterns\": true, \"sensitive_boundaries\": true}, \"detail\": {}}",
+        "updated_at": "2026-08-01 01:34:43.106443"
+      },
+      {
+        "candidate_version_id": "cc755410a4e648e0beb425e88bbcf3f6",
+        "classification": "CONTRACT_TESTED",
+        "created_at": "2026-08-01 01:34:43.109073",
+        "executed_by": "ellis-factory",
+        "id": "62d0cfa3a65a43569395fb431dbcc743",
+        "layer": "contract",
+        "passed": 1,
+        "summary": "{\"selectors_checked\": true, \"problems\": []}",
+        "updated_at": "2026-08-01 01:34:43.109075"
+      },
+      {
+        "candidate_version_id": "cc755410a4e648e0beb425e88bbcf3f6",
+        "classification": "LIVE_STRUCTURAL_TESTED",
+        "created_at": "2026-08-01 01:35:15.752930",
+        "executed_by": "ellis-factory",
+        "id": "48c51f66086e4d91a524bdd02a5347c0",
+        "layer": "live_structural",
+        "passed": 1,
+        "summary": "{\"pages_observed\": 4, \"selectors_live\": 24, \"independent_sessions\": 2, \"problems\": []}",
+        "updated_at": "2026-08-01 01:35:15.752942"
+      },
+      {
+        "candidate_version_id": "dc8b0364362f49d5a6b53fa80bc2af38",
+        "classification": "STATIC_VALIDATED",
+        "created_at": "2026-08-01 02:16:15.109651",
+        "executed_by": "ellis-factory",
+        "id": "79ba95994f5e4be093160346b62601af",
+        "layer": "static",
+        "passed": 1,
+        "summary": "{\"checks\": {\"manifest\": true, \"hostnames\": true, \"flow\": true, \"mappings\": true, \"evidence_rules\": true, \"recovery\": true, \"forbidden_patterns\": true, \"sensitive_boundaries\": true}, \"detail\": {}}",
+        "updated_at": "2026-08-01 02:16:15.109652"
+      },
+      {
+        "candidate_version_id": "dc8b0364362f49d5a6b53fa80bc2af38",
+        "classification": "CONTRACT_TESTED",
+        "created_at": "2026-08-01 02:16:15.121367",
+        "executed_by": "ellis-factory",
+        "id": "872bc6edd49a4666bf0f35e217047f5a",
+        "layer": "contract",
+        "passed": 1,
+        "summary": "{\"selectors_checked\": true, \"problems\": []}",
+        "updated_at": "2026-08-01 02:16:15.121368"
+      },
+      {
+        "candidate_version_id": "dc8b0364362f49d5a6b53fa80bc2af38",
+        "classification": "LIVE_STRUCTURAL_TESTED",
+        "created_at": "2026-08-01 02:16:31.256649",
+        "executed_by": "ellis-factory",
+        "id": "638a3622de854ed98e826aff5bacf9b5",
+        "layer": "live_structural",
+        "passed": 1,
+        "summary": "{\"pages_observed\": 2, \"selectors_live\": 24, \"independent_sessions\": 2, \"problems\": []}",
+        "updated_at": "2026-08-01 02:16:31.256652"
+      },
+      {
+        "candidate_version_id": "fb2b7e90ace14b7a97a62f020be553f7",
+        "classification": "STATIC_VALIDATED",
+        "created_at": "2026-08-01 04:11:01.420869",
+        "executed_by": "ellis-factory",
+        "id": "d096358422fe4f9289093b4765c6d2a0",
+        "layer": "static",
+        "passed": 1,
+        "summary": "{\"checks\": {\"manifest\": true, \"hostnames\": true, \"flow\": true, \"mappings\": true, \"evidence_rules\": true, \"recovery\": true, \"forbidden_patterns\": true, \"sensitive_boundaries\": true}, \"detail\": {}}",
+        "updated_at": "2026-08-01 04:11:01.420870"
+      },
+      {
+        "candidate_version_id": "fb2b7e90ace14b7a97a62f020be553f7",
+        "classification": "CONTRACT_TESTED",
+        "created_at": "2026-08-01 04:11:01.423917",
+        "executed_by": "ellis-factory",
+        "id": "60a783cf705c46ec920817bfdd93c746",
+        "layer": "contract",
+        "passed": 1,
+        "summary": "{\"selectors_checked\": true, \"problems\": []}",
+        "updated_at": "2026-08-01 04:11:01.423918"
+      },
+      {
+        "candidate_version_id": "fb2b7e90ace14b7a97a62f020be553f7",
+        "classification": "LIVE_STRUCTURAL_TESTED",
+        "created_at": "2026-08-01 04:11:22.950695",
+        "executed_by": "ellis-factory",
+        "id": "c5b381d007764dd7b4dbeeb1eff0b7a3",
+        "layer": "live_structural",
+        "passed": 1,
+        "summary": "{\"pages_observed\": 2, \"selectors_live\": 50, \"independent_sessions\": 2, \"problems\": []}",
+        "updated_at": "2026-08-01 04:11:22.950700"
       }
     ],
     "fee_records": [],

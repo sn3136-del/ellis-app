@@ -2,7 +2,7 @@
   "bundle_version": 1,
   "candidate_id": "d290f8c394c04596b52a6b5e1ebfcd89",
   "candidate_version": 1,
-  "exported_at": "2026-08-02T05:34:23.301146-04:00",
+  "exported_at": "2026-08-02T05:41:30.359969-04:00",
   "family_id": "mexico-fmme",
   "route_key": "rk1|nat=AND|iss=AND|doc=ordinary_passport|res=AND|dest=MEX|cat=visa_free_entry|sub=any|pur=tourism|per=2026-07-23|jur=default",
   "tables": {
@@ -73,6 +73,41 @@
         "route_key": "rk1|nat=AND|iss=AND|doc=ordinary_passport|res=AND|dest=MEX|cat=visa_free_entry|sub=any|pur=tourism|per=2026-07-23|jur=default",
         "tier": "sandbox",
         "updated_at": "2026-08-01 05:40:24.684562"
+      }
+    ],
+    "adapter_test_runs": [
+      {
+        "candidate_version_id": "69d8a0271cc84c01b35695d21da5d1cc",
+        "classification": "STATIC_VALIDATED",
+        "created_at": "2026-08-01 05:40:10.490737",
+        "executed_by": "ellis-factory",
+        "id": "932b55165d1f4256b2c82549dbb3fd36",
+        "layer": "static",
+        "passed": 1,
+        "summary": "{\"checks\": {\"manifest\": true, \"hostnames\": true, \"flow\": true, \"mappings\": true, \"evidence_rules\": true, \"recovery\": true, \"forbidden_patterns\": true, \"sensitive_boundaries\": true}, \"detail\": {}}",
+        "updated_at": "2026-08-01 05:40:10.490738"
+      },
+      {
+        "candidate_version_id": "69d8a0271cc84c01b35695d21da5d1cc",
+        "classification": "CONTRACT_TESTED",
+        "created_at": "2026-08-01 05:40:10.493349",
+        "executed_by": "ellis-factory",
+        "id": "26ea5f60935a4ce28a0d8c0e9367f8db",
+        "layer": "contract",
+        "passed": 1,
+        "summary": "{\"selectors_checked\": true, \"problems\": []}",
+        "updated_at": "2026-08-01 05:40:10.493349"
+      },
+      {
+        "candidate_version_id": "69d8a0271cc84c01b35695d21da5d1cc",
+        "classification": "LIVE_STRUCTURAL_TESTED",
+        "created_at": "2026-08-01 05:40:23.959105",
+        "executed_by": "ellis-factory",
+        "id": "e5ac81c323654634b734c9021a7dc281",
+        "layer": "live_structural",
+        "passed": 1,
+        "summary": "{\"pages_observed\": 2, \"selectors_live\": 60, \"independent_sessions\": 2, \"problems\": []}",
+        "updated_at": "2026-08-01 05:40:23.959117"
       }
     ],
     "fee_records": [],

@@ -2,7 +2,7 @@
   "bundle_version": 1,
   "candidate_id": "70ee2252433342d294d7c04a9a748fa5",
   "candidate_version": 1,
-  "exported_at": "2026-08-02T05:34:23.271144-04:00",
+  "exported_at": "2026-08-02T05:41:30.353456-04:00",
   "family_id": "maldives-imuga",
   "route_key": "rk1|nat=CHN|iss=CHN|doc=ordinary_passport|res=CHN|dest=MDV|cat=visa_free_entry|sub=any|pur=tourism|per=2026-07-23|jur=default",
   "tables": {
@@ -89,6 +89,41 @@
         "route_key": "rk1|nat=CHN|iss=CHN|doc=ordinary_passport|res=CHN|dest=MDV|cat=visa_free_entry|sub=any|pur=tourism|per=2026-07-23|jur=default",
         "tier": "sandbox",
         "updated_at": "2026-08-01 02:14:38.116825"
+      }
+    ],
+    "adapter_test_runs": [
+      {
+        "candidate_version_id": "0da8bb0417d24e039c9321c8eb98bdc9",
+        "classification": "STATIC_VALIDATED",
+        "created_at": "2026-08-01 02:14:19.501758",
+        "executed_by": "ellis-factory",
+        "id": "8ff0e5da0c97436589ba8afd23c491cb",
+        "layer": "static",
+        "passed": 1,
+        "summary": "{\"checks\": {\"manifest\": true, \"hostnames\": true, \"flow\": true, \"mappings\": true, \"evidence_rules\": true, \"recovery\": true, \"forbidden_patterns\": true, \"sensitive_boundaries\": true}, \"detail\": {}}",
+        "updated_at": "2026-08-01 02:14:19.501758"
+      },
+      {
+        "candidate_version_id": "0da8bb0417d24e039c9321c8eb98bdc9",
+        "classification": "CONTRACT_TESTED",
+        "created_at": "2026-08-01 02:14:19.504391",
+        "executed_by": "ellis-factory",
+        "id": "4793db6eb888481180adb3daaad8f2e0",
+        "layer": "contract",
+        "passed": 1,
+        "summary": "{\"selectors_checked\": true, \"problems\": []}",
+        "updated_at": "2026-08-01 02:14:19.504392"
+      },
+      {
+        "candidate_version_id": "0da8bb0417d24e039c9321c8eb98bdc9",
+        "classification": "LIVE_STRUCTURAL_TESTED",
+        "created_at": "2026-08-01 02:14:37.355348",
+        "executed_by": "ellis-factory",
+        "id": "cfb7e8be20184c74b398e29d1b54166a",
+        "layer": "live_structural",
+        "passed": 1,
+        "summary": "{\"pages_observed\": 3, \"selectors_live\": 36, \"independent_sessions\": 2, \"problems\": []}",
+        "updated_at": "2026-08-01 02:14:37.355362"
       }
     ],
     "fee_records": [],
