@@ -1382,6 +1382,99 @@ class AppointmentRecord(BaseModel):
     confirmation_no: str = ""
 
 
+# Address answers that change WHICH consular post serves an applicant. Editing
+# any of them makes a previously-found post potentially wrong, so the lookup is
+# re-run rather than left stale.
+_JURISDICTION_ANSWER_KEYS = ("address_city", "address_region", "address_country",
+                             "lawful_country_of_residence", "residence_subdivision")
+
+
+def _find_post_for_case(db, app_row) -> dict:
+    """Look up the consular post that serves this applicant, from the address
+    they gave. Verified answers are cached as a jurisdiction rule, so the same
+    residence never pays for the search twice."""
+    from . import consular_research as cr
+    from .portal.live_browser import LiveBrowserSession
+    answers = app_row.answers or {}
+
+    def fetch_page(url):
+        host = url.split("/")[2]
+        s = LiveBrowserSession(allowed_hostnames=[host, host.replace("www.", "")])
+        try:
+            page = s._ensure_page()
+            page.goto(url, wait_until="domcontentloaded", timeout=30000)
+            page.wait_for_timeout(2000)
+            text = page.evaluate("() => document.body ? document.body.innerText : ''") or ""
+            links = page.evaluate(
+                "() => [...document.querySelectorAll('a')].map(a=>a.href).slice(0,400)") or []
+            return page.url, text, links
+        finally:
+            s.close()
+
+    return cr.resolve_for_applicant(
+        db, destination=app_row.destination_country or "",
+        residence=(answers.get("lawful_country_of_residence")
+                   or answers.get("address_country") or ""),
+        address_city=answers.get("address_city") or "",
+        address_region=answers.get("address_region") or "",
+        fetch_page=fetch_page)
+
+
+def _schedule_consular_lookup(application_id: str, org_id: str) -> None:
+    """Run the post lookup off the request thread. Saving an address must never
+    wait on a network search, and a failed search must never fail the save —
+    the applicant can always trigger it explicitly from the appointment step."""
+    import threading
+
+    def _run():
+        from .db import SessionLocal
+        from . import assisted_booking, appointment_packet
+        db = SessionLocal()
+        try:
+            row = db.get(models.VisaApplication, application_id)
+            if row is None:
+                return
+            # Only in-person routes need a post; e-visa routes never do.
+            try:
+                route = appointment_packet.build_for_case(db, row).get("_route") or {}
+            except appointment_packet.PacketNotApplicable:
+                return
+            if not assisted_booking.needs_appointment(route.get("route_outcome") or ""):
+                return
+            if (route.get("jurisdiction") or {}).get("status") == "verified":
+                return          # already known for this residence — no re-search
+            _find_post_for_case(db, row)
+        except Exception:  # noqa: BLE001 — a background search never surfaces
+            pass              # as an error on the applicant's save
+        finally:
+            db.close()
+
+    threading.Thread(target=_run, daemon=True).start()
+
+
+@app.post("/cases/{application_id}/find-consular-post")
+def case_find_consular_post(application_id: str, db=Depends(get_session),
+                            p: Principal = Depends(get_principal)):
+    """Find the post that serves this applicant, from the address on their case.
+
+    Runs the official-source search and verifies the answer before it can
+    become a booking link; an unverifiable answer is reported as such rather
+    than shown as a place to go."""
+    app_row = _owned(db, p, application_id)
+    answers = app_row.answers or {}
+    if not (answers.get("lawful_country_of_residence") or answers.get("address_country")):
+        raise HTTPException(422, detail={
+            "reason": "residence_required",
+            "detail": "Ellis needs the applicant's country of residence to find "
+                      "the competent post"})
+    out = _find_post_for_case(db, app_row)
+    audit.record(db, org_id=app_row.org_id, application_id=application_id,
+                 action="consular_post_lookup",
+                 detail={"status": out.get("status"), "post": out.get("post", "")[:120]},
+                 actor=p.user_id)
+    return out
+
+
 @app.get("/cases/{application_id}/appointment-booking")
 def case_appointment_booking(application_id: str, db=Depends(get_session),
                              p: Principal = Depends(get_principal)):
@@ -1646,6 +1739,13 @@ def update_answers(application_id: str, body: AnswersUpdate, db=Depends(get_sess
     ans.update(incoming)
     app_row.answers = ans
     db.commit()
+    # The applicant just told Ellis where they live, which is what decides
+    # WHICH consulate serves them. Look it up now, in the background, so the
+    # appointment step already knows where to send them instead of asking them
+    # to wait for a search later. Never blocks saving their answers, and only
+    # for routes that are actually attended in person.
+    if any(k in changed for k in _JURISDICTION_ANSWER_KEYS):
+        _schedule_consular_lookup(application_id, app_row.org_id)
     # Answers the applicant TYPES INTO ELLIS are consented by construction —
     # they stale the frozen review VERSION (re-frozen under advance consent at
     # the next enqueue) but never void the ONE authorization signature

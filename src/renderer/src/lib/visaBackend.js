@@ -217,6 +217,15 @@ export function createVisaClient(session) {
     // The carry-in folder for an in-person route: what is in it, what is still
     // missing. 409 (packet_not_applicable) means Ellis files this route itself.
     appointmentPacket: (id) => call('GET', `/cases/${id}/appointment-packet`, session),
+    // Where this applicant books, and what they have already booked. Ellis
+    // never picks a slot: the applicant chooses in the secure window.
+    appointmentBooking: (id) => call('GET', `/cases/${id}/appointment-booking`, session),
+    recordAppointment: (id, startUtc, location, confirmationNo = '') =>
+      call('POST', `/cases/${id}/appointment-booking`, session,
+           { start_utc: startUtc, location, confirmation_no: confirmationNo }),
+    // Find the consular post that serves this applicant's address (official
+    // sources, verified before it can become a booking link).
+    findConsularPost: (id) => call('POST', `/cases/${id}/find-consular-post`, session),
     // The folder itself, as one download. Kept out of `call` because the body
     // is a zip, not JSON — same auth headers, raw blob back.
     downloadAppointmentPacket: async (id) => {

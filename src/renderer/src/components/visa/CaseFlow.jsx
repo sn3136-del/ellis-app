@@ -654,6 +654,7 @@ function AppointmentPacket({ t, client, caseId, onToDocuments }) {
           {t('packet.ready')}
         </div>
       )}
+      <AppointmentBooking t={t} client={client} caseId={caseId} />
       <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
         <button className="btn" onClick={download} disabled={busy}
           data-testid="packet-download">
@@ -665,6 +666,78 @@ function AppointmentPacket({ t, client, caseId, onToDocuments }) {
           </button>
         )}
       </div>
+    </div>
+  )
+}
+
+// Booking the in-person appointment. Every booking system keeps its slots
+// behind the applicant's own account, so Ellis opens the OFFICIAL site and the
+// applicant picks their own slot — then tells Ellis what they booked, so the
+// date reaches their folder. Ellis never chooses a slot.
+function AppointmentBooking({ t, client, caseId }) {
+  const toast = useToast()
+  const [state, setState] = useState(null)
+  const [finding, setFinding] = useState(false)
+  const load = () => client.appointmentBooking(caseId).then(setState).catch(() => setState(null))
+  useEffect(() => { load() }, [caseId])
+  if (!state) return null
+
+  async function findPost() {
+    setFinding(true)
+    try {
+      const out = await client.findConsularPost(caseId)
+      if (out.status === 'verified') { await load() } else {
+        toast(t('booking.notFound'))
+      }
+    } catch (e) { toast(e.detail?.detail || e.message) }
+    setFinding(false)
+  }
+
+  async function recordBooked() {
+    const when = window.prompt(t('booking.askWhen'))
+    if (!when) return
+    const ms = Date.parse(when)
+    if (!Number.isFinite(ms)) { toast(t('booking.badDate')); return }
+    try {
+      await client.recordAppointment(caseId, ms, state.post_name || '', '')
+      await load()
+    } catch (e) { toast(e.detail?.detail || e.message) }
+  }
+
+  const appt = state.appointment
+  return (
+    <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--line)' }}
+      data-testid="appointment-booking">
+      <div style={{ fontWeight: 600, marginBottom: 6 }}>{t('booking.title')}</div>
+      {appt ? (
+        <div className="kv" data-testid="appointment-booked">
+          <div className="kv__k">{t('booking.booked')}</div>
+          <div className="kv__v">{appt.when_utc}{appt.location ? ` — ${appt.location}` : ''}</div>
+        </div>
+      ) : state.bookable ? (
+        <>
+          <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 8 }}>
+            {t('booking.sub', { post: state.post_name || t('packet.consulate') })}
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <a className="btn" href={state.booking_url} target="_blank" rel="noreferrer"
+              data-testid="booking-open">{t('booking.open')}</a>
+            <button className="btn btn--ghost" onClick={recordBooked}>
+              {t('booking.record')}
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 8 }}>
+            {state.reason || t('booking.unknownPost')}
+          </div>
+          <button className="btn btn--ghost" onClick={findPost} disabled={finding}
+            data-testid="booking-find">
+            {finding ? t('booking.finding') : t('booking.find')}
+          </button>
+        </>
+      )}
     </div>
   )
 }
