@@ -336,3 +336,33 @@ def test_canadas_gate_is_expressible_now():
     # The form host must be the one probe URLs get built from.
     assert ca["hostnames"][0].startswith("eta.onlineservices")
     assert "#/application" in ca["entry_gate"]["expect_path"]
+
+
+def test_ids_carrying_a_generated_number_are_never_used_as_selectors():
+    """Indonesia's arrival card ships #spi_nationality_1785693541603 — that
+    suffix is an epoch millisecond stamp minted at page load, so the selector
+    could never re-verify in a second session and the portal failed the
+    repeated-sessions gate every time (verified live 2026-08-02)."""
+    import re
+    from app.portal.live_browser import _EXTRACT_JS
+    m = re.search(r"const generatedId = /\((.+?)\)/i;", _EXTRACT_JS)
+    assert m, "generatedId rule missing from the extractor"
+    gen = re.compile(m.group(1), re.I)
+    for bad in ("spi_nationality_1785693541603", "spi_full_name_1785693541603",
+                "field_1699999999999", "x_a3f8b2c1-4d5e-9f01"):
+        assert gen.search(bad), bad
+    # Real authored ids — including short numbers — stay usable.
+    for good in ("surname", "passportNumber", "field_2024", "step3_email",
+                 "addressLine1"):
+        assert not gen.search(good), good
+
+
+def test_a_name_is_preferred_over_a_generated_id():
+    """A name survives a re-render where a generated id does not."""
+    from app.portal.live_browser import _EXTRACT_JS
+    chain = _EXTRACT_JS[_EXTRACT_JS.index("const cssPath"):_EXTRACT_JS.index("const labelFor")]
+    id_first = chain.index("!generatedId.test(el.id)) return '#'")
+    name_line = chain.index("if (el.name) return tagl + '[name=")
+    assert id_first < name_line, "a clean id may still win"
+    # …but the fallback id line must come AFTER the name line.
+    assert chain.rindex("'#' + CSS.escape(el.id)") > name_line

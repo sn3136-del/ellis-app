@@ -148,20 +148,15 @@
       "action": "WAIT_FOR_SELECTOR",
       "selector": "select[name=\"travelDocumentType\"]",
       "timeout_ms": 60000,
-      "purpose": "The document-type question renders on the page Next opened."
+      "purpose": "Travel document type -> ordinary passport (value '0'; 1=diplomatic, 2=official, 3=service, 4=emergency). By VALUE, not label: the live label reads 'Passport - ordinary/regular' in lower case and is localised, so an exact-label match is brittle in two ways at once.",
+      "option_value": "0"
      },
      {
       "action": "SELECT_OPTION",
       "selector": "select[name=\"travelDocumentType\"]",
-      "option_label": "Passport - Ordinary/Regular",
       "settle_ms": 2500,
-      "purpose": "Ordinary passport is the tourist route Ellis serves; a diplomatic or refugee document is a different route with different rules and must never be assumed here."
-     },
-     {
-      "action": "CLICK",
-      "selector": "button:has-text(\"Next\")",
-      "timeout_ms": 45000,
-      "purpose": "Advance from the eligibility wizard into the application form."
+      "purpose": "Travel document type -> ordinary passport (value '0'; 1=diplomatic, 2=official, 3=service, 4=emergency). By VALUE, not label: the live label reads 'Passport - ordinary/regular' in lower case and is localised, so an exact-label match is brittle in two ways at once.",
+      "option_value": "0"
      }
     ],
     "expect_path": "/eta/#/application",

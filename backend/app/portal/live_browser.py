@@ -64,7 +64,15 @@ _EXTRACT_JS = r"""
   // selector built on one cannot re-verify in a second session — the exact
   // failure that blocks Angular portals at the repeated-sessions gate.
   // Stable authoring attributes are preferred over any volatile id.
+  // Volatile ids change on every render, so a selector built on one can never
+  // re-verify in a second session — the exact failure that blocks Angular and
+  // React portals at the repeated-sessions gate. Two shapes: a known framework
+  // PREFIX, and an id carrying a generated number ANYWHERE in it. Indonesia's
+  // arrival card ships #spi_nationality_1785693541603 — that suffix is an
+  // epoch millisecond stamp minted at page load (verified live 2026-08-02), so
+  // a long digit run or a uuid segment makes the whole id untrustworthy.
   const volatileId = /^(mat-|cdk-|ng-|:r[0-9a-z]+:|v-|react-|radix-|headlessui-|ember|ctl[0-9]|MainContent_|[0-9a-f]{8}-[0-9a-f]{4})/i;
+  const generatedId = /(\d{10,}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4})/i;
   const STABLE_ATTRS = ['formcontrolname', 'data-testid', 'data-test',
                         'data-cy', 'data-qa', 'ng-reflect-name'];
   const cssPath = (el) => {
@@ -73,9 +81,11 @@ _EXTRACT_JS = r"""
       const v = el.getAttribute && el.getAttribute(a);
       if (v) return tagl + '[' + a + '="' + v.replace(/"/g, '') + '"]';
     }
-    if (el.id && !volatileId.test(el.id)) return '#' + CSS.escape(el.id);
+    if (el.id && !volatileId.test(el.id) && !generatedId.test(el.id)) return '#' + CSS.escape(el.id);
+    // A NAME survives a re-render where a generated id does not, so it is
+    // preferred over any volatile/generated id, not just over a path.
     if (el.name) return tagl + '[name="' + el.name + '"]';
-    if (el.id) return '#' + CSS.escape(el.id);   // volatile, but better than a path
+    if (el.id && !generatedId.test(el.id)) return '#' + CSS.escape(el.id);   // volatile prefix, still addressable
     if (el.tagName === 'BUTTON') {
       // A button with stable visible text gets a bounded, deterministic
       // text selector instead of a brittle deep ancestor path.
