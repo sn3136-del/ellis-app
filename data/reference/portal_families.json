@@ -352,9 +352,15 @@
       "selector": "input[name=\"radio4\"][value=\"1\"]",
       "terms_text_selector": ".apply_wrap_box",
       "purpose": "Agree to the handling of unique identifying information"
+     },
+     {
+      "action": "CLICK",
+      "selector": "#applyNext",
+      "timeout_ms": 45000,
+      "purpose": "Advance past the four consents to the applicant form. Verified live 2026-08-02: the label is '⠀⠀ Next ⠀⠀' — padded with U+2800 BRAILLE PATTERN BLANK, not spaces — so any text match fails and the id is the only honest handle. Without this step the gate stops on the consent page and recon records the radios as the 'form', which is why korea-keta had 0 field mappings."
      }
     ],
-    "expect_path": "/portal/newapply/applystep1.do",
+    "expect_path": "/portal/newapply/applystep2.do",
     "declared_handoffs": [
      "otp",
      "portal_terms_consent"
