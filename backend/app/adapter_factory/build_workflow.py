@@ -110,6 +110,22 @@ def record_consent(db, req: fm.AdapterBuildRequest, *, user_id: str,
     return req
 
 
+# A connection failure is a statement about THIS MACHINE, not about a portal.
+# Kept local rather than imported from the orchestrator: that module imports
+# this one, and a circular import inside an exception handler turns a network
+# blip into a crash.
+_TRANSIENT_ERROR_MARKERS = (
+    "timeout", "timed out", "connection", "reset", "refused", "429", "502",
+    "503", "504", "network", "temporarily", "unavailable", "browserbase",
+    "nodename nor servname", "name or service not known", "errno 8",
+    "errno -2", "temporary failure in name", "getaddrinfo", "dns")
+
+
+def _error_kind(message: str) -> str:
+    m = (message or "").lower()
+    return "transient" if any(t in m for t in _TRANSIENT_ERROR_MARKERS) else "permanent"
+
+
 def _note(db, req, text: str):
     notes = list(req.progress or [])
     notes.append(text[:200])
@@ -312,7 +328,16 @@ def _run_build_stages(db, req, _obs, max_stages: int) -> fm.AdapterBuildRequest:
                 break
         except Exception as e:  # noqa: BLE001 — honest failure, never a crash
             req.error = str(e)[:400]
-            _note(db, req, f"error at {st}: {str(e)[:120]}")
+            # A network or DNS failure is a statement about THIS MACHINE's
+            # connection, not about the portal. Recording it as a build verdict
+            # made an internet outage look like five portals failing, and
+            # quarantined records that were fine. Say what it was.
+            kind = _error_kind(f"{type(e).__name__}: {e}")
+            if kind == "transient":
+                _note(db, req, f"transient at {st} (not a portal verdict): "
+                               f"{str(e)[:100]}")
+            else:
+                _note(db, req, f"error at {st}: {str(e)[:120]}")
             if req.state not in ("MANUAL_REVIEW_REQUIRED", "QUARANTINED"):
                 try:
                     transition(req, "MANUAL_REVIEW_REQUIRED", str(e)[:100])

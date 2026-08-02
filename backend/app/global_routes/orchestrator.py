@@ -37,7 +37,15 @@ ORCHESTRATOR_ACTOR = "global-orchestrator"
 
 _TRANSIENT_MARKERS = ("timeout", "timed out", "connection", "reset", "refused",
                       "429", "502", "503", "504", "network", "session",
-                      "temporarily", "unavailable", "browserbase", "retryable")
+                      "temporarily", "unavailable", "browserbase", "retryable",
+                      # DNS. A name that will not resolve says nothing about
+                      # the portal — an internet outage here recorded five
+                      # portals as failed builds and quarantined them
+                      # (2026-08-02). "errno 8" and "errno -2" are the macOS
+                      # and Linux spellings of the same nothing.
+                      "nodename nor servname", "name or service not known",
+                      "errno 8", "errno -2", "temporary failure in name",
+                      "getaddrinfo", "dns")
 
 
 def classify_error(message: str) -> str:

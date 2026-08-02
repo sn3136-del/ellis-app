@@ -14,11 +14,16 @@ disagree with the UI. The pipeline must survive all of it.
 from __future__ import annotations
 
 import itertools
+import re
 import uuid
 
 
 def _uid(prefix="id"):
     return f"{prefix}-{uuid.uuid4().hex[:10]}"
+
+
+_SENSITIVE_GATE_RE = re.compile(
+    r"(password|otp|cvv|card|secret|token|captcha|pin|pay)", re.IGNORECASE)
 
 
 class SyntheticPortal:
@@ -54,6 +59,58 @@ class SyntheticPortal:
                 "text": page.get("text", ""), "links": list(page.get("links", [])),
                 "iframes": list(page.get("iframes", [])),
                 "delayed": page.get("delayed", False)}
+
+    def observe_with_entry_gate(self, base_url: str, entry_gate: dict) -> dict:
+        """Replay a DECLARED entry gate against the synthetic portal.
+
+        Curated gates are now the normal shape for real portals, so a test
+        portal that cannot replay one makes every gated family look unbuildable
+        in tests while working live — which is backwards. The synthetic portal
+        has no real DOM, so it verifies the gate is well-formed (declared
+        vocabulary, no sensitive target) and then serves the page the gate
+        says it reaches, marking it as the application form.
+        """
+        actions = list((entry_gate or {}).get("actions") or [])
+        ALLOWED = ("CLICK", "SCROLL_TO_BOTTOM", "CHECK", "TERMS_CHOICE",
+                   "SELECT_OPTION", "WAIT_FOR_SELECTOR")
+        for a in actions:
+            if (a or {}).get("action") not in ALLOWED:
+                return {"ok": False, "status": 0, "url": base_url,
+                        "error": f"entry gate action {(a or {}).get('action')!r} "
+                                 f"not in the declared vocabulary"}
+            if _SENSITIVE_GATE_RE.search(str((a or {}).get("selector", ""))):
+                return {"ok": False, "status": 0, "url": base_url,
+                        "error": "entry gate refuses a sensitive target"}
+        # Serve the richest page this portal has: the gate's whole purpose is
+        # to reach the application form.
+        # The richest CREDENTIAL-FREE page: a gate exists to reach the
+        # application form, and a page carrying a password field is a sign-in,
+        # which recon must never accept as the form.
+        def _credential_free(page):
+            return not any((e.get("type") or "") == "password"
+                           for e in page.get("elements", []))
+
+        best, best_url = None, base_url
+        for path, page in self.pages.items():
+            if not _credential_free(page):
+                continue
+            if best is None or len(page.get("elements", [])) > len(best.get("elements", [])):
+                best, best_url = page, f"https://{self.hostname}{path}"
+        if best is None:
+            return {"ok": False, "status": 404, "url": base_url,
+                    "error": "no credential-free page behind this gate"}
+        out = self.observe(best_url)
+        # A declared gate names WHERE it lands (expect_path), and recon checks
+        # the artifact actually reached it. The test portal has one page set
+        # and no router, so it serves that page AT the declared path — the
+        # honest stand-in for "the gate arrived where it said it would".
+        expect = str((entry_gate or {}).get("expect_path") or "").split("#")[-1]
+        if expect:
+            out["url"] = f"https://{self.hostname}/{expect.lstrip('/')}"
+        out["entry_gate_replayed"] = [
+            {"action": a.get("action"), "selector": a.get("selector", ""), "ok": True}
+            for a in actions]
+        return out
 
     # ---- driver interface (the deterministic runtime drives this) ------------
     def goto(self, url: str) -> dict:

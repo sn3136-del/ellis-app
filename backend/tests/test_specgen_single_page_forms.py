@@ -408,3 +408,21 @@ def test_a_file_input_takes_its_caption_from_the_upload_widget():
     assert "i < 4" in block and "t.length <= 120" in block
     # And ONLY for file inputs: a text field must keep its own label rules.
     assert block.index("el.type === 'file'") > block.index("el.placeholder")
+
+
+def test_a_dns_failure_is_transient_not_a_portal_verdict():
+    """An internet outage recorded five portals as failed builds and
+    quarantined them (2026-08-02). A name that will not resolve says nothing
+    about the portal."""
+    from app.global_routes.orchestrator import classify_error
+    from app.adapter_factory.build_workflow import _error_kind
+    for msg in ("[Errno 8] nodename nor servname provided, or not known",
+                "[Errno -2] Name or service not known",
+                "socket.gaierror: getaddrinfo failed",
+                "Temporary failure in name resolution"):
+        assert classify_error(msg) == "transient", msg
+        assert _error_kind(msg) == "transient", msg
+    # A real portal verdict stays permanent.
+    for msg in ("no form page was mappable from public observation",
+                "portal family is not officially verified"):
+        assert classify_error(msg) == "permanent", msg
