@@ -454,7 +454,25 @@
     "EVISA",
     "EMBASSY_OR_CONSULATE_APPLICATION"
    ],
-   "account_required": false
+   "account_required": false,
+   "form_paths": [
+    "/evisa/Registration"
+   ],
+   "entry_gate": {
+    "description": "verified live 2026-08-02: 2 reversible steps to the form",
+    "actions": [
+     {
+      "action": "CLICK",
+      "selector": "a[href=\"evisa/tvoa.html\"]"
+     },
+     {
+      "action": "CLICK",
+      "selector": "a[href=\"Registration\"]"
+     }
+    ],
+    "declared_handoffs": [],
+    "expect_path": "/evisa/Registration"
+   }
   },
   {
    "family_id": "pakistan-nadra-visa",
@@ -649,32 +667,28 @@
    ],
    "account_required": false,
    "entry_gate": {
-    "description": "Angular SPA. Landing hero 'Submit e-Arrival' opens a Material dialog offering 'Sign in as Guest' / 'Sign In With Gmail' / QR scan. Clicking the explicit 'Sign in as Guest' anchor (no credentials, creates an anonymous profile) routes straight to the public foreigner individual e-Arrival form at /e-arrival/foreigner/individual-form/draft. Deep links to /e-arrival/* redirect back to / until the guest profile exists, so the click path is mandatory. The two trailing scrolls are settle time: the form is a lazy-loaded module and needs ~5s after navigation before its ~29 Material fields render. If a prior guest session persists in the browser profile the dialog is skipped and the first click navigates directly, which still lands on the same expect_path.",
+    "description": "verified live 2026-08-02: 4 reversible steps to the form",
     "actions": [
      {
       "action": "CLICK",
-      "selector": "a:has-text(\"Submit e-Arrival\")",
-      "purpose": "open the submission entry dialog from the landing hero"
+      "selector": "a.rounded-button-big:not(.green-btn)"
      },
      {
       "action": "CLICK",
-      "selector": ".cdk-overlay-container a:has-text(\"Sign in as Guest\")",
-      "purpose": "continue as guest (explicit no-account option) to reach the public form"
+      "selector": ".cdk-overlay-container a.google-login-button.primary"
      },
      {
       "action": "SCROLL_TO_BOTTOM",
-      "selector": "body",
-      "purpose": "allow lazy-loaded form module to render"
+      "selector": "body"
      },
      {
       "action": "SCROLL_TO_BOTTOM",
-      "selector": "body",
-      "purpose": "settle wait before final field snapshot"
+      "selector": "body"
      }
     ],
+    "declared_handoffs": [],
     "expect_path": "/e-arrival/foreigner/individual-form",
-    "form_ready_selector": "input[formcontrolname=\"passportNumber\"]",
-    "declared_handoffs": []
+    "form_ready_selector": "input[formcontrolname=\"passportNumber\"]"
    }
   },
   {
@@ -750,14 +764,16 @@
    ],
    "account_required": false,
    "entry_gate": {
+    "description": "verified live 2026-08-02: 1 reversible steps to the form",
     "actions": [
      {
       "action": "CLICK",
-      "selector": "div.col-lg.text-center:nth-of-type(1) button[mat-raised-button]",
-      "purpose": "The 'Arrival Card' tile on #/home. Verified live: this selector resolves to exactly 1 element whose innerText starts 'Arrival Card / Provide your Thailand Digital Arrival Card details for your coming trip.' (the sibling tile is 'Update Arrival Card'). IMPORTANT: this click is a silent no-op until the home page's invisible Cloudflare Turnstile has self-populated input[name=\"cf-turnstile-response\"]. Wait for that hidden input to have a non-empty value (observed ~10-13s after a real document load, 794 chars, no user interaction and no visible challenge) before clicking, then re-click if the route did not change."
+      "selector": "app-home div.row.align-items-stretch > div.col-lg:first-child button.mat-mdc-raised-button",
+      "timeout_ms": 45000
      }
     ],
-    "expect_path": "/arrival-card/#/tac/arrival-card/add",
+    "declared_handoffs": [],
+    "expect_path": "/tac/arrival-card/add",
     "form_ready_selector": "input[formcontrolname=\"familyName\"]"
    }
   },
@@ -838,7 +854,10 @@
     "EVISA",
     "VISA_ON_ARRIVAL"
    ],
-   "account_required": true
+   "account_required": true,
+   "form_paths": [
+    "/web/application_add/visa/4eb7326f-ddfb-4e61-a24a-fb02adceb67f/3dc4013d-e9af-44bf-89c0-82cba92563c3/f0c05fe2-f8d6-4bf1-904c-9fa5a694162f/step_1"
+   ]
   },
   {
    "family_id": "philippines-etravel",
@@ -1216,7 +1235,26 @@
    "supported_outcomes": [
     "EVISA"
    ],
-   "account_required": true
+   "account_required": true,
+   "entry_gate": {
+    "description": "verified live 2026-08-02: 3 reversible steps to the form",
+    "actions": [
+     {
+      "action": "CLICK",
+      "selector": "a[href*=\"guest/index.html#/onArrivalVisaDashboard\"]"
+     },
+     {
+      "action": "CLICK",
+      "selector": "a[ng-click=\"changeVisaMode(1)\"]"
+     },
+     {
+      "action": "CLICK",
+      "selector": ".aegov-card:has(a[href^=\"#/serviceCards/783\"]) button[ng-click=\"redirect(service)\"]"
+     }
+    ],
+    "declared_handoffs": [],
+    "expect_path": "/echannels"
+   }
   },
   {
    "family_id": "oman-evisa",
@@ -1694,7 +1732,8 @@
    "base_url": "https://www.ease.gov.cv/",
    "hostnames": [
     "www.ease.gov.cv",
-    "ease.gov.cv"
+    "ease.gov.cv",
+    "registration.cv.zetes.com"
    ],
    "destinations": [
     "CPV"
@@ -1702,7 +1741,42 @@
    "supported_outcomes": [
     "ENTRY_PREPARATION"
    ],
-   "account_required": false
+   "account_required": false,
+   "entry_gate": {
+    "description": "verified live 2026-08-02: 6 reversible steps to the form",
+    "actions": [
+     {
+      "action": "CLICK",
+      "selector": "a#singleTravelerUrl"
+     },
+     {
+      "action": "CLICK",
+      "selector": "a#PhMainContent_LnkNextStep"
+     },
+     {
+      "action": "CLICK",
+      "selector": "a#LnkPersonalInfo"
+     },
+     {
+      "action": "CLICK",
+      "selector": "a#LnkAdditionalInfo"
+     },
+     {
+      "action": "CLICK",
+      "selector": "a#LnkTravelInfo"
+     },
+     {
+      "action": "CLICK",
+      "selector": "a#LnkContactInfo"
+     }
+    ],
+    "declared_handoffs": [],
+    "expect_path": "/Pages/CapeVerde/PersonalInfo.aspx",
+    "form_ready_all": {
+     "selector": "input:not([type=\"hidden\"]), select",
+     "min": 8
+    }
+   }
   },
   {
    "family_id": "seychelles-tas",
@@ -1759,39 +1833,28 @@
    ],
    "account_required": false,
    "entry_gate": {
-    "description": "From eticket.gob.do landing: continue as guest, choose NUEVO ETICKET (lands on /new-request where an invisible Cloudflare Turnstile validates), then CREAR NUEVO creates a new application (an application number is issued) and opens the public form at /Eticket-application. First form step shows the three mandatory migratory questions (leaving DR? / layovers? / DR resident?) as styled radio groups plus a selectbox, with REGRESAR/CONTINUAR wizard buttons. The two SCROLL_TO_BOTTOM steps are deliberate dwell time: CREAR NUEVO stays disabled until the invisible Turnstile on /new-request auto-validates, and clicking too early times out.",
+    "description": "verified live 2026-08-02: 4 reversible steps to the form",
     "actions": [
      {
       "action": "CLICK",
-      "selector": "button:has-text(\"O CONTINUAR COMO INVITADO\")",
-      "purpose": "continue as guest (no account)"
-     },
-     {
-      "action": "CLICK",
-      "selector": "button:has-text(\"NUEVO ETICKET\")",
-      "purpose": "start a new e-ticket; navigates to /new-request"
+      "selector": "button.primarybtn:text-is(\"NUEVO ETICKET\")"
      },
      {
       "action": "SCROLL_TO_BOTTOM",
-      "selector": "html",
-      "purpose": "dwell while invisible Cloudflare Turnstile on /new-request validates and enables CREAR NUEVO"
+      "selector": "html"
      },
      {
       "action": "SCROLL_TO_BOTTOM",
-      "selector": "html",
-      "purpose": "additional dwell for Turnstile validation (click flakes without it)"
+      "selector": "html"
      },
      {
       "action": "CLICK",
-      "selector": "button:has-text(\"CREAR NUEVO\")",
-      "purpose": "create new application; issues application number and opens form at /Eticket-application"
+      "selector": "button.primarybtn:text-is(\"CREAR NUEVO\")",
+      "timeout_ms": 45000
      }
     ],
-    "expect_path": "/Eticket-application",
-    "form_ready_selector": "#dominican-no",
-    "declared_handoffs": [
-     "captcha"
-    ]
+    "declared_handoffs": [],
+    "expect_path": "/new-request"
    },
    "form_paths": [
     "/Auth/TravelRegister/"

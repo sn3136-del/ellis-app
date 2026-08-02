@@ -218,3 +218,20 @@ def test_live_layer_retries_a_timeout_but_never_a_refusal():
     assert not _transient_failure({"ok": False, "status": 403})
     assert not _transient_failure({"ok": False, "status": 0,
                                    "error": "off-allowlist host refused"})
+
+
+def test_a_declared_path_written_with_its_hash_route_can_match():
+    """Thailand's TDAC lives at /arrival-card/#/tac/arrival-card/add. A gate
+    declaring exactly that could never be satisfied: path and fragment were
+    compared separately, so a want containing '#' matched neither half."""
+    from app.portal.live_browser import path_reaches_expected as reaches
+    live = "https://tdac.immigration.go.th/arrival-card/#/tac/arrival-card/add"
+    assert reaches(live, "/arrival-card/#/tac/arrival-card/add")
+    assert reaches(live, "/tac/arrival-card/add")      # fragment alone still works
+    assert reaches(live, "/arrival-card")              # base alone still works
+    # And it stays strict: an unrelated route is still a miss.
+    assert not reaches("https://tdac.immigration.go.th/arrival-card/#/tac/home",
+                       "/tac/arrival-card/add")
+    # A sanitized pattern (no fragment recorded) still satisfies the base half.
+    assert reaches("https://tdac.immigration.go.th/arrival-card/",
+                   "/arrival-card/#/tac/arrival-card/add")

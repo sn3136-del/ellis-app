@@ -32,6 +32,17 @@ def path_reaches_expected(url: str, expect_path: str) -> bool:
     want = (expect_path or "").rstrip("/")
     if not want:
         return True
+    # A DECLARED path may itself be written with the fragment a hash-routed SPA
+    # shows in the address bar ("/arrival-card/#/tac/arrival-card/add"). The
+    # candidates below are path and fragment SEPARATELY, so a want containing
+    # '#' could never equal either — Thailand's TDAC gate could not match its
+    # own declared destination. Split the want the same way the URL is split
+    # and satisfy it when EITHER half is reached.
+    if "#" in want:
+        base, _, frag = want.partition("#")
+        parts = [p for p in (base.rstrip("/"), "/" + frag.lstrip("/#").rstrip("/"))
+                 if p and p != "/"]
+        return any(path_reaches_expected(url, p) for p in parts)
     parsed = urlparse(url)
     candidates = [parsed.path.rstrip("/")]
     if parsed.fragment:
