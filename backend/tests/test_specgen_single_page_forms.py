@@ -235,3 +235,55 @@ def test_a_declared_path_written_with_its_hash_route_can_match():
     # A sanitized pattern (no fragment recorded) still satisfies the base half.
     assert reaches("https://tdac.immigration.go.th/arrival-card/",
                    "/arrival-card/#/tac/arrival-card/add")
+
+
+# ---- consent doctrine: never take the DISAGREE option ---------------------
+
+class _FakeLoc:
+    """Minimal locator stand-in: evaluate() returns the control's own words."""
+    def __init__(self, info): self._info = info
+    def evaluate(self, _js): return self._info
+
+
+def test_terms_choice_refuses_a_control_that_says_disagree():
+    """Korea's K-ETA numbers its radios so #agree9 is DISAGREE and #dAgree9 is
+    Agree — the shipped gate targeted all four NEGATIVE radios (verified live
+    2026-08-02). A curation slip there records the opposite of the applicant's
+    intent on a government form, so the runtime reads the control before it
+    clicks."""
+    import pytest
+    from app.portal.live_browser import LiveBrowserSession
+    sess = LiveBrowserSession(allowed_hostnames=["www.k-eta.go.kr"])
+    for wording in ("Disagree", "I do not agree", "동의하지 않음", "不同意",
+                    "No acepto", "Decline"):
+        with pytest.raises(RuntimeError, match="DISAGREE"):
+            sess._assert_affirmative_consent(_FakeLoc({"text": wording, "value": "0"}), "#agree9")
+
+
+def test_terms_choice_allows_the_agree_control_and_unreadable_ones():
+    from app.portal.live_browser import LiveBrowserSession
+    sess = LiveBrowserSession(allowed_hostnames=["x.gov"])
+    for wording in ("Agree", "I have read and agreed to the above.", "동의", "同意"):
+        sess._assert_affirmative_consent(_FakeLoc({"text": wording, "value": "1"}), "#dAgree9")
+    # A control with no readable wording must not block an otherwise honest
+    # gate — the negative wording is what we are looking for.
+    sess._assert_affirmative_consent(_FakeLoc({"text": "", "value": ""}), "#terms")
+
+
+def test_verification_code_fields_are_sensitive_in_both_halves_of_the_rule():
+    """Georgia names its CAPTCHA input 'SecurityCode' — no 'captcha', no 'otp'.
+    It slipped the sensitive net entirely, so a curated gate could have typed
+    into a challenge field."""
+    import re as _re
+    from app.portal.live_browser import LiveBrowserSession, _EXTRACT_JS
+    for name in ("SecurityCode", "security_code", "verificationCode",
+                 "confirm_code", "authcode", "g-recaptcha-response",
+                 "cf-turnstile-response"):
+        assert LiveBrowserSession._SENSITIVE_TARGET_RE.search(name), name
+    # Ordinary applicant fields stay fillable.
+    for name in ("surname", "given_names", "email", "passport_number", "code_of_country"):
+        assert not LiveBrowserSession._SENSITIVE_TARGET_RE.search(name), name
+    # The in-page extractor must carry the SAME rule, or recon records a
+    # challenge field as an ordinary fillable input.
+    for token in ("securit", "verif", "turnstile", "recaptcha"):
+        assert token in _EXTRACT_JS

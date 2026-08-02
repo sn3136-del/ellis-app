@@ -262,25 +262,25 @@
      },
      {
       "action": "TERMS_CHOICE",
-      "selector": "#agree9",
+      "selector": "input[name=\"radio9\"][value=\"1\"]",
       "terms_text_selector": ".apply_wrap_box",
       "purpose": "Agree to the K-ETA Terms and Conditions of Use"
      },
      {
       "action": "TERMS_CHOICE",
-      "selector": "#agree2",
+      "selector": "input[name=\"radio2\"][value=\"1\"]",
       "terms_text_selector": ".apply_wrap_box",
       "purpose": "Agree to the collection and use of personal information"
      },
      {
       "action": "TERMS_CHOICE",
-      "selector": "#agree3",
+      "selector": "input[name=\"radio3\"][value=\"1\"]",
       "terms_text_selector": ".apply_wrap_box",
       "purpose": "Agree to the provision of personal information to third parties"
      },
      {
       "action": "TERMS_CHOICE",
-      "selector": "#agree4",
+      "selector": "input[name=\"radio4\"][value=\"1\"]",
       "terms_text_selector": ".apply_wrap_box",
       "purpose": "Agree to the handling of unique identifying information"
      }
@@ -463,11 +463,13 @@
     "actions": [
      {
       "action": "CLICK",
-      "selector": "a[href=\"evisa/tvoa.html\"]"
+      "selector": "a[href=\"evisa/tvoa.html\"]",
+      "purpose": "'For eVisa by Bureau of Immigration, Apply here.' on https://indianvisaonline.gov.in/"
      },
      {
       "action": "CLICK",
-      "selector": "a[href=\"Registration\"]"
+      "selector": "a[href=\"Registration\"]",
+      "purpose": "'Apply here for e-visa' on /evisa/tvoa.html — the href is relative, resolving to /evisa/Registration (10 fields)"
      }
     ],
     "declared_handoffs": [],
@@ -671,19 +673,23 @@
     "actions": [
      {
       "action": "CLICK",
-      "selector": "a.rounded-button-big:not(.green-btn)"
+      "selector": "a.rounded-button-big:not(.green-btn)",
+      "purpose": "'Submit e-Arrival' hero button on the landing page (the .green-btn sibling is the other hero action). Opens the Material sign-in dialog. Verified live 2026-08-02. Text-based equivalent (previously stored): a:has-text(\"Submit e-Arrival\")."
      },
      {
       "action": "CLICK",
-      "selector": ".cdk-overlay-container a.google-login-button.primary"
+      "selector": ".cdk-overlay-container a.google-login-button.primary",
+      "purpose": "'Sign in as Guest' in the CDK overlay dialog — despite the .google-login-button class this is the explicit NO-CREDENTIAL guest option; it creates an anonymous profile and routes to /e-arrival/foreigner/individual-form/draft. Verified live 2026-08-02. Text-based equivalent (previously stored): .cdk-overlay-container a:has-text(\"Sign in as Guest\")."
      },
      {
       "action": "SCROLL_TO_BOTTOM",
-      "selector": "body"
+      "selector": "body",
+      "purpose": "second settle pass before the final snapshot"
      },
      {
       "action": "SCROLL_TO_BOTTOM",
-      "selector": "body"
+      "selector": "body",
+      "purpose": "second settle pass before the final snapshot"
      }
     ],
     "declared_handoffs": [],
@@ -769,7 +775,8 @@
      {
       "action": "CLICK",
       "selector": "app-home div.row.align-items-stretch > div.col-lg:first-child button.mat-mdc-raised-button",
-      "timeout_ms": 45000
+      "timeout_ms": 45000,
+      "purpose": "The 'Arrival Card' tile on #/home (the sibling tile is 'Update Arrival Card'). Verified live: resolves to exactly 1 element and routes to /arrival-card/#/tac/arrival-card/add (62 fields). Equivalent older selector: div.col-lg.text-center:nth-of-type(1) button[mat-raised-button]. TIMING: the click is a SILENT no-op until the invisible Cloudflare Turnstile on the home page has self-populated input[name=\"cf-turnstile-response\"] (~10-13s, no visible challenge, no interaction); _settle_for_render already burns ~18s before the first action, which covers it, but if the replay ends on #/home this is why."
      }
     ],
     "declared_handoffs": [],
@@ -1241,15 +1248,18 @@
     "actions": [
      {
       "action": "CLICK",
-      "selector": "a[href*=\"guest/index.html#/onArrivalVisaDashboard\"]"
+      "selector": "a[href*=\"guest/index.html#/onArrivalVisaDashboard\"]",
+      "purpose": "'Public Visa Services'. Attribute-substring match so it works whether the portal renders the href relative ('guest/index.html#/...') or absolute."
      },
      {
       "action": "CLICK",
-      "selector": "a[ng-click=\"changeVisaMode(1)\"]"
+      "selector": "a[ng-click=\"changeVisaMode(1)\"]",
+      "purpose": "'Issue a new Visa' — switches the dashboard to the issue-visa service list"
      },
      {
       "action": "CLICK",
-      "selector": ".aegov-card:has(a[href^=\"#/serviceCards/783\"]) button[ng-click=\"redirect(service)\"]"
+      "selector": ".aegov-card:has(a[href^=\"#/serviceCards/783\"]) button[ng-click=\"redirect(service)\"]",
+      "purpose": "'Start Service' on the service-783 card; opens #/issueVisa/request/783/step1 (49 fields). :has() and ^= are both supported by Playwright's CSS engine."
      }
     ],
     "declared_handoffs": [],
@@ -1747,27 +1757,33 @@
     "actions": [
      {
       "action": "CLICK",
-      "selector": "a#singleTravelerUrl"
+      "selector": "a#singleTravelerUrl",
+      "purpose": "'Pre-registo de Viajantes / Travellers Pre-registration' on https://www.ease.gov.cv/ — hands the session off to the contracted operator host registration.cv.zetes.com"
      },
      {
       "action": "CLICK",
-      "selector": "a#PhMainContent_LnkNextStep"
+      "selector": "a#PhMainContent_LnkNextStep",
+      "purpose": "'Next Step - Personal info >' — lands on /Pages/CapeVerde/PersonalInfo.aspx, the applicant form"
      },
      {
       "action": "CLICK",
-      "selector": "a#LnkPersonalInfo"
+      "selector": "a#LnkPersonalInfo",
+      "purpose": "step-2 stage link (__doPostBack ctl00$LnkPersonalInfo) — renders the Personal information panel"
      },
      {
       "action": "CLICK",
-      "selector": "a#LnkAdditionalInfo"
+      "selector": "a#LnkAdditionalInfo",
+      "purpose": "step-3 stage link — renders Additional personal information"
      },
      {
       "action": "CLICK",
-      "selector": "a#LnkTravelInfo"
+      "selector": "a#LnkTravelInfo",
+      "purpose": "step-4 stage link — renders Travel info"
      },
      {
       "action": "CLICK",
-      "selector": "a#LnkContactInfo"
+      "selector": "a#LnkContactInfo",
+      "purpose": "step-5 stage link — renders Contact info / Pre-registration Summary; 41 fields observed in this state"
      }
     ],
     "declared_handoffs": [],
@@ -1837,20 +1853,24 @@
     "actions": [
      {
       "action": "CLICK",
-      "selector": "button.primarybtn:text-is(\"NUEVO ETICKET\")"
+      "selector": "button.primarybtn:text-is(\"NUEVO ETICKET\")",
+      "purpose": "Guest entry: the 'NUEVO ETICKET' button in the block under the 'O CONTINUAR COMO INVITADO' heading. Navigates to /new-request. :text-is() is exact-text so it cannot drift onto a differently-labelled sibling .primarybtn."
      },
      {
       "action": "SCROLL_TO_BOTTOM",
-      "selector": "html"
+      "selector": "html",
+      "purpose": "second settle pass before the CREAR NUEVO click"
      },
      {
       "action": "SCROLL_TO_BOTTOM",
-      "selector": "html"
+      "selector": "html",
+      "purpose": "second settle pass before the CREAR NUEVO click"
      },
      {
       "action": "CLICK",
       "selector": "button.primarybtn:text-is(\"CREAR NUEVO\")",
-      "timeout_ms": 45000
+      "timeout_ms": 45000,
+      "purpose": "Creates the application (an application number is issued) and opens the public form at /Eticket-application"
      }
     ],
     "declared_handoffs": [],

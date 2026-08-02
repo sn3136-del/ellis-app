@@ -58,7 +58,7 @@ def path_reaches_expected(url: str, expect_path: str) -> bool:
 # It deliberately never reads element .value, cookies, or storage.
 _EXTRACT_JS = r"""
 () => {
-  const sensitive = /(password|passcode|otp|one[-_]?time|cvv|cvc|card|pan|secret|token|captcha|pin|3ds|passkey)/i;
+  const sensitive = /(password|passcode|otp|one[-_]?time|cvv|cvc|card|pan|secret|token|captcha|pin|3ds|passkey|securit(y)?[-_ ]?code|verif(y|ication)[-_ ]?code|confirm(ation)?[-_ ]?code|authcode|imgcaptcha|g-recaptcha|h-captcha|turnstile)/i;
   // Framework-generated ids change on every render (Angular Material
   // mat-input-7, React useId :r3:, Vue v-123, ASP.NET ctl00_...), so a
   // selector built on one cannot re-verify in a second session — the exact
@@ -110,7 +110,12 @@ _EXTRACT_JS = r"""
   // ASP.NET WebForms alone plants dozens (__VIEWSTATE, __EVENTVALIDATION)
   // that typed as 'text' flood the page with phantom mappable fields
   // (verified live on evisa.gov.az).
+  // Custom widgets are real form controls. New Zealand's NZeTA has NO native
+  // <select> anywhere: its Nationality field is a <mat-select>, so a query
+  // limited to native elements recorded a 47-field application as an empty
+  // page (verified live 2026-08-02). Same for ARIA comboboxes and switches.
   document.querySelectorAll('input:not([type=hidden]), select, textarea, button, a[href], '
+    + 'mat-select, [role="combobox"], [role="switch"], mat-slide-toggle, '
     + '[data-slot], [data-slot-id], [data-datetime], [data-appointment]'
   ).forEach((el) => {
     const tag = el.tagName.toLowerCase();
@@ -119,6 +124,11 @@ _EXTRACT_JS = r"""
     // vocabulary knows only 'select', and the coercion fallback was turning
     // real dropdowns (Nationality on evisa.gov.az) into text inputs.
     if (tag === 'select') type = 'select';
+    // A custom widget IS its native equivalent for mapping purposes: a
+    // mat-select is a dropdown, a switch is a checkbox. Without this they
+    // fall through the unknown-type path and become buttons.
+    if (tag === 'mat-select' || el.getAttribute('role') === 'combobox') type = 'select';
+    if (tag === 'mat-slide-toggle' || el.getAttribute('role') === 'switch') type = 'checkbox';
     // javascript:/# hrefs make an anchor an ACTION control, not a navigation.
     if (tag === 'a') {
       const h = el.getAttribute('href') || '';
@@ -331,9 +341,15 @@ class LiveBrowserSession:
     ENTRY_GATE_ACTIONS = ("CLICK", "SCROLL_TO_BOTTOM", "CHECK")
     ENTRY_GATE_MAX_ACTIONS = 12
 
+    # Georgia names its CAPTCHA input "SecurityCode" — no 'captcha', no 'otp',
+    # nothing the old pattern caught, so a curated gate could legally have
+    # typed into a challenge field. Verification-code fields of every naming
+    # convention are refused here (verified live 2026-08-02).
     _SENSITIVE_TARGET_RE = re.compile(
         r"(password|passcode|otp|one[-_]?time|cvv|cvc|card|pan|secret|token|"
-        r"captcha|pin|3ds|passkey|pay)", re.IGNORECASE)
+        r"captcha|pin|3ds|passkey|pay|securit(y)?[-_ ]?code|"
+        r"verif(y|ication)[-_ ]?code|confirm(ation)?[-_ ]?code|authcode|"
+        r"imgcaptcha|g-recaptcha|h-captcha|turnstile)", re.IGNORECASE)
 
     def _assert_gate_target_safe(self, locator, action: str, selector: str):
         """No entry-gate action may ever touch a password/payment/sensitive
@@ -362,6 +378,54 @@ class LiveBrowserSession:
          t.scrollTop = t.scrollHeight;
          t.dispatchEvent(new Event('scroll', {bubbles: true}));
        }"""
+
+    # A consent control's own words, in the languages the curated portals use.
+    # Ellis reads what it is about to click and refuses the negative option.
+    # Unanchored: a real refusal control reads "I do not agree", not just
+    # "Disagree". Only unambiguous refusals — never a bare "no", which appears
+    # in ordinary sentences ("there is no fee").
+    _CONSENT_NO_RE = re.compile(
+        r"(\bdisagree\b|\bdo(es)? not agree\b|\bdon'?t agree\b|\bnot agree\b|"
+        r"\bdecline\b|\breject\b|\brefuse\b|\bdisagreement\b|"
+        r"동의하지|비동의|거부|不同意|拒否|同意しない|拒绝|"
+        r"não concordo|no acepto|je n'accepte pas|nicht einverstanden|"
+        r"katılmıyorum|не согласен|không đồng ý)", re.IGNORECASE)
+
+    def _assert_affirmative_consent(self, loc, selector: str):
+        """A TERMS_CHOICE may only ever take the AGREE option.
+
+        Korea's K-ETA numbers its consent radios so that #agree9 is the
+        DISAGREE option and #dAgree9 is Agree (verified live 2026-08-02) — the
+        shipped gate targeted all four negative radios. A curation mistake
+        there is not a broken build, it is Ellis recording the opposite of the
+        applicant's intent on a government form, so the runtime refuses rather
+        than trusting the curated selector's name.
+
+        Judged from what the control SAYS (its label, or its own text), plus
+        the radio value where the page pairs agree=1 / disagree=0. A control
+        whose wording cannot be read at all is allowed through: silent absence
+        of a label must not block honest gates, and the negative wording is
+        what we are actually looking for.
+        """
+        try:  # pragma: no cover — live DOM
+            info = loc.evaluate(
+                """(el) => {
+                  const lab = el.id ? document.querySelector('label[for="' + CSS.escape(el.id) + '"]') : null;
+                  const wrap = el.closest ? el.closest('label') : null;
+                  const text = ((lab && lab.innerText) || (wrap && wrap.innerText)
+                                || el.getAttribute('aria-label') || '').replace(/\\s+/g, ' ').trim();
+                  const sib = el.parentElement ? [...el.parentElement.querySelectorAll(
+                      'input[type=radio][name="' + (el.name || '') + '"]')].length : 0;
+                  return {text, value: el.value || '', type: el.type || '', siblings: sib};
+                }""")
+        except Exception:  # noqa: BLE001 — unreadable control: allow, see docstring
+            return
+        text = str((info or {}).get("text") or "")
+        if text and self._CONSENT_NO_RE.search(text):
+            raise RuntimeError(
+                f"TERMS_CHOICE {selector!r} targets the control labelled "
+                f"{text[:40]!r} — Ellis refuses to take the DISAGREE option on "
+                f"an applicant's behalf. Curate the affirmative control.")
 
     @staticmethod
     def _click_possibly_styled(page, loc, selector: str):
@@ -555,6 +619,7 @@ class LiveBrowserSession:
                     loc.wait_for(state="attached",
                                  timeout=int(a.get("timeout_ms") or 30000))
                     self._assert_gate_target_safe(loc, "CLICK", sel)
+                    self._assert_affirmative_consent(loc, sel)
                     self._click_possibly_styled(page, loc, sel)
                     # An SPA gate routes client-side: give the next step's DOM
                     # time to exist before we look for it, or a correct gate
