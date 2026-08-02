@@ -244,7 +244,53 @@
    "supported_outcomes": [
     "ELECTRONIC_AUTHORIZATION"
    ],
-   "account_required": false
+   "account_required": false,
+   "entry_urls": [
+    "https://www.k-eta.go.kr/portal/newapply/applystep1.do"
+   ],
+   "entry_gate": {
+    "actions": [
+     {
+      "action": "CLICK",
+      "selector": "a[href=\"#tab1-2\"]",
+      "purpose": "Choose the non-member application route (no account required)"
+     },
+     {
+      "action": "CLICK",
+      "selector": "#tab1-2 button.orgBtn",
+      "purpose": "Start a new K-ETA application from the beginning"
+     },
+     {
+      "action": "TERMS_CHOICE",
+      "selector": "#agree9",
+      "terms_text_selector": ".apply_wrap_box",
+      "purpose": "Agree to the K-ETA Terms and Conditions of Use"
+     },
+     {
+      "action": "TERMS_CHOICE",
+      "selector": "#agree2",
+      "terms_text_selector": ".apply_wrap_box",
+      "purpose": "Agree to the collection and use of personal information"
+     },
+     {
+      "action": "TERMS_CHOICE",
+      "selector": "#agree3",
+      "terms_text_selector": ".apply_wrap_box",
+      "purpose": "Agree to the provision of personal information to third parties"
+     },
+     {
+      "action": "TERMS_CHOICE",
+      "selector": "#agree4",
+      "terms_text_selector": ".apply_wrap_box",
+      "purpose": "Agree to the handling of unique identifying information"
+     }
+    ],
+    "expect_path": "/portal/newapply/applystep1.do",
+    "declared_handoffs": [
+     "otp",
+     "portal_terms_consent"
+    ]
+   }
   },
   {
    "family_id": "korea-visa-portal",

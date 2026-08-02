@@ -347,9 +347,15 @@ class LiveBrowserSession:
         except Exception:  # noqa: BLE001
             box = None
         if box and box.get("width", 0) > 0 and box.get("height", 0) > 0:
-            loc.click(timeout=15000)
-            return
-        # Zero-sized: click its <label for=…>, which is what paints the control.
+            try:
+                loc.click(timeout=15000)
+                return
+            except Exception:  # noqa: BLE001 — a styled control can HAVE a box
+                pass          # and still be covered by the label that paints
+                              # it (pointer events land on the wrapper), so
+                              # fall through to the label paths below rather
+                              # than failing a gate that a human can click.
+        # Click its <label for=…>, which is what paints the control.
         el_id = ""
         try:
             el_id = loc.evaluate("el => el.id || ''") or ""
