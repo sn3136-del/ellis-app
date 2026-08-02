@@ -48,6 +48,51 @@ def _host(url: str) -> str:
         return ""
 
 
+def _iso3(name_or_code: str) -> str:
+    """ISO-3 for a country name (or a code passed straight through)."""
+    v = (name_or_code or "").strip()
+    if len(v) == 3 and v.isalpha():
+        return v.upper()
+    try:
+        from .visa_snapshot.registry import _country_index
+        for code, e in (_country_index() or {}).items():
+            if v.lower() in (str(e.get("name") or "").lower(),
+                             str(e.get("common_name") or "").lower()):
+                # The index is keyed by alpha-2 for some entries, so take the
+                # entry's OWN alpha_3 rather than trusting the key — returning
+                # 'GB' where 'GBR' was meant silently broke jurisdiction checks.
+                return str(e.get("alpha_3") or code).upper()
+    except Exception:  # noqa: BLE001 — registry optional
+        pass
+    return ""
+
+
+def _names_country(text: str, country: str) -> bool:
+    """Does the page name this country, under any name it is actually called?
+    'United Kingdom' also appears as 'UK'; 'United States' as 'USA'/'US'."""
+    low = (text or "").lower()
+    names = {(country or "").lower()}
+    iso = _iso3(country)
+    if iso:
+        try:
+            from .visa_snapshot.registry import _country_index
+            e = (_country_index() or {}).get(iso) or {}
+            names |= {str(e.get("name") or "").lower(),
+                      str(e.get("common_name") or "").lower()}
+            a2 = str(e.get("alpha_2") or "").lower()
+        except Exception:  # noqa: BLE001
+            a2 = ""
+        names |= {iso.lower()}
+        if a2:
+            names |= {a2}
+    names = {n for n in names if n}
+    if any(n in low for n in names if len(n) > 3):
+        return True
+    # Short forms (UK, US, CN) only count as standalone words.
+    import re
+    return any(re.search(rf"\b{re.escape(n)}\b", low) for n in names if len(n) <= 3)
+
+
 def is_delegated_operator(url: str) -> bool:
     h = _host(url)
     return any(h == d or h.endswith("." + d) for d in DELEGATED_OPERATORS)
@@ -90,12 +135,23 @@ def verify_candidate(candidate: dict, *, source_url: str, source_text: str,
         problems.append(f"source host {_host(source_url)!r} is not official")
 
     # The page must actually be about THIS route, or a page about one country's
-    # visas would answer for another's.
+    # visas would answer for another's. The DESTINATION is proven by the host
+    # when the source is that government's own domain — gov.uk is the United
+    # Kingdom whether or not the prose ever spells the name out, and requiring
+    # the literal words rejected a correct gov.uk answer in testing. Otherwise
+    # the page must name it.
+    from .visa_snapshot.evidence_validator import jurisdiction_matches
     text = (source_text or "").lower()
+    dest_iso = _iso3(destination)
+    host_proves_destination = bool(
+        source_url and dest_iso and jurisdiction_matches(source_url, dest_iso))
     if text:
-        if destination and destination.lower() not in text:
+        if destination and not host_proves_destination \
+                and not _names_country(text, destination):
             problems.append(f"source page does not mention destination {destination}")
-        if residence and residence.lower() not in text:
+        # Residence must always be named: the host cannot prove WHO the page is
+        # for, only who published it.
+        if residence and not _names_country(text, residence):
             problems.append(f"source page does not mention residence {residence}")
     else:
         problems.append("no source text to corroborate the claim")
@@ -119,6 +175,104 @@ def verify_candidate(candidate: dict, *, source_url: str, source_text: str,
         "source_url": source_url,
         "problems": problems,
     }
+
+
+FIND_POST_SYSTEM = """You identify which consular post handles a visa application.
+
+Given the applicant's residence and their destination, name the office they must
+attend and the official page that says so.
+
+Rules you must follow:
+- Answer ONLY from official sources: the destination government's own site, or a
+  visa-centre operator that government delegates to.
+- The source page must be about THIS destination for applicants in THIS
+  residence country. A page about another country's visas is not an answer.
+- Consular jurisdiction is often split by region: if the applicant's city or
+  province decides which post serves them, say which subdivisions this post
+  covers.
+- If you are not certain, say so. An empty answer is correct and useful; a
+  plausible guess sends someone to the wrong city.
+
+Reply JSON:
+{"found": true|false,
+ "competent_post_name": "...",
+ "competent_post_kind": "embassy|consulate_general|consulate|visa_centre|honorary_consulate|unknown",
+ "competent_post_url": "https://... the page where they book or apply",
+ "source_url": "https://... the official page this came from",
+ "residence_subdivisions": ["provinces/states this post covers, [] if country-wide"],
+ "city": "city of the post",
+ "confidence": "high|medium|low",
+ "why": "one sentence: what the official page said"}"""
+
+
+def find_post_for_applicant(*, destination: str, residence: str,
+                            address_city: str = "", address_region: str = "",
+                            timeout_s: float = 55.0) -> dict:
+    """Ask Kimi which post serves THIS applicant, within a one-minute budget.
+
+    Called when the applicant gives Ellis their address, so the answer is
+    specific to where they actually live rather than a country-wide guess. The
+    model's answer is a CANDIDATE only: it is put through the same verification
+    as any researched claim before it can become a usable booking link.
+    """
+    from .config import settings
+    s = settings()
+    if not (s.moonshot_api_key and s.kimi_enabled):
+        return {"found": False, "reason": "search unavailable (no Kimi key)"}
+    where = ", ".join(x for x in (address_city, address_region, residence) if x)
+    user = (f"Applicant lives in: {where or residence}\n"
+            f"They are applying for a visa to: {destination}\n"
+            f"Which consular post must they attend, and where do they book it?")
+    from .providers.kimi import LiveKimiProvider, KimiTimeout, KimiHttpError
+    try:
+        out = LiveKimiProvider()._chat(FIND_POST_SYSTEM, user, timeout=timeout_s)
+    except KimiTimeout:
+        return {"found": False, "reason": "search timed out"}
+    except (KimiHttpError, Exception) as e:  # noqa: BLE001 — never crash intake
+        return {"found": False, "reason": f"search failed: {str(e)[:80]}"}
+    if not isinstance(out, dict) or not out.get("found"):
+        return {"found": False, "reason": (out or {}).get("why")
+                or "no official answer found"}
+    return out
+
+
+def resolve_for_applicant(db, *, destination: str, residence: str,
+                          address_city: str = "", address_region: str = "",
+                          fetch_page=None, timeout_s: float = 55.0) -> dict:
+    """The full on-demand path: search, then VERIFY before storing.
+
+    fetch_page(url) -> (final_url, text, links) lets the caller corroborate the
+    model's cited source against the live page. Without it the claim can still
+    be stored, but only as unverified — Ellis will not hand an applicant a
+    booking link on a model's say-so alone.
+    """
+    found = find_post_for_applicant(
+        destination=destination, residence=residence, address_city=address_city,
+        address_region=address_region, timeout_s=timeout_s)
+    if not found.get("found"):
+        return {"status": "not_found", "reason": found.get("reason", "")}
+
+    source_url = str(found.get("source_url") or "")
+    text, gov_linked = "", False
+    if fetch_page is not None and source_url:
+        try:
+            source_url, text, links = fetch_page(source_url)
+            gov_linked = any(is_delegated_operator(u) for u in (links or []))
+        except Exception:  # noqa: BLE001 — an unreachable source stays unverified
+            text = ""
+    row = verify_candidate(
+        {"competent_post_name": found.get("competent_post_name") or "",
+         "competent_post_kind": found.get("competent_post_kind") or "unknown",
+         "competent_post_url": found.get("competent_post_url") or "",
+         "residence_subdivisions": found.get("residence_subdivisions") or []},
+        source_url=source_url, source_text=text,
+        destination=destination, residence=residence,
+        government_linked=gov_linked)
+    stored = store(db, dict(row, destination_country=destination,
+                            residence_jurisdiction=residence))
+    return {"status": row["verification_status"], "post": row["competent_post_name"],
+            "booking_url": row["competent_post_url"], "city": found.get("city", ""),
+            "problems": row["problems"], "rule_id": getattr(stored, "id", "")}
 
 
 def store(db, row: dict, *, snapshot_date: str = "") -> object:

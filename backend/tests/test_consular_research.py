@@ -36,11 +36,14 @@ def test_official_source_naming_both_countries_verifies():
 
 
 def test_a_page_that_never_mentions_the_route_is_refused():
-    """A page about French visas in Morocco must never answer for the UK in
-    China — this is what a 404 or a mis-guessed URL looks like."""
+    """A 404 or a mis-guessed URL must never become an answer. The publishing
+    government's domain settles the DESTINATION, so the refusal here rests on
+    the page saying nothing about the applicant's residence — which is exactly
+    what an error page says about anywhere."""
     row = _verify(source_text="Page not found. Try searching GOV.UK.")
     assert row["verification_status"] == "unverified"
-    assert any("destination" in p for p in row["problems"])
+    assert row["competent_post_url"] == ""
+    assert any("residence" in p for p in row["problems"]), row["problems"]
 
 
 def test_an_unofficial_source_is_refused():
@@ -105,3 +108,40 @@ def test_store_persists_and_updates_in_place(db):
     again = cr.store(db, dict(row, competent_post_kind="consulate"))
     assert again.id == stored.id, "same route+post updates rather than duplicating"
     assert again.competent_post_kind == "consulate"
+
+
+# --- regressions from the first live run -----------------------------------
+
+def test_iso3_returns_alpha3_not_the_index_key():
+    """The registry indexes some countries by alpha-2, so trusting the key
+    returned 'GB' where 'GBR' was meant and every jurisdiction check failed."""
+    assert cr._iso3("United Kingdom") == "GBR"
+    assert cr._iso3("Vietnam") == "VNM"
+    assert cr._iso3("GBR") == "GBR"
+
+
+def test_the_destination_government_host_proves_the_destination():
+    """A gov.uk page says 'UK visa', never 'United Kingdom' — demanding the
+    literal name rejected a correct official answer in the first live run.
+    The publishing government's own domain settles it."""
+    row = _verify(source_text="Go to a visa application centre in China for "
+                              "your UK visa.",
+                  source_url="https://www.gov.uk/find-a-visa-application-centre")
+    assert row["verification_status"] == "verified", row["problems"]
+
+
+def test_the_host_never_proves_the_RESIDENCE():
+    """Who published the page cannot say who it is for: a gov.uk page about
+    Morocco must not answer for an applicant in China."""
+    row = _verify(source_text="Visa centres in Morocco.",
+                  source_url="https://www.gov.uk/find-a-visa-application-centre")
+    assert row["verification_status"] == "unverified"
+    assert any("residence" in p for p in row["problems"])
+
+
+def test_search_failure_is_reported_not_raised():
+    """A rate-limited or unreachable search must never crash intake."""
+    out = cr.find_post_for_applicant(destination="United Kingdom", residence="China",
+                                     timeout_s=0.001)
+    assert out["found"] is False
+    assert out.get("reason")
