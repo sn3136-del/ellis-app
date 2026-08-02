@@ -412,12 +412,27 @@ function artFor(item) {
   return '📄'
 }
 
+// Why the translate control is off, in the applicant's words. A dimmed button
+// with no explanation reads like a bug; this says which of the real reasons
+// applies (already in the right language, nothing readable to translate, or
+// the document IS a translation).
+function translateOffReason(t, binding, language, target) {
+  if (!binding) return ''
+  if (binding.detected_type === 'translation') return t('doccard.whyIsTranslation')
+  if (!binding.has_text) return t('doccard.whyNoText')
+  if (language.code && target.target && language.code === target.target) {
+    return t('doccard.whySameLanguage')
+  }
+  return t('doccard.whyNotNeeded')
+}
+
 function DocCard({ t, client, caseId, item, translation, onChanged }) {
   const toast = useToast()
   const inputRef = useRef(null)
   const [busy, setBusy] = useState('')
   const [justUploaded, setJustUploaded] = useState(false)
   const [preview, setPreview] = useState(false)
+  const [previewDoc, setPreviewDoc] = useState(null)   // {id, name} being previewed
   const [askTranslate, setAskTranslate] = useState(false)
   const binding = item.binding || null
   const status = item.status
@@ -563,15 +578,33 @@ function DocCard({ t, client, caseId, item, translation, onChanged }) {
         </div>
       )}
       {uploaded && (
-        <div style={{ marginTop: 8, display: 'flex', gap: 10, justifyContent: 'center',
-          flexWrap: 'wrap' }} onClick={(e) => e.stopPropagation()}>
+        <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column',
+          gap: 6, alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
           <button className="doccard__link" data-testid={'view-' + item.id}
             onClick={() => setPreview(true)}>{t('doccard.view')}</button>
-          {canTranslate && (
+          {/* Translation sits UNDER View and is always visible, so the
+              applicant never wonders whether it exists. When the document is
+              already in the language the post accepts, the control is dimmed
+              and says so outright rather than disappearing. */}
+          {binding.translation_document_id ? (
+            <button className="doccard__link"
+              data-testid={'translated-' + item.id}
+              onClick={() => { setPreviewDoc({ id: binding.translation_document_id,
+                name: t('checklist.machineTranslation') }); setPreview(true) }}>
+              {t('doccard.viewTranslation')}
+            </button>
+          ) : canTranslate ? (
             <button className="doccard__link" disabled={busy === 'translate'}
               data-testid={'translate-' + item.id}
               onClick={() => setAskTranslate(true)}>
-              {busy === 'translate' ? '…' : t('doccard.translate')}</button>
+              {busy === 'translate' ? t('doccard.translating') : t('doccard.translate')}
+            </button>
+          ) : (
+            <span className="doccard__link doccard__link--off"
+              data-testid={'translate-off-' + item.id}
+              title={translateOffReason(t, binding, language, target)}>
+              {t('doccard.translateNotNeeded')}
+            </span>
           )}
         </div>
       )}
@@ -591,9 +624,12 @@ function DocCard({ t, client, caseId, item, translation, onChanged }) {
       )}
       {preview && binding && (
         <div onClick={(e) => e.stopPropagation()}>
+          {/* previewDoc set means the TRANSLATION is being shown; its viewer
+              carries the Download button, which is how the applicant takes
+              the translation to the post. */}
           <DocPreview client={client} caseId={caseId}
-            doc={{ id: binding.document_id, name: binding.document_name }}
-            onClose={() => setPreview(false)} />
+            doc={previewDoc || { id: binding.document_id, name: binding.document_name }}
+            onClose={() => { setPreview(false); setPreviewDoc(null) }} />
         </div>
       )}
       <input ref={inputRef} type="file" hidden accept=".pdf,.jpg,.jpeg,.png,.tiff"

@@ -21,7 +21,27 @@ def _make_engine(url: str | None = None):
         # concurrent research job would otherwise fail immediately with
         # "database is locked"; wait for the lock instead of dropping work.
         connect_args = {"check_same_thread": False, "timeout": 60}
-    return create_engine(url, future=True, connect_args=connect_args)
+    eng = create_engine(url, future=True, connect_args=connect_args)
+    if url.startswith("sqlite") and ":memory:" not in url:
+        # Write-ahead logging: readers never block the writer and the writer
+        # never blocks readers. Without it a long portal build and the API
+        # serving the applicant contend for one lock, and a build that takes
+        # a lock mid-flush can strand the other in PendingRollbackError
+        # (observed 2026-08-02: a global sweep killed by a concurrent
+        # single-family build). Also the single biggest cheap speedup for a
+        # run that writes a checkpoint at every step.
+        from sqlalchemy import event
+
+        @event.listens_for(eng, "connect")
+        def _sqlite_pragmas(dbapi_conn, _rec):  # pragma: no cover - driver hook
+            cur = dbapi_conn.cursor()
+            try:
+                cur.execute("PRAGMA journal_mode=WAL")
+                cur.execute("PRAGMA synchronous=NORMAL")
+                cur.execute("PRAGMA busy_timeout=60000")
+            finally:
+                cur.close()
+    return eng
 
 
 engine = _make_engine()

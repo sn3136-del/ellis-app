@@ -816,7 +816,10 @@
    "supported_outcomes": [
     "ENTRY_PREPARATION"
    ],
-   "account_required": false
+   "account_required": false,
+   "form_paths": [
+    "/sgarrivalcard/fvipa"
+   ]
   },
   {
    "family_id": "indonesia-evisa",

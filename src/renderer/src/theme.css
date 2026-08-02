@@ -603,6 +603,11 @@ body { background: var(--bg-soft); }
   font-weight: 600; color: var(--trip-blue); text-decoration: none; }
 .doccard__link:hover { text-decoration: underline; }
 .doccard__link:disabled { color: var(--trip-gray); }
+/* Translation not required: present but plainly inert — the applicant can see
+   the capability exists and that this document does not need it. */
+.doccard__link--off { color: var(--trip-gray); opacity: 0.55; cursor: default;
+  font-weight: 500; }
+.doccard__link--off:hover { text-decoration: none; }
 
 /* Welcome hero (applicant landing) — the Trip.com landing look: one big
    headline, one primary action, generous air. .trip-home/.trip-home__title/
