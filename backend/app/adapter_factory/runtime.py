@@ -235,7 +235,19 @@ class FlowRunner:
                         self._evidence(node, kind="official_record",
                                        category="reconciled_prior_success", strength=2)
                         return {"status": "ok", "detail": {"reconciled": True}}
-                res = self.driver.click(node["selector"])
+                selector = node.get("selector") or ""
+                if not selector and node.get("selector_source") == "runtime_primary_action":
+                    # The spec honestly recorded that no selector could be
+                    # observed for this step (a submit control that only exists
+                    # past the applicant's own review). Resolve the portal's
+                    # primary action HERE, where the page finally shows it.
+                    find = getattr(self.driver, "primary_action_selector", None)
+                    selector = (find() if find else "") or ""
+                    if not selector:
+                        return {"status": "failed",
+                                "reason": "the portal's primary action could not "
+                                          "be found on this page"}
+                res = self.driver.click(selector)
                 if res.get("ok"):
                     break
                 code = res.get("code")

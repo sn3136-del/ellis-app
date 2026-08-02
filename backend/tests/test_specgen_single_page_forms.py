@@ -467,3 +467,42 @@ def test_a_gate_that_fails_twice_still_reports_the_failure():
 
     out = _S(allowed_hostnames=["x.gov"]).observe_with_entry_gate("https://x.gov/", {})
     assert out["ok"] is False and "off-allowlist" in out["error"]
+
+
+def test_the_submit_step_never_invents_a_selector():
+    """specgen used to fall back to '#submit-btn' — a selector Ellis made up.
+    The contract layer rightly rejects an unobserved selector, so the
+    invention turned 'we could not see the submit control' into 'this adapter
+    is broken' (Thailand's TDAC, whose submit lives past the applicant's own
+    review and can never be observed by recon)."""
+    import inspect
+    from app.adapter_factory import specgen
+    src = inspect.getsource(specgen)
+    assert '"#submit-btn"' not in src, "a fabricated submit selector is back"
+    assert 'selector_source=("observed" if submit_sel else "runtime_primary_action")' in src
+
+
+def test_an_unobservable_submit_is_resolved_at_runtime_or_fails_closed():
+    """An empty selector claims nothing. The runtime looks for the portal's
+    primary action where the page finally shows it, and stops honestly when
+    there is none — never clicking something it guessed."""
+    import inspect
+    from app.adapter_factory import runtime
+    src = inspect.getsource(runtime)
+    assert 'node.get("selector_source") == "runtime_primary_action"' in src
+    assert "primary_action_selector" in src
+    assert "could not " in src  # an honest failure, not a silent skip
+
+
+def test_a_rebuild_drops_the_cached_specification():
+    """A rebuild exists to apply what changed. The spec is where most specgen
+    fixes live, so reusing the old spec_id meant a correct, committed, tested
+    fix never reached the portal it fixed — Indonesia kept failing on the
+    invented '#submit-btn' long after that invention was removed."""
+    import inspect
+    from app.global_routes import orchestrator
+    src = inspect.getsource(orchestrator._unpark_for_rebuild)
+    assert 'pop("spec_id"' in src, "rebuild still reuses a stale specification"
+    # Recon evidence must SURVIVE: re-observing is expensive and was not the
+    # thing that changed.
+    assert "recon_job_id" not in src

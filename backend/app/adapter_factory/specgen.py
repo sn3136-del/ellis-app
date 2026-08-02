@@ -1273,8 +1273,18 @@ def _entry_gated_flow(host: str, roles: dict, mappings: list[dict],
     # The runtime is protected either way — reconcile-first plus evidence-only
     # success means a wrong selector fails closed with no irreversible action.
     submit_sel = _primary_action_selector(roles.get("submit")) or continue_sel
+    # When neither stage revealed a primary action, the honest record is that
+    # NO selector is known — not a plausible-looking '#submit-btn', which is a
+    # selector Ellis made up. The contract layer rightly rejects an unobserved
+    # selector, so the invention turned "we could not see the submit control"
+    # into "this adapter is broken" (Thailand's TDAC, whose submit sits behind
+    # the applicant's own review step and can never be observed by recon).
+    # An empty selector claims nothing; the runtime resolves the portal's
+    # primary action at that moment, and reconcile-first plus evidence-only
+    # success means a miss fails closed with no irreversible action.
     node("submit", "CLICK",
-         selector=submit_sel or "#submit-btn",
+         selector=submit_sel or "",
+         selector_source=("observed" if submit_sel else "runtime_primary_action"),
          purpose="Submit the application (portal's primary action after the "
                  "applicant's personal review/declaration)",
          irreversibility="irreversible", retry_class="reconcile_first",
