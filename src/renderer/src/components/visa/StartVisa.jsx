@@ -913,11 +913,12 @@ function GuidancePanel({ t, guidance, loading, error, onEdit, onNew, onRetry,
                          answers, onAnswerHealth,
                          onContinue, continuing, continueError }) {
   if (loading) {
+    // The loading screen carries NO copy beyond "Processing" under the plane
+    // — no AI/Kimi mentions, no countdown. The AI disclosure lives on the
+    // guidance RESULT card, where the generated content actually appears.
     return (
       <div className="card" style={{ padding: 24, textAlign: 'center' }}>
-        <div className="badge badge--ai" style={{ marginBottom: 12 }}>{t('guidance.aiBadge')}</div>
         <Loading label={t('guidance.loading')} />
-        <GuidanceCountdown t={t} />
       </div>
     )
   }

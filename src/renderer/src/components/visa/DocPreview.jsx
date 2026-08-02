@@ -103,7 +103,10 @@ export default function DocPreview({ client, caseId, doc, onClose }) {
   const pristine = zoom === 1 && rotation === 0
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    // "overlay" is the theme's ONLY fixed-position backdrop class — the name
+    // "modal-backdrop" doesn't exist in theme.css, and an unstyled backdrop
+    // let the whole preview flow INLINE inside the document card (2026-08-02).
+    <div className="overlay" onClick={onClose}>
       <div className="modal" style={{ maxWidth: 900, width: '92%' }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
           <div style={{ fontWeight: 700, flex: 1, minWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis' }}>{doc.name}</div>
@@ -131,7 +134,7 @@ export default function DocPreview({ client, caseId, doc, onClose }) {
                    maxHeight: '70vh', overflow: 'auto', display: 'flex',
                    flexDirection: 'column', alignItems: 'center',
                    justifyContent: 'flex-start' }}>
-          {state.status === 'loading' && <div style={{ padding: 40 }}><Loading label="Loading document" /></div>}
+          {state.status === 'loading' && <div style={{ padding: 40 }}><Loading label="Processing" /></div>}
           {state.status === 'unavailable' && (
             <div style={{ padding: 40, fontSize: 13, color: 'var(--muted)' }}>
               Preview unavailable: {state.reason}
