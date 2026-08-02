@@ -18,7 +18,7 @@ import {
   SignatureModal, LiveViewModal, PaymentApprove, PaymentModal,
   PaymentDetailsModal, AppointmentCalendar, RescheduleConfirm, DeclarationModal,
   FinalReviewModal, AdditionalInfoModal,
-  PortalWatch
+  PortalWatch, LiveFrame, usePortalLiveView
 } from './handoffs.jsx'
 
 export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
@@ -34,6 +34,7 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
   const [journey, setJourney] = useState(null)    // saved guidance + checklist + audit status
   const [progress, setProgress] = useState(null)  // live portal progress (polled)
   const [everQueued, setEverQueued] = useState(false) // a background run exists
+  const [portalBlocked, setPortalBlocked] = useState(false) // real_only_stop seen
   const landedOnDocs = useRef(false)
   const docsRef = useRef(null)          // scroll target for "go to documents"
   const progressSigRef = useRef('')
@@ -44,7 +45,7 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
   // per-case piece of state so the previous case never bleeds through.
   useEffect(() => {
     setStatus(null); setProgress(null); setEverQueued(false)
-    setModal(null); setError(null); setJourney(null)
+    setModal(null); setError(null); setJourney(null); setPortalBlocked(false)
     landedOnDocs.current = false
     progressSigRef.current = ''
     autoSkipRef.current = false
@@ -214,6 +215,9 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
           : reason === 'documents_incomplete' ? e.detail.message
           : e.message
       })
+      // A portal Ellis can't drive yet may still be one the applicant's own
+      // consented run can TEACH it — surface that path next to the stop.
+      if (reason === 'real_only_stop') setPortalBlocked(true)
     }
     setBusy(false)
   }
@@ -248,6 +252,9 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
           result ever reading as a real government outcome. */}
       {showExecutionBanner(journey) && (started || !kind) && <ExecutionBanner status={status} />}
       {error && <ErrorNote error={error} />}
+      {portalBlocked && (
+        <PortalObservation t={t} client={client} caseId={caseId} />
+      )}
 
       {!started && kind === 'entry_preparation' && (
         <EntryPrep t={t} client={client} caseId={caseId} journey={journey}
@@ -716,7 +723,11 @@ function AppointmentBooking({ t, client, caseId }) {
       data-testid="appointment-booking">
       <div style={{ fontWeight: 600, marginBottom: 6 }}>{t('booking.title')}</div>
       <ConsularFormQuestions t={t} client={client} caseId={caseId} onSaved={() => {}} />
-      <GovCalendar t={t} client={client} caseId={caseId} />
+      {/* Only where a readable government calendar actually exists for THIS
+          destination — the backend says which system applies. */}
+      {state.gov_calendar === 'rk_termin' && (
+        <GovCalendar t={t} client={client} caseId={caseId} />
+      )}
       {appt && !editing ? (
         <div data-testid="appointment-booked">
           <div className="kv">
@@ -988,6 +999,153 @@ function GovCalendar({ t, client, caseId }) {
 // Passport-renewal case: the Kimi renewal analysis (path, form, fees, times)
 // plus the linked-travel-case note. Documents flow through the normal
 // checklist; approving the NEW passport resumes the travel case automatically.
+// ---- Attended observation: the applicant's own run teaches Ellis a portal --
+// Shown beside a real_only_stop. Two things at once, honestly separated:
+// (1) the applicant can always complete their application THEMSELVES in the
+// secure window; (2) if — and only if — they sign the versioned consent,
+// Ellis records the STRUCTURE of the pages they pass so future applications
+// on this portal can be automated. Declining changes nothing about the case.
+function PortalObservation({ t, client, caseId }) {
+  const [obs, setObs] = useState(null)      // GET /portal-observation payload
+  const [declined, setDeclined] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [session, setSession] = useState(null)  // finish() summary
+  const [error, setError] = useState(null)
+  const pollRef = useRef(null)
+
+  async function refresh() {
+    try { setObs(await client.portalObservation(caseId)) }
+    catch (e) { setError({ message: e.message }) }
+  }
+  useEffect(() => {
+    refresh()
+    return () => pollRef.current && clearTimeout(pollRef.current)
+  }, [caseId])
+
+  // While the post-session rebuild runs, keep the card telling the truth.
+  useEffect(() => {
+    if (!obs?.rebuild?.active) return undefined
+    pollRef.current = setTimeout(refresh, 5000)
+    return () => clearTimeout(pollRef.current)
+  }, [obs])
+
+  if (!obs || !obs.available || declined) return null
+
+  async function act(fn) {
+    setBusy(true); setError(null)
+    try { setObs(await fn()) }
+    catch (e) { setError({ message: (e.detail && e.detail.detail) || e.message }) }
+    setBusy(false)
+  }
+
+  const rb = obs.rebuild || {}
+  return (
+    <div className="card fadeup-1" style={{ padding: 22, marginTop: 12 }}>
+      <div style={{ fontWeight: 700, marginBottom: 6 }}>
+        {t('obs.title')}{obs.portal_name ? ` — ${obs.portal_name}` : ''}
+      </div>
+      {error && <ErrorNote error={error} />}
+
+      {!obs.consented && (
+        <div>
+          <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 10 }}>
+            {obs.account_required ? t('obs.blockedLogin') : t('obs.blockedGate')}
+            {' '}{t('obs.offer')}
+          </div>
+          <div className="card card--soft" style={{ padding: 12, fontSize: 12.5,
+            whiteSpace: 'pre-wrap', marginBottom: 12 }}>
+            {obs.consent_text}
+          </div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button className="btn" disabled={busy}
+              onClick={() => act(() => client.portalObservationConsent(caseId))}>
+              {t('obs.agree')}
+            </button>
+            <button className="btn btn--ghost" disabled={busy}
+              onClick={() => act(() => client.portalObservationDecline(caseId))
+                .then(() => setDeclined(true))}>
+              {t('obs.decline')}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {obs.consented && !session && !rb.active && !rb.released && !rb.error && (
+        <ObservationWindow t={t} client={client} caseId={caseId}
+          obs={obs} busy={busy}
+          onStarted={refresh}
+          onFinish={() => act(async () => {
+            const r = await client.portalObservationFinish(caseId)
+            setSession(r.session || null)
+            return r
+          })} />
+      )}
+
+      {session && session.rebuilt === false && (
+        <div className="card card--soft" style={{ padding: 14, fontSize: 13 }}>
+          {t('obs.noForm')}
+        </div>
+      )}
+      {rb.active && (
+        <div style={{ marginTop: 10 }}>
+          <Loading label={t('obs.rebuilding')} />
+        </div>
+      )}
+      {!rb.active && rb.released && (
+        <div className="card card--soft" style={{ padding: 14, fontSize: 13,
+          borderColor: '#16a34a' }}>
+          {t('obs.released')}
+        </div>
+      )}
+      {!rb.active && !rb.released && (rb.missing || []).length > 0 && (
+        <div className="card card--soft" style={{ padding: 14, fontSize: 12.5 }}>
+          <div style={{ fontWeight: 700, marginBottom: 6 }}>{t('obs.gateHold')}</div>
+          {(rb.missing || []).slice(0, 4).map((m, i) => <div key={i}>· {m}</div>)}
+        </div>
+      )}
+      {!rb.active && rb.error && (
+        <div className="card card--soft" style={{ padding: 14, fontSize: 12.5 }}>
+          {t('obs.rebuildError')} {rb.error}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// The secure window plus the recording chrome. Recording starts only after
+// the window is actually embedded — the backend attaches to THAT session.
+function ObservationWindow({ t, client, caseId, obs, busy, onStarted, onFinish }) {
+  const view = usePortalLiveView(client, caseId, { restore: false })
+  const startedRef = useRef(false)
+  useEffect(() => {
+    if (view.state !== 'embedded' || startedRef.current) return
+    startedRef.current = true
+    client.portalObservationStart(caseId).then(onStarted).catch(() => {
+      startedRef.current = false
+    })
+  }, [view.state])
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5,
+        color: 'var(--muted)' }}>
+        <span className="chip chip--ink" style={{ fontSize: 10 }}>
+          {obs.active ? t('obs.recording') : t('obs.window')}
+        </span>
+        {obs.active && (
+          <span>{obs.pages} {t('obs.pages')} · {obs.forms} {t('obs.forms')}</span>
+        )}
+      </div>
+      <LiveFrame view={view} height="62vh" />
+      <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+        <button className="btn" disabled={busy || view.state !== 'embedded'}
+          onClick={onFinish}>
+          {busy ? t('obs.finishing') : t('obs.finish')}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function RenewalPrep({ t, journey, onToDocuments }) {
   const gr = journey.guidance || {}
   const g = gr.guidance || {}

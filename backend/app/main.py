@@ -1590,6 +1590,158 @@ def case_calendar_month(application_id: str, db=Depends(get_session),
         sess.close()
 
 
+def _observation_context(db, app_row):
+    """Resolve THIS case's route to its portal family and the family's build
+    request, deciding honestly whether an attended observation can help.
+    Returns (family, link, req, reason) — a non-empty reason means no."""
+    from sqlalchemy import select
+    from .adapter_factory import models as fm
+    from .global_routes import resolver
+    from .global_routes.models import FamilyAdapterLink, PortalFamily
+    answers = app_row.answers or {}
+    try:
+        rec = resolver.resolve_route(
+            db,
+            nationality=answers.get("passport_nationality") or "",
+            destination=app_row.destination_country or "",
+            issuing_country=answers.get("passport_issuing_country") or None,
+            travel_document_type=answers.get("travel_document_type") or "ordinary_passport",
+            residence=answers.get("lawful_country_of_residence") or None)
+    except Exception as e:  # noqa: BLE001 — an unresolvable route is a real answer
+        return None, None, None, f"route could not be resolved: {str(e)[:120]}"
+    gov = (rec or {}).get("governing_adapter") or {}
+    fam_id = gov.get("family_id") or ""
+    if not gov.get("required") or not fam_id:
+        return None, None, None, ("this route has no online portal to learn — "
+                                  "it is decided in person")
+    if gov.get("released"):
+        return None, None, None, "this portal is already fully supported"
+    family = db.execute(select(PortalFamily).where(
+        PortalFamily.family_id == fam_id)).scalars().first()
+    link = db.execute(select(FamilyAdapterLink).where(
+        FamilyAdapterLink.family_id == fam_id)).scalars().first()
+    req = (db.get(fm.AdapterBuildRequest, link.build_request_id)
+           if link is not None and link.build_request_id else None)
+    if family is None or req is None:
+        return family, link, None, ("Ellis has not attempted this portal's "
+                                    "automatic build yet — that runs first")
+    return family, link, req, ""
+
+
+def _observation_state(db, family, link, req) -> dict:
+    from . import attended_observation
+    from . import authorized_observation as ao
+    return {
+        "available": True,
+        "portal_name": family.name, "portal_url": family.base_url,
+        "account_required": bool(family.account_required),
+        "consent_text": ao.CONSENT_TEXT,
+        "text_version": ao.CONSENT_TEXT_VERSION,
+        "consented": ao.has_consent(req),
+        "build_state": req.state,
+        "released": bool(link.released),
+        "gate_missing": (link.gate_report or {}).get("missing", []),
+        **attended_observation.status(req.id),
+    }
+
+
+@app.get("/cases/{application_id}/portal-observation")
+def case_portal_observation(application_id: str, db=Depends(get_session),
+                            p: Principal = Depends(get_principal)):
+    """Can this applicant's own session teach Ellis their portal — and where
+    does that stand? Offered only when the portal is real, unreleased, and its
+    automatic build already ran and parked (most often: the form is behind
+    sign-in, or behind a check only a person may complete)."""
+    app_row = _owned(db, p, application_id)
+    family, link, req, reason = _observation_context(db, app_row)
+    if reason:
+        return {"available": False, "reason": reason}
+    return _observation_state(db, family, link, req)
+
+
+@app.post("/cases/{application_id}/portal-observation/consent")
+def case_portal_observation_consent(application_id: str, db=Depends(get_session),
+                                    p: Principal = Depends(get_principal)):
+    """The applicant agrees, under the versioned wording they were shown, that
+    their signed-in run may teach Ellis the SHAPE of this portal's pages."""
+    app_row = _owned(db, p, application_id)
+    from . import authorized_observation as ao
+    family, link, req, reason = _observation_context(db, app_row)
+    if reason:
+        raise HTTPException(409, detail={"reason": "observation_unavailable",
+                                         "detail": reason})
+    ao.record_consent(db, req, application_id=application_id, actor=p.user_id)
+    return _observation_state(db, family, link, req)
+
+
+@app.post("/cases/{application_id}/portal-observation/decline")
+def case_portal_observation_decline(application_id: str, db=Depends(get_session),
+                                    p: Principal = Depends(get_principal)):
+    """Consent withdrawn — nothing further is recorded, the case is unaffected."""
+    app_row = _owned(db, p, application_id)
+    from . import authorized_observation as ao
+    family, link, req, reason = _observation_context(db, app_row)
+    if reason:
+        raise HTTPException(409, detail={"reason": "observation_unavailable",
+                                         "detail": reason})
+    ao.withdraw_consent(db, req, actor=p.user_id)
+    return _observation_state(db, family, link, req)
+
+
+@app.post("/cases/{application_id}/portal-observation/start")
+def case_portal_observation_start(application_id: str, db=Depends(get_session),
+                                  p: Principal = Depends(get_principal)):
+    """Begin the attended session: Ellis attaches read-only to the applicant's
+    secure window, opens the portal's start page, and records page STRUCTURE
+    as they work. It never fills, clicks, solves or submits anything."""
+    app_row = _owned(db, p, application_id)
+    from . import attended_observation, authorized_observation as ao
+    family, link, req, reason = _observation_context(db, app_row)
+    if reason:
+        raise HTTPException(409, detail={"reason": "observation_unavailable",
+                                         "detail": reason})
+    entry_urls = (req.portal_evidence or {}).get("entry_urls") or []
+    try:
+        attended_observation.start(
+            db, req, application_id=application_id,
+            hosts=family.hostnames or [],
+            start_url=(entry_urls[0] if entry_urls else family.base_url or ""))
+    except ao.ObservationRefused as e:
+        raise HTTPException(409, detail={"reason": "consent_required",
+                                         "detail": str(e)})
+    except attended_observation.WindowUnavailable as e:
+        raise HTTPException(409, detail={"reason": "no_secure_window",
+                                         "detail": str(e)})
+    except attended_observation.SessionAlready:
+        pass    # already recording is success, not an error, for the applicant
+    audit.record(db, org_id=app_row.org_id, application_id=application_id,
+                 action="attended_observation_started",
+                 detail={"family_id": family.family_id}, actor=p.user_id)
+    return _observation_state(db, family, link, req)
+
+
+@app.post("/cases/{application_id}/portal-observation/finish")
+def case_portal_observation_finish(application_id: str, db=Depends(get_session),
+                                   p: Principal = Depends(get_principal)):
+    """The applicant is done. If a real application form was observed, the
+    build re-runs the full verification chain in the background — the same
+    sixteen gates as every portal decide release, never the observation."""
+    app_row = _owned(db, p, application_id)
+    from . import attended_observation
+    family, link, req, reason = _observation_context(db, app_row)
+    if reason:
+        raise HTTPException(409, detail={"reason": "observation_unavailable",
+                                         "detail": reason})
+    out = attended_observation.finish(db, req, family_id=family.family_id,
+                                      actor=p.user_id)
+    audit.record(db, org_id=app_row.org_id, application_id=application_id,
+                 action="attended_observation_finished",
+                 detail={"family_id": family.family_id,
+                         "pages": out.get("pages"), "forms": out.get("forms"),
+                         "rebuilt": out.get("rebuilt")}, actor=p.user_id)
+    return dict(_observation_state(db, family, link, req), session=out)
+
+
 @app.post("/cases/{application_id}/find-consular-post")
 def case_find_consular_post(application_id: str, db=Depends(get_session),
                             p: Principal = Depends(get_principal)):
@@ -1634,12 +1786,19 @@ def case_appointment_booking(application_id: str, db=Depends(get_session),
         raise HTTPException(409, detail={"reason": "no_appointment_needed",
                                          "detail": "this route needs no appointment"})
     booked = assisted_booking.summary(db, app_row)
+    # Which government calendar Ellis can READ for this destination, so the
+    # UI only offers the German mission picker on a GERMANY case — it was
+    # rendering (and failing) on every in-person route (2026-08-02).
+    dest = (app_row.destination_country or "").strip().lower()
+    gov_cal = "rk_termin" if dest in ("deu", "germany", "de") else ""
     try:
         target = assisted_booking.booking_target(route)
     except assisted_booking.BookingUnavailable as e:
-        return {"bookable": False, "reason": str(e), "appointment": booked}
+        return {"bookable": False, "reason": str(e), "appointment": booked,
+                "gov_calendar": gov_cal}
     return {"bookable": True, "booking_url": target["url"],
-            "post_name": target["post_name"], "appointment": booked}
+            "post_name": target["post_name"], "appointment": booked,
+            "gov_calendar": gov_cal}
 
 
 @app.post("/cases/{application_id}/appointment-booking")

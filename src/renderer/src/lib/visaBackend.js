@@ -286,6 +286,15 @@ export function createVisaClient(session) {
     browserLiveView: (id) => call('GET', `/cases/${id}/browser-session/live-view`, session),
     closeBrowserSession: (id) => call('DELETE', `/cases/${id}/browser-session`, session),
 
+    // Attended observation: the applicant's own consented run teaches Ellis a
+    // portal whose form hides behind sign-in (or a human-only check). Ellis
+    // records page STRUCTURE only, and only under the versioned consent.
+    portalObservation: (id) => call('GET', `/cases/${id}/portal-observation`, session),
+    portalObservationConsent: (id) => call('POST', `/cases/${id}/portal-observation/consent`, session, {}),
+    portalObservationDecline: (id) => call('POST', `/cases/${id}/portal-observation/decline`, session, {}),
+    portalObservationStart: (id) => call('POST', `/cases/${id}/portal-observation/start`, session, {}),
+    portalObservationFinish: (id) => call('POST', `/cases/${id}/portal-observation/finish`, session, {}),
+
     // Standing authorization (§5): granted only inside the signature ceremony
     // (signAuthorization) — read and revoke are the applicant's actions here;
     // payment always stays a separate exact-amount approval.

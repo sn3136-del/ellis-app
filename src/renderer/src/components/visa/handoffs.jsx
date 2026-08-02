@@ -81,7 +81,11 @@ function SecureWindow({ live, label = 'secure portal window', onReconnect, recon
 // handoff that needs the applicant to act ON the official page (CAPTCHA, OTP,
 // portal form items, PAYMENT). The URL is short-lived and sensitive: it lives
 // only in component state, is refreshed before it expires, and is never logged.
-export function usePortalLiveView(client, caseId) {
+export function usePortalLiveView(client, caseId, opts = {}) {
+  // restore:false — surfaces where the APPLICANT drives (attended
+  // observation): a fresh window must stay wherever the flow points it, not
+  // queue a portal-rebuild run for a route Ellis cannot drive yet.
+  const restore = opts.restore !== false
   const [state, setState] = useState('connecting')  // connecting|embedded|unavailable|closed
   const [url, setUrl] = useState(null)
   const [nonce, setNonce] = useState(0)
@@ -93,7 +97,7 @@ export function usePortalLiveView(client, caseId) {
     setBusy(true)
     try {
       const s = await client.createBrowserSession(caseId)
-      if (s && s.fresh) {
+      if (s && s.fresh && restore) {
         // A brand-new session shows a blank page. Ask Ellis to rebuild the
         // portal view at the case's current step (background, reversible),
         // and keep the notice up until the run finishes so the applicant is
