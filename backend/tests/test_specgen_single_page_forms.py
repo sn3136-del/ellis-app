@@ -332,7 +332,18 @@ def test_canadas_gate_is_expressible_now():
     from app.global_routes.families import load_seed
     ca = next(f for f in load_seed() if f["family_id"] == "canada-ircc")
     acts = [a["action"] for a in ca["entry_gate"]["actions"]]
-    assert "WAIT_FOR_SELECTOR" in acts and acts.count("SELECT_OPTION") == 2
+    # The wizard is a CHAIN: each answer reveals the next question, and two of
+    # them are applicant-specific (citizenship, US permanent residence). The
+    # gate answers those with declared literals to reveal the form's structure
+    # in a session that submits nothing; at runtime the flow fills the
+    # applicant's real values from the passport they uploaded.
+    assert "WAIT_FOR_SELECTOR" in acts and acts.count("SELECT_OPTION") >= 3
+    sels = [a["selector"] for a in ca["entry_gate"]["actions"]]
+    assert any("countryOfCitizenship" in x for x in sels)
+    # A question only some nationalities see must be declared optional.
+    for a in ca["entry_gate"]["actions"]:
+        if "PermanentResident" in a["selector"]:
+            assert a.get("optional") is True
     # The form host must be the one probe URLs get built from.
     assert ca["hostnames"][0].startswith("eta.onlineservices")
     assert "#/application" in ca["entry_gate"]["expect_path"]

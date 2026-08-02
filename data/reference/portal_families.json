@@ -123,46 +123,74 @@
    ],
    "account_required": false,
    "entry_gate": {
-    "description": "Canada's eTA form is public: no account, no CAPTCHA. Reaching it means waiting out a REAL virtual waiting room (measured live 2026-08-02: 141s to clear) and then answering the eligibility wizard ONE question per page, each followed by Next. Options are chosen by VALUE, not label: isRepresentative is '0'=Yes, '1'=No, and labels are localised. The form is a hash route, so it cannot be a form_path and must be replayed.",
+    "description": "Canada's eTA form is public (no account, no CAPTCHA) behind a Virtual Waiting Room (measured live: 141s) and a chain of eligibility questions, each answer revealing the next. Two of them are applicant-specific (citizenship, US permanent residence). The gate answers them with DECLARED literals for the sole purpose of revealing the form's STRUCTURE in a throwaway observation session that submits nothing — at runtime the flow fills the applicant's real nationality, read from the passport they uploaded at intake, and their real answers. Recon sees one nationality's view of the form; if Canada varies its fields by nationality, that is a reason for an attended run, not for guessing.",
     "actions": [
      {
       "action": "WAIT_FOR_SELECTOR",
       "selector": "select#welcome_isRepresentative",
       "timeout_ms": 240000,
-      "purpose": "The virtual waiting room clears with no interaction; the first eligibility control becoming VISIBLE is the signal that it has."
+      "purpose": "The Virtual Waiting Room clears with no interaction; the first eligibility control becoming visible is the signal."
      },
      {
       "action": "SELECT_OPTION",
       "selector": "select#welcome_isRepresentative",
       "option_value": "1",
       "settle_ms": 2500,
-      "purpose": "'Are you applying on someone's behalf?' -> No (value '1'; '0' is Yes). Ellis files as the applicant, never as a paid agent."
+      "purpose": "'Applying on someone's behalf?' -> No (1; 0 is Yes). Ellis files as the applicant, never as a paid agent."
      },
      {
       "action": "CLICK",
       "selector": "button:has-text(\"Next\")",
       "timeout_ms": 45000,
-      "purpose": "The wizard shows one question per page; Next advances to the travel-document question."
+      "purpose": "Advance to the travel-document question."
      },
      {
       "action": "WAIT_FOR_SELECTOR",
       "selector": "select[name=\"travelDocumentType\"]",
       "timeout_ms": 60000,
-      "purpose": "Travel document type -> ordinary passport (value '0'; 1=diplomatic, 2=official, 3=service, 4=emergency). By VALUE, not label: the live label reads 'Passport - ordinary/regular' in lower case and is localised, so an exact-label match is brittle in two ways at once.",
-      "option_value": "0"
+      "purpose": "The document-type question renders."
      },
      {
       "action": "SELECT_OPTION",
       "selector": "select[name=\"travelDocumentType\"]",
-      "settle_ms": 2500,
-      "purpose": "Travel document type -> ordinary passport (value '0'; 1=diplomatic, 2=official, 3=service, 4=emergency). By VALUE, not label: the live label reads 'Passport - ordinary/regular' in lower case and is localised, so an exact-label match is brittle in two ways at once.",
-      "option_value": "0"
+      "option_value": "0",
+      "settle_ms": 3500,
+      "purpose": "Ordinary passport (0); 1-4 are diplomatic/official/service/emergency, which are different routes entirely."
+     },
+     {
+      "action": "WAIT_FOR_SELECTOR",
+      "selector": "select[name=\"countryOfCitizenship\"]",
+      "timeout_ms": 60000,
+      "purpose": "The citizenship question renders."
+     },
+     {
+      "action": "SELECT_OPTION",
+      "selector": "select[name=\"countryOfCitizenship\"]",
+      "option_value": "1",
+      "settle_ms": 4500,
+      "purpose": "RECON ONLY: a declared nationality that reveals the form's structure. Nothing is submitted here. At runtime the flow fills the applicant's real citizenship from their uploaded passport."
+     },
+     {
+      "action": "WAIT_FOR_SELECTOR",
+      "selector": "select[name=\"isPermanentResidentOfUSAndHaveProofOfPermResidence\"]",
+      "timeout_ms": 60000,
+      "optional": true,
+      "purpose": "A follow-up question for some nationalities; optional because it does not appear for all."
+     },
+     {
+      "action": "SELECT_OPTION",
+      "selector": "select[name=\"isPermanentResidentOfUSAndHaveProofOfPermResidence\"]",
+      "option_value": "1",
+      "settle_ms": 5000,
+      "optional": true,
+      "purpose": "RECON ONLY: declared 'No' so the wizard proceeds to the form. At runtime this is the applicant's own answer."
      }
     ],
     "expect_path": "/eta/#/application",
     "form_ready_selector": "input[name=\"passportNumber\"]",
     "declared_handoffs": []
-   }
+   },
+   "notes": "Driven live 2026-08-02. The eTA form is public (no account, no CAPTCHA) but it is APPLICANT-CONDITIONAL: after 'are you a representative' and the travel-document type, the wizard asks countryOfCitizenship, and the 34-field form renders only once that is answered. A curated entry gate cannot answer it — SELECT_OPTION takes declared literals only and refuses value_from by design, because a gate must never carry a person into a throwaway observation session. So credential-free recon can reach the wizard but not the form. Canada belongs on the attended-observation path: one consented applicant run reveals the form for their nationality and teaches Ellis the structure. Also note the Virtual Waiting Room, measured at 141s to clear."
   },
   {
    "family_id": "uk-eta",
@@ -2168,7 +2196,7 @@
     "ENTRY_PREPARATION"
    ],
    "account_required": false,
-   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model.",
+   "notes": "Driven live 2026-08-02. One click from the landing page reaches the step-1 form and 8-11 fields are observed, but the inputs carry NO name, no stable attribute and only React-generated ids containing an epoch stamp (#spi_nationality_1785693541603 — regenerated every page load), so the only selector left is a deep CSS path that cannot re-verify in a second session. Ellis refuses to release on selectors it knows are unstable. Needs either a label-anchored selector strategy or an attended run.",
    "entry_gate": {
     "description": "One click from the landing page to the step-1 applicant form: no consent gate, no interstitial, no Start button. The two language-picker steps seen during recon are deliberately OMITTED - they are optional, the traveller-type card is chosen positionally so language does not affect reachability, and the 'English' row selector matches all 7 language rows (only a text filter disambiguates it, which the replay vocabulary does not do). A cold direct load of /arrival-card-submission/personal-information was never verified, so no form_path is curated. Gate replay starts at base_url, which must be the landing page https://allindonesia.imigrasi.go.id/.",
     "actions": [

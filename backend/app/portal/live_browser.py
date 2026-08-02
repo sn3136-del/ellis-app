@@ -601,8 +601,20 @@ class LiveBrowserSession:
                     # never the applicant's — families.py refuses value_from at
                     # seed load, so nothing personal can reach this session.
                     loc = page.locator(sel).first
-                    loc.wait_for(state="attached",
-                                 timeout=int(a.get("timeout_ms") or 30000))
+                    try:
+                        loc.wait_for(state="visible",
+                                     timeout=int(a.get("timeout_ms") or 30000))
+                    except Exception as e:  # noqa: BLE001
+                        # A question the portal only asks SOME nationalities is
+                        # declared optional; its absence is the portal being
+                        # itself, not a broken gate.
+                        if a.get("optional"):
+                            performed.append({"action": act, "selector": sel,
+                                              "ok": True, "skipped": "not_shown"})
+                            continue
+                        return {"ok": False, "status": status, "url": page.url,
+                                "error": f"entry gate SELECT_OPTION target "
+                                         f"{sel[:60]!r} never appeared: {str(e)[:100]}"}
                     self._assert_gate_target_safe(loc, "SELECT_OPTION", sel)
                     try:
                         if a.get("option_value"):
