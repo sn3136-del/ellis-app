@@ -49,6 +49,19 @@ def applies_to(route_outcome: str) -> bool:
     return (route_outcome or "") in IN_PERSON_OUTCOMES
 
 
+# A requirement counts as met only when the applicant EXPLICITLY submitted a
+# document against it — a merely-bound or auto-detected file is not their
+# confirmation, and the post will ask for anything they did not stand behind.
+FULFILLED_STATUSES = {"submitted", "fulfilled", "satisfied", "accepted", "complete"}
+
+
+def _is_fulfilled(item: dict) -> bool:
+    if str(item.get("status") or "").lower() in FULFILLED_STATUSES:
+        return True
+    binding = item.get("binding") or {}
+    return bool(binding.get("submitted"))
+
+
 def _post_lines(jurisdiction: dict | None) -> list[str]:
     """Where the applicant must go. Never guessed: an unresolved jurisdiction
     is stated as unresolved, with what Ellis needs to resolve it."""
@@ -92,8 +105,12 @@ def build(*, applicant_name: str, destination: str, route: dict,
     what should be in the folder and what is still missing."""
     route = route or {}
     outcome = route.get("route_outcome") or ""
+    # A checklist item carries its own live status ('submitted' once the
+    # applicant has explicitly fulfilled it); anything else is still owed.
+    # Reading a 'satisfied' flag that does not exist told applicants every
+    # document was missing while the folder contained them.
     missing_docs = [i.get("label") or i.get("id") for i in (checklist or [])
-                    if i.get("required", True) and not i.get("satisfied")]
+                    if i.get("required", True) and not _is_fulfilled(i)]
     have_docs = [d for d in (documents or []) if not d.get("rejected")]
     missing_fields = list((form_prepared or {}).get("missing_required") or [])
 
