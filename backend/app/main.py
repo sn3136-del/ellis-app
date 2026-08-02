@@ -1389,7 +1389,7 @@ _JURISDICTION_ANSWER_KEYS = ("address_city", "address_region", "address_country"
                              "lawful_country_of_residence", "residence_subdivision")
 
 
-def _find_post_for_case(db, app_row) -> dict:
+def _find_post_for_case(db, app_row, *, attempts: int = 1) -> dict:
     """Look up the consular post that serves this applicant, from the address
     they gave. Verified answers are cached as a jurisdiction rule, so the same
     residence never pays for the search twice."""
@@ -1417,7 +1417,7 @@ def _find_post_for_case(db, app_row) -> dict:
                    or answers.get("address_country") or ""),
         address_city=answers.get("address_city") or "",
         address_region=answers.get("address_region") or "",
-        fetch_page=fetch_page)
+        fetch_page=fetch_page, attempts=attempts)
 
 
 def _schedule_consular_lookup(application_id: str, org_id: str) -> None:
@@ -1443,7 +1443,7 @@ def _schedule_consular_lookup(application_id: str, org_id: str) -> None:
                 return
             if (route.get("jurisdiction") or {}).get("status") == "verified":
                 return          # already known for this residence — no re-search
-            _find_post_for_case(db, row)
+            _find_post_for_case(db, row, attempts=2)
         except Exception:  # noqa: BLE001 — a background search never surfaces
             pass              # as an error on the applicant's save
         finally:

@@ -207,13 +207,18 @@ Reply JSON:
 
 def find_post_for_applicant(*, destination: str, residence: str,
                             address_city: str = "", address_region: str = "",
-                            timeout_s: float = 55.0) -> dict:
-    """Ask Kimi which post serves THIS applicant, within a one-minute budget.
+                            timeout_s: float = 55.0, attempts: int = 1) -> dict:
+    """Ask Kimi which post serves THIS applicant, within a bounded budget.
 
     Called when the applicant gives Ellis their address, so the answer is
     specific to where they actually live rather than a country-wide guess. The
     model's answer is a CANDIDATE only: it is put through the same verification
     as any researched claim before it can become a usable booking link.
+
+    attempts > 1 retries a TIMEOUT (never a refusal or a rate limit): measured
+    live, a reasoning search lands in ~20-45s but overruns for some routes, and
+    one retry turns those from "we could not find your office" into an answer.
+    Only the background path should retry — nobody is waiting on it.
     """
     from .config import settings
     s = settings()
@@ -224,21 +229,29 @@ def find_post_for_applicant(*, destination: str, residence: str,
             f"They are applying for a visa to: {destination}\n"
             f"Which consular post must they attend, and where do they book it?")
     from .providers.kimi import LiveKimiProvider, KimiTimeout, KimiHttpError
-    try:
-        out = LiveKimiProvider()._chat(FIND_POST_SYSTEM, user, timeout=timeout_s)
-    except KimiTimeout:
-        return {"found": False, "reason": "search timed out"}
-    except (KimiHttpError, Exception) as e:  # noqa: BLE001 — never crash intake
-        return {"found": False, "reason": f"search failed: {str(e)[:80]}"}
-    if not isinstance(out, dict) or not out.get("found"):
-        return {"found": False, "reason": (out or {}).get("why")
-                or "no official answer found"}
-    return out
+    last = {"found": False, "reason": "search timed out"}
+    for attempt in range(max(1, attempts)):
+        try:
+            out = LiveKimiProvider()._chat(FIND_POST_SYSTEM, user, timeout=timeout_s)
+        except KimiTimeout:
+            last = {"found": False, "reason": "search timed out"}
+            continue                       # a slow route deserves one more try
+        except KimiHttpError as e:
+            # Rate limited or refused: retrying immediately only makes it worse.
+            return {"found": False, "reason": f"search unavailable ({e})"}
+        except Exception as e:  # noqa: BLE001 — never crash intake
+            return {"found": False, "reason": f"search failed: {str(e)[:80]}"}
+        if not isinstance(out, dict) or not out.get("found"):
+            return {"found": False, "reason": (out or {}).get("why")
+                    or "no official answer found"}
+        return out
+    return last
 
 
 def resolve_for_applicant(db, *, destination: str, residence: str,
                           address_city: str = "", address_region: str = "",
-                          fetch_page=None, timeout_s: float = 55.0) -> dict:
+                          fetch_page=None, timeout_s: float = 55.0,
+                          attempts: int = 1) -> dict:
     """The full on-demand path: search, then VERIFY before storing.
 
     fetch_page(url) -> (final_url, text, links) lets the caller corroborate the
@@ -248,7 +261,7 @@ def resolve_for_applicant(db, *, destination: str, residence: str,
     """
     found = find_post_for_applicant(
         destination=destination, residence=residence, address_city=address_city,
-        address_region=address_region, timeout_s=timeout_s)
+        address_region=address_region, timeout_s=timeout_s, attempts=attempts)
     if not found.get("found"):
         return {"status": "not_found", "reason": found.get("reason", "")}
 
