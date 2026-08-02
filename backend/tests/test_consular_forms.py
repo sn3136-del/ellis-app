@@ -288,3 +288,50 @@ def test_ds160_says_it_is_online_only_and_self_signed():
     assert "only online" in note
     assert "penalty of perjury" in note
     assert "yourself" in note or "only you" in note
+
+
+# --- destinations that abolished the paper form ----------------------------
+
+def test_the_big_online_destinations_all_have_a_preparation_sheet():
+    """China moved to COVA, the UK to gov.uk, India to indianvisaonline — none
+    of them has a blank PDF left to fill. What Ellis can give is every answer
+    in the portal's own screen order."""
+    from app import consular_forms as cf
+    assert cf.form_for_destination("CHN") == "china_cova_prep"
+    assert cf.form_for_destination("GBR") == "uk_online_prep"
+    assert cf.form_for_destination("IND") == "india_online_prep"
+    for key in ("china_cova_prep", "uk_online_prep", "india_online_prep"):
+        assert len(cf.FORMS[key]["fields"]) >= 25
+        assert cf.FORMS[key]["submission"] == "applicant_online"
+
+
+def test_each_online_sheet_says_it_is_online_and_self_declared():
+    """The applicant must not think Ellis submitted it, and must know the
+    declaration is theirs."""
+    from app import consular_forms as cf
+    for key, host in (("china_cova_prep", "cova"),
+                      ("uk_online_prep", "gov.uk"),
+                      ("india_online_prep", "indianvisaonline")):
+        note = cf.FORMS[key]["note"].lower()
+        assert host in note, f"{key} should name where to apply"
+        assert "you" in note
+
+
+def test_online_sheets_follow_the_portals_own_screen_order():
+    """Sections are grouped the way the site asks for them, so each screen
+    fills in one pass rather than sending the applicant hunting."""
+    from app import consular_forms as cf
+    for key, expected in (
+            ("china_cova_prep", {"Section 1", "Section 2", "Section 3"}),
+            ("uk_online_prep", {"About you", "Passport", "Contact", "Travel"}),
+            ("india_online_prep", {"Applicant Details", "Passport Details",
+                                   "Visa Details"})):
+        sections = {l.split(" - ")[0] for l, _, _ in cf.FORMS[key]["fields"]}
+        assert expected <= sections, f"{key} missing {expected - sections}"
+
+
+def test_no_online_sheet_pretends_an_official_blank_exists():
+    from app import consular_forms as cf
+    for key in ("china_cova_prep", "uk_online_prep", "india_online_prep"):
+        assert cf.official_template_available(key) is False
+        assert cf.fill_official_template(key, {"surname": "X"}) is None

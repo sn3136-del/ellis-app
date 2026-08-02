@@ -131,6 +131,120 @@ DS160_PREP = [
 # one, would invite someone to click through the most consequential screen of
 # the form. Ellis states plainly that the applicant answers those themselves.
 
+# Three of the world's highest-volume destinations moved their application
+# ONLINE and abolished the paper form entirely: China to COVA, the UK to
+# gov.uk, India to indianvisaonline. There is no blank PDF to fill for any of
+# them — so Ellis does what it does for the DS-160: prepares every value in the
+# order the portal's own screens ask for it, and the applicant transcribes a
+# completed sheet instead of hunting through their documents.
+
+CHINA_COVA_PREP = [
+    ("Section 1 - Surname (as in passport)", "surname", True),
+    ("Section 1 - Given names (as in passport)", "given_names", True),
+    ("Section 1 - Name in Chinese characters (if any)", "full_name_native", False),
+    ("Section 1 - Sex", "sex", True),
+    ("Section 1 - Date of birth", "birth_date", True),
+    ("Section 1 - Place of birth (city, country)", "place_of_birth", True),
+    ("Section 1 - Current nationality", "nationality", True),
+    ("Section 1 - Marital status", "marital_status", True),
+    ("Section 1 - National identity number", "national_id", False),
+    ("Section 2 - Passport number", "passport_number", True),
+    ("Section 2 - Passport issue date", "passport_issue_date", True),
+    ("Section 2 - Passport expiry date", "passport_expiry_date", True),
+    ("Section 2 - Passport issuing authority/country", "issuing_country", True),
+    ("Section 2 - Current occupation", "occupation", True),
+    ("Section 2 - Employer / school name", "employer", False),
+    ("Section 2 - Employer / school address", "employer_address", False),
+    ("Section 2 - Home address", "address_line1", True),
+    ("Section 2 - City", "address_city", True),
+    ("Section 2 - Country", "address_country", True),
+    ("Section 2 - Mobile phone", "phone", True),
+    ("Section 2 - Email", "email", True),
+    ("Section 3 - Major purpose of visit", "travel_purpose", True),
+    ("Section 3 - Intended date of entry", "arrival_date", True),
+    ("Section 3 - Intended longest stay (days)", "days_of_stay", False),
+    ("Section 3 - Itinerary / where you will stay in China",
+     "accommodation", True),
+    ("Section 3 - Address in China", "accommodation_address", False),
+    ("Section 3 - Who is paying for the trip", "trip_payer", False),
+    ("Section 4 - Emergency contact name", "emergency_contact_name", False),
+    ("Section 4 - Emergency contact phone", "emergency_contact_phone", False),
+]
+
+UK_ONLINE_PREP = [
+    ("About you - Given names (as in passport)", "given_names", True),
+    ("About you - Family name (as in passport)", "surname", True),
+    ("About you - Sex", "sex", True),
+    ("About you - Relationship status", "marital_status", True),
+    ("About you - Date of birth", "birth_date", True),
+    ("About you - Country of birth", "country_of_birth", True),
+    ("About you - Place of birth", "place_of_birth", True),
+    ("About you - Nationality", "nationality", True),
+    ("Passport - Passport number", "passport_number", True),
+    ("Passport - Issuing authority/country", "issuing_country", True),
+    ("Passport - Date of issue", "passport_issue_date", True),
+    ("Passport - Date of expiry", "passport_expiry_date", True),
+    ("Contact - Home address", "address_line1", True),
+    ("Contact - City/town", "address_city", True),
+    ("Contact - Postal code", "address_postal_code", False),
+    ("Contact - Country", "address_country", True),
+    ("Contact - Telephone number", "phone", True),
+    ("Contact - Email address", "email", True),
+    ("Travel - Reason for visiting the UK", "travel_purpose", True),
+    ("Travel - Date you plan to arrive", "arrival_date", True),
+    ("Travel - Date you plan to leave", "departure_date", True),
+    ("Travel - Where you will stay in the UK", "accommodation", True),
+    ("Travel - Address where you will stay", "accommodation_address", False),
+    ("Money - Your job title", "occupation", False),
+    ("Money - Employer name", "employer", False),
+    ("Money - Employer address", "employer_address", False),
+    ("Money - Your monthly income", "monthly_income", False),
+    ("Money - Who is paying for this trip", "trip_payer", False),
+    ("Family - Father's given names", "father_given_names", False),
+    ("Family - Father's family name", "father_surname", False),
+    ("Family - Mother's given names", "mother_given_names", False),
+    ("Family - Mother's family name", "mother_surname", False),
+]
+
+INDIA_ONLINE_PREP = [
+    ("Applicant Details - Surname", "surname", True),
+    ("Applicant Details - Given name(s)", "given_names", True),
+    ("Applicant Details - Date of birth", "birth_date", True),
+    ("Applicant Details - Town/city of birth", "place_of_birth", True),
+    ("Applicant Details - Country of birth", "country_of_birth", True),
+    ("Applicant Details - Citizenship/national ID number", "national_id", False),
+    ("Applicant Details - Nationality", "nationality", True),
+    ("Applicant Details - Sex", "sex", True),
+    ("Applicant Details - Marital status", "marital_status", True),
+    ("Passport Details - Passport number", "passport_number", True),
+    ("Passport Details - Place of issue", "issuing_country", True),
+    ("Passport Details - Date of issue", "passport_issue_date", True),
+    ("Passport Details - Date of expiry", "passport_expiry_date", True),
+    ("Applicant Address - House no./street", "address_line1", True),
+    ("Applicant Address - City", "address_city", True),
+    ("Applicant Address - State/province", "address_region", False),
+    ("Applicant Address - Postal code", "address_postal_code", False),
+    ("Applicant Address - Country", "address_country", True),
+    ("Applicant Address - Phone", "phone", True),
+    ("Applicant Address - Email", "email", True),
+    ("Family Details - Father's name", "father_given_names", False),
+    ("Family Details - Father's nationality", "father_nationality", False),
+    ("Family Details - Mother's name", "mother_given_names", False),
+    ("Family Details - Spouse's name (if married)", "spouse_full_name", False),
+    ("Profession - Present occupation", "occupation", True),
+    ("Profession - Employer name", "employer", False),
+    ("Profession - Employer address", "employer_address", False),
+    ("Visa Details - Type of visa / purpose", "travel_purpose", True),
+    ("Visa Details - Expected date of arrival", "arrival_date", True),
+    ("Visa Details - Expected date of departure", "departure_date", False),
+    ("Visa Details - Duration of visa (days)", "days_of_stay", False),
+    ("Visa Details - Places to be visited", "accommodation", False),
+    ("Previous Visit - Have you visited India before?", "been_to_india_before", False),
+    ("Reference in India - Name", "india_reference_name", False),
+    ("Reference in India - Address", "india_reference_address", False),
+    ("Reference in India - Phone", "india_reference_phone", False),
+]
+
 FORMS = {
     "schengen_uniform": {
         "title": "Schengen Uniform Visa Application",
@@ -140,6 +254,35 @@ FORMS = {
                  "bring it to your appointment with your passport, photo and "
                  "supporting documents. Ellis cannot submit a Schengen visa "
                  "application: it is decided in person, with biometrics."),
+    },
+    "china_cova_prep": {
+        "title": "China Visa (COVA) Preparation Sheet",
+        "fields": CHINA_COVA_PREP,
+        "submission": "applicant_online",
+        "note": ("Fill these into COVA at cova.cs.mfa.gov.cn, then print the "
+                 "completed form it generates and take it to the visa centre "
+                 "with your passport and photo. China abolished the paper "
+                 "form: COVA generates the only version a consulate accepts, "
+                 "so Ellis prepares your answers rather than a form."),
+    },
+    "uk_online_prep": {
+        "title": "UK Visa Online Application Preparation Sheet",
+        "fields": UK_ONLINE_PREP,
+        "submission": "applicant_online",
+        "note": ("Apply at gov.uk and copy these values into the matching "
+                 "screens. You then attend a visa application centre for "
+                 "fingerprints and a photograph only — the application itself "
+                 "is already submitted online by then. Ellis never submits it "
+                 "for you: you declare its truth as you send it."),
+    },
+    "india_online_prep": {
+        "title": "India e-Visa / Regular Visa Preparation Sheet",
+        "fields": INDIA_ONLINE_PREP,
+        "submission": "applicant_online",
+        "note": ("Apply at indianvisaonline.gov.in and copy these values into "
+                 "the matching sections. Save your temporary application ID "
+                 "at every step — the site times out and loses unsaved work. "
+                 "You sign the declaration yourself when you submit."),
     },
     "ds160_prep": {
         "title": "US DS-160 Preparation Sheet",
@@ -170,9 +313,10 @@ def form_for_destination(dest_iso3: str) -> str | None:
     d = (dest_iso3 or "").upper()
     if d in _SCHENGEN:
         return "schengen_uniform"
-    if d == "USA":
-        return "ds160_prep"
-    return None
+    # Destinations that abolished the paper form: what Ellis can give is a
+    # complete set of answers in the portal's own screen order.
+    return {"USA": "ds160_prep", "CHN": "china_cova_prep",
+            "GBR": "uk_online_prep", "IND": "india_online_prep"}.get(d)
 
 
 BLANK = "________________________"
