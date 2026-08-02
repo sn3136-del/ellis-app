@@ -565,8 +565,15 @@ class LiveBrowserSession:
                     # waiting room ("You're in line to apply") in front of the
                     # form, and the queue clears without any interaction.
                     try:
+                        # VISIBLE, not merely attached: a queued or
+                        # not-yet-hydrated page can carry the control in its
+                        # DOM while it is still unusable, and "attached" would
+                        # release the wait into a select_option that then times
+                        # out. Canada's queue took 141s to clear on a live
+                        # measurement, and the control became visible exactly
+                        # when it did.
                         page.locator(sel).first.wait_for(
-                            state="attached",
+                            state="visible",
                             timeout=int(a.get("timeout_ms") or 120000))
                         ok = True
                     except Exception as e:  # noqa: BLE001

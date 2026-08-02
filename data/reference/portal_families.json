@@ -123,31 +123,45 @@
    ],
    "account_required": false,
    "entry_gate": {
-    "description": "Canada's eTA form (34 fields) is public: no account, no CAPTCHA. Reaching it needs three declared <select> answers and a wait for the virtual waiting room ('You're in line to apply'), which clears on its own. Mapped live 2026-08-02; the destination is a hash route, so it cannot be a form_path and must be replayed.",
+    "description": "Canada's eTA form is public: no account, no CAPTCHA. Reaching it means waiting out a REAL virtual waiting room (measured live 2026-08-02: 141s to clear) and then answering the eligibility wizard ONE question per page, each followed by Next. Options are chosen by VALUE, not label: isRepresentative is '0'=Yes, '1'=No, and labels are localised. The form is a hash route, so it cannot be a form_path and must be replayed.",
     "actions": [
      {
       "action": "WAIT_FOR_SELECTOR",
       "selector": "select#welcome_isRepresentative",
-      "timeout_ms": 180000,
-      "purpose": "The virtual waiting room holds the entry for a bounded time and clears with no interaction; the first real control appearing is the signal that it has."
+      "timeout_ms": 240000,
+      "purpose": "The virtual waiting room clears with no interaction; the first eligibility control becoming VISIBLE is the signal that it has."
      },
      {
       "action": "SELECT_OPTION",
       "selector": "select#welcome_isRepresentative",
-      "option_value": "no",
-      "purpose": "'Are you a representative applying on someone's behalf?' — No. Ellis files as the applicant, never as a paid agent, so this answer is a property of the route, not of the person."
+      "option_value": "1",
+      "settle_ms": 2500,
+      "purpose": "'Are you applying on someone's behalf?' -> No (value '1'; '0' is Yes). Ellis files as the applicant, never as a paid agent."
+     },
+     {
+      "action": "CLICK",
+      "selector": "button:has-text(\"Next\")",
+      "timeout_ms": 45000,
+      "purpose": "The wizard shows one question per page; Next advances to the travel-document question."
+     },
+     {
+      "action": "WAIT_FOR_SELECTOR",
+      "selector": "select[name=\"travelDocumentType\"]",
+      "timeout_ms": 60000,
+      "purpose": "The document-type question renders on the page Next opened."
      },
      {
       "action": "SELECT_OPTION",
       "selector": "select[name=\"travelDocumentType\"]",
       "option_label": "Passport - Ordinary/Regular",
-      "purpose": "Travel document type. Ordinary passport is the tourist route Ellis serves; a diplomatic or refugee document is a different route with different rules and must not be assumed here."
+      "settle_ms": 2500,
+      "purpose": "Ordinary passport is the tourist route Ellis serves; a diplomatic or refugee document is a different route with different rules and must never be assumed here."
      },
      {
       "action": "CLICK",
-      "selector": "button[type=\"submit\"]",
+      "selector": "button:has-text(\"Next\")",
       "timeout_ms": 45000,
-      "purpose": "Advance from the eligibility questions to the application form itself."
+      "purpose": "Advance from the eligibility wizard into the application form."
      }
     ],
     "expect_path": "/eta/#/application",
