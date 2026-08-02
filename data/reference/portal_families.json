@@ -2127,7 +2127,21 @@
     "ENTRY_PREPARATION"
    ],
    "account_required": false,
-   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model.",
+   "entry_gate": {
+    "description": "One click from the landing page to the step-1 applicant form: no consent gate, no interstitial, no Start button. The two language-picker steps seen during recon are deliberately OMITTED - they are optional, the traveller-type card is chosen positionally so language does not affect reachability, and the 'English' row selector matches all 7 language rows (only a text filter disambiguates it, which the replay vocabulary does not do). A cold direct load of /arrival-card-submission/personal-information was never verified, so no form_path is curated. Gate replay starts at base_url, which must be the landing page https://allindonesia.imigrasi.go.id/.",
+    "actions": [
+     {
+      "action": "CLICK",
+      "selector": "div[style*=\"grid-template-columns\"] > div.fade-in-up:nth-child(2)",
+      "purpose": "'Foreign Visitor' / 'Pengunjung Asing' on the traveller-type chooser. There is exactly ONE grid container on the landing page and it holds 3 cards: nth-child(1)=Indonesian Citizen / Warga Negara Indonesia, nth-child(2)=Foreign Visitor / Pengunjung Asing, nth-child(3)=Retrieve Arrival Card / Ambil Kartu Kedatangan. The card is a plain div with inline style cursor:pointer (no <a>, no <button>, no href) so it must be clicked, not navigated. Cards fade in (opacity 0 -> 1) on mount, so the click needs the settle pass the observer already performs. This single click lands directly on the step-1 applicant form.",
+      "timeout_ms": 45000
+     }
+    ],
+    "declared_handoffs": [],
+    "expect_path": "/arrival-card-submission/personal-information",
+    "form_ready_selector": "input[id^=\"spi_passport_no_\"]"
+   }
   },
   {
    "family_id": "india-earrival",
@@ -2146,7 +2160,10 @@
     "ENTRY_PREPARATION"
    ],
    "account_required": false,
-   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model.",
+   "form_paths": [
+    "/earrival/"
+   ]
   },
   {
    "family_id": "china-arrival-card",
@@ -2165,7 +2182,27 @@
     "ENTRY_PREPARATION"
    ],
    "account_required": false,
-   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model.",
+   "entry_gate": {
+    "description": "Element-UI SPA. https://s.nia.gov.cn/ArrivalCardFillingPC/ routes client-side to /ArrivalCardFillingPC/entry-registation-home, which offers two declaration cards, then an instructions/exemptions notice with a single I AGREE acknowledgment, then the form at /ArrivalCardFillingPC/entry-registation-form. The form path was reached ONLY through this click path; a cold direct load of the form route was not verified, so it is deliberately NOT curated as a form_path (an unverified path would only send recon into a route guard).",
+    "actions": [
+     {
+      "action": "CLICK",
+      "selector": ".page-container ul li:nth-child(1) .card-left",
+      "purpose": "'Entry Declaration' - card 1, the general foreigner arrival card. Card 2 is 'Entry Declaration for Border Area Residents' (DPRK/Mongolia/Pakistan/Nepal/Myanmar/Laos/Vietnam border-resident permit holders only) and must NOT be picked; bare '.card-left' matches 2 elements, so the li:nth-child(1) qualifier is what makes this unique. Navigates to /ArrivalCardFillingPC/entry-registation-notice.",
+      "timeout_ms": 45000
+     },
+     {
+      "action": "CLICK",
+      "selector": "button.el-button--primary",
+      "purpose": "'I AGREE' on the instructions / exemptions notice page - an informational acknowledgment, not a terms signature. Full class list is 'el-button btn el-button--primary el-button--small is-round'; the label is a <span>I AGREE</span>, so the button must be the target, not the span. The notice page contains exactly 1 <button> in total, so this is unambiguous there ('.el-button.btn.el-button--primary' is an equally unique alternative). Navigates to /ArrivalCardFillingPC/entry-registation-form; allow ~2s.",
+      "timeout_ms": 45000
+     }
+    ],
+    "declared_handoffs": [],
+    "expect_path": "/ArrivalCardFillingPC/entry-registation-form",
+    "form_ready_selector": "input.el-upload__input[name=\"file\"]"
+   }
   },
   {
    "family_id": "vietnam-prearrival",
@@ -2224,7 +2261,39 @@
     "ENTRY_PREPARATION"
    ],
    "account_required": false,
-   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model.",
+   "entry_gate": {
+    "description": "Hash-routed Angular SPA (app.travellerdeclaration.govt.nz/#/...), so the form has NO directly-loadable path and MUST be reached by replay. Verified live 2026-08-02: landing #/ -> New declaration -> #/intro -> Start your declaration -> #/privacy -> tick the privacy route-guard flag -> Next -> #/onboarding (4 applicant fields, first is input[name=\"contactEmail\"]). Deep-linking past #/privacy redirects back to #/, so the checkbox step cannot be skipped. Gate replay starts at the family base_url, which must be https://app.travellerdeclaration.govt.nz/ (the landing route).",
+    "actions": [
+     {
+      "action": "CLICK",
+      "selector": "button[mat-flat-button][color=\"primary\"]",
+      "purpose": "'New declaration' on the landing page: leaves #/ for the declaration intro. The landing page has 3 buttons (New declaration, Edit declaration, Select language); Edit declaration is mat-button not mat-flat-button and Select language is color=link, so this selector resolves to exactly 1 element. No id, data-testid or formcontrolname exists on this control. Allow ~900ms of SPA routing after the click.",
+      "timeout_ms": 45000
+     },
+     {
+      "action": "CLICK",
+      "selector": "button[name=\"getStarted\"]",
+      "purpose": "'Start your declaration': advances #/intro -> #/privacy. Stable name attribute. Do NOT use the sibling button[name=\"completeOnBehalfOf\"] ('Start a declaration for someone else', href #/privacy-onbehalf) which forks into a different route family. Allow ~900ms of SPA routing after the click.",
+      "timeout_ms": 45000
+     },
+     {
+      "action": "CHECK",
+      "selector": "input[name=\"legalAgreements\"]",
+      "purpose": "Privacy acknowledgment on #/privacy: 'I have read and understood the privacy policy, and understand how my personal information is being collected and used.' Mandatory client-side route-guard flag - Next stays disabled until it is ticked and deep-linking past #/privacy bounces to #/. Verified purely client-side: resource count 88 before and 88 after, zero network requests, no record created. Angular Material MDC checkbox: the id is the auto-generated mat-mdc-checkbox-0-input, so match on the stable name; check the native input so Angular change detection fires (its painted label is label[for=\"mat-mdc-checkbox-0-input\"], usable as a fallback if the native control ever reports 0x0).",
+      "timeout_ms": 45000
+     },
+     {
+      "action": "CLICK",
+      "selector": "button[color=\"primary\"]",
+      "purpose": "'Next': advances #/privacy -> #/onboarding, the first real applicant form. On #/privacy this selector resolves to exactly 1 element. It is disabled until the previous CHECK lands, so a failure here means the checkbox did not take.",
+      "timeout_ms": 45000
+     }
+    ],
+    "declared_handoffs": [],
+    "expect_path": "/#/onboarding",
+    "form_ready_selector": "input[name=\"contactEmail\"]"
+   }
   },
   {
    "family_id": "southafrica-sars-traveller",
@@ -2262,7 +2331,21 @@
     "ENTRY_PREPARATION"
    ],
    "account_required": false,
-   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model.",
+   "entry_gate": {
+    "description": "Angular SPA. /datosPersonales is reached ONLY by the Angular handler ShowApplicationPage() (sets editMode=false, then router.navigate(['/datosPersonales/'])) - the control is an <a> with NO href, the transition is pure client-side routing measured at 44ms with no network round trip, and a cold direct load of /datosPersonales was never verified, so no form_path is curated. The two language-picker steps from recon are OMITTED: they are optional (formcontrolname values are identical in every language) and the 'English' row selector button.boton-idioma matches all 7 language buttons, which only a text filter disambiguates. Gate replay starts at base_url https://dviajeros.mitrans.gob.cu/, which serves /inicio.",
+    "actions": [
+     {
+      "action": "CLICK",
+      "selector": "a.btn.btn-primary.button.display-4.mr-3.mb-2",
+      "purpose": "'Crear Formulario' (English: Create Form) on /inicio - the only required click. Verified by count: this resolves to exactly 1 element. Do NOT shorten it: a.btn.btn-primary.button.display-4 matches 4 elements on /inicio (Crear Formulario, Editar Formulario, Beneficios PDF, Descargar manual PDF) and a.btn.btn-primary.button also matches 4; the .mr-3.mb-2 pair is what makes it unique. Lands on /datosPersonales (13 fields).",
+      "timeout_ms": 45000
+     }
+    ],
+    "declared_handoffs": [],
+    "expect_path": "/datosPersonales",
+    "form_ready_selector": "input[formcontrolname=\"pasaporte\"]"
+   }
   },
   {
    "family_id": "trinidad-adc",
@@ -2281,7 +2364,42 @@
     "ENTRY_PREPARATION"
    ],
    "account_required": false,
-   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model.",
+   "form_paths": [
+    "/en/create"
+   ],
+   "entry_gate": {
+    "description": "The form URL /en/create IS directly loadable (curated as a form_path so recon can observe it), but it renders only the traveller-type chooser until two SegmentedControl answers are given - the real applicant fields (Airline, Flight Number, Country of Departure, Port of Departure, Intended Date of Arrival) appear only after Non-Citizen + Air. The gate therefore replays the whole path from the family base_url https://travel.gov.tt/ (landing -> modal -> /en/create -> Non-Citizen -> Air) so the observed artifact contains real fields. Steps 1-2 are the modal route and are skippable for anyone starting at /en/create; they are included because the gate replay always starts at base_url. Mantine SegmentedControl needs a REAL pointer event (Playwright locator.click), never a synthetic element.click() or a blind coordinate press.",
+    "actions": [
+     {
+      "action": "CLICK",
+      "selector": "button.bg-\\[\\#C8102E\\]",
+      "purpose": "'Get Started' on https://travel.gov.tt/en - opens the Mantine options modal. No URL change occurs. Skippable only if navigation starts at /en/create.",
+      "timeout_ms": 45000
+     },
+     {
+      "action": "CLICK",
+      "selector": "a[href=\"/en/create\"]",
+      "purpose": "'NEW ARRIVAL / Create a new Immigration and Customs form' - a plain anchor inside the open modal; navigates to the arrival (Immigration and Customs) form. Sibling options are a[href=\"/en/search\"], a[href=\"/en/departure\"], a[href=\"/en/search/departure\"], so the exact href is what keeps this on the arrival path.",
+      "timeout_ms": 45000
+     },
+     {
+      "action": "CLICK",
+      "selector": "label[for$=\"-NON-CITIZEN\"]",
+      "purpose": "Traveller-type chooser on step 1 (Arrival); reveals the entry-mode question. Verify input[type=radio][value=\"NON-CITIZEN\"].checked === true afterwards.",
+      "timeout_ms": 45000
+     },
+     {
+      "action": "CLICK",
+      "selector": "label[for$=\"-AIR\"]",
+      "purpose": "Entry-mode chooser; reveals the real applicant fields plus the 'Next step' button (button.bg-blue-500, 1 match). Allow ~3s for the progressive disclosure before the snapshot.",
+      "timeout_ms": 45000
+     }
+    ],
+    "declared_handoffs": [],
+    "expect_path": "/en/create",
+    "form_ready_selector": "label[for$=\"-NON-CITIZEN\"]"
+   }
   },
   {
    "family_id": "barbados-ed-form",
@@ -2300,7 +2418,30 @@
     "ENTRY_PREPARATION"
    ],
    "account_required": false,
-   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model.",
+   "form_paths": [
+    "/en/create"
+   ],
+   "entry_gate": {
+    "description": "SEEDING REQUIREMENT: this family's base_url must be https://www.travelform.gov.bb/en/create, because the gate replay always starts at base_url and these actions were verified starting ON /en/create (the landing-page route into the form was never mapped). /en/create is directly loadable, which is why it is also curated as a form_path; it renders only the step-1 chooser until Non-Resident + Air are answered, after which the flight block appears. Both clicks need a REAL pointer event: a synthetic label.click() sets .checked but does not fire the progressive disclosure. The 7-step stepper is .mantine-Stepper-step (7 matches): 1 Arrival, 2 Personal, 3 Travel, 4 Destination, 5 Health, 6 Family, 7 Customs; surname and passport number live on step 2, reached by 'Next step' (form button.rounded-lg.bg-blue-500, 1 match), which is deliberately NOT in the gate - it was never exercised during recon and would only fire step-1 validation on an empty form.",
+    "actions": [
+     {
+      "action": "CLICK",
+      "selector": "label[for$=\"-NON-RESIDENT\"]",
+      "purpose": "'Non-Resident/Visitor' traveller-type chooser on step 1 (Arrival / Port-Vessel Information). Required: nothing else on the step renders until it is answered. Assert with input[value=\"NON-RESIDENT\"]:checked (1 match). WARNING: never use label[for$=\"-RESIDENT\"], which matches 2 elements because NON-RESIDENT also ends in -RESIDENT.",
+      "timeout_ms": 45000
+     },
+     {
+      "action": "CLICK",
+      "selector": "label[for$=\"-AIR\"]",
+      "purpose": "Mode-of-arrival chooser revealed by the previous click. Air renders the flight block (Airline, Flight Registration Number, Country/Port of Embarkation, Intended Date of Arrival). label[for$=\"-SEA\"] (1 match) is the cruise/vessel alternative. Assert with input[value=\"AIR\"]:checked (1 match).",
+      "timeout_ms": 45000
+     }
+    ],
+    "declared_handoffs": [],
+    "expect_path": "/en/create",
+    "form_ready_selector": "input[value=\"NON-RESIDENT\"]"
+   }
   },
   {
    "family_id": "guatemala-djrv",
@@ -2453,7 +2594,32 @@
     "ENTRY_PREPARATION"
    ],
    "account_required": false,
-   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model.",
+   "form_paths": [
+    "/"
+   ],
+   "entry_gate": {
+    "description": "ZERO navigation clicks: https://www.enterjamaica.gov.jm/ serves form#cfiveForm (59 controls, 43 applicant fields) directly in the initial HTML response - no Start button, no traveller-type chooser, no language picker - which is why '/' is curated as a form_path. What the gate exists for is the DECLARATION: the form is covered by an email-OTP modal (#emailVerify plus a .modal-backdrop) that must be cleared before any control is interactive, and clearing it needs a real inbox, so it is the applicant's own step and is declared as an otp handoff rather than replayed. The two blocked gate controls, for the handoff node: 'Continue' = #emailVerify button[onclick=\"VerifyEmail()\"] (1 match; the button carries the malformed attribute id=\"#\" so an id selector is unusable, and #emailVerify .btn-primary is an equally unique fallback) after an address is typed into #verifyEmail (1 match); then 'Verify Code' = #verifyEmailCodeBtn (1 match) after the emailed OTP is typed into #verifyEmailCode (1 match, minlength=5, initially display:none). Clearing stage 2 dismisses #emailVerify and the backdrop and releases form#cfiveForm. ORDERING CAVEAT for the generated flow: this OTP is an ENTRY gate, so the applicant handoff must be satisfied BEFORE any fill step, not at review/submit where captcha/otp handoffs are placed by default. The two SCROLL_TO_BOTTOM actions below are settle passes only (the idio",
+    "actions": [
+     {
+      "action": "SCROLL_TO_BOTTOM",
+      "selector": "body",
+      "purpose": "settle pass - the form is already in the initial HTML; no navigation click exists or is needed",
+      "timeout_ms": 30000
+     },
+     {
+      "action": "SCROLL_TO_BOTTOM",
+      "selector": "body",
+      "purpose": "second settle pass before the snapshot",
+      "timeout_ms": 30000
+     }
+    ],
+    "declared_handoffs": [
+     "otp"
+    ],
+    "expect_path": "/",
+    "form_ready_selector": "#cfiveForm #passportNo"
+   }
   },
   {
    "family_id": "palau-entry-form",
