@@ -174,6 +174,17 @@ _MAX_APPLY_CTA_ATTEMPTS = 2
 _MAX_FOLLOWED_LINKS = 8
 
 
+def _shape_key(pattern: str, art: dict) -> str:
+    """Identity of an observed page: its sanitized pattern PLUS the controls it
+    renders. Structure only — names and types the sanitizer already cleared,
+    never values."""
+    import hashlib
+    parts = [f"{e.get('name', '')}:{e.get('type', '')}"
+             for e in (art or {}).get("elements", [])]
+    digest = hashlib.sha256("|".join(sorted(parts)).encode()).hexdigest()[:12]
+    return f"{pattern}#{digest}"
+
+
 def _page_key_for(path: str) -> str:
     slug = re.sub(r"[^a-z0-9]+", "_", (path.strip("/") or "home").lower()).strip("_")
     return slug[:60] or "home"
@@ -228,9 +239,16 @@ def run_recon(db, *, build_request: fm.AdapterBuildRequest, observer,
         # it would let an error shell claim a flow role.
         if _ERROR_PATH_RE.search(pattern) and not _ERROR_PATH_RE.search(path):
             return None
-        if pattern and pattern in seen_patterns:
+        # Dedupe on the page's SHAPE, not its URL alone. Sanitized patterns
+        # drop the query (values must never survive), so /mdac/main and
+        # /mdac/main?registerMain collapse to one pattern — and Malaysia's
+        # real 22-field arrival form was discarded as a duplicate of the empty
+        # shell it shares a path with. Same story on SPA portals that serve
+        # every step from one URL. Two pages are the same page only when the
+        # controls on them are the same.
+        if pattern and _shape_key(pattern, art) in seen_patterns:
             return None
-        seen_patterns.add(pattern)
+        seen_patterns.add(_shape_key(pattern, art))
         db.add(fm.AdapterReconArtifact(
             recon_job_id=job.id, page_key=page_key,
             hostname=art["hostname"], url_pattern=pattern,

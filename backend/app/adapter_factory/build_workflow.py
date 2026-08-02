@@ -340,7 +340,12 @@ def _recon_paths(req) -> tuple:
     for url in urls:
         if not url:
             continue
-        p = urlparse(url).path
+        parsed = urlparse(url)
+        # The QUERY is part of the address on portals that select the form
+        # with a parameter — Malaysia's MDAC serves its 22-field arrival form
+        # at /mdac/main?registerMain and an empty shell at /mdac/main. Dropping
+        # the query probed the shell and reported the form unmappable.
+        p = parsed.path + (f"?{parsed.query}" if parsed.query else "")
         if p and p != "/" and p not in paths:
             paths.append(p)
     return tuple(paths)

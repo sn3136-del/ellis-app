@@ -87,3 +87,39 @@ def test_declared_account_portal_gets_the_credentials_handoff():
     nodes2 = _skeleton_flow("portal.gov.x", roles, MAPPINGS, account_required=False)
     assert not any(n.get("handoff_kind") == "credentials" for n in nodes2
                    if n["action"] == "APPLICANT_HANDOFF")
+
+
+# ---- recon addressing: the query is part of the address -------------------
+
+def test_curated_form_url_keeps_its_query_string():
+    """Malaysia's MDAC serves its 22-field form at /mdac/main?registerMain and
+    an empty shell at /mdac/main. Dropping the query probed the shell."""
+    from app.adapter_factory.build_workflow import _recon_paths
+
+    class _Req:
+        portal_evidence = {"portal_url": "https://imigresen-online.imi.gov.my/mdac/main",
+                           "entry_urls": ["https://imigresen-online.imi.gov.my/mdac/main?registerMain"]}
+    paths = _recon_paths(_Req())
+    assert "/mdac/main?registerMain" in paths
+    assert "/mdac/main" in paths          # the plain page is still probed
+
+
+def test_two_pages_sharing_a_url_pattern_are_kept_when_their_forms_differ():
+    """Sanitized patterns drop the query (values must never survive), so the
+    form and the shell collapse to one pattern — and shape must decide."""
+    from app.adapter_factory.recon import _shape_key
+    shell = {"elements": [{"name": "lang", "type": "select"}]}
+    form = {"elements": [{"name": "name", "type": "text"},
+                         {"name": "passNo", "type": "text"},
+                         {"name": "dob", "type": "text"}]}
+    pattern = "https://imigresen-online.imi.gov.my/mdac/main"
+    assert _shape_key(pattern, shell) != _shape_key(pattern, form)
+    # The same page observed twice is still one page.
+    assert _shape_key(pattern, form) == _shape_key(pattern, dict(form))
+
+
+def test_shape_key_carries_no_values():
+    from app.adapter_factory.recon import _shape_key
+    art = {"elements": [{"name": "passport", "type": "text",
+                         "value": "L898902C3", "label": "Passport"}]}
+    assert "L898902C3" not in _shape_key("https://x.gov/apply", art)
