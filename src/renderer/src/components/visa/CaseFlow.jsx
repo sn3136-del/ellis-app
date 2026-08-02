@@ -678,6 +678,9 @@ function AppointmentBooking({ t, client, caseId }) {
   const toast = useToast()
   const [state, setState] = useState(null)
   const [finding, setFinding] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [form, setForm] = useState({ date: '', time: '', location: '', ref: '' })
   const load = () => client.appointmentBooking(caseId).then(setState).catch(() => setState(null))
   useEffect(() => { load() }, [caseId])
   if (!state) return null
@@ -693,15 +696,18 @@ function AppointmentBooking({ t, client, caseId }) {
     setFinding(false)
   }
 
-  async function recordBooked() {
-    const when = window.prompt(t('booking.askWhen'))
-    if (!when) return
-    const ms = Date.parse(when)
-    if (!Number.isFinite(ms)) { toast(t('booking.badDate')); return }
+  async function saveBooked() {
+    const ms = Date.parse(`${form.date}T${form.time || '00:00'}`)
+    if (!form.date || !Number.isFinite(ms)) { toast(t('booking.badDate')); return }
+    if (ms < Date.now()) { toast(t('booking.pastDate')); return }
+    setSaving(true)
     try {
-      await client.recordAppointment(caseId, ms, state.post_name || '', '')
+      await client.recordAppointment(caseId, ms, form.location || state.post_name || '',
+                                     form.ref || '')
+      setEditing(false)
       await load()
     } catch (e) { toast(e.detail?.detail || e.message) }
+    setSaving(false)
   }
 
   const appt = state.appointment
@@ -709,10 +715,46 @@ function AppointmentBooking({ t, client, caseId }) {
     <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--line)' }}
       data-testid="appointment-booking">
       <div style={{ fontWeight: 600, marginBottom: 6 }}>{t('booking.title')}</div>
-      {appt ? (
-        <div className="kv" data-testid="appointment-booked">
-          <div className="kv__k">{t('booking.booked')}</div>
-          <div className="kv__v">{appt.when_utc}{appt.location ? ` — ${appt.location}` : ''}</div>
+      {appt && !editing ? (
+        <div data-testid="appointment-booked">
+          <div className="kv">
+            <div className="kv__k">{t('booking.booked')}</div>
+            <div className="kv__v">
+              {appt.when_utc}{appt.location ? ` — ${appt.location}` : ''}
+              {appt.confirmation_no ? ` · ${appt.confirmation_no}` : ''}
+            </div>
+          </div>
+          <button className="btn btn--ghost" style={{ marginTop: 8 }}
+            onClick={() => { setForm({ date: '', time: '', location: appt.location || '', ref: '' }); setEditing(true) }}>
+            {t('booking.change')}
+          </button>
+        </div>
+      ) : editing ? (
+        <div data-testid="booking-form">
+          <div className="wiz-grid" style={{ gap: 10 }}>
+            <div className="field"><label>{t('booking.date')}</label>
+              <input type="date" className="input" value={form.date}
+                onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
+            <div className="field"><label>{t('booking.time')}</label>
+              <input type="time" className="input" value={form.time}
+                onChange={(e) => setForm({ ...form, time: e.target.value })} /></div>
+            <div className="field"><label>{t('booking.where')}</label>
+              <input className="input" value={form.location}
+                placeholder={state.post_name || ''}
+                onChange={(e) => setForm({ ...form, location: e.target.value })} /></div>
+            <div className="field"><label>{t('booking.ref')}</label>
+              <input className="input" value={form.ref}
+                onChange={(e) => setForm({ ...form, ref: e.target.value })} /></div>
+          </div>
+          <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+            <button className="btn" onClick={saveBooked} disabled={saving}
+              data-testid="booking-save">
+              {saving ? t('booking.saving') : t('booking.save')}
+            </button>
+            <button className="btn btn--ghost" onClick={() => setEditing(false)}>
+              {t('pay.cancel')}
+            </button>
+          </div>
         </div>
       ) : state.bookable ? (
         <>
@@ -722,7 +764,8 @@ function AppointmentBooking({ t, client, caseId }) {
           <div style={{ display: 'flex', gap: 8 }}>
             <a className="btn" href={state.booking_url} target="_blank" rel="noreferrer"
               data-testid="booking-open">{t('booking.open')}</a>
-            <button className="btn btn--ghost" onClick={recordBooked}>
+            <button className="btn btn--ghost" onClick={() => setEditing(true)}
+              data-testid="booking-record">
               {t('booking.record')}
             </button>
           </div>
