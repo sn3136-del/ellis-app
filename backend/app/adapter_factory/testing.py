@@ -282,6 +282,14 @@ def _observe_flow_structure(compiled, observer, problems: list[str],
                         base = node["allowed_url_patterns"][0]
                         break
             obs = replay(base, gate)
+            # A gate that recon already walked is a gate that exists. Replaying
+            # it in a FRESH session hits the slow half of these portals: a
+            # Cloudflare interstitial serving an empty DOM for the first few
+            # seconds (Cambodia), an invisible Turnstile the click is a no-op
+            # until it self-populates (Thailand). One retry for a transient
+            # failure only — a gate whose control is genuinely gone still fails.
+            if not (obs and obs.get("ok")) and _transient_failure(obs):
+                obs = replay(base, gate)
             if not (obs and obs.get("ok")):
                 problems.append(f"{prefix}entry_gate: replay failed "
                                 f"({str((obs or {}).get('error', ''))[:120]})")
