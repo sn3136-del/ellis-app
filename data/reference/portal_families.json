@@ -5,7 +5,7 @@
  "snapshot_date": "2026-07-23",
  "source": "curated seed list of real official portals/platforms; every entry starts seed_unverified and is upgraded ONLY by deterministic government-domain verification and/or live credential-free recon. Entries that fail verification stay unreleased.",
  "notes": "One family per real platform. A family may serve many destinations, nationalities and jurisdictions — adapters are built per family and reused. No entry may be invented; uncertain platforms are omitted (their routes stay honestly unresolved).",
- "entry_count": 91,
+ "entry_count": 110,
  "entries": [
   {
    "family_id": "usa-esta",
@@ -1308,9 +1308,9 @@
    "kind": "evisa_portal",
    "operator": "Ministry of Interior (Kuwait)",
    "operator_kind": "government",
-   "base_url": "https://evisa.moi.gov.kw/",
+   "base_url": "https://kuwaitvisa.moi.gov.kw/",
    "hostnames": [
-    "evisa.moi.gov.kw"
+    "kuwaitvisa.moi.gov.kw"
    ],
    "destinations": [
     "KWT"
@@ -1606,9 +1606,9 @@
    "kind": "evisa_portal",
    "operator": "Nigeria Immigration Service",
    "operator_kind": "government",
-   "base_url": "https://portal.immigration.gov.ng/",
+   "base_url": "https://evisa.immigration.gov.ng/",
    "hostnames": [
-    "portal.immigration.gov.ng"
+    "evisa.immigration.gov.ng"
    ],
    "destinations": [
     "NGA"
@@ -2109,6 +2109,370 @@
     "APPOINTMENT_REQUIRED"
    ],
    "account_required": true
+  },
+  {
+   "family_id": "indonesia-arrival-card",
+   "name": "All Indonesia Arrival Card",
+   "kind": "arrival_card",
+   "operator": "Directorate General of Immigration (Indonesia)",
+   "operator_kind": "government",
+   "base_url": "https://allindonesia.imigrasi.go.id/",
+   "hostnames": [
+    "allindonesia.imigrasi.go.id"
+   ],
+   "destinations": [
+    "IDN"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false,
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+  },
+  {
+   "family_id": "india-earrival",
+   "name": "India e-Arrival Card",
+   "kind": "arrival_card",
+   "operator": "Bureau of Immigration (India)",
+   "operator_kind": "government",
+   "base_url": "https://indianvisaonline.gov.in/earrival/",
+   "hostnames": [
+    "indianvisaonline.gov.in"
+   ],
+   "destinations": [
+    "IND"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false,
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+  },
+  {
+   "family_id": "china-arrival-card",
+   "name": "China Arrival Card (online filing)",
+   "kind": "arrival_card",
+   "operator": "National Immigration Administration (China)",
+   "operator_kind": "government",
+   "base_url": "https://s.nia.gov.cn/ArrivalCardFillingPC/",
+   "hostnames": [
+    "s.nia.gov.cn"
+   ],
+   "destinations": [
+    "CHN"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false,
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+  },
+  {
+   "family_id": "vietnam-prearrival",
+   "name": "Vietnam Pre-Arrival Information Declaration",
+   "kind": "arrival_card",
+   "operator": "Vietnam Immigration Department",
+   "operator_kind": "government",
+   "base_url": "https://prearrival.immigration.gov.vn/",
+   "hostnames": [
+    "prearrival.immigration.gov.vn"
+   ],
+   "destinations": [
+    "VNM"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false,
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+  },
+  {
+   "family_id": "taiwan-twac",
+   "name": "Taiwan Arrival Card (TWAC)",
+   "kind": "arrival_card",
+   "operator": "National Immigration Agency (Taiwan)",
+   "operator_kind": "government",
+   "base_url": "https://twac.immigration.gov.tw/",
+   "hostnames": [
+    "twac.immigration.gov.tw"
+   ],
+   "destinations": [
+    "TWN"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false,
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+  },
+  {
+   "family_id": "nz-traveller-declaration",
+   "name": "New Zealand Traveller Declaration (NZTD)",
+   "kind": "arrival_card",
+   "operator": "New Zealand Customs Service",
+   "operator_kind": "government",
+   "base_url": "https://app.travellerdeclaration.govt.nz/",
+   "hostnames": [
+    "app.travellerdeclaration.govt.nz",
+    "www.travellerdeclaration.govt.nz",
+    "travellerdeclaration.govt.nz"
+   ],
+   "destinations": [
+    "NZL"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false,
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+  },
+  {
+   "family_id": "southafrica-sars-traveller",
+   "name": "SARS Online Traveller Declaration",
+   "kind": "arrival_card",
+   "operator": "South African Revenue Service",
+   "operator_kind": "government",
+   "base_url": "https://tools.sars.gov.za/sarsonlinequery/traveller",
+   "hostnames": [
+    "tools.sars.gov.za"
+   ],
+   "destinations": [
+    "ZAF"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false,
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+  },
+  {
+   "family_id": "cuba-dviajeros",
+   "name": "D'Viajeros advance passenger information",
+   "kind": "arrival_card",
+   "operator": "Ministry of Transport (Cuba)",
+   "operator_kind": "government",
+   "base_url": "https://dviajeros.mitrans.gob.cu/",
+   "hostnames": [
+    "dviajeros.mitrans.gob.cu"
+   ],
+   "destinations": [
+    "CUB"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false,
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+  },
+  {
+   "family_id": "trinidad-adc",
+   "name": "Trinidad and Tobago Online Arrival/Departure Card",
+   "kind": "arrival_card",
+   "operator": "Immigration Division (Trinidad and Tobago)",
+   "operator_kind": "government",
+   "base_url": "https://travel.gov.tt/",
+   "hostnames": [
+    "travel.gov.tt"
+   ],
+   "destinations": [
+    "TTO"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false,
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+  },
+  {
+   "family_id": "barbados-ed-form",
+   "name": "Barbados Online Immigration and Customs Form",
+   "kind": "arrival_card",
+   "operator": "Government of Barbados",
+   "operator_kind": "government",
+   "base_url": "https://travelform.gov.bb/",
+   "hostnames": [
+    "travelform.gov.bb"
+   ],
+   "destinations": [
+    "BRB"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false,
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+  },
+  {
+   "family_id": "guatemala-djrv",
+   "name": "Declaracion Jurada Regional de Viajero",
+   "kind": "arrival_card",
+   "operator": "Superintendencia de Administracion Tributaria (Guatemala)",
+   "operator_kind": "government",
+   "base_url": "https://farm2.sat.gob.gt/declaDelViajeroGt-web/pages/public/declaracionJuradaDelViajero.html",
+   "hostnames": [
+    "farm2.sat.gob.gt"
+   ],
+   "destinations": [
+    "GTM"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false,
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+  },
+  {
+   "family_id": "panama-declaracion-viajero",
+   "name": "Declaracion Jurada de Viajero (Panama)",
+   "kind": "arrival_card",
+   "operator": "Autoridad Nacional de Aduanas (Panama)",
+   "operator_kind": "government",
+   "base_url": "https://declaraciondeviajero.ana.gob.pa/",
+   "hostnames": [
+    "declaraciondeviajero.ana.gob.pa"
+   ],
+   "destinations": [
+    "PAN"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false,
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+  },
+  {
+   "family_id": "belize-digital-forms",
+   "name": "Belize Digital Embarkation/Disembarkation Form",
+   "kind": "arrival_card",
+   "operator": "Government of Belize",
+   "operator_kind": "government",
+   "base_url": "https://ideclare.gov.bz/Belize_Digital_Forms/",
+   "hostnames": [
+    "ideclare.gov.bz"
+   ],
+   "destinations": [
+    "BLZ"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false,
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+  },
+  {
+   "family_id": "chile-sag-declaration",
+   "name": "Declaracion Jurada Digital de Ingreso a Chile",
+   "kind": "arrival_card",
+   "operator": "Servicio Agricola y Ganadero (Chile)",
+   "operator_kind": "government",
+   "base_url": "https://dj.sag.gob.cl/",
+   "hostnames": [
+    "dj.sag.gob.cl"
+   ],
+   "destinations": [
+    "CHL"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false,
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+  },
+  {
+   "family_id": "guyana-ed-form",
+   "name": "Guyana Embarkation / Disembarkation Form",
+   "kind": "arrival_card",
+   "operator": "Guyana Police Force (Immigration)",
+   "operator_kind": "government",
+   "base_url": "https://ed.gpf.gov.gy/",
+   "hostnames": [
+    "ed.gpf.gov.gy"
+   ],
+   "destinations": [
+    "GUY"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false,
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+  },
+  {
+   "family_id": "png-digital-arrival",
+   "name": "Papua New Guinea Digital Arrival Card",
+   "kind": "arrival_card",
+   "operator": "PNG Immigration and Citizenship Authority",
+   "operator_kind": "government",
+   "base_url": "https://pngdac.ica.gov.pg/",
+   "hostnames": [
+    "pngdac.ica.gov.pg"
+   ],
+   "destinations": [
+    "PNG"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false,
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+  },
+  {
+   "family_id": "laos-ldif",
+   "name": "Lao Digital Immigration Form",
+   "kind": "arrival_card",
+   "operator": "Lao Immigration Department",
+   "operator_kind": "government",
+   "base_url": "https://immigration.gov.la/",
+   "hostnames": [
+    "immigration.gov.la"
+   ],
+   "destinations": [
+    "LAO"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false,
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+  },
+  {
+   "family_id": "jamaica-enterjamaica",
+   "name": "Jamaica Electronic Immigration/Customs Declaration",
+   "kind": "arrival_card",
+   "operator": "Government of Jamaica",
+   "operator_kind": "government",
+   "base_url": "https://www.enterjamaica.gov.jm/",
+   "hostnames": [
+    "www.enterjamaica.gov.jm",
+    "enterjamaica.gov.jm"
+   ],
+   "destinations": [
+    "JAM"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false,
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
+  },
+  {
+   "family_id": "palau-entry-form",
+   "name": "Palau Entry Form",
+   "kind": "arrival_card",
+   "operator": "Republic of Palau",
+   "operator_kind": "government",
+   "base_url": "https://palautravel.pw/entryform.html",
+   "hostnames": [
+    "palautravel.pw"
+   ],
+   "destinations": [
+    "PLW"
+   ],
+   "supported_outcomes": [
+    "ENTRY_PREPARATION"
+   ],
+   "account_required": false,
+   "notes": "Discovered and verified 2026-08-02: mandatory entry declaration, no account, free. Every traveller needs one and there is no visa decision to model."
   }
  ]
 }
