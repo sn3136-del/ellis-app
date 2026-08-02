@@ -2,7 +2,7 @@
   "bundle_version": 1,
   "candidate_id": "5d5e87b6ebf4473cb0a46aae50bcdbe5",
   "candidate_version": 3,
-  "exported_at": "2026-07-31T23:36:48.851149-04:00",
+  "exported_at": "2026-08-02T05:34:23.273845-04:00",
   "family_id": "uk-eta",
   "route_key": "rk1|nat=AND|iss=AND|doc=ordinary_passport|res=AND|dest=GBR|cat=eta|sub=any|pur=tourism|per=2026-07-23|jur=default",
   "tables": {
@@ -2141,6 +2141,7 @@
         "destinations": "[\"GBR\"]",
         "entry_gate": "{\"description\": \"UK ETA is app-first: the start URL renders an 'easier on the app' interstitial (React SPA). Click the 'I cannot apply on the UK ETA app.' escape link to the help-downloading page, then 'Continue application online' to the how-to-apply page, then the 'Continue' button, which calls the service's /start/v1 endpoint and hands over to the forms UI at /electronic-travel-authorisation/{session-id}/electronic-travel-authorisation/enter-email-address \\u2014 the first question of the guest application wizard (GOV.UK one-question-per-page, so exactly one field with a stable id is the expected form-ready state). No login, no account, no captcha on this path.\", \"actions\": [{\"action\": \"CLICK\", \"selector\": \"a:has-text(\\\"I cannot apply on the UK ETA app\\\")\", \"purpose\": \"Leave the app-first interstitial for the web application help page\"}, {\"action\": \"CLICK\", \"selector\": \"a:has-text(\\\"Continue application online\\\")\", \"purpose\": \"Choose the online (web) application route\"}, {\"action\": \"CLICK\", \"selector\": \"button:has-text(\\\"Continue\\\")\", \"purpose\": \"Start the online application and hand over to the forms UI\"}], \"expect_path\": \"/enter-email-address\", \"form_ready_selector\": \"#enter-email-address-value\", \"declared_handoffs\": [\"otp\"]}",
         "family_id": "uk-eta",
+        "form_paths": "[]",
         "hostnames": "[\"www.gov.uk\", \"apply-for-an-eta.homeoffice.gov.uk\"]",
         "id": "092fcea91d0e4084b0cb129e4a8ac178",
         "kind": "eta_portal",
@@ -2152,7 +2153,7 @@
         "operator_kind": "government",
         "stale": 0,
         "supported_outcomes": "[\"ELECTRONIC_AUTHORIZATION\"]",
-        "updated_at": "2026-08-01 02:53:39.087402",
+        "updated_at": "2026-08-01 08:46:02.851060",
         "verification_evidence": "{\"domain_check\": \"all hostnames on curated government allowlist\"}",
         "verification_status": "verified_official_domain"
       }

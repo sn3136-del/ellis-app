@@ -2,7 +2,7 @@
   "bundle_version": 1,
   "candidate_id": "fa1e0bf29f124eb1ac39238c09440d29",
   "candidate_version": 1,
-  "exported_at": "2026-07-31T23:36:48.846023-04:00",
+  "exported_at": "2026-08-02T05:34:23.264789-04:00",
   "family_id": "vietnam-evisa",
   "route_key": "rk1|nat=AFG|iss=AFG|doc=ordinary_passport|res=AFG|dest=VNM|cat=evisa_tourist|sub=any|pur=tourism|per=2026-07-23|jur=default",
   "tables": {
@@ -4208,6 +4208,7 @@
         "destinations": "[\"VNM\"]",
         "entry_gate": "{\"description\": \"The application form (/e-visa/foreigners) is gated behind an in-session instruction modal: Apply now -> scroll both instruction containers to the bottom -> tick the two acknowledgment checkboxes (the only visible checkboxes in the modal) -> Next. Direct navigation redirects to the home page. Verified live 2026-07-25.\", \"actions\": [{\"action\": \"CLICK\", \"selector\": \"button:has-text(\\\"Apply now\\\")\", \"purpose\": \"Entry gate: open the declaration-instructions modal\"}, {\"action\": \"SCROLL_TO_BOTTOM\", \"selector\": \"div[class*=\\\"overflow-y-scroll\\\"]\", \"purpose\": \"Entry gate: scroll the outer instruction container to the bottom\"}, {\"action\": \"SCROLL_TO_BOTTOM\", \"selector\": \"div[class*=\\\"overflow-auto\\\"]\", \"purpose\": \"Entry gate: scroll the inner instruction container to the bottom\"}, {\"action\": \"CHECK\", \"selector\": \"input[type=\\\"checkbox\\\"]:visible >> nth=0\", \"purpose\": \"Entry gate: acknowledge compliance with Vietnamese laws upon entry\"}, {\"action\": \"CHECK\", \"selector\": \"input[type=\\\"checkbox\\\"]:visible >> nth=1\", \"purpose\": \"Entry gate: confirm the instructions were read carefully\"}, {\"action\": \"CLICK\", \"selector\": \"button:has-text(\\\"Next\\\")\", \"purpose\": \"Entry gate: continue to the application form\"}], \"expect_path\": \"/e-visa/foreigners\", \"form_ready_selector\": \"#basic_ttcnHo\", \"form_ready_all\": {\"selector\": \"[id^=\\\"basic_\\\"]\", \"min\": 20}, \"declared_handoffs\": [\"captcha\"]}",
         "family_id": "vietnam-evisa",
+        "form_paths": "[]",
         "hostnames": "[\"evisa.gov.vn\", \"evisa.xuatnhapcanh.gov.vn\"]",
         "id": "8020e19a6670455d91f885a2430d1b8c",
         "kind": "evisa_portal",
@@ -4219,7 +4220,7 @@
         "operator_kind": "government",
         "stale": 0,
         "supported_outcomes": "[\"EVISA\"]",
-        "updated_at": "2026-07-25 21:36:17.325510",
+        "updated_at": "2026-08-01 08:46:02.851069",
         "verification_evidence": "{\"domain_check\": \"all hostnames on curated government allowlist\"}",
         "verification_status": "verified_official_domain"
       }

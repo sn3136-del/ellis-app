@@ -97,7 +97,39 @@ DS160_PREP = [
     ("Travel - Address Where You Will Stay in the U.S.", "accommodation", True),
     ("Work/Education - Primary Occupation", "occupation", False),
     ("Work/Education - Present Employer or School Name", "employer", False),
+    ("Work/Education - Employer/School Address", "employer_address", False),
+    ("Work/Education - Monthly Income (local currency)", "monthly_income", False),
+    # --- Travel section, continued: CEAC asks these on the same screens, and
+    # an applicant who has them ready fills that screen in one pass.
+    ("Travel - Person/Entity Paying for Your Trip", "trip_payer", False),
+    ("Travel - Specific Travel Plans (Yes/No)", "has_specific_plans", False),
+    ("Travel - Intended Date of Departure from the U.S.", "departure_date", False),
+    ("Travel Companions - Are you travelling with anyone?", "travelling_with", False),
+    # --- Previous US travel: factual history the applicant supplies once.
+    ("Previous U.S. Travel - Have you ever been to the U.S.?", "been_to_us_before", False),
+    ("Previous U.S. Travel - Date of Last Arrival", "last_us_arrival_date", False),
+    ("Previous U.S. Travel - Length of Last Stay", "last_us_stay_length", False),
+    ("Previous U.S. Travel - Previous U.S. Visa Number", "previous_us_visa_number", False),
+    # --- U.S. point of contact: CEAC requires one; a hotel is acceptable.
+    ("U.S. Point of Contact - Name or Organisation", "us_contact_name", False),
+    ("U.S. Point of Contact - Address", "us_contact_address", False),
+    ("U.S. Point of Contact - Phone", "us_contact_phone", False),
+    ("U.S. Point of Contact - Relationship to You", "us_contact_relationship", False),
+    # --- Family: names only. Anything about a relative's status is theirs to
+    # state, not Ellis's to infer.
+    ("Family - Father's Surnames", "father_surname", False),
+    ("Family - Father's Given Names", "father_given_names", False),
+    ("Family - Mother's Surnames", "mother_surname", False),
+    ("Family - Mother's Given Names", "mother_given_names", False),
+    ("Family - Spouse's Full Name (if married)", "spouse_full_name", False),
 ]
+
+# CEAC's SECURITY AND BACKGROUND questions are deliberately absent from the
+# list above. They ask whether the applicant has been arrested, deported,
+# involved in genocide. Those are answered under penalty of perjury by the
+# person they are about — preparing an answer, even a blank prompt shaped like
+# one, would invite someone to click through the most consequential screen of
+# the form. Ellis states plainly that the applicant answers those themselves.
 
 FORMS = {
     "schengen_uniform": {
@@ -114,9 +146,12 @@ FORMS = {
         "fields": DS160_PREP,
         "submission": "applicant_online",
         "note": ("Sign in at ceac.state.gov/genniv and copy these values into "
-                 "the matching DS-160 sections. Ellis never submits the DS-160 "
-                 "for you: it is signed electronically by the applicant under "
-                 "penalty of perjury."),
+                 "the matching DS-160 sections — they are listed in CEAC's own "
+                 "order, so each screen fills in one pass. The DS-160 exists "
+                 "only online; there is no paper original for Ellis to fill. "
+                 "You answer the Security and Background questions yourself, "
+                 "and you sign the form electronically: it is sworn under "
+                 "penalty of perjury, so only you may do either."),
     },
 }
 

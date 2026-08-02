@@ -21,7 +21,8 @@
     "test:portal": "node --test --test-concurrency=1 tests/portal/framework.test.mjs tests/portal/e2e.test.mjs",
     "test:security": "node --test tests/build_security.test.mjs",
     "test:visa": "node --test tests/visa/visa_ui_logic.test.mjs",
-    "test:visa:api": "node --test tests/visa/frontend_backend.test.mjs"
+    "test:visa:api": "node --test tests/visa/frontend_backend.test.mjs",
+    "routes:sync": "./scripts/sync-routes-to-app.sh"
   },
   "build": {
     "appId": "com.ellis.app",
@@ -47,14 +48,44 @@
       "!**/*.passport"
     ],
     "extraResources": [
-      { "from": "backend/.runtime-venv", "to": "backend-venv",
-        "filter": ["**/*", "!**/__pycache__/**", "!**/*.pyc", "!**/*.pyo"] },
-      { "from": "backend/app", "to": "backend/app",
-        "filter": ["**/*", "!**/__pycache__/**", "!**/*.pyc", "!**/*.db", "!**/*.db-*"] },
-      { "from": "backend/migrations", "to": "backend/migrations",
-        "filter": ["**/*", "!**/__pycache__/**", "!**/*.pyc"] },
-      { "from": "backend/alembic.ini", "to": "backend/alembic.ini" },
-      { "from": "data", "to": "data" }
+      {
+        "from": "backend/.runtime-venv",
+        "to": "backend-venv",
+        "filter": [
+          "**/*",
+          "!**/__pycache__/**",
+          "!**/*.pyc",
+          "!**/*.pyo"
+        ]
+      },
+      {
+        "from": "backend/app",
+        "to": "backend/app",
+        "filter": [
+          "**/*",
+          "!**/__pycache__/**",
+          "!**/*.pyc",
+          "!**/*.db",
+          "!**/*.db-*"
+        ]
+      },
+      {
+        "from": "backend/migrations",
+        "to": "backend/migrations",
+        "filter": [
+          "**/*",
+          "!**/__pycache__/**",
+          "!**/*.pyc"
+        ]
+      },
+      {
+        "from": "backend/alembic.ini",
+        "to": "backend/alembic.ini"
+      },
+      {
+        "from": "data",
+        "to": "data"
+      }
     ],
     "mac": {
       "category": "public.app-category.business",

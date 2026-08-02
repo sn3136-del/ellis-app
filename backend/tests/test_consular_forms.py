@@ -257,3 +257,34 @@ def test_checkbox_appearances_are_regenerated():
     import inspect
     from app import consular_forms as cf
     assert "set_need_appearances_writer" in inspect.getsource(cf.fill_official_template)
+
+
+# --- DS-160: prepared data, never a substitute for the applicant ------------
+
+def test_ds160_covers_the_sections_ceac_actually_asks():
+    from app import consular_forms as cf
+    sections = {l.split(" - ")[0] for l, _, _ in cf.DS160_PREP}
+    assert {"Personal Information 1", "Passport", "Travel", "Address and Phone",
+            "U.S. Point of Contact", "Family", "Previous U.S. Travel",
+            "Work/Education"} <= sections
+    assert len(cf.DS160_PREP) >= 45
+
+
+def test_ds160_never_prepares_the_security_questions():
+    """CEAC's Security and Background screen asks about arrests, deportation
+    and persecution. Those are sworn by the person they are about — even a
+    blank prompt shaped like one invites clicking through the most
+    consequential screen of the form."""
+    from app import consular_forms as cf
+    blob = " ".join(f"{l} {k}" for l, k, _ in cf.DS160_PREP).lower()
+    for forbidden in ("arrest", "deport", "convict", "terror", "genocide",
+                      "security and background", "narcotic", "prostitut"):
+        assert forbidden not in blob
+
+
+def test_ds160_says_it_is_online_only_and_self_signed():
+    from app import consular_forms as cf
+    note = cf.FORMS["ds160_prep"]["note"].lower()
+    assert "only online" in note
+    assert "penalty of perjury" in note
+    assert "yourself" in note or "only you" in note

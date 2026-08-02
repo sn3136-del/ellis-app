@@ -2,7 +2,7 @@
   "bundle_version": 1,
   "candidate_id": "70ee2252433342d294d7c04a9a748fa5",
   "candidate_version": 1,
-  "exported_at": "2026-07-31T23:36:48.849796-04:00",
+  "exported_at": "2026-08-02T05:34:23.271144-04:00",
   "family_id": "maldives-imuga",
   "route_key": "rk1|nat=CHN|iss=CHN|doc=ordinary_passport|res=CHN|dest=MDV|cat=visa_free_entry|sub=any|pur=tourism|per=2026-07-23|jur=default",
   "tables": {
@@ -199,6 +199,7 @@
         "destinations": "[\"MDV\"]",
         "entry_gate": "{}",
         "family_id": "maldives-imuga",
+        "form_paths": "[]",
         "hostnames": "[\"imuga.immigration.gov.mv\"]",
         "id": "4740bc68cfbb4dbdbef88f62357cdc78",
         "kind": "arrival_card",
@@ -210,7 +211,7 @@
         "operator_kind": "government",
         "stale": 0,
         "supported_outcomes": "[\"ENTRY_PREPARATION\"]",
-        "updated_at": "2026-07-25 20:36:47.930098",
+        "updated_at": "2026-08-01 08:46:02.851064",
         "verification_evidence": "{\"domain_check\": \"all hostnames on curated government allowlist\"}",
         "verification_status": "verified_official_domain"
       }
