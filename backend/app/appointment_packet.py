@@ -256,6 +256,7 @@ def build_for_case(db, app_row) -> dict:
                     answers.get("passport_profile"))
         merged = cf.answers_from_documents(answers, passport)
         prepared = cf.prepare(form_key, merged)
+        form_answers = merged
 
     from . import assisted_booking
     packet = build(
@@ -266,6 +267,7 @@ def build_for_case(db, app_row) -> dict:
         form_prepared=prepared,
         appointment=assisted_booking.summary(db, app_row))
     packet["_form_prepared"] = prepared
+    packet["_form_answers"] = locals().get("form_answers") or {}
     packet["_application_id"] = app_row.id
     packet["_route"] = route
     return packet
@@ -289,7 +291,12 @@ def render_zip(db, app_row, packet: dict) -> bytes:
         form_key = packet.get("form_key") or ""
         prepared = packet.get("_form_prepared")
         if form_key and prepared:
-            filled = cf.fill_official_template(form_key, prepared.get("values") or {})
+            # The applicant's OWN answers (passport OCR already merged in).
+            # prepare() returns a print-ready sheet, not a value map — reading
+            # a 'values' key it never had meant the official blank was filled
+            # with nothing at all.
+            filled = cf.fill_official_template(
+                form_key, packet.get("_form_answers") or {})
             if filled:
                 z.writestr(f"01-{form_key}-OFFICIAL-FORM.pdf", filled)
             else:

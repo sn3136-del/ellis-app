@@ -78,12 +78,13 @@ def test_no_answer_value_is_ever_fabricated(form_key):
 
 def test_without_the_official_blank_ellis_never_claims_an_official_form():
     """No government template on file -> a clearly-labelled preparation sheet,
-    never a fabricated official form."""
-    out = cf.build("schengen_uniform", ANSWERS, applicant_name="NOEMI ELIAS")
+    never a fabricated official form. (ds160_prep has no blank by design: the
+    DS-160 exists only online at CEAC, so there is no paper original.)"""
+    out = cf.build("ds160_prep", ANSWERS, applicant_name="NOEMI ELIAS")
     assert out["kind"] == "preparation_sheet"
     assert out["pdf"][:4] == b"%PDF"
     # It never guesses which government field is which without a real map.
-    assert cf.fill_official_template("schengen_uniform", ANSWERS) is None
+    assert cf.fill_official_template("ds160_prep", ANSWERS) is None
 
 
 def test_generated_pdf_is_deterministic():
@@ -128,7 +129,7 @@ def test_no_uploaded_passport_changes_nothing():
 def test_missing_official_blank_is_reported_not_silently_skipped():
     """An operator must be told the template is absent — a silent fallback to
     the preparation sheet would look like the official form succeeded."""
-    report = cf.validate_template("schengen_uniform")
+    report = cf.validate_template("ds160_prep")
     assert report["ready"] is False
     assert any("no official blank" in p for p in report["problems"])
 
@@ -158,3 +159,53 @@ def test_a_flattened_pdf_is_refused_as_a_template(tmp_path, monkeypatch):
     report = cf.validate_template("schengen_uniform")
     assert report["ready"] is False
     assert any("AcroForm" in p or "field map" in p for p in report["problems"])
+
+
+# --- the official Schengen blank (added 2026-08-02) -------------------------
+
+def test_the_official_schengen_blank_is_installed_and_ready():
+    """The harmonised form from the Italian MFA (esteri.it) — the same form
+    every Schengen state uses. validate_template proves the PDF is fillable
+    and that every mapped field really exists in it."""
+    from app import consular_forms as cf
+    report = cf.validate_template("schengen_uniform")
+    assert report["ready"], report["problems"]
+    assert report["mapped"] >= 15
+
+
+def test_filling_the_official_blank_writes_real_values():
+    """Regression: prepare() returns a print-ready sheet, not a value map, so
+    reading a 'values' key it never had filled the government's blank with
+    NOTHING — an empty official form, which is worse than no form at all."""
+    from pypdf import PdfReader
+    from io import BytesIO
+    from app import consular_forms as cf
+    pdf = cf.fill_official_template("schengen_uniform", {
+        "surname": "CHEN", "given_names": "NINGYAN",
+        "passport_number": "EG1085037", "nationality": "CHINESE"})
+    assert pdf, "the official blank should fill"
+    fields = {k.strip(): v.get("/V")
+              for k, v in (PdfReader(BytesIO(pdf)).get_fields() or {}).items()
+              if v.get("/V")}
+    assert fields.get("1 Surname Family name") == "CHEN"
+    assert fields.get("3 First names Given names") == "NINGYAN"
+    assert fields.get("13 Number of travel document") == "EG1085037"
+
+
+def test_no_answers_never_produces_a_blank_official_form():
+    """An official blank with nothing on it looks like Ellis produced the
+    applicant's application. It must fall back to the preparation sheet."""
+    from app import consular_forms as cf
+    assert cf.fill_official_template("schengen_uniform", {}) is None
+
+
+def test_unanswered_fields_are_left_blank_not_invented():
+    from pypdf import PdfReader
+    from io import BytesIO
+    from app import consular_forms as cf
+    pdf = cf.fill_official_template("schengen_uniform", {"surname": "CHEN"})
+    fields = {k.strip(): v.get("/V")
+              for k, v in (PdfReader(BytesIO(pdf)).get_fields() or {}).items()}
+    assert fields.get("1 Surname Family name") == "CHEN"
+    assert not fields.get("13 Number of travel document"), \
+        "a passport number nobody gave must never appear on a sworn form"

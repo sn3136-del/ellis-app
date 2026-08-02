@@ -1,0 +1,25 @@
+{
+  "_source": "https://ambmanila.esteri.it/wp-content/uploads/2023/11/Nuovo-Modello-Visto-Uniforme-EN-Application-form-for-Schengen-fillable-Short-Term.pdf",
+  "_authority": "Italian Ministry of Foreign Affairs (esteri.it) — the harmonised Schengen form, identical in content across all Schengen states",
+  "_retrieved": "2026-08-02",
+  "_note": "Only unambiguous text fields are mapped. Checkbox groups (sex, marital status, purpose of travel, entry count, who pays) are deliberately LEFT BLANK for the applicant to tick by hand — a wrongly-ticked box on a form signed under penalty of perjury is the applicant's problem, not a convenience worth taking.",
+  "fields": {
+    "1 Surname Family name": "surname",
+    "2 Surname at birth Former family names": "surname_at_birth",
+    "3 First names Given names": "given_names",
+    "Date of birth daymonthyear": "birth_date",
+    "5 Place of birth 6 Country of birth": "place_of_birth",
+    "Current Nationality": "nationality",
+    "11 National identity number where applicable": "national_id",
+    "13 Number of travel document": "passport_number",
+    "14 Date of issue": "passport_issue_date",
+    "15 Valid until": "passport_expiry_date",
+    "16 Issued by country": "issuing_country",
+    "19 Applicants home address and email address": "address_line1",
+    "Telephone no": "phone",
+    "21 Current occupation": "occupation",
+    "25 Member State of main destination and other Member States of destination if applicable": "destination_country",
+    " 22 Employer and employers address and telephone number For students name and address of educational establishment": "employer",
+    " 30 Surname and first name of the inviting persons in the Member States If not applicable name of hotels or temporary accommodations in the Member States": "accommodation"
+  }
+}

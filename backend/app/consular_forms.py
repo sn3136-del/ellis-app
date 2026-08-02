@@ -330,6 +330,12 @@ def fill_official_template(form_key: str, answers: dict,
         raw = (answers or {}).get(ellis_key)
         if raw not in (None, ""):
             values[field_name] = str(raw)
+    if not values:
+        # An official blank with nothing written on it is worse than no form:
+        # it looks like Ellis produced the applicant's application when it
+        # produced an empty government document. Fall back to the preparation
+        # sheet, which at least says what it is.
+        return None
     try:
         reader = PdfReader(str(path))
         writer = PdfWriter()
