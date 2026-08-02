@@ -27,7 +27,8 @@ _DIRECTIVE_RE = re.compile(
     r"instruction|password to|send .* to|https?://|@)", re.IGNORECASE)
 
 _ALLOWED_TYPES = {"text", "email", "password", "date", "select", "checkbox",
-                  "radio", "file", "button", "tel", "number", "search-combobox"}
+                  "radio", "file", "button", "submit", "tel", "number",
+                  "search-combobox", "link"}
 
 # Entry-gate replay vocabulary (declared, curated; see live_browser).
 # The reversible actions a declared entry gate may perform during recon.
@@ -62,7 +63,11 @@ def sanitize_structure(observation: dict) -> dict:
     explicitly copied here does not exist downstream."""
     elements = []
     for el in observation.get("elements", []) or []:
-        etype = el.get("type") if el.get("type") in _ALLOWED_TYPES else "text"
+        # Unknown control types become BUTTONS, never text inputs: coercing to
+        # "text" invented fillable fields out of every anchor and submit
+        # control the set didn't know (ASP.NET LinkButtons on evisa.gov.az),
+        # drowning the real form — the root of "no form page was mappable".
+        etype = el.get("type") if el.get("type") in _ALLOWED_TYPES else "button"
         clean = {
             "selector": str(el.get("selector", ""))[:200],
             "name": re.sub(r"[^a-zA-Z0-9_\-]", "", str(el.get("name", "")))[:80],

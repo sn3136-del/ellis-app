@@ -515,13 +515,14 @@
   },
   {
    "family_id": "bhutan-doi",
-   "name": "Bhutan Department of Immigration e-permit",
+   "name": "Bhutan Immigration Services Portal",
    "kind": "evisa_portal",
    "operator": "Department of Immigration (Bhutan)",
    "operator_kind": "government",
-   "base_url": "https://visit.doi.gov.bt/",
+   "base_url": "https://immi.gov.bt/",
    "hostnames": [
-    "visit.doi.gov.bt"
+    "immi.gov.bt",
+    "www.immi.gov.bt"
    ],
    "destinations": [
     "BTN"
@@ -1036,7 +1037,10 @@
    "supported_outcomes": [
     "EVISA"
    ],
-   "account_required": false
+   "account_required": false,
+   "form_paths": [
+    "/apply-step1"
+   ]
   },
   {
    "family_id": "armenia-evisa",

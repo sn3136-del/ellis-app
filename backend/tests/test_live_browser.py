@@ -125,3 +125,27 @@ def test_driver_records_only_sanitized_events():
     assert len(evs) == 1
     assert "SECRET" not in str(evs) and "?" not in evs[0]["url"]
     assert evs[0]["response_keys"] == ["ok", "ref"]
+
+
+def test_actionless_anchors_become_buttons_never_phantom_text_inputs():
+    """Regression (evisa.gov.az, 2026-08-02): SPA navbars full of href="#"/
+    javascript: anchors were typed 'text', flooding the page with dozens of
+    phantom unnamed text inputs. The real form drowned and specgen reported
+    'no form page was mappable'. An anchor that navigates nowhere is an
+    ACTION control — a button."""
+    from app.portal.live_browser import normalize_observation
+    raw = {"elements": [
+        {"selector": "ul.nav > li > a", "name": "", "label": "", "type": "link"},
+        {"selector": "a.apply", "name": "", "label": "Apply", "type": "link",
+         "navigates_to": "/apply-step1"},
+        {"selector": "#surname", "name": "surname", "label": "Surname",
+         "type": "text"},
+    ]}
+    out = normalize_observation("https://evisa.gov.az/en", 200, "evisa.gov.az", raw)
+    by_sel = {e["selector"]: e for e in out["elements"]}
+    assert by_sel["ul.nav > li > a"]["type"] == "button"
+    assert by_sel["a.apply"]["type"] == "link"       # a real navigation stays a link
+    assert by_sel["#surname"]["type"] == "text"      # a real input stays an input
+    # And the page no longer LOOKS like a form because of its navbar.
+    texts = [e for e in out["elements"] if e["type"] == "text"]
+    assert len(texts) == 1

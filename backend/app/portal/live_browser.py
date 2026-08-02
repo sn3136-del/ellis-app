@@ -95,11 +95,24 @@ _EXTRACT_JS = r"""
   const els = [];
   // Form controls PLUS appointment-calendar slot elements, which are usually
   // plain div/td/li carrying a slot handle attribute rather than form inputs.
-  document.querySelectorAll('input, select, textarea, button, a[href], '
+  // Hidden inputs are machine plumbing, not applicant-facing structure —
+  // ASP.NET WebForms alone plants dozens (__VIEWSTATE, __EVENTVALIDATION)
+  // that typed as 'text' flood the page with phantom mappable fields
+  // (verified live on evisa.gov.az).
+  document.querySelectorAll('input:not([type=hidden]), select, textarea, button, a[href], '
     + '[data-slot], [data-slot-id], [data-datetime], [data-appointment]'
   ).forEach((el) => {
     const tag = el.tagName.toLowerCase();
     let type = (el.type || (tag === 'a' ? 'link' : tag)).toLowerCase();
+    // A <select>'s DOM type is 'select-one'/'select-multiple' — downstream
+    // vocabulary knows only 'select', and the coercion fallback was turning
+    // real dropdowns (Nationality on evisa.gov.az) into text inputs.
+    if (tag === 'select') type = 'select';
+    // javascript:/# hrefs make an anchor an ACTION control, not a navigation.
+    if (tag === 'a') {
+      const h = el.getAttribute('href') || '';
+      if (/^(javascript:|#|$)/i.test(h.trim())) type = 'button';
+    }
     // Search-combobox detection (ARIA-based): SPA select widgets whose entry
     // control is a text input driving a filtered option list.
     if (tag === 'input' && (type === 'text' || type === 'search' || type === '')) {
@@ -163,7 +176,12 @@ def normalize_observation(url: str, status: int, hostname: str, raw: dict,
             "selector": str(el.get("selector", ""))[:200],
             "name": re.sub(r"[^a-zA-Z0-9_\-]", "", str(el.get("name", "")))[:80],
             "label": str(el.get("label", ""))[:120],
-            "type": "text" if etype in ("link",) and el.get("navigates_to") is None else etype,
+            # An <a> with no resolvable destination (href="#", javascript:)
+            # is an SPA ACTION control — a button, never a text input. Typing
+            # them "text" flooded pages with phantom unnamed fields, drowning
+            # the real form and failing "no form page was mappable" (verified
+            # live on evisa.gov.az: 34 navbar anchors became text inputs).
+            "type": "button" if etype in ("link",) and el.get("navigates_to") is None else etype,
             "required": bool(el.get("required", False)),
             "sensitive": bool(el.get("sensitive", False)) or etype == "password",
         }
@@ -247,6 +265,14 @@ class LiveBrowserSession:
         try:
             resp = page.goto(url, wait_until="domcontentloaded", timeout=30000)  # pragma: no cover
             status = resp.status if resp else 200                                # pragma: no cover
+            # Cookie-challenge CDNs (verified live on evisa.gov.az) answer the
+            # FIRST navigation 403 while setting the cookie that makes the
+            # second one succeed — a real browser reloads through this without
+            # anyone noticing. One same-URL retry inside the same session is
+            # that reload; it solves no CAPTCHA and spoofs nothing.
+            if resp is not None and status in (403, 503):                        # pragma: no cover
+                resp = page.goto(url, wait_until="domcontentloaded", timeout=30000)  # pragma: no cover
+                status = resp.status if resp else status                         # pragma: no cover
             final = page.url                                                     # pragma: no cover
             # A redirect that leaves the allowlist is not observed further.
             if self.allowed and not self._host_ok(final):                        # pragma: no cover
