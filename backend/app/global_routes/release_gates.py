@@ -137,12 +137,30 @@ def evaluate_gates(db, *, build_request, candidate, version, family) -> dict:
     # 5. Required applicant fields mapped — counted from FILL/SELECT_SEARCH
     #    nodes actually IN the flow, not from the spec's mapping list (which
     #    can contain mappings for pages the flow never visits).
+    #    A portal whose form only exists after sign-in can never be mapped
+    #    credential-free. Its fields may come instead from a CONSENTED
+    #    signed-in applicant session — but only with that consent on record,
+    #    and the report always says which it was, so a release can never
+    #    describe a signed-in observation as a credential-free one.
+    from ..authorized_observation import has_consent
     fill_nodes = sum(1 for n in nodes
                      if n.get("action") in ("FILL_NON_SENSITIVE", "SELECT_SEARCH"))
-    gate("required_fields_mapped", fill_nodes > 0,
-         f"{fill_nodes} grounded fill/select step(s) in the flow" if fill_nodes else
-         "missing: grounded applicant field mappings wired into the flow "
-         "(no form page was mappable from public observation)")
+    provenance = _form_evidence_provenance(db, build_request)
+    if provenance == "authorized_session":
+        consented = has_consent(build_request)
+        gate("required_fields_mapped", bool(fill_nodes) and consented,
+             f"{fill_nodes} fill/select step(s) mapped from a CONSENTED "
+             f"signed-in applicant session (this portal shows no form to a "
+             f"credential-free visitor)" if (fill_nodes and consented) else
+             ("missing: the applicant's consent to learn this portal from their "
+              "signed-in session was not recorded" if fill_nodes else
+              "missing: grounded applicant field mappings wired into the flow"))
+    else:
+        gate("required_fields_mapped", fill_nodes > 0,
+             f"{fill_nodes} grounded fill/select step(s) in the flow "
+             f"(credential-free public observation)" if fill_nodes else
+             "missing: grounded applicant field mappings wired into the flow "
+             "(no form page was mappable from public observation)")
 
     # 6. Selector stability across repeated sessions: the behavioral layer
     #    re-observes every selector in a FRESH session after recon mapped it.
@@ -328,6 +346,34 @@ def _uploads_observed_count(db, build_request) -> int:
 
 def _entry_gate_declared(build_request) -> dict:
     return (build_request.portal_evidence or {}).get("entry_gate") or {}
+
+
+def _form_evidence_provenance(db, build_request) -> str:
+    """How was the application form seen — credential-free, or from a consented
+    signed-in applicant session?
+
+    Returns "public", "authorized_session", or "" when no form was seen at all.
+    A release must never describe a signed-in observation as a credential-free
+    one, so this is what the gate report is written from.
+    """
+    from ..authorized_observation import CONTENT_CLASS
+    job = db.execute(select(fm.AdapterReconJob).where(
+        fm.AdapterReconJob.build_request_id == build_request.id)
+        .order_by(fm.AdapterReconJob.created_at.desc())).scalars().first()
+    if not job:
+        return ""
+    saw_public = saw_authorized = False
+    for art in db.execute(select(fm.AdapterReconArtifact).where(
+            fm.AdapterReconArtifact.recon_job_id == job.id)).scalars():
+        if not (art.structure or {}).get("elements"):
+            continue
+        if art.content_class == CONTENT_CLASS:
+            saw_authorized = True
+        elif art.content_class == "application_form":
+            saw_public = True
+    if saw_public:
+        return "public"
+    return "authorized_session" if saw_authorized else ""
 
 
 def _entry_gated_form_observed(db, build_request) -> bool:

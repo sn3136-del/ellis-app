@@ -381,3 +381,35 @@ def test_register_account_flow_requires_otp_handoff_and_reconcile():
     assert not ok
     assert any("reconcile" in p for p in problems)
     assert any("OTP" in p for p in problems)
+
+
+# --- learning a login-walled portal from a consented session ---------------
+
+def test_a_signed_in_observation_is_never_reported_as_credential_free():
+    """Nineteen portals show no form until an account signs in. Their fields
+    may come from a consented applicant session — but the gate report must say
+    so, or a release launders how the evidence was obtained."""
+    import inspect
+    from app.global_routes import release_gates as rg
+    src = inspect.getsource(rg.evaluate_gates)
+    assert "CONSENTED" in src and "signed-in applicant session" in src
+    assert "credential-free public observation" in src
+
+
+def test_signed_in_evidence_without_consent_cannot_release():
+    """Consent is the whole basis for this exception; without it recorded, the
+    gate fails even though the fields were mapped."""
+    import inspect
+    from app.global_routes import release_gates as rg
+    src = inspect.getsource(rg.evaluate_gates)
+    assert "has_consent(build_request)" in src
+    assert "consent to learn this portal" in src
+
+
+def test_public_evidence_is_preferred_over_signed_in():
+    """If the form WAS visible credential-free, that is what the report says —
+    the exception is only for portals that genuinely offer no other way."""
+    import inspect
+    from app.global_routes import release_gates as rg
+    src = inspect.getsource(rg._form_evidence_provenance)
+    assert 'if saw_public:' in src and 'return "public"' in src
