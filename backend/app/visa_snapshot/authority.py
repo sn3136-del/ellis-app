@@ -41,7 +41,11 @@ GOV_SUFFIXES = (
     *[f"gob.{cc}" for cc in ("mx", "ar", "cl", "pe", "bo", "ec", "es", "sv", "hn",
                              "ni", "pa", "do", "gt", "ve", "cu", "py")],
     *[f"gouv.{cc}" for cc in ("fr", "sn", "ci", "bj", "ml", "bf", "td", "mc", "nc",
-                              "qc.ca", "ht", "mg", "km", "cm", "ga")],
+                              "qc.ca", "ht", "mg", "km", "cm", "ga",
+                              # verified live 2026-08-02: Djibouti and Togo run
+                              # their e-visa portals on their own gouv.<cc>
+                              # (evisa.gouv.dj, voyage.gouv.tg)
+                              "dj", "tg")],
     *[f"go.{cc}" for cc in ("jp", "kr", "th", "id", "tz", "ke", "ug", "cr", "tj")],
     # country-specific official patterns
     "govt.nz", "gc.ca", "canada.ca", "admin.ch", "belgium.be", "europa.eu",
@@ -55,6 +59,11 @@ GOV_SUFFIXES = (
     "fmprc.gov.cn", "mfa.gov.cn", "immd.gov.hk", "boca.gov.tw", "mofa.gov.tw",
     "ica.gov.sg", "mfa.gov.sg", "homeaffairs.gov.au", "immigration.govt.nz",
     "cic.gc.ca", "ircc.canada.ca", "uscis.gov", "cbp.gov", "dhs.gov",
+    # Ministry/state-platform domains that ARE the government without a gov.<cc>
+    # suffix (each verified live 2026-08-02 as the ministry's own site):
+    # Armenia MFA (evisa.mfa.am), Iran MFA (evisatraveller.mfa.ir), and the
+    # Kyrgyz state e-government platform (www.evisa.e-gov.kg).
+    "mfa.am", "mfa.ir", "e-gov.kg",
 )
 
 AUTHORITY_KINDS = (

@@ -346,7 +346,9 @@ def build_family_adapter(db, family_id: str, *, observer=None,
         PortalFamily.family_id == family_id)).scalars().first()
     if family is None:
         raise ValueError(f"unknown portal family {family_id}")
-    if family.verification_status not in ("verified_official_domain", "verified_live"):
+    if family.verification_status not in ("verified_official_domain",
+                                          "verified_live",
+                                          "verified_via_official_link"):
         raise PermanentBuildStop(
             f"portal family {family_id} is not officially verified "
             f"({family.verification_status}) — build refused, fail closed")

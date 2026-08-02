@@ -90,6 +90,74 @@ def verify_family_live(db, family_id: str, *, observer=None) -> dict:
                 pass
 
 
+def verify_family_official_link(db, family_id: str, page_url: str,
+                                *, fetch=None) -> dict:
+    """Prove a non-government portal's identity from the GOVERNMENT's own page.
+
+    Fetches `page_url` (which must itself be on a government host — anything
+    else is refused before a byte moves) and looks for a link whose host is one
+    of the family's declared hostnames. Found -> the family is
+    verified_via_official_link with the page recorded as evidence. Not found ->
+    an honest failure; nothing is upgraded on hope."""
+    import re as _re
+    import urllib.request
+    from datetime import datetime, timezone
+    from urllib.parse import urlparse
+    from ..visa_snapshot.authority import hostname as _hostname
+    from .families import mark_official_link_verified
+
+    fam = db.execute(select(PortalFamily).where(
+        PortalFamily.family_id == family_id)).scalars().first()
+    if fam is None:
+        return {"family_id": family_id, "ok": False, "reason": "unknown family"}
+    page_host = _hostname(page_url)
+    if not is_government_host(page_host):
+        return {"family_id": family_id, "ok": False,
+                "reason": f"linking page {page_host} is not a government host — "
+                          "only the government's own word upgrades identity"}
+    if fetch is not None:
+        try:
+            html = fetch(page_url)
+        except Exception as e:  # noqa: BLE001 — an unreachable page is a real answer
+            return {"family_id": family_id, "ok": False,
+                    "reason": f"could not fetch {page_host}: {str(e)[:120]}"}
+        hrefs = _re.findall(r'''(?:href|src)\s*=\s*["']([^"']+)["']''', html)
+        link_hosts = {urlparse(h).netloc.lower().split(":")[0]
+                      for h in hrefs if "//" in h}
+    else:  # pragma: no cover — live path: government sites bot-filter bare
+        # HTTP clients (france-visas.gouv.fr 403s urllib), so the page is read
+        # with the same real-browser observer recon uses. Read-only, one page.
+        from ..portal.live_browser import LiveBrowserSession
+        sess = LiveBrowserSession(allowed_hostnames=[page_host])
+        try:
+            obs = sess.observe(page_url)
+        finally:
+            sess.close()
+        if not obs.get("ok"):
+            return {"family_id": family_id, "ok": False,
+                    "reason": f"could not fetch {page_host}: "
+                              f"{obs.get('error') or obs.get('status')}"}
+        link_hosts = {urlparse(l).netloc.lower().split(":")[0]
+                      for l in obs.get("links", []) if "//" in l}
+    matched = ""
+    for want in (fam.hostnames or []):
+        w = want.lower()
+        if any(lh == w or lh.endswith("." + w) or w.endswith("." + lh.lstrip("www."))
+               or lh.lstrip("www.") == w.lstrip("www.") for lh in link_hosts):
+            matched = w
+            break
+    if not matched:
+        return {"family_id": family_id, "ok": False,
+                "reason": f"{page_host} does not link to any of "
+                          f"{fam.hostnames} — identity not proven"}
+    evidence = {"page": page_url[:500], "page_host": page_host,
+                "matched_host": matched,
+                "retrieved_at": datetime.now(timezone.utc).isoformat(),
+                "method": "government page links to the portal hostname"}
+    mark_official_link_verified(db, family_id, evidence)
+    return {"family_id": family_id, "ok": True, "evidence": evidence}
+
+
 def verify_families_live(db, family_ids: list[str], *, observer_factory=None,
                          log=None) -> dict:
     log = log or (lambda *_: None)

@@ -262,6 +262,26 @@ def mark_live_verified(db, family_id: str, evidence: dict) -> None:
     db.commit()
 
 
+def mark_official_link_verified(db, family_id: str, evidence: dict) -> None:
+    """A GOVERNMENT page was observed linking to this portal's own hostname.
+
+    This is how a portal on a non-government domain (a contractor like VFS, or
+    a state platform on a bare ccTLD like hayya.qa) proves it is the official
+    channel: not by being reachable, but by the destination's own government
+    pointing at it. The evidence records which page, which matched host, and
+    when — a gate report can quote it."""
+    fam = db.execute(select(PortalFamily).where(
+        PortalFamily.family_id == family_id)).scalars().first()
+    if fam is None:
+        raise ValueError(f"unknown portal family {family_id}")
+    fam.verification_status = "verified_via_official_link"
+    fam.verification_evidence = dict(fam.verification_evidence or {},
+                                     official_link=evidence)
+    fam.last_verified_at = datetime.now(timezone.utc)
+    fam.stale = False
+    db.commit()
+
+
 def mark_unreachable(db, family_id: str, reason: str) -> None:
     fam = db.execute(select(PortalFamily).where(
         PortalFamily.family_id == family_id)).scalars().first()

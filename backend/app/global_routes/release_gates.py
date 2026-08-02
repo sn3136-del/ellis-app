@@ -63,6 +63,25 @@ def _handoff_kinds(nodes) -> set[str]:
     return {n.get("handoff_kind") for n in nodes if n.get("action") == "APPLICANT_HANDOFF"}
 
 
+def official_identity_ok(family, hosts, *, synthetic=False) -> tuple[bool, bool]:
+    """(family verified?, hostnames vouched for?) — the identity halves of
+    gate 1. A portal on a non-government domain passes the host check ONLY
+    through recorded official-link evidence: the destination's own government
+    page was observed linking to one of these exact hostnames. That is what
+    the gate's message always promised; this keeps the promise."""
+    fam_ok = family is not None and family.verification_status in (
+        "verified_official_domain", "verified_live", "verified_via_official_link")
+    link_ev = ((getattr(family, "verification_evidence", None) or {})
+               .get("official_link") or {}) if family is not None else {}
+    link_ok = bool(link_ev.get("matched_host")
+                   and is_government_host(link_ev.get("page_host", ""))
+                   and any(link_ev["matched_host"].lstrip("www.") ==
+                           h.lower().lstrip("www.") for h in hosts))
+    hosts_ok = synthetic or link_ok or (
+        bool(hosts) and all(is_government_host(h) for h in hosts))
+    return fam_ok, hosts_ok
+
+
 def evaluate_gates(db, *, build_request, candidate, version, family) -> dict:
     """Return {gate: {passed, reason}} — every gate present, every failure
     naming the exact missing capability."""
@@ -77,11 +96,10 @@ def evaluate_gates(db, *, build_request, candidate, version, family) -> dict:
         report[name] = {"passed": bool(passed), "reason": reason}
 
     # 1. Official portal identity: family verified by domain or live recon.
-    fam_ok = family is not None and family.verification_status in (
-        "verified_official_domain", "verified_live")
-    hosts = (build_request.portal_evidence or {}).get("hostnames", [])
-    synthetic = (build_request.portal_evidence or {}).get("verification") == "synthetic_test_portal"
-    hosts_ok = synthetic or (bool(hosts) and all(is_government_host(h) for h in hosts))
+    fam_ok, hosts_ok = official_identity_ok(
+        family, (build_request.portal_evidence or {}).get("hostnames", []),
+        synthetic=(build_request.portal_evidence or {}).get(
+            "verification") == "synthetic_test_portal")
     gate("official_portal_identity_confirmed", fam_ok and hosts_ok,
          "portal family identity verified" if (fam_ok and hosts_ok) else
          "missing: verified official portal identity (government-domain or live "
