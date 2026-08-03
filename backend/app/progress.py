@@ -159,7 +159,7 @@ def step_for_node(node: dict) -> str:
         return "portal_instructions"
     if action in ("CLICK", "CHECK") and node_id.startswith("entry_gate"):
         return "portal_instructions"
-    if action in ("FILL_NON_SENSITIVE", "SELECT_SEARCH", "SELECT"):
+    if action in ("FILL_NON_SENSITIVE", "SELECT_SEARCH", "SELECT", "SELECT_RADIO"):
         src = str(node.get("input_source") or "")
         for prefix, key in _FIELD_PREFIX_STEPS:
             if src.startswith(prefix):

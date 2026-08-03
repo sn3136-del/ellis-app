@@ -14,9 +14,15 @@ import re
 #   matching option deterministically) — sensitivity-screened like FILL.
 # SCROLL_TO_BOTTOM: scroll a container (window when selector empty) to the
 #   bottom — reversible by construction (entry-gate instruction modals).
+# SELECT_RADIO: a radio GROUP answered by its option labels. A radio's own
+#   label is its answer ("FEMALE"), not the question ("Gender"), so the group
+#   is one field with N observed choices — the node carries every one of them
+#   with the selector recon actually saw, and the runtime clicks the one the
+#   case answer names. Mandatory Gender questions were otherwise left blank.
 ACTION_TYPES = [
     "NAVIGATE", "WAIT_FOR_STATE", "CLICK", "FILL_NON_SENSITIVE", "SELECT",
-    "SELECT_SEARCH", "CHECK", "SCROLL_TO_BOTTOM", "UPLOAD_AUTHORIZED_DOCUMENT",
+    "SELECT_SEARCH", "SELECT_RADIO", "CHECK", "SCROLL_TO_BOTTOM",
+    "UPLOAD_AUTHORIZED_DOCUMENT",
     "READ_TEXT", "READ_FEE",
     "READ_APPOINTMENT_INVENTORY", "BOOK_APPOINTMENT",
     "WAIT_FOR_NETWORK", "VERIFY_EVIDENCE",
@@ -95,6 +101,10 @@ NODE_DEFAULTS = {
     "password_selector": "",
     "confirm_password_selector": "",
     "submit_selector": "",
+    # SELECT_RADIO choices: [{"label": <what the portal calls this answer>,
+    # "selector": <the selector recon observed for it>}]. Never synthesized —
+    # a choice Ellis cannot cite is a choice it will not click.
+    "options": [],
     "next": [],
 }
 
@@ -150,7 +160,8 @@ def validate_node(raw: dict, *, allowed_hostnames: list[str]) -> list[str]:
     if host and not any(host == a or host.endswith("." + a) for a in allow):
         errs.append(f"{nid}: hostname {host!r} outside the adapter allowlist")
     if action in ("CLICK", "FILL_NON_SENSITIVE", "SELECT", "SELECT_SEARCH",
-                  "CHECK", "READ_TEXT", "READ_FEE", "UPLOAD_AUTHORIZED_DOCUMENT"):
+                  "SELECT_RADIO", "CHECK", "READ_TEXT", "READ_FEE",
+                  "UPLOAD_AUTHORIZED_DOCUMENT"):
         sel = (node.get("selector") or "").strip()
         if not sel:
             # ONE honest exception: a control that provably cannot be observed
@@ -181,12 +192,25 @@ def validate_node(raw: dict, *, allowed_hostnames: list[str]) -> list[str]:
             errs.append(f"{nid}: SCROLL_TO_BOTTOM must be reversible")
         if node.get("sensitive"):
             errs.append(f"{nid}: SCROLL_TO_BOTTOM may never be marked sensitive")
-    if action in ("FILL_NON_SENSITIVE", "SELECT_SEARCH"):
+    if action in ("FILL_NON_SENSITIVE", "SELECT_SEARCH", "SELECT_RADIO"):
         src = node.get("input_source") or ""
         if not src:
             errs.append(f"{nid}: {action} requires input_source")
         if _SENSITIVE_FIELD_RE.search(src) or node.get("sensitive"):
             errs.append(f"{nid}: sensitive input may never be automated — use APPLICANT_HANDOFF")
+    if action == "SELECT_RADIO":
+        # Every choice must be one recon actually saw, with a selector the
+        # runtime can target. No options means no answer Ellis could click.
+        opts = node.get("options") or []
+        if not isinstance(opts, list) or not opts:
+            errs.append(f"{nid}: SELECT_RADIO requires observed options")
+        for o in (opts if isinstance(opts, list) else []):
+            osel = str((o or {}).get("selector", "")).strip()
+            if not str((o or {}).get("label", "")).strip():
+                errs.append(f"{nid}: SELECT_RADIO option is missing its label")
+            if not osel or not deterministic_selector(osel):
+                errs.append(f"{nid}: SELECT_RADIO option selector {osel!r} "
+                            f"is not a deterministic CSS selector")
     if action == "CHECK":
         # Instruction/commitment acknowledgments may be checked; anything that
         # smells like a signature/declaration-signing or otherwise sensitive

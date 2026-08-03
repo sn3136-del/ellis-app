@@ -35,6 +35,176 @@ _WAIT_MS = 8000      # element must appear
 _ACT_MS = 2500       # element exists: fill / select / check it
 _CLICK_MS = 6000     # click (navigation-bearing, slightly longer)
 
+# ---------------------------------------------------------------------------
+# One vocabulary for "an option in an open dropdown", shared by the picker
+# (select_search) and the reader (list_options).
+#
+# ARIA comes first on purpose: every accessible combobox marks its rows
+# role="option" and its panel role="listbox", whatever framework drew them.
+# The class patterns after it are the widgets that get ARIA wrong or attach it
+# late. Ellis previously carried only Ant Design's class names, so Angular
+# Material's autocomplete — Thailand's TDAC — read as ZERO options while three
+# were visibly on screen, and the run stalled on a dropdown a human could see.
+# A framework-specific selector list is a per-portal outage waiting to happen.
+_OPTION_JS = """
+const OPTION_SEL = '[role="option"], mat-option, [class*="select-item-option"],'
+  + '[class*="select-item"], [class*="option-content"], [class*="option-item"],'
+  + '[class*="autocomplete"] li, [role="listbox"] li, [class*="dropdown"] li,'
+  + '[class*="menu"] li, datalist option';
+const PANEL_SEL = '[role="listbox"], [class*="autocomplete-panel"],'
+  + '[class*="select-dropdown"], [class*="dropdown-menu"],'
+  + '[class*="menu-surface"], [class*="dropdown"]';
+
+function _visible(el) {
+  if (!el || el.offsetParent === null) return false;
+  if (el.getAttribute('aria-hidden') === 'true') return false;
+  if (el.hidden) return false;
+  return !/(^|[\\s-])hidden(\\s|$)/.test(String(el.className || ''));
+}
+
+// Portals built on web components keep their options inside a shadow root,
+// where querySelectorAll cannot see them — the same silent "zero options on a
+// list the applicant can see" that Angular Material produced. Walking every
+// shadow root is expensive, so it is the FALLBACK when the light DOM shows
+// nothing, never the path taken on a normal page.
+function _deep(root, sel) {
+  const out = Array.from(root.querySelectorAll(sel));
+  if (out.length) return out;
+  for (const host of root.querySelectorAll('*')) {
+    if (host.shadowRoot) out.push(..._deep(host.shadowRoot, sel));
+  }
+  return out;
+}
+
+// Every select on a page keeps its own panel; only the OPEN one may be read.
+// Reading the document's first match once declared an 83-entry list finished
+// after 10 rows, because it had read a different, closed dropdown.
+function _openPanel() {
+  const open = _deep(document, PANEL_SEL).filter(_visible);
+  return open.length ? open[open.length - 1] : null;
+}
+
+function _label(el) {
+  // The row's own visible text — a framework that renders the label in a
+  // child still yields it here. Fall back to the accessible name for rows
+  // that draw their label some other way (icon + aria-label).
+  const t = (el.innerText || el.textContent || '').replace(/\\s+/g, ' ').trim();
+  return t || (el.getAttribute('aria-label') || el.getAttribute('title') || '').trim();
+}
+
+// A "no results"/"loading" row is a message, not a choice. Treating one as
+// selectable would type a status message into a government form.
+function _placeholder(el, label) {
+  if (el.getAttribute('aria-disabled') === 'true' || el.hasAttribute('disabled'))
+    return true;
+  const cls = String(el.className || '') + ' ' +
+              String(((el.parentElement || {}).className) || '');
+  if (/empty|disabled|no-?data|no-?result|no-?option|loading|placeholder/i.test(cls))
+    return true;
+  return /^(loading|searching|no (results?|data|options?|matches)|nothing found)\\b/i
+    .test(label);
+}
+
+// Rows, de-duplicated by ELEMENT: Ant nests an -option-content span inside
+// its -option row, so both match OPTION_SEL and a text-keyed set would drop a
+// genuine duplicate label instead of the nesting.
+function _rows() {
+  const panel = _openPanel();
+  const scan = (root) => {
+    const out = [], seen = new Set();
+    for (const el of _deep(root, OPTION_SEL)) {
+      if (!_visible(el)) continue;
+      const row = el.closest('[role="option"], mat-option, [class*="select-item"],'
+                             + '[class*="option-item"]') || el;
+      if (seen.has(row)) continue;
+      const label = _label(row);
+      if (!label || _placeholder(row, label)) continue;
+      seen.add(row);
+      out.push([row, label]);
+    }
+    return out;
+  };
+  // Scoped read first; fall back to the document when the open panel cannot
+  // be identified, so an unrecognised container is a slower read, not a
+  // dropdown Ellis swears is empty.
+  const scoped = panel ? scan(panel) : [];
+  return scoped.length ? scoped : scan(document);
+}
+
+function _norm(s) {
+  return String(s || '').toLowerCase()
+    .replace(/[\\s\\u00a0]+/g, ' ').trim();
+}
+
+// "CHN : CHINESE" -> ["chn : chinese", "chn", "chinese"]. Split only on
+// separators that genuinely divide a code from a name; a bare hyphen stays
+// inside the word so "Guinea-Bissau" is never mistaken for "Guinea".
+function _segments(label) {
+  const n = _norm(label);
+  const parts = n.split(/\\s*[:|\\/,()\\[\\]\\u2013]\\s*|\\s+-\\s+/)
+                 .map(s => s.trim()).filter(Boolean);
+  return parts.length > 1 ? [n].concat(parts) : [n];
+}
+
+// The match ladder, most precise first. Within a tier the portal's own order
+// wins — it filtered and ranked these rows for the text we typed, so its
+// first row is the answer a person reading the same list would pick.
+// Below the ladder Ellis asks the applicant; it never settles for a
+// near-miss ("China" must not select "China(Taiwan)").
+function _pick(rows, want, allowSole) {
+  const w = _norm(want);
+  if (!w || !rows.length) return null;
+  const exact = rows.find(([, t]) => _norm(t) === w);
+  if (exact) return [exact, 'exact'];
+  // Split date and count dropdowns disagree about padding: a month box may
+  // list "5" where the canonical value is "05". Numbers are unambiguous, so
+  // compare them as numbers rather than as text.
+  if (/^\\d+$/.test(w)) {
+    const n = Number(w);
+    const num = rows.find(([, t]) => /^\\d+$/.test(_norm(t)) && Number(_norm(t)) === n);
+    if (num) return [num, 'numeric'];
+  }
+  const seg = rows.find(([, t]) => _segments(t).indexOf(w) >= 0);
+  if (seg) return [seg, 'segment'];
+  const pre = rows.find(([, t]) => _norm(t).startsWith(w));
+  if (pre) return [pre, 'prefix'];
+  const sub = rows.find(([, t]) => _norm(t).includes(w));
+  if (sub) return [sub, 'contains'];
+  // The portal narrowed its whole list to one row for THIS query — the
+  // widget's own resolution of the text, not a guess by Ellis. Only for a
+  // list the query filtered: a radio group of one is not an answer to
+  // whatever the applicant said, so callers that pass a fixed set opt out.
+  if (allowSole && rows.length === 1) return [rows[0], 'sole_option'];
+  return null;
+}
+"""
+
+# What a widget currently SHOWS, wherever it keeps it: an autocomplete writes
+# the label into its own input; a styled select renders it in a selection
+# element beside an input whose value stays ''. An empty input is therefore
+# not an answer — it is a reason to look at what the widget renders.
+_SHOWN_VALUE_JS = """(el) => {
+  const own = (el.value || '').trim();
+  if (own) return own;
+  // Every layer from the widget ROOT down to the input can carry 'select' in
+  // its class (ant-select > ant-select-selector > ant-select-selection-search
+  // > input.ant-select-selection-search-input), so closest() lands on an
+  // inner layer that holds no value node — and closest() can even return the
+  // input itself. Climb to the OUTERMOST select-ish ancestor instead.
+  let root = null, n = el.parentElement, hops = 0;
+  while (n && hops < 6) {
+    if (/select|combobox|dropdown|form-field/i.test(String(n.className || '')) ||
+        n.getAttribute('role') === 'combobox') root = n;
+    else if (root) break;
+    n = n.parentElement; hops++;
+  }
+  const s = root && root.querySelector('[class*="selection-item"],'
+    + '[class*="single-value"], [class*="selected-value"],'
+    + '[class*="select-value"], [class*="value-text"]');
+  if (s) return (s.innerText || '').trim();
+  return root ? '' : (el.innerText || '').trim();
+}"""
+
 
 def _parse_slot_datetime(raw: str) -> int | None:
     """Parse a portal slot's start time to a UTC epoch-ms integer, or None.
@@ -1084,14 +1254,14 @@ class BrowserbasePageDriver:
     def read_value(self, selector: str) -> dict:
         """The value the portal currently holds in a field. Used to detect a
         value the FORM dropped (a dependent select can reset a field that was
-        filled earlier) so it can be repaired instead of re-asked."""
+        filled earlier) so it can be repaired instead of re-asked.
+
+        A styled select keeps its committed value BESIDE the input, and the
+        input's own value stays '' — so an empty string is not an answer here,
+        it is a reason to look at what the widget renders. Returning it made
+        every filled combobox read as blank on resume."""
         try:
-            val = self.page.eval_on_selector(
-                selector,
-                "el => { if (el.value !== undefined && el.value !== null) return el.value;"
-                " const w = el.closest('[class*=\"select\"]');"
-                " const s = w && w.querySelector('[class*=\"selection-item\"]');"
-                " return s ? s.innerText.trim() : ''; }")
+            val = self.page.eval_on_selector(selector, _SHOWN_VALUE_JS)
             return {"ok": True, "value": str(val or "")}
         except Exception as e:  # noqa: BLE001
             return {"ok": False, "code": "NO_SUCH_ELEMENT", "detail": str(e)[:120]}
@@ -1357,38 +1527,21 @@ class BrowserbasePageDriver:
                 pass
             self.page.locator(f"{selector} >> visible=true").first.click(timeout=_CLICK_MS)
             try:  # clear any previous query so filters start clean
-                self.page.keyboard.press("Control+A")
+                self.page.keyboard.press("ControlOrMeta+A")
                 self.page.keyboard.press("Delete")
             except Exception:  # noqa: BLE001
                 pass
             self.page.keyboard.type(want, delay=25)
-            # The option ROWS ([role=option]) are empty framework placeholders;
-            # the labels live in the item/content children. Match and click in
-            # one page evaluation so no element handle can go stale mid-scroll.
-            # EXACT match wins over substring: "China" must never select
-            # "China(Taiwan)" — a near-miss is a wrong answer, not a shortcut.
-            pick_js = """(want) => {
-              const seen = new Set(), opts = [];
-              for (const el of document.querySelectorAll(
-                     '[class*="select-item"], [class*="option-content"]')) {
-                if (el.offsetParent === null) continue;
-                // Skip the widget's own "no data"/empty placeholder row — it
-                // is not a choice, and treating it as one would be a guess.
-                const cls = (el.className || '') + ' ' +
-                            ((el.closest('[class*="select-item"]') || {}).className || '');
-                if (/empty|disabled/i.test(cls)) continue;
-                const t = (el.textContent || '').trim();
-                if (!t || seen.has(t)) continue;
-                seen.add(t);
-                opts.push([el, t]);
-              }
-              if (!opts.length) return {labels: []};
-              const w = want.toLowerCase();
-              let hit = opts.find(([, t]) => t.toLowerCase() === w)
-                     || opts.find(([, t]) => t.toLowerCase().includes(w));
-              if (!hit) return {labels: opts.map(([, t]) => t).slice(0, 8)};
-              (hit[0].closest('[class*="select-item"]') || hit[0]).click();
-              return {chosen: hit[1]};
+            # Match and click in ONE page evaluation so no element handle can
+            # go stale between the read and the click (a virtualized list
+            # re-renders its rows as it settles).
+            pick_js = "(want) => {" + _OPTION_JS + """
+              const rows = _rows();
+              if (!rows.length) return {labels: []};
+              const hit = _pick(rows, want, true);
+              if (!hit) return {labels: rows.map(([, t]) => t).slice(0, 8)};
+              hit[0][0].click();
+              return {chosen: hit[0][1], match: hit[1]};
             }"""
             result = {}
             # Read FIRST — fast lists are already rendered — then poll on a
@@ -1410,22 +1563,88 @@ class BrowserbasePageDriver:
                         "detail": (f"{len(labels)} options, none match {want[:30]!r}"
                                    if labels else f"no option matches {want[:40]!r}")}
             self.page.wait_for_timeout(250)
+            # Read back what the WIDGET now shows, wherever it keeps it — the
+            # selection is only committed if the page can be seen holding it.
             shown = ""
             try:
-                shown = self.page.eval_on_selector(
-                    selector,
-                    "el => { const w = el.closest('[class*=\"select\"]');"
-                    " const s = w && w.querySelector('[class*=\"selection-item\"]');"
-                    " return s ? s.innerText.trim() : ''; }") or ""
+                shown = self.page.eval_on_selector(selector, _SHOWN_VALUE_JS) or ""
             except Exception:  # noqa: BLE001
                 shown = ""
-            if shown and not (want.lower() in shown.lower()
-                              or shown.lower() in chosen_text.lower()):
+            norm_shown, norm_want = shown.strip().lower(), want.strip().lower()
+            norm_chosen = str(chosen_text).strip().lower()
+            if shown and not (norm_want in norm_shown or norm_shown in norm_chosen
+                              or norm_chosen in norm_shown):
                 return {"ok": False, "code": "VALUE_NOT_ACCEPTED",
                         "detail": f"portal shows {shown[:60]!r}"}
-            return {"ok": True, "shown": (shown or chosen_text)[:60]}
+            return {"ok": True, "shown": (shown or chosen_text)[:60],
+                    "match": result.get("match") or "exact"}
         except Exception as e:  # noqa: BLE001
             return {"ok": False, "code": "NO_SUCH_ELEMENT", "detail": str(e)[:120]}
+
+    def select_radio(self, options: list, value: str) -> dict:
+        """Answer a radio GROUP by its option labels.
+
+        The group's choices were observed at build time, each with its own
+        selector, so nothing is searched for here — the answer is matched
+        against the portal's own words with the SAME ladder select_search
+        commits with (exact, then a delimiter-separated segment, then prefix,
+        then substring). "F" answers "FEMALE" because the portal's word starts
+        with it; nothing answers a group whose words it does not match, which
+        becomes an applicant question rather than a coin flip.
+
+        The click is verified against what the page RENDERS (aria-checked /
+        the wrapper's own class), not the hidden input's DOM property — a
+        framework widget that ignored the click must not read as answered.
+        """
+        want = str(value or "").strip()
+        rows = [(str((o or {}).get("label", "")).strip(),
+                 str((o or {}).get("selector", "")).strip())
+                for o in (options or [])]
+        rows = [r for r in rows if r[0] and r[1]]
+        if not want or not rows:
+            return {"ok": False, "code": "NO_OPTIONS",
+                    "options": [r[0] for r in rows],
+                    "detail": "no observed choices" if not rows else "no answer"}
+        hit = self.page.evaluate(
+            "([labels, want]) => {" + _OPTION_JS + """
+              const rows = labels.map((t, i) => [i, t]);
+              const pick = _pick(rows, want, false);
+              return pick ? {index: pick[0][0], match: pick[1]} : null;
+            }""", [[r[0] for r in rows], want])
+        if not hit:
+            return {"ok": False, "code": "NO_OPTIONS",
+                    "options": [r[0] for r in rows],
+                    "detail": f"{len(rows)} choices, none match {want[:30]!r}"}
+        label, sel = rows[int(hit["index"])]
+        if _SENSITIVE_SELECTOR.search(sel):
+            return {"ok": False, "code": "SENSITIVE_FIELD_AUTOMATION"}
+        try:
+            self.page.locator(f"{sel} >> visible=true").first.click(timeout=_CLICK_MS)
+        except Exception:  # noqa: BLE001 — a hidden native input under a
+            # styled widget cannot be clicked directly; click its label.
+            try:
+                self.page.eval_on_selector(
+                    sel, "el => { const w = el.closest('label, [class*=\"radio\"]');"
+                         " (w || el).click(); }")
+            except Exception as e:  # noqa: BLE001
+                return {"ok": False, "code": "NO_SUCH_ELEMENT", "detail": str(e)[:120]}
+        self.page.wait_for_timeout(120)
+        try:
+            checked = self.page.eval_on_selector(
+                sel,
+                "el => { const w = el.closest('[class*=\"radio\"], label');"
+                " const a = (w && w.getAttribute('aria-checked')) ||"
+                "   el.getAttribute('aria-checked');"
+                " if (a !== null && a !== undefined) return a === 'true';"
+                " if (w && /(^|[\\s-])(checked|selected)(\\s|$)/.test("
+                "     String(w.className || ''))) return true;"
+                " return !!el.checked; }")
+        except Exception:  # noqa: BLE001
+            checked = False
+        if not checked:
+            return {"ok": False, "code": "VALUE_NOT_ACCEPTED",
+                    "detail": f"{label[:40]!r} did not stay selected"}
+        return {"ok": True, "shown": label[:60], "match": hit.get("match")}
 
     def list_options(self, selector: str, max_options: int = 300,
                      max_scrolls: int = 12) -> dict:
@@ -1442,43 +1661,32 @@ class BrowserbasePageDriver:
         capture a long list (e.g. Vietnam's 83 border gates) in full."""
         if _SENSITIVE_SELECTOR.search(selector or ""):
             return {"ok": False, "code": "SENSITIVE_FIELD_AUTOMATION"}
-        # Every select on the page keeps its OWN dropdown in the DOM. Only the
-        # open one may be read or scrolled: targeting the document's first
-        # match read — and declared "finished" — a different, closed list,
-        # which is how an 83-entry list came back looking like 10 complete ones.
-        open_dd = """
-          const _dds = Array.from(document.querySelectorAll(
-              '[class*="select-dropdown"], [class*="dropdown"]'))
-            .filter(d => d.offsetParent !== null &&
-                         !/hidden/.test(String(d.className || '')));
-          const dd = _dds.length ? _dds[_dds.length - 1] : null;
-        """
-        read_js = """(max) => {""" + open_dd + """
+        # Same option vocabulary the picker commits with: a list Ellis offers
+        # an applicant must be the list Ellis can then select from.
+        read_js = "(max) => {" + _OPTION_JS + """
           const seen = new Set(), labels = [];
-          for (const el of (dd || document).querySelectorAll(
-                 '[class*="select-item"], [class*="option-content"]')) {
-            if (el.offsetParent === null) continue;
-            const cls = (el.className || '') + ' ' +
-                        ((el.closest('[class*="select-item"]') || {}).className || '');
-            if (/empty|disabled/i.test(cls)) continue;
-            const t = (el.textContent || '').trim();
-            if (!t || seen.has(t)) continue;
+          for (const [, t] of _rows()) {
+            if (seen.has(t)) continue;
             seen.add(t);
             labels.push(t);
             if (labels.length >= max) break;
           }
           return labels;
         }"""
-        # Ant Design virtualizes long lists — only visible rows exist in the
-        # DOM. Scroll the dropdown's holder to pull the rest in.
+        # Long lists are virtualized — only visible rows exist in the DOM.
+        # Scroll the open panel's holder to pull the rest in.
         # Reports WHY it stopped, not just that it did: "did not move" means
         # end-of-list only when a scroller was found and is already at its
         # bottom. No scroller + content that fits = a genuinely short list.
         # Anything else is an incomplete read, and an incomplete list must
         # never be offered to an applicant as the portal's whole list.
-        scroll_js = """() => {""" + open_dd + """
+        scroll_js = "() => {" + _OPTION_JS + """
+          const dd = _openPanel();
+          // The scroller is the panel itself on some widgets and an inner
+          // holder on others; an overflowing panel counts either way.
           const h = (dd || document).querySelector(
-            '.rc-virtual-list-holder, [class*="list-holder"]');
+            '.rc-virtual-list-holder, [class*="list-holder"], [class*="panel"]')
+            || (dd && dd.scrollHeight > dd.clientHeight + 2 ? dd : null);
           // No holder inside the OPEN dropdown: completeness is unknown, so
           // the read is reported partial rather than guessed complete.
           if (!h) return {found: false, moved: false, atEnd: false, fits: false};
@@ -1504,8 +1712,28 @@ class BrowserbasePageDriver:
                 labels = self.page.evaluate(read_js, max_options) or []
                 if len(labels) > 1:
                     break
+            # This read almost always follows a query that matched NOTHING —
+            # and the widget is still filtered by that query, so the "full
+            # list" is empty and the applicant is offered no choices at all.
+            # Clear the leftover query and read again. Only when the filter
+            # is showing nothing: a widget already listing options keeps its
+            # state untouched, so a committed value is never wiped.
+            if not labels:
+                try:
+                    residue = self.page.eval_on_selector(
+                        selector, "el => (el.value || '').trim()") or ""
+                except Exception:  # noqa: BLE001
+                    residue = ""
+                if residue:
+                    self.page.keyboard.press("ControlOrMeta+A")
+                    self.page.keyboard.press("Delete")
+                    for i in range(19):
+                        if i:
+                            self.page.wait_for_timeout(100)
+                        labels = self.page.evaluate(read_js, max_options) or []
+                        if len(labels) > 1:
+                            break
             seen = list(labels)
-            barren = 0
             # `complete` = the WIDGET ran out of options, not this read running
             # out of budget. A partial list must never be offered as if it were
             # the portal's whole list (a virtualized dropdown of 83 border
@@ -1527,14 +1755,12 @@ class BrowserbasePageDriver:
                 self.page.wait_for_timeout(60)
                 more = self.page.evaluate(read_js, max_options) or []
                 fresh = [t for t in more if t not in set(seen)]
-                if fresh:
-                    seen.extend(fresh)
-                    barren = 0
-                else:
-                    barren += 1
-                    if barren >= 2:     # the list stopped yielding new rows
-                        complete = bool(st.get("atEnd"))
-                        break
+                seen.extend(fresh)
+                # Keep scrolling even when a pass yields nothing new. A list
+                # that is NOT virtualized has every row in the DOM from the
+                # first read, so "no fresh rows" is what a complete list looks
+                # like — stopping there reported a whole list as partial.
+                # The scroller reaching its end is the only completeness proof.
                 if len(seen) >= max_options:
                     break               # hit the read budget: partial
             try:

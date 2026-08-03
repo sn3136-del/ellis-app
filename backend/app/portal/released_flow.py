@@ -2119,7 +2119,7 @@ def known_missing_questions(db, app_row) -> list[dict]:
     seen: set[str] = set()
     for node in (released.version_row.flow or []):
         act = node.get("action")
-        if act not in ("FILL_NON_SENSITIVE", "SELECT_SEARCH"):
+        if act not in ("FILL_NON_SENSITIVE", "SELECT_SEARCH", "SELECT_RADIO"):
             continue
         if not bool(node.get("mandatory", True)):
             continue
@@ -2142,10 +2142,18 @@ def known_missing_questions(db, app_row) -> list[dict]:
             or ("DD/MM/YYYY" if node.get("format") else "free text"),
             "mandatory": True,
             "kind": q.get("kind") or ("date" if node.get("format") else
-                                      "select" if act == "SELECT_SEARCH" else "text"),
+                                      "select" if act in ("SELECT_SEARCH",
+                                                          "SELECT_RADIO") else "text"),
         }
         options = list(q.get("options") or [])
         row = None
+        # A radio group's choices are FIXED and were observed at build time —
+        # the applicant can be offered the portal's own words up front, with
+        # no browser session and no cached read needed.
+        if not options and act == "SELECT_RADIO":
+            options = [str((o or {}).get("label", "")).strip()
+                       for o in (node.get("options") or []) if isinstance(o, dict)]
+            options = [t for t in options if t]
         if not options and entry["kind"] == "select":
             row = cached.get(node.get("node_id") or "") or cached.get(key)
             if row is not None:
@@ -2270,7 +2278,8 @@ def build_released_adapter(db, app_row, released: ReleasedRoute) -> PortalAdapte
         n.get("action") == "APPLICANT_HANDOFF" and
         n.get("handoff_kind") == "legally_personal_declaration" for n in flow)
     required_fields = [n.get("input_source") for n in flow
-                       if n.get("action") in ("FILL_NON_SENSITIVE", "SELECT_SEARCH")
+                       if n.get("action") in ("FILL_NON_SENSITIVE", "SELECT_SEARCH",
+                                              "SELECT_RADIO")
                        and n.get("input_source") and bool(n.get("mandatory", True))]
     required_docs = sorted({n.get("doc_type", "passport") for n in flow
                             if n.get("action") == "UPLOAD_AUTHORIZED_DOCUMENT"})

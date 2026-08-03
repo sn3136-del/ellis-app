@@ -339,19 +339,65 @@ _DATE_MASK_RE = re.compile(
     re.IGNORECASE)
 
 
+# A box that wants ONE component of a date and says so in the box itself.
+_DATE_PART_RE = re.compile(r"^\s*(yyyy|yy|mm|dd)\s*$", re.IGNORECASE)
+
+
+def _date_part(el: dict) -> str:
+    """The single date component a control asks for ("yyyy" / "mm" / "dd"),
+    in dates.to_portal tokens.
+
+    A split date is three controls under one caption. Read as one field, only
+    the first ever bound — TDAC's Date of Birth took a whole ISO date into its
+    YEAR dropdown while the month and day boxes stayed empty on a form that
+    will not continue without them (2026-08-03)."""
+    for raw in (el.get("placeholder"), el.get("label")):
+        m = _DATE_PART_RE.match(str(raw or ""))
+        if m:
+            return m.group(1).upper()
+    return ""
+
+
 def _date_pattern(el: dict) -> str:
     """The date format a masked input advertises, in dates.to_portal tokens.
 
     Read from the element's own placeholder or label — the portal states the
     pattern there precisely so a human types it correctly, and it is the only
-    non-guessed source for it. Anything that is not a bare mask returns "".
+    non-guessed source for it. Anything that is neither a bare mask nor a
+    single date component returns "".
     """
     for raw in (el.get("placeholder"), el.get("label")):
         m = _DATE_MASK_RE.match(str(raw or ""))
         if m:
             return "/".join(p.upper() for p in m.groups()) if "/" in str(raw) \
                 else str(raw).strip().upper()
-    return ""
+    return _date_part(el)
+
+
+def _radio_options(art, el: dict) -> list[dict]:
+    """Every button in this radio's group: the label the PORTAL gives each
+    answer, with the selector recon actually observed for it.
+
+    A radio's own label is its answer ("FEMALE"), not the question the field
+    asks ("Gender"), so a group is one field with N observed choices. Grounded
+    to this page and this group — no selector is ever synthesized."""
+    key = str(el.get("group_key") or el.get("name") or "").strip()
+    if not key:
+        return []
+    out: list[dict] = []
+    seen: set[str] = set()
+    for other in (art.structure or {}).get("elements", []):
+        if other.get("type") != "radio" or other.get("sensitive"):
+            continue
+        if str(other.get("group_key") or other.get("name") or "").strip() != key:
+            continue
+        label = str(other.get("option_label") or other.get("label") or "").strip()
+        sel = str(other.get("selector") or "").strip()
+        if not label or not sel or label.lower() in seen:
+            continue
+        seen.add(label.lower())
+        out.append({"label": label[:120], "selector": sel})
+    return out
 
 
 _NAME_QUALIFIERS = {
@@ -369,6 +415,17 @@ def _disqualified(ellis_field: str, toks: set) -> bool:
     return bool(_NAME_QUALIFIERS & toks)
 
 
+def _claimed(claimed: set, ellis_field: str, part: str) -> bool:
+    """Is this field already bound on this page?
+
+    A whole-date control and its split components are alternative ways to
+    answer the SAME field, so either form blocks the other; two components of
+    different parts do not block each other."""
+    if part:
+        return ellis_field in claimed or f"{ellis_field}:{part}" in claimed
+    return any(c == ellis_field or c.startswith(f"{ellis_field}:") for c in claimed)
+
+
 def _deterministic_mapper(artifacts: list[fm.AdapterReconArtifact]) -> list[dict]:
     """Ground each fillable control to at most one Ellis field by token match
     against a multilingual hint set. Fully deterministic; a control that
@@ -381,12 +438,21 @@ def _deterministic_mapper(artifacts: list[fm.AdapterReconArtifact]) -> list[dict
             if el.get("sensitive") or el.get("type") in (
                     "button", "submit", "checkbox", "link"):
                 continue
-            toks = _tokenize(el.get("name", ""), el.get("label", ""),
+            # A radio is named after its ANSWER, so match on the question its
+            # GROUP asks. Tokenizing "FEMALE" as if it named a field is how a
+            # mandatory Gender question matched nothing at all.
+            caption = str(el.get("group_label") or "") if el.get("type") == "radio" \
+                else str(el.get("label") or "")
+            toks = _tokenize(el.get("name", ""), caption,
                              el.get("placeholder", ""))
             if not toks:
                 continue
+            # A split date (yyyy / mm / dd) is ONE field across several
+            # controls: each component claims the field once, so the second
+            # and third boxes are no longer dropped as already-mapped.
+            part = _date_part(el)
             for ellis_field, hints in _NAME_HINTS.items():
-                if ellis_field in claimed:
+                if _claimed(claimed, ellis_field, part):
                     continue
                 if _disqualified(ellis_field, toks):
                     continue
@@ -396,7 +462,7 @@ def _deterministic_mapper(artifacts: list[fm.AdapterReconArtifact]) -> list[dict
                                 "selector": el["selector"], "page_key": art.page_key,
                                 "artifact_id": art.id,
                                 "required": bool(el.get("required"))})
-                    claimed.add(ellis_field)
+                    claimed.add(f"{ellis_field}:{part}" if part else ellis_field)
                     break
     return out
 
@@ -756,15 +822,26 @@ def generate_specification(db, *, build_request: fm.AdapterBuildRequest,
     # unknown Ellis field, unobserved element, sensitive target, or missing
     # citation ⇒ rejected and recorded.
     observed = {}
+    observed_by_selector = {}
     for a in artifacts:
         for el in (a.structure or {}).get("elements", []):
-            observed[(a.id, el.get("name"))] = el
+            observed.setdefault((a.id, el.get("name")), el)
+            observed_by_selector[(a.id, el.get("selector"))] = el
     from .schema import deterministic_selector
     accepted, rejected = [], []
     for m in proposals:
         errs = validate_field_mapping(m)
         key = (m.get("artifact_id"), m.get("portal_field"))
         el = observed.get(key)
+        # A radio GROUP shares ONE name across all its buttons, so a lookup by
+        # name alone lands on whichever sibling happened to win the dict and
+        # the proposal reads as citing a selector Ellis never saw. Prefer the
+        # element whose selector the proposal actually cites — same page, same
+        # name, just identified precisely.
+        cited = observed_by_selector.get((m.get("artifact_id"), m.get("selector")))
+        if cited is not None and \
+                str(cited.get("name") or "") == str(m.get("portal_field") or ""):
+            el = cited
         if m.get("ellis_field") not in ELLIS_FIELDS:
             errs.append("unknown_ellis_field")
         if el is None:
@@ -1083,9 +1160,19 @@ def _skeleton_flow(host: str, roles: dict, mappings: list[dict],
                     else "FILL_NON_SENSITIVE"
                 fmt = m.get("format") or _date_pattern(el)
                 extra = {"format": fmt} if fmt else {}
+                selector = m["selector"]
+                # A radio group is answered by its OPTION labels, so the node
+                # carries every choice the page showed, each with its own
+                # observed selector.
+                if kind == "radio":
+                    opts = _radio_options(app_art, el)
+                    if not opts:
+                        continue        # no citable choices — never invented
+                    action, extra = "SELECT_RADIO", {"options": opts}
+                    selector = opts[0]["selector"]
                 node(f"fill_{_unique_node_slug(m['portal_field'], used_slugs)}",
                      action,
-                     selector=m["selector"], input_source=m["ellis_field"],
+                     selector=selector, input_source=m["ellis_field"],
                      purpose=f"Fill {m['portal_field']} from the case record",
                      **extra)
             if save_sel:
@@ -1321,6 +1408,9 @@ def _entry_gated_flow(host: str, roles: dict, mappings: list[dict],
             str(el.get("name") or ""): _date_pattern(el)
             for el in (form_art.structure or {}).get("elements", [])
             if el.get("name") and _date_pattern(el)}
+        observed_el = {str(el.get("name") or ""): el
+                       for el in (form_art.structure or {}).get("elements", [])
+                       if el.get("name")}
         for m in mappings:
             if m.get("page_key") != form_key:
                 continue
@@ -1337,8 +1427,19 @@ def _entry_gated_flow(host: str, roles: dict, mappings: list[dict],
                 extra["format"] = fmt
             if isinstance(m.get("question"), dict):
                 extra["question"] = m["question"]
+            selector = m["selector"]
+            # A radio group is answered by its OPTION labels: carry every
+            # choice the page showed, each with its own observed selector.
+            if kind == "radio":
+                opts = _radio_options(form_art, observed_el.get(
+                    str(m["portal_field"])) or {})
+                if not opts:
+                    continue            # no citable choices — never invented
+                action, selector = "SELECT_RADIO", opts[0]["selector"]
+                extra = {k: v for k, v in extra.items() if k == "question"}
+                extra["options"] = opts
             node(f"fill_{_unique_node_slug(m['portal_field'], used_slugs)}", action,
-                 selector=m["selector"], input_source=m["ellis_field"],
+                 selector=selector, input_source=m["ellis_field"],
                  mandatory=bool(m.get("mandatory", True)),
                  purpose=f"Fill {m['portal_field']} from the case record "
                          f"(pauses with an applicant question when unanswered)",

@@ -83,6 +83,17 @@ def sanitize_structure(observation: dict) -> dict:
             clean["submits"] = re.sub(r"[^a-z_]", "", str(el.get("submits", "")))[:40]
         if el.get("navigates_to"):
             clean["navigates_to"] = str(el.get("navigates_to", ""))[:200]
+        # Radio-group context: the question the group asks and the answer this
+        # button stands for. Portal structure, sanitized as labels are — a
+        # radio recorded with only its own answer-label names no field, which
+        # is how a mandatory Gender question went unmapped entirely.
+        if el.get("group_label"):
+            clean["group_label"] = sanitize_label(el.get("group_label", ""))
+        if el.get("group_key"):
+            clean["group_key"] = re.sub(r"[^a-zA-Z0-9_\-]", "",
+                                        str(el.get("group_key", "")))[:80]
+        if el.get("option_label"):
+            clean["option_label"] = sanitize_label(el.get("option_label", ""))
         # Appointment-slot handles: portal STRUCTURE (a slot id or its
         # datetime), never applicant data. Only the fixed allowlist survives,
         # each value length-bounded and stripped of anything but the safe

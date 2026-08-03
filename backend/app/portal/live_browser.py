@@ -242,6 +242,29 @@ _EXTRACT_JS = r"""
                   placeholder: (el.placeholder || '').slice(0, 60),
                   required: !!el.required || el.getAttribute('aria-required') === 'true',
                   sensitive: type === 'password' || sensitive.test(name) || sensitive.test(label) };
+    // A radio's own label is its ANSWER ("FEMALE"), never the question the
+    // field asks ("Gender") — that sits once on the group. Recorded without
+    // it, TDAC's mandatory Gender arrived as three unrelated controls named
+    // after their own answers, matched no Ellis field, and was left blank on
+    // a form that refuses to continue without it (2026-08-03).
+    if (type === 'radio') {
+      const grp = el.closest('mat-radio-group, [role="radiogroup"], fieldset,'
+                             + ' [class*="radio-group"]');
+      let gl = '';
+      if (grp) {
+        gl = grp.getAttribute('aria-label') || '';
+        if (!gl) {
+          const by = grp.getAttribute('aria-labelledby');
+          const t = by && document.getElementById(by);
+          if (t) gl = t.innerText || '';
+        }
+        if (!gl) { const lg = grp.querySelector('legend'); if (lg) gl = lg.innerText || ''; }
+        if (!gl) gl = cellLabel(grp) || '';
+        rec.group_key = String(grp.id || el.name || '').slice(0, 80);
+      }
+      if (gl) rec.group_label = gl.replace(/\s+/g, ' ').trim().replace(/^[*＊]\s*/, '').slice(0, 120);
+      rec.option_label = label;
+    }
     if (tag === 'button' || type === 'submit') rec.submits = (name || 'submit').replace(/[^a-z_]/gi, '').toLowerCase().slice(0, 40);
     if (tag === 'a' && el.getAttribute('href')) {
       try { rec.navigates_to = new URL(el.href, location.href).pathname.slice(0, 200); } catch (e) {}
@@ -307,6 +330,16 @@ def normalize_observation(url: str, status: int, hostname: str, raw: dict,
             rec["submits"] = re.sub(r"[^a-z_]", "", str(el.get("submits")))[:40]
         if el.get("navigates_to"):
             rec["navigates_to"] = str(el.get("navigates_to"))[:200]
+        # Radio-group context: the question the group asks, and the answer
+        # this particular button stands for. Both are portal STRUCTURE — no
+        # applicant value is captured here, same as every other field.
+        if el.get("group_label"):
+            rec["group_label"] = str(el.get("group_label"))[:120]
+        if el.get("group_key"):
+            rec["group_key"] = re.sub(r"[^a-zA-Z0-9_\-]", "",
+                                      str(el.get("group_key")))[:80]
+        if el.get("option_label"):
+            rec["option_label"] = str(el.get("option_label"))[:120]
         elements.append(rec)
     return {
         "ok": 200 <= int(status) < 400,

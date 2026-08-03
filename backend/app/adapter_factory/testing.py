@@ -69,8 +69,9 @@ def run_contract_layer(db, version_row, artifacts) -> fm.AdapterTestRun:
     for node in compiled.nodes.values():
         sel = node.get("selector")
         if sel and node["action"] in ("CLICK", "FILL_NON_SENSITIVE", "SELECT",
-                                      "SELECT_SEARCH", "CHECK", "READ_TEXT",
-                                      "READ_FEE", "UPLOAD_AUTHORIZED_DOCUMENT") \
+                                      "SELECT_SEARCH", "SELECT_RADIO", "CHECK",
+                                      "READ_TEXT", "READ_FEE",
+                                      "UPLOAD_AUTHORIZED_DOCUMENT") \
                 and sel not in observed:
             problems.append(f"{node['node_id']}: selector {sel!r} was never observed")
     passed = not problems
@@ -205,7 +206,7 @@ def run_synthetic_layer(db, version_row, *, scenarios=None,
 
 # Interactive actions whose selectors must exist in freshly observed structure.
 _INTERACTIVE_ACTIONS = ("CLICK", "FILL_NON_SENSITIVE", "SELECT", "SELECT_SEARCH",
-                        "CHECK", "READ_TEXT", "READ_FEE",
+                        "SELECT_RADIO", "CHECK", "READ_TEXT", "READ_FEE",
                         "UPLOAD_AUTHORIZED_DOCUMENT")
 
 

@@ -477,6 +477,33 @@ class FlowRunner:
             if not res.get("ok") and res.get("code") == "SENSITIVE_FIELD_AUTOMATION":
                 return {"status": "failed", "reason": "portal marked field sensitive — refusing"}
             return self._from_driver(node, res)
+        if action == "SELECT_RADIO":
+            opts = [o for o in (node.get("options") or []) if isinstance(o, dict)]
+            labels = [str(o.get("label", "")).strip() for o in opts]
+            labels = [t for t in labels if t]
+            value = self.answers.get(node.get("input_source", ""), "")
+            if value in ("", None):
+                if not bool(node.get("mandatory", True)):
+                    return {"status": "ok", "detail": {"skipped_optional": True}}
+                # The group's own words ARE the choices — the applicant picks
+                # from the portal's list, never a free-text guess.
+                if labels:
+                    self.observed_options[node["node_id"]] = labels
+                return {"status": "handoff",
+                        "handoff_kind": "additional_information"}
+            picker = getattr(self.driver, "select_radio", None)
+            if picker is None:
+                return {"status": "failed",
+                        "reason": "driver cannot answer a radio group"}
+            res = picker(opts, str(value))
+            if not res.get("ok") and res.get("code") == "NO_OPTIONS" and labels:
+                # A fixed set the answer is not on: ask with the portal's real
+                # choices rather than clicking the nearest-looking one.
+                self.observed_options[node["node_id"]] = labels
+                self._remember_options(node, labels, complete=True)
+                return {"status": "handoff",
+                        "handoff_kind": "additional_information"}
+            return self._from_driver(node, res)
         if action == "SCROLL_TO_BOTTOM":
             scroll = getattr(self.driver, "scroll_bottom", None)
             if scroll is None:
