@@ -84,7 +84,26 @@ _EXTRACT_JS = r"""
     if (el.id && !volatileId.test(el.id) && !generatedId.test(el.id)) return '#' + CSS.escape(el.id);
     // A NAME survives a re-render where a generated id does not, so it is
     // preferred over any volatile/generated id, not just over a path.
-    if (el.name) return tagl + '[name="' + el.name + '"]';
+    //
+    // But every member of a radio group shares its name BY DEFINITION, so on
+    // a group this selector names the QUESTION and can never name a choice.
+    // Ellis asked for MALE, clicked the first element the selector matched,
+    // set FEMALE on a government form, and reported success (Thailand's TDAC,
+    // 2026-08-03). A selector that matches more than one control is not a
+    // selector — qualify it by the value the option carries, and otherwise
+    // fall through to the id/path rules below, which do tell them apart.
+    if (el.name) {
+      const base = tagl + '[name="' + el.name.replace(/"/g, '') + '"]';
+      let shared = false;
+      try { shared = document.querySelectorAll(base).length > 1; } catch (e) {}
+      if (!shared) return base;
+      const v = el.getAttribute && el.getAttribute('value');
+      if (v) {
+        const q = base + '[value="' + v.replace(/"/g, '') + '"]';
+        try { if (document.querySelectorAll(q).length === 1) return q; }
+        catch (e) {}
+      }
+    }
     // An id that is a STABLE prefix plus a per-render stamp is still precise
     // if we anchor on the prefix. Indonesia's arrival card ships
     // spi_passport_no_1785696463523 — the field is 'spi_passport_no_', only
@@ -149,6 +168,63 @@ _EXTRACT_JS = r"""
       if (t && t.length <= 60) return t.replace(/^[*＊]\s*/, '');
     }
     return '';
+  };
+  // The SAME caption cell cellLabel reads, returned unstripped — the asterisk
+  // it removes is the only place some portals say "you must answer this".
+  const cellCaptionEl = (el) => {
+    let cell = el;
+    for (let i = 0; i < 9 && cell && cell.parentElement; i++) {
+      cell = cell.parentElement;
+      const prev = cell.previousElementSibling;
+      if (!prev) continue;
+      if (prev.querySelector && prev.querySelector('input, select, textarea')) continue;
+      const t = (prev.innerText || '').trim().replace(/\s+/g, ' ');
+      if (t && t.length <= 60) return prev;
+    }
+    return null;
+  };
+  // A portal states "this answer is required" in more ways than the required
+  // attribute, and the attribute is the one modern SPA forms skip. Angular
+  // Material validates in TypeScript and draws a red asterisk in the caption
+  // — so TDAC's 23-field form recorded as entirely OPTIONAL, and Ellis
+  // silently skipped a mandatory Occupation on a form that refuses to submit
+  // without it, instead of asking the applicant for it (2026-08-03).
+  // Read the marker the applicant themselves reads.
+  const REQ_MARK = /(^|\s)[*＊]|[*＊]\s*$/;
+  const REQ_CLASS = /required|mandatory|asterisk/i;
+  const markedRequired = (node) => {
+    if (!node) return false;
+    if (REQ_CLASS.test(String(node.className || ''))) return true;
+    if (node.querySelector && node.querySelector(
+        '[class*="required"], [class*="asterisk"], [class*="mandatory"],'
+        + ' abbr[title*="equired"]')) return true;
+    // textContent, not innerText: MDC renders its marker in a span the
+    // layout may collapse, and a caption's asterisk is authored text either
+    // way. Bounded to caption-length strings so a whole section's prose
+    // containing a footnote star can never mark a field required.
+    const t = (node.textContent || '').replace(/\s+/g, ' ').trim();
+    return t.length > 0 && t.length <= 80 && REQ_MARK.test(t);
+  };
+  const isRequired = (el) => {
+    if (el.required || el.getAttribute('aria-required') === 'true') return true;
+    if (el.id) {
+      const l = document.querySelector('label[for="' + CSS.escape(el.id) + '"]');
+      if (markedRequired(l)) return true;
+    }
+    const ff = el.closest && el.closest('mat-form-field, [class*="form-field"]');
+    if (ff && markedRequired(ff.querySelector('mat-label, label'))) return true;
+    if (ff && REQ_CLASS.test(String(ff.className || ''))) return true;
+    if (markedRequired(el.closest('label'))) return true;
+    // Bootstrap-era forms class the field's WRAPPER "required". Bounded to a
+    // few ancestors, and only while the wrapper still holds this one control
+    // — a whole <form class="required-fields"> must not mark every field on
+    // the page.
+    let w = el.parentElement;
+    for (let i = 0; i < 3 && w; i++, w = w.parentElement) {
+      if (w.querySelectorAll('input, select, textarea').length > 1) break;
+      if (REQ_CLASS.test(String(w.className || ''))) return true;
+    }
+    return markedRequired(cellCaptionEl(el));
   };
   const labelFor = (el) => {
     if (el.getAttribute('aria-label')) return el.getAttribute('aria-label');
@@ -240,7 +316,7 @@ _EXTRACT_JS = r"""
     const label = (labelFor(el) || '').trim().slice(0, 120);
     const rec = { selector: cssPath(el).slice(0, 200), name, label, type,
                   placeholder: (el.placeholder || '').slice(0, 60),
-                  required: !!el.required || el.getAttribute('aria-required') === 'true',
+                  required: isRequired(el),
                   sensitive: type === 'password' || sensitive.test(name) || sensitive.test(label) };
     // A radio's own label is its ANSWER ("FEMALE"), never the question the
     // field asks ("Gender") — that sits once on the group. Recorded without
@@ -261,6 +337,12 @@ _EXTRACT_JS = r"""
         if (!gl) { const lg = grp.querySelector('legend'); if (lg) gl = lg.innerText || ''; }
         if (!gl) gl = cellLabel(grp) || '';
         rec.group_key = String(grp.id || el.name || '').slice(0, 80);
+        // A radio group is marked required ONCE, on the question — never on
+        // the individual answers. Read it where the portal writes it.
+        if (!rec.required && (markedRequired(grp.querySelector('legend'))
+                              || markedRequired(cellCaptionEl(grp))
+                              || grp.getAttribute('aria-required') === 'true'))
+          rec.required = true;
       }
       if (gl) rec.group_label = gl.replace(/\s+/g, ' ').trim().replace(/^[*＊]\s*/, '').slice(0, 120);
       rec.option_label = label;

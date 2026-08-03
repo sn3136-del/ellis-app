@@ -373,7 +373,7 @@ def test_a_name_is_preferred_over_a_generated_id():
     from app.portal.live_browser import _EXTRACT_JS
     chain = _EXTRACT_JS[_EXTRACT_JS.index("const cssPath"):_EXTRACT_JS.index("const labelFor")]
     id_first = chain.index("!generatedId.test(el.id)) return '#'")
-    name_line = chain.index("if (el.name) return tagl + '[name=")
+    name_line = chain.index("if (el.name) {")
     assert id_first < name_line, "a clean id may still win"
     # …but the fallback id line must come AFTER the name line.
     assert chain.rindex("'#' + CSS.escape(el.id)") > name_line

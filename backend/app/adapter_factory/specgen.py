@@ -1203,6 +1203,12 @@ def _skeleton_flow(host: str, roles: dict, mappings: list[dict],
                 node(f"fill_{_unique_node_slug(m['portal_field'], used_slugs)}",
                      action,
                      selector=selector, input_source=m["ellis_field"],
+                     # Whether the PORTAL demands this field decides what the
+                     # runtime does with a missing answer: ask the applicant,
+                     # or move on. Dropped here, every skeleton-flow portal
+                     # inherited the default and this builder disagreed with
+                     # _entry_gated_flow about the same mapping.
+                     mandatory=bool(m.get("mandatory", m.get("required", True))),
                      purpose=f"Fill {m['portal_field']} from the case record",
                      **extra)
             if save_sel:
