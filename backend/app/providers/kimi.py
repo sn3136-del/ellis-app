@@ -201,13 +201,28 @@ class LiveKimiProvider:  # pragma: no cover - needs a real key/network
                           json.dumps(application))
 
     def translate(self, text: str, target: str, source: str) -> str:  # pragma: no cover - needs key
+        """Translate a document's extracted text.
+
+        K3 is a reasoning model, and this call used to set neither temperature
+        nor max_tokens — so a translation could spend most of its wall clock
+        deliberating about text that needs no deliberation, and applicants
+        waited. Translation is not a reasoning task: temperature 0 is correct
+        for it anyway, and the answer's length is bounded by the input's, so
+        both are stated instead of left open.
+        """
         from ..i18n import LANGUAGE_NAMES
         tgt = LANGUAGE_NAMES.get(target, target)
+        # Output tokens scale with input; ~2 tokens per input word is generous
+        # for every language pair, with a floor for very short documents and a
+        # ceiling that keeps one runaway call from hanging the applicant.
+        budget = max(1200, min(16000, int(len(text.split()) * 2.6) + 600))
         out = self._chat(
             f"Translate the user's text into {tgt}. Keep the meaning faithful and "
             f"natural. Preserve every ⟦T…⟧ sentinel EXACTLY as written — do not "
-            f"translate, reorder, or remove them. Reply JSON {{\"translated\":\"...\"}}.",
-            text)
+            f"translate, reorder, or remove them. Translate directly: do not "
+            f"explain, do not deliberate, do not comment. Reply JSON "
+            f"{{\"translated\":\"...\"}}.",
+            text, max_tokens=budget, temperature=0.0)
         return out.get("translated", text)
 
     def translate_batch(self, items: dict, target: str, source: str) -> dict:  # pragma: no cover - needs key

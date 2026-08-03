@@ -37,7 +37,6 @@ function DocumentItemRow({ t, client, caseId, item, translation, onChanged }) {
   const [preview, setPreview] = useState(false)
   const [previewDoc, setPreviewDoc] = useState(null)   // {id, name} being previewed
   const [pickType, setPickType] = useState(false)
-  const [askTranslate, setAskTranslate] = useState(false)
   const binding = item.binding || null
   const status = item.status
   const meta = checklistStatusMeta(status)
@@ -105,10 +104,12 @@ function DocumentItemRow({ t, client, caseId, item, translation, onChanged }) {
     setBusy('')
   }
 
-  // Runs only after the applicant's explicit consent (the extracted TEXT —
-  // never the image/PDF bytes — is sent to Kimi K3).
+  // One press translates. The applicant already chose to translate by pressing
+  // it; a second confirmation explaining that extracted TEXT (never the image
+  // or PDF bytes) goes to the translator was describing an internal boundary
+  // to someone who just wanted their document readable. That boundary is still
+  // enforced — in the backend, where it belongs.
   async function translate() {
-    setAskTranslate(false)
     setBusy('translate')
     try {
       await client.translateDocument(caseId, binding.document_id)
@@ -195,26 +196,12 @@ function DocumentItemRow({ t, client, caseId, item, translation, onChanged }) {
                 ))}
               </div>
             )}
-            {canTranslate && !binding.translation_document_id && !askTranslate && (
+            {canTranslate && !binding.translation_document_id && (
               <div style={{ marginTop: 8 }}>
                 <button className="btn btn--ghost btn--sm" disabled={!!busy}
-                  onClick={() => setAskTranslate(true)} data-testid={'translate-' + item.id}>
+                  onClick={translate} data-testid={'translate-' + item.id}>
                   {busy === 'translate' ? '…' : t('checklist.translateTo', { language: target.target_name })}
                 </button>
-              </div>
-            )}
-            {askTranslate && (
-              <div className="card card--soft" style={{ padding: 10, marginTop: 8 }}
-                data-testid="translate-consent">
-                <div style={{ marginBottom: 8 }}>{t('checklist.translateConsent')}</div>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  <button className="btn btn--sm" onClick={translate}>
-                    {t('checklist.translateConfirm')}
-                  </button>
-                  <button className="btn btn--ghost btn--sm" onClick={() => setAskTranslate(false)}>
-                    {t('checklist.translateCancel')}
-                  </button>
-                </div>
               </div>
             )}
             {busy === 'translate' && <div style={{ marginTop: 8 }}><Loading label={t('checklist.translating')} /></div>}
@@ -433,7 +420,6 @@ function DocCard({ t, client, caseId, item, translation, onChanged }) {
   const [justUploaded, setJustUploaded] = useState(false)
   const [preview, setPreview] = useState(false)
   const [previewDoc, setPreviewDoc] = useState(null)   // {id, name} being previewed
-  const [askTranslate, setAskTranslate] = useState(false)
   const binding = item.binding || null
   const status = item.status
   const done = status === 'submitted'
@@ -447,7 +433,6 @@ function DocCard({ t, client, caseId, item, translation, onChanged }) {
     binding.detected_type !== 'translation' && !binding.translation_document_id
 
   async function translate() {
-    setAskTranslate(false)
     setBusy('translate')
     try {
       await client.translateDocument(caseId, binding.document_id)
@@ -596,7 +581,7 @@ function DocCard({ t, client, caseId, item, translation, onChanged }) {
           ) : canTranslate ? (
             <button className="doccard__link" disabled={busy === 'translate'}
               data-testid={'translate-' + item.id}
-              onClick={() => setAskTranslate(true)}>
+              onClick={translate}>
               {busy === 'translate' ? t('doccard.translating') : t('doccard.translate')}
             </button>
           ) : (
@@ -606,20 +591,6 @@ function DocCard({ t, client, caseId, item, translation, onChanged }) {
               {t('doccard.translateNotNeeded')}
             </span>
           )}
-        </div>
-      )}
-      {askTranslate && (
-        <div className="card card--soft" style={{ padding: 10, marginTop: 8, fontSize: 12,
-          textAlign: 'left' }} onClick={(e) => e.stopPropagation()}>
-          <div>{t('checklist.translateConsent')}</div>
-          {target.certified_note && (
-            <div style={{ marginTop: 6, color: 'var(--muted)' }}>{target.certified_note}</div>
-          )}
-          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-            <button className="btn btn--sm" onClick={translate}>{t('checklist.translateConfirm')}</button>
-            <button className="btn btn--sm btn--ghost"
-              onClick={() => setAskTranslate(false)}>{t('checklist.translateCancel')}</button>
-          </div>
         </div>
       )}
       {preview && binding && (

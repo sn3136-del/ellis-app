@@ -241,3 +241,32 @@ def test_no_document_text_in_audit_or_checklist_payload(client):
     # The checklist payload carries language codes, never the OCR text.
     j = client.get(f"/cases/{case_id}/checklist", headers=H).json()
     assert "Extracto bancario" not in _json.dumps(j)
+
+
+def test_translation_is_bounded_and_deterministic():
+    """K3 is a reasoning model, and this call set neither temperature nor
+    max_tokens — so a translation could spend most of its wall clock
+    deliberating about text that needs no deliberation, and the applicant
+    waited. Translation is not a reasoning task."""
+    import inspect
+    from app.providers import kimi
+    src = inspect.getsource(kimi.LiveKimiProvider.translate)
+    assert "temperature=0.0" in src, "translation must be deterministic"
+    assert "max_tokens=budget" in src, "translation must be bounded"
+    assert "do not deliberate" in src
+    # The budget scales with the input, with a floor and a ceiling.
+    assert "max(1200" in src and "min(16000" in src
+
+
+def test_the_translate_button_needs_one_press():
+    """A second confirmation explained an internal boundary (extracted text,
+    never the image bytes) to someone who just wanted their document readable.
+    The boundary is still enforced in the backend, where it belongs."""
+    import pathlib
+    src = pathlib.Path(__file__).resolve().parents[2] / \
+        "src/renderer/src/components/visa/Checklist.jsx"
+    text = src.read_text()
+    assert "askTranslate" not in text, "the confirmation step is back"
+    assert "translateConsent" not in text, "the consent copy is back"
+    # And the button still exists, wired straight to the action.
+    assert "onClick={translate}" in text
