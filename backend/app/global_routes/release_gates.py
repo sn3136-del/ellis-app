@@ -357,6 +357,15 @@ def _observed_sensitive_kinds(db, build_request) -> set[str]:
 
 
 def _uploads_observed_count(db, build_request) -> int:
+    """File fields the portal REQUIRES — the ones a flow must answer for.
+
+    Counting optional uploads too made this gate contradict specgen, which
+    skips them: TDAC's only file input is the hidden 0x0 control behind an
+    Angular Material Browse button, required=false. specgen rightly built no
+    node for it and the gate then failed the release for a "missing document
+    upload mapping" that nothing needed (2026-08-03). An optional upload is
+    the applicant's to add if they want it, never a reason to block a route.
+    """
     job = db.execute(select(fm.AdapterReconJob).where(
         fm.AdapterReconJob.build_request_id == build_request.id)
         .order_by(fm.AdapterReconJob.created_at.desc())).scalars().first()
@@ -366,7 +375,7 @@ def _uploads_observed_count(db, build_request) -> int:
     for art in db.execute(select(fm.AdapterReconArtifact).where(
             fm.AdapterReconArtifact.recon_job_id == job.id)).scalars():
         for el in (art.structure or {}).get("elements", []):
-            if (el.get("type") or "").lower() == "file":
+            if (el.get("type") or "").lower() == "file" and el.get("required"):
                 seen.add(el.get("selector") or el.get("name") or "file")
     return len(seen)
 

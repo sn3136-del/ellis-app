@@ -101,13 +101,19 @@ def enqueue(db, run: GlobalBuildRun, kind: str, subject: str,
     build-family/-destination): it requeues even a task that exhausted its
     attempts or failed permanently, and resets the attempt counter, so an
     explicitly targeted build never silently no-ops against a spent task.
-    A build already released/completed is still left alone."""
+    An UNFORCED enqueue leaves a completed task alone."""
     dedup = f"{kind}:{subject}"
     existing = db.execute(select(GlobalBuildTask).where(
         GlobalBuildTask.dedup_key == dedup)).scalars().first()
     if existing is not None:
-        if existing.status == "complete":
+        if existing.status == "complete" and not force:
             return None
+        # A task marked complete whose family the caller is STILL queueing has
+        # gone stale: only families with no released adapter reach here, so the
+        # completion no longer describes reality. Refusing it made `build-family`
+        # answer "queued: 0, released: 0" and do nothing — indistinguishable
+        # from success — after thailand-tdac was unreleased for rebuild
+        # (2026-08-03). The force flag is the operator saying "run this one".
         transient_retry = (existing.status == "failed"
                            and existing.error_class == "transient"
                            and existing.attempts < existing.max_attempts)

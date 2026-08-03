@@ -1242,13 +1242,27 @@ def _entry_gated_flow(host: str, roles: dict, mappings: list[dict],
         mapped_sel = {d["selector"] for d in (document_mappings or [])
                       if d.get("page_key") == form_key}
         for el in (form_art.structure or {}).get("elements", []):
-            if el.get("type") == "file" and el.get("selector") not in mapped_sel:
-                node("upload_handoff", "APPLICANT_HANDOFF",
-                     handoff_kind="document_upload", applicant_action=True,
-                     purpose="This portal does not say which document its "
-                             "upload expects, so the applicant attaches it "
-                             "personally — Ellis never guesses a document type")
-                break
+            if el.get("type") != "file" or el.get("selector") in mapped_sel:
+                continue
+            # ...but ONLY when the portal actually requires it. An optional
+            # upload must never stop a run that can otherwise complete.
+            # Angular Material renders a hidden <input class="hidden-input">
+            # behind its Browse button: 0x0, no name, no label beyond a format
+            # hint, required=false. TDAC's file input is exactly that, and
+            # turning it into a handoff dead-ended every Thailand run before a
+            # single field was filled — the applicant was asked to attach a
+            # document the portal never wanted (2026-08-03). An optional
+            # upload the applicant does want is still theirs to add in the
+            # secure window; it is not a reason to stop.
+            if not el.get("required"):
+                continue
+            node("upload_handoff", "APPLICANT_HANDOFF",
+                 handoff_kind="document_upload", applicant_action=True,
+                 purpose="This portal requires an upload but does not say "
+                         "which document it expects, so the applicant "
+                         "attaches it personally — Ellis never guesses a "
+                         "document type")
+            break
         for el in (form_art.structure or {}).get("elements", []):
             if KNOWN_FIELD_SEMANTICS.get(el.get("name", ""), {}).get("kind") \
                     == "commitment_checkbox" and not el.get("sensitive"):

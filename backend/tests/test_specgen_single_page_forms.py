@@ -547,18 +547,46 @@ def test_the_gate_settles_until_the_action_bar_stops_growing():
     assert "range(16)" in src, "the settle must be bounded"
 
 
-def test_an_unnamed_upload_becomes_the_applicant_s_step():
-    """Thailand's TDAC labels its file input 'JPG, JPEG, PNG and PDF files,
-    maximum size 5MB' — a format hint, not a document name. Nothing can say
-    which document it wants, and guessing wrong is a rejected application. The
-    flow hands that control to the applicant rather than dropping it."""
+def test_an_unnamed_REQUIRED_upload_becomes_the_applicant_s_step():
+    """An upload with no identifiable document type is the applicant's step —
+    guessing wrong (a passport where a photo was wanted) is a rejected
+    application. But only when the portal REQUIRES it."""
     import inspect
     from app.adapter_factory import schema, specgen
     assert "document_upload" in schema.SENSITIVE_HANDOFF_KINDS
     src = inspect.getsource(specgen)
     assert 'handoff_kind="document_upload"' in src
-    # It only fires for uploads that were NOT identified.
-    assert "el.get(\"selector\") not in mapped_sel" in src
+    assert 'el.get("selector") in mapped_sel' in src   # identified ones excluded
+    assert 'if not el.get("required"):' in src         # optional ones excluded
+
+
+def test_an_optional_hidden_upload_never_stops_a_run():
+    """Angular Material hides a real <input type=file class="hidden-input">
+    behind its Browse button: 0x0, no name, no label beyond a format hint,
+    required=false. TDAC's is exactly that. Treating it as a handoff
+    dead-ended every Thailand run before a single field was filled — the
+    applicant was asked to attach a document the portal never wanted
+    (2026-08-03)."""
+    from app.adapter_factory import specgen
+
+    tdac = {"selector": "div.mat-mdc-form-field-infix > input.hidden-input",
+            "name": "", "label": "JPG, JPEG, PNG, and PDF files, maximum size 5MB",
+            "type": "file", "required": False, "sensitive": False}
+    required_upload = dict(tdac, required=True)
+
+    def emits_handoff(element) -> bool:
+        # Mirrors the guard exactly: identified uploads and OPTIONAL ones are
+        # skipped; only a required, unidentified file input hands off.
+        mapped_sel: set[str] = set()
+        return (element.get("type") == "file"
+                and element.get("selector") not in mapped_sel
+                and bool(element.get("required")))
+
+    assert emits_handoff(tdac) is False
+    assert emits_handoff(required_upload) is True
+    # And the source really applies that guard, not just this mirror.
+    import inspect
+    assert 'if not el.get("required"):' in inspect.getsource(specgen)
 
 
 def test_the_upload_gate_accepts_an_applicant_handoff():

@@ -119,9 +119,35 @@ _EXTRACT_JS = r"""
     }
     return parts.join(' > ');
   };
+  // A grid layout puts the caption in its OWN cell beside the input's cell,
+  // with no `for` tying them together — TDAC's whole passport section is
+  // "<div class=col>*Family Name</div><div class=col><input></div>". The row's
+  // combined text is every label at once and attributes none of them, so read
+  // the PRECEDING sibling cell: short, label-shaped, and specific to this one
+  // field. Bounded to a few ancestors and a short string so a stray container
+  // can never become a label.
+  const cellLabel = (el) => {
+    let cell = el;
+    for (let i = 0; i < 5 && cell && cell.parentElement; i++) {
+      cell = cell.parentElement;
+      const prev = cell.previousElementSibling;
+      if (!prev) continue;
+      if (prev.querySelector && prev.querySelector('input, select, textarea')) return '';
+      const t = (prev.innerText || '').trim().replace(/\s+/g, ' ');
+      if (t && t.length <= 60) return t.replace(/^[*＊]\s*/, '');
+    }
+    return '';
+  };
   const labelFor = (el) => {
     if (el.getAttribute('aria-label')) return el.getAttribute('aria-label');
     if (el.id) { const l = document.querySelector('label[for="' + CSS.escape(el.id) + '"]'); if (l) return l.innerText; }
+    const ff = el.closest && el.closest('mat-form-field, [class*="form-field"]');
+    const ml = ff && ff.querySelector('mat-label');
+    if (ml && (ml.innerText || '').trim()) return ml.innerText;
+    const cell = cellLabel(el);
+    // Prefer a real caption over a placeholder: TDAC's placeholders are format
+    // rules ("Only letters A-Z are allowed"), which name no field at all.
+    if (cell) return cell;
     if (el.placeholder) return el.placeholder;
     const p = el.closest('label'); if (p) return p.innerText;
     if (el.tagName === 'BUTTON' || el.type === 'submit') return el.innerText || el.value || '';
@@ -185,7 +211,20 @@ _EXTRACT_JS = r"""
           el.getAttribute('aria-autocomplete') === 'list' ||
           el.closest('[role="combobox"]')) type = 'search-combobox';
     }
-    const name = (el.name || el.id || '').slice(0, 80);
+    // A framework-generated id is not a field name. Angular Material numbers
+    // every control "mat-input-0", "mat-input-1"... so TDAC's whole passport
+    // section arrived as meaningless ids and the mapper could bind exactly ONE
+    // field of twenty (2026-08-03). The SAME element carries
+    // formcontrolname="familyName", which cssPath already trusts enough to
+    // build a selector from — so trust it for the name too.
+    let name = (el.name || el.id || '');
+    if (!name || volatileId.test(name) || generatedId.test(name)) {
+      for (const a of STABLE_ATTRS) {
+        const v = el.getAttribute && el.getAttribute(a);
+        if (v) { name = v; break; }
+      }
+    }
+    name = name.slice(0, 80);
     const label = (labelFor(el) || '').trim().slice(0, 120);
     const rec = { selector: cssPath(el).slice(0, 200), name, label, type,
                   placeholder: (el.placeholder || '').slice(0, 60),
