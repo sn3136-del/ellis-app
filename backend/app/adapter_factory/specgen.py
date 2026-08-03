@@ -332,6 +332,28 @@ def _tokenize(*parts: str) -> set[str]:
 # box was filled with the applicant's whole name — "XIANGWEI CAO" typed into a
 # government form's middle-name field (2026-08-03). A qualified name field is
 # either mapped to its own Ellis field or left alone; it is never the full name.
+# A date mask as the page writes it, in any case and with any separator:
+# DD/MM/YYYY, mm-dd-yyyy, YYYY.MM.DD, dd/mm/yy.
+_DATE_MASK_RE = re.compile(
+    r"^\s*(?:(dd|mm|yyyy|yy)\s*[/.\-]\s*(dd|mm|yyyy|yy)\s*[/.\-]\s*(dd|mm|yyyy|yy))\s*$",
+    re.IGNORECASE)
+
+
+def _date_pattern(el: dict) -> str:
+    """The date format a masked input advertises, in dates.to_portal tokens.
+
+    Read from the element's own placeholder or label — the portal states the
+    pattern there precisely so a human types it correctly, and it is the only
+    non-guessed source for it. Anything that is not a bare mask returns "".
+    """
+    for raw in (el.get("placeholder"), el.get("label")):
+        m = _DATE_MASK_RE.match(str(raw or ""))
+        if m:
+            return "/".join(p.upper() for p in m.groups()) if "/" in str(raw) \
+                else str(raw).strip().upper()
+    return ""
+
+
 _NAME_QUALIFIERS = {
     "middle", "first", "given", "last", "family", "sur", "maiden",
     "mother", "father", "spouse", "parent", "guardian", "child",
@@ -1040,13 +1062,29 @@ def _skeleton_flow(host: str, roles: dict, mappings: list[dict],
                  allowed_url_patterns=[_nav_pattern(app_art, host, "/application")])
             seen_fields: set[str] = set()
             used_slugs: set[str] = set()
+            # There are TWO flow builders — this one and _entry_gated_flow —
+            # and a portal reaches exactly one of them. Fixing the gated path
+            # alone left MDAC (no entry gate) still typing ISO into a
+            # DD/MM/YYYY mask and text into its dropdowns (2026-08-03). Both
+            # builders read the same observed facts.
+            observed = {str(el.get("name") or ""): el
+                        for el in (app_art.structure or {}).get("elements", [])
+                        if el.get("name")}
             for m in page_mappings:
                 if m["portal_field"].lower() in seen_fields:
                     continue    # one deterministic node per portal field
                 seen_fields.add(m["portal_field"].lower())
-                extra = {"format": m["format"]} if m.get("format") else {}
+                el = observed.get(str(m["portal_field"])) or {}
+                # The PAGE decides the widget and the date mask; the mapper only
+                # decides which value belongs there.
+                kind = str(el.get("type") or "") or m.get("kind")
+                action = "SELECT_SEARCH" if kind in (
+                    "select", "search_combobox", "search-combobox", "combobox") \
+                    else "FILL_NON_SENSITIVE"
+                fmt = m.get("format") or _date_pattern(el)
+                extra = {"format": fmt} if fmt else {}
                 node(f"fill_{_unique_node_slug(m['portal_field'], used_slugs)}",
-                     "FILL_NON_SENSITIVE",
+                     action,
                      selector=m["selector"], input_source=m["ellis_field"],
                      purpose=f"Fill {m['portal_field']} from the case record",
                      **extra)
@@ -1274,6 +1312,15 @@ def _entry_gated_flow(host: str, roles: dict, mappings: list[dict],
             str(el.get("name") or ""): str(el.get("type") or "")
             for el in (form_art.structure or {}).get("elements", [])
             if el.get("name")}
+        # A masked date input prints the pattern it wants — MDAC's Date of Birth
+        # shows "DD/MM/YYYY" as its placeholder. Without a declared format the
+        # runtime sends canonical ISO, the mask refuses it, and the field stays
+        # empty with the caret sitting in it (2026-08-03). dates.to_portal
+        # already speaks these tokens, so the page's own pattern IS the format.
+        observed_date_fmt = {
+            str(el.get("name") or ""): _date_pattern(el)
+            for el in (form_art.structure or {}).get("elements", [])
+            if el.get("name") and _date_pattern(el)}
         for m in mappings:
             if m.get("page_key") != form_key:
                 continue
@@ -1285,8 +1332,9 @@ def _entry_gated_flow(host: str, roles: dict, mappings: list[dict],
                                                  "search-combobox", "combobox") \
                 else "FILL_NON_SENSITIVE"
             extra = {}
-            if m.get("format"):
-                extra["format"] = m["format"]
+            fmt = m.get("format") or observed_date_fmt.get(str(m["portal_field"]))
+            if fmt:
+                extra["format"] = fmt
             if isinstance(m.get("question"), dict):
                 extra["question"] = m["question"]
             node(f"fill_{_unique_node_slug(m['portal_field'], used_slugs)}", action,
