@@ -382,6 +382,12 @@ export const HANDOFF_UI = {
   otp: 'LiveViewModal',
   identity: 'LiveViewModal',
   login_challenge: 'LiveViewModal',
+  // Account creation on portals that require one. The secure window is the
+  // ONLY correct surface: Ellis never creates accounts and never handles a
+  // password. Emitted by released_flow.register() and, until 2026-08-03,
+  // absent from all three maps — the applicant got a generic "Action needed"
+  // card with no panel and no way to resolve it, and the case stalled.
+  credentials: 'LiveViewModal',
   portal_form: 'LiveViewModal',     // finish form items only you may complete
   payment_approval: 'PaymentApprove', // approve_payment (shows fee)
   fee_confirmation: 'PaymentApprove', // applicant confirms the exact portal fee
@@ -423,6 +429,7 @@ export const HANDOFF_COPY = {
   otp: ['Enter the one-time code', 'Type the code from your authenticator or SMS in the secure window.'],
   identity: ['Identity check', 'Complete the identity step in the secure window.'],
   login_challenge: ['Portal login challenge', 'Complete the portal sign-in challenge in the secure window.'],
+  credentials: ['Create your portal account', 'The official portal requires an account. Create it yourself in the secure window — Ellis never handles your password.'],
   portal_form: ['Finish the highlighted items on the official form',
     'A few items on the government form need your personal input — including any declaration only you may sign. Complete them in the secure window, then continue.'],
   payment_approval: ['Review and confirm payment', 'Confirm the official fee before payment begins.'],

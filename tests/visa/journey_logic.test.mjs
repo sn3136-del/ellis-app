@@ -4,6 +4,7 @@
 // backend stays authoritative — but the mapping must agree.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
 
 import {
   continuationMeta, CONTINUATION_KIND, deriveAge, profileRows,
@@ -567,4 +568,33 @@ test('isDateKey covers passport and trip date keys only', () => {
   for (const k of ['passport_number', 'nationality', 'age', 'full_name']) {
     assert.equal(isDateKey(k), false, k)
   }
+})
+
+// --- the dead-control regression ------------------------------------------
+// SignatureModal is the only thing that grants the standing authorization,
+// the Authorize card is the only thing that opens it, and the readiness gate
+// refuses any live run without it. So a continuation kind excluded from that
+// card cannot start: entry_preparation recorded a stage and did nothing
+// (2026-08-03), and passport_renewal enqueued a run that failed on a missing
+// representative_submission_permitted. Both were excluded by a `kind !== ...`
+// guard on the card, which is exactly how this bug is written.
+
+test('the Authorize card excludes no continuation kind', async () => {
+  const src = await readFile(
+    new URL('../../src/renderer/src/components/visa/CaseFlow.jsx', import.meta.url), 'utf8')
+  const card = src.slice(src.indexOf("data-testid=\"authorize-and-start\"") - 2500,
+                         src.indexOf("data-testid=\"authorize-and-start\""))
+  const guard = card.match(/\{!started && !docsPending([^&]*&&[^(]*)?\(/)
+  assert.ok(guard, 'could not find the Authorize card render guard')
+  assert.ok(!/kind\s*!==/.test(guard[0]),
+    `the Authorize card excludes a kind, which makes its button dead: ${guard[0].trim()}`)
+})
+
+test('ContinuePanel never carries the burden of starting a run', () => {
+  // It renders only while documents are missing; it explains what remains and
+  // records the stage. If it ever has to start a run again, some kind has
+  // been excluded from the Authorize card — fix that instead.
+  const meta = continueButtonMeta({ continuation_kind: 'entry_preparation',
+    checklist_counts: { required_missing: 0 } })
+  assert.equal(meta.startsRun, undefined)
 })

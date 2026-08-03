@@ -9,7 +9,7 @@ import { useRef, useState } from 'react'
 import { useToast, Loading, UploadTick } from '../ui.jsx'
 import {
   checklistStatusMeta, checklistCounts, continueButtonMeta, docTypeLabelKey,
-  formatDateUS, MANUAL_DOC_TYPES
+  MANUAL_DOC_TYPES
 } from '../../lib/intake.js'
 import DocPreview from './DocPreview.jsx'
 
@@ -344,29 +344,13 @@ export function ContinuePanel({ t, client, caseId, journey, onAdvanced }) {
   async function go() {
     setBusy(true)
     try {
+      // This panel only ever shows while documents are still missing, so it
+      // RECORDS the stage and hands off. Starting a run is the Authorize
+      // card's job, for every continuation kind without exception — see the
+      // note on that card in CaseFlow.jsx.
       const res = await client.completeDocuments(caseId)
-      // completeDocuments only RECORDS the stage. Routes with an authorize
-      // step get their start from the Authorize card; entry preparation and
-      // renewal have no such card, so this press was their only path to a
-      // run — and without this it recorded a row and stopped, leaving
-      // "Entry preparation complete" on screen with the arrival card never
-      // filed (2026-08-03). Start is idempotent and answers honestly when
-      // the destination's filing window has not opened yet.
-      let started = null
-      if (meta.startsRun) {
-        try {
-          started = await client.start(caseId)
-        } catch (e) {
-          toast(typeof e.detail === 'object' && e.detail?.message
-            ? e.detail.message : e.message)
-        }
-      }
-      const filing = started && started.entry_filing
-      toast(filing && filing.status === 'waiting' && filing.opens_on
-        ? t('checklist.filingScheduled',
-            { name: filing.name, date: formatDateUS(filing.opens_on) })
-        : t('checklist.continueDone'))
-      onAdvanced && onAdvanced(started || res)
+      toast(t('checklist.continueDone'))
+      onAdvanced && onAdvanced(res)
     } catch (e) {
       toast(typeof e.detail === 'object' && e.detail?.message ? e.detail.message : e.message)
     }

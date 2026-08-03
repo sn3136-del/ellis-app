@@ -298,26 +298,31 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
               documents are still missing (it explains what remains) or on
               routes with no authorize step; otherwise the Authorize card
               below is the single button and consumes this stage itself. */}
-          {(docsPending || kind === 'passport_renewal') && (
+          {docsPending && (
             <ContinuePanel t={t} client={client} caseId={caseId} journey={journey}
               onAdvanced={refresh} />
           )}
         </div>
       )}
 
-      {/* Entry preparation belongs here too. Filing an arrival card IS a
-          representative submission to a government system, so it needs the
-          same signature — and without this card there was no way to give it:
-          the readiness gate refused every run for a missing
-          representative_submission_permitted, on a route whose only button
-          recorded a stage and stopped (2026-08-03). */}
-      {!started && !docsPending && kind !== 'passport_renewal' && (
+      {/* EVERY continuation kind ends here, with no exceptions — that is the
+          point. SignatureModal is the only thing that grants the standing
+          authorization, this card is the only thing that opens it, and the
+          readiness gate refuses any live run without it. So a kind excluded
+          from this card could never start: its button enqueued a run that
+          failed on a missing representative_submission_permitted, or (entry
+          preparation) recorded a stage and did nothing at all. Excluding a
+          kind here is how that bug is written; keep the list empty
+          (2026-08-03). */}
+      {!started && !docsPending && (
         <div className="card fadeup-1" style={{ padding: 24 }}>
           <CaseValidity t={t} client={client} caseId={caseId} onOpenCase={onOpenCase} />
           <div style={{ fontWeight: 700, marginBottom: 6 }}>Ready to go?</div>
           <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>
             {kind === 'entry_preparation'
-              ? `One signature authorizes Trip.com's Ellis to file your arrival card for you — Ellis files it the day the destination opens it, and tells you when it is done.`
+              ? `One signature authorizes Trip.com's Ellis to file your arrival card for you, on the day the destination opens it.`
+              : kind === 'passport_renewal'
+              ? `One signature authorizes Trip.com's Ellis to file your renewal for you — pausing only where you are needed.`
               : `One signature authorizes Trip.com's Ellis to file for you — then everything runs automatically, pausing only where you are needed.`}
           </div>
           {standing?.granted && !standing?.revoked ? (
@@ -344,6 +349,8 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
               }}>
               {kind === 'entry_preparation'
                 ? 'Authorize & file my arrival card'
+                : kind === 'passport_renewal'
+                ? 'Authorize & start my renewal'
                 : 'Authorize & start my application'}
             </button>
           )}
