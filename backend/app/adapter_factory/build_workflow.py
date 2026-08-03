@@ -223,10 +223,19 @@ def _run_build_stages(db, req, _obs, max_stages: int) -> fm.AdapterBuildRequest:
                     break
                 live_portal = (req.portal_evidence or {}).get(
                     "verification") != "synthetic_test_portal"
-                job = recon.run_recon(db, build_request=req, observer=obs,
-                                      start_paths=_recon_paths(req),
-                                      follow_links=live_portal,
-                                      curated_paths=_curated_paths(req))
+                try:
+                    job = recon.run_recon(db, build_request=req, observer=obs,
+                                          start_paths=_recon_paths(req),
+                                          follow_links=live_portal,
+                                          curated_paths=_curated_paths(req))
+                except recon.ReconRefused as e:
+                    # The portal's quiet period. Park the build rather than
+                    # probing anyway: a rebuild is never worth spending a
+                    # government site's tolerance on the applicants next in
+                    # line. It resumes on the next tick past the cooldown.
+                    transition(req, "RECON_PENDING", f"recon deferred: {str(e)[:80]}")
+                    _review(db, req, "recon_rate_limited", str(e)[:200])
+                    break
                 if job.status != "complete":
                     transition(req, "MANUAL_REVIEW_REQUIRED", f"recon: {job.error[:80]}")
                     _review(db, req, "recon_failed", job.error or "recon failed")

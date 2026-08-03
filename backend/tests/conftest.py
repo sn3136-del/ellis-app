@@ -14,6 +14,11 @@ _REPO_DATA = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
 _DATA_COPY = tempfile.mkdtemp(suffix="-ellis-data")
 shutil.copytree(_REPO_DATA, _DATA_COPY, dirs_exist_ok=True)
 os.environ["ELLIS_DATA_DIR"] = _DATA_COPY
+# The per-host recon cooldown protects REAL government sites from build
+# iteration. These "portals" are in-memory fixtures on a shared session DB, so
+# the cooldown would only ever rate-limit one test against the next. The
+# behaviour itself is exercised deliberately in test_recon_rate_limit.py.
+os.environ["ELLIS_RECON_HOST_QUIET_SECONDS"] = "0"
 # Hermetic tests: force local fallbacks regardless of any real .env present, so
 # unit/e2e behavior is deterministic. Live-provider smoke tests are separate.
 for _k in ("MOONSHOT_API_KEY", "GOOGLE_CLOUD_PROJECT", "GOOGLE_DOCUMENT_AI_OCR_PROCESSOR_ID",

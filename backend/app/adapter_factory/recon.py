@@ -52,6 +52,49 @@ class ReconRefused(Exception):
     """Raised when recon is pointed at something it may not touch."""
 
 
+# Minimum quiet period between recon passes against the SAME government host.
+#
+# A recon pass is a dozen page loads from one address. Six rebuild passes
+# against tdac.immigration.go.th in an afternoon (2026-08-03) is what put
+# Thailand behind a Cloudflare challenge that then met real applicants — that
+# iteration cost their runs, not the build's. A portal's willingness to serve
+# Ellis is a shared, exhaustible resource, so the cost of iterating is charged
+# here, where it is visible, instead of to whoever runs next.
+#
+# Configured, because a fixture is not a government: the test suite serves its
+# "portals" from memory and sets the period to 0.
+
+
+def recon_host_quiet_seconds() -> int:
+    from ..config import settings
+    try:
+        return int(settings().recon_host_quiet_seconds)
+    except Exception:  # noqa: BLE001 — a missing setting must never disable
+        return 15 * 60         # the protection it configures
+
+
+def _recent_recon_host(db, host: str, *, now=None, quiet_seconds: int | None = None):
+    """When this host was last observed, if that was inside the quiet period.
+
+    Returns the datetime of the last pass (so the caller can say how long to
+    wait) or None when the host is free to probe."""
+    from datetime import datetime, timedelta, timezone
+    quiet = recon_host_quiet_seconds() if quiet_seconds is None else quiet_seconds
+    if quiet <= 0 or not host:
+        return None
+    now = now or datetime.now(timezone.utc)
+    row = db.execute(
+        select(fm.AdapterReconArtifact.created_at)
+        .where(fm.AdapterReconArtifact.hostname == host.lower())
+        .order_by(fm.AdapterReconArtifact.created_at.desc()).limit(1)).first()
+    if row is None or row[0] is None:
+        return None
+    last = row[0]
+    if last.tzinfo is None:
+        last = last.replace(tzinfo=timezone.utc)
+    return last if now - last < timedelta(seconds=quiet) else None
+
+
 def sanitize_label(label: str) -> str:
     label = (label or "").strip()
     if _DIRECTIVE_RE.search(label):
@@ -234,7 +277,8 @@ def run_recon(db, *, build_request: fm.AdapterBuildRequest, observer,
               hostnames: list[str] | None = None,
               follow_links: bool = False,
               entry_gate: dict | None = None,
-              curated_paths: tuple = ()) -> fm.AdapterReconJob:
+              curated_paths: tuple = (),
+              force: bool = False) -> fm.AdapterReconJob:
     """Observe the portal's public pages through `observer(url) -> observation`
     and persist sanitized artifacts. `observer` is the structural interface —
     SyntheticPortal.observe in tests, a Browserbase/Playwright structural probe
@@ -254,6 +298,20 @@ def run_recon(db, *, build_request: fm.AdapterBuildRequest, observer,
         entry_gate = (build_request.portal_evidence or {}).get("entry_gate") or None
     if not hosts:
         raise ReconRefused("no verified portal hostnames — recon may not guess where to look")
+    # Per-host quiet period. Refuse LOUDLY rather than probing anyway or
+    # silently reusing stale structure: a caller that genuinely needs a fresh
+    # read (an operator fixing a live outage) passes force and owns the cost.
+    if not force:
+        for host in hosts:
+            last = _recent_recon_host(db, host)
+            if last is not None:
+                from datetime import datetime, timezone
+                waited = (datetime.now(timezone.utc) - last).total_seconds()
+                raise ReconRefused(
+                    f"{host} was observed {int(waited // 60)} min ago — recon "
+                    f"waits {recon_host_quiet_seconds() // 60} min between "
+                    f"passes so build iteration cannot spend a portal's "
+                    f"tolerance on the applicants who run next")
     job = fm.AdapterReconJob(build_request_id=build_request.id, org_id=build_request.org_id,
                              portal_hostnames=hosts, status="running")
     db.add(job)

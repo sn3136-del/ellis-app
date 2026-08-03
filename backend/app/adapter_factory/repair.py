@@ -91,9 +91,15 @@ def attempt_repair(db, *, build_request: fm.AdapterBuildRequest,
     if prior_attempts > MAX_REPAIR_ATTEMPTS:
         return stop("repeated repair attempts failed")
 
-    # Fresh recon on the SAME verified hostnames (never expanded).
-    recon_job = recon.run_recon(db, build_request=build_request, observer=observer,
-                                hostnames=(build_request.portal_evidence or {}).get("hostnames", []))
+    # Fresh recon on the SAME verified hostnames (never expanded), and only
+    # once the portal's quiet period has passed — an automatic repair loop is
+    # exactly the thing that must not hammer a government site.
+    try:
+        recon_job = recon.run_recon(
+            db, build_request=build_request, observer=observer,
+            hostnames=(build_request.portal_evidence or {}).get("hostnames", []))
+    except recon.ReconRefused as e:
+        return stop(str(e)[:200])
     if recon_job.status != "complete":
         return stop("repair recon could not observe the portal")
     artifacts = recon.artifacts(db, recon_job.id)

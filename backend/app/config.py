@@ -113,6 +113,13 @@ class Settings:
         # falls back to a plain session rather than failing.
         self.browserbase_proxies = os.getenv(
             "BROWSERBASE_PROXIES", "true").strip().lower() not in ("0", "false", "no")
+        # Minimum quiet period between recon passes against the SAME
+        # government host. A portal's willingness to serve Ellis is a shared,
+        # exhaustible resource: six rebuild passes against one Thai host in an
+        # afternoon put it behind a challenge that then met real applicants.
+        # Set to 0 only where the "portal" is a fixture (the test suite does).
+        self.recon_host_quiet_seconds = int(
+            os.getenv("ELLIS_RECON_HOST_QUIET_SECONDS", str(15 * 60)))
 
         # --- Stripe Issuing ---
         self.stripe_secret_key = os.getenv("STRIPE_SECRET_KEY", "")
