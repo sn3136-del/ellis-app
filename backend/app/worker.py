@@ -25,11 +25,39 @@ def _jitter(base_ms: int) -> float:
     return (base_ms / 1000.0) * (0.8 + 0.4 * random.random())
 
 
+def release_due_entry_filings(db) -> int:
+    """Enqueue arrival-card filings whose destination window has now opened.
+
+    This does not breach the no-initiative rule above. The applicant already
+    pressed Continue; their instruction and the moment they gave it are
+    recorded on the case (entry_preparation.schedule). All that was missing
+    was a clock: Thailand will not accept a TDAC until three days before
+    arrival, so the press cannot be honoured the instant it is made. Only
+    cases the applicant scheduled, still untouched, and with nothing already
+    in flight are released.
+    """
+    from . import entry_preparation
+    released = 0
+    for app_row in entry_preparation.due_cases(db):
+        try:
+            _, created = portal_queue.enqueue(db, app_row=app_row, signal_name="start")
+        except Exception:  # noqa: BLE001 — one bad case must not stall the sweep
+            db.rollback()
+            continue
+        released += int(bool(created))
+    return released
+
+
 def tick_once(db) -> int:
-    """One worker tick: expire lapsed leases, then claim and execute every
-    queued portal run. Returns the number of runs executed. Cases without a
-    queued run — including any case waiting on a human — are never touched."""
+    """One worker tick: expire lapsed leases, release any arrival-card filing
+    whose window just opened, then claim and execute every queued portal run.
+    Returns the number of runs executed. Cases without a queued run —
+    including any case waiting on a human — are never touched."""
     portal_queue.expire_stale_leases(db)
+    try:
+        release_due_entry_filings(db)
+    except Exception:  # noqa: BLE001 — never let the sweep kill the run loop
+        db.rollback()
     return portal_queue.run_pending_once("worker")
 
 

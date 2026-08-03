@@ -2690,6 +2690,21 @@ def start_case(application_id: str, db=Depends(get_session), p: Principal = Depe
                 "reason": "documents_incomplete", "required_remaining": remaining,
                 "message": f"Submit {remaining} remaining required "
                            f"document{'s' if remaining != 1 else ''} before starting."})
+    # Visa-exempt routes still file an arrival card, and the destination
+    # decides when: filing before the window opens is refused by the portal.
+    # One press schedules it; the worker runs it the moment it opens.
+    from . import entry_preparation
+    ep = entry_preparation.plan(db, app_row)
+    if ep["required"] and ep["status"] == "waiting":
+        entry_preparation.schedule(db, org_id=p.org_id, app_row=app_row, plan_out=ep)
+        audit.record(db, org_id=p.org_id, application_id=application_id,
+                     action="entry_filing_scheduled",
+                     detail={k: ep[k] for k in ("opens_on", "arrival_date",
+                                                "family_id", "window_days")},
+                     actor=p.user_id)
+        return {"state": app_row.state, "entry_filing": ep, "scheduled": True}
+    if ep["required"] and ep["status"] == "open":
+        entry_preparation.schedule(db, org_id=p.org_id, app_row=app_row, plan_out=ep)
     if _live_background_route(db, app_row):
         return _queue_signal_response(db, p, app_row, "start", {})
     return _signal_or_gate_error(db, p, application_id, "start")

@@ -298,20 +298,27 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
               documents are still missing (it explains what remains) or on
               routes with no authorize step; otherwise the Authorize card
               below is the single button and consumes this stage itself. */}
-          {(docsPending || kind === 'entry_preparation' || kind === 'passport_renewal') && (
+          {(docsPending || kind === 'passport_renewal') && (
             <ContinuePanel t={t} client={client} caseId={caseId} journey={journey}
               onAdvanced={refresh} />
           )}
         </div>
       )}
 
-      {!started && !docsPending && kind !== 'entry_preparation' && kind !== 'passport_renewal' && (
+      {/* Entry preparation belongs here too. Filing an arrival card IS a
+          representative submission to a government system, so it needs the
+          same signature — and without this card there was no way to give it:
+          the readiness gate refused every run for a missing
+          representative_submission_permitted, on a route whose only button
+          recorded a stage and stopped (2026-08-03). */}
+      {!started && !docsPending && kind !== 'passport_renewal' && (
         <div className="card fadeup-1" style={{ padding: 24 }}>
           <CaseValidity t={t} client={client} caseId={caseId} onOpenCase={onOpenCase} />
           <div style={{ fontWeight: 700, marginBottom: 6 }}>Ready to go?</div>
           <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>
-            One signature authorizes Trip.com's Ellis to file for you — then
-            everything runs automatically, pausing only where you are needed.
+            {kind === 'entry_preparation'
+              ? `One signature authorizes Trip.com's Ellis to file your arrival card for you — Ellis files it the day the destination opens it, and tells you when it is done.`
+              : `One signature authorizes Trip.com's Ellis to file for you — then everything runs automatically, pausing only where you are needed.`}
           </div>
           {standing?.granted && !standing?.revoked ? (
             <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
@@ -335,7 +342,9 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
                   setModal('authorization')
                 } finally { setBusy(false) }
               }}>
-              Authorize & start my application
+              {kind === 'entry_preparation'
+                ? 'Authorize & file my arrival card'
+                : 'Authorize & start my application'}
             </button>
           )}
         </div>

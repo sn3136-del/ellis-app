@@ -600,6 +600,11 @@ export function continueButtonMeta(journey) {
     enabled: remaining === 0,
     completed,
     remaining,
+    // Kinds with no Authorize card of their own: this button is their ONLY
+    // route to a run, so it must start one and not merely record the stage.
+    // Entry preparation is NOT one of them any more — filing an arrival card
+    // needs the signature, so it goes through the same ceremony as a visa.
+    startsRun: kind === 'passport_renewal',
     labelKey: CONTINUE_LABEL_BY_KIND[kind] || 'checklist.continue.visa'
   }
 }
