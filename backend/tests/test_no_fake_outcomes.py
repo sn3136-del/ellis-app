@@ -160,3 +160,108 @@ def test_real_government_result_requires_gov_domain_submission_evidence(db):
                                      hostname="tracker.example.com"))
     db.commit()
     assert _adapter_verified_result(db, only_bad.id) is False
+
+
+# --- 6. the notice is judged by ITSELF, never by the page behind it ---------
+
+# eVisa's own entry conditions, verbatim from evisa.gov.vn. The Spanish error
+# stem `fall` used to match inside "falling", so the whole-page fallback read
+# this as a rejection and told applicants their correct CAPTCHA code "wasn't
+# accepted" (2026-08-03).
+_EVISA_PAGE = ("Foreigners with valid international travel document. Not "
+               "falling under the cases of suspension from entry.")
+_EVISA_NOTICE = ("DECLARATION COMPLETED\nElectronic document code: "
+                 "E260803CHNE9936145772\nNotice: You have to note e-Visa app "
+                 "no. for check status of this file")
+
+
+def test_success_notice_survives_error_words_on_the_page_behind_it():
+    page = _FakePage(body_text=_EVISA_PAGE, notice_present=True)
+    page.notice_text = lambda: {"ok": True, "text": _EVISA_NOTICE}
+    assert _driver_with(page)._notice_is_error(page) is False
+
+
+def test_page_body_is_never_the_notice_reader():
+    """Without a notice-scoped reader the answer is 'error', not a guess made
+    from the whole page — that guess is what broke eVisa."""
+    class _NoNoticeText(_FakePage):
+        notice_text = None
+    page = _NoNoticeText(body_text=_EVISA_PAGE, notice_present=True)
+    assert _driver_with(page)._notice_is_error(page) is True
+
+
+@pytest.mark.parametrize("text,is_error", [
+    ("Not falling under the cases of suspension from entry", False),  # en
+    ("La verificación falló. Intente de nuevo.", True),               # es
+    ("Se ha producido una falla en el envío", True),                  # es
+    ("Your application has been submitted successfully", False),
+    ("Nhập sai mã bảo mật", True),                                    # vi
+    ("Hồ sơ đã hoàn thành", False),                                   # vi
+])
+def test_error_vocabulary_is_word_anchored(text, is_error):
+    page = _FakePage(notice_present=True)
+    page.notice_text = lambda: {"ok": True, "text": text}
+    assert _driver_with(page)._notice_is_error(page) is is_error
+
+
+def test_a_success_marker_outranks_a_cautionary_word_in_the_same_notice():
+    """Portals print conditions inside their success dialogs; one stray
+    'invalid' must not reclassify a completed declaration."""
+    page = _FakePage(notice_present=True)
+    page.notice_text = lambda: {"ok": True, "text":
+        "DECLARATION COMPLETED. An invalid passport will void this e-visa."}
+    assert _driver_with(page)._notice_is_error(page) is False
+
+
+# --- 7. Ellis presses a blocking notice itself ------------------------------
+
+def _notice_page(text, sigs):
+    page = _FakePage(body_text=_EVISA_PAGE, notice_present=True)
+    page.notice_text = lambda: {"ok": True, "text": text}
+    page._sigs = list(sigs)
+    page.page_signature = lambda: page._sigs[min(len(page._sigs) - 1,
+                                                 int(page.confirmed))]
+    return page
+
+
+def test_blocking_notice_is_confirmed_by_ellis_and_reports_movement():
+    page = _notice_page(_EVISA_NOTICE, ["form-page", "payment-page"])
+    d = _driver_with(page)
+    d._capture_registration_notice = lambda _drv: None
+    assert d._confirm_blocking_notice() is True
+    assert page.confirmed is True
+
+
+def test_a_notice_that_does_not_move_the_page_is_not_progress():
+    """A pressed Confirm that leaves the page identical is not movement —
+    reporting it as progress would spin the loop."""
+    page = _notice_page(_EVISA_NOTICE, ["same-page"])
+    d = _driver_with(page)
+    d._capture_registration_notice = lambda _drv: None
+    assert d._confirm_blocking_notice() is False
+
+
+def test_an_error_notice_is_never_pressed_past():
+    page = _notice_page("Invalid security code. Please try again.",
+                        ["form-page", "form-page"])
+    d = _driver_with(page)
+    d._capture_registration_notice = lambda _drv: None
+    assert d._confirm_blocking_notice() is False
+    assert page.confirmed is False
+
+
+def test_no_notice_on_screen_is_not_a_confirm():
+    page = _FakePage(body_text=_EVISA_PAGE, notice_present=False)
+    assert _driver_with(page)._confirm_blocking_notice() is False
+
+
+# --- 8. a challenge behind a modal is not a challenge ----------------------
+
+def test_captcha_probe_ignores_widgets_covered_by_an_overlay():
+    """A modal leaves the form (CAPTCHA included) laid out and visible
+    underneath, so size and offsetParent both still pass. Only a hit test
+    tells the truth — without it eVisa's notice read as a live CAPTCHA."""
+    from app.adapter_factory.live_driver import BrowserbasePageDriver as _D
+    js = _D._CAPTCHA_JS
+    assert "elementFromPoint" in js
+    assert "reachable" in js

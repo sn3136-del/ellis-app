@@ -701,6 +701,7 @@ class ReleasedFlowDriver:
     def _discover_fee_iterations(self, boundary, repaired, advance_attempted,
                                  attempted_optional_keys, declaration_tried,
                                  incomplete_classified) -> dict:
+        notices_confirmed = 0
         while True:
             runner = None
             try:
@@ -741,6 +742,15 @@ class ReleasedFlowDriver:
                 declaration_tried = True
                 if self._tick_declaration_and_advance():
                     continue
+            # A blocking notice sits ON TOP of the form and answers nothing:
+            # everything behind it — the CAPTCHA included — still measures as
+            # visible, so classifying the page underneath describes a page the
+            # applicant cannot reach. Acknowledge the notice first (recording
+            # what it says), then re-read.
+            if notices_confirmed < self._MAX_NOTICE_CONFIRMS \
+                    and self._confirm_blocking_notice():
+                notices_confirmed += 1
+                continue
             # Otherwise read what the live page ACTUALLY shows: a CAPTCHA,
             # fields whose answers Ellis already holds (repair silently,
             # once), or still-unanswered questions must pause as themselves —
@@ -1537,33 +1547,116 @@ class ReleasedFlowDriver:
     # seeded families' languages. Presence of any of these means the notice
     # is a REJECTION, never an acceptance — so it is never scraped for a
     # reference nor confirmed past as success.
+    # Every stem is \b-anchored. Unanchored, the Spanish `fall` matched inside
+    # eVisa's own English entry conditions — "Not FALLing under the cases of
+    # suspension from entry" — and turned the success notice into a rejection,
+    # so a correct CAPTCHA code came back "wasn't accepted" (2026-08-03).
+    # Prefixes that are legitimately word-initial keep a trailing \w* instead.
     _NOTICE_ERROR_RE = re.compile(
-        r"(invalid|incorrect|wrong|failed|error|not\s+match|does\s+not\s+match|"
-        r"try\s+again|expired|"
-        r"không\s+đúng|không\s+hợp\s+lệ|sai|"          # vi
-        r"inválid|incorrect|error|fall|"               # es
-        r"invalide|incorrect|erreur|échou|"            # fr
-        r"ungültig|falsch|fehler|"                     # de
-        r"hatal|geçersiz|yanlış|"                      # tr
-        r"tidak\s+valid|salah|gagal|"                  # id
-        r"неверн|ошибк|недейств|"                      # ru
-        r"غير\s+صالح|خطأ|خاطئ)",                        # ar
+        r"(\binvalid|\bincorrect|\bwrong\b|\bfail\w*|\berror|"
+        r"\bnot\s+match|\bdoes\s+not\s+match|\btry\s+again\b|\bexpired\b|"
+        r"\bkhông\s+đúng|\bkhông\s+hợp\s+lệ|\bsai\b|"      # vi
+        # Spanish failure words are spelled out, not stemmed: any `fall`
+        # stem loose enough to catch "falló" also catches English "falling".
+        r"\binválid|\bfall[aoó]s?\b|\bfallar\b|\bfallid[oa]s?\b|"   # es
+        r"\binvalide|\berreur|\béchou\w*|"                 # fr
+        r"\bungültig|\bfalsch\b|\bfehler\b|"               # de
+        r"\bhatal\w*|\bgeçersiz\b|\byanlış\b|"             # tr
+        r"\btidak\s+valid|\bsalah\b|\bgagal\b|"            # id
+        r"\bневерн|\bошибк|\bнедейств|"                    # ru
+        r"غير\s+صالح|خطأ|خاطئ)",                            # ar
+        re.IGNORECASE)
+
+    # An explicit completion marker outranks the error vocabulary: portals
+    # print terms and conditions inside their success notices, and one stray
+    # cautionary word must not reclassify a completed declaration.
+    _NOTICE_SUCCESS_RE = re.compile(
+        r"(\bcompleted\b|\bsuccessful\w*\b|\bsuccess\b|\bsubmitted\b|"
+        r"\bthành\s+công\b|\bhoàn\s+thành\b|"              # vi
+        r"\bexitosa\w*\b|\bcompletad\w*\b|"                # es
+        r"\bréussi\w*\b|\bterminée?\b|"                    # fr
+        r"\berfolgreich\b|\babgeschlossen\b|"              # de
+        r"\bbaşarılı\b|\bberhasil\b|\bselesai\b|"          # tr / id
+        r"\bуспешн\w*\b|"                                  # ru
+        r"\bتم\s+بنجاح\b|"                                  # ar
+        r"完了|成功|完成|완료|성공)",
         re.IGNORECASE)
 
     def _notice_is_error(self, driver) -> bool:
-        """Is the on-screen notice a rejection/error dialog rather than a
-        success notice? Reads the notice/page text and matches portal error
-        vocabulary. Fail-safe: if the text can't be read, treat it as an error
-        (never scrape or confirm an unreadable dialog as success)."""
-        reader = getattr(driver, "notice_text", None) or \
-            (lambda: driver.read_text("body") if hasattr(driver, "read_text") else {})
+        """Is the on-screen notice a rejection dialog rather than a success
+        notice?
+
+        Reads the NOTICE's own text — never the page behind it, which on a
+        government form carries pages of conditions and warnings that no
+        error vocabulary can be safely matched against. An explicit success
+        marker wins over an error word. Fail-safe: unreadable text is treated
+        as an error, so an unreadable dialog is never scraped for a reference
+        nor confirmed past as success.
+        """
+        reader = getattr(driver, "notice_text", None)
+        if reader is None:
+            return True          # no notice-scoped reader: refuse to guess
         try:
             res = reader()
         except Exception:  # noqa: BLE001
             return True
         if not isinstance(res, dict) or not res.get("ok"):
             return True
-        return bool(self._NOTICE_ERROR_RE.search(res.get("text") or ""))
+        text = res.get("text") or ""
+        if not text.strip():
+            return True
+        if self._NOTICE_SUCCESS_RE.search(text):
+            return False
+        return bool(self._NOTICE_ERROR_RE.search(text))
+
+    # A page that keeps re-raising notices is not making progress; stop
+    # acknowledging and let classification report honestly.
+    _MAX_NOTICE_CONFIRMS = 3
+
+    def _confirm_blocking_notice(self) -> bool:
+        """Acknowledge a blocking notice dialog and report whether the page
+        moved.
+
+        This is the eVisa "DECLARATION COMPLETED" notice and its equivalents:
+        a dialog that states a result and offers one Confirm. It asks the
+        applicant nothing, so waiting for a human is a stall — Ellis presses
+        it, exactly as the flow always did after a CAPTCHA answer. What is new
+        is only WHEN: any point the run reaches one, not just that single path.
+
+        Refuses to press anything it cannot vouch for. An error notice is left
+        standing for the caller to classify, its text is recorded first, and
+        movement must be proved by the page's own signature rather than
+        assumed from a successful click.
+        """
+        try:
+            driver = self._ensure_live()
+        except Exception:  # noqa: BLE001
+            return False
+        state = getattr(driver, "notice_state", None)
+        confirm = getattr(driver, "confirm_notice", None)
+        if state is None or confirm is None:
+            return False
+        try:
+            if not (state() or {}).get("present"):
+                return False
+            # A rejection is a real answer about the run — never press past it.
+            if self._notice_is_error(driver):
+                return False
+            self._capture_registration_notice(driver)
+            sig_before = driver.page_signature() \
+                if hasattr(driver, "page_signature") else ""
+            if not (confirm() or {}).get("ok"):
+                return False
+            if hasattr(driver, "settle"):
+                driver.settle(1200)
+            sig_after = driver.page_signature() \
+                if hasattr(driver, "page_signature") else ""
+            if sig_before and sig_after:
+                return sig_after != sig_before
+            # No signature to compare: the notice being gone is the evidence.
+            return not (state() or {}).get("present")
+        except Exception:  # noqa: BLE001
+            return False
 
     def _capture_registration_notice(self, driver) -> None:
         """The portal's registration NOTICE carries the e-Visa document code

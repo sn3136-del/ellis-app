@@ -1795,13 +1795,23 @@ class _CaptchaPage:
     def notice_state(self):
         return {"ok": True, "present": self.accept}
 
+    # The PAGE carries eVisa's real entry conditions, whose "Not FALLing under
+    # the cases of suspension" once matched the Spanish error stem and turned
+    # every acceptance into a rejection. The NOTICE is read on its own.
+    _PAGE = ("Foreigners with valid international travel document. Not falling "
+             "under the cases of suspension from entry.")
+
     def read_text(self, selector):
+        return {"ok": True, "text": self._PAGE}
+
+    def notice_text(self):
         # The success notice carries the registration code, no error language;
         # a rejection would instead say "invalid security code".
+        if not self.accept:
+            return {"ok": False, "code": "NO_NOTICE"}
         return {"ok": True,
-                "text": ("Registration code: E260727CHNEG108503764. "
-                         "Please note this document code.")
-                        if self.accept else "Invalid security code. Try again."}
+                "text": ("DECLARATION COMPLETED. Registration code: "
+                         "E260727CHNEG108503764. Please note this document code.")}
 
     def confirm_notice(self):
         self.log.append(("confirm",))

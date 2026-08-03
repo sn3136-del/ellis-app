@@ -265,11 +265,22 @@ class BrowserbasePageDriver:
                     'iframe[title*="captcha" i]', '.g-recaptcha', '.h-captcha',
                     '[id*="captcha" i]', '[class*="captcha" i]',
                     'img[src*="captcha" i]', 'input[name*="captcha" i]'];
+      // A widget the applicant cannot reach is not a challenge they can
+      // solve. A modal notice leaves the whole form (CAPTCHA included) laid
+      // out and visible underneath it, so size and offsetParent both still
+      // pass — only a hit test tells the truth about what is on top.
+      const reachable = (el, r) => {
+        const x = r.left + r.width / 2, y = r.top + r.height / 2;
+        if (x < 0 || y < 0 || x > innerWidth || y > innerHeight) return true;
+        const top = document.elementFromPoint(x, y);
+        return !top || el.contains(top) || top.contains(el);
+      };
       for (const s of sels) {
         for (const el of document.querySelectorAll(s)) {
           const r = el.getBoundingClientRect();
           if (r.width < 20 || r.height < 20) continue;
           if (el.tagName !== 'IFRAME' && el.offsetParent === null) continue;
+          if (!reachable(el, r)) continue;
           if (highlight) {
             el.scrollIntoView({block: 'center', inline: 'center'});
             const box = (el.closest('div') || el);
@@ -912,14 +923,18 @@ class BrowserbasePageDriver:
                      '[class*="popup"], [class*="swal"], [class*="overlay"]';
       for (const b of document.querySelectorAll('button, a[role="button"]')) {
         if (b.offsetParent === null) continue;
-        if (!b.closest(DIALOG)) continue;
+        const dialog = b.closest(DIALOG);
+        if (!dialog) continue;
         const t = norm(b.innerText || '');
         if (words.includes(t)) {
           const r = b.getBoundingClientRect();
-          return {present: true, x: r.left + r.width / 2, y: r.top + r.height / 2};
+          // The dialog's OWN text, so a caller judging success/failure reads
+          // the notice and not the whole page behind it.
+          return {present: true, x: r.left + r.width / 2, y: r.top + r.height / 2,
+                  text: (dialog.innerText || '').slice(0, 4000)};
         }
       }
-      return {present: false};
+      return {present: false, text: ''};
     }"""
 
     def notice_state(self) -> dict:
@@ -929,6 +944,25 @@ class BrowserbasePageDriver:
             return {"ok": True, "present": bool(res.get("present"))}
         except Exception as e:  # noqa: BLE001
             return {"ok": False, "code": "READ_ERROR", "detail": str(e)[:120]}
+
+    def notice_text(self) -> dict:
+        """The text of the blocking notice ALONE — never the page behind it.
+
+        Without this the caller's only reader was read_text('body'), so a
+        notice was judged by the whole page: eVisa's entry conditions say
+        "Not FALLing under the cases of suspension from entry", the Spanish
+        error stem `fall` matched inside "falling", and a perfectly good
+        "DECLARATION COMPLETED" notice was read as a rejection — the
+        applicant's correct CAPTCHA code came back "wasn't accepted"
+        (2026-08-03).
+        """
+        try:
+            res = self.page.evaluate(self._NOTICE_JS) or {}
+        except Exception as e:  # noqa: BLE001
+            return {"ok": False, "code": "READ_ERROR", "detail": str(e)[:120]}
+        if not res.get("present"):
+            return {"ok": False, "code": "NO_NOTICE"}
+        return {"ok": True, "text": str(res.get("text") or "")}
 
     def confirm_notice(self) -> dict:
         """Click the notice's Confirm — a routine acknowledgement the
