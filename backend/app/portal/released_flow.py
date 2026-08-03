@@ -40,6 +40,34 @@ _FILL_BOUNDARY_ACTIONS = {"UPLOAD_AUTHORIZED_DOCUMENT", "READ_FEE",
                           "READ_APPOINTMENT_INVENTORY"}
 _FILL_BOUNDARY_HANDOFFS = {"payment_credentials", "legally_personal_declaration"}
 
+# The applicant-facing handoff vocabulary. A pause names one of these, and the
+# UI has a panel, copy and a resolving signal for each — see HANDOFF_UI /
+# HANDOFF_COPY / HANDOFF_SIGNAL in visaBackend.js, which must cover this list.
+APPLICANT_HANDOFFS = frozenset({
+    "additional_information", "appointment_selection", "authorization",
+    "captcha", "credentials", "document_upload", "email_verification",
+    "fee_confirmation", "final_review", "identity", "login_challenge",
+    "no_availability", "otp", "payment", "payment_approval",
+    "payment_credentials", "personal_declaration", "portal_form",
+    "portal_terms_consent", "reschedule_approval", "review", "three_ds",
+})
+
+# A SPEC's internal node vocabulary is not the applicant's. These names are
+# written by specgen to describe what a node IS; the applicant sees what they
+# must DO. Anything not aliased passes through unchanged and must therefore
+# already be an APPLICANT_HANDOFF — a released adapter carrying a kind that is
+# neither is a dead end: the UI falls back to a bare "Action needed" card with
+# no panel and no signal, and the case never leaves it. thailand-tdac's
+# document_upload did exactly that (2026-08-03).
+_HANDOFF_ALIASES = {
+    "legally_personal_declaration": "personal_declaration",
+}
+
+
+def applicant_handoff(kind: str) -> str:
+    """Map a flow node's handoff_kind onto the applicant-facing vocabulary."""
+    return _HANDOFF_ALIASES.get(str(kind or ""), str(kind or ""))
+
 
 class ReleasedRoute:
     """Everything needed to execute a case against its released family adapter."""
@@ -420,7 +448,8 @@ class ReleasedFlowDriver:
                     upgraded = self._portal_form_to_questions(res)
                     if upgraded is not None:
                         return upgraded
-                out = {"ok": False, "code": "APPLICANT_ACTION_REQUIRED", "handoff": kind}
+                out = {"ok": False, "code": "APPLICANT_ACTION_REQUIRED",
+                       "handoff": applicant_handoff(kind)}
             if res.get("portal_messages"):
                 out["portal_messages"] = res["portal_messages"]
             return out

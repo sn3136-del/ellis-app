@@ -471,8 +471,12 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
       if (handoff === 'email_verification' || handoff === 'otp') {
         await onResolve('verify_email', { token: typedCode.trim() || token })
         setTypedCode('')                        // never retained after use
-      } else if (handoff === 'portal_form') {
-        await onResolve('start')  // re-drive: Ellis re-verifies the form page
+      } else if (handoff === 'portal_form' || handoff === 'document_upload' ||
+                 handoff === 'portal_terms_consent' || handoff === 'credentials') {
+        // Re-drive: the applicant did the thing only they may do (attached a
+        // file, accepted the portal's terms, created the account) and Ellis
+        // re-reads the page rather than assuming it worked.
+        await onResolve('start')
       } else if (handoff === 'captcha') {
         // The applicant's typed solution rides along (vault-transported,
         // used once): Ellis enters it on the portal and continues. Without a

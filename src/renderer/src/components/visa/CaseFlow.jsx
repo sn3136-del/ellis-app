@@ -6,7 +6,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useToast, Loading, ErrorNote, KVList, Empty } from '../ui.jsx'
 import { useLocale } from '../../lib/locale.jsx'
-import { HANDOFF_COPY } from '../../lib/visaBackend.js'
+import { HANDOFF_COPY, HANDOFF_UI } from '../../lib/visaBackend.js'
 import { handoffCopy, isTerminal, formatSlot, resultDisposition } from '../../lib/visaSession.js'
 import {
   preferencesTabVisible,
@@ -419,8 +419,12 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
           onClose={() => setModal(null)}
           onDone={() => resolve('sign_authorization')} />
       )}
-      {(modal === 'captcha' || modal === 'email_verification' || modal === 'otp' ||
-        modal === 'identity' || modal === 'login_challenge' || modal === 'portal_form') && (
+      {/* Derived from HANDOFF_UI, never re-listed here. This condition used to
+          spell out its own handoff names, which made it a FOURTH map that
+          could silently disagree with the other three: document_upload had
+          copy, a panel and a signal declared, and its Continue still did
+          nothing because this line had never heard of it (2026-08-03). */}
+      {HANDOFF_UI[modal] === 'LiveViewModal' && (
         <LiveViewModal client={client} caseId={caseId} pending={pending}
           title={copy.title} sub={copy.sub}
           onResolve={async (sig, body) => {
