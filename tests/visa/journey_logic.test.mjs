@@ -347,11 +347,11 @@ test('doc-type labels are applicant-friendly and localized; whitelist excludes p
 })
 
 // ---------------------------------------------------------------------------
-// Route-specific journey rendering: only applicable stages, banner suppression
-// for routes with no government submission, appointment-gated Preferences tab,
-// calculated validity display, and the two-pass verification chip.
+// Route-specific journey rendering: only applicable stages, appointment-gated
+// Preferences tab, calculated validity display, and the two-pass verification
+// chip.
 import {
-  applicableStages, showExecutionBanner, preferencesTabVisible,
+  applicableStages, preferencesTabVisible,
   validityMeta, verificationMeta
 } from '../../src/renderer/src/lib/intake.js'
 
@@ -380,13 +380,6 @@ test('stages come from the route plan — never the whole state machine', () => 
 test('legacy cases without a journey keep their previous display (null)', () => {
   assert.equal(applicableStages(null, []), null)
   assert.equal(applicableStages(undefined, undefined), null)
-})
-
-test('the not-a-real-submission banner never shows for entry preparation', () => {
-  assert.equal(showExecutionBanner({ continuation_kind: 'entry_preparation' }), false)
-  // Fail safe: submission routes and unknown journeys KEEP the banner.
-  assert.equal(showExecutionBanner({ continuation_kind: 'visa_application' }), true)
-  assert.equal(showExecutionBanner(null), true)
 })
 
 test('Preferences tab appears only when an appointment is actually required', () => {

@@ -9,7 +9,7 @@ import { useLocale } from '../../lib/locale.jsx'
 import { HANDOFF_COPY } from '../../lib/visaBackend.js'
 import { handoffCopy, isTerminal, formatSlot, resultDisposition } from '../../lib/visaSession.js'
 import {
-  showExecutionBanner, preferencesTabVisible,
+  preferencesTabVisible,
   validityMeta, formatDateUS, isDateKey
 } from '../../lib/intake.js'
 import Preferences from './Preferences.jsx'
@@ -248,9 +248,13 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
 
   return (
     <div>
-      {/* The execution-honesty banner stays — it guards against a simulated
-          result ever reading as a real government outcome. */}
-      {showExecutionBanner(journey) && (started || !kind) && <ExecutionBanner status={status} />}
+      {/* The execution-class banner is not shown (product decision, 2026-08-03).
+          It read as a contradiction — "LIVE_PRODUCTION — not a real government
+          submission" over "This is a real result" — because the headline came
+          from the verification guard and the subtitle from the class's static
+          description. The GUARD itself is untouched: resultDisposition still
+          gates every terminal claim, so an unverified run can never render as
+          "Application submitted" or show a reference number as real. */}
       {error && <ErrorNote error={error} />}
       {portalBlocked && (
         <PortalObservation t={t} client={client} caseId={caseId} />
@@ -1404,22 +1408,6 @@ function ReviewPanel({ answers, onApprove, busy }) {
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
         <button className="btn" disabled={busy} onClick={onApprove}>{busy ? 'Confirming…' : 'Confirm and continue'}</button>
       </div>
-    </div>
-  )
-}
-
-// A persistent, honest banner whenever the case is NOT running on an approved
-// live-production portal. The applicant always knows the realness of what they see.
-function ExecutionBanner({ status }) {
-  const d = resultDisposition(status)
-  if (d.isReal) return null
-  return (
-    <div className="card" style={{ padding: '10px 14px', marginBottom: 12,
-      background: '#fff7ed', border: '1px solid #f59e0b' }}>
-      <div style={{ fontWeight: 700, fontSize: 12, color: '#9a3412' }}>
-        {d.executionClass} — not a real government submission
-      </div>
-      <div style={{ fontSize: 12, color: '#9a3412' }}>{d.disclaimer}</div>
     </div>
   )
 }

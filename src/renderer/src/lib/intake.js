@@ -510,15 +510,6 @@ export function applicableStages(continuationKind, workflowPlan) {
   return out
 }
 
-// The orange "not a real government submission" banner exists to guard routes
-// that DO end in a government submission. A route with no submission at all
-// (visa-exempt entry preparation) has nothing to guard — showing it there is
-// wrong. Fail safe: an unknown/missing journey keeps the banner.
-export function showExecutionBanner(journey) {
-  if (journey && journey.continuation_kind === 'entry_preparation') return false
-  return true
-}
-
 // The Preferences tab is appointment-booking configuration: visible ONLY when
 // the route's verified guidance says an appointment / in-person submission is
 // required. Legacy cases without a saved journey keep the previous behavior.
