@@ -480,6 +480,41 @@ _PARKED_BUILD_STATES = ("MANUAL_REVIEW_REQUIRED", "TESTS_FAILED",
                         "AWAITING_INTERNAL_RELEASE")
 
 
+def reconcile_stale_links(db) -> list[str]:
+    """Correct links left claiming 'building' by a build that never wrote back.
+
+    A family's link row is created as 'building' and only updated once the
+    attempt returns. Kill the process in between — Ctrl-C, a crash, a laptop
+    asleep mid-sweep — and the link says 'building' forever while nothing is
+    running (barbados-ed-form sat that way for hours after an interrupted
+    sweep, and the dashboard duly reported one build in flight).
+
+    The build REQUEST is the authority: if it has come to rest, the link is
+    made to say the same thing. Only unreleased links claiming 'building' are
+    touched, the state is copied rather than invented, and nothing here can
+    release a family or walk one out of quarantine.
+    """
+    from ..adapter_factory.statemachine import TERMINALISH_STATES
+    at_rest = set(_PARKED_BUILD_STATES) | set(TERMINALISH_STATES)
+    fixed: list[str] = []
+    links = db.execute(select(FamilyAdapterLink).where(
+        FamilyAdapterLink.released.is_(False),
+        FamilyAdapterLink.status == "building")).scalars().all()
+    for link in links:
+        if not link.build_request_id:
+            continue
+        req = db.get(fm.AdapterBuildRequest, link.build_request_id)
+        if req is None or req.state not in at_rest:
+            continue          # genuinely mid-build, or no request to trust
+        link.status = req.state
+        if not link.last_error:
+            link.last_error = req.error or req.state
+        fixed.append(link.family_id)
+    if fixed:
+        db.commit()
+    return fixed
+
+
 def _unpark_for_rebuild(db, req) -> None:
     """Walk a parked build request back to ROUTE_RESEARCH_PENDING along the
     state machine's own escape path — NOT straight to recon: the full chain

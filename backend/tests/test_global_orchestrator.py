@@ -299,3 +299,41 @@ def test_no_synthetic_release_in_real_only_mode(gdb, monkeypatch):
     finally:
         monkeypatch.setenv("ELLIS_RUNTIME_MODE", "test")
         config.settings.cache_clear()
+
+
+def test_interrupted_build_link_settles_to_its_request_state(gdb):
+    """A link left claiming 'building' by a killed sweep must not keep
+    reporting a build in flight.
+
+    The link row is written 'building' before the attempt and corrected after
+    it returns; a process that dies in between leaves the claim standing
+    forever (barbados-ed-form did exactly this). The build REQUEST is the
+    authority, so a request at rest settles its link."""
+    from app.adapter_factory import models as fm
+
+    link = gdb.execute(select(FamilyAdapterLink).where(
+        FamilyAdapterLink.family_id == "india-evisa")).scalars().one()
+    req = gdb.get(fm.AdapterBuildRequest, link.build_request_id)
+    was = (link.status, link.released, link.last_error, req.state)
+    try:
+        link.released, link.status, link.last_error = False, "building", ""
+        req.state = "MANUAL_REVIEW_REQUIRED"
+        gdb.commit()
+
+        assert orchestrator.reconcile_stale_links(gdb) == ["india-evisa"]
+        gdb.refresh(link)
+        assert link.status == "MANUAL_REVIEW_REQUIRED"
+        assert link.released is False          # settling never releases
+        assert link.last_error                 # and says why it is not running
+
+        # Idempotent, and a genuinely mid-flight build is left alone.
+        assert orchestrator.reconcile_stale_links(gdb) == []
+        link.status, req.state = "building", "RECON_RUNNING"
+        gdb.commit()
+        assert orchestrator.reconcile_stale_links(gdb) == []
+        gdb.refresh(link)
+        assert link.status == "building"
+    finally:
+        link.status, link.released, link.last_error = was[0], was[1], was[2]
+        req.state = was[3]
+        gdb.commit()

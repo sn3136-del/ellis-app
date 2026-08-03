@@ -39,6 +39,13 @@ def coverage(db) -> dict:
     fam_stale = db.execute(select(func.count(PortalFamily.id)).where(
         PortalFamily.stale.is_(True))).scalar_one()
 
+    # An interrupted sweep can leave a link claiming 'building' with no
+    # process behind it, which this function would otherwise report as a
+    # build in flight. Settle those against their build request first, so
+    # the count below describes what is actually running.
+    from .orchestrator import reconcile_stale_links
+    reconcile_stale_links(db)
+
     links = db.execute(select(FamilyAdapterLink)).scalars().all()
     adapters = {
         "total": len(links),
