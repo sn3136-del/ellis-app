@@ -9,7 +9,7 @@
 // (name/type/size + download) for formats the browser cannot render.
 // Rotation is a viewing aid only — the stored document is never modified.
 import { useEffect, useRef, useState } from 'react'
-import { Loading } from '../ui.jsx'
+import { Loading, Overlay } from '../ui.jsx'
 import { rotatedFrame } from '../../lib/intake.js'
 
 const RENDERABLE_IMAGE = /^image\/(jpeg|png|gif|webp)$/
@@ -103,11 +103,11 @@ export default function DocPreview({ client, caseId, doc, onClose }) {
   const pristine = zoom === 1 && rotation === 0
 
   return (
-    // "overlay" is the theme's ONLY fixed-position backdrop class — the name
-    // "modal-backdrop" doesn't exist in theme.css, and an unstyled backdrop
-    // let the whole preview flow INLINE inside the document card (2026-08-02).
-    <div className="overlay" onClick={onClose}>
-      <div className="modal" style={{ maxWidth: 900, width: '92%' }} onClick={(e) => e.stopPropagation()}>
+    // Overlay portals to <body>: the backdrop is fixed to the VIEWPORT, never
+    // to the animated card this preview is rendered from (see ui.jsx).
+    <Overlay onClose={onClose}>
+      <div className="modal" style={{ maxWidth: 900, width: 'min(900px, 92vw)' }}
+        onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
           <div style={{ fontWeight: 700, flex: 1, minWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis' }}>{doc.name}</div>
           {state.status === 'ready' && rotatable && (
@@ -191,6 +191,6 @@ export default function DocPreview({ client, caseId, doc, onClose }) {
           )}
         </div>
       </div>
-    </div>
+    </Overlay>
   )
 }

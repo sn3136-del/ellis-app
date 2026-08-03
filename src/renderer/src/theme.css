@@ -54,6 +54,9 @@ input, textarea, select { font-family: inherit; }
   padding: 10px 18px; border-radius: 999px; font-size: 14px; font-weight: 600;
   transition: transform .12s ease, opacity .2s ease, background .2s ease, color .2s ease;
   white-space: nowrap;
+  /* .btn is worn by <a> too (Download links in the document preview) — without
+     this the anchor keeps its underline and reads as a link wearing a pill. */
+  text-decoration: none;
 }
 .btn:hover { transform: translateY(-1px); }
 .btn:active { transform: translateY(0); }
@@ -585,12 +588,19 @@ body { background: var(--bg-soft); }
   padding: 5px 12px; border-radius: 999px; pointer-events: none; white-space: nowrap;
 }
 
-/* ---------- Entrance animations (used sparingly) ---------- */
+/* ---------- Entrance animations (used sparingly) ----------
+   fill-mode is `backwards`, NOT `both`: `both` retains the final keyframe
+   forever, and an animated `transform: none` computes to matrix(1,0,0,1,0,0)
+   rather than none — which permanently makes every .fadeup card the
+   containing block for its `position: fixed` descendants. `backwards` still
+   holds the from-state through the delay (what the stagger needs) and then
+   hands the element back to its own styles, which already end at opacity 1 /
+   no transform, so the animation looks identical. */
 @keyframes fadeup { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-.fadeup { animation: fadeup .35s ease both; }
-.fadeup-1 { animation: fadeup .35s .06s ease both; }
-.fadeup-2 { animation: fadeup .35s .12s ease both; }
-.fadeup-3 { animation: fadeup .35s .18s ease both; }
+.fadeup { animation: fadeup .35s ease backwards; }
+.fadeup-1 { animation: fadeup .35s .06s ease backwards; }
+.fadeup-2 { animation: fadeup .35s .12s ease backwards; }
+.fadeup-3 { animation: fadeup .35s .18s ease backwards; }
 
 /* Top-bar layout: full-width column, content scrolls under the bar. */
 .app { display: flex; flex-direction: column; height: 100vh; }
@@ -599,15 +609,27 @@ body { background: var(--bg-soft); }
 
 /* RTL: anchor the language menu to the correct side. */
 [dir="rtl"] .langpick__menu { right: auto; left: 0; }
-.doccard__link { border: none; background: none; padding: 0; font-size: 12.5px;
-  font-weight: 600; color: var(--trip-blue); text-decoration: none; }
-.doccard__link:hover { text-decoration: underline; }
-.doccard__link:disabled { color: var(--trip-gray); }
+/* Tertiary card actions (View, translation). The card's primary and secondary
+   actions are pills; these were bare text with no padding, so a long label
+   like "View / download translation" ran the full width of the card and sat
+   hard against its edges, reading as unstyled rather than quiet. They are
+   quiet BUTTONS now: same pill geometry, no border, a hover surface instead
+   of an underline, and never wider than the card's content box. */
+.doccard__link { border: none; background: none; padding: 5px 12px;
+  border-radius: 999px; font-size: 12.5px; font-weight: 600;
+  color: var(--trip-blue); text-decoration: none; line-height: 1.35;
+  max-width: 100%; cursor: pointer; transition: background 140ms ease; }
+.doccard__link:hover:not(:disabled) { background: rgba(40, 125, 250, 0.09); }
+.doccard__link:active:not(:disabled) { background: rgba(40, 125, 250, 0.16); }
+.doccard__link:focus-visible { outline: 2px solid var(--trip-blue);
+  outline-offset: 2px; }
+.doccard__link:disabled { color: var(--trip-gray); cursor: default; }
 /* Translation not required: present but plainly inert — the applicant can see
    the capability exists and that this document does not need it. */
 .doccard__link--off { color: var(--trip-gray); opacity: 0.55; cursor: default;
   font-weight: 500; }
-.doccard__link--off:hover { text-decoration: none; }
+/* Inert, so it must not offer a hover surface the way a real action does. */
+.doccard__link--off:hover { background: none; text-decoration: none; }
 
 /* Welcome hero (applicant landing) — the Trip.com landing look: one big
    headline, one primary action, generous air. .trip-home/.trip-home__title/

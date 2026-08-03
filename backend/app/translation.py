@@ -22,7 +22,9 @@ from sqlalchemy import select
 from . import models, audit
 from .i18n import protect_tokens, restore_tokens
 
-DISCLAIMER = "Machine translation by Kimi K3 — not a certified translation."
+# Applicant-facing, so it names the nature of the artifact (machine, not
+# certified) rather than the vendor behind it.
+DISCLAIMER = "Machine translation — not a certified translation."
 
 # Minimum extracted characters for detection/translation to be meaningful.
 MIN_TEXT_CHARS = 40

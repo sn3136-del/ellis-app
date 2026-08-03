@@ -15,18 +15,21 @@
 //    with the applicant.
 //  - Live View URLs are treated as sensitive: shown, never logged or emailed.
 import { useEffect, useRef, useState } from 'react'
-import { useToast, Loading, ErrorNote, KVList } from '../ui.jsx'
+import { useToast, Loading, ErrorNote, KVList, Overlay as Backdrop } from '../ui.jsx'
 import { useT } from '../../lib/locale.jsx'
 import { formatFee, formatSlot, splitQuestions, collectAnswers } from '../../lib/visaSession.js'
 import { ALLOWED, MAX_BYTES, readAsBase64 } from './Checklist.jsx'
 
+// Every handoff modal goes through the portalled backdrop in ui.jsx — these
+// render from inside animated cards, whose transform would otherwise become
+// the containing block for `position: fixed` and trap the modal in the card.
 function Overlay({ children, onClose, width = 620 }) {
   return (
-    <div className="overlay" onClick={onClose}>
+    <Backdrop onClose={onClose}>
       <div className="modal" style={{ maxWidth: width }} onClick={(e) => e.stopPropagation()}>
         {children}
       </div>
-    </div>
+    </Backdrop>
   )
 }
 

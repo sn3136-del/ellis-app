@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { Icon } from './icons.jsx'
 
 // ---------- Toast ----------
@@ -174,6 +175,27 @@ export function Empty({ title, sub, children }) {
       {sub && <div style={{ fontSize: 14, maxWidth: 380, margin: '0 auto 16px' }}>{sub}</div>}
       {children}
     </div>
+  )
+}
+
+// ---------- Overlay ----------
+// Every modal backdrop MUST go through here. `position: fixed` is relative to
+// the nearest ancestor with a transform/filter/backdrop-filter/containment —
+// not the viewport — so a modal rendered inside an animated `.card.fadeup`
+// gets trapped in that card's box and squeezed to its width (2026-08-03: the
+// translation preview rendered as a ~240px vertical strip with its header
+// scrolled off the top). Portalling to <body> makes that structurally
+// impossible regardless of what wraps the caller. Escape closes; the backdrop
+// click closes; the panel itself swallows clicks so a stray drag can't.
+export function Overlay({ onClose, children, ...rest }) {
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose && onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+  return createPortal(
+    <div className="overlay" onClick={onClose} {...rest}>{children}</div>,
+    document.body,
   )
 }
 
