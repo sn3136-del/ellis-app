@@ -155,3 +155,28 @@ def test_a_radio_node_without_options_is_refused_by_the_schema():
             "allowed_hostname": HOST, "selector": "#x", "input_source": "sex"}]
     errs = validate_flow(bad, allowed_hostnames=[HOST])
     assert any("requires observed options" in e for e in errs), errs
+
+
+# ---- "Other, please specify" companions ------------------------------------
+
+@pytest.mark.parametrize("el", [
+    {"name": "traPurposeOTH", "label": ""},
+    {"name": "tranModeOTH", "label": ""},
+    {"name": "purpose_other", "label": ""},
+    {"name": "occupation", "label": "Other (please specify)"},
+    {"name": "x", "label": "If other, specify"},
+])
+def test_a_specify_other_box_is_recognised(el):
+    from app.adapter_factory.specgen import is_specify_other_field
+    assert is_specify_other_field(el)
+
+
+@pytest.mark.parametrize("el", [
+    {"name": "occupation", "label": "Occupation"},
+    {"name": "motherName", "label": "Mother's Name"},
+    {"name": "brother", "label": "Brother"},
+    {"name": "otherNames", "label": "Other Names"},
+])
+def test_an_ordinary_field_is_not_mistaken_for_one(el):
+    from app.adapter_factory.specgen import is_specify_other_field
+    assert not is_specify_other_field(el)

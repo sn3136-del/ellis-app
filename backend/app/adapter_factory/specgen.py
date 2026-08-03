@@ -415,6 +415,31 @@ def _disqualified(ellis_field: str, toks: set) -> bool:
     return bool(_NAME_QUALIFIERS & toks)
 
 
+# The "Other — please specify" box that sits BESIDE a dropdown and is only
+# valid once that dropdown is set to Other.
+_SPECIFY_NAME_RE = re.compile(r"(_|\b)(oth|other|others|specify)$", re.IGNORECASE)
+_SPECIFY_LABEL_RE = re.compile(
+    r"\b(please specify|if other|other[,:]? *specify|specify (the )?other)\b",
+    re.IGNORECASE)
+
+
+def is_specify_other_field(el: dict) -> bool:
+    """True for a conditional "Other, please specify" companion control.
+
+    Filling one from a case field puts a real answer in the wrong box AND
+    leaves the dropdown that governs it blank — TDAC's Purpose of Travel would
+    have received "tourism" in its Other box while Purpose itself stayed
+    empty. Ellis cannot know the parent select says Other, so it does not
+    write there at all: an unfilled field is a pause, a wrongly-filled one is
+    a false statement on a government form."""
+    name = str(el.get("name") or "")
+    # camelCase and snake_case both: traPurposeOTH, purpose_other, otherSpecify
+    stem = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", name)
+    if _SPECIFY_NAME_RE.search(stem):
+        return True
+    return bool(_SPECIFY_LABEL_RE.search(str(el.get("label") or "")))
+
+
 def _claimed(claimed: set, ellis_field: str, part: str) -> bool:
     """Is this field already bound on this page?
 
@@ -848,6 +873,11 @@ def generate_specification(db, *, build_request: fm.AdapterBuildRequest,
             errs.append("ungrounded_no_observed_element")
         elif el.get("sensitive"):
             errs.append("sensitive_target_refused")
+        elif is_specify_other_field(el):
+            # Enforced HERE, at the single grounding chokepoint, so it holds
+            # for a Kimi proposal as much as a deterministic one — this exact
+            # mapping (travel_purpose -> traPurposeOTH) came from the model.
+            errs.append("conditional_specify_other_field_refused")
         elif m.get("selector") != el.get("selector"):
             errs.append("selector_mismatch_with_observation")
         sel = str(m.get("selector") or "").strip()

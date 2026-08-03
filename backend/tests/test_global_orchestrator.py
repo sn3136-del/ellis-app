@@ -337,3 +337,53 @@ def test_interrupted_build_link_settles_to_its_request_state(gdb):
         link.status, link.released, link.last_error = was[0], was[1], was[2]
         req.state = was[3]
         gdb.commit()
+
+
+def test_a_released_family_can_be_rebuilt_when_the_operator_names_it(gdb):
+    """A build-time fix must be able to reach a family that already works.
+
+    Thailand's split Date of Birth and its Gender radio group were both
+    specgen gaps on a RELEASED adapter, and every rebuild answered "already
+    released" and did nothing — so a fix could be correct, committed and
+    tested and still never meet the portal it was written for."""
+    fam = gdb.execute(select(PortalFamily).where(
+        PortalFamily.family_id == "india-evisa")).scalars().one()
+    orchestrator.build_family_adapter(gdb, "india-evisa",
+                                      observer=_obs(fam.hostnames[0]))
+    link = gdb.execute(select(FamilyAdapterLink).where(
+        FamilyAdapterLink.family_id == "india-evisa")).scalars().one()
+    link.released = True
+    gdb.commit()
+
+    # Unnamed: a batch run leaves a working family alone.
+    assert orchestrator.build_family_adapter(
+        gdb, "india-evisa", observer=_obs(fam.hostnames[0])
+    )["status"] == "already_released"
+
+    # Named: the build actually runs again.
+    out = orchestrator.build_family_adapter(
+        gdb, "india-evisa", observer=_obs(fam.hostnames[0]),
+        rebuild_released=True)
+    assert out.get("status") != "already_released"
+    assert out.get("build_state"), "a real rebuild reports where it got to"
+
+
+def test_naming_a_released_family_queues_real_work(gdb):
+    """`build-family` on a working family answered "queued: 0" — a zero-work
+    report indistinguishable from success."""
+    fam = gdb.execute(select(PortalFamily).where(
+        PortalFamily.family_id == "india-evisa")).scalars().one()
+    link = gdb.execute(select(FamilyAdapterLink).where(
+        FamilyAdapterLink.family_id == "india-evisa")).scalars().first()
+    if link is None:
+        orchestrator.build_family_adapter(gdb, "india-evisa",
+                                          observer=_obs(fam.hostnames[0]))
+        link = gdb.execute(select(FamilyAdapterLink).where(
+            FamilyAdapterLink.family_id == "india-evisa")).scalars().one()
+    link.released = True
+    gdb.commit()
+    run = orchestrator.start_run(gdb, "build-family", {"family": "india-evisa"})
+    out = orchestrator.run_adapter_phase(
+        gdb, run, only_family="india-evisa",
+        observer_factory=lambda _f: _obs(fam.hostnames[0]))
+    assert out["queued"] == 1 and out["executed"] == 1

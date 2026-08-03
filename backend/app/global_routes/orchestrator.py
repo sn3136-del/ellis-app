@@ -346,7 +346,8 @@ def research_entry_urls(db, family: PortalFamily, limit: int = 6) -> list[str]:
 
 
 def build_family_adapter(db, family_id: str, *, observer=None,
-                         allow_quarantine_rebuild: bool = False) -> dict:
+                         allow_quarantine_rebuild: bool = False,
+                         rebuild_released: bool = False) -> dict:
     """Build (or resume) THE one adapter for a portal family and evaluate the
     deterministic release gates. Idempotent: an existing link is resumed.
 
@@ -373,8 +374,20 @@ def build_family_adapter(db, family_id: str, *, observer=None,
         link = FamilyAdapterLink(family_id=family_id, status="building")
         db.add(link)
         db.commit()
-    if link.released:
+    if link.released and not rebuild_released:
         return {"family_id": family_id, "released": True, "status": "already_released"}
+    if link.released:
+        # Naming one released family on the CLI means "build it again with the
+        # current factory". Without this a specgen fix could be correct,
+        # committed, tested — and still never reach the portal it was written
+        # for, because the family already worked well enough to be released
+        # (Thailand's split Date of Birth and its Gender radio group).
+        # The link's flag is cleared so the build actually runs; the RUNTIME
+        # binding is untouched, so applicants keep the current version until a
+        # new one passes the gates on its own merits.
+        link.released = False
+        link.status = "building"
+        db.commit()
 
     rk = link.representative_route_key or representative_route_key(db, family)
     link.representative_route_key = rk
@@ -454,6 +467,10 @@ def build_family_adapter(db, family_id: str, *, observer=None,
         return r, g
 
     entry_state = req.state
+    from ..adapter_factory.statemachine import RELEASED_STATES
+    if rebuild_released and req.state in RELEASED_STATES:
+        _unpark_for_rebuild(db, req)
+        entry_state = req.state
     if allow_quarantine_rebuild and req.state == "QUARANTINED":
         # Explicit operator reset of THIS family's build: the machine's own
         # escape (QUARANTINED -> MANUAL_REVIEW_REQUIRED) then the full
@@ -526,7 +543,16 @@ def _unpark_for_rebuild(db, req) -> None:
     state machine's own escape path — NOT straight to recon: the full chain
     (portal verification, jurisdiction, automation-policy review) must re-run
     and may honestly re-park the build."""
-    from ..adapter_factory.statemachine import transition
+    from ..adapter_factory.statemachine import RELEASED_STATES, transition
+    # A RELEASED build is the hardest case and the one that matters most: the
+    # family works, and a build-time fix — a new widget kind, a field shape the
+    # mapper could not see — has no way to reach it. Ellis kept "already
+    # released" and the fix never met the portal it was written for. Walk it
+    # back the state machine's own way (release -> awaiting -> review -> fresh
+    # research). The RUNTIME keeps serving the current version throughout;
+    # nothing changes for applicants until a new one passes the gates.
+    if req.state in RELEASED_STATES:
+        transition(req, "AWAITING_INTERNAL_RELEASE", "orchestrator rebuild requested")
     if req.state in ("TESTS_FAILED", "AWAITING_INTERNAL_RELEASE"):
         transition(req, "MANUAL_REVIEW_REQUIRED", "orchestrator rebuild requested")
     if req.state == "MANUAL_REVIEW_REQUIRED":
@@ -579,6 +605,15 @@ def run_adapter_phase(db, run: GlobalBuildRun, *, observer_factory=None,
     scoped = bool(only_family or only_destination)
     if only_family:
         todo = [f for f in todo if f.family_id == only_family]
+        # families_needing_adapters lists families with NO released adapter, so
+        # naming a family that already works found nothing to do and reported
+        # "queued: 0" — indistinguishable from success. A single named family
+        # IS the operator asking for that one to be built again.
+        if not todo:
+            fam = db.execute(select(PortalFamily).where(
+                PortalFamily.family_id == only_family)).scalars().first()
+            if fam is not None:
+                todo = [fam]
     if only_destination:
         todo = [f for f in todo if only_destination in (f.destinations or [])]
     # A scoped run is the operator explicitly targeting these families: force
@@ -611,7 +646,10 @@ def run_adapter_phase(db, run: GlobalBuildRun, *, observer_factory=None,
                 # reset for that family's parked build, quarantine included.
                 out = build_family_adapter(
                     db, fid, observer=obs,
-                    allow_quarantine_rebuild=bool(only_family))
+                    allow_quarantine_rebuild=bool(only_family),
+                    # ONE named family only. A batch run must never walk a
+                    # working family back to research as a side effect.
+                    rebuild_released=bool(only_family))
             except PermanentBuildStop as exc:
                 raise RuntimeError(f"permanent: {exc}") from exc
             if not out.get("released") and out.get("status") != "already_released":
