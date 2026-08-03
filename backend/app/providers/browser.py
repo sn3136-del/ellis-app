@@ -93,13 +93,25 @@ def create_session() -> dict:
                 {"projectId": proj, "keepAlive": True},
                 {"projectId": proj})
     r = None
+    used = {}
     for body in attempts:
         r = httpx.post(f"{_BB_BASE}/sessions", headers=headers, json=body, timeout=30)
         if r.status_code < 400:
+            used = body
             break
     r.raise_for_status()
     data = r.json()
-    return {"id": data.get("id"), "mode": "browserbase", "connect_url": data.get("connectUrl")}
+    # WHICH attempt won matters. The fallbacks drop `proxies`, so a portal that
+    # refuses datacenter egress can be handed a datacenter session and answer
+    # 403 — Thailand's TDAC did exactly that twice, with Cloudflare's own
+    # Turnstile reporting Success and the request refused anyway (2026-08-03).
+    # Silently degrading to the egress a portal rejects is indistinguishable
+    # from the portal being down, so the result says what was actually opened.
+    return {"id": data.get("id"), "mode": "browserbase",
+            "connect_url": data.get("connectUrl"),
+            "proxied": bool(used.get("proxies")),
+            "proxies_requested": bool(proxied),
+            "degraded": bool(proxied) and not used.get("proxies")}
 
 
 def session_status(session_id: str) -> str:
