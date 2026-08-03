@@ -314,14 +314,23 @@ def evaluate_build(db, request_id: str) -> AutoReleaseResult:
     if cand.status == "quarantined" or releasesvc.kill_engaged(db, cand.id):
         return AutoReleaseResult(False, reason="candidate quarantined or kill-switched")
 
+    version = cand.current_version
     existing = releasesvc.active_binding(db, route_key=cand.route_key, tier="sandbox")
-    if existing is not None:
+    # "A binding exists" is not "this build is released". A rebuild produces a
+    # NEW version, and returning early here left the runtime bound to the old
+    # one while the build reported success — thailand-tdac rebuilt to a v18
+    # that fills seven fields and every applicant kept getting v17, which
+    # filled one (2026-08-03). Only a binding already carrying THIS candidate
+    # at this version or newer is genuinely released; anything else falls
+    # through to release(), which re-runs the evidence gates for the new
+    # version and rebinds only if they pass.
+    if existing is not None and existing.candidate_id == cand.id \
+            and existing.candidate_version >= version:
         evaluate_capabilities(db, request_id)   # idempotent; catch up any new caps
         return AutoReleaseResult(True, tier="sandbox", reason="already released",
                                  release_id=existing.release_id,
                                  capabilities=REVERSIBLE_CAPABILITIES)
 
-    version = cand.current_version
     try:
         rel = releasesvc.release(db, candidate_id=cand.id, version=version,
                                  tier="sandbox", actor=AUTO_ACTOR, is_admin=False,
