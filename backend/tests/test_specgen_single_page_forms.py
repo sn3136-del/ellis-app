@@ -597,3 +597,43 @@ def test_the_upload_gate_accepts_an_applicant_handoff():
     src = inspect.getsource(release_gates.evaluate_gates)
     assert 'n.get("handoff_kind") == "document_upload"' in src
     assert "upload_handoff" in src
+
+
+def test_a_confirmation_field_mirrors_what_it_confirms():
+    """Both mappers claim at most one portal field per Ellis field, so once
+    `email` is taken the "Confirm Email" input falls through and is matched to
+    whatever remains. MDAC's confirmEmail came out bound to address_line1,
+    which would type the applicant's street address into a government form's
+    email-confirmation box (2026-08-03)."""
+    from app.adapter_factory.specgen import _fix_confirmation_fields as fix
+
+    mdac = [{"portal_field": "email", "ellis_field": "email", "page_key": "f"},
+            {"portal_field": "confirmEmail", "ellis_field": "address_line1", "page_key": "f"}]
+    assert [(m["portal_field"], m["ellis_field"]) for m in fix(mdac)] == [
+        ("email", "email"), ("confirmEmail", "email")]
+
+
+def test_a_confirmation_field_with_nothing_to_confirm_is_dropped():
+    """No base field means no value to repeat — removing the mapping is the
+    honest answer; guessing one is how the bug happened."""
+    from app.adapter_factory.specgen import _fix_confirmation_fields as fix
+    assert fix([{"portal_field": "confirmEmail", "ellis_field": "address_line1",
+                 "page_key": "f"}]) == []
+
+
+def test_confirmation_detection_spans_wordings_and_languages():
+    from app.adapter_factory.specgen import _fix_confirmation_fields as fix
+    for repeat in ("re_enter_passportNo", "passportNoAgain", "repeatPassportNo",
+                   "confirmarPassportNo", "verifyPassportNo"):
+        pair = [{"portal_field": "passportNo", "ellis_field": "passport_number",
+                 "page_key": "f"},
+                {"portal_field": repeat, "ellis_field": "phone", "page_key": "f"}]
+        out = fix(pair)
+        assert out[-1]["ellis_field"] == "passport_number", repeat
+
+
+def test_ordinary_fields_are_untouched_by_the_guard():
+    from app.adapter_factory.specgen import _fix_confirmation_fields as fix
+    plain = [{"portal_field": "passNo", "ellis_field": "passport_number", "page_key": "f"},
+             {"portal_field": "arrDt", "ellis_field": "arrival_date", "page_key": "f"}]
+    assert fix(plain) == plain

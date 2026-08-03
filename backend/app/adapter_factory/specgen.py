@@ -414,13 +414,51 @@ def _known_field_proposals(artifacts: list[fm.AdapterReconArtifact]) -> list[dic
     return out
 
 
+# "Confirm email", "Re-enter passport number", "repetir correo" — a field whose
+# job is to repeat another one.
+_CONFIRM_RE = re.compile(
+    r"(confirm|verify|re[-_ ]?enter|re[-_ ]?type|repeat|again|"
+    r"confirmar|repetir|bestätig|wiederhol|xác\s*nhận|nhập\s*lại|确认|再入力)",
+    re.IGNORECASE)
+
+
+def _fix_confirmation_fields(mappings: list[dict]) -> list[dict]:
+    """A confirmation field mirrors what it confirms, or is dropped.
+
+    Both mappers claim at most one portal field per Ellis field, so once
+    `email` is taken the "Confirm Email" input falls through and gets matched
+    to whatever is left — MDAC's confirmEmail was bound to address_line1, which
+    would have typed the applicant's street address into a government form's
+    email-confirmation box (2026-08-03). A repeat field is never independent
+    data: it takes the base field's value, and if the base is unmapped there is
+    nothing to repeat and the mapping is removed rather than guessed.
+    """
+    out: list[dict] = []
+    for m in mappings or []:
+        name = str(m.get("portal_field") or "")
+        if not _CONFIRM_RE.search(name):
+            out.append(m)
+            continue
+        base = _CONFIRM_RE.sub("", name).strip(" _-")
+        page = m.get("page_key")
+        twin = next((o for o in (mappings or [])
+                     if o is not m and o.get("page_key") == page
+                     and str(o.get("portal_field") or "").lower() == base.lower()), None)
+        if twin is None:
+            continue                       # nothing to repeat: drop, never guess
+        if m.get("ellis_field") != twin.get("ellis_field"):
+            m = dict(m, ellis_field=twin["ellis_field"])
+        out.append(m)
+    return out
+
+
 def _merge_proposals(base: list[dict], known: list[dict]) -> list[dict]:
     """Known-id (curated) proposals win over generative ones for the same
     observed element; everything else passes through unchanged."""
     known_keys = {(p.get("artifact_id"), p.get("portal_field")) for p in known}
     kept = [p for p in (base or [])
             if (p.get("artifact_id"), p.get("portal_field")) not in known_keys]
-    return kept + known
+    return _fix_confirmation_fields(kept + known)
 
 
 def _count_inputs(art) -> int:

@@ -128,11 +128,23 @@ _EXTRACT_JS = r"""
   // can never become a label.
   const cellLabel = (el) => {
     let cell = el;
-    for (let i = 0; i < 5 && cell && cell.parentElement; i++) {
+    // Depth 9, not 5: a Material control buries its input under four wrapper
+    // divs before the layout grid even starts, so TDAC's "Date of Birth" sits
+    // at ancestor 8 and its nationality autocomplete at 7. The two guards
+    // below (no inputs of its own, 60 characters or fewer) are what keep a
+    // distant container from being mistaken for a caption.
+    for (let i = 0; i < 9 && cell && cell.parentElement; i++) {
       cell = cell.parentElement;
       const prev = cell.previousElementSibling;
       if (!prev) continue;
-      if (prev.querySelector && prev.querySelector('input, select, textarea')) return '';
+      // A sibling holding its own inputs is a PEER field, not this one's
+      // caption — but the caption may still sit one level up, before the whole
+      // group. Bailing out here cost TDAC its grouped fields: Date of Birth is
+      // three inputs (yyyy/mm/dd) in sibling cells, and its nationality is a
+      // Material autocomplete beside one, so every one of them fell through to
+      // its placeholder and arrived named "yyyy" or "Select or enter"
+      // (2026-08-03). Keep climbing instead of giving up.
+      if (prev.querySelector && prev.querySelector('input, select, textarea')) continue;
       const t = (prev.innerText || '').trim().replace(/\s+/g, ' ');
       if (t && t.length <= 60) return t.replace(/^[*＊]\s*/, '');
     }
