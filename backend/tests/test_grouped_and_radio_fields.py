@@ -180,3 +180,144 @@ def test_a_specify_other_box_is_recognised(el):
 def test_an_ordinary_field_is_not_mistaken_for_one(el):
     from app.adapter_factory.specgen import is_specify_other_field
     assert not is_specify_other_field(el)
+
+
+# ---- one answer, several boxes, ONE round trip ------------------------------
+# Thailand asks Date of Birth as three dropdowns. Walked one node at a time
+# over a remote browser they cost ~17.5s each and killed the run three times
+# on the applicant's own attempt (2026-08-03). They are the same answer
+# rendered three ways, so they are committed together.
+
+class _RecordingDriver:
+    """Counts what the runtime asks the browser to do."""
+
+    def __init__(self, *, many_ok=True):
+        self.batches, self.singles, self.reads = [], [], []
+        self._many_ok = many_ok
+
+    def select_search_many(self, fields, budget_ms=1500):
+        self.batches.append(list(fields))
+        ok = self._many_ok
+        return [{"ok": ok, "shown": v} if ok else
+                {"ok": False, "code": "NO_OPTIONS"} for _, v in fields]
+
+    def select_search(self, selector, value):
+        self.singles.append((selector, value))
+        return {"ok": True, "shown": value}
+
+    def read_value(self, selector):
+        self.reads.append(selector)
+        return {"ok": True, "value": ""}
+
+    def fill(self, selector, value):
+        self.singles.append((selector, value))
+        return {"ok": True}
+
+
+class _NoFastPath(_RecordingDriver):
+    """A driver from before select_search_many existed."""
+    select_search_many = None
+
+    def __getattr__(self, name):
+        raise AttributeError(name)
+
+
+def _runner(driver, nodes, answers):
+    from app.adapter_factory.runtime import CompiledFlow, FlowRunner
+
+    class _Exec:
+        id = "x"; application_id = "a"; candidate_id = "c"; candidate_version = 1
+        current_node = ""; status = "running"; org_id = "o"
+
+    class _DB:
+        def commit(self): pass
+        def add(self, *_a, **_k): pass
+        def execute(self, *_a, **_k): raise RuntimeError("no db in this test")
+
+    r = FlowRunner.__new__(FlowRunner)
+    r.db, r.execution, r.driver = _DB(), _Exec(), driver
+    r.flow = CompiledFlow(nodes, [n["node_id"] for n in nodes],
+                          {"allowed_hostnames": [HOST]})
+    r.answers, r.documents = answers, []
+    r.observed_options, r._rejected_fills = {}, set()
+    r._portal_field_messages, r._grouped_done = {}, set()
+    r._repair_attempted = False
+    r._declaration_ticked_nodes = set()
+    r.on_progress = None
+    r.fee_seen, r.slots_seen = None, []
+    return r
+
+
+def _dob_nodes():
+    return [{"node_id": f"fill_{n}", "action": "SELECT_SEARCH",
+             "allowed_hostname": HOST, "selector": f"#{n}",
+             "input_source": "birth_date", "format": f}
+            for n, f in (("y", "YYYY"), ("m", "MM"), ("d", "DD"))]
+
+
+def test_a_split_date_is_committed_in_one_call():
+    drv = _RecordingDriver()
+    r = _runner(drv, _dob_nodes(), {"birth_date": "1988-06-13"})
+    out = r._step(r.flow.nodes["fill_y"])
+    assert out["status"] == "ok"
+    assert drv.batches == [[("#y", "1988"), ("#m", "06"), ("#d", "13")]]
+    assert drv.singles == [], "no box was typed into on its own"
+
+
+def test_the_sibling_boxes_are_not_typed_again():
+    drv = _RecordingDriver()
+    r = _runner(drv, _dob_nodes(), {"birth_date": "1988-06-13"})
+    r._step(r.flow.nodes["fill_y"])
+    for nid in ("fill_m", "fill_d"):
+        out = r._step(r.flow.nodes[nid])
+        assert out["status"] == "ok"
+        assert out["detail"]["grouped_with_previous"] is True
+    assert len(drv.batches) == 1 and drv.singles == []
+
+
+def test_a_batch_that_could_not_commit_falls_back_to_the_proven_path():
+    """A partly-filled date is a wrong date. The fast path is never allowed
+    to report what it managed."""
+    drv = _RecordingDriver(many_ok=False)
+    r = _runner(drv, _dob_nodes(), {"birth_date": "1988-06-13"})
+    out = r._step(r.flow.nodes["fill_y"])
+    assert drv.singles and drv.singles[0] == ("#y", "1988")
+    assert r._grouped_done == set(), "siblings must still be filled one by one"
+
+
+def test_a_driver_without_the_fast_path_still_fills_every_box():
+    drv = _NoFastPath()
+    r = _runner(drv, _dob_nodes(), {"birth_date": "1988-06-13"})
+    for nid in ("fill_y", "fill_m", "fill_d"):
+        assert r._step(r.flow.nodes[nid])["status"] == "ok"
+    assert drv.singles == [("#y", "1988"), ("#m", "06"), ("#d", "13")]
+
+
+def test_unrelated_neighbouring_selects_are_never_grouped():
+    """Only boxes filling the SAME answer are one question. Grouping two
+    different fields would type one answer into both."""
+    nodes = [{"node_id": "fill_nat", "action": "SELECT_SEARCH", "selector": "#nat",
+              "allowed_hostname": HOST, "input_source": "nationality"},
+             {"node_id": "fill_city", "action": "SELECT_SEARCH", "selector": "#city",
+              "allowed_hostname": HOST, "input_source": "address_city"}]
+    drv = _RecordingDriver()
+    r = _runner(drv, nodes, {"nationality": "CHN", "address_city": "Guangzhou"})
+    r._step(r.flow.nodes["fill_nat"])
+    assert drv.batches == [] and drv.singles == [("#nat", "CHN")]
+
+
+def test_a_combobox_is_never_reported_set_from_its_own_typed_text():
+    """read_value on a search combobox returns whatever was last TYPED into
+    it, committed or not. Trusting it laundered three failed date selections
+    into successes and left the form's date of birth unset."""
+    class _Leftover(_NoFastPath):
+        def read_value(self, selector):
+            self.reads.append(selector)
+            return {"ok": True, "value": "1988"}     # the query, not a choice
+
+    drv = _Leftover()
+    r = _runner(drv, _dob_nodes(), {"birth_date": "1988-06-13"})
+    out = r._step(r.flow.nodes["fill_y"])
+    assert out["status"] == "ok"
+    assert out.get("detail", {}).get("already_set") is not True
+    assert drv.singles == [("#y", "1988")], "the box must be genuinely committed"

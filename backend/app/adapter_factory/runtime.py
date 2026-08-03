@@ -141,6 +141,9 @@ class FlowRunner:
         self._portal_field_messages: dict[str, str] = {}
         # One silent repair pass per run: refill fields the portal dropped.
         self._repair_attempted = False
+        # Fill nodes already committed as part of a grouped answer (a split
+        # date), so the walk steps past them instead of re-typing each part.
+        self._grouped_done: set[str] = set()
         # One declaration-tick pass per run when an advance is disabled.
         self._declaration_ticked_nodes = set()
         # Optional applicant-safe progress recorder: called with the node's
@@ -241,6 +244,9 @@ class FlowRunner:
     # -- per-action execution -------------------------------------------------
     def _step(self, node: dict) -> dict:
         action = node["action"]
+        if node.get("node_id") in getattr(self, "_grouped_done", ()):
+            # Already committed with its siblings in one page round trip.
+            return {"status": "ok", "detail": {"grouped_with_previous": True}}
         if action == "NAVIGATE":
             url = (node.get("allowed_url_patterns") or [f"https://{node['allowed_hostname']}/"])[0]
             if not self._url_ok(url):
@@ -428,8 +434,18 @@ class FlowRunner:
             # Resume speed: a field the portal ALREADY holds with this exact
             # value needs no work. Re-typing every field on every resume is
             # what made a repeat pass take minutes.
+            #
+            # NOT for a search-combobox. Its input holds whatever was last
+            # TYPED into it, committed or not, so a query Ellis failed to
+            # commit reads back as the answer. That is how three failed date
+            # selections were laundered into successes on Thailand's TDAC
+            # (2026-08-03): each pass re-read its own leftover text, reported
+            # already_set, moved on, and failed on the next box — while the
+            # government form's date of birth was, as far as anything can
+            # show, never actually set. A select is cheap to redo and
+            # catastrophic to fake, so it is always re-committed.
             reader_v = getattr(self.driver, "read_value", None)
-            if reader_v is not None:
+            if reader_v is not None and action != "SELECT_SEARCH":
                 try:
                     current = str((reader_v(node["selector"]) or {}).get("value", "")).strip()
                 except Exception:  # noqa: BLE001
@@ -437,6 +453,9 @@ class FlowRunner:
                 if current and current.lower() == str(value).strip().lower():
                     return {"status": "ok", "detail": {"already_set": True}}
             if action == "SELECT_SEARCH":
+                grouped = self._group_filled(node, value)
+                if grouped is not None:
+                    return grouped
                 sel = getattr(self.driver, "select_search", None)
                 res = sel(node["selector"], str(value)) if sel else \
                     self.driver.fill(node["selector"], str(value))
@@ -470,8 +489,16 @@ class FlowRunner:
                                     opts = []
                         if opts:
                             self.observed_options[node["node_id"]] = opts
-                            return {"status": "handoff",
-                                    "handoff_kind": "additional_information"}
+                        # A dropdown Ellis could not read is still the
+                        # applicant's question, not the end of the run. Failing
+                        # here killed a Thailand application three times over
+                        # one date of birth, each death costing a fresh
+                        # attempt, and landed the case in manual review
+                        # (2026-08-03) — while SELECT_RADIO, twenty lines
+                        # below, already asked instead. A mandatory field the
+                        # applicant can answer must always reach them.
+                        return {"status": "handoff",
+                                "handoff_kind": "additional_information"}
             else:
                 res = self.driver.fill(node["selector"], str(value))
             if not res.get("ok") and res.get("code") == "SENSITIVE_FIELD_AUTOMATION":
@@ -608,6 +635,75 @@ class FlowRunner:
         return {"status": "failed", "reason": f"unknown action {action!r}"}
 
     # -- applicant questions / documents --------------------------------------
+    def _group_filled(self, node: dict, value: str):
+        """One answer spread over several adjacent dropdowns, committed in ONE
+        page round trip.
+
+        A split date is the case that matters: Thailand asks Date of Birth as
+        three dropdowns, each its own node, each its own portal round trip —
+        about three seconds per box over a remote browser and far worse on a
+        miss. They are the SAME answer rendered three ways, so there is no
+        reason to pay the trip three times.
+
+        Returns this node's outcome when the group was handled (the siblings
+        are checkpointed here and skipped by the walk), or None to fall
+        through to the ordinary single-field path — which stays the authority
+        for anything this could not commit.
+        """
+        many = getattr(self.driver, "select_search_many", None)
+        if many is None:
+            return None
+        siblings = self._sibling_fills(node)
+        if len(siblings) < 2:
+            return None
+        from .. import dates as dates_mod
+        raw = str(self.answers.get(node.get("input_source", ""), ""))
+        pairs, nodes = [], []
+        for n in siblings:
+            fmt = n.get("format")
+            # Each box states which PART of the answer it wants; a box with no
+            # stated format takes the answer as it stands.
+            v = dates_mod.to_portal(raw, fmt) if fmt else (
+                value if n is node else raw)
+            if not str(v):
+                return None      # cannot render one part — do it the long way
+            pairs.append((n["selector"], str(v)))
+            nodes.append(n)
+        try:
+            results = many(pairs) or []
+        except Exception:  # noqa: BLE001 — a fast path must never end a run
+            return None
+        # Every part must land. A partly-filled date is a WRONG date, so an
+        # incomplete result falls back to the single-field path rather than
+        # reporting what it managed.
+        if len(results) != len(nodes) or not all(r.get("ok") for r in results):
+            return None
+        # The walk checkpoints each node as it steps past it; these are only
+        # marked so it does not re-type them.
+        done = getattr(self, "_grouped_done", None)
+        if done is None:
+            done = self._grouped_done = set()
+        done.update(n["node_id"] for n in nodes[1:])
+        return {"status": "ok", "detail": {"grouped": len(nodes),
+                                           "shown": results[0].get("shown", "")}}
+
+    def _sibling_fills(self, node: dict) -> list:
+        """The run of consecutive SELECT_SEARCH nodes that fill the SAME answer
+        key, starting at this one. Consecutive and same-key is what makes them
+        one question on the page; anything else is left alone."""
+        key = node.get("input_source", "")
+        if not key:
+            return []
+        out, nid = [], node.get("node_id")
+        while nid:
+            n = self.flow.nodes.get(nid)
+            if n is None or n.get("action") != "SELECT_SEARCH" \
+                    or n.get("input_source", "") != key or not n.get("selector"):
+                break
+            out.append(n)
+            nid = self.flow.next_of(nid, "ok")
+        return out
+
     def _question_for(self, node: dict) -> dict:
         """Applicant-friendly question for a node whose answer is missing.
         Never exposes selectors or developer terminology (§Part 4)."""

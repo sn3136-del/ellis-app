@@ -330,3 +330,252 @@ def test_a_committed_combobox_does_not_read_as_empty(browser):
     drv, _ = _driver(browser, ANT_PAGE)
     assert drv.select_search("#gate", "Moc Bai Landport")["ok"]
     assert drv.read_value("#gate") == {"ok": True, "value": "Moc Bai Landport"}
+
+
+# Angular Material 15+/MDC, as the framework really renders it: the native
+# input is visually hidden at opacity 0 under a ripple/touch-target overlay
+# that intercepts pointer events, and the checked state shows up as a class
+# on the mat-radio-button, never as aria-checked on the input.
+MDC_RADIO_PAGE = """
+<mat-radio-group id="mat-radio-group-0" class="mat-mdc-radio-group">
+  <mat-radio-button id="mat-radio-2" class="mat-mdc-radio-button">
+    <div class="mdc-form-field"><div class="mdc-radio">
+      <input id="mat-radio-2-input" class="mdc-radio__native-control" type="radio"
+             name="mat-radio-group-0" value="FEMALE">
+      <div class="mdc-radio__background"></div>
+      <div class="mat-mdc-radio-touch-target"></div>
+    </div><label for="mat-radio-2-input">FEMALE</label></div>
+  </mat-radio-button>
+  <mat-radio-button id="mat-radio-3" class="mat-mdc-radio-button">
+    <div class="mdc-form-field"><div class="mdc-radio">
+      <input id="mat-radio-3-input" class="mdc-radio__native-control" type="radio"
+             name="mat-radio-group-0" value="MALE">
+      <div class="mdc-radio__background"></div>
+      <div class="mat-mdc-radio-touch-target"></div>
+    </div><label for="mat-radio-3-input">MALE</label></div>
+  </mat-radio-button>
+  <mat-radio-button id="mat-radio-4" class="mat-mdc-radio-button">
+    <div class="mdc-form-field"><div class="mdc-radio">
+      <input id="mat-radio-4-input" class="mdc-radio__native-control" type="radio"
+             name="mat-radio-group-0" value="UNDEFINED">
+      <div class="mdc-radio__background"></div>
+      <div class="mat-mdc-radio-touch-target"></div>
+    </div><label for="mat-radio-4-input">UNDEFINED</label></div>
+  </mat-radio-button>
+</mat-radio-group>
+<style>
+  .mdc-radio { position: relative; display: inline-block; width: 40px; height: 40px; }
+  .mdc-radio__native-control { position: absolute; inset: 0; opacity: 0; }
+  .mdc-radio__background { position: absolute; top: 10px; left: 10px;
+                           width: 20px; height: 20px; border: 1px solid #666; }
+  /* The overlay that intercepts a real pointer click. */
+  .mat-mdc-radio-touch-target { position: absolute; inset: -8px; z-index: 5; }
+  mat-radio-button { display: inline-block; }
+</style>
+<script>
+  for (const el of document.querySelectorAll('input[type=radio]')) {
+    el.addEventListener('change', () => {
+      for (const b of document.querySelectorAll('mat-radio-button'))
+        b.classList.toggle('mat-mdc-radio-checked',
+          (b.querySelector('input') || {}).checked === true);
+      window.__committed = el.value;
+    });
+  }
+</script>
+"""
+
+# What recon produced BEFORE cssPath learned that a radio group shares one
+# name: every choice carrying the identical selector. The already-released
+# Thailand adapter carries exactly this, so the driver must survive it.
+COLLAPSED_OPTIONS = [
+    {"label": "FEMALE", "selector": 'input[name="mat-radio-group-0"]'},
+    {"label": "MALE", "selector": 'input[name="mat-radio-group-0"]'},
+    {"label": "UNDEFINED", "selector": 'input[name="mat-radio-group-0"]'},
+]
+MDC_OPTIONS = [{"label": "FEMALE", "selector": "#mat-radio-2-input"},
+               {"label": "MALE", "selector": "#mat-radio-3-input"},
+               {"label": "UNDEFINED", "selector": "#mat-radio-4-input"}]
+
+
+@pytest.mark.parametrize("want,expected", [
+    ("MALE", "MALE"), ("FEMALE", "FEMALE"), ("UNDEFINED", "UNDEFINED"),
+    ("M", "MALE"), ("F", "FEMALE"), ("male", "MALE"),
+])
+def test_a_real_mdc_radio_commits_the_answer_it_was_given(browser, want, expected):
+    """The native input is invisible and covered by a ripple, so a pointer
+    click cannot reach it — and MRZ hands Ellis 'M'/'F', never 'MALE'."""
+    drv, page = _driver(browser, MDC_RADIO_PAGE)
+    res = drv.select_radio(MDC_OPTIONS, want)
+    assert res["ok"], res
+    assert page.evaluate("window.__committed") == expected
+    assert page.eval_on_selector(
+        f"input[value='{expected}']",
+        "el => el.closest('mat-radio-button')"
+        ".classList.contains('mat-mdc-radio-checked')") is True
+
+
+@pytest.mark.parametrize("want,expected", [("MALE", "MALE"), ("F", "FEMALE")])
+def test_a_group_whose_choices_share_one_selector_is_resolved_by_its_words(
+        browser, want, expected):
+    """The shipped Thailand adapter's Gender group carries ONE selector for
+    all three choices. Taking .first answers FEMALE while reporting MALE — a
+    false statement on a government form. The page still says which button is
+    which, so read that and click the right one; the already-released adapter
+    is repaired without a rebuild."""
+    drv, page = _driver(browser, MDC_RADIO_PAGE)
+    res = drv.select_radio(COLLAPSED_OPTIONS, want)
+    assert res["ok"], res
+    assert page.evaluate("window.__committed") == expected
+
+
+def test_a_group_ellis_cannot_tell_apart_is_refused_not_guessed(browser):
+    """No labels, no values, one selector: nothing on the page distinguishes
+    the choices. That is an applicant question, never a coin flip."""
+    bare = """
+    <div role="radiogroup">
+      <input type="radio" name="mat-radio-group-0">
+      <input type="radio" name="mat-radio-group-0">
+      <input type="radio" name="mat-radio-group-0">
+    </div>
+    <script>document.querySelectorAll('input').forEach(
+      el => el.addEventListener('change', () => window.__committed = 'something'));
+    </script>
+    """
+    drv, page = _driver(browser, bare)
+    res = drv.select_radio(COLLAPSED_OPTIONS, "MALE")
+    assert res["ok"] is False
+    assert res["code"] == "AMBIGUOUS_OPTION"
+    assert page.evaluate("window.__committed || ''") == "", \
+        "a refusal must not leave an answer on the form"
+
+
+def test_no_answer_is_ever_reported_for_a_button_that_did_not_take(browser):
+    """A framework that ignores the click must read as unanswered."""
+    drv, page = _driver(browser, MDC_RADIO_PAGE)
+    page.evaluate("document.querySelectorAll('input[type=radio]')"
+                  ".forEach(el => el.addEventListener('click',"
+                  " e => e.preventDefault(), true))")
+    res = drv.select_radio(MDC_OPTIONS, "MALE")
+    assert res["ok"] is False
+
+
+@pytest.mark.parametrize("want", ["X", "", "OTHER"])
+def test_an_answer_the_group_does_not_offer_becomes_a_question(browser, want):
+    drv, page = _driver(browser, MDC_RADIO_PAGE)
+    res = drv.select_radio(MDC_OPTIONS, want)
+    assert res["ok"] is False and res["code"] == "NO_OPTIONS"
+    assert res["options"] == ["FEMALE", "MALE", "UNDEFINED"]
+
+
+# Thailand's Date of Birth: three Material autocompletes under one caption,
+# each filtering asynchronously. One answer, three boxes.
+DOB_PAGE = """
+<div class="row">
+  <input id="mat-input-18" role="combobox" aria-autocomplete="list" placeholder="yyyy" autocomplete="off">
+  <input id="mat-input-19" role="combobox" aria-autocomplete="list" placeholder="mm" autocomplete="off">
+  <input id="mat-input-20" role="combobox" aria-autocomplete="list" placeholder="dd" autocomplete="off">
+</div>
+<div class="cdk-overlay-container">
+  <div class="mat-mdc-autocomplete-panel" role="listbox" id="panel" hidden></div>
+</div>
+<style> .mat-mdc-autocomplete-panel { max-height: 120px; overflow-y: auto; }
+        mat-option { display: block; } </style>
+<script>
+  const YEARS = Array.from({length: 100}, (_, i) => String(1930 + i));
+  const MONTHS = Array.from({length: 12}, (_, i) => String(i + 1).padStart(2, '0'));
+  const DAYS = Array.from({length: 31}, (_, i) => String(i + 1).padStart(2, '0'));
+  const SETS = {'mat-input-18': YEARS, 'mat-input-19': MONTHS, 'mat-input-20': DAYS};
+  const panel = document.getElementById('panel');
+  window.__committed = {};
+  for (const id of Object.keys(SETS)) {
+    const input = document.getElementById(id);
+    const render = () => {
+      const q = input.value.trim();
+      panel.innerHTML = '';
+      // The list arrives a beat late, exactly like a real Material panel.
+      setTimeout(() => {
+        if (document.activeElement !== input) return;
+        panel.innerHTML = '';
+        for (const v of SETS[id].filter(x => !q || x.startsWith(q))) {
+          const o = document.createElement('mat-option');
+          o.setAttribute('role', 'option');
+          o.textContent = v;
+          o.addEventListener('click', () => {
+            input.value = v; panel.hidden = true; window.__committed[id] = v;
+          });
+          panel.appendChild(o);
+        }
+        panel.hidden = false;
+      }, 120);
+    };
+    input.addEventListener('input', render);
+    input.addEventListener('focus', render);
+  }
+</script>
+"""
+
+DOB_FIELDS = [("#mat-input-18", "1988"), ("#mat-input-19", "06"),
+              ("#mat-input-20", "13")]
+
+
+def test_a_split_date_commits_every_part(browser):
+    """1988 / 06 / 13 — the day box is the one the live run died on."""
+    drv, page = _driver(browser, DOB_PAGE)
+    results = drv.select_search_many(DOB_FIELDS)
+    assert [r["ok"] for r in results] == [True, True, True], results
+    assert page.evaluate("window.__committed") == {
+        "mat-input-18": "1988", "mat-input-19": "06", "mat-input-20": "13"}
+
+
+def test_a_grouped_date_costs_one_round_trip_not_fifteen_per_box(browser):
+    """The expense was never the work, it was ~15 sequential Playwright calls
+    per field over a remote browser. Counted, not timed: wall-clock on a
+    local fixture proves nothing about a link to Browserbase."""
+    class _Counting:
+        """Forwards to the real Playwright object, counting every call that
+        crosses into the browser. Nested handles (page.keyboard) count into
+        the same tally."""
+
+        def __init__(self, target, tally):
+            object.__setattr__(self, "_target", target)
+            object.__setattr__(self, "_tally", tally)
+
+        def __getattr__(self, name):
+            attr = getattr(self._target, name)
+            if not callable(attr):
+                return _Counting(attr, self._tally)
+
+            def counted(*a, **kw):
+                self._tally.append(name)
+                return attr(*a, **kw)
+            return counted
+
+    def _trips(html, run):
+        drv, page = _driver(browser, html)
+        tally: list = []
+        drv.page = _Counting(page, tally)
+        run(drv)
+        return len(tally)
+
+    grouped = _trips(DOB_PAGE, lambda d: d.select_search_many(DOB_FIELDS))
+    one_by_one = _trips(DOB_PAGE, lambda d: [d.select_search(s, v)
+                                             for s, v in DOB_FIELDS])
+    assert grouped * 2 < one_by_one, (
+        f"grouped {grouped} browser calls vs one-at-a-time {one_by_one}")
+
+
+def test_a_part_that_cannot_commit_is_reported_never_assumed(browser):
+    """A partly-filled date is a WRONG date. Each part reports for itself so
+    the caller can fall back to the proven single-field path."""
+    drv, page = _driver(browser, DOB_PAGE)
+    results = drv.select_search_many(
+        [("#mat-input-18", "1988"), ("#mat-input-19", "99")])
+    assert results[0]["ok"] is True
+    assert results[1]["ok"] is False and results[1]["code"] == "NO_OPTIONS"
+
+
+def test_a_missing_box_never_reads_as_answered(browser):
+    drv, page = _driver(browser, DOB_PAGE)
+    results = drv.select_search_many([("#nope", "1988")])
+    assert results[0]["ok"] is False
+    assert results[0]["code"] == "NO_SUCH_ELEMENT"

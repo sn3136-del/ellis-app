@@ -1509,6 +1509,108 @@ class BrowserbasePageDriver:
             return {"ok": False, "code": "SENSITIVE_FIELD_AUTOMATION"}
         return self._commit_checkbox(selector)
 
+    # One page evaluation that answers SEVERAL comboboxes. Everything happens
+    # inside the browser — the query is typed as real key events (a framework
+    # that listens for keydown gets one), the async option list is awaited on
+    # a short beat, and the pick is clicked — so the whole group costs ONE
+    # round trip instead of ~15 per field.
+    _MANY_JS = "(async ([fields, budgetMs]) => {" + _OPTION_JS + """
+      const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+      const fire = (el, type, init) => el.dispatchEvent(
+        new (type.startsWith('key') ? KeyboardEvent : Event)(
+          type, Object.assign({bubbles: true, cancelable: true}, init || {})));
+      const out = [];
+      let prev = null;
+      for (const [sel, want] of fields) {
+        const el = document.querySelector(sel);
+        if (!el) { out.push({sel, code: 'NO_SUCH_ELEMENT'}); continue; }
+        // Close the previous box's panel before opening this one. Two open
+        // panels and _rows() reads whichever the document happens to list
+        // last — the month's list answering the day's question.
+        if (prev && prev !== el) { prev.blur(); await sleep(30); }
+        prev = el;
+        el.focus();
+        // Clear, then enter the query character by character so a widget that
+        // filters on keystrokes sees each one.
+        el.value = '';
+        fire(el, 'input');
+        for (const ch of String(want)) {
+          fire(el, 'keydown', {key: ch});
+          el.value += ch;
+          fire(el, 'input');
+          fire(el, 'keyup', {key: ch});
+        }
+        let hit = null;
+        for (let waited = 0; waited <= budgetMs; waited += 60) {
+          const rows = _rows();
+          if (rows.length) {
+            hit = _pick(rows, want, true);
+            if (hit) break;
+            // Rows are showing and none is the answer: that is a real
+            // no-match, not a list still loading. Stop paying for it.
+            if (waited >= 240) break;
+          }
+          await sleep(60);
+        }
+        if (!hit) { out.push({sel, code: 'NO_OPTIONS'}); continue; }
+        hit[0][0].click();
+        await sleep(30);
+        out.push({sel, code: 'OK', chosen: hit[0][1], match: hit[1]});
+      }
+      if (prev) prev.blur();
+      return out;
+    })"""
+
+    def select_search_many(self, fields: list, budget_ms: int = 1500) -> list:
+        """Answer several search-comboboxes in ONE round trip, then verify each
+        one the same way select_search does.
+
+        Thailand asks Date of Birth as three dropdowns. Answered one node at a
+        time over a remote browser they cost ~3s each on a hit and ~17s on a
+        miss — measured on the applicant's own run, 2026-08-03 — because the
+        expense is the ~15 sequential Playwright round trips per field, not the
+        work. Grouped here the whole date is one trip.
+
+        Returns one result dict per field, in order, shaped like
+        select_search's. A field this cannot commit is reported honestly so the
+        caller can retry it on the proven single-field path — this is a fast
+        path, never a replacement for the page being the authority.
+        """
+        pairs = [(str(s), str(v).strip()) for s, v in fields]
+        for sel, _ in pairs:
+            if _SENSITIVE_SELECTOR.search(sel or ""):
+                return [{"ok": False, "code": "SENSITIVE_FIELD_AUTOMATION"}
+                        for _ in pairs]
+        try:
+            picked = self.page.evaluate(self._MANY_JS,
+                                        [pairs, int(budget_ms)]) or []
+        except Exception as e:  # noqa: BLE001
+            return [{"ok": False, "code": "NO_SUCH_ELEMENT",
+                     "detail": str(e)[:120]} for _ in pairs]
+        out = []
+        for (sel, want), got in zip(pairs, picked + [{}] * len(pairs)):
+            code = (got or {}).get("code")
+            if code != "OK":
+                out.append({"ok": False, "code": code or "NO_OPTIONS",
+                            "detail": f"no option matches {want[:40]!r}"})
+                continue
+            # Read back what the WIDGET now shows — a pick is only committed
+            # if the page can be seen holding it.
+            try:
+                shown = self.page.eval_on_selector(sel, _SHOWN_VALUE_JS) or ""
+            except Exception:  # noqa: BLE001
+                shown = ""
+            chosen = str(got.get("chosen") or "")
+            if shown and not (want.lower() in shown.lower()
+                              or shown.strip().lower() in chosen.lower()
+                              or chosen.strip().lower() in shown.lower()):
+                out.append({"ok": False, "code": "VALUE_NOT_ACCEPTED",
+                            "detail": f"portal shows {shown[:60]!r}"})
+                continue
+            out.append({"ok": True, "shown": (shown or chosen)[:60],
+                        "match": got.get("match") or "exact"})
+        return out
+
     def select_search(self, selector: str, value: str) -> dict:
         """Search-combobox selection (verified live against Ant Design selects):
         focus, TYPE the query (combobox inputs refuse fill()), WAIT for the
@@ -1618,32 +1720,85 @@ class BrowserbasePageDriver:
         label, sel = rows[int(hit["index"])]
         if _SENSITIVE_SELECTOR.search(sel):
             return {"ok": False, "code": "SENSITIVE_FIELD_AUTOMATION"}
+        # A radio group's members share one `name`, so a spec built before
+        # that was understood can carry the SAME selector for every choice.
+        # Taking `.first` there answers whichever button the page happens to
+        # draw first — Ellis asked for MALE, clicked FEMALE, and reported
+        # success on a government form (Thailand's TDAC, 2026-08-03). Click
+        # the element whose OWN rendered words are the answer Ellis chose, or
+        # refuse: a group Ellis cannot address is an applicant question, never
+        # a coin flip.
+        click_js = "([sel, want, doClick]) => {" + _OPTION_JS + """
+          const all = Array.from(document.querySelectorAll(sel));
+          if (!all.length) return {code: 'NO_SUCH_ELEMENT'};
+          const named = (el) => {
+            // The words a person reads next to THIS button: its own label,
+            // its wrapper's text, then the value it carries.
+            const id = el.id && document.querySelector(
+              'label[for="' + CSS.escape(el.id) + '"]');
+            if (id) return _norm(_label(id));
+            const w = el.closest('label, [class*="radio-button"], [class*="radio"]');
+            if (w && w !== el) {
+              const t = _norm(_label(w));
+              if (t) return t;
+            }
+            return _norm(el.getAttribute('value') || '');
+          };
+          let target = all[0];
+          if (all.length > 1) {
+            const w = _norm(want);
+            const hits = all.filter((el) => named(el) === w);
+            // Ambiguity is refused, not resolved by position.
+            if (hits.length !== 1) return {code: 'AMBIGUOUS_OPTION',
+                                           seen: all.map(named).slice(0, 8)};
+            target = hits[0];
+          }
+          // A styled widget hides its native input under an overlay, so a
+          // real pointer click lands on the ripple, not the control. Click
+          // what the framework listens to.
+          const lbl = target.id && document.querySelector(
+            'label[for="' + CSS.escape(target.id) + '"]');
+          if (doClick) {
+            (lbl || target).click();
+            if (!target.checked && lbl) target.click();
+          }
+          // Report by identity: whichever control is NOW checked, and what it
+          // is called. A click that landed on a sibling must not read as ok.
+          const grp = target.getAttribute('name');
+          const members = grp ? Array.from(document.querySelectorAll(
+            '[name="' + grp.replace(/"/g, '') + '"]')) : all;
+          const on = members.filter((el) => el.checked ||
+            el.getAttribute('aria-checked') === 'true');
+          return {code: 'OK', checked: on.length === 1 ? named(on[0]) : null,
+                  intended: named(target)};
+        }"""
         try:
-            self.page.locator(f"{sel} >> visible=true").first.click(timeout=_CLICK_MS)
-        except Exception:  # noqa: BLE001 — a hidden native input under a
-            # styled widget cannot be clicked directly; click its label.
-            try:
-                self.page.eval_on_selector(
-                    sel, "el => { const w = el.closest('label, [class*=\"radio\"]');"
-                         " (w || el).click(); }")
-            except Exception as e:  # noqa: BLE001
-                return {"ok": False, "code": "NO_SUCH_ELEMENT", "detail": str(e)[:120]}
+            res = self.page.evaluate(click_js, [sel, label, True]) or {}
+        except Exception as e:  # noqa: BLE001
+            return {"ok": False, "code": "NO_SUCH_ELEMENT", "detail": str(e)[:120]}
+        code = res.get("code")
+        if code == "AMBIGUOUS_OPTION":
+            return {"ok": False, "code": "AMBIGUOUS_OPTION",
+                    "options": [r[0] for r in rows],
+                    "detail": "this group's choices share one selector — "
+                              f"cannot tell {label[:30]!r} from its siblings"}
+        if code != "OK":
+            return {"ok": False, "code": code or "NO_SUCH_ELEMENT"}
         self.page.wait_for_timeout(120)
+        # The page must be seen holding the answer Ellis meant — not merely
+        # holding AN answer.
         try:
-            checked = self.page.eval_on_selector(
-                sel,
-                "el => { const w = el.closest('[class*=\"radio\"], label');"
-                " const a = (w && w.getAttribute('aria-checked')) ||"
-                "   el.getAttribute('aria-checked');"
-                " if (a !== null && a !== undefined) return a === 'true';"
-                " if (w && /(^|[\\s-])(checked|selected)(\\s|$)/.test("
-                "     String(w.className || ''))) return true;"
-                " return !!el.checked; }")
+            state = self.page.evaluate(click_js, [sel, label, False]) or {}
         except Exception:  # noqa: BLE001
-            checked = False
-        if not checked:
+            state = res
+        got = state.get("checked")
+        if got is None:
             return {"ok": False, "code": "VALUE_NOT_ACCEPTED",
                     "detail": f"{label[:40]!r} did not stay selected"}
+        if got != state.get("intended"):
+            return {"ok": False, "code": "VALUE_NOT_ACCEPTED",
+                    "detail": f"the portal selected {str(got)[:30]!r}, not "
+                              f"{label[:30]!r}"}
         return {"ok": True, "shown": label[:60], "match": hit.get("match")}
 
     def list_options(self, selector: str, max_options: int = 300,
