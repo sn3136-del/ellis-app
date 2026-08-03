@@ -2,7 +2,7 @@
   "bundle_version": 1,
   "candidate_id": "5d5e87b6ebf4473cb0a46aae50bcdbe5",
   "candidate_version": 3,
-  "exported_at": "2026-08-02T05:41:30.355568-04:00",
+  "exported_at": "2026-08-02T20:13:27.004238-04:00",
   "family_id": "uk-eta",
   "route_key": "rk1|nat=AND|iss=AND|doc=ordinary_passport|res=AND|dest=GBR|cat=eta|sub=any|pur=tourism|per=2026-07-23|jur=default",
   "tables": {

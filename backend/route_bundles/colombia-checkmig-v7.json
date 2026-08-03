@@ -2,7 +2,7 @@
   "bundle_version": 1,
   "candidate_id": "e7b37b7851bf4a19b22d3b06d4640482",
   "candidate_version": 7,
-  "exported_at": "2026-08-02T05:41:30.363374-04:00",
+  "exported_at": "2026-08-02T20:13:27.013256-04:00",
   "family_id": "colombia-checkmig",
   "route_key": "rk1|nat=ALB|iss=ALB|doc=ordinary_passport|res=ALB|dest=COL|cat=visa_free_entry|sub=any|pur=tourism|per=2026-07-23|jur=default",
   "tables": {
@@ -2886,7 +2886,7 @@
         "hostnames": "[\"apps.migracioncolombia.gov.co\"]",
         "id": "71ada642cc7441cc98679761110efecb",
         "kind": "arrival_card",
-        "last_verified_at": null,
+        "last_verified_at": "2026-08-02 11:24:07.347676",
         "name": "Colombia Check-Mig",
         "nationality_scope": "[]",
         "notes": "PRODUCT CONSENT REQUIRED: the portal home gates its start button on a personal-data/biometric processing consent checkbox (#aceptaCondiciones) that is client-side only; the factory NEVER ticks consent, and the direct start endpoint bypasses that screen — Ellis must present Migración Colombia's data-processing consent to the applicant in-product before running this family.",
@@ -2894,9 +2894,9 @@
         "operator_kind": "government",
         "stale": 0,
         "supported_outcomes": "[\"ENTRY_PREPARATION\"]",
-        "updated_at": "2026-08-01 08:46:02.851068",
-        "verification_evidence": "{\"domain_check\": \"all hostnames on curated government allowlist\"}",
-        "verification_status": "verified_official_domain"
+        "updated_at": "2026-08-02 11:24:07.348110",
+        "verification_evidence": "{\"domain_check\": \"all hostnames on curated government allowlist\", \"live\": {\"url\": \"https://apps.migracioncolombia.gov.co/pre-registro/es/Home/IniciarCheckmig\", \"observed_hostname\": \"apps.migracioncolombia.gov.co\", \"status\": 200, \"title\": \"Datos Viaje | CheckMig\", \"elements_observed\": 24, \"links_observed\": 5, \"government_domain\": true, \"read_only\": true, \"stopped_before\": [\"account_verification\", \"appointment_reservation\", \"payment\", \"final_submission\"]}}",
+        "verification_status": "verified_live"
       }
     ],
     "portal_family_adapters": [

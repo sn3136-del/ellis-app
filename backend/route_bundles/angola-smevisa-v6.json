@@ -2,7 +2,7 @@
   "bundle_version": 1,
   "candidate_id": "7d62ce0ce2fa40e6b48b1d73d17bf943",
   "candidate_version": 6,
-  "exported_at": "2026-08-02T05:41:30.361863-04:00",
+  "exported_at": "2026-08-02T20:13:27.011554-04:00",
   "family_id": "angola-smevisa",
   "route_key": "rk1|nat=CUB|iss=CUB|doc=ordinary_passport|res=CUB|dest=AGO|cat=evisa_tourist|sub=any|pur=tourism|per=2026-07-23|jur=default",
   "tables": {
@@ -483,7 +483,7 @@
         "hostnames": "[\"smevisa.gov.ao\", \"www.smevisa.gov.ao\"]",
         "id": "ac609a5b092c4dec815041614f47b1d6",
         "kind": "evisa_portal",
-        "last_verified_at": null,
+        "last_verified_at": "2026-08-02 11:19:12.703291",
         "name": "Angola SME visa portal",
         "nationality_scope": "[]",
         "notes": "",
@@ -491,9 +491,9 @@
         "operator_kind": "government",
         "stale": 0,
         "supported_outcomes": "[\"EVISA\"]",
-        "updated_at": "2026-08-01 08:46:02.851071",
-        "verification_evidence": "{\"domain_check\": \"all hostnames on curated government allowlist\"}",
-        "verification_status": "verified_official_domain"
+        "updated_at": "2026-08-02 11:19:12.704777",
+        "verification_evidence": "{\"domain_check\": \"all hostnames on curated government allowlist\", \"live\": {\"url\": \"https://smevisa.gov.ao/\", \"observed_hostname\": \"smevisa.gov.ao\", \"status\": 200, \"title\": \"SME e-Visa\", \"elements_observed\": 27, \"links_observed\": 14, \"government_domain\": true, \"read_only\": true, \"stopped_before\": [\"account_verification\", \"appointment_reservation\", \"payment\", \"final_submission\"]}}",
+        "verification_status": "verified_live"
       }
     ],
     "portal_family_adapters": [

@@ -2,7 +2,7 @@
   "bundle_version": 1,
   "candidate_id": "b6b7c756b877442caec8caa46fe9faf8",
   "candidate_version": 1,
-  "exported_at": "2026-08-02T05:41:30.365665-04:00",
+  "exported_at": "2026-08-02T20:13:27.016370-04:00",
   "family_id": "moldova-evisa",
   "route_key": "rk1|nat=AFG|iss=AFG|doc=ordinary_passport|res=AFG|dest=MDA|cat=evisa_tourist|sub=any|pur=tourism|per=2026-07-23|jur=default",
   "tables": {
