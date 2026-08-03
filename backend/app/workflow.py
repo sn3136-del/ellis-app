@@ -67,6 +67,7 @@ class VisaWorkflow:
                       "_page_field_map", "_page_declaration", "_page_refresh_uploads"):
                 setattr(self, k, snap.get(k))
             self._declaration_attempts = snap.get("_declaration_attempts", 0) or 0
+            self._preflight_asked = bool(snap.get("_preflight_asked", False))
             self.payment_authorization = snap.get("payment_authorization")
             # Searched slots must survive the reload between signals, else the
             # APPOINTMENT_AVAILABLE step sees an empty list after select/book and
@@ -87,6 +88,7 @@ class VisaWorkflow:
             self._page_declaration = None
             self._page_refresh_uploads = None
             self._declaration_attempts = 0
+            self._preflight_asked = False
         self.artifacts = []
 
     def _fresh_inputs(self):
@@ -109,7 +111,8 @@ class VisaWorkflow:
                 "_page_field_map": getattr(self, "_page_field_map", None),
                 "_page_declaration": getattr(self, "_page_declaration", None),
                 "_page_refresh_uploads": getattr(self, "_page_refresh_uploads", None),
-                "_declaration_attempts": getattr(self, "_declaration_attempts", 0)}
+                "_declaration_attempts": getattr(self, "_declaration_attempts", 0),
+                "_preflight_asked": bool(getattr(self, "_preflight_asked", False))}
 
     def status(self) -> dict:
         return {"case_id": self.case_id, "state": self.machine.state, "pending": self.pending,
@@ -772,6 +775,35 @@ class VisaWorkflow:
             self._emit("portal_login", {"session_ref": self.session_ref})
             m.transition("APPLICATION_FILLING")
         elif st == "APPLICATION_FILLING":
+            # Ask FIRST, fill second. Every mandatory field the released flow
+            # already knows about is asked in ONE prompt before a keystroke
+            # reaches the portal — the applicant answers once instead of being
+            # interrupted per field, and a form Ellis cannot complete is never
+            # started (Thailand, 2026-08-03: five fields deep into a government
+            # form before stalling on a mandatory Occupation nobody was asked
+            # for). This reads the STORED flow, so it needs no session and no
+            # browser — it runs before the token is even revealed.
+            # Asked at most once per case: after that the live page is the
+            # authority and the mid-run pause path handles the rest, so an
+            # answer the applicant declines to give can never loop.
+            if not getattr(self, "_preflight_asked", False):
+                ask = getattr(d, "preflight_questions", None)
+                self._preflight_asked = True
+                questions = []
+                if ask is not None:
+                    try:
+                        questions = list(ask(self.answers) or [])
+                    except Exception as e:  # noqa: BLE001 — a question Ellis
+                        # failed to compute must never block the run; the
+                        # mid-run pause path still asks it on the live page.
+                        self._emit("preflight_questions_failed", {"error": str(e)[:120]})
+                if questions:
+                    self._emit("preflight_questions_asked",
+                               {"keys": [q.get("key") for q in questions][:40]})
+                    return self._pause(
+                        "The official form needs a few answers before Ellis "
+                        "can fill it in.", "additional_information",
+                        questions=questions)
             token = vault.reveal(self.session_ref)
             # A mid-form OTP/verification pause is consumed HERE: the flow's
             # handoff node must be stepped past (driver.verify_email) before

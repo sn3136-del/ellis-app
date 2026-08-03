@@ -675,3 +675,49 @@ def test_cached_options_are_trimmed_and_carry_no_selectors(db):
     qs2 = {q["key"]: q for q in released_flow.known_missing_questions(db, app_row)}
     assert qs2["entry_checkpoint"]["options"] == [
         "Noi Bai Intl Airport", "Da Nang Intl Airport"]
+
+
+# ---------- the pre-flight gate: ask FIRST, fill second ----------------------
+# Thailand, 2026-08-03: a run reached the government form, typed five fields,
+# and stalled on a mandatory Occupation the applicant had never been asked
+# for. Every question the released flow already knows about belongs in ONE
+# prompt before a keystroke reaches the portal.
+
+def test_the_driver_lists_its_known_questions_without_opening_a_browser(db):
+    _mk_released_route(db)
+    app_row = _case(db)
+    released = released_flow.resolve_released_route(db, app_row)
+    drv = released_flow.ReleasedFlowDriver(db, app_row=app_row, released=released)
+    qs = drv.preflight_questions()
+    assert [q["key"] for q in qs] == ["religion", "entry_checkpoint"]
+    # No session was ever created — this is a read of the stored flow.
+    assert drv._session is None and drv._page_driver is None
+
+
+def test_preflight_reads_the_answers_the_workflow_holds_now(db):
+    """Answers provided in THIS drive have not been written to the case row
+    yet. Reading only the row would re-ask a question just answered and loop
+    the applicant through the same prompt."""
+    _mk_released_route(db)
+    app_row = _case(db)
+    released = released_flow.resolve_released_route(db, app_row)
+    drv = released_flow.ReleasedFlowDriver(db, app_row=app_row, released=released)
+    qs = drv.preflight_questions({"religion": "None",
+                                  "entry_checkpoint": "Noi Bai Intl Airport"})
+    assert qs == []
+    # The case row itself is untouched by a read.
+    assert "religion" not in (app_row.answers or {})
+
+
+def test_preflight_asks_only_what_the_portal_demands(db):
+    """An optional field is not worth interrupting anyone for — the portal
+    accepts the form without it."""
+    _mk_released_route(db)
+    app_row = _case(db)
+    released = released_flow.resolve_released_route(db, app_row)
+    ver = released.version_row
+    ver.flow = [dict(n, mandatory=False) if n.get("input_source") == "religion"
+                else n for n in ver.flow]
+    db.commit()
+    drv = released_flow.ReleasedFlowDriver(db, app_row=app_row, released=released)
+    assert [q["key"] for q in drv.preflight_questions()] == ["entry_checkpoint"]

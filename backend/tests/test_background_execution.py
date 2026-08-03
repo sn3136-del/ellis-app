@@ -1483,3 +1483,97 @@ def test_a_route_with_no_verified_fee_record_still_asks_the_applicant():
         wf.start()
         assert wf.fee is None
         assert wf.pending["handoff"] == "fee_confirmation"
+
+
+# ---------- pre-flight: ask before the browser types anything ----------------
+
+class _RecordingDriver:
+    """A driver that remembers whether the form was ever touched."""
+
+    def __init__(self, questions):
+        self._questions = questions
+        self.created = False
+
+    def preflight_questions(self, answers=None):
+        held = dict(answers or {})
+        return [q for q in self._questions if not held.get(q["key"])]
+
+    def login(self, **_kw):
+        return {"ok": True, "sessionToken": "s"}
+
+    def create_application(self, **_kw):
+        self.created = True
+        return {"ok": True, "applicationId": "a1"}
+
+
+def _session_ref():
+    """A real vault reference — the fill step reveals the portal session."""
+    from app import vault
+    return vault.store("session-token", {"kind": "portal_session"})["ref"]
+
+
+_OCCUPATION = {"key": "occupation", "question": "What is your occupation?",
+               "why": "The official application form requires this information.",
+               "format": "free text", "mandatory": True, "kind": "text"}
+
+
+def test_a_mandatory_question_is_asked_before_the_form_is_touched():
+    """Thailand ran five fields deep into a government form before stalling on
+    a mandatory Occupation nobody had been asked for."""
+    drv = _RecordingDriver([_OCCUPATION])
+    wf = _wf(drv, "APPLICATION_FILLING", session_ref=_session_ref())
+    st = wf._drive()
+    assert drv.created is False, "the portal form was filled before asking"
+    assert st["pending"]["handoff"] == "additional_information"
+    assert [q["key"] for q in st["pending"]["questions"]] == ["occupation"]
+
+
+def test_answering_the_pre_flight_lets_the_fill_proceed():
+    drv = _RecordingDriver([_OCCUPATION])
+    wf = _wf(drv, "APPLICATION_FILLING", session_ref=_session_ref())
+    wf._drive()
+    wf.provide_information({"occupation": "Engineer"})
+    assert drv.created is True
+    assert wf.answers["occupation"] == "Engineer"
+
+
+def test_the_applicant_is_asked_once_and_never_looped():
+    """A question the applicant declines to answer must not re-prompt forever
+    — past the one pre-flight batch, the live page is the authority."""
+    drv = _RecordingDriver([_OCCUPATION])
+    wf = _wf(drv, "APPLICATION_FILLING", session_ref=_session_ref())
+    wf._drive()
+    wf.provide_information({})            # answered nothing
+    assert drv.created is True
+    assert wf.pending is None
+
+
+def test_a_case_with_every_answer_is_never_interrupted():
+    drv = _RecordingDriver([])
+    wf = _wf(drv, "APPLICATION_FILLING", session_ref=_session_ref())
+    wf._drive()
+    assert drv.created is True
+    assert wf.pending is None
+
+
+def test_a_driver_that_cannot_pre_flight_still_runs():
+    """Non-released adapters have no stored flow to read — they must not be
+    blocked by a capability they do not have."""
+    class _Plain:
+        created = False
+
+        def create_application(self, **_kw):
+            type(self).created = True
+            return {"ok": True, "applicationId": "a1"}
+
+    drv = _Plain()
+    wf = _wf(drv, "APPLICATION_FILLING", session_ref=_session_ref())
+    wf._drive()
+    assert _Plain.created is True
+
+
+def test_the_pre_flight_flag_survives_a_reload():
+    drv = _RecordingDriver([_OCCUPATION])
+    wf = _wf(drv, "APPLICATION_FILLING", session_ref=_session_ref())
+    wf._drive()
+    assert wf.snapshot()["_preflight_asked"] is True

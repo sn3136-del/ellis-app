@@ -152,6 +152,19 @@ class ReleasedFlowPortal:
         return cls()
 
 
+class _AnswersView:
+    """The case row with a different answer set — so a pre-flight read can use
+    the answers the workflow is holding in memory without writing them to the
+    application first."""
+
+    def __init__(self, row, answers: dict):
+        self._row = row
+        self.answers = answers
+
+    def __getattr__(self, name):
+        return getattr(self._row, name)
+
+
 class ReleasedFlowDriver:
     """The 15-method case driver, backed by the deterministic FlowRunner over a
     persistent Browserbase session.
@@ -180,6 +193,30 @@ class ReleasedFlowDriver:
         # allowed only inside the discover loop, once per page signature.
         self._allow_refill_retry = False
         self._portal_form_refilled_sigs: set[str] = set()
+
+    def preflight_questions(self, answers: dict | None = None) -> list[dict]:
+        """Everything this portal will demand that the case cannot answer yet —
+        computed from the released flow's own nodes, with NO browser session.
+
+        Ellis knows the government form's mandatory fields before it opens one:
+        they are baked into the released adapter. Asking them at the start costs
+        the applicant one prompt; discovering them mid-fill costs a portal
+        round-trip per field, and on a form Ellis cannot complete it costs the
+        run (Thailand, 2026-08-03: a mandatory Occupation nobody was asked for).
+
+        The live page stays the authority — this is the questions Ellis already
+        KNOWS about, never the whole set, so the mid-run pause path remains and
+        is still what handles anything the stored flow could not predict.
+        """
+        row = self.app_row
+        if answers is not None:
+            # Read against the answers the workflow holds now, which include
+            # everything provided since this case row was last written.
+            merged = dict(row.answers or {})
+            merged.update({k: v for k, v in (answers or {}).items()})
+            row = _AnswersView(row, merged)
+        return [q for q in known_missing_questions(self.db, row)
+                if q.get("mandatory")]
 
     def set_progress_sink(self, sink) -> None:
         self._progress_sink = sink
