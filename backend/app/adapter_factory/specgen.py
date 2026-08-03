@@ -327,6 +327,26 @@ def _tokenize(*parts: str) -> set[str]:
     return {t for t in toks if t}
 
 
+# A qualifier on a field says whose/which name it wants. `full_name` is hinted
+# by the bare token "name", so "Middle Name" matched it and TDAC's Middle Name
+# box was filled with the applicant's whole name — "XIANGWEI CAO" typed into a
+# government form's middle-name field (2026-08-03). A qualified name field is
+# either mapped to its own Ellis field or left alone; it is never the full name.
+_NAME_QUALIFIERS = {
+    "middle", "first", "given", "last", "family", "sur", "maiden",
+    "mother", "father", "spouse", "parent", "guardian", "child",
+    "emergency", "contact", "employer", "company", "hotel", "host",
+    "airline", "vessel", "agent", "referee",
+}
+
+
+def _disqualified(ellis_field: str, toks: set) -> bool:
+    """True when a hint match would contradict the field's own qualifier."""
+    if ellis_field != "full_name":
+        return False
+    return bool(_NAME_QUALIFIERS & toks)
+
+
 def _deterministic_mapper(artifacts: list[fm.AdapterReconArtifact]) -> list[dict]:
     """Ground each fillable control to at most one Ellis field by token match
     against a multilingual hint set. Fully deterministic; a control that
@@ -345,6 +365,8 @@ def _deterministic_mapper(artifacts: list[fm.AdapterReconArtifact]) -> list[dict
                 continue
             for ellis_field, hints in _NAME_HINTS.items():
                 if ellis_field in claimed:
+                    continue
+                if _disqualified(ellis_field, toks):
                     continue
                 if any(h in toks for h in hints):
                     out.append({"ellis_field": ellis_field,
@@ -1241,14 +1263,26 @@ def _entry_gated_flow(host: str, roles: dict, mappings: list[dict],
     if form_art is not None:
         seen_fields: set[str] = set()
         used_slugs: set[str] = set()
+        # What the PAGE says a control is, keyed by the field name recon saw.
+        # The mapper only opines on which Ellis value belongs there; the widget
+        # type is observed fact and wins. Without this a Material autocomplete
+        # got FILL_NON_SENSITIVE, so Ellis typed "CHN" into TDAC's
+        # Nationality/Citizenship, never committed a choice, and the run stalled
+        # with the option list open and "This field is required" showing
+        # (2026-08-03).
+        observed_kind = {
+            str(el.get("name") or ""): str(el.get("type") or "")
+            for el in (form_art.structure or {}).get("elements", [])
+            if el.get("name")}
         for m in mappings:
             if m.get("page_key") != form_key:
                 continue
             if m["portal_field"].lower() in seen_fields:
                 continue    # one deterministic node per portal field
             seen_fields.add(m["portal_field"].lower())
-            action = "SELECT_SEARCH" if m.get("kind") in ("select", "search_combobox",
-                                                          "search-combobox") \
+            kind = observed_kind.get(str(m["portal_field"])) or m.get("kind")
+            action = "SELECT_SEARCH" if kind in ("select", "search_combobox",
+                                                 "search-combobox", "combobox") \
                 else "FILL_NON_SENSITIVE"
             extra = {}
             if m.get("format"):
