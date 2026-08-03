@@ -2299,3 +2299,54 @@ def test_payment_details_progress_steps_are_applicant_safe():
         msg = progress.STEP_MESSAGES[key]
         assert msg and "kimi" not in msg.lower()
         assert "#" not in msg and "css" not in msg.lower()
+
+
+# --- a portal refusing the SESSION, not a value ---------------------------
+
+_TDAC_BLOCKED = ("We couldn't verify your request. Please wait a moment and try "
+                 "again. 403msd039dkdf18m5sq3va IMPORTANT NOTICE Arrival Card")
+
+
+class _BlockedPage:
+    """Reads like TDAC under Cloudflare bot management: the normal page renders
+    and a refusal banner is laid over it."""
+    def __init__(self, text=_TDAC_BLOCKED, ok=True):
+        self.text, self.ok = text, ok
+
+    def read_text(self, selector):
+        return {"ok": self.ok, "text": self.text}
+
+
+def test_a_bot_check_is_seen_wherever_the_page_is_read():
+    """Checked in _page_blockers, not at NAVIGATE: Cloudflare injects its
+    banner asynchronously, so goto() returns a clean 200 and the challenge
+    appears later — during filling and during restore_portal. A
+    navigation-time check never saw it and the run died as a silent stall
+    (2026-08-03)."""
+    from app.portal.released_flow import ReleasedFlowDriver as D
+    assert D._bot_check_present(_BlockedPage()) is True
+
+
+def test_an_ordinary_page_is_never_a_bot_check():
+    from app.portal.released_flow import ReleasedFlowDriver as D
+    assert D._bot_check_present(
+        _BlockedPage("Family Name First Name Passport No. Nationality")) is False
+    # A real permission error is an answer about the APPLICANT, not the session.
+    assert D._bot_check_present(
+        _BlockedPage("You do not have permission to view this application")) is False
+
+
+def test_an_unreadable_page_is_not_a_bot_check():
+    """Fail safe the other way: a driver problem must not send the applicant to
+    clear a challenge that may not exist."""
+    from app.portal.released_flow import ReleasedFlowDriver as D
+    assert D._bot_check_present(_BlockedPage("", ok=False)) is False
+
+    class _NoReader:
+        pass
+    assert D._bot_check_present(_NoReader()) is False
+
+
+def test_the_bot_check_pause_names_a_handoff_the_ui_can_resolve():
+    from app.portal.released_flow import APPLICANT_HANDOFFS
+    assert "portal_verification" in APPLICANT_HANDOFFS

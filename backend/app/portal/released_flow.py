@@ -786,6 +786,11 @@ class ReleasedFlowDriver:
             # once), or still-unanswered questions must pause as themselves —
             # a mislabeled pause sends the applicant to the wrong step.
             blockers = self._page_blockers()
+            if blockers.get("bot_check"):
+                # The portal is refusing the automated session, not a value.
+                # Retrying cannot answer it; a human can.
+                return {"ok": False, "code": "APPLICANT_ACTION_REQUIRED",
+                        "handoff": "portal_verification"}
             if blockers.get("captcha"):
                 return {"ok": False, "code": "CAPTCHA_REQUIRED"}
             if blockers.get("refill") and not repaired:
@@ -1017,6 +1022,16 @@ class ReleasedFlowDriver:
                 probe = driver.page_probe() or {}
             except Exception:  # noqa: BLE001
                 probe = None
+        # A bot check FIRST, because it invalidates everything read below it:
+        # the page underneath is a refusal, not a form, and classifying it
+        # yields nonsense pauses. Checked here rather than at NAVIGATE because
+        # Cloudflare injects its banner asynchronously — TDAC's goto() returns a
+        # clean 200 and the challenge appears seconds later, during filling and
+        # during restore_portal, so a navigation-time check never saw it
+        # (2026-08-03). This runs on every classification pass, which is every
+        # place the page is looked at.
+        if self._bot_check_present(driver):
+            return {"bot_check": True}
         if probe is not None:
             if (probe.get("captcha") or {}).get("present"):
                 return {"captcha": True}
@@ -1611,6 +1626,26 @@ class ReleasedFlowDriver:
         r"\bتم\s+بنجاح\b|"                                  # ar
         r"完了|成功|完成|완료|성공)",
         re.IGNORECASE)
+
+    @staticmethod
+    def _bot_check_present(driver) -> bool:
+        """Is the page refusing this session as automated, right now?
+
+        Reads the page's own words through the same narrow matcher the runtime
+        uses, so one vocabulary describes a bot check everywhere. Unreadable
+        pages are NOT a bot check — a driver problem must not send the
+        applicant to clear a challenge that may not exist.
+        """
+        from ..adapter_factory.runtime import _BOT_CHECK_RE
+        if not hasattr(driver, "read_text"):
+            return False
+        try:
+            res = driver.read_text("body") or {}
+        except Exception:  # noqa: BLE001
+            return False
+        if not res.get("ok"):
+            return False
+        return bool(_BOT_CHECK_RE.search(str(res.get("text") or "")))
 
     def _notice_is_error(self, driver) -> bool:
         """Is the on-screen notice a rejection dialog rather than a success
