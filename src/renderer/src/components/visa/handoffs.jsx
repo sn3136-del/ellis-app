@@ -472,7 +472,8 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
         await onResolve('verify_email', { token: typedCode.trim() || token })
         setTypedCode('')                        // never retained after use
       } else if (handoff === 'portal_form' || handoff === 'document_upload' ||
-                 handoff === 'portal_terms_consent' || handoff === 'credentials') {
+                 handoff === 'portal_terms_consent' || handoff === 'credentials' ||
+                 handoff === 'portal_verification') {
         // Re-drive: the applicant did the thing only they may do (attached a
         // file, accepted the portal's terms, created the account) and Ellis
         // re-reads the page rather than assuming it worked.

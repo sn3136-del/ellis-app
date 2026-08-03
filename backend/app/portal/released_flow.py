@@ -49,6 +49,7 @@ APPLICANT_HANDOFFS = frozenset({
     "fee_confirmation", "final_review", "identity", "login_challenge",
     "no_availability", "otp", "payment", "payment_approval",
     "payment_credentials", "personal_declaration", "portal_form",
+    "portal_verification",
     "portal_terms_consent", "reschedule_approval", "review", "three_ds",
 })
 

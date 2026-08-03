@@ -13,7 +13,44 @@ page driver in live tiers.
 """
 from __future__ import annotations
 
+import re
 from urllib.parse import urlparse
+
+# A portal refusing the AUTOMATED SESSION, as distinct from refusing a value.
+# Cloudflare answers 403 with "We couldn't verify your request"; Akamai and
+# PerimeterX have their own wording. Matched on the page's own text plus the
+# status, so an ordinary 403 (a real permission error) is not mistaken for one.
+_BOT_CHECK_RE = re.compile(
+    r"(couldn'?t verify your request|verify you are (a )?human|"
+    r"checking your browser|enable javascript and cookies to continue|"
+    r"attention required.{0,20}cloudflare|access denied.{0,40}reference|"
+    r"unusual traffic|automated (access|requests?) (is |are )?(not )?"
+    r"(allowed|blocked|detected))", re.IGNORECASE)
+
+
+def _bot_check_blocked(driver, res) -> bool:
+    """True when the PAGE says it refused this session as automated.
+
+    Deliberately narrow: the status must be a refusal AND the page must say so
+    in its own words. A 403 alone is often a genuine permission answer, and a
+    challenge page that still renders the form is not a block.
+    """
+    if not isinstance(res, dict):
+        return False
+    # The TEXT is the evidence, not the status. TDAC answers 200 and renders
+    # its normal page with the refusal banner laid over it, so gating on 403
+    # missed the very case this exists for. Only a status that cannot be a bot
+    # check at all is excluded; the wording carries the rest.
+    status = int(res.get("status") or 0)
+    if status in (404, 410, 500, 502, 504):
+        return False
+    text = str(res.get("text") or res.get("title") or "")
+    if not text and hasattr(driver, "read_text"):
+        try:
+            text = str((driver.read_text("body") or {}).get("text") or "")
+        except Exception:  # noqa: BLE001 — an unreadable page is not a verdict
+            return False
+    return bool(_BOT_CHECK_RE.search(text))
 
 from sqlalchemy import select
 
@@ -209,6 +246,16 @@ class FlowRunner:
             if not self._url_ok(url):
                 return {"status": "failed", "reason": f"navigation outside allowlist: {url}"}
             res = self.driver.goto(url)
+            if _bot_check_blocked(self.driver, res):
+                # A bot check is a question about whether a human is here, and
+                # the honest answer is to fetch one. Thailand's TDAC sits behind
+                # Cloudflare bot management: it refuses the automated session
+                # outright, so no amount of retrying reaches the form
+                # (2026-08-03). The applicant clears it in their own secure
+                # window — the same doctrine as a CAPTCHA — and Ellis resumes
+                # in that now-trusted session and fills the form as normal.
+                # Ellis never tries to look like a different browser.
+                return {"status": "handoff", "handoff_kind": "portal_verification"}
             return self._from_driver(node, res)
         if action == "WAIT_FOR_STATE":
             return {"status": "ok"}

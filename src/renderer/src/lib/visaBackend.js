@@ -395,6 +395,10 @@ export const HANDOFF_UI = {
   // The portal's own terms. The applicant accepts them personally in the
   // secure window; Ellis never clicks agree to a government agreement.
   portal_terms_consent: 'LiveViewModal',
+  // The portal refused the automated session outright (Cloudflare bot
+  // management on Thailand's TDAC). The applicant clears the check in the
+  // secure window and Ellis resumes in that trusted session.
+  portal_verification: 'LiveViewModal',
   portal_form: 'LiveViewModal',     // finish form items only you may complete
   payment_approval: 'PaymentApprove', // approve_payment (shows fee)
   fee_confirmation: 'PaymentApprove', // applicant confirms the exact portal fee
@@ -426,6 +430,7 @@ export const HANDOFF_SIGNAL = {
   portal_form: 'start',
   document_upload: 'start',          // re-drive: Ellis re-reads the form page
   portal_terms_consent: 'start',
+  portal_verification: 'start',
   credentials: 'start',
   additional_information: 'provide_information'
 }
@@ -441,6 +446,8 @@ export const HANDOFF_COPY = {
   login_challenge: ['Portal login challenge', 'Complete the portal sign-in challenge in the secure window.'],
   credentials: ['Create your portal account', 'The official portal requires an account. Create it yourself in the secure window — Ellis never handles your password.'],
   document_upload: ['Attach a document', 'The official form asks for a file Ellis could not attach for you. Add it in the secure window and Ellis continues.'],
+  portal_verification: ["Confirm you are a real person",
+    'The official portal wants to check a person is here before it opens the form. Complete its check in the secure window and Ellis carries on filling everything in for you.'],
   portal_terms_consent: ['Accept the portal terms', "Read and accept the official portal's own terms in the secure window — Ellis never agrees to them for you."],
   portal_form: ['Finish the highlighted items on the official form',
     'A few items on the government form need your personal input — including any declaration only you may sign. Complete them in the secure window, then continue.'],
