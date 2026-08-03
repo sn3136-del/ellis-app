@@ -61,3 +61,8 @@ backend/app/portal_adapters/generated/
 
 # === Bundled slim Python runtime for the self-contained app (regenerate via scripts/build-runtime-venv.sh) ===
 backend/.runtime-venv/
+
+# SQLite runtime companions: machine-local, never source.
+backend/ellis.db-shm
+backend/ellis.db-wal
+backend/ellis.db-journal
