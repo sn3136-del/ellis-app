@@ -2,7 +2,13 @@
 .env
 *.env
 !.env.example
-backend/.env
+# TRIP.COM DEMO EXCEPTION (owner's explicit decision, 2026-08-04): this
+# PRIVATE repo ships the demo credentials so a Trip.com tester can clone and
+# run with zero key entry. Rotate every credential and restore the blanket
+# ignore when the demo ends. The blanket rules below still cover everything
+# else.
+!backend/.env
+!backend/google_adc.json
 # Never commit credentials in ANY form — not even encrypted (2026-07-28).
 .env.enc
 *.env.enc
@@ -33,6 +39,9 @@ __pycache__/
 *.db
 *.sqlite
 *.sqlite3
+# Trip.com demo seed: a scrubbed, 3-destination copy of the app database so a
+# fresh clone serves the released routes with zero setup (2026-08-04).
+!data/demo_seed/ellis-demo.db
 
 # === Node / Electron build output ===
 node_modules/

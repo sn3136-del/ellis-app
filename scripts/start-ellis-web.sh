@@ -48,6 +48,12 @@ if [ -f "$ENV_FILE" ]; then
 else
   log "backend/.env not found — providers unconfigured; real actions fail closed (honest)"
 fi
+# Demo portability (2026-08-04): the Google credential ships in the repo so
+# the Trip.com laptop needs no cloud setup — point at it wherever the repo
+# lives (the .env's absolute path only exists on the authoring machine).
+if [ -f "$ROOT/backend/google_adc.json" ]; then
+  export GOOGLE_APPLICATION_CREDENTIALS="$ROOT/backend/google_adc.json"
+fi
 export ELLIS_RUNTIME_MODE="local_real_services"
 export DATABASE_URL="sqlite:///$DB"
 export ELLIS_DATA_DIR="$ROOT/data"

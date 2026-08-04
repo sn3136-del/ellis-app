@@ -21,7 +21,8 @@
     "test:portal": "node --test --test-concurrency=1 tests/portal/framework.test.mjs tests/portal/e2e.test.mjs",
     "test:security": "node --test tests/build_security.test.mjs",
     "test:visa": "node --test tests/visa/visa_ui_logic.test.mjs",
-    "test:visa:api": "node --test tests/visa/frontend_backend.test.mjs"
+    "test:visa:api": "node --test tests/visa/frontend_backend.test.mjs",
+    "demo": "bash scripts/start-tripcom-demo.sh"
   },
   "build": {
     "appId": "com.ellis.app",

@@ -381,6 +381,16 @@ export default function StartVisa({ client, onOpenCase }) {
     label: `${c.flag ? c.flag + ' ' : ''}${c.name}`,
     search: `${c.name} ${c.alpha_2} ${c.alpha_3}`.toLowerCase()
   })), [reg])
+  // Trip.com demo (2026-08-04): the DESTINATION picker shows only the three
+  // demo routes. Nothing is deleted — every registry, adapter, and route
+  // stays live underneath; empty the set to show the full list again. Other
+  // country pickers (nationality, residence, birth country) are untouched.
+  const DEMO_DESTINATIONS = ['DEU', 'VNM', 'SGP']
+  const destinationOpts = useMemo(() => (
+    DEMO_DESTINATIONS.length
+      ? countryOpts.filter((o) => DEMO_DESTINATIONS.includes(o.value))
+      : countryOpts
+  ), [countryOpts])
   const nationalityOpts = useMemo(() => (reg?.nationalities || []).map((n) => ({
     value: n.code, label: n.name, search: `${n.name} ${n.code}`.toLowerCase()
   })), [reg])
@@ -720,7 +730,7 @@ export default function StartVisa({ client, onOpenCase }) {
         {step === 1 && (
           <div className="wiz-grid" style={{ marginTop: 8 }}>
             <Field label={t('field.destination_country')} invalid={isMissing('destination_country')}>
-              <SearchSelect t={t} value={answers.destination_country} options={countryOpts}
+              <SearchSelect t={t} value={answers.destination_country} options={destinationOpts}
                 invalid={isMissing('destination_country')}
                 onChange={(v) => setAnswer('destination_country', v)} />
             </Field>
