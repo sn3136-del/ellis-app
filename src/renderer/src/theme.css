@@ -583,10 +583,16 @@ body { background: var(--bg-soft); }
   background: transparent; cursor: default;
 }
 .watchonly__note {
-  position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 6;
-  background: rgba(15,41,77,0.82); color: #fff; font-size: 11.5px; font-weight: 600;
-  padding: 5px 12px; border-radius: 999px; pointer-events: none; white-space: nowrap;
+  /* A slim corner tag, not a banner: the centered pill sat exactly over the
+     portal's Submit row and validation messages — the part of the page the
+     applicant most wants to watch (2026-08-04). Fades to a whisper after the
+     first seconds; the click-shield above stays either way. */
+  position: absolute; right: 8px; top: 8px; z-index: 6;
+  background: rgba(15,41,77,0.62); color: #fff; font-size: 10.5px; font-weight: 600;
+  padding: 3px 9px; border-radius: 999px; pointer-events: none; white-space: nowrap;
+  animation: watchonly-fade 1s ease 4s forwards;
 }
+@keyframes watchonly-fade { to { opacity: 0.35; } }
 
 /* ---------- Entrance animations (used sparingly) ----------
    fill-mode is `backwards`, NOT `both`: `both` retains the final keyframe

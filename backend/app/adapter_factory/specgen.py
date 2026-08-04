@@ -64,6 +64,35 @@ ELLIS_FIELDS = [
 ]
 
 
+# Applicant-facing wording for answer KEYS, used when a flow node carries no
+# question of its own. A key's name is a column, not a sentence: "What is your
+# used other passport for destination?" reached a real applicant, who answered
+# "none" to a question whose only real answers are Yes and No (2026-08-04).
+# A boolean key carries its options so the ask is two buttons, not a text box.
+KEY_QUESTIONS = {
+    "used_other_passport_for_destination": {
+        "question": "Have you ever entered this country using a passport "
+                    "with a different name?",
+        "kind": "select", "options": ["Yes", "No"]},
+    "health_symptoms_present": {
+        "question": "Do you currently have any of these symptoms: fever, "
+                    "cough, shortness of breath, headache, vomiting, "
+                    "dizziness, or a rash?",
+        "kind": "select", "options": ["Yes", "No"]},
+    "prior_refusals": {
+        "question": "Have you ever been refused a visa or entry to this "
+                    "country?",
+        "kind": "select", "options": ["Yes", "No"]},
+    "phone_country_code": {
+        "question": "What is your phone's country calling code? "
+                    "(for example, 86 for China)"},
+    "phone_national": {
+        "question": "What is your phone number, without the country code?"},
+    "place_of_birth": {
+        "question": "Where were you born, as shown in your passport?"},
+}
+
+
 def _q(key, question, why, fmt, mandatory, kind):
     """Applicant-question metadata carried ON the field mapping — the runtime
     turns it into a dynamic question when the case answer is missing. Never

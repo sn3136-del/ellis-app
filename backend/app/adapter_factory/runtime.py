@@ -74,6 +74,19 @@ FORM_INCOMPLETE_REASON = ("the portal's Next button is still disabled — "
 _FEE_RE = None
 
 
+# Keys whose answer IS a yes/no. The applicant says it in their own words —
+# "none", "never", "n" — and a chip row offers exactly YES and NO; the words
+# must meet. "none" matching neither chip left both required declarations
+# empty and the save button dead (2026-08-04, Singapore).
+_BOOLEAN_KEYS = frozenset({
+    "used_other_passport_for_destination", "health_symptoms_present",
+    "prior_refusals",
+})
+_YES_WORDS = frozenset({"yes", "y", "true", "have", "did"})
+_NO_WORDS = frozenset({"no", "n", "none", "never", "false", "havent",
+                       "have not", "didnt", "did not", "nil"})
+
+
 def _with_derived_answers(answers: dict) -> dict:
     """Answers computable from answers already given — never asked, never
     guessed, only SPLIT.
@@ -93,6 +106,24 @@ def _with_derived_answers(answers: dict) -> dict:
                        re.sub(r"[^\d]", "", m.group(2)))
     elif phone:
         out.setdefault("phone_national", re.sub(r"[^\d]", "", phone))
+    # An ASKED dial code arrives as the applicant wrote it ("+86"); the box
+    # wants the digits.
+    cc = str(out.get("phone_country_code") or "")
+    if cc:
+        digits = re.sub(r"[^\d]", "", cc)
+        if digits and digits != cc:
+            out["phone_country_code"] = digits
+    # A yes/no answer in the applicant's own words becomes the one the chips
+    # are labelled with. Unrecognised words stay verbatim and fail honestly to
+    # a re-ask — "maybe" is not a No.
+    for key in _BOOLEAN_KEYS:
+        v = str(out.get(key) or "").strip().lower().replace("'", "")
+        if not v:
+            continue
+        if v in _YES_WORDS:
+            out[key] = "Yes"
+        elif v in _NO_WORDS:
+            out[key] = "No"
     return out
 
 
@@ -1065,6 +1096,14 @@ class FlowRunner:
         q = dict(node.get("question") or {})
         observed = self.observed_options.get(node.get("node_id", ""))
         key = node.get("input_source", "") or q.get("key", "")
+        if not q.get("question"):
+            # Canonical wording for the key when the node brought none — the
+            # same table the pre-flight ask uses, so the applicant is never
+            # asked the same thing two different ways.
+            from .specgen import KEY_QUESTIONS
+            canon = KEY_QUESTIONS.get(key)
+            if canon:
+                q = {**canon, **{k: v for k, v in q.items() if v}}
         label = q.get("question") or (node.get("label") or key.replace("_", " ")).strip()
         if node.get("action") == "UPLOAD_AUTHORIZED_DOCUMENT":
             dt = (node.get("doc_type") or "document").replace("_", " ")
@@ -1265,10 +1304,17 @@ class FlowRunner:
         if not sel or not fid:
             return False
         esc = _re.escape(fid)
-        return bool(
-            _re.search(rf'#{esc}(?![\w-])', sel) or
-            _re.search(rf'\[\s*id\s*=\s*["\']?{esc}["\']?\s*\]', sel) or
-            _re.search(rf'\[\s*name\s*=\s*["\']?{esc}["\']?\s*\]', sel))
+        if bool(
+                _re.search(rf'#{esc}(?![\w-])', sel) or
+                _re.search(rf'\[\s*id\s*=\s*["\']?{esc}["\']?\s*\]', sel) or
+                _re.search(rf'\[\s*name\s*=\s*["\']?{esc}["\']?\s*\]', sel)):
+            return True
+        # A chip GROUP is flagged by its container id; the nodes address the
+        # individual chips (#individual_0_sq1 flags, #individual_0_sq1_Y
+        # fills). Without the prefix match the flagged declaration mapped to
+        # no node, nobody was re-asked, and the save button stayed dead
+        # through four retries (2026-08-04, Singapore).
+        return bool(_re.search(rf'#{esc}[_-][\w-]{{1,8}}(?![\w-])', sel))
 
     def _node_for_flagged_field(self, fid: str):
         """The flow node that fills the portal-flagged field, or None."""

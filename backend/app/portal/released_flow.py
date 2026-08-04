@@ -2172,6 +2172,14 @@ def known_missing_questions(db, app_row) -> list[dict]:
             continue
         seen.add(key)
         q = dict(node.get("question") or {})
+        # Canonical wording for the key, when the node brought none of its
+        # own. Chosen ABOVE the node label: the label is the portal's caption,
+        # the canonical entry is a question a person can answer, with options
+        # where the answer is really Yes or No.
+        from ..adapter_factory.specgen import KEY_QUESTIONS
+        canon = KEY_QUESTIONS.get(key) or {}
+        if not q.get("question") and canon:
+            q = {**canon, **{k: v for k, v in q.items() if v}}
         label = (q.get("question")
                  or (node.get("label") or key.replace("_", " ")).strip())
         entry = {
