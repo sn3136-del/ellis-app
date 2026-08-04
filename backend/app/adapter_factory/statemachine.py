@@ -51,7 +51,13 @@ _T = {
     "JURISDICTION_VERIFIED": ["AUTOMATION_POLICY_REVIEW"],
     "AUTOMATION_POLICY_REVIEW": ["RECON_PENDING", "MANUAL_REVIEW_REQUIRED"],
     "RECON_PENDING": ["RECON_RUNNING"],
-    "RECON_RUNNING": ["SPECIFICATION_GENERATED", "MANUAL_REVIEW_REQUIRED"],
+    # RECON_PENDING is the POLITE outcome: the host's quiet period between
+    # recon passes has not elapsed, and the build steps back to wait. Leaving
+    # it off this list made the deferral itself an illegal transition, so a
+    # rate-limited rebuild parked in MANUAL_REVIEW_REQUIRED instead of simply
+    # waiting out the cooldown (2026-08-04, Singapore).
+    "RECON_RUNNING": ["SPECIFICATION_GENERATED", "MANUAL_REVIEW_REQUIRED",
+                      "RECON_PENDING"],
     # MANUAL_REVIEW_REQUIRED is the stage's honest escape when its spec row is
     # missing (a crash between announcing the state and persisting the spec id
     # once left builds stranded here with no legal exit).

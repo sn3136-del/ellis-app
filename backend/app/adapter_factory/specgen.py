@@ -52,6 +52,15 @@ ELLIS_FIELDS = [
     "airline", "vessel_name", "origin_city", "origin_country",
     "destination_city", "destination_region", "port_of_entry",
     "travel_date", "marital_status", "mother_name", "father_name",
+    # Phone SPLIT keys — derived from the applicant's one phone answer in
+    # runtime._with_derived_answers, never asked. A dial-code select mapped to
+    # nothing was mapped to junk instead (Singapore's Country/Region Code got
+    # destination_region, 2026-08-04).
+    "phone_country_code", "phone_national",
+    # Declaration yes/no questions arrival cards ask (SGAC's Others + Health
+    # sections). Canonical so the mapper may bind them and the runtime asks
+    # the applicant — an unmappable required YES/NO was a dead save button.
+    "used_other_passport_for_destination", "health_symptoms_present",
 ]
 
 
@@ -223,8 +232,15 @@ _NAME_HINTS = {
                   "nomecompleto"),
     "email": ("email", "emailaddress", "correo", "correoelectronico",
               "courriel"),
+    # BEFORE phone, or "countrycode" never gets a chance: token order decides
+    # ownership, and a dial-code select mapped to a full phone number typed
+    # "+86 138…" into a box wanting "86" (Singapore's Country/Region Code,
+    # 2026-08-04). Both keys are DERIVED from the applicant's one phone answer
+    # in runtime._with_derived_answers — never asked.
+    "phone_country_code": ("countrycode", "countryregioncode", "dialcode",
+                           "dialingcode", "ccno", "codigopais", "indicatif"),
     "phone": ("phone", "telephone", "mobile", "telefono", "celular",
-              "telefone", "handy"),
+              "telefone", "handy", "mobilenumber", "contactno"),
     "passport_number": ("passportnumber", "passport", "documentnumber",
                         "numerodocumento", "numeropasaporte", "numeropasseport",
                         "reisepassnummer", "docnumber"),
@@ -243,6 +259,12 @@ _NAME_HINTS = {
                        "lieunaissance", "geburtsort", "paisnacimiento",
                        "countryofbirth"),
     "sex": ("sex", "gender", "sexo", "genero", "geschlecht"),
+    # The declaration chips carry their question as the label; these tokens
+    # come from that question's own words. A tuple is an AND: every word must
+    # be present — "passport" alone belongs to passport_number.
+    "used_other_passport_for_destination": (("passport", "different"),
+                                            ("passport", "another")),
+    "health_symptoms_present": ("fever", "cough", "vomiting", "dizziness"),
     "marital_status": ("maritalstatus", "estadocivil", "etatcivil"),
     "occupation": ("occupation", "profession", "ocupacion", "profesion",
                    "beruf", "job"),
@@ -488,8 +510,15 @@ def _deterministic_mapper(artifacts: list[fm.AdapterReconArtifact]) -> list[dict
     for art in artifacts:
         claimed: set[str] = set()
         for el in (art.structure or {}).get("elements", []):
+            # A required BUTTON is an option chip, not a submit: SGAC asks sex,
+            # arrival date and both declarations as <button> rows, and skipping
+            # every button left those fields to the model mapper's mood — v3
+            # had the date chips, v4 silently did not (2026-08-04). A submit
+            # button never carries the page's required marker.
+            is_chip = el.get("type") == "button" and bool(el.get("required"))
             if el.get("sensitive") or el.get("type") in (
-                    "button", "submit", "checkbox", "link"):
+                    "submit", "checkbox", "link") or (
+                    el.get("type") == "button" and not is_chip):
                 continue
             # A radio is named after its ANSWER, so match on the question its
             # GROUP asks. Tokenizing "FEMALE" as if it named a field is how a
@@ -505,17 +534,33 @@ def _deterministic_mapper(artifacts: list[fm.AdapterReconArtifact]) -> list[dict
             # and third boxes are no longer dropped as already-mapped.
             part = _date_part(el)
             for ellis_field, hints in _NAME_HINTS.items():
+                # Chips respect existing claims (their label may mention a
+                # field an input already owns — "Sex as indicated in passport"
+                # must not bind passport_number). Because chips never ADD a
+                # claim, every sibling chip of a group still binds the same
+                # field through this same check.
                 if _claimed(claimed, ellis_field, part):
                     continue
                 if _disqualified(ellis_field, toks):
                     continue
-                if any(h in toks for h in hints):
+                # A hint is one token, or a tuple meaning ALL of these tokens
+                # ("passport" alone names the number field; "passport" AND
+                # "different" name the declaration).
+                hit = any((all(w in toks for w in h) if isinstance(h, tuple)
+                           else h in toks) for h in hints)
+                if hit:
                     out.append({"ellis_field": ellis_field,
                                 "portal_field": el["name"],
                                 "selector": el["selector"], "page_key": art.page_key,
                                 "artifact_id": art.id,
                                 "required": bool(el.get("required"))})
-                    claimed.add(f"{ellis_field}:{part}" if part else ellis_field)
+                    # Every chip of a group maps to the SAME field — the
+                    # runtime presses the one whose words match the answer and
+                    # steps past its siblings. Claiming on the first chip
+                    # mapped only YES, and an applicant whose answer was NO
+                    # had no node to press it with.
+                    if not is_chip:
+                        claimed.add(f"{ellis_field}:{part}" if part else ellis_field)
                     break
     return out
 

@@ -74,6 +74,28 @@ FORM_INCOMPLETE_REASON = ("the portal's Next button is still disabled — "
 _FEE_RE = None
 
 
+def _with_derived_answers(answers: dict) -> dict:
+    """Answers computable from answers already given — never asked, never
+    guessed, only SPLIT.
+
+    Portals disagree about what a phone number is: Vietnam wants one box,
+    Singapore wants a Country/Region Code select beside a national number. The
+    applicant gave Ellis one phone ('+86 138 0000 1234'); the split is
+    arithmetic on their own answer. Existing keys always win — this only ever
+    fills gaps."""
+    import re
+    out = dict(answers or {})
+    phone = str(out.get("phone") or "").strip()
+    m = re.match(r"^\+\s*(\d{1,3})[\s\-./]*(.+)$", phone)
+    if m:
+        out.setdefault("phone_country_code", m.group(1))
+        out.setdefault("phone_national",
+                       re.sub(r"[^\d]", "", m.group(2)))
+    elif phone:
+        out.setdefault("phone_national", re.sub(r"[^\d]", "", phone))
+    return out
+
+
 def _country_display_name(code: str) -> str:
     """ISO alpha-2/3 -> registry display name ('' when not a country code).
     Pure reference-data lookup (data/reference/countries.json)."""
@@ -148,7 +170,7 @@ class FlowRunner:
         self.execution = execution
         self.flow = compiled
         self.driver = driver
-        self.answers = case_answers or {}
+        self.answers = _with_derived_answers(case_answers or {})
         self.documents = documents or []
         self.fee_seen = None
         self.slots_seen = []
@@ -475,6 +497,14 @@ class FlowRunner:
             return {"status": "ok"}
         if action in ("FILL_NON_SENSITIVE", "SELECT_SEARCH"):
             value = self.answers.get(node.get("input_source", ""), "")
+            if node.get("input_source") == "phone" and value:
+                # A page that takes the dial code in its OWN box wants the
+                # national number here — "+86 138…" beside a Country/Region
+                # Code select is the code entered twice, and Singapore's
+                # mobile box rejects it (2026-08-04).
+                if any((n or {}).get("input_source") == "phone_country_code"
+                       for n in self.flow.nodes.values()):
+                    value = self.answers.get("phone_national") or value
             if value in ("", None):
                 if not bool(node.get("mandatory", True)) and \
                         not self._page_says_required(node):

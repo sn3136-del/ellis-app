@@ -485,6 +485,17 @@ def build_family_adapter(db, family_id: str, *, observer=None,
     if rebuild_released and req.state in RELEASED_STATES:
         _unpark_for_rebuild(db, req)
         entry_state = req.state
+    elif rebuild_released and req.state in ("MANUAL_REVIEW_REQUIRED",
+                                            "TESTS_FAILED"):
+        # A released FAMILY whose newest request is parked: the link kept
+        # serving the old version while a later rebuild attempt failed, and
+        # the released-state check above never fires because the REQUEST is
+        # not in a released state. The named-family rebuild then unparked
+        # nothing, re-ran the gates on the existing version and reported
+        # released:1 — the operator's fix went nowhere, silently, twice
+        # (2026-08-04, Singapore).
+        _unpark_for_rebuild(db, req)
+        entry_state = req.state
     if allow_quarantine_rebuild and req.state == "QUARANTINED":
         # Explicit operator reset of THIS family's build: the machine's own
         # escape (QUARANTINED -> MANUAL_REVIEW_REQUIRED) then the full

@@ -232,7 +232,33 @@ _EXTRACT_JS = r"""
     }
     return markedRequired(cellCaptionEl(el));
   };
+  // The question a short-answer chip row answers: the nearest preceding text
+  // that asks one. Consulted FIRST for buttons — every later rung (cell
+  // caption, section header) names the section, not the question, which is
+  // how "Have you ever used a passport under different name to enter
+  // Singapore?" reached the mapper labelled "Others" (2026-08-04).
+  const chipQuestion = (el) => {
+    const own = (el.innerText || el.value || '').trim();
+    if (!own || own.length > 12) return '';
+    let n = el.closest('div') || el.parentElement;
+    for (let i = 0; i < 6 && n; i++, n = n.parentElement) {
+      let sib = n.previousElementSibling, hops = 0;
+      while (sib && hops < 4) {
+        const t = ((sib.innerText || '').replace(/\s+/g, ' ').trim());
+        if (t && t.length >= 12 && t.length <= 200 && /\?/.test(t)) {
+          const q = t.split(/(?<=\?)/)[0].trim();
+          if (q.length >= 12) return q;
+        }
+        sib = sib.previousElementSibling; hops++;
+      }
+    }
+    return '';
+  };
   const labelFor = (el) => {
+    if (el.tagName === 'BUTTON') {
+      const q = chipQuestion(el);
+      if (q) return q + ' \u2014 ' + (el.innerText || el.value || '').trim();
+    }
     if (el.getAttribute('aria-label')) return el.getAttribute('aria-label');
     if (el.id) { const l = document.querySelector('label[for="' + CSS.escape(el.id) + '"]'); if (l) return l.innerText; }
     const ff = el.closest && el.closest('mat-form-field, [class*="form-field"]');
@@ -516,7 +542,7 @@ class LiveBrowserSession:
                 return {"ok": False, "status": status, "url": final,
                         "error": "redirected off allowlist"}
             self._settle_for_render(page)                                       # pragma: no cover
-            raw = page.evaluate(_EXTRACT_JS)                                     # pragma: no cover
+            raw = self._extract_until_stable(page)                               # pragma: no cover
             self._merge_accessibility(page, raw)                                  # pragma: no cover
             self._probe_widgets(page, raw)                                       # pragma: no cover
         except Exception as e:  # noqa: BLE001                                    # pragma: no cover
@@ -677,6 +703,35 @@ class LiveBrowserSession:
                               "&& document.activeElement.blur()")
             page.wait_for_timeout(120)
         return int(page.evaluate(count_js) or 0) == 0
+
+    def _extract_until_stable(self, page) -> dict:  # pragma: no cover
+        """Extract, then extract AGAIN while the control count is still
+        growing, and keep the largest capture.
+
+        _settle_for_render stops the moment a few real inputs exist — which on
+        a page that hydrates in sections is the top of the form, not the form.
+        Singapore's SGAC drew its passport section fast and its declarations
+        and phone block late: recon recorded 20 controls of a 46-control page,
+        the mapper built an adapter with no nodes for the missing sections, and
+        the applicant met two required YES/NO questions Ellis had never heard
+        of (2026-08-04). Growth means the page is still drawing; only a stable
+        count is a finished page. Bounded, and a page that never stabilises
+        still yields its largest observed shape.
+        """
+        raw = page.evaluate(_EXTRACT_JS)
+        best = raw
+        for _ in range(4):
+            count = len((best or {}).get("elements") or [])
+            try:
+                page.wait_for_timeout(1200)
+                again = page.evaluate(_EXTRACT_JS)
+            except Exception:  # noqa: BLE001 — keep what we have
+                break
+            if len((again or {}).get("elements") or []) > count:
+                best = again
+                continue
+            break
+        return best
 
     def _settle_for_render(self, page) -> None:  # pragma: no cover
         """domcontentloaded fires before a client-rendered (React/Angular/Vue)
