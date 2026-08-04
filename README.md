@@ -1,29 +1,3 @@
-# Ellis
-
-The AI workspace for immigration operations. A desktop application (Electron + React) that runs the full immigration lifecycle for the **United States (USCIS / DOS)** and **Canada (IRCC)**, including cross-border cases such as China → USA or Canada for work, study, and travel.
-
-Every capability is powered by the **OpenAI API**.
-
-## Roles
-
-On launch, Ellis asks who you are. Each role gets its own interface:
-
-- **Immigrant** — track your case, know what to upload, ask Ellis anything, handle notices and travel.
-- **Employer** — automate onboarding, run compliance audits, manage renewals and risk across the workforce, hand off to counsel.
-- **Counsel** — receive complete, structured case files; review documents, evidence, forms, risks, notices, compliance, and travel.
-
-## Capabilities (all backed by OpenAI)
-
-- **Document review** — extract every field from passports, notices, permits, pay stubs; flag what is missing or expiring.
-- **Ask Ellis** — case-grounded Q&A with citations, plus a general immigration assistant.
-- **Risk flags** — compliance and travel risk scan across the whole case.
-- **Notice / RFE summaries** — turn a government notice into clear deadlines and actions.
-- **Form preparation** — pre-fill USCIS forms (I-129, I-539, DS-160, I-765) and IRCC forms (IMM 1295, 1294, 5257) from case facts.
-- **Evidence packets** — attorney-ready handoff with exhibits and open items.
-- **Compliance audit** — score + findings for status, work authorization, worksite/LCA or LMIA, I-9, wages.
-- **Travel risk** — go / caution / hold recommendation with a re-entry checklist.
-- **Run the lifecycle** — Ellis determines the current stage and generates the next actions with owners and due dates.
-
 ## First run
 
 1. `npm install`
