@@ -62,4 +62,5 @@ else
 fi
 
 # ---- run -------------------------------------------------------------------
-exec "$ROOT/scripts/start-ellis-web.sh"
+# Through bash: a ZIP download may have dropped the script's executable bit.
+exec bash "$ROOT/scripts/start-ellis-web.sh"
