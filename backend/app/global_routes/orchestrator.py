@@ -399,8 +399,15 @@ def build_family_adapter(db, family_id: str, *, observer=None,
         # for live processing" (2026-08-04).
         prior_release = (link.released, link.status, link.release_tier,
                          link.gate_report)
-        link.released = False
-        link.status = "building"
+        # The release flag STAYS UP while the rebuild runs. The runtime binding
+        # still points at the version that passed its own gates, so serving
+        # through the rebuild is serving exactly what was served an hour ago —
+        # while clearing the flag here took the family offline for the whole
+        # build: an applicant pressed Start inside that window and was told
+        # Singapore has no approved connection, on a route that was released
+        # before the rebuild and released again fifty-one seconds after
+        # (2026-08-04). Only the OUTCOME may move the flag: a new release
+        # swaps it forward, a failed rebuild leaves it exactly where it was.
         db.commit()
 
     rk = link.representative_route_key or representative_route_key(db, family)
