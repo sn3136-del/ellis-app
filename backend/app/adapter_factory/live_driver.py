@@ -377,14 +377,22 @@ class BrowserbasePageDriver:
         try:
             self.page.locator(selector).first.wait_for(state="attached",
                                                        timeout=_WAIT_MS)
-        except Exception:  # noqa: BLE001
-            # It waited the full budget and the field never appeared. Every
-            # rung below — fill, click-and-type, the picker write — needs the
-            # same element and will each spend its own timeout discovering the
-            # same absence: ~11s of an applicant's life to re-learn what the
-            # wait already proved. Say so now.
-            return {"ok": False, "code": "NO_SUCH_ELEMENT",
-                    "detail": "the field never appeared on the page"}
+        except Exception as e:  # noqa: BLE001
+            # A TIMEOUT here is proof: it waited the full budget and the field
+            # never appeared. Every rung below needs that same element and will
+            # each spend its own timeout re-discovering the same absence —
+            # ~11s of an applicant's life. Say so now.
+            #
+            # Anything ELSE is the wait itself failing, which proves nothing
+            # about the page: a driver whose locator has no wait_for, a page
+            # closing, a protocol error. Treating those as "no such element"
+            # made a fill that would have worked report failure and sent the
+            # run to the applicant instead of onward.
+            if "timeout" not in str(e).lower():
+                pass                       # unproven: take the normal ladder
+            else:
+                return {"ok": False, "code": "NO_SUCH_ELEMENT",
+                        "detail": "the field never appeared on the page"}
         self._uncover(selector)
         # A radio or checkbox holds a CHOICE, not text, and cannot be filled at
         # all. Older adapters mapped one node per option (Singapore's ICA card

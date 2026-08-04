@@ -329,10 +329,15 @@ def get_consular_form(application_id: str, download: bool = False,
     if form_key is None:
         return {"available": False,
                 "reason": "this route has no consular form Ellis prepares"}
+    from . import checklist_intake
     profile = _latest_passport_profile(db, app_row)
     answers = consular_forms.answers_from_documents(app_row.answers or {}, profile)
-    built = consular_forms.build(form_key, answers,
-                                 applicant_name=str(answers.get("full_name") or ""))
+    built = consular_forms.build(
+        form_key, answers, applicant_name=str(answers.get("full_name") or ""),
+        # The form draws a frame marked FOTOGRAFIA and the applicant already
+        # uploaded the photo it wants; leaving it empty made them do by hand
+        # the one thing they had already done.
+        photo=checklist_intake.applicant_photo_bytes(db, application_id))
     prepared = built["prepared"]
     if not download:
         return {"available": True, "form_key": form_key,
@@ -359,15 +364,44 @@ def _iso3_for(db, destination: str) -> str:
     return iso3(d, default=d.upper())
 
 
+_SUGGESTION_KEY = "_document_suggestions"
+
+
+def _document_suggestions(db, app_row, wanted: list[str]) -> dict:
+    """Answers read out of this case's own uploaded documents, cached.
+
+    Reading a document costs a model call, and the question list is fetched
+    every time the case screen renders. The cache lives under a reserved,
+    underscore-prefixed key so it can never be mistaken for one of the
+    applicant's own answers — nothing here has been confirmed by them yet.
+    """
+    if not wanted:
+        return {}
+    answers = dict(app_row.answers or {})
+    cache = dict(answers.get(_SUGGESTION_KEY) or {})
+    todo = [k for k in wanted if k not in cache]
+    if todo:
+        from . import document_answers
+        try:
+            found = document_answers.suggest(db, app_row.id, todo)
+        except Exception:  # noqa: BLE001 — never break the question list
+            found = {}
+        # Remember the misses too, as explicit blanks: a document that does not
+        # say where somebody works will not say it on the next render either.
+        for k in todo:
+            cache[k] = found.get(k) or None
+        answers[_SUGGESTION_KEY] = cache
+        app_row.answers = answers
+        db.commit()
+    return {k: v for k, v in cache.items() if v}
+
+
 def _latest_passport_profile(db, app_row) -> dict:
-    """The verified passport profile from the applicant's own uploaded biodata
-    page, if they uploaded one."""
-    from .visa_snapshot.models import RouteIntakeDocument
-    row = db.execute(select(RouteIntakeDocument).where(
-        RouteIntakeDocument.doc_type == "passport",
-        RouteIntakeDocument.user_id == app_row.user_id).order_by(
-        RouteIntakeDocument.created_at.desc())).scalars().first()
-    return (row.passport_profile or {}) if row is not None else {}
+    """The applicant's verified passport profile. One implementation, in
+    checklist_intake, because the appointment packet needs the same thing and
+    its own copy read an attribute that does not exist."""
+    from . import checklist_intake
+    return checklist_intake.latest_passport_profile(db, app_row)
 
 
 @app.get("/cases/{application_id}/portal-account")
@@ -1377,14 +1411,39 @@ def case_form_questions(application_id: str, db=Depends(get_session),
     iso = _iso3_for(db, app_row.destination_country or "")
     form_key = cf.form_for_destination(iso) if iso else None
     if not form_key:
-        return {"form_key": None, "questions": []}
-    answers = app_row.answers or {}
+        return {"form_key": None, "questions": [], "fields": []}
+    # Merge the passport FIRST, so Ellis never asks for something the biodata
+    # page already told it.
+    answers = cf.answers_from_documents(app_row.answers or {},
+                                        _latest_passport_profile(db, app_row))
     qs = cf.checkbox_questions(form_key)
     for q in qs:
         q["answer"] = answers.get(q["key"])
+    # The form's WRITTEN questions — place of birth, phone, where you are
+    # staying. The form has always needed these; nothing ever asked for them,
+    # so they reached the applicant only as blanks on a downloaded PDF and as
+    # raw storage keys in a "still needed" list.
+    fields = cf.field_questions(form_key, answers, only_missing=False)
+    # Before asking a person, read what they already gave Ellis. Somebody who
+    # uploaded a hotel confirmation should not be asked where they are staying.
+    # Cached on the case, because this reads documents with a model and the
+    # question list is fetched on every render.
+    blanks = [f["key"] for f in fields if not f["answer"]]
+    derived = _document_suggestions(db, app_row, blanks)
+    for f in fields:
+        hit = derived.get(f["key"])
+        if hit and not f["answer"]:
+            # Pre-filled, and SAID to be pre-filled: it becomes the applicant's
+            # answer when they save it, never before. A consular form is signed
+            # under penalty of perjury — Ellis may read a document and offer
+            # what it found; it may not answer in somebody else's name.
+            f["answer"] = hit["value"]
+            f["from_document"] = hit.get("document") or hit.get("doc_type") or ""
     return {"form_key": form_key, "title": cf.FORMS[form_key]["title"],
-            "questions": qs,
-            "unanswered": [q["key"] for q in qs if q.get("answer") in (None, "", [])]}
+            "questions": qs, "fields": fields,
+            "unanswered": [q["key"] for q in qs if q.get("answer") in (None, "", [])],
+            "required_unanswered": [f["key"] for f in fields
+                                    if f["required"] and not f["answer"]]}
 
 
 @app.get("/cases/{application_id}/appointment-packet")
@@ -1415,7 +1474,20 @@ def case_appointment_packet(application_id: str, format: str = "json",
         return Response(content=data, media_type="application/zip",
                         headers={"Content-Disposition":
                                  f'attachment; filename="ellis-appointment-packet.zip"'})
-    return {k: v for k, v in packet.items() if not k.startswith("_")}
+    out = {k: v for k, v in packet.items() if not k.startswith("_")}
+    # WHERE THE APPLICANT IS in the one journey this route has: answer what
+    # Ellis still needs, take the folder, then go and present it. Decided here
+    # rather than on the screen, so the page cannot disagree with the packet
+    # about whether it is complete — and so 'already downloaded' survives a
+    # reload, which a screen-local flag would not.
+    last = db.execute(select(models.AuditEvent).where(
+        models.AuditEvent.application_id == application_id,
+        models.AuditEvent.action == "appointment_packet_downloaded").order_by(
+        models.AuditEvent.at.desc())).scalars().first()
+    out["downloaded_at"] = last.at.isoformat() if last is not None else None
+    out["stage"] = ("ask" if not packet.get("ready")
+                    else "next" if last is not None else "ready")
+    return out
 
 
 class AppointmentRecord(BaseModel):

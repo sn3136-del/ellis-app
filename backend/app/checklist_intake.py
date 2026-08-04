@@ -82,6 +82,56 @@ def current_checklist(db, app_row, cg: CaseRouteGuidance | None = None) -> list[
     return healed
 
 
+# Checklist slots that hold the applicant's face photograph, and the document
+# types the classifier files one under. Used to find the image that belongs in
+# a consular form's photo frame.
+_PHOTO_HINTS = ("photo", "photograph", "foto", "picture", "照片")
+
+
+def applicant_photo_bytes(db, application_id: str) -> bytes | None:
+    """The applicant's passport-format photograph, if they uploaded one.
+
+    Every consular form draws a frame for it and every applicant has already
+    given Ellis the file. Returns the bytes of the most recent non-rejected
+    image whose document type or filename says it is the photo — an image, so
+    a PDF bank statement can never end up on somebody's visa application.
+    """
+    docs = db.execute(select(models.StoredDocument).where(
+        models.StoredDocument.application_id == application_id).order_by(
+        models.StoredDocument.created_at.desc())).scalars().all()
+    for d in docs:
+        if (d.page_classification or {}).get("reject"):
+            continue
+        if not str(d.mime or "").lower().startswith("image/"):
+            continue
+        haystack = f"{d.doc_type or ''} {d.name or ''}".lower()
+        if not any(h in haystack for h in _PHOTO_HINTS):
+            continue
+        blob = db.get(models.DocumentBlob, d.id)
+        content = getattr(blob, "content", None)
+        if content:
+            return content
+    return None
+
+
+def latest_passport_profile(db, app_row) -> dict:
+    """The verified passport profile from the applicant's own uploaded biodata
+    page, if they uploaded one.
+
+    Lives here because TWO places need it and only one had it: the consular-form
+    endpoint looked it up properly while the appointment packet read
+    `app_row.passport_profile`, an attribute VisaApplication does not have, so
+    the packet always prepared the form with no passport behind it.
+    """
+    from sqlalchemy import select
+    from .visa_snapshot.models import RouteIntakeDocument
+    row = db.execute(select(RouteIntakeDocument).where(
+        RouteIntakeDocument.doc_type == "passport",
+        RouteIntakeDocument.user_id == app_row.user_id).order_by(
+        RouteIntakeDocument.created_at.desc())).scalars().first()
+    return (row.passport_profile or {}) if row is not None else {}
+
+
 def document_rows(db, application_id: str) -> list[dict]:
     """Status-computation rows for every stored document (no extracted PII —
     language codes and a has-text flag only, never the text itself)."""

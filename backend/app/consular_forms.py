@@ -564,6 +564,155 @@ def load_checkbox_map(form_key: str) -> dict:
     return out
 
 
+# Applicant-facing wording for the form's WRITTEN fields — the counterpart of
+# CHECKBOX_LABELS below, which covers only the tick-boxes.
+#
+# Ellis stores answers under its own keys, and those keys had been reaching
+# people's eyes: the packet cover printed "Form answers Ellis does not have:
+# place_of_birth / phone / accommodation", and the case screen listed the same
+# three. A key is a name for a column, not a question anybody can answer. Each
+# entry here is what Ellis ASKS, plus the kind of box to ask it in and a line
+# of help where the form's meaning is not obvious from its label.
+FIELD_QUESTIONS = {
+    "surname_at_birth": {
+        "label": "Surname at birth, if different from now",
+        "type": "text",
+        "help": "Leave blank if your family name has never changed."},
+    "place_of_birth": {
+        "label": "Which city were you born in?",
+        "type": "text",
+        "help": "The city exactly as it appears on your passport."},
+    "country_of_birth": {
+        "label": "Which country were you born in?",
+        "type": "country"},
+    "phone": {
+        "label": "Your phone number",
+        "type": "tel",
+        "help": "Include the country code, so the consulate can reach you."},
+    "address_postal_code": {
+        "label": "Your postal code",
+        "type": "text"},
+    "occupation": {
+        "label": "Your current occupation",
+        "type": "text",
+        "help": "What you do for a living. Write 'Student', 'Retired' or "
+                "'Unemployed' if that is the case."},
+    "employer": {
+        "label": "Your employer, and their address and phone number",
+        "type": "textarea",
+        "help": "If you are a student, your school's name and address instead."},
+    "accommodation": {
+        "label": "Where will you stay?",
+        "type": "text",
+        "help": "The hotel's name, or the name of the person inviting you."},
+    "accommodation_address": {
+        "label": "The address you will stay at",
+        "type": "textarea"},
+    "national_id": {
+        "label": "National identity number, if you have one",
+        "type": "text"},
+}
+
+
+def field_questions(form_key: str, answers: dict | None = None,
+                    *, only_missing: bool = True) -> list[dict]:
+    """The written questions THIS form still needs, in the form's own order.
+
+    Every field the form declares, matched to applicant-facing wording, with
+    the answer already on file when there is one. `required` is the form's own
+    requirement — the same flag prepare() reports as missing_required — so a
+    caller can gate on the questions that would otherwise leave the downloaded
+    form incomplete, and ask the rest as optional.
+    """
+    spec = FORMS.get(form_key)
+    if spec is None:
+        return []
+    answers = answers or {}
+    checkbox_keys = set(load_checkbox_map(form_key))
+    out = []
+    for label, key, required in spec["fields"]:
+        if key in checkbox_keys:
+            continue          # asked as a choice by checkbox_questions instead
+        meta = FIELD_QUESTIONS.get(key)
+        if meta is None:
+            continue          # derived from the passport or the trip: never asked
+        answered = answers.get(key)
+        if only_missing and answered not in (None, ""):
+            continue
+        out.append({"key": key, "label": meta["label"], "type": meta["type"],
+                    "help": meta.get("help", ""), "required": bool(required),
+                    "answer": answered if answered not in (None, "") else "",
+                    "form_label": label.strip()})
+    return out
+
+
+# Where each answer comes from. A required field with no question behind it
+# would be a dead end: the screen would say something is missing and offer the
+# applicant no way to supply it. Saying WHICH source is short is the difference
+# between "answer this" and "upload your passport biodata page".
+_FROM_PASSPORT = frozenset({
+    "surname", "given_names", "full_name", "birth_date", "sex", "nationality",
+    "issuing_country", "passport_number", "passport_issue_date",
+    "passport_expiry_date",
+})
+_FROM_TRIP = frozenset({
+    "destination_country", "arrival_date", "departure_date", "travel_purpose",
+})
+
+
+def source_for(form_key: str, key: str) -> str:
+    """'ask' | 'passport' | 'trip' | 'intake' — who can close this gap."""
+    if key in FIELD_QUESTIONS or key in load_checkbox_map(form_key):
+        return "ask"
+    if key in _FROM_PASSPORT:
+        return "passport"
+    if key in _FROM_TRIP:
+        return "trip"
+    return "intake"
+
+
+def missing_breakdown(form_key: str, answers: dict) -> list[dict]:
+    """Every REQUIRED field still blank, in the applicant's words, with the
+    place its answer would come from. The raw list of keys says what is wrong;
+    this says what to do about it."""
+    prepared = prepare(form_key, answers)
+    return [{"key": k, "label": label_for(k), "source": source_for(form_key, k),
+             "required": True}
+            for k in prepared["missing_required"]]
+
+
+def official_form_fillable(form_key: str, answers: dict) -> bool:
+    """Would the official blank actually come out FILLED for these answers?
+
+    The same three conditions fill_official_template returns None on — no
+    template, no field map, nothing to write — asked without rendering a PDF.
+    Distinguishing this from 'the blank exists' matters because the screen
+    promises the applicant a filled government form, and a preparation sheet
+    is a different thing that must not be described as one.
+    """
+    if not official_template_available(form_key):
+        return False
+    mapping = load_field_map(form_key)
+    if not mapping:
+        return False
+    answers = answers or {}
+    if any(form_value(form_key, k, answers.get(k)) for k in mapping.values()):
+        return True
+    return any(answers.get(g) not in (None, "", [])
+               for g in load_checkbox_map(form_key))
+
+
+def label_for(key: str) -> str:
+    """Applicant-facing wording for one answer key — never the raw key."""
+    meta = FIELD_QUESTIONS.get(key)
+    if meta:
+        return meta["label"]
+    meta = (CHECKBOX_LABELS.get("schengen_uniform") or {}).get(key)
+    if meta and meta.get("label"):
+        return meta["label"]
+    return str(key or "").replace("_", " ").capitalize()
+
+
 def checkbox_questions(form_key: str) -> list[dict]:
     """The tick-box questions this form needs, as plain choices Ellis can ask.
     The applicant answers once and the correct box is ticked for them."""
@@ -731,7 +880,84 @@ def fill_official_template(form_key: str, answers: dict,
         return None
 
 
-def build(form_key: str, answers: dict, *, applicant_name: str = "") -> dict:
+def photo_box(form_key: str) -> dict:
+    """The frame this form draws for the applicant's photograph, in PDF points,
+    or {} when the form has none. Data, not code — read from <form_key>.map.json
+    beside the official blank, so another country's form is still a data step."""
+    import json
+    path = _map_path(form_key)
+    if not path.is_file():
+        return {}
+    try:
+        data = json.loads(path.read_text())
+    except ValueError:
+        return {}
+    box = data.get("photo_box") if isinstance(data, dict) else None
+    if not isinstance(box, dict):
+        return {}
+    try:
+        return {"page": int(box.get("page", 1)), "x": float(box["x"]),
+                "y": float(box["y"]), "width": float(box["width"]),
+                "height": float(box["height"])}
+    except (KeyError, TypeError, ValueError):
+        return {}
+
+
+def place_photo(pdf_bytes: bytes, image_bytes: bytes, form_key: str) -> bytes:
+    """Put the applicant's OWN photograph in the form's photo frame.
+
+    The Schengen blank draws an empty box marked FOTOGRAFIA and every applicant
+    has already given Ellis the passport photo it wants — leaving the box empty
+    made them do by hand the one thing they had already done.
+
+    Nothing is generated or altered: this is the file they uploaded, fitted to
+    the frame the form itself draws. Returns the PDF unchanged if there is no
+    frame, no image, or anything at all goes wrong — a form with an empty photo
+    box is still a usable form, and a corrupted one is not.
+    """
+    box = photo_box(form_key)
+    if not box or not image_bytes or not pdf_bytes:
+        return pdf_bytes
+    try:
+        from io import BytesIO
+        from PIL import Image
+        from pypdf import PdfReader, PdfWriter
+        from .providers import pdfgen
+
+        img = Image.open(BytesIO(image_bytes))
+        img.load()
+        if img.mode != "RGB":          # PNG with alpha, CMYK scan, greyscale
+            img = img.convert("RGB")
+        buf = BytesIO()
+        img.save(buf, format="JPEG", quality=92)
+        jpeg = buf.getvalue()
+
+        reader = PdfReader(BytesIO(pdf_bytes))
+        index = max(0, int(box["page"]) - 1)
+        if index >= len(reader.pages):
+            return pdf_bytes
+        target = reader.pages[index]
+        page_size = (float(target.mediabox.width), float(target.mediabox.height))
+        overlay = PdfReader(BytesIO(pdfgen.image_pdf(
+            jpeg, pixels=img.size, page=page_size,
+            box=(box["x"], box["y"], box["width"], box["height"]))))
+
+        writer = PdfWriter()
+        writer.append(reader)
+        # The photo goes UNDER nothing and OVER nothing that matters: the frame
+        # is empty by design, so merging on top leaves every filled value and
+        # the form's own rules untouched.
+        writer.pages[index].merge_page(overlay.pages[0])
+        writer.set_need_appearances_writer(True)
+        out = BytesIO()
+        writer.write(out)
+        return out.getvalue()
+    except Exception:  # noqa: BLE001 — an unreadable photo is not a broken form
+        return pdf_bytes
+
+
+def build(form_key: str, answers: dict, *, applicant_name: str = "",
+          photo: bytes | None = None) -> dict:
     """Produce the best HONEST artifact for this form:
     the government's own filled PDF when its official blank is available,
     otherwise the preparation sheet — never a fabricated official form.
@@ -740,10 +966,16 @@ def build(form_key: str, answers: dict, *, applicant_name: str = "") -> dict:
     prepared = prepare(form_key, answers)
     official = fill_official_template(form_key, answers)
     if official is not None:
-        return {"kind": "official_form", "pdf": official, "prepared": prepared}
+        placed = False
+        if photo:
+            with_photo = place_photo(official, photo, form_key)
+            placed = with_photo is not official and with_photo != official
+            official = with_photo
+        return {"kind": "official_form", "pdf": official, "prepared": prepared,
+                "photo_placed": placed}
     return {"kind": "preparation_sheet",
             "pdf": render_pdf(prepared, applicant_name=applicant_name),
-            "prepared": prepared}
+            "prepared": prepared, "photo_placed": False}
 
 
 def render_pdf(prepared: dict, *, applicant_name: str = "") -> bytes:

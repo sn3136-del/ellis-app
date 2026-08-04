@@ -1,58 +1,66 @@
 {
-  "_source": "https://ambmanila.esteri.it/wp-content/uploads/2023/11/Nuovo-Modello-Visto-Uniforme-EN-Application-form-for-Schengen-fillable-Short-Term.pdf",
-  "_authority": "Italian Ministry of Foreign Affairs (esteri.it) — the harmonised Schengen form, identical in content across all Schengen states",
-  "_retrieved": "2026-08-02",
-  "_note": "Text fields map name -> Ellis answer key. Checkbox groups map an Ellis answer key -> {answer value: PDF checkbox field}, so the applicant answers a plain question in Ellis and the right box is ticked. Only unambiguously-named boxes are mapped; the form is signed under penalty of perjury, so a guessed tick is never worth it.",
-  "fields": {
-    "1 Surname Family name": "surname",
-    "2 Surname at birth Former family names": "surname_at_birth",
-    "3 First names Given names": "given_names",
-    "Date of birth daymonthyear": "birth_date",
-    "5 Place of birth 6 Country of birth": "place_of_birth",
-    "Current Nationality": "nationality",
-    "11 National identity number where applicable": "national_id",
-    "13 Number of travel document": "passport_number",
-    "14 Date of issue": "passport_issue_date",
-    "15 Valid until": "passport_expiry_date",
-    "16 Issued by country": "issuing_country",
-    "19 Applicants home address and email address": "address_line1",
-    "Telephone no": "phone",
-    "21 Current occupation": "occupation",
-    "25 Member State of main destination and other Member States of destination if applicable": "destination_country",
-    " 22 Employer and employers address and telephone number For students name and address of educational establishment": "employer",
-    " 30 Surname and first name of the inviting persons in the Member States If not applicable name of hotels or temporary accommodations in the Member States": "accommodation"
-  },
-  "checkboxes": {
-    "marital_status": {
-      "single": "Single",
-      "married": "Married",
-      "registered_partnership": "Registered Partnership",
-      "divorced": "Divorced",
-      "widowed": "Widower",
-      "other": "Other please"
+    "_source": "https://ambmanila.esteri.it/wp-content/uploads/2023/11/Nuovo-Modello-Visto-Uniforme-EN-Application-form-for-Schengen-fillable-Short-Term.pdf",
+    "_authority": "Italian Ministry of Foreign Affairs (esteri.it) — the harmonised Schengen form, identical in content across all Schengen states",
+    "_retrieved": "2026-08-02",
+    "_note": "Text fields map name -> Ellis answer key. Checkbox groups map an Ellis answer key -> {answer value: PDF checkbox field}, so the applicant answers a plain question in Ellis and the right box is ticked. Only unambiguously-named boxes are mapped; the form is signed under penalty of perjury, so a guessed tick is never worth it.",
+    "fields": {
+        "1 Surname Family name": "surname",
+        "2 Surname at birth Former family names": "surname_at_birth",
+        "3 First names Given names": "given_names",
+        "Date of birth daymonthyear": "birth_date",
+        "5 Place of birth 6 Country of birth": "place_of_birth",
+        "Current Nationality": "nationality",
+        "11 National identity number where applicable": "national_id",
+        "13 Number of travel document": "passport_number",
+        "14 Date of issue": "passport_issue_date",
+        "15 Valid until": "passport_expiry_date",
+        "16 Issued by country": "issuing_country",
+        "19 Applicants home address and email address": "address_line1",
+        "Telephone no": "phone",
+        "21 Current occupation": "occupation",
+        "25 Member State of main destination and other Member States of destination if applicable": "destination_country",
+        " 22 Employer and employers address and telephone number For students name and address of educational establishment": "employer",
+        " 30 Surname and first name of the inviting persons in the Member States If not applicable name of hotels or temporary accommodations in the Member States": "accommodation"
     },
-    "travel_purpose": {
-      "tourism": "Tourism",
-      "business": "Business",
-      "visiting_family_or_friends": "Visiting family or friends",
-      "cultural": "Cultural",
-      "sports": "Sports",
-      "official_visit": "Official visit",
-      "medical": "Medical reasons",
-      "study": "Study",
-      "airport_transit": "Airport transit",
-      "other": "Other please specify"
+    "checkboxes": {
+        "marital_status": {
+            "single": "Single",
+            "married": "Married",
+            "registered_partnership": "Registered Partnership",
+            "divorced": "Divorced",
+            "widowed": "Widower",
+            "other": "Other please"
+        },
+        "travel_purpose": {
+            "tourism": "Tourism",
+            "business": "Business",
+            "visiting_family_or_friends": "Visiting family or friends",
+            "cultural": "Cultural",
+            "sports": "Sports",
+            "official_visit": "Official visit",
+            "medical": "Medical reasons",
+            "study": "Study",
+            "airport_transit": "Airport transit",
+            "other": "Other please specify"
+        },
+        "costs_covered_by": {
+            "self": "by the applicant himselfherself",
+            "sponsor": "by a sponsor host company"
+        },
+        "means_of_support": {
+            "cash": "Cash",
+            "travellers_cheques": "Travellers cheques",
+            "credit_card": "Credit card",
+            "prepaid_accommodation": "Prepaid accommodation",
+            "prepaid_transport": "Prepaid transport"
+        }
     },
-    "costs_covered_by": {
-      "self": "by the applicant himselfherself",
-      "sponsor": "by a sponsor host company"
-    },
-    "means_of_support": {
-      "cash": "Cash",
-      "travellers_cheques": "Travellers cheques",
-      "credit_card": "Credit card",
-      "prepaid_accommodation": "Prepaid accommodation",
-      "prepaid_transport": "Prepaid transport"
+    "photo_box": {
+        "_note": "The FOTOGRAFIA frame the form draws on page 1, in PDF points (origin bottom-left), read off the official blank itself rather than measured by eye. Ellis fits the applicant's own photo inside it without stretching.",
+        "page": 1,
+        "x": 418.9,
+        "y": 547.2,
+        "width": 105.7,
+        "height": 86.9
     }
-  }
 }

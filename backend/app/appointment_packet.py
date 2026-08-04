@@ -113,7 +113,7 @@ def _fee_line(verified_fee: dict | None) -> str:
 def build(*, applicant_name: str, destination: str, route: dict,
           checklist: list[dict], documents: list[dict],
           answers: dict, form_key: str | None = None,
-          form_prepared: dict | None = None,
+          form_prepared: dict | None = None, form_answers: dict | None = None,
           appointment: dict | None = None) -> dict:
     """Assemble the packet's CONTENT (no bytes yet), so the caller can render
     it, inspect it, or test it. Returns the cover text plus the manifest of
@@ -124,8 +124,17 @@ def build(*, applicant_name: str, destination: str, route: dict,
     # applicant has explicitly fulfilled it); anything else is still owed.
     # Reading a 'satisfied' flag that does not exist told applicants every
     # document was missing while the folder contained them.
+    # ONLY documents. A checklist carries three kinds of row and just one of
+    # them is a file the applicant owes: 'check' is something Ellis verifies
+    # (passport validity, status 'auto'), and 'form' is the consular form Ellis
+    # is producing INTO this very folder. Counting all three told an applicant
+    # whose six documents were every one submitted that three were still
+    # missing — and one of the three was the form they were about to download
+    # (2026-08-04). It also held `ready` false forever, so nothing downstream
+    # could ever consider the packet complete.
     missing_docs = [i.get("label") or i.get("id") for i in (checklist or [])
-                    if i.get("required", True) and not _is_fulfilled(i)]
+                    if str(i.get("kind") or "document") == "document"
+                    and i.get("required", True) and not _is_fulfilled(i)]
     have_docs = [d for d in (documents or []) if not d.get("rejected")]
     missing_fields = list((form_prepared or {}).get("missing_required") or [])
 
@@ -159,7 +168,11 @@ def build(*, applicant_name: str, destination: str, route: dict,
             lines.extend(f"    [ ] {m}" for m in missing_docs)
         if missing_fields:
             lines.append("  Form answers Ellis does not have (left blank to complete):")
-            lines.extend(f"    [ ] {m}" for m in missing_fields)
+            # In the applicant's words. This printed the raw storage keys —
+            # "place_of_birth", "accommodation" — on the cover of a document
+            # somebody carries into a consulate (2026-08-04).
+            lines.extend(f"    [ ] {consular_forms.label_for(m)}"
+                         for m in missing_fields)
     else:
         lines.append("  Nothing outstanding: every required document is on file")
         lines.append("  and every required form field is filled.")
@@ -203,19 +216,58 @@ def build(*, applicant_name: str, destination: str, route: dict,
     lines.append("Ellis prepared this file from the answers and documents you")
     lines.append("gave it. It is not legal advice and not a government decision.")
 
+    form_answers = form_answers or answers or {}
     return {
         "destination": destination,
         "applicant_name": applicant_name,
         "route_outcome": outcome,
         "cover_lines": lines,
         "form_key": form_key or "",
+        # Whether the applicant will actually receive the GOVERNMENT'S form or
+        # a preparation sheet. This asked only whether the blank PDF exists on
+        # disk, so the screen could promise a filled official form while the
+        # zip held a preparation sheet.
         "official_form_included": bool(
-            form_key and consular_forms.official_template_available(form_key)),
+            form_key and consular_forms.official_form_fillable(
+                form_key, form_answers)),
         "documents": [{"id": d.get("id"), "name": d.get("name"),
                        "doc_type": d.get("doc_type")} for d in have_docs],
         "missing_documents": missing_docs,
         "missing_form_fields": missing_fields,
+        # The same gaps in the applicant's own words, each with the place its
+        # answer comes from, so a screen can offer the right way to close it
+        # instead of printing a storage key.
+        "missing_form_fields_detail": (
+            consular_forms.missing_breakdown(form_key, form_answers)
+            if form_key else []),
+        # Where they go and what they do there, as DATA. Both were reachable
+        # only as prose inside cover_lines, so the screen could not say "go to
+        # <address>" without a second full packet build.
+        "post": post_block(route),
+        "next_steps": list(steps),
         "ready": not missing_docs and not missing_fields,
+    }
+
+
+def post_block(route: dict | None) -> dict:
+    """The competent post as structured data, carrying its own status.
+
+    `status` is the whole point: 'verified' is a post an official page proved
+    serves this residence, 'unconfirmed' is one Ellis found and could not
+    prove, 'unknown' is neither. A caller that renders an unconfirmed post as
+    fact is sending somebody to a building on a guess.
+    """
+    jur = (route or {}).get("jurisdiction") or {}
+    best = jur.get("best_known") or {}
+    name = jur.get("competent_post_name") or best.get("competent_post_name") or ""
+    return {
+        "name": name,
+        "kind": jur.get("competent_post_kind") or best.get("competent_post_kind") or "",
+        "address": jur.get("address") or best.get("address") or "",
+        "booking_url": jur.get("competent_post_url") or "",
+        "source_url": best.get("evidence") or "",
+        "status": ("verified" if jur.get("status") in ("verified", "resolved")
+                   else "unconfirmed" if name else "unknown"),
     }
 
 
@@ -261,11 +313,13 @@ def build_for_case(db, app_row) -> dict:
     documents = checklist_intake.document_rows(db, app_row.id)
 
     form_key = cf.form_for_destination(iso3) if iso3 else None
-    prepared = None
+    prepared, form_answers = None, {}
     if form_key:
-        passport = (getattr(app_row, "passport_profile", None) or
-                    answers.get("passport_profile"))
-        merged = cf.answers_from_documents(answers, passport)
+        # The applicant's own verified passport, read once at intake. This read
+        # `app_row.passport_profile`, which is not a column, so it was always
+        # None and the packet judged the form without it.
+        merged = cf.answers_from_documents(
+            answers, checklist_intake.latest_passport_profile(db, app_row))
         prepared = cf.prepare(form_key, merged)
         form_answers = merged
 
@@ -275,10 +329,10 @@ def build_for_case(db, app_row) -> dict:
                            f"{answers.get('given_names','')} {answers.get('surname','')}".strip()),
         destination=dest_name, route=route, checklist=checklist,
         documents=documents, answers=answers, form_key=form_key,
-        form_prepared=prepared,
+        form_prepared=prepared, form_answers=form_answers,
         appointment=assisted_booking.summary(db, app_row))
     packet["_form_prepared"] = prepared
-    packet["_form_answers"] = locals().get("form_answers") or {}
+    packet["_form_answers"] = form_answers
     packet["_application_id"] = app_row.id
     packet["_route"] = route
     return packet
@@ -294,7 +348,7 @@ def render_zip(db, app_row, packet: dict) -> bytes:
     uploaded, under names that say what each file is."""
     import io
     import zipfile
-    from . import consular_forms as cf, models
+    from . import checklist_intake, consular_forms as cf, models
 
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
@@ -309,6 +363,12 @@ def render_zip(db, app_row, packet: dict) -> bytes:
             filled = cf.fill_official_template(
                 form_key, packet.get("_form_answers") or {})
             if filled:
+                # The photograph the form asks for, from the photo the
+                # applicant already uploaded. Silently unchanged when there is
+                # none — an empty frame is a form they can still use.
+                photo = checklist_intake.applicant_photo_bytes(db, app_row.id)
+                if photo:
+                    filled = cf.place_photo(filled, photo, form_key)
                 z.writestr(f"01-{form_key}-OFFICIAL-FORM.pdf", filled)
             else:
                 z.writestr(f"01-{form_key}-preparation-sheet.pdf",
