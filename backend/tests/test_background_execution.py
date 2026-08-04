@@ -624,17 +624,31 @@ def _flow_runner(db, nodes, driver, answers, app_id="c-batch"):
 
 
 def test_first_batch_prevalidates_selects_and_defers_dependent_lists(db):
-    """The applicant is asked ONCE: an answered select whose value the portal
-    will reject is asked up front WITH the portal's list; a dependent list the
-    portal cannot show yet is deferred (never an empty 'choose from list'
-    text box); a select whose answer matches is not asked at all."""
+    """The applicant is asked ONCE, and only about what they can actually
+    answer. Ellis fills every field it has an answer for; a stored answer the
+    portal REFUSES comes back with the portal's own list; a dependent list the
+    portal cannot show yet is never asked with an empty dropdown."""
     class Driver:
+        def __init__(self):
+            self.filled = []
+
         def list_options(self, selector, max_options=300):
             if selector == "#purpose":
                 return {"ok": True, "options": ["Du lịch (Tourist)", "Business"]}
             if selector == "#sex":
                 return {"ok": True, "options": ["Male", "Female"]}
             return {"ok": True, "options": []}     # dependent ward: not yet
+
+        def select_search(self, selector, value):
+            # The portal's real list decides. "tourism" is not on it.
+            if selector == "#purpose":
+                return {"ok": False, "code": "NO_OPTIONS", "options": []}
+            self.filled.append((selector, value))
+            return {"ok": True, "shown": value}
+
+        def fill(self, selector, value):
+            self.filled.append((selector, value))
+            return {"ok": True}
 
     nodes = [
         {"node_id": "fill_religion", "action": "FILL_NON_SENSITIVE",
@@ -650,17 +664,52 @@ def test_first_batch_prevalidates_selects_and_defers_dependent_lists(db):
          "mandatory": True},
         {"node_id": "done", "action": "COMPLETE", "allowed_hostname": "evisa.gov.vn"},
     ]
-    runner = _flow_runner(db, nodes, Driver(),
-                          {"sex": "Female", "travel_purpose": "tourism"})
+    drv = Driver()
+    runner = _flow_runner(db, nodes, drv, {"sex": "Female", "travel_purpose": "tourism"})
     res = runner.run()
     assert res["status"] == "paused_applicant_action"
     keys = {q["key"]: q for q in res["questions"]}
-    assert "religion" in keys                      # missing free-text: asked
-    assert "sex" not in keys                       # matches the portal list
+    # The answer that matched was COMMITTED, not asked about.
+    assert ("#sex", "Female") in drv.filled
+    assert "sex" not in keys
+    # The one the portal refuses comes back with the portal's own words.
     assert keys["travel_purpose"]["options"] == ["Du lịch (Tourist)", "Business"]
     assert "tourism" in keys["travel_purpose"]["why"]
-    assert "vietnam_ward" not in keys              # dependent list: deferred
-    assert any(q.get("deferred_followups") for q in res["questions"])
+    # A dependent list with nothing to offer is not asked with an empty box.
+    assert "vietnam_ward" not in keys
+
+
+def test_a_missing_field_does_not_stop_the_ones_after_it(db):
+    """Thailand stopped dead at a blank Occupation with Gender and the whole
+    trip section still empty. Everything Ellis CAN fill is filled first; the
+    gaps are asked together at the advance."""
+    class Driver:
+        def __init__(self):
+            self.filled = []
+
+        def fill(self, selector, value):
+            self.filled.append((selector, value))
+            return {"ok": True}
+
+    nodes = [
+        {"node_id": "fill_surname", "action": "FILL_NON_SENSITIVE",
+         "selector": "#surname", "input_source": "surname",
+         "allowed_hostname": "evisa.gov.vn", "mandatory": True},
+        {"node_id": "fill_occupation", "action": "FILL_NON_SENSITIVE",
+         "selector": "#occupation", "input_source": "occupation",
+         "allowed_hostname": "evisa.gov.vn", "mandatory": True},
+        {"node_id": "fill_sex", "action": "FILL_NON_SENSITIVE",
+         "selector": "#sex", "input_source": "sex",
+         "allowed_hostname": "evisa.gov.vn", "mandatory": True},
+        {"node_id": "done", "action": "COMPLETE", "allowed_hostname": "evisa.gov.vn"},
+    ]
+    drv = Driver()
+    runner = _flow_runner(db, nodes, drv, {"surname": "CAO", "sex": "M"})
+    res = runner.run()
+    assert res["status"] == "paused_applicant_action"
+    assert [s for s, _ in drv.filled] == ["#surname", "#sex"], \
+        "the fields Ellis could fill must all be filled before it asks"
+    assert [q["key"] for q in res["questions"]] == ["occupation"]
 
 
 def test_portal_dropped_value_is_repaired_silently_not_re_asked(db):
@@ -1381,6 +1430,15 @@ def test_question_collection_caps_live_option_harvests(db):
             harvested.append(selector)
             return {"ok": True, "options": ["A", "B"]}
 
+        # Ellis fills what it CAN on the way past, so the answered selects are
+        # really committed before the gaps are asked about.
+        def select_search(self, selector, value):
+            return ({"ok": True, "shown": value} if value in ("A", "B")
+                    else {"ok": False, "code": "NO_OPTIONS", "options": []})
+
+        def fill(self, selector, value):
+            return {"ok": True}
+
     def sel(i, key, answered):
         return {"node_id": f"pick_{i}", "action": "SELECT_SEARCH",
                 "selector": f"#s{i}", "input_source": key,
@@ -1392,15 +1450,19 @@ def test_question_collection_caps_live_option_harvests(db):
     runner = _flow_runner(db, nodes, Driver(), answers, app_id="c-cap")
     res = runner.run()
     assert res["status"] == "paused_applicant_action"
-    # Exactly 3 live harvests, in flow order — never one per combobox.
-    assert harvested == ["#s0", "#s1", "#s2"]
+    # At most 3 live harvests before the applicant sees the prompt, wherever
+    # they happen — the rejected answer's own read counts against the budget.
+    assert len(harvested) <= 3, harvested
+    assert harvested[0] == "#s4", "the refused answer reads its list at fill time"
     keys = {q["key"] for q in res["questions"]}
-    # Within the cap: unanswered selects are asked with the portal's options.
-    assert {"k0", "k1", "k2"} <= keys
-    # Past the cap: the answered selects are left to fill-time verification —
-    # not asked now, and the WRONG one (k4) will be re-asked by the rejected-
-    # fill path with the portal's real list.
-    assert "k3" not in keys and "k4" not in keys
+    # The answer that matched is committed, never asked about.
+    assert "k3" not in keys
+    # The refused one comes back, and so do the unanswered ones within budget.
+    assert "k4" in keys
+    assert keys & {"k0", "k1", "k2"}
+    # Anything past the budget waits for the next pause rather than being
+    # asked with an empty dropdown.
+    assert len(keys) < 5
 
 
 def test_a_live_harvest_caches_the_portals_own_options(db):

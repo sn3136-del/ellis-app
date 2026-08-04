@@ -192,8 +192,12 @@ class _RecordingDriver:
     """Counts what the runtime asks the browser to do."""
 
     def __init__(self, *, many_ok=True):
-        self.batches, self.singles, self.reads = [], [], []
+        self.batches, self.singles, self.reads, self.clicked = [], [], [], []
         self._many_ok = many_ok
+
+    def click(self, selector):
+        self.clicked.append(selector)
+        return {"ok": True}
 
     def select_search_many(self, fields, budget_ms=1500):
         self.batches.append(list(fields))
@@ -242,6 +246,7 @@ def _runner(driver, nodes, answers):
     r.observed_options, r._rejected_fills = {}, set()
     r._portal_field_messages, r._grouped_done = {}, set()
     r._repair_attempted = False
+    r._deferred_fills, r._deferred_asked = [], set()
     r._declaration_ticked_nodes = set()
     r.on_progress = None
     r.fee_seen, r.slots_seen = None, []
@@ -425,3 +430,131 @@ def test_the_floor_invents_nothing():
     from app.adapter_factory.specgen import _with_deterministic_floor
     art = _art(SUBMIT)          # a page with no fillable fields at all
     assert _with_deterministic_floor([], [art]) == []
+
+
+# ---- fill what you can, then come back and ask ------------------------------
+# Thailand met a blank Occupation five fields in and stopped dead, leaving
+# Gender, residence and the whole trip section empty. The applicant saw a
+# half-filled form and one question at a time — and when the pause carried no
+# question at all, its Continue re-drove straight back into the same pause.
+
+def _page(*names, click=True):
+    nodes = [{"node_id": f"fill_{n}", "action": "FILL_NON_SENSITIVE",
+              "allowed_hostname": HOST, "selector": f"#{n}",
+              "input_source": n, "mandatory": True} for n in names]
+    if click:
+        nodes.append({"node_id": "next", "action": "CLICK",
+                      "allowed_hostname": HOST, "selector": "#next"})
+    return nodes
+
+
+def test_a_gap_does_not_stop_the_rest_of_the_page():
+    drv = _RecordingDriver()
+    nodes = _page("surname", "occupation", "sex")
+    r = _runner(drv, nodes, {"surname": "CAO", "sex": "M"})
+    for nid in ("fill_surname", "fill_occupation", "fill_sex"):
+        assert r._step(r.flow.nodes[nid])["status"] == "ok"
+    assert [s for s, _ in drv.singles] == ["#surname", "#sex"], \
+        "the fields Ellis could fill must all be filled"
+    assert r._deferred_fills == ["fill_occupation"]
+
+
+def test_the_gaps_are_asked_together_before_the_form_advances():
+    drv = _RecordingDriver()
+    nodes = _page("surname", "occupation", "employer")
+    r = _runner(drv, nodes, {"surname": "CAO"})
+    for nid in ("fill_surname", "fill_occupation", "fill_employer"):
+        r._step(r.flow.nodes[nid])
+    out = r._step(r.flow.nodes["next"])
+    assert out["status"] == "handoff"
+    assert out["handoff_kind"] == "additional_information"
+    assert [q["key"] for q in out["questions"]] == ["occupation", "employer"]
+    assert out["resume_node"] == "fill_occupation", \
+        "the resume must rewind to the first gap so the answers get typed in"
+    assert "#next" not in [s for s, _ in drv.singles] and not drv.clicked, \
+        "the form must not be advanced with holes in it"
+
+
+def test_answering_lets_the_deferred_field_fill_normally():
+    drv = _RecordingDriver()
+    nodes = _page("surname", "occupation")
+    r = _runner(drv, nodes, {"surname": "CAO"})
+    r._step(r.flow.nodes["fill_occupation"])
+    r._step(r.flow.nodes["next"])
+    r.answers["occupation"] = "Engineer"
+    assert r._step(r.flow.nodes["fill_occupation"])["status"] == "ok"
+    assert ("#occupation", "Engineer") in drv.singles
+
+
+def test_a_question_the_applicant_declines_never_loops():
+    """Asked once. Still blank on the resume, it pauses on the spot rather
+    than deferring again forever."""
+    drv = _RecordingDriver()
+    nodes = _page("surname", "occupation")
+    r = _runner(drv, nodes, {"surname": "CAO"})
+    r._step(r.flow.nodes["fill_occupation"])
+    r._step(r.flow.nodes["next"])          # asked
+    out = r._step(r.flow.nodes["fill_occupation"])   # still unanswered
+    assert out["status"] == "handoff"
+    assert out["handoff_kind"] == "additional_information"
+
+
+def test_an_optional_gap_is_never_asked_about():
+    drv = _RecordingDriver()
+    nodes = _page("surname")
+    nodes.insert(1, {"node_id": "fill_nickname", "action": "FILL_NON_SENSITIVE",
+                     "allowed_hostname": HOST, "selector": "#nickname",
+                     "input_source": "nickname", "mandatory": False})
+    r = _runner(drv, nodes, {"surname": "CAO"})
+    r._step(r.flow.nodes["fill_nickname"])
+    assert r._deferred_fills == []
+    assert r._step(r.flow.nodes["next"])["status"] == "ok"
+
+
+def test_a_page_with_no_gaps_advances_untouched():
+    drv = _RecordingDriver()
+    nodes = _page("surname", "occupation")
+    r = _runner(drv, nodes, {"surname": "CAO", "occupation": "Engineer"})
+    for nid in ("fill_surname", "fill_occupation"):
+        r._step(r.flow.nodes[nid])
+    assert r._step(r.flow.nodes["next"])["status"] == "ok"
+
+
+def test_a_field_ellis_cannot_operate_does_not_end_the_run():
+    """Malaysia's region select refused five times at eight seconds each and
+    took the whole application down, on a form where every other field had
+    already been filled. Filling a form is not all-or-nothing."""
+    class _Stubborn(_RecordingDriver):
+        def fill(self, selector, value):
+            if selector == "#region":
+                return {"ok": False, "code": "VALUE_NOT_ACCEPTED",
+                        "detail": "the portal kept ''"}
+            self.singles.append((selector, value))
+            return {"ok": True}
+
+    nodes = _page("surname", "region", "email")
+    drv = _Stubborn()
+    r = _runner(drv, nodes, {"surname": "CAO", "region": "Selangor",
+                             "email": "a@b.c"})
+    for nid in ("fill_surname", "fill_region", "fill_email"):
+        assert r._step(r.flow.nodes[nid])["status"] == "ok"
+    assert [s for s, _ in drv.singles] == ["#surname", "#email"]
+    out = r._step(r.flow.nodes["next"])
+    assert out["status"] == "handoff"
+    assert [q["key"] for q in out["questions"]] == ["region"]
+    assert "portal kept" in out["questions"][0]["why"], \
+        "the portal's own complaint is the honest reason to re-ask"
+
+
+def test_a_field_that_fails_again_goes_to_the_secure_window_not_a_loop():
+    class _Stubborn(_RecordingDriver):
+        def fill(self, selector, value):
+            return {"ok": False, "code": "VALUE_NOT_ACCEPTED", "detail": "no"}
+
+    nodes = _page("region")
+    drv = _Stubborn()
+    r = _runner(drv, nodes, {"region": "Selangor"})
+    assert r._step(r.flow.nodes["fill_region"])["status"] == "ok"   # deferred
+    r._step(r.flow.nodes["next"])                                   # asked
+    out = r._step(r.flow.nodes["fill_region"])                      # still refuses
+    assert out["status"] == "handoff" and out["handoff_kind"] == "portal_form"

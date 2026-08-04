@@ -144,6 +144,13 @@ class FlowRunner:
         # Fill nodes already committed as part of a grouped answer (a split
         # date), so the walk steps past them instead of re-typing each part.
         self._grouped_done: set[str] = set()
+        # Mandatory fields with no answer yet: stepped past so the rest of the
+        # page still gets filled, collected here, and asked TOGETHER when the
+        # form is otherwise complete. `_deferred_asked` remembers which have
+        # already been put to the applicant once, so a question they decline
+        # cannot loop.
+        self._deferred_fills: list[str] = []
+        self._deferred_asked: set[str] = set()
         # One declaration-tick pass per run when an advance is disabled.
         self._declaration_ticked_nodes = set()
         # Optional applicant-safe progress recorder: called with the node's
@@ -224,6 +231,20 @@ class FlowRunner:
                 if result["handoff_kind"] == "additional_information":
                     result["questions"] = (outcome.get("questions")
                                            or self._collect_missing_questions(node_id))
+                    if not result["questions"]:
+                        # A pause with nothing to answer is not an applicant
+                        # action, it is a dead end: the dialog read "Additional
+                        # information required", offered no field, and its
+                        # Continue re-drove into the same pause forever
+                        # (2026-08-04). Nothing here is answerable, so step past
+                        # it and let the portal's own validation speak.
+                        self.execution.status = "running"
+                        self.db.commit()
+                        self._checkpoint(node_id, "skipped_unanswerable_pause", {})
+                        node_id = self.flow.next_of(node_id, "ok")
+                        self.execution.current_node = node_id or ""
+                        self.db.commit()
+                        continue
                 if outcome.get("portal_messages"):
                     result["portal_messages"] = outcome["portal_messages"]
                 return result
@@ -247,6 +268,20 @@ class FlowRunner:
         if node.get("node_id") in getattr(self, "_grouped_done", ()):
             # Already committed with its siblings in one page round trip.
             return {"status": "ok", "detail": {"grouped_with_previous": True}}
+        # A BOUNDARY: the page is as complete as Ellis can make it, and the
+        # next thing would advance it, hand it to the applicant, or finish.
+        # Anything Ellis had to step past is asked here, all at once, before
+        # the form moves on with holes in it — and the flow rewinds to the
+        # first gap so the answers are typed into the real fields.
+        #
+        # Every one of these matters: a flow whose last fill is followed by no
+        # click at all would otherwise run to COMPLETE with the gaps never
+        # asked about, which is worse than stopping.
+        if action in ("CLICK", "COMPLETE", "APPLICANT_HANDOFF", "PAUSE",
+                      "SUBMIT") or node.get("irreversibility") == "irreversible":
+            gaps = self._deferred_questions()
+            if gaps is not None:
+                return gaps
         if action == "NAVIGATE":
             url = (node.get("allowed_url_patterns") or [f"https://{node['allowed_hostname']}/"])[0]
             if not self._url_ok(url):
@@ -414,8 +449,29 @@ class FlowRunner:
                 if not bool(node.get("mandatory", True)):
                     return {"status": "ok", "detail": {"skipped_optional": True}}
                 # Ellis never guesses (§21) — but a missing answer is not a
-                # failure either: it becomes an applicant question and the flow
-                # pauses HERE, resumable from this exact node once answered.
+                # failure, and it is not a reason to stop either. Pausing on the
+                # spot left the rest of the page untouched: Thailand filled five
+                # fields, met a blank Occupation, and stopped with Gender,
+                # residence and the whole trip section still empty, so the
+                # applicant saw a half-filled form and one question at a time.
+                #
+                # Step PAST it, fill everything else the page needs, and come
+                # back: the gaps are collected and asked TOGETHER at the
+                # advance, then filled in on the resume. Deferred at most once
+                # per field per run — an answer the applicant declines to give
+                # pauses here the second time rather than looping forever.
+                nid = node.get("node_id", "")
+                asked = getattr(self, "_deferred_asked", None)
+                if asked is None:
+                    asked = self._deferred_asked = set()
+                pending = getattr(self, "_deferred_fills", None)
+                if pending is None:
+                    pending = self._deferred_fills = []
+                if nid not in asked:
+                    if nid not in pending:
+                        pending.append(nid)
+                    return {"status": "ok",
+                            "detail": {"deferred_missing_answer": True}}
                 return {"status": "handoff",
                         "handoff_kind": "additional_information"}
             # A node may declare the PORTAL's exact date format (tokens
@@ -498,6 +554,10 @@ class FlowRunner:
                             # applicant, not a dead-end failure.
                             lister = getattr(self.driver, "list_options", None)
                             if lister is not None:
+                                # Same budget as every other live list read:
+                                # this one happens at fill time, but it is the
+                                # same seconds off the applicant's wait.
+                                self._harvests = getattr(self, "_harvests", 0) + 1
                                 try:
                                     listed = lister(node["selector"]) or {}
                                     opts = [str(o) for o in (listed.get("options") or [])
@@ -516,8 +576,41 @@ class FlowRunner:
                         # (2026-08-03) — while SELECT_RADIO, twenty lines
                         # below, already asked instead. A mandatory field the
                         # applicant can answer must always reach them.
+                        #
+                        # But only a field the portal actually DEMANDS. Asking
+                        # about an optional one produced a pause carrying no
+                        # question at all: a dialog headed "Additional
+                        # information required" with nothing to fill in, whose
+                        # Continue re-drove straight back into the same pause
+                        # (2026-08-04). An optional list Ellis cannot read is
+                        # left alone; the portal's own validation still speaks
+                        # if it turns out to matter.
+                        if not bool(node.get("mandatory", True)):
+                            return {"status": "ok",
+                                    "detail": {"skipped_unreadable_optional": True}}
+                        # Join the SAME batch as every other gap rather than
+                        # stopping here: a stored answer the portal refuses is
+                        # one more thing to ask about at the advance, not a
+                        # reason to leave the rest of the page empty.
+                        nid = node["node_id"]
+                        asked = getattr(self, "_deferred_asked", None)
+                        if asked is None:
+                            asked = self._deferred_asked = set()
+                        pending = getattr(self, "_deferred_fills", None)
+                        if pending is None:
+                            pending = self._deferred_fills = []
+                        if nid not in asked:
+                            if nid not in pending:
+                                pending.append(nid)
+                            # Answered, but with a value this portal will not
+                            # take — so "it has an answer now" must NOT let the
+                            # batch skip over it.
+                            self._rejected_fills.add(nid)
+                            return {"status": "ok",
+                                    "detail": {"deferred_rejected_answer": True}}
                         return {"status": "handoff",
-                                "handoff_kind": "additional_information"}
+                                "handoff_kind": "additional_information",
+                                "questions": [self._question_for(node)]}
             else:
                 res = self.driver.fill(node["selector"], str(value))
                 if not res.get("ok") and res.get("code") == "NOT_THIS_OPTION":
@@ -529,6 +622,36 @@ class FlowRunner:
                             "detail": {"other_option": res.get("detail", "")[:80]}}
             if not res.get("ok") and res.get("code") == "SENSITIVE_FIELD_AUTOMATION":
                 return {"status": "failed", "reason": "portal marked field sensitive — refusing"}
+            if not res.get("ok"):
+                # A field Ellis could not operate is not the end of the
+                # application. Malaysia's region select refused five times at
+                # eight seconds each and took the whole run down with it, on a
+                # form where every other field had already been filled
+                # (2026-08-04). Filling a form is not all-or-nothing: step
+                # past this one, finish everything else, and bring it to the
+                # applicant at the advance with what the portal offered.
+                # Asked once — a field that fails again after they have
+                # answered goes to them in the secure window rather than
+                # looping or dying.
+                nid = node.get("node_id", "")
+                asked = getattr(self, "_deferred_asked", None)
+                if asked is None:
+                    asked = self._deferred_asked = set()
+                pending = getattr(self, "_deferred_fills", None)
+                if pending is None:
+                    pending = self._deferred_fills = []
+                if nid not in asked:
+                    if nid not in pending:
+                        pending.append(nid)
+                    self._rejected_fills.add(nid)
+                    self._portal_field_messages[nid] = (
+                        res.get("detail") or res.get("code") or "")[:160]
+                    return {"status": "ok",
+                            "detail": {"deferred_unfillable": res.get("code", "")}}
+                return {"status": "handoff", "handoff_kind": "portal_form",
+                        "portal_messages": [
+                            f"Please complete this field yourself: "
+                            f"{(node.get('question') or {}).get('question') or node.get('input_source', '')}"]}
             return self._from_driver(node, res)
         if action == "SELECT_RADIO":
             opts = [o for o in (node.get("options") or []) if isinstance(o, dict)]
@@ -573,9 +696,25 @@ class FlowRunner:
         if action == "UPLOAD_AUTHORIZED_DOCUMENT":
             doc = self._document_for(node.get("doc_type", "passport"))
             if doc is None:
-                # A missing document is an applicant action, not a dead end.
+                # A missing document is an applicant action, not a dead end —
+                # and not a reason to interrupt them twice. It joins the same
+                # batch as the missing fields so the whole page's gaps arrive
+                # in one ask.
+                nid = node.get("node_id", "")
+                asked = getattr(self, "_deferred_asked", None)
+                if asked is None:
+                    asked = self._deferred_asked = set()
+                pending = getattr(self, "_deferred_fills", None)
+                if pending is None:
+                    pending = self._deferred_fills = []
+                if nid not in asked:
+                    if nid not in pending:
+                        pending.append(nid)
+                    return {"status": "ok",
+                            "detail": {"deferred_missing_document": True}}
                 return {"status": "handoff",
-                        "handoff_kind": "additional_information"}
+                        "handoff_kind": "additional_information",
+                        "questions": [self._question_for(node)]}
             upload = getattr(self.driver, "upload", None)
             if upload is None or not doc.get("path"):
                 # No real upload capability on this driver (synthetic testing):
@@ -661,6 +800,69 @@ class FlowRunner:
         return {"status": "failed", "reason": f"unknown action {action!r}"}
 
     # -- applicant questions / documents --------------------------------------
+    def _deferred_questions(self):
+        """Every gap Ellis stepped past on this page, asked together — or None
+        when there are none.
+
+        The flow rewinds to the FIRST gap so the resume types the answers into
+        the real fields, never across a handoff or an irreversible node (only
+        reversible refills may repeat). A select's live option list is read
+        here, where the widget is on screen, so the applicant chooses from the
+        portal's own words instead of typing into the dark.
+        """
+        pending = [n for n in getattr(self, "_deferred_fills", [])
+                   if n not in getattr(self, "_deferred_asked", ())]
+        if not pending:
+            return None
+        questions, first, still_pending = [], None, []
+        for nid in pending:
+            node = self.flow.nodes.get(nid)
+            if node is None:
+                continue
+            if nid not in self._rejected_fills and \
+                    str(self.answers.get(node.get("input_source", ""), "") or "").strip():
+                continue        # answered since it was deferred
+            if node.get("action") == "SELECT_SEARCH":
+                known = (self.observed_options.get(nid)
+                         or (node.get("question") or {}).get("options") or [])
+                if not known:
+                    # Reading a live list costs a real round trip per widget —
+                    # opening every one of them delayed the applicant's prompt
+                    # by ~13s on a live run (2026-07-28). Capped per pause;
+                    # anything past the cap waits for the next one.
+                    if getattr(self, "_harvests", 0) >= 3:
+                        still_pending.append(nid)
+                        continue
+                    self._harvest_options(node)
+                    known = (self.observed_options.get(nid)
+                             or (node.get("question") or {}).get("options") or [])
+                if not known:
+                    # A dependent list (a ward before its province is set on
+                    # the page) has no choices to offer yet. Asking with an
+                    # empty dropdown is a dead end — leave it pending and ask
+                    # once the portal can show its own options.
+                    still_pending.append(nid)
+                    continue
+            questions.append(self._question_for(node))
+            self._deferred_asked.add(nid)
+            if first is None:
+                first = nid
+        self._deferred_fills = still_pending
+        if not questions:
+            return None
+        # Never rewind across a point of no return.
+        resume = first
+        for cursor in self.flow.order:
+            if cursor == first:
+                break
+            n = self.flow.nodes.get(cursor) or {}
+            if n.get("action") in ("APPLICANT_HANDOFF", "PAUSE") or \
+                    n.get("irreversibility") == "irreversible":
+                resume = None
+        return {"status": "handoff", "handoff_kind": "additional_information",
+                "questions": questions, "resume_node": resume,
+                "detail": {"deferred_fields": len(questions)}}
+
     def _group_filled(self, node: dict, value: str):
         """One answer spread over several adjacent dropdowns, committed in ONE
         page round trip.
@@ -1099,6 +1301,7 @@ class FlowRunner:
             res = lister(node["selector"]) or {}
         except Exception:  # noqa: BLE001 — harvesting must never break a pause
             return
+        self._harvests = getattr(self, "_harvests", 0) + 1
         opts = [str(o) for o in (res.get("options") or []) if str(o).strip()]
         if opts:
             self.observed_options[nid] = opts
