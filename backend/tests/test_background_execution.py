@@ -1639,3 +1639,43 @@ def test_the_pre_flight_flag_survives_a_reload():
     wf = _wf(drv, "APPLICATION_FILLING", session_ref=_session_ref())
     wf._drive()
     assert wf.snapshot()["_preflight_asked"] is True
+
+
+def test_one_file_submitted_against_two_requirements_keeps_both_identities(client, db):
+    """The applicant's passport page submitted as BOTH 'passport' and 'photo'
+    must satisfy both portal uploads — the later binding silently erased the
+    passport identity and the run asked for a passport the case already held
+    (Vietnam, 2026-08-04)."""
+    from app.portal.released_flow import ReleasedFlowDriver
+    from app.visa_snapshot.models import CaseRouteGuidance
+    case = _new_case(client)
+    doc = models.StoredDocument(org_id="org1", application_id=case["id"],
+                                name="passport.jpg", mime="image/jpeg",
+                                size_bytes=4, doc_type="passport", approved=False)
+    db.add(doc); db.flush()
+    db.add(models.DocumentBlob(document_id=doc.id, org_id="org1",
+                               mime="image/jpeg", content=b"\xff\xd8\xff\xd9"))
+    db.add(CaseRouteGuidance(case_id=case["id"], org_id="org1",
+                             guidance={"guidance": {}}, checklist=[
+                                 {"id": "passport", "label": "passport",
+                                  "kind": "document", "required": True,
+                                  "satisfied_by": ["passport"]},
+                                 {"id": "photo", "label": "digital passport photo",
+                                  "kind": "document", "required": True,
+                                  "satisfied_by": ["photo"]}]))
+    for item in ("passport", "photo"):
+        db.add(models.ChecklistSubmission(org_id="org1", application_id=case["id"],
+                                          item_id=item, document_id=doc.id,
+                                          status="submitted", match_verdict="match",
+                                          detected_type="passport",
+                                          confirmed_by_applicant=True))
+    db.commit()
+    drv = ReleasedFlowDriver.__new__(ReleasedFlowDriver)
+    drv.db = db
+    drv.app_row = db.get(models.VisaApplication, case["id"])
+    drv._tmp_files = []
+    docs = drv._documents()
+    types = sorted(d["doc_type"] for d in docs if d["name"] == "passport.jpg")
+    assert types == ["passport", "photo"], types
+    assert all(d["path"] for d in docs if d["name"] == "passport.jpg")
+    drv._cleanup_tmp()

@@ -464,6 +464,9 @@ class BrowserbasePageDriver:
                 self.page.wait_for_timeout(200)
                 committed = self._commit_open_list(selector, str(value))
                 if committed is not None:
+                    if committed.get("ok"):
+                        return self._seal_list_commit(selector, str(value),
+                                                      committed)
                     return committed
             # Framework forms (rc-field-form/Ant Design) commit a controlled
             # input's value to their own store on blur. Without it the DOM
@@ -890,6 +893,61 @@ class BrowserbasePageDriver:
             pass
         return {"ok": False, "code": "NO_OPTIONS",
                 "detail": f"no option matches {v[:30]!r}"}
+
+    def _seal_list_commit(self, selector: str, value: str, committed: dict) -> dict:
+        """A clicked option must SURVIVE the blur that seals the form model.
+
+        Singapore's widgets hold their choice; Vietnam's e-visa comboboxes
+        rendered it, reported ok, and dropped it when focus left the box —
+        sex, nationality, and both checkpoints all reached review empty while
+        every checkpoint read 'ok' (2026-08-04). So: dispatch the change+blur
+        the framework commits on (exactly what the pre-rewrite fill did), then
+        read the box back. A value that holds stands as committed; an empty
+        box is a PHANTOM commit — retried once through the list and once by
+        keyboard, then refused honestly. Purely additive: a widget whose
+        commit already sticks passes the first read-back untouched."""
+        def blur_and_read():
+            try:
+                self.page.eval_on_selector(
+                    selector,
+                    "el => { el.dispatchEvent(new Event('change', {bubbles: true}));"
+                    " el.blur(); }")
+            except Exception:  # noqa: BLE001
+                pass
+            self.page.wait_for_timeout(250)
+            return self._value_now(selector)
+
+        kept = blur_and_read()
+        if kept != "":                      # holds (or unreadable): it stands
+            return committed
+        # Phantom: once more through the list…
+        try:
+            self.page.fill(selector, str(value), timeout=_ACT_MS)
+            self.page.wait_for_timeout(200)
+            second = self._commit_open_list(selector, str(value))
+            if second is not None and second.get("ok"):
+                kept = blur_and_read()
+                if kept != "":
+                    return {**second, "resealed": True}
+        except Exception:  # noqa: BLE001
+            pass
+        # …then the keyboard commit the old fill used…
+        try:
+            self._uncover(selector)
+            self.page.click(selector, timeout=_CLICK_MS)
+            self.page.keyboard.type(str(value), delay=25)
+            self.page.wait_for_timeout(300)
+            self.page.keyboard.press("Enter")
+            kept = blur_and_read()
+            if kept:
+                return {"ok": True, "method": "keyboard_commit",
+                        "shown": str(kept)[:60]}
+        except Exception:  # noqa: BLE001
+            pass
+        # …then honest refusal: the portal's validation pass re-asks with the
+        # portal's own list rather than sailing on over an empty box.
+        return {"ok": False, "code": "VALUE_NOT_ACCEPTED",
+                "detail": "the widget cleared the committed choice on blur"}
 
     def _value_now(self, selector: str):
         """What the field holds right now, or None when it cannot be read."""

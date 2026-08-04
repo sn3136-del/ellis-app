@@ -385,8 +385,13 @@ class ReleasedFlowDriver:
         for d in docs:
             blob = self.db.execute(select(models.DocumentBlob).where(
                 models.DocumentBlob.document_id == d.id)).scalar_one_or_none()
-            entry = {"doc_type": submitted_types.get(d.id, d.doc_type),
-                     "name": d.name, "mime": d.mime, "path": ""}
+            # ONE file can satisfy SEVERAL requirements: the applicant who
+            # submitted their passport page as both 'passport' and 'photo'
+            # must not lose the passport identity to the later binding — a
+            # single-type map made the run ask for a passport the case
+            # already held (Vietnam, 2026-08-04).
+            types = submitted_types.get(d.id) or [d.doc_type]
+            path = ""
             if blob is not None and (getattr(d, "approved", False)
                                      or d.id in submitted_types):
                 suffix = {"image/jpeg": ".jpg", "image/png": ".png",
@@ -396,16 +401,18 @@ class ReleasedFlowDriver:
                     fh.write(blob.content)
                 os.chmod(path, 0o600)
                 self._tmp_files.append(path)
-                entry["path"] = path
-            out.append(entry)
+            for t in types:
+                out.append({"doc_type": t, "name": d.name, "mime": d.mime,
+                            "path": path})
         self._docs_cache = out
         return out
 
     def _checklist_submitted_types(self) -> dict:
-        """document_id -> effective doc type, from the applicant's explicit
+        """document_id -> [effective doc types], from the applicant's explicit
         checklist submissions (status 'submitted'). Generic items keep the
         classifier's verdict; typed requirements (photo, passport, …) impose
-        theirs."""
+        theirs. A LIST on purpose: the same file may be submitted against
+        several requirements, and each binding stands."""
         from .. import checklist_intake
         out: dict = {}
         try:
@@ -421,7 +428,9 @@ class ReleasedFlowDriver:
                 satisfied = [s for s in (item.get("satisfied_by") or []) if s]
                 eff = satisfied[0] if satisfied else str(item.get("id") or "")
                 if eff and eff != "document":
-                    out[sub["document_id"]] = eff
+                    types = out.setdefault(sub["document_id"], [])
+                    if eff not in types:
+                        types.append(eff)
         except Exception:  # noqa: BLE001 — never break uploads on lookup issues
             return {}
         return out
