@@ -549,10 +549,17 @@ def _deterministic_mapper(artifacts: list[fm.AdapterReconArtifact]) -> list[dict
                 hit = any((all(w in toks for w in h) if isinstance(h, tuple)
                            else h in toks) for h in hints)
                 if hit:
+                    # The element's own caption rides along so the flow node
+                    # can ask the PORTAL'S question ("Have you ever used a
+                    # passport under different name to enter Singapore?")
+                    # instead of a re-spelling of the answer key. A chip label
+                    # carries "question \u2014 OPTION"; only the question part
+                    # names the field.
+                    label = str(el.get("label") or "").split("\u2014")[0].strip()
                     out.append({"ellis_field": ellis_field,
                                 "portal_field": el["name"],
                                 "selector": el["selector"], "page_key": art.page_key,
-                                "artifact_id": art.id,
+                                "artifact_id": art.id, "label": label[:160],
                                 "required": bool(el.get("required"))})
                     # Every chip of a group maps to the SAME field — the
                     # runtime presses the one whose words match the answer and
@@ -1303,6 +1310,7 @@ def _skeleton_flow(host: str, roles: dict, mappings: list[dict],
                 node(f"fill_{_unique_node_slug(m['portal_field'], used_slugs)}",
                      action,
                      selector=selector, input_source=m["ellis_field"],
+                     label=str(m.get("label") or "")[:160],
                      # Whether the PORTAL demands this field decides what the
                      # runtime does with a missing answer: ask the applicant,
                      # or move on. Dropped here, every skeleton-flow portal
@@ -1575,6 +1583,7 @@ def _entry_gated_flow(host: str, roles: dict, mappings: list[dict],
                 extra["options"] = opts
             node(f"fill_{_unique_node_slug(m['portal_field'], used_slugs)}", action,
                  selector=selector, input_source=m["ellis_field"],
+                 label=str(m.get("label") or "")[:160],
                  mandatory=bool(m.get("mandatory", True)),
                  purpose=f"Fill {m['portal_field']} from the case record "
                          f"(pauses with an applicant question when unanswered)",

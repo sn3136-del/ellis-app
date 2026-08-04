@@ -2150,7 +2150,12 @@ def known_missing_questions(db, app_row) -> list[dict]:
     released = resolve_released_route(db, app_row)
     if released is None:
         return []
-    answers = app_row.answers or {}
+    # Through the same derivation the runner applies: a key SPLIT from an
+    # answer already given (phone_country_code from '+86 138…') is not a
+    # question — asking it up front would ask the applicant to retype half
+    # their own phone number.
+    from ..adapter_factory.runtime import _with_derived_answers
+    answers = _with_derived_answers(app_row.answers or {})
     cached = cached_option_lists(db, released)
     out: list[dict] = []
     seen: set[str] = set()
