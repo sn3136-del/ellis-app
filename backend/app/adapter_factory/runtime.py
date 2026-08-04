@@ -382,41 +382,7 @@ class FlowRunner:
                 return {"status": "handoff", "handoff_kind": "portal_verification"}
             return self._from_driver(node, res)
         if action == "WAIT_FOR_STATE":
-            # The spec put this node where the page must have ARRIVED — the
-            # form after the entry gates. A no-op here let a slow consent
-            # modal skate by: the gates skipped their not-yet-rendered
-            # targets, the form never opened, and the first fill spent its
-            # whole budget proving a field absent (Vietnam, 2026-08-04).
-            # Wait for the next actionable node's selector to be visible;
-            # never arriving is an honest recoverable failure, and the retry
-            # redoes the gates.
-            target = None
-            nid = self.flow.next_of(node.get("node_id", ""), "ok")
-            seen: set = set()
-            while nid and nid not in seen:
-                seen.add(nid)
-                nxt = self.flow.nodes.get(nid) or {}
-                if nxt.get("selector") and nxt.get("action") in (
-                        "FILL_NON_SENSITIVE", "SELECT_SEARCH", "CLICK",
-                        "CHECK", "SELECT", "SELECT_RADIO"):
-                    target = nxt["selector"]
-                    break
-                nid = self.flow.next_of(nid, "ok")
-            probe = getattr(self.driver, "is_visible", None)
-            if not target or probe is None:
-                return {"status": "ok"}
-            import time as _time
-            deadline = _time.time() + 20
-            while _time.time() < deadline:
-                try:
-                    res = probe(target) or {}
-                except Exception:  # noqa: BLE001 — unreadable: let fills judge
-                    return {"status": "ok"}
-                if res.get("visible"):
-                    return {"status": "ok"}
-                _time.sleep(1.0)
-            return {"status": "failed",
-                    "reason": "the expected page state never arrived"}
+            return {"status": "ok"}
         if action == "CLICK":
             if node.get("requires_signed_terms"):
                 # Ellis records the applicant's agreement to the portal's own
@@ -1397,22 +1363,9 @@ class FlowRunner:
             if n is None:
                 # A portal-revealed choice group the applicant has already
                 # answered in Ellis (portal_field_<id>): click the chosen chip
-                # with the same verified group-answer path radios use. A
-                # revealed SELECT takes the select fill machinery instead.
+                # with the same verified group-answer path radios use.
                 if self._fill_revealed_group(f):
                     repaired += 1
-                elif f.get("selectish"):
-                    fid2 = str(f.get("id") or "").strip()
-                    ans = str(self.answers.get(f"portal_field_{fid2}") or "").strip()
-                    if fid2 and ans:
-                        try:
-                            out2 = self.driver.fill(f"#{fid2}", ans) or {}
-                        except Exception:  # noqa: BLE001
-                            out2 = {}
-                        if out2.get("ok"):
-                            repaired += 1
-                            self._checkpoint(f"portal_field_{fid2}", "answered",
-                                             {"reason": "portal-revealed select filled"})
                 continue
             if n.get("action") not in ("FILL_NON_SENSITIVE", "SELECT_SEARCH"):
                 continue
@@ -1523,19 +1476,6 @@ class FlowRunner:
                 opts = [o for o in (f.get("options") or [])
                         if str((o or {}).get("label") or "").strip()]
                 label = str(f.get("label") or "").strip()
-                if not opts and fid and f.get("selectish"):
-                    # A revealed SELECT carries no chips — its choices live in
-                    # the list it opens. Read them (read-only) so the ask uses
-                    # the portal's real options ("Passport type", Vietnam
-                    # 2026-08-04).
-                    reader_s = getattr(self.driver, "read_select_options", None)
-                    if reader_s is not None:
-                        try:
-                            got = reader_s(f"#{fid}") or {}
-                        except Exception:  # noqa: BLE001
-                            got = {}
-                        opts = [{"id": "", "value": str(r), "label": str(r)}
-                                for r in (got.get("options") or [])]
                 if fid and label and len(opts) >= 2:
                     key = f"portal_field_{fid}"
                     answered = str(self.answers.get(key) or "").strip()
