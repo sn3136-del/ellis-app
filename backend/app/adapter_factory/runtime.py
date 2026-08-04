@@ -120,6 +120,26 @@ def parse_fee_text(text: str, *, currency_hint: str = "") -> dict | None:
     return {"text": t[:120], "amount_cents": cents, "currency": cur}
 
 
+# Automation internals that must never reach an applicant's screen. A traveller
+# was shown 'Page.fill: Timeout 2500ms exceeded. Call log: - waiting for
+# locator("input[formcontrolname=\"arrDate\"]")' as the reason Ellis needed
+# their arrival date — over a box already holding it (2026-08-04). A message
+# Ellis cannot say in the applicant's own words is not said at all.
+_MACHINE_TEXT = re.compile(
+    r"locator\(|Page\.\w+:|Call log|Timeout \d+ms|selector|xpath|querySelector|"
+    r"waiting for|Traceback|Exception|formcontrolname|\bcss=|>> visible=",
+    re.IGNORECASE)
+
+
+def _applicant_safe_message(text: str) -> str:
+    """A portal's own words, or ''. Anything that reads like automation
+    internals is dropped rather than shown."""
+    t = str(text or "").strip()
+    if not t or _MACHINE_TEXT.search(t):
+        return ""
+    return t[:160]
+
+
 class FlowRunner:
     def __init__(self, db, *, execution: fm.AdapterExecution, compiled: CompiledFlow,
                  driver, case_answers: dict | None = None, documents: list | None = None,
@@ -150,7 +170,17 @@ class FlowRunner:
         # already been put to the applicant once, so a question they decline
         # cannot loop.
         self._deferred_fills: list[str] = []
-        self._deferred_asked: set[str] = set()
+        # Nodes whose answer Ellis HOLDS but whose field it could not operate.
+        # These are not applicant questions — asking someone to retype the
+        # address already sitting in the box helps nobody.
+        self._unfillable: set[str] = set()
+        # Loaded from THIS EXECUTION's own checkpoints, not started empty: a
+        # new FlowRunner is built for every segment, so a runner-local memory
+        # forgets what it asked the moment the applicant's answers rewind the
+        # flow. Thailand asked for the same four fields three times in ninety
+        # seconds and never let the applicant answer any of them, because each
+        # cycle was a fresh runner that had never asked anything (2026-08-04).
+        self._deferred_asked: set[str] = self._already_asked()
         # One declaration-tick pass per run when an advance is disabled.
         self._declaration_ticked_nodes = set()
         # Optional applicant-safe progress recorder: called with the node's
@@ -446,7 +476,8 @@ class FlowRunner:
         if action in ("FILL_NON_SENSITIVE", "SELECT_SEARCH"):
             value = self.answers.get(node.get("input_source", ""), "")
             if value in ("", None):
-                if not bool(node.get("mandatory", True)):
+                if not bool(node.get("mandatory", True)) and \
+                        not self._page_says_required(node):
                     return {"status": "ok", "detail": {"skipped_optional": True}}
                 # Ellis never guesses (§21) — but a missing answer is not a
                 # failure, and it is not a reason to stop either. Pausing on the
@@ -585,7 +616,8 @@ class FlowRunner:
                         # (2026-08-04). An optional list Ellis cannot read is
                         # left alone; the portal's own validation still speaks
                         # if it turns out to matter.
-                        if not bool(node.get("mandatory", True)):
+                        if not bool(node.get("mandatory", True)) and \
+                                not self._page_says_required(node):
                             return {"status": "ok",
                                     "detail": {"skipped_unreadable_optional": True}}
                         # Join the SAME batch as every other gap rather than
@@ -643,9 +675,18 @@ class FlowRunner:
                 if nid not in asked:
                     if nid not in pending:
                         pending.append(nid)
-                    self._rejected_fills.add(nid)
-                    self._portal_field_messages[nid] = (
-                        res.get("detail") or res.get("code") or "")[:160]
+                    # Ellis HAS this answer — the field would not take it. That
+                    # is not a question for the applicant, and the driver's own
+                    # exception text is not an explanation for one: the pause
+                    # showed a traveller "Page.fill: Timeout 2500ms exceeded.
+                    # Call log: waiting for locator(...)" over a box already
+                    # holding their address (2026-08-04). Recorded as
+                    # unreachable so the batch hands it to them in the secure
+                    # window instead of asking for what it already knows.
+                    unfit = getattr(self, "_unfillable", None)
+                    if unfit is None:
+                        unfit = self._unfillable = set()
+                    unfit.add(nid)
                     return {"status": "ok",
                             "detail": {"deferred_unfillable": res.get("code", "")}}
                 return {"status": "handoff", "handoff_kind": "portal_form",
@@ -659,7 +700,8 @@ class FlowRunner:
             labels = [t for t in labels if t]
             value = self.answers.get(node.get("input_source", ""), "")
             if value in ("", None):
-                if not bool(node.get("mandatory", True)):
+                if not bool(node.get("mandatory", True)) and \
+                        not self._page_says_required(node):
                     return {"status": "ok", "detail": {"skipped_optional": True}}
                 # The group's own words ARE the choices — the applicant picks
                 # from the portal's list, never a free-text guess.
@@ -814,10 +856,18 @@ class FlowRunner:
                    if n not in getattr(self, "_deferred_asked", ())]
         if not pending:
             return None
-        questions, first, still_pending = [], None, []
+        questions, first, still_pending, unreachable = [], None, [], []
         for nid in pending:
             node = self.flow.nodes.get(nid)
             if node is None:
+                continue
+            if nid in getattr(self, "_unfillable", ()):
+                # Ellis holds this answer; the field would not take it. Asking
+                # for it again is not a question, it is noise — and the
+                # applicant can do in two seconds what Ellis could not.
+                unreachable.append(node)
+                self._deferred_asked.add(nid)
+                self._checkpoint(nid, self.ASKED_STATUS, {})
                 continue
             if nid not in self._rejected_fills and \
                     str(self.answers.get(node.get("input_source", ""), "") or "").strip():
@@ -845,10 +895,24 @@ class FlowRunner:
                     continue
             questions.append(self._question_for(node))
             self._deferred_asked.add(nid)
+            # Recorded so the NEXT runner over this execution knows it was
+            # asked. Runner-local memory alone re-asked the same fields on
+            # every rewind and the applicant never got to answer.
+            self._checkpoint(nid, self.ASKED_STATUS, {})
             if first is None:
                 first = nid
         self._deferred_fills = still_pending
         if not questions:
+            if unreachable:
+                # Nothing to ASK — Ellis has every one of these answers and
+                # simply could not reach the fields. The honest ask is for the
+                # applicant to complete them in the secure window, named in
+                # their own words. Never the driver's exception text: a
+                # traveller was shown "Page.fill: Timeout 2500ms exceeded" over
+                # a box already holding their address (2026-08-04).
+                return {"status": "handoff", "handoff_kind": "portal_form",
+                        "portal_messages": self._unreachable_messages(unreachable),
+                        "detail": {"unreachable_fields": len(unreachable)}}
             return None
         # Never rewind across a point of no return.
         resume = first
@@ -859,9 +923,26 @@ class FlowRunner:
             if n.get("action") in ("APPLICANT_HANDOFF", "PAUSE") or \
                     n.get("irreversibility") == "irreversible":
                 resume = None
-        return {"status": "handoff", "handoff_kind": "additional_information",
-                "questions": questions, "resume_node": resume,
-                "detail": {"deferred_fields": len(questions)}}
+        out = {"status": "handoff", "handoff_kind": "additional_information",
+               "questions": questions, "resume_node": resume,
+               "detail": {"deferred_fields": len(questions)}}
+        if unreachable:
+            out["portal_messages"] = self._unreachable_messages(unreachable)
+        return out
+
+    def _unreachable_messages(self, nodes: list) -> list:
+        """Plain-language names for fields Ellis could not operate. Applicant
+        words only — never a selector, a locator or a driver exception."""
+        out = []
+        for n in nodes:
+            q = (n.get("question") or {}).get("question") or ""
+            label = q.rstrip("?").replace("What is your ", "").strip()
+            if not label:
+                label = str(n.get("input_source", "")).replace("_", " ").strip()
+            if label and label not in out:
+                out.append(label)
+        return [f"Please complete these on the form yourself: {', '.join(out[:8])}."] \
+            if out else ["Please complete the remaining fields on the form yourself."]
 
     def _group_filled(self, node: dict, value: str):
         """One answer spread over several adjacent dropdowns, committed in ONE
@@ -948,7 +1029,7 @@ class FlowRunner:
         nid = node.get("node_id", "")
         prev = str(self.answers.get(key, "") or "")
         why = q.get("why") or "The official application form requires this information."
-        portal_msg = self._portal_field_messages.get(nid, "")
+        portal_msg = _applicant_safe_message(self._portal_field_messages.get(nid, ""))
         if portal_msg:
             # The government form's own words — the honest reason for a re-ask.
             why = f"The official portal says: {portal_msg}"
@@ -1539,6 +1620,57 @@ class FlowRunner:
 
     def _url_ok(self, url: str) -> bool:
         return self.flow.host_allowed(urlparse(url).netloc)
+
+    # Canonical facts no visa application anywhere treats as optional. A
+    # stale adapter calling one of these optional is the adapter being wrong,
+    # not the portal.
+    ALWAYS_REQUIRED = ("birth_date", "surname", "given_names", "full_name",
+                       "passport_number", "nationality", "sex")
+
+    def _page_says_required(self, node: dict) -> bool:
+        """Does the PORTAL demand this field, whatever the node says?
+
+        Thailand's released adapter marks all 23 of its fields optional — the
+        recon that built it could not see the form's red asterisks — so the
+        runtime silently stepped over a mandatory Occupation and a mandatory
+        date of birth and told the applicant nothing (2026-08-04). The page
+        itself still says what it needs; ask it.
+
+        Cached per node: this is one browser round trip, and it is only ever
+        reached for a field with no answer.
+        """
+        if str(node.get("input_source", "")) in self.ALWAYS_REQUIRED:
+            return True
+        nid = node.get("node_id", "")
+        cache = getattr(self, "_page_required", None)
+        if cache is None:
+            cache = self._page_required = {}
+        if nid in cache:
+            return cache[nid]
+        ask = getattr(self.driver, "field_is_required", None)
+        out = False
+        if ask is not None and node.get("selector"):
+            try:
+                out = bool(ask(node["selector"]))
+            except Exception:  # noqa: BLE001 — unreadable is not "required"
+                out = False
+        cache[nid] = out
+        return out
+
+    ASKED_STATUS = "asked_applicant"
+
+    def _already_asked(self) -> set:
+        """Node ids this EXECUTION has already put to the applicant. Durable
+        because it is read from the checkpoint trail — the one piece of runner
+        state that must survive a rewind, or the ask repeats forever."""
+        try:
+            rows = self.db.execute(
+                select(fm.AdapterCheckpoint.node_id).where(
+                    fm.AdapterCheckpoint.execution_id == self.execution.id,
+                    fm.AdapterCheckpoint.status == self.ASKED_STATUS)).scalars().all()
+        except Exception:  # noqa: BLE001 — a partial runner (tests) has no db
+            return set()
+        return {str(r) for r in rows if r}
 
     def _checkpoint(self, node_id: str, status: str, detail: dict):
         safe = {k: v for k, v in (detail or {}).items()

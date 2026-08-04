@@ -247,6 +247,7 @@ def _runner(driver, nodes, answers):
     r._portal_field_messages, r._grouped_done = {}, set()
     r._repair_attempted = False
     r._deferred_fills, r._deferred_asked = [], set()
+    r._unfillable = set()
     r._declaration_ticked_nodes = set()
     r.on_progress = None
     r.fee_seen, r.slots_seen = None, []
@@ -541,9 +542,12 @@ def test_a_field_ellis_cannot_operate_does_not_end_the_run():
     assert [s for s, _ in drv.singles] == ["#surname", "#email"]
     out = r._step(r.flow.nodes["next"])
     assert out["status"] == "handoff"
-    assert [q["key"] for q in out["questions"]] == ["region"]
-    assert "portal kept" in out["questions"][0]["why"], \
-        "the portal's own complaint is the honest reason to re-ask"
+    # Ellis HOLDS the region answer; the field refused it. That is a request to
+    # finish the field yourself, not a request for information Ellis already
+    # has — and it names the field in the applicant's own words.
+    assert out["handoff_kind"] == "portal_form"
+    assert not out.get("questions")
+    assert "region" in " ".join(out["portal_messages"])
 
 
 def test_a_field_that_fails_again_goes_to_the_secure_window_not_a_loop():
@@ -558,3 +562,101 @@ def test_a_field_that_fails_again_goes_to_the_secure_window_not_a_loop():
     r._step(r.flow.nodes["next"])                                   # asked
     out = r._step(r.flow.nodes["fill_region"])                      # still refuses
     assert out["status"] == "handoff" and out["handoff_kind"] == "portal_form"
+
+
+# ---- what Ellis already knows is not a question -----------------------------
+# The applicant was shown a dialog asking for their arrival date, travel
+# purpose, departure date and address — every box PRE-FILLED with the answer
+# Ellis already held — and the reason given was
+#   'Page.fill: Timeout 2500ms exceeded. Call log: - waiting for
+#    locator("input[formcontrolname=\"arrDate\"]")'
+# Those fields did not lack an answer; Ellis could not reach them.
+
+def test_a_field_ellis_cannot_reach_is_not_asked_about():
+    class _Unreachable(_RecordingDriver):
+        def fill(self, selector, value):
+            if selector == "#arrdate":
+                return {"ok": False, "code": "VALUE_NOT_ACCEPTED",
+                        "detail": 'Page.fill: Timeout 2500ms exceeded. Call log: '
+                                  '- waiting for locator("input[formcontrolname=\\"arrDate\\"]")'}
+            self.singles.append((selector, value))
+            return {"ok": True}
+
+    nodes = _page("surname", "arrdate")
+    drv = _Unreachable()
+    r = _runner(drv, nodes, {"surname": "CAO", "arrdate": "2026-08-04"})
+    for nid in ("fill_surname", "fill_arrdate"):
+        r._step(r.flow.nodes[nid])
+    out = r._step(r.flow.nodes["next"])
+    assert out["status"] == "handoff"
+    assert out["handoff_kind"] == "portal_form", \
+        "Ellis has the answer — this is not an information request"
+    assert not out.get("questions")
+
+
+def test_no_applicant_message_ever_carries_automation_internals():
+    from app.adapter_factory.runtime import _applicant_safe_message
+    leaks = [
+        'Page.fill: Timeout 2500ms exceeded. Call log: - waiting for locator("x")',
+        'waiting for locator("input[formcontrolname=\\"arrDate\\"]")',
+        "Timeout 2500ms exceeded",
+        'selector "#mat-input-18" not found',
+        "Traceback (most recent call last)",
+        "#dob >> visible=true",
+    ]
+    for t in leaks:
+        assert _applicant_safe_message(t) == "", t
+    # The portal's OWN words still come through.
+    for t in ("Date must be in DD/MM/YYYY format",
+              "This field is required",
+              "Please enter your occupation"):
+        assert _applicant_safe_message(t) == t
+
+
+def test_the_unreachable_message_names_fields_in_plain_words():
+    class _Unreachable(_RecordingDriver):
+        def fill(self, selector, value):
+            return {"ok": False, "code": "VALUE_NOT_ACCEPTED", "detail": "locator(...)"}
+
+    nodes = _page("arrdate")
+    nodes[0]["question"] = {"question": "What is your arrival date?"}
+    r = _runner(_Unreachable(), nodes, {"arrdate": "2026-08-04"})
+    r._step(r.flow.nodes["fill_arrdate"])
+    out = r._step(r.flow.nodes["next"])
+    msg = " ".join(out["portal_messages"])
+    assert "arrival date" in msg
+    for banned in ("locator", "Timeout", "formcontrolname", "#", "selector"):
+        assert banned not in msg, msg
+
+
+def test_the_ask_is_remembered_across_a_new_runner():
+    """A new FlowRunner is built for every segment. Runner-local memory alone
+    re-asked the same four fields three times in ninety seconds and the
+    applicant never got to answer any of them."""
+    from app.adapter_factory.runtime import FlowRunner
+    seen = {"rows": []}
+
+    class _DB:
+        def commit(self): pass
+        def add(self, row): seen["rows"].append((row.node_id, row.status))
+        def execute(self, *a, **k):
+            class R:
+                def scalars(self_inner):
+                    class S:
+                        def all(s2): return [n for n, st in seen["rows"]
+                                             if st == FlowRunner.ASKED_STATUS]
+                    return S()
+            return R()
+
+    drv = _RecordingDriver()
+    nodes = _page("occupation")
+    r = _runner(drv, nodes, {})
+    r.db = _DB()
+    r._step(r.flow.nodes["fill_occupation"])
+    out = r._step(r.flow.nodes["next"])
+    assert [q["key"] for q in out["questions"]] == ["occupation"]
+    # A FRESH runner over the same execution must know it was already asked.
+    r2 = _runner(drv, nodes, {})
+    r2.db = _DB()
+    r2._deferred_asked = r2._already_asked()
+    assert "fill_occupation" in r2._deferred_asked

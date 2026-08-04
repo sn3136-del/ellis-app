@@ -411,6 +411,65 @@ class BrowserbasePageDriver:
       return '';
     }"""
 
+    def field_is_required(self, selector: str) -> bool:
+        """Does the PAGE say this field must be answered?
+
+        An adapter built before its portal's required markers could be read
+        calls everything optional, and the runtime then skips a blank field
+        silently. Thailand's released adapter says every one of its 23 fields
+        is optional; the form itself draws a red asterisk beside Occupation,
+        Date of Birth and Gender, and refuses to continue without them. The
+        applicant watched Ellis step over a mandatory Occupation and say
+        nothing (2026-08-04).
+
+        Read from the page, the same way live_browser's recon reads it, so a
+        stale adapter cannot make Ellis silent about a field the portal is
+        about to reject. False when it cannot be read: this only ever ADDS a
+        question the page asked for, never invents one.
+        """
+        js = """(el) => {
+          const REQ_MARK = /(^|\\s)[*\\uff0a]|[*\\uff0a]\\s*$/;
+          const REQ_CLASS = /required|mandatory|asterisk/i;
+          const marked = (n) => {
+            if (!n) return false;
+            if (REQ_CLASS.test(String(n.className || ''))) return true;
+            if (n.querySelector && n.querySelector(
+                '[class*="required"], [class*="asterisk"], [class*="mandatory"],'
+                + ' abbr[title*="equired"]')) return true;
+            const t = (n.textContent || '').replace(/\\s+/g, ' ').trim();
+            return t.length > 0 && t.length <= 80 && REQ_MARK.test(t);
+          };
+          if (el.required || el.getAttribute('aria-required') === 'true') return true;
+          if (el.id) {
+            const l = document.querySelector('label[for="' + CSS.escape(el.id) + '"]');
+            if (marked(l)) return true;
+          }
+          const ff = el.closest('mat-form-field, [class*="form-field"]');
+          if (ff && marked(ff.querySelector('mat-label, label'))) return true;
+          if (marked(el.closest('label'))) return true;
+          let w = el.parentElement;
+          for (let i = 0; i < 3 && w; i++, w = w.parentElement) {
+            if (w.querySelectorAll('input, select, textarea').length > 1) break;
+            if (REQ_CLASS.test(String(w.className || ''))) return true;
+          }
+          // The caption cell beside the field, which is where a grid-layout
+          // portal like TDAC puts its "*Occupation".
+          let cell = el;
+          for (let i = 0; i < 9 && cell && cell.parentElement; i++) {
+            cell = cell.parentElement;
+            const prev = cell.previousElementSibling;
+            if (!prev) continue;
+            if (prev.querySelector && prev.querySelector('input, select, textarea')) continue;
+            const t = (prev.innerText || '').trim();
+            if (t && t.length <= 60) return marked(prev);
+          }
+          return false;
+        }"""
+        try:
+            return bool(self.page.eval_on_selector(selector, js))
+        except Exception:  # noqa: BLE001 — unreadable is not "required"
+            return False
+
     def declared_date_format(self, selector: str) -> str:
         """The date pattern this field says it wants ('DD/MM/YYYY'), or ''.
 
