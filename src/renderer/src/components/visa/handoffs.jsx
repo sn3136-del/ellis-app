@@ -100,6 +100,7 @@ export function usePortalLiveView(client, caseId, opts = {}) {
   // when it changes, instead of ever racing it with a session of its own.
   const rowRef = useRef(null)
   const retryRef = useRef(null)
+  const mintedRef = useRef(0)
 
   async function open() {
     setBusy(true)
@@ -131,6 +132,7 @@ export function usePortalLiveView(client, caseId, opts = {}) {
       }
       if (s && s.mode === 'browserbase' && s.live_view_available) {
         const lv = await client.browserLiveView(caseId)
+        mintedRef.current = Date.now()
         setUrl(lv.url); setNonce((n) => n + 1); setState('embedded'); setNote('')
       } else {
         setState('unavailable')
@@ -171,6 +173,19 @@ export function usePortalLiveView(client, caseId, opts = {}) {
     if (state !== 'embedded') return undefined
     const iv = setInterval(() => { open() }, 210000)
     return () => clearInterval(iv)
+  }, [state, caseId])
+  // Background tabs get their timers throttled, so the 210s re-mint can be
+  // missed entirely: the stream link expires and the window freezes on its
+  // last frame (the applicant came back to a stale homepage while the form
+  // sat filled, 2026-08-04). The moment the tab is visible again, re-mint
+  // any link old enough to be doubted.
+  useEffect(() => {
+    const onVis = () => {
+      if (!document.hidden && state === 'embedded' &&
+          Date.now() - mintedRef.current > 120000) open()
+    }
+    document.addEventListener('visibilitychange', onVis)
+    return () => document.removeEventListener('visibilitychange', onVis)
   }, [state, caseId])
   // Session-identity watch: while embedded, if the case's session row changes
   // under this window (the run opened its own after ours went stale), re-mint
