@@ -168,7 +168,12 @@ function _pick(rows, want, allowSole) {
   if (seg) return [seg, 'segment'];
   const pre = rows.find(([, t]) => _norm(t).startsWith(w));
   if (pre) return [pre, 'prefix'];
-  const sub = rows.find(([, t]) => _norm(t).includes(w));
+  // A one or two character answer is a CODE, and a code that merely appears
+  // somewhere inside a word is not evidence of anything: "M" is inside
+  // "FEMALE". Judged option by option — an older adapter gives a choice group
+  // one node each — that match ticked FEMALE for a man (2026-08-04). Short
+  // answers must earn an exact, segment or prefix match or none at all.
+  const sub = w.length > 2 ? rows.find(([, t]) => _norm(t).includes(w)) : null;
   if (sub) return [sub, 'contains'];
   // The portal narrowed its whole list to one row for THIS query — the
   // widget's own resolution of the text, not a guess by Ellis. Only for a
@@ -309,6 +314,15 @@ class BrowserbasePageDriver:
                                                        timeout=_WAIT_MS)
         except Exception:  # noqa: BLE001 — let fill report the real failure
             pass
+        # A radio or checkbox holds a CHOICE, not text, and cannot be filled at
+        # all. Older adapters mapped one node per option (Singapore's ICA card
+        # has fill_sex_f_0 / _m_0 / _o_0, all fed the same answer), so each
+        # option was "filled" with the applicant's sex in turn: the matching
+        # one is the answer, the others are not, and none of them is text.
+        # Ellis spent 26 seconds failing at three of them and ended the run.
+        choice = self._choice_kind(selector)
+        if choice:
+            return self._choose(selector, str(value), choice)
         try:
             self.page.fill(selector, str(value), timeout=_ACT_MS)
             # Framework forms (rc-field-form/Ant Design) commit a controlled
@@ -322,6 +336,19 @@ class BrowserbasePageDriver:
                     " el.blur(); }")
             except Exception:  # noqa: BLE001
                 pass
+            # A fill that "succeeded" is not a field that HOLDS the answer. A
+            # portal that clears its own input on change (and plenty do, when
+            # the text does not match the mask they wanted) left Ellis
+            # reporting ok on an empty box and walking into a submit that
+            # could never pass. Only emptiness is refused here — a portal
+            # normalising 13/06/1988 to 13-06-1988 is agreeing with us, and
+            # is reported as such rather than fought.
+            kept = self._value_now(selector)
+            if kept == "":
+                return {"ok": False, "code": "VALUE_NOT_ACCEPTED",
+                        "detail": "the portal cleared the field after filling it"}
+            if kept is not None and kept != str(value):
+                return {"ok": True, "reformatted": kept[:60]}
             return {"ok": True}
         except Exception as e:  # noqa: BLE001
             # Readonly picker inputs (e.g. Ant Design date pickers) refuse
@@ -338,11 +365,183 @@ class BrowserbasePageDriver:
                 self.page.keyboard.press("Escape")
                 if got == str(value):
                     return {"ok": True, "method": "typed"}
-                return {"ok": False, "code": "VALUE_NOT_ACCEPTED",
-                        "detail": f"portal kept {got!r}"[:120]}
             except Exception as e2:  # noqa: BLE001
-                return {"ok": False, "code": "NO_SUCH_ELEMENT",
-                        "detail": (str(e) + " | " + str(e2))[:120]}
+                e = Exception(f"{e} | {e2}")
+            # Still nothing. A READONLY input is not a refusal to hold the
+            # answer, it is a refusal to be TYPED into: the portal means for
+            # its own picker to write the value, and a picker writes it by
+            # assignment plus the events the form listens for. Malaysia's
+            # MDAC date of birth is exactly this — recon can only see a text
+            # input with a DD/MM/YYYY placeholder, and five attempts to type
+            # into it ended the applicant's run (2026-08-04).
+            #
+            # This writes the applicant's OWN answer, in the portal's own
+            # declared format, the way the portal's own widget would — and
+            # then believes the page rather than itself: no read-back, no
+            # success.
+            return self._set_like_a_picker(selector, str(value), e)
+
+    # A date box states the shape it wants, right on itself. Singapore's
+    # ICA arrival card takes the passport expiry as DD/MM/YYYY and answered an
+    # ISO date with "Date must be in DD/MM/YYYY format" — visible on the
+    # applicant's own screen — because the adapter node declared no format and
+    # the canonical value went in untranslated (2026-08-04). An adapter built
+    # before its portal's masks were read is not a reason to write a date the
+    # portal has just said it will not take.
+    _DATE_MASK_JS = """(el) => {
+      const own = [el.getAttribute('placeholder'), el.getAttribute('aria-placeholder'),
+                   el.getAttribute('title'), el.getAttribute('data-format'),
+                   el.getAttribute('data-date-format')];
+      const ff = el.closest('mat-form-field, [class*="form-field"], .form-group, td, div');
+      // A mask rendered beside the box (a hint span) counts too, but only a
+      // SHORT neighbouring string — a paragraph mentioning a date does not.
+      if (ff) {
+        for (const h of ff.querySelectorAll(
+            '[class*="hint"], [class*="help"], small, .form-text')) {
+          const t = (h.textContent || '').trim();
+          if (t && t.length <= 40) own.push(t);
+        }
+      }
+      for (const raw of own) {
+        if (!raw) continue;
+        const m = String(raw).toUpperCase().match(
+          /\\b(?:YYYY|YY|MM|DD|MON|MONTH)(?:[^A-Z0-9]{1,3}(?:YYYY|YY|MM|DD|MON|MONTH)){1,2}\\b/);
+        if (m) return m[0];
+      }
+      return '';
+    }"""
+
+    def declared_date_format(self, selector: str) -> str:
+        """The date pattern this field says it wants ('DD/MM/YYYY'), or ''.
+
+        Read from the page, never inferred from the value: a portal that has
+        not said what it wants gets the canonical date and its own validation
+        gets to speak.
+        """
+        try:
+            got = self.page.eval_on_selector(selector, self._DATE_MASK_JS) or ""
+        except Exception:  # noqa: BLE001
+            return ""
+        got = str(got).strip().upper()
+        # Only a mask made ENTIRELY of date tokens and separators is one.
+        import re as _re
+        if not got or len(got) > 20:
+            return ""
+        if _re.fullmatch(r"(?:YYYY|YY|MONTH|MON|MM|DD|[^A-Z0-9]){3,}", got) is None:
+            return ""
+        return got if _re.search(r"(?:YYYY|YY|MONTH|MON|MM|DD)", got) else ""
+
+    def _choice_kind(self, selector: str) -> str:
+        """'radio' / 'checkbox' when the target holds a choice, else ''."""
+        try:
+            return self.page.eval_on_selector(
+                selector, "el => (el.type === 'radio' || el.type === 'checkbox')"
+                          " ? el.type : ''") or ""
+        except Exception:  # noqa: BLE001
+            return ""
+
+    def _choose(self, selector: str, want: str, kind: str) -> dict:
+        """Answer ONE option of a choice group with the applicant's answer.
+
+        The option's own words decide: its value attribute, its label, the text
+        beside it. A match is ticked and verified against what the page
+        renders; a non-match is reported as NOT_THIS_OPTION so the caller can
+        move on. Ellis never ticks an option it cannot read as the answer, and
+        never reports a tick the page does not show.
+        """
+        js = "([sel, want]) => {" + _OPTION_JS + """
+          const el = document.querySelector(sel);
+          if (!el) return {code: 'NO_SUCH_ELEMENT'};
+          const words = [];
+          const v = el.getAttribute('value'); if (v) words.push(v);
+          if (el.id) {
+            const l = document.querySelector('label[for="' + CSS.escape(el.id) + '"]');
+            if (l) words.push(_label(l));
+          }
+          const w = el.closest('label, [class*="radio"], [class*="checkbox"]');
+          if (w && w !== el) words.push(_label(w));
+          const rows = words.filter(Boolean).map((t, i) => [i, t]);
+          return {code: 'OK', match: !!_pick(rows, want, false),
+                  words: rows.map(([, t]) => t).slice(0, 4)};
+        }"""
+        try:
+            got = self.page.evaluate(js, [selector, want]) or {}
+        except Exception as e:  # noqa: BLE001
+            return {"ok": False, "code": "NO_SUCH_ELEMENT", "detail": str(e)[:120]}
+        if got.get("code") != "OK":
+            return {"ok": False, "code": got.get("code") or "NO_SUCH_ELEMENT"}
+        if not got.get("match"):
+            # This option is simply not what the applicant said. Not an error,
+            # and emphatically not something to tick anyway.
+            return {"ok": False, "code": "NOT_THIS_OPTION",
+                    "detail": f"{want[:20]!r} is not " + str(got.get("words") or [])[:60]}
+        try:
+            self.page.eval_on_selector(
+                selector, "el => { const l = el.id && document.querySelector("
+                          "'label[for=\"' + CSS.escape(el.id) + '\"]');"
+                          " (l || el).click(); if (!el.checked) el.click(); }")
+            self.page.wait_for_timeout(120)
+            checked = self.page.eval_on_selector(selector, "el => !!el.checked")
+        except Exception as e:  # noqa: BLE001
+            return {"ok": False, "code": "NO_SUCH_ELEMENT", "detail": str(e)[:120]}
+        if not checked:
+            return {"ok": False, "code": "VALUE_NOT_ACCEPTED",
+                    "detail": f"{want[:30]!r} did not stay selected"}
+        return {"ok": True, "method": f"{kind}_choice"}
+
+    def _value_now(self, selector: str):
+        """What the field holds right now, or None when it cannot be read."""
+        try:
+            return self.page.eval_on_selector(
+                selector, "el => (el.value === undefined || el.value === null)"
+                          " ? null : String(el.value)")
+        except Exception:  # noqa: BLE001
+            return None
+
+    def _set_like_a_picker(self, selector: str, value: str, prior) -> dict:
+        """Write a value the way the field's own picker writes it, then verify
+        against the page. Never used before a normal fill and a real keyboard
+        entry have both been tried."""
+        try:
+            editable = self.page.eval_on_selector(
+                selector, "el => el.readOnly === true || el.hasAttribute('readonly')")
+        except Exception:  # noqa: BLE001
+            return {"ok": False, "code": "NO_SUCH_ELEMENT",
+                    "detail": str(prior)[:120]}
+        if not editable:
+            # Not readonly: something else refused this field, and inventing a
+            # way past it would be guessing at the portal's intent.
+            return {"ok": False, "code": "VALUE_NOT_ACCEPTED",
+                    "detail": str(prior)[:120]}
+        try:
+            self.page.eval_on_selector(selector, """(el, v) => {
+                el.focus();
+                const fire = () => {
+                    for (const t of ['input', 'change'])
+                        el.dispatchEvent(new Event(t, {bubbles: true}));
+                };
+                // React (and anything else tracking the value on the node)
+                // ignores a plain assignment — the PROTOTYPE's setter is what
+                // its onChange observes. A widget that instead defines its own
+                // value accessor is the mirror case and needs the plain one.
+                // Try the framework path, then the plain path, and let the
+                // field itself say which one it accepted.
+                const d = Object.getOwnPropertyDescriptor(
+                    Object.getPrototypeOf(el), 'value');
+                if (d && d.set) { d.set.call(el, v); fire(); }
+                if (String(el.value || '') !== v) { el.value = v; fire(); }
+                el.blur();
+            }""", value)
+            self.page.wait_for_timeout(150)
+        except Exception as e:  # noqa: BLE001
+            return {"ok": False, "code": "NO_SUCH_ELEMENT", "detail": str(e)[:120]}
+        kept = self._value_now(selector)
+        if kept is None or kept == "":
+            return {"ok": False, "code": "VALUE_NOT_ACCEPTED",
+                    "detail": f"the portal kept {kept!r} for a readonly field"}
+        if kept == value:
+            return {"ok": True, "method": "picker_value"}
+        return {"ok": True, "method": "picker_value", "reformatted": kept[:60]}
 
     def click(self, selector: str) -> dict:
         try:

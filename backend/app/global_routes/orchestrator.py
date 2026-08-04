@@ -390,7 +390,15 @@ def build_family_adapter(db, family_id: str, *, observer=None,
         # takes a working portal offline entirely. Thailand spent an evening
         # unresolvable that way (2026-08-04). The prior state is remembered
         # here and put back below unless a new version actually releases.
-        prior_release = (link.released, link.status, link.release_tier)
+        # The gate REPORT rides along, and it is not bookkeeping: personal_gate
+        # .deterministic_gate_completion derives all sixteen applicant-facing
+        # readiness gates from it, and refuses everything when it says passed
+        # false. Restoring released/status/tier without it leaves a family that
+        # claims to be released while every gate reads incomplete — Thailand
+        # sat exactly there, telling applicants their route was "not approved
+        # for live processing" (2026-08-04).
+        prior_release = (link.released, link.status, link.release_tier,
+                         link.gate_report)
         link.released = False
         link.status = "building"
         db.commit()
@@ -502,7 +510,8 @@ def build_family_adapter(db, family_id: str, *, observer=None,
         # than leaving the portal with no route at all: the runtime binding
         # still points at the version that passed its own gates, and that
         # version is exactly as good as it was an hour ago.
-        link.released, link.status, link.release_tier = prior_release
+        (link.released, link.status, link.release_tier,
+         link.gate_report) = prior_release
         link.last_error = ("rebuild did not pass the gates; the previously "
                            "released version stays live — "
                            + "; ".join(gates.get("missing", [])))[:1900]

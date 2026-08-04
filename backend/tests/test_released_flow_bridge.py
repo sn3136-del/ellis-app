@@ -120,7 +120,13 @@ class FakePage:
         return None
 
     def eval_on_selector(self, selector, _js, **_k):
-        # the driver's read-back: echo the typed value as the shown selection
+        # The driver reads a field back after writing it, because a portal
+        # that silently drops a value must not read as filled. A double that
+        # answers "" to every read says every field was dropped — so answer
+        # what this page was actually given: the value filled into THIS
+        # selector, else the last typed query (the combobox read-back).
+        if selector in self.filled:
+            return self.filled[selector]
         return self.typed[-1] if self.typed else ""
 
     def query_selector_all(self, selector):

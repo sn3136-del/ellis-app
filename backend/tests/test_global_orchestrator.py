@@ -456,3 +456,36 @@ def test_a_restored_release_is_reported_as_a_failed_rebuild(gdb, monkeypatch):
                                            log=lambda *a: None)
     assert stats.get("released", 0) == 0, stats
     assert stats.get("failed", 0) >= 1, stats
+
+
+def test_a_restored_release_keeps_its_passing_gate_report(gdb, monkeypatch):
+    """personal_gate.deterministic_gate_completion derives all sixteen
+    applicant-facing readiness gates from the link's gate_report and refuses
+    everything when it says passed:false. Restoring released/status/tier
+    without it left Thailand claiming to be released while every gate read
+    incomplete, and applicants were told their route was "not approved for
+    live processing" (2026-08-04)."""
+    from app.global_routes import orchestrator
+    from app.global_routes.models import FamilyAdapterLink
+
+    passing = {"passed": True, "missing": [],
+               "gates": {"official_portal_identity_confirmed": {"passed": True}}}
+    link = gdb.execute(select(FamilyAdapterLink).where(
+        FamilyAdapterLink.family_id == "india-evisa")).scalars().first()
+    if link is None:
+        link = FamilyAdapterLink(family_id="india-evisa",
+                                 representative_route_key="rk1|x")
+        gdb.add(link)
+    link.released, link.status, link.release_tier = True, "released", "sandbox"
+    link.gate_report = passing
+    gdb.commit()
+
+    monkeypatch.setattr(release_gates, "evaluate_and_release",
+                        lambda *a, **k: {"passed": False, "released": False,
+                                         "missing": ["safe_navigation_succeeded"],
+                                         "gates": {"safe_navigation_succeeded": {"passed": False}}})
+    orchestrator.build_family_adapter(gdb, "india-evisa", rebuild_released=True)
+    gdb.refresh(link)
+    assert link.released is True
+    assert (link.gate_report or {}).get("passed") is True, \
+        "a released family whose gate report says failed serves nobody"

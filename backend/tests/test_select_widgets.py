@@ -579,3 +579,22 @@ def test_a_missing_box_never_reads_as_answered(browser):
     results = drv.select_search_many([("#nope", "1988")])
     assert results[0]["ok"] is False
     assert results[0]["code"] == "NO_SUCH_ELEMENT"
+
+
+def test_a_one_letter_answer_never_matches_by_substring(browser):
+    """"M" is inside "FEMALE". Judged option by option — which is how older
+    adapters lay out a choice group — that substring ticked FEMALE for a man.
+    A code must earn an exact, segment or prefix match or none at all."""
+    drv, page = _driver(browser, MDC_RADIO_PAGE)
+    res = drv.select_radio([{"label": "FEMALE", "selector": "#mat-radio-2-input"}], "M")
+    assert res["ok"] is False, res
+    assert page.evaluate("window.__committed || ''") == ""
+
+
+def test_a_longer_answer_still_matches_inside_a_label(browser):
+    """The substring tier is what finds 'Bai' in 'Noi Bai Intl Airport'; only
+    the one and two character cases are refused."""
+    drv, page = _driver(browser, ANT_PAGE)
+    res = drv.select_search("#gate", "Bai")
+    assert res["ok"], res
+    assert page.evaluate("window.__committed") == "Noi Bai Int Airport"

@@ -423,6 +423,25 @@ class FlowRunner:
             # that format — never the UI display format, never a guess (a
             # declared format with a non-canonical value fails the step).
             fmt = node.get("format")
+            if not fmt:
+                # The node declared no mask — but the FIELD may state one, and
+                # an adapter built before its portal's masks were read is no
+                # reason to write a date the portal will reject. Singapore's
+                # ICA card took an ISO passport expiry and answered "Date must
+                # be in DD/MM/YYYY format" on the applicant's own screen
+                # (2026-08-04). Read the page's stated mask, never a guess: a
+                # field that says nothing still gets the canonical value.
+                from .. import dates as dates_mod
+                if dates_mod.ISO_RE.match(str(value or "")):
+                    ask = getattr(self.driver, "declared_date_format", None)
+                    if ask is not None:
+                        try:
+                            fmt = ask(node["selector"]) or ""
+                        except Exception:  # noqa: BLE001
+                            fmt = ""
+                    if fmt:
+                        self._checkpoint(node.get("node_id", ""), "format_from_page",
+                                         {"declared": fmt})
             if fmt:
                 from .. import dates as dates_mod
                 formatted = dates_mod.to_portal(str(value), fmt)
@@ -501,6 +520,13 @@ class FlowRunner:
                                 "handoff_kind": "additional_information"}
             else:
                 res = self.driver.fill(node["selector"], str(value))
+                if not res.get("ok") and res.get("code") == "NOT_THIS_OPTION":
+                    # An older adapter gives a choice group one node PER
+                    # option, each fed the same answer. The option that is not
+                    # the answer has nothing to do and must not be ticked —
+                    # stepping past it is the correct outcome, not a failure.
+                    return {"status": "ok",
+                            "detail": {"other_option": res.get("detail", "")[:80]}}
             if not res.get("ok") and res.get("code") == "SENSITIVE_FIELD_AUTOMATION":
                 return {"status": "failed", "reason": "portal marked field sensitive — refusing"}
             return self._from_driver(node, res)
