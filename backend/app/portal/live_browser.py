@@ -511,9 +511,78 @@ class LiveBrowserSession:
                         "error": "redirected off allowlist"}
             self._settle_for_render(page)                                       # pragma: no cover
             raw = page.evaluate(_EXTRACT_JS)                                     # pragma: no cover
+            self._probe_widgets(page, raw)                                       # pragma: no cover
         except Exception as e:  # noqa: BLE001                                    # pragma: no cover
             return {"ok": False, "status": 0, "url": url, "error": str(e)[:200]}
         return normalize_observation(final, status, urlparse(final).netloc, raw)  # pragma: no cover
+
+    # A field recorded as a dropdown may not BE one. Thailand's Date of Birth
+    # is three boxes placeheld "yyyy"/"mm"/"dd"; recon typed them "select" from
+    # their ARIA alone, specgen emitted SELECT_SEARCH, and at run time all
+    # three read ZERO options and killed the application three times over one
+    # date — while Nationality, on the same page and the same widget class,
+    # committed in four seconds (2026-08-03). Nothing stored could say why,
+    # because nobody had ever asked the page.
+    #
+    # So ask it HERE, once, at build time, where being wrong costs a rebuild
+    # instead of an applicant's run. Read-only: focus a field, see whether a
+    # list appears, count the rows, press Escape. Nothing is typed, nothing is
+    # chosen, no value is recorded — only the SHAPE of the widget, which is
+    # the whole of what recon exists to learn.
+    WIDGET_PROBE_MAX = 6
+
+    def _probe_widgets(self, page, raw: dict) -> None:  # pragma: no cover
+        selects = [e for e in (raw.get("elements") or [])
+                   if e.get("type") in ("select", "search-combobox")
+                   and e.get("selector") and not e.get("sensitive")]
+        for el in selects[:self.WIDGET_PROBE_MAX]:
+            el["opens_list"] = self._probe_one(page, el["selector"])
+
+    def _probe_one(self, page, selector: str) -> str:
+        """'options' (a list appeared), 'empty' (it opened nothing), or
+        'unknown' (the field could not be reached, or the page was not in a
+        state where the answer would mean anything). Never raises: a probe
+        that fails leaves the observation exactly as it was."""
+        from ..adapter_factory.live_driver import _OPTION_JS
+        count_js = "() => {" + _OPTION_JS + " return _rows().length; }"
+        try:
+            # The PREVIOUS field's panel closes first. Left open, its rows are
+            # still on the page and this field reads as a dropdown because its
+            # neighbour is one — the same mistake as reading the month's list
+            # to answer the day's question. Only a page showing NO options can
+            # say what opening this one did.
+            if not self._close_open_lists(page, count_js):
+                return "unknown"
+            page.locator(f"{selector} >> visible=true").first.click(timeout=3000)
+            rows = 0
+            for i in range(8):
+                if i:
+                    page.wait_for_timeout(120)
+                rows = int(page.evaluate(count_js) or 0)
+                if rows:
+                    break
+            verdict = "options" if rows else "empty"
+        except Exception:  # noqa: BLE001 — a diagnosis must never fail a build
+            verdict = "unknown"
+        try:
+            self._close_open_lists(page, count_js)
+        except Exception:  # noqa: BLE001
+            pass
+        return verdict
+
+    def _close_open_lists(self, page, count_js: str) -> bool:  # pragma: no cover
+        """Get the page back to showing no option rows. True when it is clean.
+        Escape, then a blur — a panel that ignores both leaves the next
+        reading meaningless, and saying so is better than guessing."""
+        for attempt in range(3):
+            if int(page.evaluate(count_js) or 0) == 0:
+                return True
+            page.keyboard.press("Escape")
+            if attempt:
+                page.evaluate("() => document.activeElement "
+                              "&& document.activeElement.blur()")
+            page.wait_for_timeout(120)
+        return int(page.evaluate(count_js) or 0) == 0
 
     def _settle_for_render(self, page) -> None:  # pragma: no cover
         """domcontentloaded fires before a client-rendered (React/Angular/Vue)

@@ -122,6 +122,12 @@ def sanitize_structure(observation: dict) -> dict:
         }
         if el.get("placeholder"):
             clean["placeholder"] = sanitize_label(el.get("placeholder", ""))
+        # What the widget DID when the page was asked: whether focusing it
+        # actually opens a list. A field typed "select" that opens nothing is
+        # not a dropdown, and building SELECT_SEARCH for it is how one date of
+        # birth killed three runs. Structure, not content — no option text.
+        if el.get("opens_list") in ("options", "empty", "unknown"):
+            clean["opens_list"] = el["opens_list"]
         if el.get("submits"):
             clean["submits"] = re.sub(r"[^a-z_]", "", str(el.get("submits", "")))[:40]
         if el.get("navigates_to"):

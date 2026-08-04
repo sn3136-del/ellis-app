@@ -244,3 +244,127 @@ def test_a_unique_name_is_still_the_selector(browser):
     it survives a re-render where a framework-generated id does not."""
     els = _observe(browser, RADIO_VALUES_PAGE)
     assert els["familyName"]["selector"] == 'input[name="familyName"]'
+
+
+# ---- asking the page what a widget actually does ---------------------------
+# TDAC's Date of Birth carries combobox ARIA but opens no list; Nationality on
+# the same page opens a real one. Read from markup alone they are identical,
+# and building both as SELECT_SEARCH killed three runs over one date.
+
+PROBE_PAGE = """
+<input id="nationality" role="combobox" aria-autocomplete="list" placeholder="Select or enter">
+<input id="year" role="combobox" aria-autocomplete="list" placeholder="yyyy">
+<div class="cdk-overlay-container">
+  <div id="panel" class="mat-mdc-autocomplete-panel" role="listbox" hidden></div>
+</div>
+<script>
+  const panel = document.getElementById('panel');
+  // Nationality opens a real list. The year box carries the same ARIA and
+  // opens nothing at all — exactly what the live run met.
+  document.getElementById('nationality').addEventListener('focus', () => {
+    panel.innerHTML = '';
+    for (const c of ['CHN : CHINESE', 'CHL : CHILEAN']) {
+      const o = document.createElement('mat-option');
+      o.setAttribute('role', 'option');
+      o.textContent = c;
+      panel.appendChild(o);
+    }
+    panel.hidden = false;
+  });
+  // A real Material autocomplete closes when it loses focus. Without this the
+  // first field's list stays on screen and every later probe reads it.
+  document.getElementById('nationality').addEventListener('blur', () => {
+    panel.hidden = true; panel.innerHTML = '';
+  });
+</script>
+"""
+
+# A panel that ignores Escape and blur. Ellis must say it does not know, not
+# report the neighbour's list as this field's.
+STUCK_PANEL_PAGE = """
+<input id="first" role="combobox" aria-autocomplete="list">
+<input id="second" role="combobox" aria-autocomplete="list" placeholder="yyyy">
+<div role="listbox" id="stuck">
+  <div role="option">Bangkok</div><div role="option">Phuket</div>
+</div>
+"""
+
+
+def _probe(browser, html, selector):
+    from app.portal.live_browser import LiveBrowserSession
+    page = browser.new_page()
+    try:
+        page.set_content(html)
+        sess = LiveBrowserSession.__new__(LiveBrowserSession)
+        return sess._probe_one(page, selector)
+    finally:
+        page.close()
+
+
+def test_a_field_that_opens_a_list_is_a_dropdown(browser):
+    assert _probe(browser, PROBE_PAGE, "#nationality") == "options"
+
+
+def test_a_field_that_opens_nothing_is_not(browser):
+    """Identical ARIA, identical widget class, opposite truth."""
+    assert _probe(browser, PROBE_PAGE, "#year") == "empty"
+
+
+def test_an_unreachable_field_is_reported_unknown_never_guessed(browser):
+    assert _probe(browser, PROBE_PAGE, "#does-not-exist") == "unknown"
+
+
+def test_the_probe_records_no_answer_on_the_form(browser):
+    """Read-only: nothing typed, nothing chosen. A build pass must not leave
+    state on a government form."""
+    page = browser.new_page()
+    try:
+        page.set_content(PROBE_PAGE)
+        from app.portal.live_browser import LiveBrowserSession
+        sess = LiveBrowserSession.__new__(LiveBrowserSession)
+        sess._probe_one(page, "#nationality")
+        assert page.eval_on_selector("#nationality", "el => el.value") == ""
+        assert page.eval_on_selector("#year", "el => el.value") == ""
+    finally:
+        page.close()
+
+
+def test_the_verdict_reaches_the_observation(browser):
+    """observe() runs the probe over the page's selects and hangs the verdict
+    on the element records the build reads."""
+    from app.portal.live_browser import LiveBrowserSession
+    page = browser.new_page()
+    try:
+        page.set_content(PROBE_PAGE)
+        raw = page.evaluate(_EXTRACT_JS)
+        sess = LiveBrowserSession.__new__(LiveBrowserSession)
+        sess._probe_widgets(page, raw)
+        by_id = {e["selector"]: e for e in raw["elements"]}
+        assert by_id["#nationality"]["opens_list"] == "options"
+        assert by_id["#year"]["opens_list"] == "empty"
+    finally:
+        page.close()
+
+
+def test_a_list_that_will_not_close_is_reported_unknown(browser):
+    """A page already showing options cannot say what focusing THIS field
+    did. Reporting the neighbour's list as this field's is exactly how a
+    date box came to be built as a dropdown."""
+    assert _probe(browser, STUCK_PANEL_PAGE, "#second") == "unknown"
+
+
+def test_one_field_s_open_list_never_becomes_its_neighbour_s_verdict(browser):
+    """Probed in order, Nationality opens a real list and the year box opens
+    nothing — the probe must not carry the first answer into the second."""
+    from app.portal.live_browser import LiveBrowserSession
+    page = browser.new_page()
+    try:
+        page.set_content(PROBE_PAGE)
+        raw = page.evaluate(_EXTRACT_JS)
+        sess = LiveBrowserSession.__new__(LiveBrowserSession)
+        sess._probe_widgets(page, raw)
+        by_id = {e["selector"]: e for e in raw["elements"]}
+        assert by_id["#nationality"]["opens_list"] == "options"
+        assert by_id["#year"]["opens_list"] == "empty"
+    finally:
+        page.close()

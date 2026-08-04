@@ -321,3 +321,66 @@ def test_a_combobox_is_never_reported_set_from_its_own_typed_text():
     assert out["status"] == "ok"
     assert out.get("detail", {}).get("already_set") is not True
     assert drv.singles == [("#y", "1988")], "the box must be genuinely committed"
+
+
+# ---- a control that opens no list is not a dropdown -------------------------
+# TDAC's Date of Birth boxes are placeheld yyyy/mm/dd and carry combobox ARIA,
+# so recon typed them "select" and specgen built SELECT_SEARCH. At run time
+# all three read ZERO options and ended the application three times over one
+# date — while Nationality, on the same page and the same widget class,
+# committed in four seconds. Recon now asks the page which it is.
+
+@pytest.mark.parametrize("probe,expected", [
+    ("options", "SELECT_SEARCH"),   # the page opened a list: a real dropdown
+    ("empty", "FILL_NON_SENSITIVE"),  # it opened nothing: a box you type in
+    ("unknown", "SELECT_SEARCH"),   # unreachable: keep the ARIA reading
+    (None, "SELECT_SEARCH"),        # never probed: keep the ARIA reading
+])
+def test_the_page_decides_whether_a_field_is_a_dropdown(probe, expected):
+    from app.adapter_factory.specgen import fill_action_for
+    el = {"type": "select"}
+    if probe is not None:
+        el["opens_list"] = probe
+    assert fill_action_for(el, "select") == expected
+
+
+def test_a_plain_text_field_is_never_upgraded_to_a_dropdown():
+    from app.adapter_factory.specgen import fill_action_for
+    assert fill_action_for({"opens_list": "options"}, "text") == "FILL_NON_SENSITIVE"
+
+
+@pytest.mark.parametrize("builder", [_skeleton_flow, _entry_gated_flow])
+def test_both_builders_honour_the_probe(builder):
+    """Patching one builder and not the other is how Malaysia kept typing ISO
+    dates after Vietnam was fixed."""
+    parts = [dict(p, opens_list="empty") for p in DOB_PARTS]
+    art = _Art("application_form", parts + SUBMIT)
+    maps = _deterministic_mapper([art])
+    for m in maps:
+        m["kind"] = "text"
+    roles = _page_roles({"application_form": art})
+    nodes = _skeleton_flow(HOST, roles, maps) if builder is _skeleton_flow \
+        else _entry_gated_flow(HOST, roles, maps, entry_gate={},
+                               document_mappings=[])
+    dob = [n for n in nodes if n.get("input_source") == "birth_date"]
+    assert len(dob) == 3
+    assert {n["action"] for n in dob} == {"FILL_NON_SENSITIVE"}
+    # The per-part date format must survive the downgrade, or the year box
+    # gets a whole ISO date typed into it.
+    assert [n.get("format") for n in dob] == ["YYYY", "MM", "DD"]
+
+
+def test_the_recon_sanitizer_keeps_the_verdict():
+    from app.adapter_factory.recon import sanitize_structure
+    out = sanitize_structure({"elements": [
+        {"selector": "#a", "name": "a", "label": "Year", "type": "select",
+         "opens_list": "empty"},
+        {"selector": "#b", "name": "b", "label": "Nationality", "type": "select",
+         "opens_list": "options"},
+        {"selector": "#c", "name": "c", "label": "X", "type": "select",
+         "opens_list": "<script>"},          # not a verdict: dropped
+    ]})
+    els = {e["name"]: e for e in out["elements"]}
+    assert els["a"]["opens_list"] == "empty"
+    assert els["b"]["opens_list"] == "options"
+    assert "opens_list" not in els["c"]

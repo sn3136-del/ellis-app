@@ -343,6 +343,27 @@ _DATE_MASK_RE = re.compile(
 _DATE_PART_RE = re.compile(r"^\s*(yyyy|yy|mm|dd)\s*$", re.IGNORECASE)
 
 
+def fill_action_for(el: dict, kind: str) -> str:
+    """The action that answers this control.
+
+    ARIA alone says "combobox" for anything with a listbox role attached, and
+    a control that opens no list is not a dropdown however it is marked.
+    Thailand's Date of Birth is three boxes placeheld yyyy/mm/dd; built as
+    SELECT_SEARCH they read zero options at run time and ended three
+    applications over one date (2026-08-03). Recon now ASKS the page whether
+    focusing the field opens anything (`opens_list`), and a field that opens
+    nothing is typed into — which is what a person does with it.
+
+    A field never probed carries no verdict and keeps the ARIA reading; only
+    an observed 'empty' overrides it, so this can never downgrade a real
+    dropdown on a page recon did not get to test.
+    """
+    if kind in ("select", "search_combobox", "search-combobox", "combobox"):
+        return "FILL_NON_SENSITIVE" if el.get("opens_list") == "empty" \
+            else "SELECT_SEARCH"
+    return "FILL_NON_SENSITIVE"
+
+
 def _date_part(el: dict) -> str:
     """The single date component a control asks for ("yyyy" / "mm" / "dd"),
     in dates.to_portal tokens.
@@ -1185,9 +1206,7 @@ def _skeleton_flow(host: str, roles: dict, mappings: list[dict],
                 # The PAGE decides the widget and the date mask; the mapper only
                 # decides which value belongs there.
                 kind = str(el.get("type") or "") or m.get("kind")
-                action = "SELECT_SEARCH" if kind in (
-                    "select", "search_combobox", "search-combobox", "combobox") \
-                    else "FILL_NON_SENSITIVE"
+                action = fill_action_for(el, kind)
                 fmt = m.get("format") or _date_pattern(el)
                 extra = {"format": fmt} if fmt else {}
                 selector = m["selector"]
@@ -1454,9 +1473,8 @@ def _entry_gated_flow(host: str, roles: dict, mappings: list[dict],
                 continue    # one deterministic node per portal field
             seen_fields.add(m["portal_field"].lower())
             kind = observed_kind.get(str(m["portal_field"])) or m.get("kind")
-            action = "SELECT_SEARCH" if kind in ("select", "search_combobox",
-                                                 "search-combobox", "combobox") \
-                else "FILL_NON_SENSITIVE"
+            action = fill_action_for(observed_el.get(str(m["portal_field"])) or {},
+                                     kind)
             extra = {}
             fmt = m.get("format") or observed_date_fmt.get(str(m["portal_field"]))
             if fmt:
