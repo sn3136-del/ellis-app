@@ -12,17 +12,26 @@ destination picker is limited to the three demo routes.
 - **Singapore**: SG Arrival Card (visa free for Chinese passports), filled live
   on the official ICA portal while you watch.
 
-## Requirements
+## Before you start (one-time, about 5 minutes)
 
-- A Mac (macOS 13 or newer)
-- Node.js 20 or newer: https://nodejs.org
-- Python 3.12 or newer: https://python.org
-- Internet access
+You need a Mac (macOS 13 or newer) with internet access. Install these two
+things first; both are normal Mac installers, no admin console work needed:
+
+1. **Node.js 20 or newer**: go to https://nodejs.org and download the LTS
+   macOS installer (.pkg), then run it.
+2. **Python 3.12 or newer**: go to https://www.python.org/downloads/ and
+   download the macOS installer (.pkg), then run it.
+
+Nothing else is required: no Xcode, no git, no Docker, no accounts, no API
+keys. If either tool is missing or too old, the launcher stops with a clear
+message telling you which one to install.
 
 ## Run it
 
-1. Download the repository (green "Code" button, then "Download ZIP", or
-   `git clone`), and open a terminal in the project folder.
+1. Download the repository ZIP (green "Code" button, then "Download ZIP"),
+   double-click the ZIP to unpack it, and open Terminal in the unpacked
+   folder (right-click the folder, then Services, then "New Terminal at
+   Folder", or `cd` to it).
 2. Run:
 
    ```bash
