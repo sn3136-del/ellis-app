@@ -952,7 +952,11 @@ function GuidancePanel({ t, guidance, loading, error, onEdit, onNew, onRetry,
     g.visa_category && { label: t('guidance.t.category'), value: g.visa_category },
     g.permitted_stay && { label: t('guidance.t.stay'), value: g.permitted_stay },
     g.processing_time && { label: t('guidance.t.processing'), value: g.processing_time },
-    fee.amount != null && { label: t('guidance.t.fee'), value: `${fee.amount} ${fee.currency || ''}`.trim() },
+    // A zero fee is a FACT worth a tile ("Free"), not a number that reads
+    // like a suspiciously free visa ("0 SGD").
+    fee.amount != null && { label: t('guidance.t.fee'),
+      value: fee.amount === 0 ? t('guidance.t.free')
+        : `${fee.amount} ${fee.currency || ''}`.trim() },
   ].filter(Boolean)
 
   return (

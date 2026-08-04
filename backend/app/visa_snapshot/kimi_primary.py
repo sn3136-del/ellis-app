@@ -513,7 +513,7 @@ def reconcile_guidance_with_route(db, guidance: dict, *, nationality: str,
         nat = iso3(nationality, default=str(nationality or "").upper())
         dest = iso3(destination, default=str(destination or "").upper())
         row = db.execute(_sql(
-            "SELECT disposition, route_outcome, max_stay_days "
+            "SELECT disposition, route_outcome, max_stay_days, portal_family_id "
             "FROM global_route_pair_policies WHERE passport_nationality = :n "
             "AND destination_country = :d AND travel_document_type = "
             "'ordinary_passport'"), {"n": nat, "d": dest}).fetchone()
@@ -532,15 +532,23 @@ def reconcile_guidance_with_route(db, guidance: dict, *, nationality: str,
         return g
     g["disposition"] = "VISA_EXEMPT"
     g["route_workflow_type"] = "visa_exempt_preparation"
-    g["visa_category"] = "No visa needed — online arrival card only"
+    g["visa_category"] = "Visa-free entry"
     if row[2]:
-        g["permitted_stay"] = f"Up to {int(row[2])} days, granted at entry"
+        g["permitted_stay"] = f"Up to {int(row[2])} days"
         g["permitted_stay_days"] = int(row[2])
-    # No visa exists, so no visa fee and no processing queue. The fee tile
-    # disappears rather than reading "0" like a suspiciously free visa.
-    g["government_fee"] = None
-    g["processing_time"] = ("Completed online before you travel — "
-                            "no processing wait")
+    # No visa exists, so the government visa fee is zero — SHOWN as zero, not
+    # hidden: an absent fee tile reads as "unknown", a free one is a fact the
+    # applicant wants (ICA: "SGAC submission is free of charge").
+    g["government_fee"] = {"amount": 0, "currency": ""}
+    family = str(row[3] or "")
+    if family == "singapore-sgac":
+        # ICA-verified specifics for the SG Arrival Card: not a visa, free,
+        # submitted within 3 days (including the day) of arrival.
+        g["processing_time"] = ("No visa application — free SG Arrival Card, "
+                                "submitted online within 3 days before arrival")
+    else:
+        g["processing_time"] = ("No visa application — entry papers are "
+                                "completed online before you travel")
     g["reconciled_with_route_record"] = True
     return g
 
