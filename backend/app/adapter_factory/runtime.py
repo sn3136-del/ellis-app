@@ -1397,9 +1397,22 @@ class FlowRunner:
             if n is None:
                 # A portal-revealed choice group the applicant has already
                 # answered in Ellis (portal_field_<id>): click the chosen chip
-                # with the same verified group-answer path radios use.
+                # with the same verified group-answer path radios use. A
+                # revealed SELECT takes the select fill machinery instead.
                 if self._fill_revealed_group(f):
                     repaired += 1
+                elif f.get("selectish"):
+                    fid2 = str(f.get("id") or "").strip()
+                    ans = str(self.answers.get(f"portal_field_{fid2}") or "").strip()
+                    if fid2 and ans:
+                        try:
+                            out2 = self.driver.fill(f"#{fid2}", ans) or {}
+                        except Exception:  # noqa: BLE001
+                            out2 = {}
+                        if out2.get("ok"):
+                            repaired += 1
+                            self._checkpoint(f"portal_field_{fid2}", "answered",
+                                             {"reason": "portal-revealed select filled"})
                 continue
             if n.get("action") not in ("FILL_NON_SENSITIVE", "SELECT_SEARCH"):
                 continue
@@ -1510,6 +1523,19 @@ class FlowRunner:
                 opts = [o for o in (f.get("options") or [])
                         if str((o or {}).get("label") or "").strip()]
                 label = str(f.get("label") or "").strip()
+                if not opts and fid and f.get("selectish"):
+                    # A revealed SELECT carries no chips — its choices live in
+                    # the list it opens. Read them (read-only) so the ask uses
+                    # the portal's real options ("Passport type", Vietnam
+                    # 2026-08-04).
+                    reader_s = getattr(self.driver, "read_select_options", None)
+                    if reader_s is not None:
+                        try:
+                            got = reader_s(f"#{fid}") or {}
+                        except Exception:  # noqa: BLE001
+                            got = {}
+                        opts = [{"id": "", "value": str(r), "label": str(r)}
+                                for r in (got.get("options") or [])]
                 if fid and label and len(opts) >= 2:
                     key = f"portal_field_{fid}"
                     answered = str(self.answers.get(key) or "").strip()

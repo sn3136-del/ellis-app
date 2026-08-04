@@ -1079,6 +1079,31 @@ class BrowserbasePageDriver:
         except Exception:  # noqa: BLE001
             pass
 
+    def read_select_options(self, selector: str, max_options: int = 40) -> dict:
+        """Open a select's list by its wrapper, read the rows, close it.
+        Read-only: no row is clicked. Lets the runtime ask an applicant about
+        a select the flow has no node for, with the portal's real choices."""
+        try:
+            wrapper = self.page.locator(selector).first.locator(
+                "xpath=ancestor::*[contains(@class,'select')][1]")
+            wrapper.click(timeout=_CLICK_MS)
+        except Exception:  # noqa: BLE001
+            try:
+                self.page.click(selector, timeout=_CLICK_MS)
+            except Exception:  # noqa: BLE001
+                return {"ok": False, "options": []}
+        self.page.wait_for_timeout(400)
+        try:
+            state = self.page.evaluate(self._OPEN_LIST_JS) or {}
+        except Exception:  # noqa: BLE001
+            state = {}
+        try:
+            self.page.keyboard.press("Escape")
+        except Exception:  # noqa: BLE001
+            pass
+        rows = [str(r) for r in (state.get("rows") or [])][:max_options]
+        return {"ok": bool(rows), "options": rows}
+
     def _open_select_and_pick(self, selector: str, value: str) -> dict | None:
         """Drive a closed select the way a hand does: click its WRAPPER to
         open the list, then commit through the normal open-list ladder (which
@@ -1318,7 +1343,14 @@ class BrowserbasePageDriver:
         const label = labelEl ? textOf(labelEl) : '';
         const errEl = item.querySelector('[class*="explain"], [role="alert"]');
         const message = errEl ? textOf(errEl) : '';
-        if (id || label || message) { out.push({id, label, message}); if (id) seenIds.add(id); }
+        if (id || label || message) {
+          const rec = {id, label, message,
+                       selectish: !!(ctrl && ctrl.closest('[class*="select"]'))};
+          const chips = chipOptions(item);
+          if (chips && chips.length <= 6) rec.options = chips;
+          out.push(rec);
+          if (id) seenIds.add(id);
+        }
         if (out.length >= 12) return out;
       }
       // Pass 2: walk up from each visible error line to the box that holds
@@ -1385,7 +1417,8 @@ class BrowserbasePageDriver:
           if (!id || seenIds.has(id)) continue;
           seenIds.add(id);
           const lab = document.querySelector('label[for="' + CSS.escape(id) + '"]');
-          out.push({id, label: lab ? textOf(lab) : groupLabel(hit.box), message});
+          out.push({id, label: lab ? textOf(lab) : groupLabel(hit.box), message,
+                    selectish: !!c.closest('[class*="select"]')});
         }
         if (out.length >= 12) break;
       }
