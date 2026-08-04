@@ -522,6 +522,11 @@ class BrowserbasePageDriver:
                     opened = self._open_select_and_pick(selector, str(value))
                     if opened is not None:
                         return opened
+                    # Never fall to the picker-write for a SELECT: assigning
+                    # a value the widget ignores read back as its own echo
+                    # and reported ok on a choice nobody made (2026-08-04).
+                    return {"ok": False, "code": "VALUE_NOT_ACCEPTED",
+                            "detail": "the select never opened its list"}
                 return self._set_like_a_picker(
                     selector, str(value), "the field is readonly")
         except Exception:  # noqa: BLE001 — unreadable: take the normal ladder
@@ -1080,8 +1085,13 @@ class BrowserbasePageDriver:
         types the filter only when the box accepts typing). Returns None when
         no list opens — the caller falls back to its other rungs."""
         try:
+            # ancestor:: on purpose, never -or-self: the search INPUT's own
+            # class contains 'select', so or-self clicked the readonly input
+            # instead of the wrapper and the list never opened — every
+            # readonly select then fell to the picker-write that Ant ignores
+            # (2026-08-04).
             wrapper = self.page.locator(selector).first.locator(
-                "xpath=ancestor-or-self::*[contains(@class,'select')][1]")
+                "xpath=ancestor::*[contains(@class,'select')][1]")
             wrapper.click(timeout=_CLICK_MS)
         except Exception:  # noqa: BLE001
             try:
