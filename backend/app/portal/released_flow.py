@@ -330,8 +330,24 @@ class ReleasedFlowDriver:
             # node being resumed cannot even find its target, the page state
             # is lost: the same honest reversible rewind as a fresh session.
             if execution.current_node:
-                node = (self._flow().nodes.get(execution.current_node) or {})
+                flow = self._flow()
+                node = (flow.nodes.get(execution.current_node) or {})
                 sel = node.get("selector") or ""
+                if not sel:
+                    # A selector-less node (WAIT_FOR_STATE) proves nothing
+                    # about the page — check the NEXT node that has one, or a
+                    # broken page passes the reattach check and the same wait
+                    # fails four times into manual review on the very page it
+                    # already failed on (Vietnam, 2026-08-04).
+                    nid = flow.next_of(execution.current_node, "ok")
+                    seen: set = set()
+                    while nid and nid not in seen:
+                        seen.add(nid)
+                        nxt = flow.nodes.get(nid) or {}
+                        if nxt.get("selector"):
+                            sel = nxt["selector"]
+                            break
+                        nid = flow.next_of(nid, "ok")
                 target_missing = False
                 if sel:
                     try:
