@@ -806,6 +806,25 @@ def _owned(db, p: Principal, application_id: str) -> models.VisaApplication:
     return app_row
 
 
+def _route_outcome_of(db, app_row) -> str:
+    """This case's resolved route outcome ('VISA_ON_ARRIVAL', 'EVISA', …), or
+    '' when it cannot be resolved. Machine-readable companion to
+    _explain_no_live_adapter's applicant-facing sentence."""
+    from .global_routes import resolver
+    answers = app_row.answers or {}
+    try:
+        rec = resolver.resolve_route(
+            db,
+            nationality=answers.get("passport_nationality") or "",
+            destination=app_row.destination_country or "",
+            issuing_country=answers.get("passport_issuing_country") or None,
+            travel_document_type=answers.get("travel_document_type") or "ordinary_passport",
+            residence=answers.get("lawful_country_of_residence") or None)
+    except Exception:  # noqa: BLE001 — never let a label break the stop
+        return ""
+    return str((rec or {}).get("route_outcome") or "")
+
+
 def _explain_no_live_adapter(db, app_row, fallback: str) -> str:
     """Why can't Ellis drive a portal for THIS case? The internal reason ('no
     live driver is bound') is true but useless to an applicant, and reads like
@@ -2653,12 +2672,20 @@ def _signal_or_gate_error(db, p: Principal, application_id: str, name: str, **kw
         # The internal reason is kept for the audit trail above; the applicant
         # is told the honest, route-specific reason instead of driver internals.
         applicant_detail = e.detail
+        outcome = ""
         if e.status == "PORTAL_UNAVAILABLE":
             row = db.get(models.VisaApplication, application_id)
             if row is not None:
                 applicant_detail = _explain_no_live_adapter(db, row, e.detail)
+                outcome = _route_outcome_of(db, row)
+        # The route's own outcome rides along so the applicant's screen can
+        # tell "no portal connection yet" from "you need no visa at all".
+        # Without it, a traveller who needs NO visa for Indonesia was told to
+        # wait for a portal release, and offered the chance to teach Ellis a
+        # portal that has nothing to do with their trip (2026-08-04).
         raise HTTPException(409, detail={"reason": "real_only_stop", "status": e.status,
-                                         "detail": applicant_detail})
+                                         "detail": applicant_detail,
+                                         "route_outcome": outcome})
     except execution.MockAsProductionError as e:
         raise HTTPException(409, detail={"reason": "real_only_stop", "status": "UNSUPPORTED",
                                          "detail": str(e)})

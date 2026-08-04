@@ -209,15 +209,34 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
       // Honest fail-closed reasons get applicant-facing copy — never a bare
       // HTTP status. real_only_stop = no approved live portal connection for
       // this route; Ellis never simulates a government submission.
-      const reason = e.detail && typeof e.detail === 'object' ? e.detail.reason : null
+      const d = e.detail && typeof e.detail === 'object' ? e.detail : null
+      const reason = d ? d.reason : null
+      // The backend already worked out the route-specific, applicant-facing
+      // reason ("your passport needs no visa in advance for Indonesia") and
+      // sends it. Replacing it with the generic "no approved portal
+      // connection" line told a traveller who needs NO visa to wait for a
+      // portal release (2026-08-04). Its sentence wins; the generic copy is
+      // the fallback for a stop that carries none.
       setError({
-        message: reason === 'real_only_stop' ? t('case.portalUnavailable')
-          : reason === 'documents_incomplete' ? e.detail.message
+        message: reason === 'real_only_stop' ? (d.detail || t('case.portalUnavailable'))
+          : reason === 'documents_incomplete' ? d.message
           : e.message
       })
       // A portal Ellis can't drive yet may still be one the applicant's own
-      // consented run can TEACH it — surface that path next to the stop.
-      if (reason === 'real_only_stop') setPortalBlocked(true)
+      // consented run can TEACH it — surface that path next to the stop. But
+      // ONLY where a portal is actually involved: there is nothing to teach on
+      // a route that needs no online application at all.
+      const HAS_PORTAL = ['EVISA', 'ELECTRONIC_AUTHORIZATION', 'ENTRY_PREPARATION']
+      if (reason === 'real_only_stop' &&
+          (!d.route_outcome || HAS_PORTAL.includes(d.route_outcome))) setPortalBlocked(true)
+      // The note renders at the TOP of the case; Start sits at the bottom of a
+      // long checklist. Measured on the Indonesia case: the answer landed 521px
+      // ABOVE the viewport, so the applicant pressed Start and watched nothing
+      // happen. An explanation nobody can see is the same as no explanation.
+      requestAnimationFrame(() => {
+        const note = document.querySelector('[data-ellis-error]')
+        if (note) note.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      })
     }
     setBusy(false)
   }

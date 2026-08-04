@@ -203,7 +203,12 @@ export function Overlay({ onClose, children, ...rest }) {
 export function ErrorNote({ error, onSettings }) {
   if (!error) return null
   return (
-    <div className="card" style={{ padding: 16, borderColor: 'var(--ink)', marginTop: 16 }}>
+    // Marked so the screen that raised it can bring it INTO VIEW. This note
+    // renders at the top of a case; the button that triggers it can be a
+    // thousand pixels below, and an explanation nobody scrolls to is the same
+    // as no explanation at all.
+    <div className="card" data-ellis-error
+         style={{ padding: 16, borderColor: 'var(--ink)', marginTop: 16 }}>
       <div style={{ fontWeight: 600, marginBottom: 4 }}>{error.message}</div>
       {error.code === 'NO_API_KEY' && (
         <button className="btn btn--sm" style={{ marginTop: 8 }} onClick={onSettings}>Open Settings</button>
