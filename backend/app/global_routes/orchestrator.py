@@ -671,6 +671,15 @@ def run_adapter_phase(db, run: GlobalBuildRun, *, observer_factory=None,
                     rebuild_released=bool(only_family))
             except PermanentBuildStop as exc:
                 raise RuntimeError(f"permanent: {exc}") from exc
+            # A rebuild whose prior release was RESTORED is not a rebuild that
+            # worked — the portal is serving exactly what it served before.
+            # Reporting released:1 there made a failed rebuild read as a
+            # success at the CLI, the same silent-zero-work trap as the old
+            # "queued: 0".
+            if out.get("rebuild_released") is False:
+                raise RuntimeError(
+                    "rebuild did not pass the gates (retryable); the previously "
+                    f"released version stays live: {'; '.join(out.get('missing') or [])}"[:1800])
             if not out.get("released") and out.get("status") != "already_released":
                 # A gates-not-passed build is a retryable failure, never a
                 # silent 'complete' — otherwise dedup would freeze the family

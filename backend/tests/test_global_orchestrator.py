@@ -423,3 +423,36 @@ def test_a_failed_rebuild_leaves_the_working_release_serving(gdb, monkeypatch):
     assert link.released is True, "a failed rebuild took the portal offline"
     assert link.release_tier == "sandbox"
     assert "stays live" in (link.last_error or "")
+
+
+def test_a_restored_release_is_reported_as_a_failed_rebuild(gdb, monkeypatch):
+    """The portal is serving exactly what it served before, so the run must
+    say so. Reporting released:1 made a failed Thailand rebuild read as a
+    success at the CLI — the same silent-zero-work trap as the old
+    'queued: 0' (2026-08-04)."""
+    from app.global_routes import orchestrator
+    from app.global_routes.models import FamilyAdapterLink
+
+    link = gdb.execute(select(FamilyAdapterLink).where(
+        FamilyAdapterLink.family_id == "india-evisa")).scalars().first()
+    if link is None:
+        link = FamilyAdapterLink(family_id="india-evisa",
+                                 representative_route_key="rk1|x")
+        gdb.add(link)
+    link.released, link.status, link.release_tier = True, "released", "sandbox"
+    gdb.commit()
+
+    monkeypatch.setattr(release_gates, "evaluate_and_release",
+                        lambda *a, **k: {"passed": False, "released": False,
+                                         "missing": ["safe_navigation_succeeded"],
+                                         "gates": {}})
+    out = orchestrator.build_family_adapter(gdb, "india-evisa",
+                                            rebuild_released=True)
+    assert out["rebuild_released"] is False
+    assert out["released"] is True, "the working release still serves"
+
+    run = orchestrator.start_run(gdb, "build-family", {"family": "india-evisa"})
+    stats = orchestrator.run_adapter_phase(gdb, run, only_family="india-evisa",
+                                           log=lambda *a: None)
+    assert stats.get("released", 0) == 0, stats
+    assert stats.get("failed", 0) >= 1, stats
