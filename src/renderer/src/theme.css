@@ -532,15 +532,15 @@ body { background: var(--bg-soft); }
 
 /* ---------- Trip.com airplane loader ---------- */
 .planeload { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 34px 8px; }
-.planeload__sky { position: relative; width: 300px; height: 96px; overflow: hidden; }
+.planeload__sky { position: relative; width: 360px; height: 112px; overflow: hidden; }
 .planeload__trail {
   position: absolute; left: 0; right: 54%; top: 50%; height: 3px; border-radius: 3px;
   background: repeating-linear-gradient(90deg, rgba(40,125,250,0.45) 0 14px, transparent 14px 26px);
   animation: trailmove 0.9s linear infinite;
 }
 .planeload__plane { position: absolute; left: 42%; top: 8px; animation: planebob 2.2s ease-in-out infinite; }
-.planeload__label { font-size: 14.5px; font-weight: 600; color: var(--trip-navy); }
-.planeload__sub { font-size: 12.5px; color: var(--trip-gray); margin-top: -10px; }
+.planeload__label { font-size: 16.5px; font-weight: 600; color: var(--trip-navy); }
+.planeload__sub { font-size: 14px; color: var(--trip-gray); margin-top: -10px; }
 @keyframes trailmove { from { background-position-x: 0; } to { background-position-x: -26px; } }
 @keyframes planebob {
   0%, 100% { transform: translateY(0) rotate(-1deg); }
@@ -578,8 +578,11 @@ body { background: var(--bg-soft); }
 
 /* ---------- Watch-only live view ---------- */
 .watchonly { position: relative; }
-.watchonly::after {
-  content: ""; position: absolute; inset: 0; z-index: 5; border-radius: 10px;
+/* A real element, not ::after: the scroll passthrough in handoffs.jsx drops
+   its pointer-events for a beat so a wheel reaches the live view — a
+   pseudo-element could not be toggled from the component. */
+.watchonly__shield {
+  position: absolute; inset: 0; z-index: 5; border-radius: 10px;
   background: transparent; cursor: default;
 }
 .watchonly__note {

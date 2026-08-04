@@ -105,6 +105,7 @@ export default function StartVisa({ client, onOpenCase }) {
   const [reg, setReg] = useState(null)
   const [draft, setDraft] = useState(null)      // newest resumable draft intake
   const [converted, setConverted] = useState(null) // newest converted intake -> its case
+  const [resolvedIntake, setResolvedIntake] = useState(null) // newest resolved-not-continued intake
 
   const [intakeId, setIntakeId] = useState(null)
   const [answers, setAnswers] = useState({})
@@ -147,67 +148,60 @@ export default function StartVisa({ client, onOpenCase }) {
         .filter((x) => x.status === 'converted' && x.case_id)
         .sort((a, b) => String(b.updated_at || '').localeCompare(String(a.updated_at || '')))
       setConverted(conv[0] || null)
-      if (await resumeResearch(intakes)) return
-      if (await resumeResolved(intakes)) return
+      // A resolved-but-not-continued intake (and any research still running on
+      // it) is RESUMABLE FROM THE HERO, never auto-entered: the root URL always
+      // lands on the welcome page (2026-08-04 — a refresh dropped the applicant
+      // straight onto a guidance card with no way back to the start).
+      const resolved = intakes
+        .filter((x) => x && x.id && x.status === 'resolved' && !x.case_id)
+        .sort((a, b) => String(b.updated_at || '').localeCompare(String(a.updated_at || '')))
+      setResolvedIntake(resolved[0] || null)
       setPhase('hero')
     } catch (e) {
       setLoadError({ message: e.message })
     }
   }
 
-  // If a resolved intake left a stored research-job id behind and that job is
-  // still non-terminal, reopen straight into the live progress view.
-  async function resumeResearch(intakes) {
-    // A converted intake's stored job id is the background AUDIT of an already
-    // created case — never a foreground research flow to trap the applicant in.
-    const candidates = intakes
-      .filter((x) => x && x.id && x.status !== 'converted' && storedResearchJobId(x.id))
-      .sort((a, b) => String(b.updated_at || '').localeCompare(String(a.updated_at || '')))
-    for (const it of candidates) {
-      const jobId = storedResearchJobId(it.id)
-      try {
-        const job = await client.getResearchJob(jobId)
-        if (!researchTerminal(job.status)) {
-          // Load the intake's saved answers too, so "Edit answers" from the
-          // research panel never autosaves an empty draft over them.
-          const full = await client.getIntake(it.id)
-          setIntakeId(it.id)
-          setAnswers({ travel_purpose: 'tourism', ...(full.answers || {}) })
-          setStep(0); setMissing([])
-          setResearchJob(job)
-          setPhase('research')
-          return true
-        }
-        clearResearchJobId(it.id) // finished while we were away — start fresh
-      } catch (e) {
-        // Job/intake gone server-side: drop the stale key. Transient errors keep it.
-        if (e && (e.status === 404 || e.status === 410)) clearResearchJobId(it.id)
-      }
-    }
-    return false
-  }
-  // A resolved-but-not-yet-continued intake resumes AT THE GUIDANCE PAGE
-  // (cached guidance loads instantly) — the applicant's answers and the
-  // primary continuation are never dropped by a refresh or restart.
-  async function resumeResolved(intakes) {
-    const cand = intakes
-      .filter((x) => x && x.id && x.status === 'resolved' && !x.case_id)
-      .sort((a, b) => String(b.updated_at || '').localeCompare(String(a.updated_at || '')))[0]
-    if (!cand) return false
+  // "Continue" from the hero for a resolved-but-not-continued intake: back to
+  // its guidance page (cached guidance loads instantly), or to the live
+  // research view when that intake's research job is still running. The
+  // applicant's answers and the primary continuation survive any refresh —
+  // they are just re-entered by a click instead of hijacking the root URL.
+  async function resumeResolvedIntake() {
+    if (!resolvedIntake) return resumeDraft()
+    setLoadError(null)
     try {
-      const full = await client.getIntake(cand.id)
-      const g = await client.routeGuidance(cand.id)
-      setIntakeId(cand.id)
+      const jobId = storedResearchJobId(resolvedIntake.id)
+      if (jobId) {
+        try {
+          const job = await client.getResearchJob(jobId)
+          if (!researchTerminal(job.status)) {
+            // Load the intake's saved answers too, so "Edit answers" from the
+            // research panel never autosaves an empty draft over them.
+            const full = await client.getIntake(resolvedIntake.id)
+            setIntakeId(resolvedIntake.id)
+            setAnswers({ travel_purpose: 'tourism', ...(full.answers || {}) })
+            setStep(0); setMissing([])
+            setResearchJob(job)
+            setPhase('research')
+            return
+          }
+          clearResearchJobId(resolvedIntake.id) // finished while we were away
+        } catch (e) {
+          // Job gone server-side: drop the stale key. Transient errors keep it.
+          if (e && (e.status === 404 || e.status === 410)) clearResearchJobId(resolvedIntake.id)
+        }
+      }
+      const full = await client.getIntake(resolvedIntake.id)
+      const g = await client.routeGuidance(resolvedIntake.id)
+      setIntakeId(resolvedIntake.id)
       setAnswers({ travel_purpose: 'tourism', ...(full.answers || {}) })
       setStep(0); setMissing([]); setGuidanceError(null); setContinueError(null)
       setEntryMode((full.answers || {}).passport_nationality ? 'manual' : null)
       setPassportConfirmed(!!(full.answers || {}).passport_number)
       setGuidance(g)
       setPhase('guidance')
-      return true
-    } catch {
-      return false // guidance unavailable right now -> normal hero
-    }
+    } catch (e) { setLoadError({ message: e.message }) }
   }
   useEffect(() => { loadAll() }, [])
   useEffect(() => () => clearTimeout(saveTimer.current), [])
@@ -424,17 +418,16 @@ export default function StartVisa({ client, onOpenCase }) {
       destination_country: (converted.answers || {}).destination_country || '',
       full_name: (converted.answers || {}).full_name || '', visa_type: 'tourist' })
     // "Continue" resumes the applicant's MOST RECENT work — the in-flight
-    // case OR an unfinished draft, whichever they touched last. Preferring
-    // the case unconditionally stranded a newer draft with no way back to it.
-    const resumeNewest = (() => {
-      if (converted && draft) {
-        const c = String(converted.updated_at || '')
-        const d = String(draft.updated_at || '')
-        return d.localeCompare(c) > 0 ? resumeDraft : resumeCase
-      }
-      return converted ? resumeCase : resumeDraft
-    })()
-    const canContinue = !!(converted || draft)
+    // case, an unfinished draft, OR a resolved intake sitting at its guidance
+    // page, whichever they touched last. Preferring any one unconditionally
+    // stranded the newer of the others with no way back to it.
+    const targets = [
+      converted && { at: String(converted.updated_at || ''), go: resumeCase },
+      draft && { at: String(draft.updated_at || ''), go: resumeDraft },
+      resolvedIntake && { at: String(resolvedIntake.updated_at || ''), go: resumeResolvedIntake }
+    ].filter(Boolean).sort((a, b) => b.at.localeCompare(a.at))
+    const resumeNewest = targets.length ? targets[0].go : resumeDraft
+    const canContinue = targets.length > 0
     const arrow = (
       <svg className="trip-cta__arrow" width="19" height="19" viewBox="0 0 24 24"
            fill="none" stroke="currentColor" strokeWidth="2.4"

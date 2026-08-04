@@ -1722,7 +1722,7 @@ function ProgressCard({ client, caseId, progress, busy, onRefresh, onRetry, onRe
     return (
       <div className="card" style={{ padding: 22 }} data-testid="portal-progress">
         <Loading label="Checking your application status" />
-        <PortalWatch client={client} caseId={caseId} height="44vh" />
+        <PortalWatch client={client} caseId={caseId} height="64vh" />
         <button className="btn btn--ghost btn--sm" style={{ marginTop: 10 }} onClick={onRefresh}>Refresh status</button>
       </div>
     )
@@ -1751,7 +1751,7 @@ function ProgressCard({ client, caseId, progress, busy, onRefresh, onRetry, onRe
           what the official site is showing rather than a bare spinner. It is
           watch-only WHILE Ellis drives; when the run stalled or failed, Ellis
           is not driving, so the applicant regains control of the page. */}
-      <PortalWatch client={client} caseId={caseId} height="44vh"
+      <PortalWatch client={client} caseId={caseId} height="64vh"
         interactive={!!pr.stalled || failed} />
       <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 10, display: 'flex',
         gap: 12, flexWrap: 'wrap' }}>

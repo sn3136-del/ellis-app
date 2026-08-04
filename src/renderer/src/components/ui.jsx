@@ -58,7 +58,7 @@ export function Loading({ label = 'Working on it', sub = null, size = 'inline' }
       <div className="planeload" role="status" aria-live="polite">
         <div className="planeload__sky">
           <span className="planeload__trail" />
-          <span className="planeload__plane"><TripPlane width={182} /></span>
+          <span className="planeload__plane"><TripPlane width={216} /></span>
         </div>
         <div className="planeload__label">{label}<Dots /></div>
         {sub && <div className="planeload__sub">{sub}</div>}
@@ -67,11 +67,11 @@ export function Loading({ label = 'Working on it', sub = null, size = 'inline' }
   }
   return (
     <div className="planeload" style={{ padding: '18px 4px', gap: 10 }} role="status" aria-live="polite">
-      <div className="planeload__sky" style={{ width: 210, height: 66 }}>
+      <div className="planeload__sky" style={{ width: 250, height: 78 }}>
         <span className="planeload__trail" />
-        <span className="planeload__plane" style={{ top: 2 }}><TripPlane width={128} /></span>
+        <span className="planeload__plane" style={{ top: 2 }}><TripPlane width={152} /></span>
       </div>
-      <div className="planeload__label" style={{ fontSize: 13.5 }}>{label}<Dots /></div>
+      <div className="planeload__label" style={{ fontSize: 15 }}>{label}<Dots /></div>
     </div>
   )
 }

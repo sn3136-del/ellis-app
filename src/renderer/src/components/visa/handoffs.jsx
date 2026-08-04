@@ -165,6 +165,40 @@ export function usePortalLiveView(client, caseId, opts = {}) {
            } }
 }
 
+// Watch-only wrapper: the applicant sees Ellis work but cannot click or type
+// into the session while it is driving — a stray click mid-fill could change
+// portal state under the runner. Scrolling IS allowed: wheeling over the
+// shield drops it for a beat so the wheel reaches the live view (which
+// forwards it to the portal page), then it re-arms the moment the wheel goes
+// quiet — clicks and typing never get a stable way through.
+function WatchOnlyFrame({ children }) {
+  const shieldRef = useRef(null)
+  const reArm = useRef(null)
+  useEffect(() => {
+    const el = shieldRef.current
+    if (!el) return undefined
+    const onWheel = (e) => {
+      e.preventDefault() // the outer page must not scroll instead
+      el.style.pointerEvents = 'none'
+      clearTimeout(reArm.current)
+      reArm.current = setTimeout(() => { el.style.pointerEvents = 'auto' }, 400)
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => { el.removeEventListener('wheel', onWheel); clearTimeout(reArm.current) }
+  }, [])
+  const armNow = () => {
+    clearTimeout(reArm.current)
+    if (shieldRef.current) shieldRef.current.style.pointerEvents = 'auto'
+  }
+  return (
+    <div className="watchonly" data-testid="watch-only" onMouseLeave={armNow}>
+      {children}
+      <div ref={shieldRef} className="watchonly__shield" aria-hidden="true" />
+      <span className="watchonly__note">View only — Ellis is working on this page</span>
+    </div>
+  )
+}
+
 export function LiveFrame({ view, height = '70vh', watchOnly = false }) {
   if (view.state === 'connecting') return <Loading label="Opening the secure portal window" />
   if (view.state === 'embedded' && view.url) {
@@ -173,8 +207,7 @@ export function LiveFrame({ view, height = '70vh', watchOnly = false }) {
         sandbox="allow-same-origin allow-scripts allow-forms"
         referrerPolicy="no-referrer"
         style={{ width: '100%', height, border: '1px solid var(--line)',
-          borderRadius: 10, marginTop: 8, background: '#fff',
-          ...(watchOnly ? { pointerEvents: 'none' } : {}) }} />
+          borderRadius: 10, marginTop: 8, background: '#fff' }} />
     )
     return (
       <div>
@@ -185,15 +218,7 @@ export function LiveFrame({ view, height = '70vh', watchOnly = false }) {
             watch it below. This takes a minute or two.
           </div>
         )}
-        {watchOnly ? (
-          // Watch-only: the applicant sees Ellis work but cannot click into
-          // the session while it is driving — a stray click mid-fill could
-          // change portal state under the runner.
-          <div className="watchonly" data-testid="watch-only">
-            {frame}
-            <span className="watchonly__note">View only — Ellis is working on this page</span>
-          </div>
-        ) : frame}
+        {watchOnly ? <WatchOnlyFrame>{frame}</WatchOnlyFrame> : frame}
       </div>
     )
   }
