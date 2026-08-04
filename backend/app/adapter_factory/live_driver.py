@@ -76,49 +76,11 @@ function _deep(root, sel) {
   return out;
 }
 
-// The panel that belongs to the box BEING TYPED IN, by the two ways
-// comboboxes universally link input to list: an ARIA reference
-// (aria-owns/aria-controls), or the id convention <input id> + '_list'
-// (Vietnam's e-visa renders #basic_ttcdNcCuaKhau_list under
-// #basic_ttcdNcCuaKhau — no listbox role, no dropdown class, invisible to
-// the generic scan; Ellis typed the answer and never chose a row,
-// 2026-08-04).
-function _anchorPanel() {
-  const a = document.activeElement;
-  if (!a || !a.id || !/^(input|textarea)$/i.test(a.tagName)) return null;
-  const ids = [a.id + '_list'];
-  for (const attr of ['aria-owns', 'aria-controls']) {
-    const v = a.getAttribute(attr);
-    if (v) ids.push(...v.split(/\\s+/));
-  }
-  for (const id of ids) {
-    const el = document.getElementById(id);
-    // rc-select keeps a ZERO-HEIGHT accessibility listbox under exactly this
-    // id while the real rows float in .ant-select-dropdown — a flat panel is
-    // bookkeeping, not the list (Vietnam's e-visa, 2026-08-04).
-    if (el && _visible(el) && el.getBoundingClientRect().height > 8) return el;
-  }
-  return null;
-}
-
 // Every select on a page keeps its own panel; only the OPEN one may be read.
 // Reading the document's first match once declared an 83-entry list finished
-// after 10 rows, because it had read a different, closed dropdown. The
-// typed box's OWN panel outranks the generic scan.
+// after 10 rows, because it had read a different, closed dropdown.
 function _openPanel() {
-  const anchored = _anchorPanel();
-  if (anchored) return anchored;
-  // A page's own navigation menus wear dropdown/menu class names while
-  // being plain page furniture — counting one as "an open list" made every
-  // fill on Vietnam's e-visa believe a list predated its typing, which
-  // bypassed the entire select machinery (2026-08-04). A real options
-  // panel FLOATS (absolute/fixed) and does not live in the site chrome.
-  const open = _deep(document, PANEL_SEL).filter(_visible)
-    .filter((p) => !p.closest('nav, header, [role="navigation"]'))
-    .filter((p) => {
-      const cs = getComputedStyle(p);
-      return cs.position === 'absolute' || cs.position === 'fixed';
-    });
+  const open = _deep(document, PANEL_SEL).filter(_visible);
   return open.length ? open[open.length - 1] : null;
 }
 
@@ -166,27 +128,7 @@ function _rows() {
   // be identified, so an unrecognised container is a slower read, not a
   // dropdown Ellis swears is empty.
   const scoped = panel ? scan(panel) : [];
-  if (scoped.length) return scoped;
-  // A panel found by its ANCHOR (id convention / ARIA reference) may draw
-  // rows that match none of the generic option selectors — Vietnam's e-visa
-  // rows are bare <div id="<panel>_0"> children. Inside that panel, and only
-  // there, its own children ARE the choices.
-  if (panel) {
-    const out = [], seen = new Set();
-    let rows = panel.id
-      ? Array.from(panel.querySelectorAll('[id^="' + CSS.escape(panel.id) + '_"]'))
-      : [];
-    if (!rows.length) rows = Array.from(panel.children);
-    for (const el of rows) {
-      if (!_visible(el) || seen.has(el)) continue;
-      const label = _label(el);
-      if (!label || _placeholder(el, label)) continue;
-      seen.add(el);
-      out.push([el, label]);
-    }
-    if (out.length) return out;
-  }
-  return scan(document);
+  return scoped.length ? scoped : scan(document);
 }
 
 function _norm(s) {
@@ -429,19 +371,7 @@ class BrowserbasePageDriver:
             return
         if not covered:
             return
-        # A sticky page header over a field's midpoint is LAYOUT, not an
-        # overlay: scrolling the field clear is the whole fix, and pressing
-        # Escape "at" it reverts Angular widgets' models instead — Vietnam's
-        # e-visa reached review with nine fields showing text the model no
-        # longer held, one Escape per fill (2026-08-04). Scroll always comes
-        # first; the dismissal keys fire only at a coverer that IS an
-        # overlay by its own naming (Malaysia's datepicker still matches).
-        import re as _re
-        overlayish = bool(_re.search(
-            r"calendar|picker|dropdown|modal|overlay|panel|menu|backdrop|"
-            r"popover|tooltip|mask|dialog", str(covered), _re.I))
-        for step in (("scroll", "escape", "mousedown") if overlayish
-                     else ("scroll",)):
+        for step in ("escape", "mousedown", "scroll"):
             try:
                 if step == "escape":
                     self.page.keyboard.press("Escape")
@@ -512,21 +442,6 @@ class BrowserbasePageDriver:
             if self.page.eval_on_selector(
                     selector,
                     "el => el.readOnly === true || el.hasAttribute('readonly')"):
-                # A readonly search box inside a SELECT is not a picker input:
-                # the widget opens on a click of its wrapper and commits on a
-                # row click (Vietnam's e-visa sex select — the picker-write
-                # path assigned a value the widget never accepted,
-                # 2026-08-04).
-                if self.page.eval_on_selector(
-                        selector, "el => !!el.closest('[class*=\"select\"]')"):
-                    opened = self._open_select_and_pick(selector, str(value))
-                    if opened is not None:
-                        return opened
-                    # Never fall to the picker-write for a SELECT: assigning
-                    # a value the widget ignores read back as its own echo
-                    # and reported ok on a choice nobody made (2026-08-04).
-                    return {"ok": False, "code": "VALUE_NOT_ACCEPTED",
-                            "detail": "the select never opened its list"}
                 return self._set_like_a_picker(
                     selector, str(value), "the field is readonly")
         except Exception:  # noqa: BLE001 — unreadable: take the normal ladder
@@ -548,50 +463,7 @@ class BrowserbasePageDriver:
             if not open_before:
                 self.page.wait_for_timeout(200)
                 committed = self._commit_open_list(selector, str(value))
-                if committed is None:
-                    # An Ant-style select opens its dropdown only for REAL
-                    # focus/click/keys: a programmatic fill leaves the panel
-                    # closed, the typed text is only uncommitted search text,
-                    # and the widget's blur erases it — every select on
-                    # Vietnam's e-visa read 'ok' and held a placeholder
-                    # (2026-08-04). If the box is select-shaped, drive it the
-                    # way a hand would and try the list again.
-                    selectish = False
-                    try:
-                        selectish = bool(self.page.eval_on_selector(
-                            selector,
-                            "el => !!(el.closest('[class*=\"select\"]')"
-                            " || el.getAttribute('role') === 'combobox'"
-                            " || el.getAttribute('aria-autocomplete'))"))
-                    except Exception:  # noqa: BLE001
-                        pass
-                    if selectish:
-                        # Open with the click and let the ladder do the
-                        # typing: its rungs clear with real keystrokes. A
-                        # programmatic clear here closed the dropdown it had
-                        # just opened. And a click on a box that is ALREADY
-                        # focused with text toggles nothing — ArrowDown is
-                        # the combobox-standard opener for exactly that state
-                        # (Vietnam's e-visa nationality, 2026-08-04).
-                        try:
-                            self.page.click(selector, timeout=_CLICK_MS)
-                            self.page.wait_for_timeout(300)
-                            try:
-                                still_closed = not bool((self.page.evaluate(
-                                    self._OPEN_LIST_JS) or {}).get("open"))
-                            except Exception:  # noqa: BLE001
-                                still_closed = False
-                            if still_closed:
-                                self.page.keyboard.press("ArrowDown")
-                                self.page.wait_for_timeout(300)
-                            committed = self._commit_open_list(
-                                selector, str(value))
-                        except Exception:  # noqa: BLE001
-                            committed = None
                 if committed is not None:
-                    if committed.get("ok"):
-                        return self._seal_list_commit(selector, str(value),
-                                                      committed)
                     return committed
             # Framework forms (rc-field-form/Ant Design) commit a controlled
             # input's value to their own store on blur. Without it the DOM
@@ -610,10 +482,7 @@ class BrowserbasePageDriver:
             # reporting ok on an empty box and walking into a submit that
             # could never pass. Only emptiness is refused here — a portal
             # normalising 13/06/1988 to 13-06-1988 is agreeing with us, and
-            # is reported as such rather than fought. The read waits a beat:
-            # widgets clear asynchronously, and an immediate read raced the
-            # clear and blessed text that was already gone (2026-08-04).
-            self.page.wait_for_timeout(150)
+            # is reported as such rather than fought.
             kept = self._value_now(selector)
             if kept == "":
                 return {"ok": False, "code": "VALUE_NOT_ACCEPTED",
@@ -622,24 +491,12 @@ class BrowserbasePageDriver:
                 return {"ok": True, "reformatted": kept[:60]}
             return {"ok": True}
         except Exception as e:  # noqa: BLE001
-            # Readonly picker inputs (e.g. Ant Design date pickers) AND closed
-            # select search-boxes refuse fill(); they accept focused keyboard
-            # entry once a click has opened them. Click, type — and if that
-            # opened an options list, commit from IT (Vietnam's e-visa
-            # selects are exactly this: not editable until clicked, and the
-            # committed choice lives in the widget's display, never the
-            # search box, 2026-08-04). Only a list-less widget falls to the
-            # Enter + exact-echo read-back.
+            # Readonly picker inputs (e.g. Ant Design date pickers) refuse
+            # fill(); they accept focused keyboard entry. Type, commit with
+            # Enter, then READ BACK the value — success only on exact echo.
             try:
                 self.page.click(selector, timeout=_CLICK_MS)
                 self.page.keyboard.type(str(value), delay=25)
-                self.page.wait_for_timeout(300)
-                committed = self._commit_open_list(selector, str(value))
-                if committed is not None:
-                    if committed.get("ok"):
-                        return self._seal_list_commit(selector, str(value),
-                                                      committed)
-                    return committed
                 self.page.keyboard.press("Enter")
                 self.page.wait_for_timeout(300)
                 got = self.page.input_value(selector, timeout=_ACT_MS)
@@ -915,16 +772,8 @@ class BrowserbasePageDriver:
       if (!rows.length) return null;
       const hit = _pick(rows, want, true);
       if (!hit) return {labels: rows.map(([, t]) => t).slice(0, 12)};
-      // Report WHERE the row is — the caller clicks it with a REAL mouse.
-      // A synthetic el.click() carries no mousedown, and autocomplete rows
-      // routinely commit on mousedown (it beats the input's blur): Vietnam's
-      // e-visa rendered the choice and bound nothing, on every select on the
-      // form (2026-08-04). The element click stays as the fallback.
-      const r = hit[0][0].getBoundingClientRect();
-      hit[0][0].scrollIntoView({block: 'nearest'});
-      const r2 = hit[0][0].getBoundingClientRect();
-      return {chosen: hit[0][1], match: hit[1],
-              cx: r2.left + r2.width / 2, cy: r2.top + Math.min(r2.height / 2, 18)};
+      hit[0][0].click();
+      return {chosen: hit[0][1], match: hit[1]};
     }"""
 
     def _commit_open_list(self, selector: str, value: str) -> dict | None:
@@ -979,17 +828,8 @@ class BrowserbasePageDriver:
                 # if the box does not hold exactly the query, no option it
                 # filtered can be trusted to belong to it.
                 try:
-                    # Keyboard-only clear: a programmatic fill("") closes an
-                    # Ant dropdown and desyncs its filter, so the retyped
-                    # query filtered a list nobody was showing (Vietnam's
-                    # e-visa, 2026-08-04). Backspace per character keeps the
-                    # widget's own state machine in the loop.
+                    self.page.fill(selector, "", timeout=_ACT_MS)
                     self.page.click(selector, timeout=_CLICK_MS)
-                    held = self.page.eval_on_selector(
-                        selector, "el => (el.value || '').length") or 0
-                    self.page.keyboard.press("End")
-                    for _ in range(int(held)):
-                        self.page.keyboard.press("Backspace")
                     self.page.keyboard.type(q, delay=40)
                     holds = self.page.eval_on_selector(
                         selector, "el => (el.value || '').trim()")
@@ -1011,7 +851,6 @@ class BrowserbasePageDriver:
                 if got:
                     break
             if got and got.get("chosen"):
-                self._click_option_row(got["chosen"], got)
                 self.page.wait_for_timeout(150)
                 return {"ok": True, "shown": got["chosen"][:60],
                         "match": got.get("match") or "exact"}
@@ -1033,7 +872,11 @@ class BrowserbasePageDriver:
                             len(finalists[0]) < len(finalists[1]):
                         chosen = finalists[0]
                         try:
-                            self._click_option_row(chosen, None)
+                            self.page.evaluate(
+                                "(w) => {" + _OPTION_JS + """
+                                  for (const [el, t] of _rows())
+                                    if (t === w) { el.click(); return true; }
+                                  return false; }""", chosen)
                             self.page.wait_for_timeout(150)
                             return {"ok": True, "shown": chosen[:60],
                                     "match": "stem"}
@@ -1047,164 +890,6 @@ class BrowserbasePageDriver:
             pass
         return {"ok": False, "code": "NO_OPTIONS",
                 "detail": f"no option matches {v[:30]!r}"}
-
-    def _click_option_row(self, chosen: str, got: dict | None) -> None:
-        """Click the option row whose RENDERED TEXT is the chosen label, with
-        a REAL mouse, resolved at click time. Pre-measured coordinates go
-        stale the moment a virtual list re-renders — the mouse landed on
-        'Male' where 'Female' had been measured (Vietnam's e-visa,
-        2026-08-04). A trusted Playwright click on the text-matched row
-        cannot miss; the measured point stays as the last resort."""
-        try:
-            row = self.page.locator(
-                '[role="option"], [class*="select-item-option"],'
-                ' [class*="option-item"], [class*="option-content"]'
-            ).filter(has_text=chosen).locator("visible=true").first
-            row.click(timeout=_CLICK_MS)
-            return
-        except Exception:  # noqa: BLE001
-            pass
-        try:
-            if got and got.get("cx") is not None:
-                self.page.mouse.click(float(got["cx"]), float(got["cy"]))
-                return
-        except Exception:  # noqa: BLE001
-            pass
-        try:
-            self.page.evaluate(
-                "(w) => {" + _OPTION_JS + """
-                  for (const [el, t] of _rows())
-                    if (t === w) { el.click(); return true; }
-                  return false; }""", chosen)
-        except Exception:  # noqa: BLE001
-            pass
-
-    def read_select_options(self, selector: str, max_options: int = 40) -> dict:
-        """Open a select's list by its wrapper, read the rows, close it.
-        Read-only: no row is clicked. Lets the runtime ask an applicant about
-        a select the flow has no node for, with the portal's real choices."""
-        try:
-            wrapper = self.page.locator(selector).first.locator(
-                "xpath=ancestor::*[contains(@class,'select')][1]")
-            wrapper.click(timeout=_CLICK_MS)
-        except Exception:  # noqa: BLE001
-            try:
-                self.page.click(selector, timeout=_CLICK_MS)
-            except Exception:  # noqa: BLE001
-                return {"ok": False, "options": []}
-        self.page.wait_for_timeout(400)
-        try:
-            state = self.page.evaluate(self._OPEN_LIST_JS) or {}
-        except Exception:  # noqa: BLE001
-            state = {}
-        try:
-            self.page.keyboard.press("Escape")
-        except Exception:  # noqa: BLE001
-            pass
-        rows = [str(r) for r in (state.get("rows") or [])][:max_options]
-        return {"ok": bool(rows), "options": rows}
-
-    def _open_select_and_pick(self, selector: str, value: str) -> dict | None:
-        """Drive a closed select the way a hand does: click its WRAPPER to
-        open the list, then commit through the normal open-list ladder (which
-        types the filter only when the box accepts typing). Returns None when
-        no list opens — the caller falls back to its other rungs."""
-        try:
-            # ancestor:: on purpose, never -or-self: the search INPUT's own
-            # class contains 'select', so or-self clicked the readonly input
-            # instead of the wrapper and the list never opened — every
-            # readonly select then fell to the picker-write that Ant ignores
-            # (2026-08-04).
-            wrapper = self.page.locator(selector).first.locator(
-                "xpath=ancestor::*[contains(@class,'select')][1]")
-            wrapper.click(timeout=_CLICK_MS)
-        except Exception:  # noqa: BLE001
-            try:
-                self.page.click(selector, timeout=_CLICK_MS)
-            except Exception:  # noqa: BLE001
-                return None
-        self.page.wait_for_timeout(300)
-        committed = self._commit_open_list(selector, value)
-        if committed is not None and committed.get("ok"):
-            return self._seal_list_commit(selector, value, committed)
-        return committed
-
-    def _seal_list_commit(self, selector: str, value: str, committed: dict) -> dict:
-        """A clicked option must SURVIVE the blur that seals the form model.
-
-        Singapore's widgets hold their choice; Vietnam's e-visa comboboxes
-        rendered it, reported ok, and dropped it when focus left the box —
-        sex, nationality, and both checkpoints all reached review empty while
-        every checkpoint read 'ok' (2026-08-04). So: dispatch the change+blur
-        the framework commits on (exactly what the pre-rewrite fill did), then
-        read the box back. A value that holds stands as committed; an empty
-        box is a PHANTOM commit — retried once through the list and once by
-        keyboard, then refused honestly. Purely additive: a widget whose
-        commit already sticks passes the first read-back untouched."""
-        shown = str(committed.get("shown") or "").strip()
-
-        def blur_and_read():
-            try:
-                self.page.eval_on_selector(
-                    selector,
-                    "el => { el.dispatchEvent(new Event('change', {bubbles: true}));"
-                    " el.blur(); }")
-            except Exception:  # noqa: BLE001
-                pass
-            self.page.wait_for_timeout(250)
-            return self._value_now(selector)
-
-        def widget_displays_choice() -> bool:
-            # Ant-style selects EMPTY their search input on a successful
-            # commit and render the chosen label in a sibling display element
-            # — an empty box there is proof of success, not of a phantom.
-            # Reading it as phantom un-did every committed select on
-            # Vietnam's e-visa, eight fields per pass (2026-08-04).
-            if not shown:
-                return False
-            try:
-                return bool(self.page.eval_on_selector(
-                    selector,
-                    "(el, t) => { let n = el;"
-                    " for (let i = 0; i < 4 && n; i++, n = n.parentElement) {"
-                    "   const txt = (n.innerText || '').replace(/\\s+/g, ' ').trim();"
-                    "   if (txt && txt.includes(t)) return true; }"
-                    " return false; }", shown))
-            except Exception:  # noqa: BLE001
-                return False
-
-        kept = blur_and_read()
-        if kept != "" or widget_displays_choice():   # holds: it stands
-            return committed
-        # Phantom: once more through the list…
-        try:
-            self.page.fill(selector, str(value), timeout=_ACT_MS)
-            self.page.wait_for_timeout(200)
-            second = self._commit_open_list(selector, str(value))
-            if second is not None and second.get("ok"):
-                shown = str(second.get("shown") or "").strip() or shown
-                kept = blur_and_read()
-                if kept != "" or widget_displays_choice():
-                    return {**second, "resealed": True}
-        except Exception:  # noqa: BLE001
-            pass
-        # …then the keyboard commit the old fill used…
-        try:
-            self._uncover(selector)
-            self.page.click(selector, timeout=_CLICK_MS)
-            self.page.keyboard.type(str(value), delay=25)
-            self.page.wait_for_timeout(300)
-            self.page.keyboard.press("Enter")
-            kept = blur_and_read()
-            if kept or widget_displays_choice():
-                return {"ok": True, "method": "keyboard_commit",
-                        "shown": str(kept or shown)[:60]}
-        except Exception:  # noqa: BLE001
-            pass
-        # …then honest refusal: the portal's validation pass re-asks with the
-        # portal's own list rather than sailing on over an empty box.
-        return {"ok": False, "code": "VALUE_NOT_ACCEPTED",
-                "detail": "the widget cleared the committed choice on blur"}
 
     def _value_now(self, selector: str):
         """What the field holds right now, or None when it cannot be read."""
@@ -1343,14 +1028,7 @@ class BrowserbasePageDriver:
         const label = labelEl ? textOf(labelEl) : '';
         const errEl = item.querySelector('[class*="explain"], [role="alert"]');
         const message = errEl ? textOf(errEl) : '';
-        if (id || label || message) {
-          const rec = {id, label, message,
-                       selectish: !!(ctrl && ctrl.closest('[class*="select"]'))};
-          const chips = chipOptions(item);
-          if (chips && chips.length <= 6) rec.options = chips;
-          out.push(rec);
-          if (id) seenIds.add(id);
-        }
+        if (id || label || message) { out.push({id, label, message}); if (id) seenIds.add(id); }
         if (out.length >= 12) return out;
       }
       // Pass 2: walk up from each visible error line to the box that holds
@@ -1417,8 +1095,7 @@ class BrowserbasePageDriver:
           if (!id || seenIds.has(id)) continue;
           seenIds.add(id);
           const lab = document.querySelector('label[for="' + CSS.escape(id) + '"]');
-          out.push({id, label: lab ? textOf(lab) : groupLabel(hit.box), message,
-                    selectish: !!c.closest('[class*="select"]')});
+          out.push({id, label: lab ? textOf(lab) : groupLabel(hit.box), message});
         }
         if (out.length >= 12) break;
       }
