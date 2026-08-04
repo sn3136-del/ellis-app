@@ -541,7 +541,36 @@ def _live_kimi_mapper(artifacts: list[fm.AdapterReconArtifact]) -> list[dict]:
         # validated identically downstream, so a Kimi outage never blocks or
         # corrupts a build; it only changes which proposals are considered.
         return _deterministic_mapper(artifacts)
-    return list((reply or {}).get("mappings", []))
+    return _with_deterministic_floor(
+        list((reply or {}).get("mappings", [])), artifacts)
+
+
+def _with_deterministic_floor(proposals: list, artifacts: list) -> list:
+    """The model's proposals, plus every deterministic one it left out.
+
+    A model has off runs. Thailand's v21 mapped Date of Birth and v22, from a
+    BETTER observation of the same page, did not — the field simply went
+    missing from the reply, and a mandatory question on a government form
+    stopped being filled because a model varied (2026-08-04). The name-hint
+    mapper is grounded in observed elements and finds the same three boxes
+    every time, so it is the floor under the reply rather than the substitute
+    for it.
+
+    Additive only, and only for portal fields the reply did not touch, so the
+    model still wins wherever it has an opinion. Everything here goes through
+    the same grounding validation as every other proposal — a floor cannot
+    smuggle in a field the page does not have.
+    """
+    claimed = {str(m.get("portal_field") or "") for m in proposals
+               if isinstance(m, dict)}
+    out = list(proposals)
+    added = 0
+    for m in _deterministic_mapper(artifacts):
+        if str(m.get("portal_field") or "") in claimed:
+            continue
+        out.append(m)
+        added += 1
+    return out
 
 
 def _known_field_proposals(artifacts: list[fm.AdapterReconArtifact]) -> list[dict]:

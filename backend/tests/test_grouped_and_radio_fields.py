@@ -384,3 +384,44 @@ def test_the_recon_sanitizer_keeps_the_verdict():
     assert els["a"]["opens_list"] == "empty"
     assert els["b"]["opens_list"] == "options"
     assert "opens_list" not in els["c"]
+
+
+# ---- the model is a proposer, not the only one ------------------------------
+# Thailand v21 mapped Date of Birth; v22, from a BETTER observation of the
+# same page, did not — the field just went missing from the model's reply, and
+# a mandatory question on a government form stopped being filled because a
+# model varied. The deterministic name-hint mapper finds those three boxes
+# every time, so it is the floor under the reply.
+
+def test_a_field_the_model_omitted_is_still_mapped():
+    from app.adapter_factory.specgen import _with_deterministic_floor
+    art = _art(DOB_PARTS, SUBMIT)
+    model_said = [{"ellis_field": "surname", "portal_field": "familyName",
+                   "selector": "#familyName", "page_key": "application_form",
+                   "artifact_id": art.id, "required": True}]
+    out = _with_deterministic_floor(model_said, [art])
+    assert [m["portal_field"] for m in out if m["ellis_field"] == "birth_date"] == [
+        "mat-input-18", "mat-input-19", "mat-input-20"]
+
+
+def test_the_model_still_wins_where_it_has_an_opinion():
+    """The floor is additive. A portal field the model mapped is the model's,
+    even where the name hints would have read it differently."""
+    from app.adapter_factory.specgen import _with_deterministic_floor
+    art = _art(DOB_PARTS, SUBMIT)
+    model_said = [{"ellis_field": "expiry_date", "portal_field": "mat-input-18",
+                   "selector": "#mat-input-18", "page_key": "application_form",
+                   "artifact_id": art.id, "required": True}]
+    out = _with_deterministic_floor(model_said, [art])
+    for m in out:
+        if m["portal_field"] == "mat-input-18":
+            assert m["ellis_field"] == "expiry_date"
+    assert sum(1 for m in out if m["portal_field"] == "mat-input-18") == 1
+
+
+def test_the_floor_invents_nothing():
+    """It can only add fields the PAGE has. A floor that could smuggle in an
+    unobserved field would be worse than the gap it fills."""
+    from app.adapter_factory.specgen import _with_deterministic_floor
+    art = _art(SUBMIT)          # a page with no fillable fields at all
+    assert _with_deterministic_floor([], [art]) == []

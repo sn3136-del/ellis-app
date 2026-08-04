@@ -97,8 +97,14 @@ _EXTRACT_JS = r"""
       let shared = false;
       try { shared = document.querySelectorAll(base).length > 1; } catch (e) {}
       if (!shared) return base;
-      const v = el.getAttribute && el.getAttribute('value');
-      if (v) {
+      const v = (el.getAttribute && el.getAttribute('value')) || '';
+      // ...but only when the value is the option's own WORD. TDAC's radios
+      // carry per-session encrypted tokens ("cXhw5LLgYCIM0sCqCyP+2A=="), and
+      // a selector built on one matches nothing in the next session — a
+      // selector that is unique today and gone tomorrow is worse than a
+      // shared one, which select_radio resolves by the option's label.
+      if (v && v.length <= 32 && !/[+/=]/.test(v) && /[a-z0-9]/i.test(v) &&
+          !/^[A-Za-z0-9]{16,}$/.test(v)) {
         const q = base + '[value="' + v.replace(/"/g, '') + '"]';
         try { if (document.querySelectorAll(q).length === 1) return q; }
         catch (e) {}
@@ -1081,6 +1087,10 @@ class LiveBrowserSession:
                         "error": f"entry gate ended at {urlparse(final).path!r}, "
                                  f"expected {expect_path!r}"}
             raw = page.evaluate(_EXTRACT_JS)
+            # Gated portals are exactly the ones whose form only exists past
+            # the gate, so this is the path that reaches the widgets worth
+            # asking about — TDAC's own form among them.
+            self._probe_widgets(page, raw)
         except Exception as e:  # noqa: BLE001                                    # pragma: no cover
             return {"ok": False, "status": 0, "url": base_url,
                     "error": f"entry gate replay failed: {str(e)[:160]}"}

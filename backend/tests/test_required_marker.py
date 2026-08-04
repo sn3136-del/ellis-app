@@ -368,3 +368,37 @@ def test_one_field_s_open_list_never_becomes_its_neighbour_s_verdict(browser):
         assert by_id["#year"]["opens_list"] == "empty"
     finally:
         page.close()
+
+
+# A per-session token is not an identity. TDAC's radios carry encrypted
+# values ("cXhw5LLgYCIM0sCqCyP+2A=="); a selector built on one is unique
+# today and matches nothing tomorrow.
+OPAQUE_VALUE_PAGE = """
+<mat-radio-group id="g">
+  <input type="radio" name="g" value="cXhw5LLgYCIM0sCqCyP+2A=="><label>FEMALE</label>
+  <input type="radio" name="g" value="ar2hFYafLjtx0JUbCesHKg=="><label>MALE</label>
+</mat-radio-group>
+"""
+
+READABLE_VALUE_PAGE = """
+<mat-radio-group id="g">
+  <input type="radio" name="g" value="FEMALE"><label>FEMALE</label>
+  <input type="radio" name="g" value="MALE"><label>MALE</label>
+</mat-radio-group>
+"""
+
+
+def test_a_readable_value_makes_a_good_selector(browser):
+    els = _observe(browser, READABLE_VALUE_PAGE)
+    sels = sorted(e["selector"] for e in els.values() if e.get("type") == "radio")
+    assert sels == ['input[name="g"][value="FEMALE"]', 'input[name="g"][value="MALE"]']
+
+
+def test_an_encrypted_value_is_never_baked_into_a_selector(browser):
+    """Better a shared selector the driver resolves by label than a unique
+    one that expires with the session."""
+    els = _observe(browser, OPAQUE_VALUE_PAGE)
+    for e in els.values():
+        if e.get("type") == "radio":
+            assert "cXhw" not in e["selector"] and "ar2hFY" not in e["selector"], \
+                e["selector"]
