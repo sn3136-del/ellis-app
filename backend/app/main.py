@@ -1997,6 +1997,16 @@ def case_checklist(application_id: str, db=Depends(get_session),
     # claiming a retired second-pass check — it must never reach the UI.
     from .visa_snapshot import kimi_primary
     guidance = kimi_primary.normalize_guidance_label(cg.guidance)
+    if isinstance(guidance, dict) and guidance.get("guidance"):
+        # The registry's pair record outranks stored model prose on whether
+        # this journey is a visa at all (arrival-card case shown as
+        # "tourist visa, 30 SGD", 2026-08-04).
+        guidance = {**guidance, "guidance":
+                    kimi_primary.reconcile_guidance_with_route(
+                        db, guidance["guidance"],
+                        nationality=(app_row.answers or {}).get(
+                            "passport_nationality", ""),
+                        destination=app_row.destination_country or "")}
     g_inner = (guidance or {}).get("guidance") or {}
     # Per-item status now reflects the applicant's EXPLICIT submissions (an
     # upload alone never fulfils a requirement) + the durable intake stage.

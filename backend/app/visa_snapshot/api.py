@@ -420,6 +420,13 @@ def route_guidance(intake_id: str, background: BackgroundTasks,
                                          "reason": e.envelope.get("user_message"),
                                          "category": e.envelope.get("category"),
                                          "provider_status": e.envelope.get("provider_status")})
+    if g.get("guidance"):
+        # The registry's verified pair record outranks the model's prose on
+        # WHAT KIND of journey this is (visa vs arrival card).
+        g["guidance"] = kimi_primary.reconcile_guidance_with_route(
+            db, g["guidance"],
+            nationality=route.get("passport_nationality", ""),
+            destination=route.get("destination_country", ""))
     if g.get("stale"):
         background.add_task(kimi_primary.refresh_stale_async, _new_session, route)
     # Guidance-driven adapter generation (authorized bridge; reversible build +
@@ -458,8 +465,19 @@ def _continuation_summary(db, r, cg, case_row) -> dict:
     from .. import checklist_intake
     status = checklist_intake.checklist_state(db, case_row, cg)
     # Serve-time normalization: stored two-pass-era guidance rows carry a label
-    # claiming a retired second-pass check — it must never reach the UI.
+    # claiming a retired second-pass check — it must never reach the UI. And
+    # the registry's pair record outranks stored model prose on whether this
+    # journey is a visa at all — an arrival-card case displayed "Short-Term
+    # Visit Pass (tourist visa), 30 SGD" from guidance saved at intake
+    # (2026-08-04).
+    answers = case_row.answers or {}
     guidance = kimi_primary.normalize_guidance_label(cg.guidance)
+    if isinstance(guidance, dict) and guidance.get("guidance"):
+        guidance = {**guidance, "guidance":
+                    kimi_primary.reconcile_guidance_with_route(
+                        db, guidance["guidance"],
+                        nationality=answers.get("passport_nationality", ""),
+                        destination=case_row.destination_country or "")}
     return {"case_id": case_row.id, "intake_id": r.id, "status": r.status,
             "case_state": case_row.state,
             "disposition": cg.disposition,

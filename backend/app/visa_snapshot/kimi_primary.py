@@ -493,6 +493,58 @@ def normalize_guidance_label(guidance: dict | None):
     return out
 
 
+def reconcile_guidance_with_route(db, guidance: dict, *, nationality: str,
+                                  destination: str) -> dict:
+    """The REGISTRY outranks the model on what kind of journey this is.
+
+    Ellis's verified route record said China -> Singapore is VISA_FREE with an
+    online arrival card; the model's guidance card said "Short-Term Visit Pass
+    (tourist visa), 30 SGD, 3-5 working days" — a visa that does not exist on
+    this route, priced and scheduled. The applicant read it and asked whether
+    they were filing a visa (2026-08-04). When the pair policy says the route
+    is visa-free entry preparation, the guidance headline must say so: no visa
+    wording, no visa fee, no processing wait. Only the contradicting fields
+    are touched; everything else the model wrote stands.
+    """
+    g = dict(guidance or {})
+    try:
+        from sqlalchemy import text as _sql
+        from .registry import iso3
+        nat = iso3(nationality, default=str(nationality or "").upper())
+        dest = iso3(destination, default=str(destination or "").upper())
+        row = db.execute(_sql(
+            "SELECT disposition, route_outcome, max_stay_days "
+            "FROM global_route_pair_policies WHERE passport_nationality = :n "
+            "AND destination_country = :d AND travel_document_type = "
+            "'ordinary_passport'"), {"n": nat, "d": dest}).fetchone()
+    except Exception:  # noqa: BLE001 — no record, nothing to reconcile against
+        return g
+    if row is None:
+        return g
+    disposition = str(row[0] or "")
+    outcome = str(row[1] or "")
+    if disposition not in ("VISA_FREE", "VISA_EXEMPT") \
+            and outcome != "ENTRY_PREPARATION":
+        return g
+    claims_visa = "visa" in str(g.get("visa_category") or "").lower() \
+        or bool((g.get("government_fee") or {}).get("amount"))
+    if not claims_visa and g.get("disposition") == "VISA_EXEMPT":
+        return g
+    g["disposition"] = "VISA_EXEMPT"
+    g["route_workflow_type"] = "visa_exempt_preparation"
+    g["visa_category"] = "No visa needed — online arrival card only"
+    if row[2]:
+        g["permitted_stay"] = f"Up to {int(row[2])} days, granted at entry"
+        g["permitted_stay_days"] = int(row[2])
+    # No visa exists, so no visa fee and no processing queue. The fee tile
+    # disappears rather than reading "0" like a suspiciously free visa.
+    g["government_fee"] = None
+    g["processing_time"] = ("Completed online before you travel — "
+                            "no processing wait")
+    g["reconciled_with_route_record"] = True
+    return g
+
+
 def get_route_guidance(db, route: dict, *, force_refresh: bool = False) -> dict:
     """The authoritative single-pass route decision under one hard deadline.
 
