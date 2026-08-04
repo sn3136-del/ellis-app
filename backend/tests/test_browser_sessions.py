@@ -155,3 +155,49 @@ def test_scroll_relay_respects_tenant_isolation(client, case_id, fake_bb):
     r = client.post(f"/cases/{case_id}/browser-session/scroll",
                     json={"delta_y": 100}, headers=OTHER)
     assert r.status_code == 403
+
+
+# ---------- the run owns session identity while it is active -----------------
+
+def _queue_fake_run(db, case_id, status="running"):
+    import uuid
+    from app import models
+    run = models.PortalRun(id=uuid.uuid4().hex, org_id="org-bb",
+                          application_id=case_id, status=status,
+                          signal_name="start", signal_kwargs={})
+    db.add(run)
+    db.commit()
+    return run
+
+
+def test_window_never_creates_a_session_while_a_run_is_active(client, case_id, fake_bb, db):
+    _queue_fake_run(db, case_id, "running")
+    r = client.post(f"/cases/{case_id}/browser-session", headers=H)
+    assert r.status_code == 200
+    body = r.json()
+    # The window WAITS for the run's session instead of racing it with its own
+    # (the race released the session Ellis was driving, 2026-08-04).
+    assert body["run_opening"] is True and body["live_view_available"] is False
+    assert fake_bb["created"] == 0
+
+
+def test_window_follows_the_runs_session_and_retires_nothing(client, case_id, fake_bb, db):
+    from app import models
+    # The RUN registered its session…
+    row = models.BrowserSession(org_id="org-bb", application_id=case_id,
+                                provider_session_id="bb-run-owned", mode="browserbase")
+    db.add(row)
+    db.commit()
+    _queue_fake_run(db, case_id, "running")
+    r = client.post(f"/cases/{case_id}/browser-session", headers=H)
+    body = r.json()
+    # …and the window attaches to exactly that one: nothing created, nothing
+    # retired, no fresh flag (a fresh flag would queue a rival restore run).
+    assert body["id"] == row.id and body.get("run_opening") is None
+    assert body["fresh"] is False
+    assert fake_bb["created"] == 0 and fake_bb["closed"] == []
+
+
+def test_without_an_active_run_the_window_still_creates_normally(client, case_id, fake_bb):
+    r = client.post(f"/cases/{case_id}/browser-session", headers=H)
+    assert r.json()["fresh"] is True and fake_bb["created"] == 1

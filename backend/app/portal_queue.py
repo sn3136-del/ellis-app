@@ -63,6 +63,20 @@ def latest_run(db, application_id: str) -> models.PortalRun | None:
         models.PortalRun.created_at.desc())).scalars().first()
 
 
+def progress_run(db, application_id: str) -> models.PortalRun | None:
+    """The run whose progress the applicant should SEE: a RUNNING run wins
+    over anything newer that is merely queued behind it. A restore-portal
+    request queued one second after the fill run started otherwise masks the
+    live fill completely — the applicant stared at 'Starting secure portal
+    work..' and a rebuild banner while eleven fields were checkpointing
+    (Vietnam, 2026-08-04)."""
+    running = db.execute(select(models.PortalRun).where(
+        models.PortalRun.application_id == application_id,
+        models.PortalRun.status == "running").order_by(
+        models.PortalRun.created_at.desc())).scalars().first()
+    return running or latest_run(db, application_id)
+
+
 class CaseBusy(Exception):
     """Too many queued runs for one case — surfaced as an honest 409."""
 

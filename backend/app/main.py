@@ -1018,6 +1018,20 @@ def create_browser_session(application_id: str, response: Response,
         audit.record(db, org_id=p.org_id, application_id=application_id,
                      action="browser_session_expired", detail={}, actor=p.user_id)
         row = None
+    # While a portal run is queued/running, the RUN owns session identity: the
+    # applicant's window only ever FOLLOWS the run's session. A window that
+    # creates its own session here races the executor's create, and the
+    # newest-row-wins retirement then releases the session Ellis is actually
+    # driving — the applicant watched an idle twin page while eleven fields
+    # checkpointed invisibly (Vietnam, 2026-08-04).
+    active_run = portal_queue.progress_run(db, application_id)
+    run_active = active_run is not None and active_run.status in ("queued", "running")
+    if row is None and run_active:
+        response.headers["Cache-Control"] = "no-store"
+        return {"id": "", "mode": "browserbase" if bb.is_configured() else "local",
+                "status": "pending", "fresh": False, "run_opening": True,
+                "live_view_available": False,
+                "browserbase_configured": bb.is_configured()}
     fresh = False
     if row is None:
         sess = bb.create_session()
@@ -1035,10 +1049,10 @@ def create_browser_session(application_id: str, response: Response,
         audit.record(db, org_id=p.org_id, application_id=application_id,
                      action="browser_session_opened",
                      detail={"mode": row.mode}, actor=p.user_id)  # no ids/urls in audit
-    # Retire duplicates on EVERY open, not only on creation: a case that
-    # already accumulated extra open rows must converge on one, or the
-    # applicant's window can still land on a session Ellis is not driving.
-    retire_other_sessions(db, application_id, row.id)
+    # Retire duplicates on EVERY open, not only on creation — but never while
+    # a run is active: the executor's registration owns retirement then.
+    if not run_active:
+        retire_other_sessions(db, application_id, row.id)
     response.headers["Cache-Control"] = "no-store"
     # fresh: a brand-new session shows a BLANK page until portal work runs —
     # the client should ask Ellis to restore the portal view.
@@ -3109,7 +3123,9 @@ def case_progress(application_id: str, db=Depends(get_session),
         models.WorkflowExecution.application_id == application_id)).scalar_one_or_none()
     state = exec_row.state if exec_row else app_row.state
     pending = exec_row.pending if exec_row else None
-    run = portal_queue.latest_run(db, application_id)
+    # A RUNNING run outranks a newer queued one: progress must narrate the
+    # work actually happening, not a restore request parked behind it.
+    run = portal_queue.progress_run(db, application_id)
     now = datetime.now(timezone.utc)
 
     def _aw(dt):
