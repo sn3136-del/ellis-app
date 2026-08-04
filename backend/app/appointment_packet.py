@@ -43,6 +43,13 @@ IN_PERSON_OUTCOMES = {
 
 UNKNOWN = "not confirmed by Ellis — verify with the post before you travel"
 
+# The one wording of the disclaimer. Served to the screen (behind a "Read
+# disclaimer" button on the final step) rather than printed on the cover.
+DISCLAIMER = ("Ellis prepared this file from the answers and documents you "
+              "gave it. It is not legal advice and not a government decision. "
+              "This visa is decided in person by the consular officer; Ellis "
+              "has not submitted anything on your behalf.")
+
 
 def applies_to(route_outcome: str) -> bool:
     """Is a carry-in packet the right artifact for this route?"""
@@ -212,9 +219,11 @@ def build(*, applicant_name: str, destination: str, route: dict,
     for i, s in enumerate(steps, start=1):
         for j, chunk in enumerate(consular_forms._wrap(s, 68)):
             lines.append(f"  {str(i) + '.' if j == 0 else '   '} {chunk}")
-    lines.append("")
-    lines.append("Ellis prepared this file from the answers and documents you")
-    lines.append("gave it. It is not legal advice and not a government decision.")
+    # The not-legal-advice disclaimer is NOT printed on the cover any more —
+    # the applicant reads it behind "Read disclaimer" on the final screen
+    # instead (product decision 2026-08-04). It still exists, in one place,
+    # as DISCLAIMER below, so screen and any future print can only ever say
+    # the same words.
 
     form_answers = form_answers or answers or {}
     return {
@@ -231,7 +240,8 @@ def build(*, applicant_name: str, destination: str, route: dict,
             form_key and consular_forms.official_form_fillable(
                 form_key, form_answers)),
         "documents": [{"id": d.get("id"), "name": d.get("name"),
-                       "doc_type": d.get("doc_type")} for d in have_docs],
+                       "doc_type": d.get("doc_type")} for d in have_docs
+                      if str(d.get("doc_type") or "") != "applicant_signature"],
         "missing_documents": missing_docs,
         "missing_form_fields": missing_fields,
         # The same gaps in the applicant's own words, each with the place its
@@ -245,6 +255,7 @@ def build(*, applicant_name: str, destination: str, route: dict,
         # <address>" without a second full packet build.
         "post": post_block(route),
         "next_steps": list(steps),
+        "disclaimer": DISCLAIMER,
         "ready": not missing_docs and not missing_fields,
     }
 
@@ -318,12 +329,14 @@ def build_for_case(db, app_row) -> dict:
         # The applicant's own verified passport, read once at intake. This read
         # `app_row.passport_profile`, which is not a column, so it was always
         # None and the packet judged the form without it.
-        merged = cf.answers_from_documents(
-            answers, checklist_intake.latest_passport_profile(db, app_row))
+        merged = cf.derived_answers(form_key, cf.answers_from_documents(
+            answers, checklist_intake.latest_passport_profile(db, app_row)))
         prepared = cf.prepare(form_key, merged)
         form_answers = merged
 
     from . import assisted_booking
+    signature_present = bool(
+        checklist_intake.applicant_signature_bytes(db, app_row.id))
     packet = build(
         applicant_name=str(answers.get("full_name") or
                            f"{answers.get('given_names','')} {answers.get('surname','')}".strip()),
@@ -331,6 +344,7 @@ def build_for_case(db, app_row) -> dict:
         documents=documents, answers=answers, form_key=form_key,
         form_prepared=prepared, form_answers=form_answers,
         appointment=assisted_booking.summary(db, app_row))
+    packet["signature_present"] = signature_present
     packet["_form_prepared"] = prepared
     packet["_form_answers"] = form_answers
     packet["_application_id"] = app_row.id
@@ -374,11 +388,16 @@ def _folder_parts(db, app_row, packet: dict):
             form_key, packet.get("_form_answers") or {})
         if filled:
             # The photograph the form asks for, from the photo the applicant
-            # already uploaded. Silently unchanged when there is none — an
-            # empty frame is a form they can still use.
+            # already uploaded, and the signature they drew in Ellis's pad.
+            # Silently unchanged when either is absent — an empty frame is a
+            # form they can still use.
             photo = checklist_intake.applicant_photo_bytes(db, app_row.id)
             if photo:
                 filled = cf.place_photo(filled, photo, form_key)
+            sig = checklist_intake.applicant_signature_bytes(db, app_row.id)
+            sig_box = cf.signature_box(form_key)
+            if sig and sig_box:
+                filled = cf.place_photo(filled, sig, form_key, box=sig_box)
             yield (f"{form_key}-OFFICIAL-FORM.pdf", filled, "application/pdf")
         else:
             yield (f"{form_key}-preparation-sheet.pdf",
@@ -386,6 +405,11 @@ def _folder_parts(db, app_row, packet: dict):
                                  applicant_name=packet.get("applicant_name") or ""),
                    "application/pdf")
     for d in packet.get("documents") or []:
+        # The signature is INSIDE the form, not a document anyone carries
+        # separately — listing it would print somebody's bare signature as a
+        # loose page in a folder that changes hands.
+        if str(d.get("doc_type") or "") == "applicant_signature":
+            continue
         blob = db.get(models.DocumentBlob, d.get("id")) if d.get("id") else None
         content = getattr(blob, "content", None)
         if not content:

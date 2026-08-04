@@ -21,7 +21,8 @@
         "25 Member State of main destination and other Member States of destination if applicable": "destination_country",
         " 22 Employer and employers address and telephone number For students name and address of educational establishment": "employer",
         " 30 Surname and first name of the inviting persons in the Member States If not applicable name of hotels or temporary accommodations in the Member States": "accommodation",
-        "8 Sex Male Female": "sex"
+        "8 Sex Male Female": "sex",
+        "Place and date": "signature_place_date"
     },
     "checkboxes": {
         "marital_status": {
@@ -63,5 +64,13 @@
         "y": 547.2,
         "width": 105.7,
         "height": 86.9
+    },
+    "signature_box": {
+        "_note": "Where the applicant's own drawn signature is placed. Bounded by the form's 'Signature:' label above and the parental-authority note below, both read off the blank itself.",
+        "page": 4,
+        "x": 332.0,
+        "y": 108.0,
+        "width": 220.0,
+        "height": 34.0
     }
 }

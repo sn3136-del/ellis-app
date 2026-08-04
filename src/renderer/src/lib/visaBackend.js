@@ -232,6 +232,10 @@ export function createVisaClient(session) {
     // Find the consular post that serves this applicant's address (official
     // sources, verified before it can become a booking link).
     findConsularPost: (id) => call('POST', `/cases/${id}/find-consular-post`, session),
+    // The signature the applicant draws in Ellis's pad — placed into the
+    // consular form's own Signature cell. Their strokes, their act.
+    saveSignature: (id, dataUrl) =>
+      call('POST', `/cases/${id}/signature`, session, { image_base64: dataUrl }),
     // Government calendars that have NO account (Germany RK-Termin, Poland
     // e-Konsulat): walk the applicant's own secure window to the month view.
     // Every mission the system serves, by NAME — an applicant knows 'Beijing',

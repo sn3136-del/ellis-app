@@ -114,6 +114,21 @@ def applicant_photo_bytes(db, application_id: str) -> bytes | None:
     return None
 
 
+def applicant_signature_bytes(db, application_id: str) -> bytes | None:
+    """The signature the applicant drew in Ellis's own pad, or None.
+
+    Exact doc_type match — a signature is an act, not a guess, so nothing is
+    ever inferred from filenames here the way the photo hunt allows."""
+    doc = db.execute(select(models.StoredDocument).where(
+        models.StoredDocument.application_id == application_id,
+        models.StoredDocument.doc_type == "applicant_signature").order_by(
+        models.StoredDocument.created_at.desc())).scalars().first()
+    if doc is None:
+        return None
+    blob = db.get(models.DocumentBlob, doc.id)
+    return getattr(blob, "content", None)
+
+
 def latest_passport_profile(db, app_row) -> dict:
     """The verified passport profile from the applicant's own uploaded biodata
     page, if they uploaded one.

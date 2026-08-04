@@ -336,8 +336,10 @@ def get_consular_form(application_id: str, download: bool = False,
         form_key, answers, applicant_name=str(answers.get("full_name") or ""),
         # The form draws a frame marked FOTOGRAFIA and the applicant already
         # uploaded the photo it wants; leaving it empty made them do by hand
-        # the one thing they had already done.
-        photo=checklist_intake.applicant_photo_bytes(db, application_id))
+        # the one thing they had already done. The signature is the one they
+        # drew in Ellis's pad — their act, carried onto the page.
+        photo=checklist_intake.applicant_photo_bytes(db, application_id),
+        signature=checklist_intake.applicant_signature_bytes(db, application_id))
     prepared = built["prepared"]
     if not download:
         return {"available": True, "form_key": form_key,
@@ -354,6 +356,51 @@ def get_consular_form(application_id: str, download: bool = False,
     return Response(content=built["pdf"], media_type="application/pdf",
                     headers={"Content-Disposition":
                              f'attachment; filename="{form_key}.pdf"'})
+
+
+class SignatureUpload(BaseModel):
+    # A data-URL or bare base64 PNG the applicant DREW in Ellis's pad.
+    image_base64: str
+
+
+@app.post("/cases/{application_id}/signature")
+def save_applicant_signature(application_id: str, body: SignatureUpload,
+                             db=Depends(get_session),
+                             p: Principal = Depends(get_principal)):
+    """Store the signature the applicant just drew, as their own act.
+
+    It is placed into the consular form's Signature cell — the applicant
+    signing through Ellis's pen, never Ellis signing for the applicant: the
+    strokes are theirs, drawn in this session, recorded in the audit trail.
+    A new drawing replaces the old one (people re-sign until it looks right).
+    """
+    import base64
+    app_row = _owned(db, p, application_id)
+    raw = body.image_base64.split(",", 1)[-1].strip()
+    try:
+        content = base64.b64decode(raw, validate=True)
+    except Exception:
+        raise HTTPException(422, detail={"reason": "bad_image",
+                                         "detail": "not decodable base64"})
+    if not content.startswith(b"\x89PNG") or len(content) > 500_000:
+        raise HTTPException(422, detail={"reason": "bad_image",
+                                         "detail": "expected a small PNG"})
+    import hashlib
+    sha = hashlib.sha256(content).hexdigest()
+    doc = models.StoredDocument(
+        org_id=p.org_id, application_id=application_id,
+        name="signature.png", mime="image/png", size_bytes=len(content),
+        sha256=sha, storage_ref=f"local://{sha[:16]}",
+        doc_type="applicant_signature", ocr_status="done")
+    db.add(doc)
+    db.commit()
+    db.add(models.DocumentBlob(document_id=doc.id, org_id=p.org_id,
+                               mime="image/png", content=content))
+    db.commit()
+    audit.record(db, org_id=p.org_id, application_id=application_id,
+                 action="applicant_signature_captured",
+                 detail={"sha256": sha, "bytes": len(content)}, actor=p.user_id)
+    return {"ok": True, "signature_present": True}
 
 
 def _iso3_for(db, destination: str) -> str:

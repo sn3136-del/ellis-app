@@ -65,6 +65,9 @@ SCHENGEN_UNIFORM = [
     ("31. Surname and first name of the inviting person / hotel(s)",
      "accommodation", True),
     ("    Address of the inviting person / hotel(s)", "accommodation_address", False),
+    # Derived at build time (the applicant's city + the day the form is
+    # produced), never asked: see derived_answers.
+    ("36. Place and date", "signature_place_date", False),
 ]
 
 # The DS-160 is submitted on the US Department of State's own site (CEAC) —
@@ -883,10 +886,10 @@ def fill_official_template(form_key: str, answers: dict,
         return None
 
 
-def photo_box(form_key: str) -> dict:
-    """The frame this form draws for the applicant's photograph, in PDF points,
-    or {} when the form has none. Data, not code — read from <form_key>.map.json
-    beside the official blank, so another country's form is still a data step."""
+def _image_box(form_key: str, key: str) -> dict:
+    """A named image frame from <form_key>.map.json (photo_box,
+    signature_box), in PDF points, or {} when the form has none. Data, not
+    code — another country's form stays a data step."""
     import json
     path = _map_path(form_key)
     if not path.is_file():
@@ -895,7 +898,7 @@ def photo_box(form_key: str) -> dict:
         data = json.loads(path.read_text())
     except ValueError:
         return {}
-    box = data.get("photo_box") if isinstance(data, dict) else None
+    box = data.get(key) if isinstance(data, dict) else None
     if not isinstance(box, dict):
         return {}
     try:
@@ -906,19 +909,48 @@ def photo_box(form_key: str) -> dict:
         return {}
 
 
-def place_photo(pdf_bytes: bytes, image_bytes: bytes, form_key: str) -> bytes:
-    """Put the applicant's OWN photograph in the form's photo frame.
+def photo_box(form_key: str) -> dict:
+    """The frame this form draws for the applicant's photograph, or {}."""
+    return _image_box(form_key, "photo_box")
 
-    The Schengen blank draws an empty box marked FOTOGRAFIA and every applicant
-    has already given Ellis the passport photo it wants — leaving the box empty
-    made them do by hand the one thing they had already done.
 
-    Nothing is generated or altered: this is the file they uploaded, fitted to
-    the frame the form itself draws. Returns the PDF unchanged if there is no
-    frame, no image, or anything at all goes wrong — a form with an empty photo
-    box is still a usable form, and a corrupted one is not.
+def signature_box(form_key: str) -> dict:
+    """The cell this form draws for the applicant's signature, or {}."""
+    return _image_box(form_key, "signature_box")
+
+
+def derived_answers(form_key: str, answers: dict) -> dict:
+    """Answers the FORM needs that no person should be asked for, because the
+    build itself knows them. Today that is 'Place and date': the city the
+    applicant gave, and the day this form is produced, in the form's own date
+    order. Only ever fills a gap — an explicit answer always wins."""
+    out = dict(answers or {})
+    if not out.get("signature_place_date"):
+        from datetime import date
+        from . import dates
+        city = str(out.get("address_city") or "").strip()
+        fmt = (FORMS.get(form_key) or {}).get("date_format") or "DD-MM-YYYY"
+        today = dates.to_portal(date.today().isoformat(), fmt)
+        if city and today:
+            out["signature_place_date"] = f"{city}, {today}"
+    return out
+
+
+def place_photo(pdf_bytes: bytes, image_bytes: bytes, form_key: str,
+                *, box: dict | None = None) -> bytes:
+    """Put the applicant's OWN image in one of the form's drawn frames.
+
+    The Schengen blank draws an empty box marked FOTOGRAFIA and a Signature
+    cell, and the applicant has already given Ellis both images — the passport
+    photo they uploaded, and the signature they drew in Ellis's own pad.
+    Leaving the frames empty made them do by hand what they had already done.
+
+    Nothing is generated or altered: these are the applicant's own files,
+    fitted to frames the form itself draws. Returns the PDF unchanged if there
+    is no frame, no image, or anything at all goes wrong — a form with an
+    empty frame is still a usable form, and a corrupted one is not.
     """
-    box = photo_box(form_key)
+    box = box or photo_box(form_key)
     if not box or not image_bytes or not pdf_bytes:
         return pdf_bytes
     try:
@@ -960,25 +992,37 @@ def place_photo(pdf_bytes: bytes, image_bytes: bytes, form_key: str) -> bytes:
 
 
 def build(form_key: str, answers: dict, *, applicant_name: str = "",
-          photo: bytes | None = None) -> dict:
+          photo: bytes | None = None, signature: bytes | None = None) -> dict:
     """Produce the best HONEST artifact for this form:
     the government's own filled PDF when its official blank is available,
     otherwise the preparation sheet — never a fabricated official form.
     Returns {kind, pdf, prepared} where kind is 'official_form' or
     'preparation_sheet'."""
+    answers = derived_answers(form_key, answers)
     prepared = prepare(form_key, answers)
     official = fill_official_template(form_key, answers)
     if official is not None:
-        placed = False
+        placed = signed = False
         if photo:
             with_photo = place_photo(official, photo, form_key)
-            placed = with_photo is not official and with_photo != official
+            placed = with_photo != official
             official = with_photo
+        if signature:
+            # The signature the applicant DREW in Ellis, placed in the cell
+            # the form draws for it. Their act, their stroke — Ellis is only
+            # the pen carrying it onto the page.
+            sig_box = signature_box(form_key)
+            if sig_box:
+                with_sig = place_photo(official, signature, form_key,
+                                       box=sig_box)
+                signed = with_sig != official
+                official = with_sig
         return {"kind": "official_form", "pdf": official, "prepared": prepared,
-                "photo_placed": placed}
+                "photo_placed": placed, "signature_placed": signed}
     return {"kind": "preparation_sheet",
             "pdf": render_pdf(prepared, applicant_name=applicant_name),
-            "prepared": prepared, "photo_placed": False}
+            "prepared": prepared, "photo_placed": False,
+            "signature_placed": False}
 
 
 def render_pdf(prepared: dict, *, applicant_name: str = "") -> bytes:

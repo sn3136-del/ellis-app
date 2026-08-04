@@ -443,7 +443,7 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
           were the last block on a page whose first question was "which city
           were you born in", asking the applicant to set a maximum travel
           distance and blackout dates before Ellis had their phone number. */}
-      {preferencesTabVisible(journey) && (!inPerson || packet?.stage === 'next') && (
+      {preferencesTabVisible(journey) && !inPerson && (
         <div style={{ marginTop: 16 }}>
           <Preferences client={client} caseId={caseId} initial={prefs} onSaved={(p) => { setPrefs(p); toast('Saved') }} />
         </div>
@@ -700,8 +700,7 @@ function ConsularJourney({ t, client, caseId, packet, journey, onChanged }) {
           onDownloaded={onChanged} onEdit={() => setReopened(true)} />
       )}
       {stage === 'next' && (
-        <ConsularNext t={t} client={client} caseId={caseId} packet={packet}
-          onEdit={() => setReopened(true)} />
+        <ConsularNext t={t} client={client} caseId={caseId} packet={packet} />
       )}
     </div>
   )
@@ -871,7 +870,88 @@ function ConsularAsk({ t, client, caseId, packet, journey, onChanged }) {
   )
 }
 
-// STEP 2 — one button. Everything Ellis needs is in; the folder is one click.
+// The pad the applicant signs in: their own strokes on a canvas, saved as the
+// image the form's Signature cell receives. Ellis never draws a stroke — a
+// signature that isn't the person's own hand is a forgery, whatever produced
+// it.
+function SignaturePad({ t, client, caseId, onSigned }) {
+  const toast = useToast()
+  const canvasRef = useRef(null)
+  const drawing = useRef(false)
+  const [dirty, setDirty] = useState(false)
+  const [busy, setBusy] = useState(false)
+
+  function pos(e) {
+    const c = canvasRef.current
+    const r = c.getBoundingClientRect()
+    const p = e.touches ? e.touches[0] : e
+    return [(p.clientX - r.left) * (c.width / r.width),
+            (p.clientY - r.top) * (c.height / r.height)]
+  }
+  function start(e) {
+    drawing.current = true
+    const ctx = canvasRef.current.getContext('2d')
+    ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.strokeStyle = '#1a2b49'
+    ctx.beginPath(); ctx.moveTo(...pos(e))
+    e.preventDefault()
+  }
+  function move(e) {
+    if (!drawing.current) return
+    const ctx = canvasRef.current.getContext('2d')
+    ctx.lineTo(...pos(e)); ctx.stroke()
+    setDirty(true)
+    e.preventDefault()
+  }
+  function end() { drawing.current = false }
+  function clear() {
+    const c = canvasRef.current
+    c.getContext('2d').clearRect(0, 0, c.width, c.height)
+    setDirty(false)
+  }
+  async function save() {
+    setBusy(true)
+    try {
+      // White ground, so the PNG pasted into the printed form reads as ink on
+      // paper rather than a grey transparency block.
+      const c = canvasRef.current
+      const flat = document.createElement('canvas')
+      flat.width = c.width; flat.height = c.height
+      const fx = flat.getContext('2d')
+      fx.fillStyle = '#ffffff'; fx.fillRect(0, 0, flat.width, flat.height)
+      fx.drawImage(c, 0, 0)
+      await client.saveSignature(caseId, flat.toDataURL('image/png'))
+      onSigned && onSigned()
+    } catch (e) { toast(e.detail?.detail || e.message) }
+    setBusy(false)
+  }
+
+  return (
+    <div style={{ margin: '4px 0 14px' }} data-testid="signature-pad">
+      <div style={{ fontWeight: 600, marginBottom: 4 }}>{t('sig.title')}</div>
+      <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 8 }}>
+        {t('sig.sub')}
+      </div>
+      <canvas ref={canvasRef} width={560} height={140}
+        style={{ width: '100%', maxWidth: 560, height: 140, touchAction: 'none',
+                 background: '#fff', border: '1px dashed var(--line)',
+                 borderRadius: 10, cursor: 'crosshair' }}
+        onMouseDown={start} onMouseMove={move} onMouseUp={end} onMouseLeave={end}
+        onTouchStart={start} onTouchMove={move} onTouchEnd={end} />
+      <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+        <button className="btn" onClick={save} disabled={!dirty || busy}
+          data-testid="signature-save">
+          {busy ? t('sig.saving') : t('sig.save')}
+        </button>
+        <button className="btn btn--ghost" onClick={clear} disabled={busy}>
+          {t('sig.clear')}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// STEP 2 — sign, then one button. Everything Ellis needs is in; the applicant
+// signs their application in the pad, and the folder is one click.
 function ConsularReady({ t, client, caseId, packet, onDownloaded, onEdit }) {
   const toast = useToast()
   const [busy, setBusy] = useState(false)
@@ -902,8 +982,23 @@ function ConsularReady({ t, client, caseId, packet, onDownloaded, onEdit }) {
           ? t('consular.ready.subOfficial', { count: docs })
           : t('consular.ready.subPrep', { count: docs })}
       </div>
+      {/* Sign before download: the form carries a Signature cell, and the
+          drawing goes into it. Re-signing any time replaces the old one. */}
+      {!packet.signature_present && (
+        <SignaturePad t={t} client={client} caseId={caseId}
+          onSigned={onDownloaded} />
+      )}
+      {packet.signature_present && (
+        <div style={{ marginBottom: 12 }}>
+          <span className="chip chip--ink" data-testid="signature-done">
+            {t('sig.done')}
+          </span>
+        </div>
+      )}
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <button className="btn" onClick={download} disabled={busy}
+        <button className="btn" onClick={download}
+          disabled={busy || !packet.signature_present}
+          title={!packet.signature_present ? t('sig.needed') : undefined}
           data-testid="packet-download">
           {busy ? t('consular.ready.preparing') : t('consular.ready.download')}
         </button>
@@ -915,10 +1010,15 @@ function ConsularReady({ t, client, caseId, packet, onDownloaded, onEdit }) {
   )
 }
 
-// STEP 3 — where to go, and what to do when you get there.
-function ConsularNext({ t, client, caseId, packet, onEdit }) {
+// STEP 3 — the last page, and it holds ONLY what the applicant does now: the
+// instructions and the folder. Booking tools, edit links and preference forms
+// all crowded this screen and were cut ("hide everything besides the
+// instruction and download again", 2026-08-04). Centered, because it is the
+// end of the journey, not another form.
+function ConsularNext({ t, client, caseId, packet }) {
   const toast = useToast()
   const [busy, setBusy] = useState(false)
+  const [showDisclaimer, setShowDisclaimer] = useState(false)
   const post = packet.post || {}
   const steps = packet.next_steps || []
 
@@ -937,54 +1037,64 @@ function ConsularNext({ t, client, caseId, packet, onEdit }) {
   }
 
   return (
-    <div data-testid="consular-next">
-      <div style={{ fontWeight: 700, marginBottom: 4 }}>{t('consular.next.title')}</div>
-      <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14 }}>
-        {t('consular.next.sub')}
+    <div data-testid="consular-next"
+      style={{ maxWidth: 560, margin: '0 auto', textAlign: 'center',
+               padding: '18px 6px 6px' }}>
+      <div className="eyebrow" style={{ marginBottom: 8 }}>
+        {t('consular.next.title')}
       </div>
-
-      {post.name ? (
-        <div className="note" style={{ marginBottom: 14 }} data-testid="consular-post">
-          <div style={{ fontWeight: 600, marginBottom: 4 }}>
-            {post.address
-              ? t('consular.next.goTo', { address: post.address })
-              : t('consular.next.goToPost', { post: post.name })}
-          </div>
-          <div style={{ fontSize: 13 }}>{post.name}</div>
-          {post.status === 'unconfirmed' && (
-            <div style={{ fontSize: 12.5, marginTop: 6, color: 'var(--muted)' }}>
-              {t('post.unconfirmed')}
-              {post.source_url && (
-                <div style={{ marginTop: 3, wordBreak: 'break-all' }}>
-                  {t('post.source')}: {post.source_url}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="note" style={{ marginBottom: 14 }}>
-          {t('booking.unknownPost')}
+      <div style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.3,
+                    marginBottom: 6 }}>
+        {post.address
+          ? t('consular.next.goTo', { address: post.address })
+          : post.name
+          ? t('consular.next.goToPost', { post: post.name })
+          : t('booking.unknownPost')}
+      </div>
+      {post.name && post.address && (
+        <div style={{ fontSize: 13.5, color: 'var(--muted)' }}>{post.name}</div>
+      )}
+      {post.status === 'unconfirmed' && post.name && (
+        <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 8 }}
+          data-testid="post-unconfirmed">
+          {t('post.unconfirmed')}
         </div>
       )}
 
       {steps.length > 0 && (
-        <div style={{ marginBottom: 14 }} data-testid="consular-steps">
-          <div style={{ fontWeight: 600, marginBottom: 6 }}>{t('consular.next.onTheDay')}</div>
-          <ol style={{ margin: 0, paddingLeft: 20, fontSize: 13.5, lineHeight: 1.7 }}>
+        <div className="card card--soft"
+          style={{ padding: '16px 20px', margin: '18px 0',
+                   textAlign: 'left' }} data-testid="consular-steps">
+          <div className="eyebrow" style={{ marginBottom: 8 }}>
+            {t('consular.next.onTheDay')}
+          </div>
+          <ol style={{ margin: 0, paddingLeft: 20, fontSize: 13.5, lineHeight: 1.8 }}>
             {steps.map((s, i) => <li key={i}>{s}</li>)}
           </ol>
         </div>
       )}
 
-      <AppointmentBooking t={t} client={client} caseId={caseId} />
+      <button className="btn" onClick={again} disabled={busy}
+        data-testid="packet-download-again">
+        {busy ? t('consular.ready.preparing') : t('consular.next.again')}
+      </button>
 
-      <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-        <button className="btn btn--ghost" onClick={again} disabled={busy}
-          data-testid="packet-download-again">
-          {busy ? t('consular.ready.preparing') : t('consular.next.again')}
-        </button>
-        <button className="btn btn--ghost" onClick={onEdit}>{t('consular.edit')}</button>
+      <div style={{ marginTop: 22 }}>
+        {showDisclaimer ? (
+          <div style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.6,
+                        maxWidth: 460, margin: '0 auto' }}
+            data-testid="disclaimer-text">
+            {packet.disclaimer || ''}
+          </div>
+        ) : (
+          <button type="button" onClick={() => setShowDisclaimer(true)}
+            data-testid="read-disclaimer"
+            style={{ background: 'none', border: 'none', cursor: 'pointer',
+                     fontSize: 12.5, color: 'var(--muted)',
+                     textDecoration: 'underline' }}>
+            {t('consular.next.disclaimer')}
+          </button>
+        )}
       </div>
     </div>
   )

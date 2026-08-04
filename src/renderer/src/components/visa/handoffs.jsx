@@ -1259,11 +1259,28 @@ export function AdditionalInfoModal({ client, caseId, checklist, pending, onReso
             <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: -2 }}>{q.why}</div>
           )}
           {q.kind === 'select' && Array.isArray(q.options) && q.options.length > 0 ? (
+            q.options_partial ? (
+              // A PARTIAL read of the portal's list is suggestions, never the
+              // menu: a hard dropdown here trapped a traveller whose answer
+              // sat past the rows Ellis managed to read (2026-08-04,
+              // Singapore's place of residence). Type anything; what is known
+              // autocompletes; the fill step verifies against the live list.
+              <>
+                <input className="input" list={`aiq-list-${q.key}`}
+                  value={values[q.key] || ''}
+                  placeholder={t('addinfo.partialPlaceholder')}
+                  onChange={(e) => set(q.key, e.target.value)} />
+                <datalist id={`aiq-list-${q.key}`}>
+                  {q.options.map((o) => <option key={String(o)} value={String(o)} />)}
+                </datalist>
+              </>
+            ) : (
             <select className="select" value={values[q.key] || ''}
                     onChange={(e) => set(q.key, e.target.value)}>
               <option value="">{t('addinfo.selectPlaceholder')}</option>
               {q.options.map((o) => <option key={String(o)} value={String(o)}>{String(o)}</option>)}
             </select>
+            )
           ) : (
             <input className="input" value={values[q.key] || ''}
                    placeholder={q.kind === 'date' ? 'MM/DD/YYYY' : (q.format || '')}

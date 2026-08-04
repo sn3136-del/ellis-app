@@ -189,6 +189,14 @@ function _pick(rows, want, allowSole) {
 # element beside an input whose value stays ''. An empty input is therefore
 # not an answer — it is a reason to look at what the widget renders.
 _SHOWN_VALUE_JS = """(el) => {
+  // A radio or checkbox CARRIES its option's value whether or not it is
+  // chosen: #sex_F_0 reads "F" forever. Reporting that as "the field holds F"
+  // let a resume shortcut skip the click that would have actually chosen
+  // FEMALE, and the applicant watched the portal keep its own default
+  // (2026-08-04, Singapore SGAC). For a choice, the held value is the value
+  // only while the box is CHECKED.
+  if (el.type === 'radio' || el.type === 'checkbox')
+    return el.checked ? (el.value || '').trim() : '';
   const own = (el.value || '').trim();
   if (own) return own;
   // Every layer from the widget ROOT down to the input can carry 'select' in
@@ -209,6 +217,17 @@ _SHOWN_VALUE_JS = """(el) => {
   if (s) return (s.innerText || '').trim();
   return root ? '' : (el.innerText || '').trim();
 }"""
+
+
+def _norm_prefix(a: str, b: str) -> int:
+    """Length of the shared leading stem of two labels, case-insensitively."""
+    a, b = str(a or "").lower().strip(), str(b or "").lower().strip()
+    n = 0
+    for x, y in zip(a, b):
+        if x != y:
+            break
+        n += 1
+    return n
 
 
 def _parse_slot_datetime(raw: str) -> int | None:
@@ -402,7 +421,7 @@ class BrowserbasePageDriver:
         # Ellis spent 26 seconds failing at three of them and ended the run.
         choice = self._choice_kind(selector)
         if choice:
-            return self._choose(selector, str(value), choice)
+            return self._choose_maybe_date(selector, str(value), choice)
         # A READONLY input is not a field that might accept typing — it is a
         # field the portal reserved for its own picker. Playwright refuses to
         # fill it, and the keyboard fallback types into something that cannot
@@ -419,7 +438,24 @@ class BrowserbasePageDriver:
         except Exception:  # noqa: BLE001 — unreadable: take the normal ladder
             pass
         try:
+            # Was a list already open before this fill? Then an open list
+            # AFTER it proves nothing about this box — only a panel that
+            # appears in RESPONSE to the typing marks a search-select.
+            try:
+                open_before = bool(
+                    (self.page.evaluate(self._OPEN_LIST_JS) or {}).get("open"))
+            except Exception:  # noqa: BLE001
+                open_before = True          # unknowable: never hijack the fill
             self.page.fill(selector, str(value), timeout=_ACT_MS)
+            # The page is the authority on what this box IS. If typing into it
+            # opened an options list, this is a search-select wearing a text
+            # input's clothes, and the text alone commits nothing — an option
+            # must be clicked (or honestly reported unmatchable).
+            if not open_before:
+                self.page.wait_for_timeout(200)
+                committed = self._commit_open_list(selector, str(value))
+                if committed is not None:
+                    return committed
             # Framework forms (rc-field-form/Ant Design) commit a controlled
             # input's value to their own store on blur. Without it the DOM
             # shows the text while the form still considers the field empty —
@@ -594,6 +630,39 @@ class BrowserbasePageDriver:
         except Exception:  # noqa: BLE001
             return ""
 
+    # The renderings a portal actually prints a date option in. DD/MM first:
+    # every portal Ellis has met that offers date CHIPS (SGAC's three arrival
+    # days) is day-first, and the same page declared DD/MM/YYYY on its typed
+    # date boxes. MM/DD is tried last, so it can only ever match when no
+    # day-first rendering did.
+    _DATE_LABEL_FORMATS = ("DD/MM/YYYY", "D/M/YYYY", "DD-MM-YYYY",
+                           "YYYY-MM-DD", "DD MON YYYY", "MM/DD/YYYY")
+
+    def _choose_maybe_date(self, selector: str, want: str, kind: str) -> dict:
+        """_choose, but a canonical ISO answer also recognises its own date in
+        the portal's rendering.
+
+        Singapore's arrival card offers the date as three radio chips labelled
+        '04/08/2026'; the case's answer is '2026-08-04'. Textually those never
+        match, so all three chips read as NOT_THIS_OPTION, the date was never
+        chosen, and the applicant was asked to answer a question whose answer
+        Ellis was holding (2026-08-04). Same date, spelled the portal's ways.
+        """
+        res = self._choose(selector, want, kind)
+        from .. import dates
+        if not dates.is_iso(want):
+            return res
+        if res.get("ok") or res.get("code") != "NOT_THIS_OPTION":
+            return res
+        for fmt in self._DATE_LABEL_FORMATS:
+            spelled = dates.to_portal(want, fmt)
+            if not spelled or spelled == want:
+                continue
+            res = self._choose(selector, spelled, kind)
+            if res.get("ok") or res.get("code") != "NOT_THIS_OPTION":
+                return res
+        return res
+
     def _choose(self, selector: str, want: str, kind: str) -> dict:
         """Answer ONE option of a choice group with the applicant's answer.
 
@@ -612,8 +681,17 @@ class BrowserbasePageDriver:
             const l = document.querySelector('label[for="' + CSS.escape(el.id) + '"]');
             if (l) words.push(_label(l));
           }
+          // The wrapper's text speaks for THIS option only when the wrapper
+          // holds no sibling. 'radio' in a class name is also how GROUP
+          // containers are styled, and closest() walked up to one: its text
+          // was "FEMALE MALE OTHERS", which starts with "F", so the F node
+          // "matched" every group and the verifying click landed on the
+          // container — which is how OTHERS got selected on an applicant
+          // whose passport says F (2026-08-04, Singapore SGAC).
           const w = el.closest('label, [class*="radio"], [class*="checkbox"]');
-          if (w && w !== el) words.push(_label(w));
+          if (w && w !== el &&
+              w.querySelectorAll('input[type=radio], input[type=checkbox]').length <= 1)
+            words.push(_label(w));
           const rows = words.filter(Boolean).map((t, i) => [i, t]);
           return {code: 'OK', match: !!_pick(rows, want, false),
                   words: rows.map(([, t]) => t).slice(0, 4)};
@@ -642,6 +720,101 @@ class BrowserbasePageDriver:
             return {"ok": False, "code": "VALUE_NOT_ACCEPTED",
                     "detail": f"{want[:30]!r} did not stay selected"}
         return {"ok": True, "method": f"{kind}_choice"}
+
+    # After typing into a field, did the page open a list of options for it?
+    # Returns {open: bool, rows: [labels]} — the page's own answer to "is this
+    # a search-select pretending to be a text box".
+    _OPEN_LIST_JS = "() => {" + _OPTION_JS + """
+      const panel = _openPanel();
+      if (!panel) return {open: false, rows: []};
+      return {open: true, rows: _rows().map(([, t]) => t).slice(0, 400)};
+    }"""
+
+    _PICK_OPEN_JS = "(want) => {" + _OPTION_JS + """
+      const rows = _rows();
+      if (!rows.length) return null;
+      const hit = _pick(rows, want, true);
+      if (!hit) return {labels: rows.map(([, t]) => t).slice(0, 12)};
+      hit[0][0].click();
+      return {chosen: hit[0][1], match: hit[1]};
+    }"""
+
+    def _commit_open_list(self, selector: str, value: str) -> dict | None:
+        """A text fill that opened an options list has NOT answered anything
+        yet — the widget commits on an option CLICK, and the typed text is
+        only its filter. Singapore's nationality box took 'CHN', reported ok,
+        and the page sat on 'No items found' with nothing committed; the save
+        then failed on a field every checkpoint called filled (2026-08-04).
+
+        Returns None when no list opened (a plain text box — the fill already
+        stands). Otherwise commits the best option and reports it, retrying an
+        ISO country code as the registry's display name and then as its
+        leading stem — 'CHN' → 'China' → 'CHIN', which is how a list that says
+        'CHINESE' gets found without Ellis ever guessing a row it cannot read
+        as the answer.
+        """
+        try:
+            state = self.page.evaluate(self._OPEN_LIST_JS) or {}
+        except Exception:  # noqa: BLE001 — unreadable: let the fill stand
+            return None
+        if not state.get("open"):
+            return None
+
+        queries = [value]
+        v = str(value).strip()
+        if len(v) == 3 and v.isalpha():
+            try:
+                from ..visa_snapshot.registry import _country_index
+                entry = (_country_index() or {}).get(v.upper()) or {}
+                name = str(entry.get("name") or "").strip()
+            except Exception:  # noqa: BLE001
+                name = ""
+            if name:
+                # The name itself, then its shrinking stem: 'China' misses a
+                # list that says 'CHINESE', 'CHIN' finds it.
+                queries.append(name)
+                queries.extend(name[:n] for n in (5, 4)
+                               if len(name) > n)
+        wanted = queries[1] if len(queries) > 1 else v
+
+        for i, q in enumerate(queries):
+            if i > 0:      # retype the new filter
+                try:
+                    self.page.fill(selector, q, timeout=_ACT_MS)
+                    self.page.wait_for_timeout(250)
+                except Exception:  # noqa: BLE001
+                    break
+            try:
+                got = self.page.evaluate(self._PICK_OPEN_JS, wanted if i else q)
+            except Exception:  # noqa: BLE001
+                got = None
+            if got and got.get("chosen"):
+                self.page.wait_for_timeout(150)
+                return {"ok": True, "shown": got["chosen"][:60],
+                        "match": got.get("match") or "exact"}
+            if got and got.get("labels") and len(got["labels"]) == 1:
+                # One row left under a filter derived from the answer, sharing
+                # its stem — that is the list's own spelling of this country
+                # (CHINESE for China), not a guess among alternatives.
+                only = str(got["labels"][0])
+                if _norm_prefix(only, wanted) >= 4:
+                    try:
+                        self.page.evaluate(
+                            "(w) => {" + _OPTION_JS +
+                            " const r=_rows(); if (r.length===1) r[0][0].click(); }",
+                            only)
+                        self.page.wait_for_timeout(150)
+                        return {"ok": True, "shown": only[:60], "match": "stem"}
+                    except Exception:  # noqa: BLE001
+                        pass
+        # Nothing committable. Clear the leftover filter text so the form is
+        # not left holding a fragment nobody chose, and fail honestly.
+        try:
+            self.page.fill(selector, "", timeout=_ACT_MS)
+        except Exception:  # noqa: BLE001
+            pass
+        return {"ok": False, "code": "NO_OPTIONS",
+                "detail": f"no option matches {v[:30]!r}"}
 
     def _value_now(self, selector: str):
         """What the field holds right now, or None when it cannot be read."""
