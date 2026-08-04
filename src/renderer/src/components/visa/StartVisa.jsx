@@ -385,7 +385,7 @@ export default function StartVisa({ client, onOpenCase }) {
   // demo routes. Nothing is deleted — every registry, adapter, and route
   // stays live underneath; empty the set to show the full list again. Other
   // country pickers (nationality, residence, birth country) are untouched.
-  const DEMO_DESTINATIONS = ['DEU', 'VNM', 'SGP']
+  const DEMO_DESTINATIONS = ['VNM']  // Vietnam edition — Germany + Singapore ship on main
   const destinationOpts = useMemo(() => (
     DEMO_DESTINATIONS.length
       ? countryOpts.filter((o) => DEMO_DESTINATIONS.includes(o.value))
