@@ -95,11 +95,26 @@ export function usePortalLiveView(client, caseId, opts = {}) {
   const [busy, setBusy] = useState(false)
   const [note, setNote] = useState('')
   const [restoring, setRestoring] = useState(false)
+  // The session ROW this window is embedded on. While Ellis's run is driving,
+  // the run owns session identity — the window follows it and re-attaches
+  // when it changes, instead of ever racing it with a session of its own.
+  const rowRef = useRef(null)
+  const retryRef = useRef(null)
 
   async function open() {
     setBusy(true)
     try {
       const s = await client.createBrowserSession(caseId)
+      if (s && s.run_opening) {
+        // Ellis's run is opening the portal session right now — attach to
+        // THAT one as soon as it registers, never create a rival window.
+        setState('connecting')
+        clearTimeout(retryRef.current)
+        retryRef.current = setTimeout(() => { open() }, 5000)
+        setBusy(false)
+        return
+      }
+      rowRef.current = (s && s.id) || null
       if (s && s.fresh && restore) {
         // A brand-new session shows a blank page. Ask Ellis to rebuild the
         // portal view at the case's current step (background, reversible),
@@ -150,11 +165,25 @@ export function usePortalLiveView(client, caseId, opts = {}) {
     } catch { /* the panel keeps its current state */ }
   }
 
-  useEffect(() => { open() }, [caseId])
+  useEffect(() => { open(); return () => clearTimeout(retryRef.current) }, [caseId])
   // Live-view links expire after a few minutes; refresh before they do.
   useEffect(() => {
     if (state !== 'embedded') return undefined
     const iv = setInterval(() => { open() }, 210000)
+    return () => clearInterval(iv)
+  }, [state, caseId])
+  // Session-identity watch: while embedded, if the case's session row changes
+  // under this window (the run opened its own after ours went stale), re-mint
+  // and re-attach automatically — the applicant must never sit watching an
+  // idle twin of the page Ellis is actually filling (Vietnam, 2026-08-04).
+  useEffect(() => {
+    if (state !== 'embedded') return undefined
+    const iv = setInterval(async () => {
+      try {
+        const s = await client.createBrowserSession(caseId)
+        if (s && s.id && rowRef.current && s.id !== rowRef.current) open()
+      } catch { /* checked again next tick */ }
+    }, 15000)
     return () => clearInterval(iv)
   }, [state, caseId])
 
