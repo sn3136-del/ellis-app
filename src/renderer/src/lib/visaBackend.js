@@ -244,8 +244,11 @@ export function createVisaClient(session) {
     calendarMonth: (id) => call('GET', `/cases/${id}/calendar/month`, session),
     // The folder itself, as one download. Kept out of `call` because the body
     // is a zip, not JSON — same auth headers, raw blob back.
-    downloadAppointmentPacket: async (id) => {
-      const res = await fetch(`${BASE}/cases/${id}/appointment-packet?format=zip`,
+    // The whole application as ONE PDF: cover, the filled official form, then
+    // every document, each behind a page naming it — one thing to scroll,
+    // print and hand over. format=zip still returns the separate originals.
+    downloadAppointmentPacket: async (id, format = 'pdf') => {
+      const res = await fetch(`${BASE}/cases/${id}/appointment-packet?format=${format}`,
                               { headers: authHeaders(session) })
       if (!res.ok) throw new Error(`packet download failed (HTTP ${res.status})`)
       return await res.blob()

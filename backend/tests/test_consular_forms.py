@@ -30,6 +30,9 @@ ANSWERS = {
     "departure_date": "2026-09-30", "accommodation": "Hotel Lutetia",
     "destination_country": "FRA", "travel_document_type": "ordinary_passport",
     "marital_status": "Single",
+    # The printed Schengen form draws asterisks beside occupation (21) and
+    # employer (22): a complete application answers both.
+    "occupation": "Engineer", "employer": "Acme Corp, 1 Market St, +1 555 0101",
 }
 
 

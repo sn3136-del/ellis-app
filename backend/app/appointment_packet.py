@@ -352,34 +352,121 @@ def render_zip(db, app_row, packet: dict) -> bytes:
 
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
-        z.writestr("00-START-HERE.pdf", render_cover_pdf(packet))
-        form_key = packet.get("form_key") or ""
-        prepared = packet.get("_form_prepared")
-        if form_key and prepared:
-            # The applicant's OWN answers (passport OCR already merged in).
-            # prepare() returns a print-ready sheet, not a value map — reading
-            # a 'values' key it never had meant the official blank was filled
-            # with nothing at all.
-            filled = cf.fill_official_template(
-                form_key, packet.get("_form_answers") or {})
-            if filled:
-                # The photograph the form asks for, from the photo the
-                # applicant already uploaded. Silently unchanged when there is
-                # none — an empty frame is a form they can still use.
-                photo = checklist_intake.applicant_photo_bytes(db, app_row.id)
-                if photo:
-                    filled = cf.place_photo(filled, photo, form_key)
-                z.writestr(f"01-{form_key}-OFFICIAL-FORM.pdf", filled)
-            else:
-                z.writestr(f"01-{form_key}-preparation-sheet.pdf",
-                           cf.render_pdf(prepared,
-                                         applicant_name=packet.get("applicant_name") or ""))
-        for i, d in enumerate(packet.get("documents") or [], start=2):
-            blob = db.get(models.DocumentBlob, d.get("id")) if d.get("id") else None
-            content = getattr(blob, "content", None)
-            if not content:
-                continue
-            safe = str(d.get("name") or d.get("doc_type") or f"document-{i}")
-            safe = "".join(c for c in safe if c.isalnum() or c in "._- ")[:60]
+        for i, (name, content, _mime) in enumerate(_folder_parts(db, app_row, packet)):
+            safe = "".join(c for c in name if c.isalnum() or c in "._- ")[:60]
             z.writestr(f"{i:02d}-{safe}", content)
     return buf.getvalue()
+
+
+def _folder_parts(db, app_row, packet: dict):
+    """The folder's contents in carry-in order: cover, the filled official
+    form (photo placed), then every accepted document. One source, so the zip
+    and the combined PDF can never disagree about what the applicant brings.
+    Yields (name, bytes, mime)."""
+    from . import checklist_intake, consular_forms as cf, models
+
+    yield ("START-HERE.pdf", render_cover_pdf(packet), "application/pdf")
+    form_key = packet.get("form_key") or ""
+    prepared = packet.get("_form_prepared")
+    if form_key and prepared:
+        # The applicant's OWN answers (passport OCR already merged in).
+        filled = cf.fill_official_template(
+            form_key, packet.get("_form_answers") or {})
+        if filled:
+            # The photograph the form asks for, from the photo the applicant
+            # already uploaded. Silently unchanged when there is none — an
+            # empty frame is a form they can still use.
+            photo = checklist_intake.applicant_photo_bytes(db, app_row.id)
+            if photo:
+                filled = cf.place_photo(filled, photo, form_key)
+            yield (f"{form_key}-OFFICIAL-FORM.pdf", filled, "application/pdf")
+        else:
+            yield (f"{form_key}-preparation-sheet.pdf",
+                   cf.render_pdf(prepared,
+                                 applicant_name=packet.get("applicant_name") or ""),
+                   "application/pdf")
+    for d in packet.get("documents") or []:
+        blob = db.get(models.DocumentBlob, d.get("id")) if d.get("id") else None
+        content = getattr(blob, "content", None)
+        if not content:
+            continue
+        yield (str(d.get("name") or d.get("doc_type") or "document"),
+               content, str(d.get("mime") or ""))
+
+
+# A4, matching the official blanks the form pages come from — mixing letter
+# and A4 pages makes a printed folder with edges that do not line up.
+_A4 = (595.32, 841.92)
+_MARGIN = 36.0
+
+
+def render_combined_pdf(db, app_row, packet: dict) -> bytes:
+    """The whole application as ONE PDF the applicant scrolls front to back:
+    cover, the filled official form, then every document, each behind a page
+    that names it.
+
+    A folder of separate files asked the applicant to be their own file
+    manager — open eight things, print eight things, lose one (2026-08-04).
+    One document is one print job and one attachment.
+
+    Honesty rule: a file that cannot be rendered into the combined PDF is not
+    silently dropped — its name page says plainly that the original must be
+    brought separately, so the folder never claims to contain what it does
+    not."""
+    import io
+    from pypdf import PdfReader, PdfWriter
+
+    writer = PdfWriter()
+
+    def append_pdf(data: bytes) -> bool:
+        try:
+            writer.append(PdfReader(io.BytesIO(data)))
+            return True
+        except Exception:  # noqa: BLE001 — an unreadable file gets a notice page
+            return False
+
+    def append_image(data: bytes) -> bool:
+        try:
+            from PIL import Image
+            img = Image.open(io.BytesIO(data))
+            img.load()
+            if img.mode != "RGB":
+                img = img.convert("RGB")
+            jbuf = io.BytesIO()
+            img.save(jbuf, format="JPEG", quality=92)
+            page_w, page_h = _A4
+            return append_pdf(pdfgen.image_pdf(
+                jbuf.getvalue(), pixels=img.size, page=_A4,
+                box=(_MARGIN, _MARGIN, page_w - 2 * _MARGIN,
+                     page_h - 2 * _MARGIN)))
+        except Exception:  # noqa: BLE001
+            return False
+
+    parts = list(_folder_parts(db, app_row, packet))
+    total_docs = max(0, len(parts) - 1)  # everything after the cover
+    for idx, (name, content, mime) in enumerate(parts):
+        if idx > 0:
+            # A one-line divider page before each item, so a person flicking
+            # through the printed stack can see where one document ends and
+            # the next begins — the job filenames did in the zip.
+            # Plain ASCII only: pdfgen writes latin-1 and renders an em dash
+            # as '?', which on a divider page reads like something failed.
+            writer.append(PdfReader(io.BytesIO(pdfgen.text_pdf(
+                ["", "", f"{idx} of {total_docs}", "", name],
+                title=name))))
+        low_mime, low_name = mime.lower(), name.lower()
+        if low_mime.startswith("image/") or low_name.endswith(
+                (".jpg", ".jpeg", ".png")):
+            ok = append_image(content)
+        else:
+            ok = append_pdf(content) or append_image(content)
+        if not ok:
+            writer.append(PdfReader(io.BytesIO(pdfgen.text_pdf([
+                "", f"{name} could not be included in this combined file.",
+                "Bring the original from Ellis's document list — it IS on",
+                "file; only this preview of it failed.",
+            ], title=name))))
+
+    out = io.BytesIO()
+    writer.write(out)
+    return out.getvalue()

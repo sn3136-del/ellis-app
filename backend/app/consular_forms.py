@@ -52,9 +52,12 @@ SCHENGEN_UNIFORM = [
     ("    Country", "address_country", True),
     ("    E-mail address", "email", True),
     ("    Telephone number", "phone", True),
-    ("19. Current occupation", "occupation", False),
+    # The printed form draws an asterisk beside both (its fields 21 and 22):
+    # they are REQUIRED, and calling them optional here meant Ellis never
+    # asked and the applicant carried a blank the consulate rejects.
+    ("19. Current occupation", "occupation", True),
     ("20. Employer and employer's address and telephone number",
-     "employer", False),
+     "employer", True),
     ("21. Purpose(s) of the journey", "travel_purpose", True),
     ("23. Member State of main destination", "destination_country", True),
     ("26. Intended date of arrival in the Schengen area", "arrival_date", True),

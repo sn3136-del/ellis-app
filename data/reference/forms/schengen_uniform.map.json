@@ -20,7 +20,8 @@
         "21 Current occupation": "occupation",
         "25 Member State of main destination and other Member States of destination if applicable": "destination_country",
         " 22 Employer and employers address and telephone number For students name and address of educational establishment": "employer",
-        " 30 Surname and first name of the inviting persons in the Member States If not applicable name of hotels or temporary accommodations in the Member States": "accommodation"
+        " 30 Surname and first name of the inviting persons in the Member States If not applicable name of hotels or temporary accommodations in the Member States": "accommodation",
+        "8 Sex Male Female": "sex"
     },
     "checkboxes": {
         "marital_status": {

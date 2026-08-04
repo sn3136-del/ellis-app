@@ -3,7 +3,7 @@
 // at, and finally show the confirmation + receipt + appointment. The backend
 // (DB-runner or Temporal) owns all state; this screen reads status and sends the
 // matching signal for each handoff.
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useToast, Loading, ErrorNote, KVList, Empty } from '../ui.jsx'
 import { useLocale } from '../../lib/locale.jsx'
 import { HANDOFF_COPY, HANDOFF_UI } from '../../lib/visaBackend.js'
@@ -707,39 +707,166 @@ function ConsularJourney({ t, client, caseId, packet, journey, onChanged }) {
   )
 }
 
-// STEP 1 — everything Ellis still needs, and nothing else on the screen.
-// The written questions, the tick-boxes and the documents are the three kinds
-// of gap, asked together in the order the form asks them.
+// STEP 1 — a wizard, not a wall. Documents first (the uploads decide which
+// questions even need asking: a hotel booking answers "where will you stay").
+// Then ONE question at a time, in the form's own order, each fading in:
+// a required question has Next, an optional one has Skip. Nothing else on the
+// screen while any of this is unanswered.
 function ConsularAsk({ t, client, caseId, packet, journey, onChanged }) {
-  const gaps = packet.missing_form_fields_detail || []
-  const docsMissing = packet.missing_documents || []
-  // A gap nobody can close by typing — it comes from a document Ellis has not
-  // been able to read. Naming it as an upload beats printing a storage key.
-  const fromDocs = gaps.filter((g) => g.source !== 'ask')
-  return (
-    <div>
-      <div style={{ fontWeight: 700, marginBottom: 4 }}>{t('consular.ask.title')}</div>
-      <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14 }}>
-        {t('consular.ask.sub', { destination: packet.destination || '' })}
+  const toast = useToast()
+  const [data, setData] = useState(null)
+  const [phase, setPhase] = useState(null)   // 'docs' | 'questions'
+  const [idx, setIdx] = useState(0)
+  const [value, setValue] = useState(null)
+  const [busy, setBusy] = useState(false)
+
+  const docsMissing = (packet.missing_documents || []).length > 0
+
+  useEffect(() => {
+    let live = true
+    client.consularFormQuestions(caseId)
+      .then((d) => { if (live) setData(d) })
+      .catch(() => { if (live) setData({ questions: [], fields: [] }) })
+    return () => { live = false }
+  }, [caseId])
+
+  // Documents come first, once, and only while any are actually owed —
+  // answered questions never bounce the applicant back to the upload screen.
+  useEffect(() => {
+    if (phase === null && data) setPhase(docsMissing ? 'docs' : 'questions')
+  }, [data, phase, docsMissing])
+
+  // One flat list in the form's own order: written fields, then tick-boxes.
+  // A question already answered (typed earlier, or read from a document) is
+  // only re-asked to be CONFIRMED when it came from a document; a confirmed
+  // answer never reappears.
+  const list = useMemo(() => {
+    if (!data) return []
+    const fields = (data.fields || [])
+      .filter((f) => !f.answer || f.from_document)
+      .map((f) => ({ ...f, kind: 'text' }))
+    const boxes = (data.questions || [])
+      .filter((q) => q.answer == null || q.answer === '' ||
+                     (Array.isArray(q.answer) && !q.answer.length))
+      .map((q) => ({ ...q, kind: 'choice', required: true }))
+    return [...fields.filter((f) => f.required), ...boxes,
+            ...fields.filter((f) => !f.required)]
+  }, [data])
+
+  const q = list[idx]
+  // Seed the input with what Ellis already knows the moment a question shows.
+  useEffect(() => {
+    if (!q) return
+    setValue(q.kind === 'choice' ? (q.multi ? [] : '') : (q.answer || ''))
+  }, [idx, q && q.key])
+
+  async function advance(save) {
+    if (!q) return
+    setBusy(true)
+    try {
+      if (save) await client.updateAnswers(caseId, { [q.key]: value })
+      if (idx + 1 < list.length) setIdx(idx + 1)
+      else onChanged()          // the backend decides: ready, or still gaps
+    } catch (e) { toast(e.detail?.detail || e.message) }
+    setBusy(false)
+  }
+
+  if (!data || phase === null) return <Loading label={t('consular.ask.title')} />
+
+  if (phase === 'docs') {
+    return (
+      <div className="fadeup" data-testid="consular-docs">
+        <div style={{ fontWeight: 700, marginBottom: 4 }}>{t('consular.docs.title')}</div>
+        <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14 }}>
+          {t('consular.docs.sub', { destination: packet.destination || '' })}
+        </div>
+        <DocCards t={t} client={client} caseId={caseId}
+          checklist={journey?.checklist} translation={journey?.translation}
+          onChanged={onChanged} />
+        <button className="btn" style={{ marginTop: 12 }}
+          disabled={docsMissing} onClick={() => setPhase('questions')}
+          data-testid="docs-next"
+          title={docsMissing ? t('consular.docs.stillMissing') : undefined}>
+          {t('consular.wizard.next')}
+        </button>
+        {docsMissing && (
+          <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 6 }}>
+            {t('consular.docs.stillMissing')}
+          </div>
+        )}
       </div>
-      <ConsularFormQuestions t={t} client={client} caseId={caseId}
-        onSaved={onChanged} bare />
-      {fromDocs.length > 0 && (
-        <div className="note" style={{ margin: '12px 0' }} data-testid="gaps-from-docs">
-          <div style={{ fontWeight: 600, marginBottom: 4 }}>{t('consular.ask.fromDocs')}</div>
-          <ul style={{ margin: 0, paddingLeft: 18 }}>
-            {fromDocs.map((g) => <li key={g.key}>{g.label}</li>)}
-          </ul>
+    )
+  }
+
+  if (!q) {
+    // Every question asked and answered — the refresh will flip the stage.
+    return <Loading label={t('consular.ready.preparing')} />
+  }
+
+  const answered = q.kind === 'choice'
+    ? (q.multi ? Array.isArray(value) && value.length > 0 : value !== '')
+    : String(value || '').trim() !== ''
+
+  return (
+    // key={q.key} remounts the block per question, which is what re-runs the
+    // fade — the animation the applicant sees between questions.
+    <div key={q.key} className="fadeup" data-testid="consular-question">
+      <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 8 }}>
+        {t('consular.wizard.progress', { n: idx + 1, total: list.length })}
+      </div>
+      <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 6 }}>
+        {q.label}
+      </div>
+      {q.from_document ? (
+        <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 10 }}>
+          {t('formq.fromDocument', { document: q.from_document })}
         </div>
-      )}
-      {docsMissing.length > 0 && (
-        <div style={{ marginTop: 14 }}>
-          <div style={{ fontWeight: 600, marginBottom: 6 }}>{t('consular.ask.docs')}</div>
-          <DocCards t={t} client={client} caseId={caseId}
-            checklist={journey?.checklist} translation={journey?.translation}
-            onChanged={onChanged} />
+      ) : q.help ? (
+        <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 10 }}>{q.help}</div>
+      ) : null}
+
+      {q.kind === 'choice' ? (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
+          {(q.options || []).map((o) => {
+            const on = q.multi ? (Array.isArray(value) && value.includes(o.value))
+              : value === o.value
+            return (
+              <button key={o.value} type="button"
+                className={'chip' + (on ? ' chip--ink' : '')}
+                aria-pressed={on}
+                onClick={() => setValue(q.multi
+                  ? (on ? value.filter((v) => v !== o.value) : [...(value || []), o.value])
+                  : o.value)}>
+                {o.label}
+              </button>
+            )
+          })}
         </div>
+      ) : q.type === 'textarea' ? (
+        <textarea className="input" rows={3} value={value || ''} autoFocus
+          style={{ marginBottom: 14 }}
+          onChange={(e) => setValue(e.target.value)} />
+      ) : (
+        <input className="input" autoFocus
+          type={q.type === 'tel' ? 'tel' : 'text'}
+          inputMode={q.type === 'tel' ? 'tel' : undefined}
+          value={value || ''} style={{ marginBottom: 14 }}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter' && answered && !busy) advance(true) }} />
       )}
+
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button className="btn" disabled={busy || !answered}
+          onClick={() => advance(true)} data-testid="question-next">
+          {busy ? t('formq.saving') : t('consular.wizard.next')}
+        </button>
+        {!q.required && (
+          <button className="btn btn--ghost" disabled={busy}
+            onClick={() => advance(false)} data-testid="question-skip">
+            {t('consular.wizard.skip')}
+          </button>
+        )}
+      </div>
     </div>
   )
 }
@@ -757,7 +884,7 @@ function ConsularReady({ t, client, caseId, packet, onDownloaded, onEdit }) {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = 'ellis-application-packet.zip'
+      a.download = 'ellis-visa-application.pdf'
       document.body.appendChild(a); a.click(); a.remove()
       URL.revokeObjectURL(url)
       // The download is what advances the step, and the backend records it —
@@ -802,7 +929,7 @@ function ConsularNext({ t, client, caseId, packet, onEdit }) {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = 'ellis-application-packet.zip'
+      a.download = 'ellis-visa-application.pdf'
       document.body.appendChild(a); a.click(); a.remove()
       URL.revokeObjectURL(url)
     } catch (e) { toast(e.message) }
@@ -1019,128 +1146,6 @@ function AppointmentBooking({ t, client, caseId }) {
           </button>
         </>
       )}
-    </div>
-  )
-}
-
-// A consular form asks most of its questions as tick-boxes. Ellis asks them in
-// plain words and ticks the box the applicant chose, so the form they download
-// is complete — nothing left to fill in by hand. Ellis never guesses an answer:
-// the form is signed under penalty of perjury, so an unanswered group stays
-// untouched rather than assumed.
-function ConsularFormQuestions({ t, client, caseId, onSaved, bare = false }) {
-  const toast = useToast()
-  const [data, setData] = useState(null)
-  const [busy, setBusy] = useState(false)
-  const [draft, setDraft] = useState({})
-  const load = () => client.consularFormQuestions(caseId)
-    .then((d) => {
-      setData(d)
-      const seed = {}
-      for (const q of d.questions || []) if (q.answer != null) seed[q.key] = q.answer
-      // The WRITTEN fields seed from whatever Ellis already knows — including
-      // anything it read out of the applicant's own uploaded documents — so a
-      // question it can already answer arrives answered, for confirmation
-      // rather than for typing.
-      for (const f of d.fields || []) if (f.answer) seed[f.key] = f.answer
-      setDraft(seed)
-    }).catch(() => setData(null))
-  useEffect(() => { load() }, [caseId])
-  if (!data || !data.form_key) return null
-  const fields = data.fields || []
-  if (!(data.questions || []).length && !fields.length) return null
-
-  function pick(q, value) {
-    setDraft((prev) => {
-      if (!q.multi) return { ...prev, [q.key]: value }
-      const cur = Array.isArray(prev[q.key]) ? prev[q.key] : []
-      return { ...prev, [q.key]: cur.includes(value)
-        ? cur.filter((v) => v !== value) : [...cur, value] }
-    })
-  }
-  const chosen = (q, v) => q.multi
-    ? (Array.isArray(draft[q.key]) && draft[q.key].includes(v))
-    : draft[q.key] === v
-
-  async function save() {
-    setBusy(true)
-    try {
-      await client.updateAnswers(caseId, draft)
-      await load()
-      onSaved && onSaved()
-      toast(t('formq.saved'))
-    } catch (e) { toast(e.detail?.detail || e.message) }
-    setBusy(false)
-  }
-
-  const left = (data.unanswered || []).length +
-               (data.required_unanswered || []).length
-  // Required first: those are the ones that decide whether the form comes out
-  // complete. Optional fields follow, clearly marked, and never block.
-  const ordered = [...fields].sort((a, b) => (b.required ? 1 : 0) - (a.required ? 1 : 0))
-  return (
-    <div data-testid="consular-form-questions">
-      {/* `bare` where the step around it already said what this is. The two
-          headings stacked read as two separate asks of the same person. */}
-      {!bare && (
-        <>
-          <div style={{ fontWeight: 600, marginBottom: 4 }}>{t('formq.title')}</div>
-          <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 10 }}>
-            {left > 0 ? t('formq.sub', { n: left }) : t('formq.complete')}
-          </div>
-        </>
-      )}
-      {ordered.map((f) => (
-        <div key={f.key} style={{ marginBottom: 12 }}>
-          <label htmlFor={`cf-${f.key}`}
-            style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 5 }}>
-            {f.label}
-            {!f.required && (
-              <span style={{ fontWeight: 400, color: 'var(--muted)' }}>
-                {' '}— {t('formq.optional')}
-              </span>
-            )}
-          </label>
-          {f.type === 'textarea' ? (
-            <textarea id={`cf-${f.key}`} className="input" rows={2}
-              value={draft[f.key] || ''}
-              onChange={(e) => setDraft((p) => ({ ...p, [f.key]: e.target.value }))} />
-          ) : (
-            <input id={`cf-${f.key}`} className="input"
-              type={f.type === 'tel' ? 'tel' : 'text'}
-              inputMode={f.type === 'tel' ? 'tel' : undefined}
-              value={draft[f.key] || ''}
-              onChange={(e) => setDraft((p) => ({ ...p, [f.key]: e.target.value }))} />
-          )}
-          {f.from_document ? (
-            <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}
-              data-testid={`from-doc-${f.key}`}>
-              {t('formq.fromDocument', { document: f.from_document })}
-            </div>
-          ) : f.help ? (
-            <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>{f.help}</div>
-          ) : null}
-        </div>
-      ))}
-      {(data.questions || []).map((q) => (
-        <div key={q.key} style={{ marginBottom: 12 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 5 }}>
-            {q.label}{q.multi ? ` — ${t('formq.chooseAny')}` : ''}
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-            {q.options.map((o) => (
-              <button key={o.value} type="button"
-                className={'chip' + (chosen(q, o.value) ? ' chip--ink' : '')}
-                onClick={() => pick(q, o.value)}
-                aria-pressed={chosen(q, o.value)}>{o.label}</button>
-            ))}
-          </div>
-        </div>
-      ))}
-      <button className="btn" onClick={save} disabled={busy}
-        data-testid="formq-save">
-        {busy ? t('formq.saving') : t('formq.save')}
-      </button>
     </div>
   )
 }

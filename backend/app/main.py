@@ -1465,15 +1465,24 @@ def case_appointment_packet(application_id: str, format: str = "json",
     except appointment_packet.PacketNotApplicable as e:
         raise HTTPException(409, detail={"reason": "packet_not_applicable",
                                          "detail": str(e)})
-    if format == "zip":
-        data = appointment_packet.render_zip(db, app_row, packet)
+    if format in ("pdf", "zip"):
+        # ONE PDF by default: the application is a thing somebody prints and
+        # hands across a counter, and a zip made them assemble it themselves.
+        # The zip stays reachable for anyone who wants the separate originals.
+        combined = format == "pdf"
+        data = (appointment_packet.render_combined_pdf(db, app_row, packet)
+                if combined else appointment_packet.render_zip(db, app_row, packet))
         audit.record(db, org_id=app_row.org_id, application_id=application_id,
                      action="appointment_packet_downloaded",
                      detail={"documents": len(packet.get("documents") or []),
+                             "format": format,
                              "ready": packet.get("ready")}, actor=p.user_id)
-        return Response(content=data, media_type="application/zip",
+        name = ("ellis-visa-application.pdf" if combined
+                else "ellis-application-documents.zip")
+        return Response(content=data,
+                        media_type="application/pdf" if combined else "application/zip",
                         headers={"Content-Disposition":
-                                 f'attachment; filename="ellis-appointment-packet.zip"'})
+                                 f'attachment; filename="{name}"'})
     out = {k: v for k, v in packet.items() if not k.startswith("_")}
     # WHERE THE APPLICANT IS in the one journey this route has: answer what
     # Ellis still needs, take the folder, then go and present it. Decided here
