@@ -374,6 +374,7 @@ def build_family_adapter(db, family_id: str, *, observer=None,
         link = FamilyAdapterLink(family_id=family_id, status="building")
         db.add(link)
         db.commit()
+    prior_release = None
     if link.released and not rebuild_released:
         return {"family_id": family_id, "released": True, "status": "already_released"}
     if link.released:
@@ -382,9 +383,14 @@ def build_family_adapter(db, family_id: str, *, observer=None,
         # committed, tested — and still never reach the portal it was written
         # for, because the family already worked well enough to be released
         # (Thailand's split Date of Birth and its Gender radio group).
-        # The link's flag is cleared so the build actually runs; the RUNTIME
-        # binding is untouched, so applicants keep the current version until a
-        # new one passes the gates on its own merits.
+        # The link's flag is cleared so the build actually runs. The runtime
+        # binding is untouched — but that is NOT enough on its own to keep
+        # applicants served: resolve_released_route checks this flag BEFORE it
+        # ever looks at the binding, so a rebuild that then fails its gates
+        # takes a working portal offline entirely. Thailand spent an evening
+        # unresolvable that way (2026-08-04). The prior state is remembered
+        # here and put back below unless a new version actually releases.
+        prior_release = (link.released, link.status, link.release_tier)
         link.released = False
         link.status = "building"
         db.commit()
@@ -491,6 +497,19 @@ def build_family_adapter(db, family_id: str, *, observer=None,
         # rests solely on the gates.
         _unpark_for_rebuild(db, req)
         req, gates = _attempt()
+    if prior_release is not None and not link.released:
+        # The rebuild did not earn a release. Put the working one back rather
+        # than leaving the portal with no route at all: the runtime binding
+        # still points at the version that passed its own gates, and that
+        # version is exactly as good as it was an hour ago.
+        link.released, link.status, link.release_tier = prior_release
+        link.last_error = ("rebuild did not pass the gates; the previously "
+                           "released version stays live — "
+                           + "; ".join(gates.get("missing", [])))[:1900]
+        db.commit()
+        return {"family_id": family_id, "build_state": req.state,
+                "released": link.released, "rebuild_released": False,
+                "missing": gates.get("missing", [])}
     return {"family_id": family_id, "build_state": req.state,
             "released": link.released, "missing": gates.get("missing", [])}
 

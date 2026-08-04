@@ -387,3 +387,39 @@ def test_naming_a_released_family_queues_real_work(gdb):
         gdb, run, only_family="india-evisa",
         observer_factory=lambda _f: _obs(fam.hostnames[0]))
     assert out["queued"] == 1 and out["executed"] == 1
+
+
+def test_a_failed_rebuild_leaves_the_working_release_serving(gdb, monkeypatch):
+    """resolve_released_route checks the family link BEFORE the runtime
+    binding, so clearing the flag for a rebuild takes the portal offline the
+    moment the rebuild fails its gates. Thailand spent an evening
+    unresolvable that way (2026-08-04): applicants had no route at all, while
+    the version that passed its own gates sat bound and ready."""
+    from app.global_routes import orchestrator
+    from app.global_routes.models import FamilyAdapterLink
+
+    fam = gdb.execute(select(PortalFamily).where(
+        PortalFamily.family_id == "india-evisa")).scalars().one()
+    link = gdb.execute(select(FamilyAdapterLink).where(
+        FamilyAdapterLink.family_id == fam.family_id)).scalars().first()
+    if link is None:
+        link = FamilyAdapterLink(family_id=fam.family_id,
+                                 representative_route_key="rk1|x")
+        gdb.add(link)
+    link.released, link.status, link.release_tier = True, "released", "sandbox"
+    gdb.commit()
+
+    # The rebuild runs for real; its gates refuse it, which is the case the
+    # fix is about.
+    monkeypatch.setattr(release_gates, "evaluate_and_release",
+                        lambda *a, **k: {"passed": False, "released": False,
+                                         "missing": ["selectors_verified_repeated_sessions"],
+                                         "gates": {}})
+
+    out = orchestrator.build_family_adapter(gdb, fam.family_id,
+                                            rebuild_released=True)
+    gdb.refresh(link)
+    assert out["released"] is True
+    assert link.released is True, "a failed rebuild took the portal offline"
+    assert link.release_tier == "sandbox"
+    assert "stays live" in (link.last_error or "")
