@@ -382,7 +382,41 @@ class FlowRunner:
                 return {"status": "handoff", "handoff_kind": "portal_verification"}
             return self._from_driver(node, res)
         if action == "WAIT_FOR_STATE":
-            return {"status": "ok"}
+            # The spec put this node where the page must have ARRIVED — the
+            # form after the entry gates. A no-op here let a slow consent
+            # modal skate by: the gates skipped their not-yet-rendered
+            # targets, the form never opened, and the first fill spent its
+            # whole budget proving a field absent (Vietnam, 2026-08-04).
+            # Wait for the next actionable node's selector to be visible;
+            # never arriving is an honest recoverable failure, and the retry
+            # redoes the gates.
+            target = None
+            nid = self.flow.next_of(node.get("node_id", ""), "ok")
+            seen: set = set()
+            while nid and nid not in seen:
+                seen.add(nid)
+                nxt = self.flow.nodes.get(nid) or {}
+                if nxt.get("selector") and nxt.get("action") in (
+                        "FILL_NON_SENSITIVE", "SELECT_SEARCH", "CLICK",
+                        "CHECK", "SELECT", "SELECT_RADIO"):
+                    target = nxt["selector"]
+                    break
+                nid = self.flow.next_of(nid, "ok")
+            probe = getattr(self.driver, "is_visible", None)
+            if not target or probe is None:
+                return {"status": "ok"}
+            import time as _time
+            deadline = _time.time() + 20
+            while _time.time() < deadline:
+                try:
+                    res = probe(target) or {}
+                except Exception:  # noqa: BLE001 — unreadable: let fills judge
+                    return {"status": "ok"}
+                if res.get("visible"):
+                    return {"status": "ok"}
+                _time.sleep(1.0)
+            return {"status": "failed",
+                    "reason": "the expected page state never arrived"}
         if action == "CLICK":
             if node.get("requires_signed_terms"):
                 # Ellis records the applicant's agreement to the portal's own
