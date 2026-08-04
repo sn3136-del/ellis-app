@@ -660,3 +660,34 @@ def test_the_ask_is_remembered_across_a_new_runner():
     r2.db = _DB()
     r2._deferred_asked = r2._already_asked()
     assert "fill_occupation" in r2._deferred_asked
+
+
+# ---- the browser's own answer outranks the markup ---------------------------
+# TDAC's Nationality box and its three date boxes carry identical combobox
+# ARIA and behave nothing alike: one opens a list, three do not. Nothing in the
+# markup distinguishes them; the accessibility tree's computed hasPopup does.
+
+@pytest.mark.parametrize("el,expected", [
+    # No popup computed -> not a dropdown, whatever the ARIA says.
+    ({"type": "select", "haspopup": ""}, "FILL_NON_SENSITIVE"),
+    ({"type": "select", "haspopup": None}, "FILL_NON_SENSITIVE"),
+    # A real popup -> a real dropdown.
+    ({"type": "select", "haspopup": "listbox"}, "SELECT_SEARCH"),
+    ({"type": "select", "haspopup": "menu"}, "SELECT_SEARCH"),
+    # Never observed -> keep the ARIA reading; this can only ever correct an
+    # observation, never invent one.
+    ({"type": "select"}, "SELECT_SEARCH"),
+])
+def test_the_browser_decides_dropdown_or_textbox(el, expected):
+    from app.adapter_factory.specgen import fill_action_for
+    assert fill_action_for(el, "select") == expected
+
+
+def test_what_the_widget_DID_outranks_what_it_advertises():
+    """A control can declare a popup and open nothing. The probe FOCUSED it
+    and watched: that is behaviour, and behaviour beats a capability claim.
+    TDAC's date boxes are exactly this shape, and building SELECT_SEARCH for
+    them cost three applications over one date."""
+    from app.adapter_factory.specgen import fill_action_for
+    el = {"type": "select", "haspopup": "listbox", "opens_list": "empty"}
+    assert fill_action_for(el, "select") == "FILL_NON_SENSITIVE"

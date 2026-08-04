@@ -402,3 +402,113 @@ def test_an_encrypted_value_is_never_baked_into_a_selector(browser):
         if e.get("type") == "radio":
             assert "cXhw" not in e["selector"] and "ar2hFY" not in e["selector"], \
                 e["selector"]
+
+
+# ---- what the BROWSER knows that the DOM pass cannot see ---------------------
+# Two facts cost live applicant runs on 2026-08-04, and neither is visible to
+# _EXTRACT_JS: Malaysia's MDAC date of birth is `readonly` (driven by the
+# portal's own picker — Ellis typed at it five times, ~9s each, and ended the
+# application), and TDAC's date boxes carry the same combobox ARIA as the
+# Nationality box beside them while only one of them opens a list.
+
+AX_PAGE = """
+<label for="dob">Date of Birth :</label>
+<input id="dob" type="text" placeholder="DD/MM/YYYY" readonly>
+<label for="nat">Nationality</label>
+<input id="nat" role="combobox" aria-autocomplete="list" aria-haspopup="listbox">
+<label for="plain">Middle Name</label>
+<input id="plain">
+<label for="off">Closed for now</label>
+<input id="off" disabled>
+<label for="native">Country</label>
+<select id="native"><option>China</option></select>
+"""
+
+
+def _observe_live(browser, html) -> dict:
+    """A full observation INCLUDING the accessibility merge, keyed by selector."""
+    from app.portal.live_browser import LiveBrowserSession
+    page = browser.new_page()
+    try:
+        page.set_content(html)
+        raw = page.evaluate(_EXTRACT_JS)
+        sess = LiveBrowserSession.__new__(LiveBrowserSession)
+        sess._merge_accessibility(page, raw)
+        return {e["selector"]: e for e in raw["elements"]}
+    finally:
+        page.close()
+
+
+def test_a_readonly_picker_is_recorded_as_readonly(browser):
+    """The Malaysia field. _EXTRACT_JS sees an ordinary text input."""
+    els = _observe_live(browser, AX_PAGE)
+    assert els["#dob"].get("readonly") is True
+    assert els["#plain"].get("readonly") is None
+
+
+def test_a_control_that_opens_a_list_says_so(browser):
+    els = _observe_live(browser, AX_PAGE)
+    assert els["#nat"].get("haspopup")
+    assert els["#plain"].get("haspopup") is None
+
+
+def test_a_native_select_has_a_popup_without_any_aria(browser):
+    """Computed from role, which is why the browser's answer beats reading
+    the attribute: a <select> carries no aria-haspopup at all."""
+    els = _observe_live(browser, AX_PAGE)
+    assert els["#native"].get("haspopup")
+
+
+def test_a_disabled_control_is_recorded(browser):
+    els = _observe_live(browser, AX_PAGE)
+    assert els["#off"].get("disabled") is True
+
+
+def test_the_merge_only_ever_adds(browser):
+    """Purely additive: every field the DOM pass recorded survives untouched."""
+    page = browser.new_page()
+    try:
+        page.set_content(AX_PAGE)
+        before = page.evaluate(_EXTRACT_JS)
+        import copy
+        original = copy.deepcopy(before["elements"])
+        from app.portal.live_browser import LiveBrowserSession
+        sess = LiveBrowserSession.__new__(LiveBrowserSession)
+        sess._merge_accessibility(page, before)
+        for old, new in zip(original, before["elements"]):
+            for k, v in old.items():
+                assert new[k] == v, f"{k} was overwritten"
+    finally:
+        page.close()
+
+
+def test_the_marker_attribute_never_survives_on_the_page(browser):
+    """The correlation marks elements through the protocol and reads the mark
+    back. A government form must not be left carrying Ellis's scratch data."""
+    from app.portal.live_browser import LiveBrowserSession
+    page = browser.new_page()
+    try:
+        page.set_content(AX_PAGE)
+        raw = page.evaluate(_EXTRACT_JS)
+        sess = LiveBrowserSession.__new__(LiveBrowserSession)
+        sess._merge_accessibility(page, raw)
+        left = page.evaluate(
+            "(a) => document.querySelectorAll('[' + a + ']').length",
+            LiveBrowserSession.AX_MARK)
+        assert left == 0
+    finally:
+        page.close()
+
+
+def test_the_sanitizer_keeps_the_browser_s_answer(browser):
+    from app.adapter_factory.recon import sanitize_structure
+    out = sanitize_structure({"elements": [
+        {"selector": "#dob", "name": "dob", "label": "DOB", "type": "text",
+         "readonly": True, "haspopup": "listbox"},
+        {"selector": "#x", "name": "x", "label": "X", "type": "text",
+         "haspopup": "<script>alert(1)</script>"},
+    ]})
+    els = {e["selector"]: e for e in out["elements"]}
+    assert els["#dob"]["readonly"] is True
+    assert els["#dob"]["haspopup"] == "listbox"
+    assert els["#x"]["haspopup"] == "scriptalertscript"   # stripped, never markup

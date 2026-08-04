@@ -359,6 +359,13 @@ def fill_action_for(el: dict, kind: str) -> str:
     dropdown on a page recon did not get to test.
     """
     if kind in ("select", "search_combobox", "search-combobox", "combobox"):
+        # The BROWSER's own computed answer outranks the markup. A control the
+        # accessibility tree gives no popup is not a dropdown however its ARIA
+        # reads — that is the difference between TDAC's Nationality box and the
+        # three date boxes beside it, which carry identical attributes and
+        # behave nothing alike.
+        if "haspopup" in el and not el.get("haspopup"):
+            return "FILL_NON_SENSITIVE"
         return "FILL_NON_SENSITIVE" if el.get("opens_list") == "empty" \
             else "SELECT_SEARCH"
     return "FILL_NON_SENSITIVE"

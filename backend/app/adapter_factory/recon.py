@@ -128,6 +128,15 @@ def sanitize_structure(observation: dict) -> dict:
         # birth killed three runs. Structure, not content — no option text.
         if el.get("opens_list") in ("options", "empty", "unknown"):
             clean["opens_list"] = el["opens_list"]
+        # What the BROWSER computed about this control, which the DOM pass
+        # cannot see: readonly (the portal drives it with its own picker) and
+        # hasPopup (it really does open a list). Structure, not content.
+        if el.get("readonly"):
+            clean["readonly"] = True
+        if el.get("disabled"):
+            clean["disabled"] = True
+        if el.get("haspopup"):
+            clean["haspopup"] = re.sub(r"[^a-z]", "", str(el["haspopup"]).lower())[:20]
         if el.get("submits"):
             clean["submits"] = re.sub(r"[^a-z_]", "", str(el.get("submits", "")))[:40]
         if el.get("navigates_to"):

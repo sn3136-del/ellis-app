@@ -517,6 +517,7 @@ class LiveBrowserSession:
                         "error": "redirected off allowlist"}
             self._settle_for_render(page)                                       # pragma: no cover
             raw = page.evaluate(_EXTRACT_JS)                                     # pragma: no cover
+            self._merge_accessibility(page, raw)                                  # pragma: no cover
             self._probe_widgets(page, raw)                                       # pragma: no cover
         except Exception as e:  # noqa: BLE001                                    # pragma: no cover
             return {"ok": False, "status": 0, "url": url, "error": str(e)[:200]}
@@ -535,6 +536,93 @@ class LiveBrowserSession:
     # list appears, count the rows, press Escape. Nothing is typed, nothing is
     # chosen, no value is recorded — only the SHAPE of the widget, which is
     # the whole of what recon exists to learn.
+    # The accessibility tree knows two things the DOM extraction structurally
+    # cannot, and both cost a live applicant's run tonight (2026-08-04):
+    #
+    #   readonly  Malaysia's MDAC date of birth is a readonly box driven by the
+    #             portal's own picker. _EXTRACT_JS records it as an ordinary
+    #             text input, so Ellis typed at it five times, ~9s each, and
+    #             ended the application.
+    #   hasPopup  Thailand's TDAC date boxes carry the same combobox ARIA as the
+    #             Nationality box beside them. One opens a list and one does
+    #             not, and nothing in the markup says which.
+    #
+    # The browser's own computed answer, read over CDP with no model in the
+    # loop and no new dependency — the same source Stagehand is built on, and
+    # richer than reading aria-haspopup, because it is computed from role as
+    # well (a native <select> has an implicit popup and no attribute).
+    #
+    # Correlated by MARKING each AX node's element through the protocol and
+    # reading the mark back, so the two halves line up by DOM identity rather
+    # than by matching selector strings. Purely additive: it never overwrites
+    # anything the DOM pass recorded, and any failure leaves the observation
+    # exactly as it was.
+    AX_MARK = "data-ellis-ax"
+
+    def _merge_accessibility(self, page, raw: dict) -> None:  # pragma: no cover
+        els = (raw or {}).get("elements") or []
+        if not els:
+            return
+        try:
+            cdp = page.context.new_cdp_session(page)
+            cdp.send("Accessibility.enable")
+            tree = cdp.send("Accessibility.getFullAXTree") or {}
+        except Exception:  # noqa: BLE001 — an unreadable tree changes nothing
+            return
+        marked: dict = {}
+        try:
+            for i, node in enumerate(tree.get("nodes", []) or []):
+                bid = node.get("backendDOMNodeId")
+                if bid is None:
+                    continue
+                props = {}
+                for prop in (node.get("properties") or []):
+                    v = (prop.get("value") or {}).get("value")
+                    if v is not None:
+                        props[prop.get("name")] = v
+                if not any(k in props for k in ("readonly", "disabled", "hasPopup")):
+                    continue
+                try:
+                    obj = cdp.send("DOM.resolveNode", {"backendNodeId": bid})
+                    oid = (obj.get("object") or {}).get("objectId")
+                    if not oid:
+                        continue
+                    cdp.send("Runtime.callFunctionOn", {
+                        "objectId": oid,
+                        "functionDeclaration":
+                            "function(k){ if (this.setAttribute) this.setAttribute('%s', k); }"
+                            % self.AX_MARK,
+                        "arguments": [{"value": str(i)}]})
+                    marked[str(i)] = props
+                except Exception:  # noqa: BLE001 — skip a node we cannot resolve
+                    continue
+            if not marked:
+                return
+            keys = page.evaluate("""(attr) => {
+              const els = document.querySelectorAll(
+                'input:not([type=hidden]), select, textarea, button, a[href], '
+                + 'mat-select, [role="combobox"], [role="switch"], mat-slide-toggle, '
+                + '[data-slot], [data-slot-id], [data-datetime], [data-appointment]');
+              return Array.from(els).map((el) => {
+                const k = el.getAttribute(attr);
+                if (k !== null) el.removeAttribute(attr);
+                return k;
+              });
+            }""", self.AX_MARK) or []
+        except Exception:  # noqa: BLE001
+            return
+        for el, key in zip(els, keys):
+            props = marked.get(str(key)) if key is not None else None
+            if not props:
+                continue
+            if props.get("readonly") is True:
+                el["readonly"] = True
+            if props.get("disabled") is True:
+                el["disabled"] = True
+            pop = props.get("hasPopup")
+            if pop and str(pop) != "false":
+                el["haspopup"] = str(pop)[:20]
+
     WIDGET_PROBE_MAX = 6
 
     def _probe_widgets(self, page, raw: dict) -> None:  # pragma: no cover
@@ -1090,6 +1178,7 @@ class LiveBrowserSession:
             # Gated portals are exactly the ones whose form only exists past
             # the gate, so this is the path that reaches the widgets worth
             # asking about — TDAC's own form among them.
+            self._merge_accessibility(page, raw)
             self._probe_widgets(page, raw)
         except Exception as e:  # noqa: BLE001                                    # pragma: no cover
             return {"ok": False, "status": 0, "url": base_url,
