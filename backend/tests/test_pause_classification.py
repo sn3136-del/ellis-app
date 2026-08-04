@@ -2350,3 +2350,148 @@ def test_an_unreadable_page_is_not_a_bot_check():
 def test_the_bot_check_pause_names_a_handoff_the_ui_can_resolve():
     from app.portal.released_flow import APPLICANT_HANDOFFS
     assert "portal_verification" in APPLICANT_HANDOFFS
+
+
+# ---------- portal-revealed questions (SGAC yellow-fever, 2026-08-04) -----------
+
+_QN9_FIELD = {
+    "id": "individual_0_qn9",
+    "label": ("Have you visited any of the listed countries^ in Africa or "
+              "Latin America in the past 6 days prior to your arrival in "
+              "Singapore? ^Refer to Communicable Diseases Agency's website "
+              "for countries with risk of yellow fever transmission."),
+    "message": "Please fill in the field above",
+    "options": [
+        {"id": "individual_0_qn9_Y", "value": "Y", "label": "YES"},
+        {"id": "individual_0_qn9_N", "value": "N", "label": "NO"}],
+}
+
+
+def _revealed_runner(driver):
+    from types import SimpleNamespace
+    from app.adapter_factory.runtime import FlowRunner
+    runner = object.__new__(FlowRunner)
+    runner.driver = driver
+    runner.answers = {}
+    runner.flow = SimpleNamespace(nodes={}, order=[])
+    runner._repair_attempted = False
+    runner._portal_field_messages = {}
+    runner.observed_options = {}
+    runner._rejected_fills = set()
+    runner._checkpoint = lambda *a, **k: None
+    return runner
+
+
+class _RevealedDriver:
+    """The page after Next: one revealed, unanswered YES/NO group flagged.
+    Clicking a chip answers the group, so the flag clears — as on the real
+    page."""
+
+    def __init__(self):
+        self.clicks = []
+        self.radio_calls = []
+        self.group_answered = False
+
+    def click(self, sel):
+        self.clicks.append(sel)
+        return {"ok": True}
+
+    def settle(self, ms=700):
+        pass
+
+    def read_validation_errors(self):
+        if self.group_answered:
+            return {"ok": True, "messages": [], "fields": []}
+        return {"ok": True, "messages": [], "fields": [dict(_QN9_FIELD)]}
+
+    def select_radio(self, options, value):
+        self.radio_calls.append((tuple((o["label"], o["selector"]) for o in options), value))
+        self.group_answered = True
+        return {"ok": True}
+
+
+def test_missing_evidence_reads_the_page_and_asks_the_revealed_question():
+    # The click landed, the evidence never came — because the portal revealed
+    # a new required question and refused the advance. That must become an
+    # applicant question with the portal's own choices, never a blind retry
+    # loop into manual review (Singapore's yellow-fever question, 2026-08-04).
+    runner = _revealed_runner(_RevealedDriver())
+    runner._verify_evidence = lambda n: False
+    runner._deferred_questions = lambda: None
+    out = runner._step({"node_id": "advance", "action": "CLICK",
+                        "selector": "#next_btn",
+                        "success_evidence": [{"kind": "url_pattern", "value": "next"}]})
+    assert out["status"] == "handoff"
+    assert out["handoff_kind"] == "additional_information"
+    q = out["questions"][0]
+    assert q["key"] == "portal_field_individual_0_qn9"
+    # The question is the portal's sentence up to its question mark; the
+    # trailing reference text becomes the why line, and the options are the
+    # portal's own chips — a dropdown, never free text.
+    assert q["question"].endswith("Singapore?")
+    assert "Refer to" in q["why"]
+    assert q["options"] == ["YES", "NO"]
+    assert q["kind"] == "select" and q["mandatory"] is True
+
+
+def test_answered_revealed_question_is_clicked_on_the_resume_and_advances():
+    # Resume run: the applicant answered NO in Ellis. The repair pass clicks
+    # the chip through the verified group-answer path and the retried Next
+    # then carries evidence -> plain ok, no second ask.
+    driver = _RevealedDriver()
+    runner = _revealed_runner(driver)
+    runner.answers = {"portal_field_individual_0_qn9": "NO"}
+    evidence = {"n": 0}
+
+    def _verify(node):
+        evidence["n"] += 1
+        return evidence["n"] > 1     # missing before the repair, present after
+    runner._verify_evidence = _verify
+    runner._deferred_questions = lambda: None
+    out = runner._step({"node_id": "advance", "action": "CLICK",
+                        "selector": "#next_btn",
+                        "success_evidence": [{"kind": "url_pattern", "value": "next"}]})
+    assert out == {"status": "ok"}
+    assert len(driver.radio_calls) == 1
+    rows, value = driver.radio_calls[0]
+    assert value == "NO"
+    assert ("YES", "#individual_0_qn9_Y") in rows
+    assert ("NO", "#individual_0_qn9_N") in rows
+    # Next was retried after the repair.
+    assert driver.clicks.count("#next_btn") == 2
+
+
+def test_irreversible_click_never_takes_the_revealed_question_path():
+    # Missing evidence after an IRREVERSIBLE action stays "uncertain" — no
+    # page probing, no retry, no question: reconcile-before-act owns that.
+    runner = _revealed_runner(_RevealedDriver())
+    runner._verify_evidence = lambda n: False
+    runner._deferred_questions = lambda: None
+    runner._already_done = lambda n, o: False
+    runner._official = lambda: None
+    out = runner._step({"node_id": "pay", "action": "CLICK",
+                        "selector": "#submit", "irreversibility": "irreversible",
+                        "success_evidence": [{"kind": "url_pattern", "value": "done"}]})
+    assert out["status"] == "uncertain"
+
+
+def test_rejected_revealed_answer_is_reasked_with_the_previous_answer_shown():
+    # The applicant answered, Ellis clicked it in, and the portal STILL flags
+    # the group: re-ask (showing what was tried) — never a silent dead end.
+    class StubbornDriver(_RevealedDriver):
+        def select_radio(self, options, value):
+            self.radio_calls.append((tuple((o["label"], o["selector"]) for o in options), value))
+            return {"ok": True}     # click lands, but the flag never clears
+
+    runner = _revealed_runner(StubbornDriver())
+    runner.answers = {"portal_field_individual_0_qn9": "NO"}
+    runner._verify_evidence = lambda n: False
+    runner._deferred_questions = lambda: None
+    out = runner._step({"node_id": "advance", "action": "CLICK",
+                        "selector": "#next_btn",
+                        "success_evidence": [{"kind": "url_pattern", "value": "next"}]})
+    assert out["status"] == "handoff"
+    assert out["handoff_kind"] == "additional_information"
+    q = out["questions"][0]
+    assert q["key"] == "portal_field_individual_0_qn9"
+    assert q["previous_answer"] == "NO"

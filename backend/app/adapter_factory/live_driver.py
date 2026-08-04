@@ -996,9 +996,28 @@ class BrowserbasePageDriver:
     }"""
 
     # A field carrying an error, paired with its own label — lets Ellis name
-    # the exact question the portal is objecting to.
+    # the exact question the portal is objecting to. Two passes: framework
+    # error containers (Ant & friends), then portals that render a bare error
+    # line under the widget with no error-classed form item at all (SGAC's
+    # "Please fill in the field above" beneath a YES/NO chip group revealed
+    # mid-fill, 2026-08-04). A flagged CHIP GROUP reports its own options
+    # ({id,value,label} per chip) so the runtime can ask the applicant with
+    # the portal's real choices and click the chosen chip on the resume.
     _INVALID_FIELDS_JS = """() => {
       const out = [];
+      const seenIds = new Set();
+      const textOf = (el) => (el.textContent || '').trim();
+      const chipOptions = (root) => {
+        const opts = [];
+        for (const b of root.querySelectorAll(
+            'button[value], [role="radio"], [role="button"][value]')) {
+          if (b.offsetParent === null || !b.id) continue;
+          const label = textOf(b);
+          const value = (b.getAttribute('value') || label).trim();
+          if (label && opts.length < 12) opts.push({id: b.id, value, label});
+        }
+        return opts.length >= 2 ? opts : null;
+      };
       const items = document.querySelectorAll(
         '[class*="form-item-has-error"], [class*="has-error"]');
       for (const item of items) {
@@ -1006,10 +1025,78 @@ class BrowserbasePageDriver:
         const ctrl = item.querySelector('input,select,textarea');
         const id = ctrl ? (ctrl.id || ctrl.name || '') : '';
         const labelEl = item.querySelector('label');
-        const label = labelEl ? (labelEl.textContent || '').trim() : '';
+        const label = labelEl ? textOf(labelEl) : '';
         const errEl = item.querySelector('[class*="explain"], [role="alert"]');
-        const message = errEl ? (errEl.textContent || '').trim() : '';
-        if (id || label || message) out.push({id, label, message});
+        const message = errEl ? textOf(errEl) : '';
+        if (id || label || message) { out.push({id, label, message}); if (id) seenIds.add(id); }
+        if (out.length >= 12) return out;
+      }
+      // Pass 2: walk up from each visible error line to the box that holds
+      // exactly one control or one chip group. A box with several visible
+      // controls is a form-level banner ("There are missing or erroneous
+      // field(s)") that names no single field — never flag through it.
+      const errSel = '[class*="error"], [role="alert"], [class*="invalid"], [class*="danger"]';
+      for (const err of document.querySelectorAll(errSel)) {
+        if (err.offsetParent === null) continue;
+        const message = textOf(err);
+        if (!message || message.length > 200) continue;
+        let box = err.parentElement, hit = null;
+        for (let i = 0; i < 5 && box && box !== document.body; i++, box = box.parentElement) {
+          const chips = chipOptions(box);
+          if (chips) {
+            if (chips.length > 6) break;   // a whole-form sweep, not one group
+            hit = {chips, box}; break;
+          }
+          const vis = Array.from(box.querySelectorAll('input,select,textarea'))
+            .filter((c) => c.offsetParent !== null);
+          if (vis.length === 1) { hit = {ctrl: vis[0], box}; break; }
+          if (vis.length > 1) break;
+        }
+        if (!hit) continue;
+        // The question the widget answers usually lives on the enclosing
+        // form group's own label, not inside the chip box (SGAC's "Sex as
+        // indicated in passport" sits above the F/M/O chips).
+        const groupLabel = (box2) => {
+          const grp = box2.closest('[class*="form-group"], [class*="form-row"], fieldset');
+          if (!grp) return '';
+          const l = grp.querySelector('label, legend, [class*="form_title"], [class*="form-title"]');
+          return l ? textOf(l) : '';
+        };
+        if (hit.chips) {
+          const ids = hit.chips.map((o) => o.id);
+          let p = ids[0];
+          for (const s of ids.slice(1)) {
+            let j = 0; while (j < p.length && p[j] === s[j]) j++;
+            p = p.slice(0, j);
+          }
+          const id = p.replace(/[_-]+$/, '');
+          if (!id || seenIds.has(id)) continue;
+          // Prefer the group's label; fall back to the box's text minus the
+          // error line and the chips' own words.
+          let label = groupLabel(hit.box);
+          if (!label) {
+            label = textOf(hit.box);
+            for (const t of [message].concat(hit.chips.map((o) => o.label))) {
+              label = label.split(t).join(' ');
+            }
+            label = label.replace(/\\s+/g, ' ').trim();
+          }
+          seenIds.add(id);
+          out.push({id, label: label.slice(0, 240), message, options: hit.chips});
+        } else {
+          // A single control is only "flagged" when the page itself marks it
+          // invalid — a stray error-classed element near a healthy input must
+          // not invent a complaint.
+          const c = hit.ctrl;
+          const invalid = c.matches(
+            '.ng-invalid, [aria-invalid="true"], .is-invalid, [class*="error"]');
+          if (!invalid) continue;
+          const id = c.id || c.name || '';
+          if (!id || seenIds.has(id)) continue;
+          seenIds.add(id);
+          const lab = document.querySelector('label[for="' + CSS.escape(id) + '"]');
+          out.push({id, label: lab ? textOf(lab) : groupLabel(hit.box), message});
+        }
         if (out.length >= 12) break;
       }
       return out;

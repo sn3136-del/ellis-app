@@ -303,6 +303,10 @@ export function createVisaClient(session) {
     createBrowserSession: (id) => call('POST', `/cases/${id}/browser-session`, session, {}),
     browserLiveView: (id) => call('GET', `/cases/${id}/browser-session/live-view`, session),
     closeBrowserSession: (id) => call('DELETE', `/cases/${id}/browser-session`, session),
+    // Watch-only scroll relay: the click shield eats the wheel, so the deltas
+    // ride to the backend, which scrolls the case's own live session.
+    scrollBrowserSession: (id, deltaY) =>
+      call('POST', `/cases/${id}/browser-session/scroll`, session, { delta_y: deltaY }),
 
     // Attended observation: the applicant's own consented run teaches Ellis a
     // portal whose form hides behind sign-in (or a human-only check). Ellis

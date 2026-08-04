@@ -109,3 +109,49 @@ def test_observability_scrub_redacts_live_view_urls():
     from app.observability import scrub
     out = scrub({"msg": "handoff at https://www.browserbase.com/devtools-fullscreen/abc?t=1"})
     assert "browserbase.com/devtools-fullscreen/abc" not in str(out)
+
+
+# ---------- watch-only scroll relay ------------------------------------------
+
+def test_scroll_relay_queues_a_view_only_scroll(client, case_id, fake_bb, monkeypatch):
+    from app.portal import viewer_gestures as vg
+    client.post(f"/cases/{case_id}/browser-session", headers=H)
+    sent = []
+    monkeypatch.setattr(vg, "connect_url_for", lambda sid: "wss://connect.example/x")
+    monkeypatch.setattr(vg, "enqueue_scroll",
+                        lambda app_id, url, dy: sent.append((app_id, url, dy)) or True)
+    r = client.post(f"/cases/{case_id}/browser-session/scroll",
+                    json={"delta_y": 480}, headers=H)
+    assert r.status_code == 200 and r.json()["queued"] is True
+    assert sent == [(case_id, "wss://connect.example/x", 480.0)]
+    # Deltas are clamped — a hostile client cannot demand a mile of scroll.
+    client.post(f"/cases/{case_id}/browser-session/scroll",
+                json={"delta_y": 999999}, headers=H)
+    assert sent[-1][2] == 4000.0
+    # A zero delta does nothing.
+    r = client.post(f"/cases/{case_id}/browser-session/scroll",
+                    json={"delta_y": 0}, headers=H)
+    assert r.json()["queued"] is False and len(sent) == 2
+
+
+def test_scroll_relay_is_honest_without_a_live_session(client, case_id, fake_bb, monkeypatch):
+    from app.portal import viewer_gestures as vg
+    # No session at all -> 404.
+    r = client.post(f"/cases/{case_id}/browser-session/scroll",
+                    json={"delta_y": 100}, headers=H)
+    assert r.status_code == 404 and r.json()["detail"]["reason"] == "no_session"
+    # Session ended at the provider -> 409, never a silent drop.
+    client.post(f"/cases/{case_id}/browser-session", headers=H)
+    def _gone(sid):
+        raise RuntimeError("session gone")
+    monkeypatch.setattr(vg, "connect_url_for", _gone)
+    r = client.post(f"/cases/{case_id}/browser-session/scroll",
+                    json={"delta_y": 100}, headers=H)
+    assert r.status_code == 409 and r.json()["detail"]["reason"] == "session_ended"
+
+
+def test_scroll_relay_respects_tenant_isolation(client, case_id, fake_bb):
+    client.post(f"/cases/{case_id}/browser-session", headers=H)
+    r = client.post(f"/cases/{case_id}/browser-session/scroll",
+                    json={"delta_y": 100}, headers=OTHER)
+    assert r.status_code == 403

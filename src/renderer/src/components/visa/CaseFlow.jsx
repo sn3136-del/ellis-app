@@ -1718,11 +1718,17 @@ function formatElapsed(seconds) {
 
 function ProgressCard({ client, caseId, progress, busy, onRefresh, onRetry, onResume }) {
   const pr = progress
+  // Centered column: the waiting animation and the portal window read as one
+  // composed unit in the middle of the page, not a strip pinned to the left.
+  const cardStyle = { padding: '26px 28px', maxWidth: 1100, margin: '0 auto',
+                      textAlign: 'center' }
   if (!pr) {
     return (
-      <div className="card" style={{ padding: 22 }} data-testid="portal-progress">
+      <div className="card" style={cardStyle} data-testid="portal-progress">
         <Loading label="Checking your application status" />
-        <PortalWatch client={client} caseId={caseId} height="64vh" />
+        <div style={{ textAlign: 'left' }}>
+          <PortalWatch client={client} caseId={caseId} height="64vh" />
+        </div>
         <button className="btn btn--ghost btn--sm" style={{ marginTop: 10 }} onClick={onRefresh}>Refresh status</button>
       </div>
     )
@@ -1730,7 +1736,7 @@ function ProgressCard({ client, caseId, progress, busy, onRefresh, onRetry, onRe
   const message = pr.step?.message || 'Working on your application'
   const failed = !!pr.error && !pr.active && !pr.queued
   return (
-    <div className="card" style={{ padding: 22 }} data-testid="portal-progress">
+    <div className="card" style={cardStyle} data-testid="portal-progress">
       {pr.stalled ? (
         <>
           <div style={{ fontWeight: 700, marginBottom: 4 }}>Connection to the portal stalled</div>
@@ -1751,10 +1757,12 @@ function ProgressCard({ client, caseId, progress, busy, onRefresh, onRetry, onRe
           what the official site is showing rather than a bare spinner. It is
           watch-only WHILE Ellis drives; when the run stalled or failed, Ellis
           is not driving, so the applicant regains control of the page. */}
-      <PortalWatch client={client} caseId={caseId} height="64vh"
-        interactive={!!pr.stalled || failed} />
+      <div style={{ textAlign: 'left' }}>
+        <PortalWatch client={client} caseId={caseId} height="64vh"
+          interactive={!!pr.stalled || failed} />
+      </div>
       <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 10, display: 'flex',
-        gap: 12, flexWrap: 'wrap' }}>
+        gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
         {pr.elapsed_seconds != null && (
           <span data-testid="progress-elapsed">Working for {formatElapsed(pr.elapsed_seconds)}</span>
         )}
@@ -1763,7 +1771,7 @@ function ProgressCard({ client, caseId, progress, busy, onRefresh, onRetry, onRe
         )}
         {pr.browser_session_alive && <span className="chip">Secure portal session active</span>}
       </div>
-      <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+      <div style={{ display: 'flex', gap: 8, marginTop: 12, justifyContent: 'center' }}>
         <button className="btn btn--ghost btn--sm" onClick={onRefresh}>Refresh status</button>
         {pr.retry_available && !pr.active && !pr.queued && (
           <button className="btn btn--sm" disabled={busy} onClick={onRetry}

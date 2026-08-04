@@ -167,31 +167,42 @@ export function usePortalLiveView(client, caseId, opts = {}) {
 
 // Watch-only wrapper: the applicant sees Ellis work but cannot click or type
 // into the session while it is driving — a stray click mid-fill could change
-// portal state under the runner. Scrolling IS allowed: wheeling over the
-// shield drops it for a beat so the wheel reaches the live view (which
-// forwards it to the portal page), then it re-arms the moment the wheel goes
-// quiet — clicks and typing never get a stable way through.
-function WatchOnlyFrame({ children }) {
+// portal state under the runner. Scrolling IS allowed, by relay: the shield
+// eats the wheel (a browser latches scroll gestures to where they start, so
+// letting the wheel "through" would also open a window for clicks) and the
+// accumulated deltas ride to the backend, which scrolls the case's own live
+// session — a document scroll only, never a click or a keystroke.
+function WatchOnlyFrame({ children, client, caseId }) {
   const shieldRef = useRef(null)
-  const reArm = useRef(null)
+  const pending = useRef(0)
+  const timer = useRef(null)
+  const canScroll = !!(client && caseId)
   useEffect(() => {
     const el = shieldRef.current
-    if (!el) return undefined
+    if (!el || !canScroll) return undefined
+    const flush = () => {
+      timer.current = null
+      const dy = Math.round(pending.current)
+      pending.current = 0
+      if (dy) client.scrollBrowserSession(caseId, dy).catch(() => {})
+    }
     const onWheel = (e) => {
       e.preventDefault() // the outer page must not scroll instead
-      el.style.pointerEvents = 'none'
-      clearTimeout(reArm.current)
-      reArm.current = setTimeout(() => { el.style.pointerEvents = 'auto' }, 400)
+      // Normalize delta units: 0 = pixels, 1 = lines, 2 = pages.
+      const scale = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1
+      pending.current += e.deltaY * scale
+      if (!timer.current) timer.current = setTimeout(flush, 250)
     }
     el.addEventListener('wheel', onWheel, { passive: false })
-    return () => { el.removeEventListener('wheel', onWheel); clearTimeout(reArm.current) }
-  }, [])
-  const armNow = () => {
-    clearTimeout(reArm.current)
-    if (shieldRef.current) shieldRef.current.style.pointerEvents = 'auto'
-  }
+    return () => {
+      el.removeEventListener('wheel', onWheel)
+      clearTimeout(timer.current)
+      timer.current = null
+      pending.current = 0
+    }
+  }, [canScroll, caseId])
   return (
-    <div className="watchonly" data-testid="watch-only" onMouseLeave={armNow}>
+    <div className="watchonly" data-testid="watch-only">
       {children}
       <div ref={shieldRef} className="watchonly__shield" aria-hidden="true" />
       <span className="watchonly__note">View only — Ellis is working on this page</span>
@@ -199,7 +210,8 @@ function WatchOnlyFrame({ children }) {
   )
 }
 
-export function LiveFrame({ view, height = '70vh', watchOnly = false }) {
+export function LiveFrame({ view, height = '70vh', watchOnly = false,
+                            client = null, caseId = null }) {
   if (view.state === 'connecting') return <Loading label="Opening the secure portal window" />
   if (view.state === 'embedded' && view.url) {
     const frame = (
@@ -218,7 +230,9 @@ export function LiveFrame({ view, height = '70vh', watchOnly = false }) {
             watch it below. This takes a minute or two.
           </div>
         )}
-        {watchOnly ? <WatchOnlyFrame>{frame}</WatchOnlyFrame> : frame}
+        {watchOnly
+          ? <WatchOnlyFrame client={client} caseId={caseId}>{frame}</WatchOnlyFrame>
+          : frame}
       </div>
     )
   }
@@ -253,7 +267,8 @@ export function PortalWatch({ client, caseId, height = '40vh', label, interactiv
         <button className="btn btn--sm btn--ghost" disabled={view.busy}
           onClick={view.reconnect}>{view.busy ? '…' : t('live.refresh')}</button>
       </div>
-      <LiveFrame view={view} height={height} watchOnly={!interactive} />
+      <LiveFrame view={view} height={height} watchOnly={!interactive}
+        client={client} caseId={caseId} />
     </div>
   )
 }

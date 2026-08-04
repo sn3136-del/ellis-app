@@ -1083,6 +1083,39 @@ def browser_session_live_view(application_id: str, response: Response,
     return {"url": url, "expires_hint_seconds": 300}
 
 
+class ViewerScrollBody(BaseModel):
+    delta_y: float
+
+
+@app.post("/cases/{application_id}/browser-session/scroll")
+def browser_session_scroll(application_id: str, body: ViewerScrollBody,
+                           db=Depends(get_session), p: Principal = Depends(get_principal)):
+    """Apply the applicant's wheel to the case's own live session — the
+    watch-only view forwards scroll here because the click shield (rightly)
+    eats it. View-only by construction: a document scrollBy, never a click,
+    a key, or a form value (see portal/viewer_gestures.py)."""
+    _owned(db, p, application_id)
+    from .portal import viewer_gestures
+    from .portal_store import current_browser_session
+    row = current_browser_session(db, application_id)
+    if row is None:
+        raise HTTPException(404, detail={"reason": "no_session",
+                                         "message": "no open browser session for this case"})
+    if row.mode != "browserbase":
+        raise HTTPException(404, detail={"reason": "not_configured",
+                                         "message": "scroll relay needs a live provider session"})
+    dy = max(-4000.0, min(4000.0, float(body.delta_y or 0)))
+    if not dy:
+        return {"queued": False}
+    try:
+        url = viewer_gestures.connect_url_for(row.provider_session_id)
+    except Exception:  # noqa: BLE001 — session ended at the provider
+        raise HTTPException(409, detail={
+            "reason": "session_ended",
+            "message": "the secure portal session is not reachable right now"})
+    return {"queued": viewer_gestures.enqueue_scroll(application_id, url, dy)}
+
+
 @app.delete("/cases/{application_id}/browser-session")
 def close_browser_session(application_id: str, db=Depends(get_session),
                           p: Principal = Depends(get_principal)):

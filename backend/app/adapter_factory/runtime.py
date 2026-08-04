@@ -517,6 +517,17 @@ class FlowRunner:
                     if node.get("irreversibility") == "irreversible":
                         return {"status": "uncertain",
                                 "detail": {"reason": "no qualifying evidence after irreversible action"}}
+                    # Missing evidence after a reversible advance is usually
+                    # the FORM refusing it with its own validation on screen —
+                    # read the page and ask, never fail into a blind retry
+                    # loop (Singapore 2026-08-04: a question the portal
+                    # revealed mid-fill went unasked through four retries and
+                    # ended in manual review with no question pending).
+                    refused = self._advance_refused(node)
+                    if refused is not None:
+                        return refused
+                    if self._verify_evidence(node):
+                        return {"status": "ok"}    # accepted on a repaired retry
                     return {"status": "failed", "reason": "expected evidence missing"}
             elif node.get("irreversibility") != "irreversible":
                 # A CLICK can land perfectly and still not advance: the form
@@ -1313,8 +1324,10 @@ class FlowRunner:
         # individual chips (#individual_0_sq1 flags, #individual_0_sq1_Y
         # fills). Without the prefix match the flagged declaration mapped to
         # no node, nobody was re-asked, and the save button stayed dead
-        # through four retries (2026-08-04, Singapore).
-        return bool(_re.search(rf'#{esc}[_-][\w-]{{1,8}}(?![\w-])', sel))
+        # through four retries (2026-08-04, Singapore). The suffix is a short
+        # VALUE CODE (_Y, _N, _F_0, _YES) — a word-length suffix (_extra) is a
+        # DIFFERENT field that merely shares the prefix, never this group.
+        return bool(_re.search(rf'#{esc}[_-][\w-]{{1,3}}(?![\w-])', sel))
 
     def _node_for_flagged_field(self, fid: str):
         """The flow node that fills the portal-flagged field, or None."""
@@ -1347,7 +1360,14 @@ class FlowRunner:
         for f in fields:
             fid = str(f.get("id") or "").strip()
             n = self._node_for_flagged_field(fid)
-            if n is None or n.get("action") not in ("FILL_NON_SENSITIVE", "SELECT_SEARCH"):
+            if n is None:
+                # A portal-revealed choice group the applicant has already
+                # answered in Ellis (portal_field_<id>): click the chosen chip
+                # with the same verified group-answer path radios use.
+                if self._fill_revealed_group(f):
+                    repaired += 1
+                continue
+            if n.get("action") not in ("FILL_NON_SENSITIVE", "SELECT_SEARCH"):
                 continue
             value = self.answers.get(n.get("input_source", ""), "")
             if value in ("", None):
@@ -1382,6 +1402,46 @@ class FlowRunner:
                                  {"reason": "portal dropped a filled value"})
         return repaired
 
+    def _fill_revealed_group(self, flagged_field: dict) -> bool:
+        """Click the applicant's stored answer into a portal-revealed choice
+        group (a flagged field with its own options but no flow node). The
+        click goes through select_radio, which matches the answer against the
+        chips' own rendered words and verifies the rendered selection —
+        never a coin flip, never an unverified click."""
+        fid = str(flagged_field.get("id") or "").strip()
+        opts = flagged_field.get("options") or []
+        if not fid or len(opts) < 2:
+            return False
+        answer = str(self.answers.get(f"portal_field_{fid}") or "").strip()
+        if not answer:
+            return False
+        chooser = getattr(self.driver, "select_radio", None)
+        if chooser is None:
+            return False
+        rows = [{"label": str(o.get("label") or "").strip(),
+                 "selector": f"#{o['id']}"}
+                for o in opts if o.get("id")]
+        try:
+            out = chooser(rows, answer) or {}
+        except Exception as e:  # noqa: BLE001
+            self._checkpoint(f"portal_field_{fid}", "repair_failed",
+                             {"code": "EXCEPTION", "detail": str(e)[:120]})
+            return False
+        if out.get("ok"):
+            # Remembered so a group the portal STILL flags after this click is
+            # re-asked (with the tried answer shown) instead of dead-ending.
+            filled = getattr(self, "_revealed_filled", None)
+            if filled is None:
+                filled = self._revealed_filled = set()
+            filled.add(fid)
+            self._checkpoint(f"portal_field_{fid}", "answered",
+                             {"reason": "portal-revealed question filled"})
+            return True
+        self._checkpoint(f"portal_field_{fid}", "repair_failed",
+                         {"code": str(out.get("code") or "")[:40],
+                          "detail": str(out.get("detail") or "")[:120]})
+        return False
+
     def _portal_validation_questions(self, node: dict):
         """When the government form itself flags fields (the portal's own
         validation messages are visible), those complaints become applicant
@@ -1400,14 +1460,51 @@ class FlowRunner:
             return None
         flagged: list[str] = []
         unmapped_msgs: list[str] = []
+        synth_questions: list[dict] = []
         for f in fields:
             fid = str(f.get("id") or "").strip()
             n = self._node_for_flagged_field(fid)
             if n is None:
-                # A portal field the released flow has no node for (e.g. the
-                # form's own inline legal declaration, or an expenses section)
-                # — only the applicant can complete it, in the secure window.
+                # A portal field the released flow has no node for. When the
+                # page reports it as a CHOICE GROUP with its own options (a
+                # question the portal revealed mid-fill — SGAC's yellow-fever
+                # question appears only after the health answer), Ellis asks
+                # the applicant with the portal's real choices and clicks the
+                # chosen chip on the resume. Anything else (an inline legal
+                # declaration, an expenses section) stays the applicant's own
+                # step in the secure window.
+                opts = [o for o in (f.get("options") or [])
+                        if str((o or {}).get("label") or "").strip()]
                 label = str(f.get("label") or "").strip()
+                if fid and label and len(opts) >= 2:
+                    key = f"portal_field_{fid}"
+                    answered = str(self.answers.get(key) or "").strip()
+                    # Every route here runs the repair pass BEFORE asking, so
+                    # a group that is STILL flagged — answer stored or not —
+                    # is asked (again, with the tried answer shown). The
+                    # first live run proved the suppress-when-answered guard
+                    # wrong: a failed repair left the flag up, the question
+                    # suppressed, and the run dead-ended with no question
+                    # (2026-08-04).
+                    # The portal's own sentence, split at its question mark:
+                    # what follows ("^Refer to …'s website for countries…")
+                    # is context, not the question.
+                    q_text, why = label, ("The official form asks this on its "
+                                          "own page — Ellis enters your answer there.")
+                    if "?" in label:
+                        q_text, rest = label.split("?", 1)
+                        q_text += "?"
+                        rest = rest.strip(" ^* ")
+                        if rest:
+                            why = rest[:200]
+                    synth_questions.append({
+                        "key": key, "question": q_text[:240], "why": why,
+                        "format": "choose one", "mandatory": True,
+                        "kind": "select",
+                        "options": [str(o.get("label")).strip() for o in opts][:12],
+                        **({"previous_answer": answered} if answered else {})})
+                    continue
+                # Only the applicant can complete it, in the secure window.
                 msg = str(f.get("message") or "").strip()
                 text = " — ".join(x for x in (label, msg) if x)[:160]
                 if text and text not in unmapped_msgs:
@@ -1425,6 +1522,14 @@ class FlowRunner:
             else:
                 self._rejected_fills.add(nid)
         if not flagged:
+            if synth_questions:
+                out = {"status": "handoff",
+                       "handoff_kind": "additional_information",
+                       "questions": synth_questions, "resume_node": None,
+                       "detail": {"portal_revealed_questions": len(synth_questions)}}
+                if unmapped_msgs:
+                    out["portal_messages"] = unmapped_msgs[:8]
+                return out
             if unmapped_msgs:
                 return {"status": "handoff", "handoff_kind": "portal_form",
                         "portal_messages": unmapped_msgs[:8],
@@ -1444,6 +1549,8 @@ class FlowRunner:
             if resume is None and nid in flagged:
                 resume = nid
         questions = self._collect_missing_questions(resume or node.get("node_id", ""))
+        questions = questions + [q for q in synth_questions
+                                 if q["key"] not in {x["key"] for x in questions}]
         if not questions:
             if unmapped_msgs:
                 return {"status": "handoff", "handoff_kind": "portal_form",
@@ -1452,7 +1559,8 @@ class FlowRunner:
             return None
         out = {"status": "handoff", "handoff_kind": "additional_information",
                "questions": questions, "resume_node": resume,
-               "detail": {"portal_validation_fields": len(flagged)}}
+               "detail": {"portal_validation_fields": len(flagged),
+                          "portal_revealed_questions": len(synth_questions)}}
         if unmapped_msgs:
             out["portal_messages"] = unmapped_msgs[:8]
         return out
