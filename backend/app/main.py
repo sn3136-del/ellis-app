@@ -352,16 +352,11 @@ def get_consular_form(application_id: str, download: bool = False,
 
 
 def _iso3_for(db, destination: str) -> str:
-    from .visa_snapshot.registry import _country_index
+    """The case's destination as ISO alpha-3. One shared lookup — see
+    registry.iso3 for why writing another one is a bug."""
+    from .visa_snapshot.registry import iso3
     d = (destination or "").strip()
-    if len(d) == 3 and d.isalpha():
-        return d.upper()
-    for code, entry in (_country_index() or {}).items():
-        names = {str(entry.get("name") or "").lower(),
-                 str(entry.get("common_name") or "").lower()}
-        if d.lower() in names:
-            return code.upper()
-    return d.upper()
+    return iso3(d, default=d.upper())
 
 
 def _latest_passport_profile(db, app_row) -> dict:
@@ -1375,14 +1370,11 @@ def case_form_questions(application_id: str, db=Depends(get_session),
     finished by hand. Returns which are already answered."""
     app_row = _owned(db, p, application_id)
     from . import consular_forms as cf
-    from .visa_snapshot.registry import _country_index
-    dest = app_row.destination_country or ""
-    iso = ""
-    for code, e in (_country_index() or {}).items():
-        if dest and dest.lower() in (str(e.get("name") or "").lower(),
-                                     str(e.get("common_name") or "").lower()):
-            iso = code
-            break
+    # Through the one shared lookup. This had its own inline copy that returned
+    # the registry KEY — 'DE' for Germany, where every table downstream is
+    # keyed by 'DEU' — so a Schengen case was told it had no form to fill and
+    # no questions to answer (2026-08-04).
+    iso = _iso3_for(db, app_row.destination_country or "")
     form_key = cf.form_for_destination(iso) if iso else None
     if not form_key:
         return {"form_key": None, "questions": []}
@@ -1461,6 +1453,9 @@ def _find_post_for_case(db, app_row, *, attempts: int = 1) -> dict:
         finally:
             s.close()
 
+    # The destination goes in by NAME on purpose: the search prompt and the
+    # source-page corroboration both read better with "Germany" than "DEU".
+    # consular_research.store normalizes it to ISO-3 on the way into the table.
     return cr.resolve_for_applicant(
         db, destination=app_row.destination_country or "",
         residence=(answers.get("lawful_country_of_residence")
@@ -1810,13 +1805,28 @@ def case_appointment_booking(application_id: str, db=Depends(get_session),
     # rendering (and failing) on every in-person route (2026-08-02).
     dest = (app_row.destination_country or "").strip().lower()
     gov_cal = "rk_termin" if dest in ("deu", "germany", "de") else ""
+    # Where to go, whether or not a booking link exists. These are separate
+    # questions and Ellis used to answer neither when it could not answer the
+    # second: an applicant asking "which embassy, and where is it?" got a
+    # bare "no verified booking address". The post block below carries its own
+    # status, so the screen can show the address AND say it is unconfirmed.
+    jur = route.get("jurisdiction") or {}
+    best = jur.get("best_known") or {}
+    post = {
+        "name": jur.get("competent_post_name") or best.get("competent_post_name") or "",
+        "kind": jur.get("competent_post_kind") or best.get("competent_post_kind") or "",
+        "address": jur.get("address") or best.get("address") or "",
+        "source_url": best.get("evidence") or "",
+        "status": "verified" if jur.get("status") in ("verified", "resolved")
+                  else ("unconfirmed" if best.get("competent_post_name") else "unknown"),
+    }
     try:
         target = assisted_booking.booking_target(route)
     except assisted_booking.BookingUnavailable as e:
         return {"bookable": False, "reason": str(e), "appointment": booked,
-                "gov_calendar": gov_cal}
+                "post": post, "gov_calendar": gov_cal}
     return {"bookable": True, "booking_url": target["url"],
-            "post_name": target["post_name"], "appointment": booked,
+            "post_name": target["post_name"], "post": post, "appointment": booked,
             "gov_calendar": gov_cal}
 
 

@@ -273,10 +273,16 @@ JAPAN_VJW_PREP = [
     ("Customs Declaration - Email for the QR codes", "email", True),
 ]
 
+# `date_format` is the order THIS form asks for, in dates.to_portal tokens.
+# An official blank gets the order it prints beside the field — the Schengen
+# form says "(day-month-year)" and means it. A preparation sheet is read by a
+# person retyping into a website, so it spells the month out: nobody can
+# mis-key "13 June 1988", and everybody eventually mis-keys 06/13 vs 13/06.
 FORMS = {
     "schengen_uniform": {
         "title": "Schengen Uniform Visa Application",
         "fields": SCHENGEN_UNIFORM,
+        "date_format": "DD-MM-YYYY",
         "submission": "in_person",
         "note": ("Print this form, sign it by hand (fields 37 and 38), and "
                  "bring it to your appointment with your passport, photo and "
@@ -286,6 +292,7 @@ FORMS = {
     "japan_vjw_prep": {
         "title": "Visit Japan Web Preparation Sheet (arrival, not a visa)",
         "fields": JAPAN_VJW_PREP,
+        "date_format": "DD MONTH YYYY",
         "submission": "applicant_online",
         "note": ("Complete Visit Japan Web at vjw-lp.digital.go.jp before you "
                  "fly — it needs an account, so you register and enter these "
@@ -297,6 +304,7 @@ FORMS = {
     "china_cova_prep": {
         "title": "China Visa (COVA) Preparation Sheet",
         "fields": CHINA_COVA_PREP,
+        "date_format": "DD MONTH YYYY",
         "submission": "applicant_online",
         "note": ("Fill these into COVA at cova.cs.mfa.gov.cn, then print the "
                  "completed form it generates and take it to the visa centre "
@@ -307,6 +315,7 @@ FORMS = {
     "uk_online_prep": {
         "title": "UK Visa Online Application Preparation Sheet",
         "fields": UK_ONLINE_PREP,
+        "date_format": "DD MONTH YYYY",
         "submission": "applicant_online",
         "note": ("Apply at gov.uk and copy these values into the matching "
                  "screens. You then attend a visa application centre for "
@@ -317,6 +326,7 @@ FORMS = {
     "india_online_prep": {
         "title": "India e-Visa / Regular Visa Preparation Sheet",
         "fields": INDIA_ONLINE_PREP,
+        "date_format": "DD MONTH YYYY",
         "submission": "applicant_online",
         "note": ("Apply at indianvisaonline.gov.in and copy these values into "
                  "the matching sections. Save your temporary application ID "
@@ -326,6 +336,7 @@ FORMS = {
     "ds160_prep": {
         "title": "US DS-160 Preparation Sheet",
         "fields": DS160_PREP,
+        "date_format": "DD MONTH YYYY",
         "submission": "applicant_online",
         "note": ("Sign in at ceac.state.gov/genniv and copy these values into "
                  "the matching DS-160 sections — they are listed in CEAC's own "
@@ -396,6 +407,66 @@ def answers_from_documents(answers: dict, passport_profile: dict | None) -> dict
     return merged
 
 
+# ------------------------------------------------------- writing the values
+# Ellis stores answers in ITS canonical vocabulary: dates as ISO, countries as
+# ISO-3, choices as snake_case keys. None of that is what a consular officer
+# reads. The Schengen blank prints "(day-month-year)" beside field 4, so
+# "1988-06-13" written there is not merely ugly — it is the wrong order on a
+# form somebody signs under penalty of perjury, and "CHN" is not what field 7
+# asks for. This is the one place that translates a stored answer into the
+# words the form itself uses, and both the printed sheet and the filled PDF go
+# through it so they can never disagree.
+
+# Answer keys that hold an ISO-3 country code rather than free text.
+_COUNTRY_KEYS = frozenset({
+    "nationality", "issuing_country", "address_country", "country_of_birth",
+    "destination_country", "employer_country",
+})
+
+# Answer keys that hold a snake_case choice from a fixed list. Only these are
+# re-worded — a free-text field is written exactly as the applicant typed it.
+_CODED_KEYS = frozenset({
+    "travel_document_type", "travel_purpose", "marital_status",
+    "costs_covered_by", "means_of_support", "prior_refusals",
+    "has_specific_plans", "travelling_with", "been_to_us_before",
+})
+
+_SEX = {"F": "Female", "M": "Male", "X": "X"}
+
+
+def _country_name(code: str) -> str:
+    """The country's own name for an ISO code, or the code unchanged when the
+    registry does not know it — an unknown code is still true, a guessed name
+    would not be."""
+    c = str(code or "").strip()
+    if not c:
+        return ""
+    try:
+        from .visa_snapshot.registry import _country_index
+        entry = (_country_index() or {}).get(c.upper()) or {}
+        return str(entry.get("name") or "").strip() or c
+    except Exception:  # noqa: BLE001 — registry optional; the code is honest
+        return c
+
+
+def form_value(form_key: str, key: str, raw) -> str:
+    """The applicant's stored answer, written the way THIS form asks for it."""
+    value = str(raw).strip() if raw not in (None, "", []) else ""
+    if not value:
+        return ""
+    from . import dates
+    if dates.date_kind_for_key(key) and dates.is_iso(value):
+        fmt = (FORMS.get(form_key) or {}).get("date_format") or ""
+        return dates.to_portal(value, fmt) or value
+    if key in _COUNTRY_KEYS:
+        return _country_name(value)
+    if key == "sex":
+        return _SEX.get(value.upper(), value)
+    if key in _CODED_KEYS and value == value.lower() and " " not in value:
+        return value.replace("_", " ").capitalize()
+    return value
+
+
 def prepare(form_key: str, answers: dict) -> dict:
     """Fill a consular form from the applicant's OWN answers.
 
@@ -412,8 +483,7 @@ def prepare(form_key: str, answers: dict) -> dict:
     missing: list[str] = []
     filled = 0
     for label, key, required in spec["fields"]:
-        raw = answers.get(key)
-        value = str(raw).strip() if raw not in (None, "") else ""
+        value = form_value(form_key, key, answers.get(key))
         if value:
             filled += 1
         else:
@@ -618,9 +688,12 @@ def fill_official_template(form_key: str, answers: dict,
         return None          # never guess which government field is which
     values = {}
     for field_name, ellis_key in mapping.items():
-        raw = (answers or {}).get(ellis_key)
-        if raw not in (None, ""):
-            values[field_name] = str(raw)
+        # Written the way the form asks for it, through the same translator the
+        # printed sheet uses — so the PDF an officer stamps and the sheet the
+        # applicant checked can never say different things.
+        written = form_value(form_key, ellis_key, (answers or {}).get(ellis_key))
+        if written:
+            values[field_name] = written
     # Tick-boxes the applicant answered: their choice becomes the /On state of
     # exactly the box they picked. A group they did not answer is left entirely
     # untouched — this form is signed under penalty of perjury, so a guessed

@@ -200,6 +200,11 @@ class ConsularJurisdictionRule(Base, TimestampMixin):
     competent_post_name: Mapped[str] = mapped_column(String(300), default="")
     competent_post_kind: Mapped[str] = mapped_column(String(32), default="unknown")
     competent_post_url: Mapped[str] = mapped_column(String(500), default="")
+    # The street address the applicant actually travels to. Knowing the office
+    # is NAMED "German Consulate General Guangzhou" does not tell anyone where
+    # to go, and a name is what Ellis used to hand over. Stored only when the
+    # official source page itself prints it — see consular_research.
+    competent_post_address: Mapped[str] = mapped_column(String(500), default="")
     covers_nationalities: Mapped[list] = mapped_column(JSON, default=list)
     conditions: Mapped[list] = mapped_column(JSON, default=list)
     verification_status: Mapped[str] = mapped_column(String(32), default="unverified")

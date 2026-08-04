@@ -300,6 +300,71 @@ class BrowserbasePageDriver:
                 return {"ok": False, "code": "PORTAL_UNAVAILABLE", "detail": msg}
             return {"ok": False, "code": "NAV_ERROR", "detail": msg}
 
+    # ------------------------------------------------------------ overlays
+    # A date picker does not close because the date is written. Malaysia's MDAC
+    # calendar stayed open over State and City after the arrival date went in,
+    # so every field beneath it was answering to a panel instead of the form,
+    # and the applicant watched Ellis stall against its own calendar
+    # (2026-08-04). Escape was pressed before a CLICK and nowhere else, which
+    # is precisely backwards: the click is the one action that already scrolls
+    # and retries. It is the quiet fills underneath that get swallowed.
+    #
+    # Cost matters here — this runs before every field — so nothing is
+    # dismissed on suspicion. One JS call asks the page the only question that
+    # matters: at this field's own coordinates, is the topmost element the
+    # field? Anything else is a real cover, and only then is it cleared.
+    _COVERED_JS = """(el) => {
+      const r = el.getBoundingClientRect();
+      if (!r.width || !r.height) return '';        // not laid out: nothing to cover
+      const x = r.left + r.width / 2;
+      const y = r.top + Math.min(r.height / 2, 12);
+      if (x < 0 || y < 0 || x > innerWidth || y > innerHeight) return '';
+      const top = document.elementFromPoint(x, y);
+      if (!top || top === el || el.contains(top) || top.contains(el)) return '';
+      // A <label> sitting over its own control is not a cover — clicking it
+      // focuses the field, which is what we wanted anyway.
+      if (top.tagName === 'LABEL' && el.id && top.getAttribute('for') === el.id)
+        return '';
+      return (top.tagName + '.' + String(top.className || '')).slice(0, 60);
+    }"""
+
+    def _uncover(self, selector: str) -> None:
+        """Clear whatever is sitting on top of this field, cheapest first.
+
+        Deterministic and click-free: Ellis never clicks a blind coordinate on
+        a government form to dismiss a panel — a stray click on a real control
+        is how an application gets a wrong answer nobody typed. Escape, then
+        the document-level mousedown every calendar and dropdown widget listens
+        for, then a scroll that moves the field out from under. Silent when it
+        cannot: the fill below will report the real failure."""
+        try:
+            covered = self.page.eval_on_selector(selector, self._COVERED_JS)
+        except Exception:  # noqa: BLE001 — unreadable: let the action judge
+            return
+        if not covered:
+            return
+        for step in ("escape", "mousedown", "scroll"):
+            try:
+                if step == "escape":
+                    self.page.keyboard.press("Escape")
+                elif step == "mousedown":
+                    # What a bootstrap/jQuery datepicker and most custom
+                    # dropdowns actually close on. Dispatched on <body>, so it
+                    # bubbles to document without landing on any control.
+                    self.page.evaluate(
+                        "() => { if (document.activeElement &&"
+                        " document.activeElement.blur) document.activeElement.blur();"
+                        " document.body.dispatchEvent(new MouseEvent('mousedown',"
+                        " {bubbles: true})); }")
+                else:
+                    self.page.locator(selector).first.scroll_into_view_if_needed(
+                        timeout=_ACT_MS)
+                self.page.wait_for_timeout(80)
+                if not self.page.eval_on_selector(selector, self._COVERED_JS):
+                    return
+            except Exception:  # noqa: BLE001 — try the next escalation
+                continue
+
     def fill(self, selector: str, value: str) -> dict:
         # The deterministic runtime never fills a sensitive field, but refuse
         # here too (defense in depth) so a mis-generated node fails closed.
@@ -312,8 +377,15 @@ class BrowserbasePageDriver:
         try:
             self.page.locator(selector).first.wait_for(state="attached",
                                                        timeout=_WAIT_MS)
-        except Exception:  # noqa: BLE001 — let fill report the real failure
-            pass
+        except Exception:  # noqa: BLE001
+            # It waited the full budget and the field never appeared. Every
+            # rung below — fill, click-and-type, the picker write — needs the
+            # same element and will each spend its own timeout discovering the
+            # same absence: ~11s of an applicant's life to re-learn what the
+            # wait already proved. Say so now.
+            return {"ok": False, "code": "NO_SUCH_ELEMENT",
+                    "detail": "the field never appeared on the page"}
+        self._uncover(selector)
         # A radio or checkbox holds a CHOICE, not text, and cannot be filled at
         # all. Older adapters mapped one node per option (Singapore's ICA card
         # has fill_sex_f_0 / _m_0 / _o_0, all fed the same answer), so each
@@ -323,6 +395,21 @@ class BrowserbasePageDriver:
         choice = self._choice_kind(selector)
         if choice:
             return self._choose(selector, str(value), choice)
+        # A READONLY input is not a field that might accept typing — it is a
+        # field the portal reserved for its own picker. Playwright refuses to
+        # fill it, and the keyboard fallback types into something that cannot
+        # receive characters, so both rungs are guaranteed to fail: ~11s per
+        # date field (fill 2.5s + click 6s + read-back 2.5s) spent proving what
+        # the DOM says outright. Malaysia's MDAC asks for three such dates.
+        # Ask once, cheaply, and go straight to the write its widget uses.
+        try:
+            if self.page.eval_on_selector(
+                    selector,
+                    "el => el.readOnly === true || el.hasAttribute('readonly')"):
+                return self._set_like_a_picker(
+                    selector, str(value), "the field is readonly")
+        except Exception:  # noqa: BLE001 — unreadable: take the normal ladder
+            pass
         try:
             self.page.fill(selector, str(value), timeout=_ACT_MS)
             # Framework forms (rc-field-form/Ant Design) commit a controlled
@@ -605,12 +692,11 @@ class BrowserbasePageDriver:
     def click(self, selector: str) -> dict:
         try:
             # A still-open dropdown/date overlay from the previous field can
-            # cover the button and turn the click into a 15s timeout.
-            try:
-                self.page.keyboard.press("Escape")
-                self.page.wait_for_timeout(60)
-            except Exception:  # noqa: BLE001
-                pass
+            # cover the button and turn the click into a 15s timeout. Only
+            # dismissed when it is genuinely in the way — an unconditional
+            # Escape before every click also closes panels Ellis opened on
+            # purpose.
+            self._uncover(selector)
             # Text selectors can also match stale HIDDEN elements (e.g. a
             # dismissed modal's button still in the DOM) — click the first
             # VISIBLE match so the wait can't hang on an invisible node.
@@ -1765,6 +1851,7 @@ class BrowserbasePageDriver:
         must never read as ticked when its box is visually empty."""
         if _SENSITIVE_SELECTOR.search(selector or ""):
             return {"ok": False, "code": "SENSITIVE_FIELD_AUTOMATION"}
+        self._uncover(selector)
         return self._commit_checkbox(selector)
 
     # One page evaluation that answers SEVERAL comboboxes. Everything happens
@@ -1839,6 +1926,8 @@ class BrowserbasePageDriver:
             if _SENSITIVE_SELECTOR.search(sel or ""):
                 return [{"ok": False, "code": "SENSITIVE_FIELD_AUTOMATION"}
                         for _ in pairs]
+        if pairs:
+            self._uncover(pairs[0][0])
         try:
             picked = self.page.evaluate(self._MANY_JS,
                                         [pairs, int(budget_ms)]) or []
@@ -1880,11 +1969,11 @@ class BrowserbasePageDriver:
             return {"ok": False, "code": "SENSITIVE_FIELD_AUTOMATION"}
         want = str(value).strip()
         try:
-            try:  # dismiss any lingering overlay (e.g. an open date picker)
-                self.page.keyboard.press("Escape")
-                self.page.wait_for_timeout(60)
-            except Exception:  # noqa: BLE001
-                pass
+            # A lingering overlay (the date picker two fields up) sits ON this
+            # combobox and eats the click that opens it. Escape alone was tried
+            # here and was not enough for MDAC's calendar — _uncover escalates
+            # and then CHECKS, instead of pressing a key and hoping.
+            self._uncover(selector)
             self.page.locator(f"{selector} >> visible=true").first.click(timeout=_CLICK_MS)
             try:  # clear any previous query so filters start clean
                 self.page.keyboard.press("ControlOrMeta+A")
@@ -1978,6 +2067,7 @@ class BrowserbasePageDriver:
         label, sel = rows[int(hit["index"])]
         if _SENSITIVE_SELECTOR.search(sel):
             return {"ok": False, "code": "SENSITIVE_FIELD_AUTOMATION"}
+        self._uncover(sel)
         # A radio group's members share one `name`, so a spec built before
         # that was understood can carry the SAME selector for every choice.
         # Taking `.first` there answers whichever button the page happens to

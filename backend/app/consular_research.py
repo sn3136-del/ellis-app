@@ -50,21 +50,11 @@ def _host(url: str) -> str:
 
 def _iso3(name_or_code: str) -> str:
     """ISO-3 for a country name (or a code passed straight through)."""
-    v = (name_or_code or "").strip()
-    if len(v) == 3 and v.isalpha():
-        return v.upper()
     try:
-        from .visa_snapshot.registry import _country_index
-        for code, e in (_country_index() or {}).items():
-            if v.lower() in (str(e.get("name") or "").lower(),
-                             str(e.get("common_name") or "").lower()):
-                # The index is keyed by alpha-2 for some entries, so take the
-                # entry's OWN alpha_3 rather than trusting the key — returning
-                # 'GB' where 'GBR' was meant silently broke jurisdiction checks.
-                return str(e.get("alpha_3") or code).upper()
+        from .visa_snapshot.registry import iso3
+        return iso3(name_or_code)
     except Exception:  # noqa: BLE001 — registry optional
-        pass
-    return ""
+        return ""
 
 
 def _names_country(text: str, country: str) -> bool:
@@ -111,6 +101,103 @@ def acceptable_booking_host(url: str, *, government_linked: bool) -> bool:
     if is_government_host(_host(url)):
         return True
     return bool(government_linked and is_delegated_operator(url))
+
+
+def _grounded_address(address: str, source_text: str) -> str:
+    """The post's street address, kept ONLY when the official page prints it.
+
+    An address is the one field where a plausible-sounding answer does real
+    harm: somebody gets on a train to a building that is not there, on a day
+    they waited weeks for. So the claim is checked against the page it came
+    from rather than trusted — its distinctive parts (the street line and the
+    number) must appear in the source text, or Ellis reports no address at all.
+    Whitespace and punctuation are normalised before comparing, because the
+    same address is printed across several lines on most consular pages.
+    """
+    import re
+    addr = " ".join(str(address or "").split()).strip()
+    if not addr or not source_text:
+        return ""
+    squash = lambda s: re.sub(r"[^a-z0-9]+", "", s.lower())  # noqa: E731
+    page = squash(source_text)
+    if not page:
+        return ""
+    # Compared in chunks, because the same address is laid out differently on
+    # every page it appears on — across lines, with or without the country,
+    # postcode before or after the city. Requiring ALL of them was too strict
+    # to pass on real consular pages. Requiring a MAJORITY, and at least two,
+    # is what separates "this page prints this address" from "a model recalled
+    # one": a fabricated address matches essentially nothing on the real page,
+    # while a true one matches its street and its city whatever the layout.
+    parts = [p for p in re.split(r"[,\n;]+", addr) if squash(p)]
+    if len(parts) < 2:
+        return addr if parts and squash(parts[0]) in page else ""
+    hits = sum(1 for p in parts if squash(p) in page)
+    return addr if hits >= 2 and hits * 2 >= len(parts) else ""
+
+
+# Where an address lives when the page that named the post does not print one:
+# that same official site's contact page. Followed rather than guessed — the
+# link has to already be on the official page Ellis fetched, and stay on its
+# host — so this can never wander onto a look-alike domain.
+_CONTACT_HINTS = ("kontakt", "contact", "anschrift", "adresse", "address",
+                  "impressum", "visa", "sprechzeit", "opening", "联系", "地址",
+                  "签证",
+                  # These sites name a post's own page after what the post IS,
+                  # not after "contact" — china.diplo.de's hub links onward to
+                  # the Generalkonsulat pages, and the street only appears
+                  # there. Without them the walk circled the hub.
+                  "generalkonsulat", "konsulat", "consulate", "botschaft",
+                  "embassy", "vertretung", "mission", "consulado", "ambassade",
+                  "领事馆", "大使馆")
+
+
+def _contact_links(source_url: str, links: list, *, prefer: str = "",
+                   limit: int = 3) -> list:
+    """Links from an official page that look like they lead to an address.
+    Ordered, deduplicated, bounded — an address hunt must not turn into a crawl
+    of a government site. `prefer` (the post's city) floats the pages about
+    THAT post to the front."""
+    host = _host(source_url)
+    if not host:
+        return []
+    # The mission's own site is usually a SIBLING subdomain of the one that
+    # answered "which consulate" — china.diplo.de names the post, kanton.diplo.de
+    # is the post. Same-host-only kept Ellis on the page that had no address.
+    # Widened to the same registrable government domain, so it can reach the
+    # consulate's own pages and still cannot leave diplo.de.
+    domain = lambda h: ".".join(h.split(".")[-2:]) if h else ""  # noqa: E731
+    here_domain = domain(host)
+    # '#main' and '#nav__primary' are the SAME page. Without dropping the
+    # fragment, every in-page anchor read as a fresh contact page and the three
+    # fetches Ellis is allowed were spent re-reading the page it started on.
+    strip = lambda u: u.split("#", 1)[0].rstrip("/")  # noqa: E731
+    here = strip(source_url)
+    seen, out = {here}, []
+    for raw in (links or []):
+        u = strip(str(raw or "").strip())
+        if not u.lower().startswith("https://") or u in seen:
+            continue
+        h = _host(u)
+        if domain(h) != here_domain or not (h == host or is_government_host(h)):
+            continue
+        if not any(hint in u.lower() for hint in _CONTACT_HINTS):
+            continue
+        seen.add(u)
+        out.append(u)
+    # A page whose URL is ABOUT contact details is likelier to print an address
+    # than one that merely mentions visas, so spend the few fetches there — and
+    # a page naming the applicant's own city ahead of one naming another post's.
+    strong = ("kontakt", "contact", "anschrift", "adresse", "impressum", "联系", "地址")
+    city = (prefer or "").strip().lower()
+
+    def rank(u: str) -> tuple:
+        low = u.lower()
+        return (0 if city and city in low else 1,
+                0 if any(h in low for h in strong) else 1)
+
+    out.sort(key=rank)
+    return out[:limit]
 
 
 def verify_candidate(candidate: dict, *, source_url: str, source_text: str,
@@ -162,12 +249,27 @@ def verify_candidate(candidate: dict, *, source_url: str, source_text: str,
             f"booking host {_host(booking)!r} is neither a government domain nor "
             f"an operator this route's official page links to")
 
+    # The street address is a SEPARATE claim from "this is the post that serves
+    # you", and it is checked separately. It survives only when the official
+    # page Ellis fetched actually prints it — so an address is never the
+    # model's recollection of a building. It is kept even when the jurisdiction
+    # claim above is unverified, because those two facts can be true
+    # independently: this really is the German Consulate General in Guangzhou's
+    # address, whether or not the page also proved it serves Guangdong. The
+    # applicant is shown the jurisdiction's status alongside it and can see the
+    # difference.
+    official_source = bool(source_url and (is_government_host(_host(source_url))
+                                           or is_delegated_operator(source_url)))
+    address = _grounded_address(candidate.get("post_address"), source_text) \
+        if official_source else ""
+
     return {
         "destination_country": destination,
         "residence_jurisdiction": residence,
         "residence_subdivisions": list(candidate.get("residence_subdivisions") or []),
         "competent_post_name": post_name,
         "competent_post_kind": kind,
+        "competent_post_address": address,
         "competent_post_url": booking if not problems else "",
         "covers_nationalities": list(candidate.get("covers_nationalities") or []),
         "conditions": list(candidate.get("conditions") or []),
@@ -198,6 +300,7 @@ Reply JSON:
  "competent_post_name": "...",
  "competent_post_kind": "embassy|consulate_general|consulate|visa_centre|honorary_consulate|unknown",
  "competent_post_url": "https://... the page where they book or apply",
+ "post_address": "the office's full street address, copied EXACTLY as the official page prints it, or \"\" if that page does not give one",
  "source_url": "https://... the official page this came from",
  "residence_subdivisions": ["provinces/states this post covers, [] if country-wide"],
  "city": "city of the post",
@@ -266,25 +369,71 @@ def resolve_for_applicant(db, *, destination: str, residence: str,
         return {"status": "not_found", "reason": found.get("reason", "")}
 
     source_url = str(found.get("source_url") or "")
-    text, gov_linked = "", False
+    text, links, gov_linked = "", [], False
     if fetch_page is not None and source_url:
         try:
             source_url, text, links = fetch_page(source_url)
             gov_linked = any(is_delegated_operator(u) for u in (links or []))
         except Exception:  # noqa: BLE001 — an unreachable source stays unverified
             text = ""
+    candidate = {
+        "competent_post_name": found.get("competent_post_name") or "",
+        "competent_post_kind": found.get("competent_post_kind") or "unknown",
+        "competent_post_url": found.get("competent_post_url") or "",
+        "post_address": found.get("post_address") or "",
+        "residence_subdivisions": found.get("residence_subdivisions") or [],
+    }
     row = verify_candidate(
-        {"competent_post_name": found.get("competent_post_name") or "",
-         "competent_post_kind": found.get("competent_post_kind") or "unknown",
-         "competent_post_url": found.get("competent_post_url") or "",
-         "residence_subdivisions": found.get("residence_subdivisions") or []},
-        source_url=source_url, source_text=text,
+        candidate, source_url=source_url, source_text=text,
         destination=destination, residence=residence,
         government_linked=gov_linked)
+
+    # The page that names the post is often not the page that prints its
+    # address — Germany's Guangzhou mission answers "which consulate" on a news
+    # landing page and keeps the street on its contact page. Rather than take
+    # the address on trust, follow that official site's OWN contact links and
+    # look for it there. Bounded to three same-host pages, and it can only ever
+    # ADD an address that a real page corroborates.
+    address_source = source_url if row["competent_post_address"] else ""
+    if candidate["post_address"] and not row["competent_post_address"] \
+            and fetch_page is not None:
+        # Two levels, because that is how these sites are actually built: the
+        # page that answers "which consulate" links to a CONTACT HUB, and the
+        # hub links to the individual post's own page, which is where the
+        # street finally appears. Breadth-first with a hard fetch budget, so a
+        # site with no address costs a bounded number of page loads and then
+        # stops. Never more than two hops from an official page Ellis was
+        # already reading.
+        queue = [(u, 1) for u in _contact_links(
+            source_url, links, prefer=found.get("city", ""))]
+        fetched, budget = set(), 6
+        while queue and budget > 0:
+            link, depth = queue.pop(0)
+            if link in fetched:
+                continue
+            fetched.add(link)
+            budget -= 1
+            try:
+                final_url, page_text, page_links = fetch_page(link)
+            except Exception:  # noqa: BLE001 — a dead link proves nothing
+                continue
+            grounded = _grounded_address(candidate["post_address"], page_text)
+            if grounded:
+                row["competent_post_address"] = grounded
+                address_source = final_url or link
+                break
+            if depth < 2:
+                queue.extend((u, depth + 1) for u in _contact_links(
+                    final_url or link, page_links,
+                    prefer=found.get("city", ""), limit=2))
+
     stored = store(db, dict(row, destination_country=destination,
                             residence_jurisdiction=residence))
     return {"status": row["verification_status"], "post": row["competent_post_name"],
+            "address": row["competent_post_address"],
+            "address_source": address_source,
             "booking_url": row["competent_post_url"], "city": found.get("city", ""),
+            "source_url": source_url,
             "problems": row["problems"], "rule_id": getattr(stored, "id", "")}
 
 
@@ -296,6 +445,17 @@ def store(db, row: dict, *, snapshot_date: str = "") -> object:
     from .visa_snapshot import SNAPSHOT_DATE
     from .visa_snapshot.models import ConsularJurisdictionRule
 
+    # Keyed by ISO-3, always. The on-demand path was handed the case's DISPLAY
+    # name ("Germany", "United Kingdom") and stored it verbatim, while the
+    # resolver reads these rows by ISO-3 — so not one rule the applicant's own
+    # search produced was ever visible to the code that needs it, including the
+    # verified UK one. The applicant kept being told no post was known while
+    # the answer sat in the table under another spelling (2026-08-04).
+    row = dict(row)
+    row["destination_country"] = (_iso3(row.get("destination_country", ""))
+                                  or str(row.get("destination_country") or ""))
+    row["residence_jurisdiction"] = (_iso3(row.get("residence_jurisdiction", ""))
+                                     or str(row.get("residence_jurisdiction") or ""))
     snap = snapshot_date or SNAPSHOT_DATE
     existing = db.execute(select(ConsularJurisdictionRule).where(
         ConsularJurisdictionRule.destination_country == row["destination_country"],
@@ -310,6 +470,10 @@ def store(db, row: dict, *, snapshot_date: str = "") -> object:
     target.competent_post_name = row["competent_post_name"]
     target.competent_post_kind = row["competent_post_kind"]
     target.competent_post_url = row["competent_post_url"]
+    # Never blank an address already on file with an empty one: a later search
+    # that failed to reach the source page must not erase a grounded answer.
+    if row.get("competent_post_address"):
+        target.competent_post_address = row["competent_post_address"]
     target.covers_nationalities = row["covers_nationalities"]
     target.conditions = row["conditions"]
     target.verification_status = row["verification_status"]

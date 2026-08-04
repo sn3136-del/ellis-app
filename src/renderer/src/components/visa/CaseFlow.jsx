@@ -704,6 +704,7 @@ function AppointmentPacket({ t, client, caseId, onToDocuments }) {
           {t('packet.ready')}
         </div>
       )}
+      <ConsularForm t={t} client={client} caseId={caseId} />
       <AppointmentBooking t={t} client={client} caseId={caseId} />
       <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
         <button className="btn" onClick={download} disabled={busy}
@@ -716,6 +717,107 @@ function AppointmentPacket({ t, client, caseId, onToDocuments }) {
           </button>
         )}
       </div>
+    </div>
+  )
+}
+
+// The form itself — the part an applicant would otherwise spend an evening on.
+// Ellis fills the government's OWN blank from answers they already gave, and
+// hands it back as a PDF to print, sign and carry in. Self-hiding: the
+// endpoint says {available:false} for routes with no verified form, so this
+// never promises a document Ellis cannot produce.
+//
+// It exists because the backend has filled this form since the consular work
+// landed and nothing in the app ever asked for it: a Germany applicant pressed
+// Start, was correctly told the route is decided in person, and was handed
+// nothing (2026-08-04).
+function ConsularForm({ t, client, caseId }) {
+  const toast = useToast()
+  const [form, setForm] = useState(null)
+  const [busy, setBusy] = useState(false)
+  useEffect(() => {
+    let live = true
+    client.consularForm(caseId)
+      .then((f) => { if (live) setForm(f && f.available ? f : null) })
+      .catch(() => { if (live) setForm(null) })
+    return () => { live = false }
+  }, [caseId])
+  if (!form) return null
+
+  const official = form.kind === 'official_form'
+  const missing = form.missing_required || []
+
+  async function download() {
+    setBusy(true)
+    try {
+      const blob = await client.downloadConsularForm(caseId)
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${form.form_key || 'visa-application'}.pdf`
+      document.body.appendChild(a); a.click(); a.remove()
+      URL.revokeObjectURL(url)
+    } catch (e) { toast(e.message) }
+    setBusy(false)
+  }
+
+  return (
+    <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--line)' }}
+      data-testid="consular-form">
+      <div style={{ fontWeight: 600, marginBottom: 4 }}>{t('form.title')}</div>
+      <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 10 }}>
+        {official ? t('form.subOfficial') : t('form.subPrep')}
+      </div>
+      <div className="kv"><div className="kv__k">{t('form.filled')}</div>
+        <div className="kv__v">{form.filled} / {form.total}</div></div>
+      {missing.length > 0 ? (
+        <div className="note" style={{ margin: '10px 0' }} data-testid="form-missing">
+          <div style={{ fontWeight: 600, marginBottom: 4 }}>{t('form.missing')}</div>
+          <ul style={{ margin: 0, paddingLeft: 18 }}>
+            {missing.map((m) => <li key={m}>{m.replace(/_/g, ' ')}</li>)}
+          </ul>
+        </div>
+      ) : (
+        <div className="note" style={{ margin: '10px 0' }} data-testid="form-complete">
+          {t('form.complete')}
+        </div>
+      )}
+      <button className="btn" onClick={download} disabled={busy}
+        data-testid="form-download">
+        {busy ? t('form.preparing')
+          : official ? t('form.download') : t('form.downloadPrep')}
+      </button>
+    </div>
+  )
+}
+
+// Where the applicant physically goes. A name ("German Consulate General
+// Guangzhou") is not an answer to "where do I go" — the street address is, and
+// Ellis had never shown one. Renders the address whenever it has one, with the
+// jurisdiction's own status beside it, so an office Ellis found but has not
+// confirmed serves this address is shown AS THAT rather than withheld.
+function ConsularPost({ t, post }) {
+  if (!post || !post.name) return null
+  return (
+    <div style={{ marginBottom: 10 }} data-testid="consular-post">
+      <div style={{ fontWeight: 600, marginBottom: 4 }}>{t('post.title')}</div>
+      <div className="kv"><div className="kv__k">{post.kind
+        ? post.kind.replace(/_/g, ' ') : t('post.title')}</div>
+        <div className="kv__v">{post.name}</div></div>
+      {post.address && (
+        <div className="kv"><div className="kv__k">{t('post.address')}</div>
+          <div className="kv__v">{post.address}</div></div>
+      )}
+      {post.status === 'unconfirmed' && (
+        <div className="note" style={{ marginTop: 8 }} data-testid="post-unconfirmed">
+          {t('post.unconfirmed')}
+          {post.source_url && (
+            <div style={{ marginTop: 4, fontSize: 12, wordBreak: 'break-all' }}>
+              {t('post.source')}: {post.source_url}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -739,9 +841,12 @@ function AppointmentBooking({ t, client, caseId }) {
     setFinding(true)
     try {
       const out = await client.findConsularPost(caseId)
-      if (out.status === 'verified') { await load() } else {
-        toast(t('booking.notFound'))
-      }
+      // Reload whatever the search found, verified or not. Gating the refresh
+      // on 'verified' meant an unverified answer — which now carries the
+      // office's name and its address off an official page — was thrown away
+      // and the applicant told only that nothing was confirmed.
+      await load()
+      if (out.status !== 'verified') toast(t('booking.notFound'))
     } catch (e) { toast(e.detail?.detail || e.message) }
     setFinding(false)
   }
@@ -764,6 +869,7 @@ function AppointmentBooking({ t, client, caseId }) {
   return (
     <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--line)' }}
       data-testid="appointment-booking">
+      <ConsularPost t={t} post={state.post} />
       <div style={{ fontWeight: 600, marginBottom: 6 }}>{t('booking.title')}</div>
       <ConsularFormQuestions t={t} client={client} caseId={caseId} onSaved={() => {}} />
       {/* Only where a readable government calendar actually exists for THIS

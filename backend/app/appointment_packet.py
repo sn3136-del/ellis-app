@@ -79,6 +79,20 @@ def _post_lines(jurisdiction: dict | None) -> list[str]:
     if status == "residence_required":
         return ["  Post:      cannot be determined yet — Ellis needs your lawful",
                 "             country of residence to name the competent post."]
+    # Unverified, but researched: name it and give the address, and say in the
+    # same breath that the applicant must confirm it. "NOT CONFIRMED" with
+    # nothing beside it is not caution, it is withholding the one thing they
+    # asked for — where to go.
+    best = j.get("best_known") or {}
+    if best.get("competent_post_name"):
+        out = ["  Post:      " + str(best["competent_post_name"]),
+               "             NOT YET CONFIRMED as the post for your residence —",
+               "             check with them before you travel."]
+        if best.get("address"):
+            out.append(f"  {'Address:':10} {best['address']}")
+        if best.get("evidence"):
+            out.append(f"  {'Source:':10} {str(best['evidence'])[:100]}")
+        return out
     return ["  Post:      NOT CONFIRMED. Several posts may serve you, or the",
             "             rule is not verified. Confirm the competent post for",
             "             your residence before booking or travelling.",
@@ -219,17 +233,14 @@ def build_for_case(db, app_row) -> dict:
     applicant to do work they do not have to do."""
     from . import checklist_intake, consular_forms as cf, models
     from .global_routes import resolver
-    from .visa_snapshot.registry import _country_index
+    from .visa_snapshot import registry
     from sqlalchemy import select
 
     answers = app_row.answers or {}
     dest_name = app_row.destination_country or ""
-    iso3 = ""
-    for code, e in (_country_index() or {}).items():
-        if dest_name and dest_name.lower() in (
-                str(e.get("name") or "").lower(), str(e.get("common_name") or "").lower()):
-            iso3 = code
-            break
+    # One shared lookup (registry.iso3). The copy that lived here returned the
+    # index key — 'DE', not 'DEU' — like the three others did.
+    iso3 = registry.iso3(dest_name)
     try:
         route = resolver.resolve_route(
             db, nationality=answers.get("passport_nationality") or "",

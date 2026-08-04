@@ -82,6 +82,26 @@ def normalize_country(value: str, *, field: str = "country") -> str:
     return entry["alpha_3"]
 
 
+def iso3(value: str, *, default: str = "") -> str:
+    """ISO alpha-3 for any accepted country identifier — a name ('Germany'),
+    an alpha-2 ('DE') or an alpha-3 ('DEU') — or `default` when the value is
+    not a country Ellis knows.
+
+    The soft twin of normalize_country, which raises. Four call sites had each
+    written their own version by walking _country_index and returning the KEY
+    it matched on; the index is keyed by alpha-2 AND alpha-3 AND name, alpha-2
+    comes first, so every one of them returned 'DE' for Germany while the
+    tables they fed are keyed 'DEU'. A Schengen applicant was told their route
+    has no consular form, no form questions, and no known post — three
+    symptoms, one line of code (2026-08-04). Use this; do not write a fifth.
+    """
+    v = str(value or "").strip()
+    if not v:
+        return default
+    entry = _country_index().get(v.upper()) or _country_index().get(v.lower())
+    return entry["alpha_3"] if entry else default
+
+
 def normalize_nationality(value: str) -> str:
     """Normalize a nationality to registry code (ISO alpha-3 or special class)."""
     if not value or not isinstance(value, str):

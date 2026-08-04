@@ -219,6 +219,9 @@ export function createVisaClient(session) {
     // Tick-box questions the consular form needs, in plain words. Answering
     // them means the downloaded form needs nothing finished by hand.
     consularFormQuestions: (id) => call('GET', `/cases/${id}/form-questions`, session),
+    // The official form itself, filled from the applicant's own answers.
+    // {available:false} on routes Ellis has no verified form for.
+    consularForm: (id) => call('GET', `/cases/${id}/consular-form`, session),
     appointmentPacket: (id) => call('GET', `/cases/${id}/appointment-packet`, session),
     // Where this applicant books, and what they have already booked. Ellis
     // never picks a slot: the applicant chooses in the secure window.
@@ -245,6 +248,14 @@ export function createVisaClient(session) {
       const res = await fetch(`${BASE}/cases/${id}/appointment-packet?format=zip`,
                               { headers: authHeaders(session) })
       if (!res.ok) throw new Error(`packet download failed (HTTP ${res.status})`)
+      return await res.blob()
+    },
+    // The filled official form as a PDF — the government's own blank with the
+    // applicant's answers written into it. Raw bytes, so it bypasses `call`.
+    downloadConsularForm: async (id) => {
+      const res = await fetch(`${BASE}/cases/${id}/consular-form?download=true`,
+                              { headers: authHeaders(session) })
+      if (!res.ok) throw new Error(`form download failed (HTTP ${res.status})`)
       return await res.blob()
     },
     // Document intake: the applicant's explicit Submit fulfils a requirement

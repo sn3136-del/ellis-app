@@ -169,8 +169,42 @@ def _jurisdiction(db, dest: str, residence: str | None, nat: str,
     return {"status": "verified", "competent_post_name": r.competent_post_name,
             "competent_post_kind": r.competent_post_kind,
             "competent_post_url": r.competent_post_url,
+            "address": r.competent_post_address or "",
             "residence_subdivisions": r.residence_subdivisions or [],
             "conditions": r.conditions or []}
+
+
+def _best_known_post(db, *, dest: str, residence: str, nat: str) -> dict:
+    """The post Ellis has on file for this pair when nothing is VERIFIED yet.
+
+    Kept strictly apart from the verified answer above, which gates booking
+    links and must never soften. This is the honest middle state: the search
+    named an office and read its address off an official page, but could not
+    prove from that page that it is the office for this applicant's residence.
+    Reporting nothing at all was the worse lie — a traveller was told "post:
+    NOT CONFIRMED" while Ellis held the consulate's name and street address
+    (2026-08-04). The caller must label it as unconfirmed.
+    """
+    if not residence:
+        return {}
+    rows = db.execute(select(ConsularJurisdictionRule).where(
+        ConsularJurisdictionRule.destination_country == dest,
+        ConsularJurisdictionRule.residence_jurisdiction == residence)
+        .order_by(ConsularJurisdictionRule.competent_post_name)).scalars().all()
+    rows = [r for r in rows
+            if r.competent_post_name
+            and (not r.covers_nationalities or nat in r.covers_nationalities)]
+    if not rows:
+        return {}
+    # An address is the whole point of showing this at all — prefer a row that
+    # has one.
+    r = next((x for x in rows if x.competent_post_address), rows[0])
+    return {"competent_post_name": r.competent_post_name,
+            "competent_post_kind": r.competent_post_kind,
+            "address": r.competent_post_address or "",
+            "residence_subdivisions": r.residence_subdivisions or [],
+            "conditions": r.conditions or [],
+            "evidence": (r.evidence_ids or [None])[0] or ""}
 
 
 def _passport_validity(db, dest: str) -> dict | None:
@@ -291,6 +325,14 @@ def resolve_route(db, *, nationality: str, destination: str,
     # 2) Physical routes: jurisdiction is residence-dependent, never guessed.
     if outcome in _JURISDICTION_OUTCOMES:
         j = _jurisdiction(db, dest, res, nat, res_sub)
+        # Nothing verified, but Ellis may still hold a researched post and its
+        # address for this pair. Attached under its own key so no consumer can
+        # mistake it for the verified answer — `status` is still not "verified"
+        # and the booking gate still refuses it.
+        if j["status"] not in ("verified", "resolved"):
+            best = _best_known_post(db, dest=dest, residence=res or "", nat=nat)
+            if best:
+                j["best_known"] = best
         record["jurisdiction"] = j
         if j["status"] == "residence_required":
             record["route_outcome"] = "REQUIRES_MANUAL_JURISDICTION_SELECTION"
