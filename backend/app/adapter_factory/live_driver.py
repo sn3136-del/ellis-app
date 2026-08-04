@@ -197,6 +197,15 @@ _SHOWN_VALUE_JS = """(el) => {
   // only while the box is CHECKED.
   if (el.type === 'radio' || el.type === 'checkbox')
     return el.checked ? (el.value || '').trim() : '';
+  // SGAC's chips are <button value="F">FEMALE</button> — probed live: no
+  // radio, no aria, selection is a class. A button's value attribute is not a
+  // held answer either; it is one only while the page marks the button chosen.
+  if (el.tagName === 'BUTTON' || el.getAttribute('role') === 'button') {
+    const marked = /select|active|checked|pressed/i.test(String(el.className || ''))
+      || el.getAttribute('aria-pressed') === 'true'
+      || el.getAttribute('aria-checked') === 'true';
+    return marked ? ((el.value || '').trim() || (el.innerText || '').trim()) : '';
+  }
   const own = (el.value || '').trim();
   if (own) return own;
   // Every layer from the widget ROOT down to the input can carry 'select' in
@@ -622,11 +631,22 @@ class BrowserbasePageDriver:
         return got if _re.search(r"(?:YYYY|YY|MONTH|MON|MM|DD)", got) else ""
 
     def _choice_kind(self, selector: str) -> str:
-        """'radio' / 'checkbox' when the target holds a choice, else ''."""
+        """'radio' / 'checkbox' / 'button' when the target holds a choice,
+        else ''.
+
+        A BUTTON is a choice here by construction: this is only consulted by
+        fill(), and an adapter that feeds an answer to a button means "press
+        this if it is the answer" — SGAC's sex and arrival-date chips are
+        literally <button value=F>FEMALE</button> (probed live 2026-08-04).
+        Text was unfillable into them, so every chip died as
+        VALUE_NOT_ACCEPTED and the applicant was asked what their own passport
+        says."""
         try:
             return self.page.eval_on_selector(
-                selector, "el => (el.type === 'radio' || el.type === 'checkbox')"
-                          " ? el.type : ''") or ""
+                selector,
+                "el => (el.type === 'radio' || el.type === 'checkbox') ? el.type"
+                " : (el.tagName === 'BUTTON' || el.getAttribute('role') === 'button'"
+                "    || el.getAttribute('role') === 'radio') ? 'button' : ''") or ""
         except Exception:  # noqa: BLE001
             return ""
 
@@ -677,6 +697,9 @@ class BrowserbasePageDriver:
           if (!el) return {code: 'NO_SUCH_ELEMENT'};
           const words = [];
           const v = el.getAttribute('value'); if (v) words.push(v);
+          // A button chip wears its label on itself (<button>FEMALE</button>).
+          if (el.tagName === 'BUTTON' || el.getAttribute('role') === 'button')
+            words.push(_label(el));
           if (el.id) {
             const l = document.querySelector('label[for="' + CSS.escape(el.id) + '"]');
             if (l) words.push(_label(l));
@@ -708,12 +731,26 @@ class BrowserbasePageDriver:
             return {"ok": False, "code": "NOT_THIS_OPTION",
                     "detail": f"{want[:20]!r} is not " + str(got.get("words") or [])[:60]}
         try:
-            self.page.eval_on_selector(
-                selector, "el => { const l = el.id && document.querySelector("
-                          "'label[for=\"' + CSS.escape(el.id) + '\"]');"
-                          " (l || el).click(); if (!el.checked) el.click(); }")
-            self.page.wait_for_timeout(120)
-            checked = self.page.eval_on_selector(selector, "el => !!el.checked")
+            if kind == "button":
+                # A chip button: click IT (there is no hidden input to check),
+                # then believe only what the page renders — a selected-state
+                # class or aria flag that appears on it. SGAC marks the chosen
+                # chip `button_Selected` (probed live 2026-08-04).
+                self.page.eval_on_selector(selector, "el => el.click()")
+                self.page.wait_for_timeout(150)
+                checked = self.page.eval_on_selector(
+                    selector,
+                    "el => /select|active|checked|pressed/i.test("
+                    "String(el.className || ''))"
+                    " || el.getAttribute('aria-pressed') === 'true'"
+                    " || el.getAttribute('aria-checked') === 'true'")
+            else:
+                self.page.eval_on_selector(
+                    selector, "el => { const l = el.id && document.querySelector("
+                              "'label[for=\"' + CSS.escape(el.id) + '\"]');"
+                              " (l || el).click(); if (!el.checked) el.click(); }")
+                self.page.wait_for_timeout(120)
+                checked = self.page.eval_on_selector(selector, "el => !!el.checked")
         except Exception as e:  # noqa: BLE001
             return {"ok": False, "code": "NO_SUCH_ELEMENT", "detail": str(e)[:120]}
         if not checked:
@@ -778,35 +815,63 @@ class BrowserbasePageDriver:
         wanted = queries[1] if len(queries) > 1 else v
 
         for i, q in enumerate(queries):
-            if i > 0:      # retype the new filter
+            if i > 0:
+                # REAL keystrokes, not fill(): the widget's filter listens to
+                # key events, and a one-shot programmatic value change left
+                # SGAC's list unfiltered while the checkpoint said the query
+                # was typed (proved against the live page, 2026-08-04).
                 try:
-                    self.page.fill(selector, q, timeout=_ACT_MS)
-                    self.page.wait_for_timeout(250)
+                    self.page.click(selector, timeout=_CLICK_MS)
+                    self.page.keyboard.press("ControlOrMeta+A")
+                    self.page.keyboard.press("Delete")
+                    self.page.keyboard.type(q, delay=40)
                 except Exception:  # noqa: BLE001
                     break
-            try:
-                got = self.page.evaluate(self._PICK_OPEN_JS, wanted if i else q)
-            except Exception:  # noqa: BLE001
-                got = None
+            # The list loads asynchronously (debounce + a network round trip).
+            # 250ms was inside SGAC's debounce; poll instead of guessing one
+            # magic delay.
+            got = None
+            for _ in range(10):                      # up to ~1.5s per query
+                self.page.wait_for_timeout(150)
+                try:
+                    got = self.page.evaluate(self._PICK_OPEN_JS,
+                                             wanted if i else q)
+                except Exception:  # noqa: BLE001
+                    got = None
+                if got:
+                    break
             if got and got.get("chosen"):
                 self.page.wait_for_timeout(150)
                 return {"ok": True, "shown": got["chosen"][:60],
                         "match": got.get("match") or "exact"}
-            if got and got.get("labels") and len(got["labels"]) == 1:
-                # One row left under a filter derived from the answer, sharing
-                # its stem — that is the list's own spelling of this country
-                # (CHINESE for China), not a guess among alternatives.
-                only = str(got["labels"][0])
-                if _norm_prefix(only, wanted) >= 4:
-                    try:
-                        self.page.evaluate(
-                            "(w) => {" + _OPTION_JS +
-                            " const r=_rows(); if (r.length===1) r[0][0].click(); }",
-                            only)
-                        self.page.wait_for_timeout(150)
-                        return {"ok": True, "shown": only[:60], "match": "stem"}
-                    except Exception:  # noqa: BLE001
-                        pass
+            labels = [str(x) for x in (got or {}).get("labels") or []]
+            if labels:
+                # No ladder match, but the filter came from the answer itself,
+                # so a row SHARING ITS STEM is the list's own spelling of this
+                # value — CHINESE for China. Among stem-sharers the shortest
+                # row wins: 'CHINESE / HONG KONG SAR' is a different, more
+                # specific answer the applicant did not give. A tie is real
+                # ambiguity and fails to a question, never a coin flip.
+                cand = [(l, _norm_prefix(l, wanted)) for l in labels]
+                cand = [(l, n) for l, n in cand if n >= 4]
+                if cand:
+                    best = max(n for _, n in cand)
+                    finalists = sorted((l for l, n in cand if n == best),
+                                       key=len)
+                    if len(finalists) == 1 or \
+                            len(finalists[0]) < len(finalists[1]):
+                        chosen = finalists[0]
+                        try:
+                            self.page.evaluate(
+                                "(w) => {" + _OPTION_JS + """
+                                  for (const [el, t] of _rows())
+                                    if (t === w) { el.click(); return true; }
+                                  return false; }""", chosen)
+                            self.page.wait_for_timeout(150)
+                            return {"ok": True, "shown": chosen[:60],
+                                    "match": "stem"}
+                        except Exception:  # noqa: BLE001
+                            pass
         # Nothing committable. Clear the leftover filter text so the form is
         # not left holding a fragment nobody chose, and fail honestly.
         try:
@@ -2451,8 +2516,23 @@ class BrowserbasePageDriver:
                 self.page.keyboard.press("Escape")
             except Exception:  # noqa: BLE001
                 pass
+            # A list whose rows are driven by TYPING into the field can never
+            # be proven complete from one render: it shows what matches the
+            # current filter (or a suggestion subset when empty), not its
+            # vocabulary. SGAC's place-of-residence read a fitting handful,
+            # called itself complete, and the applicant got a dropdown with no
+            # China and no USA in it (2026-08-04). Partial keeps the question
+            # a type-anything with suggestions.
+            try:
+                filter_driven = bool(self.page.eval_on_selector(
+                    selector,
+                    "el => (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')"
+                    " && !el.readOnly"))
+            except Exception:  # noqa: BLE001
+                filter_driven = False
             return {"ok": True, "options": seen[:max_options],
-                    "complete": bool(complete) and len(seen) < max_options}
+                    "complete": bool(complete) and len(seen) < max_options
+                    and not filter_driven}
         except Exception as e:  # noqa: BLE001
             try:
                 self.page.keyboard.press("Escape")

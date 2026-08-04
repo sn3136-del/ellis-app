@@ -645,6 +645,22 @@ class FlowRunner:
                                 "questions": [self._question_for(node)]}
             else:
                 res = self.driver.fill(node["selector"], str(value))
+                if not res.get("ok") and res.get("code") == "NO_OPTIONS" \
+                        and node.get("input_source") == "place_of_birth":
+                    # Some portals ask "place of birth" and list COUNTRIES —
+                    # SGAC's list has CHINA, not GUANGZHOU. The city is not
+                    # wrong, it is the wrong granularity; the applicant's own
+                    # coarser facts are tried before anyone is asked
+                    # (2026-08-04).
+                    for alt in (self.answers.get("country_of_birth"),
+                                _country_display_name(
+                                    str(self.answers.get("nationality")
+                                        or self.answers.get("passport_nationality")
+                                        or ""))):
+                        if alt and str(alt).lower() != str(value).lower():
+                            res = self.driver.fill(node["selector"], str(alt))
+                            if res.get("ok"):
+                                break
                 if not res.get("ok") and res.get("code") == "NOT_THIS_OPTION":
                     # An older adapter gives a choice group one node PER
                     # option, each fed the same answer. The option that is not
