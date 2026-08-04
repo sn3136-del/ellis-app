@@ -820,11 +820,21 @@ class BrowserbasePageDriver:
                 # key events, and a one-shot programmatic value change left
                 # SGAC's list unfiltered while the checkpoint said the query
                 # was typed (proved against the live page, 2026-08-04).
+                #
+                # Cleared with fill(""), never select-all+Delete: a widget
+                # that eats the key combo keeps the old text and each retry
+                # APPENDS — an applicant watched "ChinaChin…" pile up in their
+                # nationality box (2026-08-04). And VERIFIED before matching:
+                # if the box does not hold exactly the query, no option it
+                # filtered can be trusted to belong to it.
                 try:
+                    self.page.fill(selector, "", timeout=_ACT_MS)
                     self.page.click(selector, timeout=_CLICK_MS)
-                    self.page.keyboard.press("ControlOrMeta+A")
-                    self.page.keyboard.press("Delete")
                     self.page.keyboard.type(q, delay=40)
+                    holds = self.page.eval_on_selector(
+                        selector, "el => (el.value || '').trim()")
+                    if (holds or "") != q:
+                        continue
                 except Exception:  # noqa: BLE001
                     break
             # The list loads asynchronously (debounce + a network round trip).
