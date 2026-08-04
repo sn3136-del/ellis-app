@@ -40,8 +40,8 @@ message telling you which one to install.
    Ellis opens at **http://127.0.0.1:5199** in your browser.
 
 3. Click "Start your application" and follow the flow: upload a passport photo
-   page, answer the questions, pick a destination (Germany, Vietnam, or
-   Singapore), and let Ellis work. During live portal filling you can watch
+   page, answer the questions, pick Vietnam (the only destination in this
+   build), and let Ellis work. During live portal filling you can watch
    the official page and scroll it, but not click; Ellis pauses and asks you
    whenever the portal needs something only you can answer.
 
