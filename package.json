@@ -14,14 +14,15 @@
     "dist:mac:dir": "electron-vite build && electron-builder --mac --dir",
     "scan:release": "./scripts/scan-release-secrets.sh",
     "ellis:real": "./scripts/start-ellis-real.sh",
-    "ellis:web": "./scripts/start-ellis-web.sh",
-    "ellis:stop": "./scripts/stop-ellis.sh",
+    "ellis:web": "bash scripts/start-ellis-web.sh",
+    "ellis:stop": "bash scripts/stop-ellis.sh",
     "ellis:status": "./scripts/status-ellis.sh",
     "test": "node --test --test-concurrency=1 tests/build_security.test.mjs tests/tripcom_only.test.mjs tests/visa/visa_ui_logic.test.mjs tests/visa/intake_logic.test.mjs tests/visa/journey_logic.test.mjs tests/visa/i18n.test.mjs tests/portal/framework.test.mjs tests/portal/e2e.test.mjs tests/portal/mrz_name.test.mjs",
     "test:portal": "node --test --test-concurrency=1 tests/portal/framework.test.mjs tests/portal/e2e.test.mjs",
     "test:security": "node --test tests/build_security.test.mjs",
     "test:visa": "node --test tests/visa/visa_ui_logic.test.mjs",
     "test:visa:api": "node --test tests/visa/frontend_backend.test.mjs",
+    "routes:sync": "./scripts/sync-routes-to-app.sh",
     "demo": "bash scripts/start-tripcom-demo.sh"
   },
   "build": {
@@ -48,14 +49,44 @@
       "!**/*.passport"
     ],
     "extraResources": [
-      { "from": "backend/.runtime-venv", "to": "backend-venv",
-        "filter": ["**/*", "!**/__pycache__/**", "!**/*.pyc", "!**/*.pyo"] },
-      { "from": "backend/app", "to": "backend/app",
-        "filter": ["**/*", "!**/__pycache__/**", "!**/*.pyc", "!**/*.db", "!**/*.db-*"] },
-      { "from": "backend/migrations", "to": "backend/migrations",
-        "filter": ["**/*", "!**/__pycache__/**", "!**/*.pyc"] },
-      { "from": "backend/alembic.ini", "to": "backend/alembic.ini" },
-      { "from": "data", "to": "data" }
+      {
+        "from": "backend/.runtime-venv",
+        "to": "backend-venv",
+        "filter": [
+          "**/*",
+          "!**/__pycache__/**",
+          "!**/*.pyc",
+          "!**/*.pyo"
+        ]
+      },
+      {
+        "from": "backend/app",
+        "to": "backend/app",
+        "filter": [
+          "**/*",
+          "!**/__pycache__/**",
+          "!**/*.pyc",
+          "!**/*.db",
+          "!**/*.db-*"
+        ]
+      },
+      {
+        "from": "backend/migrations",
+        "to": "backend/migrations",
+        "filter": [
+          "**/*",
+          "!**/__pycache__/**",
+          "!**/*.pyc"
+        ]
+      },
+      {
+        "from": "backend/alembic.ini",
+        "to": "backend/alembic.ini"
+      },
+      {
+        "from": "data",
+        "to": "data"
+      }
     ],
     "mac": {
       "category": "public.app-category.business",
