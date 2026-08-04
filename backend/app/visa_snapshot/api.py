@@ -373,16 +373,6 @@ def resolve_intake(intake_id: str, background: BackgroundTasks,
         cached_row = kimi_primary._cached(db, kimi_primary.cache_key(route))
         if cached_row is not None:
             g = kimi_primary.get_route_guidance(db, route)
-            if g.get("guidance"):
-                # Same rule as every other serve site: the registry's verified
-                # pair record outranks the cached prose on WHAT KIND of journey
-                # this is. This attach path was the fourth serve site — missed
-                # on 2026-08-04, caught because a fresh install served the
-                # stale "tourist visa, 30 SGD" card on a visa-free route.
-                g["guidance"] = kimi_primary.reconcile_guidance_with_route(
-                    db, g["guidance"],
-                    nationality=route.get("passport_nationality", ""),
-                    destination=route.get("destination_country", ""))
             result["kimi_guidance"] = g
             if g.get("stale"):
                 background.add_task(kimi_primary.refresh_stale_async,
