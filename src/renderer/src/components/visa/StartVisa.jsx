@@ -375,11 +375,13 @@ export default function StartVisa({ client, onOpenCase }) {
     label: `${c.flag ? c.flag + ' ' : ''}${c.name}`,
     search: `${c.name} ${c.alpha_2} ${c.alpha_3}`.toLowerCase()
   })), [reg])
-  // Trip.com demo (2026-08-04): the DESTINATION picker shows only the three
-  // demo routes. Nothing is deleted — every registry, adapter, and route
-  // stays live underneath; empty the set to show the full list again. Other
-  // country pickers (nationality, residence, birth country) are untouched.
-  const DEMO_DESTINATIONS = ['DEU', 'VNM', 'SGP']
+  // Trip.com demo (2026-08-04): the DESTINATION picker shows only this
+  // edition's routes — Germany + Singapore here; Vietnam ships as its own
+  // edition (branch vietnam-edition), per the owner's decision to keep the
+  // two portal behaviors in separate builds. Nothing is deleted — every
+  // registry, adapter, and route stays live underneath; empty the set to
+  // show the full list again. Other country pickers are untouched.
+  const DEMO_DESTINATIONS = ['DEU', 'SGP']
   const destinationOpts = useMemo(() => (
     DEMO_DESTINATIONS.length
       ? countryOpts.filter((o) => DEMO_DESTINATIONS.includes(o.value))

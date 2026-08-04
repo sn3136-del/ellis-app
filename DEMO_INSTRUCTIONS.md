@@ -1,16 +1,23 @@
 # Ellis demo for Trip.com
 
 Ellis prepares and files tourist visa and arrival card applications end to end.
-This demo build is ready to run: all provider credentials are included, and the
-destination picker is limited to the three demo routes.
+This demo build is ready to run: all provider credentials are included.
 
-- **Germany** (China passport): consular route. Ellis asks the required
-  questions, fills the official Schengen form, adds your photo and signature,
-  and produces one combined application packet PDF with instructions for the
-  consulate visit.
-- **Vietnam**: official e-visa portal, filled live by Ellis while you watch.
-- **Singapore**: SG Arrival Card (visa free for Chinese passports), filled live
-  on the official ICA portal while you watch.
+The demo ships as **two downloads** from the same repository:
+
+1. **This build (the `main` branch ZIP)** covers:
+   - **Germany** (China passport): consular route. Ellis asks the required
+     questions, fills the official Schengen form, adds your photo and
+     signature, and produces one combined application packet PDF with
+     instructions for the consulate visit.
+   - **Singapore**: SG Arrival Card (visa free for Chinese passports), filled
+     live on the official ICA portal while you watch.
+2. **The Vietnam build** (select the `vietnam-edition` branch on GitHub, then
+   Code, then Download ZIP): the official Vietnam e-visa portal, filled live
+   by Ellis while you watch.
+
+Run one build at a time (stop one before starting the other); the steps below
+are the same for both.
 
 ## Before you start (one-time, about 5 minutes)
 
