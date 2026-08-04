@@ -1108,8 +1108,18 @@ class VisaWorkflow:
         elif st == "RECOVERABLE_FAILURE":
             # Bounded automatic retry: resume at the state that failed when the
             # machine allows it; repeated failures stop honestly for a human.
+            # The budget RESETS at the applicant's own retry — counting a
+            # day-old failure streak made every released attempt one-strike
+            # (one fresh failure re-tripped manual review in 15 seconds,
+            # Vietnam 2026-08-04).
             hist = self.machine.history
-            retries = sum(1 for h in hist[-8:] if h["state"] == "RECOVERABLE_FAILURE")
+            start = 0
+            for i in range(len(hist) - 1, -1, -1):
+                if "released by applicant retry" in (hist[i].get("reason") or ""):
+                    start = i + 1
+                    break
+            window = hist[start:][-8:]
+            retries = sum(1 for h in window if h["state"] == "RECOVERABLE_FAILURE")
             last_reason = (hist[-1].get("reason") or "") if hist else ""
             prior = next((h["state"] for h in reversed(hist[:-1])
                           if h["state"] != "RECOVERABLE_FAILURE"), None)

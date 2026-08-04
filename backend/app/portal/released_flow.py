@@ -322,6 +322,30 @@ class ReleasedFlowDriver:
                 self.db.commit()
         else:
             page = session._ensure_page()
+            # A LIVE page is not necessarily the FLOW's page: a reattach can
+            # land on the case's registered session while the browser that
+            # held the half-filled form is gone (session race, 2026-08-04 —
+            # the resume then retried the photo upload against a pristine
+            # page with no form DOM, five times, into manual review). If the
+            # node being resumed cannot even find its target, the page state
+            # is lost: the same honest reversible rewind as a fresh session.
+            if execution.current_node:
+                node = (self._flow().nodes.get(execution.current_node) or {})
+                sel = node.get("selector") or ""
+                target_missing = False
+                if sel:
+                    try:
+                        target_missing = page.locator(sel).count() == 0
+                    except Exception:  # noqa: BLE001 — unreadable: keep the page
+                        target_missing = False
+                if target_missing:
+                    if self._passed_irreversible(execution.current_node):
+                        raise _OutcomeUncertain(
+                            "the portal session lost its page state after an "
+                            "irreversible step; Ellis will not repeat it "
+                            "without reconciliation")
+                    execution.current_node = ""   # honest rewind of reversible work
+                    self.db.commit()
         self._session = session
         self._page_driver = BrowserbasePageDriver(page, allowed_hostnames=self._hosts())
         return self._page_driver
