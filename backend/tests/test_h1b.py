@@ -263,6 +263,99 @@ def test_step_cannot_release_without_verified_predecessor(client, db):
     assert lca.lca_number == "I-200-26123-456789"
 
 
+# ---------- end-to-end with sample documents ----------
+
+SAMPLE_DOCS = {
+    # beneficiary
+    "degree_certificate": "学位证书 Degree of Master of Science conferred upon "
+                          "WEI ZHANG. Bachelor of Engineering.",
+    "graduation_certificate": "毕业证书 Graduation certificate. Has completed "
+                              "the course of study. 毕业证",
+    "transcript": "Official transcript 成绩单. GPA 3.7. Credit hours 128. "
+                  "Semester records, academic record.",
+    "credential_evaluation": "Credential evaluation report. Foreign degree "
+                             "equivalency: US master's degree equivalent. "
+                             "Evaluator: sample agency. WES reference.",
+    "resume": "Resume 简历. Curriculum vitae. Professional summary. Work "
+              "experience: software engineer, Trip.com.",
+    "prior_i797": "Form I-797 Notice of Action. Receipt number WAC2498765432. "
+                  "Notice type: Approval notice. Petitioner and beneficiary.",
+    "i94_record": "Form I-94 Arrival/Departure record. Admit until 10/01/2026. "
+                  "Class of admission H-1B. Most recent date of entry.",
+    # petitioner
+    "support_letter": "Letter of support for H-1B petition. The position is a "
+                      "specialty occupation. In support of the beneficiary.",
+    "job_description": "Job description. Duties and responsibilities. Minimum "
+                       "requirements. Position overview and essential functions.",
+    "fein_evidence": "IRS CP 575. Employer Identification Number EIN assigned "
+                     "12-3456789. Federal tax identification.",
+    "employer_financials": "Audited financial statements. Income statement and "
+                           "balance sheet. Federal tax return Form 1120.",
+    "corporate_relationship": "Certificate of incorporation. Wholly owned "
+                              "subsidiary of Trip.com Group. Parent company "
+                              "ownership structure. Organizational chart.",
+}
+
+
+def test_sample_documents_walk_the_whole_checklist(client, db):
+    """A full two-party intake on sample documents: every required item gets a
+    sample upload, explicit Submit fulfills it, and the stage completes into
+    petition_preparation. Sample docs exercise the real pipeline — upload
+    validation, OCR text tier, keyword classification, provenance verdicts —
+    with zero simulated government output."""
+    from .conftest import PASSPORT_MRZ
+    out = _create_case(client)          # extension, in-US, first_h1b=False
+    case_id = out["case_id"]
+
+    required = [i for i in out["checklist"]
+                if i["required"] and i["kind"] == "document"]
+    assert {i["id"] for i in required} == set(SAMPLE_DOCS) | {"passport"}
+
+    up = client.post(f"/cases/{case_id}/documents", json={
+        "name": "passport.pdf", "mime": "application/pdf", "size_bytes": 1024,
+        "checklist_item_id": "passport", "text": PASSPORT_MRZ},
+        headers=AUTH)
+    assert up.status_code == 200, up.text
+    s = client.post(f"/cases/{case_id}/checklist/passport/submit",
+                    json={"document_id": up.json()["id"], "confirm": True},
+                    headers=AUTH)
+    assert s.status_code == 200, s.text
+
+    for item_id, text in SAMPLE_DOCS.items():
+        up = client.post(f"/cases/{case_id}/documents", json={
+            "name": f"{item_id}.pdf", "mime": "application/pdf",
+            "size_bytes": 2048, "checklist_item_id": item_id, "text": text},
+            headers=AUTH)
+        assert up.status_code == 200, (item_id, up.text)
+        s = client.post(f"/cases/{case_id}/checklist/{item_id}/submit",
+                        json={"document_id": up.json()["id"], "confirm": True},
+                        headers=AUTH)
+        assert s.status_code == 200, (item_id, s.text)
+
+    done = client.post(f"/cases/{case_id}/checklist/complete", headers=AUTH)
+    assert done.status_code == 200, done.text
+    body = done.json()
+    assert body["completed"] is True
+    assert body["next_stage"] == "petition_preparation"
+
+
+def test_cross_party_upload_stays_advisory(client):
+    """Employer financials uploaded to the beneficiary's transcript item gets a
+    mismatch verdict but still submits with explicit confirmation — the
+    applicant's word outranks the classifier, per the intake doctrine."""
+    out = _create_case(client)
+    case_id = out["case_id"]
+    up = client.post(f"/cases/{case_id}/documents", json={
+        "name": "wrong.pdf", "mime": "application/pdf", "size_bytes": 2048,
+        "checklist_item_id": "transcript",
+        "text": SAMPLE_DOCS["employer_financials"]}, headers=AUTH)
+    assert up.status_code == 200
+    s = client.post(f"/cases/{case_id}/checklist/transcript/submit",
+                    json={"document_id": up.json()["id"], "confirm": True},
+                    headers=AUTH)
+    assert s.status_code == 200, s.text
+
+
 def test_privacy_cascade_includes_h1b_tables(client, db):
     from app import privacy
     out = _create_case(client)
