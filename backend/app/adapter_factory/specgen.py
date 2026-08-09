@@ -61,6 +61,24 @@ ELLIS_FIELDS = [
     # sections). Canonical so the mapper may bind them and the runtime asks
     # the applicant — an unmappable required YES/NO was a dead save button.
     "used_other_passport_for_destination", "health_symptoms_present",
+    # H1B petition vocabulary (docs/H1B_ARCHITECTURE.md, "Portal families and
+    # adapters"): grown BEFORE the first FLAG/myUSCIS observation, or every
+    # observed petition field is rejected as unknown. Petitioner facts feed
+    # ETA-9035 / registration / I-129; the extra beneficiary identity keys
+    # feed I-129 and DS-160 prep. Date keys end in _date on purpose — the
+    # dates.to_portal fail-closed contract keys off that suffix.
+    "employer_legal_name", "employer_dba", "employer_fein", "employer_naics",
+    "employer_contact_name", "employer_contact_email", "employer_contact_phone",
+    "job_title", "soc_code", "soc_title", "wage_offer", "wage_offer_unit",
+    "prevailing_wage", "pw_tracking_number",
+    "worksite_address_line1", "worksite_address_city",
+    "worksite_address_state", "worksite_address_zip",
+    "employment_start_date", "employment_end_date",
+    # Attestation yes/no keys — each also joins KEY_QUESTIONS and
+    # runtime._BOOLEAN_KEYS so the ask is two chips, and none is ever
+    # defaulted: a default here becomes a statement on a government form.
+    "full_time_position", "h1b_dependent_employer", "willful_violator",
+    "middle_name", "birth_country", "citizenship_country",
 ]
 
 
@@ -90,6 +108,20 @@ KEY_QUESTIONS = {
         "question": "What is your phone number, without the country code?"},
     "place_of_birth": {
         "question": "Where were you born, as shown in your passport?"},
+    # H1B attestations (LCA Section J territory / I-129). Asked of the
+    # PETITIONER, never defaulted — the answer becomes a statement on a
+    # government form (H1B_ARCHITECTURE contract pin 1).
+    "full_time_position": {
+        "question": "Is this a full-time position?",
+        "kind": "select", "options": ["Yes", "No"]},
+    "h1b_dependent_employer": {
+        "question": "Is the employer H-1B dependent, as defined by the "
+                    "Department of Labor?",
+        "kind": "select", "options": ["Yes", "No"]},
+    "willful_violator": {
+        "question": "Has the Department of Labor found the employer to be a "
+                    "willful violator of H-1B program rules?",
+        "kind": "select", "options": ["Yes", "No"]},
 }
 
 

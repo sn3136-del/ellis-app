@@ -16,6 +16,7 @@ from .. import models, audit
 from ..db import get_session
 from ..security import Principal, get_principal, require_owner
 from ..visa_snapshot.models import CaseRouteGuidance
+from . import filing as h1b_filing
 from . import models as h1b_models
 from . import steps as h1b_steps
 from .checklist import derive_h1b_checklist
@@ -165,6 +166,45 @@ def create_h1b_case(body: CreateH1bCaseBody,
             "steps": h1b_steps.recompute_readiness(db, parent.id),
             "checklist": checklist,
             "attorney_disclaimer": disclaimer(body.locale),
+            "disclaimer_version": DISCLAIMER_VERSION}
+
+
+@router.post("/cases/{case_id}/steps/{step_key}/release")
+def release_step(case_id: str, step_key: str, locale: str = "en",
+                 principal: Principal = Depends(get_principal),
+                 db=Depends(get_session)):
+    """Release a ready step into its real child filing case. Honest 409s:
+    a blocked step names its unverified dependencies, never a vague 'later'."""
+    parent = db.get(models.VisaApplication, case_id)
+    if parent is None or parent.visa_type != "h1b":
+        raise HTTPException(404, "h1b case not found")
+    require_owner(principal, parent.org_id)
+    # Idempotent sweep first so a step whose dependencies verified since the
+    # last read releases now instead of 409ing on stale status.
+    h1b_steps.recompute_readiness(db, case_id)
+    step = db.execute(select(h1b_models.H1bCaseStep).where(
+        h1b_models.H1bCaseStep.application_id == case_id,
+        h1b_models.H1bCaseStep.step_key == step_key)).scalars().first()
+    if step is None:
+        raise HTTPException(404, f"step '{step_key}' is not in this case's plan")
+
+    if not step.child_case_id and step.status != "ready":
+        if step.status == "blocked":
+            by_key = {s.step_key: s for s in h1b_steps.steps_for_case(db, case_id)}
+            unverified = [k for k in (step.depends_on or [])
+                          if by_key.get(k) is None or by_key[k].status != "verified"]
+            raise HTTPException(409, {
+                "reason": f"step '{step_key}' is blocked: dependencies not yet "
+                          f"verified: {', '.join(unverified)}",
+                "step_status": step.status,
+                "unverified_dependencies": unverified})
+        raise HTTPException(409, {
+            "reason": f"step '{step_key}' is {step.status}, not ready",
+            "step_status": step.status})
+
+    result = h1b_filing.release_step(db, parent=parent, step=step,
+                                     principal=principal)
+    return {**result, "attorney_disclaimer": disclaimer(locale),
             "disclaimer_version": DISCLAIMER_VERSION}
 
 

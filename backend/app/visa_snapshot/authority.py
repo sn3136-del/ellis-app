@@ -59,6 +59,9 @@ GOV_SUFFIXES = (
     "fmprc.gov.cn", "mfa.gov.cn", "immd.gov.hk", "boca.gov.tw", "mofa.gov.tw",
     "ica.gov.sg", "mfa.gov.sg", "homeaffairs.gov.au", "immigration.govt.nz",
     "cic.gc.ca", "ircc.canada.ca", "uscis.gov", "cbp.gov", "dhs.gov",
+    # U.S. Department of Labor: flag.dol.gov (FLAG) hosts the ETA-9035 LCA
+    # filings of the H1B edition. Added 2026-08-09 per docs/H1B_ARCHITECTURE.md.
+    "dol.gov",
     # Ministry/state-platform domains that ARE the government without a gov.<cc>
     # suffix (each verified live 2026-08-02 as the ministry's own site):
     # Armenia MFA (evisa.mfa.am), Iran MFA (evisatraveller.mfa.ir), and the

@@ -81,6 +81,10 @@ _FEE_RE = None
 _BOOLEAN_KEYS = frozenset({
     "used_other_passport_for_destination", "health_symptoms_present",
     "prior_refusals",
+    # H1B petition attestations (LCA / I-129): the petitioner states them in
+    # their own words too, and the chips must meet those words. Never
+    # defaulted — a default becomes a statement on a government form.
+    "full_time_position", "h1b_dependent_employer", "willful_violator",
 })
 _YES_WORDS = frozenset({"yes", "y", "true", "have", "did"})
 _NO_WORDS = frozenset({"no", "n", "none", "never", "false", "havent",

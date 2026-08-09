@@ -5,7 +5,7 @@
  "snapshot_date": "2026-07-23",
  "source": "curated seed list of real official portals/platforms; every entry starts seed_unverified and is upgraded ONLY by deterministic government-domain verification and/or live credential-free recon. Entries that fail verification stay unreleased.",
  "notes": "One family per real platform. A family may serve many destinations, nationalities and jurisdictions — adapters are built per family and reused. No entry may be invented; uncertain platforms are omitted (their routes stay honestly unresolved).",
- "entry_count": 110,
+ "entry_count": 112,
  "entries": [
   {
    "family_id": "usa-esta",
@@ -82,6 +82,40 @@
     "EMBASSY_OR_CONSULATE_APPLICATION"
    ],
    "account_required": true
+  },
+  {
+   "family_id": "usa-dol-flag",
+   "name": "U.S. DOL FLAG (Foreign Labor Application Gateway, ETA-9035 LCA)",
+   "kind": "immigration_authority",
+   "operator": "U.S. Department of Labor, Office of Foreign Labor Certification",
+   "operator_kind": "government",
+   "base_url": "https://flag.dol.gov/",
+   "hostnames": [
+    "flag.dol.gov"
+   ],
+   "destinations": [
+    "USA"
+   ],
+   "supported_outcomes": [],
+   "account_required": true,
+   "notes": "H1B edition (LCA / ETA-9035; resolution is step-keyed, never via tourist pair outcomes — supported_outcomes stays empty so pick_family can never bind it). Login-walled behind the employer's FLAG account with Login.gov-style MFA: credentials and OTP stay personal handoffs. account_required carries the credential wall; the otp declaration joins entry_gate.declared_handoffs only when a live gate_probe authors the gate. Not yet probed, so entry_gate is honestly absent."
+  },
+  {
+   "family_id": "usa-uscis-myaccount",
+   "name": "U.S. myUSCIS online account (H-1B registration and I-129)",
+   "kind": "immigration_authority",
+   "operator": "U.S. Citizenship and Immigration Services",
+   "operator_kind": "government",
+   "base_url": "https://my.uscis.gov/",
+   "hostnames": [
+    "my.uscis.gov"
+   ],
+   "destinations": [
+    "USA"
+   ],
+   "supported_outcomes": [],
+   "account_required": true,
+   "notes": "H1B edition (H-1B registration + I-129; resolution is step-keyed, never via tourist pair outcomes — supported_outcomes stays empty so pick_family can never bind it). Login-walled behind the petitioner's myUSCIS organizational account with Login.gov-style MFA: credentials and OTP stay personal handoffs. account_required carries the credential wall; the otp declaration joins entry_gate.declared_handoffs only when a live gate_probe authors the gate. Not yet probed, so entry_gate is honestly absent."
   },
   {
    "family_id": "usa-usvisa-appointments",

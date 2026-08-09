@@ -29,6 +29,7 @@ NEXT_STAGE_BY_KIND = {
     "entry_preparation": "entry_preparation",
     "passport_renewal": "renewal_preparation",
     "h1b_petition": "petition_preparation",
+    "h1b_filing": "application_preparation",
 }
 
 
