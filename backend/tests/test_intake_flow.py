@@ -430,8 +430,16 @@ def test_no_admin_approval_anywhere_on_the_continuation_path(client, db):
 
 
 def test_guidance_saved_to_case_survives_cache_expiry(client, db):
+    # Destination constraints (session-global state): must be unused by every
+    # other guidance test (KimiRouteGuidanceCache is keyed per route, first
+    # resolver wins), and must NOT be VISA_FREE in the baseline pair layer —
+    # once a test_global_* module seeds all pairs,
+    # reconcile_guidance_with_route rewrites permitted_stay from the pair
+    # row's max_stay_days (USA->PHL's 30 turned this mock's "90 days" into
+    # "Up to 30 days" whenever the global files ran first). USA->EGY is
+    # VISA_ON_ARRIVAL, so the reconcile guard leaves the mock untouched.
     iid, _ = _resolve_with_guidance(
-        client, EXEMPT_ANSWER, dict(ANSWERS_SGP, destination_country="PHL"))
+        client, EXEMPT_ANSWER, dict(ANSWERS_SGP, destination_country="EGY"))
     case_id = client.post(f"/intake/{iid}/continue", headers=H).json()["case_id"]
     # Wipe the guidance cache entirely — the case must still know its route.
     for row in db.execute(select(KimiRouteGuidanceCache)).scalars().all():
