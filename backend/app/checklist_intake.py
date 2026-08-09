@@ -28,6 +28,7 @@ NEXT_STAGE_BY_KIND = {
     "conditional_guidance": "application_preparation",
     "entry_preparation": "entry_preparation",
     "passport_renewal": "renewal_preparation",
+    "h1b_petition": "petition_preparation",
 }
 
 

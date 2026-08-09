@@ -1,0 +1,276 @@
+"""H1B edition P1: two-party case creation, party-tagged checklist,
+pipeline sequencing honesty, doc-type registries, and the disclaimer contract."""
+import pytest
+from sqlalchemy import select
+
+from app import models
+from app.h1b import models as h1b_models
+from app.h1b import steps as h1b_steps
+from app.h1b.checklist import derive_h1b_checklist, items_for_party
+from app.h1b.disclaimer import ATTORNEY_DISCLAIMER, disclaimer
+from app.h1b.guidance import CASE_KINDS, FEES, build_guidance, step_plan
+from app.providers.doc_classifier import (CANONICAL_TYPES,
+                                          classify_supporting_document)
+from app.visa_snapshot.intake_flow import (MANUAL_DOC_TYPES,
+                                           doc_type_for_label)
+
+from .conftest import AUTH, AUTH2
+
+
+# ---------- step plans ----------
+
+def test_extension_plan_skips_registration_and_consular():
+    plan = step_plan("extension", beneficiary_abroad=False)
+    assert [s["step_key"] for s in plan] == ["lca", "i129"]
+    assert plan[1]["depends_on"] == ["lca"]
+
+
+def test_cap_plan_has_registration_and_consular_leg():
+    plan = step_plan("cap_initial", beneficiary_abroad=True)
+    keys = [s["step_key"] for s in plan]
+    assert keys == ["lca", "registration", "i129", "ds160_consular"]
+    i129 = next(s for s in plan if s["step_key"] == "i129")
+    assert sorted(i129["depends_on"]) == ["lca", "registration"]
+    consular = plan[-1]
+    assert consular["acting_party"] == "beneficiary"
+    assert consular["depends_on"] == ["i129"]
+
+
+def test_unknown_case_kind_rejected():
+    with pytest.raises(ValueError):
+        step_plan("lottery_hack", beneficiary_abroad=True)
+
+
+def test_guidance_is_curated_with_sources():
+    g = build_guidance("extension", beneficiary_abroad=False)
+    assert g["status"] == "curated"
+    assert g["year_round"] is True
+    assert g["sources"], "curated guidance must carry official sources"
+    assert all(u.startswith("https://") for u in g["sources"])
+    # Fee facts present and sourced; no invented numbers without a source.
+    for fee in FEES.values():
+        assert fee.get("source", "").startswith("https://")
+
+
+# ---------- checklist ----------
+
+def test_checklist_is_party_tagged_and_covers_both_parties():
+    items = derive_h1b_checklist(case_kind="extension", beneficiary_abroad=False,
+                                 beneficiary_in_us=True)
+    assert all("party" in i for i in items)
+    ben = items_for_party(items, "beneficiary")
+    pet = items_for_party(items, "petitioner")
+    assert {i["id"] for i in ben} >= {"passport", "degree_certificate",
+                                      "graduation_certificate", "transcript",
+                                      "credential_evaluation", "i94_record"}
+    assert {i["id"] for i in pet} >= {"support_letter", "job_description",
+                                      "fein_evidence", "employer_financials",
+                                      "corporate_relationship", "certified_lca"}
+
+
+def test_chinese_degree_documents_are_distinct_items():
+    items = derive_h1b_checklist(case_kind="extension", beneficiary_abroad=True)
+    ids = [i["id"] for i in items]
+    assert "degree_certificate" in ids and "graduation_certificate" in ids
+
+
+def test_certified_lca_flips_required_after_certification():
+    before = derive_h1b_checklist(case_kind="extension", beneficiary_abroad=False)
+    after = derive_h1b_checklist(case_kind="extension", beneficiary_abroad=False,
+                                 lca_certified=True)
+    lca_before = next(i for i in before if i["id"] == "certified_lca")
+    lca_after = next(i for i in after if i["id"] == "certified_lca")
+    assert lca_before["required"] is False and lca_after["required"] is True
+
+
+def test_i94_only_for_in_us_beneficiary():
+    abroad = derive_h1b_checklist(case_kind="extension", beneficiary_abroad=True)
+    in_us = derive_h1b_checklist(case_kind="extension", beneficiary_abroad=False,
+                                 beneficiary_in_us=True)
+    assert not any(i["id"] == "i94_record" for i in abroad)
+    assert any(i["id"] == "i94_record" for i in in_us)
+
+
+# ---------- doc-type registries (the four-sync contract) ----------
+
+H1B_TYPES = ("degree_certificate", "graduation_certificate", "transcript",
+             "resume_cv", "prior_i797", "i94_record", "credential_evaluation",
+             "employer_support_letter", "job_description", "fein_evidence",
+             "employer_financials", "corporate_relationship_evidence",
+             "certified_lca")
+
+
+def test_h1b_types_in_canonical_and_manual_registries():
+    for t in H1B_TYPES:
+        assert t in CANONICAL_TYPES, t
+        assert t in MANUAL_DOC_TYPES, t
+    assert "passport" not in MANUAL_DOC_TYPES
+
+
+def test_checklist_satisfied_by_types_are_canonical():
+    items = derive_h1b_checklist(case_kind="cap_initial", beneficiary_abroad=True,
+                                 beneficiary_in_us=True)
+    for item in items:
+        for t in item["satisfied_by"]:
+            assert t in CANONICAL_TYPES, f"{item['id']} -> {t}"
+
+
+def test_lca_label_is_not_swallowed_by_form_trap():
+    # "form" historically maps any label to the non-uploadable destination_form.
+    assert doc_type_for_label("Labor Condition Application (Form ETA-9035)") == "certified_lca"
+    assert doc_type_for_label("FEIN evidence (IRS CP-575)") == "fein_evidence"
+    assert doc_type_for_label("Prior I-797 Notice of Action") == "prior_i797"
+
+
+def test_keyword_classification_for_h1b_fixtures():
+    cases = {
+        "certified_lca": "U.S. Department of Labor OFLC. Labor Condition "
+                         "Application ETA-9035E. Prevailing wage: $132,000. "
+                         "SOC code 15-1252. Wage level II. Certification date.",
+        "prior_i797": "Form I-797, Notice of Action. Receipt number "
+                      "WAC2412345678. Notice type: Approval notice.",
+        "degree_certificate": "学位证书 Degree of Master of Science conferred "
+                              "upon the graduate. Bachelor of Engineering.",
+        "transcript": "Official transcript. GPA 3.8. Credit hours 120. "
+                      "Semester 1 成绩单 academic record.",
+        "employer_support_letter": "Letter of support for H-1B petition. The "
+                                   "position is a specialty occupation. In "
+                                   "support of the beneficiary.",
+        "fein_evidence": "IRS CP 575. Employer Identification Number EIN "
+                         "assigned. Federal tax identification.",
+    }
+    for expected, text in cases.items():
+        assert classify_supporting_document(text) == expected, expected
+
+
+def test_bank_statement_still_classifies_after_h1b_types():
+    text = ("Bank statement. Opening balance 4,000. Closing balance 5,000. "
+            "Account statement. IBAN DE00. Transaction list.")
+    assert classify_supporting_document(text) == "bank_statement"
+
+
+# ---------- disclaimer ----------
+
+def test_disclaimer_localized_and_never_empty():
+    for locale in ("en", "zh-CN", "zh-Hant"):
+        assert ATTORNEY_DISCLAIMER[locale]
+        assert disclaimer(locale) == ATTORNEY_DISCLAIMER[locale]
+    assert "attorney" in disclaimer("en")
+    assert "律师" in disclaimer("zh-CN") and "律師" in disclaimer("zh-Hant")
+    assert disclaimer("fr-FR") == ATTORNEY_DISCLAIMER["en"]
+
+
+# ---------- API: creation, pipeline, tenancy ----------
+
+def _create_case(client, **overrides):
+    body = {"case_kind": "extension",
+            "beneficiary_full_name": "WEI ZHANG",
+            "beneficiary_email": "wei.zhang@example.com",
+            "beneficiary_abroad": False, "beneficiary_in_us": True,
+            "first_h1b": False}
+    body.update(overrides)
+    r = client.post("/h1b/cases", json=body, headers=AUTH)
+    assert r.status_code == 200, r.text
+    return r.json()
+
+
+def test_create_case_returns_steps_checklist_disclaimer(client):
+    out = _create_case(client)
+    assert out["case_kind"] == "extension"
+    assert [s["step_key"] for s in out["steps"]] == ["lca", "i129"]
+    assert out["steps"][0]["status"] == "ready"
+    assert out["steps"][1]["status"] == "blocked"
+    assert out["attorney_disclaimer"] == disclaimer("en")
+    assert any(i["party"] == "petitioner" for i in out["checklist"])
+
+
+def test_create_case_zh_locale_disclaimer(client):
+    out = _create_case(client, locale="zh-CN")
+    assert out["attorney_disclaimer"] == disclaimer("zh-CN")
+
+
+def test_create_case_rejects_unknown_kind(client):
+    r = client.post("/h1b/cases", json={
+        "case_kind": "instant_approval", "beneficiary_full_name": "X",
+        "beneficiary_email": "x@example.com"}, headers=AUTH)
+    assert r.status_code == 422
+
+
+def test_parties_created_one_per_role(client, db):
+    out = _create_case(client)
+    rows = db.execute(select(h1b_models.CaseParty).where(
+        h1b_models.CaseParty.application_id == out["case_id"])).scalars().all()
+    assert sorted(p.role for p in rows) == ["beneficiary", "petitioner"]
+
+
+def test_pipeline_requires_owner_org(client):
+    out = _create_case(client)
+    r = client.get(f"/h1b/cases/{out['case_id']}/pipeline", headers=AUTH2)
+    assert r.status_code in (403, 404)
+    r = client.get(f"/h1b/cases/{out['case_id']}/pipeline", headers=AUTH)
+    assert r.status_code == 200
+    assert r.json()["parties"]
+
+
+def test_case_route_guidance_registered_for_journey(client, db):
+    from app.visa_snapshot.models import CaseRouteGuidance
+    out = _create_case(client)
+    cg = db.execute(select(CaseRouteGuidance).where(
+        CaseRouteGuidance.case_id == out["case_id"])).scalars().first()
+    assert cg is not None
+    assert cg.continuation_kind == "h1b_petition"
+    assert cg.checklist
+
+
+def test_employer_profile_fein_validation(client):
+    r = client.post("/h1b/employer-profiles", json={
+        "legal_name": "Trip.com US Inc", "fein": "12-34"}, headers=AUTH)
+    assert r.status_code == 422
+    r = client.post("/h1b/employer-profiles", json={
+        "legal_name": "Trip.com US Inc", "fein": "12-3456789",
+        "parent_company_name": "Trip.com Group Ltd",
+        "parent_company_country": "China"}, headers=AUTH)
+    assert r.status_code == 200
+    r = client.get("/h1b/employer-profiles", headers=AUTH)
+    profiles = r.json()["profiles"]
+    assert any(p["fein_last4"] == "6789" for p in profiles)
+
+
+# ---------- sequencing honesty ----------
+
+def test_step_cannot_release_without_verified_predecessor(client, db):
+    out = _create_case(client)
+    case_id = out["case_id"]
+    steps = h1b_steps.steps_for_case(db, case_id)
+    lca = next(s for s in steps if s.step_key == "lca")
+    i129 = next(s for s in steps if s.step_key == "i129")
+    assert lca.status == "ready" and i129.status == "blocked"
+
+    # A recompute without evidence must NOT unblock the successor.
+    h1b_steps.recompute_readiness(db, case_id)
+    db.refresh(i129)
+    assert i129.status == "blocked"
+
+    # No child confirmation row exists, so verification reads False.
+    assert h1b_steps.child_filing_verified(db, lca.child_case_id) is False
+
+    # Only an explicit verified outcome (held evidence) unblocks the successor.
+    h1b_steps.mark_step_verified(db, lca, receipts={"lca_number": "I-200-26123-456789"},
+                                 actor="test")
+    db.refresh(i129)
+    assert i129.status == "ready"
+    db.refresh(lca)
+    assert lca.lca_number == "I-200-26123-456789"
+
+
+def test_privacy_cascade_includes_h1b_tables(client, db):
+    from app import privacy
+    out = _create_case(client)
+    case_id = out["case_id"]
+    assert h1b_models.CaseParty in privacy._CASE_CHILD_MODELS
+    assert h1b_models.H1bCaseStep in privacy._CASE_CHILD_MODELS
+    privacy.delete_case(db, case_id)
+    assert db.execute(select(h1b_models.CaseParty).where(
+        h1b_models.CaseParty.application_id == case_id)).scalars().all() == []
+    assert db.execute(select(h1b_models.H1bCaseStep).where(
+        h1b_models.H1bCaseStep.application_id == case_id)).scalars().all() == []

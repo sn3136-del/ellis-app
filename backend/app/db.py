@@ -54,6 +54,7 @@ def create_all(bind=None):
     from .visa_snapshot import models as snapshot_models  # noqa: F401
     from .adapter_factory import models as factory_models  # noqa: F401
     from .global_routes import models as global_models  # noqa: F401
+    from .h1b import models as h1b_models  # noqa: F401
     eng = bind or engine
     Base.metadata.create_all(eng)
     _ensure_columns(eng)

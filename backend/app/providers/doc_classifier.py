@@ -15,6 +15,12 @@ CANONICAL_TYPES = (
     "employment_letter", "student_letter", "invitation_letter",
     "travel_insurance", "residence_permit", "prior_visa", "destination_form",
     "vaccination_certificate",
+    # H1B edition: beneficiary evidence
+    "degree_certificate", "graduation_certificate", "transcript", "resume_cv",
+    "prior_i797", "i94_record", "credential_evaluation",
+    # H1B edition: petitioner evidence
+    "employer_support_letter", "job_description", "fein_evidence",
+    "employer_financials", "corporate_relationship_evidence", "certified_lca",
     "document",
 )
 
@@ -24,6 +30,48 @@ CANONICAL_TYPES = (
 # vocabulary. Ties keep the earlier entry. Keywords are deliberately specific:
 # no bare "insured", no "departure", no "to whom it may concern".
 _KEYWORDS = (
+    # H1B types first. Argmax by hit count still rules, but several H1B
+    # documents share vocabulary with tourist types (an LCA mentions wages like
+    # an employment letter does), so each entry carries 3+ phrases that only
+    # its own document uses.
+    ("certified_lca", ("labor condition application", "eta-9035", "eta 9035",
+                       "prevailing wage", "soc code", "wage level",
+                       "certification date", "oflc")),
+    ("prior_i797", ("i-797", "i797", "notice of action", "receipt number",
+                    "notice type", "approval notice", "petitioner",
+                    "beneficiary")),
+    ("i94_record", ("i-94", "i94", "arrival/departure record", "admit until",
+                    "class of admission", "most recent date of entry")),
+    ("credential_evaluation", ("credential evaluation", "credentials evaluation",
+                               "equivalency", "equivalence", "evaluator",
+                               "foreign degree", "us degree equivalent",
+                               "wes", "ece report")),
+    ("degree_certificate", ("degree certificate", "degree of", "conferred",
+                            "bachelor of", "master of", "doctor of", "学位证",
+                            "学位证书")),
+    ("graduation_certificate", ("graduation certificate", "certificate of "
+                                "graduation", "has completed the course",
+                                "毕业证", "毕业证书")),
+    ("transcript", ("transcript", "academic record", "gpa", "credit hours",
+                    "semester", "成绩单")),
+    ("resume_cv", ("resume", "curriculum vitae", "professional summary",
+                   "work experience", "简历")),
+    ("employer_support_letter", ("support letter", "specialty occupation",
+                                 "in support of", "h-1b petition",
+                                 "letter of support")),
+    ("job_description", ("job description", "duties and responsibilities",
+                         "minimum requirements", "position overview",
+                         "essential functions")),
+    ("fein_evidence", ("employer identification number", "ein assigned",
+                       "cp 575", "cp575", "federal tax identification")),
+    ("employer_financials", ("annual report", "audited financial",
+                             "income statement", "balance sheet",
+                             "federal tax return", "form 1120")),
+    ("corporate_relationship_evidence", ("subsidiary", "parent company",
+                                         "wholly owned", "ownership structure",
+                                         "articles of incorporation",
+                                         "certificate of incorporation",
+                                         "organizational chart")),
     ("travel_insurance", ("travel insurance", "insurance policy",
                           "insurance certificate", "medical coverage",
                           "coverage amount", "insurer")),

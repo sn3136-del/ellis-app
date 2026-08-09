@@ -31,6 +31,14 @@ _CASE_CHILD_MODELS = [
     models.PortalRun, models.CaseProgressEvent, models.BrowserSession,
 ]
 
+# H1B two-party tables join the cascade (import kept below the legacy list so
+# a missing h1b module can never break tourist-only deployments).
+try:
+    from .h1b import models as _h1b_models
+    _CASE_CHILD_MODELS += [_h1b_models.CaseParty, _h1b_models.H1bCaseStep]
+except Exception:  # pragma: no cover - h1b module always ships in this edition
+    pass
+
 
 def _rows(db, model, application_id):
     return db.execute(select(model).where(model.application_id == application_id)).scalars().all()

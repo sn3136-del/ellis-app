@@ -61,6 +61,9 @@ app.include_router(_snapshot_router)
 app.include_router(_factory_router)
 from .global_routes.api import router as _global_router  # noqa: E402
 app.include_router(_global_router)
+# H1B edition: two-party petition pipeline (docs/H1B_ARCHITECTURE.md).
+from .h1b.api import router as _h1b_router  # noqa: E402
+app.include_router(_h1b_router)
 
 
 @app.on_event("startup")

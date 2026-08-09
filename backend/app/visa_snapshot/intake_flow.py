@@ -415,6 +415,28 @@ def continuation_meta(guidance_result: dict) -> dict:
 # FIELDS (never free text execution). Kimi's document labels are kept for
 # display; satisfaction is matched on classified doc types.
 _DOC_TYPE_KEYWORDS = (
+    # H1B labels FIRST: "Labor Condition Application (Form ETA-9035)" must hit
+    # certified_lca before the generic "form" keyword turns it into a
+    # non-uploadable destination_form item, and "FEIN evidence" must beat
+    # bank_statement's "statement"/"financial" net.
+    ("certified_lca", ("labor condition", "eta-9035", "eta 9035",
+                       "certified lca")),
+    ("prior_i797", ("i-797", "i797", "notice of action")),
+    ("i94_record", ("i-94", "i94")),
+    ("credential_evaluation", ("credential evaluation", "credentials evaluation",
+                               "degree evaluation", "equivalency report")),
+    ("degree_certificate", ("degree certificate", "degree", "diploma", "学位证")),
+    ("graduation_certificate", ("graduation certificate", "graduation", "毕业证")),
+    ("transcript", ("transcript", "academic record", "成绩单")),
+    ("resume_cv", ("resume", "curriculum vitae", " cv", "简历")),
+    ("employer_support_letter", ("support letter", "letter of support")),
+    ("job_description", ("job description", "position description")),
+    ("fein_evidence", ("fein", "employer identification number", "ein evidence",
+                       "cp-575", "cp 575")),
+    ("corporate_relationship_evidence", ("corporate relationship",
+                                         "parent company", "subsidiary")),
+    ("employer_financials", ("ability to pay", "employer financial",
+                             "company financial")),
     ("photo", ("photograph", "passport photo", "photo")),
     ("flight_itinerary", ("flight", "itinerar", "onward", "return ticket",
                           "round-trip", "round trip", "air ticket", "booking reference")),
@@ -639,6 +661,11 @@ MANUAL_DOC_TYPES = (
     "employment_letter", "student_letter", "invitation_letter",
     "travel_insurance", "residence_permit", "prior_visa", "destination_form",
     "vaccination_certificate",
+    # H1B edition (passport stays excluded: identity comes only from MRZ)
+    "degree_certificate", "graduation_certificate", "transcript", "resume_cv",
+    "prior_i797", "i94_record", "credential_evaluation",
+    "employer_support_letter", "job_description", "fein_evidence",
+    "employer_financials", "corporate_relationship_evidence", "certified_lca",
 )
 
 # Classifier provenance considered DETERMINISTIC (drives whether a differing
