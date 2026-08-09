@@ -254,9 +254,25 @@ def test_step_cannot_release_without_verified_predecessor(client, db):
     # No child confirmation row exists, so verification reads False.
     assert h1b_steps.child_filing_verified(db, lca.child_case_id) is False
 
-    # Only an explicit verified outcome (held evidence) unblocks the successor.
+    # Doctrine (finding #6): 'verified' is never inferred from a receipt dict —
+    # without real government evidence, mark_step_verified refuses and the
+    # successor stays blocked.
+    with pytest.raises(h1b_steps.EvidenceRequired):
+        h1b_steps.mark_step_verified(db, lca,
+                                     receipts={"lca_number": "I-200-26123-456789"},
+                                     actor="test")
+    db.refresh(i129)
+    assert i129.status == "blocked"
+
+    # An admin-accepted offline government artifact (a certified LCA on this
+    # case) IS evidence — only then does the successor unblock.
+    doc = models.StoredDocument(
+        org_id="org1", application_id=case_id, name="certified-lca.pdf",
+        mime="application/pdf", doc_type="certified_lca", approved=True)
+    db.add(doc)
+    db.commit()
     h1b_steps.mark_step_verified(db, lca, receipts={"lca_number": "I-200-26123-456789"},
-                                 actor="test")
+                                 actor="test", offline_evidence_document_id=doc.id)
     db.refresh(i129)
     assert i129.status == "ready"
     db.refresh(lca)
@@ -367,3 +383,317 @@ def test_privacy_cascade_includes_h1b_tables(client, db):
         h1b_models.CaseParty.application_id == case_id)).scalars().all() == []
     assert db.execute(select(h1b_models.H1bCaseStep).where(
         h1b_models.H1bCaseStep.application_id == case_id)).scalars().all() == []
+
+
+# ============================================================================
+# Agent B — per-party authorization, the verify caller, statutory windows,
+# FEIN on the filing path, and the CaseParty.answers writer. Each test FAILS on
+# the pre-change endpoints and passes after.
+# ============================================================================
+
+# A distinct petitioner principal (same org, different user) and an admin. In
+# this build the petitioner CaseParty is unbound until an account operates it;
+# the tests bind it explicitly, exactly as a P3 employer session would.
+PETITIONER_AUTH = {"Authorization": "Bearer dev-token",
+                   "X-Org-Id": "org1", "X-User-Id": "hr1"}
+ADMIN_AUTH = {"Authorization": "Bearer admin-token",
+              "X-Org-Id": "org1", "X-User-Id": "admin1"}
+
+
+def _bind_petitioner(db, case_id, user_id="hr1"):
+    """Bind an account to the petitioner party (the P3 employer session does this
+    for real; here it makes the petitioner principal able to act)."""
+    pet = db.execute(select(h1b_models.CaseParty).where(
+        h1b_models.CaseParty.application_id == case_id,
+        h1b_models.CaseParty.role == "petitioner")).scalars().first()
+    pet.user_id = user_id
+    db.commit()
+    return pet
+
+
+# ---------- #3/#14/#20 per-party authorization ----------
+
+def test_beneficiary_cannot_release_petitioner_step(client, db):
+    """The lca step is petitioner-acting (ETA-9035, penalty of perjury). The
+    beneficiary who created the case operates the beneficiary party and must be
+    refused; only the bound petitioner (or an admin) may release it."""
+    out = _create_case(client)                     # AUTH becomes the beneficiary
+    case_id = out["case_id"]
+    r = client.post(f"/h1b/cases/{case_id}/steps/lca/release", headers=AUTH)
+    assert r.status_code == 403, r.text
+    assert r.json()["detail"]["acting_party"] == "petitioner"
+
+    _bind_petitioner(db, case_id, "hr1")
+    r = client.post(f"/h1b/cases/{case_id}/steps/lca/release", headers=PETITIONER_AUTH)
+    assert r.status_code == 200, r.text
+    assert r.json()["visa_type"] == "h1b_lca"
+
+    # And an admin may act on either party's step.
+    out2 = _create_case(client)
+    r = client.post(f"/h1b/cases/{out2['case_id']}/steps/lca/release",
+                    headers=ADMIN_AUTH)
+    assert r.status_code == 200, r.text
+
+
+def test_pipeline_read_is_scoped_to_caller_party(client, db):
+    """The petitioner party payload (employer contact, FEIN-bearing profile) must
+    not appear in the beneficiary's pipeline read, and vice versa (finding
+    #3/#20 reads)."""
+    out = _create_case(client)
+    case_id = out["case_id"]
+    r = client.get(f"/h1b/cases/{case_id}/pipeline", headers=AUTH)
+    assert r.status_code == 200
+    assert {p["role"] for p in r.json()["parties"]} == {"beneficiary"}
+
+    _bind_petitioner(db, case_id, "hr1")
+    r = client.get(f"/h1b/cases/{case_id}/pipeline", headers=PETITIONER_AUTH)
+    assert {p["role"] for p in r.json()["parties"]} == {"petitioner"}
+
+    r = client.get(f"/h1b/cases/{case_id}/pipeline", headers=ADMIN_AUTH)
+    assert {p["role"] for p in r.json()["parties"]} == {"beneficiary", "petitioner"}
+
+
+# ---------- #4/#12 the missing verify caller ----------
+
+def test_verify_endpoint_unblocks_successor_only_with_government_evidence(client, db):
+    """POST verify flips lca->verified and i129->ready only when the child filing
+    holds real government evidence. Without it the endpoint honestly 409s and the
+    successor stays blocked — the deadlock (#4/#12) is gone, evidence honesty
+    (#6/#8) is kept."""
+    from app.adapter_factory import models as fm
+    out = _create_case(client)
+    case_id = out["case_id"]
+    _bind_petitioner(db, case_id, "hr1")
+    rel = client.post(f"/h1b/cases/{case_id}/steps/lca/release", headers=PETITIONER_AUTH)
+    assert rel.status_code == 200, rel.text
+    child_id = rel.json()["child_case_id"]
+
+    # No evidence yet: honest 409, i129 stays blocked.
+    v = client.post(f"/h1b/cases/{case_id}/steps/lca/verify", json={},
+                    headers=PETITIONER_AUTH)
+    assert v.status_code == 409, v.text
+    pipe = client.get(f"/h1b/cases/{case_id}/pipeline", headers=ADMIN_AUTH).json()
+    assert next(s for s in pipe["steps"] if s["step_key"] == "i129")["status"] == "blocked"
+
+    # A bare SubmissionConfirmation (mock/sandbox) is NOT enough on its own.
+    db.add(models.SubmissionConfirmation(application_id=child_id,
+                                         reference_no="REF-SANDBOX"))
+    db.commit()
+    v = client.post(f"/h1b/cases/{case_id}/steps/lca/verify", json={},
+                    headers=PETITIONER_AUTH)
+    assert v.status_code == 409, v.text
+
+    # Real government evidence: a completed execution with a government-host
+    # (flag.dol.gov) outcome. Now verification flips lca and unblocks i129.
+    ex = fm.AdapterExecution(org_id="org1", application_id=child_id,
+                             candidate_id="cand1", candidate_version=1,
+                             status="completed")
+    db.add(ex)
+    db.flush()
+    db.add(fm.AdapterOutcomeEvidence(execution_id=ex.id, hostname="flag.dol.gov",
+                                     state_category="submitted"))
+    db.commit()
+    v = client.post(f"/h1b/cases/{case_id}/steps/lca/verify",
+                    json={"receipts": {"lca_number": "I-200-26123-456789"}},
+                    headers=PETITIONER_AUTH)
+    assert v.status_code == 200, v.text
+    statuses = {s["step_key"]: s["status"] for s in v.json()["steps"]}
+    assert statuses["lca"] == "verified"
+    assert statuses["i129"] == "ready"
+
+
+def test_verify_admin_offline_evidence_path(client, db):
+    """An admin may record an accepted offline government artifact (a certified
+    LCA on the case) as verification; a party cannot self-attest one."""
+    out = _create_case(client)
+    case_id = out["case_id"]
+    doc = models.StoredDocument(
+        org_id="org1", application_id=case_id, name="certified-lca.pdf",
+        mime="application/pdf", doc_type="certified_lca", approved=True)
+    db.add(doc)
+    db.commit()
+    _bind_petitioner(db, case_id, "hr1")
+
+    # A party cannot record an offline government outcome.
+    r = client.post(f"/h1b/cases/{case_id}/steps/lca/verify",
+                    json={"offline_evidence_document_id": doc.id},
+                    headers=PETITIONER_AUTH)
+    assert r.status_code == 403, r.text
+
+    # The admin can, and the successor unblocks.
+    r = client.post(f"/h1b/cases/{case_id}/steps/lca/verify",
+                    json={"offline_evidence_document_id": doc.id,
+                          "receipts": {"lca_number": "I-200-OFFLINE-01"}},
+                    headers=ADMIN_AUTH)
+    assert r.status_code == 200, r.text
+    statuses = {s["step_key"]: s["status"] for s in r.json()["steps"]}
+    assert statuses["lca"] == "verified" and statuses["i129"] == "ready"
+
+
+# ---------- #9 statutory registration window ----------
+
+def test_registration_window_helper_open_and_closed():
+    import datetime as dt
+    from app.h1b import api as h1b_api
+    assert h1b_api._registration_window_status(dt.date(2026, 8, 9))["open"] is False
+    assert h1b_api._registration_window_status(dt.date(2027, 3, 10))["open"] is True
+    assert h1b_api._registration_window_status(dt.date(2027, 4, 1))["open"] is False
+
+
+def test_cap_registration_release_honors_window(client, db, monkeypatch):
+    import datetime as dt
+    from app.h1b import api as h1b_api
+    prof = client.post("/h1b/employer-profiles", json={
+        "legal_name": "Trip.com US Inc", "fein": "12-3456789"}, headers=AUTH).json()
+    out = _create_case(client, case_kind="cap_initial",
+                       employer_profile_id=prof["employer_profile_id"])
+    case_id = out["case_id"]
+    _bind_petitioner(db, case_id, "hr1")
+
+    # Out of window: honest 409 naming the next window; no child filing opened.
+    monkeypatch.setattr(h1b_api, "_today", lambda: dt.date(2026, 8, 9))
+    r = client.post(f"/h1b/cases/{case_id}/steps/registration/release",
+                    headers=PETITIONER_AUTH)
+    assert r.status_code == 409, r.text
+    assert r.json()["detail"]["next_window"]
+    pipe = client.get(f"/h1b/cases/{case_id}/pipeline", headers=ADMIN_AUTH).json()
+    reg = next(s for s in pipe["steps"] if s["step_key"] == "registration")
+    assert reg["status"] == "ready" and reg["child_case_id"] is None
+
+    # In window: the release proceeds into a real registration filing.
+    monkeypatch.setattr(h1b_api, "_today", lambda: dt.date(2027, 3, 10))
+    r = client.post(f"/h1b/cases/{case_id}/steps/registration/release",
+                    headers=PETITIONER_AUTH)
+    assert r.status_code == 200, r.text
+    assert r.json()["visa_type"] == "h1b_registration"
+
+
+# ---------- #15 FEIN on the filing path ----------
+
+def test_employer_profile_without_fein_cannot_bind_to_case(client):
+    """FEIN validation lived only on profile creation and was skippable (an empty
+    FEIN was accepted). Binding such a profile to a filing case — where the FEIN
+    becomes a statement on ETA-9035/I-129 — is refused."""
+    prof = client.post("/h1b/employer-profiles",
+                       json={"legal_name": "No FEIN Inc"}, headers=AUTH)
+    assert prof.status_code == 200                      # empty FEIN allowed here
+    pid = prof.json()["employer_profile_id"]
+    r = client.post("/h1b/cases", json={
+        "case_kind": "extension", "beneficiary_full_name": "WEI ZHANG",
+        "beneficiary_email": "wei.zhang@example.com",
+        "employer_profile_id": pid}, headers=AUTH)
+    assert r.status_code == 422, r.text
+    assert "FEIN" in r.json()["detail"]
+
+
+def test_release_refuses_when_bound_profile_fein_invalid(client, db):
+    prof = client.post("/h1b/employer-profiles", json={
+        "legal_name": "Trip.com US Inc", "fein": "12-3456789"},
+        headers=AUTH).json()
+    out = _create_case(client, employer_profile_id=prof["employer_profile_id"])
+    case_id = out["case_id"]
+    _bind_petitioner(db, case_id, "hr1")
+    # The bound profile's FEIN is corrupted after the fact; the filing path must
+    # re-validate rather than carry a malformed FEIN onto a federal form.
+    profile = db.get(h1b_models.EmployerProfile, prof["employer_profile_id"])
+    profile.fein = ""
+    db.commit()
+    r = client.post(f"/h1b/cases/{case_id}/steps/lca/release", headers=PETITIONER_AUTH)
+    assert r.status_code == 409, r.text
+    assert "FEIN" in r.json()["detail"]["reason"]
+
+
+# ---------- CaseParty.answers writer (the missing petitioner writer) ----------
+
+def test_party_answers_writer_is_scoped_and_feeds_the_partition(client, db):
+    """The petitioner writes job/wage facts onto CaseParty.answers (the writer
+    finding #2 said nothing in production had); the beneficiary cannot write
+    them, perjury attestations are refused as free answers, and the whitelisted
+    facts flow into the lca child while non-shared keys stay on the party row."""
+    out = _create_case(client)
+    case_id = out["case_id"]
+    _bind_petitioner(db, case_id, "hr1")
+
+    # The beneficiary cannot write petitioner facts.
+    r = client.post(f"/h1b/cases/{case_id}/party/petitioner/answers",
+                    json={"answers": {"job_title": "Software Engineer"}},
+                    headers=AUTH)
+    assert r.status_code == 403, r.text
+
+    # A penalty-of-perjury attestation is never a free-form answer.
+    r = client.post(f"/h1b/cases/{case_id}/party/petitioner/answers",
+                    json={"answers": {"willful_violator": False}},
+                    headers=PETITIONER_AUTH)
+    assert r.status_code == 422, r.text
+
+    # The petitioner writes their job facts.
+    r = client.post(f"/h1b/cases/{case_id}/party/petitioner/answers",
+                    json={"answers": {"job_title": "Software Engineer",
+                                      "wage_offer": 132000,
+                                      "internal_hr_note": "budget review"}},
+                    headers=PETITIONER_AUTH)
+    assert r.status_code == 200, r.text
+    assert set(r.json()["written_keys"]) == {"job_title", "wage_offer",
+                                             "internal_hr_note"}
+
+    # Released lca child carries the whitelisted facts; the non-shared note stays.
+    rel = client.post(f"/h1b/cases/{case_id}/steps/lca/release",
+                      headers=PETITIONER_AUTH)
+    assert rel.status_code == 200, rel.text
+    db.expire_all()
+    child = db.get(models.VisaApplication, rel.json()["child_case_id"])
+    a = child.answers
+    assert a["job_title"] == "Software Engineer" and a["wage_offer"] == 132000
+    assert "internal_hr_note" not in a
+
+
+def test_beneficiary_party_answers_land_on_parent_case(client, db):
+    """Beneficiary facts stay on the parent case (where the filing partition and
+    intake machinery read them)."""
+    out = _create_case(client)
+    case_id = out["case_id"]
+    r = client.post(f"/h1b/cases/{case_id}/party/beneficiary/answers",
+                    json={"answers": {"birth_country": "China"}}, headers=AUTH)
+    assert r.status_code == 200, r.text
+    db.expire_all()
+    parent = db.get(models.VisaApplication, case_id)
+    assert (parent.answers or {}).get("birth_country") == "China"
+
+
+# ---------- residual: cross-party child reads on the generic case endpoint ----------
+
+def test_generic_child_case_read_hides_the_other_partys_facts(client, db):
+    """After the petitioner releases the LCA child, the child's answers carry
+    employer FEIN/wage. The generic GET /cases/{child} is org-scoped, so the
+    beneficiary could read them — the read half of the party wall. The child
+    read must return those facts only to the acting party or an admin."""
+    out = _create_case(client)
+    case_id = out["case_id"]
+    _bind_petitioner(db, case_id, "hr1")
+    r = client.post(f"/h1b/cases/{case_id}/party/petitioner/answers",
+                    json={"answers": {"job_title": "Software Engineer",
+                                      "wage_offer": 132000}},
+                    headers=PETITIONER_AUTH)
+    assert r.status_code == 200, r.text
+    rel = client.post(f"/h1b/cases/{case_id}/steps/lca/release",
+                      headers=PETITIONER_AUTH)
+    assert rel.status_code == 200, rel.text
+    child_id = rel.json()["child_case_id"]
+
+    # The acting petitioner sees the filing's facts.
+    mine = client.get(f"/cases/{child_id}", headers=PETITIONER_AUTH).json()
+    assert mine["answers"].get("wage_offer") == 132000
+
+    # The beneficiary sees the filing exists, never the employer's facts.
+    theirs = client.get(f"/cases/{child_id}", headers=AUTH).json()
+    assert "wage_offer" not in theirs["answers"]
+    assert "employer_fein" not in theirs["answers"]
+    assert theirs["answers"].get("h1b_parent_case_id") == case_id
+
+    # An admin retains the full view.
+    admin = client.get(f"/cases/{child_id}", headers=ADMIN_AUTH).json()
+    assert admin["answers"].get("wage_offer") == 132000
+
+    # Non-H1B parent read is untouched by the scoping.
+    parent = client.get(f"/cases/{case_id}", headers=AUTH).json()
+    assert parent["answers"].get("full_name") == "WEI ZHANG"

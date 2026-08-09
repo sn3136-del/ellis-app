@@ -1182,7 +1182,14 @@ def get_case(application_id: str, db=Depends(get_session), p: Principal = Depend
     adapter_verified = _adapter_verified_result(db, application_id)
     disposition = execution.result_disposition(app_row.state, ec,
                                                adapter_verified=adapter_verified)
-    return {"id": app_row.id, "state": app_row.state, "answers": app_row.answers,
+    # H1B child filing cases carry one party's private facts (petitioner FEIN/
+    # wage, or beneficiary passport); the org-scoped read must not hand those to
+    # the other party. For every other case this is a single cheap type check
+    # returning the answers unchanged.
+    from .h1b.api import scope_child_case_read
+    scoped = scope_child_case_read(db, app_row, p)
+    answers_out = app_row.answers if scoped is None else scoped
+    return {"id": app_row.id, "state": app_row.state, "answers": answers_out,
             "pending": exec_row.pending if exec_row else None,
             "portal_reference": app_row.portal_reference,
             "execution_class": str(ec),

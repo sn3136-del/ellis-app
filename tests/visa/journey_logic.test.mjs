@@ -347,6 +347,36 @@ test('doc-type labels are applicant-friendly and localized; whitelist excludes p
   }
 })
 
+// The 13 H1B document types the backend added to intake_flow.MANUAL_DOC_TYPES
+// must be mirrored in the renderer registries (finding #13). Without them a
+// photographed 学位证 that OCRs poorly and classifies as 'document' can never be
+// picked as its real type (the manual picker maps MANUAL_DOC_TYPES), and every
+// mismatch advisory for a detected H1B type degrades to "Ellis detected this as
+// document" because docTypeLabelKey falls back to 'doctype.document'.
+const H1B_DOC_TYPES = [
+  'degree_certificate', 'graduation_certificate', 'transcript', 'resume_cv',
+  'prior_i797', 'i94_record', 'credential_evaluation', 'employer_support_letter',
+  'job_description', 'fein_evidence', 'employer_financials',
+  'corporate_relationship_evidence', 'certified_lca'
+]
+
+test('renderer doc-type registries mirror the backend H1B types, localized in every locale (finding #13)', () => {
+  for (const dt of H1B_DOC_TYPES) {
+    // KNOWN_DOC_TYPES (tested through docTypeLabelKey) recognizes the type: a
+    // known type resolves to its own label, never the generic fallback.
+    assert.equal(docTypeLabelKey(dt), `doctype.${dt}`, `known: ${dt}`)
+    // The applicant may manually pick it for an ambiguous upload.
+    assert.ok(MANUAL_DOC_TYPES.includes(dt), `manual: ${dt}`)
+    // Every locale carries a non-empty applicant-facing label.
+    for (const lang of SUPPORTED) {
+      const label = STRINGS[lang][`doctype.${dt}`]
+      assert.ok(typeof label === 'string' && label.trim().length > 0, `${lang} ${dt}`)
+    }
+  }
+  // passport is still never manually pickable (identity comes only from the MRZ).
+  assert.ok(!MANUAL_DOC_TYPES.includes('passport'))
+})
+
 // ---------------------------------------------------------------------------
 // Route-specific journey rendering: only applicable stages, appointment-gated
 // Preferences tab, calculated validity display, and the two-pass verification
@@ -588,6 +618,30 @@ test('the Authorize card excludes no continuation kind', async () => {
   assert.ok(guard, 'could not find the Authorize card render guard')
   assert.ok(!/kind\s*!==/.test(guard[0]),
     `the Authorize card excludes a kind, which makes its button dead: ${guard[0].trim()}`)
+})
+
+// The inverse of the dead-control bug (finding #18): the H1B parent case is a
+// petition CONTAINER whose tourist "Authorize & start" /start can never do the
+// right thing (no live adapter, CHN→USA tourist wording; the real filings live
+// in the H1B workspace). Leaving the h1b kinds IN that card is the same bug
+// written the other way, so the parent must be guarded OUT of the tourist card
+// via a NAMED boolean (never a `kind !== ...` exclusion, which the test above
+// forbids) and shown an honest placeholder instead.
+test('the H1B parent is guarded out of the tourist Authorize card and shown a placeholder', async () => {
+  const src = await readFile(
+    new URL('../../src/renderer/src/components/visa/CaseFlow.jsx', import.meta.url), 'utf8')
+  // isH1bParent is derived from exactly the two H1B continuation kinds.
+  assert.match(src,
+    /isH1bParent\s*=\s*kind === 'h1b_petition' \|\| kind === 'h1b_filing'/)
+  // The tourist Authorize card render guard excludes the H1B parent.
+  const card = src.slice(src.indexOf('data-testid="authorize-and-start"') - 2500,
+                         src.indexOf('data-testid="authorize-and-start"'))
+  const guard = card.match(/\{!started && !docsPending([^(]*)\(/)
+  assert.ok(guard, 'could not find the Authorize card render guard')
+  assert.ok(/!isH1bParent/.test(guard[0]),
+    `the Authorize card does not exclude the H1B parent: ${guard[0].trim()}`)
+  // An honest H1B placeholder renders in its place (never the tourist card).
+  assert.match(src, /data-testid="h1b-placeholder"/)
 })
 
 test('ContinuePanel never carries the burden of starting a run', () => {

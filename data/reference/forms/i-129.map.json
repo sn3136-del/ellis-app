@@ -1,0 +1,322 @@
+{
+    "_source": "https://www.uscis.gov/i-129 (official blank, edition 02/27/26)",
+    "_authority": "U.S. Citizenship and Immigration Services (USCIS), Department of Homeland Security",
+    "_retrieved": "2026-08-09",
+    "_edition": "02/27/26",
+    "_scope": "H-1B extension / amendment slice: Part 1 petitioner, Part 2 petition, Part 3 named beneficiary incl. the in-US block, Part 4 processing, Part 5 employment and employer, Part 6 export control, Part 7 signatory identity, Part 8 preparer identity, H Classification Supplement names + classification checkbox, H-1B Data Collection Supplement Sections 1 and 3. Every mapping is grounded in the field's /TU tooltip on the real PDF; anything ambiguous is omitted (unfilled beats wrong on a perjury form).",
+    "_date_format": "MM/DD/YYYY",
+    "_note": "Text fields map PDF field name -> Ellis answer key. Checkbox groups map an Ellis answer key -> {answer value: PDF checkbox field}. This form's checkboxes use non-/On on-states, so checkbox_states records the EXACT on-state per checkbox field, read from the field's /_States_ in the PDF. Field names are the FULL qualified AcroForm names - short names repeat across #subform indices on this 38-page package. Beneficiary keys follow backend/app/h1b/filing.py (full_name, birth_date, passport_number, passport_expiry); employer keys follow its _EMPLOYER_PROFILE_KEYS vocabulary.",
+    "fields": {
+        "form1[0].#subform[0].Line3_CompanyorOrgName[0]": "employer_legal_name",
+        "form1[0].#subform[0].Line7a_InCareofName[0]": "employer_contact_name",
+        "form1[0].#subform[0].Line7b_StreetNumberName[0]": "employer_address_line1",
+        "form1[0].#subform[0].Line3_AptSteFlrNumber[0]": "h1b_employer_unit_number",
+        "form1[0].#subform[0].Line_CityTown[0]": "employer_city",
+        "form1[0].#subform[0].P1_Line3_State[0]": "employer_state",
+        "form1[0].#subform[0].P1_Line3_ZipCode[0]": "employer_postal_code",
+        "form1[0].#subform[0].Line2_DaytimePhoneNumber1_Part8[0]": "employer_phone",
+        "form1[0].#subform[0].Line9_EmailAddress[0]": "employer_contact_email",
+        "form1[0].#subform[0].TextField1[0]": "employer_fein",
+
+        "form1[0].#subform[1].Part2_ClassificationSymbol[0]": "h1b_classification_symbol",
+        "form1[0].#subform[1].Line1_ReceiptNumber[0]": "h1b_receipt_number",
+        "form1[0].#subform[1].TtlNumbersofWorker[0]": "h1b_total_workers",
+
+        "form1[0].#subform[1].Part3_Line2_FamilyName[0]": "surname",
+        "form1[0].#subform[1].Part3_Line2_GivenName[0]": "given_names",
+        "form1[0].#subform[1].Part3_Line2_MiddleName[0]": "middle_name",
+        "form1[0].#subform[2].Line6_DateOfBirth[0]": "birth_date",
+        "form1[0].#subform[2].Part3Line4_CountryOfBirth[0]": "birth_country",
+        "form1[0].#subform[2].Part3Line4_CountryOfCitizenship[0]": "citizenship_country",
+        "form1[0].#subform[2].Part3Line5_DateofArrival[0]": "h1b_last_arrival_date",
+        "form1[0].#subform[2].Part3Line5_ArrivalDeparture[0]": "i94_number",
+        "form1[0].#subform[2].Part3Line5_PassportorTravDoc[0]": "passport_number",
+        "form1[0].#subform[2].Line11e_ExpDate[0]": "passport_expiry",
+        "form1[0].#subform[2].Line11e_ExpDate[1]": "passport_issue_date",
+        "form1[0].#subform[2].Line_CountryOfIssuance[0]": "issuing_country",
+        "form1[0].#subform[2].Line11g_CurrentNon[0]": "h1b_current_status",
+        "form1[0].#subform[2].Line11h_DateStatusExpires[0]": "current_status_expiry",
+        "form1[0].#subform[2].Line8a_StreetNumberName[0]": "h1b_beneficiary_us_street",
+        "form1[0].#subform[2].Line6_AptSteFlrNumber[0]": "h1b_beneficiary_us_apt_number",
+        "form1[0].#subform[2].Line8d_CityTown[0]": "h1b_beneficiary_us_city",
+        "form1[0].#subform[2].Line8e_State[0]": "h1b_beneficiary_us_state",
+        "form1[0].#subform[2].Line8f_ZipCode[0]": "h1b_beneficiary_us_zip",
+
+        "form1[0].#subform[2].OfficeAddressCity[0]": "h1b_consulate_city",
+        "form1[0].#subform[2].Part4_1c_State_or_Country[0]": "h1b_consulate_state_or_country",
+        "form1[0].#subform[3].Line2b_StreetNumberName[0]": "h1b_beneficiary_foreign_street",
+        "form1[0].#subform[3].Line2b2_AptSteFlrNumber[0]": "h1b_beneficiary_foreign_apt_number",
+        "form1[0].#subform[3].Line2c_CityTown[0]": "h1b_beneficiary_foreign_city",
+        "form1[0].#subform[3].Line2g2_Province[0]": "h1b_beneficiary_foreign_state",
+        "form1[0].#subform[3].Line2g2_Province[1]": "h1b_beneficiary_foreign_province",
+        "form1[0].#subform[3].Line3f_PostalCode[0]": "h1b_beneficiary_foreign_postal_code",
+        "form1[0].#subform[3].Line_Country[0]": "h1b_beneficiary_foreign_country",
+
+        "form1[0].#subform[4].Part5_Q1_JobTitle[0]": "job_title",
+        "form1[0].#subform[4].Part5_Q2_LCAorETA[0]": "h1b_lca_case_number",
+        "form1[0].#subform[4].P5Line3a_StreetNumberName[0]": "worksite_address_line1",
+        "form1[0].#subform[4].P5Line3a_AptSteFlrNumber[0]": "h1b_worksite_apt_number",
+        "form1[0].#subform[4].P5Line3a_CityTown[0]": "worksite_address_city",
+        "form1[0].#subform[4].P5Line3a_State[0]": "worksite_address_state",
+        "form1[0].#subform[4].P5Line3a_ZipCode[0]": "worksite_address_zip",
+        "form1[0].#subform[4].P5Line3a_ThirdpartyOrganization[0]": "h1b_worksite_third_party_org",
+        "form1[0].#subform[4].Line8_Wages[0]": "wage_offer",
+        "form1[0].#subform[4].Line8_Per[0]": "wage_offer_unit",
+        "form1[0].#subform[4].Part5_Q10_DateFrom[0]": "employment_start_date",
+        "form1[0].#subform[4].Part5_Q10_DateTo[0]": "employment_end_date",
+        "form1[0].#subform[5].Part5Line12_TypeofBusiness[0]": "h1b_business_type",
+        "form1[0].#subform[5].P5Line13_YearEstablished[0]": "h1b_year_established",
+        "form1[0].#subform[5].P5Line14_NumberofEmployees[0]": "h1b_us_employee_count",
+        "form1[0].#subform[5].Line15_GrossAnnualIncome[0]": "h1b_gross_annual_income",
+        "form1[0].#subform[5].Line16_NetAnnualIncome[0]": "h1b_net_annual_income",
+
+        "form1[0].#subform[5].Line1a_PetitionerLastName[0]": "h1b_signatory_family_name",
+        "form1[0].#subform[5].Line1b_PetitionerFirstName[0]": "h1b_signatory_given_name",
+        "form1[0].#subform[5].Line1a_PetitionerLastName[1]": "employer_contact_title",
+        "form1[0].#subform[6].Pt7Line3_DaytimePhoneNumber1[0]": "employer_contact_phone",
+        "form1[0].#subform[6].Pt7Line3_EmailAddress[0]": "employer_contact_email",
+
+        "form1[0].#subform[6].Line_PreparerFamilyName[0]": "h1b_preparer_family_name",
+        "form1[0].#subform[6].Line_PreparerGivenName[0]": "h1b_preparer_given_name",
+        "form1[0].#subform[6].Line_BusinessName[0]": "h1b_preparer_business_name",
+        "form1[0].#subform[6].Pt8Line4_DaytimePhoneNumber1[0]": "h1b_preparer_phone",
+        "form1[0].#subform[6].EmailAddress[0]": "h1b_preparer_email",
+
+        "form1[0].#subform[13].Line1_PetitionerName[0]": "employer_legal_name",
+        "form1[0].#subform[13].Line2_BeneficiaryName[0]": "full_name",
+
+        "form1[0].#subform[22].Line1_FamilyName[3]": "employer_legal_name",
+        "form1[0].#subform[22].Line1_FamilyName[2]": "full_name",
+        "form1[0].#subform[22].PartA_q3_Field_of_Study[0]": "h1b_field_of_study",
+        "form1[0].#subform[22].Line4_RateofPayPerYear[0]": "h1b_annual_rate_of_pay",
+        "form1[0].#subform[22].Line5_SOCCode1[0]": "h1b_soc_code_first2",
+        "form1[0].#subform[22].Line5_SOCCode2[0]": "h1b_soc_code_last4",
+        "form1[0].#subform[22].Line2f[0].Line6_NAICSCode[0]": "employer_naics"
+    },
+    "checkboxes": {
+        "h1b_nonprofit_or_governmental_research": {
+            "yes": "form1[0].#subform[0].P1Line6_Yes[0]",
+            "no": "form1[0].#subform[0].P1Line6_No[0]"
+        },
+        "h1b_employer_unit_type": {
+            "ste": "form1[0].#subform[0].Line3_Unit[0]",
+            "apt": "form1[0].#subform[0].Line3_Unit[1]",
+            "flr": "form1[0].#subform[0].Line3_Unit[2]"
+        },
+        "h1b_basis_for_classification": {
+            "extension": "form1[0].#subform[1].continuation[0]",
+            "nonmaterial_change": "form1[0].#subform[1].previouschange[0]",
+            "amendment": "form1[0].#subform[1].amended[0]"
+        },
+        "h1b_requested_action": {
+            "extend": "form1[0].#subform[1].P2Checkbox4[2]",
+            "amend": "form1[0].#subform[1].P2Checkbox4[3]"
+        },
+        "sex": {
+            "M": "form1[0].#subform[2].Line1_Gender_P3[0]",
+            "F": "form1[0].#subform[2].Line1_Gender_P3[1]"
+        },
+        "h1b_beneficiary_us_unit_type": {
+            "apt": "form1[0].#subform[2].Line6_Unit[0]",
+            "flr": "form1[0].#subform[2].Line6_Unit[1]",
+            "ste": "form1[0].#subform[2].Line6_Unit[2]"
+        },
+        "h1b_notify_office_type": {
+            "consulate": "form1[0].#subform[2].TypeofOffice[0]",
+            "pre_flight_inspection": "form1[0].#subform[2].TypeofOffice[1]",
+            "port_of_entry": "form1[0].#subform[2].TypeofOffice[2]"
+        },
+        "h1b_beneficiary_foreign_unit_type": {
+            "ste": "form1[0].#subform[3].Line2b2_Unit[0]",
+            "flr": "form1[0].#subform[3].Line2b2_Unit[1]",
+            "apt": "form1[0].#subform[3].Line2b2_Unit[2]"
+        },
+        "h1b_valid_passport": {
+            "yes": "form1[0].#subform[3].P4Line2_Checkbox[1]",
+            "no": "form1[0].#subform[3].P4Line2_Checkbox[0]"
+        },
+        "h1b_prior_immigrant_petition": {
+            "yes": "form1[0].#subform[3].P4Line7[1]",
+            "no": "form1[0].#subform[3].P4Line7[0]"
+        },
+        "h1b_new_petition_indicated": {
+            "yes": "form1[0].#subform[3].P4Line8[0]",
+            "no": "form1[0].#subform[3].P4Line8[1]"
+        },
+        "h1b_prior_same_classification": {
+            "yes": "form1[0].#subform[3].P4Line8a_Yes[0]",
+            "no": "form1[0].#subform[3].P4Line8a_No[0]"
+        },
+        "h1b_denied_same_classification": {
+            "yes": "form1[0].#subform[3].P4Line8b_Yes[0]",
+            "no": "form1[0].#subform[3].P4Line8b_No[0]"
+        },
+        "h1b_prior_petition_for_beneficiary": {
+            "yes": "form1[0].#subform[3].P4Line9_Yes[0]",
+            "no": "form1[0].#subform[3].P4Line9_No[0]"
+        },
+        "h1b_worksite_unit_type": {
+            "apt": "form1[0].#subform[4].P5Line3a_Unit[0]",
+            "flr": "form1[0].#subform[4].P5Line3a_Unit[1]",
+            "ste": "form1[0].#subform[4].P5Line3a_Unit[2]"
+        },
+        "h1b_worksite_third_party": {
+            "yes": "form1[0].#subform[4].P5Line3[1]",
+            "no": "form1[0].#subform[4].P5Line3[0]"
+        },
+        "h1b_offsite_work": {
+            "yes": "form1[0].#subform[4].P5Line5_Yes[0]",
+            "no": "form1[0].#subform[4].P5Line5_No[0]"
+        },
+        "full_time_position": {
+            "yes": "form1[0].#subform[4].P5Line7_Yes[0]",
+            "no": "form1[0].#subform[4].P5Line7_No[0]"
+        },
+        "h1b_employs_25_or_fewer_fte": {
+            "yes": "form1[0].#subform[5].P5Line15_Yes[0]",
+            "no": "form1[0].#subform[5].P5Line15_No[0]"
+        },
+        "export_control_license_required": {
+            "no": "form1[0].#subform[5].NoDeemed[0]",
+            "yes_with_controls": "form1[0].#subform[5].Deemed[0]"
+        },
+        "h1b_classification_sought": {
+            "h1b_specialty": "form1[0].#subform[13].SubHLine4_class[0]"
+        },
+        "h1b_dependent_employer": {
+            "yes": "form1[0].#subform[22].H1BSecALine1a_Yes[0]",
+            "no": "form1[0].#subform[22].H1BSecALine1a_No[0]"
+        },
+        "willful_violator": {
+            "yes": "form1[0].#subform[22].H1BSecALine1b_Yes[0]",
+            "no": "form1[0].#subform[22].H1BSecALine1b_No[0]"
+        },
+        "h1b_exempt_beneficiary": {
+            "yes": "form1[0].#subform[22].H1BSecALine1c_Yes[0]",
+            "no": "form1[0].#subform[22].H1BSecALine1c_No[0]"
+        },
+        "h1b_exempt_by_pay": {
+            "yes": "form1[0].#subform[22].H1BSecALine1c1_Yes[0]",
+            "no": "form1[0].#subform[22].H1BSecALine1c1_No[0]"
+        },
+        "h1b_exempt_by_degree": {
+            "yes": "form1[0].#subform[22].H1BSecALine1c2_Yes[0]",
+            "no": "form1[0].#subform[22].H1BSecALine1c2_No[0]"
+        },
+        "h1b_employs_50_plus_us": {
+            "yes": "form1[0].#subform[22].H1BSecALine1d_Yes[0]",
+            "no": "form1[0].#subform[22].H1BSecALine1d_No[0]"
+        },
+        "h1b_majority_h1b_l1_workforce": {
+            "yes": "form1[0].#subform[22].H1BSecALine1d1_Yes[0]",
+            "no": "form1[0].#subform[22].H1BSecALine1d1_No[0]"
+        },
+        "h1b_beneficiary_education": {
+            "no_diploma": "form1[0].#subform[22].a_no_diploma[0]",
+            "high_school": "form1[0].#subform[22].b_HSDiploma[0]",
+            "some_college": "form1[0].#subform[22].c_some_college[0]",
+            "one_plus_years_college": "form1[0].#subform[22].d_collegeplus[0]",
+            "associate": "form1[0].#subform[22].e_AssociateDegree[0]",
+            "bachelor": "form1[0].#subform[22].f_BachelorDegree[0]",
+            "master": "form1[0].#subform[22].g_MasterDegree[0]",
+            "professional": "form1[0].#subform[22].h_ProfessionalDegree[0]",
+            "doctorate": "form1[0].#subform[22].i_DoctorateDegree[0]"
+        },
+        "h1b_cap_type": {
+            "cap_bachelors": "form1[0].#subform[23].Cap[0]",
+            "cap_masters": "form1[0].#subform[23].Cap[1]",
+            "cap_chile_singapore": "form1[0].#subform[23].Cap[2]",
+            "cap_exempt": "form1[0].#subform[23].Cap[3]"
+        },
+        "h1b_cap_exempt_reason": {
+            "previously_counted": "form1[0].#subform[24].PartC_4gCheckbox[0]"
+        }
+    },
+    "checkbox_states": {
+        "form1[0].#subform[0].P1Line6_Yes[0]": "/Y",
+        "form1[0].#subform[0].P1Line6_No[0]": "/Y",
+        "form1[0].#subform[0].Line3_Unit[0]": "/ STE ",
+        "form1[0].#subform[0].Line3_Unit[1]": "/ APT ",
+        "form1[0].#subform[0].Line3_Unit[2]": "/ FLR ",
+        "form1[0].#subform[1].continuation[0]": "/1",
+        "form1[0].#subform[1].previouschange[0]": "/1",
+        "form1[0].#subform[1].amended[0]": "/1",
+        "form1[0].#subform[1].P2Checkbox4[2]": "/C",
+        "form1[0].#subform[1].P2Checkbox4[3]": "/D",
+        "form1[0].#subform[2].Line1_Gender_P3[0]": "/M",
+        "form1[0].#subform[2].Line1_Gender_P3[1]": "/F",
+        "form1[0].#subform[2].Line6_Unit[0]": "/ APT ",
+        "form1[0].#subform[2].Line6_Unit[1]": "/ FLR ",
+        "form1[0].#subform[2].Line6_Unit[2]": "/ STE ",
+        "form1[0].#subform[2].TypeofOffice[0]": "/CON",
+        "form1[0].#subform[2].TypeofOffice[1]": "/PFI",
+        "form1[0].#subform[2].TypeofOffice[2]": "/POE",
+        "form1[0].#subform[3].Line2b2_Unit[0]": "/ STE ",
+        "form1[0].#subform[3].Line2b2_Unit[1]": "/ FLR ",
+        "form1[0].#subform[3].Line2b2_Unit[2]": "/ APT ",
+        "form1[0].#subform[3].P4Line2_Checkbox[1]": "/Y",
+        "form1[0].#subform[3].P4Line2_Checkbox[0]": "/N",
+        "form1[0].#subform[3].P4Line7[1]": "/Y",
+        "form1[0].#subform[3].P4Line7[0]": "/N",
+        "form1[0].#subform[3].P4Line8[0]": "/Y",
+        "form1[0].#subform[3].P4Line8[1]": "/N",
+        "form1[0].#subform[3].P4Line8a_Yes[0]": "/Y",
+        "form1[0].#subform[3].P4Line8a_No[0]": "/Y",
+        "form1[0].#subform[3].P4Line8b_Yes[0]": "/Y",
+        "form1[0].#subform[3].P4Line8b_No[0]": "/Y",
+        "form1[0].#subform[3].P4Line9_Yes[0]": "/Y",
+        "form1[0].#subform[3].P4Line9_No[0]": "/Y",
+        "form1[0].#subform[4].P5Line3a_Unit[0]": "/ APT ",
+        "form1[0].#subform[4].P5Line3a_Unit[1]": "/ FLR ",
+        "form1[0].#subform[4].P5Line3a_Unit[2]": "/ STE ",
+        "form1[0].#subform[4].P5Line3[0]": "/0",
+        "form1[0].#subform[4].P5Line3[1]": "/1",
+        "form1[0].#subform[4].P5Line5_Yes[0]": "/Y",
+        "form1[0].#subform[4].P5Line5_No[0]": "/Y",
+        "form1[0].#subform[4].P5Line7_Yes[0]": "/Y",
+        "form1[0].#subform[4].P5Line7_No[0]": "/Y",
+        "form1[0].#subform[5].P5Line15_Yes[0]": "/Y",
+        "form1[0].#subform[5].P5Line15_No[0]": "/Y",
+        "form1[0].#subform[5].NoDeemed[0]": "/1",
+        "form1[0].#subform[5].Deemed[0]": "/1",
+        "form1[0].#subform[13].SubHLine4_class[0]": "/A",
+        "form1[0].#subform[22].H1BSecALine1a_Yes[0]": "/Y",
+        "form1[0].#subform[22].H1BSecALine1a_No[0]": "/N",
+        "form1[0].#subform[22].H1BSecALine1b_Yes[0]": "/Y",
+        "form1[0].#subform[22].H1BSecALine1b_No[0]": "/N",
+        "form1[0].#subform[22].H1BSecALine1c_Yes[0]": "/Y",
+        "form1[0].#subform[22].H1BSecALine1c_No[0]": "/N",
+        "form1[0].#subform[22].H1BSecALine1c1_Yes[0]": "/Y",
+        "form1[0].#subform[22].H1BSecALine1c1_No[0]": "/N",
+        "form1[0].#subform[22].H1BSecALine1c2_Yes[0]": "/Y",
+        "form1[0].#subform[22].H1BSecALine1c2_No[0]": "/N",
+        "form1[0].#subform[22].H1BSecALine1d_Yes[0]": "/Y",
+        "form1[0].#subform[22].H1BSecALine1d_No[0]": "/N",
+        "form1[0].#subform[22].H1BSecALine1d1_Yes[0]": "/Y",
+        "form1[0].#subform[22].H1BSecALine1d1_No[0]": "/N",
+        "form1[0].#subform[22].a_no_diploma[0]": "/1",
+        "form1[0].#subform[22].b_HSDiploma[0]": "/1",
+        "form1[0].#subform[22].c_some_college[0]": "/1",
+        "form1[0].#subform[22].d_collegeplus[0]": "/1",
+        "form1[0].#subform[22].e_AssociateDegree[0]": "/1",
+        "form1[0].#subform[22].f_BachelorDegree[0]": "/1",
+        "form1[0].#subform[22].g_MasterDegree[0]": "/1",
+        "form1[0].#subform[22].h_ProfessionalDegree[0]": "/1",
+        "form1[0].#subform[22].i_DoctorateDegree[0]": "/1",
+        "form1[0].#subform[23].Cap[0]": "/A",
+        "form1[0].#subform[23].Cap[1]": "/B",
+        "form1[0].#subform[23].Cap[2]": "/C",
+        "form1[0].#subform[23].Cap[3]": "/D",
+        "form1[0].#subform[24].PartC_4gCheckbox[0]": "/1"
+    },
+    "_human_only": [
+        "form1[0].#subform[6].P5_Line6a_SignatureofApplicant[0]",
+        "form1[0].#subform[6].Line1b_DateofSignature[0]",
+        "form1[0].#subform[6].Line_Signature[0]",
+        "form1[0].#subform[6].Line_DateofSignature[0]",
+        "form1[0].#subform[15].P5_Line6a_SignatureofApplicant[2]",
+        "form1[0].#subform[15].Sect1_DateSignedByPetitioner[0]",
+        "form1[0].#pageSet[0].Page1[*].PDF417BarCode1[0]"
+    ],
+    "_human_only_note": "Signature fields, date-of-signature fields, and the per-page PDF417 barcodes are never filled by Ellis. Out-of-scope supplements (Trade Agreement, O/P, Q, R) carry further signature fields under P5_Line6a_SignatureofApplicant[1..6]; none of their sections are mapped."
+}

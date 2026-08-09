@@ -1,6 +1,7 @@
 """H1B filing coordinator: a ready step becomes a real linked child filing
 case with explicitly assembled, party-partitioned answers — never a wholesale
 merge of both parties, and never a release without verified predecessors."""
+import pytest
 from sqlalchemy import select
 
 from app import models
@@ -10,6 +11,13 @@ from app.h1b import steps as h1b_steps
 from app.visa_snapshot.models import CaseRouteGuidance
 
 from .conftest import AUTH, PASSPORT_MRZ
+
+# The release/verify endpoints now enforce per-party authorization: only the
+# step's acting party (or an admin) may act. AUTH is the beneficiary (user1);
+# the petitioner party is bound to a distinct HR operator so petitioner-acting
+# filings are released by the petitioner, exactly as production requires.
+AUTH_HR = {"Authorization": "Bearer dev-token", "X-Org-Id": "org1",
+           "X-User-Id": "hr1"}
 
 PETITIONER_JOB_ANSWERS = {
     "job_title": "Software Engineer",
@@ -56,6 +64,10 @@ def _create_case(client, db, **overrides):
         h1b_models.CaseParty.application_id == out["case_id"],
         h1b_models.CaseParty.role == "petitioner")).scalars().first()
     petitioner.answers = dict(PETITIONER_JOB_ANSWERS)
+    # Bind the petitioner party to a distinct operator so petitioner-acting
+    # filings are released under the petitioner's own account (the endpoint now
+    # enforces per-party authorization).
+    petitioner.user_id = "hr1"
     db.commit()
     return out
 
@@ -66,9 +78,39 @@ def _step(db, case_id, step_key):
         h1b_models.H1bCaseStep.step_key == step_key)).scalars().first()
 
 
-def _release(client, case_id, step_key):
+def _release(client, case_id, step_key, headers=None):
+    # The acting party releases its own step: the beneficiary for the consular
+    # leg, the petitioner (hr1) for the DOL/USCIS filings.
+    if headers is None:
+        headers = AUTH if step_key == "ds160_consular" else AUTH_HR
     return client.post(f"/h1b/cases/{case_id}/steps/{step_key}/release",
-                       headers=AUTH)
+                       headers=headers)
+
+
+# The offline government artifact an admin accepts as verification evidence for
+# a step whose outcome arrives outside a portal run (certified LCA / I-797).
+_OFFLINE_TYPE_FOR = {"lca": "certified_lca", "registration": "prior_i797",
+                     "i129": "prior_i797"}
+
+
+def _accepted_offline_doc(db, case_id, step_key, org_id="org1"):
+    doc = models.StoredDocument(
+        org_id=org_id, application_id=case_id,
+        name=f"{step_key}-evidence.pdf", mime="application/pdf", size_bytes=2048,
+        doc_type=_OFFLINE_TYPE_FOR[step_key], ocr_status="done", approved=True)
+    db.add(doc)
+    db.commit()
+    return doc
+
+
+def _verify_step_offline(db, case_id, step_key, receipts=None):
+    """Verify a step the way an admin would with an accepted offline artifact —
+    the guarded path mark_step_verified now requires."""
+    step = _step(db, case_id, step_key)
+    doc = _accepted_offline_doc(db, case_id, step_key)
+    h1b_steps.mark_step_verified(db, step, receipts=receipts or {}, actor="admin",
+                                 offline_evidence_document_id=doc.id)
+    return step
 
 
 # ---------- answer partitioning ----------
@@ -113,9 +155,8 @@ def test_release_ready_lca_creates_partitioned_child(client, db):
 def test_i129_child_gets_beneficiary_identity_but_not_email(client, db):
     out = _create_case(client, db)
     case_id = out["case_id"]
-    lca = _step(db, case_id, "lca")
-    h1b_steps.mark_step_verified(db, lca, receipts={
-        "lca_number": "I-200-26123-456789"}, actor="test")
+    _verify_step_offline(db, case_id, "lca",
+                         receipts={"lca_number": "I-200-26123-456789"})
     db.refresh(i129 := _step(db, case_id, "i129"))
     assert i129.status == "ready"
 
@@ -142,8 +183,7 @@ def test_ds160_child_is_beneficiary_only_and_carries_passport(client, db):
     assert up.status_code == 200, up.text
 
     for key in ("lca", "i129"):
-        h1b_steps.mark_step_verified(db, _step(db, case_id, key),
-                                     receipts={}, actor="test")
+        _verify_step_offline(db, case_id, key)
     r = _release(client, case_id, "ds160_consular")
     assert r.status_code == 200, r.text
     payload = r.json()
@@ -255,3 +295,244 @@ def test_parent_deletion_leaves_children_as_separate_cases(client, db):
     assert cg is not None
     privacy.delete_case(db, child_id)
     assert db.get(models.VisaApplication, child_id) is None
+
+
+# ---------- acting-party identity (the Applicant side-channel) ----------
+
+def test_petitioner_child_applicant_is_petitioner_not_beneficiary(client, db):
+    """The child filing's Applicant row is the identity the workflow registers
+    the portal account with and sends every notification to. For a petitioner-
+    acting filing it MUST be the petitioner, never the beneficiary — otherwise
+    the DOL account and the employer's perjury action prompts carry the worker's
+    name and land in the worker's inbox."""
+    out = _create_case(client, db)
+    case_id = out["case_id"]
+    child_id = _release(client, case_id, "lca").json()["child_case_id"]
+
+    db.expire_all()
+    child = db.get(models.VisaApplication, child_id)
+    parent = db.get(models.VisaApplication, case_id)
+    applicant = db.get(models.Applicant, child.applicant_id)
+    # The petitioner drives the DOL filing — its own signatory email, not the
+    # beneficiary's.
+    assert applicant.email == "hr@tripus.example.com"
+    assert applicant.email != "wei.zhang@example.com"
+    assert "wei" not in (applicant.full_name or "").lower()
+    # The beneficiary's Applicant row is a different, untouched identity.
+    assert child.applicant_id != parent.applicant_id
+
+
+def test_consular_child_keeps_the_beneficiary_identity(client, db):
+    out = _create_case(client, db, beneficiary_abroad=True, beneficiary_in_us=False)
+    case_id = out["case_id"]
+    for key in ("lca", "i129"):
+        _verify_step_offline(db, case_id, key)
+    child_id = _release(client, case_id, "ds160_consular").json()["child_case_id"]
+
+    db.expire_all()
+    child = db.get(models.VisaApplication, child_id)
+    parent = db.get(models.VisaApplication, case_id)
+    # The consular leg is the beneficiary's own act → the beneficiary Applicant.
+    assert child.applicant_id == parent.applicant_id
+    assert db.get(models.Applicant, child.applicant_id).email == "wei.zhang@example.com"
+
+
+# ---------- DS-160 whitelist (petitioner facts never reach the beneficiary) ----
+
+def test_ds160_never_leaks_petitioner_facts_from_parent_answers(client, db):
+    """parent.answers is beneficiary answers only by convention: the generic
+    /cases/{id}/answers endpoint merges arbitrary keys into it. The consular
+    child must take a beneficiary whitelist, never a wholesale copy, so employer
+    job/wage/worksite facts and internal notes cannot ride into the DS-160."""
+    out = _create_case(client, db, beneficiary_abroad=True, beneficiary_in_us=False)
+    case_id = out["case_id"]
+
+    parent = db.get(models.VisaApplication, case_id)
+    merged = dict(parent.answers or {})
+    merged.update({"job_title": "Software Engineer", "wage_offer": 132000,
+                   "prevailing_wage": 121000, "worksite_city": "New York",
+                   "internal_hr_note": "relocation budget flagged"})
+    parent.answers = merged
+    db.commit()
+
+    for key in ("lca", "i129"):
+        _verify_step_offline(db, case_id, key)
+    child_id = _release(client, case_id, "ds160_consular").json()["child_case_id"]
+
+    a = db.get(models.VisaApplication, child_id).answers
+    assert a["full_name"] == "WEI ZHANG" and a["email"] == "wei.zhang@example.com"
+    for leaked in ("job_title", "wage_offer", "prevailing_wage",
+                   "worksite_city", "internal_hr_note"):
+        assert leaked not in a
+
+
+# ---------- verification requires real government evidence ----------
+
+def test_mark_step_verified_refuses_without_evidence(client, db):
+    out = _create_case(client, db)
+    case_id = out["case_id"]
+    lca = _step(db, case_id, "lca")
+    with pytest.raises(h1b_steps.EvidenceRequired):
+        h1b_steps.mark_step_verified(db, lca, receipts={"lca_number": "I-200-x"},
+                                     actor="test")
+    db.refresh(lca)
+    assert lca.status != "verified"
+    # The next real filing must not have unblocked off a bare receipt dict.
+    db.refresh(i129 := _step(db, case_id, "i129"))
+    assert i129.status == "blocked"
+
+
+def test_mark_step_verified_rejects_unaccepted_or_wrong_offline_doc(client, db):
+    out = _create_case(client, db)
+    case_id = out["case_id"]
+
+    # Present but not admin-accepted → not evidence.
+    unaccepted = models.StoredDocument(
+        org_id="org1", application_id=case_id, name="lca.pdf",
+        mime="application/pdf", doc_type="certified_lca", approved=False)
+    db.add(unaccepted)
+    # Accepted but wrong type → not evidence.
+    wrong = models.StoredDocument(
+        org_id="org1", application_id=case_id, name="cv.pdf",
+        mime="application/pdf", doc_type="resume_cv", approved=True)
+    db.add(wrong)
+    db.commit()
+
+    for doc in (unaccepted, wrong):
+        with pytest.raises(h1b_steps.EvidenceRequired):
+            h1b_steps.mark_step_verified(db, _step(db, case_id, "lca"),
+                                         receipts={}, actor="admin",
+                                         offline_evidence_document_id=doc.id)
+
+    # An accepted certified LCA on the case IS admin-reviewed evidence.
+    ok = models.StoredDocument(
+        org_id="org1", application_id=case_id, name="lca-cert.pdf",
+        mime="application/pdf", doc_type="certified_lca", approved=True)
+    db.add(ok)
+    db.commit()
+    h1b_steps.mark_step_verified(db, _step(db, case_id, "lca"), receipts={},
+                                 actor="admin", offline_evidence_document_id=ok.id)
+    db.refresh(lca := _step(db, case_id, "lca"))
+    assert lca.status == "verified"
+
+
+def test_child_filing_verified_rejects_mock_confirmation(client, db):
+    """persist_workflow writes a SubmissionConfirmation for ANY execution class,
+    so the confirmation alone must not verify a step. Only a completed adapter
+    execution with government-host outcome evidence does."""
+    from app.adapter_factory import models as fm
+    out = _create_case(client, db)
+    case_id = out["case_id"]
+    child_id = _release(client, case_id, "lca").json()["child_case_id"]
+
+    db.add(models.SubmissionConfirmation(application_id=child_id,
+                                         reference_no="REF-MOCK-1"))
+    db.commit()
+    assert h1b_steps.child_filing_verified(db, child_id) is False
+
+    ex = fm.AdapterExecution(org_id="org1", application_id=child_id,
+                             candidate_id="cand1", candidate_version=1,
+                             status="completed")
+    db.add(ex)
+    db.commit()
+    db.add(fm.AdapterOutcomeEvidence(execution_id=ex.id, hostname="flag.dol.gov",
+                                     state_category="submitted"))
+    db.commit()
+    assert h1b_steps.child_filing_verified(db, child_id) is True
+
+
+def test_step_verifies_on_child_government_evidence(client, db):
+    from app.adapter_factory import models as fm
+    out = _create_case(client, db)
+    case_id = out["case_id"]
+    child_id = _release(client, case_id, "lca").json()["child_case_id"]
+    db.add(models.SubmissionConfirmation(application_id=child_id, reference_no="R1"))
+    ex = fm.AdapterExecution(org_id="org1", application_id=child_id,
+                             candidate_id="c", candidate_version=1,
+                             status="completed")
+    db.add(ex)
+    db.commit()
+    db.add(fm.AdapterOutcomeEvidence(execution_id=ex.id, hostname="flag.dol.gov",
+                                     state_category="submitted"))
+    db.commit()
+
+    lca = _step(db, case_id, "lca")
+    h1b_steps.mark_step_verified(db, lca, receipts={"lca_number": "I-200-y"},
+                                 actor="worker")
+    db.refresh(lca)
+    assert lca.status == "verified" and lca.lca_number == "I-200-y"
+    db.refresh(i129 := _step(db, case_id, "i129"))
+    assert i129.status == "ready"
+
+
+# ---------- certified_lca required-flip on LCA verification ----------
+
+def test_lca_verification_flips_certified_lca_required(client, db):
+    out = _create_case(client, db)
+    case_id = out["case_id"]
+
+    def _certified_item():
+        cg = db.execute(select(CaseRouteGuidance).where(
+            CaseRouteGuidance.case_id == case_id)).scalars().first()
+        return cg.checklist, next(i for i in cg.checklist
+                                  if i["id"] == "certified_lca")
+
+    _, before = _certified_item()
+    assert before["required"] is False
+
+    _verify_step_offline(db, case_id, "lca")
+    db.expire_all()
+
+    checklist, after = _certified_item()
+    assert after["required"] is True
+    # Re-derivation preserved the rest of the case shape (in-US, non-first-timer).
+    prior = next(i for i in checklist if i["id"] == "prior_i797")
+    assert prior["required"] is True
+    assert any(i["id"] == "i94_record" for i in checklist)
+
+
+# ---------- concurrent release (the duplicate-child race) ----------
+
+def test_concurrent_release_shares_one_child(client, db):
+    """Two releases that both read the step as 'ready' before either commits
+    must not both mint a child. The DB-level claim (ready -> in_progress) means
+    only the winner creates the filing case; the loser returns the same child."""
+    from app.db import SessionLocal
+    from app.security import Principal
+    out = _create_case(client, db)
+    case_id = out["case_id"]
+    parent0 = db.get(models.VisaApplication, case_id)
+    principal = Principal(org_id=parent0.org_id, user_id="user1")
+
+    s_win = SessionLocal()
+    s_lose = SessionLocal()
+    s_lose.expire_on_commit = False
+    try:
+        # The loser reads the ready step, then ends its read transaction while
+        # KEEPING the stale ready/empty snapshot in memory (so it will race).
+        step_lose = _step(s_lose, case_id, "lca")
+        parent_lose = s_lose.get(models.VisaApplication, case_id)
+        assert step_lose.status == "ready" and not step_lose.child_case_id
+        s_lose.commit()
+
+        # The winner releases fully and commits its child.
+        parent_win = s_win.get(models.VisaApplication, case_id)
+        step_win = _step(s_win, case_id, "lca")
+        r_win = h1b_filing.release_step(s_win, parent=parent_win, step=step_win,
+                                        principal=principal)
+        assert r_win["already_exists"] is False
+
+        # The loser still believes the step is releasable; the claim sends it to
+        # the winner's child instead of creating a duplicate.
+        r_lose = h1b_filing.release_step(s_lose, parent=parent_lose,
+                                         step=step_lose, principal=principal)
+        assert r_lose["already_exists"] is True
+        assert r_lose["child_case_id"] == r_win["child_case_id"]
+    finally:
+        s_win.close()
+        s_lose.close()
+
+    children = db.execute(select(models.VisaApplication).where(
+        models.VisaApplication.visa_type == "h1b_lca")).scalars().all()
+    assert len([c for c in children
+                if (c.answers or {}).get("h1b_parent_case_id") == case_id]) == 1

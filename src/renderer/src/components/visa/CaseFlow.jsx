@@ -283,6 +283,16 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
   // submit through". The applicant's own words were "a lot of fluff"
   // (2026-08-04).
   const inPerson = !started && !!packet
+  // An H1B parent case is a petition CONTAINER (continuation kinds
+  // 'h1b_petition' / 'h1b_filing'), not a single tourist filing. The tourist
+  // "Authorize & start" card below runs /start on the parent, which can never
+  // do the right thing for it — in real mode it dead-ends on "no live adapter"
+  // worded for the CHN→USA tourist route, and its LCA / registration / I-129
+  // pipeline lives in the H1B workspace, where each party performs its own
+  // personal ceremonies. So the parent is guarded OUT of that card and shown an
+  // honest placeholder in its place (finding #18). This is only the guard that
+  // prevents the wrong card; the full two-party console is a later phase.
+  const isH1bParent = kind === 'h1b_petition' || kind === 'h1b_filing'
 
   return (
     <div>
@@ -362,7 +372,7 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
           Start and nothing happened" they reported (2026-08-04). It is not a
           continuation kind being excluded; it is a route where the button
           could never have worked. */}
-      {!started && !docsPending && !inPerson && (
+      {!started && !docsPending && !inPerson && !isH1bParent && (
         <div className="card fadeup-1" style={{ padding: 24 }}>
           <CaseValidity t={t} client={client} caseId={caseId} onOpenCase={onOpenCase} />
           <div style={{ fontWeight: 700, marginBottom: 6 }}>Ready to go?</div>
@@ -402,6 +412,25 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
                 : 'Authorize & start my application'}
             </button>
           )}
+        </div>
+      )}
+
+      {/* The H1B parent case is shown here, in place of the tourist Authorize
+          card it would otherwise render (guarded out above). This is an honest
+          placeholder: the petition's LCA / registration / I-129 filings run in
+          the H1B workspace, each party completing its own personal ceremonies,
+          so there is no single Start to press on the parent. The full two-party
+          console is a later phase; this only prevents the wrong card from
+          appearing (finding #18). */}
+      {!started && !docsPending && !inPerson && isH1bParent && (
+        <div className="card fadeup-1" style={{ padding: 24 }} data-testid="h1b-placeholder">
+          <div style={{ fontWeight: 700, marginBottom: 6 }}>{t('h1b.placeholder.title')}</div>
+          <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>
+            {t('h1b.placeholder.body')}
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--muted)' }} data-testid="h1b-disclaimer">
+            {t('h1b.disclaimer')}
+          </div>
         </div>
       )}
 

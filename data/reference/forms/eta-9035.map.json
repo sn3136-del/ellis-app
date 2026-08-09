@@ -1,0 +1,220 @@
+{
+    "_source": "https://www.dol.gov/agencies/eta/foreign-labor/forms — Form ETA-9035 & 9035E, Labor Condition Application for Nonimmigrant Workers (OMB 1205-0310)",
+    "_authority": "U.S. Department of Labor, Employment and Training Administration, Office of Foreign Labor Certification",
+    "_retrieved": "2026-08-09",
+    "_note": "PREP/PREVIEW COPY ONLY. The real LCA is filed electronically in FLAG (flag.dol.gov); this filled PDF exists so the petitioner can review every answer before the FLAG run, and the implementer must watermark it as a preview, never present it as a filed LCA. Format: 'fields' maps the PDF's own AcroForm field name -> Ellis answer key (field names are literally the printed questions, including their double spaces). 'checkboxes' maps an Ellis answer key -> {answer value: PDF field name} for groups where every option is its own PDF field. 'checkbox_states' (H1B extension) records the EXACT state that means 'this box is ticked' for every field referenced by 'checkboxes' — note the three prevailing-wage-source tick boxes ('12', 'undefined_14', '14_2') are TEXT fields, not buttons: their recorded on-state 'X' is a literal string to WRITE, not a /Name state. 'radio_groups' (H1B extension) covers the six-of-one-field questions this form asks as a single /Btn with one state per option (e.g. /Yes_4 vs /No_4): {ellis key: {field, states: {answer value: exact state}}} — the generic consular '/On' tick can never land these, so the H1B filler must set the recorded state itself. Section L (DOL certification block) and every DOL-use header field (Case Number/Status, Period of Employment) are NEVER filled. Signature and date-signed fields are HUMAN-ONLY. Unfilled beats wrong: every label-area artifact field the PDF carries ('11  Prevailing Wage Rate', '13', '14', 'Yes No', 'Yes No_2', 'Yes No_3', '10a  Per Choose only one Hour Week BiWeekly Month Year', the two 'A PW obtained...' caption fields, '2 At the time of filing this LCA is the employer a willful violator') is deliberately unmapped. Section E question 1 (radio 'undefined', states /Yes_2 //No_2, 'Is the employer represented by an attorney or agent') is deliberately unmapped: Sections E and K carry identity fields only.",
+    "fields": {
+        "1  Indicate the type of visa classification supported by this application Write classification symbol": "h1b_visa_classification",
+
+        "1  Job Title": "job_title",
+        "2  SOC ONETOES code": "soc_code",
+        "3  SOC ONETOES occupation title": "soc_title",
+        "5  Begin Date  mmddyyyy": "employment_start_date",
+        "6  End Date  mmddyyyy": "employment_end_date",
+        "Total Worker Positions Being Requested for Certification": "h1b_total_worker_positions",
+        "a New employment": "h1b_positions_new_employment",
+        "b Continuation of previously approved employment": "h1b_positions_continuation",
+        "c Change in previously approved employment": "h1b_positions_change_previous",
+        "d New concurrent employment": "h1b_positions_new_concurrent",
+        "e Change in employer": "h1b_positions_change_employer",
+        "f Amended petition": "h1b_positions_amended",
+
+        "1 Legal business name": "employer_legal_name",
+        "2 Trade nameDoing Business As DBA if applicable": "employer_dba",
+        "3  Address 1": "h1b_employer_address1",
+        "4  Address 2": "h1b_employer_address2",
+        "5  City": "h1b_employer_city",
+        "6 State": "h1b_employer_state",
+        "7 Postal code": "h1b_employer_postal_code",
+        "8  Country": "h1b_employer_country",
+        "9 Province": "h1b_employer_province",
+        "10  Telephone number": "h1b_employer_phone",
+        "11 Extension": "h1b_employer_phone_ext",
+        "12  Federal Employer Identification Number FEIN from IRS": "employer_fein",
+        "13  NAICS code must be at least 4digits": "employer_naics",
+
+        "1 Contacts last family name": "h1b_contact_last_name",
+        "2 First given name": "h1b_contact_first_name",
+        "3 Middle names": "h1b_contact_middle_names",
+        "4  Contacts job title": "h1b_contact_job_title",
+        "5  Address 1": "h1b_contact_address1",
+        "6 Address 2": "h1b_contact_address2",
+        "7  City": "h1b_contact_city",
+        "8 State": "h1b_contact_state",
+        "9 Postal code": "h1b_contact_postal_code",
+        "10  Country": "h1b_contact_country",
+        "11 Province": "h1b_contact_province",
+        "12 Telephone number": "employer_contact_phone",
+        "13 Extension": "h1b_contact_phone_ext",
+        "14  EMail address": "employer_contact_email",
+
+        "2 Attorney or Agents last family name": "h1b_attorney_last_name",
+        "3 First given name": "h1b_attorney_first_name",
+        "4 Middle names": "h1b_attorney_middle_names",
+        "5  Address 1_2": "h1b_attorney_address1",
+        "6 Address 2_2": "h1b_attorney_address2",
+        "7  City_2": "h1b_attorney_city",
+        "8 State_2": "h1b_attorney_state",
+        "9 Postal code_2": "h1b_attorney_postal_code",
+        "10  Country_2": "h1b_attorney_country",
+        "11 Province_2": "h1b_attorney_province",
+        "12 Telephone number_2": "h1b_attorney_phone",
+        "13 Extension_2": "h1b_attorney_phone_ext",
+        "14  EMail address_2": "h1b_attorney_email",
+        "15  Law firmBusiness name": "h1b_attorney_firm_name",
+        "16  Law firmBusiness FEIN": "h1b_attorney_firm_fein",
+        "17 State Bar number only if attorney": "h1b_attorney_bar_number",
+        "18 State of highest court where attorney is in good standing only if attorney": "h1b_attorney_bar_state",
+        "19  Name of the highest State court where attorney is in good standing only if attorney": "h1b_attorney_bar_court",
+
+        "1  Enter the estimated number of workers that will perform work at this place of employment under the LCA": "h1b_worksite_worker_count",
+        "3  If Yes to question 2 provide the legal business name of the secondary entity": "h1b_secondary_entity_name",
+        "4  Address 1": "worksite_address_line1",
+        "5  Address 2": "h1b_worksite_address2",
+        "6  City": "worksite_address_city",
+        "7  County": "h1b_worksite_county",
+        "8  StateDistrictTerritory": "worksite_address_state",
+        "9  Postal code": "worksite_address_zip",
+        "undefined_3": "h1b_wage_from_dollars",
+        "undefined_4": "h1b_wage_from_cents",
+        "undefined_5": "h1b_wage_to_dollars",
+        "undefined_6": "h1b_wage_to_cents",
+        "undefined_12": "h1b_prevailing_wage_dollars",
+        "undefined_13": "h1b_prevailing_wage_cents",
+        "a PWD tracking number": "pw_tracking_number",
+        "b  Source Year": "h1b_pw_oes_source_year",
+        "b  Source Year_2": "h1b_pw_other_source_year",
+        "c  If responded Other PW Survey in question 14a enter the name of the survey producer or publisher": "h1b_pw_survey_publisher",
+        "d  If responded Other PW Survey in question 14a enter the title or name of the PW survey": "h1b_pw_survey_name",
+
+        "1  Last family name of hiring or designated official": "h1b_hiring_official_last_name",
+        "2 First given name of hiring or designated official": "h1b_hiring_official_first_name",
+        "3 Middle initial": "h1b_hiring_official_middle_initial",
+        "4  Hiring or designated official title": "h1b_hiring_official_title",
+
+        "1  Last family name": "h1b_preparer_last_name",
+        "2 First given name_2": "h1b_preparer_first_name",
+        "3 Middle initial_2": "h1b_preparer_middle_initial",
+        "4  FirmBusiness name": "h1b_preparer_firm_name",
+        "5  EMail address": "h1b_preparer_email"
+    },
+    "checkboxes": {
+        "wage_offer_unit": {
+            "hour": "undefined_7",
+            "week": "undefined_8",
+            "biweekly": "undefined_9",
+            "month": "undefined_10",
+            "year": "undefined_11"
+        },
+        "h1b_prevailing_wage_unit": {
+            "hour": "Hour",
+            "week": "Week",
+            "biweekly": "BiWeekly",
+            "month": "Month",
+            "year": "Year"
+        },
+        "h1b_pw_source": {
+            "pwd": "12",
+            "oes": "undefined_14",
+            "other": "14_2"
+        },
+        "h1b_pw_wage_level": {
+            "i": "I",
+            "ii": "II",
+            "iii": "III",
+            "iv": "IV",
+            "na": "NA"
+        },
+        "h1b_pw_source_type": {
+            "cba": "CBA",
+            "dba": "DBA",
+            "sca": "SCA",
+            "other_survey": "Other PW Survey"
+        },
+        "h1b_dependent_employer": {
+            "yes": "undefined_16",
+            "no": "undefined_17"
+        },
+        "willful_violator": {
+            "yes": "undefined_18",
+            "no": "undefined_19"
+        },
+        "h1b_exempt_workers_only": {
+            "yes": "undefined_20",
+            "no": "undefined_21"
+        },
+        "h1b_exemption_basis": {
+            "wage_60000_or_higher": "60000 or higher annual wage",
+            "masters_degree": "Masters Degree or higher in related specialty",
+            "both": "Both"
+        },
+        "h1b_public_access_file_location": {
+            "principal_place_of_business": "Employers principal place of business",
+            "place_of_employment": "Place of employment"
+        }
+    },
+    "checkbox_states": {
+        "undefined_7": "/On",
+        "undefined_8": "/On",
+        "undefined_9": "/On",
+        "undefined_10": "/On",
+        "undefined_11": "/On",
+        "Hour": "/On",
+        "Week": "/On",
+        "BiWeekly": "/On",
+        "Month": "/On",
+        "Year": "/On",
+        "12": "X",
+        "undefined_14": "X",
+        "14_2": "X",
+        "I": "/On",
+        "II": "/On",
+        "III": "/On",
+        "IV": "/On",
+        "NA": "/On",
+        "CBA": "/On",
+        "DBA": "/On",
+        "SCA": "/On",
+        "Other PW Survey": "/On",
+        "undefined_16": "/On",
+        "undefined_17": "/On",
+        "undefined_18": "/On",
+        "undefined_19": "/On",
+        "undefined_20": "/On",
+        "undefined_21": "/On",
+        "60000 or higher annual wage": "/On",
+        "Masters Degree or higher in related specialty": "/On",
+        "Both": "/On",
+        "Employers principal place of business": "/On",
+        "Place of employment": "/On"
+    },
+    "radio_groups": {
+        "full_time_position": {
+            "field": "4  Is this a fulltime position",
+            "states": {"yes": "/Yes", "no": "/No"}
+        },
+        "h1b_secondary_entity": {
+            "field": "undefined_2",
+            "states": {"yes": "/Yes_3", "no": "/No_3"}
+        },
+        "h1b_labor_condition_agreement": {
+            "field": "undefined_15",
+            "states": {"yes": "/Yes_4", "no": "/No_4"}
+        },
+        "h1b_appendix_a_attached": {
+            "field": "undefined_22",
+            "states": {"yes": "/Yes_5", "no": "/No_5", "na": "/NA_2"}
+        },
+        "h1b_subsection2_agreement": {
+            "field": "undefined_23",
+            "states": {"yes": "/Yes_6", "no": "/No_6"}
+        }
+    },
+    "human_only": [
+        "5  Signature",
+        "6 Date signed",
+        "M  Signature Notification and Complaints",
+        "Department of Labor Office of Foreign Labor Certification",
+        "Certification Date date signed"
+    ]
+}

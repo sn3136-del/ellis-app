@@ -609,7 +609,13 @@ export function continueButtonMeta(journey) {
 const KNOWN_DOC_TYPES = new Set([
   'passport', 'photo', 'flight_itinerary', 'hotel_booking', 'bank_statement',
   'employment_letter', 'student_letter', 'invitation_letter', 'travel_insurance',
-  'residence_permit', 'prior_visa', 'destination_form', 'vaccination_certificate'
+  'residence_permit', 'prior_visa', 'destination_form', 'vaccination_certificate',
+  // H1B edition (mirrors backend intake_flow.MANUAL_DOC_TYPES; passport stays
+  // excluded there — identity comes only from the MRZ classifier).
+  'degree_certificate', 'graduation_certificate', 'transcript', 'resume_cv',
+  'prior_i797', 'i94_record', 'credential_evaluation', 'employer_support_letter',
+  'job_description', 'fein_evidence', 'employer_financials',
+  'corporate_relationship_evidence', 'certified_lca'
 ])
 
 export function docTypeLabelKey(docType) {
@@ -621,7 +627,12 @@ export function docTypeLabelKey(docType) {
 export const MANUAL_DOC_TYPES = [
   'photo', 'flight_itinerary', 'hotel_booking', 'bank_statement',
   'employment_letter', 'student_letter', 'invitation_letter', 'travel_insurance',
-  'residence_permit', 'prior_visa', 'destination_form', 'vaccination_certificate'
+  'residence_permit', 'prior_visa', 'destination_form', 'vaccination_certificate',
+  // H1B edition (mirrors backend intake_flow.MANUAL_DOC_TYPES; passport excluded).
+  'degree_certificate', 'graduation_certificate', 'transcript', 'resume_cv',
+  'prior_i797', 'i94_record', 'credential_evaluation', 'employer_support_letter',
+  'job_description', 'fein_evidence', 'employer_financials',
+  'corporate_relationship_evidence', 'certified_lca'
 ]
 
 export const RESIDENCE_STATUS_OPTIONS = [

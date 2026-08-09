@@ -37,7 +37,7 @@ try:
     from .h1b import models as _h1b_models
     _CASE_CHILD_MODELS += [_h1b_models.CaseParty, _h1b_models.H1bCaseStep]
 except Exception:  # pragma: no cover - h1b module always ships in this edition
-    pass
+    _h1b_models = None
 
 
 def _rows(db, model, application_id):
@@ -55,6 +55,15 @@ def export_case(db, application_id: str) -> dict:
     confs = _rows(db, models.SubmissionConfirmation, application_id)
     sigs = _rows(db, models.NativeSignature, application_id)
     audit = _rows(db, models.AuditEvent, application_id)
+    # H1B two-party data: the parties Ellis holds and the government-filing
+    # pipeline (receipts included). The bundle legally must RETURN this data,
+    # not only erase it — export and erasure are the two halves of the same
+    # contract. Secret-free by construction: no vault refs live on these rows
+    # (employer_profile_id is an id, party answers are petition facts).
+    parties, steps = [], []
+    if _h1b_models is not None:
+        parties = _rows(db, _h1b_models.CaseParty, application_id)
+        steps = _rows(db, _h1b_models.H1bCaseStep, application_id)
     return {
         "exported_at": _now_iso(),
         "case": {"id": app.id, "state": app.state, "destination_country": app.destination_country,
@@ -69,6 +78,15 @@ def export_case(db, application_id: str) -> dict:
         "appointments": [{"slot_id": a.slot_id, "location_id": a.location_id, "start_utc": a.start_utc,
                           "confirmation_no": a.confirmation_no, "reschedule_count": a.reschedule_count} for a in appts],
         "confirmations": [{"reference_no": c.reference_no, "receipt_no": c.receipt_no} for c in confs],
+        "case_parties": [{"role": p.role, "party_kind": p.party_kind,
+                          "display_name": p.display_name, "email": p.email, "phone": p.phone,
+                          "status": p.status, "employer_profile_id": p.employer_profile_id,
+                          "answers": p.answers} for p in parties],
+        "h1b_steps": [{"step_key": s.step_key, "acting_party": s.acting_party,
+                       "status": s.status, "child_case_id": s.child_case_id,
+                       "depends_on": s.depends_on, "lca_number": s.lca_number,
+                       "beneficiary_confirmation_number": s.beneficiary_confirmation_number,
+                       "uscis_receipt_number": s.uscis_receipt_number} for s in steps],
         "audit": [{"seq": e.seq, "action": e.action, "actor": e.actor, "detail": e.detail} for e in audit],
     }
 

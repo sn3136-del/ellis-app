@@ -57,6 +57,64 @@ REQUIRED_APPLICANT_INFO: dict[str, str] = {
     "representative_submission_permitted": "Whether representative/automated submission is permitted",
 }
 
+# H1B routes never pass through the tourist wizard, so the tourist-shaped keys
+# above (travel_purpose, intended_arrival/departure, visa_subtype, ...) have no
+# H1B source and would 409 every H1B live start on facts no H1B surface asks.
+# Each H1B visa_type instead carries the facts its own filing actually states,
+# sourced from the H1B creation endpoint + assembly whitelists + EmployerProfile
+# + the passport OCR pipeline (proven by the guaranteed-source contract test).
+# Same discipline as the tourist set: an answer that becomes a statement on a
+# government form is required, never defaulted. Petitioner-acting filings need
+# employer identity + job/wage; the beneficiary consular leg needs identity.
+H1B_REQUIRED_APPLICANT_INFO: dict[str, dict[str, str]] = {
+    # Umbrella parent case: never runs a filing itself, but a live preflight on
+    # it must not demand tourist facts. Identity only (seeded at creation).
+    "h1b": {
+        "full_name": "Beneficiary full name",
+        "email": "Beneficiary email",
+    },
+    "h1b_lca": {
+        "employer_legal_name": "Employer legal name",
+        "employer_fein": "Employer FEIN",
+        "job_title": "Job title",
+        "wage_offer": "Offered wage",
+        "prevailing_wage": "Prevailing wage",
+    },
+    "h1b_registration": {
+        "employer_legal_name": "Employer legal name",
+        "employer_fein": "Employer FEIN",
+        "full_name": "Beneficiary full name",
+        "birth_date": "Beneficiary date of birth",
+    },
+    "h1b_i129": {
+        "employer_legal_name": "Employer legal name",
+        "employer_fein": "Employer FEIN",
+        "job_title": "Job title",
+        "full_name": "Beneficiary full name",
+        "birth_date": "Beneficiary date of birth",
+        "passport_number": "Beneficiary passport number",
+    },
+    "h1b_ds160": {
+        "nationality": "Beneficiary nationality",
+        "full_name": "Beneficiary full name",
+        "birth_date": "Beneficiary date of birth",
+        "passport_number": "Beneficiary passport number",
+    },
+}
+
+
+def _required_info_for(app_row: "models.VisaApplication") -> dict:
+    """The required-info set for this case. H1B cases carry their own per-
+    visa_type set (the facts each filing states); every other case keeps the
+    tourist REQUIRED_APPLICANT_INFO. An H1B type that is somehow unmapped falls
+    back to the minimal identity set — never the tourist keys, which have no
+    H1B source."""
+    vt = str(getattr(app_row, "visa_type", "") or "")
+    if vt == "h1b" or vt.startswith("h1b_"):
+        return H1B_REQUIRED_APPLICANT_INFO.get(vt, H1B_REQUIRED_APPLICANT_INFO["h1b"])
+    return REQUIRED_APPLICANT_INFO
+
+
 # Execution classes that involve a REAL external portal → gate-enforced.
 LIVE_CLASSES = {ExecutionClass.LIVE_SANDBOX, ExecutionClass.LIVE_PRODUCTION}
 # Classes that must NEVER auto-proceed: an unknown/undeclared driver
@@ -142,17 +200,30 @@ def deterministic_gate_completion(db, *, destination: str, visa_type: str,
         from .visa_snapshot.registry import normalize_country
     except Exception:  # noqa: BLE001 — global routes not deployed
         return {}
-    try:
-        dest = normalize_country(destination, field="destination_country")
-        pk = _pair_key((nationality or "").strip(), "ordinary_passport", dest)
-    except Exception:  # noqa: BLE001 — unknown route: no derivation
-        return {}
-    pair = db.execute(_select(RoutePairPolicy).where(
-        RoutePairPolicy.pair_key == pk)).scalar_one_or_none()
-    if pair is None or not pair.portal_family_id:
-        return {}
+    # H1B routes resolve their portal family by PURPOSE (visa_type), exactly as
+    # the released-flow bridge does — never through the purpose-blind pair_key.
+    # An H1B route whose designated family carries no released adapter derives
+    # NOTHING here, so it can never inherit a tourist family's release evidence
+    # and be marked live-ready off it.
+    from .portal.released_flow import (H1B_PORTAL_FAMILY_BY_VISA_TYPE,
+                                       is_h1b_visa_type)
+    if is_h1b_visa_type(visa_type):
+        family_id = H1B_PORTAL_FAMILY_BY_VISA_TYPE.get(str(visa_type or ""), "")
+        if not family_id:
+            return {}
+    else:
+        try:
+            dest = normalize_country(destination, field="destination_country")
+            pk = _pair_key((nationality or "").strip(), "ordinary_passport", dest)
+        except Exception:  # noqa: BLE001 — unknown route: no derivation
+            return {}
+        pair = db.execute(_select(RoutePairPolicy).where(
+            RoutePairPolicy.pair_key == pk)).scalar_one_or_none()
+        if pair is None or not pair.portal_family_id:
+            return {}
+        family_id = pair.portal_family_id
     link = db.execute(_select(FamilyAdapterLink).where(
-        FamilyAdapterLink.family_id == pair.portal_family_id)).scalar_one_or_none()
+        FamilyAdapterLink.family_id == family_id)).scalar_one_or_none()
     if link is None or not link.released:
         return {}
     report = (link.gate_report or {})
@@ -169,7 +240,7 @@ def deterministic_gate_completion(db, *, destination: str, visa_type: str,
             out[personal_gate] = {
                 "complete": True,
                 "evidence": (f"deterministic release of family adapter "
-                             f"'{pair.portal_family_id}' (candidate {link.candidate_id}, "
+                             f"'{family_id}' (candidate {link.candidate_id}, "
                              f"tier {link.release_tier or 'sandbox'}); basis: {basis}"),
                 "by": "deterministic-release-engine", "at": when}
     return out
@@ -262,7 +333,7 @@ def missing_applicant_info(app_row: models.VisaApplication, db=None) -> list[dic
         return False
 
     missing = []
-    for key, label in REQUIRED_APPLICANT_INFO.items():
+    for key, label in _required_info_for(app_row).items():
         if present(key):
             continue
         if key in _RETIRED_INFO_DEFAULTS:

@@ -90,37 +90,85 @@ def _iso3(db, name_or_code: str) -> str:
         return ""
 
 
-def resolve_released_route(db, app_row) -> ReleasedRoute | None:
-    """Case -> pair policy -> portal family -> released link -> active binding.
+# H1B child filings resolve their portal family by PURPOSE (the child's
+# visa_type), never through the purpose-blind pair_key. pair_key keys on
+# (nationality, travel document, destination) only, so every H1B child of a
+# CHN beneficiary bound for the USA would otherwise collapse onto the SAME
+# tourist USA family (usa-ceac / usa-esta) and an ETA-9035 or I-129 filing
+# could bind and run a tourist portal. Each H1B step instead maps to the
+# government portal that actually files it. H1B adapters are unreleased today,
+# so these families carry no released adapter and the route fails closed
+# honestly ("no released adapter for this H1B step") rather than ever binding
+# a tourist adapter (docs/H1B_ARCHITECTURE.md 'Released-flow resolution').
+H1B_PORTAL_FAMILY_BY_VISA_TYPE = {
+    "h1b_lca": "usa-dol-flag",                  # ETA-9035 on flag.dol.gov (petitioner)
+    "h1b_registration": "usa-uscis-myaccount",  # myUSCIS registration (petitioner)
+    "h1b_i129": "usa-uscis-myaccount",          # myUSCIS I-129 (petitioner)
+    "h1b_ds160": "usa-ceac",                    # CEAC DS-160 consular leg (beneficiary)
+}
 
-    Returns None (fail closed) unless every link in the chain exists and the
-    binding's bound version is live. Never raises for 'not available' — the
-    caller's RealOnlyStop already words that honestly for the applicant."""
-    from ..adapter_factory import models as fm
-    from ..adapter_factory.release import active_binding, kill_engaged
-    from ..global_routes.models import FamilyAdapterLink, PortalFamily, RoutePairPolicy
+
+def is_h1b_visa_type(visa_type: str) -> bool:
+    """True for the H1B umbrella case ('h1b') and every H1B child filing
+    ('h1b_lca', 'h1b_registration', 'h1b_i129', 'h1b_ds160'). These NEVER
+    resolve a route through the purpose-blind pair_key."""
+    vt = str(visa_type or "")
+    return vt == "h1b" or vt.startswith("h1b_")
+
+
+def _resolve_family_id(db, app_row) -> str:
+    """The portal family this case resolves to, or '' for none.
+
+    H1B cases resolve by PURPOSE (the step-keyed map); every other case keeps
+    the (nationality, travel document, destination) pair_key path unchanged.
+    The umbrella 'h1b' and any unmapped h1b_* type have no filing family of
+    their own -> '' -> the caller fails closed. A mapped H1B child returns its
+    designated government family, which may itself carry no released adapter
+    today (the caller then fails closed just the same — never a tourist bind)."""
+    if is_h1b_visa_type(app_row.visa_type):
+        return H1B_PORTAL_FAMILY_BY_VISA_TYPE.get(str(app_row.visa_type or ""), "")
+
+    from ..global_routes.models import RoutePairPolicy
     from ..global_routes.models import pair_key as make_pair_key
-
     answers = app_row.answers or {}
     nat = (answers.get("passport_nationality") or answers.get("nationality") or "").strip()
     doc = (answers.get("travel_document_type") or "ordinary_passport").strip()
     dest = _iso3(db, app_row.destination_country)
     if not nat or not dest:
-        return None
+        return ""
     try:
         pk = make_pair_key(nat, doc, dest)
     except Exception:  # noqa: BLE001
-        return None
+        return ""
     pair = db.execute(select(RoutePairPolicy).where(
         RoutePairPolicy.pair_key == pk)).scalar_one_or_none()
     if pair is None or not pair.portal_family_id:
+        return ""
+    return pair.portal_family_id
+
+
+def resolve_released_route(db, app_row) -> ReleasedRoute | None:
+    """Case -> portal family -> released link -> active binding.
+
+    Non-H1B cases resolve the family from the (nationality, document,
+    destination) pair policy; H1B cases resolve it by purpose (visa_type), so a
+    petition filing can never bind a tourist adapter. Returns None (fail
+    closed) unless every link in the chain exists and the binding's bound
+    version is live. Never raises for 'not available' — the caller's
+    RealOnlyStop already words that honestly for the applicant."""
+    from ..adapter_factory import models as fm
+    from ..adapter_factory.release import active_binding, kill_engaged
+    from ..global_routes.models import FamilyAdapterLink, PortalFamily
+
+    family_id = _resolve_family_id(db, app_row)
+    if not family_id:
         return None
     link = db.execute(select(FamilyAdapterLink).where(
-        FamilyAdapterLink.family_id == pair.portal_family_id)).scalar_one_or_none()
+        FamilyAdapterLink.family_id == family_id)).scalar_one_or_none()
     if link is None or not link.released or not link.representative_route_key:
         return None
     family = db.execute(select(PortalFamily).where(
-        PortalFamily.family_id == pair.portal_family_id)).scalar_one_or_none()
+        PortalFamily.family_id == family_id)).scalar_one_or_none()
     if family is None or family.verification_status not in (
             "verified_official_domain", "verified_live"):
         return None
