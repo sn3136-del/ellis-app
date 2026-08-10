@@ -36,6 +36,19 @@ ALLOWLISTED_TOOLS = {
     # Read-only discovery: backend runs the controlled search + official-domain
     # verification and can ONLY produce a disabled adapter draft.
     "discover_official_visa_portal": {"country": "str", "visa_type": "str"},
+    # H1B Ask-Ellis assistant tools (executed by app/h1b/assistant.py). READ
+    # tools return party-scoped views assembled backend-side; ACTION tools
+    # execute ONLY through the party-gated h1b api code paths AS the calling
+    # human's principal, so the model can never exceed that human's authority
+    # (an unauthorized proposal comes back as an honest 403 tool result, never
+    # an execution). Sign / pay / submit / declaration surfaces remain
+    # model-prohibited below.
+    "get_h1b_pipeline": {"case_id": "str"},
+    "get_h1b_checklist_status": {"case_id": "str"},
+    "get_h1b_step_facts": {"step_key": "str"},
+    "get_h1b_rfe_summary": {"case_id": "str"},
+    "release_h1b_step": {"case_id": "str", "step_key": "str"},
+    "prepare_h1b_form": {"case_id": "str", "form_key": "str"},
 }
 
 PROHIBITED_FOR_MODEL = {
@@ -95,7 +108,49 @@ class LocalKimiProvider:
                            f"{application.get('destination_country', '?')} {application.get('visa_type', 'tourist')} visa.",
                 "risks": []}
 
+    # ---- H1B Ask-Ellis assistant (deterministic stand-in) ------------------
+    # Obvious action phrases -> tool proposals. Real language understanding is
+    # the live model's job; the stand-in only needs to exercise the SAME
+    # validated, party-gated tool path the hermetic tests pin down.
+    _H1B_ACTION_PATTERNS = (
+        (re.compile(r"release\s+(?:the\s+)?([a-z0-9_]+)\s+step"),
+         "release_h1b_step", "step_key"),
+        (re.compile(r"prepare\s+(?:the\s+)?([a-z0-9_\-]+)\s+form"),
+         "prepare_h1b_form", "form_key"),
+    )
+
+    def _run_h1b_assistant(self, context: dict) -> AgentResult:
+        message = str(context.get("message") or "").lower()
+        grounding = context.get("grounding") or {}
+        case_id = str(context.get("case_id") or "")
+        calls = []
+        for pattern, tool, arg_name in self._H1B_ACTION_PATTERNS:
+            m = pattern.search(message)
+            if m:
+                calls.append({"tool": tool,
+                              "args": {"case_id": case_id, arg_name: m.group(1)}})
+        # The reply echoes ONLY facts the backend already scoped for THIS
+        # caller: the grounding is party-scoped upstream, so a fact the caller
+        # may not see is absent from it and can never be echoed.
+        parts = []
+        steps = grounding.get("steps") or []
+        if steps:
+            parts.append("; ".join(f"{s.get('step_key')}: {s.get('status')}"
+                                   for s in steps))
+        for key, value in sorted((grounding.get("party_answers") or {}).items()):
+            tokens = [t for t in str(key).split("_") if len(t) >= 3]
+            if any(t in message for t in tokens):
+                parts.append(f"{key}: {value}")
+        sources = grounding.get("sources") or []
+        if not parts and sources:
+            parts.append(f"see official source: {sources[0]}")
+        return AgentResult(ok=True, output={"reply": " | ".join(parts)},
+                           tool_calls=calls, steps=1, stopped_reason="done",
+                           engine=self.name)
+
     def run(self, goal: str, context: dict) -> AgentResult:
+        if str(goal or "").startswith("h1b_assistant"):
+            return self._run_h1b_assistant(context)
         # A tiny deterministic "agent": propose the one obviously-useful tool.
         calls = []
         if "document" in goal and context.get("doc_excerpt"):

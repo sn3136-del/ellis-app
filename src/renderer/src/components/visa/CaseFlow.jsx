@@ -13,6 +13,7 @@ import {
   validityMeta, formatDateUS, isDateKey
 } from '../../lib/intake.js'
 import Preferences from './Preferences.jsx'
+import H1bPipeline from './H1bPipeline.jsx'
 import { ContinuePanel, DocCards } from './Checklist.jsx'
 import {
   SignatureModal, LiveViewModal, PaymentApprove, PaymentModal,
@@ -415,14 +416,19 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
         </div>
       )}
 
-      {/* The H1B parent case is shown here, in place of the tourist Authorize
-          card it would otherwise render (guarded out above). This is an honest
-          placeholder: the petition's LCA / registration / I-129 filings run in
-          the H1B workspace, each party completing its own personal ceremonies,
-          so there is no single Start to press on the parent. The full two-party
-          console is a later phase; this only prevents the wrong card from
-          appearing (finding #18). */}
-      {!started && !docsPending && !inPerson && isH1bParent && (
+      {/* The H1B PARENT petition ('h1b_petition') renders the full two-party
+          walkthrough in place of the review-fix placeholder: step cards with
+          per-party actions (release/verify), forms, RFE risks, evidence index
+          and narrative drafts (H1bPipeline). It renders alongside the document
+          surface above — the walkthrough explains the journey while documents
+          are still arriving. Child FILING cases (kind 'h1b_filing') keep the
+          standard flow surfaces and, being guarded out of the tourist
+          Authorize card above (finding #18), keep the honest placeholder:
+          their ceremonies run under the pipeline's own release machinery. */}
+      {!started && !inPerson && kind === 'h1b_petition' && (
+        <H1bPipeline client={client} caseId={caseId} onOpenCase={onOpenCase} />
+      )}
+      {!started && !docsPending && !inPerson && isH1bParent && kind === 'h1b_filing' && (
         <div className="card fadeup-1" style={{ padding: 24 }} data-testid="h1b-placeholder">
           <div style={{ fontWeight: 700, marginBottom: 6 }}>{t('h1b.placeholder.title')}</div>
           <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>

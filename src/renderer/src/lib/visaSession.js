@@ -15,6 +15,153 @@ export function newAdminSession({ orgId = 'platform', userId = 'admin-1', token 
   return { token, orgId, userId }
 }
 
+// Employer (petitioner) session: SAME org as the beneficiary's cases — org
+// tenancy grants shared case reads — but a distinct userId, so the backend's
+// per-party authorization (_authorize_step_action) can tell the parties apart.
+// Server enforcement is the wall; this session is only the identity it checks.
+export function newEmployerSession({ orgId = 'ellis-demo', userId = 'petitioner-1', token = 'dev-token' } = {}) {
+  return { token, orgId, userId }
+}
+
+// ---- Persona detection ------------------------------------------------------
+// Generalizes the old detectAdminMode: one bundle serves three personas.
+// 'applicant' is the default; '#employer' reveals the employer console;
+// '#admin' / '#ops' reveal the operator surfaces. The choice persists in
+// localStorage 'ellis_persona'; the legacy 'ellis_admin' flag keeps working
+// (older builds read it), and '#applicant' clears both. Pure and injectable
+// ({hash, storage}) so node tests can drive it without a DOM; any failure
+// (no window, storage denied) fails safe to 'applicant'.
+export function detectPersona({ hash, storage } = {}) {
+  try {
+    const h = String(
+      hash !== undefined ? hash
+        : (typeof window !== 'undefined' && window.location.hash) || ''
+    ).toLowerCase()
+    const store = storage !== undefined ? storage
+      : (typeof window !== 'undefined' ? window.localStorage : null)
+    const setSafe = (k, v) => { try { store && store.setItem(k, v) } catch { /* ignore */ } }
+    const delSafe = (k) => { try { store && store.removeItem(k) } catch { /* ignore */ } }
+    if (h === '#admin' || h === '#ops') {
+      setSafe('ellis_persona', 'admin')
+      setSafe('ellis_admin', '1')          // back-compat for older builds
+      return 'admin'
+    }
+    if (h === '#employer') {
+      setSafe('ellis_persona', 'employer')
+      delSafe('ellis_admin')
+      return 'employer'
+    }
+    if (h === '#applicant') {
+      delSafe('ellis_persona')
+      delSafe('ellis_admin')
+      return 'applicant'
+    }
+    const persisted = store ? store.getItem('ellis_persona') : null
+    if (persisted === 'admin' || persisted === 'employer') return persisted
+    // Back-compat: a legacy admin flag alone still grants the admin persona.
+    if (store && store.getItem('ellis_admin') === '1') return 'admin'
+    return 'applicant'
+  } catch {
+    return 'applicant'
+  }
+}
+
+// The case party a persona views the H1B pipeline as. Display-only: the
+// backend enforces per-party authorization on every mutating action.
+export function partyForPersona(persona) {
+  if (persona === 'employer') return 'petitioner'
+  if (persona === 'admin') return 'admin'
+  return 'beneficiary'
+}
+
+// ---- H1B pipeline display helpers ------------------------------------------
+// Mirrors of backend/app/h1b/models.py STEP_STATUSES — display-only; the
+// backend stays authoritative. Unknown statuses fail safe to a muted chip.
+const H1B_STEP_STATUS = {
+  blocked: { tone: 'muted', i18nKey: 'h1b.status.blocked' },
+  ready: { tone: 'ready', i18nKey: 'h1b.status.ready' },
+  in_progress: { tone: 'active', i18nKey: 'h1b.status.in_progress' },
+  awaiting_government: { tone: 'pending', i18nKey: 'h1b.status.awaiting_government' },
+  verified: { tone: 'ok', i18nKey: 'h1b.status.verified' },
+  failed: { tone: 'bad', i18nKey: 'h1b.status.failed' }
+}
+
+export function h1bStepMeta(status) {
+  return H1B_STEP_STATUS[status] || { tone: 'muted', i18nKey: 'h1b.status.unknown' }
+}
+
+// Who acts on a pipeline step, from the viewer's seat. The other party's step
+// renders as "waiting on the employer / the worker" — never as an action the
+// viewer could take (server-side per-party authorization would refuse anyway).
+// Admins see the acting party named, with no waiting framing.
+export function h1bWhoActs(step, viewerParty) {
+  const acting = step && step.acting_party === 'petitioner' ? 'petitioner' : 'beneficiary'
+  if (viewerParty === 'admin') {
+    return { mine: false, waiting: false, acting, i18nKey: `h1b.actingParty.${acting}` }
+  }
+  if (viewerParty === acting) {
+    return { mine: true, waiting: false, acting, i18nKey: 'h1b.whoActs.you' }
+  }
+  return {
+    mine: false, waiting: true, acting,
+    i18nKey: acting === 'petitioner' ? 'h1b.waitingOn.petitioner' : 'h1b.waitingOn.beneficiary'
+  }
+}
+
+// ---- Ask Ellis action honesty ----------------------------------------------
+// The assistant reports the actions it attempted. The backend contract
+// (h1b/assistant.py execute_tool) is {tool, summary, ok} where `summary` is
+// the localized honest sentence (done / denied / failed) and `ok` is true only
+// for a genuinely performed act. Execution-class honesty: an action renders as
+// DONE only when the backend explicitly said so (ok === true or an explicit
+// done status); a denied action renders as denied (never hidden, never
+// softened); anything unknown fails safe to "not performed" — an unconfirmed
+// act can never display as one that happened.
+const _ASSISTANT_DONE = new Set(['done', 'ok', 'success', 'completed', 'performed'])
+const _ASSISTANT_DENIED = new Set(['denied', 'refused', 'forbidden', 'unauthorized', 'rejected'])
+
+export function assistantActionMeta(action) {
+  const status = String((action && action.status) || '').toLowerCase()
+  const denied = _ASSISTANT_DENIED.has(status) || (action && action.denied === true)
+  const done = !denied &&
+    ((action && action.ok === true) || _ASSISTANT_DONE.has(status))
+  return {
+    // The backend summary is the honest localized sentence; fall back to the
+    // tool/action name for older shapes.
+    label: (action && (action.summary || action.label || action.tool || action.action)) || '',
+    detail: (action && (action.detail || action.reason)) || '',
+    done,
+    denied,
+    i18nKey: denied ? 'askellis.actionDenied'
+      : done ? 'askellis.actionDone'
+      : 'askellis.actionNotDone'
+  }
+}
+
+// ---- Active H1B case (Ask Ellis mount point) -------------------------------
+// App.jsx mounts the floating Ask Ellis button once; whichever surface is
+// showing an H1B case (H1bPipeline in the case flow or the employer console)
+// registers it here so the assistant always has honest case context — and
+// disappears when no case is open.
+let _activeH1bCase = ''
+const _activeH1bSubs = new Set()
+
+export function setActiveH1bCase(caseId) {
+  _activeH1bCase = caseId || ''
+  for (const fn of _activeH1bSubs) {
+    try { fn(_activeH1bCase) } catch { /* subscriber errors never propagate */ }
+  }
+}
+
+export function getActiveH1bCase() {
+  return _activeH1bCase
+}
+
+export function subscribeActiveH1bCase(fn) {
+  _activeH1bSubs.add(fn)
+  return () => _activeH1bSubs.delete(fn)
+}
+
 // Map an OCR confidence (0..1) to a severity bucket for the review badges.
 export function confidenceLevel(confidence) {
   if (confidence == null) return 'mid'

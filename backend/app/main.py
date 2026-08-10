@@ -64,6 +64,12 @@ app.include_router(_global_router)
 # H1B edition: two-party petition pipeline (docs/H1B_ARCHITECTURE.md).
 from .h1b.api import router as _h1b_router  # noqa: E402
 app.include_router(_h1b_router)
+from .h1b.forms_api import router as _h1b_forms_router  # noqa: E402
+app.include_router(_h1b_forms_router)
+from .h1b.assistant_api import router as _h1b_assistant_router  # noqa: E402
+app.include_router(_h1b_assistant_router)
+from .h1b.counsel_api import router as _h1b_counsel_router  # noqa: E402
+app.include_router(_h1b_counsel_router)
 
 
 @app.on_event("startup")

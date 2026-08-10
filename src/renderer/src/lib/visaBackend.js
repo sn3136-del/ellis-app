@@ -390,7 +390,61 @@ export function createVisaClient(session) {
     // Global route coverage (admin session required).
     adminGlobalCoverage: () => call('GET', '/admin/global/coverage', session),
     adminGlobalUnsupported: (limit = 100) =>
-      call('GET', `/admin/global/unsupported?limit=${limit}`, session)
+      call('GET', `/admin/global/unsupported?limit=${limit}`, session),
+
+    // ---- H1B edition (docs/H1B_ARCHITECTURE.md) ----------------------------
+    // Two-party petition pipeline. Every payload carries the attorney
+    // disclaimer; per-party authorization is enforced server-side — a denied
+    // action surfaces its honest 403/409 reason, never a silent no-op.
+    h1bCreateCase: (body) => call('POST', '/h1b/cases', session, body),
+    h1bEmployerProfiles: () => call('GET', '/h1b/employer-profiles', session),
+    h1bCreateEmployerProfile: (body) => call('POST', '/h1b/employer-profiles', session, body),
+    // Honest per-step status: blocked/ready/in_progress/awaiting_government/
+    // verified/failed, plus the parties visible to THIS caller (party wall).
+    h1bPipeline: (caseId) => call('GET', `/h1b/cases/${caseId}/pipeline`, session),
+    // The guided walkthrough payload the pipeline surface renders: step cards,
+    // who acts (party-scoped server-side), blockers, and next actions.
+    h1bWalkthrough: (caseId, locale = 'en') =>
+      call('GET', `/h1b/cases/${caseId}/walkthrough?locale=${encodeURIComponent(locale)}`, session),
+    // Ask Ellis. Replies + actions-taken (denied actions reported AS denied)
+    // + suggestion chips; locale rides so the answer speaks the UI language.
+    h1bAssistant: (caseId, { message, locale = 'en', history = [] } = {}) =>
+      call('POST', `/h1b/cases/${caseId}/assistant`, session, { message, locale, history }),
+    // Release a ready step into its real child filing case (acting party or
+    // admin only; blocked steps 409 naming their unverified dependencies).
+    h1bReleaseStep: (caseId, stepKey) =>
+      call('POST', `/h1b/cases/${caseId}/steps/${stepKey}/release`, session, {}),
+    // Record a verified government outcome. body: {receipts, offline_evidence_
+    // document_id} — evidence discipline is server-side (EvidenceRequired 409;
+    // the offline path is an administrator act).
+    h1bVerifyStep: (caseId, stepKey, body = {}) =>
+      call('POST', `/h1b/cases/${caseId}/steps/${stepKey}/verify`, session, body),
+    // Prepare a government form (form_key: 'i-129' | 'eta-9035') from the
+    // party-partitioned case facts: filled/missing counts, the missing list,
+    // and the human-only signature lines (never signed by Ellis).
+    h1bPrepareForm: (caseId, formKey, locale = 'en') =>
+      call('POST', `/h1b/cases/${caseId}/forms/${encodeURIComponent(formKey)}/prepare?locale=${encodeURIComponent(locale)}`, session, {}),
+    // Build the mail-ready paper I-129 packet (docs/H1B_PAPER_FILING.md):
+    // lockbox addresses, wet-ink warnings, exhibits, download URL.
+    h1bPaperPacket: (caseId, locale = 'en') =>
+      call('POST', `/h1b/cases/${caseId}/paper-packet?locale=${encodeURIComponent(locale)}`, session, {}),
+    // Deterministic RFE risk signals (docs/H1B_RFE_TAXONOMY.md) with curing
+    // evidence per ground. Advisory only — never legal advice.
+    h1bRfeRisks: (caseId, locale = 'en') =>
+      call('GET', `/h1b/cases/${caseId}/counsel/rfe-risks?locale=${encodeURIComponent(locale)}`, session),
+    // Narrative DRAFT of the given kind (e.g. support_letter) — always labeled
+    // a draft, petitioner-facing.
+    h1bNarrative: (caseId, kind, locale = 'en') =>
+      call('POST', `/h1b/cases/${caseId}/counsel/narrative?locale=${encodeURIComponent(locale)}`, session, { kind }),
+    // The indexed exhibit list for the petition (missing items included
+    // honestly — the index never implies a complete pack).
+    h1bEvidenceIndex: (caseId, locale = 'en') =>
+      call('GET', `/h1b/cases/${caseId}/counsel/evidence-index?locale=${encodeURIComponent(locale)}`, session),
+    // Write ONE party's own answers (petitioner job/wage/worksite facts or
+    // beneficiary facts). The party wall lives server-side: only the acting
+    // party (or an admin) may write, and attestation keys are rejected.
+    h1bPartyAnswers: (caseId, role, answers) =>
+      call('POST', `/h1b/cases/${caseId}/party/${encodeURIComponent(role)}/answers`, session, { answers })
   }
 }
 

@@ -652,3 +652,256 @@ test('ContinuePanel never carries the burden of starting a run', () => {
     checklist_counts: { required_missing: 0 } })
   assert.equal(meta.startsRun, undefined)
 })
+
+// ---------------------------------------------------------------------------
+// H1B edition (docs/H1B_ARCHITECTURE.md P3): typed client contract, persona
+// detection, per-party walkthrough rendering, and Ask Ellis action honesty.
+import { createVisaClient } from '../../src/renderer/src/lib/visaBackend.js'
+import {
+  detectPersona, partyForPersona, newEmployerSession, newSession,
+  h1bWhoActs, h1bStepMeta, assistantActionMeta,
+  setActiveH1bCase, getActiveH1bCase, subscribeActiveH1bCase
+} from '../../src/renderer/src/lib/visaSession.js'
+
+// The H1B client methods must hit exactly the pinned endpoint paths with the
+// pinned body shapes — the backend routers (h1b/api.py + the forms/assistant/
+// counsel routers) implement these same paths.
+test('h1b client methods hit the pinned endpoint paths with the pinned bodies', async () => {
+  const calls = []
+  const realFetch = globalThis.fetch
+  globalThis.fetch = async (url, opts = {}) => {
+    calls.push({ url: String(url), method: opts.method || 'GET', body: opts.body })
+    return { ok: true, status: 200, text: async () => '{}' }
+  }
+  try {
+    const c = createVisaClient(newEmployerSession())
+    await c.h1bCreateCase({ case_kind: 'extension' })
+    await c.h1bEmployerProfiles()
+    await c.h1bCreateEmployerProfile({ legal_name: 'Trip.com US' })
+    await c.h1bPipeline('c1')
+    await c.h1bWalkthrough('c1')
+    await c.h1bAssistant('c1', { message: 'hi', locale: 'zh-CN', history: [] })
+    await c.h1bReleaseStep('c1', 'lca')
+    await c.h1bVerifyStep('c1', 'lca', { receipts: { lca_number: 'I-200-1' } })
+    await c.h1bPrepareForm('c1', 'eta-9035', 'zh-CN')
+    await c.h1bPaperPacket('c1')
+    await c.h1bRfeRisks('c1')
+    await c.h1bNarrative('c1', 'support_letter')
+    await c.h1bEvidenceIndex('c1')
+    await c.h1bPartyAnswers('c1', 'petitioner', { job_title: 'SWE' })
+  } finally {
+    globalThis.fetch = realFetch
+  }
+  const seen = calls.map((x) => `${x.method} ${new URL(x.url).pathname}`)
+  assert.deepEqual(seen, [
+    'POST /h1b/cases',
+    'GET /h1b/employer-profiles',
+    'POST /h1b/employer-profiles',
+    'GET /h1b/cases/c1/pipeline',
+    'GET /h1b/cases/c1/walkthrough',
+    'POST /h1b/cases/c1/assistant',
+    'POST /h1b/cases/c1/steps/lca/release',
+    'POST /h1b/cases/c1/steps/lca/verify',
+    'POST /h1b/cases/c1/forms/eta-9035/prepare',
+    'POST /h1b/cases/c1/paper-packet',
+    'GET /h1b/cases/c1/counsel/rfe-risks',
+    'POST /h1b/cases/c1/counsel/narrative',
+    'GET /h1b/cases/c1/counsel/evidence-index',
+    'POST /h1b/cases/c1/party/petitioner/answers'
+  ])
+  const byPath = Object.fromEntries(calls.map((x) => [new URL(x.url).pathname, x]))
+  // The assistant body carries message + locale + history (the locale rides so
+  // replies speak the UI language); party answers are wrapped in {answers};
+  // the narrative kind rides in the body (counsel_api.NarrativeBody).
+  assert.deepEqual(JSON.parse(byPath['/h1b/cases/c1/assistant'].body),
+    { message: 'hi', locale: 'zh-CN', history: [] })
+  assert.deepEqual(JSON.parse(byPath['/h1b/cases/c1/party/petitioner/answers'].body),
+    { answers: { job_title: 'SWE' } })
+  assert.deepEqual(JSON.parse(byPath['/h1b/cases/c1/steps/lca/verify'].body),
+    { receipts: { lca_number: 'I-200-1' } })
+  assert.deepEqual(JSON.parse(byPath['/h1b/cases/c1/counsel/narrative'].body),
+    { kind: 'support_letter' })
+  // Locale rides as a query parameter on the localized endpoints.
+  assert.equal(new URL(byPath['/h1b/cases/c1/forms/eta-9035/prepare'].url)
+    .searchParams.get('locale'), 'zh-CN')
+})
+
+// Persona detection: three-way, hash-driven, persisted, with the legacy
+// ellis_admin flag still honored (back-compat) and failure-safe to applicant.
+function memStorage(init = {}) {
+  const m = new Map(Object.entries(init))
+  return {
+    getItem: (k) => (m.has(k) ? m.get(k) : null),
+    setItem: (k, v) => m.set(k, String(v)),
+    removeItem: (k) => m.delete(k)
+  }
+}
+
+test('persona detection is three-way with ellis_admin back-compat', () => {
+  assert.equal(detectPersona({ hash: '#admin', storage: memStorage() }), 'admin')
+  assert.equal(detectPersona({ hash: '#ops', storage: memStorage() }), 'admin')
+  assert.equal(detectPersona({ hash: '#employer', storage: memStorage() }), 'employer')
+  assert.equal(detectPersona({ hash: '', storage: memStorage() }), 'applicant')
+  // The choice persists across loads without the hash.
+  const s = memStorage()
+  detectPersona({ hash: '#employer', storage: s })
+  assert.equal(detectPersona({ hash: '', storage: s }), 'employer')
+  // #applicant clears BOTH the persona and the legacy admin flag.
+  detectPersona({ hash: '#applicant', storage: s })
+  assert.equal(detectPersona({ hash: '', storage: s }), 'applicant')
+  assert.equal(s.getItem('ellis_admin'), null)
+  // Back-compat: a legacy ellis_admin flag alone still grants admin.
+  assert.equal(detectPersona({ hash: '', storage: memStorage({ ellis_admin: '1' }) }), 'admin')
+  // #admin still WRITES the legacy flag so older builds keep working.
+  const s2 = memStorage()
+  detectPersona({ hash: '#admin', storage: s2 })
+  assert.equal(s2.getItem('ellis_admin'), '1')
+  // #employer never leaves a stale admin flag behind.
+  const s3 = memStorage({ ellis_admin: '1' })
+  detectPersona({ hash: '#employer', storage: s3 })
+  assert.equal(s3.getItem('ellis_admin'), null)
+  // Failure-safe: no storage, broken storage → applicant, never a throw.
+  assert.equal(detectPersona({ hash: '', storage: null }), 'applicant')
+  assert.equal(detectPersona({ hash: '', storage: { getItem() { throw new Error('denied') } } }), 'applicant')
+})
+
+test('employer session shares the org but never the applicant identity', () => {
+  const emp = newEmployerSession()
+  const app = newSession()
+  assert.equal(emp.orgId, app.orgId)          // org tenancy shares the case
+  assert.notEqual(emp.userId, app.userId)     // per-party authz can tell them apart
+  assert.equal(emp.userId, 'petitioner-1')
+  assert.equal(partyForPersona('applicant'), 'beneficiary')
+  assert.equal(partyForPersona('employer'), 'petitioner')
+  assert.equal(partyForPersona('admin'), 'admin')
+  // Unknown persona fails safe to the beneficiary view (least surface).
+  assert.equal(partyForPersona('whatever'), 'beneficiary')
+})
+
+// Walkthrough who-acts: the other party's step reads "waiting on the
+// employer/worker", never as an action the viewer could take.
+test('walkthrough maps the other party to waiting-on, the own party to acting', () => {
+  const lca = { step_key: 'lca', acting_party: 'petitioner', status: 'ready' }
+  const consular = { step_key: 'ds160_consular', acting_party: 'beneficiary', status: 'ready' }
+  // Beneficiary viewer: the LCA waits on the employer.
+  const w = h1bWhoActs(lca, 'beneficiary')
+  assert.equal(w.mine, false)
+  assert.equal(w.waiting, true)
+  assert.equal(w.i18nKey, 'h1b.waitingOn.petitioner')
+  // Petitioner viewer: the consular leg waits on the worker.
+  const w2 = h1bWhoActs(consular, 'petitioner')
+  assert.equal(w2.mine, false)
+  assert.equal(w2.waiting, true)
+  assert.equal(w2.i18nKey, 'h1b.waitingOn.beneficiary')
+  // The acting party sees its own step as its own.
+  assert.equal(h1bWhoActs(lca, 'petitioner').mine, true)
+  assert.equal(h1bWhoActs(lca, 'petitioner').i18nKey, 'h1b.whoActs.you')
+  assert.equal(h1bWhoActs(consular, 'beneficiary').mine, true)
+  // Admin sees the acting party named, with no waiting framing.
+  const wa = h1bWhoActs(lca, 'admin')
+  assert.equal(wa.waiting, false)
+  assert.equal(wa.i18nKey, 'h1b.actingParty.petitioner')
+  // The English copy names the right human.
+  assert.match(STRINGS.en['h1b.waitingOn.petitioner'], /employer/i)
+  assert.match(STRINGS.en['h1b.waitingOn.beneficiary'], /worker/i)
+  // Every who-acts key exists in every locale.
+  for (const lang of SUPPORTED) {
+    for (const k of ['h1b.whoActs.you', 'h1b.waitingOn.petitioner',
+                     'h1b.waitingOn.beneficiary', 'h1b.actingParty.petitioner',
+                     'h1b.actingParty.beneficiary']) {
+      assert.ok(STRINGS[lang][k], `${lang} ${k}`)
+    }
+  }
+})
+
+test('h1b step statuses are localized and unknown fails safe', () => {
+  for (const s of ['blocked', 'ready', 'in_progress', 'awaiting_government',
+                   'verified', 'failed']) {
+    const meta = h1bStepMeta(s)
+    for (const lang of SUPPORTED) {
+      assert.ok(STRINGS[lang][meta.i18nKey], `${lang} ${s}`)
+    }
+  }
+  // Only a genuinely verified step gets the ok tone; unknown is muted, never ok.
+  assert.equal(h1bStepMeta('verified').tone, 'ok')
+  assert.equal(h1bStepMeta('surprise_status').i18nKey, 'h1b.status.unknown')
+  assert.notEqual(h1bStepMeta('surprise_status').tone, 'ok')
+})
+
+// Ask Ellis action honesty: a denied action renders AS denied, and an
+// unconfirmed action can never display as performed.
+test('AskEllis renders denied actions as denied and never claims unconfirmed ones', () => {
+  const denied = assistantActionMeta({
+    action: 'release_step', status: 'denied',
+    reason: "this action is the petitioner party's" })
+  assert.equal(denied.denied, true)
+  assert.equal(denied.done, false)
+  assert.equal(denied.i18nKey, 'askellis.actionDenied')
+  assert.match(denied.detail, /petitioner/)
+  // A confirmed action is done.
+  assert.equal(assistantActionMeta({ action: 'release_step', status: 'done' }).done, true)
+  assert.equal(assistantActionMeta({ action: 'release_step', status: 'done' }).i18nKey,
+    'askellis.actionDone')
+  // Fail-safe honesty: unknown/absent status is NEITHER done NOR denied.
+  const unknown = assistantActionMeta({ action: 'release_step', status: 'maybe?' })
+  assert.equal(unknown.done, false)
+  assert.equal(unknown.denied, false)
+  assert.equal(unknown.i18nKey, 'askellis.actionNotDone')
+  assert.equal(assistantActionMeta(null).done, false)
+  assert.equal(assistantActionMeta({}).done, false)
+  // The real backend shape ({tool, summary, ok} from h1b/assistant.py
+  // execute_tool): ok:true is done; ok:false can NEVER render as done, and
+  // the honest localized summary is the chip label.
+  const backendDenied = assistantActionMeta({
+    tool: 'release_step', ok: false,
+    summary: 'Ellis was not allowed to do this: release_step (403).' })
+  assert.equal(backendDenied.done, false)
+  assert.match(backendDenied.label, /not allowed/)
+  const backendDone = assistantActionMeta({
+    tool: 'release_step', ok: true, summary: 'Done: release_step.' })
+  assert.equal(backendDone.done, true)
+  assert.equal(backendDone.label, 'Done: release_step.')
+  for (const lang of SUPPORTED) {
+    for (const k of ['askellis.actionDenied', 'askellis.actionDone',
+                     'askellis.actionNotDone', 'askellis.actionsTaken']) {
+      assert.ok(STRINGS[lang][k], `${lang} ${k}`)
+    }
+  }
+})
+
+// The AskEllis surface pins the attorney disclaimer at the panel top and
+// renders actions only through the honest meta helper.
+test('AskEllis pins the disclaimer and routes actions through assistantActionMeta', async () => {
+  const src = await readFile(
+    new URL('../../src/renderer/src/components/visa/AskEllis.jsx', import.meta.url), 'utf8')
+  assert.ok(src.includes("t('h1b.disclaimer')"), 'the attorney disclaimer must be in the panel')
+  assert.ok(src.includes('assistantActionMeta'), 'actions must render through the honest meta')
+  assert.ok(src.includes('askellis-action-denied'), 'denied actions must be distinguishable')
+})
+
+// The active-case registry that mounts Ask Ellis in App.jsx.
+test('the active H1B case registry notifies subscribers and clears honestly', () => {
+  const seen = []
+  const unsub = subscribeActiveH1bCase((id) => seen.push(id))
+  setActiveH1bCase('case-9')
+  assert.equal(getActiveH1bCase(), 'case-9')
+  setActiveH1bCase('')
+  assert.equal(getActiveH1bCase(), '')
+  unsub()
+  setActiveH1bCase('case-10')
+  assert.deepEqual(seen, ['case-9', ''])      // unsubscribed: no further pushes
+  setActiveH1bCase('')                        // leave global state clean
+})
+
+// The H1B parent petition renders the full walkthrough; child filing cases
+// keep the standard flow (and the honest placeholder instead of the tourist
+// Authorize card).
+test('CaseFlow renders H1bPipeline for the parent petition kind only', async () => {
+  const src = await readFile(
+    new URL('../../src/renderer/src/components/visa/CaseFlow.jsx', import.meta.url), 'utf8')
+  assert.match(src, /kind === 'h1b_petition' && \(\s*<H1bPipeline/,
+    'the parent petition must render the pipeline walkthrough')
+  assert.match(src, /kind === 'h1b_filing' && \(/,
+    'child filings must keep their own branch')
+  assert.match(src, /data-testid="h1b-placeholder"/)
+})

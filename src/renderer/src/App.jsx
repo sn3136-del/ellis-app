@@ -17,7 +17,12 @@ import TripPortal from './screens/TripPortal.jsx'
 import VisaConsole from './screens/VisaConsole.jsx'
 import AdminConsole from './screens/AdminConsole.jsx'
 import SetupWizard from './screens/SetupWizard.jsx'
+import EmployerConsole from './screens/EmployerConsole.jsx'
+import AskEllis from './components/visa/AskEllis.jsx'
 import { fetchRuntimeMode } from './lib/visaBackend.js'
+import {
+  detectPersona, getActiveH1bCase, subscribeActiveH1bCase
+} from './lib/visaSession.js'
 import { tripcomLogo } from './assets/logos.js'
 
 export default function App() {
@@ -52,30 +57,18 @@ function DemoDisabled() {
 
 // Internal/operator surfaces (Adapter Admin, Cases & tools, CapabilityGrid,
 // CountryMatrix, release/quarantine/rollback/kill-switch) are HIDDEN from the
-// ordinary applicant — not deleted. An operator reveals them out-of-band via
-// `#admin` in the URL or a persisted local flag; an applicant never sees them.
-function detectAdminMode() {
-  try {
-    if (typeof window === 'undefined') return false
-    const hash = (window.location.hash || '').toLowerCase()
-    if (hash === '#admin' || hash === '#ops') {
-      try { window.localStorage.setItem('ellis_admin', '1') } catch { /* ignore */ }
-      return true
-    }
-    if (hash === '#applicant') {
-      try { window.localStorage.removeItem('ellis_admin') } catch { /* ignore */ }
-      return false
-    }
-    return window.localStorage.getItem('ellis_admin') === '1'
-  } catch {
-    return false
-  }
-}
+// ordinary applicant — not deleted. Persona detection is generalized in
+// visaSession.detectPersona (H1B edition): 'applicant' (default), 'employer'
+// (`#employer`, the petitioner-side console) and 'admin' (`#admin`/`#ops`),
+// persisted in localStorage 'ellis_persona' with the legacy 'ellis_admin'
+// flag still honored. Persona hides surfaces only — every per-party and
+// admin authorization is enforced by the backend.
 
 // Operator-only nav strip: never rendered for applicants.
 function AdminNav({ view, onNav, demoMode }) {
   const items = [
-    ['visa', 'Visa Platform'], ['admin', 'Adapter Admin'],
+    ['visa', 'Visa Platform'], ['employer', 'Employer console'],
+    ['admin', 'Adapter Admin'],
     ['setup', 'Setup'], ['settings', 'Settings'],
   ]
   if (demoMode) items.push(['demo', 'Demo portal'])
@@ -92,8 +85,16 @@ function AdminNav({ view, onNav, demoMode }) {
 }
 
 function AppInner() {
+  const [persona] = useState(detectPersona)
+  const adminMode = persona === 'admin'
+  // Boots into the applicant intake surface; the employer persona is routed
+  // to the employer console immediately after mount.
   const [view, setView] = useState('visa')
-  const [adminMode] = useState(detectAdminMode)
+  useEffect(() => { if (persona === 'employer') setView('employer') }, [persona])
+  // The floating Ask Ellis assistant follows whichever H1B case a surface has
+  // registered (H1bPipeline registers the parent case); hidden when no case.
+  const [askCaseId, setAskCaseId] = useState(getActiveH1bCase)
+  useEffect(() => subscribeActiveH1bCase(setAskCaseId), [])
   // Fail-safe default: 'production' until the backend proves otherwise.
   const [runtimeMode, setRuntimeMode] = useState('production')
 
@@ -128,6 +129,11 @@ function AppInner() {
         </header>
         <main className="main main--top">
           {view === 'visa' && <VisaConsole onNotify={() => {}} adminMode={adminMode} />}
+          {/* Employer console: the employer persona's home; admins may visit.
+              An applicant can never route here. */}
+          {view === 'employer' && (persona === 'employer' || adminMode
+            ? <EmployerConsole />
+            : <VisaConsole onNotify={() => {}} adminMode={adminMode} />)}
           {/* Admin console is operator-only; an applicant can never route here. */}
           {view === 'admin' && (adminMode ? <AdminConsole /> : <VisaConsole onNotify={() => {}} adminMode={adminMode} />)}
           {view === 'setup' && (adminMode ? <SetupWizard /> : <VisaConsole onNotify={() => {}} adminMode={adminMode} />)}
@@ -136,6 +142,9 @@ function AppInner() {
             ? <TripPortal onSwitchRole={() => setView('visa')} />
             : <DemoDisabled />)}
         </main>
+        {/* Floating Ask Ellis — all personas, only while an H1B case is in
+            context (H1bPipeline registers/clears the active case). */}
+        {askCaseId && <AskEllis caseId={askCaseId} persona={persona} />}
       </div>
     </ToastProvider>
   )

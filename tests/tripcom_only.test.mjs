@@ -47,8 +47,17 @@ const FORBIDDEN = [
   { name: 'CaseWorkspace', re: /CaseWorkspace/ },
   { name: 'OnboardingDemo', re: /OnboardingDemo/ },
   { name: 'role name: Immigrant', re: /\bimmigrant\b/i },
-  { name: 'role name: Employer', re: /\bemployer\b/i },
-  { name: 'role name: Counsel', re: /\bcounsel\b/i }
+  // 'role name: Employer' and 'role name: Counsel' retired 2026-08-10: the
+  // H1B edition (docs/H1B_ARCHITECTURE.md, Surfaces) makes the employer
+  // PETITIONER a first-class product party — EmployerConsole.jsx, the
+  // '#employer' persona, and pinned copy like "Waiting on the employer"
+  // legitimately use the word — and the backend pins its RFE/narrative/
+  // evidence endpoints under /h1b/cases/{id}/counsel/* (h1b/counsel_api.py),
+  // so the typed client necessarily carries that word too. Both appear in
+  // renderer source AND the built bundle, which a per-file whitelist cannot
+  // cover (bundle names are hashed). The legacy Employer/Counsel ROLE product
+  // stays guarded by the deleted-file list, the RoleSelect/CaseWorkspace/
+  // OnboardingDemo markers, and the no-role-selection App.jsx test below.
 ]
 
 // Explicit whitelist for legitimate remaining uses of a forbidden marker.
