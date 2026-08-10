@@ -293,6 +293,201 @@ _EXTRACT_JS = r"""
     }
     return el.name || '';
   };
+  // ---- rendering metadata ---------------------------------------------------
+  // What the APPLICANT would actually see and be able to touch. The mapper's
+  // accuracy is bounded by its representation: a page's real form is ~15
+  // controls, and the same page routinely records 150 once a navigation menu,
+  // a collapsed accordion, a cookie banner and the controls sitting behind an
+  // open modal are counted. Flooding the field-mapper with those is how a
+  // proposal ends up grounded in a control no human could reach.
+  //
+  // These flags are ANNOTATION ONLY. Every element the extractor records today
+  // is still recorded: the release gates count observed elements and the
+  // grounding chokepoint validates proposals against the FULL observed set, so
+  // dropping one here would silently weaken both. Narrowing happens later and
+  // separately, in recon.compact_view, which builds a view and never edits the
+  // artifact.
+  //
+  // Every flag defaults to the answer that KEEPS a field. A JS hiccup on a
+  // government form must never be able to delete a real control from the
+  // mapper's view.
+  const safeFlag = (fn, dflt) => {
+    try { const v = fn(); return (v === true || v === false) ? v : dflt; }
+    catch (e) { return dflt; }
+  };
+  const viewW = () => window.innerWidth || document.documentElement.clientWidth || 0;
+  const viewH = () => window.innerHeight || document.documentElement.clientHeight || 0;
+  // contains() stops at a shadow boundary, and elementFromPoint RETARGETS a hit
+  // inside a shadow tree to its host — so a plain contains() check would call
+  // every shadow-DOM control "covered" by its own host element.
+  const composedContains = (a, b) => {
+    let n = b;
+    for (let i = 0; n && i < 200; i++) {
+      if (n === a) return true;
+      n = n.parentNode || n.host || null;
+    }
+    return false;
+  };
+  // A STYLED control is a real control. Material/MDL/Bootstrap paint a wrapper
+  // and hide the native input at 0x0 or opacity 0 — the exact shape
+  // _click_possibly_styled exists to click. Calling such a control invisible
+  // would delete a real radio or checkbox from the mapper's view, so when the
+  // element itself has no box, the thing the HUMAN sees answers for it.
+  const paintedProxy = (el) => {
+    let p = null;
+    try {
+      if (el.id) p = document.querySelector('label[for="' + CSS.escape(el.id) + '"]');
+    } catch (e) {}
+    if (!p && el.closest) {
+      p = el.closest('label, mat-radio-button, mat-checkbox, mat-slide-toggle,'
+                     + ' [class*="radio-button"], [class*="checkbox"],'
+                     + ' [class*="form-field"]');
+    }
+    return (p && p !== el) ? p : null;
+  };
+  // The painted box to reason about: the element's own, else its proxy's.
+  const boxOf = (el) => {
+    const r = el.getBoundingClientRect && el.getBoundingClientRect();
+    if (r && r.width > 0 && r.height > 0) return {node: el, rect: r};
+    const p = paintedProxy(el);
+    if (p) {
+      const pr = p.getBoundingClientRect && p.getBoundingClientRect();
+      if (pr && pr.width > 0 && pr.height > 0) return {node: p, rect: pr};
+    }
+    return null;
+  };
+  const styleOf = (el) => {
+    const win = (el.ownerDocument && el.ownerDocument.defaultView) || window;
+    return (win && win.getComputedStyle) ? win.getComputedStyle(el) : null;
+  };
+  // Does the layout engine give this element boxes at all? A display:none
+  // subtree has NONE, which is how a genuinely hidden control is told apart
+  // from one that is merely painted invisibly.
+  const hasLayoutBox = (el) => {
+    try { return !!(el.getClientRects && el.getClientRects().length > 0); }
+    catch (e) { return false; }
+  };
+  // Would a click at this control's own centre land on the control itself?
+  // opacity:0 and z-index tricks keep an element HIT-TESTABLE; display:none
+  // and visibility:hidden remove it from hit testing entirely. So a control
+  // the page paints invisibly but still answers its own hit test is a STYLED
+  // control a human can click — a file input stretched transparently across a
+  // painted "Browse" button is the canonical shape — not a hidden one. Only a
+  // hit ON the element (or inside it) counts: a hit on an ANCESTOR means the
+  // element itself took no part in it.
+  const hitsItself = (el) => {
+    const r = el.getBoundingClientRect && el.getBoundingClientRect();
+    if (!r || r.width <= 0 || r.height <= 0) return false;
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    if (!(cx >= 0 && cy >= 0 && cx < viewW() && cy < viewH())) return false;
+    const hit = document.elementFromPoint(cx, cy);
+    return !!hit && (hit === el || composedContains(el, hit));
+  };
+  const nodeIsVisible = (n) => {
+    // checkVisibility answers for the whole ANCESTOR chain (an opacity:0 or
+    // content-visibility:hidden wrapper hides its children without their own
+    // computed style saying so). Where it is unavailable the explicit checks
+    // below still catch the common dialects.
+    if (n.checkVisibility) {
+      try {
+        if (!n.checkVisibility({checkOpacity: true, checkVisibilityCSS: true}))
+          return false;
+      } catch (e) {}
+    }
+    const cs = styleOf(n);
+    if (cs) {
+      if (cs.display === 'none' || cs.visibility === 'hidden'
+          || cs.visibility === 'collapse') return false;
+      if (parseFloat(cs.opacity) === 0) return false;
+      // offsetParent is null for a display:none subtree — but ALSO, and
+      // legitimately, for a fixed-position element and for <body>, so it is
+      // only evidence outside those two cases.
+      if (!n.offsetParent && cs.position !== 'fixed'
+          && n.tagName !== 'BODY' && n.tagName !== 'HTML') return false;
+    }
+    return true;
+  };
+  const isVisible = (el) => {
+    const b = boxOf(el);
+    if (b && nodeIsVisible(b.node)) return true;
+    // A control the page RENDERS but suppresses visually is a styled control,
+    // not a hidden one. Bootstrap's .custom-control-input keeps its full box
+    // and sets opacity:0 behind a label that paints the box a human ticks; a
+    // styled upload stretches a transparent file input over its own button.
+    // Neither has zero size, so the box fallback above never fires for them,
+    // and calling them invisible deletes a consent checkbox, a sex radio or a
+    // passport upload from the mapper's view. A display:none subtree has no
+    // layout box at all and can never be rescued here.
+    if (hasLayoutBox(el)) {
+      const p = paintedProxy(el);
+      if (p && nodeIsVisible(p)) return true;   // the human sees its proxy
+      if (hitsItself(el)) return true;          // the human's click reaches it
+    }
+    return false;
+  };
+  const isOccluded = (el) => {
+    const b = boxOf(el);
+    if (!b) return false;                 // no geometry: nothing to hit-test
+    const r = b.rect;
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    // A field SCROLLED PAST THE FOLD is not covered. Long government forms
+    // legitimately run for several screens, and a hit test at an off-screen
+    // point answers about some other part of the page — or about nothing.
+    // Only a real hit INSIDE the viewport may ever say "something is on top".
+    if (!(cx >= 0 && cy >= 0 && cx < viewW() && cy < viewH())) return false;
+    const hit = document.elementFromPoint(cx, cy);
+    if (!hit) return false;
+    if (hit === el || hit === b.node) return false;
+    if (composedContains(hit, el) || composedContains(el, hit)) return false;
+    if (composedContains(hit, b.node) || composedContains(b.node, hit)) return false;
+    // A control's OWN painted proxy is not something covering it. A
+    // <label for> stacked over its input (float-label and card layouts do this
+    // routinely) is the very thing a human clicks to focus that input, and the
+    // styled wrapper of a Material/Bootstrap control is how its native input
+    // is meant to be reached. Reading either as an occlusion drops a real,
+    // reachable field. Only the proxy ITSELF or something painted INSIDE it
+    // counts — an ancestor hit is already answered above.
+    const px = paintedProxy(el);
+    if (px && (hit === px || composedContains(px, hit))) return false;
+    return true;                          // a genuinely different node paints here
+  };
+  // A readonly box the portal drives with its OWN picker is a field the mapper
+  // must map: Malaysia's MDAC date of birth, Thailand's TDAC date boxes.
+  // Readonly there means "do not type here", not "this is not your field" —
+  // and only the ones that ADVERTISE a popup are treated this way, so a
+  // portal's read-back receipt number stays the unactionable text it is.
+  const drivenByPicker = (el) => {
+    if (!el.getAttribute) return false;
+    const hp = (el.getAttribute('aria-haspopup') || '').toLowerCase();
+    if (hp && hp !== 'false') return true;
+    if ((el.getAttribute('role') || '').toLowerCase() === 'combobox') return true;
+    return el.getAttribute('aria-expanded') !== null;
+  };
+  const isInteractable = (el) => {
+    if (el.disabled === true) return false;
+    if (el.getAttribute && el.getAttribute('aria-disabled') === 'true') return false;
+    if (el.inert === true) return false;
+    const tg = el.tagName.toLowerCase();
+    if ((tg === 'input' || tg === 'textarea')
+        && (el.readOnly === true
+            || (el.getAttribute && el.getAttribute('readonly') !== null))
+        && !drivenByPicker(el)) return false;
+    // Ancestors: an open modal marks the page behind it aria-hidden/inert, and
+    // a disabled fieldset disables every control inside it. closest() includes
+    // the element itself, which is what "not aria-hidden" means here.
+    if (el.closest && el.closest('[aria-hidden="true"], [inert], fieldset[disabled]'))
+      return false;
+    return true;
+  };
+  // Informational ONLY — never used to filter. A 40-field form is taller than
+  // any viewport, so "below the fold" says nothing about whether a field is
+  // real.
+  const inViewport = (el) => {
+    const b = boxOf(el);
+    if (!b) return false;
+    const r = b.rect;
+    return r.bottom > 0 && r.right > 0 && r.top < viewH() && r.left < viewW();
+  };
   const els = [];
   // Form controls PLUS appointment-calendar slot elements, which are usually
   // plain div/td/li carrying a slot handle attribute rather than form inputs.
@@ -350,6 +545,13 @@ _EXTRACT_JS = r"""
                   placeholder: (el.placeholder || '').slice(0, 60),
                   required: isRequired(el),
                   sensitive: type === 'password' || sensitive.test(name) || sensitive.test(label) };
+    // Rendering metadata (additive, cheap, computed in-page). Purely a
+    // description of this control: no value, no page text, nothing new to
+    // leak. Each defaults to the answer that keeps the field.
+    rec.visible = safeFlag(() => isVisible(el), true);
+    rec.occluded = safeFlag(() => isOccluded(el), false);
+    rec.interactable = safeFlag(() => isInteractable(el), true);
+    rec.in_viewport = safeFlag(() => inViewport(el), true);
     // A radio's own label is its ANSWER ("FEMALE"), never the question the
     // field asks ("Gender") — that sits once on the group. Recorded without
     // it, TDAC's mandatory Gender arrived as three unrelated controls named
@@ -454,6 +656,16 @@ def normalize_observation(url: str, status: int, hostname: str, raw: dict,
                                       str(el.get("group_key")))[:80]
         if el.get("option_label"):
             rec["option_label"] = str(el.get("option_label"))[:120]
+        # Rendering metadata: whether this control is actually painted, whether
+        # something is on top of it, whether it can be acted on. Structural
+        # BOOLEANS — the whitelist would otherwise drop them here, before
+        # sanitize_structure ever sees them. Anything that is not a real
+        # boolean (an older extractor, a JS hiccup) becomes the SAFE answer,
+        # which is the one that keeps the field in the mapper's view.
+        for flag, safe in (("visible", True), ("occluded", False),
+                           ("interactable", True), ("in_viewport", True)):
+            v = el.get(flag)
+            rec[flag] = v if isinstance(v, bool) else safe
         elements.append(rec)
     return {
         "ok": 200 <= int(status) < 400,

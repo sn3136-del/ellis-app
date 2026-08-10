@@ -19,7 +19,8 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
-from sqlalchemy import String, Integer, Boolean, Text, JSON, DateTime
+from sqlalchemy import (String, Integer, Boolean, Text, JSON, DateTime,
+                        UniqueConstraint)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from ..db import Base
@@ -387,3 +388,45 @@ class PortalFieldOptionCache(Base, _Stamped):
     observations: Mapped[int] = mapped_column(Integer, default=1)
     captured_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+
+class LearnedFieldMapping(Base, _Stamped):
+    """One remembered "this portal box is that Ellis field" for a portal
+    FAMILY — so the next build of the same family starts where the last one
+    ended instead of asking the mapper to guess again.
+
+    Family-keyed, never route-keyed or visa-type-keyed: a tourist e-visa
+    family and a government work-visa family use this table identically, and
+    every one of the families in data/reference/portal_families.json can fill
+    it. Keyed by field_signature (mapping_memory.signature_for) rather than by
+    selector or id, because the ids these portals mint are volatile — the row
+    must survive the re-render that changes #mat-input-7 into #mat-input-12.
+
+    BUILDER-side only, and advisory only. A row here is a PROPOSAL for the
+    next build: it is re-grounded against that build's own observation and
+    passes the one grounding chokepoint in specgen unchanged (unknown Ellis
+    field, unobserved element, sensitive target, mismatched selector and
+    non-deterministic selector all still reject it). Nothing here reaches the
+    runtime that fills a real applicant's form, and nothing here releases an
+    adapter — a human still does that.
+    """
+    __tablename__ = "learned_field_mappings"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    family_id: Mapped[str] = mapped_column(String(80), index=True)
+    field_signature: Mapped[str] = mapped_column(String(200), index=True)
+    ellis_field: Mapped[str] = mapped_column(String(80))
+    # The portal name/page the mapping was witnessed on: provenance for the
+    # human reading this row, never the lookup key (both can change).
+    portal_field: Mapped[str] = mapped_column(String(120), default="")
+    page_key: Mapped[str] = mapped_column(String(80), default="")
+    # confirmed = a human witnessed it (correction/approval); released = it
+    # rode inside an adapter that passed the gates and was released.
+    confidence: Mapped[str] = mapped_column(String(20), default="confirmed")
+    source: Mapped[str] = mapped_column(String(30), default="human_correction")
+    # How many separate builds/corrections agreed on this exact mapping.
+    observations: Mapped[int] = mapped_column(Integer, default=1)
+    created_by: Mapped[str] = mapped_column(String(64), default="")
+    __table_args__ = (
+        UniqueConstraint("family_id", "field_signature", "ellis_field",
+                         name="uq_learned_field_mapping"),
+    )

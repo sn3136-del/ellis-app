@@ -21,9 +21,27 @@ provenance. When the session ends with a real form observed, the build is
 walked back through the ordinary verification chain — spec, candidate, static,
 contract, live layers, and the same sixteen release gates as every other
 portal. Observation earns a rebuild, never a shortcut past the gates.
+
+An attended session is also the most expensive evidence Ellis will ever get —
+a real person walked a real form — so it is not spent on one build. Two things
+outlive the session, both family-scoped and both advisory:
+
+  * WITNESSED MAPPINGS. The groundings specgen ACCEPTED from those pages are
+    remembered for the family, so the next portal in it starts from what a
+    human already proved instead of from nothing. Only accepted mappings are
+    ever remembered — the grounding chokepoint stays the one place a mapping
+    is judged, and a recalled mapping re-enters a build as a proposal through
+    that same chokepoint, never around it.
+  * READ-ONLY ENDPOINT NOTES. The JSON calls the portal's own frontend made
+    while the applicant worked, written down as evidence a human can use to
+    read a status later. Only GET/HEAD is ever recorded, so a submit endpoint
+    is not written down at all, and Ellis builds no caller against the list:
+    an application is submitted through the portal's own pages, the same ones
+    a person would use, or it is not submitted.
 """
 from __future__ import annotations
 
+import re
 import threading
 import time
 from datetime import datetime, timezone
@@ -37,6 +55,33 @@ POLL_SECONDS = 2.0
 # artifact table.
 MAX_PAGES = 40
 MAX_MINUTES = 45
+
+# Every artifact this module records is page-keyed with this prefix. It is how
+# a later reader tells the pages a HUMAN walked from the public recon pages
+# sharing the same job — the difference between witnessed evidence and
+# evidence nobody saw.
+ATTENDED_PAGE_PREFIX = "attended_"
+
+# --- READ-ONLY status-endpoint discovery -----------------------------------
+# When the observation payload exposes the JSON/XHR calls the portal's OWN
+# frontend already made, Ellis keeps a scrubbed, deduped list of them as an
+# ADVISORY next step for a human: the addresses a future case-STATUS reader
+# might one day poll to learn an outcome. HARD RULE, load-bearing and enforced
+# in code + test below: these are READ-ONLY status candidates. Nothing in Ellis
+# ever posts to them or places them on a submit path — the submit path is the
+# released deterministic flow, which never reads this store. Ellis issues none
+# of these calls itself; it only notes ones the applicant's own page made. When
+# the payload carries no network info the discovery is a no-op — a portal is
+# never handed a fabricated endpoint.
+STATUS_ENDPOINT_EVIDENCE_KEY = "status_endpoint_candidates"
+STATUS_ENDPOINT_USAGE = "READ_ONLY_STATUS_CANDIDATE"
+MAX_STATUS_ENDPOINTS = 50
+# A path segment that carries an applicant's own identity (a long numeric id, a
+# uuid, an opaque token) is masked to ':id' so the stored value is the
+# endpoint's structural TEMPLATE, never one traveller's handle — the same
+# value-free doctrine the URL sanitizer keeps for query strings.
+_ID_SEGMENT_RE = re.compile(
+    r"^(\d{4,}|[0-9a-f]{8}-[0-9a-f]{4}|[A-Za-z0-9_+/=-]{16,})$", re.I)
 
 
 class WindowUnavailable(Exception):
@@ -139,6 +184,110 @@ def _scrub_signed_in(obs: dict) -> dict:
     return out
 
 
+def _scrub_endpoint_url(url: str) -> str:
+    """host + path only, with the query and fragment dropped and id-shaped path
+    segments masked — the endpoint's structural template, never an applicant's
+    own identifier. Returns '' for anything that is not an http(s) URL."""
+    try:
+        p = urlparse(url or "")
+    except Exception:  # noqa: BLE001 — a malformed URL is simply not an endpoint
+        return ""
+    if p.scheme not in ("http", "https") or not p.netloc:
+        return ""
+    segs = [(":id" if _ID_SEGMENT_RE.match(s) else s)
+            for s in (p.path or "").split("/")]
+    return f"{p.scheme}://{p.netloc.lower()}{'/'.join(segs)}"[:300]
+
+
+def _same_site(host: str, page_host: str) -> bool:
+    """Is this the PORTAL's own endpoint, or somebody else's? An analytics
+    beacon and a chat widget are also XHR calls the page made, and neither is
+    ever a status endpoint — writing them down would be noise at best and a
+    third party's address in a government build's evidence at worst. Kept
+    deliberately tight: the same host, or one a label-boundary below the
+    other (api.evisa.gov.example under evisa.gov.example)."""
+    host = (host or "").lower().removeprefix("www.")
+    page_host = (page_host or "").lower().removeprefix("www.")
+    if not host or not page_host:
+        return False
+    return (host == page_host or host.endswith("." + page_host)
+            or page_host.endswith("." + host))
+
+
+def _status_endpoint_candidates(obs: dict, *, job_id: str) -> list[dict]:
+    """READ-ONLY status-endpoint candidates from an observation's network info.
+
+    Reads only the JSON/XHR calls the portal's frontend already made — Ellis
+    issues none of them — scrubs each to a value-free host+path template, and
+    labels every record READ-ONLY. If the observation carries no network info
+    this returns [] rather than inventing an endpoint (don't fabricate)."""
+    net = (obs or {}).get("network") or (obs or {}).get("networkRequests") or []
+    page_host = str((obs or {}).get("hostname")
+                    or urlparse(str((obs or {}).get("url") or "")).netloc).lower()
+    out: list[dict] = []
+    seen: set[tuple] = set()
+    for r in net if isinstance(net, list) else []:
+        if not isinstance(r, dict):
+            continue
+        kind = str(r.get("resource_type") or r.get("type") or "").lower()
+        ctype = str(r.get("content_type") or r.get("mime") or "").lower()
+        # A data call the frontend made: an XHR/fetch, or anything answering
+        # JSON. Documents, images and scripts are page chrome, not status.
+        if kind not in ("xhr", "fetch") and "json" not in ctype:
+            continue
+        method = (re.sub(r"[^A-Z]", "",
+                         str(r.get("method") or "GET").upper())[:8] or "GET")
+        # ENFORCED AT CAPTURE, not just by labelling: only a read verb is ever
+        # written down. A POST/PUT/PATCH/DELETE is how a portal MUTATES — the
+        # submit path — so it is never stored, never recalled, never a caller's
+        # target. The read-only guarantee is therefore true of the data itself.
+        if method not in ("GET", "HEAD"):
+            continue
+        raw_url = str(r.get("url") or "")
+        pattern = _scrub_endpoint_url(raw_url)
+        if not pattern or not _same_site(urlparse(raw_url).hostname or "",
+                                         page_host):
+            continue
+        key = (method, pattern)
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append({"method": method, "url_pattern": pattern,
+                    "kind": kind or "json", "usage": STATUS_ENDPOINT_USAGE,
+                    "recon_job_id": job_id,
+                    "discovered_by": "attended_observation"})
+    return out
+
+
+def _record_status_endpoints(db, req, obs: dict, job_id: str) -> int:
+    """Merge newly discovered READ-ONLY status endpoints into the build's
+    evidence bag — a side record keyed to the recon job. Advisory only: a human
+    later decides whether a status reader may poll them. This function is the
+    ONLY writer of the store, and no code path reads it onto a submit/POST."""
+    found = _status_endpoint_candidates(obs, job_id=job_id)
+    if not found:
+        return 0
+    evidence = dict(req.portal_evidence or {})
+    existing = list(evidence.get(STATUS_ENDPOINT_EVIDENCE_KEY) or [])
+    have = {(e.get("method"), e.get("url_pattern")) for e in existing}
+    added = 0
+    for e in found:
+        if len(existing) >= MAX_STATUS_ENDPOINTS:
+            break
+        k = (e.get("method"), e.get("url_pattern"))
+        if k in have:
+            continue
+        existing.append(e)
+        have.add(k)
+        added += 1
+    if not added:
+        return 0
+    evidence[STATUS_ENDPOINT_EVIDENCE_KEY] = existing
+    req.portal_evidence = evidence
+    db.commit()
+    return added
+
+
 def record_tick(db, req, *, job_id: str, obs: dict, seen: set[str],
                 watch: _Watch) -> bool:
     """One poll of the applicant's page. Records at most one artifact; returns
@@ -146,13 +295,21 @@ def record_tick(db, req, *, job_id: str, obs: dict, seen: set[str],
     if not obs or not obs.get("ok"):
         return False
     obs = _scrub_signed_in(obs)
+    # READ-ONLY harvest of any status-endpoint candidates the applicant's own
+    # frontend revealed. Runs every tick (an SPA can call new endpoints on an
+    # unchanged page shape), and is a no-op when there is no network info.
+    # Consent is re-checked HERE and not inherited from the artifact path
+    # below: this is a recording too, it happens on ticks that record no
+    # artifact, and a withdrawn consent must stop every recording at once.
+    if authorized_observation.has_consent(req):
+        _record_status_endpoints(db, req, obs, job_id)
     sig = _signature(obs)
     if sig in seen:
         return False
     seen.add(sig)
     is_form = looks_like_form(obs)
     path = urlparse(obs.get("url") or "").path.strip("/").replace("/", "_")
-    page_key = f"attended_{watch.pages + 1}_{(path or 'page')[:40]}"
+    page_key = f"{ATTENDED_PAGE_PREFIX}{watch.pages + 1}_{(path or 'page')[:40]}"
     # authorized_observation enforces consent and sanitization — going through
     # it is the point, not a convenience.
     authorized_observation.observe(
@@ -303,6 +460,70 @@ def finish(db, req, *, family_id: str, actor: str) -> dict:
     return dict(summary, rebuilt=True)
 
 
+def _witnessed_element(art, mapping: dict) -> dict | None:
+    """The observed element an accepted mapping cites, or None.
+
+    The chokepoint already proved this selector is one recon actually SAW on
+    this page, so an exact selector+name match is the whole lookup. When it
+    somehow does not match, nothing is remembered — memory is keyed on the
+    observed field, and a guessed element would poison every later recall."""
+    for el in ((getattr(art, "structure", None) or {}).get("elements") or []):
+        if el.get("selector") == mapping.get("selector") and \
+                str(el.get("name") or "") == str(mapping.get("portal_field") or ""):
+            return el
+    return None
+
+
+def remember_witnessed_mappings(db, req, *, family_id: str, spec, artifacts,
+                                source: str, actor: str) -> int:
+    """Teach the builder what this attended session just proved: feed the
+    family-scoped mapping memory every mapping a human's own run grounded.
+
+    This is the loop's other half, and it is deliberately narrow.
+
+      * ONLY ACCEPTED MAPPINGS. `spec.field_mappings` is exactly the pile that
+        PASSED the single grounding chokepoint in
+        specgen.generate_specification; the rejected proposals live only in
+        `spec.generation_basis['rejected_mappings']` and are never read here.
+        No raw proposal and no rejected proposal is ever remembered, and a
+        recalled one comes back as a proposal through that same chokepoint.
+      * ONLY WITNESSED PAGES. A job can also hold public recon pages, and a
+        page nobody walked is not human-witnessed evidence. Only artifacts
+        this module recorded from the applicant's own session qualify, so the
+        `human_correction` label stays literally true.
+      * ONLY WITH CONSENT. Withdrawal means nothing further is recorded, and
+        a memory row derived from that session is a recording.
+
+    Family-scoped and family-agnostic: the key is the family id the build was
+    called with, so a tourist e-visa family and a work-visa family fill the
+    same memory identically. The import stays lazy only to keep this module
+    free of an import-time dependency on the factory package. Learning is
+    advisory and must never break, delay or alter a build — which is what the
+    per-mapping guard below is for."""
+    if not authorized_observation.has_consent(req):
+        return 0
+    from .adapter_factory import mapping_memory, recon
+    remember = mapping_memory.remember
+    witnessed = {
+        a.id: a for a in (artifacts or [])
+        if str(getattr(a, "page_key", "") or "").startswith(ATTENDED_PAGE_PREFIX)
+        and getattr(a, "content_class", "") in (
+            authorized_observation.CONTENT_CLASS, recon.ENTRY_GATED_FORM_CLASS)}
+    n = 0
+    for m in (getattr(spec, "field_mappings", None) or []):
+        art = witnessed.get(m.get("artifact_id"))
+        el = _witnessed_element(art, m) if art is not None else None
+        if el is None:
+            continue
+        try:
+            remember(db, family_id=family_id, mapping=m, observed_field=el,
+                     source=source, actor=actor)
+            n += 1
+        except Exception:  # noqa: BLE001 — one bad record never fails a build
+            pass
+    return n
+
+
 def _run_rebuild(req_id: str, job_id: str, family_id: str, actor: str) -> None:
     """Regenerate the spec from the now-complete evidence, then run the same
     orchestrated build every portal goes through. Backgrounded because the
@@ -333,6 +554,14 @@ def _run_rebuild(req_id: str, job_id: str, family_id: str, actor: str) -> None:
             generator_name="kimi-k3+deterministic-skeleton")
         req.portal_evidence = dict(req.portal_evidence or {}, spec_id=spec.id)
         db.commit()
+        # The applicant drove this real form, so every grounding specgen just
+        # ACCEPTED on a page they walked is human-witnessed. Record it now —
+        # before the downstream build can fail or park — so a later failure
+        # never discards what this session already proved. Recorded even if
+        # release does not follow: the evidence was witnessed either way.
+        remember_witnessed_mappings(db, req, family_id=family_id, spec=spec,
+                                    artifacts=arts, source="human_correction",
+                                    actor=actor)
         # Walk the parked build to CODE_GENERATED along declared edges only —
         # the state machine stays the single authority on what moves.
         note = authorized_observation.provenance_note(req)
@@ -359,6 +588,9 @@ def _run_rebuild(req_id: str, job_id: str, family_id: str, actor: str) -> None:
                     close()
                 except Exception:  # noqa: BLE001 — cleanup is best-effort
                     pass
+        # What a released adapter carries is recorded where release happens,
+        # not here: the orchestrator builds its own specification, so this
+        # session's pile is not the one that shipped and must not claim to be.
         with _lock:
             _rebuilds[req_id] = {"active": False,
                                  "released": bool(result.get("released")),

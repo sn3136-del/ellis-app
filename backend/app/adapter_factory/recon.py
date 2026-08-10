@@ -152,6 +152,20 @@ def sanitize_structure(observation: dict) -> dict:
                                         str(el.get("group_key", "")))[:80]
         if el.get("option_label"):
             clean["option_label"] = sanitize_label(el.get("option_label", ""))
+        # Rendering metadata the in-page pass computed: is this control really
+        # painted, is something on top of it, can it be acted on, is it on
+        # screen right now. Structural BOOLEANS — never content, so nothing new
+        # can leak through them.
+        #
+        # ANNOTATION ONLY. Which elements are kept is unchanged: the artifact
+        # still records every control the observer saw, because the release
+        # gates count observed elements and the grounding chokepoint validates
+        # model proposals against the FULL observed set. `compact_view` below
+        # is where the mapper-facing narrowing happens, and it builds a new
+        # dict rather than editing this one.
+        for flag in ("visible", "occluded", "interactable", "in_viewport"):
+            if flag in el:
+                clean[flag] = bool(el.get(flag))
         # Appointment-slot handles: portal STRUCTURE (a slot id or its
         # datetime), never applicant data. Only the fixed allowlist survives,
         # each value length-bounded and stripped of anything but the safe
@@ -227,6 +241,86 @@ def _assert_sanitized(obj, path="root"):
     elif isinstance(obj, str):
         if len(obj) > 300:
             raise ReconRefused(f"overlong text at {path} — free text must not survive recon")
+
+
+# ---- the mapper-facing view -------------------------------------------------
+# The single biggest lever on field-mapping accuracy is REPRESENTATION: a
+# government form is ~20 controls, and the page carrying it routinely records
+# 150 once its navigation menu, its collapsed accordions, its cookie banner and
+# everything sitting behind an open modal are counted. Every one of those is
+# real structure worth STORING, and none of them is worth ASKING a model about
+# — noise floods the mapper, spends its context, and invites proposals grounded
+# in controls no applicant could ever reach.
+#
+# So the artifact keeps everything and the VIEW is narrow. Nothing here edits
+# an artifact: `compact_view` reads one and returns a new dict.
+#
+# The flags come from the in-page pass (portal/live_browser._EXTRACT_JS). An
+# observation that predates them — or a synthetic portal that never computed
+# them — simply has none, and the defaults below keep every element, so a
+# missing flag can never cost a field.
+_VIEW_FLAG_DEFAULTS = {"visible": True, "occluded": False, "interactable": True}
+
+
+def element_is_mappable(el: dict) -> bool:
+    """Whether a sanitized element belongs in the view the field-mapper sees:
+    painted, actionable, and with nothing covering it.
+
+    Belt and braces: a REQUIRED field is kept whatever the flags say. The flags
+    are heuristics computed in a live page — a custom widget whose native input
+    is 0x0, a control the hit test read a frame too early — and being wrong
+    about one of them must never make a MANDATORY government-form question
+    vanish before the mapper is asked about it. A little noise costs context; a
+    missing required field costs an applicant their filing.
+    """
+    el = el or {}
+    if el.get("required"):
+        return True
+    return (bool(el.get("visible", _VIEW_FLAG_DEFAULTS["visible"]))
+            and bool(el.get("interactable", _VIEW_FLAG_DEFAULTS["interactable"]))
+            and not bool(el.get("occluded", _VIEW_FLAG_DEFAULTS["occluded"])))
+
+
+def compact_view(artifact: dict) -> dict:
+    """A MAPPER-FACING view of a sanitized recon artifact: the same page, with
+    only the elements a human could actually see and touch.
+
+    Pure — no DB, no network, no mutation. The artifact passed in is returned
+    untouched (a new dict is built, and the kept elements are copies), so the
+    full observed set stays available to the release gates that count it and to
+    the grounding check that validates proposals against it.
+
+    `in_viewport` is deliberately NOT a filter: a 40-field application is
+    taller than any viewport, so "below the fold" says nothing about whether a
+    field is real. It rides along as information only.
+
+    The returned dict carries a `compaction` stat {total, kept, dropped} so a
+    build can log what the narrowing actually bought.
+    """
+    art = artifact or {}
+    els = list(art.get("elements") or [])
+    kept = [dict(el) for el in els if element_is_mappable(el)]
+    out = dict(art)
+    out["elements"] = kept
+    out["compaction"] = {"total": len(els), "kept": len(kept),
+                         "dropped": len(els) - len(kept)}
+    # An entry-gated artifact carries the portal's VERBATIM terms text (up to
+    # 20k chars) as consent evidence, attached after sanitization because the
+    # applicant must be shown those exact words. It is legitimate in the
+    # artifact — and it is also the only free portal prose anywhere in the
+    # pipeline, while THIS object is the one named "what the field-mapper is
+    # shown". Handing it over would spend more context than the whole narrowing
+    # saves and would hand a hostile page the single channel recon exists to
+    # close. The evidence stays in the artifact, where the consent handoff
+    # reads it; the view carries only the fact that it exists.
+    if out.pop("portal_terms", None) is not None:
+        out["portal_terms_present"] = True
+    # The view is built from an already-sanitized artifact, and it must not be
+    # able to become a second, laxer path to the model: re-assert everything it
+    # is about to hand over, now that the one legitimate attachment above has
+    # been taken out of it.
+    _assert_sanitized(out, "compact_view")
+    return out
 
 
 # Visa/application path markers. Real portals localise their URLs, so the

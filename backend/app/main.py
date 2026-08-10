@@ -70,6 +70,11 @@ from .h1b.assistant_api import router as _h1b_assistant_router  # noqa: E402
 app.include_router(_h1b_assistant_router)
 from .h1b.counsel_api import router as _h1b_counsel_router  # noqa: E402
 app.include_router(_h1b_counsel_router)
+from .h1b.status_api import router as _h1b_status_router  # noqa: E402
+app.include_router(_h1b_status_router)
+# Adapter-learning + case-status tracking (makes each build easier than the last).
+from .adapter_factory.learning_api import router as _factory_learning_router  # noqa: E402
+app.include_router(_factory_learning_router)
 
 
 @app.on_event("startup")

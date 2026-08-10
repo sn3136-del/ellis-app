@@ -15,6 +15,14 @@ Two strictly separated roles:
 
 Kimi never sees credentials, values, cookies, URLs beyond sanitized patterns,
 or raw page prose — only the sanitized structures (§14).
+
+Proposals reach that validator from three sources: the generative mapper, the
+curated known-id map, and this family's mapping memory (what a human already
+corrected, or a released adapter already proved, on an earlier build of the
+same portal family). Sources differ only in RANK; not one of them skips the
+validator, and a proposal for a field Ellis has no word for is rejected like
+any other — recorded in `proposed_vocabulary` for a human to read, never
+auto-added to ELLIS_FIELDS.
 """
 from __future__ import annotations
 
@@ -22,7 +30,7 @@ import json
 import re
 
 from .. import audit
-from . import models as fm
+from . import models as fm, mapping_memory
 from .schema import validate_flow, validate_field_mapping
 
 # The only case fields Kimi may map portal inputs onto (non-sensitive only).
@@ -766,6 +774,28 @@ def _merge_proposals(base: list[dict], known: list[dict]) -> list[dict]:
     return _fix_confirmation_fields(kept + known)
 
 
+def _merge_learned(base: list[dict], learned: list[dict]) -> list[dict]:
+    """Remembered mappings outrank the proposers for the same observed element
+    — but only where they DISAGREE.
+
+    A mapping a human witnessed on this family's own form is at least as
+    trustworthy as a curated id, so it replaces what the generative or curated
+    proposer said about that box. Where both name the same Ellis field the
+    existing proposal stays: the curated entry carries the portal's date format
+    and the applicant-question metadata that memory does not store, and
+    swapping it for the bare learned one would silently stop a question being
+    asked. Either way the result goes through the same grounding chokepoint.
+    """
+    if not learned:
+        return base
+    claimed = {(p.get("artifact_id"), p.get("portal_field")): p.get("ellis_field")
+               for p in (base or [])}
+    override = [p for p in learned
+                if claimed.get((p.get("artifact_id"), p.get("portal_field")))
+                != p.get("ellis_field")]
+    return _merge_proposals(base, override) if override else base
+
+
 def _count_inputs(art) -> int:
     return sum(1 for el in (art.structure or {}).get("elements", [])
                if not el.get("sensitive")
@@ -996,6 +1026,41 @@ def _nav_pattern(art, host: str, literal_path: str) -> str:
     return pattern or f"https://{host}{literal_path}"
 
 
+_SNAKE_STRIP_RE = re.compile(r"[^a-z0-9]+")
+_VOCAB_MARKERS = {"required", "mandatory", "optional", "please", "your"}
+
+
+def _snake_field_name(text: str) -> str:
+    """A snake_case candidate key from a portal's own words for the field."""
+    spaced = re.sub(r"([a-z0-9])([A-Z])", r"\1 \2", str(text or ""))
+    words = [w for w in _SNAKE_STRIP_RE.split(spaced.lower())
+             if w and w not in _VOCAB_MARKERS]
+    return "_".join(words)[:60].strip("_")
+
+
+def _note_vocabulary(vocabulary: list[dict], m: dict, el: dict) -> None:
+    """One candidate for a word Ellis does not have yet.
+
+    ADVISORY ONLY. A portal asking something the canonical vocabulary cannot
+    name is a fact a human needs told once — not a licence for a build to
+    invent a field. The mapping that produced this entry was already rejected;
+    this list only spares the next person the work of finding it again.
+    """
+    key = (m.get("artifact_id"), m.get("portal_field"))
+    if any((v.get("artifact_id"), v.get("portal_field")) == key for v in vocabulary):
+        return
+    label = str((el or {}).get("label") or (el or {}).get("group_label")
+                or (el or {}).get("placeholder") or "")[:160]
+    suggested = _snake_field_name(label) or _snake_field_name(m.get("portal_field", ""))
+    if not suggested:
+        return
+    vocabulary.append({"portal_field": str(m.get("portal_field") or ""),
+                       "page_key": str(m.get("page_key") or ""),
+                       "suggested_ellis_field": suggested, "label": label,
+                       "input_type": str((el or {}).get("type") or ""),
+                       "artifact_id": str(m.get("artifact_id") or "")})
+
+
 def generate_specification(db, *, build_request: fm.AdapterBuildRequest,
                            recon_job: fm.AdapterReconJob,
                            artifacts: list[fm.AdapterReconArtifact],
@@ -1012,6 +1077,14 @@ def generate_specification(db, *, build_request: fm.AdapterBuildRequest,
     # whose stable id semantics are known and observed.
     proposals = _merge_proposals(list(proposals or []),
                                  _known_field_proposals(artifacts))
+    # What this FAMILY's own past builds already established, keyed by a
+    # signature that survives the portal re-minting its ids. Family-agnostic:
+    # a tourist arrival card and a work-visa filing consult the same memory.
+    # Advisory, like every other source — merged into the same list and
+    # answered by the same chokepoint below, never around it.
+    family_id = evidence.get("family_id", "")
+    proposals = _merge_learned(proposals, mapping_memory.lookup(
+        db, family_id, mapping_memory.observed_rows(artifacts)))
 
     # Deterministic grounding validation of every mapping proposal (§12):
     # unknown Ellis field, unobserved element, sensitive target, or missing
@@ -1023,7 +1096,7 @@ def generate_specification(db, *, build_request: fm.AdapterBuildRequest,
             observed.setdefault((a.id, el.get("name")), el)
             observed_by_selector[(a.id, el.get("selector"))] = el
     from .schema import deterministic_selector
-    accepted, rejected = [], []
+    accepted, rejected, vocabulary = [], [], []
     for m in proposals:
         errs = validate_field_mapping(m)
         key = (m.get("artifact_id"), m.get("portal_field"))
@@ -1059,6 +1132,14 @@ def generate_specification(db, *, build_request: fm.AdapterBuildRequest,
         if errs:
             rejected.append({"proposal": {k: str(v)[:80] for k, v in m.items()},
                              "reasons": errs})
+            if errs == ["unknown_ellis_field"]:
+                # Grounded in every other respect: the element was observed,
+                # it is not sensitive, not an Other-specify box, the selector
+                # matches the observation and is deterministic. The ONLY thing
+                # missing is a word for it in Ellis's vocabulary. The mapping
+                # stays rejected; this is a candidate for a HUMAN to add, and
+                # ELLIS_FIELDS is never extended by a build.
+                _note_vocabulary(vocabulary, m, el)
         else:
             entry = {"ellis_field": m["ellis_field"], "portal_field": m["portal_field"],
                      "selector": m["selector"], "page_key": m["page_key"],
@@ -1081,7 +1162,6 @@ def generate_specification(db, *, build_request: fm.AdapterBuildRequest,
     portal_terms = []
     for art in by_page.values():
         portal_terms.extend((art.structure or {}).get("portal_terms") or [])
-    family_id = (build_request.portal_evidence or {}).get("family_id", "")
     account_required = bool((build_request.portal_evidence or {}).get("account_required"))
     flow = _skeleton_flow(hosts[0] if hosts else "", roles, accepted,
                           sensitive_kinds=_observed_sensitive_kinds(by_page),
@@ -1104,6 +1184,9 @@ def generate_specification(db, *, build_request: fm.AdapterBuildRequest,
         generation_basis={"recon_job": recon_job.id,
                           "artifact_ids": [a.id for a in artifacts],
                           "rejected_mappings": rejected,
+                          # Words the portal asked for that Ellis cannot name.
+                          # A human reads these; no build acts on them.
+                          **({"proposed_vocabulary": vocabulary} if vocabulary else {}),
                           **({"entry_gate": entry_gate,
                               "known_limitations": [
                                   "final submit control sits past the credential-"

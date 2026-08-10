@@ -135,6 +135,17 @@ class Settings:
         self.s3_bucket = os.getenv("S3_BUCKET", "")
         self.kms_key_id = os.getenv("KMS_KEY_ID", "")
 
+        # --- USCIS Torch (case status, read-only) ---
+        # developer.uscis.gov publishes a Case Status API and a FOIA API and
+        # NOTHING that files. Credentials here buy tracking of receipts Ellis
+        # already filed elsewhere; there is no submit path to configure.
+        self.uscis_torch_base_url = os.getenv("USCIS_TORCH_BASE_URL",
+                                              "https://api.uscis.gov")
+        self.uscis_torch_client_id = os.getenv("USCIS_TORCH_CLIENT_ID", "")
+        self.uscis_torch_client_secret = os.getenv("USCIS_TORCH_CLIENT_SECRET", "")
+        self.uscis_torch_access_token = os.getenv("USCIS_TORCH_ACCESS_TOKEN", "")
+        self.uscis_torch_enabled = _bool("USCIS_TORCH_ENABLED", True)
+
         # --- Temporal ---
         self.temporal_host = os.getenv("TEMPORAL_HOST", "")  # empty → DB workflow runner
 
@@ -166,6 +177,9 @@ def killswitches() -> dict:
 def capabilities() -> dict:
     s = settings()
     ks = killswitches()
+    # Imported lazily: the provider imports this module, and its is_configured()
+    # is the single definition of "Torch can actually be reached".
+    from .providers.torch_status import is_configured as _torch_configured
     return {
         "auth": "clerk" if s.clerk_secret_key else "dev_token",
         "database": "postgres" if s.database_url.startswith("postgres") else "sqlite",
@@ -175,6 +189,8 @@ def capabilities() -> dict:
         "browserbase": bool(s.browserbase_api_key) and not ks["browserbase"],
         "stripe_issuing": bool(s.stripe_secret_key) and s.issuing_approved and not ks["stripe"],
         "docusign": bool(s.docusign_integration_key and s.docusign_account_id),
+        # Read-only tracking of filed government receipts. Never a filing path.
+        "uscis_case_status": _torch_configured(),
         "storage": "s3_kms" if s.s3_bucket else "local_encrypted",
         "workflow_engine": "temporal" if s.temporal_host else "db_runner",
         "fallbacks": {
@@ -183,5 +199,6 @@ def capabilities() -> dict:
             "payment": "stripe_issuing" if (s.stripe_secret_key and s.issuing_approved) else "applicant_payment_window",
             "handoff": "browserbase_liveview" if s.browserbase_api_key else "local_handoff",
             "authorization": "docusign" if s.docusign_integration_key else "in_app_authorization",
+            "case_status": "uscis_torch" if _torch_configured() else "tracking_unavailable",
         },
     }

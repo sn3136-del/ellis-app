@@ -146,3 +146,36 @@ def test_ellis_never_acts_in_the_applicants_session():
                  "captcha"):
         assert verb not in src, f"attended observation must never call {verb}"
     assert src.count("page.goto") == 1, "exactly one navigation: the start page"
+
+
+def test_frontends_own_read_calls_are_kept_as_readonly_status_notes(db):
+    """The JSON reads the portal's own page made are written down as READ-ONLY
+    status candidates — scrubbed to a value-free template (the applicant's id
+    masked, the token-bearing query dropped) and never a submit target."""
+    import json
+    req = _req(db, route_key="att|ep")
+    job = _job(db, req)
+    w = att._Watch(req_id=req.id, job_id=job.id)
+    obs = dict(FORM_PAGE, url=f"https://{HOST}/apply", network=[
+        {"url": f"https://api.{HOST}/v1/applications/778899/status?tok=SESSIONTOK",
+         "method": "GET", "resource_type": "xhr", "content_type": "application/json"},
+        # A POST is the SUBMIT verb — it must never be written down.
+        {"url": f"https://api.{HOST}/v1/applications", "method": "POST",
+         "resource_type": "xhr", "content_type": "application/json"}])
+    att.record_tick(db, req, job_id=job.id, obs=obs, seen=set(), watch=w)
+    store = (req.portal_evidence or {}).get(att.STATUS_ENDPOINT_EVIDENCE_KEY)
+    assert [e["url_pattern"] for e in store] == \
+        [f"https://api.{HOST}/v1/applications/:id/status"]
+    assert store[0]["usage"] == att.STATUS_ENDPOINT_USAGE
+    blob = json.dumps(store)
+    assert "778899" not in blob and "SESSIONTOK" not in blob and "POST" not in blob
+
+
+def test_a_session_with_no_network_info_records_no_endpoint_notes(db):
+    """No network info is a no-op — a portal is never handed a fabricated
+    endpoint."""
+    req = _req(db, route_key="att|noep")
+    job = _job(db, req)
+    w = att._Watch(req_id=req.id, job_id=job.id)
+    att.record_tick(db, req, job_id=job.id, obs=FORM_PAGE, seen=set(), watch=w)
+    assert att.STATUS_ENDPOINT_EVIDENCE_KEY not in (req.portal_evidence or {})
