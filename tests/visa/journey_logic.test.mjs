@@ -905,3 +905,183 @@ test('CaseFlow renders H1bPipeline for the parent petition kind only', async () 
     'child filings must keep their own branch')
   assert.match(src, /data-testid="h1b-placeholder"/)
 })
+
+// ---------------------------------------------------------------------------
+// H1B wage-level + SOC/NAICS suggestion surface (Agent 4). Ellis computes the
+// prevailing-wage LEVEL and suggests SOC/NAICS codes from OFFICIAL free
+// government data. The two typed client methods hit the pinned wage_api.py
+// paths; the display normalizers keep every wage / level / code an HONEST,
+// confirm-required SUGGESTION (never a filed value); and the employer console
+// renders the DOL caveats and the "you must confirm this" note.
+import {
+  wageLevelView, socSuggestionsView
+} from '../../src/renderer/src/lib/visaBackend.js'
+
+test('h1b wage + occupation client methods hit the pinned paths with pinned bodies', async () => {
+  const calls = []
+  const realFetch = globalThis.fetch
+  globalThis.fetch = async (url, opts = {}) => {
+    calls.push({ url: String(url), method: opts.method || 'GET', body: opts.body })
+    return { ok: true, status: 200, text: async () => '{}' }
+  }
+  try {
+    const c = createVisaClient(newEmployerSession())
+    await c.h1bWageAnalysis('c1')
+    await c.h1bClassifyOccupation('c1',
+      { industry_text: 'online travel', occupation_text: 'Software Engineer' })
+    // A missing argument defaults to empty strings — never undefined fields.
+    await c.h1bClassifyOccupation('c1')
+  } finally {
+    globalThis.fetch = realFetch
+  }
+  const seen = calls.map((x) => `${x.method} ${new URL(x.url).pathname}`)
+  assert.deepEqual(seen, [
+    'GET /h1b/cases/c1/wage-analysis',
+    'POST /h1b/cases/c1/classify-occupation',
+    'POST /h1b/cases/c1/classify-occupation'
+  ])
+  // The classifier body carries industry + occupation text (NIOCCS inputs).
+  assert.deepEqual(JSON.parse(calls[1].body),
+    { industry_text: 'online travel', occupation_text: 'Software Engineer' })
+  assert.deepEqual(JSON.parse(calls[2].body), { industry_text: '', occupation_text: '' })
+})
+
+test('wageLevelView normalizes the four levels and surfaces DOL caveats honestly', () => {
+  const view = wageLevelView({
+    available: true,
+    source: 'U.S. DOL OFLC OEWS Wage Data', as_of: '2026-07-01',
+    soc_code: '15-1252', soc_title: 'Software Developers',
+    area_name: 'Statewide, CA', geo_level: 3,
+    level_wages: { 1: 120000, 2: 145000, 3: 170000, 4: 195000 },
+    offered_wage: 150000, offered_unit: 'year',
+    computed_level: 'III', meets_prevailing: true, label: 'High Wage'
+  })
+  assert.equal(view.available, true)
+  assert.deepEqual(view.levels.map((l) => l.roman), ['I', 'II', 'III', 'IV'])
+  assert.equal(view.levels[2].wage, 170000)
+  assert.equal(view.computedLevel, 'III')
+  assert.equal(view.meetsPrevailing, true)
+  assert.equal(view.source, 'U.S. DOL OFLC OEWS Wage Data')
+  assert.equal(view.asOf, '2026-07-01')
+  // A statewide fallback (GeoLvl 3) AND a High Wage label are BOTH surfaced.
+  const codes = view.caveats.map((c) => c.code)
+  assert.ok(codes.includes('geo_statewide'), 'statewide caveat surfaced')
+  assert.ok(codes.includes('label_high'), 'High Wage caveat surfaced')
+  // Every structured caveat code localizes in every locale.
+  for (const code of ['geo_broadened', 'geo_statewide', 'geo_national',
+                      'label_high', 'label_annual']) {
+    for (const lang of SUPPORTED) {
+      assert.ok(STRINGS[lang][`h1b.wage.caveat.${code}`], `${lang} ${code}`)
+    }
+  }
+  // The wage panel's own strings resolve everywhere too.
+  for (const lang of SUPPORTED) {
+    for (const k of ['h1b.wage.title', 'h1b.wage.check', 'h1b.wage.caveatsTitle',
+                     'h1b.wage.confirmNote', 'h1b.wage.meets', 'h1b.wage.belowPrevailing',
+                     'h1b.wage.sourceLine', 'h1b.wage.unavailable']) {
+      assert.ok(STRINGS[lang][k], `${lang} ${k}`)
+    }
+  }
+})
+
+test('wageLevelView honest-degrades and never invents a wage', () => {
+  // Explicitly unavailable, or simply missing the level wages, is unavailable.
+  assert.equal(wageLevelView({ available: false, reason: 'no soc' }).available, false)
+  assert.equal(wageLevelView({}).available, false)
+  assert.equal(wageLevelView(null).available, false)
+  // A partial payload (only two levels) never fabricates the missing two.
+  assert.equal(wageLevelView({ level_wages: { 1: 100000, 2: 120000 } }).levels.length, 2)
+  // No geo fallback (GeoLvl 1 = the actual worksite MSA) and no label -> no
+  // caveats invented.
+  assert.deepEqual(wageLevelView({ geo_level: 1, level_wages: [1, 2, 3, 4] }).caveats, [])
+  // GeoLvl 2 (broadened) and GeoLvl 4 (national) each surface their own caveat.
+  assert.ok(wageLevelView({ geo_level: 2, level_wages: [1, 2, 3, 4] }).caveats
+    .some((c) => c.code === 'geo_broadened'))
+  assert.ok(wageLevelView({ geo_level: 4, level_wages: [1, 2, 3, 4] }).caveats
+    .some((c) => c.code === 'geo_national'))
+  // The Annual-wage label invalidates the 2080-hour conversion -> surfaced.
+  assert.ok(wageLevelView({ level_wages: [1, 2, 3, 4], label: 'Annual Wage' }).caveats
+    .some((c) => c.code === 'label_annual'))
+  // meets_prevailing stays a genuine tri-state: absent is null, not false.
+  assert.equal(wageLevelView({ level_wages: [1, 2, 3, 4] }).meetsPrevailing, null)
+  assert.equal(wageLevelView({ level_wages: [1, 2, 3, 4], meets_prevailing: false })
+    .meetsPrevailing, false)
+})
+
+test('socSuggestionsView ranks suggestions and always requires confirmation', () => {
+  const view = socSuggestionsView({
+    source: 'CDC NIOCCS', as_of: '2026-08-01',
+    occupation: [
+      { Code: '15-1252', Title: 'Software Developers', Probability: 0.97 },
+      { Code: '15-1211', Title: 'Computer Systems Analysts', Probability: 0.42 }
+    ],
+    industry: [{ Code: '518210', Title: 'Data Processing', Probability: 0.88 }]
+  })
+  assert.equal(view.available, true)
+  assert.equal(view.occupation.length, 2)
+  assert.equal(view.occupation[0].code, '15-1252')
+  assert.equal(view.occupation[0].confidence, 'high')   // 0.97 -> high
+  assert.equal(view.occupation[1].confidence, 'low')    // 0.42 -> low
+  assert.equal(view.industry[0].code, '518210')
+  assert.equal(view.industry[0].confidence, 'high')     // 0.88 -> high
+  // Confirmation is required no matter how confident the top match is.
+  assert.equal(view.confirmRequired, true)
+  assert.equal(view.lowConfidence, false)               // top match is high
+})
+
+test('a low-confidence top SOC match sets lowConfidence but never drops confirmRequired', () => {
+  const view = socSuggestionsView({
+    occupation: [{ code: '13-1111', title: 'Management Analysts', probability: 0.31 }]
+  })
+  assert.equal(view.lowConfidence, true)
+  assert.equal(view.confirmRequired, true)              // still a legal representation
+  // The confirm-required note + low-confidence note + confidence tiers localize
+  // everywhere.
+  for (const lang of SUPPORTED) {
+    for (const k of ['h1b.soc.confirmNote', 'h1b.soc.lowConfidenceNote',
+                     'h1b.soc.title', 'h1b.soc.suggest', 'h1b.soc.occupationTitle',
+                     'h1b.soc.industryTitle', 'h1b.soc.sourceCaveat',
+                     'h1b.soc.unavailable', 'h1b.soc.needJobTitle', 'h1b.soc.probability']) {
+      assert.ok(STRINGS[lang][k], `${lang} ${k}`)
+    }
+    for (const tier of ['high', 'medium', 'low', 'unknown']) {
+      assert.ok(STRINGS[lang][`h1b.soc.confidence.${tier}`], `${lang} ${tier}`)
+    }
+  }
+  // The confirm note names the code as a legal representation the user confirms.
+  assert.match(STRINGS.en['h1b.soc.confirmNote'], /confirm/i)
+  assert.match(STRINGS.en['h1b.soc.confirmNote'], /legal representation/i)
+})
+
+test('socSuggestionsView honest-degrades when the classifier is unavailable', () => {
+  assert.equal(socSuggestionsView({ available: false, reason: 'unconfigured' }).available, false)
+  assert.equal(socSuggestionsView({}).available, false)
+  assert.equal(socSuggestionsView(null).available, false)
+  // Unavailable still reports confirmRequired true (defensive default).
+  assert.equal(socSuggestionsView(null).confirmRequired, true)
+})
+
+test('the employer console renders the wage caveats and the SOC confirm-required note', async () => {
+  const src = await readFile(
+    new URL('../../src/renderer/src/screens/EmployerConsole.jsx', import.meta.url), 'utf8')
+  // The two official-data actions are wired to the pinned client methods and
+  // render through the honest view helpers.
+  assert.ok(src.includes('h1bWageAnalysis'), 'wage check must call h1bWageAnalysis')
+  assert.ok(src.includes('h1bClassifyOccupation'), 'SOC suggest must call h1bClassifyOccupation')
+  assert.ok(src.includes('wageLevelView') && src.includes('socSuggestionsView'),
+    'the console must render through the honest view helpers')
+  // The caveats block renders, keyed to the localized caveat strings.
+  assert.ok(src.includes('h1b-wage-caveats'), 'the caveats block must be distinguishable')
+  assert.ok(/h1b\.wage\.caveat\./.test(src), 'caveats must localize through h1b.wage.caveat.*')
+  // The confirm-required notes render (both the SOC code note and the wage note).
+  assert.ok(src.includes('h1b-soc-confirm-note'), 'the SOC confirm note must be distinguishable')
+  assert.ok(src.includes("t('h1b.soc.confirmNote')"), 'the SOC confirm note must render its string')
+  assert.ok(src.includes("t('h1b.wage.confirmNote')"), 'the wage panel must render its confirm note')
+  // Nothing auto-fills a filed answer: neither suggestion panel ever calls the
+  // party-answers writer — the petitioner types the confirmed value in.
+  const panels = src.slice(src.indexOf('function WageLevelCheck'),
+                           src.indexOf('function JobAnswersForm'))
+  assert.ok(panels.length > 0, 'the suggestion panels must exist above JobAnswersForm')
+  assert.ok(!/h1bPartyAnswers/.test(panels),
+    'a suggestion panel must never write a filed answer')
+})

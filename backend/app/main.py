@@ -75,6 +75,9 @@ app.include_router(_h1b_status_router)
 # Adapter-learning + case-status tracking (makes each build easier than the last).
 from .adapter_factory.learning_api import router as _factory_learning_router  # noqa: E402
 app.include_router(_factory_learning_router)
+# H1B wage-level + occupation classification from official DOL/CDC/O*NET data.
+from .h1b.wage_api import router as _h1b_wage_router  # noqa: E402
+app.include_router(_h1b_wage_router)
 
 
 @app.on_event("startup")

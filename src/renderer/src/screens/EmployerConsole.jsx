@@ -11,7 +11,7 @@
 import { useEffect, useState } from 'react'
 import { useToast, Loading, ErrorNote, Empty } from '../components/ui.jsx'
 import { useLocale } from '../lib/locale.jsx'
-import { createVisaClient } from '../lib/visaBackend.js'
+import { createVisaClient, wageLevelView, socSuggestionsView } from '../lib/visaBackend.js'
 import { newEmployerSession } from '../lib/visaSession.js'
 import H1bPipeline from '../components/visa/H1bPipeline.jsx'
 
@@ -159,6 +159,266 @@ function NewCaseForm({ t, client, profiles, onCreated }) {
   )
 }
 
+// Fill {placeholders} in an already-localized template (mirrors H1bPipeline's
+// manual .replace pattern; t()'s own vars arg would also work).
+function fill(str, vars) {
+  let out = String(str == null ? '' : str)
+  for (const [k, v] of Object.entries(vars)) out = out.split(`{${k}}`).join(String(v))
+  return out
+}
+// US dollars, no cents — an OEWS yearly wage never carries meaningful cents.
+function money(n) {
+  return typeof n === 'number' && Number.isFinite(n)
+    ? '$' + Math.round(n).toLocaleString('en-US') : ''
+}
+// Known structured caveat codes localize; anything else renders verbatim.
+const WAGE_CAVEAT_CODES = ['geo_broadened', 'geo_statewide', 'geo_national',
+                           'label_high', 'label_annual']
+
+// ---- Check wage level (deterministic OEWS/OFLC computation) -----------------
+// Reads the case's saved petitioner facts server-side and renders the computed
+// Level I–IV, the four level wages, whether the offer meets prevailing, and the
+// DOL caveats — prominently. Every number is a SUGGESTION: the wage level is a
+// legal representation on the LCA/I-129, so the petitioner confirms and enters
+// it; this panel never writes a value back into the filed answers.
+function WageLevelCheck({ t, client, caseId }) {
+  const [view, setView] = useState(null)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState(null)
+
+  async function check() {
+    setBusy(true); setError(null)
+    try {
+      setView(wageLevelView(await client.h1bWageAnalysis(caseId)))
+    } catch (e) {
+      setError({ message: e.message })
+    }
+    setBusy(false)
+  }
+
+  return (
+    <div style={{ marginTop: 16 }} data-testid="h1b-wage-check">
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10,
+                    alignItems: 'center', flexWrap: 'wrap' }}>
+        <div>
+          <div style={{ fontWeight: 600, fontSize: 13.5 }}>{t('h1b.wage.title')}</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)' }}>{t('h1b.wage.sub')}</div>
+        </div>
+        <button className="btn btn--sm btn--ghost" disabled={busy} onClick={check}>
+          {busy ? t('h1b.wage.checking') : t('h1b.wage.check')}
+        </button>
+      </div>
+      {error && <ErrorNote error={error} />}
+      {view && !view.available && (
+        <div className="card" style={{ padding: 12, marginTop: 10, fontSize: 12.5 }}>
+          <div>{t('h1b.wage.unavailable')}</div>
+          {view.reason && (
+            <div style={{ color: 'var(--muted)', marginTop: 4 }}>{view.reason}</div>
+          )}
+        </div>
+      )}
+      {view && view.available && (
+        <div className="card" style={{ padding: 14, marginTop: 10 }}>
+          {(view.socCode || view.socTitle) && (
+            <div style={{ fontSize: 12.5 }}>
+              <span style={{ color: 'var(--muted)' }}>{t('h1b.wage.socLabel')}: </span>
+              {[view.socCode, view.socTitle].filter(Boolean).join(' · ')}
+            </div>
+          )}
+          {view.areaName && (
+            <div style={{ fontSize: 12.5, marginTop: 2 }}>
+              <span style={{ color: 'var(--muted)' }}>{t('h1b.wage.areaLabel')}: </span>
+              {view.areaName}
+            </div>
+          )}
+          {/* The four prevailing-wage tiers. */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8,
+                        margin: '12px 0' }} data-testid="h1b-wage-levels">
+            {view.levels.map((lv) => {
+              const isComputed = view.computedLevel === lv.roman
+              return (
+                <div key={lv.level} className="card"
+                     style={{ padding: '8px 10px', textAlign: 'center',
+                              borderColor: isComputed ? 'var(--accent, #2b6cb0)' : undefined,
+                              background: isComputed ? 'var(--bg-2, #f5f6f8)' : undefined }}>
+                  <div style={{ fontSize: 11, color: 'var(--muted)' }}>
+                    {t('h1b.wage.levelWord')} {lv.roman}
+                  </div>
+                  <div style={{ fontWeight: 700, fontSize: 13 }}>{money(lv.wage)}</div>
+                  <div style={{ fontSize: 10.5, color: 'var(--muted)' }}>{t('h1b.wage.perYear')}</div>
+                </div>
+              )
+            })}
+          </div>
+          {/* Offer vs prevailing. */}
+          {view.offeredWage != null && (
+            <div style={{ fontSize: 12.5 }}>
+              <span style={{ color: 'var(--muted)' }}>{t('h1b.wage.offered')}: </span>
+              {money(view.offeredWage)}
+              {view.computedLevel && (
+                <span style={{ marginLeft: 8 }}>
+                  · {fill(t('h1b.wage.clears'), { level: view.computedLevel })}
+                </span>
+              )}
+            </div>
+          )}
+          <div style={{ fontSize: 12.5, marginTop: 6, fontWeight: 600,
+                        color: view.meetsPrevailing === false ? '#d33'
+                          : view.meetsPrevailing === true ? '#1a7f37' : 'var(--muted)' }}
+               data-testid="h1b-wage-meets">
+            {view.meetsPrevailing === true ? t('h1b.wage.meets')
+              : view.meetsPrevailing === false ? t('h1b.wage.belowPrevailing')
+              : t('h1b.wage.meetsUnknown')}
+          </div>
+          {/* Caveats — prominent, warning-colored. */}
+          {view.caveats.length > 0 && (
+            <div style={{ marginTop: 10 }} data-testid="h1b-wage-caveats">
+              <div style={{ fontSize: 12, fontWeight: 600, color: '#c77700' }}>
+                {t('h1b.wage.caveatsTitle')}
+              </div>
+              <ul style={{ margin: '4px 0 0 18px', fontSize: 12, color: '#c77700' }}>
+                {view.caveats.map((c, i) => (
+                  <li key={i}>
+                    {c.code && WAGE_CAVEAT_CODES.includes(c.code)
+                      ? t(`h1b.wage.caveat.${c.code}`) : (c.text || '')}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {/* Standing honesty note + provenance. */}
+          <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 10 }}
+               data-testid="h1b-wage-confirm-note">
+            {t('h1b.wage.confirmNote')}
+          </div>
+          {(view.source || view.asOf) && (
+            <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>
+              {fill(t('h1b.wage.sourceLine'),
+                    { source: view.source || '—', asOf: view.asOf || '—' })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ---- Suggest SOC / NAICS codes (CDC NIOCCS classifier) ---------------------
+// occupation_text is the job title above; industry_text is a company/industry
+// description the petitioner types here. Ranked SOC + NAICS suggestions render
+// with their probabilities, and EVERY suggestion carries the confirm-required
+// note — the SOC code is a legal representation Ellis only suggests, so the
+// petitioner types the confirmed value into the field above themselves. Nothing
+// here auto-fills a filed answer.
+function SocSuggest({ t, client, caseId, jobTitle }) {
+  const [industryText, setIndustryText] = useState('')
+  const [view, setView] = useState(null)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState(null)
+  const hasJobTitle = String(jobTitle || '').trim().length > 0
+
+  async function suggest() {
+    setBusy(true); setError(null)
+    try {
+      const res = await client.h1bClassifyOccupation(caseId, {
+        occupation_text: String(jobTitle || '').trim(),
+        industry_text: industryText.trim()
+      })
+      setView(socSuggestionsView(res))
+    } catch (e) {
+      setError({ message: e.message })
+    }
+    setBusy(false)
+  }
+
+  function Suggestion({ s }) {
+    const pct = s.probability != null ? Math.round(s.probability * 100) : null
+    return (
+      <div className="row">
+        <div className="row__main">
+          <div className="row__title" style={{ fontSize: 13 }}>
+            {[s.code, s.title].filter(Boolean).join(' · ')}
+          </div>
+          <div className="row__sub">
+            {t(`h1b.soc.confidence.${s.confidence}`)}
+            {pct != null ? ` · ${fill(t('h1b.soc.probability'), { pct })}` : ''}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ marginTop: 16 }} data-testid="h1b-soc-suggest">
+      <div style={{ fontWeight: 600, fontSize: 13.5 }}>{t('h1b.soc.title')}</div>
+      <div style={{ fontSize: 12, color: 'var(--muted)' }}>{t('h1b.soc.sub')}</div>
+      <div className="field" style={{ marginTop: 8 }}>
+        <label>{t('h1b.soc.industryInput')}</label>
+        <input className="input" value={industryText}
+               placeholder={t('h1b.soc.industryPlaceholder')}
+               onChange={(e) => setIndustryText(e.target.value)} />
+      </div>
+      {!hasJobTitle && (
+        <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 6 }}>
+          {t('h1b.soc.needJobTitle')}
+        </div>
+      )}
+      {error && <ErrorNote error={error} />}
+      <button className="btn btn--sm btn--ghost" disabled={busy || !hasJobTitle}
+              onClick={suggest}>
+        {busy ? t('h1b.soc.suggesting') : t('h1b.soc.suggest')}
+      </button>
+      {view && !view.available && (
+        <div className="card" style={{ padding: 12, marginTop: 10, fontSize: 12.5 }}>
+          {view.reason || t('h1b.soc.unavailable')}
+        </div>
+      )}
+      {view && view.available && (
+        <div style={{ marginTop: 10 }}>
+          {/* Confirm-required note FIRST — it is the point of the whole panel. */}
+          <div className="card" style={{ padding: 12, borderColor: '#c77700' }}
+               data-testid="h1b-soc-confirm-note">
+            <div style={{ fontSize: 12.5, color: '#c77700', fontWeight: 600 }}>
+              {t('h1b.soc.confirmNote')}
+            </div>
+            {view.lowConfidence && (
+              <div style={{ fontSize: 12, color: '#d33', marginTop: 6 }}
+                   data-testid="h1b-soc-lowconf">
+                {t('h1b.soc.lowConfidenceNote')}
+              </div>
+            )}
+          </div>
+          {view.occupation.length > 0 && (
+            <div className="card" style={{ padding: 12, marginTop: 8 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>
+                {t('h1b.soc.occupationTitle')}
+              </div>
+              {view.occupation.map((s, i) => <Suggestion key={i} s={s} />)}
+            </div>
+          )}
+          {view.industry.length > 0 && (
+            <div className="card" style={{ padding: 12, marginTop: 8 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>
+                {t('h1b.soc.industryTitle')}
+              </div>
+              {view.industry.map((s, i) => <Suggestion key={i} s={s} />)}
+            </div>
+          )}
+          <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 8 }}>
+            {t('h1b.soc.sourceCaveat')}
+          </div>
+          {(view.source || view.asOf) && (
+            <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>
+              {fill(t('h1b.soc.sourceLine'),
+                    { source: view.source || '—', asOf: view.asOf || '—' })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ---- Petitioner job/wage/worksite answers ----------------------------------
 // Writes through POST /h1b/cases/{id}/party/petitioner/answers. ONLY answered
 // fields are sent: these values become statements on the ETA-9035/I-129, and
@@ -250,11 +510,17 @@ function JobAnswersForm({ t, client, caseId }) {
         <Field label={t('h1b.job.worksitePostal')} value={f.worksite_postal_code}
                onChange={set('worksite_postal_code')} />
       </div>
+      {/* Official-data helpers. Both are suggestion surfaces: they read/compute
+          from authoritative sources but write nothing back into the answers
+          above — the petitioner confirms and types every filed value. Wage
+          analysis runs over the SAVED facts, so it comes after Save. */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
         <button className="btn" disabled={busy} onClick={save}>
           {busy ? t('h1b.employer.saving') : t('h1b.job.save')}
         </button>
       </div>
+      <SocSuggest t={t} client={client} caseId={caseId} jobTitle={f.job_title} />
+      <WageLevelCheck t={t} client={client} caseId={caseId} />
     </section>
   )
 }

@@ -146,6 +146,12 @@ class Settings:
         self.uscis_torch_access_token = os.getenv("USCIS_TORCH_ACCESS_TOKEN", "")
         self.uscis_torch_enabled = _bool("USCIS_TORCH_ENABLED", True)
 
+        # --- O*NET Web Services v2 (occupation search) ---
+        # Free registration at onetcenter.org/developer; sent as X-API-Key.
+        # Unset → the occupation provider degrades honestly (no classification
+        # is ever fabricated). NIOCCS and NAICS validation need no key.
+        self.onet_api_key = os.getenv("ONET_API_KEY", "")
+
         # --- Temporal ---
         self.temporal_host = os.getenv("TEMPORAL_HOST", "")  # empty → DB workflow runner
 
@@ -189,6 +195,9 @@ def capabilities() -> dict:
         "browserbase": bool(s.browserbase_api_key) and not ks["browserbase"],
         "stripe_issuing": bool(s.stripe_secret_key) and s.issuing_approved and not ks["stripe"],
         "docusign": bool(s.docusign_integration_key and s.docusign_account_id),
+        # O*NET occupation search. A live key only helps SUGGEST an O*NET-SOC
+        # code a human confirms; NIOCCS and NAICS validation stay key-free.
+        "onet_occupation_search": bool(s.onet_api_key),
         # Read-only tracking of filed government receipts. Never a filing path.
         "uscis_case_status": _torch_configured(),
         "storage": "s3_kms" if s.s3_bucket else "local_encrypted",

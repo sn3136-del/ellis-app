@@ -444,7 +444,168 @@ export function createVisaClient(session) {
     // beneficiary facts). The party wall lives server-side: only the acting
     // party (or an admin) may write, and attestation keys are rejected.
     h1bPartyAnswers: (caseId, role, answers) =>
-      call('POST', `/h1b/cases/${caseId}/party/${encodeURIComponent(role)}/answers`, session, { answers })
+      call('POST', `/h1b/cases/${caseId}/party/${encodeURIComponent(role)}/answers`, session, { answers }),
+
+    // Deterministic OEWS/OFLC prevailing-wage LEVEL analysis over the case's
+    // saved petitioner facts (SOC code + worksite + offered wage). A pure
+    // offline computation server-side over cached official DOL wage data — no
+    // live call at fill time. The response carries its source + as_of and the
+    // honest caveats that break a naive reading (a broadened-area or statewide
+    // fallback when DOL has no wage for the worksite's own metro area; an OEWS
+    // "High Wage"/"Annual Wage" label that invalidates the 2080-hour
+    // conversion). The four level wages and the level the offer clears are
+    // SUGGESTIONS a human confirms — the wage level is a legal representation on
+    // the LCA/I-129, never a value Ellis files.
+    h1bWageAnalysis: (caseId) =>
+      call('GET', `/h1b/cases/${caseId}/wage-analysis`, session),
+    // Suggest SOC (occupation) + NAICS (industry) codes from free text via the
+    // CDC NIOCCS classifier. Ranked with probabilities that double as an RFE
+    // confidence signal. EVERY suggestion is a legal representation the
+    // petitioner must confirm and type in themselves — nothing auto-fills a
+    // filed answer. Honest-degrades ({available:false}) when the classifier is
+    // unreachable or unconfigured.
+    h1bClassifyOccupation: (caseId, { industry_text = '', occupation_text = '' } = {}) =>
+      call('POST', `/h1b/cases/${caseId}/classify-occupation`, session,
+           { industry_text, occupation_text })
+  }
+}
+
+// ---- H1B wage-level + SOC/NAICS suggestion display models ------------------
+// Pure, deterministic normalizers over the wage_api.py payloads, kept out of
+// the React components so the honesty rules are unit-testable without a DOM.
+// Doctrine carried here: every wage / level / code stays a SUGGESTION a human
+// confirms; every result surfaces its source + as_of; and the DOL caveats that
+// invalidate a naive reading are derived from structured flags, never swallowed.
+
+const _ROMAN_LEVEL = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV' }
+
+// Lenient numeric coercion: strips currency/percent punctuation, returns null
+// (never NaN, never 0) for anything unparseable so a missing wage never renders
+// as "$0".
+function _num(v) {
+  if (v == null || v === '') return null
+  const n = typeof v === 'number' ? v : Number(String(v).replace(/[^0-9.\-]/g, ''))
+  return Number.isFinite(n) ? n : null
+}
+
+// Normalize the OEWS wage level marker to a roman numeral I–IV (accepts
+// 1..4, "1".."4", or "I".."IV"); null for anything else.
+function _normLevel(v) {
+  if (v == null || v === '') return null
+  const s = String(v).trim().toUpperCase()
+  if (_ROMAN_LEVEL[s]) return _ROMAN_LEVEL[s]           // numeric -> roman
+  if (['I', 'II', 'III', 'IV'].includes(s)) return s
+  return null
+}
+
+// The four level wages as an ordered [{level, roman, wage}] list, tolerating an
+// object ({'1':.., level1:.., Level1:..}) or a 4-element array.
+function _levelWages(raw) {
+  if (!raw || typeof raw !== 'object') return []
+  const out = []
+  for (const n of [1, 2, 3, 4]) {
+    const w = Array.isArray(raw)
+      ? raw[n - 1]
+      : (raw[n] ?? raw[String(n)] ?? raw['level' + n] ?? raw['Level' + n] ?? raw['level_' + n])
+    const num = _num(w)
+    if (num != null) out.push({ level: n, roman: _ROMAN_LEVEL[n], wage: num })
+  }
+  return out
+}
+
+// Honest caveat list: structured DOL flags first (a broadened / statewide /
+// national geography fallback; a High/Annual OEWS label), then any freeform
+// caveat strings the backend already localized. Each entry is either
+// { code } (UI localizes it) or { text } (render verbatim).
+function _wageCaveats(p) {
+  const out = []
+  const geo = _num(p.geo_level ?? p.geoLvl ?? p.geo_lvl)
+  if (geo === 2) out.push({ code: 'geo_broadened' })
+  else if (geo === 3) out.push({ code: 'geo_statewide' })
+  else if (geo != null && geo >= 4) out.push({ code: 'geo_national' })
+  const label = String(p.label || '').toLowerCase()
+  if (label.includes('high')) out.push({ code: 'label_high' })
+  if (label.includes('annual')) out.push({ code: 'label_annual' })
+  const extra = Array.isArray(p.caveats) ? p.caveats : []
+  for (const c of extra) {
+    if (typeof c === 'string' && c.trim()) out.push({ text: c.trim() })
+    else if (c && typeof c === 'object' && (c.text || c.message)) {
+      out.push({ text: String(c.text || c.message).trim() })
+    }
+  }
+  return out
+}
+
+// Normalize a wage-analysis payload into an honest display model. Marks itself
+// unavailable (honest-degrade) unless it actually carries the four level wages.
+export function wageLevelView(payload) {
+  const p = payload && typeof payload === 'object' ? payload : {}
+  const levels = _levelWages(p.level_wages ?? p.levels ?? p.levelWages)
+  const explicitlyUnavailable = p.available === false || p.unavailable === true
+  const meets = typeof p.meets_prevailing === 'boolean' ? p.meets_prevailing
+    : (typeof p.meets === 'boolean' ? p.meets : null)
+  return {
+    available: !explicitlyUnavailable && levels.length > 0,
+    reason: p.reason || p.message || '',
+    source: p.source || p.provider || '',
+    asOf: p.as_of || p.asOf || '',
+    socCode: p.soc_code || p.socCode || '',
+    socTitle: p.soc_title || p.socTitle || '',
+    areaName: p.area_name || p.areaName || p.area || '',
+    geoLevel: _num(p.geo_level ?? p.geoLvl ?? p.geo_lvl),
+    levels,
+    wageUnit: p.wage_unit || p.unit || 'year',
+    offeredWage: _num(p.offered_wage ?? p.offeredWage ?? p.wage_offer),
+    offeredUnit: p.offered_unit || p.offeredUnit || p.wage_offer_unit || '',
+    computedLevel: _normLevel(p.computed_level ?? p.computedLevel ?? p.wage_level),
+    meetsPrevailing: meets,
+    label: String(p.label || '').trim(),
+    caveats: _wageCaveats(p)
+  }
+}
+
+// Map a NIOCCS probability (0..1) to a confidence tier. The tiers double as an
+// RFE risk signal — a low-confidence top match warns the petitioner to look
+// harder before committing to a code.
+function _confidenceTier(prob) {
+  if (typeof prob !== 'number' || Number.isNaN(prob)) return 'unknown'
+  if (prob >= 0.85) return 'high'
+  if (prob >= 0.5) return 'medium'
+  return 'low'
+}
+
+function _suggestions(raw) {
+  if (!Array.isArray(raw)) return []
+  return raw.map((s) => {
+    const o = s && typeof s === 'object' ? s : {}
+    const probability = _num(o.probability ?? o.Probability ?? o.confidence_score ?? o.score)
+    return {
+      code: String(o.code ?? o.Code ?? o.soc_code ?? o.naics_code ?? '').trim(),
+      title: String(o.title ?? o.Title ?? o.name ?? '').trim(),
+      probability,
+      confidence: _confidenceTier(probability)
+    }
+  }).filter((s) => s.code || s.title)
+}
+
+// Normalize a classify-occupation payload into ranked SOC + NAICS suggestions.
+// confirmRequired is ALWAYS true (the code is a legal representation regardless
+// of confidence); lowConfidence flags a weak top occupation match for extra
+// emphasis — it never suppresses the confirm-required note.
+export function socSuggestionsView(payload) {
+  const p = payload && typeof payload === 'object' ? payload : {}
+  const explicitlyUnavailable = p.available === false || p.unavailable === true
+  const occupation = _suggestions(p.occupation ?? p.occupations ?? p.soc ?? p.Occupation)
+  const industry = _suggestions(p.industry ?? p.industries ?? p.naics ?? p.Industry)
+  return {
+    available: !explicitlyUnavailable && (occupation.length > 0 || industry.length > 0),
+    reason: p.reason || p.message || '',
+    source: p.source || p.provider || '',
+    asOf: p.as_of || p.asOf || '',
+    occupation,
+    industry,
+    confirmRequired: true,
+    lowConfidence: occupation.length > 0 && occupation[0].confidence === 'low'
   }
 }
 

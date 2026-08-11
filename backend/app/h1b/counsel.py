@@ -179,6 +179,143 @@ def _beneficiary_nationality(db, case, parent_answers: dict) -> str:
     return ""
 
 
+# ---------------------------------------------------------------------------
+# Official-data seams (Agent 1 wage_data / Agent 2 occupation). Two RFE signals
+# are upgraded from self-reported to COMPUTED: the OEWS wage LEVEL and the
+# below-prevailing check come from DOL OFLC data (a pure offline computation
+# over the cached wage CSVs); an advisory SOC-mismatch signal is grounded on
+# CDC NIOCCS. Both providers are imported LAZILY and degrade to nothing on any
+# failure — missing module, missing function, unconfigured data, or a raised
+# error. When the data is unavailable the deterministic rules fall back to the
+# petitioner's self-reported answers, exactly as before this seam existed. A
+# computed result carries the DOL source, its as_of date, and the geo/label
+# caveats (execution-class honesty), and is never written into a filing.
+#
+# Contract consumed (Agent 1 wage_data):
+#   is_available() -> bool
+#   lookup_area(query) -> {"area_code", "ambiguous", "candidates", ...}
+#   compute_wage_level(*, area_code, soc_code, offered_wage, wage_unit) -> dict
+#     carrying level (1-4 or None), level_wages ({1..4} annual or None),
+#     meets_prevailing (bool | None), geo_level, geo_caveat,
+#     invalid_2080_conversion, label, status, source, as_of.
+# Contract consumed (Agent 2 occupation):
+#   classify_nioccs(*, occupation_text, industry_text) -> {"soc": [{code, title,
+#     probability}], "naics": [...], "live": bool, "caveat": str}.
+# ---------------------------------------------------------------------------
+
+def _wage_data_module():
+    try:
+        from . import wage_data
+    except Exception:  # noqa: BLE001 — a missing/broken seam degrades to self-report
+        return None
+    return wage_data
+
+
+def _resolve_area_code(wd, pet: dict) -> str:
+    """Resolve the petitioner's worksite to an OFLC area code via wage_data's
+    Geography lookup. A directly-supplied area code wins; otherwise the worksite
+    COUNTY (then city), state-qualified, is looked up. An ambiguous or unresolved
+    worksite returns "" so the seam degrades to self-report rather than guess a
+    wrong OEWS area — a wrong worksite area is a real filing error."""
+    direct = str(pet.get("worksite_area") or "").strip()
+    if direct:
+        return direct
+    lookup = getattr(wd, "lookup_area", None)
+    if not callable(lookup):
+        return ""
+    state = str(pet.get("worksite_state") or "").strip()
+    for place in (str(pet.get("worksite_county") or "").strip(),
+                  str(pet.get("worksite_city") or "").strip()):
+        if not place:
+            continue
+        query = f"{place}, {state}" if state else place
+        try:
+            out = lookup(query)
+        except Exception:  # noqa: BLE001
+            continue
+        if (isinstance(out, dict) and out.get("area_code")
+                and not out.get("ambiguous")):
+            return str(out["area_code"])
+    return ""
+
+
+def _compute_case_wage(ctx: dict) -> dict | None:
+    """The DOL OEWS wage-level determination for this case (worksite area + SOC +
+    offered wage), or None when the OFLC data is unavailable or the case lacks
+    those inputs. None means 'fall back to the self-reported answers' — never a
+    fabricated level. Every failure degrades to None (honest, offline-first)."""
+    wd = _wage_data_module()
+    is_avail = getattr(wd, "is_available", None)
+    compute = getattr(wd, "compute_wage_level", None)
+    if not (callable(is_avail) and callable(compute)):
+        return None
+    try:
+        if not is_avail():
+            return None
+    except Exception:  # noqa: BLE001
+        return None
+    pet = ctx["petitioner_answers"]
+    soc_code = str(pet.get("soc_code") or "").strip()
+    offered = _num(pet.get("wage_offer"))
+    if not soc_code or offered is None:
+        return None
+    area_code = _resolve_area_code(wd, pet)
+    if not area_code:
+        return None
+    unit = str(pet.get("wage_offer_unit") or "year").strip().lower() or "year"
+    try:
+        result = compute(area_code=area_code, soc_code=soc_code,
+                         offered_wage=offered, wage_unit=unit)
+    except Exception:  # noqa: BLE001 — any signature/runtime failure degrades
+        return None
+    return result if isinstance(result, dict) else None
+
+
+def _computed_label_caveat(cw) -> str | None:
+    """The 'the 2080-hour conversion is invalid' note when DOL labelled the row
+    High/Annual Wage — surfaced, never silently converted away."""
+    if isinstance(cw, dict) and cw.get("invalid_2080_conversion"):
+        return cw.get("status") or (
+            "DOL labelled this wage row un-annualisable (High/Annual Wage); the "
+            "2080-hour conversion is invalid and no level was computed.")
+    return None
+
+
+def _occupation_module():
+    try:
+        from ..providers import occupation
+    except Exception:  # noqa: BLE001
+        return None
+    return occupation
+
+
+def _classified_top_soc(ctx: dict) -> tuple[str, float | None]:
+    """(top CDC NIOCCS SOC code, probability) for the petition's stated duties,
+    or ("", None) when the classifier is unavailable. Cached on ctx so the fact
+    getters reuse the one call the signal made. Network-gated and fully
+    degrading — NIOCCS is 'no longer supported' and is never a hard dependency."""
+    cached = ctx.get("_classified_top_soc")
+    if cached is not None:
+        return cached
+    result: tuple[str, float | None] = ("", None)
+    occ = _occupation_module()
+    classify = getattr(occ, "classify_nioccs", None)
+    pet = _pet(ctx)
+    occ_text = str(pet.get("job_title") or pet.get("job_duties")
+                   or pet.get("duties") or "").strip()
+    if callable(classify) and occ_text:
+        try:
+            out = classify(occupation_text=occ_text, industry_text="")
+            rows = (out or {}).get("soc") or []
+            if rows and isinstance(rows[0], dict):
+                top = rows[0]
+                result = (str(top.get("code") or ""), top.get("probability"))
+        except Exception:  # noqa: BLE001 — InvalidClassificationInput / transport
+            result = ("", None)
+    ctx["_classified_top_soc"] = result
+    return result
+
+
 def case_context(db, case) -> dict:
     """Everything the deterministic signals read, assembled once. Keys:
     parent_answers, petitioner_answers, employer (EmployerProfile row or None),
@@ -194,7 +331,7 @@ def case_context(db, case) -> dict:
     state = checklist_intake.checklist_state(db, case)
     items = [i for i in (state.get("items") or []) if i.get("kind") == "document"]
     degree_facts, degree_sources = _accepted_document_facts(db, case)
-    return {
+    ctx = {
         "parent_answers": parent_answers,
         "petitioner_answers": petitioner_answers,
         "employer": employer,
@@ -209,6 +346,12 @@ def case_context(db, case) -> dict:
         "case_kind": str(parent_answers.get("h1b_case_kind") or ""),
         "today": _today(),
     }
+    # Upgrade wage self-report to a COMPUTED DOL determination when the data and
+    # the case inputs are present; None (the common case) means self-report
+    # governs, unchanged. A monkeypatched ctx that omits this key degrades the
+    # same way.
+    ctx["computed_wage"] = _compute_case_wage(ctx)
+    return ctx
 
 
 # ---------------------------------------------------------------------------
@@ -307,6 +450,13 @@ SENSITIVE_NAICS_PREFIXES = {
 
 
 def _sig_wage_level_is_one(ctx: dict) -> bool:
+    computed = ctx.get("computed_wage")
+    if computed is not None:
+        # DOL data present: the wage level is what the OFLC data computes for the
+        # offered wage, NOT what was self-reported. A None level means the offer
+        # sits below prevailing — a different, more severe signal owns that case,
+        # so this one stays silent rather than double-counting.
+        return computed.get("level") == 1
     level = str(_pet(ctx).get("wage_level") or "").strip().upper()
     return level in ("I", "1", "LEVEL I", "LEVEL 1")
 
@@ -397,6 +547,11 @@ def _sig_current_status_expired(ctx: dict) -> bool:
 
 
 def _sig_wage_offer_below_prevailing(ctx: dict) -> bool:
+    computed = ctx.get("computed_wage")
+    if computed is not None and computed.get("meets_prevailing") is not None:
+        # The DOL Level-I prevailing wage is authoritative over the self-report:
+        # offered_annual < computed Level-I => meets_prevailing False => fire.
+        return computed["meets_prevailing"] is False
     pet = _pet(ctx)
     offer, prevailing = _num(pet.get("wage_offer")), _num(pet.get("prevailing_wage"))
     if offer is None or prevailing is None:
@@ -417,6 +572,21 @@ def _sig_no_pay_evidence_on_file(ctx: dict) -> bool:
             and "employer_financials" not in ctx["satisfied"])
 
 
+def _sig_soc_title_duties_mismatch(ctx: dict) -> bool:
+    # Grounded ONLY on a real classifier disagreement: fires when the petition
+    # states a SOC code AND CDC NIOCCS classifies the stated duties to a
+    # DIFFERENT top SOC. When no SOC is stated, or the classifier is
+    # unavailable, this stays silent — never a presumed mismatch.
+    stated = _squash(_pet(ctx).get("soc_code"))
+    if not stated:
+        return False
+    classified, _prob = _classified_top_soc(ctx)
+    classified = _squash(classified)
+    if not classified:
+        return False
+    return classified != stated
+
+
 SIGNALS = {
     "wage_level_is_one": _sig_wage_level_is_one,
     "job_title_generic_without_qualifier": _sig_job_title_generic,
@@ -434,6 +604,7 @@ SIGNALS = {
     "wage_offer_below_prevailing_wage": _sig_wage_offer_below_prevailing,
     "case_kind_is_extension": _sig_case_kind_is_extension,
     "no_pay_evidence_on_file": _sig_no_pay_evidence_on_file,
+    "soc_title_duties_mismatch": _sig_soc_title_duties_mismatch,
 }
 
 # Per-risk transparency facts (what fired and from where). Petitioner-private
@@ -456,10 +627,25 @@ FACT_GETTERS = {
     "case_kind": lambda ctx: ctx["case_kind"],
     "chinese_degree_documents_on_file": lambda ctx: sorted(
         ctx["satisfied"] & {"degree_certificate", "graduation_certificate"}),
+    # Computed DOL determination (present only when the OFLC data grounded the
+    # signal). The level and the prevailing floor are petitioner-private numbers;
+    # the caveats and source are methodology notes, safe to show either party.
+    "computed_wage_level": lambda ctx: (ctx.get("computed_wage") or {}).get("level"),
+    "computed_prevailing_wage": lambda ctx: (
+        (ctx.get("computed_wage") or {}).get("level_wages") or {}).get(1),
+    "wage_determination_source": lambda ctx: (
+        ctx.get("computed_wage") or {}).get("source"),
+    "wage_geo_caveat": lambda ctx: (ctx.get("computed_wage") or {}).get("geo_caveat"),
+    "wage_label_caveat": lambda ctx: _computed_label_caveat(ctx.get("computed_wage")),
+    # NIOCCS classification grounding for the SOC-mismatch advisory.
+    "stated_soc_code": lambda ctx: _pet(ctx).get("soc_code"),
+    "nioccs_suggested_soc": lambda ctx: _classified_top_soc(ctx)[0],
+    "nioccs_probability": lambda ctx: _classified_top_soc(ctx)[1],
 }
 
 _PETITIONER_PRIVATE_FACT_KEYS = frozenset({"wage_offer", "prevailing_wage",
-                                           "wage_level"})
+                                           "wage_level", "computed_wage_level",
+                                           "computed_prevailing_wage"})
 REDACTED = "[petitioner-private]"
 
 
@@ -496,7 +682,9 @@ RISK_RULES = (
             "Duty-by-duty breakdown mapped to specific degree coursework",
         ],
         "cite": f"{TAXONOMY_DOC} §1 (specialty occupation / wage level), §7",
-        "fact_keys": ("wage_level",),
+        "fact_keys": ("wage_level", "computed_wage_level",
+                      "wage_determination_source", "wage_geo_caveat",
+                      "wage_label_caveat"),
     },
     {
         "ground": "generic_job_title",
@@ -716,7 +904,9 @@ RISK_RULES = (
             "Alternative wage-source documentation where OEWS does not apply",
         ],
         "cite": f"{TAXONOMY_DOC} §4 (LCA obligation), §7 (wage consistency)",
-        "fact_keys": ("wage_offer", "prevailing_wage"),
+        "fact_keys": ("wage_offer", "prevailing_wage", "computed_prevailing_wage",
+                      "wage_determination_source", "wage_geo_caveat",
+                      "wage_label_caveat"),
     },
     {
         "ground": "missing_pay_evidence_for_extension",
@@ -736,6 +926,34 @@ RISK_RULES = (
         ],
         "cite": f"{TAXONOMY_DOC} §5 (maintenance of status), cross-cutting notes",
         "fact_keys": ("case_kind",),
+    },
+    {
+        "ground": "soc_title_duties_mismatch",
+        "title": {"en": "Classifier SOC disagrees with the petition's stated SOC",
+                  "zh-CN": "职业分类系统建议的 SOC 代码与申请填报的不一致",
+                  "zh-Hant": "職業分類系統建議的 SOC 代碼與申請填報的不一致"},
+        "signals": ("soc_title_duties_mismatch",),
+        "base_severity": "advisory",
+        # Pinned advisory: NIOCCS is a signal to CONFIRM, never a determination.
+        # CDC states the service is 'no longer supported', so it never escalates
+        # and never claims more than 'a human should confirm the SOC'.
+        "severity_pinned": True,
+        "uscis_wording": "The SOC code is a legal representation on the "
+                         "ETA-9035/I-129, not a lookup; when CDC NIOCCS "
+                         "classifies the stated duties to a different SOC, an "
+                         "officer may question whether the OES prevailing wage "
+                         "and the specialty-occupation analysis (8 CFR "
+                         "214.2(h)(4)(iii)(A)) used the correct occupation. This "
+                         "is an advisory signal to confirm, not a determination.",
+        "curing_evidence": [
+            "Confirm the SOC code with a licensed attorney before filing",
+            "Reconcile the job duties against the selected SOC's OES definition",
+            "Re-run the OES prevailing wage under the confirmed SOC and MSA",
+        ],
+        "cite": f"{TAXONOMY_DOC} §1 (specialty occupation / SOC selection), "
+                f"§7 (wage consistency)",
+        "fact_keys": ("stated_soc_code", "nioccs_suggested_soc",
+                      "nioccs_probability"),
     },
 )
 
