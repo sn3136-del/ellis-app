@@ -5,7 +5,7 @@
  "snapshot_date": "2026-07-23",
  "source": "curated seed list of real official portals/platforms; every entry starts seed_unverified and is upgraded ONLY by deterministic government-domain verification and/or live credential-free recon. Entries that fail verification stay unreleased.",
  "notes": "One family per real platform. A family may serve many destinations, nationalities and jurisdictions — adapters are built per family and reused. No entry may be invented; uncertain platforms are omitted (their routes stay honestly unresolved).",
- "entry_count": 112,
+ "entry_count": 115,
  "entries": [
   {
    "family_id": "usa-esta",
@@ -225,6 +225,25 @@
     "declared_handoffs": []
    },
    "notes": "Driven live 2026-08-02. The eTA form is public (no account, no CAPTCHA) but it is APPLICANT-CONDITIONAL: after 'are you a representative' and the travel-document type, the wizard asks countryOfCitizenship, and the 34-field form renders only once that is answered. A curated entry gate cannot answer it — SELECT_OPTION takes declared literals only and refuses value_from by design, because a gate must never carry a person into a throwaway observation session. So credential-free recon can reach the wizard but not the form. Canada belongs on the attended-observation path: one consented applicant run reveals the form for their nationality and teaches Ellis the structure. Also note the Virtual Waiting Room, measured at 141s to clear."
+  },
+  {
+   "family_id": "canada-eta-representative",
+   "name": "Canada eTA — authorized representative filing on a client's behalf",
+   "kind": "eta_portal",
+   "operator": "Immigration, Refugees and Citizenship Canada",
+   "operator_kind": "government",
+   "base_url": "https://eta.onlineservices-servicesenligne.apps.cic.gc.ca/eta/?lang=en",
+   "hostnames": [
+    "eta.onlineservices-servicesenligne.apps.cic.gc.ca",
+    "onlineservices-servicesenligne.cic.gc.ca",
+    "www.canada.ca"
+   ],
+   "destinations": [
+    "CAN"
+   ],
+   "supported_outcomes": [],
+   "account_required": false,
+   "notes": "SANCTIONED AGENT CHANNEL (edition-neutral; see docs/SANCTIONED_AGENT_CHANNELS.md). IRCC officially permits an authorized representative to complete and submit an eTA for a client. The channel is the public eTA form's own first eligibility question, 'Are you applying on someone's behalf?' (select#welcome_isRepresentative, option 0 = Yes), which opens the representative declaration; canada-ircc's curated gate answers that same question 'No' because a traveller filing for themselves is the other channel. IRCC also runs an account-based Authorized Paid Representatives Portal; it is deliberately NOT seeded here because no live evidence of its eTA path has been taken, and an unobserved hostname is never claimed. account_required stays false: the representative-declaration path is the public form and has no login wall — the representative's authorization is a professional fact, not a portal credential. Resolution is channel-keyed, never via tourist pair outcomes: supported_outcomes stays empty so pick_family can never bind a tourist pair to the representative channel by accident (self-filing tourists keep resolving to canada-ircc). BUSINESS PREREQUISITE: the declared representative must be authorized under IRPA s.91 (a lawyer or paralegal in good standing, an RCIC, or an UNPAID family member or friend), and a travel professional may NOT charge a fee specifically for submitting an eTA — that fee rule is a release blocker for any paid-agent product framing, not a UI detail. Ellis may deterministically FILL the form; the representative's declaration, the payment and the submit remain personal acts. Hostnames re-checked 2026-08-11: all three resolve on Government of Canada infrastructure (gc.ca GSLB / canada.ca). entry_gate absent: the representative branch has never been probed live."
   },
   {
    "family_id": "uk-eta",
@@ -651,6 +670,24 @@
     "ELECTRONIC_AUTHORIZATION"
    ],
    "account_required": false
+  },
+  {
+   "family_id": "srilanka-eta-thirdparty",
+   "name": "Sri Lanka ETA — Third Party application (agent, airline or relative applies for the traveller)",
+   "kind": "eta_portal",
+   "operator": "Department of Immigration and Emigration (Sri Lanka)",
+   "operator_kind": "government",
+   "base_url": "https://eta.gov.lk/slvisa/",
+   "hostnames": [
+    "eta.gov.lk",
+    "www.eta.gov.lk"
+   ],
+   "destinations": [
+    "LKA"
+   ],
+   "supported_outcomes": [],
+   "account_required": false,
+   "notes": "SANCTIONED AGENT CHANNEL (edition-neutral; see docs/SANCTIONED_AGENT_CHANNELS.md). The state ETA system offers an official 'Third Party' application type: an agent, an airline or a relative may apply on the traveller's behalf, alongside the Individual and Group types. Same state host as srilanka-eta, so the deterministic domain check verifies IDENTITY — it does NOT verify policy stability, and this route's policy is in flux. RE-VERIFY BEFORE ANY RELEASE (unstable): the privatized srilankaevisa.lk operation was reverted to the state-run eta.gov.lk in October 2025 and the before-arrival ETA mandate is SUSPENDED, so whether an ETA is required at all, whether the Third Party type still exists, and what it costs must each be re-observed live before this family is used for anything. Checked 2026-08-11: srilankaevisa.lk does not resolve in DNS; https://eta.gov.lk/ redirects to https://eta.gov.lk/slvisa/ and serves the state 'Online Visa Application' page. Resolution is channel-keyed, never via tourist pair outcomes: supported_outcomes stays empty so pick_family can never bind a tourist pair to the third-party channel (self-filing travellers keep resolving to srilanka-eta). account_required false mirrors srilanka-eta: the state form is public, no agent account exists. Ellis may deterministically FILL the form; payment and submit remain personal acts. entry_gate absent: the Third Party branch has never been probed live."
   },
   {
    "family_id": "nepal-immigration",
@@ -2201,6 +2238,22 @@
     "APPOINTMENT_REQUIRED"
    ],
    "account_required": true
+  },
+  {
+   "family_id": "vfs-registered-agent-appointments",
+   "name": "VFS Global registered travel-partner appointment portal (accredited agent channel)",
+   "kind": "appointment_portal",
+   "operator": "VFS Global",
+   "operator_kind": "contracted_visa_center",
+   "base_url": "https://row1.vfsglobal.com/GlobalAppointment/Account/RegisteredLogin",
+   "hostnames": [
+    "row1.vfsglobal.com",
+    "row4.vfsglobal.com"
+   ],
+   "destinations": [],
+   "supported_outcomes": [],
+   "account_required": true,
+   "notes": "SANCTIONED AGENT CHANNEL (edition-neutral; see docs/SANCTIONED_AGENT_CHANNELS.md). COMMERCIAL operator — VFS Global is a contractor, never quoted as the government. Distinct from the public vfs-global family: this is the registered travel-partner APPOINTMENT channel, where an accredited agent signs in, adds its customers and books a calendar slot for them (row1.vfsglobal.com/GlobalAppointment/Account/RegisteredLogin and row4.vfsglobal.com/GAR1Ph1Appt/Account/RegisteredLogin). vfsglobal.com is not on the government allowlist, so this family stays seed_unverified until a destination government's own page links it (mark_official_link_verified) — that is the intended fail-closed outcome, not a gap to paper over. BUSINESS PREREQUISITE, NOT A CODE GAP: no registered-agent account is held, so nothing here is releasable; obtaining the account is a contractual step for the operating company, and VFS expires a registration after 100 inactive days, which makes 'the account still works' a recurring pre-flight check rather than a one-time setup. destinations is deliberately EMPTY: which client governments an agent may book for is a property of that account, not of the portal — and an empty list also makes the release_gates destination check unpassable, so no build can escape while the account does not exist. supported_outcomes empty for the same reason as the other agent channels: appointment resolution is channel-keyed and must never be bound to a tourist pair by assign_families_to_pairs. account_required true: the registered-agent login is a real credential wall, and those credentials are a personal act of the agent staff member — never automated, never stored against an applicant. Hostnames checked 2026-08-11: both resolve on VFS Global's own vfsglobal.com apex behind the same Cloudflare front as visa.vfsglobal.com and answer over HTTPS. entry_gate absent: everything past the login wall is unobservable without the account, and a gate may never be invented."
   },
   {
    "family_id": "tlscontact",

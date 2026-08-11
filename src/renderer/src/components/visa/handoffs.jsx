@@ -130,7 +130,10 @@ export function usePortalLiveView(client, caseId, opts = {}) {
                     'Ellis could not rebuild the portal page.')
           })
       }
-      if (s && s.mode === 'browserbase' && s.live_view_available) {
+      // live_view_available is the server's own answer for whichever cloud
+      // browser serves this session; matching a vendor name here would hide a
+      // real live view behind the instruction panel.
+      if (s && s.live_view_available) {
         const lv = await client.browserLiveView(caseId)
         mintedRef.current = Date.now()
         setUrl(lv.url); setNonce((n) => n + 1); setState('embedded'); setNote('')

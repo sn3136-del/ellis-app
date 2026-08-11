@@ -5,6 +5,13 @@ Playwright, with Stagehand as a validated fallback (activation:
 BROWSERBASE_API_KEY). Live View surfaces CAPTCHA/OTP/verification/identity/
 payment/3-DS/declaration to the applicant.
 
+Second source: Steel (Apache-2.0, self-hostable) serves the same CDP-shaped
+session when ELLIS_BROWSER_PROVIDER=steel and Steel is actually configured. The
+choice is a dispatch at the top of the lifecycle functions below and nothing
+more — every Browserbase path here is untouched, and an unconfigured stack
+still falls through to `local_handoff`. Neither provider will ever solve a
+CAPTCHA or wear a stealth fingerprint; see providers/steel_browser.py.
+
 Local fallback: a `local_handoff` descriptor the Electron client renders as an
 instruction panel while the applicant completes the step on the real portal in
 their own browser. Sensitive values are never logged, recorded, or sent to an
@@ -18,6 +25,7 @@ import time
 from dataclasses import dataclass
 
 from ..config import settings
+from . import steel_browser
 
 HANDOFF_KINDS = {
     "captcha", "otp", "email_verification", "login_challenge", "identity",
@@ -37,6 +45,11 @@ HANDOFF_KINDS = {
 class LiveViewHandoff:
     kind: str
     reason: str
+    # CLIENT vocabulary, not a vendor claim: it selects the embedded live-view
+    # renderer vs the instruction panel. Which provider actually serves that
+    # view is reported by capabilities()["browser_provider"] and by
+    # active_provider() below. The strings are frozen — the Electron client and
+    # the Node workflow both switch on them.
     mode: str            # "browserbase_liveview" | "local_handoff"
     token: str
     expires_at: float
@@ -47,8 +60,43 @@ class LiveViewHandoff:
                 "token": self.token, "expires_at": self.expires_at, "url": self.url}
 
 
+# --- provider dispatch -------------------------------------------------------
+# Steel is used only when the deployment asks for it BY NAME and Steel is
+# actually reachable; anything else keeps the Browserbase behaviour below
+# exactly as it was, and an unconfigured stack still lands on local_handoff.
+# A provider is never inferred from a stray key: an operator who sets
+# STEEL_API_KEY while ELLIS_BROWSER_PROVIDER is unset keeps Browserbase.
+PROVIDER_STEEL = "steel"
+PROVIDER_BROWSERBASE = "browserbase"
+PROVIDER_LOCAL = "local_handoff"
+
+# Session modes that mean "a real remote provider session with a live view",
+# as opposed to the "local" descriptor. Callers that gate a live view on the
+# stored mode should ask is_remote_mode() rather than compare to one vendor.
+REMOTE_MODES = ("browserbase", "steel")
+
+
+def is_remote_mode(mode: str) -> bool:
+    return str(mode or "") in REMOTE_MODES
+
+
+def _steel_active() -> bool:
+    return ((settings().browser_provider or "").strip().lower() == PROVIDER_STEEL
+            and steel_browser.is_configured())
+
+
+def active_provider() -> str:
+    """What a session opened right now would ACTUALLY run on:
+    'steel' | 'browserbase' | 'local_handoff'."""
+    if _steel_active():
+        return PROVIDER_STEEL
+    return PROVIDER_BROWSERBASE if settings().browserbase_api_key else PROVIDER_LOCAL
+
+
 def is_configured() -> bool:
-    return bool(settings().browserbase_api_key)
+    # True when a real remote session (and therefore a live view) is available
+    # from whichever provider this deployment selected.
+    return _steel_active() or bool(settings().browserbase_api_key)
 
 
 _BB_BASE = "https://api.browserbase.com/v1"
@@ -62,6 +110,8 @@ SESSION_TIMEOUT_SECONDS = int(os.getenv("ELLIS_BROWSER_SESSION_TIMEOUT", "3600")
 def create_session() -> dict:
     """Create an ISOLATED Browserbase session (one per applicant/case). Returns
     {id, connect_url} for a live session, or a local descriptor when unconfigured."""
+    if _steel_active():
+        return steel_browser.create_session()
     s = settings()
     if not s.browserbase_api_key:
         return {"id": "local-" + secrets.token_hex(6), "mode": "local", "connect_url": None}
@@ -117,7 +167,12 @@ def create_session() -> dict:
 def session_status(session_id: str) -> str:
     """The PROVIDER's own status for a session ('RUNNING', 'COMPLETED', …).
     '' when unknown. A session Ellis believes is open may already be gone —
-    the applicant must never be sent to a window that no longer exists."""
+    the applicant must never be sent to a window that no longer exists.
+
+    Provider-native wording ('RUNNING' here, 'live' on Steel): read it through
+    session_alive() rather than comparing strings across providers."""
+    if _steel_active():
+        return steel_browser.session_status(session_id)
     s = settings()
     if not s.browserbase_api_key or not session_id or session_id.startswith("local-"):
         return ""
@@ -137,6 +192,9 @@ def session_alive(session_id: str) -> bool:
     running. An unknown status (provider unreachable, no API key) counts as
     alive: a probe that cannot see the truth must never destroy a working
     session — the caller's own connect attempt remains the real test."""
+    if _steel_active():
+        # Steel's own vocabulary, applied by Steel's own rule.
+        return steel_browser.session_alive(session_id)
     status = session_status(session_id).upper()
     if not status:
         return True
@@ -153,6 +211,12 @@ def _default_project() -> str:
 
 
 def close_session(session_id: str) -> None:
+    # A provider switched mid-flight cannot release the OTHER provider's
+    # sessions (the ids are opaque and look alike); those expire on their own
+    # session timeout. Switching providers is an operator action between runs.
+    if _steel_active():
+        steel_browser.close_session(session_id)
+        return
     s = settings()
     if not s.browserbase_api_key or session_id.startswith("local-"):
         return
@@ -170,6 +234,8 @@ def session_connect_info(session_id: str) -> dict:
     """Re-attach info for an EXISTING session ({id, mode, connect_url}) so a
     later request can drive the SAME applicant portal session (resume after a
     question/CAPTCHA). Raises if the session is gone or not running."""
+    if _steel_active():
+        return steel_browser.session_connect_info(session_id)
     s = settings()
     if not s.browserbase_api_key or session_id.startswith("local-"):
         raise RuntimeError("no live Browserbase session to re-attach")
@@ -189,6 +255,8 @@ def session_connect_info(session_id: str) -> dict:
 def live_view_url(session_id: str) -> str | None:
     """Fetch the short-lived Live View (debugger) URL for a session. This is the
     surface the applicant uses for CAPTCHA/OTP/payment/declaration. Never emailed."""
+    if _steel_active():
+        return steel_browser.live_view_url(session_id)
     s = settings()
     if not s.browserbase_api_key or session_id.startswith("local-"):
         return None

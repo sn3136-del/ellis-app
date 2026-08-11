@@ -31,7 +31,9 @@ _SENSITIVE_VALUE = re.compile(
     r"|eyJ[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-.]+"  # JWTs
     r"|AKIA[0-9A-Z]{16}"                      # AWS
     r"|vault://\S+"                           # vault refs stay internal
-    r"|https?://\S*(browserbase|liveview|live-view)\S*"  # Live View URLs
+    # Live View URLs, whichever provider serves them. `/v1/sessions/` covers a
+    # self-hosted Steel viewer, which carries no vendor name at all.
+    r"|https?://\S*(browserbase|liveview|live-view|steel\.dev|/v1/sessions/)\S*"
     r"|[A-Z0-9<]{6,}<{2,}[A-Z0-9<]*"          # MRZ fragments
     r"|\b(?=[A-Z0-9]*[A-Z])(?=[A-Z0-9]*\d)[A-Z0-9]{8,9}\b"  # alnum passport-like ids
     r"|\b\d{8,9}\b"                            # all-numeric passport/ID numbers (e.g. US 9-digit)

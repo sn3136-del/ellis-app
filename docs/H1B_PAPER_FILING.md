@@ -1,4 +1,46 @@
-# H-1B I-129 Paper (Mail) Filing — verified 2026-08-09
+# H-1B I-129 Paper (Mail) Filing — verified 2026-08-09, re-verified 2026-08-10
+
+## Mandatory e-filing IFR (eff. 2026-08-11): paper is STILL ALLOWED
+
+"Mandatory Electronic Filing (e-Filing)", IFR, 91 FR 51924 (Aug 11 2026), RIN
+1615-AD19, FR Doc 2026-16313. The rule is ENABLING, not self-executing — its
+own words: "This rule does not impose or announce a requirement to e-file any
+benefit request, but this rule authorizes USCIS to do so."
+
+New 8 CFR 103.2(a)(1)(ii) makes e-filing mandatory only where ALL THREE hold:
+(A) the form has been e-filable for 180+ days, (B) USCIS has affirmatively
+mandated it, and (C) USCIS published 60 days' advance notice on uscis.gov.
+As of 2026-08-10, **no form is designated** — (B) and (C) have happened for
+nothing. A second gate applies too: no mandate may take effect until the PRA
+information-collection process concludes with OMB.
+
+So: paper I-129 extensions/amendments remain valid, and the concurrent paper
+package (I-129 + dependents' I-539/I-539A in one envelope) is intact — the
+main reason to choose paper.
+
+WATCH ITEM (not a blocker): I-129, I-907 and I-539 are all on the voluntary
+e-filing list, so all three are ELIGIBLE for designation at any time on 60
+days' notice. Ellis monitors uscis.gov/newsroom + the Federal Register feed
+for a designation notice; if I-129 is designated the paper path must be gated
+and the packet feature switched to the online-filing prep path.
+
+If a mandate ever lands, the only escape is a discretionary waiver on Form
+I-936 ($25, undue-hardship standard) — and DHS says business entities and
+represented parties will generally NOT qualify, which is exactly Ellis's
+petitioner population. There is no disability, no-internet, batch, concurrent
+filing, or G-28 exception in the rule.
+
+## Signature rules cross-check (eff. 2026-07-10)
+
+"Signatures on Immigration Benefit Requests", 91 FR 25479, amended 8 CFR
+103.2(a)(7)(ii)(A) so a request later found to carry an invalid signature may
+be REJECTED **or DENIED** — a defect is no longer merely a rejection. Encode
+two consequences: (1) an electronic signature is valid ONLY inside a USCIS
+online filing flow; (2) an attorney-filed PDF upload (PDFi) still requires a
+handwritten wet-ink signature on the uploaded PDF. Everything Ellis prepares
+for paper or PDF upload leaves the signature line blank for a pen.
+
+
 
 Paper filing is fully permitted in 2026 for H-1B extensions and amendments;
 online filing is optional, never mandatory. Ellis offers BOTH paths as

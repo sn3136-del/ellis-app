@@ -78,6 +78,9 @@ app.include_router(_factory_learning_router)
 # H1B wage-level + occupation classification from official DOL/CDC/O*NET data.
 from .h1b.wage_api import router as _h1b_wage_router  # noqa: E402
 app.include_router(_h1b_wage_router)
+# LCA Public Access File assembly + posting notice (20 CFR 655.734/655.760).
+from .h1b.paf_api import router as _h1b_paf_router  # noqa: E402
+app.include_router(_h1b_paf_router)
 
 
 @app.on_event("startup")
@@ -1028,7 +1031,10 @@ def create_browser_session(application_id: str, response: Response,
     # A session Ellis records as open may already have ended at the provider
     # (lifetime elapsed). Reconcile before handing the applicant a window:
     # a dead session is closed and a fresh one opened, never pretended.
-    if row is not None and row.mode == "browserbase" and not bb.session_alive(
+    # is_remote_mode, not a vendor literal: a session opened on Steel is stored
+    # with its own provenance ("steel"), and probing it as if it were local
+    # would strand the applicant on a window Ellis refuses to reconcile.
+    if row is not None and bb.is_remote_mode(row.mode) and not bb.session_alive(
             row.provider_session_id):
         row.status = "closed"
         db.commit()
@@ -1045,7 +1051,11 @@ def create_browser_session(application_id: str, response: Response,
     run_active = active_run is not None and active_run.status in ("queued", "running")
     if row is None and run_active:
         response.headers["Cache-Control"] = "no-store"
-        return {"id": "", "mode": "browserbase" if bb.is_configured() else "local",
+        # The provider a session opened right now would ACTUALLY run on. No
+        # session exists yet, so this names the provider, never a vendor the
+        # run is not using.
+        return {"id": "", "mode": (bb.active_provider() if bb.is_configured()
+                                   else "local"),
                 "status": "pending", "fresh": False, "run_opening": True,
                 "live_view_available": False,
                 "browserbase_configured": bb.is_configured()}
@@ -1076,7 +1086,7 @@ def create_browser_session(application_id: str, response: Response,
     # The PROVIDER's session id is never exposed to the client (pinned by
     # test_browser_sessions) — only Ellis's own opaque row id.
     return {"id": row.id, "mode": row.mode, "status": row.status, "fresh": fresh,
-            "live_view_available": row.mode == "browserbase",
+            "live_view_available": bb.is_remote_mode(row.mode),
             "browserbase_configured": bb.is_configured()}
 
 
@@ -1092,11 +1102,11 @@ def browser_session_live_view(application_id: str, response: Response,
     if row is None:
         raise HTTPException(404, detail={"reason": "no_session",
                                          "message": "no open browser session for this case"})
-    if row.mode != "browserbase":
+    if not bb.is_remote_mode(row.mode):
         raise HTTPException(404, detail={
             "reason": "not_configured",
             "message": "live view unavailable: session is local mode "
-                       "(Browserbase not configured)"})
+                       "(no cloud browser provider configured)"})
     url = bb.live_view_url(row.provider_session_id)
     if not url:
         # The session ended at the provider: say so honestly (it is NOT a
@@ -1128,11 +1138,12 @@ def browser_session_scroll(application_id: str, body: ViewerScrollBody,
     _owned(db, p, application_id)
     from .portal import viewer_gestures
     from .portal_store import current_browser_session
+    from .providers import browser as bb
     row = current_browser_session(db, application_id)
     if row is None:
         raise HTTPException(404, detail={"reason": "no_session",
                                          "message": "no open browser session for this case"})
-    if row.mode != "browserbase":
+    if not bb.is_remote_mode(row.mode):
         raise HTTPException(404, detail={"reason": "not_configured",
                                          "message": "scroll relay needs a live provider session"})
     dy = max(-4000.0, min(4000.0, float(body.delta_y or 0)))
@@ -1704,7 +1715,7 @@ def _attach_applicant_window(db, application_id: str, hostnames: list[str]):
     from .portal_store import current_browser_session
     from .providers import browser as bb
     row = current_browser_session(db, application_id)
-    if row is None or row.mode != "browserbase":
+    if row is None or not bb.is_remote_mode(row.mode):
         raise HTTPException(409, detail={
             "reason": "no_secure_window",
             "detail": "open the secure window first"})
@@ -3184,7 +3195,7 @@ def case_progress(application_id: str, db=Depends(get_session),
     from .portal_store import current_browser_session
     session_row = current_browser_session(db, application_id)
     # "Secure portal session active" must mean the PROVIDER still has it.
-    if session_row is not None and session_row.mode == "browserbase" and \
+    if session_row is not None and bb_probe.is_remote_mode(session_row.mode) and \
             not bb_probe.session_alive(session_row.provider_session_id):
         session_row = None
     retryable = portal_queue.retry_available(db, app_row, exec_row)

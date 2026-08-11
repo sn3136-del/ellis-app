@@ -152,6 +152,35 @@ class Settings:
         # is ever fabricated). NIOCCS and NAICS validation need no key.
         self.onet_api_key = os.getenv("ONET_API_KEY", "")
 
+        # --- Browser session provider (Browserbase | Steel) ---
+        # Steel is an Apache-2.0 second source with the same CDP shape, self
+        # hostable. CAPTCHA solving and stealth stay OFF on every Ellis session
+        # regardless of provider: a government filing needs a clean,
+        # attributable session, and solving a CAPTCHA for an applicant is a
+        # personal act Ellis never performs.
+        self.browser_provider = os.getenv("ELLIS_BROWSER_PROVIDER", "browserbase")
+        self.steel_api_key = os.getenv("STEEL_API_KEY", "")
+        self.steel_base_url = os.getenv("STEEL_BASE_URL", "")  # self-host origin
+
+        # --- Official US government reference feeds (no key, no vendor) ---
+        # Federal Register API v1: rule changes that move fees/windows/editions.
+        # USCIS H-1B Employer Data Hub: an employer's own filing history.
+        self.federal_register_enabled = os.getenv(
+            "ELLIS_FEDERAL_REGISTER", "on").strip().lower() not in ("0", "off", "false")
+        self.uscis_employer_hub_enabled = os.getenv(
+            "ELLIS_USCIS_EMPLOYER_HUB", "on").strip().lower() not in ("0", "off", "false")
+
+        # --- Third-party corroboration / verification (all optional) ---
+        # Each is a SECOND opinion only. Unset → the provider reports
+        # unavailable and Ellis's own curated answer stands; nothing is ever
+        # fabricated and no third party is ever quoted as the government.
+        self.sherpa_api_key = os.getenv("SHERPA_API_KEY", "")          # travel requirements
+        self.regula_api_key = os.getenv("REGULA_API_KEY", "")          # prior-visa sticker read
+        self.regula_base_url = os.getenv("REGULA_BASE_URL", "")        # on-prem option
+        self.everify_client_id = os.getenv("EVERIFY_CLIENT_ID", "")    # DHS E-Verify (employer)
+        self.everify_client_secret = os.getenv("EVERIFY_CLIENT_SECRET", "")
+        self.credential_eval_partner = os.getenv("ELLIS_CREDENTIAL_EVAL", "")  # wes|ece|''
+
         # --- Temporal ---
         self.temporal_host = os.getenv("TEMPORAL_HOST", "")  # empty → DB workflow runner
 
@@ -186,6 +215,16 @@ def capabilities() -> dict:
     # Imported lazily: the provider imports this module, and its is_configured()
     # is the single definition of "Torch can actually be reached".
     from .providers.torch_status import is_configured as _torch_configured
+    # Same rule for every provider added since: the PROVIDER's own
+    # is_configured() is the single definition of "this can actually answer".
+    # A config flag is a claim, and a claim is not a capability.
+    from .providers import browser as _browser
+    from .providers import (credential_eval as _credential_eval,
+                            document_read as _document_read,
+                            everify as _everify,
+                            federal_register as _federal_register,
+                            requirements_oracle as _requirements_oracle,
+                            uscis_employer_hub as _employer_hub)
     return {
         "auth": "clerk" if s.clerk_secret_key else "dev_token",
         "database": "postgres" if s.database_url.startswith("postgres") else "sqlite",
@@ -200,13 +239,44 @@ def capabilities() -> dict:
         "onet_occupation_search": bool(s.onet_api_key),
         # Read-only tracking of filed government receipts. Never a filing path.
         "uscis_case_status": _torch_configured(),
+        # Which cloud browser serves applicant sessions. Both speak CDP; the
+        # provider choice never changes what Ellis is willing to do in a
+        # session (no CAPTCHA solving, no stealth, personal acts stay personal).
+        # Asked of the dispatch that actually opens sessions, so this can never
+        # drift from what a session would really run on; the Browserbase kill
+        # switch still forces the local path.
+        "browser_provider": (
+            "local_handoff"
+            if (_browser.active_provider() == "browserbase" and ks["browserbase"])
+            else _browser.active_provider()),
+        # Key-free official US reference feeds. The Federal Register needs only
+        # the operator switch; the Employer Data Hub ALSO needs a cached
+        # government file on disk, because USCIS publishes no API for it — the
+        # switch alone would advertise lookups this deployment cannot answer.
+        "federal_register": _federal_register.is_configured(),
+        "uscis_employer_hub": _employer_hub.is_configured(),
+        "uscis_employer_hub_enabled": s.uscis_employer_hub_enabled,
+        # Optional second opinions; each is honestly unavailable when unset and
+        # never overrides Ellis's own curated, sourced answer.
+        "sherpa_requirements": _requirements_oracle.is_configured(),
+        "regula_document_read": _document_read.is_configured(),
+        "everify_employer": _everify.is_configured(),
+        # The partner Ellis actually holds a referral for, not the raw env
+        # value: an unrecognized name is no partner at all.
+        "credential_evaluation_partner": (_credential_eval.configured_partner()
+                                          or "none"),
         "storage": "s3_kms" if s.s3_bucket else "local_encrypted",
         "workflow_engine": "temporal" if s.temporal_host else "db_runner",
         "fallbacks": {
             "kimi": "live" if (s.moonshot_api_key and s.kimi_enabled) else "local_test_provider",
             "ocr": "live" if (s.google_cloud_project and s.document_ai_ocr_processor) else "local_mrz_provider",
             "payment": "stripe_issuing" if (s.stripe_secret_key and s.issuing_approved) else "applicant_payment_window",
-            "handoff": "browserbase_liveview" if s.browserbase_api_key else "local_handoff",
+            # Client vocabulary for "an embedded live view", whichever provider
+            # serves it — the same string create_handoff() actually emits, so
+            # this must ask the same question it does (browser.is_configured()),
+            # not a single vendor's key. The real provider is `browser_provider`.
+            "handoff": ("browserbase_liveview" if _browser.is_configured()
+                        else "local_handoff"),
             "authorization": "docusign" if s.docusign_integration_key else "in_app_authorization",
             "case_status": "uscis_torch" if _torch_configured() else "tracking_unavailable",
         },
