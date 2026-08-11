@@ -7,6 +7,7 @@ from sqlalchemy import select
 
 from app import models
 from app.h1b import assistant
+from app.h1b import forms as h1b_forms
 from app.h1b import models as h1b_models
 from app.h1b.disclaimer import disclaimer
 from app.providers.kimi import (ALLOWLISTED_TOOLS, PROHIBITED_FOR_MODEL,
@@ -438,4 +439,10 @@ def test_prepare_form_real_seam_fills_and_walls(client, db):
                                  {"case_id": case_id, "form_key": "ds-160"})
     assert act["ok"] is False
     assert act["output"]["status"] == 404
-    assert act["output"]["detail"]["known_forms"] == ["i-129", "eta-9035"]
+    # The known-form vocabulary is FORM_KEYS itself, so it grows with the
+    # product (the ETA-9141 PWD request joined it with the FLAG build).
+    known = act["output"]["detail"]["known_forms"]
+    assert known == list(h1b_forms.FORM_KEYS)
+    # ...and the vocabulary really is the three government forms Ellis prepares,
+    # so a form silently dropping out of it still fails here.
+    assert set(known) == {"i-129", "eta-9035", "eta-9141"}

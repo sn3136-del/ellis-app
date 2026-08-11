@@ -81,6 +81,10 @@ app.include_router(_h1b_wage_router)
 # LCA Public Access File assembly + posting notice (20 CFR 655.734/655.760).
 from .h1b.paf_api import router as _h1b_paf_router  # noqa: E402
 app.include_router(_h1b_paf_router)
+# Appointment cockpit: eligibility triage, pre-stage, group roster, availability.
+# Ellis prepares everything; the authorized human performs the booking action.
+from .appt_api import router as _appt_router  # noqa: E402
+app.include_router(_appt_router)
 
 
 @app.on_event("startup")

@@ -42,11 +42,13 @@ from ..providers import pdfgen
 from . import filing as h1b_filing
 from . import models as h1b_models
 
-FORM_KEYS = ("i-129", "eta-9035")
+FORM_KEYS = ("i-129", "eta-9035", "eta-9141")
 
 # Which pipeline step each form's answers are assembled for. The step row must
-# exist in the case's plan (every H1B plan carries lca + i129).
-STEP_BY_FORM = {"i-129": "i129", "eta-9035": "lca"}
+# exist in the case's plan (every H1B plan carries lca + i129). The ETA-9141
+# (prevailing wage request) precedes the LCA and states the same job/worksite
+# facts, so it is assembled for the lca step.
+STEP_BY_FORM = {"i-129": "i129", "eta-9035": "lca", "eta-9141": "lca"}
 
 PREPARED_DOC_TYPE = "prepared_form"
 
@@ -54,6 +56,16 @@ PREPARED_DOC_TYPE = "prepared_form"
 # electronically in FLAG. ASCII hyphen (the minimal PDF writer is latin-1).
 LCA_WATERMARK = ("PREPARATION COPY - the LCA is filed electronically in FLAG "
                  "(flag.dol.gov). This printout is for review only.")
+
+# The ETA-9141 prevailing wage request is likewise made in FLAG, so its printout
+# is a review artifact too.
+PWD_WATERMARK = ("PREPARATION COPY - the prevailing wage request (ETA-9141) is "
+                 "made electronically in FLAG (flag.dol.gov). This printout is "
+                 "for review only.")
+
+# form_key -> the preparation-copy watermark stamped on page 1. A form absent
+# here (the I-129, which really is mailed on paper) is left unstamped.
+PREPARATION_WATERMARKS = {"eta-9035": LCA_WATERMARK, "eta-9141": PWD_WATERMARK}
 
 # ---------------------------------------------------------------------------
 # Localized user-facing strings (en + zh-CN + zh-Hant, the sibling contract).
@@ -288,9 +300,11 @@ def fill_form(form_key: str, answers: dict) -> dict:
     """Fill the government's own blank and return {pdf, filled_count,
     total_mapped, missing, human_only}. I-129: the /XFA key is stripped after
     filling (the hybrid static-XFA form renders blank in Acrobat otherwise) and
-    NeedAppearances is set so every value and tick is visible. ETA-9035: the
-    first page carries the preparation-copy watermark; Section J signature/date
-    and Section L are human-only / unmapped and stay empty."""
+    NeedAppearances is set so every value and tick is visible. ETA-9035 and
+    ETA-9141: the first page carries the preparation-copy watermark (both are
+    really filed in FLAG); the 9035's Section J signature/date and Section L are
+    human-only / unmapped and stay empty, and the 9141's DOL-use Section F
+    carries no field at all."""
     from pypdf import PdfReader, PdfWriter
     from pypdf.generic import NameObject
 
@@ -313,8 +327,9 @@ def fill_form(form_key: str, answers: dict) -> dict:
             # disappears.
             del acroform[NameObject("/XFA")]
 
-    if form_key == "eta-9035":
-        overlay = PdfReader(BytesIO(pdfgen.text_pdf([LCA_WATERMARK], title="")))
+    watermark = PREPARATION_WATERMARKS.get(form_key)
+    if watermark:
+        overlay = PdfReader(BytesIO(pdfgen.text_pdf([watermark], title="")))
         writer.pages[0].merge_page(overlay.pages[0])
 
     buf = BytesIO()
@@ -402,6 +417,14 @@ def answers_for_form(db, parent: models.VisaApplication, form_key: str) -> dict:
             alias = src.get("expiry_date") or src.get("passport_expiry_date")
             if alias not in (None, ""):
                 out["passport_expiry"] = alias
+    elif form_key == "eta-9141":
+        # The PWD request's own derivations (worksite key aliases, the case's
+        # classification symbol, the DOL SOC title) live with the form that owns
+        # them. Lazy import: flag_forms imports this module. Both entry points -
+        # this generic one and flag_forms.prepare_pwd_request - therefore fill
+        # from the SAME dict; the two can never drift apart.
+        from . import flag_forms
+        out = flag_forms.derive_pwd_answers(parent, out)["answers"]
     return out
 
 
