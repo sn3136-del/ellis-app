@@ -397,6 +397,8 @@ export function createVisaClient(session) {
     // disclaimer; per-party authorization is enforced server-side — a denied
     // action surfaces its honest 403/409 reason, never a silent no-op.
     h1bCreateCase: (body) => call('POST', '/h1b/cases', session, body),
+    h1bClaimParty: (caseId, role) =>
+      call('POST', `/h1b/cases/${caseId}/party/${role}/claim`, session),
     h1bEmployerProfiles: () => call('GET', '/h1b/employer-profiles', session),
     h1bCreateEmployerProfile: (body) => call('POST', '/h1b/employer-profiles', session, body),
     // Honest per-step status: blocked/ready/in_progress/awaiting_government/

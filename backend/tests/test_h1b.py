@@ -203,6 +203,56 @@ def test_parties_created_one_per_role(client, db):
     assert sorted(p.role for p in rows) == ["beneficiary", "petitioner"]
 
 
+def test_default_creation_binds_caller_as_beneficiary(client, db):
+    out = _create_case(client)
+    rows = {p.role: p for p in db.execute(select(h1b_models.CaseParty).where(
+        h1b_models.CaseParty.application_id == out["case_id"])).scalars().all()}
+    assert rows["beneficiary"].user_id == "user1"
+    assert rows["petitioner"].user_id == ""
+
+
+def test_employer_creation_binds_caller_as_petitioner(client, db):
+    """The employer-console bug: creating a case bound the EMPLOYER as the
+    worker, so their own console addressed them as the employee. acting_as
+    'petitioner' binds the creator to the filing seat and leaves the worker's
+    seat open (invited) until they join."""
+    out = _create_case(client, acting_as="petitioner")
+    rows = {p.role: p for p in db.execute(select(h1b_models.CaseParty).where(
+        h1b_models.CaseParty.application_id == out["case_id"])).scalars().all()}
+    assert rows["petitioner"].user_id == "user1"
+    assert rows["beneficiary"].user_id == ""
+    assert rows["beneficiary"].status == "invited"
+
+
+def test_creation_rejects_unknown_acting_as(client):
+    r = client.post("/h1b/cases", json={
+        "case_kind": "extension", "beneficiary_full_name": "X",
+        "beneficiary_email": "x@example.com", "acting_as": "attorney"},
+        headers=AUTH)
+    assert r.status_code == 422
+
+
+def test_claim_binds_unbound_seat_and_is_idempotent(client, db):
+    out = _create_case(client, acting_as="petitioner")  # beneficiary unbound
+    case_id = out["case_id"]
+    # A different org member (the worker) claims the open beneficiary seat.
+    r = client.post(f"/h1b/cases/{case_id}/party/beneficiary/claim",
+                    headers=PETITIONER_AUTH)
+    assert r.status_code == 200 and r.json()["claimed"] is True
+    # Claiming again is a no-op, never an error.
+    r = client.post(f"/h1b/cases/{case_id}/party/beneficiary/claim",
+                    headers=PETITIONER_AUTH)
+    assert r.status_code == 200 and r.json()["already_yours"] is True
+    # A seat someone else operates is never transferable by claim.
+    r = client.post(f"/h1b/cases/{case_id}/party/beneficiary/claim",
+                    headers=AUTH)
+    assert r.status_code == 409
+    # And the claim never crosses orgs.
+    r = client.post(f"/h1b/cases/{case_id}/party/petitioner/claim",
+                    headers=AUTH2)
+    assert r.status_code in (403, 404)
+
+
 def test_pipeline_requires_owner_org(client):
     out = _create_case(client)
     r = client.get(f"/h1b/cases/{out['case_id']}/pipeline", headers=AUTH2)

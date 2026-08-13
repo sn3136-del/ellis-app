@@ -207,6 +207,9 @@ class CreateH1bCaseBody(BaseModel):
     petitioner_email: str = ""
     petitioner_name: str = ""
     locale: str = "en"
+    # Which party the CREATOR operates: the employer console sends
+    # 'petitioner'; the worker/applicant path keeps the default.
+    acting_as: str = "beneficiary"
 
 
 @router.post("/employer-profiles")
@@ -246,6 +249,8 @@ def create_h1b_case(body: CreateH1bCaseBody,
                     db=Depends(get_session)):
     if body.case_kind not in CASE_KINDS:
         raise HTTPException(422, f"case_kind must be one of {CASE_KINDS}")
+    if body.acting_as not in ("beneficiary", "petitioner"):
+        raise HTTPException(422, "acting_as must be 'beneficiary' or 'petitioner'")
 
     employer = None
     if body.employer_profile_id:
@@ -278,13 +283,22 @@ def create_h1b_case(body: CreateH1bCaseBody,
     db.add(parent)
     db.flush()
 
+    # WHO IS CREATING THIS CASE decides which party the caller operates. The
+    # employer console creates as the petitioner (the caller becomes the party
+    # that files; the worker joins later), the worker/applicant path creates as
+    # the beneficiary. Binding the caller as beneficiary unconditionally was
+    # the bug where the employer's own console addressed them as the worker.
+    acting_petitioner = body.acting_as == "petitioner"
     db.add(h1b_models.CaseParty(
         org_id=principal.org_id, application_id=parent.id, role="beneficiary",
-        user_id=principal.user_id, display_name=body.beneficiary_full_name,
+        user_id=("" if acting_petitioner else principal.user_id),
+        status=("invited" if acting_petitioner else "active"),
+        display_name=body.beneficiary_full_name,
         email=body.beneficiary_email))
     db.add(h1b_models.CaseParty(
         org_id=principal.org_id, application_id=parent.id, role="petitioner",
         party_kind="organization",
+        user_id=(principal.user_id if acting_petitioner else ""),
         display_name=(employer.legal_name if employer else body.petitioner_name),
         email=(employer.signatory_email if employer else body.petitioner_email),
         employer_profile_id=(employer.id if employer else "")))
@@ -396,6 +410,43 @@ def release_step(case_id: str, step_key: str, locale: str = "en",
                                      principal=principal)
     return {**result, "attorney_disclaimer": disclaimer(locale),
             "disclaimer_version": DISCLAIMER_VERSION}
+
+
+@router.post("/cases/{case_id}/party/{role}/claim")
+def claim_party(case_id: str, role: str,
+                principal: Principal = Depends(get_principal),
+                db=Depends(get_session)):
+    """Bind the caller as the operator of an UNBOUND party seat.
+
+    Exists for two real moments: an employer opening a case created before the
+    acting_as fix (the petitioner seat was left empty), and a worker joining
+    the case their employer opened. A seat already bound to someone else is
+    never transferable here — that is an explicit admin act, not a claim."""
+    if role not in ("beneficiary", "petitioner"):
+        raise HTTPException(422, "role must be 'beneficiary' or 'petitioner'")
+    parent = db.get(models.VisaApplication, case_id)
+    if parent is None or parent.visa_type != "h1b":
+        raise HTTPException(404, "h1b case not found")
+    require_owner(principal, parent.org_id)
+    party = db.execute(select(h1b_models.CaseParty).where(
+        h1b_models.CaseParty.application_id == case_id,
+        h1b_models.CaseParty.role == role)).scalars().first()
+    if party is None:
+        raise HTTPException(404, f"case has no {role} party")
+    if party.user_id and party.user_id != principal.user_id:
+        raise HTTPException(409, f"the {role} seat is already operated by "
+                                 f"another user; an admin must rebind it")
+    already = party.user_id == principal.user_id
+    if not already:
+        party.user_id = principal.user_id
+        if party.status == "invited":
+            party.status = "active"
+        db.commit()
+        audit.record(db, org_id=principal.org_id, application_id=case_id,
+                     action="h1b_party_claimed",
+                     detail={"role": role}, actor=principal.user_id)
+    return {"case_id": case_id, "role": role,
+            "claimed": not already, "already_yours": already}
 
 
 @router.get("/cases/{case_id}/pipeline")

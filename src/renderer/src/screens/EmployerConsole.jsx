@@ -112,7 +112,9 @@ function NewCaseForm({ t, client, profiles, onCreated }) {
   async function create() {
     setBusy(true); setError(null)
     try {
-      const res = await client.h1bCreateCase({ ...f, locale: lang })
+      // The console creates AS THE PETITIONER: the employer operates the
+      // filing side; the worker's seat stays open until they join.
+      const res = await client.h1bCreateCase({ ...f, locale: lang, acting_as: 'petitioner' })
       onCreated({ id: res.case_id, case_kind: res.case_kind,
         full_name: f.beneficiary_full_name, createdAt: Date.now() })
     } catch (e) {
@@ -570,6 +572,15 @@ export default function EmployerConsole() {
 
   // The open case registers itself with Ask Ellis via H1bPipeline's own
   // setActiveH1bCase effect — no double bookkeeping here.
+
+  // Self-heal older cases: before the acting_as fix, the console's own cases
+  // left the petitioner seat unbound (and bound the creator as the WORKER),
+  // so the employer was addressed as the employee. Claiming is idempotent,
+  // refuses seats owned by someone else, and simply logs on failure.
+  useEffect(() => {
+    if (!openId) return
+    client.h1bClaimParty(openId, 'petitioner').catch(() => {})
+  }, [openId])
 
   function addCase(c) {
     const next = [c, ...cases.filter((x) => x.id !== c.id)]
