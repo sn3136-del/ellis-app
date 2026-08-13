@@ -742,10 +742,18 @@ test('persona detection is three-way with ellis_admin back-compat', () => {
   assert.equal(detectPersona({ hash: '#ops', storage: memStorage() }), 'admin')
   assert.equal(detectPersona({ hash: '#employer', storage: memStorage() }), 'employer')
   assert.equal(detectPersona({ hash: '', storage: memStorage() }), 'applicant')
-  // The choice persists across loads without the hash.
+  // The employer persona is a DOOR, not a home: a bare URL always returns to
+  // the applicant menu, and the stale 'employer' flag is cleared so it can
+  // never hijack a later visit (owner decision 2026-08-13). Admin (an ops
+  // tool) still persists — see below.
   const s = memStorage()
   detectPersona({ hash: '#employer', storage: s })
-  assert.equal(detectPersona({ hash: '', storage: s }), 'employer')
+  assert.equal(detectPersona({ hash: '', storage: s }), 'applicant')
+  assert.equal(s.getItem('ellis_persona'), null)
+  // Admin DOES persist across a bare-URL load.
+  const sa = memStorage()
+  detectPersona({ hash: '#admin', storage: sa })
+  assert.equal(detectPersona({ hash: '', storage: sa }), 'admin')
   // #applicant clears BOTH the persona and the legacy admin flag.
   detectPersona({ hash: '#applicant', storage: s })
   assert.equal(detectPersona({ hash: '', storage: s }), 'applicant')
