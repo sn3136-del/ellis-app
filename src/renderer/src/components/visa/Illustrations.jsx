@@ -13,6 +13,8 @@
 // artwork. Drawn strokes carry pathLength="100" to match .illo-draw's
 // dash length. Nobody outside this file draws their own artwork.
 
+import { tripcomLogo } from '../../assets/logos.js'
+
 const NAVY = 'var(--trip-navy, #0f294d)'
 const BLUE = 'var(--trip-blue, #2681ff)'
 const BLUE_SOFT = '#eef4ff'
@@ -37,10 +39,11 @@ export function DocumentsIllustration({ size = 120, className = '' }) {
         <rect x="44" y="20" width="62" height="84" rx="7" fill="#ffffff" stroke={NAVY} strokeWidth="2.2"
               transform="rotate(5 75 62)" />
       </g>
-      {/* front sheet with its text lines */}
+      {/* front sheet with its text lines — the real Trip.com wordmark is the
+          letterhead, exactly where a branded document carries it */}
       <g className="illo-part illo-rise illo-rise--2">
         <rect x="50" y="16" width="64" height="88" rx="7" fill="#ffffff" stroke={NAVY} strokeWidth="2.4" />
-        <rect x="60" y="28" width="30" height="5" rx="2.5" fill={BLUE} />
+        <image href={tripcomLogo} x="60" y="24" width="32" height="8" />
         <rect x="60" y="42" width="44" height="4" rx="2" fill={GRAY} opacity="0.5" />
         <rect x="60" y="53" width="44" height="4" rx="2" fill={GRAY} opacity="0.5" />
         <rect x="60" y="64" width="32" height="4" rx="2" fill={GRAY} opacity="0.5" />
@@ -69,8 +72,10 @@ export function PassportIllustration({ size = 120, className = '' }) {
         <circle cx="76" cy="52" r="15" stroke="#ffffff" strokeWidth="2" />
         <ellipse cx="76" cy="52" rx="7" ry="15" stroke="#ffffff" strokeWidth="1.6" />
         <path d="M61 52 h30 M63.5 44.5 h25 M63.5 59.5 h25" stroke="#ffffff" strokeWidth="1.6" strokeLinecap="round" />
-        {/* wordmark + biometric chip mark */}
-        <rect x="62" y="24" width="28" height="4" rx="2" fill="#ffffff" opacity="0.9" />
+        {/* the Trip.com brand plate (the blue logo needs a white ground on the
+            blue cover) + biometric chip mark */}
+        <rect x="57" y="21" width="38" height="12" rx="3.5" fill="#ffffff" opacity="0.96" />
+        <image href={tripcomLogo} x="60" y="23.5" width="32" height="7.7" />
         <rect x="68" y="86" width="16" height="9" rx="2.5" stroke="#ffffff" strokeWidth="1.6" />
         <path d="M72 86 v9 M80 86 v9" stroke="#ffffff" strokeWidth="1.2" opacity="0.8" />
       </g>
@@ -99,10 +104,10 @@ export function PassportIllustration({ size = 120, className = '' }) {
 export function FormFillIllustration({ size = 120, className = '' }) {
   return (
     <svg width={size} viewBox="0 0 160 120" fill="none" className={`illo ${className}`} aria-hidden="true">
-      {/* the form */}
+      {/* the form — titled by the real Trip.com wordmark */}
       <g className="illo-part illo-rise">
         <rect x="28" y="14" width="82" height="94" rx="8" fill="#ffffff" stroke={NAVY} strokeWidth="2.4" />
-        <rect x="38" y="24" width="26" height="5" rx="2.5" fill={BLUE} />
+        <image href={tripcomLogo} x="38" y="21" width="30" height="7.5" />
       </g>
       {/* field labels (static) + values (drawing in) */}
       <g stroke={GRAY} strokeWidth="3" strokeLinecap="round" opacity="0.45">
