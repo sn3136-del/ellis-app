@@ -601,6 +601,7 @@ export const STRINGS = {
     'h1b.kind.transfer': 'Transfer (change of employer)',
     'h1b.kind.cap_exempt': 'Cap-exempt',
     // Employer console (EmployerConsole.jsx)
+    'h1b.employer.menu': 'Menu',
     'h1b.employer.title': 'Employer console',
     'h1b.employer.sub': 'Your company, your H-1B cases.',
     'h1b.employer.profileTitle': 'Employer profile',
@@ -1660,6 +1661,7 @@ export const STRINGS = {
     'h1b.kind.transfer': '转换雇主',
     'h1b.kind.cap_exempt': '免抽签类',
     // Employer console (EmployerConsole.jsx)
+    'h1b.employer.menu': '主菜单',
     'h1b.employer.title': '雇主控制台',
     'h1b.employer.sub': '公司资料与 H-1B 案件。',
     'h1b.employer.profileTitle': '雇主资料',
@@ -2709,6 +2711,7 @@ export const STRINGS = {
     'h1b.kind.transfer': '轉換雇主',
     'h1b.kind.cap_exempt': '免抽籤類',
     // Employer console (EmployerConsole.jsx)
+    'h1b.employer.menu': '主選單',
     'h1b.employer.title': '雇主控制台',
     'h1b.employer.sub': '公司資料與 H-1B 案件。',
     'h1b.employer.profileTitle': '雇主資料',

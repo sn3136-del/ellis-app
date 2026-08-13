@@ -60,8 +60,14 @@ export function detectPersona({ hash, storage } = {}) {
       delSafe('ellis_admin')
       return 'applicant'
     }
+    // A BARE URL ALWAYS LANDS ON THE MENU (owner decision 2026-08-13): the
+    // employer persona is never resurrected from storage — it opens only when
+    // its door is explicitly chosen (#employer). Persisting it meant one visit
+    // to the console hijacked every later visit, and the menu never showed.
+    // Admin stays persisted: an ops tool, not a product surface.
     const persisted = store ? store.getItem('ellis_persona') : null
-    if (persisted === 'admin' || persisted === 'employer') return persisted
+    if (persisted === 'employer') delSafe('ellis_persona')
+    if (persisted === 'admin') return 'admin'
     // Back-compat: a legacy admin flag alone still grants the admin persona.
     if (store && store.getItem('ellis_admin') === '1') return 'admin'
     return 'applicant'

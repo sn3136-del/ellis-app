@@ -670,6 +670,16 @@ export default function EmployerConsole() {
   return (
     <div className="page page--wide" data-testid="employer-console">
       <div className="anim-rise" style={{ margin: '30px 0 34px' }}>
+        {/* Always a way back to the product menu — the console opens only by
+            an explicit door click, never as an inescapable default. */}
+        <button className="btn btn--sm btn--ghost" data-testid="back-to-menu"
+          style={{ marginBottom: 14 }}
+          onClick={() => {
+            try { localStorage.removeItem('ellis_persona') } catch { /* ignore */ }
+            window.location.hash = '#applicant'; window.location.reload()
+          }}>
+          ← {t('h1b.employer.menu')}
+        </button>
         <div style={{ fontSize: 27, fontWeight: 800, color: NAVY, letterSpacing: '-0.3px' }}>
           {t('h1b.employer.title')}
         </div>
