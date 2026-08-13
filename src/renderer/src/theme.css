@@ -659,6 +659,29 @@ body { background: var(--bg-soft); }
 .main--top .trip-home { min-height: calc(100vh - 62px - 96px); }
 /* Two side-by-side hero actions. */
 .trip-home__actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+/* The two products, side by side on the landing page. */
+.trip-home__lanes {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px; margin-top: 48px; width: 100%; max-width: 780px;
+  margin-left: auto; margin-right: auto; text-align: left;
+}
+.trip-lane {
+  background: var(--card, #fff); border: 1px solid var(--line, #e5e7eb);
+  border-radius: 16px; padding: 22px 24px; cursor: pointer;
+  display: flex; flex-direction: column; gap: 8px; text-align: left;
+  transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+.trip-lane:hover {
+  border-color: var(--trip-blue, #2681ff);
+  box-shadow: 0 6px 24px rgba(38, 129, 255, .12); transform: translateY(-2px);
+}
+.trip-lane__title { font-size: 17px; font-weight: 650; color: var(--ink, #0f172a); }
+.trip-lane__sub { font-size: 13.5px; line-height: 1.5; color: var(--trip-gray, #64748b); }
+.trip-lane__cta {
+  margin-top: 6px; font-size: 14px; font-weight: 600;
+  color: var(--trip-blue, #2681ff); display: inline-flex; align-items: center; gap: 6px;
+}
 .trip-cta--ghost { background: #fff; color: var(--trip-blue); box-shadow: 0 2px 10px rgba(15,41,77,0.08); }
 .trip-cta--ghost:hover { background: #f0f6ff; color: var(--trip-blue-dark);
   box-shadow: 0 10px 26px rgba(15,41,77,0.12); }

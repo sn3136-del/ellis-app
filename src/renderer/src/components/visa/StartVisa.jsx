@@ -480,6 +480,21 @@ export default function StartVisa({ client, onOpenCase }) {
               {t('start.hero.startCta')}{arrow}
             </button>
           </div>
+          {/* The two products Ellis actually runs. Without this the whole H-1B
+              side was reachable only by typing a URL hash nobody would guess. */}
+          <div className="trip-home__lanes" data-testid="product-lanes">
+            <button className="trip-lane" data-testid="lane-tourist" onClick={startNew}>
+              <div className="trip-lane__title">{t('start.lane.tourist.title')}</div>
+              <div className="trip-lane__sub">{t('start.lane.tourist.sub')}</div>
+              <div className="trip-lane__cta">{t('start.lane.tourist.cta')}{arrow}</div>
+            </button>
+            <button className="trip-lane" data-testid="lane-h1b"
+              onClick={() => { window.location.hash = '#employer'; window.location.reload() }}>
+              <div className="trip-lane__title">{t('start.lane.h1b.title')}</div>
+              <div className="trip-lane__sub">{t('start.lane.h1b.sub')}</div>
+              <div className="trip-lane__cta">{t('start.lane.h1b.cta')}{arrow}</div>
+            </button>
+          </div>
         </div>
       </div>
     )
