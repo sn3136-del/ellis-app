@@ -1,4 +1,5 @@
 // The filing cockpit — docs/MAX_AUTOMATION_SPEC.md's "one screen per filing".
+// 2026-08-13 visual redesign: three illustrated cards, labels instead of prose.
 //
 // It shows three things and nothing else:
 //   1. Everything Ellis has prepared — every field it filled, each traceable to
@@ -22,11 +23,31 @@ import { useLocale } from '../../lib/locale.jsx'
 import { ErrorNote } from '../ui.jsx'
 import { filingCockpitView, HUMAN_ACT_KEYS } from '../../lib/visaBackend.js'
 import { usePortalLiveView, LiveFrame } from './handoffs.jsx'
+import {
+  DocumentsIllustration, FormFillIllustration, EnvelopeIllustration, WageIllustration
+} from './Illustrations.jsx'
+
+const NAVY = 'var(--trip-navy, #0f294d)'
+const GRAY = 'var(--trip-gray, #8592a6)'
+const CARD = { padding: 20, borderRadius: 18, marginTop: 14 }
 
 // US dollars, no cents (mirrors EmployerConsole's money()).
 function money(n) {
   return typeof n === 'number' && Number.isFinite(n)
     ? '$' + Math.round(n).toLocaleString('en-US') : ''
+}
+
+// A section card: illustration on the left, content on the right. Rest props
+// pass through so each call site carries its own literal data-testid.
+function IlloCard({ art, className = '', children, ...rest }) {
+  return (
+    <div className={`card ${className}`} style={CARD} {...rest}>
+      <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start' }}>
+        <div style={{ flexShrink: 0 }}>{art}</div>
+        <div style={{ flex: 1, minWidth: 0 }}>{children}</div>
+      </div>
+    </div>
+  )
 }
 
 // One named human act. A backend-supplied act renders its own words; a curated
@@ -38,12 +59,12 @@ function HumanAct({ t, act }) {
   return (
     <li>
       {label}
-      {act.who && <span style={{ color: 'var(--muted)' }}> · {t('cockpit.acts.who', { who: act.who })}</span>}
+      {act.who && <span style={{ color: GRAY }}> · {t('cockpit.acts.who', { who: act.who })}</span>}
       {act.nonDelegable === true && (
         <span style={{ color: '#c77700' }}> · {t('cockpit.acts.nonDelegable')}</span>
       )}
       {act.ellisDoes && (
-        <div style={{ fontSize: 11.5, color: 'var(--muted)' }}>
+        <div style={{ fontSize: 11.5, color: GRAY }}>
           {t('cockpit.acts.ellis', { what: act.ellisDoes })}
         </div>
       )}
@@ -56,12 +77,12 @@ function HumanAct({ t, act }) {
 function SecureWindow({ t, client, caseId, onClose }) {
   const view = usePortalLiveView(client, caseId)
   return (
-    <div style={{ marginTop: 10 }} data-testid="cockpit-secure-window">
+    <div style={{ marginTop: 12 }} data-testid="cockpit-secure-window">
       {view.state === 'connecting' && (
-        <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>{t('cockpit.action.opening')}</div>
+        <div style={{ fontSize: 12.5, color: GRAY }}>{t('cockpit.action.opening')}</div>
       )}
       <LiveFrame view={view} height="60vh" client={client} caseId={caseId} />
-      <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 6 }}>
+      <div style={{ fontSize: 11.5, color: GRAY, marginTop: 6 }}>
         {t('cockpit.action.note')}
       </div>
       {/* Closing ends the isolated session server-side, the same way every
@@ -109,12 +130,17 @@ export default function FilingCockpit({
   }
 
   return (
-    <div style={{ marginTop: 16 }} data-testid="filing-cockpit">
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10,
+    <div style={{ marginTop: 28 }} data-testid="filing-cockpit">
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12,
                     alignItems: 'center', flexWrap: 'wrap' }}>
-        <div>
-          <div style={{ fontWeight: 600, fontSize: 13.5 }}>{title || t('cockpit.title')}</div>
-          <div style={{ fontSize: 12, color: 'var(--muted)' }}>{t('cockpit.sub')}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <EnvelopeIllustration size={72} />
+          <div>
+            <div style={{ fontWeight: 800, fontSize: 15, color: NAVY }}>
+              {title || t('cockpit.title')}
+            </div>
+            <div style={{ fontSize: 12, color: GRAY }}>{t('cockpit.sub')}</div>
+          </div>
         </div>
         <button className="btn btn--sm btn--ghost" disabled={busy} onClick={refresh}
                 data-testid="cockpit-load">
@@ -122,43 +148,48 @@ export default function FilingCockpit({
         </button>
       </div>
       {/* Standing honesty: nothing on this screen has been filed. */}
-      <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 6 }}
+      <div style={{ fontSize: 11.5, color: GRAY, marginTop: 8 }}
            data-testid="cockpit-nothing-filed">
         {t('cockpit.notice.nothingFiled')}
       </div>
       {error && <ErrorNote error={error} />}
 
       {view && !view.available && (
-        <div className="card" style={{ padding: 12, marginTop: 10, fontSize: 12.5 }}
+        <div className="card anim-rise" style={{ ...CARD, fontSize: 12.5 }}
              data-testid="cockpit-unavailable">
           <div>{t('cockpit.unavailable')}</div>
           {view.reason && (
-            <div style={{ color: 'var(--muted)', marginTop: 4 }}>{view.reason}</div>
+            <div style={{ color: GRAY, marginTop: 4 }}>{view.reason}</div>
           )}
         </div>
       )}
 
       {view && view.available && (
-        <div style={{ marginTop: 10 }}>
+        <div style={{ marginTop: 4 }}>
           {/* ---- 1. Everything Ellis has prepared ---------------------------- */}
-          <div className="card" style={{ padding: 14 }} data-testid="cockpit-prepared">
-            <div style={{ fontWeight: 600, fontSize: 13 }}>{t('cockpit.prepared.title')}</div>
-            {view.filledCount != null && view.totalCount != null && (
-              <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
-                {t('cockpit.prepared.count', { filled: view.filledCount, total: view.totalCount })}
+          <IlloCard art={<DocumentsIllustration size={64} />} className="anim-rise"
+                    data-testid="cockpit-prepared">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <div style={{ fontWeight: 800, fontSize: 14, color: NAVY }}>
+                {t('cockpit.prepared.title')}
               </div>
-            )}
+              {view.filledCount != null && view.totalCount != null && (
+                <span className="chip">
+                  {t('cockpit.prepared.count', { filled: view.filledCount, total: view.totalCount })}
+                </span>
+              )}
+            </div>
             {view.prepared.length === 0 && view.documents.length === 0 && (
-              <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 6 }}>
+              <div style={{ fontSize: 12.5, color: GRAY, marginTop: 6 }}>
                 {t('cockpit.prepared.empty')}
               </div>
             )}
             {view.prepared.length > 0 && (
-              <ul style={{ margin: '6px 0 0 18px', fontSize: 12.5 }}>
+              <ul style={{ margin: '8px 0 0 18px', fontSize: 12.5 }}>
                 {view.prepared.map((f, i) => (
                   <li key={f.key || i}>
                     {f.label}{f.value ? `: ${f.value}` : ''}
-                    <span style={{ color: 'var(--muted)' }}>
+                    <span style={{ color: GRAY }}>
                       {' '}· {f.sourceKnown
                         ? t('cockpit.prepared.source', { source: f.source })
                         : t('cockpit.prepared.sourceUnknown')}
@@ -169,28 +200,32 @@ export default function FilingCockpit({
             )}
             {/* The computed wage level — a suggestion, never a filed value. */}
             {view.wage && (
-              <div style={{ fontSize: 12.5, marginTop: 8 }} data-testid="cockpit-wage">
-                <span style={{ fontWeight: 600 }}>{t('cockpit.prepared.wage')}</span>
-                {view.wage.computedLevel && (
-                  <div>
-                    {t('cockpit.prepared.wageLine', {
-                      level: view.wage.computedLevel,
-                      wage: money((view.wage.levels.find(
-                        (l) => l.roman === view.wage.computedLevel) || {}).wage) || '—',
-                      source: view.wage.source || '—',
-                      asOf: view.wage.asOf || '—'
-                    })}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 10 }}
+                   data-testid="cockpit-wage">
+                <WageIllustration size={46} />
+                <div style={{ fontSize: 12.5 }}>
+                  <span style={{ fontWeight: 700 }}>{t('cockpit.prepared.wage')}</span>
+                  {view.wage.computedLevel && (
+                    <div>
+                      {t('cockpit.prepared.wageLine', {
+                        level: view.wage.computedLevel,
+                        wage: money((view.wage.levels.find(
+                          (l) => l.roman === view.wage.computedLevel) || {}).wage) || '—',
+                        source: view.wage.source || '—',
+                        asOf: view.wage.asOf || '—'
+                      })}
+                    </div>
+                  )}
+                  <div style={{ fontSize: 11.5, color: GRAY }}>
+                    {t('h1b.wage.confirmNote')}
                   </div>
-                )}
-                <div style={{ fontSize: 11.5, color: 'var(--muted)' }}>
-                  {t('h1b.wage.confirmNote')}
                 </div>
               </div>
             )}
             {view.documents.length > 0 && (
-              <div style={{ marginTop: 8 }} data-testid="cockpit-documents">
-                <div style={{ fontSize: 12, fontWeight: 600 }}>{t('cockpit.prepared.documents')}</div>
-                <ul style={{ margin: '4px 0 0 18px', fontSize: 12.5, color: 'var(--muted)' }}>
+              <div style={{ marginTop: 10 }} data-testid="cockpit-documents">
+                <div style={{ fontSize: 12, fontWeight: 700 }}>{t('cockpit.prepared.documents')}</div>
+                <ul style={{ margin: '4px 0 0 18px', fontSize: 12.5, color: GRAY }}>
                   {view.documents.map((d, i) => (
                     <li key={d.key || i}>
                       {d.label}{d.citation ? ` · ${d.citation}` : ''}
@@ -200,8 +235,8 @@ export default function FilingCockpit({
               </div>
             )}
             {view.narrative.available && (
-              <div style={{ marginTop: 8 }} data-testid="cockpit-narrative">
-                <div style={{ fontSize: 12, fontWeight: 600 }}>
+              <div style={{ marginTop: 10 }} data-testid="cockpit-narrative">
+                <div style={{ fontSize: 12, fontWeight: 700 }}>
                   {t('cockpit.prepared.narrative')}
                 </div>
                 <div style={{ fontSize: 11.5, color: '#c77700' }}>
@@ -220,35 +255,37 @@ export default function FilingCockpit({
               </div>
             )}
             {view.notApplicable.length > 0 && (
-              <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 8 }}>
+              <div style={{ fontSize: 11.5, color: GRAY, marginTop: 10 }}>
                 {t('cockpit.prepared.notApplicable', {
                   items: view.notApplicable.map((x) => x.label).join(', ')
                 })}
               </div>
             )}
-          </div>
+          </IlloCard>
 
           {/* ---- 2. What is still missing ------------------------------------ */}
-          <div className="card" style={{ padding: 14, marginTop: 10 }}
-               data-testid="cockpit-missing">
-            <div style={{ fontWeight: 600, fontSize: 13 }}>
-              {t('cockpit.missing.title')}
+          <IlloCard art={<FormFillIllustration size={64} />} className="anim-rise-1"
+                    data-testid="cockpit-missing">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <div style={{ fontWeight: 800, fontSize: 14, color: NAVY }}>
+                {t('cockpit.missing.title')}
+              </div>
               {view.missingCount > 0 && (
-                <span className="chip" style={{ marginLeft: 8 }}>
+                <span className="chip-icon chip-icon--warn">
                   {t('cockpit.missing.count', { count: view.missingCount })}
                 </span>
               )}
             </div>
             {view.missingCount === 0 ? (
-              <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 4 }}>
+              <div style={{ fontSize: 12.5, color: GRAY, marginTop: 6 }}>
                 {t('cockpit.missing.none')}
               </div>
             ) : (
-              <ul style={{ margin: '6px 0 0 18px', fontSize: 12.5 }}>
+              <ul style={{ margin: '8px 0 0 18px', fontSize: 12.5 }}>
                 {view.missing.map((m, i) => (
                   <li key={m.key || i}>
                     {m.label}
-                    <div style={{ fontSize: 11.5, color: 'var(--muted)' }}>
+                    <div style={{ fontSize: 11.5, color: GRAY }}>
                       {t('cockpit.missing.input', { input: m.input })}
                     </div>
                   </li>
@@ -256,8 +293,8 @@ export default function FilingCockpit({
               </ul>
             )}
             {view.humanOnly.length > 0 && (
-              <div style={{ marginTop: 8 }} data-testid="cockpit-human-only">
-                <div style={{ fontSize: 12, fontWeight: 600, color: '#c77700' }}>
+              <div style={{ marginTop: 10 }} data-testid="cockpit-human-only">
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#c77700' }}>
                   {t('cockpit.humanOnly.title')}
                 </div>
                 <ul style={{ margin: '4px 0 0 18px', fontSize: 12, color: '#c77700' }}>
@@ -265,21 +302,21 @@ export default function FilingCockpit({
                 </ul>
               </div>
             )}
-          </div>
+          </IlloCard>
 
           {/* ---- 3. The single action ---------------------------------------- */}
-          <div className="card" style={{ padding: 14, marginTop: 10 }}
-               data-testid="cockpit-action">
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'space-between',
+          <IlloCard art={<EnvelopeIllustration size={64} />} className="anim-rise-2"
+                    data-testid="cockpit-action">
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'space-between',
                           alignItems: 'center', flexWrap: 'wrap' }}>
               <div style={{ fontSize: 12.5 }} data-testid="cockpit-taps">
-                <span style={{ fontWeight: 600 }}>{t('cockpit.taps.title')}: </span>
+                <span style={{ fontWeight: 700 }}>{t('cockpit.taps.title')}: </span>
                 {view.taps.known
                   ? (view.taps.exact != null
                       ? t('cockpit.taps.exact', { count: view.taps.exact })
                       : t('cockpit.taps.range', { min: view.taps.min, max: view.taps.max }))
                   : t('cockpit.taps.unknown')}
-                <div style={{ fontSize: 11.5, color: 'var(--muted)' }}>{t('cockpit.taps.note')}</div>
+                <div style={{ fontSize: 11.5, color: GRAY }}>{t('cockpit.taps.note')}</div>
               </div>
               {/* THE single action. It opens the applicant's own window on the
                   official page and stops: the close control lives inside the
@@ -293,7 +330,7 @@ export default function FilingCockpit({
               )}
             </div>
             {!view.action.enabled && (
-              <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 6 }}
+              <div style={{ fontSize: 12, color: GRAY, marginTop: 6 }}
                    data-testid="cockpit-action-disabled">
                 {t('cockpit.action.disabled', {
                   reason: view.action.reasonKey ? t(view.action.reasonKey)
@@ -303,12 +340,12 @@ export default function FilingCockpit({
             )}
             {/* The acts that stay the human's — named, always, beside the
                 button and never behind it. */}
-            <div style={{ marginTop: 10 }} data-testid="cockpit-human-acts">
-              <div style={{ fontSize: 12, fontWeight: 600 }}>{t('cockpit.acts.title')}</div>
+            <div style={{ marginTop: 12 }} data-testid="cockpit-human-acts">
+              <div style={{ fontSize: 12, fontWeight: 700 }}>{t('cockpit.acts.title')}</div>
               <ul style={{ margin: '4px 0 0 18px', fontSize: 12.5 }}>
                 {view.humanActs.map((a, i) => <HumanAct key={a.key || i} t={t} act={a} />)}
               </ul>
-              <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 6 }}
+              <div style={{ fontSize: 11.5, color: GRAY, marginTop: 6 }}
                    data-testid="cockpit-never">
                 {t('cockpit.acts.never')}
               </div>
@@ -317,12 +354,12 @@ export default function FilingCockpit({
               <SecureWindow t={t} client={client} caseId={sessionCaseId}
                             onClose={() => setWindowOpen(false)} />
             )}
-          </div>
+          </IlloCard>
 
           {/* Backend notices (preparation copies, DOL-use blocks, retention)
               render verbatim: they are the server's own honest wording. */}
           {view.notices.map((n, i) => (
-            <div key={i} style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 8 }}>{n}</div>
+            <div key={i} style={{ fontSize: 11.5, color: GRAY, marginTop: 8 }}>{n}</div>
           ))}
           {view.filedAt && (
             <div style={{ fontSize: 11.5, marginTop: 6 }}>
@@ -332,7 +369,7 @@ export default function FilingCockpit({
             </div>
           )}
           {view.disclaimer && (
-            <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 8 }}>
+            <div style={{ fontSize: 11, color: GRAY, marginTop: 8 }}>
               {view.disclaimer}
             </div>
           )}

@@ -1,5 +1,6 @@
 // Employer console — the petitioner-side workspace (persona '#employer').
-// Follows the SetupWizard visual pattern: sectioned cards of labeled fields.
+// 2026-08-13 visual redesign: one accent illustration per section, text cut to
+// labels, spacious cards, motion from theme.css's shared system.
 // It holds the employer profile (FEIN / NAICS / signatory / parent company),
 // starts H-1B petitions, embeds the per-case pipeline walkthrough, and writes
 // the petitioner's own job/wage/worksite answers through the party-answers
@@ -16,6 +17,9 @@ import { newEmployerSession } from '../lib/visaSession.js'
 import H1bPipeline from '../components/visa/H1bPipeline.jsx'
 import FilingCockpit from '../components/visa/FilingCockpit.jsx'
 import AppointmentCockpit from '../components/visa/AppointmentCockpit.jsx'
+import {
+  ShieldIllustration, FormFillIllustration, PipelineIllustration, WageIllustration
+} from '../components/visa/Illustrations.jsx'
 
 const LS_KEY = 'ellis.h1b.employer.cases'
 function loadCases() {
@@ -27,6 +31,9 @@ function saveCases(list) {
 
 const CASE_KINDS = ['extension', 'amendment', 'transfer', 'cap_exempt', 'cap_initial']
 
+const NAVY = 'var(--trip-navy, #0f294d)'
+const GRAY = 'var(--trip-gray, #8592a6)'
+
 function Field({ label, value, onChange, placeholder }) {
   return (
     <div className="field">
@@ -37,7 +44,35 @@ function Field({ label, value, onChange, placeholder }) {
   )
 }
 
-// ---- Employer profile form (SetupWizard pattern) ---------------------------
+// A section header: one illustration, a few words, nothing else.
+function IlloHeader({ art, title, sub }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 18 }}>
+      {art}
+      <div>
+        <div style={{ fontSize: 16, fontWeight: 800, color: NAVY }}>{title}</div>
+        {sub && <div style={{ fontSize: 12.5, color: GRAY, marginTop: 3 }}>{sub}</div>}
+      </div>
+    </div>
+  )
+}
+
+// A quiet three-stop dot trail for case cards: prepare → file → done, drawn
+// with plain divs (the artwork itself lives in Illustrations.jsx). Neutral by
+// design — it names the road, it never claims where this case stands on it.
+function DotTrail() {
+  const dot = { width: 8, height: 8, borderRadius: '50%', background: '#c3d6f2' }
+  const dash = { flex: 1, height: 2, borderRadius: 2,
+                 background: 'repeating-linear-gradient(90deg, #c3d6f2 0 6px, transparent 6px 12px)' }
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: 92 }} aria-hidden="true">
+      <span style={{ ...dot, background: 'var(--trip-blue, #2681ff)' }} />
+      <span style={dash} /><span style={dot} /><span style={dash} /><span style={dot} />
+    </div>
+  )
+}
+
+// ---- Employer profile form (one spacious card, no per-field prose) ----------
 function ProfileForm({ t, client, onSaved }) {
   const toast = useToast()
   const [busy, setBusy] = useState(false)
@@ -63,14 +98,13 @@ function ProfileForm({ t, client, onSaved }) {
   }
 
   return (
-    <section className="card" style={{ padding: 18, marginBottom: 14 }}
+    <section className="card anim-rise-1" style={{ padding: 28, borderRadius: 20, marginBottom: 24 }}
              data-testid="employer-profile-form">
-      <div className="eyebrow">{t('h1b.employer.profileTitle')}</div>
-      <div style={{ fontSize: 12.5, color: 'var(--muted)', margin: '4px 0 10px' }}>
-        {t('h1b.employer.profileSub')}
-      </div>
+      <IlloHeader art={<FormFillIllustration size={92} />}
+                  title={t('h1b.employer.profileTitle')}
+                  sub={t('h1b.employer.profileSub')} />
       {error && <ErrorNote error={error} />}
-      <div className="grid grid-2" style={{ gap: 12 }}>
+      <div className="grid grid-2" style={{ gap: '14px 18px' }}>
         <Field label={t('h1b.employer.legalName')} value={f.legal_name} onChange={set('legal_name')} />
         <Field label={t('h1b.employer.tradeName')} value={f.trade_name} onChange={set('trade_name')} />
         <Field label={t('h1b.employer.fein')} value={f.fein} onChange={set('fein')}
@@ -89,7 +123,7 @@ function ProfileForm({ t, client, onSaved }) {
         <Field label={t('h1b.employer.parentCompany')} value={f.parent_company_name} onChange={set('parent_company_name')} />
         <Field label={t('h1b.employer.parentCountry')} value={f.parent_company_country} onChange={set('parent_company_country')} />
       </div>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 18 }}>
         <button className="btn" disabled={busy} onClick={save}>
           {busy ? t('h1b.employer.saving') : t('h1b.employer.saveProfile')}
         </button>
@@ -124,11 +158,12 @@ function NewCaseForm({ t, client, profiles, onCreated }) {
   }
 
   return (
-    <section className="card" style={{ padding: 18, marginBottom: 14 }}
+    <section className="card anim-rise-1" style={{ padding: 28, borderRadius: 20, marginBottom: 24 }}
              data-testid="employer-new-case">
-      <div className="eyebrow">{t('h1b.employer.newCaseTitle')}</div>
+      <IlloHeader art={<PipelineIllustration size={110} />}
+                  title={t('h1b.employer.newCaseTitle')} />
       {error && <ErrorNote error={error} />}
-      <div className="grid grid-2" style={{ gap: 12 }}>
+      <div className="grid grid-2" style={{ gap: '14px 18px' }}>
         <div className="field">
           <label>{t('h1b.employer.caseKind')}</label>
           <select className="select" value={f.case_kind}
@@ -153,7 +188,7 @@ function NewCaseForm({ t, client, profiles, onCreated }) {
         <Field label={t('h1b.employer.beneficiaryEmail')} value={f.beneficiary_email}
                onChange={(v) => set('beneficiary_email', v)} />
       </div>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 18 }}>
         <button className="btn" disabled={busy || !f.beneficiary_full_name || !f.beneficiary_email}
                 onClick={create}>
           {busy ? t('h1b.employer.creating') : t('h1b.employer.create')}
@@ -201,12 +236,15 @@ function WageLevelCheck({ t, client, caseId }) {
   }
 
   return (
-    <div style={{ marginTop: 16 }} data-testid="h1b-wage-check">
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10,
+    <div style={{ marginTop: 28 }} data-testid="h1b-wage-check">
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12,
                     alignItems: 'center', flexWrap: 'wrap' }}>
-        <div>
-          <div style={{ fontWeight: 600, fontSize: 13.5 }}>{t('h1b.wage.title')}</div>
-          <div style={{ fontSize: 12, color: 'var(--muted)' }}>{t('h1b.wage.sub')}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <WageIllustration size={64} />
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 14, color: NAVY }}>{t('h1b.wage.title')}</div>
+            <div style={{ fontSize: 12, color: GRAY }}>{t('h1b.wage.sub')}</div>
+          </div>
         </div>
         <button className="btn btn--sm btn--ghost" disabled={busy} onClick={check}>
           {busy ? t('h1b.wage.checking') : t('h1b.wage.check')}
@@ -214,42 +252,42 @@ function WageLevelCheck({ t, client, caseId }) {
       </div>
       {error && <ErrorNote error={error} />}
       {view && !view.available && (
-        <div className="card" style={{ padding: 12, marginTop: 10, fontSize: 12.5 }}>
+        <div className="card anim-rise" style={{ padding: 14, marginTop: 12, borderRadius: 16, fontSize: 12.5 }}>
           <div>{t('h1b.wage.unavailable')}</div>
           {view.reason && (
-            <div style={{ color: 'var(--muted)', marginTop: 4 }}>{view.reason}</div>
+            <div style={{ color: GRAY, marginTop: 4 }}>{view.reason}</div>
           )}
         </div>
       )}
       {view && view.available && (
-        <div className="card" style={{ padding: 14, marginTop: 10 }}>
+        <div className="card anim-rise" style={{ padding: 18, marginTop: 12, borderRadius: 16 }}>
           {(view.socCode || view.socTitle) && (
             <div style={{ fontSize: 12.5 }}>
-              <span style={{ color: 'var(--muted)' }}>{t('h1b.wage.socLabel')}: </span>
+              <span style={{ color: GRAY }}>{t('h1b.wage.socLabel')}: </span>
               {[view.socCode, view.socTitle].filter(Boolean).join(' · ')}
             </div>
           )}
           {view.areaName && (
             <div style={{ fontSize: 12.5, marginTop: 2 }}>
-              <span style={{ color: 'var(--muted)' }}>{t('h1b.wage.areaLabel')}: </span>
+              <span style={{ color: GRAY }}>{t('h1b.wage.areaLabel')}: </span>
               {view.areaName}
             </div>
           )}
           {/* The four prevailing-wage tiers. */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8,
-                        margin: '12px 0' }} data-testid="h1b-wage-levels">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10,
+                        margin: '14px 0' }} data-testid="h1b-wage-levels">
             {view.levels.map((lv) => {
               const isComputed = view.computedLevel === lv.roman
               return (
                 <div key={lv.level} className="card"
-                     style={{ padding: '8px 10px', textAlign: 'center',
-                              borderColor: isComputed ? 'var(--accent, #2b6cb0)' : undefined,
-                              background: isComputed ? 'var(--bg-2, #f5f6f8)' : undefined }}>
-                  <div style={{ fontSize: 11, color: 'var(--muted)' }}>
+                     style={{ padding: '12px 10px', textAlign: 'center', borderRadius: 14,
+                              border: isComputed ? '2px solid var(--trip-blue, #2681ff)' : '2px solid transparent',
+                              background: isComputed ? '#eef4ff' : '#f8fafd' }}>
+                  <div style={{ fontSize: 11, color: GRAY }}>
                     {t('h1b.wage.levelWord')} {lv.roman}
                   </div>
-                  <div style={{ fontWeight: 700, fontSize: 13 }}>{money(lv.wage)}</div>
-                  <div style={{ fontSize: 10.5, color: 'var(--muted)' }}>{t('h1b.wage.perYear')}</div>
+                  <div style={{ fontWeight: 800, fontSize: 14, color: NAVY }}>{money(lv.wage)}</div>
+                  <div style={{ fontSize: 10.5, color: GRAY }}>{t('h1b.wage.perYear')}</div>
                 </div>
               )
             })}
@@ -257,7 +295,7 @@ function WageLevelCheck({ t, client, caseId }) {
           {/* Offer vs prevailing. */}
           {view.offeredWage != null && (
             <div style={{ fontSize: 12.5 }}>
-              <span style={{ color: 'var(--muted)' }}>{t('h1b.wage.offered')}: </span>
+              <span style={{ color: GRAY }}>{t('h1b.wage.offered')}: </span>
               {money(view.offeredWage)}
               {view.computedLevel && (
                 <span style={{ marginLeft: 8 }}>
@@ -266,18 +304,19 @@ function WageLevelCheck({ t, client, caseId }) {
               )}
             </div>
           )}
-          <div style={{ fontSize: 12.5, marginTop: 6, fontWeight: 600,
-                        color: view.meetsPrevailing === false ? '#d33'
-                          : view.meetsPrevailing === true ? '#1a7f37' : 'var(--muted)' }}
-               data-testid="h1b-wage-meets">
-            {view.meetsPrevailing === true ? t('h1b.wage.meets')
-              : view.meetsPrevailing === false ? t('h1b.wage.belowPrevailing')
-              : t('h1b.wage.meetsUnknown')}
+          <div style={{ marginTop: 8 }} data-testid="h1b-wage-meets">
+            <span className={view.meetsPrevailing === true ? 'chip-icon chip-icon--ok'
+                    : view.meetsPrevailing === false ? 'chip-icon chip-icon--crit' : 'chip-icon'}
+                  style={{ whiteSpace: 'normal' }}>
+              {view.meetsPrevailing === true ? t('h1b.wage.meets')
+                : view.meetsPrevailing === false ? t('h1b.wage.belowPrevailing')
+                : t('h1b.wage.meetsUnknown')}
+            </span>
           </div>
           {/* Caveats — prominent, warning-colored. */}
           {view.caveats.length > 0 && (
-            <div style={{ marginTop: 10 }} data-testid="h1b-wage-caveats">
-              <div style={{ fontSize: 12, fontWeight: 600, color: '#c77700' }}>
+            <div style={{ marginTop: 12 }} data-testid="h1b-wage-caveats">
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#c77700' }}>
                 {t('h1b.wage.caveatsTitle')}
               </div>
               <ul style={{ margin: '4px 0 0 18px', fontSize: 12, color: '#c77700' }}>
@@ -291,12 +330,12 @@ function WageLevelCheck({ t, client, caseId }) {
             </div>
           )}
           {/* Standing honesty note + provenance. */}
-          <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 10 }}
+          <div style={{ fontSize: 11.5, color: GRAY, marginTop: 12 }}
                data-testid="h1b-wage-confirm-note">
             {t('h1b.wage.confirmNote')}
           </div>
           {(view.source || view.asOf) && (
-            <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>
+            <div style={{ fontSize: 11, color: GRAY, marginTop: 4 }}>
               {fill(t('h1b.wage.sourceLine'),
                     { source: view.source || '—', asOf: view.asOf || '—' })}
             </div>
@@ -353,17 +392,17 @@ function SocSuggest({ t, client, caseId, jobTitle }) {
   }
 
   return (
-    <div style={{ marginTop: 16 }} data-testid="h1b-soc-suggest">
-      <div style={{ fontWeight: 600, fontSize: 13.5 }}>{t('h1b.soc.title')}</div>
-      <div style={{ fontSize: 12, color: 'var(--muted)' }}>{t('h1b.soc.sub')}</div>
-      <div className="field" style={{ marginTop: 8 }}>
+    <div style={{ marginTop: 28 }} data-testid="h1b-soc-suggest">
+      <div style={{ fontWeight: 700, fontSize: 14, color: NAVY }}>{t('h1b.soc.title')}</div>
+      <div style={{ fontSize: 12, color: GRAY }}>{t('h1b.soc.sub')}</div>
+      <div className="field" style={{ marginTop: 10 }}>
         <label>{t('h1b.soc.industryInput')}</label>
         <input className="input" value={industryText}
                placeholder={t('h1b.soc.industryPlaceholder')}
                onChange={(e) => setIndustryText(e.target.value)} />
       </div>
       {!hasJobTitle && (
-        <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 6 }}>
+        <div style={{ fontSize: 12, color: GRAY, marginBottom: 6 }}>
           {t('h1b.soc.needJobTitle')}
         </div>
       )}
@@ -373,16 +412,16 @@ function SocSuggest({ t, client, caseId, jobTitle }) {
         {busy ? t('h1b.soc.suggesting') : t('h1b.soc.suggest')}
       </button>
       {view && !view.available && (
-        <div className="card" style={{ padding: 12, marginTop: 10, fontSize: 12.5 }}>
+        <div className="card anim-rise" style={{ padding: 14, marginTop: 12, borderRadius: 16, fontSize: 12.5 }}>
           {view.reason || t('h1b.soc.unavailable')}
         </div>
       )}
       {view && view.available && (
-        <div style={{ marginTop: 10 }}>
+        <div style={{ marginTop: 12 }} className="anim-rise">
           {/* Confirm-required note FIRST — it is the point of the whole panel. */}
-          <div className="card" style={{ padding: 12, borderColor: '#c77700' }}
+          <div className="card" style={{ padding: 14, borderRadius: 16, border: '1px solid #c77700' }}
                data-testid="h1b-soc-confirm-note">
-            <div style={{ fontSize: 12.5, color: '#c77700', fontWeight: 600 }}>
+            <div style={{ fontSize: 12.5, color: '#c77700', fontWeight: 700 }}>
               {t('h1b.soc.confirmNote')}
             </div>
             {view.lowConfidence && (
@@ -393,26 +432,26 @@ function SocSuggest({ t, client, caseId, jobTitle }) {
             )}
           </div>
           {view.occupation.length > 0 && (
-            <div className="card" style={{ padding: 12, marginTop: 8 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>
+            <div className="card" style={{ padding: 14, marginTop: 10, borderRadius: 16 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4 }}>
                 {t('h1b.soc.occupationTitle')}
               </div>
               {view.occupation.map((s, i) => <Suggestion key={i} s={s} />)}
             </div>
           )}
           {view.industry.length > 0 && (
-            <div className="card" style={{ padding: 12, marginTop: 8 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>
+            <div className="card" style={{ padding: 14, marginTop: 10, borderRadius: 16 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4 }}>
                 {t('h1b.soc.industryTitle')}
               </div>
               {view.industry.map((s, i) => <Suggestion key={i} s={s} />)}
             </div>
           )}
-          <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 8 }}>
+          <div style={{ fontSize: 11.5, color: GRAY, marginTop: 10 }}>
             {t('h1b.soc.sourceCaveat')}
           </div>
           {(view.source || view.asOf) && (
-            <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>
+            <div style={{ fontSize: 11, color: GRAY, marginTop: 4 }}>
               {fill(t('h1b.soc.sourceLine'),
                     { source: view.source || '—', asOf: view.asOf || '—' })}
             </div>
@@ -458,14 +497,12 @@ function JobAnswersForm({ t, client, caseId }) {
   }
 
   return (
-    <section className="card" style={{ padding: 18, marginTop: 14 }}
+    <section className="card anim-rise-2" style={{ padding: 28, borderRadius: 20, marginTop: 24 }}
              data-testid="employer-job-answers">
-      <div className="eyebrow">{t('h1b.job.title')}</div>
-      <div style={{ fontSize: 12.5, color: 'var(--muted)', margin: '4px 0 10px' }}>
-        {t('h1b.job.sub')}
-      </div>
+      <IlloHeader art={<FormFillIllustration size={80} />}
+                  title={t('h1b.job.title')} sub={t('h1b.job.sub')} />
       {error && <ErrorNote error={error} />}
-      <div className="grid grid-2" style={{ gap: 12 }}>
+      <div className="grid grid-2" style={{ gap: '14px 18px' }}>
         <Field label={t('h1b.job.jobTitle')} value={f.job_title} onChange={set('job_title')} />
         <Field label={t('h1b.job.socCode')} value={f.soc_code} onChange={set('soc_code')}
                placeholder="15-1252" />
@@ -518,7 +555,7 @@ function JobAnswersForm({ t, client, caseId }) {
           from authoritative sources but write nothing back into the answers
           above — the petitioner confirms and types every filed value. Wage
           analysis runs over the SAVED facts, so it comes after Save. */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 18 }}>
         <button className="btn" disabled={busy} onClick={save}>
           {busy ? t('h1b.employer.saving') : t('h1b.job.save')}
         </button>
@@ -539,16 +576,38 @@ function JobAnswersForm({ t, client, caseId }) {
 // section is what has no step of its own.
 function PetitionerCockpits({ t, client, caseId }) {
   return (
-    <section className="card" style={{ padding: 18, marginTop: 14 }}
+    <section className="card anim-rise-3" style={{ padding: 28, borderRadius: 20, marginTop: 24 }}
              data-testid="employer-cockpits">
-      <div className="eyebrow">{t('cockpit.employer.title')}</div>
-      <div style={{ fontSize: 12.5, color: 'var(--muted)', margin: '4px 0 10px' }}>
+      <div style={{ fontSize: 16, fontWeight: 800, color: NAVY }}>{t('cockpit.employer.title')}</div>
+      <div style={{ fontSize: 12.5, color: GRAY, marginTop: 3 }}>
         {t('cockpit.employer.sub')}
       </div>
       <FilingCockpit client={client} caseId={caseId} kind="paf" routeKey="paf"
                      title={t('cockpit.paf.title')} />
       <AppointmentCockpit client={client} caseId={caseId} />
     </section>
+  )
+}
+
+// The attorney disclaimer, always visible: one compact line with a shield,
+// the full text one tap away. Never deleted, never buried (owner decision).
+function DisclaimerStrip({ t }) {
+  return (
+    <details className="card anim-rise-1" data-testid="employer-disclaimer"
+             style={{ padding: '10px 18px', borderRadius: 18, marginTop: 14,
+                      display: 'inline-block' }}>
+      <summary style={{ display: 'inline-flex', alignItems: 'center', gap: 10,
+                        cursor: 'pointer', listStyle: 'none' }}>
+        <ShieldIllustration size={30} />
+        <span style={{ fontSize: 12.5, fontWeight: 600, color: NAVY }}>
+          {t('h1b.disclaimerShort')}
+        </span>
+      </summary>
+      <div style={{ fontSize: 12, color: GRAY, marginTop: 8, maxWidth: 640,
+                    whiteSpace: 'normal' }}>
+        {t('h1b.disclaimer')}
+      </div>
+    </details>
   )
 }
 
@@ -591,11 +650,14 @@ export default function EmployerConsole() {
     const c = cases.find((x) => x.id === openId)
     return (
       <div className="page page--wide">
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, margin: '10px 0' }}>
+        <div className="anim-rise"
+             style={{ display: 'flex', alignItems: 'center', gap: 14, margin: '22px 0 18px' }}>
           <button className="btn btn--sm btn--ghost" onClick={() => setOpenId(null)}>
             {t('h1b.employer.back')}
           </button>
-          <div style={{ fontWeight: 700 }}>{c?.full_name || openId.slice(0, 8)}</div>
+          <div style={{ fontWeight: 800, fontSize: 20, color: NAVY }}>
+            {c?.full_name || openId.slice(0, 8)}
+          </div>
           {c?.case_kind && <span className="chip">{t(`h1b.kind.${c.case_kind}`)}</span>}
         </div>
         <H1bPipeline client={client} caseId={openId} persona="employer" />
@@ -607,27 +669,26 @@ export default function EmployerConsole() {
 
   return (
     <div className="page page--wide" data-testid="employer-console">
-      <div style={{ margin: '14px 0' }}>
-        <div className="eyebrow">{t('h1b.employer.title')}</div>
-        <div style={{ fontSize: 13, color: 'var(--muted)' }}>{t('h1b.employer.sub')}</div>
-        {/* Attorney disclaimer on the console itself, not only in payloads. */}
-        <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 6 }}
-             data-testid="employer-disclaimer">
-          {t('h1b.disclaimer')}
+      <div className="anim-rise" style={{ margin: '30px 0 34px' }}>
+        <div style={{ fontSize: 27, fontWeight: 800, color: NAVY, letterSpacing: '-0.3px' }}>
+          {t('h1b.employer.title')}
         </div>
+        <div style={{ fontSize: 13.5, color: GRAY, marginTop: 4 }}>{t('h1b.employer.sub')}</div>
+        {/* Attorney disclaimer on the console itself, not only in payloads. */}
+        <DisclaimerStrip t={t} />
       </div>
 
-      <div className="grid grid-2" style={{ gap: 20, alignItems: 'start' }}>
+      <div className="grid grid-2" style={{ gap: 28, alignItems: 'start' }}>
         <div>
           <ProfileForm t={t} client={client} onSaved={loadProfiles} />
           <div className="eyebrow">{t('h1b.employer.savedProfiles')}</div>
           {profiles === null ? <Loading label={t('common.loading')} />
             : profiles.length === 0
-            ? <div style={{ fontSize: 12.5, color: 'var(--muted)', margin: '6px 0' }}>
+            ? <div style={{ fontSize: 12.5, color: GRAY, margin: '6px 0' }}>
                 {t('h1b.employer.noProfiles')}
               </div>
             : profiles.map((p) => (
-                <div key={p.id} className="row">
+                <div key={p.id} className="row card-hover">
                   <div className="row__main">
                     <div className="row__title">{p.legal_name}</div>
                     <div className="row__sub">
@@ -643,20 +704,24 @@ export default function EmployerConsole() {
           <NewCaseForm t={t} client={client} profiles={profiles || []}
             onCreated={(c) => { addCase(c); setOpenId(c.id) }} />
           <div className="eyebrow">{t('h1b.employer.casesTitle')}</div>
-          <div style={{ fontSize: 11.5, color: 'var(--muted)', margin: '4px 0 8px' }}>
+          <div style={{ fontSize: 11.5, color: GRAY, margin: '4px 0 10px' }}>
             {t('h1b.employer.casesNote')}
           </div>
           {cases.length === 0
             ? <Empty title={t('h1b.employer.casesTitle')} sub={t('h1b.employer.noCases')} />
-            : cases.map((c) => (
-                <div key={c.id} className="row" style={{ cursor: 'pointer' }}
+            : cases.map((c, i) => (
+                <div key={c.id} className={`card card-hover anim-rise-${Math.min(i + 1, 3)}`}
+                     style={{ padding: '16px 20px', borderRadius: 18, marginBottom: 12,
+                              cursor: 'pointer', display: 'flex', alignItems: 'center',
+                              justifyContent: 'space-between', gap: 14 }}
                      onClick={() => setOpenId(c.id)}>
-                  <div className="row__main">
-                    <div className="row__title">{c.full_name}</div>
-                    <div className="row__sub">
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: 14.5, color: NAVY }}>{c.full_name}</div>
+                    <div style={{ fontSize: 12, color: GRAY, marginTop: 3 }}>
                       {c.case_kind ? t(`h1b.kind.${c.case_kind}`) : 'H-1B'} · {c.id.slice(0, 8)}
                     </div>
                   </div>
+                  <DotTrail />
                 </div>
               ))}
         </div>

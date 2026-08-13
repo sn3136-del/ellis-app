@@ -3,6 +3,7 @@ import { ellis, COUNTRIES, fmtDate } from '../lib/api.js'
 import { downloadArrivalPassPdfToDesktop, downloadTripReceiptPdfToDesktop, downloadTripApplicationPackPdfToDesktop, downloadTripOfficialFormPdfToDesktop, downloadAppointmentNoticePdfToDesktop } from '../lib/pdf.js'
 import { useToast } from '../components/ui.jsx'
 import { Icon } from '../components/icons.jsx'
+import { PipelineIllustration } from '../components/visa/Illustrations.jsx'
 import { tripcomLogo } from '../assets/logos.js'
 import visaCompleteImg from '../assets/trip-visa-complete.png'
 
@@ -453,19 +454,24 @@ function TripHome({ trips, t, onNew, onOpen, onDelete, onSwitchRole }) {
         <Icon.back style={{ width: 17, height: 17 }} />
       </button>
       <div className="trip-home">
-        <h1 className="trip-home__title">{t('hero')}</h1>
-        <button className="trip-cta" onClick={onNew}>
+        {/* The whole promise as one drawing — prepare, submit, done — so the
+            headline needs no subline at all. */}
+        <div className="anim-rise" style={{ marginBottom: 8 }}>
+          <PipelineIllustration size={200} />
+        </div>
+        <h1 className="trip-home__title anim-rise-1">{t('hero')}</h1>
+        <button className="trip-cta anim-rise-2" onClick={onNew}>
           {t('start')}
           <span className="trip-cta__arrow" style={{ display: 'inline-flex' }}><Icon.arrow style={{ width: 18, height: 18 }} /></span>
         </button>
       </div>
 
       {trips.length > 0 && (
-        <div className="trip-apps">
+        <div className="trip-apps anim-rise-3">
           <div className="eyebrow trip-eyebrow" style={{ marginBottom: 12 }}>{t('yourApps')}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {trips.map((x) => (
-              <button key={x.id} className="row" style={{ width: '100%', textAlign: 'left', cursor: 'pointer' }}
+              <button key={x.id} className="row card-hover" style={{ width: '100%', textAlign: 'left', cursor: 'pointer' }}
                 onClick={() => onOpen(x.id)}
                 onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setMenu({ x: e.clientX, y: e.clientY, id: x.id }) }}>
                 <div className="row__main">

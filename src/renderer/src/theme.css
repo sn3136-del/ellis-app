@@ -16,12 +16,15 @@
   --muted-2: #8592a6;
   --line: rgba(15, 41, 77, 0.10);
   --line-strong: rgba(15, 41, 77, 0.20);
-  --radius: 16px;
+  /* 2026-08-13 visual redesign: slightly bigger radii + softer, deeper-but-
+     fainter shadows. Every consumer reads these vars, so the whole app gets
+     the rounder, airier look without touching individual rules. */
+  --radius: 18px;
   --radius-sm: 10px;
   --font: "Inter", system-ui, -apple-system, sans-serif;
   --serif: "Instrument Serif", Georgia, serif;
   --crit: #c0392b;
-  --shadow: 0 2px 12px rgba(15, 41, 77, 0.06);
+  --shadow: 0 4px 18px rgba(15, 41, 77, 0.06);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -138,7 +141,9 @@ input, textarea, select { font-family: inherit; }
 .topbar h1 { font-size: 18px; font-weight: 600; }
 .topbar__actions { display: flex; gap: 10px; -webkit-app-region: no-drag; }
 .topbar button, .topbar a, .topbar input, .topbar select { -webkit-app-region: no-drag; }
-.page { padding: 32px; max-width: 1100px; }
+/* More air (2026-08-13): the content column is narrower, centered, and the
+   page breathes top and bottom. .page--wide keeps dashboards roomy. */
+.page { padding: 40px 36px 72px; max-width: 1080px; margin: 0 auto; }
 .page--wide { max-width: 1280px; }
 
 .eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 1.6px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
@@ -660,10 +665,11 @@ body { background: var(--bg-soft); }
 /* Two side-by-side hero actions. */
 .trip-home__actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 
-/* The two products, side by side on the landing page. */
+/* The products, side by side on the landing page (2026-08-13 redesign:
+   tall illustrated cards — one drawing per lane instead of a paragraph). */
 .trip-home__lanes {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px; margin-top: 48px; width: 100%; max-width: 780px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px; margin-top: 56px; width: 100%; max-width: 920px;
   margin-left: auto; margin-right: auto; text-align: left;
 }
 .trip-lane {
@@ -682,6 +688,27 @@ body { background: var(--bg-soft); }
   margin-top: 6px; font-size: 14px; font-weight: 600;
   color: var(--trip-blue, #2681ff); display: inline-flex; align-items: center; gap: 6px;
 }
+/* Tall variant: illustration on top, everything centred, soft 20px radius.
+   Hover lift comes from the shared .card-hover; mount stagger from
+   .anim-rise-N — both silenced by the single reduced-motion block. */
+.trip-lane--tall {
+  align-items: center; text-align: center; gap: 8px;
+  padding: 30px 22px 24px; border-radius: 20px;
+}
+.trip-lane--tall .trip-lane__art { margin-bottom: 6px; }
+.trip-lane--tall .trip-lane__title { font-size: 17.5px; color: var(--trip-navy, #0f294d); }
+.trip-lane--tall .trip-lane__sub { max-width: 240px; }
+.trip-lane--tall .trip-lane__cta { margin-top: 10px; }
+
+/* Worker landing empty state: an envelope (the case arrives from the
+   employer) + two short honest lines — no fake search box. */
+.worker-empty {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  background: var(--card, #fff); border-radius: 20px; padding: 32px 26px 28px;
+  box-shadow: 0 4px 18px rgba(15, 41, 77, 0.07);
+}
+.worker-empty__title { margin-top: 8px; font-size: 16px; font-weight: 700; color: var(--trip-navy, #0f294d); }
+.worker-empty__sub { font-size: 13.5px; line-height: 1.5; color: var(--trip-gray, #64748b); }
 .trip-cta--ghost { background: #fff; color: var(--trip-blue); box-shadow: 0 2px 10px rgba(15,41,77,0.08); }
 .trip-cta--ghost:hover { background: #f0f6ff; color: var(--trip-blue-dark);
   box-shadow: 0 10px 26px rgba(15,41,77,0.12); }
@@ -701,9 +728,8 @@ body { background: var(--bg-soft); }
 }
 @keyframes underdraw { to { transform: scaleX(1); } }
 
-@media (prefers-reduced-motion: reduce) {
-  .trip-home__accent::after { animation: none; transform: scaleX(1); }
-}
+/* (reduced-motion handling for the accent underline lives in the single
+   prefers-reduced-motion block at the bottom of this file.) */
 /* The applicant hero headline scales with the viewport so the accent phrase
    (kept unbreakable) never overflows on a narrow window. */
 .main--top .trip-home__title { font-size: clamp(30px, 5.6vw, 54px); margin-bottom: 34px; }
@@ -855,4 +881,135 @@ body { background: var(--bg-soft); }
 .doccard__pill {
   display: inline-block; margin-top: 8px; padding: 4px 12px; border-radius: 999px;
   background: #e8f8ee; color: #1d9e55; font-size: 12px; font-weight: 700;
+}
+
+/* =====================================================================
+   MOTION SYSTEM (2026-08-13 visual redesign)
+   Trip.com-adjacent motion, matching the charm of the airplane loader:
+   fade+rise on mount, gentle floats on illustrations, strokes that draw
+   themselves, a stamp that thunks down, pipeline nodes lighting in
+   sequence. Additive — no existing class is renamed or removed.
+   EVERYTHING here is disabled by the single prefers-reduced-motion
+   block at the bottom of this file.
+   ===================================================================== */
+
+/* ---------- Keyframes ---------- */
+@keyframes fadeRise {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes floatSoft {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+/* Drawn strokes carry pathLength="100" in the SVG, so one dash length
+   (100) draws any shape regardless of its true geometry. */
+@keyframes drawLine { to { stroke-dashoffset: 0; } }
+/* The passport-stamp thunk: hangs above, drops with a squash, settles,
+   holds, then fades just before the loop re-stamps. */
+@keyframes stampDrop {
+  0%, 6%   { opacity: 0; transform: translateY(-16px) scale(1.3); }
+  14%      { opacity: 1; transform: translateY(0) scale(0.94); }
+  20%      { transform: translateY(0) scale(1.05); }
+  26%, 90% { opacity: 1; transform: translateY(0) scale(1); }
+  100%     { opacity: 0; transform: translateY(0) scale(1); }
+}
+@keyframes pulseSoft {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.45; }
+}
+/* One node's cycle: dim → lit → dim. Three nodes with staggered delays
+   read as progress flowing left to right. */
+@keyframes nodeLight {
+  0%, 10%   { opacity: 0.22; }
+  22%, 62%  { opacity: 1; }
+  78%, 100% { opacity: 0.22; }
+}
+
+/* ---------- Mount + hover utilities ---------- */
+/* fill-mode is `backwards`, never `both` — see the .fadeup note above:
+   a retained final transform would break position:fixed descendants. */
+.anim-rise   { animation: fadeRise .5s cubic-bezier(.22,1,.36,1) backwards; }
+.anim-rise-1 { animation: fadeRise .5s .08s cubic-bezier(.22,1,.36,1) backwards; }
+.anim-rise-2 { animation: fadeRise .5s .16s cubic-bezier(.22,1,.36,1) backwards; }
+.anim-rise-3 { animation: fadeRise .5s .24s cubic-bezier(.22,1,.36,1) backwards; }
+.anim-float  { animation: floatSoft 4.2s ease-in-out infinite; }
+
+.card-hover { transition: transform .2s ease, box-shadow .25s ease; }
+.card-hover:hover { transform: translateY(-3px); box-shadow: 0 14px 34px rgba(15, 41, 77, 0.12); }
+
+/* Icon chips: what used to be a bullet list becomes a row of these. */
+.chip-icon {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 14px; border-radius: 999px;
+  background: #eef4ff; color: var(--trip-blue-dark);
+  font-size: 12.5px; font-weight: 600; line-height: 1.2; white-space: nowrap;
+}
+.chip-icon svg { width: 14px; height: 14px; flex-shrink: 0; }
+.chip-icon--ok   { background: #e8f8ee; color: #1d9e55; }
+.chip-icon--warn { background: #fdf3e0; color: #b97b0a; }
+.chip-icon--crit { background: #fdf0ef; color: var(--crit); }
+
+/* Sections breathe: 48px+ between major blocks. */
+.section-gap    { margin-top: 48px; }
+.section-gap--lg { margin-top: 64px; }
+
+/* ---------- Refined primitives (cascade overrides, no renames) ---------- */
+.btn { transition: transform .18s cubic-bezier(.22,1,.36,1), box-shadow .22s ease, background .2s ease, opacity .2s ease; }
+.row { border-radius: 14px; transition: border-color .18s ease, background .18s ease, box-shadow .2s ease; }
+.card { transition: box-shadow .25s ease; }
+
+/* ---------- Illustration hooks (Illustrations.jsx) ---------- */
+/* Animated SVG parts scale/translate around their own box, not the
+   viewport origin — without this every transform flies off-canvas. */
+.illo { display: block; overflow: visible; }
+.illo-part { transform-box: fill-box; transform-origin: 50% 50%; }
+
+/* Papers stack once on mount, then settle. */
+.illo-rise    { animation: fadeRise .6s cubic-bezier(.22,1,.36,1) backwards; }
+.illo-rise--1 { animation-delay: .15s; }
+.illo-rise--2 { animation-delay: .3s; }
+.illo-rise--3 { animation-delay: .45s; }
+
+/* Pens, planes, pinned things hover gently forever. */
+.illo-float       { animation: floatSoft 3.8s ease-in-out infinite; }
+.illo-float--slow { animation-duration: 5.4s; }
+
+/* Form lines / bars / checks draw themselves in once (pathLength=100). */
+.illo-draw {
+  stroke-dasharray: 100; stroke-dashoffset: 100;
+  animation: drawLine .9s .35s cubic-bezier(.4, 0, .2, 1) forwards;
+}
+.illo-draw--1 { animation-delay: .55s; }
+.illo-draw--2 { animation-delay: .75s; }
+.illo-draw--3 { animation-delay: .95s; }
+.illo-draw--4 { animation-delay: 1.15s; }
+
+/* The stamp thunks down every 4 seconds. */
+.illo-stamp { animation: stampDrop 4s cubic-bezier(.3, 1.4, .5, 1) infinite; }
+
+/* Soft attention pulse (highlighted day, shield halo, coin). */
+.illo-pulse { animation: pulseSoft 2.8s ease-in-out infinite; }
+
+/* Pipeline nodes light in sequence; `backwards` keeps a delayed node dim
+   (its 0% state) instead of fully lit while it waits its turn. */
+.illo-node    { animation: nodeLight 3.9s ease-in-out infinite backwards; }
+.illo-node--2 { animation-delay: 1.3s; }
+.illo-node--3 { animation-delay: 2.6s; }
+
+/* ---------- THE reduced-motion block (the only one in this file) ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .anim-rise, .anim-rise-1, .anim-rise-2, .anim-rise-3, .anim-float,
+  .card-hover, .card-hover:hover,
+  .illo-rise, .illo-float, .illo-draw, .illo-stamp, .illo-pulse, .illo-node,
+  .trip-home__accent::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .card-hover:hover { transform: none; }
+  /* End states, not blank states: drawn strokes appear fully drawn, the
+     stamp sits stamped, every node is lit, the accent underline is drawn. */
+  .illo-draw { stroke-dashoffset: 0; }
+  .illo-stamp, .illo-node, .illo-pulse { opacity: 1; transform: none; }
+  .trip-home__accent::after { transform: scaleX(1); }
 }

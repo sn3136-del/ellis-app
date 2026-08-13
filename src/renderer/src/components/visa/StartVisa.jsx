@@ -18,6 +18,10 @@ import {
 } from '../../lib/intake.js'
 import ConnectorBuild from './ConnectorBuild.jsx'
 import PassportIntake from './PassportIntake.jsx'
+import {
+  DocumentsIllustration, FormFillIllustration, PassportIllustration,
+  EnvelopeIllustration, ShieldIllustration
+} from './Illustrations.jsx'
 
 // Readiness statuses that mean no verified LIVE connector exists yet, so the
 // applicant may ask Ellis to build one (brief §10).
@@ -434,22 +438,29 @@ export default function StartVisa({ client, onOpenCase }) {
     } catch { /* unreadable list reads as empty */ }
     return (
       <div className="trip-home" data-testid="worker-landing">
-        <h1 className="trip-home__title" style={{ fontSize: 34 }}>
+        {/* One picture instead of a paragraph: the worker's side of an H-1B
+            is their passport, so the passport gets stamped up top. */}
+        <div className="anim-rise">
+          <PassportIllustration size={150} />
+        </div>
+        <h1 className="trip-home__title anim-rise-1" style={{ fontSize: 34, margin: '10px 0 10px' }}>
           {t('start.worker.title')}
         </h1>
-        <p style={{ color: 'var(--trip-gray, #64748b)', maxWidth: 560, textAlign: 'center', margin: '0 auto 22px' }}>
+        <p className="anim-rise-2" style={{ color: 'var(--trip-gray, #64748b)', maxWidth: 480,
+          textAlign: 'center', margin: '0 auto 34px', fontSize: 14.5 }}>
           {t('start.worker.sub')}
         </p>
-        <div style={{ width: '100%', maxWidth: 560, margin: '0 auto' }}>
+        <div className="anim-rise-3" style={{ width: '100%', maxWidth: 520, margin: '0 auto' }}>
           {workerCases.length === 0
-            ? <div className="row" style={{ justifyContent: 'center', textAlign: 'center' }}>
-                <div className="row__main">
-                  <div className="row__title">{t('start.worker.emptyTitle')}</div>
-                  <div className="row__sub">{t('start.worker.emptySub')}</div>
-                </div>
+            ? <div className="worker-empty">
+                {/* The case arrives from the employer — an envelope, not a
+                    search box the backend does not offer. */}
+                <EnvelopeIllustration size={96} />
+                <div className="worker-empty__title">{t('start.worker.emptyTitle')}</div>
+                <div className="worker-empty__sub">{t('start.worker.emptySub')}</div>
               </div>
             : workerCases.map((c) => (
-                <button key={c.id} className="row" style={{ width: '100%', textAlign: 'left', cursor: 'pointer' }}
+                <button key={c.id} className="row card-hover" style={{ width: '100%', textAlign: 'left', cursor: 'pointer' }}
                   onClick={() => onOpenCase && onOpenCase(c)} data-testid="worker-case">
                   <div className="row__main">
                     <div className="row__title">{c.full_name || t('start.worker.caseFallback')}</div>
@@ -458,10 +469,25 @@ export default function StartVisa({ client, onOpenCase }) {
                 </button>
               ))}
         </div>
-        <button className="trip-cta trip-cta--ghost" style={{ marginTop: 26 }}
+        <button className="trip-cta trip-cta--ghost anim-rise-3" style={{ marginTop: 38 }}
           onClick={() => { window.location.hash = '#applicant'; window.location.reload() }}>
           {t('start.worker.back')}
         </button>
+        {/* The attorney disclaimer: one compact line, full text one tap away —
+            never deleted, never buried (owner decision, legal). */}
+        <details className="anim-rise-3" data-testid="worker-disclaimer"
+                 style={{ marginTop: 26, maxWidth: 520, width: '100%' }}>
+          <summary style={{ listStyle: 'none', display: 'flex', alignItems: 'center',
+                            justifyContent: 'center', gap: 8, cursor: 'pointer',
+                            fontSize: 11, color: 'var(--muted)' }}>
+            <ShieldIllustration size={22} />
+            <span>{t('h1b.disclaimer.short')}</span>
+          </summary>
+          <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 6,
+                        lineHeight: 1.55, textAlign: 'center' }}>
+            {t('h1b.disclaimer')}
+          </div>
+        </details>
       </div>
     )
   }
@@ -530,20 +556,26 @@ export default function StartVisa({ client, onOpenCase }) {
               H-1B is TWO lanes because it is two different processes: the
               employer files (LCA, I-129); the worker supplies documents and
               does the consular leg. */}
+          {/* The three products as tall illustrated cards — one drawing each
+              instead of a paragraph each, staggered on mount. */}
           <div className="trip-home__lanes" data-testid="product-lanes">
-            <button className="trip-lane" data-testid="lane-tourist" onClick={startNew}>
+            <button className="trip-lane trip-lane--tall card-hover anim-rise-1"
+              data-testid="lane-tourist" onClick={startNew}>
+              <DocumentsIllustration size={132} className="trip-lane__art" />
               <div className="trip-lane__title">{t('start.lane.tourist.title')}</div>
               <div className="trip-lane__sub">{t('start.lane.tourist.sub')}</div>
               <div className="trip-lane__cta">{t('start.lane.tourist.cta')}{arrow}</div>
             </button>
-            <button className="trip-lane" data-testid="lane-h1b-employer"
+            <button className="trip-lane trip-lane--tall card-hover anim-rise-2" data-testid="lane-h1b-employer"
               onClick={() => { window.location.hash = '#employer'; window.location.reload() }}>
+              <FormFillIllustration size={132} className="trip-lane__art" />
               <div className="trip-lane__title">{t('start.lane.h1b.title')}</div>
               <div className="trip-lane__sub">{t('start.lane.h1b.sub')}</div>
               <div className="trip-lane__cta">{t('start.lane.h1b.cta')}{arrow}</div>
             </button>
-            <button className="trip-lane" data-testid="lane-h1b-worker"
+            <button className="trip-lane trip-lane--tall card-hover anim-rise-3" data-testid="lane-h1b-worker"
               onClick={() => { window.location.hash = '#worker'; window.location.reload() }}>
+              <PassportIllustration size={132} className="trip-lane__art" />
               <div className="trip-lane__title">{t('start.lane.h1bworker.title')}</div>
               <div className="trip-lane__sub">{t('start.lane.h1bworker.sub')}</div>
               <div className="trip-lane__cta">{t('start.lane.h1bworker.cta')}{arrow}</div>

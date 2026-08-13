@@ -1,16 +1,18 @@
 // Ask Ellis — the floating H-1B case assistant. A fixed button bottom-right
-// opens a chat panel wired to POST /h1b/cases/{id}/assistant. Honesty rules:
-// the attorney disclaimer is pinned at the top of the panel (never scrolled
-// away), and every action the assistant reports renders through
-// assistantActionMeta — a denied action shows AS denied, and an unconfirmed
-// one can never display as performed. Locale rides with every message so the
-// reply speaks the UI language.
+// (with a soft pulsing halo) opens an airy chat panel wired to POST
+// /h1b/cases/{id}/assistant. Honesty rules: the attorney disclaimer is pinned
+// at the top of the panel as one compact line with the full text one tap away
+// (never scrolled away, never deleted), and every action the assistant
+// reports renders through assistantActionMeta — a denied action shows AS
+// denied, and an unconfirmed one can never display as performed. Locale rides
+// with every message so the reply speaks the UI language.
 import { useEffect, useRef, useState } from 'react'
 import { useLocale } from '../../lib/locale.jsx'
 import { createVisaClient } from '../../lib/visaBackend.js'
 import {
   newSession, newAdminSession, newEmployerSession, assistantActionMeta
 } from '../../lib/visaSession.js'
+import { PipelineIllustration, ShieldIllustration } from './Illustrations.jsx'
 
 function sessionForPersona(persona) {
   if (persona === 'admin') return newAdminSession()
@@ -85,42 +87,75 @@ export default function AskEllis({ caseId, persona = 'applicant' }) {
 
   return (
     <>
-      {/* Floating opener — above content, all personas. */}
-      <button type="button" className="btn" data-testid="askellis-button"
-        style={{ position: 'fixed', right: 20, bottom: 20, zIndex: 60,
-                 borderRadius: 999, boxShadow: '0 4px 16px rgba(0,0,0,0.18)' }}
-        onClick={() => setOpen((v) => !v)}>
-        {open ? t('askellis.close') : t('askellis.button')}
-      </button>
+      {/* Floating opener — above content, all personas, with a gentle halo. */}
+      <div style={{ position: 'fixed', right: 22, bottom: 22, zIndex: 60 }}>
+        <span className="illo-pulse" aria-hidden="true"
+          style={{ position: 'absolute', inset: -6, borderRadius: 999,
+                   background: 'rgba(38,129,255,0.35)', filter: 'blur(10px)',
+                   pointerEvents: 'none' }} />
+        <button type="button" className="btn" data-testid="askellis-button"
+          style={{ position: 'relative', borderRadius: 999,
+                   boxShadow: '0 6px 20px rgba(38,129,255,0.35)' }}
+          onClick={() => setOpen((v) => !v)}>
+          {open ? t('askellis.close') : t('askellis.button')}
+        </button>
+      </div>
 
       {open && (
-        <div className="card" data-testid="askellis-panel"
-          style={{ position: 'fixed', right: 20, bottom: 72, zIndex: 60,
-                   width: 'min(380px, calc(100vw - 40px))', maxHeight: '70vh',
+        <div className="card anim-rise" data-testid="askellis-panel"
+          style={{ position: 'fixed', right: 22, bottom: 80, zIndex: 60,
+                   width: 'min(400px, calc(100vw - 44px))', maxHeight: '72vh',
+                   borderRadius: 20,
                    display: 'flex', flexDirection: 'column', overflow: 'hidden',
-                   boxShadow: '0 10px 32px rgba(0,0,0,0.22)' }}>
-          {/* Header + the attorney disclaimer, PINNED at the panel top. */}
-          <div style={{ padding: '12px 14px 10px', borderBottom: '1px solid var(--line, #e5e7eb)' }}>
-            <div style={{ fontWeight: 700 }}>{t('askellis.title')}</div>
-            <div style={{ fontSize: 12, color: 'var(--muted)' }}>{t('askellis.sub')}</div>
-            <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 6 }}
-                 data-testid="askellis-disclaimer">
-              {t('h1b.disclaimer')}
+                   boxShadow: '0 14px 44px rgba(15,41,77,0.22)' }}>
+          {/* Header + the attorney disclaimer, PINNED at the panel top:
+              one compact line, full text one tap away. */}
+          <div style={{ padding: '16px 18px 12px',
+                        borderBottom: '1px solid var(--line, #e5e7eb)' }}>
+            <div style={{ fontWeight: 800, fontSize: 15,
+                          color: 'var(--trip-navy, #0f294d)' }}>{t('askellis.title')}</div>
+            <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
+              {t('askellis.sub')}
             </div>
+            <details data-testid="askellis-disclaimer" style={{ marginTop: 8 }}>
+              <summary style={{ listStyle: 'none', display: 'flex', alignItems: 'center',
+                                gap: 8, cursor: 'pointer', fontSize: 11,
+                                color: 'var(--muted)' }}>
+                <ShieldIllustration size={22} />
+                <span style={{ flex: 1, minWidth: 0 }}>{t('h1b.disclaimer.short')}</span>
+              </summary>
+              <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 6,
+                            lineHeight: 1.55 }}>
+                {t('h1b.disclaimer')}
+              </div>
+            </details>
           </div>
 
-          <div ref={listRef} style={{ flex: 1, overflowY: 'auto', padding: 12,
-                                      display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div ref={listRef} style={{ flex: 1, overflowY: 'auto', padding: 16,
+                                      display: 'flex', flexDirection: 'column', gap: 12 }}>
             {messages.length === 0 && !busy && (
-              <div style={{ fontSize: 13, color: 'var(--muted)' }}>{t('askellis.empty')}</div>
+              <div style={{ textAlign: 'center', padding: '14px 6px 6px' }}>
+                <span style={{ display: 'grid', placeItems: 'center' }}>
+                  <PipelineIllustration size={130} />
+                </span>
+                <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 8,
+                              lineHeight: 1.5 }}>
+                  {t('askellis.empty')}
+                </div>
+              </div>
             )}
             {messages.map((m, i) => (
-              <div key={i} style={{ alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
-                                    maxWidth: '92%' }}>
+              <div key={i} className="anim-rise"
+                   style={{ alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
+                            maxWidth: '92%' }}>
                 <div style={{
-                  padding: '8px 11px', borderRadius: 12, fontSize: 13.5,
+                  padding: '9px 13px', fontSize: 13.5, lineHeight: 1.5,
                   whiteSpace: 'pre-wrap',
-                  background: m.role === 'user' ? 'var(--trip-navy, #0f294d)' : 'var(--bg-2, #f3f4f6)',
+                  borderRadius: 14,
+                  borderBottomRightRadius: m.role === 'user' ? 5 : 14,
+                  borderBottomLeftRadius: m.role === 'user' ? 14 : 5,
+                  background: m.role === 'user'
+                    ? 'var(--trip-blue, #2681ff)' : 'var(--bg-2, #f3f6fb)',
                   color: m.role === 'user' ? '#fff' : 'inherit'
                 }}>
                   {m.text}
@@ -138,7 +173,9 @@ export default function AskEllis({ caseId, persona = 'applicant' }) {
               </div>
             ))}
             {busy && (
-              <div style={{ fontSize: 13, color: 'var(--muted)' }}>{t('askellis.thinking')}</div>
+              <div className="illo-pulse" style={{ fontSize: 13, color: 'var(--muted)' }}>
+                {t('askellis.thinking')}
+              </div>
             )}
             {error && (
               <div style={{ fontSize: 12.5, color: '#d33' }} data-testid="askellis-error">
@@ -149,7 +186,7 @@ export default function AskEllis({ caseId, persona = 'applicant' }) {
 
           {/* Suggestion chips prefill the input — the user always presses Send. */}
           {lastEllis && Array.isArray(lastEllis.suggestions) && lastEllis.suggestions.length > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, padding: '0 12px 8px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, padding: '0 14px 10px' }}>
               {lastEllis.suggestions.map((s, i) => (
                 <button key={i} type="button" className="chip"
                         style={{ cursor: 'pointer' }}
@@ -160,9 +197,9 @@ export default function AskEllis({ caseId, persona = 'applicant' }) {
             </div>
           )}
 
-          <div style={{ display: 'flex', gap: 8, padding: 12,
+          <div style={{ display: 'flex', gap: 8, padding: 14,
                         borderTop: '1px solid var(--line, #e5e7eb)' }}>
-            <input className="input" style={{ flex: 1 }} value={input}
+            <input className="input" style={{ flex: 1, borderRadius: 999 }} value={input}
                    placeholder={t('askellis.placeholder')}
                    onChange={(e) => setInput(e.target.value)}
                    onKeyDown={(e) => { if (e.key === 'Enter') send() }} />
