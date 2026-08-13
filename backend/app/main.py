@@ -85,6 +85,12 @@ app.include_router(_h1b_paf_router)
 # Ellis prepares everything; the authorized human performs the booking action.
 from .appt_api import router as _appt_router  # noqa: E402
 app.include_router(_appt_router)
+# H1B ops: org-account bulk registration, RFE response assembly, cap exemption.
+from .h1b.ops_api import router as _h1b_ops_router  # noqa: E402
+app.include_router(_h1b_ops_router)
+# Travel authorizations (ESTA/eTA/UK ETA) + Schengen 90/180 stay engine.
+from .travel_api import router as _travel_router  # noqa: E402
+app.include_router(_travel_router)
 
 
 @app.on_event("startup")

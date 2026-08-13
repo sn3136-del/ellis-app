@@ -364,8 +364,10 @@ def test_no_wage_data_derives_no_soc_title(no_oflc):
 
 def test_prepare_pwd_request_fills_stores_and_reports(client, db, oflc):
     case_id = _prepared_case(client, db)
+    # The 2019 blank stays reachable by naming its edition; the newer blank is
+    # now the default (test_flag_forms_2021.py covers that path).
     out = flag_forms.prepare_pwd_request(db, _parent(db, case_id),
-                                         actor="flaghr1")
+                                         actor="flaghr1", edition="2019")
     assert out["form_key"] == "eta-9141"
     assert out["filled_count"] > 0
     assert out["human_only"] == []

@@ -310,7 +310,7 @@
   },
   {
    "family_id": "australia-immi",
-   "name": "Australia ImmiAccount / eVisitor / ETA",
+   "name": "Australia ImmiAccount (eVisitor and online visa lodgement)",
    "kind": "eta_portal",
    "operator": "Department of Home Affairs",
    "operator_kind": "government",
@@ -326,7 +326,8 @@
     "ELECTRONIC_AUTHORIZATION",
     "EVISA"
    ],
-   "account_required": true
+   "account_required": true,
+   "notes": "NAME CORRECTED 2026-08-11: this family is ImmiAccount, and it does NOT carry the ETA (subclass 601). Home Affairs' own ETA help text states 'You cannot apply for an ETA online, or through an agent or airline at this time, unless the application is lodged via the ETA app' — the subclass 601 ETA exists only inside the AustralianETA mobile app, which requires an NFC read of the passport chip and a LIVE facial capture on the traveller's own device. Neither act can be performed by a browser adapter and neither may be performed for a traveller by anyone, so no adapter built on this family may ever be presented as obtaining an ETA. The ELECTRONIC_AUTHORIZATION outcome here is eVisitor (subclass 651), which genuinely is lodged in ImmiAccount. The ETA's honest route lives in app/travel_authorization.py, which reports fill_supported=false and hands the traveller the official app plus a checklist. account_required is true: the ImmiAccount login is a personal handoff."
   },
   {
    "family_id": "nz-nzeta",
@@ -755,7 +756,7 @@
    "base_url": "https://evisa.gov.vn/",
    "hostnames": [
     "evisa.gov.vn",
-    "evisa.xuatnhapcanh.gov.vn"
+    "thithucdientu.gov.vn"
    ],
    "destinations": [
     "VNM"
@@ -764,6 +765,7 @@
     "EVISA"
    ],
    "account_required": false,
+   "notes": "HOSTNAME REPAIR 2026-08-11. The Immigration Department's own notice on immigration.gov.vn states: 'From 08:00 on 11/11/2024 (GMT+7), the Vietnam Electronic Visa Portal will operate on two new domains: https://thithucdientu.gov.vn and https://evisa.gov.vn.' The previously seeded evisa.xuatnhapcanh.gov.vn is the RETIRED host and was removed — a dead hostname on an allowlist is not a harmless leftover, it is a live-navigation target that can be re-registered or silently redirected. Both current hosts are the SAME portal (one platform, two domains), so this stays one family. PROBE PROVENANCE: the entry_gate below was authored from a live credential-free probe of evisa.gov.vn on 2026-07-25. thithucdientu.gov.vn has NOT been probed; it is seeded as an identity/allowlist fact only, and no gate, path or selector is claimed for it. Anything that is not one of these two domains is not the Vietnamese e-visa portal, whatever it calls itself.",
    "entry_gate": {
     "description": "The application form (/e-visa/foreigners) is gated behind an in-session instruction modal: Apply now -> scroll both instruction containers to the bottom -> tick the two acknowledgment checkboxes (the only visible checkboxes in the modal) -> Next. Direct navigation redirects to the home page. Verified live 2026-07-25.",
     "actions": [
@@ -813,7 +815,7 @@
    "family_id": "cambodia-evisa",
    "name": "Cambodia e-Visa",
    "kind": "evisa_portal",
-   "operator": "Ministry of Foreign Affairs (Cambodia)",
+   "operator": "Ministry of Foreign Affairs and International Cooperation (Cambodia)",
    "operator_kind": "government",
    "base_url": "https://www.evisa.gov.kh/",
    "hostnames": [
@@ -825,7 +827,8 @@
    "supported_outcomes": [
     "EVISA"
    ],
-   "account_required": false
+   "account_required": false,
+   "notes": "Operator re-checked 2026-08-11: the e-Visa is run by Cambodia's Ministry of Foreign Affairs and International Cooperation (the ministry's own missions, e.g. recberlin.mfaic.gov.kh, and the Royal Embassy in Washington D.C. both name https://www.evisa.gov.kh/ as the single official portal, and the ministry publishes lists of impersonating sites). The registrable domain evisa.gov.kh sits under the Cambodian government's gov.kh delegation, so the deterministic domain check verifies it. ONLY www.evisa.gov.kh is claimed: the bare apex is plausible but has never been observed serving the portal, and a plausible host is not a claimed one. The e-Arrival card is a SEPARATE platform and a separate family (cambodia-earrival, arrival.gov.kh) — the two must never be merged. entry_gate is honestly absent: no live probe has run, so no path, selector or handoff is asserted."
   },
   {
    "family_id": "cambodia-earrival",
@@ -1516,7 +1519,7 @@
   },
   {
    "family_id": "egypt-evisa",
-   "name": "Egypt e-Visa",
+   "name": "Egypt e-Visa (Visa2Egypt)",
    "kind": "evisa_portal",
    "operator": "Ministry of Interior (Egypt)",
    "operator_kind": "government",
@@ -1531,7 +1534,8 @@
    "supported_outcomes": [
     "EVISA"
    ],
-   "account_required": true
+   "account_required": true,
+   "notes": "Operator re-checked 2026-08-11: Visa2Egypt is the Egyptian Ministry of Interior's own e-Visa platform, on the government's gov.eg delegation, so the deterministic domain check verifies it. account_required is true and REAL: Visa2Egypt makes the traveller register an account before an application exists, so registration and login are personal handoffs, never Ellis's. Look-alike commercial sites trading on the Visa2Egypt name are common; only these two hostnames are the government's. FEES ARE VOLATILE HERE — the portal's own tourist e-Visa amounts were raised in 2026 and are NOT curated in this registry; a fee shown next to a payment must come from a sourced, dated fee record, never from this entry. entry_gate is honestly absent: no live probe has run, so no path, selector or handoff is asserted."
   },
   {
    "family_id": "morocco-evisa",

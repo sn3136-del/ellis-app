@@ -1085,3 +1085,566 @@ test('the employer console renders the wage caveats and the SOC confirm-required
   assert.ok(!/h1bPartyAnswers/.test(panels),
     'a suggestion panel must never write a filed answer')
 })
+
+// ---------------------------------------------------------------------------
+// The filing + appointment cockpits (Agent 7). docs/MAX_AUTOMATION_SPEC.md's
+// "one screen per filing": everything prepared, everything missing, and ONE
+// action that opens the applicant's own secure window and stops there. The
+// appointment surface (docs/APPOINTMENTS_DESIGN.md) carries the same boundary:
+// Ellis prepares to the edge of a person's act and never books a slot.
+import {
+  filingCockpitView, appointmentTriageView, appointmentPrestageView,
+  groupRosterView, appointmentAvailabilityView, deepLinkView, tapsToDone,
+  TAPS_TO_DONE, GROUP_MIN_MEMBERS, HUMAN_ACT_KEYS
+} from '../../src/renderer/src/lib/visaBackend.js'
+
+test('this wave’s client methods hit the pinned endpoint paths with the pinned bodies', async () => {
+  const calls = []
+  const realFetch = globalThis.fetch
+  globalThis.fetch = async (url, opts = {}) => {
+    calls.push({ url: String(url), method: opts.method || 'GET', body: opts.body })
+    return { ok: true, status: 200, text: async () => '{}', blob: async () => ({}) }
+  }
+  try {
+    const c = createVisaClient(newEmployerSession())
+    // Appointment cockpit (app/appt_api.py).
+    await c.appointmentTriage('c1', 'zh-CN')
+    await c.appointmentPrestage('c1')
+    await c.appointmentGroupRoster({ case_ids: ['c1', 'c2'], group_kind: 'tour_group' })
+    await c.downloadGroupRoster({ caseIds: ['c1', 'c2'], format: 'csv', post: 'Beijing' })
+    await c.appointmentAvailability({ post: 'Beijing', country: 'CHN' })
+    // Travel authorizations + Schengen stay (app/travel_api.py).
+    await c.travelAuthorizations({ nationality: 'CHN', destination: 'USA' })
+    await c.travelAuthorization('esta')
+    await c.schengenStay({ stays: [{ entry: '2026-01-02', exit: '2026-01-20' }],
+                           asOf: '2026-09-01' })
+    // H1B ops (app/h1b/ops_api.py).
+    await c.h1bBulkRegistration('org-1', { case_ids: ['c1'] })
+    await c.h1bRfeAssemble('c1', { issues: ['specialty_occupation'] })
+    await c.h1bRfeIssues()
+    await c.h1bCapExemption('c1')
+    await c.h1bCapExemptionQuestions()
+    // ETA-9141 (both editions) + the public access file.
+    await c.prepareEta9141('c1', 'zh-Hant')
+    await c.h1bPafManifest('c1')
+    await c.h1bPafNotice('c1')
+    await c.h1bPafPosting('c1', { method: 'hard_copy', locations: ['lobby', 'break room'] })
+    await c.h1bPafPackage('c1')
+  } finally {
+    globalThis.fetch = realFetch
+  }
+  const seen = calls.map((x) => `${x.method} ${new URL(x.url).pathname}`)
+  assert.deepEqual(seen, [
+    'GET /appointments/triage/c1',
+    'GET /appointments/prestage/c1',
+    'POST /appointments/group-roster',
+    'GET /appointments/group-roster/export',
+    'GET /appointments/availability',
+    'GET /travel/authorizations',
+    'GET /travel/authorizations/esta',
+    'GET /travel/schengen-stay',
+    'POST /h1b/orgs/org-1/bulk-registration',
+    'POST /h1b/cases/c1/rfe/assemble',
+    'GET /h1b/rfe/issues',
+    'GET /h1b/cases/c1/cap-exemption',
+    'GET /h1b/cap-exemption/questions',
+    'POST /h1b/cases/c1/forms/eta-9141/prepare',
+    'GET /h1b/cases/c1/paf/manifest',
+    'POST /h1b/cases/c1/paf/notice',
+    'POST /h1b/cases/c1/paf/posting',
+    'GET /h1b/cases/c1/paf/package'
+  ])
+  const byPath = {}
+  for (const x of calls) byPath[new URL(x.url).pathname] = x
+  // The locale rides as a query parameter on every localized endpoint.
+  assert.equal(new URL(byPath['/appointments/triage/c1'].url).searchParams.get('locale'), 'zh-CN')
+  assert.equal(new URL(byPath['/h1b/cases/c1/forms/eta-9141/prepare'].url)
+    .searchParams.get('locale'), 'zh-Hant')
+  // The roster body carries the full GroupRosterRequest shape, defaults filled
+  // in — never an undefined field the server would have to guess at.
+  const roster = JSON.parse(byPath['/appointments/group-roster'].body)
+  assert.deepEqual(roster.case_ids, ['c1', 'c2'])
+  assert.equal(roster.group_kind, 'tour_group')
+  assert.equal(roster.include_passport_numbers, false)   // identifiers are opt-IN
+  // The export repeats case_id once per member (FastAPI Query(list)); a
+  // URLSearchParams array would have flattened it into one comma value.
+  const exportUrl = new URL(byPath['/appointments/group-roster/export'].url)
+  assert.deepEqual(exportUrl.searchParams.getAll('case_id'), ['c1', 'c2'])
+  assert.equal(exportUrl.searchParams.get('format'), 'csv')
+  assert.equal(exportUrl.searchParams.get('post'), 'Beijing')
+  // The Schengen stay history rides as JSON in the query the endpoint declares,
+  // and the day count is asked for, never posted as a decision.
+  const stayUrl = new URL(byPath['/travel/schengen-stay'].url)
+  assert.deepEqual(JSON.parse(stayUrl.searchParams.get('stays')),
+    [{ entry: '2026-01-02', exit: '2026-01-20' }])
+  assert.equal(stayUrl.searchParams.get('as_of'), '2026-09-01')
+  // The bulk-registration body carries the whole BulkRegistrationBody shape:
+  // invalid rows are opt-IN, because USCIS rejects a batch that contains them.
+  const bulk = JSON.parse(byPath['/h1b/orgs/org-1/bulk-registration'].body)
+  assert.deepEqual(bulk, { case_ids: ['c1'], fiscal_year: null, include_invalid: false })
+  // The RFE body defaults every optional field rather than sending undefined,
+  // and no deadline is ever invented client-side.
+  const rfe = JSON.parse(byPath['/h1b/cases/c1/rfe/assemble'].body)
+  assert.deepEqual(rfe.issues, ['specialty_occupation'])
+  assert.equal(rfe.response_due_date, '')
+  assert.equal(rfe.generate_pdf, false)
+  assert.deepEqual(JSON.parse(byPath['/h1b/cases/c1/paf/posting'].body),
+    { method: 'hard_copy', locations: ['lobby', 'break room'],
+      individual_direct_email: false })
+})
+
+test('filingCockpitView shows what is prepared with its source, and what is missing', () => {
+  const view = filingCockpitView({
+    form_key: 'eta-9141', filled_count: 22, total_mapped: 30,
+    derived: [{ key: 'soc_title', label: 'Occupation title', value: 'Software Developers',
+                source: 'the DOL SOC list' }],
+    missing: [{ key: 'worksite_city', label: 'Worksite city',
+                question: 'Which city will the worker actually work in?' }],
+    human_only: [{ key: 'signature', label: 'Employer signature' }],
+    preparation_notice: 'PREPARATION COPY — the real request is made in FLAG.'
+  }, { sessionCaseId: 'child-1' })
+  assert.equal(view.available, true)
+  assert.equal(view.filledCount, 22)
+  assert.equal(view.totalCount, 30)
+  // Every prepared value names where it came from.
+  assert.equal(view.prepared[0].source, 'the DOL SOC list')
+  assert.equal(view.prepared[0].sourceKnown, true)
+  // Each missing item carries the ONE input that clears it, in real words.
+  assert.equal(view.missingCount, 1)
+  assert.equal(view.missing[0].input, 'Which city will the worker actually work in?')
+  assert.deepEqual(view.humanOnly, ['Employer signature'])
+  assert.ok(view.notices.includes('PREPARATION COPY — the real request is made in FLAG.'))
+  // A prepared value with no recorded source says so rather than inventing one.
+  const noSource = filingCockpitView({ prepared: [{ key: 'fein', label: 'FEIN' }] })
+  assert.equal(noSource.prepared[0].sourceKnown, false)
+  assert.equal(noSource.prepared[0].source, '')
+})
+
+test('the cockpit’s single action opens a window and never performs a human act', () => {
+  const ready = filingCockpitView({ form_key: 'i-129', filled_count: 40, total_mapped: 50 },
+    { sessionCaseId: 'child-1' })
+  assert.equal(ready.action.enabled, true)
+  assert.equal(ready.action.labelKey, 'cockpit.action.open')
+  // Pinned: the action opens a window. It never signs, pays, or submits.
+  assert.equal(ready.action.performsHumanAct, false)
+  // The acts that remain are NAMED, so the surface can never read as "done".
+  assert.deepEqual(ready.humanActs.map((a) => a.key), ['login', 'sign', 'pay', 'submit'])
+  for (const a of ready.humanActs) assert.ok(HUMAN_ACT_KEYS.includes(a.key))
+  // No child filing case yet: the button is honestly disabled with a reason,
+  // never a control that cannot work.
+  const notStarted = filingCockpitView({ form_key: 'i-129', filled_count: 1, total_mapped: 2 })
+  assert.equal(notStarted.action.enabled, false)
+  assert.equal(notStarted.action.reasonKey, 'cockpit.action.notStarted')
+  // The backend's own typed acts (appt_api) win over the curated list.
+  const fromServer = filingCockpitView({
+    filled_count: 1, total_mapped: 2,
+    human_acts: [{ act: 'submit the group appointment request', who: 'the coordinator',
+                   ellis_does: 'assembles and validates the roster' }]
+  }, { sessionCaseId: 'c1' })
+  assert.equal(fromServer.humanActs.length, 1)
+  assert.equal(fromServer.humanActs[0].who, 'the coordinator')
+})
+
+test('taps-to-done is the measured target or an honest unknown, never a guess', () => {
+  // The numbers come from docs/MAX_AUTOMATION_SPEC.md's own table.
+  assert.deepEqual(tapsToDone('eta-9035'), { known: true, min: 3, max: 3, exact: 3 })
+  assert.deepEqual(tapsToDone('i-129'), { known: true, min: 4, max: 4, exact: 4 })
+  assert.deepEqual(tapsToDone('registration'), { known: true, min: 3, max: 3, exact: 3 })
+  assert.equal(tapsToDone('tourist-evisa').exact, null)     // 2-4 is a range
+  assert.equal(tapsToDone('tourist-evisa').max, 4)
+  // A route the spec does not pin reports UNKNOWN rather than a number someone
+  // would quote back as a promise.
+  assert.equal(tapsToDone('eta-9141').known, false)
+  assert.equal(tapsToDone('something-new').known, false)
+  assert.equal(tapsToDone('').known, false)
+  assert.ok(!('paf' in TAPS_TO_DONE))
+  assert.equal(filingCockpitView({ form_key: 'eta-9141', filled_count: 1, total_mapped: 2 })
+    .taps.known, false)
+})
+
+test('filingCockpitView honest-degrades and splits a PAF manifest by real status', () => {
+  assert.equal(filingCockpitView({ available: false, reason: 'no lca step' }).available, false)
+  assert.equal(filingCockpitView({}).available, false)
+  assert.equal(filingCockpitView(null).available, false)
+  assert.equal(filingCockpitView(null).action.enabled, false)
+  // A 655.760(a) manifest: present items are prepared, and partial/missing/
+  // unknown are all reported missing — an unanswered conditional item is never
+  // quietly dropped.
+  const paf = filingCockpitView({
+    items: [
+      { item_id: 'certified_lca', title: 'Certified LCA', status: 'present',
+        citation: '20 CFR 655.760(a)(1)' },
+      { item_id: 'wage_rate', title: 'Wage rate documentation', status: 'partial',
+        next_action: 'Ellis holds the facts; the file still needs the document itself.' },
+      { item_id: 'notice_documentation', title: 'Notice posting record', status: 'missing',
+        next_action: 'record how the 655.734 notice was given' },
+      { item_id: 'h1b_dependent', title: 'H-1B dependent attestations', status: 'unknown',
+        condition_question: 'Is the employer H-1B dependent?' },
+      { item_id: 'corporate', title: 'Corporate change documents', status: 'not_applicable' }
+    ]
+  }, { routeKey: 'paf' })
+  assert.equal(paf.documents.length, 1)
+  assert.equal(paf.documents[0].citation, '20 CFR 655.760(a)(1)')
+  assert.deepEqual(paf.missing.map((m) => m.key),
+    ['wage_rate', 'notice_documentation', 'h1b_dependent'])
+  // Each gap carries the backend's own next action; an unanswered conditional
+  // item asks its question rather than being dropped or assumed inapplicable.
+  assert.match(paf.missing[0].input, /still needs the document itself/)
+  assert.equal(paf.missing[2].input, 'Is the employer H-1B dependent?')
+  assert.equal(paf.notApplicable[0].key, 'corporate')
+  assert.deepEqual(paf.humanActs.map((a) => a.key), ['review'])
+  // The public access file is never filed on a government site, so the single
+  // action is honestly unavailable — not "not started yet", which would imply a
+  // window is coming.
+  assert.equal(paf.action.enabled, false)
+  assert.equal(paf.action.reasonKey, 'cockpit.action.noPortal')
+  assert.equal(filingCockpitView({ items: [{ label: 'x', status: 'present' }] },
+    { routeKey: 'paf', sessionCaseId: 'c1' }).action.enabled, false)
+})
+
+test('appointment triage keeps every verdict a genuine tri-state', () => {
+  // The real appt_eligibility.triage shape, inside appt_api's envelope: the
+  // verdict block, the route-specific block, and the backend's own "unknown"
+  // STRING, which must land as a null and never as a false.
+  const schengen = appointmentTriageView({
+    available: true,
+    triage: { route: 'schengen', member_state: 'FRA',
+      schengen: { required: false, within_59_months: true },
+      submission_without_appearance_permitted: true,
+      verdict: { in_person_required: false, biometrics_required: false,
+                 agent_deliverable_end_to_end: true,
+                 summary: 'Fingerprints can be reused, so an accredited agent can carry the whole filing.' },
+      human_acts: [{ act: 'sign_mandate', label: 'Sign the mandate authorising the intermediary',
+                     who: 'applicant', non_delegable: true, why: 'Art. 45 requires it.' }],
+      open_questions: [] }
+  })
+  assert.equal(schengen.available, true)
+  assert.equal(schengen.route, 'schengen')
+  assert.equal(schengen.memberState, 'FRA')
+  assert.equal(schengen.inPersonRequired, false)
+  assert.equal(schengen.biometricsRequired, false)
+  assert.equal(schengen.visBiometricsReusable, true)
+  assert.equal(schengen.agentEndToEnd, true)
+  assert.match(schengen.summary, /accredited agent/)
+  // The act renders its server-localized SENTENCE, not its bare key, and keeps
+  // the non-delegable flag.
+  assert.match(schengen.humanActs[0].act, /Sign the mandate/)
+  assert.equal(schengen.humanActs[0].nonDelegable, true)
+  assert.equal(schengen.neverBooks, true)
+  // First-time applicant: appearance is required and non-delegable, and that
+  // is a REAL false on reuse.
+  const firstTime = appointmentTriageView({ triage: { route: 'schengen',
+    schengen: { required: true, within_59_months: false },
+    verdict: { in_person_required: true, biometrics_required: true } } })
+  assert.equal(firstTime.visBiometricsReusable, false)
+  assert.equal(firstTime.biometricsRequired, true)
+  assert.equal(firstTime.inPersonRequired, true)
+  // A biometrics EXEMPTION is not 59-month reuse: "no fingerprints needed"
+  // must never be reported as "fingerprints can be reused".
+  const exempt = appointmentTriageView({ triage: { route: 'schengen',
+    schengen: { required: false, within_59_months: null },
+    verdict: { in_person_required: false, biometrics_required: false } } })
+  assert.equal(exempt.biometricsRequired, false)
+  assert.equal(exempt.visBiometricsReusable, null)
+  // US: the interview waiver IS "no interview needed"; EVUS is its own answer.
+  const us = appointmentTriageView({ triage: { route: 'us',
+    us: { needed: false }, evus: { required: false },
+    verdict: { in_person_required: false, interview_required: false } } })
+  assert.equal(us.interviewWaiverEligible, true)
+  assert.equal(us.evusRequired, false)
+  const interview = appointmentTriageView({ triage: { route: 'us',
+    us: { needed: true }, evus: { required: true } } })
+  assert.equal(interview.interviewWaiverEligible, false)
+  assert.equal(interview.evusRequired, true)
+  // The backend's UNKNOWN string is an unknown, not a "no".
+  const unknown = appointmentTriageView({ triage: { route: 'us',
+    us: { needed: 'unknown', missing_facts: ['prior visa issue date'] },
+    evus: { required: 'unknown' },
+    verdict: { in_person_required: 'unknown' },
+    open_questions: [{ question: 'Is the visa a 10-year B-1/B-2?',
+                       resolve_with: 'the visa sticker’s validity dates' }] } })
+  assert.equal(unknown.inPersonRequired, null)
+  assert.equal(unknown.interviewWaiverEligible, null)
+  assert.equal(unknown.evusRequired, null)
+  assert.equal(unknown.visBiometricsReusable, null)
+  // An all-unknown triage is still an ANSWER: it says what would settle it.
+  assert.equal(unknown.available, true)
+  assert.equal(unknown.openQuestions[0].resolveWith, 'the visa sticker’s validity dates')
+  assert.equal(appointmentTriageView(null).available, false)
+  assert.equal(appointmentTriageView(null).neverBooks, true)   // the note survives
+})
+
+test('the group roster enforces nothing itself: only the backend calls it submittable', () => {
+  const members = Array.from({ length: 12 }, (_, i) => ({ case_id: `c${i}`, full_name: `T ${i}` }))
+  const ok = groupRosterView({ roster: { members, submittable: true } },
+    { groupKind: 'tour_group' })
+  assert.equal(ok.count, 12)
+  assert.equal(ok.submittable, true)
+  assert.deepEqual(ok.preChecks, [])
+  assert.equal(ok.coordinatorSubmits, true)
+  assert.equal(ok.neverBooks, true)
+  // Fewer than 10 travelling together: Ellis's own advisory pre-check fires.
+  const few = groupRosterView({ roster: { members: members.slice(0, 4) } })
+  assert.deepEqual(few.preChecks.map((c) => c.code), ['too_few'])
+  assert.equal(few.preChecks[0].count, 4)
+  assert.equal(GROUP_MIN_MEMBERS, 10)
+  // Families and relatives are excluded from the channel by the consulate.
+  const family = groupRosterView({ roster: { members } }, { groupKind: 'family' })
+  assert.ok(family.preChecks.some((c) => c.code === 'family_excluded'))
+  // A member missing what the consulate requires is named, not dropped.
+  const gap = groupRosterView({ roster: { members: [
+    { case_id: 'c1', full_name: 'A', missing: ['DS-160 confirmation number'] },
+    { case_id: 'c2', full_name: 'B' }] } })
+  assert.equal(gap.incompleteMembers.length, 1)
+  assert.deepEqual(gap.incompleteMembers[0].missing, ['DS-160 confirmation number'])
+  assert.ok(gap.preChecks.some((c) => c.code === 'members_incomplete'))
+  // Silence is NOT a green light: an unstated submittable stays null.
+  assert.equal(gap.submittable, null)
+  assert.equal(groupRosterView(null).submittable, null)
+  assert.equal(groupRosterView(null).available, false)
+})
+
+test('availability shows published estimates and only https official links', () => {
+  // The real appt_availability.availability shape: snapshot metadata in
+  // wait_time_data, the records in wait_times, the requested post in wait_time.
+  const view = appointmentAvailabilityView({
+    available: true,
+    wait_time_data: { available: true, as_of: '2026-07-01' },
+    wait_time: { post: 'Beijing', category: 'visitor', category_label: 'Visitor (B1/B2)',
+                 wait_days: 88, known: true, as_of: '2026-07-01' },
+    wait_times: [{ post: 'Shanghai', category: 'visitor', wait_days: 102,
+                   as_of: '2026-07-01' }],
+    source: 'U.S. Department of State published wait times',
+    why_no_live_slots: 'No booking system publishes an availability feed.',
+    official_links: [
+      { kind: 'wait_times', label: 'Global visa wait times',
+        url: 'https://travel.state.gov/content/travel/en/us-visas/wait-times.html' },
+      { kind: 'appointment_system', label: 'US visa appointment service',
+        url: 'https://www.usvisascheduling.com/' },
+      { kind: 'insecure', label: 'Not https', url: 'http://insecure.example.com/slots' },
+      { kind: 'other', label: 'Slot watcher', url: 'https://slot-sniper.example.com/china' },
+      { kind: 'official_application_portal', label: 'Member state portal — not determined',
+        url: '', description: 'Ellis has no verified official portal for this member state yet.' }
+    ]
+  })
+  assert.equal(view.available, true)
+  assert.equal(view.entries[0].post, 'Beijing')
+  assert.equal(view.entries[0].waitDays, 88)
+  assert.equal(view.entries[1].post, 'Shanghai')
+  assert.equal(view.estimateOnly, true)
+  assert.equal(view.liveSlotData, false)
+  assert.equal(view.neverBooks, true)
+  assert.match(view.whyNoLiveSlots, /no booking system publishes/i)
+  // http:// is dropped entirely; https survives and is CLASSIFIED, not hidden;
+  // and an unverified destination is kept, unlinked, rather than disappearing.
+  assert.deepEqual(view.links.map((l) => l.kind),
+    ['government', 'authorized_provider', 'insecure', 'unrecognized', 'not_determined'])
+  assert.equal(view.links[2].url, '')          // insecure: kept, but never linked
+  assert.equal(view.links[3].official, false)
+  assert.equal(view.links[4].url, '')
+  assert.match(view.links[4].description, /no verified official portal/)
+  // A post with no published figure is unknown, never interpolated to a number.
+  const partial = appointmentAvailabilityView({
+    available: true, wait_time_data: { available: true },
+    wait_times: [{ post: 'Wuhan', category: 'visitor', wait_days: null }] })
+  assert.equal(partial.entries[0].waitDays, null)
+  // Nothing published: an explicit unavailable, never an invented date.
+  const none = appointmentAvailabilityView({
+    available: false, wait_time_data: { available: false, reason: 'no snapshot placed' } })
+  assert.equal(none.available, false)
+  assert.equal(none.reason, 'no snapshot placed')
+  assert.equal(none.neverBooks, true)
+  // deepLinkView refuses anything that is not https.
+  assert.equal(deepLinkView('javascript:alert(1)'), null)
+  assert.equal(deepLinkView('data:text/html,<b>x'), null)
+  assert.equal(deepLinkView('http://travel.state.gov'), null)
+  assert.equal(deepLinkView(''), null)
+  assert.equal(deepLinkView('https://ceac.state.gov/genniv/').kind, 'government')
+  assert.equal(deepLinkView('https://visa.vfsglobal.com/chn/en/fra').kind, 'authorized_provider')
+})
+
+test('the pre-stage view never claims anything was filed, paid or booked', () => {
+  // The real appt_appointments_prestage.prestage shape.
+  const view = appointmentPrestageView({
+    available: true,
+    prestage: {
+      route: 'us_b1b2',
+      filled: [{ key: 'surname', label: 'Surname', value: 'CAO',
+                 source: 'passport (machine-readable zone)', required: true }],
+      missing: [
+        { key: 'travel_dates', label: 'Intended travel dates', required: true,
+          kind: 'form_answer', source: 'ask',
+          how_to_resolve: 'Tell Ellis the dates you plan to travel.' },
+        { key: 'previous_visits', label: 'Previous US visits', required: false,
+          kind: 'form_answer', source: 'ask', how_to_resolve: 'Optional; answer if you have any.' }
+      ],
+      documents: [{ id: 'd1', label: 'Passport', status: 'submitted' }],
+      fees: [{ key: 'mrv', label: 'MRV visa application fee (B1/B2)', amount: 185,
+               currency: 'USD', per: 'applicant', payer: 'applicant',
+               payment_channels: [{ label: 'China CITIC Bank' }],
+               ellis_never: 'Ellis never enters card, bank or UnionPay details.' }],
+      readiness: { filled: 12, form_fields: 20, missing_required: 1, missing_optional: 1 },
+      human_acts: [{ act: 'pay_mrv', label: 'Pay the MRV fee', who: 'applicant',
+                     non_delegable: true }],
+      submitted: false
+    }
+  })
+  assert.equal(view.available, true)
+  assert.equal(view.nothingFiled, true)
+  assert.equal(view.neverBooks, true)
+  assert.equal(view.prepared[0].source, 'passport (machine-readable zone)')
+  // The ONE input that clears each gap is the backend's own how-to-resolve.
+  assert.equal(view.missing[0].input, 'Tell Ellis the dates you plan to travel.')
+  // An optional question blocks nothing, so the blocking count is its own
+  // number rather than a total that overstates what is in the way.
+  assert.equal(view.missingCount, 2)
+  assert.equal(view.missingRequiredCount, 1)
+  assert.equal(view.filledCount, 12)
+  assert.equal(view.totalCount, 20)
+  assert.equal(view.documents[0].label, 'Passport')
+  // The fee is exact, with its official channel, and carries the server's own
+  // "Ellis never pays this" sentence.
+  assert.equal(view.fees[0].amount, 185)
+  assert.deepEqual(view.fees[0].channels, ['China CITIC Bank'])
+  assert.match(view.fees[0].ellisNever, /never enters card/)
+  assert.equal(view.humanActs[0].nonDelegable, true)
+  assert.equal(appointmentPrestageView(null).available, false)
+  assert.equal(appointmentPrestageView(null).nothingFiled, true)
+})
+
+test('every cockpit string exists in every locale and the single action never claims a submission', () => {
+  const keys = [
+    'cockpit.title', 'cockpit.sub', 'cockpit.open', 'cockpit.load', 'cockpit.loading',
+    'cockpit.refresh', 'cockpit.unavailable', 'cockpit.notice.nothingFiled',
+    'cockpit.prepared.title', 'cockpit.prepared.count', 'cockpit.prepared.empty',
+    'cockpit.prepared.source', 'cockpit.prepared.sourceUnknown', 'cockpit.prepared.documents',
+    'cockpit.prepared.narrative', 'cockpit.prepared.narrativeDraft', 'cockpit.prepared.wage',
+    'cockpit.prepared.wageLine', 'cockpit.prepared.notApplicable', 'cockpit.missing.title',
+    'cockpit.missing.count', 'cockpit.missing.none', 'cockpit.missing.input',
+    'cockpit.humanOnly.title', 'cockpit.taps.title', 'cockpit.taps.exact', 'cockpit.taps.range',
+    'cockpit.taps.unknown', 'cockpit.taps.note', 'cockpit.acts.title', 'cockpit.acts.never',
+    'cockpit.acts.who', 'cockpit.acts.ellis', 'cockpit.action.open', 'cockpit.action.opening',
+    'cockpit.action.close', 'cockpit.action.note', 'cockpit.action.disabled',
+    'cockpit.action.notStarted', 'cockpit.action.noPortal', 'cockpit.noForm',
+    'cockpit.filedAt', 'cockpit.employer.title',
+    'cockpit.employer.sub', 'cockpit.paf.title', 'h1b.form.eta9141',
+    'appt.open', 'appt.title', 'appt.sub', 'appt.neverBooks', 'appt.acts.title',
+    'appt.acts.who', 'appt.acts.ellis', 'appt.triage.title', 'appt.triage.run',
+    'appt.triage.checking', 'appt.triage.required', 'appt.triage.notRequired',
+    'appt.triage.unknown', 'appt.triage.vis59.reuse', 'appt.triage.vis59.required',
+    'appt.triage.vis59.unknown', 'appt.triage.waiver.eligible', 'appt.triage.waiver.notEligible',
+    'appt.triage.waiver.unknown', 'appt.triage.evus.required', 'appt.triage.evus.notRequired',
+    'appt.triage.evus.unknown', 'appt.prestage.title', 'appt.prestage.load',
+    'appt.prestage.nothingDone', 'appt.prestage.ready', 'appt.prestage.missing',
+    'appt.prestage.empty', 'appt.prestage.feeTitle', 'appt.prestage.feeLine',
+    'appt.prestage.feeChannels', 'appt.prestage.readiness',
+    'appt.triage.bio.required', 'appt.triage.bio.notRequired', 'appt.triage.bio.unknown',
+    'appt.triage.questions', 'appt.triage.resolveWith', 'cockpit.acts.nonDelegable',
+    'appt.group.title', 'appt.group.sub',
+    'appt.group.caseIds', 'appt.group.name', 'appt.group.kind', 'appt.group.post',
+    'appt.group.coordinator', 'appt.group.build', 'appt.group.building', 'appt.group.export',
+    'appt.group.members', 'appt.group.preCheck', 'appt.group.tooFew',
+    'appt.group.familyExcluded', 'appt.group.incomplete', 'appt.group.submittable',
+    'appt.group.notSubmittable', 'appt.group.submittableUnknown', 'appt.group.coordinatorActs',
+    'appt.avail.title', 'appt.avail.sub', 'appt.avail.load', 'appt.avail.post',
+    'appt.avail.country', 'appt.avail.unavailable', 'appt.avail.asOf', 'appt.avail.waitDays',
+    'appt.avail.officialLink', 'appt.avail.unofficialLink', 'appt.avail.estimate',
+    'appt.avail.waitUnknown', 'appt.avail.linkNotDetermined', 'appt.avail.insecureLink'
+  ]
+  for (const lang of SUPPORTED) {
+    for (const k of keys) assert.ok(STRINGS[lang][k], `${lang} missing ${k}`)
+    for (const act of HUMAN_ACT_KEYS) {
+      assert.ok(STRINGS[lang][`cockpit.act.${act}`], `${lang} cockpit.act.${act}`)
+    }
+    for (const kind of ['tour_group', 'company', 'school', 'family']) {
+      assert.ok(STRINGS[lang][`appt.group.kind.${kind}`], `${lang} ${kind}`)
+    }
+    // THE button label: it opens a window. In no language does it claim to
+    // submit, sign, pay, or file anything.
+    const label = STRINGS[lang]['cockpit.action.open']
+    assert.ok(!/submit|sign|pay\b|file it|files|book/i.test(label), `${lang}: ${label}`)
+    assert.ok(!/提交|遞交|递交|付款|簽署|签署|預訂|预订/.test(label), `${lang}: ${label}`)
+  }
+  // The English copy says what it does and what it does not.
+  assert.match(STRINGS.en['cockpit.action.open'], /open secure window/i)
+  assert.match(STRINGS.en['cockpit.acts.never'], /never logs in, signs, pays, submits/i)
+  assert.match(STRINGS.en['appt.neverBooks'], /never searches for or books/i)
+  assert.match(STRINGS.en['cockpit.notice.nothingFiled'], /nothing on this screen has been filed/i)
+  // The group pre-check names the consulate's own numbers, not Ellis's.
+  assert.ok(STRINGS.en['appt.group.tooFew'].includes('{min}'))
+  assert.ok(STRINGS.en['appt.group.tooFew'].includes('{count}'))
+})
+
+test('FilingCockpit renders the three sections and calls no signing, paying or submitting method', async () => {
+  const src = await readFile(
+    new URL('../../src/renderer/src/components/visa/FilingCockpit.jsx', import.meta.url), 'utf8')
+  // The three things the spec allows on this screen, and nothing else.
+  for (const id of ['cockpit-prepared', 'cockpit-missing', 'cockpit-action']) {
+    assert.ok(src.includes(`data-testid="${id}"`), `missing section ${id}`)
+  }
+  // The taps target and the named human acts sit BESIDE the button.
+  assert.ok(src.includes('data-testid="cockpit-taps"'))
+  assert.ok(src.includes('data-testid="cockpit-human-acts"'))
+  assert.ok(src.includes("t('cockpit.acts.never')"))
+  assert.ok(src.includes("t('cockpit.notice.nothingFiled')"))
+  // The single action opens the secure window and nothing else: no client
+  // method that signs, pays, submits, or resolves a personal handoff appears.
+  for (const forbidden of ['completePayment', 'approvePayment', 'approvePaymentExact',
+                           'providePaymentDetails', 'signAuthorization', 'signFinalReview',
+                           'solveCaptcha', 'selectAppointment', 'recordAppointment',
+                           'completeDeclaration']) {
+    assert.ok(!src.includes(forbidden), `the cockpit must never call ${forbidden}`)
+  }
+  // It renders through the honest view model, never its own normalization.
+  assert.ok(src.includes('filingCockpitView'))
+})
+
+test('AppointmentCockpit always shows the human-acts note and never books', async () => {
+  const src = await readFile(
+    new URL('../../src/renderer/src/components/visa/AppointmentCockpit.jsx', import.meta.url), 'utf8')
+  // The never-books note is rendered UNCONDITIONALLY, at the top of the
+  // surface's own return — before any payload arrives, and whether or not one
+  // ever does.
+  assert.ok(src.includes('data-testid="appt-never-books"'))
+  const main = src.slice(src.indexOf('export default function AppointmentCockpit'))
+  assert.match(main, /return \([\s\S]{0,500}<NeverBooksNote/,
+    'the never-books note must render at the top of the cockpit, unconditionally')
+  assert.ok(src.includes("t('appt.neverBooks')"))
+  // The four surfaces, each wired to its pinned client method.
+  for (const m of ['appointmentTriage', 'appointmentPrestage', 'appointmentGroupRoster',
+                   'appointmentAvailability', 'downloadGroupRoster']) {
+    assert.ok(src.includes(m), `missing client method ${m}`)
+  }
+  // Nothing here picks, holds, or confirms a slot.
+  for (const forbidden of ['selectAppointment', 'recordAppointment', 'approveReschedule',
+                           'solveCaptcha', 'providePaymentDetails']) {
+    assert.ok(!src.includes(forbidden), `the appointment cockpit must never call ${forbidden}`)
+  }
+  // The three-way verdict component exists, so an unknown can never render as
+  // a "no".
+  assert.ok(src.includes('unknownKey'))
+  assert.ok(src.includes('appt.triage.vis59.unknown'))
+})
+
+test('both cockpits are wired into the employer console and the H1B pipeline', async () => {
+  const console_ = await readFile(
+    new URL('../../src/renderer/src/screens/EmployerConsole.jsx', import.meta.url), 'utf8')
+  assert.ok(console_.includes('FilingCockpit'), 'the employer console must mount the filing cockpit')
+  assert.ok(console_.includes('AppointmentCockpit'),
+    'the employer console must mount the appointment cockpit')
+  // The existing petitioner branches survive untouched.
+  assert.ok(console_.includes('<H1bPipeline'))
+  assert.ok(console_.includes('<JobAnswersForm'))
+
+  const pipeline = await readFile(
+    new URL('../../src/renderer/src/components/visa/H1bPipeline.jsx', import.meta.url), 'utf8')
+  assert.ok(pipeline.includes('<FilingCockpit'), 'each filing step must offer its cockpit')
+  assert.ok(pipeline.includes('<AppointmentCockpit'),
+    'the consular leg must offer the appointment cockpit')
+  // The secure window belongs to the CHILD filing case; the parent petition is
+  // a container with no portal session of its own.
+  assert.match(pipeline, /sessionCaseId=\{step\.child_case_id \|\| ''\}/)
+  // The ETA-9141 rides the LCA step beside the ETA-9035.
+  assert.match(pipeline, /FORM_KEYS_BY_STEP = \{ lca: \['eta-9035', 'eta-9141'\]/)
+  assert.ok(pipeline.includes('prepareEta9141'))
+})

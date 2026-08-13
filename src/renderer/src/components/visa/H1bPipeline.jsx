@@ -14,6 +14,8 @@ import { Loading, ErrorNote, Empty } from '../ui.jsx'
 import {
   detectPersona, partyForPersona, h1bStepMeta, h1bWhoActs, setActiveH1bCase
 } from '../../lib/visaSession.js'
+import FilingCockpit from './FilingCockpit.jsx'
+import AppointmentCockpit from './AppointmentCockpit.jsx'
 
 // Filing-step order and the government form each one prepares.
 const STEP_ORDER = ['lca', 'registration', 'i129', 'ds160_consular']
@@ -23,11 +25,17 @@ const VISA_TYPE_BY_STEP = {
   lca: 'h1b_lca', registration: 'h1b_registration',
   i129: 'h1b_i129', ds160_consular: 'h1b_ds160'
 }
-// forms_api.FORM_KEYS — only the two petitioner paper forms are preparable;
-// the registration and DS-160 are portal wizards, not fillable blanks.
+// forms_api.FORM_KEYS — only the petitioner paper forms are preparable; the
+// registration and DS-160 are portal wizards, not fillable blanks. The LCA step
+// carries TWO: the ETA-9035 itself and the ETA-9141 prevailing wage request
+// that precedes it (both are really filed in FLAG, so both print as
+// preparation copies).
+const FORM_KEYS_BY_STEP = { lca: ['eta-9035', 'eta-9141'], i129: ['i-129'] }
+// The single form a step's cockpit opens on (the filing itself, not its
+// prerequisite request).
 const FORM_KEY_BY_STEP = { lca: 'eta-9035', i129: 'i-129' }
 const FORM_LABEL_KEY = {
-  'eta-9035': 'h1b.form.eta9035', 'i-129': 'h1b.form.i129'
+  'eta-9035': 'h1b.form.eta9035', 'eta-9141': 'h1b.form.eta9141', 'i-129': 'h1b.form.i129'
 }
 // Which receipt column labels a step's proven outcome (labels only — the
 // backend refuses to verify on a receipt without evidence).
@@ -123,6 +131,7 @@ function StepCard({ t, client, caseId, step, byKey, viewerParty, isAdmin,
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
   const [verifyOpen, setVerifyOpen] = useState(false)
+  const [cockpitOpen, setCockpitOpen] = useState(false)
   const meta = h1bStepMeta(step.status)
   const who = h1bWhoActs(step, viewerParty)
   // Blockers: the walkthrough payload names its own (localized, honest —
@@ -196,11 +205,34 @@ function StepCard({ t, client, caseId, step, byKey, viewerParty, isAdmin,
             {t('h1b.action.verify')}
           </button>
         )}
+        {/* The cockpit for THIS step: one screen with what Ellis prepared, what
+            is missing, and the single action. Steps with a preparable form get
+            the filing cockpit; the consular leg gets the appointment cockpit
+            (its remaining act is an in-person one, not a form). */}
+        {(FORM_KEY_BY_STEP[step.step_key] || step.step_key === 'ds160_consular') && (
+          <button className="btn btn--sm btn--ghost" onClick={() => setCockpitOpen((v) => !v)}
+                  data-testid={`h1b-cockpit-toggle-${step.step_key}`}>
+            {step.step_key === 'ds160_consular' ? t('appt.open') : t('cockpit.open')}
+          </button>
+        )}
       </div>
       {verifyOpen && (
         <VerifyPanel t={t} client={client} caseId={caseId} step={step} isAdmin={isAdmin}
           onDone={() => { setVerifyOpen(false); onChanged() }}
           onError={(e) => setError({ message: e.message })} />
+      )}
+      {cockpitOpen && FORM_KEY_BY_STEP[step.step_key] && (
+        <FilingCockpit client={client} caseId={caseId}
+          formKey={FORM_KEY_BY_STEP[step.step_key]}
+          // The secure window belongs to the CHILD filing case: the parent
+          // petition is a container with no portal session of its own. Until
+          // the step is released there is none, and the cockpit says so
+          // instead of offering a button that cannot work.
+          sessionCaseId={step.child_case_id || ''} />
+      )}
+      {cockpitOpen && step.step_key === 'ds160_consular' && (
+        <AppointmentCockpit client={client} caseId={step.child_case_id || caseId}
+                            showGroupRoster={false} />
       )}
     </div>
   )
@@ -211,12 +243,17 @@ function FormCards({ t, lang, client, caseId, steps }) {
   const [prepared, setPrepared] = useState({})   // formKey -> result
   const [busyKey, setBusyKey] = useState('')
   const [error, setError] = useState(null)
-  const formKeys = steps.map((s) => FORM_KEY_BY_STEP[s.step_key]).filter(Boolean)
+  const formKeys = steps.flatMap((s) => FORM_KEYS_BY_STEP[s.step_key] || [])
 
   async function prepare(formKey) {
     setBusyKey(formKey); setError(null)
     try {
-      const res = await client.h1bPrepareForm(caseId, formKey, lang)
+      // The PWD request has its own named client method (it carries the
+      // derivation provenance and the DOL-block notice the generic prepare
+      // does not); everything else goes through the generic forms path.
+      const res = formKey === 'eta-9141'
+        ? await client.prepareEta9141(caseId, lang)
+        : await client.h1bPrepareForm(caseId, formKey, lang)
       setPrepared((p) => ({ ...p, [formKey]: res || {} }))
     } catch (e) {
       setError({ message: e.message })

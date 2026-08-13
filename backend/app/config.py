@@ -181,6 +181,23 @@ class Settings:
         self.everify_client_secret = os.getenv("EVERIFY_CLIENT_SECRET", "")
         self.credential_eval_partner = os.getenv("ELLIS_CREDENTIAL_EVAL", "")  # wes|ece|''
 
+        # --- HRIS / entity / field-quality (all optional, honest-degrade) ---
+        # HRIS pull so an employer never retypes title/salary/worksite; a
+        # unified aggregator (Merge/Finch) is one key for many systems. Unset →
+        # the employer types the facts as today; nothing is invented.
+        self.hris_provider = os.getenv("ELLIS_HRIS_PROVIDER", "")       # merge|finch|''
+        self.hris_api_key = os.getenv("ELLIS_HRIS_API_KEY", "")
+        # Business-entity verification (existence/age/size) feeding ability-to-pay
+        # and FDNS-risk signals. A SECOND opinion, never the government's word.
+        self.entity_verify_provider = os.getenv("ELLIS_ENTITY_VERIFY", "")  # middesk|dnb|''
+        self.entity_verify_api_key = os.getenv("ELLIS_ENTITY_VERIFY_KEY", "")
+        # Address validation + visa-photo compliance. Raise fill accuracy /
+        # catch a photo the consulate will reject BEFORE submission — never to
+        # evade anyone. Unset → Ellis flags the field/photo for human review.
+        self.address_verify_provider = os.getenv("ELLIS_ADDRESS_VERIFY", "")  # smarty|loqate|''
+        self.address_verify_key = os.getenv("ELLIS_ADDRESS_VERIFY_KEY", "")
+        self.photo_check_provider = os.getenv("ELLIS_PHOTO_CHECK", "")   # regula|''
+
         # --- Temporal ---
         self.temporal_host = os.getenv("TEMPORAL_HOST", "")  # empty → DB workflow runner
 
@@ -225,6 +242,10 @@ def capabilities() -> dict:
                             federal_register as _federal_register,
                             requirements_oracle as _requirements_oracle,
                             uscis_employer_hub as _employer_hub)
+    from .providers import (address_verify as _address_verify,
+                            entity_verify as _entity_verify,
+                            hris as _hris,
+                            photo_check as _photo_check)
     return {
         "auth": "clerk" if s.clerk_secret_key else "dev_token",
         "database": "postgres" if s.database_url.startswith("postgres") else "sqlite",
@@ -265,6 +286,18 @@ def capabilities() -> dict:
         # value: an unrecognized name is no partner at all.
         "credential_evaluation_partner": (_credential_eval.configured_partner()
                                           or "none"),
+        # Employer-data and field-quality helpers. Unset means the human
+        # supplies the fact exactly as today — never a fabricated one.
+        # Asked of each PROVIDER, not of the env string, per the rule above: a
+        # named provider with no key (or, for the photo service, no operator
+        # host) cannot answer, and advertising it would promise a capability
+        # this deployment does not have.
+        "hris_import": _hris.configured_provider() or "none",
+        "entity_verification": _entity_verify.configured_provider() or "none",
+        "address_verification": (_address_verify.active_provider()
+                                 if _address_verify.is_configured() else "none"),
+        "photo_compliance_check": (_photo_check.active_provider()
+                                   if _photo_check.is_configured() else "none"),
         "storage": "s3_kms" if s.s3_bucket else "local_encrypted",
         "workflow_engine": "temporal" if s.temporal_host else "db_runner",
         "fallbacks": {

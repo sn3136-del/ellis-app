@@ -42,13 +42,22 @@ from ..providers import pdfgen
 from . import filing as h1b_filing
 from . import models as h1b_models
 
-FORM_KEYS = ("i-129", "eta-9035", "eta-9141")
+# The prevailing wage request exists on this server in two printed editions of
+# the government's blank ('eta-9141' expires 05/31/2019, 'eta-9141-2021'
+# expires 04/30/2021). They are the SAME petitioner act, so both assemble the
+# same answers, run the same derivations and carry the same preparation-copy
+# watermark - a case can never end up with two differently-filled copies of one
+# perjury form. flag_forms owns the edition selector and the honest caveat that
+# neither printed expiry is a claim about DOL's current form.
+PWD_FORM_KEYS = ("eta-9141", "eta-9141-2021")
+FORM_KEYS = ("i-129", "eta-9035", *PWD_FORM_KEYS)
 
 # Which pipeline step each form's answers are assembled for. The step row must
 # exist in the case's plan (every H1B plan carries lca + i129). The ETA-9141
 # (prevailing wage request) precedes the LCA and states the same job/worksite
 # facts, so it is assembled for the lca step.
-STEP_BY_FORM = {"i-129": "i129", "eta-9035": "lca", "eta-9141": "lca"}
+STEP_BY_FORM = {"i-129": "i129", "eta-9035": "lca",
+                **{key: "lca" for key in PWD_FORM_KEYS}}
 
 PREPARED_DOC_TYPE = "prepared_form"
 
@@ -64,8 +73,11 @@ PWD_WATERMARK = ("PREPARATION COPY - the prevailing wage request (ETA-9141) is "
                  "for review only.")
 
 # form_key -> the preparation-copy watermark stamped on page 1. A form absent
-# here (the I-129, which really is mailed on paper) is left unstamped.
-PREPARATION_WATERMARKS = {"eta-9035": LCA_WATERMARK, "eta-9141": PWD_WATERMARK}
+# here (the I-129, which really is mailed on paper) is left unstamped. Every
+# edition of the PWD request carries the same stamp: the edition changes which
+# blank is printed, never who files it.
+PREPARATION_WATERMARKS = {"eta-9035": LCA_WATERMARK,
+                          **{key: PWD_WATERMARK for key in PWD_FORM_KEYS}}
 
 # ---------------------------------------------------------------------------
 # Localized user-facing strings (en + zh-CN + zh-Hant, the sibling contract).
@@ -417,12 +429,13 @@ def answers_for_form(db, parent: models.VisaApplication, form_key: str) -> dict:
             alias = src.get("expiry_date") or src.get("passport_expiry_date")
             if alias not in (None, ""):
                 out["passport_expiry"] = alias
-    elif form_key == "eta-9141":
+    elif form_key in PWD_FORM_KEYS:
         # The PWD request's own derivations (worksite key aliases, the case's
         # classification symbol, the DOL SOC title) live with the form that owns
         # them. Lazy import: flag_forms imports this module. Both entry points -
-        # this generic one and flag_forms.prepare_pwd_request - therefore fill
-        # from the SAME dict; the two can never drift apart.
+        # this generic one and flag_forms.prepare_pwd_request - and BOTH
+        # editions of the blank therefore fill from the SAME dict; they can
+        # never drift apart.
         from . import flag_forms
         out = flag_forms.derive_pwd_answers(parent, out)["answers"]
     return out

@@ -443,6 +443,8 @@ def test_prepare_form_real_seam_fills_and_walls(client, db):
     # product (the ETA-9141 PWD request joined it with the FLAG build).
     known = act["output"]["detail"]["known_forms"]
     assert known == list(h1b_forms.FORM_KEYS)
-    # ...and the vocabulary really is the three government forms Ellis prepares,
+    # ...and the vocabulary really is the government forms Ellis prepares - the
+    # I-129, the LCA, and both printed editions of the ETA-9141 PWD request -
     # so a form silently dropping out of it still fails here.
-    assert set(known) == {"i-129", "eta-9035", "eta-9141"}
+    assert set(known) == {"i-129", "eta-9035", *h1b_forms.PWD_FORM_KEYS}
+    assert set(h1b_forms.PWD_FORM_KEYS) == {"eta-9141", "eta-9141-2021"}

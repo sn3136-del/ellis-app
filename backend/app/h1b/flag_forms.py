@@ -20,10 +20,23 @@ Doctrine this module holds to, on top of everything forms.py already enforces:
   A missing wage, SOC or worksite is REPORTED MISSING, never filled in.
 - THE GOVERNMENT'S BLOCK IS THE GOVERNMENT'S. Section F (Prevailing Wage
   Determination) is marked FOR OFFICIAL GOVERNMENT USE ONLY and the printed
-  'FOR DEPARTMENT OF LABOR USE ONLY' PW Tracking Number header is DOL's - on
-  this blank neither carries a single AcroForm field, so they are unmappable by
-  construction and this module writes nothing there. Ellis's own computed wage
-  level travels in the PAYLOAD as a suggestion, never onto the form.
+  'FOR DEPARTMENT OF LABOR USE ONLY' PW Tracking Number header is DOL's. On the
+  2019 blank neither carries a single AcroForm field, so they were unmappable
+  by construction. On the 2021 blank they ARE fillable - 22 widgets in Section
+  F, 12 more in the running footer - and nothing but this module's map stops a
+  write from landing there. So the map names all 34 in its never-write list,
+  build_fill hard-skips them, and the payload reports every one as deliberately
+  left empty. Ellis's own computed wage level travels in the PAYLOAD as a
+  suggestion, never onto the form, in either edition.
+- TWO EDITIONS, ONE ACT. The server carries two printed editions of the
+  government's blank: eta-9141.pdf (expiration 05/31/2019, 79 fields) and
+  eta-9141-2021.pdf (expiration 04/30/2021, 130 fields). The newer one is the
+  default; the older stays reachable by an explicit edition selector. Both
+  assemble the same answers through forms.answers_for_form and run the same
+  derivations, so a case can never hold two differently-filled copies of one
+  perjury form. Neither printed expiry is a claim that the blank is DOL's
+  CURRENT form: the request is really made in FLAG, where DOL serves its own,
+  and the payload says so rather than implying currency Ellis cannot verify.
 - PARTY WALL. The ETA-9141 is a petitioner act and receives NO beneficiary
   facts: the fill dict is forms.answers_for_form (petitioner shared facts +
   EmployerProfile), which hands beneficiary identity only to the I-129. DOL
@@ -33,16 +46,66 @@ Doctrine this module holds to, on top of everything forms.py already enforces:
 """
 from __future__ import annotations
 
+import json
+
 from . import filing as h1b_filing
 from . import forms as h1b_forms
 
-# The form this module owns. forms.FORM_KEYS/STEP_BY_FORM know it too, so the
-# generic prepare endpoint and this module fill from the same map and the same
-# assembled answers.
-FORM_KEY = "eta-9141"
+# ---------------------------------------------------------------------------
+# The two printed editions of the government's blank. Each entry states only
+# what is PRINTED ON that PDF and what pypdf reads out of it - the expiration
+# date is transcribed from the page, the field count is the AcroForm count, and
+# tests assert both against the real file. forms.FORM_KEYS/STEP_BY_FORM know
+# both keys, so the generic prepare endpoint and this module fill either
+# edition from the same map and the same assembled answers.
+# ---------------------------------------------------------------------------
+EDITION_2019 = "2019"
+EDITION_2021 = "2021"
+DEFAULT_EDITION = EDITION_2021
+
+EDITIONS = {
+    EDITION_2021: {
+        "form_key": "eta-9141-2021",
+        "blank": "data/reference/forms/eta-9141-2021.pdf",
+        "blank_expiration": "04/30/2021",
+        "omb_control_number": "1205-0508",
+        "field_count": 130,
+    },
+    EDITION_2019: {
+        "form_key": "eta-9141",
+        "blank": "data/reference/forms/eta-9141.pdf",
+        "blank_expiration": "05/31/2019",
+        "omb_control_number": "1205-0508",
+        "field_count": 79,
+    },
+}
+
+# The blank Ellis prints unless a caller names an edition. FORM_KEY keeps its
+# old name because it keeps its old meaning - "the ETA-9141 this module fills".
+FORM_KEY = EDITIONS[DEFAULT_EDITION]["form_key"]
+LEGACY_FORM_KEY = EDITIONS[EDITION_2019]["form_key"]
 LCA_FORM_KEY = "eta-9035"
 
 FLAG_URL = "flag.dol.gov"
+
+
+def form_key_for_edition(edition: str = DEFAULT_EDITION) -> str:
+    """The form key for one printed edition. An unrecognised edition RAISES:
+    filling some other blank than the one asked for would be a silent
+    substitution on a form filed under penalty of perjury."""
+    spec = EDITIONS.get(str(edition or "").strip())
+    if spec is None:
+        raise ValueError(
+            f"unknown ETA-9141 edition {edition!r}; this server carries "
+            f"{sorted(EDITIONS)}")
+    return spec["form_key"]
+
+
+def edition_of(form_key: str) -> str:
+    for edition, spec in EDITIONS.items():
+        if spec["form_key"] == form_key:
+            return edition
+    raise ValueError(f"{form_key!r} is not an ETA-9141 edition")
 
 
 # ---------------------------------------------------------------------------
@@ -73,6 +136,44 @@ STRINGS = {
                   "Ellis 整块留空。"),
         "zh-Hant": ("現行工資、OES 工資等級、PW 追蹤號及裁定日期均由勞工部填寫，"
                     "Ellis 整塊留空。"),
+    },
+    "flag.edition_currency": {
+        "en": ("The expiration date printed on this blank is not a promise "
+               "that it is the Department of Labor's current form - the "
+               "request itself is made in FLAG, where DOL serves its own. "
+               "Check the form page at dol.gov before relying on this "
+               "printout."),
+        "zh-CN": ("本空白表上印刷的有效期并不代表它就是劳工部当前使用的版本 - "
+                  "申请本身在 FLAG 上提交，劳工部在那里提供其现行表格。"
+                  "使用本打印件前请先在 dol.gov 核对。"),
+        "zh-Hant": ("本空白表上印刷的有效期並不代表它就是勞工部當前使用的版本 - "
+                    "申請本身在 FLAG 上提交，勞工部在那裡提供其現行表格。"
+                    "使用本列印件前請先在 dol.gov 核對。"),
+    },
+    "flag.older_edition": {
+        "en": ("You are printing the OLDER of the two ETA-9141 blanks on this "
+               "server. Your answers do not change - only the paper does. The "
+               "newer blank is what Ellis prints unless an edition is asked "
+               "for by name."),
+        "zh-CN": ("您正在打印本服务器上两份 ETA-9141 空白表中较旧的一份。"
+                  "您的答案不会改变，改变的只是纸质表格。除非指定版本，"
+                  "Ellis 默认打印较新的空白表。"),
+        "zh-Hant": ("您正在列印本伺服器上兩份 ETA-9141 空白表中較舊的一份。"
+                    "您的答案不會改變，改變的只是紙質表格。除非指定版本，"
+                    "Ellis 預設列印較新的空白表。"),
+    },
+    "flag.government_fields_left_empty": {
+        "en": ("On this edition the Department of Labor's own boxes really can "
+               "be typed in. Ellis leaves every one of them empty: the "
+               "prevailing wage, the OES wage level, the per-unit, the wage "
+               "source, the tracking number and the determination dates are "
+               "DOL's answer to this request, not the employer's statement."),
+        "zh-CN": ("在本版本中，劳工部专用栏位实际上是可以填写的。Ellis 将其全部留空："
+                  "现行工资、OES 工资等级、计薪单位、工资来源、追踪号及裁定日期"
+                  "均为劳工部对本申请的答复，而非雇主的陈述。"),
+        "zh-Hant": ("在本版本中，勞工部專用欄位實際上是可以填寫的。Ellis 將其全部留空："
+                    "現行工資、OES 工資等級、計薪單位、工資來源、追蹤號及裁定日期"
+                    "均為勞工部對本申請的答覆，而非雇主的陳述。"),
     },
     "flag.lca_report": {
         "en": ("What Ellis can prefill on your LCA, and what is still missing. "
@@ -332,6 +433,121 @@ def _derived_report(db, parent, answers: dict) -> list[dict]:
 
 
 # ---------------------------------------------------------------------------
+# The edition, and the block Ellis refuses to write in.
+# ---------------------------------------------------------------------------
+
+def _raw_map(form_key: str) -> dict:
+    """The map file as authored, including the underscore-prefixed provenance
+    keys forms.load_form_map normalizes away. Never invents a key: an edition
+    whose map records no government-use list simply reports none."""
+    path = h1b_forms._template_path(form_key).with_suffix(".map.json")
+    return json.loads(path.read_text())
+
+
+def edition_info(edition: str = DEFAULT_EDITION, locale: str = "en") -> dict:
+    """Which printed blank this fill used, what that blank says about itself,
+    and the honest caveat that a printed expiry is not a currency claim."""
+    spec = EDITIONS[edition]
+    raw = _raw_map(spec["form_key"])
+    is_default = edition == DEFAULT_EDITION
+    return {
+        "edition": edition,
+        "form_key": spec["form_key"],
+        "blank": spec["blank"],
+        "blank_expiration": spec["blank_expiration"],
+        "omb_control_number": spec["omb_control_number"],
+        "is_default": is_default,
+        "available_editions": sorted(EDITIONS),
+        "source": raw.get("_source", ""),
+        "authority": raw.get("_authority", ""),
+        "currency_notice": tr("flag.edition_currency", locale),
+        # Said only when the caller really did ask for the older blank - a
+        # notice that is printed either way teaches nothing.
+        "older_edition_notice": ("" if is_default
+                                 else tr("flag.older_edition", locale)),
+        "currency_note": raw.get("_edition_currency", ""),
+    }
+
+
+# What the government's own printed headings call each field Ellis refuses to
+# write. TRANSCRIBED from the blank's page 4 and running footer - the widget
+# names there ('undefined_18', 'I', 'Hour') say nothing on their own, and a
+# payload that lists them raw would be unreadable. A name absent here is
+# reported under its own field name, never under a guessed label.
+_GOVERNMENT_FIELD_WORDING = {
+    "1 PW tracking number": "F.1 - PW tracking number",
+    "2 Date PW request received": "F.2 - Date PW request received",
+    "3 SOC ONETOES code": "F.3 - SOC (ONET/OES) code, as determined by DOL",
+    "3a  SOC ONETOES occupation title":
+        "F.3a - SOC (ONET/OES) occupation title, as determined by DOL",
+    "undefined_18": "F.4 - Prevailing wage (dollars)",
+    "undefined_19": "F.4 - Prevailing wage (cents)",
+    "I": "F.4a - OES wage level I",
+    "II": "F.4a - OES wage level II",
+    "III": "F.4a - OES wage level III",
+    "IV": "F.4a - OES wage level IV",
+    "NA": "F.4a - OES wage level N/A",
+    "Hour": "F.5 - Prevailing wage per hour",
+    "Week": "F.5 - Prevailing wage per week",
+    "BiWeekly": "F.5 - Prevailing wage per bi-week",
+    "Month": "F.5 - Prevailing wage per month",
+    "Year": "F.5 - Prevailing wage per year",
+    "Piece Rate": "F.5 - Prevailing wage per piece rate",
+    "5a  If Piece Rate is indicated in question 2 specify the wage offer requirements":
+        "F.5a - Piece-rate wage offer requirements",
+    "6a  If OtherAlternate Survey in question 7 specify":
+        "F.6a - The other/alternate survey DOL used",
+    "7 Additional Notes Regarding Wage Determination":
+        "F.7 - Additional notes regarding the wage determination",
+    "8 Determination date": "F.8 - Determination date",
+    "9 Expiration date": "F.9 - Expiration date of the determination",
+}
+
+
+def _government_rows(names) -> list[dict]:
+    return [{"field": name,
+             "label": _GOVERNMENT_FIELD_WORDING.get(name, name)}
+            for name in names]
+
+
+def government_block(form_key: str = FORM_KEY, locale: str = "en") -> dict:
+    """Every field on this blank Ellis will never write, and why - read off the
+    map, not restated here.
+
+    The two editions differ in exactly the way that matters: on the 2019 blank
+    the Department of Labor's block is static page text (no widget exists, so
+    nothing could land there by construction), while on the 2021 blank those
+    boxes are real AcroForm fields. This reports which case the caller is in
+    instead of letting 'we never write there' mean two different things.
+    """
+    raw = _raw_map(form_key)
+    never = list(raw.get("_human_only") or [])
+    determination = list(raw.get("_section_f_fields") or [])
+    footer = list(raw.get("_dol_footer_fields") or [])
+    static = list(raw.get("_static_page_text") or [])
+    fillable = bool(never)
+    return {
+        "fillable_on_this_blank": fillable,
+        "left_empty_count": len(never),
+        "written_by_ellis": 0,
+        "determination_block": _government_rows(determination),
+        "dol_use_footer": _government_rows(footer),
+        "static_page_text": static,
+        "notice": (tr("flag.government_fields_left_empty", locale) if fillable
+                   else tr("flag.dol_block", locale)),
+        "reason": (
+            "these are AcroForm fields on this blank, so a careless filler "
+            "could type in them; Ellis's map names all of them never-write and "
+            "the filler hard-skips them"
+            if fillable else
+            "on this blank the Department of Labor's block is static page "
+            "text: it carries no field at all, so nothing Ellis writes can "
+            "reach it"),
+        "map_note": raw.get("_human_only_note", ""),
+    }
+
+
+# ---------------------------------------------------------------------------
 # Choice vocabulary - read off the map so the asked question can never drift
 # from what the PDF actually accepts.
 # ---------------------------------------------------------------------------
@@ -485,8 +701,8 @@ def naics_check(answers: dict) -> dict:
 # The two products of this module.
 # ---------------------------------------------------------------------------
 
-def prepare_pwd_request(db, parent, *, actor: str = "",
-                        locale: str = "en") -> dict:
+def prepare_pwd_request(db, parent, *, actor: str = "", locale: str = "en",
+                        edition: str = DEFAULT_EDITION) -> dict:
     """Fill, store and mint a download for the ETA-9141 prevailing wage request.
 
     The fill itself is forms.prepare_form - same map loader, same build_fill,
@@ -495,28 +711,38 @@ def prepare_pwd_request(db, parent, *, actor: str = "",
     the applicant-worded gap list, the DOL-block honesty notice, and Ellis's
     computed wage/NAICS context (which travels beside the PDF, never on it).
 
+    ``edition`` picks which printed blank is filled and defaults to the newer
+    one; an unrecognised edition raises rather than quietly substituting a
+    different government form. Both editions run the same answers assembly and
+    the same derivations, so the choice changes the paper, never the answers.
+
     Raises LookupError when the case's plan has no 'lca' step (forms.py's
     contract). Callers must already have authorized the PETITIONER party.
     """
-    result = h1b_forms.prepare_form(db, parent, FORM_KEY, actor=actor)
+    form_key = form_key_for_edition(edition)
+    result = h1b_forms.prepare_form(db, parent, form_key, actor=actor)
     # Deterministic re-assembly (pure DB reads) so the payload can name which
     # values were Ellis's derivations rather than a party's own answer.
-    answers = h1b_forms.answers_for_form(db, parent, FORM_KEY)
+    answers = h1b_forms.answers_for_form(db, parent, form_key)
     return {
-        "form_key": FORM_KEY,
+        "form_key": form_key,
         "form_name": "ETA-9141, Application for Prevailing Wage Determination",
+        "edition": edition_info(edition, locale),
+        "government_block": government_block(form_key, locale),
         "document_id": result["document_id"],
         "download_url": result["download_url"],
         "expires_in": result["expires_in"],
         "filled_count": result["filled_count"],
         "total_mapped": result["total_mapped"],
         "missing": _worded(result["missing"]),
-        # This blank carries no signature widget at all - it is signed inside
-        # FLAG - so the human-only list is empty by construction, not by
-        # oversight. The notices below say who acts.
+        # Neither blank carries a signature widget - the request is signed
+        # inside FLAG - so nothing here is a signature line. On the 2019 blank
+        # the list is empty by construction; on the 2021 blank it holds the
+        # government's own boxes and the printed page text, which are never
+        # Ellis's to write. government_block above says which case this is.
         "human_only": result["human_only"],
         "derived": _derived_report(db, parent, answers),
-        "choice_vocabulary": choice_vocabulary(),
+        "choice_vocabulary": choice_vocabulary(form_key),
         "wage": wage_context(db, parent),
         "naics": naics_check(answers),
         "preparation_notice": tr("flag.pwd_preparation", locale),

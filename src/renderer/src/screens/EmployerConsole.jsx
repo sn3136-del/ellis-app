@@ -14,6 +14,8 @@ import { useLocale } from '../lib/locale.jsx'
 import { createVisaClient, wageLevelView, socSuggestionsView } from '../lib/visaBackend.js'
 import { newEmployerSession } from '../lib/visaSession.js'
 import H1bPipeline from '../components/visa/H1bPipeline.jsx'
+import FilingCockpit from '../components/visa/FilingCockpit.jsx'
+import AppointmentCockpit from '../components/visa/AppointmentCockpit.jsx'
 
 const LS_KEY = 'ellis.h1b.employer.cases'
 function loadCases() {
@@ -525,6 +527,29 @@ function JobAnswersForm({ t, client, caseId }) {
   )
 }
 
+// ---- Petitioner cockpits ---------------------------------------------------
+// The two cockpit surfaces the EMPLOYER owns on an open case:
+//   * the public access file (20 CFR 655.760) — the employer's own file, which
+//     is never filed with anyone but must be complete and available;
+//   * the worker's consular appointment — triage and pre-stage, so the employer
+//     can see what remains without ever being able to book it.
+// Per-form filing cockpits live on their own step in the pipeline above; this
+// section is what has no step of its own.
+function PetitionerCockpits({ t, client, caseId }) {
+  return (
+    <section className="card" style={{ padding: 18, marginTop: 14 }}
+             data-testid="employer-cockpits">
+      <div className="eyebrow">{t('cockpit.employer.title')}</div>
+      <div style={{ fontSize: 12.5, color: 'var(--muted)', margin: '4px 0 10px' }}>
+        {t('cockpit.employer.sub')}
+      </div>
+      <FilingCockpit client={client} caseId={caseId} kind="paf" routeKey="paf"
+                     title={t('cockpit.paf.title')} />
+      <AppointmentCockpit client={client} caseId={caseId} />
+    </section>
+  )
+}
+
 export default function EmployerConsole() {
   const { t } = useLocale()
   const [session] = useState(() => newEmployerSession())
@@ -564,6 +589,7 @@ export default function EmployerConsole() {
         </div>
         <H1bPipeline client={client} caseId={openId} persona="employer" />
         <JobAnswersForm t={t} client={client} caseId={openId} />
+        <PetitionerCockpits t={t} client={client} caseId={openId} />
       </div>
     )
   }

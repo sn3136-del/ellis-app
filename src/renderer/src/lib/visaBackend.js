@@ -466,7 +466,127 @@ export function createVisaClient(session) {
     // unreachable or unconfigured.
     h1bClassifyOccupation: (caseId, { industry_text = '', occupation_text = '' } = {}) =>
       call('POST', `/h1b/cases/${caseId}/classify-occupation`, session,
-           { industry_text, occupation_text })
+           { industry_text, occupation_text }),
+
+    // ---- Appointment cockpit (app/appt_api.py) -----------------------------
+    // Ellis prepares an appointment to the edge of the human's act and stops
+    // there: no slot search, no booking, no card, no CAPTCHA. Every payload
+    // carries its own `human_acts` block, which the cockpit renders verbatim —
+    // a caller can never mistake "Ellis prepared it" for "Ellis did it".
+    // Waiver/EVUS (US) and the VIS 59-month fingerprint question (Schengen):
+    // whether an in-person act is required at all.
+    appointmentTriage: (caseId, locale = 'en') =>
+      call('GET', `/appointments/triage/${caseId}?locale=${encodeURIComponent(locale)}`, session),
+    // Everything prepared for this appointment, and everything still missing.
+    // Nothing in the payload has been filed, paid, signed, or booked.
+    appointmentPrestage: (caseId, locale = 'en') =>
+      call('GET', `/appointments/prestage/${caseId}?locale=${encodeURIComponent(locale)}`, session),
+    // The consulate's own group channel (10+ travelling together). Ellis
+    // assembles and validates the roster; a human coordinator submits it.
+    appointmentGroupRoster: (body = {}) =>
+      call('POST', '/appointments/group-roster', session, {
+        case_ids: [], group_name: '', group_kind: '', expires_on: '',
+        include_passport_numbers: false, post: '', country: '',
+        coordinator_name: '', coordinator_email: '', travel_start_date: '',
+        options: {}, locale: 'en', ...body
+      }),
+    // The roster as a file the coordinator carries into the official channel.
+    // `case_id` REPEATS once per member (FastAPI Query(list)), so the query is
+    // built by hand — URLSearchParams would flatten the array into one value.
+    // Raw bytes, so it bypasses `call`. The file identifies real travellers:
+    // it goes to the coordinator and is never logged.
+    downloadGroupRoster: async ({ caseIds = [], format = 'csv', ...rest } = {}) => {
+      const q = caseIds.map((id) => `case_id=${encodeURIComponent(id)}`)
+      q.push(`format=${encodeURIComponent(format)}`)
+      for (const [k, v] of Object.entries(rest)) {
+        if (v === undefined || v === null || v === '') continue
+        q.push(`${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+      }
+      const res = await fetch(`${BASE}/appointments/group-roster/export?${q.join('&')}`,
+                              { headers: authHeaders(session) })
+      if (!res.ok) throw new Error(`roster export failed (HTTP ${res.status})`)
+      return await res.blob()
+    },
+    // Published wait times + the official places to look. There is no live slot
+    // inventory here and never will be: reading a booking calendar by machine
+    // gets the traveller's appointment cancelled.
+    appointmentAvailability: (params = {}) =>
+      call('GET', `/appointments/availability?${new URLSearchParams(params)}`, session),
+
+    // ---- Travel authorizations + Schengen stay (app/travel_api.py) ---------
+    // Edition-neutral: the tourist journey and an H1B beneficiary's personal
+    // travel both read these. An unconfigured or unknown answer comes back as
+    // an explicit unavailable with its reason — never a fabricated verdict.
+    // With no destination this is the curated CATALOGUE; with one it becomes
+    // this traveller's own answer (and a destination Ellis curates nothing for
+    // says so, instead of an empty list that reads as "nothing required").
+    travelAuthorizations: (params = {}) =>
+      call('GET', `/travel/authorizations?${new URLSearchParams(params)}`, session),
+    // One authorization in full, BY ITS PROGRAM KEY (esta, eta-canada, …) —
+    // not by case: the record is curated reference data, the same for everyone.
+    travelAuthorization: (key) =>
+      call('GET', `/travel/authorizations/${encodeURIComponent(key)}`, session),
+    // The 90-days-in-any-180 arithmetic. `stays` is the traveller's own
+    // [{entry, exit}] history, sent as JSON in the query the endpoint declares.
+    // The answer is a day COUNT, never a permission: a border officer decides
+    // admission, on the day.
+    schengenStay: ({ stays = [], asOf = '' } = {}) =>
+      call('GET', `/travel/schengen-stay?${new URLSearchParams({
+        stays: JSON.stringify(stays), as_of: asOf })}`, session),
+
+    // ---- H1B ops (app/h1b/ops_api.py) --------------------------------------
+    // The USCIS Organizational Account bulk-registration file, built from the
+    // named cases and validated to the template. ORG-scoped, because one file
+    // aggregates many beneficiaries for one employer. The file itself rides
+    // back inside the payload (download.content_base64) — there is no separate
+    // export, and there is no upload: a human signs in to myUSCIS, uploads,
+    // pays, and submits.
+    h1bBulkRegistration: (org, body = {}, locale = 'en') =>
+      call('POST', `/h1b/orgs/${encodeURIComponent(org)}/bulk-registration?locale=${encodeURIComponent(locale)}`,
+           session, { case_ids: [], fiscal_year: null, include_invalid: false, ...body }),
+    // RFE response packet: each cited ground mapped to its curing evidence, the
+    // exhibits on file that answer it, the gaps that do not, and a DRAFT
+    // narrative. An attorney reviews it and a human uploads it.
+    h1bRfeAssemble: (caseId, body = {}, locale = 'en') =>
+      call('POST', `/h1b/cases/${caseId}/rfe/assemble?locale=${encodeURIComponent(locale)}`,
+           session, { issues: [], notice_text: '', notice_document_id: '',
+                      response_due_date: '', receipt_number: '', generate_pdf: false, ...body }),
+    // The RFE ground vocabulary the assembler understands (the UI's picker).
+    h1bRfeIssues: (locale = 'en') =>
+      call('GET', `/h1b/rfe/issues?locale=${encodeURIComponent(locale)}`, session),
+    // Advisory 8 CFR 214.2(h)(19) determination. `exempt` is true, false, or
+    // the STRING 'unknown' — an entity fact nobody has stated leaves the answer
+    // unknown, and the open questions are answered through the party-answers
+    // endpoint (h1bPartyAnswers), never guessed here.
+    h1bCapExemption: (caseId, locale = 'en') =>
+      call('GET', `/h1b/cases/${caseId}/cap-exemption?locale=${encodeURIComponent(locale)}`, session),
+    h1bCapExemptionQuestions: (locale = 'en') =>
+      call('GET', `/h1b/cap-exemption/questions?locale=${encodeURIComponent(locale)}`, session),
+
+    // ---- ETA-9141 prevailing wage request (both editions) ------------------
+    // The same pinned forms path every prepared government blank uses
+    // (forms_api.FORM_KEYS carries 'eta-9141'), named here because the PWD
+    // request is its own product surface: the whole request derived from the
+    // job + SOC, with each derived value naming its own source.
+    prepareEta9141: (caseId, locale = 'en') =>
+      call('POST', `/h1b/cases/${caseId}/forms/eta-9141/prepare?locale=${encodeURIComponent(locale)}`,
+           session, {}),
+
+    // ---- Public access file (app/h1b/paf_api.py) ---------------------------
+    // 20 CFR 655.760(a) item by item, each with its citation and an honest
+    // status; the 655.734 notice; and the assembled file. A fact Ellis does not
+    // hold is reported missing and left blank — never completed with a guess.
+    h1bPafManifest: (caseId, locale = 'en') =>
+      call('GET', `/h1b/cases/${caseId}/paf/manifest?locale=${encodeURIComponent(locale)}`, session),
+    h1bPafNotice: (caseId, locale = 'en') =>
+      call('POST', `/h1b/cases/${caseId}/paf/notice?locale=${encodeURIComponent(locale)}`, session, {}),
+    // The employer's own account of how the notice was given. Ellis records and
+    // tests it; it never posts a notice or attests that one was posted.
+    h1bPafPosting: (caseId, body = {}, locale = 'en') =>
+      call('POST', `/h1b/cases/${caseId}/paf/posting?locale=${encodeURIComponent(locale)}`,
+           session, { method: '', locations: [], individual_direct_email: false, ...body }),
+    h1bPafPackage: (caseId, locale = 'en') =>
+      call('GET', `/h1b/cases/${caseId}/paf/package?locale=${encodeURIComponent(locale)}`, session)
   }
 }
 
@@ -606,6 +726,547 @@ export function socSuggestionsView(payload) {
     industry,
     confirmRequired: true,
     lowConfidence: occupation.length > 0 && occupation[0].confidence === 'low'
+  }
+}
+
+// ---- Filing + appointment cockpit display models ---------------------------
+// docs/MAX_AUTOMATION_SPEC.md: ONE screen per filing showing exactly three
+// things — everything Ellis prepared (each field with its source), what is
+// still missing (each with the one input needed), and THE SINGLE ACTION that
+// opens the applicant's own secure window at the point of their act.
+//
+// The doctrine these normalizers carry, so no component can lose it:
+//   * The single action OPENS a window. It never logs in, signs, pays,
+//     submits, clears a human check, or books a slot — `action.performsHumanAct`
+//     is a pinned false, and the remaining human acts are always named.
+//   * An unknown tap target is UNKNOWN. The taps-to-done table holds only the
+//     routes docs/MAX_AUTOMATION_SPEC.md actually pins; everything else says so.
+//   * A verdict Ellis does not hold stays null (tri-state), never false. "No
+//     appointment needed" and "Ellis cannot tell" are different answers.
+//   * Only the backend may call a group roster submittable.
+
+function _obj(v) { return v && typeof v === 'object' && !Array.isArray(v) ? v : {} }
+function _arr(v) { return Array.isArray(v) ? v : [] }
+function _text(v) {
+  if (v == null) return ''
+  if (typeof v === 'string') return v.trim()
+  if (typeof v === 'number' || typeof v === 'boolean') return String(v)
+  return ''
+}
+// Tri-state: a boolean the backend actually stated, or null for "not known".
+function _tri(v) {
+  if (v === true || v === false) return v
+  if (v === 'true' || v === 'yes') return true
+  if (v === 'false' || v === 'no') return false
+  return null
+}
+function _first(...vals) {
+  for (const v of vals) { const s = _text(v); if (s) return s }
+  return ''
+}
+
+// The human acts that legally remain, per filing. Named so the cockpit can
+// never read as "Ellis will handle it". Keys localize as cockpit.act.{key}.
+export const HUMAN_ACT_KEYS = ['login', 'review', 'sign', 'pay', 'submit',
+                               'captcha', 'biometrics']
+export const DEFAULT_FILING_HUMAN_ACTS = ['login', 'review', 'submit']
+export const FILING_HUMAN_ACTS = {
+  'eta-9035': ['login', 'review', 'submit'],
+  'eta-9141': ['login', 'review', 'submit'],
+  'i-129': ['login', 'sign', 'pay', 'submit'],
+  registration: ['login', 'pay', 'submit'],
+  'ds-160': ['login', 'sign', 'submit'],
+  ds160_consular: ['login', 'sign', 'submit'],
+  'tourist-evisa': ['login', 'pay', 'submit', 'captcha'],
+  // The public access file is the employer's OWN file: nothing is filed with a
+  // government, so the remaining act is the employer's review and retention.
+  paf: ['review']
+}
+
+// "Taps to done" straight from docs/MAX_AUTOMATION_SPEC.md. Only the routes
+// that document pins appear: a route with no measured target reports UNKNOWN
+// rather than a number someone will quote back as a promise.
+export const TAPS_TO_DONE = {
+  'eta-9035': { min: 3, max: 3 },
+  'i-129': { min: 4, max: 4 },
+  registration: { min: 3, max: 3 },
+  'tourist-evisa': { min: 2, max: 4 },
+  'us-appointment': { min: 2, max: 4 },
+  'schengen-agent': { min: 1, max: 2 }
+}
+
+// Artifacts that are never filed on a government site, so no secure window can
+// ever be the "single action" for them.
+export const NO_PORTAL_ROUTES = ['paf']
+
+export function tapsToDone(routeKey) {
+  const t = TAPS_TO_DONE[_text(routeKey)]
+  if (!t) return { known: false, min: null, max: null, exact: null }
+  return { known: true, min: t.min, max: t.max, exact: t.min === t.max ? t.min : null }
+}
+
+function _humanActs(payload, routeKey) {
+  // The backend's own typed acts win (appt_eligibility names who acts, why,
+  // and whether it can be delegated at all); the curated per-form list is the
+  // fallback. `label` is the server-localized sentence and `act` is its bare
+  // key, so the sentence is preferred and the key is only a last resort.
+  const given = _arr(payload.human_acts).map((raw) => {
+    const a = _obj(raw)
+    return {
+      key: _text(a.key),
+      act: _first(a.label, a.title, a.act),
+      who: _first(a.who, a.actor),
+      why: _first(a.why, a.reason),
+      nonDelegable: _tri(a.non_delegable ?? a.nonDelegable),
+      ellisDoes: _first(a.ellis_does, a.ellisDoes)
+    }
+  }).filter((a) => a.act || a.key)
+  if (given.length) return given
+  const keys = FILING_HUMAN_ACTS[_text(routeKey)] || DEFAULT_FILING_HUMAN_ACTS
+  return keys.map((key) => ({ key, act: '', who: '', why: '', nonDelegable: null,
+                              ellisDoes: '' }))
+}
+
+// One prepared field: what Ellis wrote, and where it came from. A value with
+// no recorded source says so (sourceKnown:false) — a source is never invented.
+function _preparedRows(payload) {
+  const out = []
+  for (const raw of _arr(payload.derived)) {
+    const o = _obj(raw)
+    const source = _text(o.source)
+    out.push({ key: _text(o.key), label: _first(o.label, o.key), value: _text(o.value),
+               source, sourceKnown: !!source, derived: true })
+  }
+  for (const raw of _arr(payload.prepared ?? payload.ready ?? payload.filled)) {
+    const o = typeof raw === 'string' ? { label: raw } : _obj(raw)
+    const source = _first(o.source, o.from)
+    out.push({ key: _text(o.key), label: _first(o.label, o.question, o.key), value: _text(o.value),
+               source, sourceKnown: !!source, derived: false })
+  }
+  return out.filter((r) => r.label || r.key)
+}
+
+// One missing item, with THE ONE INPUT needed to clear it. Never a raw key.
+function _missingRows(payload) {
+  const raw = payload.missing ?? payload.missing_fields ?? payload.missing_items
+  return _arr(raw).map((item) => {
+    const o = typeof item === 'string' ? { label: item } : _obj(item)
+    const label = _first(o.label, o.question, o.ask, o.key)
+    return {
+      key: _text(o.key),
+      label,
+      // The single input that clears it: the backend's own "how to resolve"
+      // sentence when there is one (appt_appointments_prestage writes it), then
+      // an applicant-worded question, and only then the label itself.
+      input: _first(o.how_to_resolve, o.howToResolve, o.resolve_with, o.question,
+                    o.ask, o.input, o.label) || label,
+      // required:false is a real answer (an optional question blocks nothing);
+      // an item that never said stays null rather than being called required.
+      required: _tri(o.required),
+      kind: _first(o.kind),
+      party: _first(o.party, o.who),
+      status: _text(o.status)
+    }
+  }).filter((m) => m.label || m.key)
+}
+
+// A PAF-manifest-shaped payload: each item carries its own regulatory status,
+// so present items are prepared and everything unresolved is honestly missing
+// (including 'unknown' — a conditional item nobody answered is never dropped).
+function _manifestSplit(payload) {
+  const documents = []
+  const missing = []
+  const notApplicable = []
+  for (const raw of _arr(payload.items)) {
+    const o = _obj(raw)
+    const status = _text(o.status).toLowerCase()
+    const entry = { key: _first(o.item_id, o.key, o.id),
+                    label: _first(o.title, o.label, o.name, o.item_id),
+                    status, citation: _first(o.citation, o.cite),
+                    note: _first(o.next_action, o.reason, o.note, o.detail) }
+    if (!entry.label && !entry.key) continue
+    if (status === 'present') documents.push(entry)
+    else if (status === 'not_applicable' || status === 'n/a') notApplicable.push(entry)
+    else if (status) {
+      missing.push({
+        key: entry.key, label: entry.label,
+        // next_action is the backend's own one-line "what closes this"; a
+        // conditional item nobody answered asks its question instead.
+        input: _first(o.next_action, o.condition_question, o.reason, o.description) ||
+               entry.label,
+        required: null, kind: 'paf_item', party: '', status
+      })
+    } else documents.push(entry)
+  }
+  return { documents, missing, notApplicable }
+}
+
+// Only https links are ever rendered, and a host Ellis does not recognize as a
+// government or an authorized service provider is LABELED, not hidden.
+const GOV_HOST_SUFFIXES = ['.gov', '.gouv.fr', '.europa.eu', '.gov.uk', '.gov.cn',
+                           '.go.jp', '.gc.ca', '.gov.au', '.govt.nz', '.gov.in']
+const AUTHORIZED_HOSTS = ['usvisascheduling.com', 'ustraveldocs.com', 'usvisa-info.com',
+                          'vfsglobal.com', 'vfsevisa.com', 'tlscontact.com',
+                          'blsinternational.com']
+
+export function deepLinkView(raw) {
+  const url = _text(raw)
+  if (!/^https:\/\//i.test(url)) return null      // no http:, no javascript:, no data:
+  let host = ''
+  try { host = new URL(url).hostname.toLowerCase() } catch { return null }
+  if (!host) return null
+  const gov = GOV_HOST_SUFFIXES.some((s) => host.endsWith(s))
+  const authorized = AUTHORIZED_HOSTS.some((h) => host === h || host.endsWith('.' + h))
+  return {
+    url, host,
+    official: gov || authorized,
+    kind: gov ? 'government' : authorized ? 'authorized_provider' : 'unrecognized'
+  }
+}
+
+// The filing cockpit's whole display model. Tolerant of every prepared-filing
+// payload this product produces: a prepared government form, the PWD request
+// (which names its derivations), a PAF manifest, a tourist consular form.
+export function filingCockpitView(payload, opts = {}) {
+  const p = _obj(payload)
+  const formKey = _first(opts.formKey, p.form_key, p.filing_key)
+  const routeKey = _first(opts.routeKey, formKey)
+  const explicitlyUnavailable = p.available === false || p.unavailable === true
+  const reason = _first(p.reason, p.message)
+
+  const prepared = _preparedRows(p)
+  const manifest = _manifestSplit(p)
+  const missing = _missingRows(p).concat(manifest.missing)
+  const documents = _arr(p.documents ?? p.exhibits ?? p.evidence).map((raw) => {
+    const o = typeof raw === 'string' ? { label: raw } : _obj(raw)
+    return { key: _text(o.key ?? o.id), label: _first(o.label, o.title, o.name, o.doc_type),
+             status: _text(o.status), citation: '', note: '' }
+  }).filter((d) => d.label || d.key).concat(manifest.documents)
+
+  const filledCount = _num(p.filled_count ?? p.filledCount)
+  const totalCount = _num(p.total_mapped ?? p.totalMapped ?? p.total)
+
+  const wageRaw = p.wage ?? p.wage_analysis ?? p.wageAnalysis
+  const wage = wageRaw ? wageLevelView(_obj(wageRaw).wage ?? wageRaw) : null
+
+  const narrativeText = _first(p.draft_text, p.narrative_text,
+                               typeof p.narrative === 'string' ? p.narrative : '')
+  const narrative = {
+    available: !!narrativeText || _obj(p.narrative).available === true,
+    // A narrative is ALWAYS a draft for a licensed attorney to review.
+    isDraft: true,
+    text: narrativeText
+  }
+
+  const humanOnly = _arr(p.human_only).map((raw) => {
+    const o = typeof raw === 'string' ? { label: raw } : _obj(raw)
+    return _first(o.label, o.key)
+  }).filter(Boolean)
+
+  const notices = [p.preparation_notice, p.human_acts_notice, p.dol_use_only_notice,
+                   p.nothing_submitted_notice, p.availability_notice, p.retention_notice,
+                   p.posting_guidance, p.note]
+    .map(_text).filter(Boolean)
+
+  const sessionCaseId = _text(opts.sessionCaseId)
+  // Some artifacts are never filed with anyone: the public access file is the
+  // employer's OWN file. There is no government window to open for it, ever,
+  // and saying "not started yet" would imply one is coming.
+  const noPortal = NO_PORTAL_ROUTES.includes(routeKey)
+  const action = {
+    labelKey: 'cockpit.action.open',
+    enabled: !noPortal && !!sessionCaseId && !explicitlyUnavailable,
+    // Honest reason when the single action cannot be offered.
+    reasonKey: noPortal ? 'cockpit.action.noPortal'
+      : !sessionCaseId ? 'cockpit.action.notStarted' : '',
+    reason: explicitlyUnavailable ? reason : '',
+    // Pinned: this button opens a window and stops. The runtime has no path to
+    // the acts below, and this flag exists so a test can say so out loud.
+    performsHumanAct: false
+  }
+
+  return {
+    available: !explicitlyUnavailable && (prepared.length > 0 || missing.length > 0 ||
+      documents.length > 0 || filledCount != null || narrative.available),
+    reason,
+    formKey,
+    routeKey,
+    prepared,
+    filledCount,
+    totalCount,
+    missing,
+    missingCount: missing.length,
+    documents,
+    notApplicable: manifest.notApplicable,
+    narrative,
+    wage: wage && wage.available ? wage : null,
+    humanOnly,
+    humanActs: _humanActs(p, routeKey),
+    taps: tapsToDone(routeKey),
+    action,
+    downloadUrl: _text(p.download_url),
+    filedAt: deepLinkView(p.filed_at ?? p.official_url),
+    notices,
+    disclaimer: _first(p.attorney_disclaimer, p.disclaimer)
+  }
+}
+
+// ---- Appointment cockpit ---------------------------------------------------
+// Ellis never searches for or books a slot. That is not a policy setting: the
+// penalty for automated slot search falls on the TRAVELLER (appointments
+// cancelled, visas revoked), so `neverBooks` is a constant on every view here
+// and the surface renders it whether or not a payload arrived.
+
+export function appointmentTriageView(payload) {
+  const p = _obj(payload)
+  const t = _obj(p.triage ?? p.result ?? p)
+  const verdict = _obj(t.verdict)
+  const us = _obj(t.us ?? t.united_states)         // us_appointment_needed(...)
+  const sch = _obj(t.schengen ?? t.vis ?? t.eu)    // schengen_biometrics_required(...)
+  const evusBlock = _obj(t.evus)
+  const explicitlyUnavailable = p.available === false || t.available === false
+  const reason = _first(p.reason, t.reason, p.message, t.message)
+  const route = _first(t.route, t.system, p.route).toLowerCase()
+
+  // Every verdict below is tri-state, and the backend's own "unknown" string
+  // lands as null. Three different answers stay three.
+  const inPerson = _tri(verdict.in_person_required ?? t.in_person_required ??
+                        t.appearance_required ?? t.in_person)
+  // Schengen: the fingerprint gate itself (EU law), kept SEPARATE from whether
+  // the member state still wants the applicant at the counter to lodge.
+  const bioRequired = _tri(verdict.biometrics_required ?? sch.required)
+  // Art. 13(3): only a DATED fact proves the 59-month reuse. A biometrics
+  // exemption is not reuse, so this reads the reuse answer itself and never
+  // infers it from "no fingerprints needed".
+  const visReusable = _tri(sch.within_59_months ?? sch.reusable ?? sch.vis_reusable ??
+                           t.within_59_months)
+  const visMonths = _num(sch.months_since_biometrics ?? sch.vis_age_months ??
+                         t.months_since_biometrics)
+  // US: an interview waiver is exactly "no interview needed". EVUS is a
+  // separate pre-travel enrolment on a 10-year visa.
+  const explicitWaiver = _tri(us.interview_waiver_eligible ?? us.waiver_eligible ??
+                              t.interview_waiver_eligible)
+  const interviewNeeded = _tri(us.needed ?? verdict.interview_required)
+  const waiver = explicitWaiver !== null ? explicitWaiver
+    : (interviewNeeded === null ? null : !interviewNeeded)
+  const evus = _tri(evusBlock.required ?? us.evus_required ?? t.evus_required)
+
+  // What Ellis would need in order to firm up an unknown. These are the
+  // questions themselves, never guesses dressed as answers.
+  const openQuestions = _arr(t.open_questions ?? p.open_questions).map((raw) => {
+    const o = typeof raw === 'string' ? { question: raw } : _obj(raw)
+    return { question: _first(o.question, o.label),
+             resolveWith: _first(o.resolve_with, o.resolveWith, o.how) }
+  }).filter((q) => q.question)
+
+  const reasons = _arr(t.reasons ?? t.why ?? p.reasons).map((r) => {
+    const o = typeof r === 'string' ? { text: r } : _obj(r)
+    return _first(o.text, o.label, o.reason)
+  }).filter(Boolean)
+  if (reason && route === 'unsupported') reasons.unshift(reason)
+
+  return {
+    // A triage that answers "Ellis cannot tell, and here is what would settle
+    // it" IS an answer: the surface stays available and each line renders its
+    // own unknown.
+    available: !explicitlyUnavailable && (!!route || inPerson !== null ||
+      bioRequired !== null || visReusable !== null || waiver !== null ||
+      evus !== null || openQuestions.length > 0 || reasons.length > 0),
+    reason,
+    route,
+    memberState: _first(t.member_state, t.state),
+    post: _first(t.post, t.location),
+    summary: _first(verdict.summary, t.summary),
+    inPersonRequired: inPerson,
+    biometricsRequired: bioRequired,
+    visBiometricsReusable: visReusable,
+    visMonths,
+    interviewWaiverEligible: waiver,
+    evusRequired: evus,
+    // Whether an accredited agent could carry the whole filing (Schengen).
+    agentEndToEnd: _tri(verdict.agent_deliverable_end_to_end),
+    openQuestions,
+    reasons,
+    asOf: _first(t.as_of, p.as_of),
+    humanActs: _humanActs({ human_acts: t.human_acts ?? p.human_acts }, 'appointment'),
+    disclaimer: _first(p.disclaimer, p.attorney_disclaimer),
+    neverBooks: true
+  }
+}
+
+export function appointmentPrestageView(payload) {
+  const p = _obj(payload)
+  const s = _obj(p.prestage ?? p.result ?? p)
+  const explicitlyUnavailable = p.available === false || s.available === false
+  const prepared = _preparedRows(s)
+  const missing = _missingRows(s)
+  const readiness = _obj(s.readiness)
+  const documents = _arr(s.documents).map((raw) => {
+    const o = typeof raw === 'string' ? { label: raw } : _obj(raw)
+    return { key: _text(o.key ?? o.id), label: _first(o.label, o.title, o.name, o.doc_type),
+             status: _text(o.status) }
+  }).filter((d) => d.label || d.key)
+
+  // The fee stack, each line with its own payer and channel. Ellis computes the
+  // exact amount and names where to pay it; it never pays and never holds a
+  // card. The server's own `ellis_never` sentence rides along verbatim.
+  const fees = _arr(s.fees).map((raw) => {
+    const o = _obj(raw)
+    return {
+      key: _text(o.key),
+      label: _first(o.label, o.name),
+      amount: _num(o.amount),
+      currency: _first(o.currency),
+      per: _first(o.per),
+      payer: _first(o.payer),
+      channels: _arr(o.payment_channels).map((c) => _first(_obj(c).label, _obj(c).name,
+        typeof c === 'string' ? c : '')).filter(Boolean),
+      note: _first(o.note),
+      ellisNever: _first(o.ellis_never, o.ellisNever),
+      source: _first(o.source), asOf: _first(o.as_of, o.asOf)
+    }
+  }).filter((f) => f.label || f.amount != null)
+
+  return {
+    available: !explicitlyUnavailable && (prepared.length > 0 || missing.length > 0 ||
+      documents.length > 0 || fees.length > 0),
+    reason: _first(p.reason, s.reason, p.message),
+    route: _first(s.route, p.route),
+    prepared,
+    missing,
+    missingCount: missing.length,
+    // required:false items block nothing, so the blocking count is its own
+    // number rather than a total that overstates what is in the way.
+    missingRequiredCount: _num(readiness.missing_required) ??
+      missing.filter((m) => m.required !== false).length,
+    filledCount: _num(readiness.filled),
+    totalCount: _num(readiness.form_fields ?? _obj(s.form).total_fields),
+    documents,
+    fees,
+    humanActs: _humanActs({ human_acts: s.human_acts ?? p.human_acts }, 'appointment'),
+    note: _first(p.note, s.note, s.disclaimer),
+    // Constant, not a payload field: nothing on a pre-stage surface has been
+    // filed, paid, signed, or booked.
+    nothingFiled: true,
+    neverBooks: true
+  }
+}
+
+// The consulate's group channel: built for 10 or more travelling together,
+// with families and relatives explicitly excluded (docs/APPOINTMENTS_DESIGN.md).
+export const GROUP_MIN_MEMBERS = 10
+export const GROUP_EXCLUDED_KINDS = ['family', 'families', 'relatives',
+                                     'families_and_relatives']
+
+export function groupRosterView(payload, opts = {}) {
+  const p = _obj(payload)
+  const r = _obj(p.roster ?? p.result ?? p)
+  const rawMembers = _arr(r.members ?? r.rows ?? r.roster ?? r.entries ?? r.applicants)
+  const members = rawMembers.map((raw, i) => {
+    const o = _obj(raw)
+    return {
+      caseId: _first(o.case_id, o.caseId),
+      index: _num(o.member_index) ?? i + 1,
+      name: _first(o.full_name, o.name, [_text(o.given_names), _text(o.surname)]
+        .filter(Boolean).join(' ')),
+      status: _text(o.status),
+      // What this member is still missing before the coordinator can submit.
+      missing: _arr(o.missing).map((m) => (typeof m === 'string' ? m : _first(_obj(m).label,
+        _obj(m).key))).filter(Boolean),
+      note: _first(o.note, o.detail)
+    }
+  })
+  const count = members.length || _num(r.member_count ?? r.count) || 0
+  const kind = _first(opts.groupKind, r.group_kind, p.group_kind).toLowerCase()
+
+  // Ellis's OWN pre-check, before the consulate sees anything. Advisory and
+  // labeled as such — the consulate's own rules are the authority.
+  const preChecks = []
+  if (count > 0 && count < GROUP_MIN_MEMBERS) preChecks.push({ code: 'too_few', count })
+  if (kind && GROUP_EXCLUDED_KINDS.includes(kind)) preChecks.push({ code: 'family_excluded' })
+  const incomplete = members.filter((m) => m.missing.length > 0)
+  if (incomplete.length > 0) preChecks.push({ code: 'members_incomplete', count: incomplete.length })
+
+  return {
+    available: !(p.available === false || r.available === false) && count > 0,
+    reason: _first(p.reason, r.reason, p.message),
+    members,
+    count,
+    groupKind: kind,
+    incompleteMembers: incomplete,
+    preChecks,
+    // ONLY the backend may call a roster submittable. Absent stays null, which
+    // the surface renders as "Ellis cannot confirm this is ready".
+    submittable: _tri(r.submittable ?? p.submittable),
+    humanActs: _humanActs(p, 'group_roster'),
+    // Constant: the coordinator submits and books. Ellis assembles and checks.
+    coordinatorSubmits: true,
+    neverBooks: true
+  }
+}
+
+export function appointmentAvailabilityView(payload) {
+  const p = _obj(payload)
+  // `wait_time_data` is the snapshot's metadata (available / as_of / reason);
+  // `wait_times` is the record list; `wait_time` is the one requested post.
+  const wait = _obj(p.wait_time_data ?? p.waitTimeData)
+  const one = _obj(p.wait_time)
+  const _entry = (raw) => {
+    const o = _obj(raw)
+    return {
+      post: _first(o.post, o.location, o.city),
+      category: _first(o.category_label, o.category, o.visa_class),
+      waitDays: _num(o.wait_days ?? o.days ?? o.wait),
+      // known:false means the figure is simply not in the snapshot. It is
+      // reported as unknown, never interpolated or averaged into a number.
+      known: _tri(o.known) !== false,
+      asOf: _first(o.as_of, o.asOf, wait.as_of, p.as_of)
+    }
+  }
+  const entries = []
+  if (one.post && _tri(one.known) === true) entries.push(_entry(one))
+  for (const rec of _arr(p.wait_times ?? p.records)) {
+    const e = _entry(rec)
+    if ((e.post || e.waitDays != null) && !entries.some((x) => x.post === e.post &&
+        x.category === e.category)) entries.push(e)
+  }
+
+  // Official destinations. An entry with no URL is a real answer ("Ellis has no
+  // verified portal for this member state yet") and is kept, unlinked, rather
+  // than silently dropped.
+  const links = _arr(p.official_links ?? p.links).map((raw) => {
+    const o = typeof raw === 'string' ? { url: raw } : _obj(raw)
+    const link = deepLinkView(o.url ?? o.href)
+    const label = _first(o.label, o.title)
+    if (!link) {
+      // Two different answers, kept apart: a destination that exists but is not
+      // a safe https link ('insecure', shown unlinked with a caution), and one
+      // Ellis has not verified at all ('not_determined', shown as text).
+      const kind = _text(o.url ?? o.href) ? 'insecure' : 'not_determined'
+      return (label || _first(o.description))
+        ? { url: '', host: '', official: false, kind, label,
+            description: _first(o.description) }
+        : null
+    }
+    return { ...link, label, description: _first(o.description) }
+  }).filter(Boolean)
+
+  return {
+    available: _tri(p.available ?? wait.available) === true && entries.length > 0,
+    reason: _first(p.reason, wait.reason, one.reason, p.message),
+    entries,
+    links,
+    source: _first(p.source, wait.source),
+    attribution: _first(p.attribution),
+    asOf: _first(wait.as_of, p.as_of),
+    // The server's own sentence about why there is no live slot feed.
+    whyNoLiveSlots: _first(p.why_no_live_slots),
+    humanActs: _humanActs(p, 'availability'),
+    // Constants: a published wait time is an estimate, not a slot; there is no
+    // live slot inventory; and Ellis never books.
+    liveSlotData: false,
+    estimateOnly: true,
+    neverBooks: true
   }
 }
 
