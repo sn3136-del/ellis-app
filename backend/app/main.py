@@ -301,10 +301,15 @@ def document_preview_url(application_id: str, doc_id: str, db=Depends(get_sessio
     <img>/<iframe> can load it without headers). No filesystem paths, no bucket
     URLs, no credentials are ever exposed."""
     import time as _time
-    _owned(db, p, application_id)
+    app_row = _owned(db, p, application_id)
     doc = db.get(models.StoredDocument, doc_id)
     if not doc or doc.application_id != application_id:
         raise HTTPException(404, "document not found")
+    # Close the H1B party wall on the document READ path: a petitioner-private
+    # artifact (I-129/ETA, RFE packet, evidence cover) stored on the shared
+    # parent case is never mintable by a beneficiary-bound org member.
+    from .h1b.api import authorize_document_read
+    authorize_document_read(db, app_row, doc, p)
     blob = db.get(models.DocumentBlob, doc_id)
     if blob is None:
         return {"available": False,
@@ -1521,8 +1526,14 @@ def review(application_id: str, db=Depends(get_session), p: Principal = Depends(
     app_row = _owned(db, p, application_id)
     docs = db.execute(select(models.StoredDocument).where(
         models.StoredDocument.application_id == application_id)).scalars().all()
+    # Only OCR-shaped values ({"value": ...}) feed cross-document conflicts.
+    # H1B derived documents (prepared forms, RFE packets, evidence covers) carry
+    # FLAT metadata in extracted_fields (e.g. {"party": "petitioner"}), so guard
+    # the shape rather than assume every value is an OCR field dict (finding #2).
     conflicts = ocr_provider.cross_document_conflicts(
-        [{"fields": [{"key": k, "value": v["value"]} for k, v in d.extracted_fields.items()]} for d in docs])
+        [{"fields": [{"key": k, "value": v["value"]}
+                     for k, v in (d.extracted_fields or {}).items()
+                     if isinstance(v, dict) and "value" in v]} for d in docs])
     required = _required_fields_for(app_row.destination_country, app_row.visa_type)
     answers = app_row.answers or {}
     missing = [f for f in required if not answers.get(f)]

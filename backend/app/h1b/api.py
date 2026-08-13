@@ -111,6 +111,37 @@ _CROSS_PARTY_VISIBLE_KEYS = frozenset({
     "h1b_parent_case_id", "h1b_case_kind", "full_name"})
 
 
+# Petitioner-private DERIVED artifacts are stored on the SHARED parent case
+# (forms.store_prepared_pdf tags them {"party": "petitioner"}; the RFE response
+# packet and evidence cover are the same petitioner-only artifacts by doc_type).
+# The write half of the party wall is enforced at the prepare/assemble gates;
+# this is the READ half — without it a beneficiary-bound org member could mint a
+# signed URL for the petitioner's FEIN/wage-bearing I-129 (findings #1/#2).
+_PETITIONER_PRIVATE_DOC_TYPES = frozenset({
+    "prepared_form", "h1b_rfe_response_packet", "h1b_evidence_cover"})
+
+
+def authorize_document_read(db, app_row, doc, principal) -> None:
+    """Close the DOCUMENT half of the H1B party wall. A StoredDocument that is a
+    petitioner-private H1B artifact (party tag or doc_type) may be read only by
+    that party's own principal or an admin; any other org member — the
+    beneficiary included — gets a 403, mirroring the prepare/assemble write gate
+    and scope_child_case_read. Documents with no party (parent identity docs,
+    beneficiary uploads) stay org-scoped, so non-H1B reads are untouched."""
+    party = (getattr(doc, "extracted_fields", None) or {}).get("party") or ""
+    if not party and getattr(doc, "doc_type", "") in _PETITIONER_PRIVATE_DOC_TYPES:
+        party = "petitioner"
+    if not party:
+        return
+    roles = _party_roles(db, app_row.id, principal)
+    if "admin" in roles or party in roles:
+        return
+    raise HTTPException(403, {
+        "reason": f"this document is the {party} party's; your account does not "
+                  f"act for that party on this case",
+        "party": party, "your_roles": sorted(roles)})
+
+
 # --- Statutory registration window (finding #9) ----------------------------
 # The H-1B cap electronic registration is an ANNUAL window (~early-mid March);
 # outside it USCIS accepts no registration, so releasing one out of window would

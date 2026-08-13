@@ -60,10 +60,21 @@ def export_case(db, application_id: str) -> dict:
     # not only erase it — export and erasure are the two halves of the same
     # contract. Secret-free by construction: no vault refs live on these rows
     # (employer_profile_id is an id, party answers are petition facts).
-    parties, steps = [], []
+    parties, steps, employer_profiles = [], [], []
     if _h1b_models is not None:
         parties = _rows(db, _h1b_models.CaseParty, application_id)
         steps = _rows(db, _h1b_models.H1bCaseStep, application_id)
+        # The petitioner's org-scoped EmployerProfile holds FEIN, signatory
+        # contact and financials that never live on a CaseParty row; portability
+        # must RETURN them (export/erasure parity — finding #7).
+        seen_pids = set()
+        for p in parties:
+            pid = getattr(p, "employer_profile_id", "") or ""
+            if pid and pid not in seen_pids:
+                prof = db.get(_h1b_models.EmployerProfile, pid)
+                if prof is not None:
+                    seen_pids.add(pid)
+                    employer_profiles.append(prof)
     return {
         "exported_at": _now_iso(),
         "case": {"id": app.id, "state": app.state, "destination_country": app.destination_country,
@@ -87,6 +98,18 @@ def export_case(db, application_id: str) -> dict:
                        "depends_on": s.depends_on, "lca_number": s.lca_number,
                        "beneficiary_confirmation_number": s.beneficiary_confirmation_number,
                        "uscis_receipt_number": s.uscis_receipt_number} for s in steps],
+        "employer_profiles": [{
+            "legal_name": e.legal_name, "trade_name": e.trade_name, "fein": e.fein,
+            "naics_code": e.naics_code, "address_line1": e.address_line1,
+            "address_line2": e.address_line2, "city": e.city, "state": e.state,
+            "postal_code": e.postal_code, "phone": e.phone,
+            "signatory_name": e.signatory_name, "signatory_title": e.signatory_title,
+            "signatory_email": e.signatory_email, "signatory_phone": e.signatory_phone,
+            "gross_annual_income_cents": e.gross_annual_income_cents,
+            "net_annual_income_cents": e.net_annual_income_cents,
+            "parent_company_name": e.parent_company_name,
+            "parent_company_country": e.parent_company_country}
+            for e in employer_profiles],
         "audit": [{"seq": e.seq, "action": e.action, "actor": e.actor, "detail": e.detail} for e in audit],
     }
 
@@ -107,6 +130,36 @@ def delete_case(db, application_id: str, *, actor: str = "applicant", reason: st
         raise KeyError("case not found")
     org_id = app.org_id
     counts = {}
+    # H1B child FILING cases are independent VisaApplication rows linked only by
+    # H1bCaseStep.child_case_id (a plain string column, no FK cascade). Each
+    # carries party PII (employer FEIN/wage on LCA/I-129 children, a copied
+    # passport blob on the consular child) and each petitioner-acting child owns
+    # a freshly-minted petitioner Applicant. Erase them FIRST — before the parent
+    # row and its step rows go — so right-to-erasure actually reaches them
+    # (finding #6). One level deep: children have no steps, so no recursion loop.
+    child_n = 0
+    if _h1b_models is not None:
+        for step in _rows(db, _h1b_models.H1bCaseStep, application_id):
+            cid = getattr(step, "child_case_id", "") or ""
+            if not cid or cid == application_id:
+                continue
+            if db.get(models.VisaApplication, cid) is None:
+                continue
+            delete_case(db, cid, actor=actor, reason=f"{reason}:h1b_child")
+            child_n += 1
+    counts["h1b_child_cases"] = child_n
+    # Petitioner EmployerProfile rows are org-scoped (org_id, no application_id),
+    # so the per-case cascade never reaches them. Collect the profiles this
+    # case's parties reference now; after the case (and its CaseParty rows) are
+    # gone, erase any left unreferenced — otherwise petitioner PII (FEIN,
+    # signatory contact, financials) survives erasure with no path to delete it
+    # (finding #7). A profile still used by another case is kept.
+    employer_profile_ids = set()
+    if _h1b_models is not None:
+        for cp in _rows(db, _h1b_models.CaseParty, application_id):
+            pid = getattr(cp, "employer_profile_id", "") or ""
+            if pid:
+                employer_profile_ids.add(pid)
     # Document preview bytes are keyed by document_id (not application_id), so
     # erase them explicitly — otherwise raw passport-scan bytes would survive
     # applicant erasure indefinitely.
@@ -181,6 +234,20 @@ def delete_case(db, application_id: str, *, actor: str = "applicant", reason: st
         applicant = db.get(models.Applicant, applicant_id)
         if applicant:
             db.delete(applicant); counts["applicants"] = 1
+    # Erase petitioner EmployerProfile rows this case referenced that no other
+    # case still uses (autoflush ensures the just-deleted CaseParty rows are gone
+    # before this reference check runs).
+    emp_n = 0
+    if _h1b_models is not None and employer_profile_ids:
+        for pid in employer_profile_ids:
+            still = db.execute(select(_h1b_models.CaseParty).where(
+                _h1b_models.CaseParty.employer_profile_id == pid)).scalars().first()
+            if still is not None:
+                continue
+            prof = db.get(_h1b_models.EmployerProfile, pid)
+            if prof is not None:
+                db.delete(prof); emp_n += 1
+    counts["employer_profiles"] = emp_n
     tomb = models.AuditEvent(org_id=org_id, application_id=application_id, actor=actor,
                              action="case_erased", detail={"reason": reason, "counts": counts})
     db.add(tomb)
@@ -190,11 +257,15 @@ def delete_case(db, application_id: str, *, actor: str = "applicant", reason: st
 
 def delete_applicant(db, applicant_id: str, *, actor: str = "applicant") -> dict:
     """Right-to-erasure for an applicant: erase every case then the applicant."""
-    apps = db.execute(select(models.VisaApplication).where(
-        models.VisaApplication.applicant_id == applicant_id)).scalars().all()
+    app_ids = [a.id for a in db.execute(select(models.VisaApplication).where(
+        models.VisaApplication.applicant_id == applicant_id)).scalars().all()]
     total = {"cases": 0}
-    for a in apps:
-        delete_case(db, a.id, actor=actor, reason="applicant_erasure")
+    for aid in app_ids:
+        # A case may already be gone if it was an H1B child erased when its
+        # parent case (also this applicant's) was deleted earlier in the loop.
+        if db.get(models.VisaApplication, aid) is None:
+            continue
+        delete_case(db, aid, actor=actor, reason="applicant_erasure")
         total["cases"] += 1
     applicant = db.get(models.Applicant, applicant_id)
     if applicant:

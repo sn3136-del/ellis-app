@@ -408,6 +408,32 @@ def test_wage_analysis_missing_inputs_is_honest(client, db, monkeypatch):
     assert set(body["missing_inputs"]) == {"soc_code", "wage_offer", "worksite"}
 
 
+def test_wage_analysis_blank_unit_is_missing_not_assumed_year(client, db,
+                                                              monkeypatch):
+    """A $65/hour offer with a BLANK pay basis must report the unit MISSING, not
+    silently assume "year" and return a confident false "below prevailing"
+    (finding #3). A $65/hr offer in fact clears the SOC 15-1252 floor."""
+    _use_oflc(monkeypatch)
+    case_id = _prepared_case(client, db, {
+        "soc_code": "15-1252", "wage_offer": 65, **_WORKSITE})  # no wage_offer_unit
+    body = client.post(f"/h1b/cases/{case_id}/wage-analysis",
+                       headers=PETITIONER_AUTH).json()
+    assert body["available"] is False and body["level"] is None
+    assert "wage_offer_unit" in body["missing_inputs"]
+    # No compliance verdict is fabricated off an assumed basis.
+    assert body.get("meets_prevailing") is None and not body.get("status")
+
+
+def test_compute_case_wage_none_when_unit_blank(monkeypatch):
+    """The counsel seam degrades to None (self-report governs) when the pay basis
+    is blank, so no false lca_wage_below_prevailing risk fires (finding #3)."""
+    _use_oflc(monkeypatch)
+    assert counsel._compute_case_wage(
+        {"petitioner_answers": {"soc_code": "15-1252",
+                                "worksite_county": "Taylor County",
+                                "worksite_state": "TX", "wage_offer": 65}}) is None
+
+
 def test_wage_analysis_beneficiary_forbidden(client, db, monkeypatch):
     _use_oflc(monkeypatch)
     case_id = _prepared_case(client, db, {

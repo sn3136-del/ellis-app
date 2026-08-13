@@ -579,6 +579,28 @@ def test_generic_required_documents_keep_separate_checklist_items():
     assert "photo" in ids
 
 
+def test_h1b_keywords_never_collapse_or_reclassify_tourist_items():
+    """The shared classifier gained broad H1B keywords ("degree", "support
+    letter", "parent company", "ability to pay"). In the tourist/consular
+    derive_document_checklist path they must NOT collapse near-synonym labels
+    into one dropped item, nor reclassify a tourist label away from the generic
+    "document" type (finding #5)."""
+    cl = intake_flow.derive_document_checklist({
+        "disposition": "VISA_REQUIRED",
+        "required_documents": [
+            "Diploma", "Degree certificate",
+            "Academic transcript", "Academic records",
+            "Letter of support from your host",
+            "Financial statement showing ability to pay"]})
+    docs = [i for i in cl if i["kind"] == "document" and i["id"] != "passport"]
+    # All six survive as distinct items — none silently dropped by dedup.
+    assert len(docs) == 6, [i["id"] for i in docs]
+    # And each is the generic type any readable upload can satisfy.
+    for i in docs:
+        assert i["id"].startswith("doc:")
+        assert i["satisfied_by"] == ["document"]
+
+
 def test_vaccination_labels_never_become_generic_checklist_items():
     """A vaccination mention in required_documents is Kimi noise — health
     evidence appears ONLY through the structured, trigger-evaluated

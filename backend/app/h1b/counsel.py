@@ -262,7 +262,12 @@ def _compute_case_wage(ctx: dict) -> dict | None:
     area_code = _resolve_area_code(wd, pet)
     if not area_code:
         return None
-    unit = str(pet.get("wage_offer_unit") or "year").strip().lower() or "year"
+    # Pay basis is never defaulted (doctrine). Without it a raw offered number
+    # cannot be annualised, so degrade to None (fall back to self-reported)
+    # rather than assume "year" and fire a false lca_wage_below_prevailing risk.
+    unit = str(pet.get("wage_offer_unit") or "").strip().lower()
+    if not unit:
+        return None
     try:
         result = compute(area_code=area_code, soc_code=soc_code,
                          offered_wage=offered, wage_unit=unit)

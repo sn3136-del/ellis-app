@@ -88,8 +88,10 @@ def _wage_inputs(pet: dict) -> dict:
         "county": str(pet.get("worksite_county") or "").strip(),
         "area": str(pet.get("worksite_area") or "").strip(),
         "offered_wage": _to_number(pet.get("wage_offer")),
-        "wage_unit": (str(pet.get("wage_offer_unit") or "year").strip().lower()
-                      or "year"),
+        # NEVER defaulted: the pay basis decides whether a raw number annualises.
+        # Assuming "year" for a $65/hour offer would report a confident, wrong
+        # "does not meet the prevailing wage". A blank unit is a MISSING input.
+        "wage_unit": str(pet.get("wage_offer_unit") or "").strip().lower(),
     }
 
 
@@ -99,6 +101,9 @@ def _missing_inputs(inputs: dict) -> list[str]:
         missing.append("soc_code")
     if inputs["offered_wage"] is None:
         missing.append("wage_offer")
+    elif not inputs["wage_unit"]:
+        # An offered amount with no pay basis cannot be annualised honestly.
+        missing.append("wage_offer_unit")
     if not (inputs["area"] or inputs["state"] or inputs["city"]
             or inputs["county"]):
         missing.append("worksite")

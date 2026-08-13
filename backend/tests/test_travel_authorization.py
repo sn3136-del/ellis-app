@@ -676,6 +676,22 @@ def test_listing_for_a_traveller_returns_a_verdict_per_authorization(client):
     assert body["authorizations"][0]["status"] == ta.NOT_REQUIRED
 
 
+def test_listing_endpoint_reaches_the_verified_route_policy_layer(client, db, pair):
+    """The endpoint must wire a DB session (finding #4): a verified
+    ELECTRONIC_AUTHORIZATION pair on file resolves to route_policy_verified /
+    required through GET /travel/authorizations, never the db-less short-circuit
+    'no_route_policy_layer'."""
+    pair("FRA", "GBR", outcome="ELECTRONIC_AUTHORIZATION", verification="verified",
+         urls=["https://www.gov.uk/eta"])
+    r = client.get("/travel/authorizations",
+                   params={"nationality": "FRA", "destination": "GBR"},
+                   headers=AUTH)
+    assert r.status_code == 200, r.text
+    uk = next(a for a in r.json()["authorizations"] if a["key"] == "uk-eta")
+    assert uk["basis"] == "route_policy_verified"
+    assert uk["status"] == ta.REQUIRED and uk["required"] is True
+
+
 def test_listing_for_an_uncurated_destination_says_so(client):
     r = client.get("/travel/authorizations",
                    params={"nationality": "FRA", "destination": "BRA"},

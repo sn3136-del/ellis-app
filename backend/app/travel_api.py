@@ -27,6 +27,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from . import travel_authorization as ta
 from .dates import is_iso
+from .db import get_session
 from .security import Principal, get_principal
 
 router = APIRouter(prefix="/travel", tags=["travel"])
@@ -149,7 +150,8 @@ def _call_schengen(stays: list[dict], as_of: str, route: str = "") -> dict:
 def list_authorizations(nationality: str = Query(default=""),
                         destination: str = Query(default=""),
                         purpose: str = Query(default="tourism"),
-                        principal: Principal = Depends(get_principal)):
+                        principal: Principal = Depends(get_principal),
+                        db=Depends(get_session)):
     """Without a destination this is the catalogue: every visa-waiver travel
     authorization Ellis curates, with its fee, validity and whether Ellis can
     fill it. With a destination it becomes the traveller's own answer — and a
@@ -166,7 +168,10 @@ def list_authorizations(nationality: str = Query(default=""),
                      "traveller. Pass nationality and destination to ask "
                      "whether one applies.")})
         return payload
-    payload.update(ta.applicable(nationality, destination, purpose))
+    # Pass the DB session through so is_required can consult the global-routes
+    # RoutePairPolicy layer; without it every verdict short-circuits to
+    # "no_route_policy_layer" and the endpoint can never return a real answer.
+    payload.update(ta.applicable(nationality, destination, purpose, db=db))
     return payload
 
 

@@ -275,6 +275,40 @@ def test_beneficiary_gets_403_on_both_endpoints(client, db):
     assert r.status_code == 200, r.text
 
 
+def test_beneficiary_cannot_mint_url_for_petitioner_document(client, db):
+    """Read half of the party wall (finding #1): the beneficiary is 403 at
+    prepare AND must not be able to mint a signed preview URL for the resulting
+    petitioner-private I-129 stored on the shared parent case. Petitioner and
+    admin still can."""
+    case_id = _prepared_case(client, db)
+    r = client.post(f"/h1b/cases/{case_id}/forms/i-129/prepare",
+                    headers=PETITIONER_AUTH)
+    assert r.status_code == 200
+    doc_id = r.json()["document_id"]
+    # Petitioner (hr1) and admin may mint the preview URL.
+    assert client.get(f"/cases/{case_id}/documents/{doc_id}/url",
+                      headers=PETITIONER_AUTH).status_code == 200
+    assert client.get(f"/cases/{case_id}/documents/{doc_id}/url",
+                      headers=ADMIN_AUTH).status_code == 200
+    # The beneficiary (AUTH=user1) is refused — it cannot obtain the signature.
+    denied = client.get(f"/cases/{case_id}/documents/{doc_id}/url", headers=AUTH)
+    assert denied.status_code == 403, denied.text
+    assert denied.json()["detail"]["party"] == "petitioner"
+
+
+def test_review_survives_h1b_derived_document(client, db):
+    """GET /cases/{id}/review must not 500 on the FLAT metadata extracted_fields
+    of an H1B derived document (finding #2) — the prepared form's value is
+    "petitioner", not an OCR {"value": ...} dict."""
+    case_id = _prepared_case(client, db)
+    r = client.post(f"/h1b/cases/{case_id}/forms/i-129/prepare",
+                    headers=PETITIONER_AUTH)
+    assert r.status_code == 200
+    rv = client.get(f"/cases/{case_id}/review", headers=PETITIONER_AUTH)
+    assert rv.status_code == 200, rv.text
+    assert any(d["doc_type"] == "prepared_form" for d in rv.json()["documents"])
+
+
 def test_lca_form_carries_no_beneficiary_facts(client, db):
     """DOL never sees the worker: the ETA-9035 fill dict is petitioner-only."""
     case_id = _prepared_case(client, db)

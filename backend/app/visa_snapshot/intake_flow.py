@@ -493,6 +493,21 @@ def doc_type_for_label(label: str) -> str:
     return "document"
 
 
+# H1B statutory document types are classified for UPLOAD matching (via
+# doc_classifier) and assembled into the hardcoded H1B checklist — they are
+# NEVER synthesized from a tourist/consular route's free-text guidance labels.
+# Their broad keywords ("degree", "support letter", "parent company", "ability
+# to pay") otherwise reclassify and silently collapse ordinary tourist checklist
+# items in the SHARED derive_document_checklist path (finding #5), so that
+# builder treats them as the generic "document" type it used before the H1B
+# edition added them.
+_H1B_ONLY_DOC_TYPES = frozenset({
+    "certified_lca", "prior_i797", "i94_record", "credential_evaluation",
+    "degree_certificate", "graduation_certificate", "transcript", "resume_cv",
+    "employer_support_letter", "job_description", "fein_evidence",
+    "corporate_relationship_evidence", "employer_financials"})
+
+
 # Answer keys whose countries count as the applicant's route exposure when a
 # health requirement is conditional on presence in trigger countries.
 _EXPOSURE_ANSWER_KEYS = ("lawful_country_of_residence", "transit_countries",
@@ -596,6 +611,11 @@ def derive_document_checklist(guidance: dict, *, answers: dict | None = None) ->
         if is_payment_label(label):
             continue  # payment is a workflow stage, never a document (Part 1)
         dt = doc_type_for_label(label)
+        if dt in _H1B_ONLY_DOC_TYPES:
+            # Tourist/consular guidance never emits H1B statutory documents;
+            # keep the label as a distinct generic item so any readable upload
+            # satisfies it and near-synonym labels never collapse into one.
+            dt = "document"
         if dt == "passport":
             continue
         if dt == "destination_form":

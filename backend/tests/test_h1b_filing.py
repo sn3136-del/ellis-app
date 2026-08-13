@@ -276,25 +276,96 @@ def test_release_step_refuses_non_ready_even_without_endpoint(client, db):
 
 # ---------- erasure ----------
 
-def test_parent_deletion_leaves_children_as_separate_cases(client, db):
+def test_parent_deletion_erases_child_filing_cases(client, db):
+    """Right-to-erasure follows H1bCaseStep.child_case_id (finding #6): the LCA
+    child filing case holds employer FEIN/wage in its answers and owns a fresh
+    petitioner Applicant, none of which any other erasure path reaches. Deleting
+    the parent must cascade to the child, its guidance, and its petitioner
+    Applicant — leaving no orphaned PII."""
     from app import privacy
     out = _create_case(client, db)
     case_id = out["case_id"]
     child_id = _release(client, case_id, "lca").json()["child_case_id"]
+    db.expire_all()
+    child = db.get(models.VisaApplication, child_id)
+    petitioner_applicant_id = child.applicant_id
+    # The child really does carry petitioner-private filing facts.
+    assert str(child.answers.get("wage_offer")) == "132000"
 
-    privacy.delete_case(db, case_id)
+    result = privacy.delete_case(db, case_id)
     assert db.get(models.VisaApplication, case_id) is None
     assert db.execute(select(h1b_models.H1bCaseStep).where(
         h1b_models.H1bCaseStep.application_id == case_id)).scalars().all() == []
-    # The child is a real, separate case: it survives with its own guidance
-    # and can itself be erased later — deleting the parent must not crash it.
-    child = db.get(models.VisaApplication, child_id)
-    assert child is not None
-    cg = db.execute(select(CaseRouteGuidance).where(
-        CaseRouteGuidance.case_id == child_id)).scalars().first()
-    assert cg is not None
-    privacy.delete_case(db, child_id)
+    # The child filing case, its route guidance, and its petitioner Applicant
+    # are all gone — no orphaned PII survives.
     assert db.get(models.VisaApplication, child_id) is None
+    assert db.execute(select(CaseRouteGuidance).where(
+        CaseRouteGuidance.case_id == child_id)).scalars().first() is None
+    assert db.get(models.Applicant, petitioner_applicant_id) is None
+    assert result["counts"].get("h1b_child_cases") == 1
+
+
+def test_applicant_erasure_reaches_petitioner_child_cases(client, db):
+    """delete_applicant(beneficiary) erases the parent, which cascades to the
+    petitioner-acting child cases even though they carry a DIFFERENT applicant_id
+    that delete_applicant would never enumerate directly (finding #6)."""
+    from app import privacy
+    out = _create_case(client, db)
+    case_id = out["case_id"]
+    child_id = _release(client, case_id, "lca").json()["child_case_id"]
+    db.expire_all()
+    parent = db.get(models.VisaApplication, case_id)
+    beneficiary_applicant_id = parent.applicant_id
+    petitioner_applicant_id = db.get(models.VisaApplication, child_id).applicant_id
+    assert petitioner_applicant_id != beneficiary_applicant_id
+
+    privacy.delete_applicant(db, beneficiary_applicant_id)
+    db.expire_all()
+    assert db.get(models.VisaApplication, case_id) is None
+    assert db.get(models.VisaApplication, child_id) is None
+    assert db.get(models.Applicant, petitioner_applicant_id) is None
+    assert db.get(models.Applicant, beneficiary_applicant_id) is None
+
+
+def test_parent_deletion_erases_orphaned_employer_profile(client, db):
+    """An EmployerProfile used only by this case is org-scoped (no
+    application_id) and escapes the per-case cascade. delete_case must erase it
+    once no case references it, so petitioner FEIN/signatory PII actually has an
+    erasure path (finding #7)."""
+    from app import privacy
+    out = _create_case(client, db)
+    case_id = out["case_id"]
+    pet = db.execute(select(h1b_models.CaseParty).where(
+        h1b_models.CaseParty.application_id == case_id,
+        h1b_models.CaseParty.role == "petitioner")).scalars().first()
+    profile_id = pet.employer_profile_id
+    assert db.get(h1b_models.EmployerProfile, profile_id) is not None
+
+    result = privacy.delete_case(db, case_id)
+    assert db.get(h1b_models.EmployerProfile, profile_id) is None
+    assert result["counts"].get("employer_profiles") == 1
+
+
+def test_shared_employer_profile_survives_while_another_case_uses_it(client, db):
+    """The org-reuse pattern (one petitioner profile, many beneficiaries): a
+    profile still referenced by another case is NOT erased when one case goes."""
+    from app import privacy
+    out1 = _create_case(client, db)
+    pet1 = db.execute(select(h1b_models.CaseParty).where(
+        h1b_models.CaseParty.application_id == out1["case_id"],
+        h1b_models.CaseParty.role == "petitioner")).scalars().first()
+    profile_id = pet1.employer_profile_id
+    out2 = client.post("/h1b/cases", json={
+        "case_kind": "extension", "beneficiary_full_name": "LI MING",
+        "beneficiary_email": "li.ming@example.com",
+        "beneficiary_abroad": False, "beneficiary_in_us": True,
+        "first_h1b": False, "employer_profile_id": profile_id},
+        headers=AUTH).json()
+
+    privacy.delete_case(db, out1["case_id"])
+    assert db.get(h1b_models.EmployerProfile, profile_id) is not None  # still used
+    privacy.delete_case(db, out2["case_id"])
+    assert db.get(h1b_models.EmployerProfile, profile_id) is None      # now orphaned
 
 
 # ---------- acting-party identity (the Applicant side-channel) ----------
