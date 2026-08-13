@@ -539,33 +539,30 @@ export default function StartVisa({ client, onOpenCase }) {
               )
             })()}
           </h1>
-          <div className="trip-home__actions">
-            {canContinue && (
-              <button className="trip-cta" data-testid="resume-newest"
-                onClick={resumeNewest}>
-                {t('case.resume')}{arrow}
-              </button>
-            )}
-            <button className={'trip-cta' + (canContinue ? ' trip-cta--ghost' : '')}
-              onClick={startNew} data-testid="start-new">
-              {t('start.hero.startCta')}{arrow}
-            </button>
-          </div>
-          {/* The products Ellis actually runs. Without this the whole H-1B
-              side was reachable only by typing a URL hash nobody would guess.
-              H-1B is TWO lanes because it is two different processes: the
-              employer files (LCA, I-129); the worker supplies documents and
-              does the consular leg. */}
-          {/* The three products as tall illustrated cards — one drawing each
-              instead of a paragraph each, staggered on mount. */}
+          {/* The welcome page IS the menu: pick what you're working on. The
+              filling flow starts only after a product is chosen — the old
+              hero-level Continue/Get-started buttons dropped people into the
+              tourist wizard before they ever saw the three doors. Resume and
+              start now live ON the Travel-visas card. */}
           <div className="trip-home__lanes" data-testid="product-lanes">
-            <button className="trip-lane trip-lane--tall card-hover anim-rise-1"
-              data-testid="lane-tourist" onClick={startNew}>
+            <div className="trip-lane trip-lane--tall card-hover anim-rise-1"
+              data-testid="lane-tourist">
               <DocumentsIllustration size={132} className="trip-lane__art" />
               <div className="trip-lane__title">{t('start.lane.tourist.title')}</div>
               <div className="trip-lane__sub">{t('start.lane.tourist.sub')}</div>
-              <div className="trip-lane__cta">{t('start.lane.tourist.cta')}{arrow}</div>
-            </button>
+              <div className="trip-lane__ctas">
+                <button className="trip-cta trip-cta--sm" onClick={startNew}
+                  data-testid="start-new">
+                  {t('start.lane.tourist.cta')}{arrow}
+                </button>
+                {canContinue && (
+                  <button className="trip-cta trip-cta--sm trip-cta--ghost"
+                    data-testid="resume-newest" onClick={resumeNewest}>
+                    {t('case.resume')}{arrow}
+                  </button>
+                )}
+              </div>
+            </div>
             <button className="trip-lane trip-lane--tall card-hover anim-rise-2" data-testid="lane-h1b-employer"
               onClick={() => { window.location.hash = '#employer'; window.location.reload() }}>
               <FormFillIllustration size={132} className="trip-lane__art" />

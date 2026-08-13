@@ -290,12 +290,15 @@ input, textarea, select { font-family: inherit; }
 
 /* Minimal home — hero sits at the true center of the viewport */
 .trip-home {
-  text-align: center; padding: 20px;
-  min-height: calc(100vh - 320px);
-  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  /* The welcome page is a MENU: headline up top, the three product doors
+     immediately visible — never a centered hero pushing them below the fold. */
+  text-align: center; padding: 7vh 20px 40px;
+  display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
   animation: rise .4s cubic-bezier(.22,1,.36,1) both;
 }
-.trip-home__title { font-size: 54px; font-weight: 800; letter-spacing: -1.2px; color: var(--trip-navy); margin: 0 0 38px; }
+.trip-home__title { font-size: 46px; font-weight: 800; letter-spacing: -1.2px; color: var(--trip-navy); margin: 0 0 30px; }
+.trip-cta--sm { padding: 9px 18px; font-size: 14px; }
+.trip-lane__ctas { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 4px; }
 .trip-cta {
   display: inline-flex; align-items: center; gap: 12px; border: none; cursor: pointer;
   background: var(--trip-blue); color: #fff; border-radius: 999px; padding: 19px 42px;
