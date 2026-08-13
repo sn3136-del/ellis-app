@@ -43,8 +43,8 @@ export function DocumentsIllustration({ size = 120, className = '' }) {
           letterhead, exactly where a branded document carries it */}
       <g className="illo-part illo-rise illo-rise--2">
         <rect x="50" y="16" width="64" height="88" rx="7" fill="#ffffff" stroke={NAVY} strokeWidth="2.4" />
-        <image href={tripcomLogo} x="60" y="24" width="32" height="8" />
-        <rect x="60" y="42" width="44" height="4" rx="2" fill={GRAY} opacity="0.5" />
+        <image href={tripcomLogo} x="59" y="23" width="46" height="11.1" />
+        <rect x="60" y="44" width="44" height="4" rx="2" fill={GRAY} opacity="0.5" />
         <rect x="60" y="53" width="44" height="4" rx="2" fill={GRAY} opacity="0.5" />
         <rect x="60" y="64" width="32" height="4" rx="2" fill={GRAY} opacity="0.5" />
         <rect x="60" y="82" width="18" height="5" rx="2.5" fill={ORANGE} />
@@ -74,8 +74,8 @@ export function PassportIllustration({ size = 120, className = '' }) {
         <path d="M61 52 h30 M63.5 44.5 h25 M63.5 59.5 h25" stroke="#ffffff" strokeWidth="1.6" strokeLinecap="round" />
         {/* the Trip.com brand plate (the blue logo needs a white ground on the
             blue cover) + biometric chip mark */}
-        <rect x="57" y="21" width="38" height="12" rx="3.5" fill="#ffffff" opacity="0.96" />
-        <image href={tripcomLogo} x="60" y="23.5" width="32" height="7.7" />
+        <rect x="53" y="20" width="46" height="14.5" rx="4" fill="#ffffff" opacity="0.97" />
+        <image href={tripcomLogo} x="56" y="22.4" width="40" height="9.7" />
         <rect x="68" y="86" width="16" height="9" rx="2.5" stroke="#ffffff" strokeWidth="1.6" />
         <path d="M72 86 v9 M80 86 v9" stroke="#ffffff" strokeWidth="1.2" opacity="0.8" />
       </g>
@@ -107,7 +107,7 @@ export function FormFillIllustration({ size = 120, className = '' }) {
       {/* the form — titled by the real Trip.com wordmark */}
       <g className="illo-part illo-rise">
         <rect x="28" y="14" width="82" height="94" rx="8" fill="#ffffff" stroke={NAVY} strokeWidth="2.4" />
-        <image href={tripcomLogo} x="38" y="21" width="30" height="7.5" />
+        <image href={tripcomLogo} x="38" y="19" width="44" height="10.6" />
       </g>
       {/* field labels (static) + values (drawing in) */}
       <g stroke={GRAY} strokeWidth="3" strokeLinecap="round" opacity="0.45">
