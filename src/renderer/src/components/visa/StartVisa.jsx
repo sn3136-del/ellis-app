@@ -421,6 +421,51 @@ export default function StartVisa({ client, onOpenCase }) {
       : <Loading label={t('common.loading')} />
   }
 
+  // The H-1B worker's entry (#worker): their petition is opened by the
+  // EMPLOYER, so this lane never starts an application — it finds one. Cases
+  // known to this device are listed (the same local list the console keeps);
+  // the empty state says honestly how a case arrives, rather than pretending
+  // a search exists that the backend does not offer yet.
+  if (phase === 'hero' && (window.location.hash || '').includes('worker')) {
+    let workerCases = []
+    try {
+      workerCases = (JSON.parse(localStorage.getItem('ellis.visa.cases') || '[]'))
+        .filter((c) => String(c.visa_type || '').startsWith('h1b'))
+    } catch { /* unreadable list reads as empty */ }
+    return (
+      <div className="trip-home" data-testid="worker-landing">
+        <h1 className="trip-home__title" style={{ fontSize: 34 }}>
+          {t('start.worker.title')}
+        </h1>
+        <p style={{ color: 'var(--trip-gray, #64748b)', maxWidth: 560, textAlign: 'center', margin: '0 auto 22px' }}>
+          {t('start.worker.sub')}
+        </p>
+        <div style={{ width: '100%', maxWidth: 560, margin: '0 auto' }}>
+          {workerCases.length === 0
+            ? <div className="row" style={{ justifyContent: 'center', textAlign: 'center' }}>
+                <div className="row__main">
+                  <div className="row__title">{t('start.worker.emptyTitle')}</div>
+                  <div className="row__sub">{t('start.worker.emptySub')}</div>
+                </div>
+              </div>
+            : workerCases.map((c) => (
+                <button key={c.id} className="row" style={{ width: '100%', textAlign: 'left', cursor: 'pointer' }}
+                  onClick={() => onOpenCase && onOpenCase(c)} data-testid="worker-case">
+                  <div className="row__main">
+                    <div className="row__title">{c.full_name || t('start.worker.caseFallback')}</div>
+                    <div className="row__sub">H-1B · {String(c.id || '').slice(0, 8)}</div>
+                  </div>
+                </button>
+              ))}
+        </div>
+        <button className="trip-cta trip-cta--ghost" style={{ marginTop: 26 }}
+          onClick={() => { window.location.hash = '#applicant'; window.location.reload() }}>
+          {t('start.worker.back')}
+        </button>
+      </div>
+    )
+  }
+
   if (phase === 'hero') {
     // The Trip.com landing look: one big headline over two side-by-side
     // actions — continue what you already started, or start fresh. "Continue"
@@ -480,19 +525,28 @@ export default function StartVisa({ client, onOpenCase }) {
               {t('start.hero.startCta')}{arrow}
             </button>
           </div>
-          {/* The two products Ellis actually runs. Without this the whole H-1B
-              side was reachable only by typing a URL hash nobody would guess. */}
+          {/* The products Ellis actually runs. Without this the whole H-1B
+              side was reachable only by typing a URL hash nobody would guess.
+              H-1B is TWO lanes because it is two different processes: the
+              employer files (LCA, I-129); the worker supplies documents and
+              does the consular leg. */}
           <div className="trip-home__lanes" data-testid="product-lanes">
             <button className="trip-lane" data-testid="lane-tourist" onClick={startNew}>
               <div className="trip-lane__title">{t('start.lane.tourist.title')}</div>
               <div className="trip-lane__sub">{t('start.lane.tourist.sub')}</div>
               <div className="trip-lane__cta">{t('start.lane.tourist.cta')}{arrow}</div>
             </button>
-            <button className="trip-lane" data-testid="lane-h1b"
+            <button className="trip-lane" data-testid="lane-h1b-employer"
               onClick={() => { window.location.hash = '#employer'; window.location.reload() }}>
               <div className="trip-lane__title">{t('start.lane.h1b.title')}</div>
               <div className="trip-lane__sub">{t('start.lane.h1b.sub')}</div>
               <div className="trip-lane__cta">{t('start.lane.h1b.cta')}{arrow}</div>
+            </button>
+            <button className="trip-lane" data-testid="lane-h1b-worker"
+              onClick={() => { window.location.hash = '#worker'; window.location.reload() }}>
+              <div className="trip-lane__title">{t('start.lane.h1bworker.title')}</div>
+              <div className="trip-lane__sub">{t('start.lane.h1bworker.sub')}</div>
+              <div className="trip-lane__cta">{t('start.lane.h1bworker.cta')}{arrow}</div>
             </button>
           </div>
         </div>

@@ -51,7 +51,11 @@ export function detectPersona({ hash, storage } = {}) {
       delSafe('ellis_admin')
       return 'employer'
     }
-    if (h === '#applicant') {
+    // '#worker' is the H-1B beneficiary's entry: same applicant persona, but
+    // VisaConsole reads the hash to open on the case list (the worker's
+    // petition is opened by their employer — their journey starts at "find my
+    // case", never "start an application").
+    if (h === '#applicant' || h === '#worker') {
       delSafe('ellis_persona')
       delSafe('ellis_admin')
       return 'applicant'
