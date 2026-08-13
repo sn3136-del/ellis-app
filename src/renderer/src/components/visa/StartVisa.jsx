@@ -547,7 +547,7 @@ export default function StartVisa({ client, onOpenCase }) {
           <div className="trip-home__lanes" data-testid="product-lanes">
             <div className="trip-lane trip-lane--tall card-hover anim-rise-1"
               data-testid="lane-tourist">
-              <DocumentsIllustration size={132} className="trip-lane__art" />
+              <DocumentsIllustration size={150} className="trip-lane__art" />
               <div className="trip-lane__title">{t('start.lane.tourist.title')}</div>
               <div className="trip-lane__sub">{t('start.lane.tourist.sub')}</div>
               <div className="trip-lane__ctas">
@@ -565,14 +565,14 @@ export default function StartVisa({ client, onOpenCase }) {
             </div>
             <button className="trip-lane trip-lane--tall card-hover anim-rise-2" data-testid="lane-h1b-employer"
               onClick={() => { window.location.hash = '#employer'; window.location.reload() }}>
-              <FormFillIllustration size={132} className="trip-lane__art" />
+              <FormFillIllustration size={150} className="trip-lane__art" />
               <div className="trip-lane__title">{t('start.lane.h1b.title')}</div>
               <div className="trip-lane__sub">{t('start.lane.h1b.sub')}</div>
               <div className="trip-lane__cta">{t('start.lane.h1b.cta')}{arrow}</div>
             </button>
             <button className="trip-lane trip-lane--tall card-hover anim-rise-3" data-testid="lane-h1b-worker"
               onClick={() => { window.location.hash = '#worker'; window.location.reload() }}>
-              <PassportIllustration size={132} className="trip-lane__art" />
+              <PassportIllustration size={150} className="trip-lane__art" />
               <div className="trip-lane__title">{t('start.lane.h1bworker.title')}</div>
               <div className="trip-lane__sub">{t('start.lane.h1bworker.sub')}</div>
               <div className="trip-lane__cta">{t('start.lane.h1bworker.cta')}{arrow}</div>
