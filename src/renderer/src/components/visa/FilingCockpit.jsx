@@ -50,8 +50,10 @@ function IlloCard({ art, className = '', children, ...rest }) {
   )
 }
 
-// One named human act. A backend-supplied act renders its own words; a curated
-// one localizes. Either way it names a person, never Ellis.
+// One named human act, always backend-supplied (app/filing_acts.py or the
+// appointment modules). A vocabulary key localizes as cockpit.act.{key}; an
+// act outside the vocabulary renders its server sentence. Either way it names
+// a person, never Ellis.
 function HumanAct({ t, act }) {
   const known = act.key && HUMAN_ACT_KEYS.includes(act.key)
   const label = known ? t(`cockpit.act.${act.key}`) : act.act
@@ -316,6 +318,14 @@ export default function FilingCockpit({
                       ? t('cockpit.taps.exact', { count: view.taps.exact })
                       : t('cockpit.taps.range', { min: view.taps.min, max: view.taps.max }))
                   : t('cockpit.taps.unknown')}
+                {/* The backend's own reason why there is no count (paper,
+                    in-person, a portal Ellis does not drive) beats the
+                    generic line. */}
+                {!view.taps.known && view.taps.reason && (
+                  <div style={{ fontSize: 11.5, color: GRAY }} data-testid="cockpit-taps-reason">
+                    {view.taps.reason}
+                  </div>
+                )}
                 <div style={{ fontSize: 11.5, color: GRAY }}>{t('cockpit.taps.note')}</div>
               </div>
               {/* THE single action. It opens the applicant's own window on the
@@ -342,9 +352,18 @@ export default function FilingCockpit({
                 button and never behind it. */}
             <div style={{ marginTop: 12 }} data-testid="cockpit-human-acts">
               <div style={{ fontSize: 12, fontWeight: 700 }}>{t('cockpit.acts.title')}</div>
-              <ul style={{ margin: '4px 0 0 18px', fontSize: 12.5 }}>
-                {view.humanActs.map((a, i) => <HumanAct key={a.key || i} t={t} act={a} />)}
-              </ul>
+              {/* Acts come only from the backend's own answer. None arriving
+                  renders as an honest unknown — a list is never invented. */}
+              {view.humanActs.length === 0 ? (
+                <div style={{ fontSize: 12.5, color: GRAY, marginTop: 4 }}
+                     data-testid="cockpit-acts-unknown">
+                  {t('cockpit.acts.unknown')}
+                </div>
+              ) : (
+                <ul style={{ margin: '4px 0 0 18px', fontSize: 12.5 }}>
+                  {view.humanActs.map((a, i) => <HumanAct key={a.key || i} t={t} act={a} />)}
+                </ul>
+              )}
               <div style={{ fontSize: 11.5, color: GRAY, marginTop: 6 }}
                    data-testid="cockpit-never">
                 {t('cockpit.acts.never')}

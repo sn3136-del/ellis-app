@@ -379,18 +379,12 @@ export default function StartVisa({ client, onOpenCase }) {
     label: `${c.flag ? c.flag + ' ' : ''}${c.name}`,
     search: `${c.name} ${c.alpha_2} ${c.alpha_3}`.toLowerCase()
   })), [reg])
-  // Trip.com demo (2026-08-04): the DESTINATION picker shows only this
-  // edition's routes — Germany + Singapore here; Vietnam ships as its own
-  // edition (branch vietnam-edition), per the owner's decision to keep the
-  // two portal behaviors in separate builds. Nothing is deleted — every
-  // registry, adapter, and route stays live underneath; empty the set to
-  // show the full list again. Other country pickers are untouched.
-  const DEMO_DESTINATIONS = ['DEU', 'SGP']
-  const destinationOpts = useMemo(() => (
-    DEMO_DESTINATIONS.length
-      ? countryOpts.filter((o) => DEMO_DESTINATIONS.includes(o.value))
-      : countryOpts
-  ), [countryOpts])
+  // The DESTINATION picker lists every country the backend registry serves —
+  // the registry is the single owner of this list (the 2026-08-04 two-country
+  // demo filter is gone by the owner's 2026-08-14 decision). Coverage honesty
+  // lives where it belongs: the route resolver answers each pair with its real
+  // status, so nothing needs hiding here.
+  const destinationOpts = countryOpts
   const nationalityOpts = useMemo(() => (reg?.nationalities || []).map((n) => ({
     value: n.code, label: n.name, search: `${n.name} ${n.code}`.toLowerCase()
   })), [reg])

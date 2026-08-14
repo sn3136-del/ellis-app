@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from .. import models
+from .. import filing_acts, models
 from ..db import get_session
 from ..security import Principal, get_principal, require_owner
 from . import forms as h1b_forms
@@ -60,6 +60,10 @@ def prepare_official_form(case_id: str, form_key: str, locale: str = "en",
            "document_id": result["document_id"],
            "download_url": result["download_url"],
            "expires_in": result["expires_in"],
+           # The acts that remain a person's, and the tap count COUNTED from
+           # them (app/filing_acts.py) — the frontend keeps no copy of either.
+           "human_acts": filing_acts.acts_for(form_key),
+           "taps_to_done": filing_acts.taps_to_done(form_key),
            "attorney_disclaimer": disclaimer(locale),
            "disclaimer_version": DISCLAIMER_VERSION}
     if form_key == "eta-9035":
@@ -96,6 +100,10 @@ def build_paper_packet(case_id: str, locale: str = "en",
             "usps_address": result["usps_address"],
             "courier_address": result["courier_address"],
             "wet_ink_warnings": wet_ink_warnings,
+            # Paper acts are ink, a check and an envelope — never taps, and
+            # taps_to_done says so rather than inventing a count.
+            "human_acts": filing_acts.acts_for("i-129-paper"),
+            "taps_to_done": filing_acts.taps_to_done("i-129-paper"),
             "verify_address_notice": h1b_forms.tr("forms.verify_address", locale),
             "dependents_paper_notice": h1b_forms.tr("forms.dependents_paper", locale),
             "nothing_submitted_notice": h1b_forms.tr("forms.nothing_submitted", locale),

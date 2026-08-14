@@ -16,7 +16,7 @@ from sqlalchemy import select
 
 from .config import capabilities, settings
 from .db import get_session, create_all
-from . import models, audit, service, execution, portal_queue
+from . import models, audit, service, execution, filing_acts, portal_queue
 from . import progress as progress_vocab
 from .security import (Principal, get_principal, require_owner, require_admin,
                        issue_action_token, verify_action_token)
@@ -377,11 +377,17 @@ def get_consular_form(application_id: str, download: bool = False,
         signature=checklist_intake.applicant_signature_bytes(db, application_id))
     prepared = built["prepared"]
     if not download:
+        # Human acts + tap count from the single authority (app/filing_acts),
+        # keyed on the form spec's OWN submission mode — the frontend keeps no
+        # fallback copy of either.
+        acts_key = filing_acts.consular_key(prepared["submission"])
         return {"available": True, "form_key": form_key,
                 "title": prepared["title"], "kind": built["kind"],
                 "filled": prepared["filled"], "total": prepared["total"],
                 "missing_required": prepared["missing_required"],
                 "submission": prepared["submission"], "note": prepared["note"],
+                "human_acts": filing_acts.acts_for(acts_key),
+                "taps_to_done": filing_acts.taps_to_done(acts_key),
                 "lines": prepared["lines"]}
     from fastapi.responses import Response
     audit.record(db, org_id=p.org_id, application_id=application_id,

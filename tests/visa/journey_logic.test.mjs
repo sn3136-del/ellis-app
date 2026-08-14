@@ -1103,7 +1103,7 @@ test('the employer console renders the wage caveats and the SOC confirm-required
 import {
   filingCockpitView, appointmentTriageView, appointmentPrestageView,
   groupRosterView, appointmentAvailabilityView, deepLinkView, tapsToDone,
-  TAPS_TO_DONE, GROUP_MIN_MEMBERS, HUMAN_ACT_KEYS
+  GROUP_MIN_MEMBERS, HUMAN_ACT_KEYS
 } from '../../src/renderer/src/lib/visaBackend.js'
 
 test('this wave’s client methods hit the pinned endpoint paths with the pinned bodies', async () => {
@@ -1229,8 +1229,17 @@ test('filingCockpitView shows what is prepared with its source, and what is miss
 })
 
 test('the cockpit’s single action opens a window and never performs a human act', () => {
-  const ready = filingCockpitView({ form_key: 'i-129', filled_count: 40, total_mapped: 50 },
-    { sessionCaseId: 'child-1' })
+  // The acts arrive IN the payload (app/filing_acts.py is the only author);
+  // this is the shape the prepare endpoint actually sends.
+  const ready = filingCockpitView({
+    form_key: 'i-129', filled_count: 40, total_mapped: 50,
+    human_acts: [
+      { key: 'login', who: 'the signatory', why: 'personal account', non_delegable: true },
+      { key: 'sign', who: 'the signatory', why: 'perjury', non_delegable: true },
+      { key: 'pay', who: 'the petitioner', why: 'no card details' },
+      { key: 'submit', who: 'the signatory', why: 'their legal act' }
+    ]
+  }, { sessionCaseId: 'child-1' })
   assert.equal(ready.action.enabled, true)
   assert.equal(ready.action.labelKey, 'cockpit.action.open')
   // Pinned: the action opens a window. It never signs, pays, or submits.
@@ -1243,7 +1252,10 @@ test('the cockpit’s single action opens a window and never performs a human ac
   const notStarted = filingCockpitView({ form_key: 'i-129', filled_count: 1, total_mapped: 2 })
   assert.equal(notStarted.action.enabled, false)
   assert.equal(notStarted.action.reasonKey, 'cockpit.action.notStarted')
-  // The backend's own typed acts (appt_api) win over the curated list.
+  // A payload that names no acts yields NONE: the curated per-form list this
+  // client used to invent is gone, and the surface renders an honest unknown.
+  assert.deepEqual(notStarted.humanActs, [])
+  // The backend's own typed acts render with their server sentence.
   const fromServer = filingCockpitView({
     filled_count: 1, total_mapped: 2,
     human_acts: [{ act: 'submit the group appointment request', who: 'the coordinator',
@@ -1253,21 +1265,66 @@ test('the cockpit’s single action opens a window and never performs a human ac
   assert.equal(fromServer.humanActs[0].who, 'the coordinator')
 })
 
-test('taps-to-done is the measured target or an honest unknown, never a guess', () => {
-  // The numbers come from docs/MAX_AUTOMATION_SPEC.md's own table.
-  assert.deepEqual(tapsToDone('eta-9035'), { known: true, min: 3, max: 3, exact: 3 })
-  assert.deepEqual(tapsToDone('i-129'), { known: true, min: 4, max: 4, exact: 4 })
-  assert.deepEqual(tapsToDone('registration'), { known: true, min: 3, max: 3, exact: 3 })
-  assert.equal(tapsToDone('tourist-evisa').exact, null)     // 2-4 is a range
-  assert.equal(tapsToDone('tourist-evisa').max, 4)
-  // A route the spec does not pin reports UNKNOWN rather than a number someone
-  // would quote back as a promise.
-  assert.equal(tapsToDone('eta-9141').known, false)
-  assert.equal(tapsToDone('something-new').known, false)
-  assert.equal(tapsToDone('').known, false)
-  assert.ok(!('paf' in TAPS_TO_DONE))
+test('taps-to-done is the backend’s counted measure or an honest unknown, never a guess', () => {
+  // The count arrives in the payload, counted server-side from the named
+  // human acts (app/filing_acts.py). The old frontend table is gone.
+  assert.deepEqual(
+    tapsToDone({ taps_to_done: { known: true, min: 4, max: 4, basis: 'counted from acts' } }),
+    { known: true, min: 4, max: 4, exact: 4, reason: 'counted from acts' })
+  // A conditional act (a fee screen, a CAPTCHA) makes the honest answer a range.
+  const range = tapsToDone({ taps_to_done: { known: true, min: 3, max: 5 } })
+  assert.equal(range.exact, null)
+  assert.equal(range.max, 5)
+  // No count in the payload, an unknown one, or a half-stated one all read as
+  // UNKNOWN rather than a number someone would quote back as a promise.
+  assert.equal(tapsToDone({}).known, false)
+  assert.equal(tapsToDone(null).known, false)
+  assert.equal(tapsToDone({ taps_to_done: { known: false, reason: 'filed by mail' } }).known, false)
+  assert.equal(tapsToDone({ taps_to_done: { known: false, reason: 'filed by mail' } }).reason,
+    'filed by mail')
+  assert.equal(tapsToDone({ taps_to_done: { known: true, min: 2 } }).known, false) // no max
   assert.equal(filingCockpitView({ form_key: 'eta-9141', filled_count: 1, total_mapped: 2 })
     .taps.known, false)
+  // ...and the payload's own count flows through the cockpit view untouched.
+  assert.equal(filingCockpitView({ form_key: 'i-129', filled_count: 1, total_mapped: 2,
+    taps_to_done: { known: true, min: 4, max: 4 } }).taps.exact, 4)
+})
+
+test('the act-key vocabulary matches app/filing_acts.py exactly', async () => {
+  // filing_acts.py promises every act key it emits is in the UI vocabulary
+  // (a key outside it renders as a blank line). Pin the two lists to each
+  // other across the language boundary so neither can drift alone.
+  const py = await readFile(
+    new URL('../../backend/app/filing_acts.py', import.meta.url), 'utf8')
+  const m = py.match(/ACT_VOCABULARY = \(([^)]+)\)/)
+  assert.ok(m, 'ACT_VOCABULARY not found in filing_acts.py')
+  const backendVocab = [...m[1].matchAll(/"([a-z]+)"/g)].map((x) => x[1])
+  assert.deepEqual(backendVocab.sort(), [...HUMAN_ACT_KEYS].sort())
+})
+
+test('the consular form payload parses into an available cockpit view', () => {
+  // main.py get_consular_form speaks `filled`/`total`/`missing_required`; the
+  // view must read that shape or the endpoint's acts and gaps never render.
+  const view = filingCockpitView({
+    available: true, form_key: 'schengen_uniform', filled: 12, total: 30,
+    missing_required: [{ key: 'birth_place', label: 'Place of birth' }],
+    human_acts: [
+      { key: 'review', who: 'the applicant' },
+      { key: 'sign', who: 'the applicant, by hand', non_delegable: true },
+      { key: 'submit', who: 'the applicant, in person' }
+    ],
+    taps_to_done: { known: false, reason: 'lodged in person on paper' }
+  }, { sessionCaseId: 'c1' })
+  assert.equal(view.available, true)
+  assert.equal(view.filledCount, 12)
+  assert.equal(view.totalCount, 30)
+  assert.equal(view.missing[0].label, 'Place of birth')
+  assert.deepEqual(view.humanActs.map((a) => a.key), ['review', 'sign', 'submit'])
+  assert.equal(view.taps.known, false)
+  assert.equal(view.taps.reason, 'lodged in person on paper')
+  // A `filled` LIST (the prepared-rows key on other payloads) is never
+  // mistaken for a count.
+  assert.equal(filingCockpitView({ filled: [{ label: 'FEIN' }] }).filledCount, null)
 })
 
 test('filingCockpitView honest-degrades and splits a PAF manifest by real status', () => {
@@ -1279,6 +1336,11 @@ test('filingCockpitView honest-degrades and splits a PAF manifest by real status
   // unknown are all reported missing — an unanswered conditional item is never
   // quietly dropped.
   const paf = filingCockpitView({
+    // The manifest names its one act itself (paf_api's envelope) — the client
+    // no longer holds a per-form list to fall back on.
+    human_acts: [{ key: 'review', who: 'the employer',
+                   why: 'the file is the employer’s own record' }],
+    taps_to_done: { known: false, reason: 'kept in the employer’s own records' },
     items: [
       { item_id: 'certified_lca', title: 'Certified LCA', status: 'present',
         citation: '20 CFR 655.760(a)(1)' },
@@ -1595,6 +1657,12 @@ test('FilingCockpit renders the three sections and calls no signing, paying or s
   assert.ok(src.includes('data-testid="cockpit-human-acts"'))
   assert.ok(src.includes("t('cockpit.acts.never')"))
   assert.ok(src.includes("t('cockpit.notice.nothingFiled')"))
+  // A payload that names no acts renders the honest unknown line — the
+  // cockpit never falls back to a client-side list (there is none left).
+  assert.ok(src.includes('data-testid="cockpit-acts-unknown"'))
+  assert.ok(src.includes("t('cockpit.acts.unknown')"))
+  // The backend's own no-tap-count reason renders when it gives one.
+  assert.ok(src.includes('data-testid="cockpit-taps-reason"'))
   // The single action opens the secure window and nothing else: no client
   // method that signs, pays, submits, or resolves a personal handoff appears.
   for (const forbidden of ['completePayment', 'approvePayment', 'approvePaymentExact',

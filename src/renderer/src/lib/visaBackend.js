@@ -741,8 +741,9 @@ export function socSuggestionsView(payload) {
 //   * The single action OPENS a window. It never logs in, signs, pays,
 //     submits, clears a human check, or books a slot — `action.performsHumanAct`
 //     is a pinned false, and the remaining human acts are always named.
-//   * An unknown tap target is UNKNOWN. The taps-to-done table holds only the
-//     routes docs/MAX_AUTOMATION_SPEC.md actually pins; everything else says so.
+//   * An unknown tap target is UNKNOWN. The count is the backend's own,
+//     counted server-side from the named human acts (app/filing_acts.py); a
+//     payload without one renders as unknown — this client holds no table.
 //   * A verdict Ellis does not hold stays null (tri-state), never false. "No
 //     appointment needed" and "Ellis cannot tell" are different answers.
 //   * Only the backend may call a group roster submittable.
@@ -767,52 +768,40 @@ function _first(...vals) {
   return ''
 }
 
-// The human acts that legally remain, per filing. Named so the cockpit can
-// never read as "Ellis will handle it". Keys localize as cockpit.act.{key}.
+// The act-key vocabulary the backend's single authority (app/filing_acts.py)
+// speaks and this UI localizes as cockpit.act.{key}. A vocabulary, not data:
+// which acts a filing actually has comes from the server, never from here.
 export const HUMAN_ACT_KEYS = ['login', 'review', 'sign', 'pay', 'submit',
                                'captcha', 'biometrics']
-export const DEFAULT_FILING_HUMAN_ACTS = ['login', 'review', 'submit']
-export const FILING_HUMAN_ACTS = {
-  'eta-9035': ['login', 'review', 'submit'],
-  'eta-9141': ['login', 'review', 'submit'],
-  'i-129': ['login', 'sign', 'pay', 'submit'],
-  registration: ['login', 'pay', 'submit'],
-  'ds-160': ['login', 'sign', 'submit'],
-  ds160_consular: ['login', 'sign', 'submit'],
-  'tourist-evisa': ['login', 'pay', 'submit', 'captcha'],
-  // The public access file is the employer's OWN file: nothing is filed with a
-  // government, so the remaining act is the employer's review and retention.
-  paf: ['review']
-}
-
-// "Taps to done" straight from docs/MAX_AUTOMATION_SPEC.md. Only the routes
-// that document pins appear: a route with no measured target reports UNKNOWN
-// rather than a number someone will quote back as a promise.
-export const TAPS_TO_DONE = {
-  'eta-9035': { min: 3, max: 3 },
-  'i-129': { min: 4, max: 4 },
-  registration: { min: 3, max: 3 },
-  'tourist-evisa': { min: 2, max: 4 },
-  'us-appointment': { min: 2, max: 4 },
-  'schengen-agent': { min: 1, max: 2 }
-}
 
 // Artifacts that are never filed on a government site, so no secure window can
 // ever be the "single action" for them.
 export const NO_PORTAL_ROUTES = ['paf']
 
-export function tapsToDone(routeKey) {
-  const t = TAPS_TO_DONE[_text(routeKey)]
-  if (!t) return { known: false, min: null, max: null, exact: null }
-  return { known: true, min: t.min, max: t.max, exact: t.min === t.max ? t.min : null }
+// The tap count as the BACKEND measured it (counted from the named human acts
+// server-side — see app/filing_acts.py). A payload that carries no count, or a
+// half-stated one, reads as unknown: a number is never invented here, and the
+// old frontend table of targets is gone.
+export function tapsToDone(payload) {
+  const t = _obj(_obj(payload).taps_to_done)
+  const min = _num(t.min)
+  const max = _num(t.max)
+  if (t.known !== true || min == null || max == null) {
+    return { known: false, min: null, max: null, exact: null,
+             reason: _first(t.reason, t.basis) }
+  }
+  return { known: true, min, max, exact: min === max ? min : null,
+           reason: _text(t.basis) }
 }
 
-function _humanActs(payload, routeKey) {
-  // The backend's own typed acts win (appt_eligibility names who acts, why,
-  // and whether it can be delegated at all); the curated per-form list is the
-  // fallback. `label` is the server-localized sentence and `act` is its bare
-  // key, so the sentence is preferred and the key is only a last resort.
-  const given = _arr(payload.human_acts).map((raw) => {
+function _humanActs(payload) {
+  // Only the backend's own typed acts (filing_acts.py / appt_eligibility —
+  // who acts, why, whether it can be delegated at all). `label` is the
+  // server-localized sentence and `act` is its bare key, so the sentence is
+  // preferred and the key is only a last resort. No payload acts -> an EMPTY
+  // list the surface renders as an honest unknown: the curated per-form
+  // fallback that used to be invented here is gone.
+  return _arr(payload.human_acts).map((raw) => {
     const a = _obj(raw)
     return {
       key: _text(a.key),
@@ -820,13 +809,10 @@ function _humanActs(payload, routeKey) {
       who: _first(a.who, a.actor),
       why: _first(a.why, a.reason),
       nonDelegable: _tri(a.non_delegable ?? a.nonDelegable),
+      conditional: _tri(a.conditional) === true,
       ellisDoes: _first(a.ellis_does, a.ellisDoes)
     }
   }).filter((a) => a.act || a.key)
-  if (given.length) return given
-  const keys = FILING_HUMAN_ACTS[_text(routeKey)] || DEFAULT_FILING_HUMAN_ACTS
-  return keys.map((key) => ({ key, act: '', who: '', why: '', nonDelegable: null,
-                              ellisDoes: '' }))
 }
 
 // One prepared field: what Ellis wrote, and where it came from. A value with
@@ -849,8 +835,11 @@ function _preparedRows(payload) {
 }
 
 // One missing item, with THE ONE INPUT needed to clear it. Never a raw key.
+// `missing_required` is the consular form's name for the same list
+// (main.py get_consular_form).
 function _missingRows(payload) {
-  const raw = payload.missing ?? payload.missing_fields ?? payload.missing_items
+  const raw = payload.missing ?? payload.missing_fields ?? payload.missing_items ??
+              payload.missing_required
   return _arr(raw).map((item) => {
     const o = typeof item === 'string' ? { label: item } : _obj(item)
     const label = _first(o.label, o.question, o.ask, o.key)
@@ -945,7 +934,11 @@ export function filingCockpitView(payload, opts = {}) {
              status: _text(o.status), citation: '', note: '' }
   }).filter((d) => d.label || d.key).concat(manifest.documents)
 
-  const filledCount = _num(p.filled_count ?? p.filledCount)
+  // The consular form payload (main.py get_consular_form) counts as bare
+  // `filled`/`total` numbers; a `filled` LIST is a different key (prepared
+  // rows, parsed above) and must not be mistaken for a count.
+  const filledCount = _num(p.filled_count ?? p.filledCount ??
+                           (typeof p.filled === 'number' ? p.filled : null))
   const totalCount = _num(p.total_mapped ?? p.totalMapped ?? p.total)
 
   const wageRaw = p.wage ?? p.wage_analysis ?? p.wageAnalysis
@@ -1003,8 +996,8 @@ export function filingCockpitView(payload, opts = {}) {
     narrative,
     wage: wage && wage.available ? wage : null,
     humanOnly,
-    humanActs: _humanActs(p, routeKey),
-    taps: tapsToDone(routeKey),
+    humanActs: _humanActs(p),
+    taps: tapsToDone(p),
     action,
     downloadUrl: _text(p.download_url),
     filedAt: deepLinkView(p.filed_at ?? p.official_url),
@@ -1090,7 +1083,7 @@ export function appointmentTriageView(payload) {
     openQuestions,
     reasons,
     asOf: _first(t.as_of, p.as_of),
-    humanActs: _humanActs({ human_acts: t.human_acts ?? p.human_acts }, 'appointment'),
+    humanActs: _humanActs({ human_acts: t.human_acts ?? p.human_acts }),
     disclaimer: _first(p.disclaimer, p.attorney_disclaimer),
     neverBooks: true
   }
@@ -1145,7 +1138,7 @@ export function appointmentPrestageView(payload) {
     totalCount: _num(readiness.form_fields ?? _obj(s.form).total_fields),
     documents,
     fees,
-    humanActs: _humanActs({ human_acts: s.human_acts ?? p.human_acts }, 'appointment'),
+    humanActs: _humanActs({ human_acts: s.human_acts ?? p.human_acts }),
     note: _first(p.note, s.note, s.disclaimer),
     // Constant, not a payload field: nothing on a pre-stage surface has been
     // filed, paid, signed, or booked.
@@ -1200,7 +1193,7 @@ export function groupRosterView(payload, opts = {}) {
     // ONLY the backend may call a roster submittable. Absent stays null, which
     // the surface renders as "Ellis cannot confirm this is ready".
     submittable: _tri(r.submittable ?? p.submittable),
-    humanActs: _humanActs(p, 'group_roster'),
+    humanActs: _humanActs(p),
     // Constant: the coordinator submits and books. Ellis assembles and checks.
     coordinatorSubmits: true,
     neverBooks: true
@@ -1263,7 +1256,7 @@ export function appointmentAvailabilityView(payload) {
     asOf: _first(wait.as_of, p.as_of),
     // The server's own sentence about why there is no live slot feed.
     whyNoLiveSlots: _first(p.why_no_live_slots),
-    humanActs: _humanActs(p, 'availability'),
+    humanActs: _humanActs(p),
     // Constants: a published wait time is an estimate, not a slot; there is no
     // live slot inventory; and Ellis never books.
     liveSlotData: false,

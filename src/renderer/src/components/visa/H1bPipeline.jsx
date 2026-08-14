@@ -11,6 +11,7 @@
 // wall.
 import { useEffect, useState } from 'react'
 import { useLocale } from '../../lib/locale.jsx'
+import { HUMAN_ACT_KEYS } from '../../lib/visaBackend.js'
 import { Loading, ErrorNote, Empty } from '../ui.jsx'
 import {
   detectPersona, partyForPersona, h1bStepMeta, h1bWhoActs, setActiveH1bCase
@@ -727,6 +728,30 @@ function PaperPacketPanel({ t, lang, client, caseId }) {
             <ul style={{ margin: '0 0 8px 18px', color: '#c77700', lineHeight: 1.6 }}>
               {result.wet_ink_warnings.map((w, i) => <li key={i}>{String(w)}</li>)}
             </ul>
+          )}
+          {/* The acts that stay the petitioner's (app/filing_acts.py:
+              wet-ink sign, pay by check, mail) and the backend's own reason
+              there is no tap count — rendered, never restated client-side. */}
+          {Array.isArray(result.human_acts) && result.human_acts.length > 0 && (
+            <div style={{ marginBottom: 8 }} data-testid="paper-human-acts">
+              <div style={{ fontWeight: 700 }}>{t('cockpit.acts.title')}</div>
+              <ul style={{ margin: '4px 0 0 18px', lineHeight: 1.6 }}>
+                {result.human_acts.map((a, i) => {
+                  const label = a.key && HUMAN_ACT_KEYS.includes(a.key)
+                    ? t(`cockpit.act.${a.key}`) : (a.label || a.act || a.key)
+                  return label
+                    ? <li key={a.key || i}>{label}{a.who ? ` · ${a.who}` : ''}</li>
+                    : null
+                })}
+              </ul>
+            </div>
+          )}
+          {result.taps_to_done && result.taps_to_done.known === false &&
+            result.taps_to_done.reason && (
+              <div style={{ color: 'var(--muted)', marginBottom: 8 }}
+                   data-testid="paper-taps-reason">
+                {result.taps_to_done.reason}
+              </div>
           )}
           {Array.isArray(exhibits) && exhibits.length > 0 && (
             <ul style={{ margin: '0 0 0 18px', color: 'var(--muted)', lineHeight: 1.7 }}>

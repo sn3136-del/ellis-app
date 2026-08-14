@@ -19,7 +19,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from .. import models
+from .. import filing_acts, models
 from ..db import get_session
 from ..security import Principal, get_principal, require_owner
 from . import public_access_file as paf
@@ -52,6 +52,11 @@ def _envelope(locale: str) -> dict:
         "nothing_filed_notice": paf.tr("paf.nothing_filed", locale),
         "attested_not_verified_notice": paf.tr("paf.attested_not_verified",
                                                locale),
+        # The one act the file leaves (the employer's own review/retention)
+        # and the honest no-taps answer, from the single authority
+        # (app/filing_acts.py) — the frontend keeps no fallback copy.
+        "human_acts": filing_acts.acts_for("paf"),
+        "taps_to_done": filing_acts.taps_to_done("paf"),
         "attorney_disclaimer": disclaimer(locale),
         "disclaimer_version": DISCLAIMER_VERSION,
     }
