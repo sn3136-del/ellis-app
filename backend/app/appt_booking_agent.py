@@ -74,12 +74,13 @@ _REQUIRES = [
 
 
 def _route_target(row) -> tuple[str, str]:
-    """(country, visa_type) for adapter selection. Schengen resolves to the
-    member state the applicant chose; US is the single B1/B2 scheduling
-    surface."""
+    """(country, visa_type) for adapter selection — matches the scheduling
+    adapters (app/portal/adapters/{us_visa,schengen}_scheduling.py). US is the
+    single B1/B2 scheduling surface; Schengen is the accredited-ESP flow,
+    modelled as the Schengen Area (the ESP portal, not the member state, is
+    what the agent navigates)."""
     if row.route == "schengen":
-        post = (row.posts or [""])[0]
-        return (post or "Schengen", "schengen_c")
+        return ("Schengen Area", "schengen")
     return ("United States", "b1b2")
 
 

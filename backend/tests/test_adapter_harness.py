@@ -73,9 +73,12 @@ def test_harness_endpoint_admin_only():
     r = client.get("/admin/adapters/harness", headers=ADMIN_H)
     assert r.status_code == 200
     body = r.json()
-    # mock-allowed test mode registers the two demo adapters; all reports carry
-    # the cannot-approve note.
-    assert len(body["reports"]) == 2
+    # mock-allowed test mode registers the demo adapters (mockland + vietnam
+    # e-visa) plus the two `tested` scheduling adapters (US + Schengen); all
+    # reports carry the cannot-approve note.
+    ids = {rep["adapter_id"] for rep in body["reports"]}
+    assert {"us-visa-scheduling-v1", "schengen-vfs-scheduling-v1"} <= ids
+    assert len(body["reports"]) == 4
     assert all("cannot approve" in rep["activation_note"] for rep in body["reports"])
 
 
