@@ -55,6 +55,19 @@ class PortalAdapter:
     # Portals like the Vietnam eVisa take personal applications with no account
     # at all; the workflow then skips registration/login instead of inventing one.
     account_required: bool = True
+    # Calendar read (deterministic, adapter-declared — no model at runtime). When
+    # `appointment_search` is not "none", the live driver navigates the approved
+    # appointment_url and reads each open slot from these selectors. Absent ->
+    # the driver reads nothing (returns no slots), never a guess. `slot_selector`
+    # is the repeated element; the *_field selectors are read WITHIN each slot,
+    # and when date/time fields are both absent the whole slot's text is the
+    # when. This is read-only: it can never book, and it visits only the
+    # allowlisted host.
+    appointment_slot_selector: str = ""
+    appointment_date_field: str = ""
+    appointment_time_field: str = ""
+    appointment_label_field: str = ""
+    appointment_post_field: str = ""
 
 
 def validate_adapter(a: PortalAdapter) -> list[str]:

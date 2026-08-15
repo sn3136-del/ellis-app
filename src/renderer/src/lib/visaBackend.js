@@ -515,6 +515,47 @@ export function createVisaClient(session) {
     appointmentAvailability: (params = {}) =>
       call('GET', `/appointments/availability?${new URLSearchParams(params)}`, session),
 
+    // ---- Agent-channel booking (app/appt_booking_api.py) -------------------
+    // The applicant asks inside Trip.com; a NAMED HUMAN operator works the
+    // official site in their own session; `booked` exists only behind evidence
+    // (confirmation number + confirmation document on the case). Nothing here
+    // touches the booking site.
+    bookingCreate: (caseId, body = {}) =>
+      call('POST', `/appointments/booking/cases/${caseId}`, session,
+           { route: '', posts: [], date_windows: [], note: '', ...body }),
+    bookingForCase: (caseId) =>
+      call('GET', `/appointments/booking/cases/${caseId}`, session),
+    // Echo the slot's post+when so the server can 409 if the operator
+    // re-offered between render and pick — consent binds to the seen slot.
+    bookingPick: (requestId, index, slot = {}) =>
+      call('POST', `/appointments/booking/${requestId}/pick`, session,
+           { index, post: slot.post || '', when: slot.when || '' }),
+    bookingCancel: (requestId) =>
+      call('POST', `/appointments/booking/${requestId}/cancel`, session, {}),
+    // Operator (admin role) side.
+    bookingQueue: () => call('GET', '/appointments/booking/queue', session),
+    bookingOfferSlots: (requestId, slots) =>
+      call('POST', `/appointments/booking/${requestId}/offer-slots`, session, { slots }),
+    // The operator's confirmation document (screenshot/PDF) — the evidence
+    // half of `booked`.
+    bookingEvidence: (requestId, { name = '', mime = '', content_b64 = '' } = {}) =>
+      call('POST', `/appointments/booking/${requestId}/evidence`, session,
+           { name, mime, content_b64 }),
+    bookingBooked: (requestId, body) =>
+      call('POST', `/appointments/booking/${requestId}/booked`, session,
+           { confirmation_number: '', evidence_document_id: '', note: '', ...body }),
+    bookingFailed: (requestId, reason) =>
+      call('POST', `/appointments/booking/${requestId}/failed`, session, { reason }),
+    // Ellis's browser agent, run inside the operator's authorized session:
+    // reads the official calendar / drives the picked slot to confirmation.
+    // Fails closed with an honest `agent` block (ran:false + reason) whenever
+    // it cannot act — including when the site presents a human check, which
+    // only the operator may clear.
+    bookingAgentReadSlots: (requestId) =>
+      call('POST', `/appointments/booking/${requestId}/agent/read-slots`, session, {}),
+    bookingAgentBook: (requestId) =>
+      call('POST', `/appointments/booking/${requestId}/agent/book`, session, {}),
+
     // ---- Travel authorizations + Schengen stay (app/travel_api.py) ---------
     // Edition-neutral: the tourist journey and an H1B beneficiary's personal
     // travel both read these. An unconfigured or unknown answer comes back as
@@ -1261,6 +1302,72 @@ export function appointmentAvailabilityView(payload) {
     // live slot inventory; and Ellis never books.
     liveSlotData: false,
     estimateOnly: true,
+    neverBooks: true
+  }
+}
+
+// ---- Agent-channel booking (app/appt_booking.py) ---------------------------
+// The applicant asks and picks inside Trip.com; a NAMED HUMAN operator reads
+// the official calendar and executes the booking in their own session. This
+// view carries that honesty: every offered slot names who read it and when,
+// and `isRealGovernmentResult` is true only on `booked`, which the server
+// grants only behind evidence (confirmation number + document on the case).
+export const BOOKING_ACTIVE_STATUSES = ['requested', 'slots_offered', 'slot_picked']
+
+export function bookingView(payload) {
+  const p = _obj(payload)
+  if (p.exists === false || (!p.id && !p.status)) return { exists: false }
+  const status = _text(p.status)
+  const slots = _arr(p.offered_slots).map((raw) => {
+    const o = _obj(raw)
+    return { post: _text(o.post), when: _text(o.when), label: _text(o.label),
+             recordedBy: _text(o.recorded_by), recordedAt: _text(o.recorded_at),
+             // How the calendar was read: 'ellis_agent' | 'operator_manual'.
+             source: _text(o.source) }
+  }).filter((s) => s.post && s.when)
+  const picked = _obj(p.picked_slot)
+  const conf = _obj(p.confirmation)
+  return {
+    exists: true,
+    id: _text(p.id),
+    caseId: _text(p.case_id),
+    route: _text(p.route),
+    status,
+    active: BOOKING_ACTIVE_STATUSES.includes(status),
+    posts: _arr(p.posts).map(_text).filter(Boolean),
+    dateWindows: _arr(p.date_windows).map((w) => ({
+      from: _text(_obj(w).from), to: _text(_obj(w).to) })),
+    note: _text(p.note),
+    requestedAt: _text(p.requested_at),
+    offeredSlots: slots,
+    agentRead: p.agent_read === true,
+    slotsNotice: _text(p.slots_notice),
+    // The agent's own honest outcome block, when an agent endpoint answered.
+    agent: p.agent ? {
+      ran: _obj(p.agent).ran === true,
+      kind: _text(_obj(p.agent).kind),
+      reason: _text(_obj(p.agent).reason),
+      liveViewUrl: _text(_obj(p.agent).live_view_url),
+      confirmationHint: _text(_obj(p.agent).confirmation_hint),
+      count: _num(_obj(p.agent).count)
+    } : null,
+    pickedSlot: picked.post ? { post: _text(picked.post), when: _text(picked.when),
+                                label: _text(picked.label) } : null,
+    // Confirmation renders ONLY with both halves of the evidence — the same
+    // rule the server enforces, repeated here so a hand-built payload cannot
+    // read as booked.
+    confirmation: (conf.number && conf.evidence_document_id)
+      ? { number: _text(conf.number), evidenceDocumentId: _text(conf.evidence_document_id),
+          recordedBy: _text(conf.recorded_by), recordedAt: _text(conf.recorded_at),
+          note: _text(conf.note) }
+      : null,
+    failureReason: _text(p.failure_reason),
+    isRealGovernmentResult: p.is_real_government_result === true &&
+      !!(conf.number && conf.evidence_document_id),
+    legalBasis: { basis: _text(_obj(p.legal_basis).basis),
+                  limit: _text(_obj(p.legal_basis).limit) },
+    humanActs: _humanActs(p),
+    neverAutomatedNotice: _text(p.never_automated_notice),
     neverBooks: true
   }
 }

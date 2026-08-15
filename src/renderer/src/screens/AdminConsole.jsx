@@ -2,7 +2,7 @@
 // Drives each adapter through discovered → … → production_active with human-only
 // activation. Talks to the backend admin API (admin token grants the role); no
 // provider credentials ever touch this renderer.
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useToast, Loading, ErrorNote, Empty, KVList } from '../components/ui.jsx'
 import { Icon } from '../components/icons.jsx'
 import { useLocale } from '../lib/locale.jsx'
@@ -74,7 +74,7 @@ export default function AdminConsole() {
       <div className="page page--wide">
         {error && <ErrorNote error={error} />}
         <div className="tabs">
-          {['adapters', 'review queue', 'coverage'].map((name) => (
+          {['adapters', 'review queue', 'coverage', 'booking desk'].map((name) => (
             <button key={name} className={'tab' + (tab === name ? ' is-active' : '')} onClick={() => setTab(name)}>
               {name[0].toUpperCase() + name.slice(1)}
             </button>
@@ -137,6 +137,7 @@ export default function AdminConsole() {
           </div>
         )}
 
+        {tab === 'booking desk' && <BookingDeskTab client={client} toast={toast} />}
         {tab === 'global' && <GlobalCoverageTab client={client} t={t} />}
         {tab === 'snapshot' && <SnapshotTab client={client} t={t} />}
         {tab === 'reviews' && <ReviewsTab client={client} t={t} />}
@@ -145,6 +146,221 @@ export default function AdminConsole() {
         {tab === 'adapter tasks' && <AdapterTasksTab client={client} t={t} />}
         {tab === 'research jobs' && <ResearchJobsTab client={client} t={t} />}
         {tab === 'adapter factory' && <AdapterFactoryTab client={client} t={t} isAdmin={isAdmin} toast={toast} />}
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Booking desk (app/appt_booking.py): the OPERATOR side of agent-channel
+// appointment booking. The operator works the official site in their OWN
+// browser and session; this desk is the work order and the record of what
+// they did — offered slots (each stamped who/when server-side), the booked
+// confirmation with its evidence document, or an honest failure. Nothing
+// here opens or drives the booking site.
+function BookingDeskTab({ client, toast }) {
+  const [queue, setQueue] = useState(null)
+  const [notice, setNotice] = useState('')
+  const [error, setError] = useState(null)
+
+  async function load() {
+    try {
+      const r = await client.bookingQueue()
+      setQueue(r.requests || [])
+      setNotice(r.never_automated_notice || '')
+      setError(null)
+    } catch (e) { setError({ message: e.message }) }
+  }
+  useEffect(() => { load() }, [])
+
+  return (
+    <div className="tabpanel" data-testid="booking-desk">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="eyebrow">Booking desk — active requests, oldest first</div>
+        <button className="btn btn--sm btn--ghost" onClick={load}>Refresh</button>
+      </div>
+      {notice && <div style={{ fontSize: 12, color: 'var(--muted)', margin: '6px 0 10px' }}>{notice}</div>}
+      {error && <ErrorNote error={error} />}
+      {!queue ? <Loading label="Loading queue" />
+        : queue.length === 0
+          ? <Empty title="No open booking requests" sub="Applicant requests appear here, oldest first." />
+          : queue.map((r) => (
+              <BookingDeskItem key={r.id} client={client} req={r} toast={toast} onChanged={load} />
+            ))}
+    </div>
+  )
+}
+
+function BookingDeskItem({ client, req, toast, onChanged }) {
+  const [slotLines, setSlotLines] = useState('')
+  const [conf, setConf] = useState('')
+  const [failReason, setFailReason] = useState('')
+  const [file, setFile] = useState(null)   // {name, mime, content_b64}
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState(null)
+  // The agent's honest outcome for THIS request: {ran, kind, reason,
+  // live_view_url, confirmation_hint}. Rendered verbatim — the agent's
+  // failure reasons are the truth of what it could and couldn't do.
+  const [agentOut, setAgentOut] = useState(null)
+
+  async function run(fn, doneMsg) {
+    setBusy(true); setError(null)
+    try {
+      await fn()
+      if (doneMsg) toast(doneMsg)
+      onChanged()
+    } catch (e) { setError({ message: e.message }) }
+    setBusy(false)
+  }
+
+  // Invoke the agent and keep its outcome block. On capture_missing the real
+  // confirmation number is preserved into the manual field so nothing the
+  // official site issued is ever lost.
+  async function runAgent(fn, doneMsg) {
+    setBusy(true); setError(null)
+    try {
+      const res = await fn()
+      setAgentOut(res.agent || null)
+      if (res.agent?.ran) { toast(doneMsg); onChanged() }
+      else if (res.agent?.confirmation_hint) setConf(res.agent.confirmation_hint)
+    } catch (e) { setError({ message: e.message }) }
+    setBusy(false)
+  }
+
+  // One slot per line: "post | when | label?" — the operator types exactly
+  // what they see in the official calendar.
+  function parsedSlots() {
+    return slotLines.split('\n').map((ln) => ln.trim()).filter(Boolean).map((ln) => {
+      const [post = '', when = '', label = ''] = ln.split('|').map((s) => s.trim())
+      return { post, when, label }
+    })
+  }
+
+  // A monotonically increasing token so a slow read of an earlier selection
+  // can never overwrite a newer one (last-write-wins by SELECTION, not by
+  // whichever FileReader happens to resolve last).
+  const fileToken = useRef(0)
+  function onFile(e) {
+    const f = e.target.files && e.target.files[0]
+    const token = ++fileToken.current
+    if (!f) { setFile(null); return }
+    const reader = new FileReader()
+    reader.onload = () => {
+      if (token !== fileToken.current) return   // superseded selection
+      const b64 = String(reader.result || '').split(',')[1] || ''
+      setFile({ name: f.name, mime: f.type, content_b64: b64 })
+    }
+    reader.readAsDataURL(f)
+  }
+
+  return (
+    <div className="card" style={{ padding: 16, marginBottom: 12 }} data-testid="booking-desk-item">
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+        <div>
+          <div style={{ fontWeight: 700 }}>
+            {req.route === 'schengen' ? 'Schengen' : 'US B1/B2'} · case {String(req.case_id).slice(0, 8)}
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--muted)' }}>
+            {(req.posts || []).join(', ')}
+            {req.date_windows?.[0] && ` · ${req.date_windows[0].from || '…'} → ${req.date_windows[0].to || '…'}`}
+            {req.note && ` · ${req.note}`}
+          </div>
+        </div>
+        <span className="chip">{req.status}</span>
+      </div>
+      {error && <ErrorNote error={error} />}
+
+      {/* The agent's honest outcome, verbatim: why it could not act, the live
+          view to clear a human check, or what it just did. */}
+      {agentOut && !agentOut.ran && (
+        <div className="card card--soft" style={{ padding: 12, marginTop: 10, fontSize: 12.5 }}
+             data-testid="desk-agent-outcome">
+          <b>Ellis agent:</b> {agentOut.reason}
+          {agentOut.live_view_url && (
+            <div style={{ marginTop: 4 }}>
+              <a href={agentOut.live_view_url} target="_blank" rel="noreferrer">
+                Open the live session to clear it, then run the agent again
+              </a>
+            </div>
+          )}
+        </div>
+      )}
+
+      {(req.status === 'requested' || req.status === 'slots_offered') && (
+        <div style={{ marginTop: 10 }}>
+          <button className="btn btn--sm" disabled={busy} data-testid="desk-agent-read"
+                  onClick={() => runAgent(() => client.bookingAgentReadSlots(req.id),
+                                          'Ellis read the calendar and relayed the slots')}>
+            Let Ellis read the calendar
+          </button>
+          <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 4 }}>
+            Runs in your signed-in session. If the site asks for a human check,
+            you clear it and run the agent again. Manual entry below always works.
+          </div>
+          <div style={{ fontSize: 12, fontWeight: 700, marginTop: 10 }}>
+            Slots you saw (one per line: post | when | label)
+          </div>
+          <textarea className="input" rows={3} value={slotLines}
+                    onChange={(e) => setSlotLines(e.target.value)}
+                    placeholder={'Beijing | 2026-10-12 09:30 | morning\nShanghai | 2026-10-19 14:00'}
+                    data-testid="desk-slot-lines" />
+          <button className="btn btn--sm" style={{ marginTop: 6 }}
+                  disabled={busy || !slotLines.trim()}
+                  onClick={() => run(() => client.bookingOfferSlots(req.id, parsedSlots()),
+                                     'Slots relayed to the applicant')}
+                  data-testid="desk-offer">
+            Relay slots to the applicant
+          </button>
+        </div>
+      )}
+
+      {req.status === 'slot_picked' && (
+        <div style={{ marginTop: 10 }} data-testid="desk-book">
+          <div style={{ fontSize: 12.5 }}>
+            Applicant picked: <b>{req.picked_slot?.post}</b> · {req.picked_slot?.when}
+          </div>
+          <button className="btn btn--sm" style={{ marginTop: 8 }} disabled={busy}
+                  data-testid="desk-agent-book"
+                  onClick={() => runAgent(() => client.bookingAgentBook(req.id),
+                                          'Ellis booked it and recorded the confirmation')}>
+            Let Ellis book it
+          </button>
+          <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 4 }}>
+            Drives the booking to the official confirmation in your session and
+            records the evidence itself. Falls back to the manual record below.
+          </div>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 8, alignItems: 'center' }}>
+            <input className="input" style={{ maxWidth: 220 }} value={conf}
+                   onChange={(e) => setConf(e.target.value)}
+                   placeholder="Confirmation number" data-testid="desk-confnum" />
+            <input type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={onFile} />
+            <button className="btn btn--sm" disabled={busy || !conf.trim() || !file}
+                    onClick={() => run(async () => {
+                      const up = await client.bookingEvidence(req.id, file)
+                      await client.bookingBooked(req.id, {
+                        confirmation_number: conf.trim(),
+                        evidence_document_id: up.document_id })
+                    }, 'Booked — evidence recorded')}
+                    data-testid="desk-booked">
+              Record booked
+            </button>
+          </div>
+          <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 4 }}>
+            Booked needs both: the confirmation number and the confirmation document.
+          </div>
+        </div>
+      )}
+
+      <div style={{ display: 'flex', gap: 10, marginTop: 10, alignItems: 'center' }}>
+        <input className="input" style={{ maxWidth: 320 }} value={failReason}
+               onChange={(e) => setFailReason(e.target.value)}
+               placeholder="Honest failure reason (required to fail)" />
+        <button className="btn btn--sm btn--ghost" disabled={busy || !failReason.trim()}
+                onClick={() => run(() => client.bookingFailed(req.id, failReason.trim()),
+                                   'Recorded as failed')}
+                data-testid="desk-failed">
+          Mark failed
+        </button>
       </div>
     </div>
   )

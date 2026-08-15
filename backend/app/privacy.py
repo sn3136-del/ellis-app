@@ -29,6 +29,7 @@ _CASE_CHILD_MODELS = [
     models.EmailNotification, models.ApplicantStandingAuthorization,
     models.ApplicationReviewVersion, models.PaymentAuthorization,
     models.PortalRun, models.CaseProgressEvent, models.BrowserSession,
+    models.AppointmentBookingRequest,
 ]
 
 # H1B two-party tables join the cascade (import kept below the legacy list so
@@ -81,7 +82,9 @@ def export_case(db, application_id: str) -> dict:
                  "visa_type": app.visa_type, "answers": app.answers, "portal_reference": app.portal_reference},
         "applicant": ({"full_name": applicant.full_name, "email": applicant.email,
                        "phone": applicant.phone, "time_zone": applicant.time_zone} if applicant else None),
-        "documents": [{"name": d.name, "mime": d.mime, "size_bytes": d.size_bytes,
+        # `id` included so a booking confirmation's evidence_document_id can be
+        # joined to its document inside the bundle itself.
+        "documents": [{"id": d.id, "name": d.name, "mime": d.mime, "size_bytes": d.size_bytes,
                        "sha256": d.sha256, "doc_type": d.doc_type, "approved": d.approved,
                        "extracted_fields": d.extracted_fields} for d in docs],
         "signatures": [{"id": s.id, "provider": s.provider, "artifact_hash": s.artifact_hash,
@@ -89,6 +92,17 @@ def export_case(db, application_id: str) -> dict:
         "appointments": [{"slot_id": a.slot_id, "location_id": a.location_id, "start_utc": a.start_utc,
                           "confirmation_no": a.confirmation_no, "reschedule_count": a.reschedule_count} for a in appts],
         "confirmations": [{"reference_no": c.reference_no, "receipt_no": c.receipt_no} for c in confs],
+        "appointment_booking_requests": [
+            {"route": b.route, "status": b.status, "posts": b.posts,
+             "date_windows": b.date_windows, "note": b.note,
+             "requested_by": b.requested_by,
+             "requested_at": b.created_at.isoformat() if b.created_at else "",
+             "offered_slots": b.offered_slots,
+             "picked_slot": b.picked_slot,
+             "picked_at": b.picked_at.isoformat() if b.picked_at else "",
+             "confirmation": b.confirmation,
+             "failure_reason": b.failure_reason}
+            for b in _rows(db, models.AppointmentBookingRequest, application_id)],
         "case_parties": [{"role": p.role, "party_kind": p.party_kind,
                           "display_name": p.display_name, "email": p.email, "phone": p.phone,
                           "status": p.status, "employer_profile_id": p.employer_profile_id,

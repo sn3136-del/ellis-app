@@ -85,6 +85,10 @@ app.include_router(_h1b_paf_router)
 # Ellis prepares everything; the authorized human performs the booking action.
 from .appt_api import router as _appt_router  # noqa: E402
 app.include_router(_appt_router)
+# Agent-channel booking pipeline: applicant requests in-app, a named human
+# operator works the official site in their own session, booked = evidence.
+from .appt_booking_api import router as _appt_booking_router  # noqa: E402
+app.include_router(_appt_booking_router)
 # H1B ops: org-account bulk registration, RFE response assembly, cap exemption.
 from .h1b.ops_api import router as _h1b_ops_router  # noqa: E402
 app.include_router(_h1b_ops_router)

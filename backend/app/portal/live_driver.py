@@ -78,6 +78,29 @@ def _host_ok(url: str, approved: set[str]) -> bool:
     return any(host == a or host.endswith("." + a) for a in approved)
 
 
+def _field_text(node, sub: str) -> str:
+    """Text of a declared sub-selector within a calendar node. An UNDECLARED
+    field (sub == "") reads nothing — "" — never the whole node's blob: a
+    field the adapter did not map must not leak the entire slot's text into
+    post/label/when. Any read failure is "" too."""
+    if not sub:
+        return ""
+    try:
+        child = node.query_selector(sub)
+        return (child.inner_text().strip() if child else "")
+    except Exception:  # noqa: BLE001
+        return ""
+
+
+def _whole_text(node) -> str:
+    """The whole node's text — used ONLY for the intentional both-dates-absent
+    branch, where the entire slot cell IS the datetime."""
+    try:
+        return (node.inner_text() or "").strip()
+    except Exception:  # noqa: BLE001
+        return ""
+
+
 class BrowserbaseLiveViewDriver:
     """Route-specific live driver. Bind ONLY to a production-approved adapter.
 
@@ -278,12 +301,55 @@ class BrowserbaseLiveViewDriver:
                 "reference": ev.reference,
                 "live_view": self.live_view_url() if not ev.ok else None}
 
-    def search_appointments(self, **kw):
+    def search_appointments(self, *, post=None, **kw):
+        """Read the OPEN slots from the official calendar, deterministically,
+        through the adapter's declared selectors. Read-only: it navigates only
+        the allowlisted appointment_url and never books. An e-visa route (or an
+        adapter that declares no calendar selectors) returns none by policy —
+        never a guessed date."""
         _reject_secrets(kw)
-        # Real inventory only; an e-visa route returns none by policy.
         if getattr(self.adapter, "appointment_search", "none") == "none":
             return {"ok": True, "slots": []}
-        return {"ok": True, "slots": []}  # production reads the real calendar DOM
+        url = getattr(self.adapter, "appointment_url", "")
+        if url:
+            self._goto(url)                       # host-checked
+        return {"ok": True,
+                "slots": self._read_calendar_slots(default_post=post or "")}
+
+    def _read_calendar_slots(self, *, default_post: str = "") -> list[dict]:
+        """Extract each open slot from the rendered calendar via the adapter's
+        `appointment_*` selectors. Nothing declared -> nothing read. Any node
+        that yields no `when` is skipped rather than invented."""
+        slot_sel = getattr(self.adapter, "appointment_slot_selector", "")
+        if not slot_sel:
+            return []
+        page = self._ensure_page()
+        query_all = getattr(page, "query_selector_all", None)
+        if not callable(query_all):
+            return []
+        try:
+            nodes = query_all(slot_sel) or []
+        except Exception:  # noqa: BLE001 - a calendar that won't read yields none
+            return []
+        date_f = getattr(self.adapter, "appointment_date_field", "")
+        time_f = getattr(self.adapter, "appointment_time_field", "")
+        label_f = getattr(self.adapter, "appointment_label_field", "")
+        post_f = getattr(self.adapter, "appointment_post_field", "")
+        out = []
+        for node in nodes:
+            if date_f or time_f:
+                # Only the DECLARED half is read; an undeclared date/time
+                # contributes "", never the whole cell.
+                when = f"{_field_text(node, date_f)} {_field_text(node, time_f)}".strip()
+            else:
+                when = _whole_text(node)          # whole slot text is the datetime
+            if not when:
+                continue
+            # An undeclared post field -> "" -> the applicant's preferred post
+            # labels the slot (default_post), rather than the whole cell blob.
+            out.append({"post": _field_text(node, post_f) or default_post,
+                        "when": when, "label": _field_text(node, label_f)})
+        return out
 
     def book_appointment(self, *, session_token=None, application_id=None, **kw):
         _reject_secrets(kw)

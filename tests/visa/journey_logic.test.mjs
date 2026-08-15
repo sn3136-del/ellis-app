@@ -1103,8 +1103,46 @@ test('the employer console renders the wage caveats and the SOC confirm-required
 import {
   filingCockpitView, appointmentTriageView, appointmentPrestageView,
   groupRosterView, appointmentAvailabilityView, deepLinkView, tapsToDone,
-  GROUP_MIN_MEMBERS, HUMAN_ACT_KEYS
+  bookingView, GROUP_MIN_MEMBERS, HUMAN_ACT_KEYS
 } from '../../src/renderer/src/lib/visaBackend.js'
+
+test('bookingView: slots name their reader, booked exists only behind evidence', () => {
+  // No request yet -> an honest nonexistence, never an invented state.
+  assert.equal(bookingView({ exists: false }).exists, false)
+  assert.equal(bookingView(null).exists, false)
+
+  const offered = bookingView({
+    exists: true, id: 'b1', case_id: 'c1', route: 'us_b1b2',
+    status: 'slots_offered', posts: ['Beijing'],
+    offered_slots: [{ post: 'Beijing', when: '2026-10-12T09:30',
+                      recorded_by: 'operator-1', recorded_at: '2026-08-14T10:00:00Z' }],
+    slots_notice: 'not live inventory',
+    legal_basis: { basis: 'official FAQ', limit: 'agency, not automation' },
+    human_acts: [{ act: 'Read the calendar', who: 'a Trip.com operator' }]
+  })
+  assert.equal(offered.active, true)
+  assert.equal(offered.offeredSlots[0].recordedBy, 'operator-1')
+  assert.ok(offered.slotsNotice)
+  assert.equal(offered.isRealGovernmentResult, false)
+  assert.equal(offered.neverBooks, true)
+
+  // A hand-built payload claiming booked WITHOUT the evidence pair renders as
+  // NOT a real government result — the client repeats the server's rule.
+  const fake = bookingView({ exists: true, id: 'b2', status: 'booked',
+                             is_real_government_result: true, confirmation: {} })
+  assert.equal(fake.isRealGovernmentResult, false)
+  assert.equal(fake.confirmation, null)
+
+  // The real thing: number + evidence document.
+  const booked = bookingView({ exists: true, id: 'b3', status: 'booked',
+    is_real_government_result: true,
+    picked_slot: { post: 'Beijing', when: '2026-10-12T09:30' },
+    confirmation: { number: 'USV-42', evidence_document_id: 'doc9',
+                    recorded_by: 'operator-1' } })
+  assert.equal(booked.isRealGovernmentResult, true)
+  assert.equal(booked.confirmation.number, 'USV-42')
+  assert.equal(booked.active, false)
+})
 
 test('this wave’s client methods hit the pinned endpoint paths with the pinned bodies', async () => {
   const calls = []
@@ -1199,6 +1237,61 @@ test('this wave’s client methods hit the pinned endpoint paths with the pinned
   assert.deepEqual(JSON.parse(byPath['/h1b/cases/c1/paf/posting'].body),
     { method: 'hard_copy', locations: ['lobby', 'break room'],
       individual_direct_email: false })
+})
+
+test('the agent-channel booking client methods hit the pinned paths with the pinned bodies', async () => {
+  const calls = []
+  const realFetch = globalThis.fetch
+  globalThis.fetch = async (url, opts = {}) => {
+    calls.push({ url: String(url), method: opts.method || 'GET', body: opts.body })
+    return { ok: true, status: 200, text: async () => '{}', blob: async () => ({}) }
+  }
+  try {
+    const c = createVisaClient(newEmployerSession())
+    await c.bookingCreate('c1', { route: 'us_b1b2', posts: ['Beijing'] })
+    await c.bookingForCase('c1')
+    await c.bookingPick('r1', 2, { post: 'Beijing', when: '2026-10-12T09:30' })
+    await c.bookingCancel('r1')
+    await c.bookingQueue()
+    await c.bookingOfferSlots('r1', [{ post: 'Beijing', when: '2026-10-12' }])
+    await c.bookingEvidence('r1', { name: 'c.png', mime: 'image/png', content_b64: 'AAA' })
+    await c.bookingBooked('r1', { confirmation_number: 'X', evidence_document_id: 'd1' })
+    await c.bookingFailed('r1', 'no slots')
+    await c.bookingAgentReadSlots('r1')
+    await c.bookingAgentBook('r1')
+  } finally {
+    globalThis.fetch = realFetch
+  }
+  const seen = calls.map((x) => `${x.method} ${new URL(x.url).pathname}`)
+  assert.deepEqual(seen, [
+    'POST /appointments/booking/cases/c1',
+    'GET /appointments/booking/cases/c1',
+    'POST /appointments/booking/r1/pick',
+    'POST /appointments/booking/r1/cancel',
+    'GET /appointments/booking/queue',
+    'POST /appointments/booking/r1/offer-slots',
+    'POST /appointments/booking/r1/evidence',
+    'POST /appointments/booking/r1/booked',
+    'POST /appointments/booking/r1/failed',
+    'POST /appointments/booking/r1/agent/read-slots',
+    'POST /appointments/booking/r1/agent/book'
+  ])
+  const byPath = {}
+  for (const x of calls) byPath[`${x.method} ${new URL(x.url).pathname}`] = x
+  // Pick echoes the SEEN slot (post + when) so consent binds to it, not a
+  // position a concurrent re-offer could change under the applicant.
+  assert.deepEqual(JSON.parse(byPath['POST /appointments/booking/r1/pick'].body),
+    { index: 2, post: 'Beijing', when: '2026-10-12T09:30' })
+  // Booked carries the full evidence pair; a bare call still defaults them so
+  // the server never has to guess an undefined field.
+  assert.deepEqual(JSON.parse(byPath['POST /appointments/booking/r1/booked'].body),
+    { confirmation_number: 'X', evidence_document_id: 'd1', note: '' })
+  assert.deepEqual(JSON.parse(byPath['POST /appointments/booking/r1/failed'].body),
+    { reason: 'no slots' })
+  // The create body defaults posts/windows/note rather than sending undefined.
+  const created = JSON.parse(byPath['POST /appointments/booking/cases/c1'].body)
+  assert.deepEqual(created, { route: 'us_b1b2', posts: ['Beijing'],
+                             date_windows: [], note: '' })
 })
 
 test('filingCockpitView shows what is prepared with its source, and what is missing', () => {

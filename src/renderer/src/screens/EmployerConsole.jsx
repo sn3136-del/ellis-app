@@ -584,7 +584,9 @@ function PetitionerCockpits({ t, client, caseId }) {
       </div>
       <FilingCockpit client={client} caseId={caseId} kind="paf" routeKey="paf"
                      title={t('cockpit.paf.title')} />
-      <AppointmentCockpit client={client} caseId={caseId} />
+      {/* The employer sees appointment triage/prestage, but NOT the booking
+          request panel — booking is the worker's own personal act. */}
+      <AppointmentCockpit client={client} caseId={caseId} showBooking={false} />
     </section>
   )
 }

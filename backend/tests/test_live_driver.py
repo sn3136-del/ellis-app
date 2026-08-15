@@ -105,6 +105,137 @@ def test_fail_closed_when_adapter_not_production_approved(real_only_mode):
                                   session={"id": "x"}, require_real_key=False)
 
 
+# ---- Calendar read: deterministic, adapter-declared, read-only -------------
+
+class _FakeNode:
+    """A calendar slot element: sub-selector reads come from `parts`, and the
+    node's OWN inner_text is a realistic full-cell blob so a regression that
+    leaks the whole node into an undeclared field is caught, not hidden."""
+    def __init__(self, parts=None, text=None):
+        self.parts = parts or {}
+        # Default whole-cell text = a blob built from the parts, mimicking a
+        # real calendar cell ("2026-10-12 09:30 Beijing morning APPLY").
+        self._text = text if text is not None else \
+            " ".join(str(v) for v in self.parts.values() if v) + " APPLY"
+
+    def query_selector(self, sel):
+        v = self.parts.get(sel)
+        return _FakeNode(parts={}, text=v) if v is not None else None
+
+    def inner_text(self):
+        return self._text
+
+
+class _CalendarPage(_FakePage):
+    def __init__(self, nodes=None, **kw):
+        super().__init__(**kw)
+        self.nodes = nodes or []
+        self.queried = []
+
+    def query_selector_all(self, sel):
+        self.queried.append(sel)
+        return self.nodes
+
+
+class _CalendarAdapter(_FakeAdapter):
+    appointment_search = "automated"
+    appointment_url = "https://evisa.gov.vn/en_US/lich-hen"
+    appointment_slot_selector = ".slot.available"
+    appointment_date_field = ".date"
+    appointment_time_field = ".time"
+    appointment_label_field = ".kind"
+    appointment_post_field = ".post"
+
+
+def test_reads_open_slots_from_the_official_calendar(real_only_mode):
+    page = _CalendarPage(nodes=[
+        _FakeNode({".date": "2026-10-12", ".time": "09:30",
+                   ".kind": "morning", ".post": "Beijing"}),
+        _FakeNode({".date": "2026-10-19", ".time": "14:00"}),
+        _FakeNode({".time": ""}),          # nothing readable -> skipped
+    ])
+    d = _driver(adapter=_CalendarAdapter(), page=page)
+    out = d.search_appointments(post="Shanghai")
+    assert out["ok"] is True
+    assert out["slots"] == [
+        {"post": "Beijing", "when": "2026-10-12 09:30", "label": "morning"},
+        # No post on the node -> the applicant's preferred post labels it.
+        {"post": "Shanghai", "when": "2026-10-19 14:00", "label": ""},
+    ]
+    # It navigated the APPROVED appointment page and queried the declared
+    # slot selector — no other host, no invented selector.
+    assert page.visited == ["https://evisa.gov.vn/en_US/lich-hen"]
+    assert page.queried == [".slot.available"]
+
+
+def test_undeclared_fields_never_leak_the_whole_cell(real_only_mode):
+    # A date-only calendar (no time field) and no post field declared: the
+    # undeclared fields must read as "" (post falls back to default_post),
+    # NEVER the whole cell blob.
+    class _DateOnly(_CalendarAdapter):
+        appointment_time_field = ""
+        appointment_label_field = ""
+        appointment_post_field = ""
+    page = _CalendarPage(nodes=[_FakeNode({".date": "2026-10-12"})])
+    d = _driver(adapter=_DateOnly(), page=page)
+    out = d.search_appointments(post="Shanghai")
+    assert out["slots"] == [
+        {"post": "Shanghai", "when": "2026-10-12", "label": ""}]
+    # Explicitly: the garbled duplicate ("2026-10-12 ... APPLY") never appears.
+    assert "APPLY" not in out["slots"][0]["when"]
+    assert out["slots"][0]["post"] == "Shanghai"   # default_post won, not blob
+
+
+def test_time_only_calendar_reads_just_the_time(real_only_mode):
+    class _TimeOnly(_CalendarAdapter):
+        appointment_date_field = ""
+        appointment_post_field = ""
+        appointment_label_field = ""
+    page = _CalendarPage(nodes=[_FakeNode({".time": "09:30"})])
+    d = _driver(adapter=_TimeOnly(), page=page)
+    out = d.search_appointments(post="Beijing")
+    assert out["slots"] == [{"post": "Beijing", "when": "09:30", "label": ""}]
+
+
+def test_calendar_read_is_none_without_declared_selectors(real_only_mode):
+    class _NoSelectors(_CalendarAdapter):
+        appointment_slot_selector = ""
+    page = _CalendarPage(nodes=[_FakeNode({".date": "2026-10-12"})])
+    d = _driver(adapter=_NoSelectors(), page=page)
+    # Nothing declared -> nothing read. A calendar Ellis cannot parse yields
+    # no slots, never a guess.
+    assert d.search_appointments()["slots"] == []
+
+
+def test_calendar_read_refuses_an_off_allowlist_appointment_url(real_only_mode):
+    from app.portal.driver_factory import RealOnlyStop
+
+    class _Offsite(_CalendarAdapter):
+        appointment_url = "https://not-approved.example/cal"
+    d = _driver(adapter=_Offsite(), page=_CalendarPage())
+    with pytest.raises(RealOnlyStop):
+        d.search_appointments()
+
+
+def test_calendar_read_survives_a_broken_node(real_only_mode):
+    class _Angry(_FakeNode):
+        def query_selector(self, sel):
+            raise RuntimeError("detached node")
+    page = _CalendarPage(nodes=[_Angry(), _FakeNode({".date": "2026-11-02",
+                                                     ".time": "10:00"})])
+    d = _driver(adapter=_CalendarAdapter(), page=page)
+    # One unreadable node never loses the rest of the calendar.
+    assert d.search_appointments(post="Paris")["slots"] == [
+        {"post": "Paris", "when": "2026-11-02 10:00", "label": ""}]
+
+
+def test_evisa_route_reads_no_calendar_by_policy(real_only_mode):
+    page = _CalendarPage(nodes=[_FakeNode({".date": "2026-10-12"})])
+    d = _driver(adapter=_FakeAdapter(), page=page)   # appointment_search "none"
+    assert d.search_appointments() == {"ok": True, "slots": []}
+    assert page.queried == []
+
+
 def test_declares_live_production_class(real_only_mode):
     d = _driver()
     from app import execution

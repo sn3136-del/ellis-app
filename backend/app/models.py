@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from sqlalchemy import (String, Integer, BigInteger, Float, Boolean, ForeignKey, Text,
-                        JSON, DateTime, LargeBinary, UniqueConstraint)
+                        JSON, DateTime, LargeBinary, UniqueConstraint, Index, text)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base
@@ -256,6 +256,48 @@ class Appointment(Base, TimestampMixin):
     start_utc: Mapped[int] = mapped_column(BigInteger)  # epoch ms (needs 64-bit)
     confirmation_no: Mapped[str] = mapped_column(String(120))
     reschedule_count: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class AppointmentBookingRequest(Base, TimestampMixin):
+    """One agent-channel booking request (app/appt_booking.py) — the applicant
+    asks inside Trip.com; a named human operator works the OFFICIAL site in
+    their own session. Ellis stores what each person did and when; it never
+    touches the booking site itself (the module performs no network I/O).
+
+    Every offered slot is something a person SAW in the official calendar,
+    stamped with who and when. `booked` exists only behind evidence: a
+    confirmation number plus a confirmation document stored on this case.
+
+    At most ONE active request per case, enforced by the DB (not only the
+    check-then-insert in create_request) so two concurrent creates cannot both
+    win: a partial unique index over application_id for the active statuses."""
+    __tablename__ = "appointment_booking_requests"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    org_id: Mapped[str] = mapped_column(String(64), index=True)
+    application_id: Mapped[str] = mapped_column(ForeignKey("visa_applications.id"), index=True)
+    route: Mapped[str] = mapped_column(String(20))            # us_b1b2 | schengen
+    # requested | slots_offered | slot_picked | booked | failed | cancelled
+    status: Mapped[str] = mapped_column(String(20), default="requested", index=True)
+    posts: Mapped[list] = mapped_column(JSON, default=list)   # preferred posts/cities
+    date_windows: Mapped[list] = mapped_column(JSON, default=list)  # [{from,to}]
+    note: Mapped[str] = mapped_column(String(500), default="")
+    requested_by: Mapped[str] = mapped_column(String(64), default="")
+    # [{post, when, label, recorded_by, recorded_at}] — a person's own reading
+    # of the official calendar, never a scrape.
+    offered_slots: Mapped[list] = mapped_column(JSON, default=list)
+    picked_slot: Mapped[dict] = mapped_column(JSON, default=dict)
+    picked_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    # {number, evidence_document_id, note, recorded_by, recorded_at}
+    confirmation: Mapped[dict] = mapped_column(JSON, default=dict)
+    failure_reason: Mapped[str] = mapped_column(String(500), default="")
+    # One active request per case, at the DB level (SQLite + Postgres partial
+    # unique index). A terminal request drops out of the index, freeing the
+    # case for a fresh one.
+    __table_args__ = (
+        Index("uq_active_booking_per_case", "application_id", unique=True,
+              sqlite_where=text("status IN ('requested','slots_offered','slot_picked')"),
+              postgresql_where=text("status IN ('requested','slots_offered','slot_picked')")),
+    )
 
 
 class PaymentAttempt(Base, TimestampMixin):

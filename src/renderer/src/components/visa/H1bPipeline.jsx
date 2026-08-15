@@ -360,8 +360,14 @@ function StepCard({ t, client, caseId, step, byKey, viewerParty, isAdmin,
             sessionCaseId={step.child_case_id || ''} />
         )}
         {cockpitOpen && step.step_key === 'ds160_consular' && (
+          // Booking belongs to the released CHILD consular case, never the
+          // parent petition, AND it is the BENEFICIARY's own personal act —
+          // the petitioner (employer) sees triage/prestage but never the
+          // request/pick/cancel controls. Seats cannot cross.
           <AppointmentCockpit client={client} caseId={step.child_case_id || caseId}
-                              showGroupRoster={false} />
+                              showGroupRoster={false}
+                              showBooking={!!step.child_case_id &&
+                                           viewerParty === 'beneficiary'} />
         )}
       </div>
     </div>
