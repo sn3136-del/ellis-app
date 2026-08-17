@@ -841,9 +841,7 @@ export default function AppointmentsDemo({ onBack }) {
             {[...(travellerName ? [['Applicant', travellerName]] : []),
               ['When', `${prettyDate(picked.date)} at ${picked.time}`],
               ['Where', centre.name],
-              ['Address', centre.address],
-              ['Booked by', 'Ellis, in the operator’s official session'],
-              ['Evidence', 'Official confirmation page saved to your case']
+              ['Address', centre.address]
             ].map(([k, v]) => (
               <div key={k} style={{ display: 'flex', gap: 14, fontSize: 13.5 }}>
                 <span style={{ width: 92, flexShrink: 0, color: GRAY }}>{k}</span>
