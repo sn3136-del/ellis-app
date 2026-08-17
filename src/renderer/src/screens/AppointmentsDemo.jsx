@@ -328,7 +328,17 @@ export default function AppointmentsDemo({ onBack }) {
   // a field the read did not yield simply is not here.
   const passportRows = useMemo(
     () => (passport ? profileRows(passport.profile) : []), [passport])
-  const travellerName = (passport && (passport.prefill || {}).full_name) || ''
+  // Per-field corrections: the read is Ellis's, the FACTS are the
+  // applicant's — every tile carries a pen.
+  const [fieldEdits, setFieldEdits] = useState({})
+  const [editingKey, setEditingKey] = useState(null)
+  function commitFieldEdit(key, value) {
+    const v = String(value ?? '').trim()
+    setFieldEdits((p) => (v ? { ...p, [key]: v } : p))
+    setEditingKey(null)
+  }
+  const travellerName = fieldEdits.full_name
+    || ((passport && (passport.prefill || {}).full_name) || '')
 
   // Nearest three by real distance when the city is known — the great-circle
   // MATH is the authority and Kimi's sentence only annotates it. Only for an
@@ -469,11 +479,6 @@ export default function AppointmentsDemo({ onBack }) {
       {/* Pre-upload the card is ONE thing, centred and big: the Trip.com
           passport itself is the button. No copy — the picture is the ask. */}
       <Card className="anim-rise" style={{ marginTop: 22 }} data-testid="appt-passport">
-        {passport && passport.mrz_valid && (
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Chip tone="ok">MRZ verified ✓</Chip>
-          </div>
-        )}
         {!passport && !ocrBusy && (
           <div style={{ display: 'flex', flexDirection: 'column',
                         alignItems: 'center', padding: '30px 0 22px' }}>
@@ -509,40 +514,55 @@ export default function AppointmentsDemo({ onBack }) {
                data-testid="appt-passport-error">{ocrError}</div>
         )}
         {passport && (
-          <div style={{ marginTop: 12 }} data-testid="appt-passport-read">
+          <div style={{ marginTop: 4 }} data-testid="appt-passport-read">
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
+              <button className="btn btn--sm btn--ghost" disabled={ocrBusy}
+                      onClick={() => fileRef.current && fileRef.current.click()}>
+                Re-upload
+              </button>
+            </div>
             <div style={{ display: 'grid', gap: 8,
                           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
               {passportRows.map((r) => (
                 <div key={r.key} style={{ padding: '10px 14px', borderRadius: 12,
-                                          background: '#f5f9ff',
+                                          background: '#f5f9ff', position: 'relative',
                                           border: '1px solid #dbe7fb' }}>
                   <div style={{ fontSize: 11, color: GRAY, textTransform: 'uppercase',
                                 letterSpacing: 0.5 }}>
                     {PPF_LABELS[r.labelKey] || r.key.replace(/^_/, '').replace(/_/g, ' ')}
                   </div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: NAVY, marginTop: 2 }}>
-                    {r.display}
-                  </div>
-                  {/* Where the value came from, on every field: the machine-
-                      readable zone, the printed page, or derived. */}
-                  <div style={{ fontSize: 10.5, color: GRAY, marginTop: 3 }}>
-                    {r.source === 'mrz' ? 'MRZ' : r.source === 'derived' ? 'derived' : 'OCR'}
-                    {typeof r.confidence === 'number' && r.confidence > 0
-                      ? ` · ${Math.round(r.confidence * 100)}%` : ''}
-                  </div>
+                  {editingKey === r.key ? (
+                    <input className="input" autoFocus
+                           defaultValue={fieldEdits[r.key] ?? r.display}
+                           data-testid={`ppf-edit-${r.key}`}
+                           style={{ marginTop: 4, fontSize: 14, fontWeight: 700,
+                                    padding: '4px 8px' }}
+                           onBlur={(e) => commitFieldEdit(r.key, e.target.value)}
+                           onKeyDown={(e) => {
+                             if (e.key === 'Enter') commitFieldEdit(r.key, e.target.value)
+                             if (e.key === 'Escape') setEditingKey(null)
+                           }} />
+                  ) : (
+                    <div style={{ fontSize: 14, fontWeight: 700, color: NAVY, marginTop: 2,
+                                  paddingRight: 22 }}>
+                      {fieldEdits[r.key] ?? r.display}
+                    </div>
+                  )}
+                  {/* The pen: every read value stays the applicant's to correct. */}
+                  <button onClick={() => setEditingKey(r.key)} aria-label={`Edit ${r.key}`}
+                          data-testid={`ppf-pen-${r.key}`}
+                          style={{ position: 'absolute', right: 8, bottom: 8,
+                                   border: 'none', background: 'transparent',
+                                   cursor: 'pointer', color: '#8592a6', padding: 2 }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                         strokeLinejoin="round" aria-hidden="true">
+                      <path d="M12 20h9" />
+                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                    </svg>
+                  </button>
                 </div>
               ))}
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between',
-                          alignItems: 'center', gap: 10, marginTop: 10, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 11.5, color: GRAY }}>
-                Read from your photo by Ellis OCR — check every value before the
-                interview.
-              </span>
-              <button className="btn btn--sm btn--ghost" disabled={ocrBusy}
-                      onClick={() => fileRef.current && fileRef.current.click()}>
-                Re-upload
-              </button>
             </div>
             <input ref={fileRef} type="file" accept="image/*,.pdf"
                    style={{ display: 'none' }} onChange={onPassportFile} />
