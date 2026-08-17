@@ -34,6 +34,33 @@ def _petitioner_case(db, case_id: str, principal: Principal):
     return parent
 
 
+def _beneficiary_case(db, case_id: str, principal: Principal):
+    """The WORKER's seat: same tenancy check, beneficiary-party (or admin)
+    authorization. The petitioner is refused — the bundle is the worker's."""
+    parent = db.get(models.VisaApplication, case_id)
+    if parent is None or parent.visa_type != "h1b":
+        raise HTTPException(404, "h1b case not found")
+    require_owner(principal, parent.org_id)
+    _authorize_step_action(db, case_id, principal, "beneficiary")
+    return parent
+
+
+@router.post("/cases/{case_id}/beneficiary/packet")
+def build_beneficiary_packet(case_id: str, locale: str = "en",
+                             principal: Principal = Depends(get_principal),
+                             db=Depends(get_session)):
+    """The worker's own bundle: their part's facts + their uploaded documents
+    merged into one PDF, with a cover that says plainly this is NOT the
+    petition (the employer files that). Beneficiary-authorized."""
+    parent = _beneficiary_case(db, case_id, principal)
+    result = h1b_forms.build_beneficiary_packet(db, parent,
+                                                actor=principal.user_id)
+    db.commit()
+    return {**result,
+            "attorney_disclaimer": disclaimer(locale),
+            "disclaimer_version": DISCLAIMER_VERSION}
+
+
 @router.post("/cases/{case_id}/forms/{form_key}/prepare")
 def prepare_official_form(case_id: str, form_key: str, locale: str = "en",
                           principal: Principal = Depends(get_principal),

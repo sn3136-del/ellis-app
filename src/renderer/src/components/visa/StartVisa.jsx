@@ -108,6 +108,30 @@ export default function StartVisa({ client, onOpenCase }) {
   const [info, setInfo] = useState(null)
   const [reg, setReg] = useState(null)
   const [draft, setDraft] = useState(null)      // newest resumable draft intake
+  // Worker lane: join the case the employer opened, by its case ID. The claim
+  // binds this account to the beneficiary seat (idempotent server-side).
+  const [joinId, setJoinId] = useState('')
+  const [joinBusy, setJoinBusy] = useState(false)
+  const [joinErr, setJoinErr] = useState(null)
+
+  async function joinWorkerCase() {
+    const id = joinId.trim()
+    if (!id) return
+    setJoinBusy(true); setJoinErr(null)
+    try {
+      await client.h1bClaimParty(id, 'beneficiary')
+      const entry = { id, visa_type: 'h1b', full_name: '' }
+      try {
+        const list = JSON.parse(localStorage.getItem('ellis.visa.cases') || '[]')
+        if (!list.some((c) => c.id === id)) list.unshift(entry)
+        localStorage.setItem('ellis.visa.cases', JSON.stringify(list))
+      } catch { /* the open below still works; only the saved list is lost */ }
+      onOpenCase && onOpenCase(entry)
+    } catch (e) {
+      setJoinErr({ message: (e.detail && e.detail.reason) || e.message })
+    }
+    setJoinBusy(false)
+  }
   const [converted, setConverted] = useState(null) // newest converted intake -> its case
   const [resolvedIntake, setResolvedIntake] = useState(null) // newest resolved-not-continued intake
 
@@ -445,6 +469,29 @@ export default function StartVisa({ client, onOpenCase }) {
           {t('start.worker.sub')}
         </p>
         <div className="anim-rise-3" style={{ width: '100%', maxWidth: 520, margin: '0 auto' }}>
+          {/* Join by case ID: the employer opens the case and shares its ID;
+              the claim binds this device to the BENEFICIARY seat and the case
+              opens with the worker's own view (documents, their part, their
+              bundle). */}
+          <div className="card" style={{ padding: '16px 18px', marginBottom: 14 }}
+               data-testid="worker-join">
+            <div style={{ fontSize: 12.5, fontWeight: 700,
+                          color: 'var(--trip-navy, #0f294d)' }}>
+              {t('start.worker.joinTitle')}
+            </div>
+            <div style={{ display: 'flex', gap: 10, marginTop: 8, flexWrap: 'wrap' }}>
+              <input className="input" style={{ flex: '1 1 240px' }} value={joinId}
+                     placeholder={t('start.worker.joinPlaceholder')}
+                     data-testid="worker-join-id"
+                     onChange={(e) => setJoinId(e.target.value)}
+                     onKeyDown={(e) => { if (e.key === 'Enter') joinWorkerCase() }} />
+              <button className="trip-cta trip-cta--sm" disabled={joinBusy || !joinId.trim()}
+                      onClick={joinWorkerCase} data-testid="worker-join-go">
+                {joinBusy ? t('cockpit.loading') : t('start.worker.joinCta')}
+              </button>
+            </div>
+            {joinErr && <ErrorNote error={joinErr} />}
+          </div>
           {workerCases.length === 0
             ? <div className="worker-empty">
                 {/* The case arrives from the employer — an envelope, not a

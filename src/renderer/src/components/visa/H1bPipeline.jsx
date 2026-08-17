@@ -9,9 +9,9 @@
 // backend reason, and the admin-only offline-evidence picker mirrors the
 // server's administrator gate — UI hiding is a courtesy; the server is the
 // wall.
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocale } from '../../lib/locale.jsx'
-import { HUMAN_ACT_KEYS } from '../../lib/visaBackend.js'
+import { BASE, HUMAN_ACT_KEYS } from '../../lib/visaBackend.js'
 import { Loading, ErrorNote, Empty } from '../ui.jsx'
 import {
   detectPersona, partyForPersona, h1bStepMeta, h1bWhoActs, setActiveH1bCase
@@ -20,7 +20,8 @@ import FilingCockpit from './FilingCockpit.jsx'
 import AppointmentCockpit from './AppointmentCockpit.jsx'
 import {
   DocumentsIllustration, FormFillIllustration, AppointmentIllustration,
-  PipelineIllustration, EnvelopeIllustration, ShieldIllustration
+  PipelineIllustration, EnvelopeIllustration, PassportIllustration,
+  ShieldIllustration
 } from './Illustrations.jsx'
 
 // Filing-step order and the government form each one prepares.
@@ -784,6 +785,135 @@ const TOOLS = [
 ]
 
 // ---- The walkthrough surface ----------------------------------------------
+// ---- The worker's desk -----------------------------------------------------
+// Upload a document -> the REAL OCR reads it -> the extracted identity is
+// written to the BENEFICIARY party's own answers (never the petitioner's) ->
+// the bundle button hands back one PDF of their part + their documents.
+const _OCR_TO_BENEFICIARY = {
+  surname: 'surname', given_names: 'given_names', full_name: 'full_name',
+  birth_date: 'birth_date', sex: 'sex', nationality: 'citizenship_country',
+  issuing_country: 'issuing_country', passport_number: 'passport_number',
+  expiry_date: 'passport_expiry', issue_date: 'passport_issue_date'
+}
+
+function BeneficiaryDesk({ t, lang, client, caseId, onChanged }) {
+  const [busy, setBusy] = useState('')
+  const [error, setError] = useState(null)
+  const [filledKeys, setFilledKeys] = useState(null)   // last upload's yield
+  const [bundle, setBundle] = useState(null)
+  const fileRef = useRef(null)
+
+  async function onFile(e) {
+    const f = e.target.files && e.target.files[0]
+    if (!f) return
+    setBusy('upload'); setError(null); setFilledKeys(null)
+    try {
+      const b64 = await new Promise((resolve, reject) => {
+        const r = new FileReader()
+        r.onload = () => resolve(String(r.result || '').split(',')[1] || '')
+        r.onerror = reject
+        r.readAsDataURL(f)
+      })
+      const res = await client.addDocument(caseId, {
+        name: f.name, mime: f.type || 'image/jpeg', size_bytes: f.size,
+        content_b64: b64 })
+      const extracted = (res && res.extracted_fields) || {}
+      const answers = {}
+      for (const [ocrKey, benKey] of Object.entries(_OCR_TO_BENEFICIARY)) {
+        const v = extracted[ocrKey]
+        if (v != null && String(v).trim() !== '') answers[benKey] = String(v)
+      }
+      if (Object.keys(answers).length > 0) {
+        await client.h1bPartyAnswers(caseId, 'beneficiary', answers)
+        setFilledKeys(Object.keys(answers))
+        onChanged && onChanged()
+      } else {
+        // An upload that yields no identity fields is still stored — say so
+        // honestly rather than implying the form advanced.
+        setFilledKeys([])
+      }
+    } catch (err) {
+      setError({ message: (err.detail && err.detail.reason) || err.message })
+    }
+    setBusy('')
+    if (fileRef.current) fileRef.current.value = ''
+  }
+
+  async function buildBundle() {
+    setBusy('bundle'); setError(null)
+    try {
+      setBundle(await client.h1bBeneficiaryPacket(caseId, lang))
+    } catch (err) {
+      setError({ message: (err.detail && err.detail.reason) || err.message })
+    }
+    setBusy('')
+  }
+
+  return (
+    <div className="card anim-rise-1" style={{ padding: '18px 22px', marginBottom: 14 }}
+         data-testid="beneficiary-desk">
+      <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+        <PassportIllustration size={54} />
+        <div style={{ flex: 1, minWidth: 220 }}>
+          <div style={{ fontWeight: 800, fontSize: 15,
+                        color: 'var(--trip-navy, #0f294d)' }}>
+            {t('h1b.bene.title')}
+          </div>
+          <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 3 }}>
+            {t('h1b.bene.sub')}
+          </div>
+        </div>
+        <input ref={fileRef} type="file" accept="image/*,.pdf"
+               style={{ display: 'none' }} onChange={onFile}
+               data-testid="bene-upload-file" />
+        <button className="btn btn--sm" disabled={!!busy}
+                onClick={() => fileRef.current && fileRef.current.click()}
+                data-testid="bene-upload">
+          {busy === 'upload' ? t('h1b.bene.uploading') : t('h1b.bene.upload')}
+        </button>
+        <button className="btn btn--sm btn--ghost" disabled={!!busy}
+                onClick={buildBundle} data-testid="bene-bundle">
+          {busy === 'bundle' ? t('cockpit.loading') : t('h1b.bene.bundle')}
+        </button>
+      </div>
+      {error && <ErrorNote error={error} />}
+      {filledKeys && filledKeys.length > 0 && (
+        <div style={{ marginTop: 12 }} data-testid="bene-filled">
+          <span className="chip-icon chip-icon--ok" style={{ whiteSpace: 'normal' }}>
+            {t('h1b.bene.filled', { n: filledKeys.length })}
+          </span>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
+            {filledKeys.map((k) => (
+              <span key={k} className="chip">{k.replace(/_/g, ' ')}</span>
+            ))}
+          </div>
+        </div>
+      )}
+      {filledKeys && filledKeys.length === 0 && (
+        <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 10 }}>
+          {t('h1b.bene.nothing')}
+        </div>
+      )}
+      {bundle && bundle.download_url && (
+        <div style={{ marginTop: 12 }} data-testid="bene-bundle-ready">
+          <a className="btn btn--sm" href={`${BASE}${bundle.download_url}`}
+             target="_blank" rel="noreferrer">
+            {t('h1b.bene.bundleReady')}
+          </a>
+          {Array.isArray(bundle.missing) && bundle.missing.length > 0 && (
+            <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 8 }}>
+              {t('h1b.bene.bundleMissing', { n: bundle.missing.length })}
+            </div>
+          )}
+          <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 6 }}>
+            {t('h1b.bene.bundleNote')}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function H1bPipeline({ client, caseId, persona, onOpenCase }) {
   const { t, lang } = useLocale()
   const viewerPersona = persona || detectPersona()
@@ -873,6 +1003,14 @@ export default function H1bPipeline({ client, caseId, persona, onOpenCase }) {
           {disclaimer}
         </div>
       </details>
+
+      {/* The WORKER's own desk: upload documents that fill their part, and
+          download their bundle. Petitioners have their console; this is the
+          beneficiary's. */}
+      {viewerParty === 'beneficiary' && (
+        <BeneficiaryDesk t={t} lang={lang} client={client} caseId={caseId}
+                         onChanged={refresh} />
+      )}
 
       {steps.length === 0
         ? <Empty title={t('h1b.pipeline.title')} sub={t('h1b.status.unknown')} />

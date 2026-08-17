@@ -5,7 +5,7 @@
 // docker-compose). Auth: Clerk session token in production; the dev token +
 // org/user headers locally. Every method returns parsed JSON or throws.
 
-const BASE = (typeof process !== 'undefined' && process.env?.ELLIS_BACKEND_URL) || 'http://localhost:8000'
+export const BASE = (typeof process !== 'undefined' && process.env?.ELLIS_BACKEND_URL) || 'http://localhost:8000'
 
 function authHeaders(session) {
   // session = { token, orgId, userId }. In production `token` is the Clerk JWT
@@ -447,6 +447,10 @@ export function createVisaClient(session) {
     // party (or an admin) may write, and attestation keys are rejected.
     h1bPartyAnswers: (caseId, role, answers) =>
       call('POST', `/h1b/cases/${caseId}/party/${encodeURIComponent(role)}/answers`, session, { answers }),
+    // The WORKER's own bundle: their facts + their uploads, one PDF, with a
+    // cover stating it is not the petition. Beneficiary-authorized.
+    h1bBeneficiaryPacket: (caseId, locale = 'en') =>
+      call('POST', `/h1b/cases/${caseId}/beneficiary/packet?locale=${encodeURIComponent(locale)}`, session, {}),
 
     // Deterministic OEWS/OFLC prevailing-wage LEVEL analysis over the case's
     // saved petitioner facts (SOC code + worksite + offered wage). A pure

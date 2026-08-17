@@ -448,16 +448,18 @@ def answers_for_form(db, parent: models.VisaApplication, form_key: str) -> dict:
 # ---------------------------------------------------------------------------
 
 def store_prepared_pdf(db, parent: models.VisaApplication, *, name: str,
-                       pdf: bytes, detail: dict) -> models.StoredDocument:
+                       pdf: bytes, detail: dict,
+                       party: str = "petitioner") -> models.StoredDocument:
     sha = hashlib.sha256(pdf).hexdigest()
     doc = models.StoredDocument(
         org_id=parent.org_id, application_id=parent.id, name=name,
         mime="application/pdf", size_bytes=len(pdf), sha256=sha,
         storage_ref=f"local://{sha[:16]}", doc_type=PREPARED_DOC_TYPE,
         ocr_status="done", execution_class="LOCAL_PROVIDER",
-        # stored_documents has no party column in this build; the petitioner
-        # scoping is recorded with the artifact itself.
-        extracted_fields={"party": "petitioner", **(detail or {})})
+        # stored_documents has no party column in this build; the owning
+        # party is recorded with the artifact itself (petitioner for the
+        # petition forms, beneficiary for the worker's own bundle).
+        extracted_fields={"party": party, **(detail or {})})
     db.add(doc)
     db.flush()
     db.add(models.DocumentBlob(document_id=doc.id, org_id=parent.org_id,
@@ -642,3 +644,148 @@ def build_paper_packet(db, parent: models.VisaApplication, *,
 def _disclaimer_en() -> str:
     from .disclaimer import ATTORNEY_DISCLAIMER
     return ATTORNEY_DISCLAIMER["en"]
+
+
+# The beneficiary facts the worker's own part of the petition needs. Used by
+# the bundle to say honestly what is on file and what is still missing.
+BENEFICIARY_CORE_FIELDS = (
+    ("surname", "Surname (as in passport)"),
+    ("given_names", "Given names (as in passport)"),
+    ("birth_date", "Date of birth"),
+    ("citizenship_country", "Country of citizenship"),
+    ("passport_number", "Passport number"),
+    ("passport_expiry", "Passport expiry date"),
+    ("passport_issue_date", "Passport issue date"),
+    ("issuing_country", "Passport issuing country"),
+    ("sex", "Sex"),
+)
+
+
+def _image_to_pdf(content: bytes) -> bytes | None:
+    """One uploaded image as a single-page PDF, or None when undecodable —
+    an unreadable file is SKIPPED from the merge and listed as such, never a
+    crash and never silently dropped."""
+    try:
+        from io import BytesIO as _B
+
+        from PIL import Image
+        img = Image.open(_B(content))
+        if img.mode not in ("RGB", "L"):
+            img = img.convert("RGB")
+        out = _B()
+        img.save(out, "PDF")
+        return out.getvalue()
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def build_beneficiary_packet(db, parent: models.VisaApplication, *,
+                             actor: str = "") -> dict:
+    """The WORKER's own bundle: a cover sheet saying exactly what this is and
+    is not, the status of their part's facts, and every document THEY put on
+    the case, merged into one PDF.
+
+    Party wall: petitioner-tagged prepared artifacts (the I-129, LCA, paper
+    packet — employer statements with FEIN/wage) are excluded by tag. What
+    remains is the worker's own material.
+
+    Honesty: the cover states that the PETITION is the employer's to file —
+    this bundle is the worker's records for their part and their interview,
+    never a submission and never the thing mailed to USCIS."""
+    from pypdf import PdfReader, PdfWriter
+
+    names = _party_names(db, parent)
+    # Beneficiary facts live on the PARENT case (write_party_answers routes
+    # them there, where the intake/passport machinery reads them); any older
+    # facts on the CaseParty row still count.
+    party = db.execute(select(h1b_models.CaseParty).where(
+        h1b_models.CaseParty.application_id == parent.id,
+        h1b_models.CaseParty.role == "beneficiary")).scalars().first()
+    answers = {**dict(getattr(party, "answers", None) or {}),
+               **dict(parent.answers or {})}
+    filled = [(label, str(answers[key])) for key, label in
+              BENEFICIARY_CORE_FIELDS if answers.get(key)]
+    missing = [label for key, label in BENEFICIARY_CORE_FIELDS
+               if not answers.get(key)]
+
+    docs = db.execute(select(models.StoredDocument).where(
+        models.StoredDocument.application_id == parent.id)
+        .order_by(models.StoredDocument.created_at.asc())).scalars().all()
+    own_docs, skipped = [], []
+    for d in docs:
+        tags = d.extracted_fields or {}
+        if d.doc_type == PREPARED_DOC_TYPE and tags.get("party") != "beneficiary":
+            continue                       # the employer's petition artifacts
+        if d.translation_of:
+            continue                       # derived translations ride behind originals
+        own_docs.append(d)
+
+    today = _dt.date.today().isoformat()
+    cover = ["H-1B BENEFICIARY BUNDLE - YOUR DOCUMENTS AND YOUR PART", ""]
+    cover.append(f"Case: {parent.id}   Generated: {today}")
+    cover.append(f"Worker: {names.get('beneficiary', '')}")
+    cover.append(f"Employer (petitioner): {names.get('petitioner', '')}")
+    cover.append("")
+    cover += consular_forms._wrap(
+        "WHAT THIS IS: your own records for your part of the H-1B - the facts "
+        "you provided and the documents you uploaded, in one file. Keep it for "
+        "your records and bring it to your visa interview.", 92)
+    cover.append("")
+    cover += consular_forms._wrap(
+        "WHAT THIS IS NOT: the petition. The I-129 petition is prepared and "
+        "filed by your EMPLOYER (online or mailed by them to the USCIS "
+        "lockbox). Nothing in this bundle has been submitted to any "
+        "government.", 92)
+    cover.append("")
+    cover.append("YOUR PART - ON FILE:")
+    cover += [f"  [x] {label}: {value}" for label, value in filled] or \
+             ["  (nothing on file yet - upload your passport to fill this)"]
+    if missing:
+        cover.append("")
+        cover.append("YOUR PART - STILL NEEDED:")
+        cover += [f"  [ ] {label}" for label in missing]
+    cover.append("")
+    cover.append("DOCUMENTS IN THIS BUNDLE:")
+    cover += [f"  {i}. {d.name}  ({d.doc_type or 'document'})"
+              for i, d in enumerate(own_docs, start=1)] or ["  (none yet)"]
+    cover.append("")
+    cover += consular_forms._wrap("DISCLAIMER: " + _disclaimer_en(), 92)
+    cover_pdf = pdfgen.text_pdf(cover, title="H-1B Beneficiary Bundle")
+
+    writer = PdfWriter()
+    writer.append(PdfReader(BytesIO(cover_pdf)))
+    for d in own_docs:
+        blob = db.get(models.DocumentBlob, d.id)
+        if blob is None:
+            skipped.append(d.name)
+            continue
+        if d.mime == "application/pdf":
+            try:
+                writer.append(PdfReader(BytesIO(blob.content)))
+            except Exception:  # noqa: BLE001 - a corrupt pdf is listed, not fatal
+                skipped.append(d.name)
+        else:
+            page = _image_to_pdf(blob.content)
+            if page is not None:
+                writer.append(PdfReader(BytesIO(page)))
+            else:
+                skipped.append(d.name)
+    buf = BytesIO()
+    writer.write(buf)
+    packet = buf.getvalue()
+
+    doc = store_prepared_pdf(
+        db, parent, name="h1b-beneficiary-bundle.pdf", pdf=packet,
+        detail={"kind": "beneficiary_bundle", "documents": len(own_docs),
+                "skipped": skipped},
+        party="beneficiary")
+    audit.record(db, org_id=parent.org_id, application_id=parent.id,
+                 action="h1b_beneficiary_bundle_built",
+                 detail={"document_id": doc.id, "documents": len(own_docs),
+                         "missing_count": len(missing)}, actor=actor)
+    return {"document_id": doc.id,
+            "filled": [{"label": label, "value": value} for label, value in filled],
+            "missing": missing,
+            "documents": [d.name for d in own_docs],
+            "skipped": skipped,
+            **mint_download_url(doc.id)}

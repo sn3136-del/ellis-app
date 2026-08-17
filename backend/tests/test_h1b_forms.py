@@ -451,3 +451,49 @@ def test_paper_packet_zh_notices_localized(client, db):
     assert "uscis.gov/i-129-addresses" in out["verify_address_notice"]
     assert "親筆簽名" in out["wet_ink_warnings"][0]
     assert out["attorney_disclaimer"] == disclaimer("zh-Hant")
+
+
+def test_beneficiary_bundle_is_the_workers_own_and_walled(client, db):
+    """The worker's bundle: beneficiary-authorized, includes their uploads,
+    EXCLUDES the employer's prepared petition artifacts, and its cover states
+    it is not the petition."""
+    import base64
+    out = _create_case(client, employer_profile_id=_employer_profile(client))
+    case_id = out["case_id"]
+    _bind_petitioner(db, case_id)
+    # Bind the worker to the beneficiary seat.
+    ben = db.execute(select(h1b_models.CaseParty).where(
+        h1b_models.CaseParty.application_id == case_id,
+        h1b_models.CaseParty.role == "beneficiary")).scalars().first()
+    ben.user_id = "worker-1"
+    db.commit()
+    WORKER = {"Authorization": "Bearer dev-token", "X-Org-Id": "org1",
+              "X-User-Id": "worker-1"}
+    # The worker's own facts + a document they uploaded.
+    r = client.post(f"/h1b/cases/{case_id}/party/beneficiary/answers",
+                    json={"answers": BENEFICIARY_ANSWERS}, headers=WORKER)
+    assert r.status_code == 200, r.text
+    png = base64.b64encode(b"\x89PNG\r\n\x1a\nWORKER-PASSPORT-SCAN").decode()
+    client.post(f"/cases/{case_id}/documents", headers=WORKER,
+                json={"name": "passport.png", "mime": "image/png",
+                      "size_bytes": 64, "content_b64": png})
+    # The employer prepares the I-129 (a petitioner-tagged artifact).
+    r = client.post(f"/h1b/cases/{case_id}/forms/i-129/prepare",
+                    headers=PETITIONER_AUTH)
+    assert r.status_code == 200, r.text
+    # The PETITIONER may not build the worker's bundle...
+    assert client.post(f"/h1b/cases/{case_id}/beneficiary/packet",
+                       headers=PETITIONER_AUTH).status_code == 403
+    # ...the worker may.
+    r = client.post(f"/h1b/cases/{case_id}/beneficiary/packet", headers=WORKER)
+    assert r.status_code == 200, r.text
+    bundle = r.json()
+    assert bundle["download_url"]
+    assert "passport.png" in bundle["documents"]
+    # Party wall: the employer's prepared I-129 is NOT in the worker's bundle.
+    assert not any("i-129" in d for d in bundle["documents"])
+    # The worker's facts show as filled; the bundle downloads as a real PDF.
+    assert any(f["label"].startswith("Surname") for f in bundle["filled"])
+    pdf = client.get(bundle["download_url"])
+    assert pdf.status_code == 200
+    assert pdf.content[:5] == b"%PDF-"
