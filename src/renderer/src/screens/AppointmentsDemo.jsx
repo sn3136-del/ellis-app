@@ -225,11 +225,40 @@ export default function AppointmentsDemo({ onBack }) {
   const [passport, setPassport] = useState(null)   // upload response (accepted)
   const fileRef = useRef(null)
 
+  // Normalize ANY selected image to a JPEG the backend accepts: phone photos
+  // routinely exceed the 10MB cap and iPhones default to HEIC, which the
+  // server's allowlist refuses. Re-encoding through a canvas fixes both (when
+  // the browser can decode the file at all) with no visible quality loss for
+  // OCR. PDFs and already-small JPEG/PNGs pass through untouched.
+  async function normalizeForUpload(f) {
+    const passthrough = ['application/pdf', 'image/jpeg', 'image/png', 'image/tiff']
+    if (f.type === 'application/pdf') return f
+    const needsWork = !passthrough.includes(f.type) || f.size > 8 * 1024 * 1024
+    if (!needsWork) return f
+    const bitmap = await createImageBitmap(f).catch(() => null)
+    if (!bitmap) return f          // undecodable here -> let the server answer
+    const maxSide = 2400
+    const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height))
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.round(bitmap.width * scale)
+    canvas.height = Math.round(bitmap.height * scale)
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+    const blob = await new Promise((res) => canvas.toBlob(res, 'image/jpeg', 0.92))
+    if (!blob) return f
+    return new File([blob], f.name.replace(/\.[^.]+$/, '') + '.jpg',
+                    { type: 'image/jpeg' })
+  }
+
   async function onPassportFile(e) {
-    const f = e.target.files && e.target.files[0]
-    if (!f) return
+    const raw = e.target.files && e.target.files[0]
+    if (!raw) return
     setOcrBusy(true); setOcrError('')
     try {
+      const f = await normalizeForUpload(raw)
+      if (f.size > 10 * 1024 * 1024) {
+        throw new Error('That photo is too large even after compression — '
+          + 'try a smaller one.')
+      }
       if (!clientRef.current) {
         clientRef.current = createVisaClient(newSession({ orgId: 'ellis-demo' }))
       }
@@ -261,8 +290,11 @@ export default function AppointmentsDemo({ onBack }) {
     if (fileRef.current) fileRef.current.value = ''
   }
 
+  // EVERYTHING the OCR extracted — every field, with its provenance (MRZ /
+  // OCR / derived) and confidence. Nothing is trimmed and nothing invented:
+  // a field the read did not yield simply is not here.
   const passportRows = useMemo(
-    () => (passport ? profileRows(passport.profile).slice(0, 6) : []), [passport])
+    () => (passport ? profileRows(passport.profile) : []), [passport])
   const travellerName = (passport && (passport.prefill || {}).full_name) || ''
 
   const centres = useMemo(
@@ -391,10 +423,17 @@ export default function AppointmentsDemo({ onBack }) {
                                           border: '1px solid #dbe7fb' }}>
                   <div style={{ fontSize: 11, color: GRAY, textTransform: 'uppercase',
                                 letterSpacing: 0.5 }}>
-                    {PPF_LABELS[r.labelKey] || r.key.replace(/_/g, ' ')}
+                    {PPF_LABELS[r.labelKey] || r.key.replace(/^_/, '').replace(/_/g, ' ')}
                   </div>
                   <div style={{ fontSize: 14, fontWeight: 700, color: NAVY, marginTop: 2 }}>
                     {r.display}
+                  </div>
+                  {/* Where the value came from, on every field: the machine-
+                      readable zone, the printed page, or derived. */}
+                  <div style={{ fontSize: 10.5, color: GRAY, marginTop: 3 }}>
+                    {r.source === 'mrz' ? 'MRZ' : r.source === 'derived' ? 'derived' : 'OCR'}
+                    {typeof r.confidence === 'number' && r.confidence > 0
+                      ? ` · ${Math.round(r.confidence * 100)}%` : ''}
                   </div>
                 </div>
               ))}

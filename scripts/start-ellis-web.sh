@@ -48,11 +48,23 @@ if [ -f "$ENV_FILE" ]; then
 else
   log "backend/.env not found — providers unconfigured; real actions fail closed (honest)"
 fi
-# Demo portability (2026-08-04): the Google credential ships in the repo so
-# the Trip.com laptop needs no cloud setup — point at it wherever the repo
-# lives (the .env's absolute path only exists on the authoring machine).
-if [ -f "$ROOT/backend/google_adc.json" ]; then
+# Demo portability (2026-08-04): a Google credential may ship in the repo so a
+# demo laptop needs no cloud setup. But it must NEVER override a working path
+# from .env — the repo copy was revoked in the 2026-08-09 rotation, and
+# overriding silently sent every OCR call to a dead credential (Document AI
+# then failed auth and every passport came back "we couldn't read this
+# image"). Only fall back to the repo copy when .env named nothing.
+if [ -z "${GOOGLE_APPLICATION_CREDENTIALS:-}" ] && [ -f "$ROOT/backend/google_adc.json" ]; then
   export GOOGLE_APPLICATION_CREDENTIALS="$ROOT/backend/google_adc.json"
+fi
+# Whatever we ended up with, say whether it can actually mint a token, so a
+# dead credential is visible at launch instead of at the first upload.
+if [ -n "${GOOGLE_APPLICATION_CREDENTIALS:-}" ]; then
+  if "$PY" -c "import google.auth,google.auth.transport.requests as r;c,_=google.auth.default(scopes=['https://www.googleapis.com/auth/cloud-platform']);c.refresh(r.Request())" >/dev/null 2>&1; then
+    log "google credential : OK ($(basename "$GOOGLE_APPLICATION_CREDENTIALS"))"
+  else
+    log "google credential : DEAD ($(basename "$GOOGLE_APPLICATION_CREDENTIALS")) — passport OCR will fail closed"
+  fi
 fi
 export ELLIS_RUNTIME_MODE="local_real_services"
 export DATABASE_URL="sqlite:///$DB"
