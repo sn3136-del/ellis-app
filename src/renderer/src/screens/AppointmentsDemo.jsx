@@ -466,44 +466,38 @@ export default function AppointmentsDemo({ onBack }) {
       </div>
 
       {/* ---- Step 0: passport, read by REAL OCR ------------------------- */}
+      {/* Pre-upload the card is ONE thing, centred and big: the Trip.com
+          passport itself is the button. No copy — the picture is the ask. */}
       <Card className="anim-rise" style={{ marginTop: 22 }} data-testid="appt-passport">
-        <div style={{ display: 'flex', justifyContent: 'space-between',
-                      alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 0.6,
-                        color: GRAY, textTransform: 'uppercase' }}>
-            Your passport
+        {passport && passport.mrz_valid && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Chip tone="ok">MRZ verified ✓</Chip>
           </div>
-          {passport && passport.mrz_valid && <Chip tone="ok">MRZ verified ✓</Chip>}
-        </div>
-        {!passport && (
-          <div style={{ display: 'flex', gap: 14, alignItems: 'center',
-                        marginTop: 12, flexWrap: 'wrap' }}>
-            <PassportIllustration size={58} />
-            <div style={{ flex: '1 1 260px' }}>
-              <div style={{ fontSize: 13.5, color: NAVY, fontWeight: 650 }}>
-                Upload the photo page — Ellis reads it
-              </div>
-              <div style={{ fontSize: 12.5, color: GRAY, marginTop: 3 }}>
-                Name, passport number and dates are extracted from your photo
-                and carried onto the booking.
-              </div>
-            </div>
+        )}
+        {!passport && !ocrBusy && (
+          <div style={{ display: 'flex', flexDirection: 'column',
+                        alignItems: 'center', padding: '30px 0 22px' }}>
             <input ref={fileRef} type="file" accept="image/*,.pdf"
                    style={{ display: 'none' }} onChange={onPassportFile}
                    data-testid="appt-passport-file" />
-            <button className="trip-cta trip-cta--sm" disabled={ocrBusy}
-                    onClick={() => fileRef.current && fileRef.current.click()}
-                    data-testid="appt-passport-upload">
-              {ocrBusy ? 'Reading…' : 'Upload passport'}
+            <button onClick={() => fileRef.current && fileRef.current.click()}
+                    data-testid="appt-passport-upload" aria-label="Upload passport"
+                    className="card-hover"
+                    style={{ border: 'none', background: 'transparent',
+                             cursor: 'pointer', padding: 10, borderRadius: 24 }}>
+              <PassportIllustration size={230} />
             </button>
           </div>
         )}
         {ocrBusy && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
-            <span className="dot-pulse" style={{ color: BLUE, fontSize: 20, lineHeight: 1 }}>…</span>
-            <span style={{ fontSize: 13, color: GRAY }}>
-              Reading the photo page — checking it, extracting the MRZ…
-            </span>
+          <div style={{ display: 'flex', flexDirection: 'column',
+                        alignItems: 'center', padding: '30px 0 22px' }}>
+            <PassportIllustration size={190} />
+            <div style={{ fontWeight: 800, fontSize: 20, color: NAVY,
+                          marginTop: 16, textAlign: 'center' }}>
+              Reading your passport
+              <span className="dot-pulse" style={{ color: BLUE }}>…</span>
+            </div>
           </div>
         )}
         {ocrError && !ocrBusy && (
