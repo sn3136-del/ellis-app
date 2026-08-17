@@ -17,6 +17,9 @@ import {
   agentSteps, bookingSteps, confirmationNumber, daysAway, generateAvailability,
   nearestCentres, prettyDate, resolveAddress
 } from '../lib/apptDemoData.js'
+import { createVisaClient } from '../lib/visaBackend.js'
+import { newSession } from '../lib/visaSession.js'
+import { profileRows } from '../lib/intake.js'
 
 // Same origin convention as lib/visaBackend.js.
 const API_BASE = (typeof process !== 'undefined' && process.env?.ELLIS_BACKEND_URL)
@@ -25,6 +28,17 @@ const API_BASE = (typeof process !== 'undefined' && process.env?.ELLIS_BACKEND_U
 const NAVY = 'var(--trip-navy, #0f294d)'
 const GRAY = 'var(--trip-gray, #64748b)'
 const BLUE = 'var(--trip-blue, #287dfa)'
+
+// English labels for the OCR profile rows (the shared profileRows() emits
+// i18n labelKeys; this demo surface is single-language by design).
+const PPF_LABELS = {
+  'ppf.full_name': 'Full name', 'ppf.surname': 'Surname',
+  'ppf.given_names': 'Given names', 'ppf.passport_number': 'Passport no.',
+  'ppf.nationality': 'Nationality', 'ppf.date_of_birth': 'Date of birth',
+  'ppf.birth_date': 'Date of birth', 'ppf.sex': 'Sex',
+  'ppf.expiry_date': 'Expiry', 'ppf.passport_expiry_date': 'Expiry',
+  'ppf.issuing_country': 'Issuing country', 'ppf.age': 'Age'
+}
 
 const ROUTES = [
   { key: 'us', title: 'U.S. visa interview', sub: 'B1/B2 · consular interview',
@@ -199,6 +213,58 @@ export default function AppointmentsDemo({ onBack }) {
   // so the flow can never stall on a model call.
   const [aiPick, setAiPick] = useState(null)
 
+  // ---- REAL passport OCR (the same pipeline as the tourist intake) --------
+  // The upload goes through POST /intake/{id}/passport: page classification,
+  // Document AI / MRZ read, per-field provenance + confidence. Nothing here
+  // is canned — a real passport photo yields ITS holder's data, and a photo
+  // that is not a passport biodata page is honestly refused.
+  const clientRef = useRef(null)
+  const intakeRef = useRef(null)
+  const [ocrBusy, setOcrBusy] = useState(false)
+  const [ocrError, setOcrError] = useState('')
+  const [passport, setPassport] = useState(null)   // upload response (accepted)
+  const fileRef = useRef(null)
+
+  async function onPassportFile(e) {
+    const f = e.target.files && e.target.files[0]
+    if (!f) return
+    setOcrBusy(true); setOcrError('')
+    try {
+      if (!clientRef.current) {
+        clientRef.current = createVisaClient(newSession({ orgId: 'ellis-demo' }))
+      }
+      if (!intakeRef.current) {
+        const made = await clientRef.current.createIntake({ answers: {} })
+        intakeRef.current = made.id
+      }
+      const b64 = await new Promise((resolve, reject) => {
+        const r = new FileReader()
+        r.onload = () => resolve(String(r.result || '').split(',')[1] || '')
+        r.onerror = reject
+        r.readAsDataURL(f)
+      })
+      const res = await clientRef.current.uploadIntakePassport(intakeRef.current, {
+        name: f.name, mime: f.type || 'image/jpeg', size_bytes: f.size,
+        content_b64: b64
+      })
+      if (res && res.rejected) {
+        setOcrError(res.message || 'That image does not look like a passport '
+          + 'biodata page — try a clearer photo of the photo page.')
+        setPassport(null)
+      } else {
+        setPassport(res)
+      }
+    } catch (err) {
+      setOcrError(err.message || 'The passport could not be read — try again.')
+    }
+    setOcrBusy(false)
+    if (fileRef.current) fileRef.current.value = ''
+  }
+
+  const passportRows = useMemo(
+    () => (passport ? profileRows(passport.profile).slice(0, 6) : []), [passport])
+  const travellerName = (passport && (passport.prefill || {}).full_name) || ''
+
   const centres = useMemo(
     () => (origin ? nearestCentres(route, origin, 3) : []), [route, origin])
   const days = useMemo(
@@ -270,8 +336,88 @@ export default function AppointmentsDemo({ onBack }) {
         </div>
       </div>
 
+      {/* ---- Step 0: passport, read by REAL OCR ------------------------- */}
+      <Card className="anim-rise" style={{ marginTop: 22 }} data-testid="appt-passport">
+        <div style={{ display: 'flex', justifyContent: 'space-between',
+                      alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 0.6,
+                        color: GRAY, textTransform: 'uppercase' }}>
+            Your passport
+          </div>
+          {passport && passport.mrz_valid && <Chip tone="ok">MRZ verified ✓</Chip>}
+        </div>
+        {!passport && (
+          <div style={{ display: 'flex', gap: 14, alignItems: 'center',
+                        marginTop: 12, flexWrap: 'wrap' }}>
+            <PassportIllustration size={58} />
+            <div style={{ flex: '1 1 260px' }}>
+              <div style={{ fontSize: 13.5, color: NAVY, fontWeight: 650 }}>
+                Upload the photo page — Ellis reads it
+              </div>
+              <div style={{ fontSize: 12.5, color: GRAY, marginTop: 3 }}>
+                Name, passport number and dates are extracted from your photo
+                and carried onto the booking.
+              </div>
+            </div>
+            <input ref={fileRef} type="file" accept="image/*,.pdf"
+                   style={{ display: 'none' }} onChange={onPassportFile}
+                   data-testid="appt-passport-file" />
+            <button className="trip-cta trip-cta--sm" disabled={ocrBusy}
+                    onClick={() => fileRef.current && fileRef.current.click()}
+                    data-testid="appt-passport-upload">
+              {ocrBusy ? 'Reading…' : 'Upload passport'}
+            </button>
+          </div>
+        )}
+        {ocrBusy && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
+            <span className="dot-pulse" style={{ color: BLUE, fontSize: 20, lineHeight: 1 }}>…</span>
+            <span style={{ fontSize: 13, color: GRAY }}>
+              Reading the photo page — checking it, extracting the MRZ…
+            </span>
+          </div>
+        )}
+        {ocrError && !ocrBusy && (
+          <div style={{ fontSize: 12.5, color: '#b4231f', marginTop: 10 }}
+               data-testid="appt-passport-error">{ocrError}</div>
+        )}
+        {passport && (
+          <div style={{ marginTop: 12 }} data-testid="appt-passport-read">
+            <div style={{ display: 'grid', gap: 8,
+                          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+              {passportRows.map((r) => (
+                <div key={r.key} style={{ padding: '10px 14px', borderRadius: 12,
+                                          background: '#f5f9ff',
+                                          border: '1px solid #dbe7fb' }}>
+                  <div style={{ fontSize: 11, color: GRAY, textTransform: 'uppercase',
+                                letterSpacing: 0.5 }}>
+                    {PPF_LABELS[r.labelKey] || r.key.replace(/_/g, ' ')}
+                  </div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: NAVY, marginTop: 2 }}>
+                    {r.display}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between',
+                          alignItems: 'center', gap: 10, marginTop: 10, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 11.5, color: GRAY }}>
+                Read from your photo by Ellis OCR — check every value before the
+                interview.
+              </span>
+              <button className="btn btn--sm btn--ghost" disabled={ocrBusy}
+                      onClick={() => fileRef.current && fileRef.current.click()}>
+                Re-upload
+              </button>
+            </div>
+            <input ref={fileRef} type="file" accept="image/*,.pdf"
+                   style={{ display: 'none' }} onChange={onPassportFile} />
+          </div>
+        )}
+      </Card>
+
       {/* ---- Step 1: route + address ------------------------------------ */}
-      <Card className="anim-rise" style={{ marginTop: 22 }}>
+      <Card className="anim-rise" style={{ marginTop: 16 }}>
         <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 0.6,
                       color: GRAY, textTransform: 'uppercase' }}>
           Where are you?
@@ -457,7 +603,8 @@ export default function AppointmentsDemo({ onBack }) {
             </div>
           </div>
           <div style={{ display: 'grid', gap: 10, marginTop: 18 }}>
-            {[['When', `${prettyDate(picked.date)} at ${picked.time}`],
+            {[...(travellerName ? [['Applicant', travellerName]] : []),
+              ['When', `${prettyDate(picked.date)} at ${picked.time}`],
               ['Where', centre.name],
               ['Address', centre.address],
               ['Booked by', 'Ellis, in the operator’s official session'],
