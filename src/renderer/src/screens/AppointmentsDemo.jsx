@@ -15,8 +15,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { AppointmentIllustration, PassportIllustration } from '../components/visa/Illustrations.jsx'
 import {
   agentSteps, bookingSteps, confirmationNumber, daysAway, generateAvailability,
-  nearestCentres, prettyDate, resolveAddress
+  nearestCentres, prettyDate, resolveAddress, routeCatalogue
 } from '../lib/apptDemoData.js'
+import { searchCities } from '../lib/worldCities.js'
 import { createVisaClient } from '../lib/visaBackend.js'
 import { newSession } from '../lib/visaSession.js'
 import { profileRows } from '../lib/intake.js'
@@ -212,6 +213,7 @@ export default function AppointmentsDemo({ onBack }) {
   // answer — the deterministic distance sort below is then the whole answer,
   // so the flow can never stall on a model call.
   const [aiPick, setAiPick] = useState(null)
+  const [cityOpen, setCityOpen] = useState(false)
 
   // ---- REAL passport OCR (the same pipeline as the tourist intake) --------
   // The upload goes through POST /intake/{id}/passport: page classification,
@@ -297,26 +299,47 @@ export default function AppointmentsDemo({ onBack }) {
     () => (passport ? profileRows(passport.profile) : []), [passport])
   const travellerName = (passport && (passport.prefill || {}).full_name) || ''
 
-  const centres = useMemo(
-    () => (origin ? nearestCentres(route, origin, 3) : []), [route, origin])
+  // Nearest three by real distance when the city is known; for an unknown
+  // locality (origin.approx) Kimi's pick leads and no distance is claimed.
+  const centres = useMemo(() => {
+    if (!origin) return []
+    const base = nearestCentres(route, origin, 3)
+    if (!aiPick || !aiPick.centre_id) return base
+    if (base.some((c) => c.id === aiPick.centre_id)) {
+      return [...base].sort((a, b) =>
+        (a.id === aiPick.centre_id ? -1 : 0) - (b.id === aiPick.centre_id ? -1 : 0))
+    }
+    const picked = routeCatalogue(route).find((c) => c.id === aiPick.centre_id)
+    return picked ? [{ ...picked, km: null }, ...base.slice(0, 2)] : base
+  }, [route, origin, aiPick])
   const days = useMemo(
     () => (centre ? generateAvailability(route, centre).slice(0, 6) : []), [route, centre])
   const routeMeta = ROUTES.find((r) => r.key === route) || ROUTES[0]
 
-  function findCentres() {
-    const o = resolveAddress(address)
+  // City autocomplete over the world list (real cities, real coordinates).
+  const citySuggestions = useMemo(() => searchCities(address, 8), [address])
+  function pickCity(c) {
+    setAddress(`${c.name}, ${c.country}`)
+    setCityOpen(false)
+    findCentres({ lat: c.lat, lon: c.lon, label: c.name })
+  }
+
+  function findCentres(originOverride) {
+    const o = originOverride || resolveAddress(address)
     if (!o) return
     setOrigin(o)
     setCentre(null)
     setPicked(null)
     setAiPick(null)
     setStep('locating')
-    // Kimi K3 reads the address and names the nearest official centre. Any
-    // failure (no key, timeout, odd answer) simply leaves aiPick null and the
-    // distance-sorted list stands on its own — the demo always advances.
-    const pool = nearestCentres(route, o, 3)
+    // Kimi K3 reads the address and names the nearest official centre. For a
+    // city the local table knows, it gets the 3 candidates (fast confirm);
+    // for anything else it gets the WHOLE route catalogue and does the real
+    // locating. Any failure (no key, timeout, odd answer) leaves aiPick null
+    // and the local list stands — the demo always advances, capped at 10s.
+    const pool = o.approx ? routeCatalogue(route) : nearestCentres(route, o, 3)
     const ctrl = new AbortController()
-    const timer = setTimeout(() => ctrl.abort(), 9000)
+    const timer = setTimeout(() => ctrl.abort(), 10000)
     fetch(`${API_BASE}/appointments/demo/nearest-centre`, {
       method: 'POST', signal: ctrl.signal,
       headers: { 'content-type': 'application/json' },
@@ -341,7 +364,9 @@ export default function AppointmentsDemo({ onBack }) {
     setPicked(null); setAddress('')
   }
 
-  const canFind = !!resolveAddress(address)
+  // Any address of a few characters can be found — the local city table
+  // answers instantly and Kimi K3 places everything else.
+  const canFind = address.trim().length >= 3
 
   return (
     <div className="page" style={{ maxWidth: 780, margin: '0 auto', padding: '26px 20px 60px' }}
@@ -477,14 +502,49 @@ export default function AppointmentsDemo({ onBack }) {
         </div>
         <div style={{ marginTop: 16 }}>
           <label style={{ fontSize: 12.5, fontWeight: 650, color: NAVY }}>
-            Your address
+            Your city
           </label>
-          <div style={{ display: 'flex', gap: 10, marginTop: 7, flexWrap: 'wrap' }}>
-            <input className="input" style={{ flex: '1 1 320px' }} value={address}
-                   data-testid="appt-address"
-                   placeholder="e.g. 88 Century Avenue, Pudong, Shanghai"
-                   onChange={(e) => setAddress(e.target.value)}
-                   onKeyDown={(e) => { if (e.key === 'Enter' && canFind) findCentres() }} />
+          <div style={{ display: 'flex', gap: 10, marginTop: 7, flexWrap: 'wrap',
+                        position: 'relative' }}>
+            <div style={{ flex: '1 1 320px', position: 'relative' }}>
+              <input className="input" style={{ width: '100%' }} value={address}
+                     data-testid="appt-address"
+                     placeholder="Start typing your city — 上海, Lyon, New York…"
+                     onChange={(e) => { setAddress(e.target.value); setCityOpen(true) }}
+                     onFocus={() => setCityOpen(true)}
+                     onBlur={() => setTimeout(() => setCityOpen(false), 150)}
+                     onKeyDown={(e) => {
+                       if (e.key === 'Enter') {
+                         const top = citySuggestions[0]
+                         if (top) pickCity(top)
+                         else if (canFind) findCentres()
+                       }
+                     }} />
+              {/* World-city autocomplete: real cities, real coordinates. A
+                  city not on the list still works — free text falls through
+                  to Kimi K3, which places it. */}
+              {cityOpen && citySuggestions.length > 0 && (
+                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0,
+                              zIndex: 30, background: '#fff', borderRadius: 12,
+                              border: '1px solid #e2e8f0', marginTop: 4,
+                              boxShadow: '0 12px 32px rgba(15,41,77,.10)',
+                              overflow: 'hidden' }}
+                     data-testid="appt-city-list">
+                  {citySuggestions.map((c) => (
+                    <button key={`${c.name}-${c.country}`}
+                      onMouseDown={(e) => { e.preventDefault(); pickCity(c) }}
+                      data-testid={`city-${c.name.replace(/\s+/g, '-').toLowerCase()}`}
+                      style={{ display: 'flex', width: '100%', gap: 8,
+                               justifyContent: 'space-between', padding: '10px 14px',
+                               cursor: 'pointer', border: 'none', background: '#fff',
+                               textAlign: 'left', fontSize: 13.5 }}>
+                      <span style={{ color: NAVY, fontWeight: 650 }}>{c.name}</span>
+                      <span style={{ color: GRAY, fontSize: 12.5 }}>{c.country}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <button className="trip-cta trip-cta--sm" disabled={!canFind}
                     onClick={findCentres} data-testid="appt-find"
                     style={{ opacity: canFind ? 1 : 0.5 }}>
@@ -493,8 +553,7 @@ export default function AppointmentsDemo({ onBack }) {
           </div>
           {address && !canFind && (
             <div style={{ fontSize: 12, color: GRAY, marginTop: 7 }}>
-              Type a city so Ellis can measure the distance — Shanghai, Beijing,
-              Guangzhou, Shenzhen, Chengdu, Hangzhou…
+              Keep typing — pick your city, or any address works.
             </div>
           )}
         </div>

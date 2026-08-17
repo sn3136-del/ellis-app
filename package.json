@@ -17,7 +17,7 @@
     "ellis:web": "bash scripts/start-ellis-web.sh",
     "ellis:stop": "bash scripts/stop-ellis.sh",
     "ellis:status": "./scripts/status-ellis.sh",
-    "test": "node --test --test-concurrency=1 tests/build_security.test.mjs tests/tripcom_only.test.mjs tests/visa/visa_ui_logic.test.mjs tests/visa/intake_logic.test.mjs tests/visa/journey_logic.test.mjs tests/visa/i18n.test.mjs tests/visa/illustrations.test.mjs tests/portal/framework.test.mjs tests/portal/e2e.test.mjs tests/portal/mrz_name.test.mjs",
+    "test": "node --test --test-concurrency=1 tests/build_security.test.mjs tests/tripcom_only.test.mjs tests/visa/visa_ui_logic.test.mjs tests/visa/intake_logic.test.mjs tests/visa/journey_logic.test.mjs tests/visa/i18n.test.mjs tests/visa/illustrations.test.mjs tests/visa/appt_demo_data.test.mjs tests/portal/framework.test.mjs tests/portal/e2e.test.mjs tests/portal/mrz_name.test.mjs",
     "test:portal": "node --test --test-concurrency=1 tests/portal/framework.test.mjs tests/portal/e2e.test.mjs",
     "test:security": "node --test tests/build_security.test.mjs",
     "test:visa": "node --test tests/visa/visa_ui_logic.test.mjs",
