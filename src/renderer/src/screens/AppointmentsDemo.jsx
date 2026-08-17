@@ -299,12 +299,14 @@ export default function AppointmentsDemo({ onBack }) {
     () => (passport ? profileRows(passport.profile) : []), [passport])
   const travellerName = (passport && (passport.prefill || {}).full_name) || ''
 
-  // Nearest three by real distance when the city is known; for an unknown
-  // locality (origin.approx) Kimi's pick leads and no distance is claimed.
+  // Nearest three by real distance when the city is known — the great-circle
+  // MATH is the authority and Kimi's sentence only annotates it. Only for an
+  // unknown locality (origin.approx, no coordinates) does Kimi's pick lead,
+  // and then no distance is claimed.
   const centres = useMemo(() => {
     if (!origin) return []
     const base = nearestCentres(route, origin, 3)
-    if (!aiPick || !aiPick.centre_id) return base
+    if (!origin.approx || !aiPick || !aiPick.centre_id) return base
     if (base.some((c) => c.id === aiPick.centre_id)) {
       return [...base].sort((a, b) =>
         (a.id === aiPick.centre_id ? -1 : 0) - (b.id === aiPick.centre_id ? -1 : 0))
@@ -312,6 +314,10 @@ export default function AppointmentsDemo({ onBack }) {
     const picked = routeCatalogue(route).find((c) => c.id === aiPick.centre_id)
     return picked ? [{ ...picked, km: null }, ...base.slice(0, 2)] : base
   }, [route, origin, aiPick])
+  // "Nearest to you" is a claim: it needs either real coordinates (math) or
+  // Kimi's explicit placement. An unplaced city gets neither badge nor
+  // "closest" wording.
+  const placed = !!origin && (!origin.approx || !!(aiPick && aiPick.centre_id))
   const days = useMemo(
     () => (centre ? generateAvailability(route, centre).slice(0, 6) : []), [route, centre])
   const routeMeta = ROUTES.find((r) => r.key === route) || ROUTES[0]
@@ -325,7 +331,11 @@ export default function AppointmentsDemo({ onBack }) {
   }
 
   function findCentres(originOverride) {
-    const o = originOverride || resolveAddress(address)
+    // Only a real origin counts as an override — a DOM click event (the Find
+    // button's onClick argument) must never masquerade as one.
+    const ov = originOverride && typeof originOverride.lat === 'number'
+      ? originOverride : null
+    const o = ov || resolveAddress(address)
     if (!o) return
     setOrigin(o)
     setCentre(null)
@@ -546,7 +556,7 @@ export default function AppointmentsDemo({ onBack }) {
               )}
             </div>
             <button className="trip-cta trip-cta--sm" disabled={!canFind}
-                    onClick={findCentres} data-testid="appt-find"
+                    onClick={() => findCentres()} data-testid="appt-find"
                     style={{ opacity: canFind ? 1 : 0.5 }}>
               Find centres
             </button>
@@ -582,7 +592,9 @@ export default function AppointmentsDemo({ onBack }) {
                         alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
             <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 0.6,
                           color: GRAY, textTransform: 'uppercase' }}>
-              Closest to {origin.label}
+              {/* "Closest" is a measured claim; an unplaced city gets the
+                  honest wording instead. */}
+              {placed ? `Closest to ${origin.label || address}` : 'Suggested centres'}
             </div>
             <Chip tone="info">{routeMeta.site}</Chip>
           </div>
@@ -599,9 +611,14 @@ export default function AppointmentsDemo({ onBack }) {
               </span>
             </div>
           )}
-          {centres.map((c) => (
+          {centres.map((c, i) => (
             <CentreRow key={c.id} centre={c} selected={centre && centre.id === c.id}
-                       recommended={aiPick && aiPick.centre_id === c.id}
+                       // The badge goes to the MEASURED nearest (first row)
+                       // when we have coordinates, or to Kimi's placement on
+                       // an approx origin. Never to an unplaced guess.
+                       recommended={placed && (origin.approx
+                         ? (aiPick && aiPick.centre_id === c.id)
+                         : i === 0)}
                        onSelect={() => chooseCentre(c)} />
           ))}
         </Card>
