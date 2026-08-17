@@ -274,14 +274,32 @@ function hash(str) {
   return (h >>> 0) / 4294967295
 }
 
-const TIMES_AM = ['08:00', '08:15', '08:30', '08:45', '09:00', '09:15', '09:30',
-                  '09:45', '10:00', '10:30', '11:00']
-const TIMES_PM = ['13:00', '13:15', '13:30', '14:00', '14:15', '14:30', '15:00',
-                  '15:30']
+// Real consular scheduling patterns: US visa interviews are overwhelmingly
+// MORNING appointments (doors 07:30, interviews through late morning; PM
+// blocks are rare); VFS/TLS centres run full submission days on 15-minute
+// grids. Odd minutes like :15/:45 are what real letters carry.
+const US_TIMES_AM = ['07:30', '07:45', '08:00', '08:15', '08:30', '08:45',
+                     '09:00', '09:15', '09:30', '09:45', '10:15', '10:45']
+const US_TIMES_PM = ['13:15', '13:45']
+const VAC_TIMES_AM = ['08:00', '08:15', '08:30', '08:45', '09:00', '09:30',
+                      '10:00', '10:15', '10:45', '11:15']
+const VAC_TIMES_PM = ['13:00', '13:30', '14:00', '14:15', '14:45', '15:15',
+                      '15:45']
 
 function pad(n) { return String(n).padStart(2, '0') }
 export function isoDate(d) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
+/** "Today" in the CENTRE's own timezone (approximated from its longitude —
+ *  ±1h is irrelevant at day granularity). The applicant may be browsing from
+ *  any timezone; the calendar must never show a date that is already over at
+ *  the centre. */
+export function centreToday(centre, now = new Date()) {
+  const offsetHours = Math.round((centre?.lon ?? 0) / 15)
+  const utcMs = now.getTime() + now.getTimezoneOffset() * 60000
+  const local = new Date(utcMs + offsetHours * 3600000)
+  return new Date(local.getFullYear(), local.getMonth(), local.getDate())
 }
 
 /** Realistic typical wait before the first opening, per route + centre. */
@@ -292,29 +310,38 @@ function leadDays(route, centre) {
 }
 
 /**
- * A month of availability for one centre: business days only, a realistic
- * lead time before anything opens, some days fully booked, and a varying
- * number of morning/afternoon slots per open day.
+ * A month of availability for one centre: business days only, in the
+ * CENTRE's own timezone (never a date that is past there), a realistic lead
+ * time before anything opens, some days fully booked, and a varying number
+ * of morning/afternoon slots per open day.
  */
-export function generateAvailability(route, centre, { from = new Date(), days = 45 } = {}) {
+export function generateAvailability(route, centre, { from = null, days = 45 } = {}) {
   const out = []
-  const lead = leadDays(route, centre)
+  const base = from || centreToday(centre)
+  const lead = Math.max(1, leadDays(route, centre))   // never today, never past
   for (let i = lead; i < lead + days; i++) {
-    const d = new Date(from.getFullYear(), from.getMonth(), from.getDate() + i)
+    const d = new Date(base.getFullYear(), base.getMonth(), base.getDate() + i)
     const dow = d.getDay()
     if (dow === 0 || dow === 6) continue           // consulates close weekends
     const key = `${centre.id}:${isoDate(d)}`
     const r = hash(key)
     if (r < 0.42) continue                          // fully booked that day
     const amCount = Math.floor(hash(key + ':am') * 4)      // 0-3
-    const pmCount = Math.floor(hash(key + ':pm') * 3)      // 0-2
+    // US interview sections rarely run afternoons; VACs usually do.
+    const pmCount = route === 'us'
+      ? (hash(key + ':pm') > 0.8 ? 1 : 0)
+      : Math.floor(hash(key + ':pm') * 3)                  // 0-2
     if (amCount + pmCount === 0) continue
+    // Route-true time patterns: US interviews cluster in the morning; VACs
+    // run a full submission day.
+    const AM = route === 'us' ? US_TIMES_AM : VAC_TIMES_AM
+    const PM = route === 'us' ? US_TIMES_PM : VAC_TIMES_PM
     const times = []
-    for (let k = 0; k < amCount; k++) {
-      times.push(TIMES_AM[Math.floor(hash(key + ':a' + k) * TIMES_AM.length)])
+    for (let k = 0; k < amCount + (route === 'us' ? 1 : 0); k++) {
+      times.push(AM[Math.floor(hash(key + ':a' + k) * AM.length)])
     }
     for (let k = 0; k < pmCount; k++) {
-      times.push(TIMES_PM[Math.floor(hash(key + ':p' + k) * TIMES_PM.length)])
+      times.push(PM[Math.floor(hash(key + ':p' + k) * PM.length)])
     }
     const uniq = [...new Set(times)].sort()
     if (!uniq.length) continue

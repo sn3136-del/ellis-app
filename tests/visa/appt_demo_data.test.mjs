@@ -191,3 +191,37 @@ test('slot generation is deterministic per centre and never empty', () => {
   assert.ok(a.length >= 4)
   for (const d of a) assert.ok(d.times.length > 0)
 })
+
+test('no centre anywhere on earth ever offers a past or weekend date', async () => {
+  const { centreToday } = await import('../../src/renderer/src/lib/apptDemoData.js')
+  for (const centre of CENTRES) {
+    for (const route of centre.routes) {
+      const today = centreToday(centre)
+      for (const day of generateAvailability(route, centre)) {
+        const [y, m, dd] = day.date.split('-').map(Number)
+        const dt = new Date(y, m - 1, dd)
+        assert.ok(dt > today,
+          `${centre.id} (${route}) offered ${day.date}, not after centre-local today`)
+        const dow = dt.getDay()
+        assert.ok(dow !== 0 && dow !== 6, `${centre.id} offered a weekend ${day.date}`)
+      }
+    }
+  }
+})
+
+test('times look like real consular schedules', () => {
+  const us = CENTRES.find((c) => c.id === 'us-bj')
+  const vac = CENTRES.find((c) => c.id === 'sch-sh-fr')
+  const usTimes = generateAvailability('us', us).flatMap((d) => d.times)
+  const vacTimes = generateAvailability('schengen', vac).flatMap((d) => d.times)
+  assert.ok(usTimes.length > 0 && vacTimes.length > 0)
+  // US interviews: heavily morning; nothing before 07:30 or after 14:00.
+  const am = usTimes.filter((t) => t < '12:00').length
+  assert.ok(am / usTimes.length >= 0.8, `US slots too PM-heavy: ${usTimes}`)
+  for (const t of usTimes) assert.ok(t >= '07:30' && t <= '14:00', t)
+  // VAC submission days: inside 08:00-16:00, on 15-minute boundaries.
+  for (const t of [...usTimes, ...vacTimes]) {
+    assert.match(t, /^\d{2}:(00|15|30|45)$/, `off-grid time ${t}`)
+  }
+  for (const t of vacTimes) assert.ok(t >= '08:00' && t <= '16:00', t)
+})

@@ -553,6 +553,9 @@ export default function AppointmentsDemo({ onBack }) {
       </Card>
 
       {/* ---- Step 1: route + address ------------------------------------ */}
+      {/* Destination + city appear only once the passport is READ — the OCR
+          is the doorway, so the flow always starts with the document. */}
+      {passport && (
       <Card className="anim-rise" style={{ marginTop: 16 }}>
         <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 0.6,
                       color: GRAY, textTransform: 'uppercase' }}>
@@ -649,6 +652,7 @@ export default function AppointmentsDemo({ onBack }) {
           {/* No button: the search starts itself the moment a city lands. */}
         </div>
       </Card>
+      )}
 
       {/* ---- Step 1b: locating — the airplane, big and centred ---------- */}
       {step === 'locating' && (
