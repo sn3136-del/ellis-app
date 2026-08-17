@@ -186,6 +186,10 @@ export function AppointmentIllustration({ size = 120, className = '' }) {
         <path d="M32 50 h88" stroke={NAVY} strokeWidth="2" />
         <rect x="32" y="28" width="88" height="22" rx="9" fill={BLUE} />
         <rect x="32" y="42" width="88" height="8" fill={BLUE} />
+        {/* Trip.com on the calendar's header band: a white plate keeps the
+            wordmark legible over the blue, matching the other three doors. */}
+        <rect x="42" y="32" width="68" height="14" rx="3.5" fill="#ffffff" />
+        <image href={tripcomLogo} x="45" y="33.6" width="62" height="10.8" />
         {/* binder rings */}
         <path d="M52 22 v12 M100 22 v12" stroke={NAVY} strokeWidth="3.4" strokeLinecap="round" />
       </g>

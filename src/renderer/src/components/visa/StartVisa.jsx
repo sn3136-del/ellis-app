@@ -20,7 +20,7 @@ import ConnectorBuild from './ConnectorBuild.jsx'
 import PassportIntake from './PassportIntake.jsx'
 import {
   DocumentsIllustration, FormFillIllustration, PassportIllustration,
-  EnvelopeIllustration, ShieldIllustration
+  EnvelopeIllustration, ShieldIllustration, AppointmentIllustration
 } from './Illustrations.jsx'
 
 // Readiness statuses that mean no verified LIVE connector exists yet, so the
@@ -573,6 +573,16 @@ export default function StartVisa({ client, onOpenCase }) {
                 <button className="trip-cta trip-cta--sm"
                   onClick={() => { window.location.hash = '#worker'; window.location.reload() }}>
                   {t('start.lane.h1bworker.cta')}{arrow}
+                </button>
+              </div>
+            </div>
+            <div className="trip-lane trip-lane--tall card-hover anim-rise-4" data-testid="lane-appointments">
+              <AppointmentIllustration size={150} className="trip-lane__art" />
+              <div className="trip-lane__title">{t('start.lane.appts.title')}</div>
+              <div className="trip-lane__ctas">
+                <button className="trip-cta trip-cta--sm"
+                  onClick={() => { window.location.hash = '#appointments'; window.location.reload() }}>
+                  {t('start.lane.appts.cta')}{arrow}
                 </button>
               </div>
             </div>

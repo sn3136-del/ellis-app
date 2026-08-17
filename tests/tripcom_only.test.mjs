@@ -130,8 +130,9 @@ test('App.jsx imports no deleted screens and has no role selection', () => {
   // legacy prop name, is not a standalone word and is allowed).
   assert.ok(!/\brole\b/i.test(app), "App.jsx must not reference 'role' selection")
   assert.ok(!/\broles\b/i.test(app), "App.jsx must not reference 'roles'")
-  // Boots directly into the applicant intake surface.
-  assert.match(app, /useState\('visa'\)/)
+  // Boots directly into the applicant intake surface — the ONLY exception is
+  // the explicit #appointments hash, which opens the appointments demo door.
+  assert.match(app, /includes\('appointments'\) \? 'appointments' : 'visa'/)
 })
 
 test('the demo banner string exists in the i18n en locale exactly once', () => {
