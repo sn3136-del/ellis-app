@@ -486,6 +486,10 @@ export default function AppointmentsDemo({ onBack }) {
                     style={{ border: 'none', background: 'transparent',
                              cursor: 'pointer', padding: 10, borderRadius: 24 }}>
               <PassportIllustration size={230} />
+              <div style={{ fontWeight: 800, fontSize: 20, color: NAVY,
+                            marginTop: 14, textAlign: 'center' }}>
+                Upload your passport
+              </div>
             </button>
           </div>
         )}
