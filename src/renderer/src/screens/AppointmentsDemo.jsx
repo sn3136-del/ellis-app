@@ -12,7 +12,7 @@
 // booking must never be mistakable for a real government outcome, even in a
 // pitch.
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { TripPlane } from '../components/ui.jsx'
+import { Loading } from '../components/ui.jsx'
 import { AppointmentIllustration, PassportIllustration } from '../components/visa/Illustrations.jsx'
 import {
   agentSteps, bookingSteps, confirmationNumber, daysAway, generateAvailability,
@@ -148,6 +148,24 @@ function AgentRunner({ steps, onDone, tone = BLUE }) {
 }
 
 // One centre row with its real address and the true distance.
+// The selected centre on a real map (keyless Google embed pinned to the
+// centre's coordinates), with the address as caption.
+function CentreMap({ centre }) {
+  if (!centre || centre.lat == null) return null
+  return (
+    <div style={{ marginTop: 14 }} data-testid="centre-map">
+      <iframe
+        title={`Map — ${centre.name}`}
+        src={`https://maps.google.com/maps?q=${centre.lat},${centre.lon}&z=15&output=embed&hl=en`}
+        style={{ width: '100%', height: 240, border: 'none', borderRadius: 14 }}
+        loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+      <div style={{ fontSize: 12, color: GRAY, marginTop: 6 }}>
+        📍 {centre.name} · {centre.address}
+      </div>
+    </div>
+  )
+}
+
 function CentreRow({ centre, selected, recommended, onSelect }) {
   const lit = selected || recommended
   return (
@@ -672,16 +690,15 @@ export default function AppointmentsDemo({ onBack }) {
       </Card>
       )}
 
-      {/* ---- Step 1b: locating — the airplane, big and centred ---------- */}
+      {/* ---- Step 1b: locating — the ANIMATED airplane, big and centred.
+             The planeload classes carry the bobbing plane + moving trail;
+             the scale wrapper sizes the whole scene up. */}
       {step === 'locating' && (
         <Card className="anim-rise-1" style={{ marginTop: 16 }} data-testid="appt-locating">
-          <div style={{ display: 'flex', flexDirection: 'column',
-                        alignItems: 'center', padding: '26px 0 18px' }}>
-            <TripPlane width={280} />
-            <div style={{ fontWeight: 800, fontSize: 21, color: NAVY,
-                          marginTop: 18, textAlign: 'center' }}>
-              Finding your nearest centre
-              <span className="dot-pulse" style={{ color: BLUE }}>…</span>
+          <div style={{ display: 'flex', justifyContent: 'center',
+                        padding: '14px 0 6px' }}>
+            <div style={{ transform: 'scale(1.25)', transformOrigin: 'center top' }}>
+              <Loading size="big" label="Finding your nearest centre" />
             </div>
           </div>
         </Card>
@@ -754,6 +771,7 @@ export default function AppointmentsDemo({ onBack }) {
             </div>
             <Chip tone="ok">{days.length} days open</Chip>
           </div>
+          <CentreMap centre={centre} />
           {step === 'pick' && (
             <>
               <SlotCalendar days={days} picked={picked} onPick={setPicked} />
@@ -833,6 +851,7 @@ export default function AppointmentsDemo({ onBack }) {
               </div>
             ))}
           </div>
+          <CentreMap centre={centre} />
           <div style={{ display: 'flex', gap: 10, marginTop: 20, flexWrap: 'wrap' }}>
             <button className="trip-cta trip-cta--sm" onClick={restart}
                     data-testid="appt-restart">
@@ -840,11 +859,8 @@ export default function AppointmentsDemo({ onBack }) {
             </button>
             <button className="btn btn--sm btn--ghost" onClick={onBack}>Back to menu</button>
           </div>
-          <div style={{ fontSize: 11.5, color: GRAY, marginTop: 16, lineHeight: 1.6 }}>
-            Ellis books inside an authorized operator session on the official
-            site, and records the booking only against the real confirmation it
-            captures.
-          </div>
+          {/* The operator-session line is the presenter's talking point —
+              kept off the screen by the owner's choice. */}
         </Card>
       )}
 
