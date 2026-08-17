@@ -12,6 +12,7 @@
 // booking must never be mistakable for a real government outcome, even in a
 // pitch.
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { TripPlane } from '../components/ui.jsx'
 import { AppointmentIllustration, PassportIllustration } from '../components/visa/Illustrations.jsx'
 import {
   agentSteps, bookingSteps, confirmationNumber, daysAway, generateAvailability,
@@ -366,11 +367,30 @@ export default function AppointmentsDemo({ onBack }) {
 
   // City autocomplete over the world list (real cities, real coordinates).
   const citySuggestions = useMemo(() => searchCities(address, 8), [address])
+  const lastSearchRef = useRef('')
   function pickCity(c) {
     setAddress(`${c.name}, ${c.country}`)
     setCityOpen(false)
+    lastSearchRef.current = `${c.name}, ${c.country}`
     findCentres({ lat: c.lat, lon: c.lon, label: c.name })
   }
+
+  // The search starts ITSELF: a moment after typing stops, a recognized city
+  // (or a long-enough free-text address) runs — no button. The guard keeps
+  // the same text from re-firing, and pickCity pre-stamps it.
+  useEffect(() => {
+    const text = address.trim()
+    if (!text || text === lastSearchRef.current) return
+    const t = setTimeout(() => {
+      const o = resolveAddress(text)
+      if (!o) return
+      if (!o.approx || text.length >= 8) {
+        lastSearchRef.current = text
+        findCentres()
+      }
+    }, 900)
+    return () => clearTimeout(t)
+  }, [address])
 
   function findCentres(originOverride) {
     // Only a real origin counts as an override — a DOM click event (the Find
@@ -625,32 +645,22 @@ export default function AppointmentsDemo({ onBack }) {
                 </div>
               )}
             </div>
-            <button className="trip-cta trip-cta--sm" disabled={!canFind}
-                    onClick={() => findCentres()} data-testid="appt-find"
-                    style={{ opacity: canFind ? 1 : 0.5 }}>
-              Find centres
-            </button>
           </div>
-          {address && !canFind && (
-            <div style={{ fontSize: 12, color: GRAY, marginTop: 7 }}>
-              Keep typing — pick your city, or any address works.
-            </div>
-          )}
+          {/* No button: the search starts itself the moment a city lands. */}
         </div>
       </Card>
 
-      {/* ---- Step 1b: Ellis reads the address --------------------------- */}
+      {/* ---- Step 1b: locating — the airplane, big and centred ---------- */}
       {step === 'locating' && (
         <Card className="anim-rise-1" style={{ marginTop: 16 }} data-testid="appt-locating">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontWeight: 800, fontSize: 15, color: NAVY }}>
-              Ellis is finding your nearest centre
-            </span>
-            <span className="dot-pulse" style={{ color: BLUE, fontSize: 20, lineHeight: 1 }}>…</span>
-          </div>
-          <div style={{ fontSize: 13, color: GRAY, marginTop: 8 }}>
-            Reading “{address}” and matching it against the official
-            {route === 'us' ? ' consular posts' : ' visa application centres'}.
+          <div style={{ display: 'flex', flexDirection: 'column',
+                        alignItems: 'center', padding: '26px 0 18px' }}>
+            <TripPlane width={280} />
+            <div style={{ fontWeight: 800, fontSize: 21, color: NAVY,
+                          marginTop: 18, textAlign: 'center' }}>
+              Finding your nearest centre
+              <span className="dot-pulse" style={{ color: BLUE }}>…</span>
+            </div>
           </div>
         </Card>
       )}
@@ -816,17 +826,9 @@ export default function AppointmentsDemo({ onBack }) {
         </Card>
       )}
 
-      {/* Standing footnote: the compliance story, in one line. */}
-      <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginTop: 22,
-                    padding: '14px 16px', borderRadius: 14, background: '#f8fafc' }}>
-        <PassportIllustration size={40} />
-        <div style={{ fontSize: 12, color: GRAY, lineHeight: 1.65 }}>
-          Ellis schedules through the official website, as the applicant’s agent —
-          permitted by the U.S. scheduling FAQ and, for Schengen, by Visa Code
-          Art. 45 (accredited intermediary). Ellis never solves a human
-          verification check.
-        </div>
-      </div>
+      {/* The compliance framing (official-website agency, US FAQ + Visa Code
+          Art. 45) is the presenter's talking point on the call — kept off the
+          screen by the owner's choice. */}
     </div>
   )
 }
