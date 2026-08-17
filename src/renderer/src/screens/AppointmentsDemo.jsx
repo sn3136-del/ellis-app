@@ -42,11 +42,38 @@ const PPF_LABELS = {
 }
 
 const ROUTES = [
-  { key: 'us', title: 'U.S. visa interview', sub: 'B1/B2 · consular interview',
-    site: 'ais.usvisa-info.com' },
-  { key: 'schengen', title: 'Schengen appointment', sub: 'Short-stay (C) · biometrics',
-    site: 'visa.vfsglobal.com' }
+  { key: 'us', title: 'United States', site: 'ais.usvisa-info.com' },
+  { key: 'schengen', title: 'Schengen', site: 'visa.vfsglobal.com' }
 ]
+
+// All 29 Schengen member states, with flags for the destination picker.
+const SCHENGEN_STATES = [
+  { name: 'Austria', flag: '🇦🇹' }, { name: 'Belgium', flag: '🇧🇪' },
+  { name: 'Bulgaria', flag: '🇧🇬' }, { name: 'Croatia', flag: '🇭🇷' },
+  { name: 'Czechia', flag: '🇨🇿' }, { name: 'Denmark', flag: '🇩🇰' },
+  { name: 'Estonia', flag: '🇪🇪' }, { name: 'Finland', flag: '🇫🇮' },
+  { name: 'France', flag: '🇫🇷' }, { name: 'Germany', flag: '🇩🇪' },
+  { name: 'Greece', flag: '🇬🇷' }, { name: 'Hungary', flag: '🇭🇺' },
+  { name: 'Iceland', flag: '🇮🇸' }, { name: 'Italy', flag: '🇮🇹' },
+  { name: 'Latvia', flag: '🇱🇻' }, { name: 'Liechtenstein', flag: '🇱🇮' },
+  { name: 'Lithuania', flag: '🇱🇹' }, { name: 'Luxembourg', flag: '🇱🇺' },
+  { name: 'Malta', flag: '🇲🇹' }, { name: 'Netherlands', flag: '🇳🇱' },
+  { name: 'Norway', flag: '🇳🇴' }, { name: 'Poland', flag: '🇵🇱' },
+  { name: 'Portugal', flag: '🇵🇹' }, { name: 'Romania', flag: '🇷🇴' },
+  { name: 'Slovakia', flag: '🇸🇰' }, { name: 'Slovenia', flag: '🇸🇮' },
+  { name: 'Spain', flag: '🇪🇸' }, { name: 'Sweden', flag: '🇸🇪' },
+  { name: 'Switzerland', flag: '🇨🇭' }
+]
+
+// Present a Schengen centre under the SELECTED member state's mission (the
+// same real VAC buildings host many member states' missions; the state named
+// is the one whose appointment is being booked).
+function labelForState(centre, dest) {
+  if (!dest || !centre.routes.includes('schengen')) return centre
+  if (centre.state === dest) return centre
+  return { ...centre,
+           name: `${dest} Visa Application Centre — ${centre.city}` }
+}
 
 function Chip({ children, tone = '' }) {
   const tones = {
@@ -214,6 +241,9 @@ export default function AppointmentsDemo({ onBack }) {
   // so the flow can never stall on a model call.
   const [aiPick, setAiPick] = useState(null)
   const [cityOpen, setCityOpen] = useState(false)
+  // The Schengen member state whose appointment is being booked ('' until
+  // chosen); its mission names the centres presented.
+  const [schengenDest, setSchengenDest] = useState('')
 
   // ---- REAL passport OCR (the same pipeline as the tourist intake) --------
   // The upload goes through POST /intake/{id}/passport: page classification,
@@ -305,15 +335,27 @@ export default function AppointmentsDemo({ onBack }) {
   // and then no distance is claimed.
   const centres = useMemo(() => {
     if (!origin) return []
+    const dest = route === 'schengen' ? schengenDest : ''
+    // Relabel under the chosen member state, then collapse rows that end up
+    // with the same presented name (two real buildings, one mission) —
+    // keeping the nearest.
+    const relabel = (list) => {
+      const seen = new Set()
+      return list.map((c) => labelForState(c, dest)).filter((c) => {
+        if (seen.has(c.name)) return false
+        seen.add(c.name)
+        return true
+      })
+    }
     const base = nearestCentres(route, origin, 3)
-    if (!origin.approx || !aiPick || !aiPick.centre_id) return base
+    if (!origin.approx || !aiPick || !aiPick.centre_id) return relabel(base)
     if (base.some((c) => c.id === aiPick.centre_id)) {
-      return [...base].sort((a, b) =>
-        (a.id === aiPick.centre_id ? -1 : 0) - (b.id === aiPick.centre_id ? -1 : 0))
+      return relabel([...base].sort((a, b) =>
+        (a.id === aiPick.centre_id ? -1 : 0) - (b.id === aiPick.centre_id ? -1 : 0)))
     }
     const picked = routeCatalogue(route).find((c) => c.id === aiPick.centre_id)
-    return picked ? [{ ...picked, km: null }, ...base.slice(0, 2)] : base
-  }, [route, origin, aiPick])
+    return relabel(picked ? [{ ...picked, km: null }, ...base.slice(0, 2)] : base)
+  }, [route, origin, aiPick, schengenDest])
   // "Nearest to you" is a claim: it needs either real coordinates (math) or
   // Kimi's explicit placement. An unplaced city gets neither badge nor
   // "closest" wording.
@@ -494,21 +536,49 @@ export default function AppointmentsDemo({ onBack }) {
       <Card className="anim-rise" style={{ marginTop: 16 }}>
         <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 0.6,
                       color: GRAY, textTransform: 'uppercase' }}>
-          Where are you?
+          Destination
         </div>
         <div style={{ display: 'flex', gap: 10, marginTop: 12, flexWrap: 'wrap' }}>
-          {ROUTES.map((r) => (
-            <button key={r.key} data-testid={`route-${r.key}`}
-              onClick={() => { setRoute(r.key); setCentre(null); setPicked(null)
-                               setStep(origin ? 'centre' : 'address') }}
-              style={{ flex: '1 1 220px', textAlign: 'left', padding: '14px 16px',
-                       borderRadius: 16, cursor: 'pointer', transition: 'all .18s ease',
-                       border: route === r.key ? `2px solid ${BLUE}` : '1px solid #e2e8f0',
-                       background: route === r.key ? '#f5f9ff' : '#fff' }}>
-              <div style={{ fontWeight: 700, fontSize: 14.5, color: NAVY }}>{r.title}</div>
-              <div style={{ fontSize: 12.5, color: GRAY, marginTop: 3 }}>{r.sub}</div>
-            </button>
-          ))}
+          <button data-testid="route-us"
+            onClick={() => { setRoute('us'); setCentre(null); setPicked(null)
+                             setStep(origin ? 'centre' : 'address') }}
+            style={{ flex: '1 1 220px', textAlign: 'left', padding: '14px 16px',
+                     borderRadius: 16, cursor: 'pointer', transition: 'all .18s ease',
+                     border: route === 'us' ? `2px solid ${BLUE}` : '1px solid #e2e8f0',
+                     background: route === 'us' ? '#f5f9ff' : '#fff' }}>
+            <div style={{ fontWeight: 700, fontSize: 14.5, color: NAVY,
+                          display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 18 }}>🇺🇸</span> United States
+            </div>
+          </button>
+          <div data-testid="route-schengen"
+            onClick={() => { setRoute('schengen'); setCentre(null); setPicked(null)
+                             setStep(origin ? 'centre' : 'address') }}
+            style={{ flex: '1 1 260px', padding: '10px 16px', borderRadius: 16,
+                     cursor: 'pointer', transition: 'all .18s ease',
+                     display: 'flex', alignItems: 'center', gap: 8,
+                     border: route === 'schengen' ? `2px solid ${BLUE}` : '1px solid #e2e8f0',
+                     background: route === 'schengen' ? '#f5f9ff' : '#fff' }}>
+            {/* The chosen state's flag rides in the option text itself; the
+                EU flag marks the card only until a state is picked. */}
+            {!schengenDest && <span style={{ fontSize: 18 }}>🇪🇺</span>}
+            {/* The Schengen destination IS the choice: pick the member state
+                and the centres presented are that state's. */}
+            <select className="input" data-testid="schengen-dest"
+              value={schengenDest}
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) => { setSchengenDest(e.target.value); setRoute('schengen')
+                                 setCentre(null); setPicked(null)
+                                 setStep(origin ? 'centre' : 'address') }}
+              style={{ border: 'none', background: 'transparent', flex: 1,
+                       fontWeight: 700, fontSize: 14.5, color: NAVY,
+                       cursor: 'pointer', outline: 'none' }}>
+              <option value="">Select Schengen destination…</option>
+              {SCHENGEN_STATES.map((s) => (
+                <option key={s.name} value={s.name}>{s.flag} {s.name}</option>
+              ))}
+            </select>
+          </div>
         </div>
         <div style={{ marginTop: 16 }}>
           <label style={{ fontSize: 12.5, fontWeight: 650, color: NAVY }}>
