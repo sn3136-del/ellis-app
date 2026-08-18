@@ -14,6 +14,7 @@ import {
 } from '../../lib/intake.js'
 import Preferences from './Preferences.jsx'
 import H1bPipeline from './H1bPipeline.jsx'
+import BookAppointment, { bookingRouteForDestination } from './BookAppointment.jsx'
 import { ContinuePanel, DocCards } from './Checklist.jsx'
 import {
   SignatureModal, LiveViewModal, PaymentApprove, PaymentModal,
@@ -324,7 +325,9 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
           answer what Ellis still needs, take the folder, go and present it. */}
       {inPerson && (
         <ConsularJourney t={t} client={client} caseId={caseId}
-          packet={packet} journey={journey} onChanged={refresh} />
+          packet={packet} journey={journey} onChanged={refresh}
+          destination={(status?.answers || {}).destination_country || ''}
+          applicantName={(status?.answers || {}).full_name || ''} />
       )}
 
       {/* Document upload — illustrated cards. EVERY continuation kind has a
@@ -718,7 +721,8 @@ function EntryPrep({ t, client, caseId, journey, onToDocuments, onOpenCase }) {
 // the finished folder, go and present it. The backend decides which step this
 // case is on (packet.stage) so the screen can never disagree with the packet
 // about whether it is complete, and so "already downloaded" survives a reload.
-function ConsularJourney({ t, client, caseId, packet, journey, onChanged }) {
+function ConsularJourney({ t, client, caseId, packet, journey, onChanged,
+                           destination = '', applicantName = '' }) {
   const [reopened, setReopened] = useState(false)
   // The applicant can always go back and change an answer after downloading;
   // that is a local override of the backend's stage, never a rewrite of it.
@@ -735,7 +739,8 @@ function ConsularJourney({ t, client, caseId, packet, journey, onChanged }) {
           onDownloaded={onChanged} onEdit={() => setReopened(true)} />
       )}
       {stage === 'next' && (
-        <ConsularNext t={t} client={client} caseId={caseId} packet={packet} />
+        <ConsularNext t={t} client={client} caseId={caseId} packet={packet}
+          destination={destination} applicantName={applicantName} />
       )}
     </div>
   )
@@ -1045,17 +1050,22 @@ function ConsularReady({ t, client, caseId, packet, onDownloaded, onEdit }) {
   )
 }
 
-// STEP 3 — the last page, and it holds ONLY what the applicant does now: the
-// instructions and the folder. Booking tools, edit links and preference forms
-// all crowded this screen and were cut ("hide everything besides the
-// instruction and download again", 2026-08-04). Centered, because it is the
-// end of the journey, not another form.
-function ConsularNext({ t, client, caseId, packet }) {
+// STEP 3 — the last page, and it holds what the applicant does now: the
+// instructions, the folder, and — on routes with an agent channel (US B1/B2,
+// Schengen) — the real booking journey, where Ellis books the appointment on
+// the official site. Edit links and preference forms stay cut (2026-08-04);
+// booking returned by owner decision (2026-08-18) as the step's own act.
+function ConsularNext({ t, client, caseId, packet, destination = '',
+                        applicantName = '' }) {
   const toast = useToast()
   const [busy, setBusy] = useState(false)
   const [showDisclaimer, setShowDisclaimer] = useState(false)
   const post = packet.post || {}
   const steps = packet.next_steps || []
+  // Destinations with an agent-channel booking route (US B1/B2, Schengen)
+  // get the real booking journey right here — the folder is in hand, the
+  // appointment is the next act, and Ellis books it on the official site.
+  const bookable = bookingRouteForDestination(destination)
 
   async function again() {
     setBusy(true)
@@ -1106,6 +1116,13 @@ function ConsularNext({ t, client, caseId, packet }) {
           <ol style={{ margin: 0, paddingLeft: 20, fontSize: 13.5, lineHeight: 1.8 }}>
             {steps.map((s, i) => <li key={i}>{s}</li>)}
           </ol>
+        </div>
+      )}
+
+      {bookable && (
+        <div style={{ textAlign: 'left', margin: '6px 0 18px' }}>
+          <BookAppointment client={client} caseId={caseId}
+            destination={destination} applicantName={applicantName} />
         </div>
       )}
 
@@ -1162,258 +1179,6 @@ function ConsularPost({ t, post }) {
             </div>
           )}
         </div>
-      )}
-    </div>
-  )
-}
-
-// Booking the in-person appointment. Every booking system keeps its slots
-// behind the applicant's own account, so Ellis opens the OFFICIAL site and the
-// applicant picks their own slot — then tells Ellis what they booked, so the
-// date reaches their folder. Ellis never chooses a slot.
-function AppointmentBooking({ t, client, caseId }) {
-  const toast = useToast()
-  const [state, setState] = useState(null)
-  const [finding, setFinding] = useState(false)
-  const [editing, setEditing] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [form, setForm] = useState({ date: '', time: '', location: '', ref: '' })
-  const load = () => client.appointmentBooking(caseId).then(setState).catch(() => setState(null))
-  useEffect(() => { load() }, [caseId])
-  if (!state) return null
-
-  async function findPost() {
-    setFinding(true)
-    try {
-      const out = await client.findConsularPost(caseId)
-      // Reload whatever the search found, verified or not. Gating the refresh
-      // on 'verified' meant an unverified answer — which now carries the
-      // office's name and its address off an official page — was thrown away
-      // and the applicant told only that nothing was confirmed.
-      await load()
-      if (out.status !== 'verified') toast(t('booking.notFound'))
-    } catch (e) { toast(e.detail?.detail || e.message) }
-    setFinding(false)
-  }
-
-  async function saveBooked() {
-    const ms = Date.parse(`${form.date}T${form.time || '00:00'}`)
-    if (!form.date || !Number.isFinite(ms)) { toast(t('booking.badDate')); return }
-    if (ms < Date.now()) { toast(t('booking.pastDate')); return }
-    setSaving(true)
-    try {
-      await client.recordAppointment(caseId, ms, form.location || state.post_name || '',
-                                     form.ref || '')
-      setEditing(false)
-      await load()
-    } catch (e) { toast(e.detail?.detail || e.message) }
-    setSaving(false)
-  }
-
-  const appt = state.appointment
-  return (
-    <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--line)' }}
-      data-testid="appointment-booking">
-      {/* The post is named by the step that owns it (ConsularNext), and the
-          form's questions are asked in the step BEFORE the folder exists —
-          this card had been rendering both, so the same office appeared twice
-          and answering a question here refreshed nothing (its onSaved was a
-          no-op, so the completeness score above it never moved). */}
-      <div style={{ fontWeight: 600, marginBottom: 6 }}>{t('booking.title')}</div>
-      {/* Only where a readable government calendar actually exists for THIS
-          destination — the backend says which system applies. */}
-      {state.gov_calendar === 'rk_termin' && (
-        <GovCalendar t={t} client={client} caseId={caseId} />
-      )}
-      {appt && !editing ? (
-        <div data-testid="appointment-booked">
-          <div className="kv">
-            <div className="kv__k">{t('booking.booked')}</div>
-            <div className="kv__v">
-              {appt.when_utc}{appt.location ? ` — ${appt.location}` : ''}
-              {appt.confirmation_no ? ` · ${appt.confirmation_no}` : ''}
-            </div>
-          </div>
-          <button className="btn btn--ghost" style={{ marginTop: 8 }}
-            onClick={() => { setForm({ date: '', time: '', location: appt.location || '', ref: '' }); setEditing(true) }}>
-            {t('booking.change')}
-          </button>
-        </div>
-      ) : editing ? (
-        <div data-testid="booking-form">
-          <div className="wiz-grid" style={{ gap: 10 }}>
-            <div className="field"><label>{t('booking.date')}</label>
-              <input type="date" className="input" value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
-            <div className="field"><label>{t('booking.time')}</label>
-              <input type="time" className="input" value={form.time}
-                onChange={(e) => setForm({ ...form, time: e.target.value })} /></div>
-            <div className="field"><label>{t('booking.where')}</label>
-              <input className="input" value={form.location}
-                placeholder={state.post_name || ''}
-                onChange={(e) => setForm({ ...form, location: e.target.value })} /></div>
-            <div className="field"><label>{t('booking.ref')}</label>
-              <input className="input" value={form.ref}
-                onChange={(e) => setForm({ ...form, ref: e.target.value })} /></div>
-          </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-            <button className="btn" onClick={saveBooked} disabled={saving}
-              data-testid="booking-save">
-              {saving ? t('booking.saving') : t('booking.save')}
-            </button>
-            <button className="btn btn--ghost" onClick={() => setEditing(false)}>
-              {t('pay.cancel')}
-            </button>
-          </div>
-        </div>
-      ) : state.bookable ? (
-        <>
-          <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 8 }}>
-            {t('booking.sub', { post: state.post_name || t('packet.consulate') })}
-          </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <a className="btn" href={state.booking_url} target="_blank" rel="noreferrer"
-              data-testid="booking-open">{t('booking.open')}</a>
-            <button className="btn btn--ghost" onClick={() => setEditing(true)}
-              data-testid="booking-record">
-              {t('booking.record')}
-            </button>
-          </div>
-        </>
-      ) : (
-        <>
-          <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 8 }}>
-            {state.reason || t('booking.unknownPost')}
-          </div>
-          <button className="btn btn--ghost" onClick={findPost} disabled={finding}
-            data-testid="booking-find">
-            {finding ? t('booking.finding') : t('booking.find')}
-          </button>
-        </>
-      )}
-    </div>
-  )
-}
-
-// The two government systems with a REAL readable calendar and no accounts
-// (Germany's RK-Termin — 190+ missions — and Poland's e-Konsulat). The
-// applicant completes the portal's image check in their own secure window;
-// only then can Ellis read the month. Ellis never solves the check and never
-// clicks a day, because on these systems a click reserves a real slot.
-function GovCalendar({ t, client, caseId }) {
-  const toast = useToast()
-  const [open, setOpen] = useState(null)     // walk result (categories, gate)
-  const [month, setMonth] = useState(null)   // month summary once readable
-  const [busy, setBusy] = useState(false)
-  const [loc, setLoc] = useState('')
-  const [missions, setMissions] = useState(null)
-  const [search, setSearch] = useState('')
-
-  async function loadMissions() {
-    setBusy(true)
-    try {
-      const out = await client.calendarMissions(caseId)
-      setMissions(out.missions || [])
-      if ((out.missions || []).length) setLoc(out.missions[0].code)
-    } catch (e) { toast(e.detail?.detail || e.message) }
-    setBusy(false)
-  }
-
-  async function openCalendar() {
-    if (!loc.trim()) { toast(t('cal.needLocation')); return }
-    setBusy(true)
-    try {
-      const out = await client.calendarOpen(caseId, loc.trim())
-      setOpen(out); setMonth(null)
-    } catch (e) { toast(e.detail?.detail || e.message) }
-    setBusy(false)
-  }
-
-  async function readMonth() {
-    setBusy(true)
-    try { setMonth(await client.calendarMonth(caseId)) }
-    catch (e) { toast(e.detail?.detail || e.message) }
-    setBusy(false)
-  }
-
-  return (
-    <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--line)' }}
-      data-testid="gov-calendar">
-      <div style={{ fontWeight: 600, marginBottom: 4 }}>{t('cal.title')}</div>
-      <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 8 }}>
-        {t('cal.sub')}
-      </div>
-      {!open ? (
-        <div>
-          <div className="field">
-            <label>{t('cal.location')}</label>
-            {missions === null ? (
-              <button className="btn btn--ghost" onClick={loadMissions} disabled={busy}
-                data-testid="cal-load-missions">
-                {busy ? t('cal.loadingMissions') : t('cal.loadMissions')}
-              </button>
-            ) : (
-              <>
-                <input className="input" value={search} placeholder={t('cal.searchMission')}
-                  onChange={(e) => setSearch(e.target.value)} data-testid="cal-search" />
-                <select className="select" value={loc} size={6} style={{ marginTop: 6 }}
-                  onChange={(e) => setLoc(e.target.value)} data-testid="cal-mission">
-                  {missions
-                    .filter((m) => !search ||
-                      m.name.toLowerCase().includes(search.toLowerCase()))
-                    .map((m) => (
-                      <option key={m.code} value={m.code}>{m.name}</option>
-                    ))}
-                </select>
-              </>
-            )}
-          </div>
-          {missions !== null && (
-            <button className="btn" onClick={openCalendar} disabled={busy || !loc}
-              data-testid="cal-open" style={{ marginTop: 8 }}>
-              {busy ? t('cal.opening') : t('cal.open')}
-            </button>
-          )}
-        </div>
-      ) : (
-        <>
-          {open.captcha_required && !month && (
-            <div className="note" style={{ marginBottom: 8 }} data-testid="cal-captcha">
-              {t('cal.captcha')}
-            </div>
-          )}
-          {Array.isArray(open.categories) && open.categories.length > 0 && (
-            <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 8 }}>
-              {t('cal.categories')}: {open.categories.slice(0, 4)
-                .map((c) => c.label).join(' · ')}
-            </div>
-          )}
-          <button className="btn btn--ghost" onClick={readMonth} disabled={busy}
-            data-testid="cal-read">
-            {busy ? t('cal.reading') : t('cal.read')}
-          </button>
-          {month && (
-            <div style={{ marginTop: 10 }} data-testid="cal-month">
-              {!month.readable ? (
-                <div className="note">{month.reason}</div>
-              ) : month.none_available ? (
-                <div className="note">{t('cal.none')}</div>
-              ) : (
-                <>
-                  <div style={{ fontSize: 13, marginBottom: 6 }}>
-                    {t('cal.found', { n: month.bookable_count })}
-                  </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {(month.days || []).map((d) => (
-                      <a key={d.href} className="chip" href={d.href} target="_blank"
-                        rel="noreferrer" title={d.title || ''}>{d.label}</a>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-        </>
       )}
     </div>
   )

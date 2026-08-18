@@ -11,22 +11,24 @@
 //      coordinator submits it and books each member.
 //   4. Availability — published wait times and the official places to look.
 //
-// The line this surface exists to hold: Ellis never searches for or books an
-// appointment slot. The penalty for automated slot search falls on the
-// TRAVELLER — appointments cancelled and visas revoked — so the note is
-// rendered unconditionally at the top of the surface, before any payload
-// arrives and whether or not one ever does.
-import { useEffect, useRef, useState } from 'react'
+// The line this surface exists to hold: Ellis books only as an agent through
+// the official website, in a named operator's own session, and NEVER hunts
+// for slots with automation — the penalty for automated slot search falls on
+// the TRAVELLER (appointments cancelled, visas revoked). The note stating
+// this is rendered unconditionally at the top of the surface, before any
+// payload arrives and whether or not one ever does.
+import { useState } from 'react'
 import { useLocale } from '../../lib/locale.jsx'
 import { ErrorNote } from '../ui.jsx'
 import {
   appointmentTriageView, appointmentPrestageView, groupRosterView,
-  appointmentAvailabilityView, bookingView, HUMAN_ACT_KEYS, GROUP_MIN_MEMBERS
+  appointmentAvailabilityView, HUMAN_ACT_KEYS, GROUP_MIN_MEMBERS
 } from '../../lib/visaBackend.js'
 import {
   AppointmentIllustration, PassportIllustration, DocumentsIllustration,
   PipelineIllustration
 } from './Illustrations.jsx'
+import BookAppointment from './BookAppointment.jsx'
 
 const GROUP_KINDS = ['tour_group', 'company', 'school', 'family']
 const NAVY = 'var(--trip-navy, #0f294d)'
@@ -631,218 +633,6 @@ function AvailabilityPanel({ t, lang, client }) {
   )
 }
 
-// ---- Agent-channel booking (app/appt_booking.py) ---------------------------
-// The applicant asks and picks HERE, inside Trip.com. A named human operator
-// reads the official calendar and executes the booking in their own session;
-// this panel polls while the request is active so the operator's slots appear
-// within seconds of being recorded. "Booked" renders only behind evidence.
-function StatusChip({ t, status }) {
-  const tone = status === 'booked' ? ' chip--ink'
-    : (status === 'failed' || status === 'cancelled') ? ' chip-icon--warn' : ''
-  return <span className={'chip' + tone} data-testid="booking-status">
-    {t(`appt.booking.status.${status}`)}
-  </span>
-}
-
-function BookingPanel({ t, lang, client, caseId }) {
-  const [view, setView] = useState(null)   // null = first fetch not resolved
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState(null)
-  const [form, setForm] = useState({ route: 'us_b1b2', posts: '', from: '', to: '', note: '' })
-  const timer = useRef(null)
-  // Guards a poll response that lands after the case changed underneath it —
-  // a stale case's booking must never render as this case's.
-  const caseRef = useRef(caseId)
-  const set = (k) => (v) => setForm((p) => ({ ...p, [k]: v }))
-
-  async function refresh() {
-    const forCase = caseId
-    try {
-      const payload = await client.bookingForCase(forCase)
-      if (caseRef.current !== forCase) return
-      setView(bookingView(payload))
-      setError(null)
-    } catch (e) {
-      if (caseRef.current !== forCase) return
-      setError({ message: e.message })
-    }
-  }
-  useEffect(() => { caseRef.current = caseId; setView(null); refresh() }, [caseId])
-  // Poll only while a request is ACTIVE — the operator's recorded slots and
-  // the final confirmation arrive without a manual reload.
-  useEffect(() => {
-    clearInterval(timer.current)
-    if (view?.active) timer.current = setInterval(refresh, 4000)
-    return () => clearInterval(timer.current)
-  }, [view?.active, view?.status])
-
-  async function request() {
-    setBusy(true); setError(null)
-    try {
-      const posts = form.posts.split(',').map((s) => s.trim()).filter(Boolean)
-      const windows = (form.from || form.to) ? [{ from: form.from, to: form.to }] : []
-      setView(bookingView(await client.bookingCreate(caseId, {
-        route: form.route, posts, date_windows: windows, note: form.note })))
-    } catch (e) {
-      setError({ message: e.message })
-    }
-    setBusy(false)
-  }
-
-  async function act(fn) {
-    setBusy(true); setError(null)
-    try { setView(bookingView(await fn())) } catch (e) { setError({ message: e.message }) }
-    setBusy(false)
-  }
-
-  // While the first fetch is in flight (view === null) show nothing but the
-  // loader — the request form must not flash before we know the case's state.
-  const loading = view === null
-  const showForm = !!view && (!view.exists || (!view.active && view.status !== 'booked'))
-  return (
-    <PanelCard art={<AppointmentIllustration size={60} />} title={t('appt.booking.title')}
-               sub={t('appt.booking.sub')} className="anim-rise-2"
-               data-testid="appt-booking">
-      {error && <ErrorNote error={error} />}
-      {loading && !error && (
-        <div style={{ fontSize: 12.5, color: GRAY, marginTop: 10 }}
-             data-testid="booking-loading">{t('cockpit.loading')}</div>
-      )}
-      {/* A failed FIRST fetch leaves view null; without a way forward the
-          whole panel is stuck. Offer a retry rather than blindly showing the
-          request form (a request may already exist). */}
-      {loading && error && (
-        <button className="btn btn--sm btn--ghost" style={{ marginTop: 8 }}
-                disabled={busy} onClick={refresh} data-testid="booking-retry">
-          {t('common.retry')}
-        </button>
-      )}
-      {/* A finished (failed / cancelled) request stays visible above the
-          fresh-request form: the history is honest, not swept away. */}
-      {view && view.exists && (view.status === 'failed' || view.status === 'cancelled') && (
-        <div className="card card--soft anim-rise" style={{ padding: 14, marginTop: 10, borderRadius: 14, fontSize: 12.5 }}
-             data-testid="booking-ended">
-          <StatusChip t={t} status={view.status} />
-          {view.failureReason && <div style={{ color: GRAY, marginTop: 6 }}>{view.failureReason}</div>}
-        </div>
-      )}
-
-      {showForm && (
-        <div style={{ marginTop: 12 }} data-testid="booking-request-form">
-          <div className="grid grid-2" style={{ gap: '12px 16px' }}>
-            <div className="field">
-              <label>{t('appt.booking.route')}</label>
-              <select className="input" value={form.route}
-                      onChange={(e) => set('route')(e.target.value)}>
-                <option value="us_b1b2">{t('appt.booking.routeUS')}</option>
-                <option value="schengen">{t('appt.booking.routeSchengen')}</option>
-              </select>
-            </div>
-            <div className="field">
-              <label>{t('appt.booking.posts')}</label>
-              <input className="input" value={form.posts} placeholder={t('appt.booking.postsHint')}
-                     onChange={(e) => set('posts')(e.target.value)} />
-            </div>
-            <div className="field">
-              <label>{t('appt.booking.windowFrom')}</label>
-              <input className="input" type="date" value={form.from}
-                     onChange={(e) => set('from')(e.target.value)} />
-            </div>
-            <div className="field">
-              <label>{t('appt.booking.windowTo')}</label>
-              <input className="input" type="date" value={form.to}
-                     onChange={(e) => set('to')(e.target.value)} />
-            </div>
-          </div>
-          <button className="btn btn--sm" style={{ marginTop: 10 }} disabled={busy || !form.posts.trim()}
-                  onClick={request} data-testid="booking-request">
-            {t('appt.booking.request')}
-          </button>
-        </div>
-      )}
-
-      {view && view.exists && view.active && (
-        <div className="card card--soft anim-rise" style={{ padding: 16, marginTop: 12, borderRadius: 14, fontSize: 12.5 }}
-             data-testid="booking-active">
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-            <StatusChip t={t} status={view.status} />
-            <span style={{ color: GRAY }}>
-              {view.posts.join(' · ')}
-              {view.dateWindows[0] && ` · ${view.dateWindows[0].from || '…'} → ${view.dateWindows[0].to || '…'}`}
-            </span>
-          </div>
-          {view.status === 'requested' && (
-            <div style={{ color: GRAY, marginTop: 8 }}>{t('appt.booking.waitingOp')}</div>
-          )}
-          {view.status === 'slots_offered' && (
-            <div style={{ marginTop: 10 }} data-testid="booking-slots">
-              <div style={{ fontWeight: 700 }}>{t('appt.booking.pickTitle')}</div>
-              {/* Who read the calendar and when — on every slot. */}
-              <div style={{ fontSize: 11.5, color: GRAY, marginTop: 2 }}>{view.slotsNotice}</div>
-              {view.offeredSlots.map((s, i) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between',
-                                      alignItems: 'center', gap: 10, marginTop: 8 }}>
-                  <div>
-                    <b>{s.post}</b> · {s.when}{s.label ? ` · ${s.label}` : ''}
-                    <div style={{ fontSize: 11, color: GRAY }}>
-                      {s.source === 'ellis_agent'
-                        ? t('appt.booking.readByEllis', { at: s.recordedAt })
-                        : t('appt.booking.seenBy', { who: s.recordedBy, at: s.recordedAt })}
-                    </div>
-                  </div>
-                  <button className="btn btn--sm" disabled={busy} data-testid={`booking-pick-${i}`}
-                          onClick={() => act(() => client.bookingPick(view.id, i, s))}>
-                    {t('appt.booking.pick')}
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-          {view.status === 'slot_picked' && view.pickedSlot && (
-            <div style={{ marginTop: 8 }} data-testid="booking-picked">
-              <b>{view.pickedSlot.post}</b> · {view.pickedSlot.when}
-              <div style={{ color: GRAY, marginTop: 4 }}>{t('appt.booking.waitingBook')}</div>
-            </div>
-          )}
-          <button className="btn btn--sm btn--ghost" style={{ marginTop: 10 }} disabled={busy}
-                  onClick={() => act(() => client.bookingCancel(view.id))} data-testid="booking-cancel">
-            {t('appt.booking.cancel')}
-          </button>
-        </div>
-      )}
-
-      {view && view.exists && view.status === 'booked' && view.confirmation && (
-        <div className="card card--soft anim-rise" style={{ padding: 16, marginTop: 12, borderRadius: 14, fontSize: 12.5 }}
-             data-testid="booking-booked">
-          <StatusChip t={t} status="booked" />
-          <div style={{ marginTop: 8 }}>
-            <b>{view.pickedSlot?.post}</b> · {view.pickedSlot?.when}
-          </div>
-          <div style={{ marginTop: 4 }}>
-            {t('appt.booking.confNumber', { number: view.confirmation.number })}
-          </div>
-          <div style={{ fontSize: 11.5, color: GRAY, marginTop: 4 }}>
-            {t('appt.booking.bookedBy', { who: view.confirmation.recordedBy })}
-          </div>
-        </div>
-      )}
-
-      {view && view.exists && (
-        <>
-          {view.legalBasis.basis && (
-            <div style={{ fontSize: 11.5, color: GRAY, marginTop: 10 }} data-testid="booking-basis">
-              {view.legalBasis.basis}{view.legalBasis.limit ? ` ${view.legalBasis.limit}` : ''}
-            </div>
-          )}
-          {view.neverAutomatedNotice && (
-            <div style={{ fontSize: 11.5, color: GRAY, marginTop: 4 }}>{view.neverAutomatedNotice}</div>
-          )}
-          <HumanActs t={t} acts={view.humanActs} testid="booking-acts" />
-        </>
-      )}
-    </PanelCard>
-  )
-}
 
 export default function AppointmentCockpit({ client, caseId, showGroupRoster = true,
                                             showBooking = true }) {
@@ -850,14 +640,23 @@ export default function AppointmentCockpit({ client, caseId, showGroupRoster = t
   return (
     <div style={{ marginTop: 28 }} data-testid="appointment-cockpit">
       <CockpitHeader t={t} />
-      {/* Unconditional, before any payload: Ellis never books. */}
+      {/* Unconditional, before any payload: agency through the official
+          site only, never automated slot search. */}
       <NeverBooksNote t={t} />
       {caseId && <TriagePanel t={t} lang={lang} client={client} caseId={caseId} />}
       {caseId && <PrestagePanel t={t} lang={lang} client={client} caseId={caseId} />}
       {/* Booking is the APPLICANT's own act on their own case. It never shows
           on the employer console, and never on the parent petition case (only
-          a released child consular case has a real appointment to book). */}
-      {caseId && showBooking && <BookingPanel t={t} lang={lang} client={client} caseId={caseId} />}
+          a released child consular case has a real appointment to book).
+          The themed booking journey (BookAppointment) runs the same real
+          pipeline: request -> calendar read in an authorized session -> pick
+          -> booked behind evidence. */}
+      {caseId && showBooking && (
+        <div className="card anim-rise-2" style={{ padding: 20, borderRadius: 18, marginTop: 16 }}
+             data-testid="appt-booking">
+          <BookAppointment client={client} caseId={caseId} destination="USA" />
+        </div>
+      )}
       {showGroupRoster && <GroupRosterPanel t={t} lang={lang} client={client} />}
       <AvailabilityPanel t={t} lang={lang} client={client} />
     </div>

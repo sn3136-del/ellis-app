@@ -1,18 +1,18 @@
-// Appointment DEMO data + generators (Trip.com pitch demo, 2026-08-17).
+// Official appointment centres + the geography that finds the right one.
 //
-// SIMULATED. Nothing here touches the real booking pipeline, the backend, or
-// any government site: it is a self-contained script for showing the product
-// end to end. The real feature (app/appt_booking*.py + AppointmentCockpit's
-// BookingPanel) is evidence-gated and fails closed; this module exists so a
-// demo can run without an operator account or a released adapter.
+// REAL DATA, used by the real booking pipeline's UI (BookAppointment.jsx):
+//   * CENTRES are the real visa application centres / consulates, with real
+//     street addresses and coordinates — every address verified against
+//     official sources (2026-08-17). Tokyo/Seoul carry NO Schengen VAC entry:
+//     applications there go directly to the embassies, and a "VAC" would be
+//     an invention.
+//   * resolveAddress / nearestCentres are true great-circle geography from
+//     the city the applicant names — no network call, never a dead end.
 //
-// Realism the demo relies on:
-//   * centres are the REAL visa application centres / consulates, with real
-//     street addresses and coordinates, so "nearest to you" is a true
-//     great-circle sort from the address the viewer types;
-//   * slot dates are generated on a business calendar with plausible wait
-//     times per route, morning/afternoon blocks, and scarcity (some days
-//     full), so the calendar never looks like a uniform grid.
+// What this module deliberately does NOT contain: slot availability. Open
+// dates come only from the booking pipeline (app/appt_booking*.py) — read
+// from the official calendar in an authorized session and stamped with who
+// read them and when. Nothing here generates, guesses, or embellishes a slot.
 
 import { WORLD_CITIES } from './worldCities.js'
 
@@ -23,15 +23,21 @@ export const CENTRES = [
   { id: 'us-bj', name: 'U.S. Embassy Beijing', kind: 'consulate', city: 'Beijing',
     address: '55 An Jia Lou Road, Chaoyang District, Beijing',
     lat: 39.9500, lon: 116.4667, routes: ['us'] },
+  // Visa-section addresses (where the applicant actually goes), not always
+  // the consulate compound — re-verified against the embassy's own pages
+  // 2026-08-18.
   { id: 'us-sh', name: 'U.S. Consulate General Shanghai', kind: 'consulate', city: 'Shanghai',
-    address: '1038 Nanjing West Road, Jing’an District, Shanghai',
+    address: 'Westgate Mall 8/F, 1038 Nanjing West Road, Jing’an District, Shanghai',
     lat: 31.2286, lon: 121.4500, routes: ['us'] },
   { id: 'us-gz', name: 'U.S. Consulate General Guangzhou', kind: 'consulate', city: 'Guangzhou',
-    address: '43 Hua Jiu Road, Zhujiang New Town, Tianhe District, Guangzhou',
+    address: '43 Hua Jiu Road, Zhujiang New Town, Tianhe District, Guangzhou (applicant entrance on Huaxia Road)',
     lat: 23.1180, lon: 113.3230, routes: ['us'] },
   { id: 'us-sy', name: 'U.S. Consulate General Shenyang', kind: 'consulate', city: 'Shenyang',
-    address: '52 Shi Si Wei Road, Heping District, Shenyang',
-    lat: 41.7860, lon: 123.4100, routes: ['us'] },
+    address: 'Maoye Tiandi Shopping Mall 5/F, 185 Qingnian Street, Shenhe District, Shenyang',
+    lat: 41.7770, lon: 123.4400, routes: ['us'] },
+  { id: 'us-wh', name: 'U.S. Consulate General Wuhan', kind: 'consulate', city: 'Wuhan',
+    address: 'Minsheng Bank Building, 396 Xinhua Road, Jiang’an District, Wuhan',
+    lat: 30.5990, lon: 114.2860, routes: ['us'] },
   { id: 'us-hk', name: 'U.S. Consulate General Hong Kong', kind: 'consulate', city: 'Hong Kong',
     address: '26 Garden Road, Central, Hong Kong',
     lat: 22.2780, lon: 114.1580, routes: ['us'] },
@@ -102,9 +108,6 @@ export const CENTRES = [
     address: '100 Jinhu Road, Neihu District, Taipei', lat: 25.0800, lon: 121.5940, routes: ['us'] },
 
   // ---- Schengen visa application centres outside mainland China -----------
-  // Tokyo/Seoul carry NO entry: Schengen applications in Japan and Korea go
-  // directly to the embassies — a "VAC" there would be an invention
-  // (verified 2026-08-17 against official sources).
   { id: 'sch-hk', name: 'Schengen Visa Application Centre — Hong Kong', kind: 'vac', city: 'Hong Kong',
     address: 'Unit 03-05, 12/F, Prosperity Millennia Plaza, 663 King’s Road, Quarry Bay, Hong Kong',
     lat: 22.2880, lon: 114.2090, routes: ['schengen'] },
@@ -131,8 +134,8 @@ export const CENTRES = [
 ]
 
 // Well-known city anchors so a typed address resolves without any network
-// call (a demo must never depend on a geocoding service). Matching is by
-// substring on the city name, in English or Chinese.
+// call (centre-finding must never depend on a geocoding service). Matching is
+// by substring on the city name, in English or Chinese.
 const CITY_ANCHORS = [
   { keys: ['beijing', '北京'], lat: 39.9042, lon: 116.4074, label: 'Beijing' },
   { keys: ['shanghai', '上海'], lat: 31.2304, lon: 121.4737, label: 'Shanghai' },
@@ -155,7 +158,7 @@ const CITY_ANCHORS = [
   { keys: ['fuzhou', '福州'], lat: 26.0745, lon: 119.2965, label: 'Fuzhou' },
   { keys: ['taipei', '台北', '臺北'], lat: 25.0330, lon: 121.5654, label: 'Taipei' },
   { keys: ['macau', 'macao', '澳门', '澳門'], lat: 22.1987, lon: 113.5439, label: 'Macau' },
-  // World cities — the demo must place ANY address a viewer types.
+  // World cities — any address an applicant types must place.
   { keys: ['lyon'], lat: 45.7640, lon: 4.8357, label: 'Lyon' },
   { keys: ['paris'], lat: 48.8566, lon: 2.3522, label: 'Paris' },
   { keys: ['marseille'], lat: 43.2965, lon: 5.3698, label: 'Marseille' },
@@ -208,7 +211,7 @@ const CITY_ANCHORS = [
 // a CJK key matches as a substring.
 function keyHits(s, key) {
   if (!key) return false
-  if (/[^ -ÿ]/.test(key)) return s.includes(key)
+  if (/[^ -ÿ]/.test(key)) return s.includes(key)
   const esc = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   return new RegExp(`(^|[^a-z\\u00c0-\\u024f])${esc}([^a-z\\u00c0-\\u024f]|$)`).test(s)
 }
@@ -227,8 +230,9 @@ export function resolveAddress(text) {
       return { lat: c.lat, lon: c.lon, label: c.name }
     }
   }
-  // Unknown locality: keep the viewer's own words as the label (last segment
-  // reads most like the city), mark it approximate, and let Kimi place it.
+  // Unknown locality: keep the applicant's own words as the label (last
+  // segment reads most like the city), mark it approximate, and let Kimi
+  // place it.
   const parts = String(text).split(',').map((p) => p.trim()).filter(Boolean)
   const label = (parts[parts.length - 1] || String(text).trim()).slice(0, 60)
   return { lat: null, lon: null, label, approx: true }
@@ -266,92 +270,18 @@ export function routeCatalogue(route) {
   return CENTRES.filter((c) => c.routes.includes(route))
 }
 
-// ---- Slot generation -------------------------------------------------------
-// Deterministic per (centre, day) so re-renders don't reshuffle the calendar,
-// but varied enough to look like a real, uneven booking calendar.
-function hash(str) {
-  let h = 2166136261
-  for (let i = 0; i < str.length; i++) {
-    h ^= str.charCodeAt(i)
-    h = Math.imul(h, 16777619)
-  }
-  return (h >>> 0) / 4294967295
-}
-
-// Real consular scheduling patterns: US visa interviews are overwhelmingly
-// MORNING appointments (doors 07:30, interviews through late morning; PM
-// blocks are rare); VFS/TLS centres run full submission days on 15-minute
-// grids. Odd minutes like :15/:45 are what real letters carry.
-const US_TIMES_AM = ['07:30', '07:45', '08:00', '08:15', '08:30', '08:45',
-                     '09:00', '09:15', '09:30', '09:45', '10:15', '10:45']
-const US_TIMES_PM = ['13:15', '13:45']
-const VAC_TIMES_AM = ['08:00', '08:15', '08:30', '08:45', '09:00', '09:30',
-                      '10:00', '10:15', '10:45', '11:15']
-const VAC_TIMES_PM = ['13:00', '13:30', '14:00', '14:15', '14:45', '15:15',
-                      '15:45']
-
-function pad(n) { return String(n).padStart(2, '0') }
-export function isoDate(d) {
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
-}
-
-/** "Today" in the CENTRE's own timezone (approximated from its longitude —
- *  ±1h is irrelevant at day granularity). The applicant may be browsing from
- *  any timezone; the calendar must never show a date that is already over at
- *  the centre. */
-export function centreToday(centre, now = new Date()) {
-  const offsetHours = Math.round((centre?.lon ?? 0) / 15)
-  const utcMs = now.getTime() + now.getTimezoneOffset() * 60000
-  const local = new Date(utcMs + offsetHours * 3600000)
-  return new Date(local.getFullYear(), local.getMonth(), local.getDate())
-}
-
-/** Realistic typical wait before the first opening, per route + centre. */
-function leadDays(route, centre) {
-  const base = route === 'us' ? 24 : 11
-  const jitter = Math.floor(hash(centre.id + ':lead') * 14)
-  return base + jitter
-}
-
-/**
- * A month of availability for one centre: business days only, in the
- * CENTRE's own timezone (never a date that is past there), a realistic lead
- * time before anything opens, some days fully booked, and a varying number
- * of morning/afternoon slots per open day.
- */
-export function generateAvailability(route, centre, { from = null, days = 45 } = {}) {
-  const out = []
-  const base = from || centreToday(centre)
-  const lead = Math.max(1, leadDays(route, centre))   // never today, never past
-  for (let i = lead; i < lead + days; i++) {
-    const d = new Date(base.getFullYear(), base.getMonth(), base.getDate() + i)
-    const dow = d.getDay()
-    if (dow === 0 || dow === 6) continue           // consulates close weekends
-    const key = `${centre.id}:${isoDate(d)}`
-    const r = hash(key)
-    if (r < 0.42) continue                          // fully booked that day
-    const amCount = Math.floor(hash(key + ':am') * 4)      // 0-3
-    // US interview sections rarely run afternoons; VACs usually do.
-    const pmCount = route === 'us'
-      ? (hash(key + ':pm') > 0.8 ? 1 : 0)
-      : Math.floor(hash(key + ':pm') * 3)                  // 0-2
-    if (amCount + pmCount === 0) continue
-    // Route-true time patterns: US interviews cluster in the morning; VACs
-    // run a full submission day.
-    const AM = route === 'us' ? US_TIMES_AM : VAC_TIMES_AM
-    const PM = route === 'us' ? US_TIMES_PM : VAC_TIMES_PM
-    const times = []
-    for (let k = 0; k < amCount + (route === 'us' ? 1 : 0); k++) {
-      times.push(AM[Math.floor(hash(key + ':a' + k) * AM.length)])
-    }
-    for (let k = 0; k < pmCount; k++) {
-      times.push(PM[Math.floor(hash(key + ':p' + k) * PM.length)])
-    }
-    const uniq = [...new Set(times)].sort()
-    if (!uniq.length) continue
-    out.push({ date: isoDate(d), times: uniq })
-  }
-  return out
+/** Best-effort match from an operator-recorded post string back to a known
+ *  centre — so a real offered slot can be drawn on a real map. Matches by
+ *  exact name, then by the centre's city appearing in the post text. Returns
+ *  null rather than guessing across cities. */
+export function centreForPost(route, post) {
+  const p = String(post || '').toLowerCase().trim()
+  if (!p) return null
+  const pool = routeCatalogue(route)
+  return pool.find((c) => c.name.toLowerCase() === p)
+    || pool.find((c) => p.includes(c.name.toLowerCase()))
+    || pool.find((c) => p.includes(c.city.toLowerCase()))
+    || null
 }
 
 /** Human date label, e.g. "Tue, 16 Sep 2026". */
@@ -370,30 +300,14 @@ export function daysAway(iso, from = new Date()) {
   return Math.round((dt - base) / 86400000)
 }
 
-/** A plausible official confirmation number for the route. */
-export function confirmationNumber(route, seed) {
-  const n = Math.floor(hash(String(seed) + ':conf') * 9_000_000) + 1_000_000
-  return route === 'us' ? `AA00${n}` : `VFS-CN-${n}`
-}
-
-// The steps Ellis's agent narrates while "working" the official site. Each is
-// a real step of the live pipeline, so the demo mirrors the true flow.
-export function agentSteps(route, centre) {
-  const site = route === 'us' ? 'ais.usvisa-info.com' : 'visa.vfsglobal.com'
-  return [
-    { key: 'session', label: `Opening the operator's signed-in session on ${site}` },
-    { key: 'navigate', label: `Navigating to the ${centre.city} scheduling calendar` },
-    { key: 'read', label: 'Reading the open dates from the official calendar' },
-    { key: 'relay', label: 'Relaying what it found to Trip.com' },
-  ]
-}
-
-export function bookingSteps(route, centre, slot) {
-  const site = route === 'us' ? 'ais.usvisa-info.com' : 'visa.vfsglobal.com'
-  return [
-    { key: 'reopen', label: `Re-opening ${site} in the operator's session` },
-    { key: 'select', label: `Selecting ${prettyDate(slot.date)} at ${slot.time}` },
-    { key: 'confirm', label: `Confirming the appointment at ${centre.name}` },
-    { key: 'capture', label: 'Capturing the official confirmation as evidence' },
-  ]
+/** Split a recorded slot's free-form `when` into a date part and the rest —
+ *  "2026-09-14 09:30" -> { date: '2026-09-14', time: '09:30' }. A `when` that
+ *  does not start with an ISO date keeps its whole text as `time` and no
+ *  date, so nothing recorded by a person is ever dropped or reformatted into
+ *  a claim they did not make. */
+export function splitWhen(when) {
+  const s = String(when || '').trim()
+  const m = s.match(/^(\d{4}-\d{2}-\d{2})[T ]?(.*)$/)
+  if (!m) return { date: '', time: s }
+  return { date: m[1], time: (m[2] || '').trim() }
 }

@@ -1731,7 +1731,12 @@ test('every cockpit string exists in every locale and the single action never cl
   // The English copy says what it does and what it does not.
   assert.match(STRINGS.en['cockpit.action.open'], /open secure window/i)
   assert.match(STRINGS.en['cockpit.acts.never'], /never logs in, signs, pays, submits/i)
-  assert.match(STRINGS.en['appt.neverBooks'], /never searches for or books/i)
+  // The doctrine line since the agent-channel desk shipped: agency through
+  // the official website only, never automated slot search, booked only
+  // behind the official confirmation.
+  assert.match(STRINGS.en['appt.neverBooks'], /only as your agent through the official website/i)
+  assert.match(STRINGS.en['appt.neverBooks'], /never hunts for slots with automation/i)
+  assert.match(STRINGS.en['appt.neverBooks'], /official confirmation on file/i)
   assert.match(STRINGS.en['cockpit.notice.nothingFiled'], /nothing on this screen has been filed/i)
   // The group pre-check names the consulate's own numbers, not Ellis's.
   assert.ok(STRINGS.en['appt.group.tooFew'].includes('{min}'))

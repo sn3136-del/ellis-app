@@ -524,6 +524,12 @@ export function createVisaClient(session) {
     // official site in their own session; `booked` exists only behind evidence
     // (confirmation number + confirmation document on the case). Nothing here
     // touches the booking site.
+    // Kimi K3 names the nearest official centre from the applicant's own
+    // address — centre CHOICE only, no slot data, and any failure returns
+    // available:false so the caller's great-circle sort stands.
+    bookingNearestCentre: (body = {}) =>
+      call('POST', '/appointments/booking/nearest-centre', session,
+           { address: '', centres: [], ...body }),
     bookingCreate: (caseId, body = {}) =>
       call('POST', `/appointments/booking/cases/${caseId}`, session,
            { route: '', posts: [], date_windows: [], note: '', ...body }),

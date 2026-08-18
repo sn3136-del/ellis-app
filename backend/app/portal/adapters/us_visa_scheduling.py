@@ -21,6 +21,16 @@ production (that is exactly why production_enabled stays False — a guessed
 selector can never touch a real traveller). Tests bind `driver` to a
 MockPortal; no live navigation, booking, or payment runs in CI.
 
+REGION SCOPE (verified against official sources 2026-08-18): ais.usvisa-info.com
+serves many posts (India, Mexico, Brazil, much of Europe) but NOT mainland
+China. China runs on CGI's ustraveldocs.com/cn + www.usvisascheduling.com
+(cutover 2024-12-07), whose Terms prohibit access "through automated means,
+including bots, crawlers, or scripts" and sit behind an active bot check.
+For China, therefore, this adapter must never be selected: slots are read and
+booked by a named operator BY HAND (source='operator_manual' in the booking
+desk), or through the sanctioned group-coordinator channel. Any future China
+adapter is a separate decision with its own legal review.
+
 ACTIVATION (one reviewed step at a time):
   1. Legal/ToS review of ais.usvisa-info.com for agent-channel scheduling.
   2. Provision the operator account(s) that will hold the signed-in session.

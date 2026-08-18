@@ -676,3 +676,33 @@ def test_input_caps_bound_posts_and_windows(client, db):
     # A non-ISO 'from' is dropped, never stored as a fake date.
     assert row.date_windows[0]["from"] == ""
     assert row.date_windows[0]["to"] == "2026-11-15"
+
+
+# --------------------------------------------------- nearest-centre (Kimi K3)
+
+def test_nearest_centre_is_authenticated_and_fails_closed(client):
+    """The centre finder is part of the booking desk (moved off the demo
+    surface 2026-08-18): a session endpoint, never an open model relay, and
+    every failure is available:false — the caller's own great-circle sort is
+    the fallback, never an error and never an invented consulate."""
+    centres = [{"id": "us-sh", "name": "U.S. Consulate General Shanghai",
+                "city": "Shanghai", "address": "1038 Nanjing West Road"}]
+    # No auth -> refused.
+    r = client.post("/appointments/booking/nearest-centre",
+                    json={"address": "Pudong, Shanghai", "centres": centres})
+    assert r.status_code in (401, 403)
+    # Authenticated: either Kimi answered with an id FROM THE LIST, or the
+    # endpoint honestly says available:false. Nothing else is possible.
+    r = client.post("/appointments/booking/nearest-centre", headers=AUTH,
+                    json={"address": "Pudong, Shanghai", "centres": centres})
+    assert r.status_code == 200, r.text
+    body = r.json()
+    if body["available"]:
+        assert body["centre_id"] == "us-sh"
+    else:
+        assert body["reason"]
+    # Empty inputs are refused the same honest way, not with a 4xx.
+    r = client.post("/appointments/booking/nearest-centre", headers=AUTH,
+                    json={"address": "", "centres": []})
+    assert r.status_code == 200
+    assert r.json()["available"] is False

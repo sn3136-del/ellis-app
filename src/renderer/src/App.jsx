@@ -18,7 +18,6 @@ import VisaConsole from './screens/VisaConsole.jsx'
 import AdminConsole from './screens/AdminConsole.jsx'
 import SetupWizard from './screens/SetupWizard.jsx'
 import EmployerConsole from './screens/EmployerConsole.jsx'
-import AppointmentsDemo from './screens/AppointmentsDemo.jsx'
 import AskEllis from './components/visa/AskEllis.jsx'
 import { fetchRuntimeMode } from './lib/visaBackend.js'
 import {
@@ -90,8 +89,7 @@ function AppInner() {
   const adminMode = persona === 'admin'
   // Boots into the applicant intake surface; the employer persona is routed
   // to the employer console immediately after mount.
-  const [view, setView] = useState(() =>
-    (window.location.hash || '').includes('appointments') ? 'appointments' : 'visa')
+  const [view, setView] = useState('visa')
   useEffect(() => { if (persona === 'employer') setView('employer') }, [persona])
   // The floating Ask Ellis assistant follows whichever H1B case a surface has
   // registered (H1bPipeline registers the parent case); hidden when no case.
@@ -131,13 +129,6 @@ function AppInner() {
         </header>
         <main className="main main--top">
           {view === 'visa' && <VisaConsole onNotify={() => {}} adminMode={adminMode} />}
-          {/* Appointments DEMO surface: self-contained simulation for the
-              Trip.com pitch — never touches the real booking pipeline. */}
-          {view === 'appointments' && (
-            <AppointmentsDemo onBack={() => {
-              window.location.hash = '#applicant'; window.location.reload()
-            }} />
-          )}
           {/* Employer console: the employer persona's home; admins may visit.
               An applicant can never route here. */}
           {view === 'employer' && (persona === 'employer' || adminMode

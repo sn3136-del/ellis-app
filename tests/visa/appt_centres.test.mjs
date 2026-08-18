@@ -1,12 +1,13 @@
-// Appointments-demo find-centre logic: ANY address must resolve to something
-// actionable, the distance sort must be true geography, and the catalogue must
-// stay internally valid. The demo's rule: the Find button never dead-ends.
+// Centre-finding for the real booking surface: ANY address must resolve to
+// something actionable, the distance sort must be true geography, and the
+// catalogue must stay internally valid. The rule: finding a centre never
+// dead-ends — and nothing in this library invents a slot.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   CENTRES, resolveAddress, distanceKm, nearestCentres, routeCatalogue,
-  generateAvailability
-} from '../../src/renderer/src/lib/apptDemoData.js'
+  centreForPost, splitWhen
+} from '../../src/renderer/src/lib/apptCentres.js'
 
 // ---- resolveAddress: the many-address torture list -------------------------
 
@@ -61,7 +62,7 @@ test('an unknown locality still resolves — approximate, never a dead end', () 
     assert.ok(o.label.length > 0)
     assert.equal(o.lat, null)
   }
-  // Only emptiness returns null (the button stays disabled until 3 chars).
+  // Only emptiness returns null (the search waits until 3 chars).
   assert.equal(resolveAddress(''), null)
   assert.equal(resolveAddress('   '), null)
 })
@@ -133,9 +134,43 @@ test('the centre catalogue is valid: unique ids, real coords, routed', () => {
     assert.ok(Math.abs(c.lat) <= 90 && Math.abs(c.lon) <= 180, `bad coords ${c.id}`)
     assert.ok(Array.isArray(c.routes) && c.routes.length > 0, `unrouted ${c.id}`)
   }
-  // Both routes have enough coverage for a worldwide demo.
+  // Both routes have worldwide coverage.
   assert.ok(routeCatalogue('us').length >= 20)
   assert.ok(routeCatalogue('schengen').length >= 15)
+})
+
+// ---- the library never invents availability ---------------------------------
+
+test('no slot generation exists here — dates come only from the pipeline', async () => {
+  const lib = await import('../../src/renderer/src/lib/apptCentres.js')
+  for (const banned of ['generateAvailability', 'confirmationNumber',
+                        'agentSteps', 'bookingSteps', 'centreToday']) {
+    assert.ok(!(banned in lib), `${banned} must not exist in apptCentres.js`)
+  }
+})
+
+// ---- mapping a recorded slot back to a real centre ---------------------------
+
+test('centreForPost matches operator-recorded post text honestly', () => {
+  assert.equal(centreForPost('us', 'U.S. Consulate General Shanghai').id, 'us-sh')
+  assert.equal(centreForPost('us', 'u.s. embassy beijing').id, 'us-bj')
+  assert.equal(centreForPost('us', 'Interview at the Shanghai consulate').id, 'us-sh')
+  assert.equal(centreForPost('schengen', 'VFS New York').id, 'sch-ny')
+  // No cross-city guess: an unknown post maps to nothing, never "somewhere".
+  assert.equal(centreForPost('us', 'Consulate of Elbonia'), null)
+  assert.equal(centreForPost('us', ''), null)
+})
+
+test('splitWhen keeps a person’s own words intact', () => {
+  assert.deepEqual(splitWhen('2026-09-14 09:30'),
+    { date: '2026-09-14', time: '09:30' })
+  assert.deepEqual(splitWhen('2026-09-14T09:30'),
+    { date: '2026-09-14', time: '09:30' })
+  assert.deepEqual(splitWhen('2026-09-14'), { date: '2026-09-14', time: '' })
+  // Free text an operator typed is never reformatted into a date claim.
+  assert.deepEqual(splitWhen('mid-September, morning'),
+    { date: '', time: 'mid-September, morning' })
+  assert.deepEqual(splitWhen(''), { date: '', time: '' })
 })
 
 // ---- city autocomplete -------------------------------------------------------
@@ -181,47 +216,4 @@ test('every world city resolves through resolveAddress with real coordinates', a
     assert.ok(o && o.lat != null, `no coords for ${c.name}`)
     assert.ok(!o.approx, `${c.name} resolved only approximately`)
   }
-})
-
-test('slot generation is deterministic per centre and never empty', () => {
-  const centre = CENTRES.find((c) => c.id === 'us-paris')
-  const a = generateAvailability('us', centre)
-  const b = generateAvailability('us', centre)
-  assert.deepEqual(a, b)                     // re-render must not reshuffle
-  assert.ok(a.length >= 4)
-  for (const d of a) assert.ok(d.times.length > 0)
-})
-
-test('no centre anywhere on earth ever offers a past or weekend date', async () => {
-  const { centreToday } = await import('../../src/renderer/src/lib/apptDemoData.js')
-  for (const centre of CENTRES) {
-    for (const route of centre.routes) {
-      const today = centreToday(centre)
-      for (const day of generateAvailability(route, centre)) {
-        const [y, m, dd] = day.date.split('-').map(Number)
-        const dt = new Date(y, m - 1, dd)
-        assert.ok(dt > today,
-          `${centre.id} (${route}) offered ${day.date}, not after centre-local today`)
-        const dow = dt.getDay()
-        assert.ok(dow !== 0 && dow !== 6, `${centre.id} offered a weekend ${day.date}`)
-      }
-    }
-  }
-})
-
-test('times look like real consular schedules', () => {
-  const us = CENTRES.find((c) => c.id === 'us-bj')
-  const vac = CENTRES.find((c) => c.id === 'sch-sh-fr')
-  const usTimes = generateAvailability('us', us).flatMap((d) => d.times)
-  const vacTimes = generateAvailability('schengen', vac).flatMap((d) => d.times)
-  assert.ok(usTimes.length > 0 && vacTimes.length > 0)
-  // US interviews: heavily morning; nothing before 07:30 or after 14:00.
-  const am = usTimes.filter((t) => t < '12:00').length
-  assert.ok(am / usTimes.length >= 0.8, `US slots too PM-heavy: ${usTimes}`)
-  for (const t of usTimes) assert.ok(t >= '07:30' && t <= '14:00', t)
-  // VAC submission days: inside 08:00-16:00, on 15-minute boundaries.
-  for (const t of [...usTimes, ...vacTimes]) {
-    assert.match(t, /^\d{2}:(00|15|30|45)$/, `off-grid time ${t}`)
-  }
-  for (const t of vacTimes) assert.ok(t >= '08:00' && t <= '16:00', t)
 })
