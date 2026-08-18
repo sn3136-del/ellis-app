@@ -76,12 +76,16 @@ def register_adapters_for_mode():
         return None
     from .adapters.mockland import build_mockland_adapter
     from .adapters.schengen_scheduling import build_schengen_scheduling_adapter
+    from .adapters.us_ceac_ds160 import build_us_ceac_ds160_adapter
     from .adapters.us_visa_scheduling import build_us_visa_scheduling_adapter
     from .adapters.vietnam_evisa import build_vietnam_evisa_adapter
     from .mock_portal import MockPortal
     portal = MockPortal()
     build_mockland_adapter(portal)
     build_vietnam_evisa_adapter(portal)
+    # The DS-160 application itself (CEAC). `tested`, NOT production_enabled:
+    # its application screens still need the attended mapping pass.
+    build_us_ceac_ds160_adapter(portal)
     # Scheduling adapters are `tested` + NOT production_enabled, so they are
     # selectable for testing but the live driver refuses to bind them until
     # they are individually production-approved (their own ACTIVATION steps).
@@ -97,10 +101,12 @@ def register_runtime_adapters(portal) -> None:
     if settings().mock_portal_allowed:
         from .adapters.mockland import build_mockland_adapter
         from .adapters.schengen_scheduling import build_schengen_scheduling_adapter
+        from .adapters.us_ceac_ds160 import build_us_ceac_ds160_adapter
         from .adapters.us_visa_scheduling import build_us_visa_scheduling_adapter
         from .adapters.vietnam_evisa import build_vietnam_evisa_adapter
         build_mockland_adapter(portal)
         build_vietnam_evisa_adapter(portal)
+        build_us_ceac_ds160_adapter(portal)
         build_us_visa_scheduling_adapter(portal)
         build_schengen_scheduling_adapter(portal)
 

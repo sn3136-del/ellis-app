@@ -74,11 +74,13 @@ def test_harness_endpoint_admin_only():
     assert r.status_code == 200
     body = r.json()
     # mock-allowed test mode registers the demo adapters (mockland + vietnam
-    # e-visa) plus the two `tested` scheduling adapters (US + Schengen); all
-    # reports carry the cannot-approve note.
+    # e-visa), the two `tested` scheduling adapters (US + Schengen), and the
+    # `tested` CEAC DS-160 application adapter; all reports carry the
+    # cannot-approve note.
     ids = {rep["adapter_id"] for rep in body["reports"]}
-    assert {"us-visa-scheduling-v1", "schengen-vfs-scheduling-v1"} <= ids
-    assert len(body["reports"]) == 4
+    assert {"us-visa-scheduling-v1", "schengen-vfs-scheduling-v1",
+            "us-ceac-ds160-v1"} <= ids
+    assert len(body["reports"]) == 5
     assert all("cannot approve" in rep["activation_note"] for rep in body["reports"])
 
 

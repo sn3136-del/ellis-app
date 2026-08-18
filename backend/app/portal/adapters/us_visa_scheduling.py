@@ -22,8 +22,8 @@ selector can never touch a real traveller). Tests bind `driver` to a
 MockPortal; no live navigation, booking, or payment runs in CI.
 
 REGION SCOPE (verified against official sources 2026-08-18): ais.usvisa-info.com
-serves many posts (India, Mexico, Brazil, much of Europe) but NOT mainland
-China. China runs on CGI's ustraveldocs.com/cn + www.usvisascheduling.com
+serves many posts (India, Mexico, Brazil, much of Europe) but is NOT mainland
+China's scheduler. China runs on CGI's ustraveldocs.com/cn + www.usvisascheduling.com
 (cutover 2024-12-07), whose Terms prohibit access "through automated means,
 including bots, crawlers, or scripts" and sit behind an active bot check.
 For China, therefore, this adapter must never be selected: slots are read and

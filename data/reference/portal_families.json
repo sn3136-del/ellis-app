@@ -71,7 +71,7 @@
    "kind": "immigration_authority",
    "operator": "U.S. Department of State",
    "operator_kind": "government",
-   "base_url": "https://ceac.state.gov/",
+   "base_url": "https://ceac.state.gov/genniv/",
    "hostnames": [
     "ceac.state.gov"
    ],
@@ -81,7 +81,32 @@
    "supported_outcomes": [
     "EMBASSY_OR_CONSULATE_APPLICATION"
    ],
-   "account_required": true
+   "account_required": true,
+   "entry_gate": {
+    "base_url": "https://ceac.state.gov/genniv/",
+    "description": "DS-160 location gate, verified live in an attended session 2026-08-18: select the interviewing post from the location dropdown (pilot: CHINA, SHANGHAI = SHG; Beijing BEJ, Guangzhou GUZ, Shenyang SNY, Wuhan WUH also observed), the applicant personally completes the BotDetect code box below the dropdown (declared captcha handoff), then START AN APPLICATION opens /GenNIV/Common/ConfirmApplicationID.aspx?node=SecureQuestion, which displays the application ID (AA00…) and asks the Privacy Act agreement + a retrieval security question — the applicant's own acts, handled as flow handoffs, never gate actions. The instructions page itself prints the agency basis: under 22 C.F.R. 41.103 others may assist with the application, but the applicant must click Sign Application themselves.",
+    "actions": [
+     {
+      "action": "SELECT_OPTION",
+      "selector": "[id=\"ctl00_SiteContentPlaceHolder_ucLocation_ddlLocation\"]",
+      "option_value": "SHG",
+      "purpose": "Entry gate: select the interviewing post — CHINA, SHANGHAI (verified live 2026-08-18)"
+     },
+     {
+      "action": "CLICK",
+      "selector": "[id=\"ctl00_SiteContentPlaceHolder_lnkNew\"]",
+      "purpose": "Entry gate: START AN APPLICATION — enabled only after the applicant cleared the declared captcha"
+     }
+    ],
+    "declared_handoffs": [
+     "captcha"
+    ],
+    "expect_path": "/GenNIV/Common/ConfirmApplicationID.aspx",
+    "form_ready_selector": "[id=\"ctl00_SiteContentPlaceHolder_chkbxPrivacyAct\"]"
+   },
+   "form_paths": [
+    "/GenNIV/General/complete/complete_personal.aspx"
+   ]
   },
   {
    "family_id": "usa-dol-flag",
