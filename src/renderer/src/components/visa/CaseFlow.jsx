@@ -482,7 +482,14 @@ export default function CaseFlow({ client, caseId, onNotify, onOpenCase }) {
           were the last block on a page whose first question was "which city
           were you born in", asking the applicant to set a maximum travel
           distance and blackout dates before Ellis had their phone number. */}
-      {preferencesTabVisible(journey) && !inPerson && (
+      {/* ...and never before the application is actually submitted. Appointment
+          centre preferences, travel radius, blackout dates and the automation
+          controls are all about a booking that does not exist yet while the
+          applicant is still uploading their passport. `started` is the gate:
+          preferences appear once the case has left DRAFT. `packet === null`
+          additionally holds them back while the in-person probe is still in
+          flight, so they never flash in during load. */}
+      {preferencesTabVisible(journey) && !inPerson && started && packet === null && (
         <div style={{ marginTop: 16 }}>
           <Preferences client={client} caseId={caseId} initial={prefs} onSaved={(p) => { setPrefs(p); toast('Saved') }} />
         </div>
