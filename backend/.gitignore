@@ -1,8 +1,9 @@
 .env
 *.env
 # Trip.com demo exception (owner's decision, 2026-08-04): see root .gitignore.
-!.env
 .venv/
 __pycache__/
 *.db
 backend/private_fixtures/
+
+# (removed 2026-08-19) negation that leaked plaintext keys to a public repo
