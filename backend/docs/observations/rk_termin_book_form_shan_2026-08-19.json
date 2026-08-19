@@ -9,39 +9,187 @@
     "category_label": "Waiting list for other employment and their family members in the case of a joint application",
     "note": "WAITING-LIST category: hidden date/dateStr were EMPTY and the form loaded without a day pick; openingPeriodId=77072 was set. Submitting registers on a queue, it does not take a dated slot. Dated categories will carry date/dateStr from the day link."
   },
-  "form": {"method": "post", "action": "appointment_showForm.do", "framework": "Struts2"},
+  "form": {
+    "method": "post",
+    "action": "appointment_showForm.do",
+    "framework": "Struts2"
+  },
   "fields": [
-    {"name": "lastname", "label": "Last Name", "kind": "text"},
-    {"name": "firstname", "label": "First Name", "kind": "text"},
-    {"name": "email", "label": "Email", "kind": "text"},
-    {"name": "emailrepeat", "label": "Repeat email", "kind": "text"},
-    {"name": "fields[0].content", "label": "Passport number", "kind": "text", "required": true},
-    {"name": "fields[1].content", "label": "Date of birth", "kind": "datepicker_hidden", "required": true,
-     "gotcha": "visible input #fields1content is READONLY jQuery-UI datepicker (dateFormat dd.mm.yy => DD.MM.YYYY); the POSTed value lives in hidden fields[1].content. Fill BOTH: hidden gets the value, visible shows it to the human."},
-    {"name": "fields[2].content", "label": "Telephone number", "kind": "text", "required": true},
-    {"name": "fields[3].content", "label": "Purpose of Stay", "kind": "select", "required": true,
-     "options": ["Beschleunigtes Fachkräfteverfahren MIT Vorabzustimmung...", "Kurzzeitige kontingentierte Beschäftigung § 15d BeschV", "Selbstständige Tätigkeit (Self-Employment)", "Spezialist*in/Leitende*r Angestellte*r/Führungskraft", "Au-Pair / Freiwilligendienst / Praktikum", "Sonstige (Others)"],
-     "gotcha": "option value == full bilingual label text, not a code"},
-    {"name": "fields[4].content", "label": "Other purpose of employment", "kind": "text"},
-    {"name": "fields[5].content", "label": "Employer in Germany", "kind": "text", "required": true},
-    {"name": "fields[6].content", "label": "Family reunification planned", "kind": "select", "required": true,
-     "options": ["ja / yes", "nein / no"]},
-    {"name": "fields[7].content", "label": "If family reunification planned: names + passport numbers", "kind": "text"},
-    {"name": "fields[8].content", "label": "Remarks", "kind": "text"},
-    {"name": "fields[9].content", "label": "I confirm I have read the information leaflets", "kind": "checkbox", "applicant_only": true,
-     "gotcha": "Struts2 pairs it with always-posted hidden __checkbox_fields[9].content=true"},
-    {"name": "fields[10].content", "label": "I confirm the information is correct and complete", "kind": "checkbox", "applicant_only": true},
-    {"name": "captchaText", "label": "text from picture", "kind": "captcha", "applicant_only": true,
-     "gotcha": "challenge is the <captcha> custom element again (inline data: background), same reader as the month gate"}
+    {
+      "name": "lastname",
+      "label": "Last Name",
+      "kind": "text"
+    },
+    {
+      "name": "firstname",
+      "label": "First Name",
+      "kind": "text"
+    },
+    {
+      "name": "email",
+      "label": "Email",
+      "kind": "text"
+    },
+    {
+      "name": "emailrepeat",
+      "label": "Repeat email",
+      "kind": "text"
+    },
+    {
+      "name": "fields[0].content",
+      "label": "Passport number",
+      "kind": "text",
+      "required": true
+    },
+    {
+      "name": "fields[1].content",
+      "label": "Date of birth",
+      "kind": "datepicker_hidden",
+      "required": true,
+      "gotcha": "visible input #fields1content is READONLY jQuery-UI datepicker (dateFormat dd.mm.yy => DD.MM.YYYY); the POSTed value lives in hidden fields[1].content. Fill BOTH: hidden gets the value, visible shows it to the human."
+    },
+    {
+      "name": "fields[2].content",
+      "label": "Telephone number",
+      "kind": "text",
+      "required": true
+    },
+    {
+      "name": "fields[3].content",
+      "label": "Purpose of Stay",
+      "kind": "select",
+      "required": true,
+      "options": [
+        "Beschleunigtes Fachkräfteverfahren MIT Vorabzustimmung der AUSLÄNDERBEHÖRDE (Accelerated procedure for skilled workers WITH prior approval from the AUSLAENDERBEHOERDE)",
+        "Kurzzeitige kontingentierte Beschäftigung gem. § 15d BeschV (Short-term quota-based employment)",
+        "Selbstständige Tätigkeit (Self-Employment)",
+        "Spezialist*in/Leitende*r Angestelle*r/Führungskraft (Specialist/executive employee/manager)",
+        "Au-Pair / Freiwilligendienst (voluntary service) / Praktikum (internship)",
+        "Sonstige (Others): Bitte im nächsten Textfeld näher erläutern (Please explain in more detail in the next text field)"
+      ],
+      "gotcha": "option value == full bilingual label text, not a code"
+    },
+    {
+      "name": "fields[4].content",
+      "label": "Other purpose of employment",
+      "kind": "text"
+    },
+    {
+      "name": "fields[5].content",
+      "label": "Employer in Germany",
+      "kind": "text",
+      "required": true
+    },
+    {
+      "name": "fields[6].content",
+      "label": "Family reunification planned",
+      "kind": "select",
+      "required": true,
+      "options": [
+        "ja / yes",
+        "nein / no"
+      ]
+    },
+    {
+      "name": "fields[7].content",
+      "label": "If family reunification planned: names + passport numbers",
+      "kind": "text"
+    },
+    {
+      "name": "fields[8].content",
+      "label": "Remarks",
+      "kind": "text"
+    },
+    {
+      "name": "fields[9].content",
+      "label": "I confirm I have read the information leaflets",
+      "kind": "checkbox",
+      "applicant_only": true,
+      "gotcha": "Struts2 pairs it with always-posted hidden __checkbox_fields[9].content=true"
+    },
+    {
+      "name": "fields[10].content",
+      "label": "I confirm the information is correct and complete",
+      "kind": "checkbox",
+      "applicant_only": true
+    },
+    {
+      "name": "captchaText",
+      "label": "text from picture",
+      "kind": "captcha",
+      "applicant_only": true,
+      "gotcha": "challenge is the <captcha> custom element again (inline data: background), same reader as the month gate"
+    }
   ],
   "hidden_plumbing": {
     "per_field": "fields[N].definitionId + fields[N].index accompany every content field; ids ROT across months (July ids died in August). Fill in the live DOM by NAME and the current ids post themselves — never pin ids.",
-    "slot": ["locationCode", "realmId", "categoryId", "openingPeriodId", "date", "dateStr"],
-    "definition_ids_seen": {"passport": "12373", "dob": "12379", "phone": "12380", "purpose": "14097", "other_purpose": "14098", "employer": "12382", "fam_reun": "12383", "fam_names": "12384", "remarks": "14820", "leaflets_cb": "12385", "correct_cb": "12386"}
+    "slot": [
+      "locationCode",
+      "realmId",
+      "categoryId",
+      "openingPeriodId",
+      "date",
+      "dateStr"
+    ],
+    "definition_ids_seen": {
+      "passport": "12373",
+      "dob": "12379",
+      "phone": "12380",
+      "purpose": "14097",
+      "other_purpose": "14098",
+      "employer": "12382",
+      "fam_reun": "12383",
+      "fam_names": "12384",
+      "remarks": "14820",
+      "leaflets_cb": "12385",
+      "correct_cb": "12386"
+    }
   },
   "buttons": {
     "submit": "action:appointment_addAppointment (applicant presses)",
     "cancel": "action:appointment_cancelAddAppointment",
     "refresh_captcha": "action:appointment_refreshCaptcha"
+  },
+  "complete_inventory": {
+    "free_text_inputs": [
+      "lastname",
+      "firstname",
+      "email",
+      "emailrepeat",
+      "fields[0].content passport",
+      "fields[2].content phone",
+      "fields[4].content other-purpose",
+      "fields[5].content employer",
+      "fields[7].content family names+passports",
+      "fields[8].content remarks",
+      "captchaText"
+    ],
+    "readonly_inputs": [
+      "fields1content (datepicker face for DOB)"
+    ],
+    "selects": [
+      "fields[3].content purpose (6 options + blank)",
+      "fields[6].content family reunification (ja/nein + blank)"
+    ],
+    "checkboxes": [
+      "fields[9].content leaflets-read",
+      "fields[10].content correct-complete"
+    ],
+    "buttons": [
+      {
+        "name": "action:appointment_refreshCaptcha",
+        "label": "Load another picture"
+      },
+      {
+        "name": "action:appointment_addAppointment",
+        "label": "Submit"
+      },
+      {
+        "name": "action:appointment_cancelAddAppointment",
+        "label": "Cancel"
+      }
+    ],
+    "no_links_no_legends": "the page carries no <a> links (leaflets are NOT linked here) and no fieldset legends; all constraints observed: no maxLength on any input, size=20 cosmetic only",
+    "page_text_complete": true
   }
 }
