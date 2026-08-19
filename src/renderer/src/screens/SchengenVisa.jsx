@@ -60,6 +60,224 @@ function monthsOf(days) {
   return { months, loose }
 }
 
+// RK-Termin lists its missions in GERMAN — the Beijing post is "Peking", the
+// Guangzhou one is "Kanton". An applicant types the English or local name, so
+// every German exonym on the live list (read from choose_locationList.do,
+// 196 missions, 2026-08-19) carries its aliases here. Matching is on the
+// official name OR any alias; the name SHOWN is always the portal's own.
+const MISSION_ALIASES = {
+  peki: ['beijing', 'bei jing', '北京'],
+  kant: ['guangzhou', 'canton', '广州'],
+  shan: ['shanghai', '上海'],
+  shen: ['shenyang', '沈阳'],
+  cheng: ['chengdu', '成都'],
+  hong: ['hong kong', 'hongkong', '香港'],
+  mosk: ['moscow', 'moskva'],
+  wien: ['vienna'],
+  prag: ['prague', 'praha'],
+  wars: ['warsaw', 'warszawa'],
+  kair: ['cairo'],
+  rom: ['rome', 'roma'],
+  maila: ['milan', 'milano'],
+  liss: ['lisbon', 'lisboa'],
+  kope: ['copenhagen', 'kobenhavn'],
+  brue: ['brussels', 'bruxelles'],
+  athe: ['athens', 'athina'],
+  buka: ['bucharest', 'bucuresti'],
+  belg: ['belgrade', 'beograd'],
+  tehe: ['tehran'],
+  riad: ['riyadh'],
+  algi: ['algiers'],
+  kaps: ['cape town'],
+  sing: ['singapore'],
+  hoch: ['ho chi minh city', 'ho chi minh', 'saigon'],
+  mexi: ['mexico city'],
+  guat: ['guatemala city'],
+  hava: ['havana', 'la habana'],
+  niko: ['nicosia'],
+  kiew: ['kyiv', 'kiev'],
+  krak: ['krakow', 'cracow'],
+  danz: ['gdansk'],
+  bres: ['wroclaw', 'breslau'],
+  pres: ['bratislava'],
+  laib: ['ljubljana'],
+  herm: ['sibiu'],
+  oppe: ['opole'],
+  jaun: ['yaounde'],
+  khar: ['khartoum'],
+  rang: ['yangon', 'rangoon'],
+  ulan: ['ulaanbaatar', 'ulan bator'],
+  asch: ['ashgabat'],
+  bisc: ['bishkek'],
+  dusc: ['dushanbe'],
+  tasc: ['tashkent'],
+  eriw: ['yerevan'],
+  tifl: ['tbilisi'],
+  jeka: ['yekaterinburg', 'ekaterinburg'],
+  nowo: ['novosibirsk'],
+  sarj: ['sarajevo'],
+  wind: ['windhoek'],
+  djid: ['jeddah', 'jiddah'],
+  mask: ['muscat'],
+  bagd: ['baghdad'],
+  stra: ['strasbourg'],
+  luxe: ['luxembourg'],
+  addi: ['addis ababa'],
+  dare: ['dar es salaam'],
+  lome: ['lome'],
+  osak: ['osaka', 'kobe'],
+  lasp: ['las palmas'],
+  wiln: ['vilnius'],
+  toky: ['tokyo'],
+  seou: ['seoul'],
+  taip: ['taipei'],
+  bangk: ['bangkok'],
+  kual: ['kuala lumpur'],
+  jaka: ['jakarta'],
+  mani: ['manila'],
+  newd: ['new delhi', 'delhi'],
+  banga: ['bangalore', 'bengaluru'],
+  chenn: ['chennai', 'madras'],
+  isla: ['islamabad'],
+  kara: ['karachi'],
+  dhak: ['dhaka'],
+  kath: ['kathmandu'],
+  colo: ['colombo'],
+  duba: ['dubai'],
+  doha: ['doha'],
+  ista: ['istanbul'],
+  tela: ['tel aviv'],
+  amma: ['amman'],
+  beir: ['beirut'],
+  nair: ['nairobi'],
+  lago: ['lagos'],
+  accr: ['accra'],
+  abuj: ['abuja'],
+  pret: ['pretoria'],
+  saop: ['sao paulo'],
+  rio: ['rio de janeiro'],
+  buen: ['buenos aires'],
+  santi: ['santiago'],
+  lima: ['lima'],
+  bogo: ['bogota'],
+  cara: ['caracas'],
+  newy: ['new york'],
+  losa: ['los angeles'],
+  sanf: ['san francisco'],
+  chic: ['chicago'],
+  hous: ['houston'],
+  bost: ['boston'],
+  miam: ['miami'],
+  atla: ['atlanta'],
+  wash: ['washington', 'washington dc'],
+  toro: ['toronto'],
+  vanc: ['vancouver'],
+  otta: ['ottawa'],
+  sydn: ['sydney'],
+  melb: ['melbourne'],
+  well: ['wellington'],
+  lond: ['london'],
+  edin: ['edinburgh'],
+  dubl: ['dublin'],
+  pari: ['paris'],
+  lyon: ['lyon'],
+  mars: ['marseille'],
+  bord: ['bordeaux'],
+  madri: ['madrid'],
+  barc: ['barcelona'],
+  amst: ['amsterdam'],
+  bern: ['bern', 'berne'],
+  stoc: ['stockholm'],
+  oslo: ['oslo'],
+  hels: ['helsinki'],
+  reyk: ['reykjavik'],
+  riga: ['riga'],
+  tall: ['tallinn'],
+  mins: ['minsk'],
+  stpe: ['st petersburg', 'saint petersburg'],
+  sofi: ['sofia'],
+  skop: ['skopje'],
+  tira: ['tirana'],
+  zagr: ['zagreb'],
+  podg: ['podgorica'],
+  pris: ['pristina'],
+  chis: ['chisinau'],
+  baku: ['baku'],
+  alma: ['almaty'],
+  anka: ['ankara'],
+  izmi: ['izmir'],
+  antl: ['antalya'],
+  thes: ['thessaloniki'],
+  vall: ['valletta'],
+  buda: ['budapest'],
+  raba: ['rabat'],
+  tuni: ['tunis'],
+  abid: ['abidjan'],
+  daka: ['dakar'],
+  bama: ['bamako'],
+  cona: ['conakry'],
+  coto: ['cotonou'],
+  ouag: ['ouagadougou'],
+  kins: ['kinshasa'],
+  luan: ['luanda'],
+  lusa: ['lusaka'],
+  hara: ['harare'],
+  gabo: ['gaborone'],
+  mapu: ['maputo'],
+  anta: ['antananarivo'],
+  kamp: ['kampala'],
+  kiga: ['kigali'],
+  asma: ['asmara'],
+  abud: ['abu dhabi'],
+  kuwa: ['kuwait city', 'kuwait'],
+  manam: ['manama'],
+  erbi: ['erbil'],
+  rama: ['ramallah'],
+  hano: ['hanoi'],
+  phno: ['phnom penh'],
+  vien: ['vientiane'],
+  brisb: ['brisbane'],
+  pert: ['perth'],
+  adel: ['adelaide'],
+  canb: ['canberra'],
+  king: ['kingston'],
+  ports: ['port of spain'],
+  sanj: ['san jose'],
+  sans: ['san salvador'],
+  tegu: ['tegucigalpa'],
+  manag: ['managua'],
+  pana: ['panama city', 'panama'],
+  quit: ['quito'],
+  lapa: ['la paz'],
+  monte: ['montevideo'],
+  asun: ['asuncion'],
+  reci: ['recife'],
+  porta: ['porto alegre'],
+  santo: ['santo domingo'],
+  noua: ['nouakchott'],
+  sana: ['sanaa'],
+  kali: ['kaliningrad'],
+  mala: ['malaga'],
+  palm: ['palma', 'mallorca'],
+  niko: ['nicosia', 'lefkosia']
+}
+
+// Fold accents so "Brussel" finds "Brüssel" and "Sao" finds "São".
+function fold(s) {
+  return String(s || '').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
+
+/** Does this mission match what the applicant typed — by its official German
+ *  name, or by any English/local alias for it? */
+function missionMatches(m, query) {
+  const q = fold(query).trim()
+  if (!q) return true
+  if (fold(m.name).includes(q)) return true
+  return (MISSION_ALIASES[m.code] || []).some((a) => fold(a).includes(q)
+                                                  || q.includes(fold(a)))
+}
+
 export default function SchengenVisa({ onBack }) {
   const clientRef = useRef(null)
   if (!clientRef.current) {
@@ -128,11 +346,11 @@ export default function SchengenVisa({ onBack }) {
           destination_country: 'Germany', visa_type: 'tourist', answers: {}
         })
         setCaseId(made.id)
-        // The window and the mission list do not depend on each other.
-        const [, out] = await Promise.all([
-          client.createBrowserSession(made.id),
-          client.calendarMissions(made.id)
-        ])
+        // The mission list is READ THROUGH the applicant's window, so the
+        // window must exist first. (Racing these with Promise.all 409s every
+        // time with no_secure_window — the list then silently arrives empty.)
+        await client.createBrowserSession(made.id)
+        const out = await client.calendarMissions(made.id)
         setMissions(out.missions || [])
         setPhase('picking')
       } catch (e) { fail(e); setPhase('picking') }
@@ -191,11 +409,13 @@ export default function SchengenVisa({ onBack }) {
     setPhase('dates')
   }
 
-  const shown = useMemo(() => missions.filter(
-    (m) => !search || (m.name || '').toLowerCase().includes(search.toLowerCase())),
-    [missions, search])
-  const quick = useMemo(() => missions.filter(
-    (m) => /beijing|peking|shanghai|guangzhou|chengdu|hong kong/i.test(m.name || '')),
+  const shown = useMemo(
+    () => missions.filter((m) => missionMatches(m, search)), [missions, search])
+  // The China posts, by CODE (their names on the site are German: Peking,
+  // Kanton, Hongkong), in the order an applicant is most likely to want.
+  const CHINA_CODES = ['peki', 'shan', 'kant', 'cheng', 'shen', 'hong']
+  const quick = useMemo(
+    () => CHINA_CODES.map((c) => missions.find((m) => m.code === c)).filter(Boolean),
     [missions])
   const grouped = useMemo(() => monthsOf(month?.days || []), [month])
 
