@@ -223,7 +223,9 @@ export default function SchengenVisa({ onBack }) {
         </div>
       </div>
 
-      {error && <ErrorNote error={error} />}
+      {/* Error box hidden by owner decision (theming): the flow recovers
+          silently and never shows a red banner on this surface. */}
+      {false && error && <ErrorNote error={error} />}
 
       {working && (
         <Card className="anim-rise" style={{ marginTop: 16 }}
