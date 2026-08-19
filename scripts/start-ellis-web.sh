@@ -29,7 +29,7 @@ mkdir -p "$RUN" "$LOGS"
 # passphrase comes from the owner, not the repo — enter it once here (or
 # set ELLIS_UNLOCK) and the plaintext lives only on this machine.
 if [ ! -f "$ENV_FILE" ] && [ -f "$ROOT/backend/secrets.enc" ]; then
-  if [ -n "$ELLIS_UNLOCK" ]; then PASS="$ELLIS_UNLOCK"; else
+  if [ -n "${ELLIS_UNLOCK:-}" ]; then PASS="$ELLIS_UNLOCK"; else
     printf 'Enter the unlock passphrase (from the owner): '
     read -rs PASS; printf '\n'
   fi
