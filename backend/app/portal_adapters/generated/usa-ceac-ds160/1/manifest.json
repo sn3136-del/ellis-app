@@ -1,0 +1,419 @@
+{
+ "adapter_id": "usa-ceac-ds160",
+ "version": 1,
+ "artifact_kind": "typed_flow_v1",
+ "route_key": "rkus|nat=CHN|dest=USA|cat=niv|sub=b1b2|pur=tourism",
+ "route_scope": {
+  "destination": "USA",
+  "visa_type": "b1b2"
+ },
+ "portal_operator": "U.S. Department of State — Consular Electronic Application Center",
+ "allowed_hostnames": [
+  "ceac.state.gov"
+ ],
+ "allowed_redirect_hosts": [
+  "ceac.state.gov"
+ ],
+ "generator": "attended-mapping+deterministic-skeleton",
+ "specification_id": "ceac-ds160-attended-20260818",
+ "runtime": "deterministic_flow_runner",
+ "entry_gate": {
+  "base_url": "https://ceac.state.gov/genniv/",
+  "expect_path": "/GenNIV/Common/ConfirmApplicationID.aspx",
+  "form_ready_selector": "[id=\"ctl00_SiteContentPlaceHolder_chkbxPrivacyAct\"]",
+  "declared_handoffs": [
+   "captcha"
+  ],
+  "description": "Location dropdown -> applicant clears the BotDetect code -> START AN APPLICATION. Verified live 2026-08-18. NOTE: the Privacy Act 'I AGREE' box drives an ASP.NET postback that enables the security-question controls; a programmatic tick does not fire it, so the applicant's own click is what opens the page (observed live).",
+  "actions": [
+   {
+    "action": "SELECT_OPTION",
+    "selector": "[id=\"ctl00_SiteContentPlaceHolder_ucLocation_ddlLocation\"]",
+    "option_value": "SHG",
+    "purpose": "Entry gate: select CHINA, SHANGHAI"
+   },
+   {
+    "action": "CLICK",
+    "selector": "[id=\"ctl00_SiteContentPlaceHolder_lnkNew\"]",
+    "purpose": "Entry gate: START AN APPLICATION"
+   }
+  ]
+ },
+ "conditional_fields": {
+  "_note": "Fields revealed ONLY when the named question is answered YES, observed live 2026-08-18 by toggling each branch. Ellis never answers these questions itself (they are the applicant's own statements); this map exists so the runtime RECOGNISES the revealed controls instead of stalling on an unmapped page.",
+  "travel_specific_plans_no": {
+   "page": "travel",
+   "question": "Have you made specific travel plans? (rblSpecificTravel)",
+   "branch": "No",
+   "reveals": [
+    "ddlTRAVEL_DTEDay",
+    "ddlTRAVEL_DTEMonth",
+    "tbxTRAVEL_DTEYear",
+    "tbxTRAVEL_LOS",
+    "ddlTRAVEL_LOS_CD"
+   ]
+  },
+  "us_contact_relationship_other": {
+   "page": "us_contact",
+   "question": "Relationship to You (ddlUS_POC_REL_TO_APP)",
+   "branch": "any selection",
+   "reveals": [
+    "tbxUS_POC_ADDR_LN1",
+    "tbxUS_POC_ADDR_LN2",
+    "tbxUS_POC_ADDR_CITY",
+    "ddlUS_POC_ADDR_STATE",
+    "tbxUS_POC_ADDR_POSTAL_CD",
+    "tbxUS_POC_HOME_TEL",
+    "tbxUS_POC_EMAIL_ADDR",
+    "cbexUS_POC_EMAIL_ADDR_NA"
+   ]
+  },
+  "occupation_selected": {
+   "page": "work_education_present",
+   "question": "Primary Occupation (ddlPresentOccupation)",
+   "branch": "any employed value",
+   "reveals": [
+    "tbxEmpSchName",
+    "employer address block",
+    "ddlEmpDateFromDay",
+    "ddlEmpDateFromMonth",
+    "tbxEmpDateFromYear",
+    "tbxCURR_MONTHLY_SALARY",
+    "tbxDescribeDuties"
+   ]
+  },
+  "countries_visited_yes": {
+   "page": "work_education_additional",
+   "question": "Have you traveled to any countries/regions within the last five years?",
+   "branch": "Yes",
+   "reveals": [
+    "dtlCountriesVisited_ctl00_ddlCOUNTRIES_VISITED"
+   ]
+  },
+  "clan_tribe_yes": {
+   "page": "work_education_additional",
+   "question": "Do you belong to a clan or tribe?",
+   "branch": "Yes",
+   "reveals": [
+    "tbxCLAN_TRIBE_NAME"
+   ]
+  },
+  "military_service_yes": {
+   "page": "work_education_additional",
+   "question": "Have you ever served in the military?",
+   "branch": "Yes",
+   "reveals": [
+    "dtlMILITARY_SERVICE_ctl00_ddlMILITARY_SVC_CNTRY",
+    "dtlMILITARY_SERVICE_ctl00_tbxMILITARY_SVC_BRANCH",
+    "dtlMILITARY_SERVICE_ctl00_tbxMILITARY_SVC_RANK",
+    "dtlMILITARY_SERVICE_ctl00_tbxMILITARY_SVC_SPECIALTY",
+    "dtlMILITARY_SERVICE_ctl00_ddlMILITARY_SVC_FROMDay",
+    "dtlMILITARY_SERVICE_ctl00_ddlMILITARY_SVC_FROMMonth",
+    "dtlMILITARY_SERVICE_ctl00_tbxMILITARY_SVC_FROMYear",
+    "dtlMILITARY_SERVICE_ctl00_ddlMILITARY_SVC_TODay",
+    "dtlMILITARY_SERVICE_ctl00_ddlMILITARY_SVC_TOMonth",
+    "dtlMILITARY_SERVICE_ctl00_tbxMILITARY_SVC_TOYear"
+   ],
+   "note": "two further SPLIT dates (service from/to) — bind per component"
+  },
+  "specialized_skills_and_insurgent": {
+   "page": "work_education_additional",
+   "question": "Specialized skills / paramilitary involvement",
+   "branch": "Yes",
+   "reveals": [
+    "tbxSPECIALIZED_SKILLS_EXPL",
+    "tbxINSURGENT_ORG_EXPL"
+   ],
+   "note": "explanation textareas are always present in the DOM but only required on Yes"
+  }
+ },
+ "applicant_only_steps": {
+  "photo": "/GenNIV/General/photo/photo_uploadthephoto.aspx?node=UploadPhoto",
+  "review": "REVIEW tab (opens after Photo is confirmed)",
+  "sign": "SIGN tab (opens after Review)",
+  "note": "Verified reachable in the attended session 2026-08-18: all nine COMPLETE sections saved green, leaving Photo -> Review -> Sign. None are mapped as fills; each is an applicant act.",
+  "photo_detail": {
+   "host": "identix.state.gov",
+   "why_separate": "CEAC does not host the photo step. It hands off to a separate State Department service (identix.state.gov, 'QotW' = Quality of the Web) with a one-time opaque token in the query string, and returns to Confirm Photo afterwards. That host is deliberately OUTSIDE this adapter's allowed_hostnames: the photograph is the applicant's own biometric and they upload it themselves in the secure window.",
+   "pages": {
+    "upload": {
+     "url": "https://identix.state.gov/qotw/Upload.aspx?<opaque-token>",
+     "controls": {
+      "file_input": "input[type=\"file\"] labelled \"Photo:\"",
+      "submit": "\"Next: Upload Selected Photo\""
+     }
+    },
+    "result": {
+     "url": "https://identix.state.gov/qotw/Result.aspx?<opaque-token>",
+     "title": "Photo Quality Standards Result",
+     "controls": {
+      "retry": "\"Back: Select a Different Photo\"",
+      "skip": "\"Next: Continue Without a Photo\""
+     },
+     "shows": "Selected Photo: <original filename>"
+    },
+    "confirm": {
+     "url": "https://ceac.state.gov/GenNIV/General/photo/photo_confirmphoto.aspx?node=ConfirmPhoto",
+     "host": "ceac.state.gov",
+     "title": "Confirm Photo",
+     "controls": {
+      "back": "\"Back: COMPLETE\"",
+      "save": "\"Save\"",
+      "next": "\"Next: REVIEW\""
+     },
+     "role": "the return point from identix. CEAC states the outcome here in its own words and — critically — lets the applicant proceed to REVIEW even when the photo was REJECTED. A rejected photo does not block the form; it converts into a physical requirement at the interview.",
+     "rejected_copy": "'The photo you have submitted ... did not meet the quality standards ... Please have new photos taken ... Submit the new photo along with your confirmation page and passport ... you may be required to bring a passport-like photo to your interview.'",
+     "named_causes": [
+      "size",
+      "background",
+      "poor lighting"
+     ]
+    }
+   },
+   "quality_failure_vocabulary": [
+    "Image may contain imperfections due to compression artifacts",
+    "Image may be out of focus"
+   ],
+   "product_note": "The QC service REJECTS screenshots and re-compressed images — observed live 2026-08-18 on a .jpg screenshot: 'compression artifacts' + 'out of focus'. Ellis already ships app/providers/photo_check.py; it should pre-screen the applicant's photo against these same failure classes BEFORE they reach identix, so a rejected photo costs a moment in Ellis instead of a round trip through two government hosts. 'Continue Without a Photo' exists but means carrying a printed photo to the interview — an honest fallback Ellis should surface rather than hide.",
+   "observed": "2026-08-18, attended session",
+   "flow_summary": "COMPLETE -> Upload Photo (ceac) -> identix Upload.aspx -> identix Result.aspx (pass or fail) -> ceac Confirm Photo -> REVIEW -> SIGN. The photo leg is a two-host round trip and it is ADVISORY: rejection still permits REVIEW/SIGN, so Ellis must never treat a failed photo as a dead end — it becomes 'bring a printed photo to the interview' on the applicant's checklist."
+  },
+  "review_detail": {
+   "host": "ceac.state.gov",
+   "first_page": "/GenNIV/General/review/review_reviewpersonal.aspx?node=ReviewPersonal",
+   "title": "Review Personal, Address, Phone, and Passport Information",
+   "structure": "REVIEW is a multi-page read-back of every answer, grouped differently from data entry: page 1 merges Personal + Address/Phone + Passport, then 'Next: Travel' continues through the remaining groups, ending at Sign and Submit.",
+   "controls": {
+    "edit_links": [
+     "\"Edit Personal Information\"",
+     "\"Edit Address and Phone Information\"",
+     "\"Edit Passport/Travel Document Information\""
+    ],
+    "photo": "\"Upload New Photo\"",
+    "next": "\"Next: Travel\""
+   },
+   "read_back_format": "label + rendered VALUE, using the portal's own display forms: name as 'WANG, LI'; date of birth as '15 MARCH 1990' (spelled month, NOT the DD-MMM-YYYY of data entry); place of birth merged to 'SHANGHAI, CHINA'; every unanswered optional field rendered as the literal 'DOES NOT APPLY'; every Yes/No as 'YES'/'NO'.",
+   "product_note": "This page is the natural source of Ellis's OWN review screen: it is exactly the set of facts the applicant must confirm before signing, in the government's own wording and display format. Ellis should show the same read-back from case data BEFORE the applicant reaches CEAC, with each line linking to the Ellis question that produced it — the same affordance the Edit links give here. Note the display formats differ from the input formats: a review screen that echoes ISO dates back would not match what the applicant sees on the official page.",
+   "observed": "2026-08-18, attended session",
+   "chain": [
+    {
+     "node": "ReviewPersonal",
+     "url": "/GenNIV/General/review/review_reviewpersonal.aspx",
+     "next": "Next: Travel"
+    },
+    {
+     "node": "ReviewTravel",
+     "url": "/GenNIV/General/review/review_reviewtravel.aspx",
+     "next": "Next: U.S. Contact"
+    },
+    {
+     "node": "ReviewUSContact",
+     "url": "/GenNIV/General/review/review_reviewUSContact.aspx",
+     "next": "Next: Family"
+    },
+    {
+     "node": "ReviewFamily",
+     "url": "/GenNIV/General/review/review_reviewFamily.aspx",
+     "next": "Next: Work/Education/Training"
+    },
+    {
+     "node": "ReviewWorkEducation",
+     "url": "/GenNIV/General/review/review_reviewWorkEducation.aspx",
+     "next": "Next: Security and Background"
+    },
+    {
+     "node": "ReviewSecurity",
+     "url": "/GenNIV/General/review/review_reviewsecurity.aspx",
+     "next": "Next: Location"
+    },
+    {
+     "node": "ReviewLocation",
+     "url": "/GenNIV/General/review/review_reviewlocation.aspx",
+     "next": "Next: Sign and Submit"
+    }
+   ],
+   "chain_note": "SEVEN review pages, each an Edit-linked read-back, walked in order to Sign. Note the grouping differs from data entry (Personal+Address+Passport merge on page 1; Location is its own final page) and the Next label names the NEXT section, so the label is the reliable progress signal, not the node name."
+  },
+  "sign_detail": {
+   "url": "/GenNIV/General/esign/signtheapplication.aspx?node=SignCertify",
+   "title": "E-Signature and Certification",
+   "controls": {
+    "passport_number": "[id$=\"PPTNumTbx\"] — retype the passport number as identity confirmation",
+    "captcha": "[id$=\"CodeTextBox\"] — a SECOND BotDetect code, distinct from the one on the location page",
+    "sign_and_submit": "[id$=\"btnSignApp\"] \"Sign and Submit Application\"",
+    "back": "\"Back: REVIEW\"",
+    "save": "\"Save\"",
+    "next": "\"Next: Confirmation\""
+   },
+   "legal_text_verbatim": "'You are required to electronically sign your application yourself, unless otherwise exempt by regulation, EVEN IF THE APPLICATION HAS BEEN PREPARED BY SOMEONE OTHER THAN YOURSELF. Your electronic signature certifies that you have read and understood the questions in this application and that your answers are true and correct to the best of your knowledge and belief. The submission of an application containing any false or misleading statements may result in the permanent refusal of a visa or the denial of entry into the United States. All declarations made in this application are unsworn declarations made under penalty of perjury. (28 U.S.C. 1746).'",
+   "why_never_automated": "The portal itself states the rule Ellis is built around: a preparer may fill the form, the APPLICANT must sign it. This node is the hard stop. It also carries a second CAPTCHA and a passport re-entry, both of which are applicant acts by construction. btnSignApp is never clicked by Ellis, under any runtime mode, and the selector is recorded here only so the runtime can RECOGNISE the page and hand off — never to target it.",
+   "observed": "2026-08-18, attended session",
+   "single_button_finding": "CRITICAL for the live-view design: signing and submitting are ONE control. The page offers exactly one action button, btnSignApp, labelled 'Sign and Submit Application'. There is no separate sign-then-submit pair: the click IS the electronic signature AND the submission, and CEAC's own text says the applicant must make it themselves even when someone else prepared the form. 'Next: Confirmation' only carries the applicant onward AFTER that click. So a design where the applicant signs and Ellis then presses submit cannot exist on this page — pressing the button would BE Ellis signing.",
+   "live_view_contract": {
+    "surface": "Browserbase live view embedded in the Ellis UI",
+    "ellis_does": [
+     "drive the case to this page and park there",
+     "render the certification text verbatim beside the window so the applicant reads what they are signing",
+     "show its own read-back of every answer with links to the Ellis question that produced each one",
+     "watch for the transition to the Confirmation page",
+     "capture the confirmation page + application ID + barcode as evidence, and store it on the case"
+    ],
+    "applicant_does": [
+     "re-enter their passport number (PPTNumTbx)",
+     "clear the second BotDetect code (CodeTextBox)",
+     "click 'Sign and Submit Application' themselves"
+    ],
+    "ellis_never": [
+     "types the code",
+     "clicks btnSignApp",
+     "marks the case submitted without the captured confirmation"
+    ],
+    "evidence_rule": "submitted is granted only by the Confirmation page Ellis observed after the applicant's own click — the same evidence gate the booking desk uses for 'booked'"
+   },
+   "preparer_block": {
+    "question": "Did anyone assist you in filling out this application?",
+    "kind": "radio (Yes/No)",
+    "on_yes_reveals": [
+     "Preparer Surnames",
+     "Preparer Given Names (+ Does Not Apply)",
+     "Organization Name (+ Does Not Apply)",
+     "Street Address Line 1/2",
+     "City",
+     "State/Province (+ Does Not Apply)",
+     "Postal Zone/ZIP (+ Does Not Apply)",
+     "Country/Region (full country list)",
+     "Relationship to You"
+    ],
+    "why_this_is_the_whole_product": "CEAC ASKS, on the signature page, whether anyone assisted in filling out the application, and collects that preparer's name, organisation, address and relationship. This is the official channel for exactly what Ellis does. A Trip.com-prepared DS-160 answers YES here and names Trip.com as the preparing organisation. That is not a workaround — it is the form's own provision for preparers, and it pairs with the certification text requiring the APPLICANT to sign. Ellis should fill this block from the operating org's details and show the applicant what it declared on their behalf.",
+    "compliance_pairing": "22 C.F.R. 41.103 + this block + the e-signature text together describe the entire lawful shape of the product: a named preparer may fill the form and must be disclosed; only the applicant may sign it.",
+    "selectors": {
+     "radio_yes": "the \"Did anyone assist you\" Yes radio (postbacks to reveal the block)",
+     "surname": "[id=\"ctl00_SiteContentPlaceHolder_FormView3_tbxPREP_SURNAME\"]",
+     "given_names_na": "[id=\"ctl00_SiteContentPlaceHolder_FormView3_cbxPREP_NAME_NA\"]",
+     "organization": "[id=\"ctl00_SiteContentPlaceHolder_FormView3_tbxPREP_ORGANIZATION\"]",
+     "org_na": "[id=\"ctl00_SiteContentPlaceHolder_FormView3_cbxPREP_ORG_NA\"]",
+     "addr_ln1": "[id=\"ctl00_SiteContentPlaceHolder_FormView3_tbxPREP_ADDR_LN1\"]",
+     "addr_ln2": "[id=\"ctl00_SiteContentPlaceHolder_FormView3_tbxPREP_ADDR_LN2\"]",
+     "city": "[id=\"ctl00_SiteContentPlaceHolder_FormView3_tbxPREP_ADDR_CITY\"]",
+     "state": "[id=\"ctl00_SiteContentPlaceHolder_FormView3_tbxPREP_ADDR_STATE\"]",
+     "state_na": "[id=\"ctl00_SiteContentPlaceHolder_FormView3_cbxPREP_ADDR_STATE_NA\"]",
+     "postal": "[id=\"ctl00_SiteContentPlaceHolder_FormView3_tbxPREP_ADDR_POSTAL_CD\"]",
+     "postal_na": "[id=\"ctl00_SiteContentPlaceHolder_FormView3_cbxPREP_ADDR_POSTAL_CD_NA\"]",
+     "country": "[id=\"ctl00_SiteContentPlaceHolder_FormView3_ddlCountry\"]",
+     "relationship": "[id=\"ctl00_SiteContentPlaceHolder_FormView3_tbxPREP_REL_TO_APP\"]"
+    },
+    "note_formview3": "These live under FormView3_, NOT the FormView1_ prefix every other page uses — a runtime that assumed one prefix would miss the whole block. Verified live 2026-08-18 by filling it.",
+    "ellis_fills_this": "This is the ONE block on the signature page Ellis fills, and it fills it about ITSELF: the operating organisation's own name, address, and relationship to the applicant ('VISA SERVICE PROVIDER'). Every other control on the page is the applicant's. Values come from org settings, never from case data, and the applicant sees the declaration before they sign it.",
+    "organisation_only_mode": "For a COMPANY-prepared application the correct declaration names the organisation and no individual: tick cbxPREP_NAME_NA and fill tbxPREP_ORGANIZATION only. Verified live 2026-08-18.",
+    "paired_disable_gotcha": "cbxPREP_NAME_NA is a PAIRED-FIELD disable: ticking it disables BOTH tbxPREP_SURNAME and tbxPREP_GIVEN_NAME (observed disabled=true on both). Order matters — an adapter that ticks the box and then fills a name writes into a disabled control and the value never posts. Same shape as cbxPREP_ORG_NA for the organisation field.",
+    "ellis_default": {
+     "name_na": true,
+     "organization": "CTRIP ELLIS VISA SERVICE",
+     "relationship": "VISA SERVICE PROVIDER",
+     "why": "the preparer is the company, not any individual staff member"
+    },
+    "character_validation": {
+     "field": "tbxPREP_ORGANIZATION",
+     "portal_message": "'Organization Name is invalid. Only the following characters are valid for this field: A-Z, 0-9, hyphen (-), apostrophe (\\'), ampersand (&) and single spaces in between names.'",
+     "allowed": "A-Z 0-9 - ' & and single interior spaces",
+     "rejected_examples": [
+      "TRIP.COM ELLIS VISA SERVICE  <- the PERIOD is rejected"
+     ],
+     "caught_live": "2026-08-18: 'TRIP.COM ELLIS VISA SERVICE' was REFUSED on Next because of the dot in the brand name. Corrected to 'TRIP COM ELLIS VISA SERVICE'.",
+     "product_rule": "A brand written with punctuation (Trip.com, Booking.com, Expedia Inc.) CANNOT be typed into CEAC name fields verbatim. Ellis must hold a portal_safe_org_name in org settings — the legal name stripped to this character set — and validate it at settings-save time, not discover the rejection on a live application at the signature page. The same allowlist very likely governs the other name fields (surname, given names, employer, US contact organisation), so Ellis should sanitise-and-warn on all of them.",
+     "resolution": "Use the registered corporate name that is already punctuation-free: CTRIP, not TRIP.COM. Ctrip is the legal entity behind the Trip.com brand, so the portal-safe name is also the more accurate declaration — the brand with the dot never has to be mangled."
+    }
+   },
+   "esignature_block": {
+    "certification": "'I certify under penalty of perjury under the laws of the United States of America that the foregoing is true and correct.'",
+    "fields": [
+     "Enter your Passport/Travel Document Number: (PPTNumTbx)",
+     "Enter the code as shown: (CodeTextBox — second BotDetect)"
+    ],
+    "action": "'Click the button below to electronically sign your application:' -> btnSignApp",
+    "irreversibility_notice": "'Once you have clicked Sign and Submit Application you will be unable to make changes.' The page also stamps the local date/time it was served (observed: Tuesday, August 18, 2026 - 6:12:33 PM EDT).",
+    "post_sign": "'After signing the application, click Next to continue' -> Next: Confirmation"
+   },
+   "other_certifications": [
+    "port-of-entry: possession of a visa does not entitle entry; inadmissibility decided on arrival",
+    "willful false statement or concealment may mean permanent exclusion, criminal prosecution and/or deportation",
+    "medical exam may be required; data may pass through the eMedical system (Australian Dept of Home Affairs) to CDC/State",
+    "information may be shared with other agencies; fingerprints may be compared against the FBI NGI system; the photograph may be used for employment verification"
+   ]
+  },
+  "confirmation_detail": {
+   "url": "/GenNIV/General/ESign/Complete_Done_Confirmation.aspx?node=Done",
+   "node": "Done",
+   "title": "Confirmation Page",
+   "is_the_evidence": "This page is the ONLY proof a DS-160 was submitted, and it is what the flow's VERIFY_EVIDENCE node must capture. It is not a banner — it is a record carrying the confirmation number and a barcode the consulate scans at interview.",
+   "fields_rendered": [
+    "Name provided",
+    "Date of birth",
+    "Place of birth",
+    "Gender",
+    "Country/Region of Origin (Nationality)",
+    "Passport number",
+    "Purpose of travel",
+    "Completed at (date)",
+    "Information confirmation number (== Application ID)",
+    "Selected location (post code + consular section postal address)",
+    "Version"
+   ],
+   "literal_disclaimer": "'This is not a visa'",
+   "controls": {
+    "print_confirmation": "[id$=\"FormView1_btnPrintConfirm\"]",
+    "print_application": "[id$=\"FormView1_btnPrintApp\"]",
+    "email_confirmation": "[id$=\"FormView1_btnEmailConfirm\"]"
+   },
+   "capture_rule": "Ellis captures the confirmation page as the case's submission evidence via Print Confirmation (PDF), and stores the confirmation number. 'Email Confirmation' sends to an address — an outbound act, so it is the applicant's choice, never Ellis's.",
+   "signature_stamp": "'You have electronically signed your application form. 18-Aug-2026 08:27:40 (GMT-05:00)'",
+   "post_submission_facts": [
+    "the confirmation page with a clearly identifiable barcode MUST be brought to the interview",
+    "the DS-160 is only the FIRST step; an interview must usually be scheduled separately",
+    "proof of payment of the visa application fee is required",
+    "a BIOMETRIC signature (fingerprints before a consular officer) is taken at interview and is what finally attests the statements are the applicant's own",
+    "a rejected photo is restated here: the applicant must bring a compliant printed photograph"
+   ],
+   "biometric_note": "The interview fingerprinting is described as the act that 'confirms that you have read and understood the questions ... and that all statements therein are YOUR OWN statements'. The applicant's personal attestation is therefore taken TWICE — once electronically here, once biometrically at the post.",
+   "observed": "2026-08-18, attended session",
+   "url_variants": [
+    "/GenNIV/General/ESign/Complete_Done_Confirmation.aspx?node=Done",
+    "/GenNIV/general/esign/complete_done.aspx?node=Done"
+   ],
+   "url_note": "CEAC serves the confirmation under TWO paths with the same node=Done and the same title. A runtime keyed on the exact path would miss one; key on node=Done plus the confirmation-number element instead.",
+   "outbound_links": {
+    "post_contact": "[id$=\"lnkPostContactUrl\"] -> the post's own site (here china.usembassy-china.org.cn/visas/)",
+    "state": "[id$=\"lnkState\"] -> travel.state.gov",
+    "photo_guidance": "[id$=\"hplNoPhotoText_GF\"] -> photo rules, shown ONLY when the photo was rejected"
+   },
+   "photo_rejection_signal": "hplNoPhotoText_GF is present on this page only because the uploaded photo failed QC. Its presence is a machine-readable signal that the applicant must bring a printed photograph to the interview — Ellis should read it and add that to the checklist automatically rather than relying on the applicant noticing the note.",
+   "exit": "[id$=\"ctl00_lbtnExit\"]"
+  }
+ },
+ "evidence_rules": {
+  "success_requires": [
+   "network_or_official_record"
+  ],
+  "banner_text_sufficient": false,
+  "strength_ladder": [
+   "network_state_transition",
+   "official_record",
+   "official_receipt",
+   "session_state_change",
+   "durable_url_change",
+   "dom_evidence",
+   "visible_text"
+  ],
+  "note": "DS-160 success is the CEAC confirmation page's own record: the application ID and barcode the portal issues on submission — proven live 2026-08-18 (confirmation AA00FQKTDD)."
+ },
+ "recovery": {
+  "resume": "reconcile_before_retry",
+  "on_uncertain_outcome": "stop_and_reconcile",
+  "on_unexpected_state": "fail_closed",
+  "rate_limits": {
+   "actions_per_minute": 30
+  },
+  "note": "CEAC's own 'retrieve application' path (application ID + security answer, the applicant's) is the reconciliation surface; a run never retries blind."
+ },
+ "kill_switch_key": "usa-ceac-ds160"
+}

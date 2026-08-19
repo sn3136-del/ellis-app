@@ -2,7 +2,7 @@
   "bundle_version": 1,
   "candidate_id": "9c5d66bc1bad400c992d13611c5d7482",
   "candidate_version": 3,
-  "exported_at": "2026-08-02T20:13:27.027043-04:00",
+  "exported_at": "2026-08-19T08:20:53.341726-04:00",
   "family_id": "india-evisa",
   "route_key": "rk1|nat=AFG|iss=AFG|doc=ordinary_passport|res=AFG|dest=IND|cat=evisa_tourist|sub=any|pur=tourism|per=2026-07-23|jur=default",
   "tables": {

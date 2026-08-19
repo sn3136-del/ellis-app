@@ -2,7 +2,7 @@
   "bundle_version": 1,
   "candidate_id": "d290f8c394c04596b52a6b5e1ebfcd89",
   "candidate_version": 1,
-  "exported_at": "2026-08-02T20:13:27.009701-04:00",
+  "exported_at": "2026-08-19T08:20:53.239240-04:00",
   "family_id": "mexico-fmme",
   "route_key": "rk1|nat=AND|iss=AND|doc=ordinary_passport|res=AND|dest=MEX|cat=visa_free_entry|sub=any|pur=tourism|per=2026-07-23|jur=default",
   "tables": {

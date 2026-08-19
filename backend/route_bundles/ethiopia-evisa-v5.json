@@ -2,7 +2,7 @@
   "bundle_version": 1,
   "candidate_id": "9b341da5c9414fb09e9ccafb241e5168",
   "candidate_version": 5,
-  "exported_at": "2026-08-02T20:13:27.006996-04:00",
+  "exported_at": "2026-08-19T08:20:53.223577-04:00",
   "family_id": "ethiopia-evisa",
   "route_key": "rk1|nat=AFG|iss=AFG|doc=ordinary_passport|res=AFG|dest=ETH|cat=evisa_tourist|sub=any|pur=tourism|per=2026-07-23|jur=default",
   "tables": {

@@ -1,0 +1,831 @@
+[
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "open_portal",
+  "action": "NAVIGATE",
+  "allowed_url_patterns": [
+   "https://ceac.state.gov/genniv/"
+  ],
+  "expected_state": "instructions",
+  "purpose": "Open the official DS-160 instructions page"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "entry_gate_1_select_post",
+  "action": "SELECT",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_ucLocation_ddlLocation\"]",
+  "input_source": "SHG",
+  "purpose": "Entry gate: select the interviewing post (CHINA, SHANGHAI = SHG; verified live 2026-08-18)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "captcha_handoff_location",
+  "action": "APPLICANT_HANDOFF",
+  "handoff_kind": "captcha",
+  "applicant_action": true,
+  "sensitive": true,
+  "purpose": "The applicant reads and types the portal's code themselves \u2014 Ellis never solves it"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "entry_gate_2_start",
+  "action": "CLICK",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_lnkNew\"]",
+  "expected_transition": "/GenNIV/Common/ConfirmApplicationID.aspx",
+  "purpose": "Entry gate: START AN APPLICATION"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "wait_confirm_id",
+  "action": "WAIT_FOR_STATE",
+  "expected_state": "application_id_page",
+  "purpose": "Wait for the application-ID page (CEAC mints the AA00\u2026 id here)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "privacy_terms_handoff",
+  "action": "APPLICANT_HANDOFF",
+  "handoff_kind": "portal_terms_consent",
+  "applicant_action": true,
+  "sensitive": true,
+  "purpose": "The applicant agrees to the Privacy Act / Computer Fraud and Abuse Act notice in their own words, verbatim, inside Ellis"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "read_application_id",
+  "action": "READ_TEXT",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_lblBarcode\"]",
+  "purpose": "Record the application ID the portal issued (the applicant's key, and the number the appointment system later requires)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "security_question_handoff",
+  "action": "APPLICANT_HANDOFF",
+  "handoff_kind": "credentials",
+  "applicant_action": true,
+  "sensitive": true,
+  "purpose": "The retrieval security question and its answer are the applicant's own key to their application \u2014 chosen and typed by them, never stored by Ellis"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "wait_personal1",
+  "action": "WAIT_FOR_STATE",
+  "expected_state": "personal1_form_visible",
+  "purpose": "Wait for Personal Information 1 to render"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxapp_surname",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxAPP_SURNAME\"]",
+  "input_source": "surname",
+  "mandatory": true,
+  "purpose": "Fill tbxAPP_SURNAME from the case record (pauses with an applicant question when unanswered)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxapp_given_name",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxAPP_GIVEN_NAME\"]",
+  "input_source": "given_names",
+  "mandatory": true,
+  "purpose": "Fill tbxAPP_GIVEN_NAME from the case record (pauses with an applicant question when unanswered)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxapp_full_name_native",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxAPP_FULL_NAME_NATIVE\"]",
+  "input_source": "full_name_native",
+  "mandatory": false,
+  "purpose": "Fill tbxAPP_FULL_NAME_NATIVE from the case record (pauses with an applicant question when unanswered)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_ddlapp_gender",
+  "action": "SELECT_SEARCH",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_ddlAPP_GENDER\"]",
+  "input_source": "sex",
+  "mandatory": true,
+  "purpose": "Fill ddlAPP_GENDER from the case record (pauses with an applicant question when unanswered)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_ddlapp_marital_status",
+  "action": "SELECT_SEARCH",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_ddlAPP_MARITAL_STATUS\"]",
+  "input_source": "marital_status",
+  "mandatory": true,
+  "purpose": "Fill ddlAPP_MARITAL_STATUS from the case record (pauses with an applicant question when unanswered)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxapp_pob_city",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxAPP_POB_CITY\"]",
+  "input_source": "place_of_birth",
+  "mandatory": true,
+  "purpose": "Fill tbxAPP_POB_CITY from the case record (pauses with an applicant question when unanswered)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxapp_pob_st_province",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxAPP_POB_ST_PROVINCE\"]",
+  "input_source": "birth_region",
+  "mandatory": false,
+  "purpose": "Fill tbxAPP_POB_ST_PROVINCE from the case record (pauses with an applicant question when unanswered)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_ddlapp_pob_cntry",
+  "action": "SELECT_SEARCH",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_ddlAPP_POB_CNTRY\"]",
+  "input_source": "country_of_birth",
+  "mandatory": true,
+  "purpose": "Fill ddlAPP_POB_CNTRY from the case record (pauses with an applicant question when unanswered)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_ddldobday",
+  "action": "SELECT_SEARCH",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_ddlDOBDay\"]",
+  "input_source": "birth_date",
+  "mandatory": true,
+  "date_part": "DD",
+  "format": "DD",
+  "purpose": "Fill the DD component of the date of birth (CEAC splits it into three controls)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_ddldobmonth",
+  "action": "SELECT_SEARCH",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_ddlDOBMonth\"]",
+  "input_source": "birth_date",
+  "mandatory": true,
+  "date_part": "MON",
+  "format": "MON",
+  "purpose": "Fill the MON component of the date of birth (CEAC splits it into three controls)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxdobyear",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxDOBYear\"]",
+  "input_source": "birth_date",
+  "mandatory": true,
+  "date_part": "YYYY",
+  "format": "YYYY",
+  "purpose": "Fill the YYYY component of the date of birth (CEAC splits it into three controls)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "personal1_history_handoff",
+  "action": "APPLICANT_HANDOFF",
+  "handoff_kind": "legally_personal_declaration",
+  "applicant_action": true,
+  "sensitive": true,
+  "purpose": "Other-names-used and telecode questions are the applicant's own factual statements on a sworn form \u2014 answered by them in the secure window"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "next_personal2",
+  "action": "CLICK",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_UpdateButton3\"]",
+  "expected_transition": "/GenNIV/General/complete/complete_personalcont.aspx",
+  "purpose": "Next: Personal 2 (CEAC saves the page on navigation)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "wait_personal2",
+  "action": "WAIT_FOR_STATE",
+  "expected_state": "personal2_form_visible",
+  "purpose": "Wait for Personal Information 2 to render"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_ddlapp_natl",
+  "action": "SELECT_SEARCH",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_ddlAPP_NATL\"]",
+  "input_source": "nationality",
+  "mandatory": true,
+  "purpose": "Fill nationality (Country/Region of Origin) from the case record"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "personal2_history_handoff",
+  "action": "APPLICANT_HANDOFF",
+  "handoff_kind": "legally_personal_declaration",
+  "applicant_action": true,
+  "sensitive": true,
+  "purpose": "Other-nationality, permanent-residence-elsewhere, and the U.S. SSN/tax-ID questions are the applicant's own factual statements (rblAPP_OTH_NATL_IND, rblPermResOtherCntryInd, tbxAPP_NATIONAL_ID, tbxAPP_SSN*, tbxAPP_TAX_ID) \u2014 answered by them in the secure window"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "next_travel",
+  "action": "CLICK",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_UpdateButton3\"]",
+  "expected_transition": "/GenNIV/General/complete/complete_travel.aspx",
+  "purpose": "Next: Travel (CEAC saves the page on navigation)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "wait_travel",
+  "action": "WAIT_FOR_STATE",
+  "expected_state": "travel_form_visible",
+  "purpose": "Wait for the Travel Information page to render"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_purpose_of_trip",
+  "action": "SELECT_SEARCH",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_dlPrincipalAppTravel_ctl00_ddlPurposeOfTrip\"]",
+  "input_source": "travel_purpose_class",
+  "mandatory": true,
+  "purpose": "Purpose of Trip = B (TEMP. BUSINESS OR PLEASURE VISITOR) for a tourist; the choice reveals the Specify sub-dropdown via postback"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_purpose_specify",
+  "action": "SELECT_SEARCH",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_dlPrincipalAppTravel_ctl00_ddlOtherPurpose\"]",
+  "input_source": "travel_purpose_subclass",
+  "mandatory": true,
+  "purpose": "Specify = B2-TM (TOURISM/MEDICAL TREATMENT) \u2014 the tourist sub-class for China->USA"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_who_is_paying",
+  "action": "SELECT_SEARCH",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_ddlWhoIsPaying\"]",
+  "input_source": "trip_payer",
+  "mandatory": true,
+  "purpose": "Person/Entity paying for the trip (e.g. Self) from the case record"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "travel_plans_handoff",
+  "action": "APPLICANT_HANDOFF",
+  "handoff_kind": "legally_personal_declaration",
+  "applicant_action": true,
+  "sensitive": true,
+  "purpose": "Specific-travel-plans (rblSpecificTravel) and the arrival/length-of-stay it reveals are the applicant's own statements of intent \u2014 answered by them in the secure window"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "next_travelcompanions",
+  "action": "CLICK",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_UpdateButton3\"]",
+  "expected_transition": "/GenNIV/General/complete/complete_travelcompanions.aspx",
+  "purpose": "Next: Travel Companions"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "travel_companions_handoff",
+  "action": "APPLICANT_HANDOFF",
+  "handoff_kind": "legally_personal_declaration",
+  "applicant_action": true,
+  "sensitive": true,
+  "purpose": "Whether other persons travel with the applicant (rblOtherPersonsTravelingWithYou) is their own statement"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "prev_us_travel_handoff",
+  "action": "APPLICANT_HANDOFF",
+  "handoff_kind": "legally_personal_declaration",
+  "applicant_action": true,
+  "sensitive": true,
+  "purpose": "Previous U.S. travel, prior visas, ANY prior refusal, and immigrant petitions (rblPREV_US_TRAVEL_IND, rblPREV_VISA_IND, rblPREV_VISA_REFUSED_IND, rblIV_PETITION_IND) are sworn history \u2014 only the applicant may answer"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "wait_address_phone",
+  "action": "WAIT_FOR_STATE",
+  "expected_state": "address_phone_form_visible",
+  "purpose": "Wait for Address and Phone to render"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxapp_addr_ln1",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxAPP_ADDR_LN1\"]",
+  "input_source": "address_line1",
+  "mandatory": true,
+  "purpose": "Fill tbxAPP_ADDR_LN1 from the case record"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxapp_addr_ln2",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxAPP_ADDR_LN2\"]",
+  "input_source": "address_line2",
+  "mandatory": false,
+  "purpose": "Fill tbxAPP_ADDR_LN2 from the case record"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxapp_addr_city",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxAPP_ADDR_CITY\"]",
+  "input_source": "address_city",
+  "mandatory": true,
+  "purpose": "Fill tbxAPP_ADDR_CITY from the case record"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxapp_addr_state",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxAPP_ADDR_STATE\"]",
+  "input_source": "address_region",
+  "mandatory": false,
+  "purpose": "Fill tbxAPP_ADDR_STATE from the case record"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxapp_addr_postal_cd",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxAPP_ADDR_POSTAL_CD\"]",
+  "input_source": "address_postal_code",
+  "mandatory": false,
+  "purpose": "Fill tbxAPP_ADDR_POSTAL_CD from the case record"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_ddlcountry",
+  "action": "SELECT_SEARCH",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_ddlCountry\"]",
+  "input_source": "address_country",
+  "mandatory": true,
+  "purpose": "Fill ddlCountry from the case record"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxapp_home_tel",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxAPP_HOME_TEL\"]",
+  "input_source": "phone",
+  "mandatory": true,
+  "purpose": "Fill tbxAPP_HOME_TEL from the case record"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxapp_mobile_tel",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxAPP_MOBILE_TEL\"]",
+  "input_source": "mobile_phone",
+  "mandatory": false,
+  "purpose": "Fill tbxAPP_MOBILE_TEL from the case record"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxapp_email_addr",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxAPP_EMAIL_ADDR\"]",
+  "input_source": "email",
+  "mandatory": true,
+  "purpose": "Fill tbxAPP_EMAIL_ADDR from the case record"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "social_media_handoff",
+  "action": "APPLICANT_HANDOFF",
+  "handoff_kind": "legally_personal_declaration",
+  "applicant_action": true,
+  "sensitive": true,
+  "purpose": "Social-media identifiers (dtlSocial_ctl00_ddlSocialMedia / tbxSocialMediaIdent) and the mailing-address-same question are the applicant's own disclosures on a sworn form"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "next_passport_page",
+  "action": "CLICK",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_UpdateButton3\"]",
+  "expected_transition": "/GenNIV/General/complete/complete_passport.aspx",
+  "purpose": "Next: Passport"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "wait_passport",
+  "action": "WAIT_FOR_STATE",
+  "expected_state": "passport_form_visible",
+  "purpose": "Wait for the Passport page to render"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_ddlppt_type",
+  "action": "SELECT_SEARCH",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_ddlPPT_TYPE\"]",
+  "input_source": "passport_type",
+  "mandatory": true,
+  "purpose": "Fill ddlPPT_TYPE from the case record (passport OCR)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxppt_num",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxPPT_NUM\"]",
+  "input_source": "passport_number",
+  "mandatory": true,
+  "purpose": "Fill tbxPPT_NUM from the case record (passport OCR)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_ddlppt_issued_cntry",
+  "action": "SELECT_SEARCH",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_ddlPPT_ISSUED_CNTRY\"]",
+  "input_source": "issuing_country",
+  "mandatory": true,
+  "purpose": "Fill ddlPPT_ISSUED_CNTRY from the case record (passport OCR)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxppt_issued_in_city",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxPPT_ISSUED_IN_CITY\"]",
+  "input_source": "passport_issue_city",
+  "mandatory": true,
+  "purpose": "Fill tbxPPT_ISSUED_IN_CITY from the case record (passport OCR)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxppt_issued_in_state",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxPPT_ISSUED_IN_STATE\"]",
+  "input_source": "passport_issue_region",
+  "mandatory": false,
+  "purpose": "Fill tbxPPT_ISSUED_IN_STATE from the case record (passport OCR)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_ddlppt_issued_in_cntry",
+  "action": "SELECT_SEARCH",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_ddlPPT_ISSUED_IN_CNTRY\"]",
+  "input_source": "passport_issue_country",
+  "mandatory": true,
+  "purpose": "Fill ddlPPT_ISSUED_IN_CNTRY from the case record (passport OCR)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_ddlppt_issued_dteday",
+  "action": "SELECT_SEARCH",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_ddlPPT_ISSUED_DTEDay\"]",
+  "input_source": "passport_issue_date",
+  "mandatory": true,
+  "date_part": "DD",
+  "format": "DD",
+  "purpose": "Fill the DD component of passport_issue_date (CEAC splits it into three controls)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_ddlppt_issued_dtemonth",
+  "action": "SELECT_SEARCH",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_ddlPPT_ISSUED_DTEMonth\"]",
+  "input_source": "passport_issue_date",
+  "mandatory": true,
+  "date_part": "MON",
+  "format": "MON",
+  "purpose": "Fill the MON component of passport_issue_date (CEAC splits it into three controls)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxppt_issuedyear",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxPPT_ISSUEDYear\"]",
+  "input_source": "passport_issue_date",
+  "mandatory": true,
+  "date_part": "YYYY",
+  "format": "YYYY",
+  "purpose": "Fill the YYYY component of passport_issue_date (CEAC splits it into three controls)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_ddlppt_expire_dteday",
+  "action": "SELECT_SEARCH",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_ddlPPT_EXPIRE_DTEDay\"]",
+  "input_source": "passport_expiry_date",
+  "mandatory": true,
+  "date_part": "DD",
+  "format": "DD",
+  "purpose": "Fill the DD component of passport_expiry_date (CEAC splits it into three controls)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_ddlppt_expire_dtemonth",
+  "action": "SELECT_SEARCH",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_ddlPPT_EXPIRE_DTEMonth\"]",
+  "input_source": "passport_expiry_date",
+  "mandatory": true,
+  "date_part": "MON",
+  "format": "MON",
+  "purpose": "Fill the MON component of passport_expiry_date (CEAC splits it into three controls)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxppt_expireyear",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxPPT_EXPIREYear\"]",
+  "input_source": "passport_expiry_date",
+  "mandatory": true,
+  "date_part": "YYYY",
+  "format": "YYYY",
+  "purpose": "Fill the YYYY component of passport_expiry_date (CEAC splits it into three controls)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "lost_passport_handoff",
+  "action": "APPLICANT_HANDOFF",
+  "handoff_kind": "legally_personal_declaration",
+  "applicant_action": true,
+  "sensitive": true,
+  "purpose": "Whether a passport was ever lost or stolen (rblLOST_PPT_IND) is the applicant's own sworn statement"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "next_uscontact",
+  "action": "CLICK",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_UpdateButton3\"]",
+  "expected_transition": "/GenNIV/General/complete/complete_uscontact.aspx",
+  "purpose": "Next: U.S. Contact"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "wait_uscontact",
+  "action": "WAIT_FOR_STATE",
+  "expected_state": "uscontact_form_visible",
+  "purpose": "Wait for the U.S. Point of Contact page to render"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxus_poc_organization",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxUS_POC_ORGANIZATION\"]",
+  "input_source": "us_contact_name",
+  "mandatory": true,
+  "purpose": "Fill tbxUS_POC_ORGANIZATION from the case record (a hotel is an acceptable U.S. point of contact; relationship OTHER reveals the address block via postback)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_ddlus_poc_rel_to_app",
+  "action": "SELECT_SEARCH",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_ddlUS_POC_REL_TO_APP\"]",
+  "input_source": "us_contact_relationship",
+  "mandatory": true,
+  "purpose": "Fill ddlUS_POC_REL_TO_APP from the case record (a hotel is an acceptable U.S. point of contact; relationship OTHER reveals the address block via postback)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxus_poc_addr_ln1",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxUS_POC_ADDR_LN1\"]",
+  "input_source": "us_contact_address",
+  "mandatory": true,
+  "purpose": "Fill tbxUS_POC_ADDR_LN1 from the case record (a hotel is an acceptable U.S. point of contact; relationship OTHER reveals the address block via postback)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxus_poc_addr_city",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxUS_POC_ADDR_CITY\"]",
+  "input_source": "us_contact_city",
+  "mandatory": true,
+  "purpose": "Fill tbxUS_POC_ADDR_CITY from the case record (a hotel is an acceptable U.S. point of contact; relationship OTHER reveals the address block via postback)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_ddlus_poc_addr_state",
+  "action": "SELECT_SEARCH",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_ddlUS_POC_ADDR_STATE\"]",
+  "input_source": "us_contact_state",
+  "mandatory": true,
+  "purpose": "Fill ddlUS_POC_ADDR_STATE from the case record (a hotel is an acceptable U.S. point of contact; relationship OTHER reveals the address block via postback)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxus_poc_addr_postal_cd",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxUS_POC_ADDR_POSTAL_CD\"]",
+  "input_source": "us_contact_zip",
+  "mandatory": false,
+  "purpose": "Fill tbxUS_POC_ADDR_POSTAL_CD from the case record (a hotel is an acceptable U.S. point of contact; relationship OTHER reveals the address block via postback)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxus_poc_home_tel",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxUS_POC_HOME_TEL\"]",
+  "input_source": "us_contact_phone",
+  "mandatory": true,
+  "purpose": "Fill tbxUS_POC_HOME_TEL from the case record (a hotel is an acceptable U.S. point of contact; relationship OTHER reveals the address block via postback)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "next_family",
+  "action": "CLICK",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_UpdateButton3\"]",
+  "expected_transition": "/GenNIV/General/complete/complete_family1.aspx",
+  "purpose": "Next: Family"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "wait_family",
+  "action": "WAIT_FOR_STATE",
+  "expected_state": "family_form_visible",
+  "purpose": "Wait for Family Information: Relatives to render"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxfather_surname",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxFATHER_SURNAME\"]",
+  "input_source": "father_surname",
+  "mandatory": false,
+  "purpose": "Fill father's surname from the case record"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxfather_given_name",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxFATHER_GIVEN_NAME\"]",
+  "input_source": "father_given_names",
+  "mandatory": false,
+  "purpose": "Fill father's given names from the case record"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxmother_surname",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxMOTHER_SURNAME\"]",
+  "input_source": "mother_surname",
+  "mandatory": false,
+  "purpose": "Fill mother's surname from the case record"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxmother_given_name",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxMOTHER_GIVEN_NAME\"]",
+  "input_source": "mother_given_names",
+  "mandatory": false,
+  "purpose": "Fill mother's given names from the case record"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "family_us_relatives_handoff",
+  "action": "APPLICANT_HANDOFF",
+  "handoff_kind": "legally_personal_declaration",
+  "applicant_action": true,
+  "sensitive": true,
+  "purpose": "Parents' DOB (split, with Do-Not-Know), whether each parent is in the U.S., and immediate/other U.S. relatives (rblFATHER_LIVE_IN_US_IND, rblMOTHER_LIVE_IN_US_IND, rblUS_IMMED_RELATIVE_IND, rblUS_OTHER_RELATIVE_IND) are the applicant's own statements"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "next_workeducation",
+  "action": "CLICK",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_UpdateButton3\"]",
+  "expected_transition": "/GenNIV/General/complete/complete_workeducation1.aspx",
+  "purpose": "Next: Work/Education/Training"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "wait_work_present",
+  "action": "WAIT_FOR_STATE",
+  "expected_state": "work_present_visible",
+  "purpose": "Wait for Present Work/Education (choosing an occupation reveals the employer block via postback)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_ddlpresentoccupation",
+  "action": "SELECT_SEARCH",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_ddlPresentOccupation\"]",
+  "input_source": "occupation",
+  "mandatory": true,
+  "purpose": "Primary occupation; the chosen value reveals employer fields via postback"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxempschname",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxEmpSchName\"]",
+  "input_source": "employer",
+  "mandatory": true,
+  "purpose": "Present employer or school name"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxempschaddr1",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxEmpSchAddr1\"]",
+  "input_source": "employer_address",
+  "mandatory": true,
+  "purpose": "Employer street address"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxempschcity",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxEmpSchCity\"]",
+  "input_source": "employer_city",
+  "mandatory": true,
+  "purpose": "Employer city"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_ddlempschcountry",
+  "action": "SELECT_SEARCH",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_ddlEmpSchCountry\"]",
+  "input_source": "employer_country",
+  "mandatory": true,
+  "purpose": "Employer country"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxworkphone",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxWORK_TEL\"]",
+  "input_source": "employer_phone",
+  "mandatory": true,
+  "purpose": "Employer phone number"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxcurmonthlysalary",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxCURR_MONTHLY_SALARY\"]",
+  "input_source": "monthly_income",
+  "mandatory": false,
+  "purpose": "Monthly income in local currency (Does-Not-Apply checkbox exists)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "fill_tbxdescribeduties",
+  "action": "FILL_NON_SENSITIVE",
+  "selector": "[id=\"ctl00_SiteContentPlaceHolder_FormView1_tbxDescribeDuties\"]",
+  "input_source": "job_duties",
+  "mandatory": true,
+  "purpose": "Briefly describe your duties (textarea, 4000 chars)"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "work_history_handoff",
+  "action": "APPLICANT_HANDOFF",
+  "handoff_kind": "legally_personal_declaration",
+  "applicant_action": true,
+  "sensitive": true,
+  "purpose": "Employment start date (split), previous employment, education history, languages, five-year travel, organizations, specialized skills, military service and related questions (WorkEducation 2-3) are the applicant's own sworn statements; Yes answers reveal further controls recorded in the manifest's conditional_fields map"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "photo_upload_handoff",
+  "action": "APPLICANT_HANDOFF",
+  "handoff_kind": "document_upload",
+  "applicant_action": true,
+  "sensitive": true,
+  "purpose": "Upload Photo (/GenNIV/General/photo/photo_uploadthephoto.aspx?node=UploadPhoto) delegates to the Department of State's own photo-verification system, which checks the image and returns to Confirm Photo. The photograph is the applicant's own biometric: they choose and upload it themselves. Ellis never attaches a face to an application"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "review_handoff",
+  "action": "APPLICANT_HANDOFF",
+  "handoff_kind": "legally_personal_declaration",
+  "applicant_action": true,
+  "sensitive": true,
+  "purpose": "Review: the applicant reads back every answer on the form before signing. Ellis shows what it filled and from which case field, but the confirmation that it is true is theirs"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "sign_handoff",
+  "action": "APPLICANT_HANDOFF",
+  "handoff_kind": "legally_personal_declaration",
+  "applicant_action": true,
+  "sensitive": true,
+  "purpose": "Sign and Submit: sworn under penalty of perjury under 22 C.F.R. 41.103 \u2014 a preparer may fill the form, only the applicant may sign it. This is the last node before COMPLETE and it is never automated"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "reconcile_submission",
+  "action": "RECONCILE_OUTCOME",
+  "retry_class": "reconcile_first",
+  "purpose": "Never double-submit: check the official application state first"
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "verify_submission",
+  "action": "VERIFY_EVIDENCE",
+  "purpose": "Submission is proven by the official confirmation page, never a banner",
+  "success_evidence": [
+   {
+    "kind": "network",
+    "category": "submission_accepted"
+   },
+   {
+    "kind": "official_record",
+    "category": "submitted"
+   }
+  ]
+ },
+ {
+  "allowed_hostname": "ceac.state.gov",
+  "node_id": "done",
+  "action": "COMPLETE",
+  "purpose": "Flow complete"
+ }
+]

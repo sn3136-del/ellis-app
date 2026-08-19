@@ -1,0 +1,232 @@
+{
+ "artifact": "ceac-ds160-attended-20260818",
+ "source": "Harvested live from ceac.state.gov in an authorized attended session (application AA00FQKTDD), 2026-08-18",
+ "purpose": "Every question the DS-160 asks, with the portal's exact answer vocabulary, so Ellis can ask it in its OWN UI: a portal dropdown becomes the same dropdown in Ellis, a free-text box becomes free text with the portal's own maxlength. The applicant answers once, in Ellis; Ellis then transcribes those answers into CEAC. Questions marked applicant_only are the applicant's own sworn or personal statements: Ellis renders them in the secure window and never types their answers.",
+ "conventions": {
+  "kind": "select | radio | checkbox | text | textarea | split_date | address",
+  "split_date": "CEAC asks dates as THREE controls (day dropdown, month dropdown, year text). Ellis shows one date picker and binds each component separately.",
+  "na_checkbox": "the portal's own 'Does Not Apply' / 'Do Not Know' companion control",
+  "applicant_only": "never auto-filled; asked and answered by the applicant personally",
+  "COUNTRY_LIST": "CEAC's full country/region list (~240 entries, e.g. CHIN=CHINA); Ellis reuses the portal's own value codes"
+ },
+ "pages": [
+  {
+   "page": "getting_started",
+   "questions": [
+    {"field": "ddlLocation", "kind": "select", "question": "Select a location where you will be applying for this visa",
+     "options": [{"value": "BEJ", "label": "CHINA, BEIJING"}, {"value": "GUZ", "label": "CHINA, GUANGZHOU"},
+                 {"value": "SHG", "label": "CHINA, SHANGHAI"}, {"value": "SNY", "label": "CHINA, SHENYANG"},
+                 {"value": "WUH", "label": "CHINA, WUHAN"}],
+     "notes": "80 posts worldwide; the five mainland-China codes are listed"},
+    {"field": "IdentifyCaptcha1_txtCodeTextBox", "kind": "text", "question": "Enter the code as shown", "applicant_only": true}
+   ]
+  },
+  {
+   "page": "confirm_application_id",
+   "questions": [
+    {"field": "chkbxPrivacyAct", "kind": "checkbox", "question": "I AGREE (Privacy Act / Computer Fraud and Abuse Act notice)", "applicant_only": true,
+     "notes": "drives an ASP.NET postback that enables the controls below; a programmatic tick does not fire it"},
+    {"field": "ddlQuestions", "kind": "select", "question": "Security Question (used to retrieve the application)", "applicant_only": true,
+     "options_sample": [{"value": "1", "label": "What is the given name of your mother's mother?"},
+                        {"value": "2", "label": "What is the given name of your father's father?"},
+                        {"value": "3", "label": "What is your maternal grandmother's maiden name?"}]},
+    {"field": "txtAnswer", "kind": "text", "question": "Answer", "applicant_only": true,
+     "notes": "the applicant's key to their own application; Ellis never stores it"}
+   ]
+  },
+  {
+   "page": "personal1",
+   "questions": [
+    {"field": "tbxAPP_SURNAME", "kind": "text", "question": "Surnames (exactly as written in your passport)"},
+    {"field": "tbxAPP_GIVEN_NAME", "kind": "text", "question": "Given Names (exactly as written in your passport)"},
+    {"field": "tbxAPP_FULL_NAME_NATIVE", "kind": "text", "question": "Full Name in Native Alphabet", "na_checkbox": "cbexAPP_FULL_NAME_NATIVE_NA"},
+    {"field": "rblOtherNames", "kind": "radio", "question": "Have you ever used other names (i.e., maiden, religious, professional, alias, etc.)?", "options": ["Yes", "No"], "applicant_only": true},
+    {"field": "rblTelecodeQuestion", "kind": "radio", "question": "Do you have a telecode that represents your name?", "options": ["Yes", "No"], "applicant_only": true},
+    {"field": "ddlAPP_GENDER", "kind": "select", "question": "Sex", "options": [{"value": "M", "label": "MALE"}, {"value": "F", "label": "FEMALE"}]},
+    {"field": "ddlAPP_MARITAL_STATUS", "kind": "select", "question": "Marital Status",
+     "options": [{"value": "M", "label": "MARRIED"}, {"value": "C", "label": "COMMON LAW MARRIAGE"},
+                 {"value": "P", "label": "CIVIL UNION/DOMESTIC PARTNERSHIP"}, {"value": "S", "label": "SINGLE"},
+                 {"value": "W", "label": "WIDOWED"}, {"value": "D", "label": "DIVORCED"},
+                 {"value": "L", "label": "LEGALLY SEPARATED"}, {"value": "O", "label": "OTHER"}]},
+    {"field": "ddlDOBDay+ddlDOBMonth+tbxDOBYear", "kind": "split_date", "question": "Date of Birth (DD-MMM-YYYY)"},
+    {"field": "tbxAPP_POB_CITY", "kind": "text", "question": "City of Birth"},
+    {"field": "tbxAPP_POB_ST_PROVINCE", "kind": "text", "question": "State/Province of Birth", "na_checkbox": "cbexAPP_POB_ST_PROVINCE_NA"},
+    {"field": "ddlAPP_POB_CNTRY", "kind": "select", "question": "Country/Region of Birth", "options": "COUNTRY_LIST"}
+   ]
+  },
+  {
+   "page": "personal2",
+   "questions": [
+    {"field": "ddlAPP_NATL", "kind": "select", "question": "Country/Region of Origin (Nationality)", "options": "COUNTRY_LIST"},
+    {"field": "rblAPP_OTH_NATL_IND", "kind": "radio", "question": "Do you hold or have you held any nationality other than the one indicated above?", "options": ["Yes", "No"], "applicant_only": true},
+    {"field": "rblPermResOtherCntryInd", "kind": "radio", "question": "Are you a permanent resident of a country/region other than your country/region of origin?", "options": ["Yes", "No"], "applicant_only": true},
+    {"field": "tbxAPP_NATIONAL_ID", "kind": "text", "question": "National Identification Number", "na_checkbox": "cbexAPP_NATIONAL_ID_NA"},
+    {"field": "tbxAPP_SSN1/2/3", "kind": "text", "question": "U.S. Social Security Number (three boxes)", "na_checkbox": "cbexAPP_SSN_NA"},
+    {"field": "tbxAPP_TAX_ID", "kind": "text", "question": "U.S. Taxpayer ID Number", "na_checkbox": "cbexAPP_TAX_ID_NA"}
+   ]
+  },
+  {
+   "page": "travel",
+   "questions": [
+    {"field": "dlPrincipalAppTravel_ctl00_ddlPurposeOfTrip", "kind": "select", "question": "Purpose of Trip to the U.S.",
+     "options_sample": [{"value": "B", "label": "TEMP. BUSINESS OR PLEASURE VISITOR (B)"}],
+     "notes": "26 visa classes; B is the tourist/business class. Choosing it postbacks and reveals Specify."},
+    {"field": "dlPrincipalAppTravel_ctl00_ddlOtherPurpose", "kind": "select", "question": "Specify",
+     "options": [{"value": "B1-B2", "label": "BUSINESS OR TOURISM (TEMPORARY VISITOR) (B1/B2)"},
+                 {"value": "B1-CF", "label": "BUSINESS/CONFERENCE (B1)"},
+                 {"value": "B2-TM", "label": "TOURISM/MEDICAL TREATMENT (B2)"}],
+     "notes": "B2-TM is the tourist sub-class for a China->USA leisure trip"},
+    {"field": "rblSpecificTravel", "kind": "radio", "question": "Have you made specific travel plans?", "options": ["Yes", "No"], "applicant_only": true,
+     "conditional": "No reveals intended-arrival split date, length of stay, and the U.S. stay address"},
+    {"field": "ddlTRAVEL_DTEDay+Month+tbxTRAVEL_DTEYear", "kind": "split_date", "question": "Intended Date of Arrival"},
+    {"field": "tbxTRAVEL_LOS + ddlTRAVEL_LOS_CD", "kind": "text+select", "question": "Intended Length of Stay in U.S.",
+     "options": [{"value": "D", "label": "DAY(S)"}, {"value": "W", "label": "WEEK(S)"}, {"value": "M", "label": "MONTH(S)"}, {"value": "Y", "label": "YEAR(S)"}]},
+    {"field": "tbxStreetAddress1/2 + tbxCity + ddlTravelState + tbxZIPCode", "kind": "address", "question": "Address Where You Will Stay in the U.S."},
+    {"field": "ddlWhoIsPaying", "kind": "select", "question": "Person/Entity Paying for Your Trip",
+     "options": [{"value": "S", "label": "Self"}, {"value": "H", "label": "U.S. Petitioner"}, {"value": "O", "label": "Other Person"},
+                 {"value": "P", "label": "Present Employer"}, {"value": "U", "label": "Employer in the U.S."}, {"value": "C", "label": "Other Company/Organization"}]}
+   ]
+  },
+  {
+   "page": "travel_companions",
+   "questions": [
+    {"field": "rblOtherPersonsTravelingWithYou", "kind": "radio", "question": "Are there other persons traveling with you?", "options": ["Yes", "No"], "applicant_only": true}
+   ]
+  },
+  {
+   "page": "previous_us_travel",
+   "questions": [
+    {"field": "rblPREV_US_TRAVEL_IND", "kind": "radio", "question": "Have you ever been in the U.S.?", "options": ["Yes", "No"], "applicant_only": true},
+    {"field": "rblPREV_VISA_IND", "kind": "radio", "question": "Have you ever been issued a U.S. Visa?", "options": ["Yes", "No"], "applicant_only": true},
+    {"field": "rblPREV_VISA_REFUSED_IND", "kind": "radio", "question": "Have you ever been refused a U.S. Visa, or been refused admission to the United States, or withdrawn your application for admission at the port of entry?", "options": ["Yes", "No"], "applicant_only": true},
+    {"field": "rblIV_PETITION_IND", "kind": "radio", "question": "Has anyone ever filed an immigrant petition on your behalf with the United States Citizenship and Immigration Services?", "options": ["Yes", "No"], "applicant_only": true}
+   ]
+  },
+  {
+   "page": "address_phone",
+   "questions": [
+    {"field": "tbxAPP_ADDR_LN1 / LN2 / tbxAPP_ADDR_CITY / tbxAPP_ADDR_STATE / tbxAPP_ADDR_POSTAL_CD / ddlCountry", "kind": "address", "question": "Home Address",
+     "na_checkbox": "cbexAPP_ADDR_STATE_NA, cbexAPP_ADDR_POSTAL_CD_NA"},
+    {"field": "rblMailingAddrSame", "kind": "radio", "question": "Is your Mailing Address the same as your Home Address?", "options": ["Yes", "No"]},
+    {"field": "tbxAPP_HOME_TEL", "kind": "text", "question": "Primary Phone Number"},
+    {"field": "tbxAPP_MOBILE_TEL", "kind": "text", "question": "Secondary Phone Number", "na_checkbox": "cbexAPP_MOBILE_TEL_NA"},
+    {"field": "tbxAPP_BUS_TEL", "kind": "text", "question": "Work Phone Number", "na_checkbox": "cbexAPP_BUS_TEL_NA"},
+    {"field": "rblAddPhone", "kind": "radio", "question": "Have you used any other phone numbers in the last five years?", "options": ["Yes", "No"], "applicant_only": true},
+    {"field": "tbxAPP_EMAIL_ADDR", "kind": "text", "question": "Email Address"},
+    {"field": "rblAddEmail", "kind": "radio", "question": "Have you used any other email addresses in the last five years?", "options": ["Yes", "No"], "applicant_only": true},
+    {"field": "dtlSocial_ctl00_ddlSocialMedia", "kind": "select", "question": "Social Media Provider/Platform", "repeating": true,
+     "options": [{"label": "ASK.FM"}, {"label": "DOUBAN"}, {"label": "FACEBOOK"}, {"label": "FLICKR"}, {"label": "GOOGLE+"},
+                 {"label": "INSTAGRAM"}, {"label": "LINKEDIN"}, {"label": "MYSPACE"}, {"label": "PINTEREST"}, {"label": "QZONE (QQ)"},
+                 {"label": "REDDIT"}, {"label": "SINA WEIBO"}, {"label": "TENCENT WEIBO"}, {"label": "TUMBLR"}, {"label": "TWITTER"},
+                 {"label": "TWOO"}, {"label": "VINE"}, {"label": "VKONTAKTE (VK)"}, {"label": "YOUKU"}, {"label": "YOUTUBE"},
+                 {"value": "NONE", "label": "NONE"}],
+     "notes": "a platform MUST be selected before the page saves; NONE is the answer when none apply"},
+    {"field": "dtlSocial_ctl00_tbxSocialMediaIdent", "kind": "text", "question": "Social Media Identifier (username or handle; never a password)", "applicant_only": true},
+    {"field": "rblAddSocial", "kind": "radio", "question": "Do you wish to provide information about your presence on any other websites or applications you have used within the last five years to create or share content?", "options": ["Yes", "No"], "applicant_only": true}
+   ]
+  },
+  {
+   "page": "passport",
+   "questions": [
+    {"field": "ddlPPT_TYPE", "kind": "select", "question": "Passport/Travel Document Type",
+     "options": [{"value": "R", "label": "REGULAR"}, {"value": "O", "label": "OFFICIAL"}, {"value": "D", "label": "DIPLOMATIC"},
+                 {"value": "L", "label": "LAISSEZ-PASSER"}, {"value": "T", "label": "OTHER"}]},
+    {"field": "tbxPPT_NUM", "kind": "text", "question": "Passport/Travel Document Number"},
+    {"field": "tbxPPT_BOOK_NUM", "kind": "text", "question": "Passport Book Number", "na_checkbox": "cbexPPT_BOOK_NUM_NA"},
+    {"field": "ddlPPT_ISSUED_CNTRY", "kind": "select", "question": "Country/Authority that Issued Passport/Travel Document", "options": "COUNTRY_LIST"},
+    {"field": "tbxPPT_ISSUED_IN_CITY + tbxPPT_ISSUED_IN_STATE + ddlPPT_ISSUED_IN_CNTRY", "kind": "address", "question": "Where was the Passport/Travel Document Issued?"},
+    {"field": "ddlPPT_ISSUED_DTEDay+Month+tbxPPT_ISSUEDYear", "kind": "split_date", "question": "Issuance Date"},
+    {"field": "ddlPPT_EXPIRE_DTEDay+Month+tbxPPT_EXPIREYear", "kind": "split_date", "question": "Expiration Date", "na_checkbox": "cbxPPT_EXPIRE_NA (No Expiration)"},
+    {"field": "rblLOST_PPT_IND", "kind": "radio", "question": "Have you ever lost a passport or had one stolen?", "options": ["Yes", "No"], "applicant_only": true}
+   ]
+  },
+  {
+   "page": "us_contact",
+   "questions": [
+    {"field": "tbxUS_POC_SURNAME + tbxUS_POC_GIVEN_NAME", "kind": "text", "question": "Contact Person in the U.S. (name)", "na_checkbox": "cbxUS_POC_NAME_NA (Do Not Know)"},
+    {"field": "tbxUS_POC_ORGANIZATION", "kind": "text", "question": "Organization Name", "na_checkbox": "cbxUS_POC_ORG_NA_IND",
+     "notes": "a hotel is an acceptable U.S. point of contact for a tourist"},
+    {"field": "ddlUS_POC_REL_TO_APP", "kind": "select", "question": "Relationship to You",
+     "options": [{"value": "R", "label": "RELATIVE"}, {"value": "S", "label": "SPOUSE"}, {"value": "C", "label": "FRIEND"},
+                 {"value": "B", "label": "BUSINESS ASSOCIATE"}, {"value": "P", "label": "EMPLOYER"},
+                 {"value": "H", "label": "SCHOOL OFFICIAL"}, {"value": "O", "label": "OTHER"}],
+     "conditional": "any selection postbacks and reveals the U.S. address, phone and email block"},
+    {"field": "tbxUS_POC_ADDR_LN1/LN2 + tbxUS_POC_ADDR_CITY + ddlUS_POC_ADDR_STATE + tbxUS_POC_ADDR_POSTAL_CD", "kind": "address", "question": "U.S. Contact Address"},
+    {"field": "tbxUS_POC_HOME_TEL", "kind": "text", "question": "Phone Number"},
+    {"field": "tbxUS_POC_EMAIL_ADDR", "kind": "text", "question": "Email Address", "na_checkbox": "cbexUS_POC_EMAIL_ADDR_NA"}
+   ]
+  },
+  {
+   "page": "family",
+   "questions": [
+    {"field": "tbxFATHER_SURNAME + tbxFATHER_GIVEN_NAME", "kind": "text", "question": "Father's Full Name",
+     "na_checkbox": "cbxFATHER_SURNAME_UNK_IND, cbxFATHER_GIVEN_NAME_UNK_IND (Do Not Know)"},
+    {"field": "ddlFathersDOBDay+Month+tbxFathersDOBYear", "kind": "split_date", "question": "Father's Date of Birth", "na_checkbox": "cbxFATHER_DOB_UNK_IND"},
+    {"field": "rblFATHER_LIVE_IN_US_IND", "kind": "radio", "question": "Is your father in the U.S.?", "options": ["Yes", "No"], "applicant_only": true},
+    {"field": "tbxMOTHER_SURNAME + tbxMOTHER_GIVEN_NAME", "kind": "text", "question": "Mother's Full Name",
+     "na_checkbox": "cbxMOTHER_SURNAME_UNK_IND, cbxMOTHER_GIVEN_NAME_UNK_IND"},
+    {"field": "ddlMothersDOBDay+Month+tbxMothersDOBYear", "kind": "split_date", "question": "Mother's Date of Birth", "na_checkbox": "cbxMOTHER_DOB_UNK_IND"},
+    {"field": "rblMOTHER_LIVE_IN_US_IND", "kind": "radio", "question": "Is your mother in the U.S.?", "options": ["Yes", "No"], "applicant_only": true},
+    {"field": "rblUS_IMMED_RELATIVE_IND", "kind": "radio", "question": "Do you have any immediate relatives, not including parents, in the United States?", "options": ["Yes", "No"], "applicant_only": true},
+    {"field": "rblUS_OTHER_RELATIVE_IND", "kind": "radio", "question": "Do you have any other relatives in the United States?", "options": ["Yes", "No"], "applicant_only": true,
+     "conditional": "appears only after the immediate-relatives question is answered"}
+   ]
+  },
+  {
+   "page": "work_education_present",
+   "questions": [
+    {"field": "ddlPresentOccupation", "kind": "select", "question": "Primary Occupation",
+     "options": [{"value": "A", "label": "AGRICULTURE"}, {"value": "AP", "label": "ARTIST/PERFORMER"}, {"value": "B", "label": "BUSINESS"},
+                 {"value": "CM", "label": "COMMUNICATIONS"}, {"value": "CS", "label": "COMPUTER SCIENCE"}, {"value": "C", "label": "CULINARY/FOOD SERVICES"},
+                 {"value": "ED", "label": "EDUCATION"}, {"value": "EN", "label": "ENGINEERING"}, {"value": "G", "label": "GOVERNMENT"},
+                 {"value": "H", "label": "HOMEMAKER"}, {"value": "LP", "label": "LEGAL PROFESSION"}, {"value": "MH", "label": "MEDICAL/HEALTH"},
+                 {"value": "M", "label": "MILITARY"}, {"value": "NS", "label": "NATURAL SCIENCE"}, {"value": "N", "label": "NOT EMPLOYED"},
+                 {"value": "PS", "label": "PHYSICAL SCIENCES"}, {"value": "RV", "label": "RELIGIOUS VOCATION"}, {"value": "R", "label": "RESEARCH"},
+                 {"value": "RT", "label": "RETIRED"}, {"value": "SS", "label": "SOCIAL SCIENCE"}, {"value": "S", "label": "STUDENT"},
+                 {"value": "O", "label": "OTHER"}],
+     "conditional": "an employed value postbacks and reveals the whole employer block below"},
+    {"field": "tbxEmpSchName", "kind": "text", "question": "Present Employer or School Name"},
+    {"field": "employer address block", "kind": "address", "question": "Present employer or school address (street, city, state/province, postal code, phone, country)"},
+    {"field": "employer start date", "kind": "split_date", "question": "Start Date"},
+    {"field": "tbxCURR_MONTHLY_SALARY", "kind": "text", "question": "Monthly Income in Local Currency (if employed)", "na_checkbox": "yes"},
+    {"field": "tbxDescribeDuties", "kind": "textarea", "question": "Briefly describe your duties", "maxlength": 4000}
+   ]
+  },
+  {
+   "page": "work_education_previous",
+   "questions": [
+    {"field": "rblPreviouslyEmployed", "kind": "radio", "question": "Were you previously employed?", "options": ["Yes", "No"], "applicant_only": true,
+     "conditional": "Yes reveals a repeating previous-employer block"},
+    {"field": "rblOtherEduc", "kind": "radio", "question": "Have you attended any educational institutions at a secondary level or above?", "options": ["Yes", "No"], "applicant_only": true,
+     "conditional": "Yes reveals a repeating institution block"}
+   ]
+  },
+  {
+   "page": "work_education_additional",
+   "questions": [
+    {"field": "rblCLAN_TRIBE_IND", "kind": "radio", "question": "Do you belong to a clan or tribe?", "options": ["Yes", "No"], "applicant_only": true,
+     "conditional": "Yes reveals tbxCLAN_TRIBE_NAME"},
+    {"field": "dtlLANGUAGES_ctl00_tbxLANGUAGE_NAME", "kind": "text", "question": "Provide a List of Languages You Speak", "maxlength": 66, "repeating": true},
+    {"field": "rblCOUNTRIES_VISITED_IND", "kind": "radio", "question": "Have you traveled to any countries/regions within the last five years?", "options": ["Yes", "No"], "applicant_only": true,
+     "conditional": "Yes reveals dtlCountriesVisited_ctl00_ddlCOUNTRIES_VISITED (repeating country dropdown)"},
+    {"field": "rblORGANIZATION_IND", "kind": "radio", "question": "Have you belonged to, contributed to, or worked for any professional, social, or charitable organization?", "options": ["Yes", "No"], "applicant_only": true},
+    {"field": "rblSPECIALIZED_SKILLS_IND", "kind": "radio", "question": "Do you have any specialized skills or training, such as firearms, explosives, nuclear, biological, or chemical experience?", "options": ["Yes", "No"], "applicant_only": true,
+     "explanation_field": "tbxSPECIALIZED_SKILLS_EXPL", "explanation_maxlength": 4000},
+    {"field": "rblMILITARY_SERVICE_IND", "kind": "radio", "question": "Have you ever served in the military?", "options": ["Yes", "No"], "applicant_only": true,
+     "conditional": "Yes reveals country of service, branch, rank, specialty, and TWO further split dates (service from / service to)"},
+    {"field": "rblINSURGENT_ORG_IND", "kind": "radio", "question": "Have you ever served in, been a member of, or been involved with a paramilitary unit, vigilante unit, rebel group, guerrilla group, or insurgent organization?", "options": ["Yes", "No"], "applicant_only": true,
+     "explanation_field": "tbxINSURGENT_ORG_EXPL", "explanation_maxlength": 4000}
+   ]
+  },
+  {
+   "page": "security_and_background_1",
+   "applicant_only_page": true,
+   "questions": [
+    {"field": "rblDisease", "kind": "radio", "question": "Do you have a communicable disease of public health significance?", "options": ["Yes", "No"], "explanation_field": "tbxDisease"},
+    {"field": "rblDisorder", "kind": "radio", "question": "Do you have a mental or physical disorder that poses or is likely to pose a threat to the safety or welfare of yourself or others?", "options": ["Yes", "No"], "explanation_field": "tbxDisorder"},
+    {"field": "rblDruguser", "kind": "radio", "question": "Are you or have you ever been a drug abuser or addict?", "options": ["Yes", "No"], "explanation_field": "tbxDruguser"}
+   ],
+   "note": "Parts 2 to 5 follow the same radio + explanation-textarea pattern (criminal, security/terrorism, immigration violations, and other grounds). ALL are sworn under penalty of perjury: Ellis renders them in the secure window for the applicant and never answers them."
+  }
+ ]
+}

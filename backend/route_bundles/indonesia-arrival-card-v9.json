@@ -2,7 +2,7 @@
   "bundle_version": 1,
   "candidate_id": "7f5f76f2d2f2435d93b7660a9aa8bf0b",
   "candidate_version": 9,
-  "exported_at": "2026-08-02T20:13:27.031811-04:00",
+  "exported_at": "2026-08-19T08:20:53.372963-04:00",
   "family_id": "indonesia-arrival-card",
   "route_key": "rk1|nat=BRN|iss=BRN|doc=ordinary_passport|res=BRN|dest=IDN|cat=visa_free_entry|sub=any|pur=tourism|per=2026-07-23|jur=default",
   "tables": {

@@ -2,7 +2,7 @@
   "bundle_version": 1,
   "candidate_id": "7d62ce0ce2fa40e6b48b1d73d17bf943",
   "candidate_version": 6,
-  "exported_at": "2026-08-02T20:13:27.011554-04:00",
+  "exported_at": "2026-08-19T08:20:53.251771-04:00",
   "family_id": "angola-smevisa",
   "route_key": "rk1|nat=CUB|iss=CUB|doc=ordinary_passport|res=CUB|dest=AGO|cat=evisa_tourist|sub=any|pur=tourism|per=2026-07-23|jur=default",
   "tables": {

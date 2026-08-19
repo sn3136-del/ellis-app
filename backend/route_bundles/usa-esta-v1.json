@@ -2,7 +2,7 @@
   "bundle_version": 1,
   "candidate_id": "52dbf6ed65c24e10aae09d0ca529d8b2",
   "candidate_version": 1,
-  "exported_at": "2026-08-02T20:13:27.018796-04:00",
+  "exported_at": "2026-08-19T08:20:53.297146-04:00",
   "family_id": "usa-esta",
   "route_key": "rk1|nat=AND|iss=AND|doc=ordinary_passport|res=AND|dest=USA|cat=eta|sub=any|pur=tourism|per=2026-07-23|jur=default",
   "tables": {

@@ -67,6 +67,10 @@ ocr_scratch/
 
 # === Generated adapter candidate bundles (DB is authoritative) ===
 backend/app/portal_adapters/generated/
+# ...except the attended-mapped CEAC adapter: it is a curated artifact of
+# record (ds160_api serves its question bank from disk) and must ship.
+!backend/app/portal_adapters/generated/usa-ceac-ds160/
+!backend/app/portal_adapters/generated/usa-ceac-ds160/**
 
 # === Bundled slim Python runtime for the self-contained app (regenerate via scripts/build-runtime-venv.sh) ===
 backend/.runtime-venv/

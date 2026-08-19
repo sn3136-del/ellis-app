@@ -118,6 +118,27 @@ log "ensuring complete schema…"
   || die "could not initialize the database schema — see $LOGS/backend.log"
 
 # ---- backend + worker (127.0.0.1 only) ------------------------------------
+# Fresh clone: the app database starts empty — publish the shipped route
+# bundles (the released adapters, evidence and bindings) so every released
+# route serves from the first boot. Idempotent; skipped once routes exist.
+ROUTES=$(DATABASE_URL="sqlite:///$DB" "$PY" - <<'PYCOUNT' 2>/dev/null
+from app.db import SessionLocal
+from sqlalchemy import text
+db = SessionLocal()
+try:
+    print(db.execute(text("SELECT COUNT(*) FROM portal_family_adapters WHERE released=1")).fetchone()[0])
+except Exception:
+    print(0)
+db.close()
+PYCOUNT
+)
+if [ "${ROUTES:-0}" = "0" ] && ls "$ROOT/backend/route_bundles"/*.json >/dev/null 2>&1; then
+  log "first run: publishing released route bundles"
+  for f in "$ROOT/backend/route_bundles"/*.json; do
+    DATABASE_URL="sqlite:///$DB" "$PY" "$ROOT/backend/route_bundle.py" import "$f" --overwrite >/dev/null 2>&1 || true
+  done
+fi
+
 cd "$ROOT/backend"
 "$PY" -m uvicorn app.main:app --host "$HOST" --port "$PORT" --log-level warning >>"$LOGS/backend.log" 2>&1 &
 echo $! > "$RUN/backend.pid"; log "backend pid  : $(cat "$RUN/backend.pid")"

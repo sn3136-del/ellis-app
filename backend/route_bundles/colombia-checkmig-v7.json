@@ -2,7 +2,7 @@
   "bundle_version": 1,
   "candidate_id": "e7b37b7851bf4a19b22d3b06d4640482",
   "candidate_version": 7,
-  "exported_at": "2026-08-02T20:13:27.013256-04:00",
+  "exported_at": "2026-08-19T08:20:53.255946-04:00",
   "family_id": "colombia-checkmig",
   "route_key": "rk1|nat=ALB|iss=ALB|doc=ordinary_passport|res=ALB|dest=COL|cat=visa_free_entry|sub=any|pur=tourism|per=2026-07-23|jur=default",
   "tables": {

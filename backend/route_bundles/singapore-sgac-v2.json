@@ -2,7 +2,7 @@
   "bundle_version": 1,
   "candidate_id": "ca9163f58e3d44ac8a724378ac124cdf",
   "candidate_version": 2,
-  "exported_at": "2026-08-02T20:13:27.023827-04:00",
+  "exported_at": "2026-08-19T08:20:53.305554-04:00",
   "family_id": "singapore-sgac",
   "route_key": "rk1|nat=AGO|iss=AGO|doc=ordinary_passport|res=AGO|dest=SGP|cat=visa_free_entry|sub=any|pur=tourism|per=2026-07-23|jur=default",
   "tables": {
