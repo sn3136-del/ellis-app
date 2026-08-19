@@ -706,7 +706,11 @@ export default function SchengenVisa({ onBack }) {
       {/* What this mission actually books. RK-Termin missions differ, and
           neither of Shanghai's areas is short-stay tourism — so the real lists
           are shown rather than a category being assumed. */}
-      {loc && (realms.length > 1 || cats.length > 1) && phase !== 'opening' && (
+      {/* Card hidden by owner decision (theming). The area/queue selection
+          itself is untouched: the walk still reads both lists, still defaults
+          to the visa area by label, and chooseRealm/chooseCategory still
+          work — only this panel is not drawn. */}
+      {false && loc && (realms.length > 1 || cats.length > 1) && phase !== 'opening' && (
         <Card className="anim-rise-1" style={{ marginTop: 14 }}
               data-testid="schengen-queues">
           {realms.length > 1 && (
