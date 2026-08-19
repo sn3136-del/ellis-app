@@ -1375,6 +1375,13 @@ export default function SchengenVisa({ onBack }) {
                         textAlign: 'left', whiteSpace: 'pre-wrap' }}>
             {booked.page_text || 'No message could be read from the page.'}
           </div>
+          {booked.screenshot && (
+            <img src={booked.screenshot}
+                 alt="The official confirmation page"
+                 data-testid="schengen-confirmation-shot"
+                 style={{ width: '100%', borderRadius: 12, marginTop: 12,
+                          border: '1px solid var(--line, #e2e8f0)' }} />
+          )}
           <div style={{ fontSize: 12, color: GRAY, marginTop: 10 }}>
             The confirmation email goes to the address on the form.
           </div>

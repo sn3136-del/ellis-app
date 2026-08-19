@@ -882,5 +882,15 @@ def submit_book_form(driver, *, applicant_instructed: bool) -> dict:
     after = after or {}
     errors = list(after.get("errors") or [])
     succeeded = (not after.get("form_still", True)) and not errors
+    # The applicant keeps a picture of the official confirmation, exactly as
+    # their own window shows it — the page text can be forwarded, but the
+    # page itself is the thing they saw.
+    shot = ""
+    if succeeded:
+        try:
+            shot = "data:image/png;base64," + driver.shot("body")
+        except Exception:  # noqa: BLE001 — a missing picture is not a failure
+            shot = ""
     return {"submitted": True, "url": landed, "page_text": text,
-            "errors": errors, "looks_successful": succeeded}
+            "errors": errors, "looks_successful": succeeded,
+            "screenshot": shot}
