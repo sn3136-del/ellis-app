@@ -241,3 +241,60 @@ def test_the_visa_area_is_preferred_by_label_not_position():
     # The applicant's explicit choice beats the label default.
     out = gc.rk_termin_walk(_W(realms, cats), location_code="shan", realm_id="9")
     assert out["realm_id"] == "9"
+
+
+def test_the_booking_form_fill_is_transcription_and_clicks_nothing():
+    """fill_book_form refuses the picture box outright, an empty answer set
+    is an error rather than a silent no-op, and filling never clicks."""
+    class _D:
+        def __init__(self): self.clicked = []
+        def evaluate(self, js, *a):
+            return {"filled": list(a[0].keys()) if a else [], "refused": []}
+        def click(self, sel): self.clicked.append(sel)
+    d = _D()
+    out = gc.fill_book_form(d, answers={"lastname": "CAO", "captchaText": "ABC"})
+    assert out["filled"] == ["lastname"]
+    assert any(r["name"] == "captchaText" for r in out["refused"])
+    assert d.clicked == [], "filling must click nothing"
+    with pytest.raises(gc.CalendarUnavailable):
+        gc.fill_book_form(d, answers={})
+
+
+def test_submit_is_only_the_applicants_relayed_instruction():
+    """No instruction, an unticked confirmation, or an empty picture answer
+    each refuse BEFORE the click; only the full set presses Submit."""
+    class _D:
+        def __init__(self, unticked=0, cap_empty=False):
+            self.state = {"unticked": unticked, "captcha_empty": cap_empty,
+                          "has_submit": True}
+            self.clicked = []
+        def evaluate(self, js, *a):
+            return self.state if "checkbox" in js else ""
+        def click(self, sel): self.clicked.append(sel)
+    with pytest.raises(gc.CalendarUnavailable):
+        gc.submit_book_form(_D(), applicant_instructed=False)
+    for d in (_D(unticked=1), _D(cap_empty=True)):
+        with pytest.raises(gc.CalendarUnavailable):
+            gc.submit_book_form(d, applicant_instructed=True)
+        assert d.clicked == [], "a refused submit must not have clicked"
+    d = _D()
+    out = gc.submit_book_form(d, applicant_instructed=True)
+    assert out["submitted"] is True and len(d.clicked) == 1
+
+
+def test_the_form_is_reached_only_by_the_sites_own_query():
+    """open_book_form takes the walk's own query string and nothing else —
+    no hand-built addresses, no foreign hosts, no markup."""
+    class _D:
+        def goto(self, url): raise AssertionError("must refuse before navigating")
+        def evaluate(self, js, *a): return None
+    for bad in ("", "categoryId=1", "locationCode=shan",
+                "locationCode=shan&categoryId=<script>",
+                "https://evil.example/?locationCode=shan&categoryId=1"):
+        with pytest.raises(gc.CalendarUnavailable):
+            gc.open_book_form(_D(), query=bad)
+
+
+def test_confirmations_need_statements_to_relay():
+    with pytest.raises(gc.CalendarUnavailable):
+        gc.relay_confirmations(object(), labels=[])

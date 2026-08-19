@@ -268,6 +268,21 @@ export function createVisaClient(session) {
     calendarPick: (id, href, knownHrefs = []) =>
       call('POST', `/cases/${id}/calendar/pick`, session,
            { href, known_hrefs: knownHrefs }),
+    // The booking form for the category the applicant chose: open it (query
+    // is the site's own string from the walk), read its questions, transcribe
+    // the applicant's answers, relay the confirmations they ticked verbatim
+    // in Ellis, enter the picture answer they typed, and press Submit only as
+    // their explicit final instruction.
+    calendarBookForm: (id, query) =>
+      call('POST', `/cases/${id}/calendar/book-form`, session, { query }),
+    calendarBookFormFill: (id, answers) =>
+      call('POST', `/cases/${id}/calendar/book-form/fill`, session, { answers }),
+    calendarBookFormConfirm: (id, labels) =>
+      call('POST', `/cases/${id}/calendar/book-form/confirm`, session, { labels }),
+    calendarBookFormCaptcha: (id, text) =>
+      call('POST', `/cases/${id}/calendar/book-form/captcha`, session, { text }),
+    calendarBookFormSubmit: (id) =>
+      call('POST', `/cases/${id}/calendar/book-form/submit`, session, {}),
     // The folder itself, as one download. Kept out of `call` because the body
     // is a zip, not JSON — same auth headers, raw blob back.
     // The whole application as ONE PDF: cover, the filled official form, then

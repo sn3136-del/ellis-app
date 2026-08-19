@@ -310,6 +310,13 @@ export default function SchengenVisa({ onBack }) {
   const [month, setMonth] = useState(null)
   const [picked, setPicked] = useState(null)
   const [times, setTimes] = useState(null)   // the picked day's slots
+  const [walkQuery, setWalkQuery] = useState('') // the site's own query string
+  const [form, setForm] = useState(null)       // the live form's questions
+  const [formAnswers, setFormAnswers] = useState({})
+  const [confirms, setConfirms] = useState({}) // statement -> ticked in Ellis
+  const [formCaptcha, setFormCaptcha] = useState('')
+  const [formCapAnswer, setFormCapAnswer] = useState('')
+  const [booked, setBooked] = useState(null)   // the submit outcome
   const [error, setError] = useState(null)
   const startedRef = useRef(false)
 
@@ -317,14 +324,15 @@ export default function SchengenVisa({ onBack }) {
   // given. During startup that raced the mount's createBrowserSession and the
   // missions read landed mid-replacement (409 -> empty list, invisibly). It is
   // only ever rendered on the captcha step, so it is only given the case then.
+  const LIVE_PHASES = ['captcha', 'submitting', 'filling', 'confirm', 'registering']
   const view = usePortalLiveView(
-    client, (phase === 'captcha' || phase === 'submitting') ? caseId : '')
+    client, LIVE_PHASES.includes(phase) ? caseId : '')
   // A Browserbase session can idle out while the applicant reads the
   // challenge. Rather than surface a reconnect card, reopen it silently — but
   // only once per lapse, so a genuinely unavailable window does not loop.
   const reconnectRef = useRef(false)
   useEffect(() => {
-    if ((phase === 'captcha' || phase === 'submitting')
+    if (LIVE_PHASES.includes(phase)
         && (view.state === 'closed' || view.state === 'unavailable')) {
       if (!reconnectRef.current) { reconnectRef.current = true; view.reconnect() }
     } else if (view.state === 'embedded') {
@@ -416,6 +424,8 @@ export default function SchengenVisa({ onBack }) {
     if (!opts.keep) { setLoc(m.code); setSearch(m.name || ''); setListOpen(false) }
     setPhase('opening'); setError(null)
     setMonth(null); setPicked(null); setTimes(null)
+    setForm(null); setFormAnswers({}); setConfirms({})
+    setFormCaptcha(''); setFormCapAnswer(''); setBooked(null)
     setCaptcha(''); setAnswer(''); setCapNote('')
     try {
       const out = await withTimeout(
@@ -426,6 +436,7 @@ export default function SchengenVisa({ onBack }) {
       setRealmId(out.realm_id || '')
       setCats(out.categories || [])
       setCatId(out.category_id || '')
+      setWalkQuery(out.query || '')
       if (out.captcha_required) {
         setPhase('captcha')
         const img = await client.calendarCaptcha(caseId).catch(() => ({}))
@@ -494,6 +505,81 @@ export default function SchengenVisa({ onBack }) {
     setPhase('dates')
   }
 
+  // From the calendar to the category's booking form. The query is the
+  // site's own string from the walk — RK-Termin refuses hand-built addresses
+  // and so does the backend. Waiting-list queues carry no date at all:
+  // registering joins the queue, which is why this works with no day picked.
+  async function startBookForm() {
+    setPhase('form-opening'); setError(null)
+    try {
+      const out = await withTimeout(
+        withWindow(() => client.calendarBookForm(caseId, walkQuery)),
+        60000, 'open the booking form')
+      setForm(out)
+      // Standardized default, visible and changeable: this lane is offered
+      // for self-employed applicants, so the purpose select STARTS on the
+      // site's own self-employment option when it carries one. All options
+      // stay shown; the applicant can change it and attests correctness
+      // themselves before anything is submitted.
+      const pre = {}
+      for (const f of out.fields || []) {
+        if (f.kind !== 'select') continue
+        const se = (f.options || []).find((o) => /self-employment|selbstständig/i.test(o))
+        if (se) pre[f.name] = se
+      }
+      setFormAnswers(pre)
+      setConfirms({})
+      setPhase('form')
+    } catch (e) { fail(e); setPhase('dates') }
+  }
+
+  // Ellis transcribes the applicant's answers into the official form. The
+  // backend refuses the picture box, the checkboxes, every button and any
+  // field the live form does not carry.
+  async function fillBookForm() {
+    setPhase('filling'); setError(null)
+    try {
+      const send = {}
+      for (const [k, v] of Object.entries(formAnswers)) {
+        if (String(v || '').trim()) send[k] = String(v).trim()
+      }
+      await withTimeout(
+        withWindow(() => client.calendarBookFormFill(caseId, send)),
+        60000, 'write your answers into the form')
+      const img = await client.calendarCaptcha(caseId).catch(() => ({}))
+      setFormCaptcha(img.image || '')
+      setPhase('confirm')
+    } catch (e) { fail(e); setPhase('form') }
+  }
+
+  // The applicant has ticked each confirmation statement (shown verbatim) in
+  // Ellis, read the picture and typed its answer, and pressed the final
+  // button. Ellis relays exactly that: ticks those boxes, types that answer,
+  // presses Submit — as their instructed agent, all of it audited.
+  async function registerAppointment() {
+    const labels = (form?.fields || [])
+      .filter((f) => f.kind === 'checkbox' && confirms[f.label])
+      .map((f) => f.label)
+    const allTicked = (form?.fields || [])
+      .filter((f) => f.kind === 'checkbox')
+      .every((f) => confirms[f.label])
+    if (!allTicked || !formCapAnswer.trim()) return
+    setPhase('registering'); setError(null)
+    try {
+      await withTimeout(
+        withWindow(() => client.calendarBookFormConfirm(caseId, labels)),
+        60000, 'relay your confirmations')
+      await withTimeout(
+        withWindow(() => client.calendarBookFormCaptcha(caseId, formCapAnswer.trim())),
+        60000, 'enter your picture answer')
+      const out = await withTimeout(
+        withWindow(() => client.calendarBookFormSubmit(caseId)),
+        90000, 'register the appointment')
+      setBooked(out)
+      setPhase('booked')
+    } catch (e) { fail(e); setPhase('confirm') }
+  }
+
   const shown = useMemo(
     () => missions.filter((m) => missionMatches(m, search)), [missions, search])
   // The China posts, by CODE (their names on the site are German: Peking,
@@ -504,13 +590,14 @@ export default function SchengenVisa({ onBack }) {
     [missions])
   const grouped = useMemo(() => monthsOf(month?.days || []), [month])
 
-  const working = ['starting', 'opening', 'reading', 'booking'].includes(phase)
+  const working = ['starting', 'opening', 'reading', 'booking', 'form-opening'].includes(phase)
   const submitting = phase === 'submitting'
   const workLabel = {
     starting: 'Opening your secure session and reading the mission list',
     opening: 'Opening the official calendar',
     reading: 'Reading the open dates from the official calendar',
-    booking: 'Opening your date on the official site'
+    booking: 'Opening your date on the official site',
+    'form-opening': 'Opening the official booking form'
   }[phase]
 
   return (
@@ -842,6 +929,164 @@ export default function SchengenVisa({ onBack }) {
         </Card>
       )}
 
+      {/* On to the official booking form — for waiting-list queues this is
+          the whole registration (they carry no date at all). */}
+      {phase === 'dates' && walkQuery && (
+        <Card className="anim-rise-2" style={{ marginTop: 16, textAlign: 'center' }}
+              data-testid="schengen-continue-form">
+          <button className="btn btn--primary" onClick={startBookForm}
+                  data-testid="schengen-open-form"
+                  style={{ fontSize: 15, fontWeight: 800, padding: '12px 26px' }}>
+            Continue to the booking form
+          </button>
+          <div style={{ fontSize: 12.5, color: GRAY, marginTop: 8 }}>
+            Ellis reads the official form and asks you its questions here.
+          </div>
+        </Card>
+      )}
+
+      {/* The form's own questions, asked in Ellis and transcribed verbatim. */}
+      {(phase === 'form' || phase === 'filling') && form && (
+        <Card className="anim-rise" style={{ marginTop: 16 }}
+              data-testid="schengen-form">
+          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 0.6,
+                        color: GRAY, textTransform: 'uppercase' }}>
+            The official form's questions
+          </div>
+          {form.title ? (
+            <div style={{ fontSize: 13.5, color: NAVY, fontWeight: 700,
+                          marginTop: 8 }}>{form.title}</div>
+          ) : null}
+          <div style={{ display: 'grid', gap: 12, marginTop: 14 }}>
+            {(form.fields || []).filter((f) => !f.applicant_only).map((f) => (
+              <label key={f.name} style={{ display: 'grid', gap: 5,
+                                           textAlign: 'left' }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>
+                  {f.label}{f.required ? ' *' : ''}
+                </span>
+                {f.kind === 'select' ? (
+                  <select value={formAnswers[f.name] || ''}
+                          data-testid={`schengen-q-${f.name}`}
+                          onChange={(e) => setFormAnswers(
+                            { ...formAnswers, [f.name]: e.target.value })}
+                          style={{ fontSize: 13, padding: '9px 10px',
+                                   borderRadius: 10, maxWidth: '100%',
+                                   border: '1px solid var(--line, #e2e8f0)' }}>
+                    <option value=""></option>
+                    {(f.options || []).map((o) => (
+                      <option key={o} value={o}>{o}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input value={formAnswers[f.name] || ''}
+                         data-testid={`schengen-q-${f.name}`}
+                         placeholder={f.kind === 'date' ? 'DD.MM.YYYY' : ''}
+                         onChange={(e) => setFormAnswers(
+                           { ...formAnswers, [f.name]: e.target.value })}
+                         style={{ fontSize: 14, padding: '9px 12px',
+                                  borderRadius: 10,
+                                  border: '1px solid var(--line, #e2e8f0)' }} />
+                )}
+              </label>
+            ))}
+          </div>
+          <div style={{ marginTop: 16, textAlign: 'center' }}>
+            <button className="btn btn--primary" onClick={fillBookForm}
+                    data-testid="schengen-fill-form"
+                    disabled={phase === 'filling' || !(form.fields || [])
+                      .filter((f) => !f.applicant_only && f.required)
+                      .every((f) => String(formAnswers[f.name] || '').trim())}
+                    style={{ fontSize: 15, fontWeight: 800,
+                             padding: '12px 26px' }}>
+              {phase === 'filling' ? 'Writing your answers…'
+                                   : 'Fill it in on the official form'}
+            </button>
+            <div style={{ fontSize: 12.5, color: GRAY, marginTop: 8 }}>
+              The confirmation statements, the picture check and the final
+              submission come next — each one is yours to give.
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* The applicant's own say-so: each confirmation statement verbatim,
+          the picture answer, and the one instruction that lets Ellis press
+          Submit for them. */}
+      {(phase === 'confirm' || phase === 'registering') && form && (
+        <Card className="anim-rise" style={{ marginTop: 16 }}
+              data-testid="schengen-confirm">
+          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 0.6,
+                        color: GRAY, textTransform: 'uppercase' }}>
+            Your confirmations
+          </div>
+          <div style={{ display: 'grid', gap: 10, marginTop: 12 }}>
+            {(form.fields || []).filter((f) => f.kind === 'checkbox').map((f) => (
+              <label key={f.name} style={{ display: 'flex', gap: 10,
+                                           alignItems: 'flex-start',
+                                           textAlign: 'left', cursor: 'pointer' }}>
+                <input type="checkbox" checked={!!confirms[f.label]}
+                       data-testid={`schengen-confirm-${f.name}`}
+                       onChange={(e) => setConfirms(
+                         { ...confirms, [f.label]: e.target.checked })}
+                       style={{ marginTop: 3, width: 16, height: 16 }} />
+                <span style={{ fontSize: 13.5, color: NAVY }}>{f.label}</span>
+              </label>
+            ))}
+          </div>
+          {formCaptcha ? (
+            <div style={{ marginTop: 16, textAlign: 'center' }}>
+              <img src={formCaptcha} alt="Picture check from the official site"
+                   style={{ width: 300, maxWidth: '100%',
+                            imageRendering: 'pixelated', borderRadius: 10 }} />
+              <input value={formCapAnswer}
+                     data-testid="schengen-form-captcha"
+                     placeholder="Type the text from the picture"
+                     onChange={(e) => setFormCapAnswer(e.target.value)}
+                     style={{ display: 'block', margin: '10px auto 0',
+                              fontSize: 24, letterSpacing: 4, padding: '8px 14px',
+                              textAlign: 'center', borderRadius: 12, width: 280,
+                              border: '1px solid var(--line, #e2e8f0)' }} />
+            </div>
+          ) : null}
+          <div style={{ marginTop: 16, textAlign: 'center' }}>
+            <button className="btn btn--primary" onClick={registerAppointment}
+                    data-testid="schengen-register"
+                    disabled={phase === 'registering'
+                      || !formCapAnswer.trim()
+                      || !(form.fields || []).filter((f) => f.kind === 'checkbox')
+                           .every((f) => confirms[f.label])}
+                    style={{ fontSize: 15, fontWeight: 800,
+                             padding: '12px 26px' }}>
+              {phase === 'registering' ? 'Registering on the official site…'
+                                       : 'Register my appointment'}
+            </button>
+            <div style={{ fontSize: 12.5, color: GRAY, marginTop: 8 }}>
+              On your instruction Ellis ticks exactly the statements you
+              confirmed, enters your picture answer, and presses Submit.
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* The official site's own answer, shown as it is. */}
+      {phase === 'booked' && booked && (
+        <Card className="anim-rise" style={{ marginTop: 16 }}
+              data-testid="schengen-booked">
+          <div style={{ fontWeight: 800, fontSize: 16, color: NAVY }}>
+            {booked.looks_successful
+              ? 'The official site accepted your registration'
+              : 'The official site answered'}
+          </div>
+          <div style={{ fontSize: 13, color: GRAY, marginTop: 8,
+                        textAlign: 'left', whiteSpace: 'pre-wrap' }}>
+            {booked.page_text || 'No message could be read from the page.'}
+          </div>
+          <div style={{ fontSize: 12, color: GRAY, marginTop: 10 }}>
+            The confirmation email goes to the address on the form.
+          </div>
+        </Card>
+      )}
+
       {/* The live window is shown ONLY during the image check — that is the one
           moment the applicant benefits from seeing the official page. The rest
           of the flow (opening, reading, picking) is Ellis's to run; a window
@@ -851,7 +1096,7 @@ export default function SchengenVisa({ onBack }) {
           embedded; a timed-out Browserbase session must never leave a
           dead-end 'reconnect' card on this surface. When it lapses, Ellis
           quietly opens a fresh one in the background (reconnectRef). */}
-      {caseId && (phase === 'captcha' || submitting) && view.state === 'embedded' && (
+      {caseId && LIVE_PHASES.includes(phase) && view.state === 'embedded' && (
         <div style={{ marginTop: 18 }}>
           <LiveFrame view={view} height="40vh" watchOnly
                      client={client} caseId={caseId} />

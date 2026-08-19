@@ -441,3 +441,287 @@ def open_day(driver, *, href: str, known_hrefs: list[str] | None = None) -> dict
             "note": ("The day is open in your own window. Enter your details "
                      "there and confirm — the booking and its confirmation "
                      "email are yours to complete.")}
+
+
+_FORM_QUERY_RE = re.compile(r"^[A-Za-z0-9=&_.\-]+$")
+
+
+def open_book_form(driver, *, query: str) -> dict:
+    """Open the new-appointment form for the category the APPLICANT chose.
+
+    `query` must be the site's own query string, exactly as rk_termin_walk
+    returned it — never hand-built. Waiting-list categories carry no date at
+    all (registering joins a queue, not a slot); dated categories reach the
+    same form from their day page.
+    """
+    q = str(query or "").strip()
+    if (not q or not _FORM_QUERY_RE.match(q)
+            or "categoryId=" not in q or "locationCode=" not in q):
+        raise CalendarUnavailable(
+            "that is not a category from this mission's own list")
+    driver.goto(f"{RK_BASE}appointment_showForm.do?{q}")
+    return read_book_form(driver)
+
+
+def read_book_form(driver) -> dict:
+    """The booking form as the applicant will see it: every question, its live
+    options, and which parts are theirs alone.
+
+    Field ids and definitionIds ROT monthly, so nothing here is pinned — the
+    questions, options and required marks are read from the live page every
+    time, and the fill addresses fields by NAME in the same live DOM so the
+    current ids post themselves.
+    """
+    out = None
+    try:
+        out = driver.evaluate(
+            "() => {"
+            "  const form = document.querySelector('form');"
+            "  if (!form || !form.querySelector("
+            "      'input[name=\"captchaText\"], input[name^=\"fields\"]')) return null;"
+            "  const all = [...document.body.querySelectorAll('*')];"
+            "  const labelFor = (el) => {"
+            "    let label = '';"
+            "    for (let i = all.indexOf(el) - 1; i >= 0 && !label; i--) {"
+            "      const e2 = all[i];"
+            "      if (e2.querySelector && e2.querySelector('input,select,textarea,captcha')) continue;"
+            "      const t = (e2.textContent||'').replace(/\\s+/g,' ').trim();"
+            "      if (t && t.length > 1 && t.length < 160) label = t;"
+            "    }"
+            "    return label;"
+            "  };"
+            "  const strip = s => String(s||'').replace(/[^a-zA-Z0-9]/g,'');"
+            "  const fields = [];"
+            "  for (const el of form.querySelectorAll('input, select')) {"
+            "    const t = (el.type||'').toLowerCase();"
+            "    if (t === 'hidden' || t === 'submit' || t === 'button') continue;"
+            "    let label = labelFor(el).replace(/:\\s*$/,'');"
+            "    const required = /^\\*/.test(label);"
+            "    label = label.replace(/^\\*\\s*/,'');"
+            "    if (el.name === 'captchaText') {"
+            "      fields.push({name: el.name, label, kind: 'captcha',"
+            "                   applicant_only: true, required: true});"
+            "      continue;"
+            "    }"
+            "    if (t === 'checkbox') {"
+            "      fields.push({name: el.name, label, kind: 'checkbox',"
+            "                   applicant_only: true, required});"
+            "      continue;"
+            "    }"
+            "    if (el.tagName === 'SELECT') {"
+            "      fields.push({name: el.name, label, kind: 'select', required,"
+            "                   options: [...el.options].map(o => o.value).filter(Boolean)});"
+            "      continue;"
+            "    }"
+            "    if (el.readOnly) {"
+            "      const hid = [...form.querySelectorAll('input[type=hidden]')]"
+            "        .find(h => strip(h.name) === strip(el.id||el.name));"
+            "      fields.push({name: hid ? hid.name : el.name, label,"
+            "                   kind: 'date', required, format: 'DD.MM.YYYY'});"
+            "      continue;"
+            "    }"
+            "    fields.push({name: el.name, label, kind: 'text', required});"
+            "  }"
+            "  const head = form.querySelector('h1,h2,legend')"
+            "            || document.querySelector('h1,h2');"
+            "  return {title: (head ? head.innerText : '').trim().slice(0,160),"
+            "          fields};"
+            "}")
+    except Exception:  # noqa: BLE001 — an unreadable page is an honest absence
+        out = None
+    if not out:
+        raise CalendarUnavailable("no booking form on this page")
+    out["url"] = ""
+    try:
+        out["url"] = driver.evaluate("() => location.href") or ""
+    except Exception:  # noqa: BLE001
+        pass
+    out["captcha_required"] = captcha_present(driver)
+    return out
+
+
+def fill_book_form(driver, *, answers: dict) -> dict:
+    """Transcribe the APPLICANT'S answers into the booking form — nothing else.
+
+    Fail-closed by construction: it refuses the CAPTCHA box, every checkbox
+    (the confirmations are attestations, the applicant's alone), every button,
+    hidden plumbing, any field the live form does not carry, and any select
+    value that is not one of the site's own options. It clicks nothing —
+    Submit is the applicant's. A date answer lands in both halves of the
+    datepicker pair (the readonly face the human sees and the hidden twin
+    that actually POSTs).
+    """
+    if not isinstance(answers, dict) or not answers:
+        raise CalendarUnavailable("no answers to transcribe")
+    clean, refused = {}, []
+    for name, value in answers.items():
+        if name == "captchaText":
+            refused.append({"name": name,
+                            "why": "the image check is the applicant's"})
+            continue
+        clean[str(name)] = str(value)
+    result = {"filled": [], "refused": refused}
+    if clean:
+        out = driver.evaluate(
+            "(ans) => {"
+            "  const out = {filled: [], refused: []};"
+            "  const strip = s => String(s||'').replace(/[^a-zA-Z0-9]/g,'');"
+            "  const form = document.querySelector('form');"
+            "  if (!form) return null;"
+            "  for (const [name, value] of Object.entries(ans)) {"
+            "    const el = form.querySelector(`[name=\"${name}\"]`);"
+            "    if (!el) { out.refused.push({name, why: 'not on this form'}); continue; }"
+            "    const t = (el.type||'').toLowerCase();"
+            "    if (t === 'checkbox' || t === 'submit' || t === 'button'"
+            "        || el.tagName === 'BUTTON') {"
+            "      out.refused.push({name, why: \"attestations and buttons are the applicant's\"});"
+            "      continue;"
+            "    }"
+            "    if (t === 'hidden') {"
+            "      const vis = [...form.querySelectorAll('input[readonly]')]"
+            "        .find(v => strip(v.id||v.name) === strip(name));"
+            "      if (!vis) { out.refused.push({name, why: 'hidden plumbing is not fillable'}); continue; }"
+            "      el.value = value; vis.value = value;"
+            "      out.filled.push(name); continue;"
+            "    }"
+            "    if (el.tagName === 'SELECT') {"
+            "      if (![...el.options].some(o => o.value === value)) {"
+            "        out.refused.push({name, why: \"not one of the site's own options\"});"
+            "        continue;"
+            "      }"
+            "      el.value = value;"
+            "      el.dispatchEvent(new Event('change', {bubbles: true}));"
+            "      out.filled.push(name); continue;"
+            "    }"
+            "    if (el.readOnly) {"
+            "      const hid = [...form.querySelectorAll('input[type=hidden]')]"
+            "        .find(h => strip(h.name) === strip(el.id||el.name));"
+            "      el.value = value;"
+            "      if (hid) hid.value = value;"
+            "      out.filled.push(name); continue;"
+            "    }"
+            "    el.value = value;"
+            "    el.dispatchEvent(new Event('change', {bubbles: true}));"
+            "    out.filled.push(name);"
+            "  }"
+            "  return out;"
+            "}", clean)
+        if out is None:
+            raise CalendarUnavailable("no booking form on this page")
+        result["filled"] = out.get("filled", [])
+        result["refused"].extend(out.get("refused", []))
+    return result
+
+
+def relay_confirmations(driver, *, labels: list[str]) -> dict:
+    """Tick the confirmation checkboxes the APPLICANT confirmed in Ellis.
+
+    The applicant is shown each statement VERBATIM in the Ellis UI and ticks
+    it there; this carries those ticks to the page. A live checkbox is ticked
+    only when its own label text matches one the applicant confirmed —
+    whitespace aside, no paraphrase counts. Boxes they did not confirm stay
+    untouched, and nothing is submitted here.
+    """
+    wanted = {re.sub(r"\s+", " ", str(l)).strip() for l in (labels or []) if str(l).strip()}
+    if not wanted:
+        raise CalendarUnavailable("no confirmed statements to relay")
+    out = driver.evaluate(
+        "(wanted) => {"
+        "  const norm = s => String(s||'').replace(/\\s+/g,' ').trim();"
+        "  const all = [...document.body.querySelectorAll('*')];"
+        "  const labelFor = (el) => {"
+        "    for (let i = all.indexOf(el) - 1; i >= 0; i--) {"
+        "      const e2 = all[i];"
+        "      if (e2.querySelector && e2.querySelector('input,select')) continue;"
+        "      const t = norm(e2.textContent).replace(/^\\*\\s*/,'');"
+        "      if (t && t.length > 1 && t.length < 200) return t;"
+        "    }"
+        "    return '';"
+        "  };"
+        "  const res = {ticked: [], skipped: []};"
+        "  for (const cb of document.querySelectorAll('form input[type=checkbox]')) {"
+        "    const label = labelFor(cb);"
+        "    if (wanted.includes(label)) {"
+        "      cb.checked = true;"
+        "      cb.dispatchEvent(new Event('change', {bubbles: true}));"
+        "      res.ticked.push(label);"
+        "    } else {"
+        "      res.skipped.push(label);"
+        "    }"
+        "  }"
+        "  return res;"
+        "}", sorted(wanted))
+    if out is None:
+        raise CalendarUnavailable("no booking form on this page")
+    unmatched = sorted(wanted - set(out.get("ticked", [])))
+    return {"ticked": out.get("ticked", []),
+            "left_unticked": out.get("skipped", []),
+            "unmatched": unmatched}
+
+
+def enter_captcha_answer(driver, *, text: str) -> dict:
+    """Type the applicant's CAPTCHA answer into the form's answer box.
+
+    Same contract as submit_captcha: the answer comes from the applicant, who
+    read the picture in Ellis — this transcribes it and nothing more. No
+    button is pressed here; on the booking form the answer travels with the
+    single Submit, which needs the applicant's instruction.
+    """
+    answer = str(text or "").strip()
+    if not answer:
+        raise CalendarUnavailable("the applicant has not given an answer to enter")
+    if len(answer) > 24:
+        raise CalendarUnavailable("that does not look like a picture answer")
+    driver.fill('input[name="captchaText"]', answer)
+    return {"entered": True}
+
+
+def submit_book_form(driver, *, applicant_instructed: bool) -> dict:
+    """Press Submit — only as the applicant's explicitly relayed instruction.
+
+    The applicant has, in the Ellis UI: answered every question that was
+    filled, ticked each confirmation statement shown verbatim, read the
+    picture and typed its answer, and pressed the final button. This carries
+    that press to the page. Fail-closed: it refuses without that instruction,
+    refuses while any confirmation checkbox on the page is unticked, and
+    refuses while the picture answer box is empty — a submit the site would
+    bounce is not one worth relaying.
+    """
+    if applicant_instructed is not True:
+        raise CalendarUnavailable("the applicant has not instructed this submit")
+    state = driver.evaluate(
+        "() => {"
+        "  const form = document.querySelector('form');"
+        "  if (!form) return null;"
+        "  const boxes = [...form.querySelectorAll('input[type=checkbox]')];"
+        "  const cap = form.querySelector('input[name=\"captchaText\"]');"
+        "  return {unticked: boxes.filter(b => !b.checked).length,"
+        "          captcha_empty: !!cap && !cap.value.trim(),"
+        "          has_submit: !!form.querySelector("
+        "            'input[name=\"action:appointment_addAppointment\"]')};"
+        "}")
+    if not state:
+        raise CalendarUnavailable("no booking form on this page")
+    if not state.get("has_submit"):
+        raise CalendarUnavailable("this page has no submit button")
+    if state.get("unticked"):
+        raise CalendarUnavailable(
+            "a confirmation statement is not ticked yet — it needs the "
+            "applicant's confirmation in Ellis first")
+    if state.get("captcha_empty"):
+        raise CalendarUnavailable(
+            "the picture answer box is empty — the applicant types that first")
+    driver.click('input[name="action:appointment_addAppointment"]')
+    landed, text = "", ""
+    try:
+        landed = driver.evaluate("() => location.href") or ""
+        text = driver.evaluate(
+            "() => (document.body.innerText || '').replace(/\\s+/g,' ').trim().slice(0, 600)") or ""
+    except Exception:  # noqa: BLE001
+        pass
+    low = text.lower()
+    succeeded = bool(re.search(
+        r"appointment|termin", low)) and not re.search(
+        r"wrong text|falscher text|error|fehler|not correct|nicht korrekt", low)
+    return {"submitted": True, "url": landed, "page_text": text,
+            "looks_successful": succeeded}

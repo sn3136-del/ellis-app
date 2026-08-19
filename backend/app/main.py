@@ -1853,6 +1853,18 @@ class CalendarCaptchaIn(BaseModel):
     text: str
 
 
+class CalendarFormOpenIn(BaseModel):
+    query: str
+
+
+class CalendarFormFillIn(BaseModel):
+    answers: dict[str, str]
+
+
+class CalendarFormConfirmIn(BaseModel):
+    labels: list[str]
+
+
 @app.post("/cases/{application_id}/calendar/captcha")
 def case_calendar_captcha_submit(application_id: str, body: CalendarCaptchaIn,
                                  db=Depends(get_session),
@@ -1945,6 +1957,128 @@ def case_calendar_pick(application_id: str, body: CalendarPickIn,
     audit.record(db, org_id=app_row.org_id, application_id=application_id,
                  action="calendar_day_opened",
                  detail={"url": str(out.get("url"))[:200]}, actor=p.user_id)
+    return out
+
+
+@app.post("/cases/{application_id}/calendar/book-form")
+def case_calendar_book_form(application_id: str, body: CalendarFormOpenIn,
+                            db=Depends(get_session),
+                            p: Principal = Depends(get_principal)):
+    """Open the new-appointment form for the category the APPLICANT chose and
+    read its questions. `query` is the site's own query string from the walk —
+    RK-Termin refuses hand-built addresses and so does this endpoint."""
+    _owned(db, p, application_id)
+    from . import gov_calendar as gc
+    sess = _attach_applicant_window(db, application_id, list(gc.DAY_LINK_HOSTS))
+    try:
+        return gc.open_book_form(_WindowDriver(sess._ensure_page()),
+                                 query=body.query)
+    except gc.CalendarUnavailable as e:
+        raise HTTPException(409, detail={"reason": "form_unavailable",
+                                         "detail": str(e)})
+    finally:
+        sess.close()
+
+
+@app.post("/cases/{application_id}/calendar/book-form/fill")
+def case_calendar_book_form_fill(application_id: str, body: CalendarFormFillIn,
+                                 db=Depends(get_session),
+                                 p: Principal = Depends(get_principal)):
+    """Transcribe the APPLICANT'S answers into the booking form. Fail-closed
+    in gov_calendar: no captcha box, no checkboxes, no buttons, no field the
+    live form does not carry, no invented select options. The audit trail
+    records WHICH fields were filled, never their values."""
+    app_row = _owned(db, p, application_id)
+    from . import gov_calendar as gc
+    sess = _attach_applicant_window(db, application_id, list(gc.DAY_LINK_HOSTS))
+    try:
+        out = gc.fill_book_form(_WindowDriver(sess._ensure_page()),
+                                answers=body.answers)
+    except gc.CalendarUnavailable as e:
+        raise HTTPException(409, detail={"reason": "form_unavailable",
+                                         "detail": str(e)})
+    finally:
+        sess.close()
+    audit.record(db, org_id=app_row.org_id, application_id=application_id,
+                 action="calendar_form_filled",
+                 detail={"filled": out.get("filled", []),
+                         "refused": [r.get("name") for r in out.get("refused", [])]},
+                 actor=p.user_id)
+    return out
+
+
+@app.post("/cases/{application_id}/calendar/book-form/confirm")
+def case_calendar_book_form_confirm(application_id: str,
+                                    body: CalendarFormConfirmIn,
+                                    db=Depends(get_session),
+                                    p: Principal = Depends(get_principal)):
+    """Relay the confirmation statements the applicant ticked in Ellis. Each
+    statement was shown VERBATIM in the Ellis UI; only live checkboxes whose
+    own label matches a confirmed statement are ticked."""
+    app_row = _owned(db, p, application_id)
+    from . import gov_calendar as gc
+    sess = _attach_applicant_window(db, application_id, list(gc.DAY_LINK_HOSTS))
+    try:
+        out = gc.relay_confirmations(_WindowDriver(sess._ensure_page()),
+                                     labels=body.labels)
+    except gc.CalendarUnavailable as e:
+        raise HTTPException(409, detail={"reason": "form_unavailable",
+                                         "detail": str(e)})
+    finally:
+        sess.close()
+    audit.record(db, org_id=app_row.org_id, application_id=application_id,
+                 action="calendar_confirmations_relayed",
+                 detail={"ticked": out.get("ticked", []),
+                         "unmatched": out.get("unmatched", [])},
+                 actor=p.user_id)
+    return out
+
+
+@app.post("/cases/{application_id}/calendar/book-form/captcha")
+def case_calendar_book_form_captcha(application_id: str,
+                                    body: CalendarCaptchaIn,
+                                    db=Depends(get_session),
+                                    p: Principal = Depends(get_principal)):
+    """Type the picture answer THE APPLICANT read and typed into Ellis, into
+    the form's answer box. Nothing is pressed — on this form the answer
+    travels with the single Submit, which needs their instruction."""
+    _owned(db, p, application_id)
+    from . import gov_calendar as gc
+    sess = _attach_applicant_window(db, application_id, list(gc.DAY_LINK_HOSTS))
+    try:
+        return gc.enter_captcha_answer(_WindowDriver(sess._ensure_page()),
+                                       text=body.text)
+    except gc.CalendarUnavailable as e:
+        raise HTTPException(409, detail={"reason": "captcha_not_entered",
+                                         "detail": str(e)})
+    finally:
+        sess.close()
+
+
+@app.post("/cases/{application_id}/calendar/book-form/submit")
+def case_calendar_book_form_submit(application_id: str,
+                                   db=Depends(get_session),
+                                   p: Principal = Depends(get_principal)):
+    """Press Submit as the applicant's explicitly relayed instruction — the
+    final button in Ellis is theirs, and this endpoint exists only behind it.
+    gov_calendar refuses while any confirmation is unticked or the picture
+    answer is empty."""
+    app_row = _owned(db, p, application_id)
+    from . import gov_calendar as gc
+    sess = _attach_applicant_window(db, application_id, list(gc.DAY_LINK_HOSTS))
+    try:
+        out = gc.submit_book_form(_WindowDriver(sess._ensure_page()),
+                                  applicant_instructed=True)
+    except gc.CalendarUnavailable as e:
+        raise HTTPException(409, detail={"reason": "not_submittable",
+                                         "detail": str(e)})
+    finally:
+        sess.close()
+    audit.record(db, org_id=app_row.org_id, application_id=application_id,
+                 action="calendar_form_submitted",
+                 detail={"url": str(out.get("url"))[:200],
+                         "looks_successful": out.get("looks_successful")},
+                 actor=p.user_id)
     return out
 
 
