@@ -432,11 +432,6 @@ export default function SchengenVisa({ onBack }) {
         </div>
       )}
 
-      <div style={{ fontSize: 11.5, color: GRAY, marginTop: 20, lineHeight: 1.6 }}>
-        Germany’s RK-Termin needs no account. Ellis reads its published
-        calendar, never solves the image check, and never chooses a date —
-        it opens the one you pick.
-      </div>
     </div>
   )
 }
