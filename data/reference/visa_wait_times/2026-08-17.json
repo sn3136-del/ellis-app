@@ -1,0 +1,52 @@
+{
+  "as_of": "2026-08-17",
+  "source_url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/global-visa-wait-times.html",
+  "collected_by": "attended browser session, 2026-08-18 (page states: Last updated 17-AUG-2026)",
+  "note": "Transcribed from the Department of State's Global Visa Wait Times table, read in a browser as a person would. State publishes months in 30-day increments and half-months as 15 days; '< 0.5 Month' is recorded as 15 days, the shortest figure the page expresses. 'NA' is omitted rather than zero-filled. These are WAIT TIMES, not availability: real openings are visible only to a signed-in human on the scheduling site.",
+  "posts": [
+    {
+      "post": "Beijing",
+      "post_code": "BEJ",
+      "country": "China",
+      "visitor": 120,
+      "student_exchange": 120,
+      "petition_worker": 150,
+      "crew_transit": 45
+    },
+    {
+      "post": "Guangzhou",
+      "post_code": "GUZ",
+      "country": "China",
+      "visitor": 45,
+      "student_exchange": 75,
+      "petition_worker": 75,
+      "crew_transit": 60
+    },
+    {
+      "post": "Shanghai",
+      "post_code": "SHG",
+      "country": "China",
+      "visitor": 15,
+      "student_exchange": 75,
+      "petition_worker": 105,
+      "crew_transit": 75
+    },
+    {
+      "post": "Shenyang",
+      "post_code": "SNY",
+      "country": "China",
+      "visitor": 15,
+      "student_exchange": 15,
+      "petition_worker": 30,
+      "crew_transit": 15
+    },
+    {
+      "post": "Wuhan",
+      "post_code": "WUH",
+      "country": "China",
+      "visitor": 60,
+      "student_exchange": 75,
+      "petition_worker": 135
+    }
+  ]
+}

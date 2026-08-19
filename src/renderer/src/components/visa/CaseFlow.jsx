@@ -15,6 +15,7 @@ import {
 import Preferences from './Preferences.jsx'
 import H1bPipeline from './H1bPipeline.jsx'
 import BookAppointment, { bookingRouteForDestination } from './BookAppointment.jsx'
+import Ds160Panel from './Ds160Panel.jsx'
 import { ContinuePanel, DocCards } from './Checklist.jsx'
 import {
   SignatureModal, LiveViewModal, PaymentApprove, PaymentModal,
@@ -1116,6 +1117,14 @@ function ConsularNext({ t, client, caseId, packet, destination = '',
           <ol style={{ margin: 0, paddingLeft: 20, fontSize: 13.5, lineHeight: 1.8 }}>
             {steps.map((s, i) => <li key={i}>{s}</li>)}
           </ol>
+        </div>
+      )}
+
+      {/* The US form itself: what Ellis fills and what stays the
+          traveller's, in the government's own questions. */}
+      {String(destination).toUpperCase() === 'USA' && (
+        <div style={{ textAlign: 'left', margin: '6px 0 18px' }}>
+          <Ds160Panel client={client} />
         </div>
       )}
 

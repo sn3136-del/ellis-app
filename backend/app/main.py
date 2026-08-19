@@ -89,6 +89,9 @@ app.include_router(_appt_router)
 # operator works the official site in their own session, booked = evidence.
 from .appt_booking_api import router as _appt_booking_router  # noqa: E402
 app.include_router(_appt_booking_router)
+# The DS-160 question bank: the government's own questions, asked inside Ellis.
+from .ds160_api import router as _ds160_router  # noqa: E402
+app.include_router(_ds160_router)
 # H1B ops: org-account bulk registration, RFE response assembly, cap exemption.
 from .h1b.ops_api import router as _h1b_ops_router  # noqa: E402
 app.include_router(_h1b_ops_router)

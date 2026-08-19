@@ -527,6 +527,10 @@ export function createVisaClient(session) {
     // Kimi K3 names the nearest official centre from the applicant's own
     // address — centre CHOICE only, no slot data, and any failure returns
     // available:false so the caller's great-circle sort stands.
+    // The DS-160 question bank: the government's own questions, asked in
+    // Ellis. Static reference data — no case, no network beyond our backend.
+    ds160Questions: () => call('GET', '/ds160/questions', session),
+    ds160Summary: () => call('GET', '/ds160/summary', session),
     bookingNearestCentre: (body = {}) =>
       call('POST', '/appointments/booking/nearest-centre', session,
            { address: '', centres: [], ...body }),
