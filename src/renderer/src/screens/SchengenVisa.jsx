@@ -238,26 +238,47 @@ export default function SchengenVisa({ onBack }) {
             </div>
           )}
           <div style={{ position: 'relative', marginTop: 12 }}>
-            <input className="input" style={{ width: '100%' }} value={search}
-                   placeholder="Or type any city — Istanbul, Cairo, New Delhi…"
+            <input className="input" style={{ width: '100%', paddingRight: 34 }}
+                   value={search}
+                   placeholder="Or choose from all 190+ missions — type to filter"
                    onChange={(e) => { setSearch(e.target.value); setListOpen(true) }}
                    onFocus={() => setListOpen(true)}
                    onBlur={() => setTimeout(() => setListOpen(false), 150)}
-                   onKeyDown={(e) => { if (e.key === 'Enter' && shown.length) choose(shown[0]) }}
+                   onKeyDown={(e) => {
+                     if (e.key === 'Enter' && shown.length) choose(shown[0])
+                     if (e.key === 'Escape') setListOpen(false)
+                   }}
                    data-testid="schengen-search" />
-            {listOpen && shown.length > 0 && search && (
+            {/* The caret says this is a dropdown, not just a search box. */}
+            <button type="button" aria-label="Show all missions"
+                    onMouseDown={(e) => { e.preventDefault(); setListOpen((v) => !v) }}
+                    data-testid="schengen-toggle"
+                    style={{ position: 'absolute', right: 8, top: 8, border: 'none',
+                             background: 'transparent', cursor: 'pointer',
+                             color: GRAY, padding: 4, lineHeight: 1 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"
+                   strokeLinejoin="round" aria-hidden="true"
+                   style={{ transform: listOpen ? 'rotate(180deg)' : 'none',
+                            transition: 'transform .15s ease' }}>
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+            {listOpen && shown.length > 0 && (
               <div style={{ position: 'absolute', top: '100%', left: 0, right: 0,
                             zIndex: 30, background: '#fff', borderRadius: 12,
                             border: '1px solid #e2e8f0', marginTop: 4,
-                            maxHeight: 240, overflowY: 'auto',
+                            maxHeight: 320, overflowY: 'auto',
                             boxShadow: '0 12px 32px rgba(15,41,77,.10)' }}
                    data-testid="schengen-mission-list">
-                {shown.slice(0, 30).map((m) => (
+                {shown.slice(0, 200).map((m) => (
                   <button key={m.code}
                     onMouseDown={(e) => { e.preventDefault(); choose(m) }}
+                    data-testid={`schengen-option-${m.code}`}
                     style={{ display: 'block', width: '100%', textAlign: 'left',
                              padding: '10px 14px', border: 'none', cursor: 'pointer',
-                             fontSize: 13.5, color: NAVY, background: '#fff' }}>
+                             fontSize: 13.5, background: m.code === loc ? '#f5f9ff' : '#fff',
+                             color: NAVY, fontWeight: m.code === loc ? 700 : 400 }}>
                     {m.name}
                   </button>
                 ))}
@@ -397,8 +418,11 @@ export default function SchengenVisa({ onBack }) {
         </Card>
       )}
 
-      {/* Watch-only proof of what Ellis is doing, once anything is happening. */}
-      {caseId && phase !== 'starting' && (
+      {/* The live window is shown ONLY during the image check — that is the one
+          moment the applicant benefits from seeing the official page. The rest
+          of the flow (opening, reading, picking) is Ellis's to run; a window
+          open the whole time is noise and an idle Browserbase view. */}
+      {caseId && phase === 'captcha' && (
         <div style={{ marginTop: 18 }}>
           <div style={{ fontSize: 11.5, color: GRAY, marginBottom: 6 }}>
             Your session on service2.diplo.de — watch only
