@@ -738,12 +738,24 @@ export default function SchengenVisa({ onBack }) {
         withWindow(() => client.calendarBookFormSubmit(caseId)),
         90000, 'register the appointment')
       if (!out.looks_successful) {
-        // The site re-rendered the form with its own field messages: the
-        // registration did NOT go through. Back to the questions, with those
-        // messages shown, so the applicant can correct and go again.
+        const errs = out.errors || []
+        // A wrong PICTURE answer is its own case: the site issues a fresh
+        // picture on every re-render, so the fix is a new reading here —
+        // not a trip back to the questions.
+        if (errs.some((t) => /entered text was wrong|falscher text|text you see in the picture/i.test(t))) {
+          setFormCapAnswer('')
+          const img = await client.calendarCaptcha(caseId).catch(() => ({}))
+          setFormCaptcha(img.image || '')
+          setConfirmNote('The picture answer did not match — here is a fresh '
+            + 'picture. Type it and press Register again.')
+          setPhase('confirm')
+          return
+        }
+        // Field messages: back to the questions, with the site's own words,
+        // so the applicant corrects and goes again.
         setConfirmNote('')
         setPassportMsg('')
-        setFormNote((out.errors || []).join(' · ')
+        setFormNote(errs.join(' · ')
           || 'The official site did not accept the registration — please '
           + 'check the answers and try again.')
         setPhase('form')
