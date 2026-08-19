@@ -537,23 +537,24 @@ export default function SchengenVisa({ onBack }) {
           <div style={{ fontWeight: 800, fontSize: 15, color: NAVY }}>
             Type the characters you see
           </div>
-          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap',
-                        alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: 18, flexDirection: 'column',
+                        alignItems: 'center' }}>
             {captcha ? (
               // The challenge is a small bitmap; scale it up hard with
               // smoothing off so the characters stay sharp instead of blurring.
               <img src={captcha} alt="Challenge image"
                    data-testid="schengen-captcha-img"
-                   style={{ height: 260, imageRendering: 'pixelated',
+                   style={{ height: 300, width: '100%', maxWidth: 560,
+                            objectFit: 'contain', imageRendering: 'pixelated',
                             borderRadius: 14, border: '1px solid #dbe3ec',
                             background: '#fff', padding: 14,
                             display: 'block' }} />
             ) : (
               // Placeholder kept sized so the row does not jump when the
               // picture lands; the loading words are hidden by owner choice.
-              <div style={{ height: 260, width: 380 }} aria-hidden="true" />
+              <div style={{ height: 300, width: '100%', maxWidth: 560 }} aria-hidden="true" />
             )}
-            <div style={{ flex: '1 1 240px', minWidth: 220 }}>
+            <div style={{ width: '100%', maxWidth: 560 }}>
               <input className="input" value={answer} autoFocus
                      style={{ width: '100%', fontSize: 26, letterSpacing: 6,
                               fontWeight: 800, textAlign: 'center',

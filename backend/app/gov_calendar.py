@@ -135,17 +135,40 @@ def captcha_image(driver) -> dict:
     """The CAPTCHA challenge image, as a PNG data URI, so Ellis can show it
     ENLARGED and legible.
 
-    Taken as a SCREENSHOT of the element rather than read out of the DOM: the
-    challenge is served cross-origin and session-bound, so a canvas read taints
-    and returns nothing, and its bare src cannot be fetched from Ellis.
+    RK-Termin does NOT use an <img>: the challenge is a <captcha> custom
+    element holding a <div> whose CSS `background` is an inline
+    `data:image/jpg;base64,...` (verified live 2026-08-19). So the data URI is
+    lifted straight out of that style when present — no fetch, no canvas (a
+    canvas read taints on this page and yields nothing) — and an element
+    screenshot is the fallback for any other shape.
 
-    This is a reading aid and nothing else. Ellis does not interpret the
-    picture — the applicant reads it and types the answer themselves.
+    A reading aid only: Ellis does not interpret the picture. The applicant
+    reads it and types the answer themselves.
     """
+    # 1. The inline data URI on the captcha element's background.
+    try:
+        found = driver.evaluate(
+            "() => {"
+            "  const els = [...document.querySelectorAll('captcha *, captcha,"
+            "    [id*=captcha i] *, [class*=captcha i] *')];"
+            "  for (const e of els) {"
+            "    const b = (e.style && e.style.background) || '';"
+            "    const c = getComputedStyle(e).backgroundImage || '';"
+            "    const m = (b + ' ' + c).match(/url\\(['\"]?(data:image\\/[^'\")]+)/);"
+            "    if (m) return m[1];"
+            "  }"
+            "  return '';"
+            "}")
+    except Exception:  # noqa: BLE001
+        found = ""
+    if found:
+        return {"image": str(found)}
+
+    # 2. Anything else: screenshot the element the browser is showing.
     shot = getattr(driver, "shot", None)
     if shot is not None:
-        for sel in ('img[src*="captcha" i]', 'img[id*="captcha" i]',
-                    'img[class*="captcha" i]', "#captcha img", ".captcha img"):
+        for sel in ("captcha", '[id*="captcha" i] div[style*="data:image"]',
+                    'img[src*="captcha" i]', 'img[id*="captcha" i]'):
             try:
                 data = shot(sel)
             except Exception:  # noqa: BLE001 — try the next candidate
@@ -155,11 +178,51 @@ def captcha_image(driver) -> dict:
     return {"image": ""}
 
 
+def submit_captcha(driver, *, text: str) -> dict:
+    """Type the answer THE APPLICANT read, and continue.
+
+    The line this keeps: Ellis never READS the challenge image. No OCR, no
+    model, no solving service — `text` is what a human typed into Ellis after
+    looking at it. Ellis only transcribes their answer into the portal's own
+    field, exactly as it transcribes a signed declaration. If a machine ever
+    produced this string, the control these ministries put there would have
+    been defeated, so nothing in Ellis may generate it.
+
+    Refuses when no challenge is showing (nothing to answer) and when the
+    answer is empty or implausibly long.
+    """
+    answer = str(text or "").strip()
+    if not answer:
+        raise CalendarUnavailable("no answer given — the applicant reads the "
+                                  "image and types it themselves")
+    if len(answer) > 24:
+        raise CalendarUnavailable("that does not look like a challenge answer")
+    if not captcha_present(driver):
+        raise CalendarUnavailable("no image check is showing right now")
+    driver.fill(RK_CAPTCHA_INPUT, answer)
+    for sel in (RK_SUBMIT, 'input[type="submit"]', 'button[type="submit"]'):
+        try:
+            if driver.evaluate("() => !!document.querySelector(%r)" % sel):
+                driver.click(sel)
+                break
+        except Exception:  # noqa: BLE001 — try the next candidate
+            continue
+    still = captcha_present(driver)
+    return {"submitted": True, "still_challenged": still,
+            "note": ("That answer was wrong or the image refreshed — read the "
+                     "new one and try again." if still else
+                     "Accepted. Reading the month.")}
+
+
 def captcha_present(driver) -> bool:
     """Is the image CAPTCHA standing in front of the month view?"""
+    # Either the answer field OR the challenge element itself: RK-Termin
+    # renders the picture in a <captcha> custom element, and a page can show
+    # one without the other while it is mid-refresh.
     try:
         return bool(driver.evaluate(
-            "() => !!document.querySelector('input[name=\"captchaText\"]')"))
+            "() => !!(document.querySelector('input[name=\"captchaText\"]')"
+            " || document.querySelector('captcha'))"))
     except Exception:  # noqa: BLE001 — an unreadable page is treated as gated
         return True
 
