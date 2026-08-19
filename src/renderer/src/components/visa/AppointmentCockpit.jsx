@@ -6,9 +6,10 @@
 //      fingerprint question: whether an in-person act is required at all.
 //   2. Pre-stage — everything Ellis has prepared, everything still missing.
 //      Nothing here has been filed, paid, signed, or booked.
-//   3. The group-request roster — the consulate's own channel for 10 or more
-//      travelling together. Ellis assembles and checks it; the HUMAN
-//      coordinator submits it and books each member.
+//   3. The group-request roster — the consulate's own channel for groups
+//      travelling together (the minimum is PER POST: 15 in China, 10 as the
+//      baseline). Ellis assembles and checks it; the HUMAN coordinator
+//      submits it and books each member.
 //   4. Availability — published wait times and the official places to look.
 //
 // The line this surface exists to hold: Ellis books only as an agent through
@@ -22,7 +23,7 @@ import { useLocale } from '../../lib/locale.jsx'
 import { ErrorNote } from '../ui.jsx'
 import {
   appointmentTriageView, appointmentPrestageView, groupRosterView,
-  appointmentAvailabilityView, HUMAN_ACT_KEYS, GROUP_MIN_MEMBERS
+  appointmentAvailabilityView, HUMAN_ACT_KEYS, GROUP_MIN_MEMBERS, groupMinMembers
 } from '../../lib/visaBackend.js'
 import {
   AppointmentIllustration, PassportIllustration, DocumentsIllustration,
@@ -392,7 +393,8 @@ function GroupRosterPanel({ t, lang, client }) {
         post: form.post, country: form.country, coordinator_name: form.coordinator_name,
         coordinator_email: form.coordinator_email, locale: lang
       })
-      setView(groupRosterView(res, { groupKind: form.group_kind }))
+      setView(groupRosterView(res, { groupKind: form.group_kind,
+                                     country: form.country }))
     } catch (e) {
       setError({ message: e.message })
     }
@@ -419,9 +421,13 @@ function GroupRosterPanel({ t, lang, client }) {
     setBusy(false)
   }
 
+  // The heading states the threshold, so it must follow the country the
+  // coordinator typed — China's group channel starts at 15, not the baseline 10.
+  const headingMin = groupMinMembers(form.country)
+
   return (
     <PanelCard art={<PipelineIllustration size={72} />}
-               title={t('appt.group.title', { min: GROUP_MIN_MEMBERS })}
+               title={t('appt.group.title', { min: headingMin })}
                sub={t('appt.group.sub')}
                className="anim-rise-2" data-testid="appt-group-roster">
       <div className="field" style={{ marginTop: 12 }}>
@@ -476,7 +482,10 @@ function GroupRosterPanel({ t, lang, client }) {
                 {view.preChecks.map((c, i) => (
                   <li key={i}>
                     {c.code === 'too_few'
-                      ? t('appt.group.tooFew', { count: c.count, min: GROUP_MIN_MEMBERS })
+                      // The post's own minimum travels on the pre-check; the
+                      // baseline is only the fallback when it names none.
+                      ? t('appt.group.tooFew', { count: c.count,
+                                                 min: c.min || GROUP_MIN_MEMBERS })
                       : c.code === 'family_excluded' ? t('appt.group.familyExcluded')
                       : t('appt.group.incomplete', { count: c.count })}
                   </li>

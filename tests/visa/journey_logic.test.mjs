@@ -1822,3 +1822,32 @@ test('both cockpits are wired into the employer console and the H1B pipeline', a
   assert.match(pipeline, /FORM_KEYS_BY_STEP = \{ lca: \['eta-9035', 'eta-9141'\]/)
   assert.ok(pipeline.includes('prepareEta9141'))
 })
+
+test('the group-appointment minimum follows the POST, not a global constant', async () => {
+  const { groupMinMembers, GROUP_MIN_MEMBERS, groupRosterView } =
+    await import('../../src/renderer/src/lib/visaBackend.js')
+  // ustraveldocs China states 15 or more travelling together (verified live on
+  // /cn/en/step-4, 2026-08-18). The design's baseline elsewhere is 10. A single
+  // global constant told a coordinator with 12 travellers they qualified, and
+  // the post would then refuse the roster — twelve people's work wasted.
+  assert.equal(groupMinMembers('CHN'), 15)
+  assert.equal(groupMinMembers('CHINA'), 15)
+  assert.equal(groupMinMembers('chn'), 15)
+  // A country Ellis has not verified keeps the baseline rather than inventing
+  // a stricter number it cannot cite.
+  assert.equal(groupMinMembers('BRA'), GROUP_MIN_MEMBERS)
+  assert.equal(groupMinMembers(''), GROUP_MIN_MEMBERS)
+  assert.equal(groupMinMembers(), GROUP_MIN_MEMBERS)
+
+  // 12 travellers: too few for China, fine for the baseline — and the
+  // pre-check carries the minimum it actually applied, so the UI can say it.
+  const members = Array.from({ length: 12 }, (_, i) => ({ case_id: `c${i}` }))
+  const cn = groupRosterView({ members }, { country: 'CHN' })
+  const tooFew = cn.preChecks.find((c) => c.code === 'too_few')
+  assert.ok(tooFew, '12 travellers must be too few for China')
+  assert.equal(tooFew.min, 15)
+  assert.equal(tooFew.count, 12)
+  const other = groupRosterView({ members }, { country: 'BRA' })
+  assert.ok(!other.preChecks.some((c) => c.code === 'too_few'),
+    '12 travellers meet the baseline of 10')
+})

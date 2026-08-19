@@ -1198,9 +1198,24 @@ export function appointmentPrestageView(payload) {
   }
 }
 
-// The consulate's group channel: built for 10 or more travelling together,
-// with families and relatives explicitly excluded (docs/APPOINTMENTS_DESIGN.md).
-export const GROUP_MIN_MEMBERS = 10
+// The consulate's group channel, with families and relatives explicitly
+// excluded (docs/APPOINTMENTS_DESIGN.md).
+//
+// The MINIMUM IS PER-POST, not global. ustraveldocs China states 15 or more
+// travelling together (verified live on /cn/en/step-4, 2026-08-18) while the
+// design's baseline elsewhere is 10. Telling a coordinator with 12 travellers
+// that they qualify, then having the post refuse the roster, wastes the work
+// of twelve people — so the threshold follows the country.
+const GROUP_MIN_BY_COUNTRY = { CHN: 15, CHINA: 15 }
+export const GROUP_MIN_MEMBERS = 10          // baseline when the post is unknown
+
+/** The group minimum for a post/country, falling back to the baseline. A
+ *  country Ellis has not verified keeps the baseline rather than guessing a
+ *  stricter number it cannot cite. */
+export function groupMinMembers(country = '') {
+  const key = String(country || '').trim().toUpperCase()
+  return GROUP_MIN_BY_COUNTRY[key] ?? GROUP_MIN_MEMBERS
+}
 export const GROUP_EXCLUDED_KINDS = ['family', 'families', 'relatives',
                                      'families_and_relatives']
 
@@ -1228,7 +1243,11 @@ export function groupRosterView(payload, opts = {}) {
   // Ellis's OWN pre-check, before the consulate sees anything. Advisory and
   // labeled as such — the consulate's own rules are the authority.
   const preChecks = []
-  if (count > 0 && count < GROUP_MIN_MEMBERS) preChecks.push({ code: 'too_few', count })
+  // The post's own minimum decides this, not a global constant.
+  const minMembers = groupMinMembers(_first(opts.country, r.country, p.country))
+  if (count > 0 && count < minMembers) {
+    preChecks.push({ code: 'too_few', count, min: minMembers })
+  }
   if (kind && GROUP_EXCLUDED_KINDS.includes(kind)) preChecks.push({ code: 'family_excluded' })
   const incomplete = members.filter((m) => m.missing.length > 0)
   if (incomplete.length > 0) preChecks.push({ code: 'members_incomplete', count: incomplete.length })
