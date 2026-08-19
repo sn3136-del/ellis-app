@@ -875,3 +875,36 @@ def test_ds160_checklist_requests_only_passport_and_photo():
     for needed in ("passport", "photo", "bank_statement", "hotel_booking",
                    "flight_itinerary", "travel_insurance"):
         assert needed in sch, (needed, sch)
+
+
+def test_covid_questions_are_retired_and_ds160_asks_no_health_question():
+    """A 2026 applicant is never asked to prove COVID-19 vaccination: the US
+    rescinded the requirement for air travellers on 2023-05-12 and Schengen
+    dropped theirs earlier. A model summarising older sources still emits the
+    rule, so it is filtered wherever it appears. Genuine health rules (yellow
+    fever) are untouched. The DS-160 route asks no health question at all."""
+    from app.visa_snapshot import intake_flow
+    covid = {"name": "COVID-19 vaccination certificate",
+             "question": "Are you vaccinated against COVID-19?",
+             "trigger": "all travellers"}
+    yellow = {"name": "Yellow fever certificate",
+              "trigger": "arriving from a yellow-fever risk country",
+              "trigger_countries": ["Angola", "Brazil"]}
+    assert intake_flow.is_retired_health_requirement(covid) is True
+    assert intake_flow.is_retired_health_requirement(yellow) is False
+
+    guidance = {"disposition": "VISA_REQUIRED",
+                "health_requirements": [covid, yellow]}
+    # US DS-160 route: no health questions, and no health checklist items.
+    assert intake_flow.pending_health_questions(
+        guidance, answers={"destination_country": "USA"}) == []
+    us_ids = [i["id"] for i in intake_flow.derive_document_checklist(
+        guidance, answers={"destination_country": "USA"})]
+    assert not any(i.startswith("health:") for i in us_ids), us_ids
+    # Other routes: COVID never appears, in questions or in the checklist.
+    fr_q = intake_flow.pending_health_questions(
+        guidance, answers={"destination_country": "FRA"})
+    assert not any("covid" in q["name"].lower() for q in fr_q), fr_q
+    fr_ids = [i["id"] for i in intake_flow.derive_document_checklist(
+        guidance, answers={"destination_country": "FRA"})]
+    assert not any("covid" in i.lower() for i in fr_ids), fr_ids

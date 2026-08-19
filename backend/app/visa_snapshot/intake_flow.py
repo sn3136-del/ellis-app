@@ -525,6 +525,18 @@ def _exposure_countries(answers: dict) -> set[str]:
     return out
 
 
+def _is_ds160_route(answers: dict | None) -> bool:
+    """True when this case's destination files the US DS-160."""
+    try:
+        from ..consular_forms import form_for_destination
+        from .registry import normalize_country
+        iso3 = normalize_country((answers or {}).get("destination_country") or "",
+                                 field="destination_country")
+        return form_for_destination(iso3) == "ds160_prep"
+    except Exception:  # noqa: BLE001 - unknown destination is not the DS-160
+        return False
+
+
 def health_requirement_state(req: dict, answers: dict) -> str:
     """Deterministic per-applicant state of one structured health requirement:
       'required'        — applies to this applicant's route
@@ -554,11 +566,36 @@ def health_requirement_state(req: dict, answers: dict) -> str:
     return "question" if triggers or req.get("question") else "not_applicable"
 
 
+# Health requirements that no longer exist in the world. A model summarising
+# older sources still emits COVID-19 vaccination/testing rules, but the United
+# States rescinded its vaccination requirement for international air travellers
+# on 2023-05-12 and the Schengen states dropped theirs earlier still. Asking a
+# 2026 applicant to prove COVID vaccination is a stale question that costs
+# trust, so it is dropped wherever it appears rather than shown as optional.
+_RETIRED_HEALTH_RE = re.compile(
+    r"(covid|sars[-\s]?cov|coronavirus|新冠|2019-ncov)", re.IGNORECASE)
+
+
+def is_retired_health_requirement(req: dict) -> bool:
+    """True for a health rule that has been withdrawn worldwide."""
+    probe = " ".join(str(req.get(k) or "") for k in
+                     ("name", "question", "trigger", "note"))
+    return bool(_RETIRED_HEALTH_RE.search(probe))
+
+
 def pending_health_questions(guidance: dict, *, answers: dict) -> list[dict]:
     """Travel-history questions to ask ONLY when a conditional health rule
-    needs them. Empty for routes with no conditional health requirement."""
+    needs them. Empty for routes with no conditional health requirement.
+
+    Two classes are never asked: retired rules (COVID-19), and anything on the
+    US DS-160 route — the DS-160 asks no health question, and entry health
+    rules are not part of preparing it."""
     out = []
+    if _is_ds160_route(answers):
+        return out
     for req in (guidance or {}).get("health_requirements") or []:
+        if is_retired_health_requirement(req):
+            continue
         if health_requirement_state(req, answers) == "question":
             out.append({
                 "id": f"health:{_slug(req.get('name'))}",
@@ -595,16 +632,7 @@ def derive_document_checklist(guidance: dict, *, answers: dict | None = None) ->
     # they are NOT inputs to the form. So the US consular route requests
     # exactly passport + photo and nothing else. Every other consular route
     # (e.g. Schengen, which files those at submission) keeps the full list.
-    ds160_only = False
-    try:
-        from ..consular_forms import form_for_destination
-        from .registry import normalize_country
-        _dest_iso3 = normalize_country(
-            (answers.get("destination_country") or ""),
-            field="destination_country")
-        ds160_only = form_for_destination(_dest_iso3) == "ds160_prep"
-    except Exception:  # noqa: BLE001 - unknown destination keeps the full list
-        ds160_only = False
+    ds160_only = _is_ds160_route(answers)
 
     def add(item_id, label, *, kind="document", required=True, satisfied_by=None,
             note=""):
@@ -672,6 +700,8 @@ def derive_document_checklist(guidance: dict, *, answers: dict | None = None) ->
 
     # Health/vaccination evidence: structured, trigger-evaluated, honest.
     for req in ([] if ds160_only else (g.get("health_requirements") or [])):
+        if is_retired_health_requirement(req):
+            continue
         state = health_requirement_state(req, answers)
         if state != "required":
             continue  # not_applicable -> omitted; question -> asked separately
