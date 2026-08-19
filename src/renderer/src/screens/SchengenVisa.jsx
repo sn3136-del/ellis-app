@@ -322,6 +322,7 @@ export default function SchengenVisa({ onBack }) {
   const [passportBusy, setPassportBusy] = useState(false)
   const [passportMsg, setPassportMsg] = useState('')
   const [confirmNote, setConfirmNote] = useState('')
+  const [formNote, setFormNote] = useState('')
   // Where the flow resumes after a solved challenge: gates can stand
   // before the month, before a day's times, or before a time's form.
   const afterCaptchaRef = useRef('month')
@@ -435,6 +436,7 @@ export default function SchengenVisa({ onBack }) {
     setForm(null); setFormAnswers({}); setConfirms({})
     setPickedTime(null); afterCaptchaRef.current = 'month'
     setPassport(null); setPassportBusy(false); setPassportMsg('')
+    setFormNote(''); setConfirmNote('')
     setFormCaptcha(''); setFormCapAnswer(''); setBooked(null)
     setCaptcha(''); setAnswer(''); setCapNote('')
     try {
@@ -670,8 +672,30 @@ export default function SchengenVisa({ onBack }) {
     setPhase('filling'); setError(null)
     try {
       const send = {}
+      const fieldByName = {}
+      for (const f of form?.fields || []) fieldByName[f.name] = f
       for (const [k, v] of Object.entries(formAnswers)) {
-        if (String(v || '').trim()) send[k] = String(v).trim()
+        let val = String(v || '').trim()
+        if (!val) continue
+        const f = fieldByName[k]
+        // RK-Termin's phone validator wants A NUMBER: "+86 130..." is
+        // rejected. International prefix becomes 00, everything non-digit
+        // goes — the number the applicant gave, in the shape the site takes.
+        if (f && /telephone|telefon|电话/i.test(f.label)) {
+          val = val.replace(/^\+/, '00').replace(/[^0-9]/g, '')
+        }
+        // Dates leave here in the site's own DD.MM.YYYY whatever separator
+        // the applicant typed; unparseable input is left as typed and the
+        // site's own message is reported honestly after submit.
+        if (f && f.kind === 'date') {
+          let m = val.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})$/)
+          if (m) val = `${m[1].padStart(2, '0')}.${m[2].padStart(2, '0')}.${m[3]}`
+          else {
+            m = val.match(/^(\d{4})[.\/-](\d{1,2})[.\/-](\d{1,2})$/)
+            if (m) val = `${m[3].padStart(2, '0')}.${m[2].padStart(2, '0')}.${m[1]}`
+          }
+        }
+        send[k] = val
       }
       // "Repeat email" is a transcription of the email answer, not a second
       // question — the applicant is asked once.
@@ -713,6 +737,18 @@ export default function SchengenVisa({ onBack }) {
       const out = await withTimeout(
         withWindow(() => client.calendarBookFormSubmit(caseId)),
         90000, 'register the appointment')
+      if (!out.looks_successful) {
+        // The site re-rendered the form with its own field messages: the
+        // registration did NOT go through. Back to the questions, with those
+        // messages shown, so the applicant can correct and go again.
+        setConfirmNote('')
+        setPassportMsg('')
+        setFormNote((out.errors || []).join(' · ')
+          || 'The official site did not accept the registration — please '
+          + 'check the answers and try again.')
+        setPhase('form')
+        return
+      }
       setBooked(out)
       setPhase('booked')
     } catch (e) {
@@ -1132,6 +1168,12 @@ export default function SchengenVisa({ onBack }) {
             <div style={{ fontSize: 13.5, color: NAVY, fontWeight: 700,
                           marginTop: 8 }}>{form.title}</div>
           ) : null}
+          {formNote && (
+            <div style={{ fontSize: 13, color: NAVY, fontWeight: 700,
+                          marginTop: 10 }} data-testid="schengen-form-note">
+              The official site asked for corrections: {formNote}
+            </div>
+          )}
           {/* The passport answers its own questions. Until it is read, the
               identity fields are not asked as typing work — the applicant
               uploads the photo page and Ellis reads it once. */}
@@ -1298,6 +1340,12 @@ export default function SchengenVisa({ onBack }) {
                 {confirmNote}
               </div>
             )}
+            <button className="btn btn--sm btn--ghost"
+                    onClick={() => { setConfirmNote(''); setPhase('form') }}
+                    data-testid="schengen-edit-answers"
+                    style={{ marginTop: 10, fontSize: 12.5 }}>
+              Edit my answers
+            </button>
           </div>
         </Card>
       )}

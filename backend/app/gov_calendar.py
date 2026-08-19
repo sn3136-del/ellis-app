@@ -829,15 +829,38 @@ def submit_book_form(driver, *, applicant_instructed: bool) -> dict:
             "the picture answer box is empty — the applicant types that first")
     driver.click('input[name="action:appointment_addAppointment"]')
     landed, text = "", ""
+    after = None
     try:
         landed = driver.evaluate("() => location.href") or ""
         text = driver.evaluate(
             "() => (document.body.innerText || '').replace(/\\s+/g,' ').trim().slice(0, 600)") or ""
+        # An accepted registration leaves the form BEHIND; a rejected one
+        # re-renders it with the site's own field messages ("Please enter a
+        # date in the Format dd.mm.yyyy") — polite text no error-word scan
+        # catches. So the judgment is structural: form still present, or any
+        # field message showing, means NOT accepted.
+        after = driver.evaluate(
+            "() => {"
+            "  const errs = [];"
+            "  document.querySelectorAll("
+            "      '[class*=error], [id*=error], .errorMessage').forEach(e => {"
+            "    const t = (e.textContent||'').replace(/\\s+/g,' ').trim();"
+            "    if (t && t.length < 160 && !errs.includes(t)) errs.push(t);"
+            "  });"
+            "  [...document.querySelectorAll('span,div,li,label')].forEach(e => {"
+            "    if (e.children.length) return;"
+            "    const t = (e.textContent||'').replace(/\\s+/g,' ').trim();"
+            "    if (/^(please enter|bitte geben)/i.test(t)"
+            "        && t.length < 160 && !errs.includes(t)) errs.push(t);"
+            "  });"
+            "  return {form_still: !!document.querySelector("
+            "            'form input[name^=\"fields\"]'),"
+            "          errors: errs.slice(0, 6)};"
+            "}")
     except Exception:  # noqa: BLE001
         pass
-    low = text.lower()
-    succeeded = bool(re.search(
-        r"appointment|termin", low)) and not re.search(
-        r"wrong text|falscher text|error|fehler|not correct|nicht korrekt", low)
+    after = after or {}
+    errors = list(after.get("errors") or [])
+    succeeded = (not after.get("form_still", True)) and not errors
     return {"submitted": True, "url": landed, "page_text": text,
-            "looks_successful": succeeded}
+            "errors": errors, "looks_successful": succeeded}
