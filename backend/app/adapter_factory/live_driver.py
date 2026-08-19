@@ -2789,3 +2789,110 @@ class BrowserbasePageDriver:
     # Test seam: feed a sanitized event directly (hermetic tests).
     def _record_event(self, method, url, status, content_type, body_text):
         self._events.append(sanitize_network_event(method, url, status, content_type, body_text))
+
+
+# Appended to BrowserbasePageDriver via assignment below: dynamic-page
+# observation for the read->ask->transcribe cycle (app/portal/dynamic_page).
+_DYNAMIC_QUESTIONS_JS = """() => {
+  const sensitive = /(password|passcode|otp|one[-_]?time|cvv|cvc|card|\\bpan\\b|secret|token|captcha|\\bpin\\b|3ds|passkey)/i;
+  const norm = (s) => String(s || '').replace(/\\s+/g, ' ').trim();
+  const optionLabel = (el) => {
+    if (el.id) {
+      const l = document.querySelector('label[for="' + CSS.escape(el.id) + '"]');
+      if (l) return norm(l.innerText);
+    }
+    const wrap = el.closest('label');
+    if (wrap) return norm(wrap.innerText);
+    return norm(el.value);
+  };
+  const groupQuestion = (el) => {
+    // The question TEXT for a radio group: climb to the container that holds
+    // the whole group, take its text minus the option labels themselves.
+    let box = el;
+    for (let i = 0; i < 5 && box; i++) {
+      box = box.parentElement;
+      if (!box) break;
+      const radios = box.querySelectorAll('input[type=radio]');
+      const t = norm(box.innerText);
+      if (radios.length >= 2 && t.length > 8) {
+        let text = t;
+        for (const r of radios) {
+          const ol = optionLabel(r);
+          if (ol) text = text.replace(ol, ' ');
+        }
+        text = norm(text.replace(/^[*＊\\s]+/, ''));
+        if (text.length > 8) return text.slice(0, 400);
+      }
+    }
+    return '';
+  };
+  const labelFor = (el) => {
+    if (el.getAttribute('aria-label')) return norm(el.getAttribute('aria-label'));
+    if (el.id) {
+      const l = document.querySelector('label[for="' + CSS.escape(el.id) + '"]');
+      if (l) return norm(l.innerText);
+    }
+    const p = el.closest('label');
+    if (p) return norm(p.innerText);
+    return norm(el.placeholder);
+  };
+  const visible = (el) => el.offsetParent !== null && !el.disabled;
+  const groups = {};
+  const order = [];
+  for (const r of document.querySelectorAll('input[type=radio]')) {
+    if (!visible(r)) continue;
+    const name = r.name || r.id || '';
+    if (!name || sensitive.test(name + ' ' + (r.id || ''))) continue;
+    if (!groups[name]) {
+      groups[name] = {kind: 'radio', name, question: groupQuestion(r), options: []};
+      order.push(name);
+    }
+    groups[name].options.push({label: optionLabel(r) || norm(r.value),
+                               selector: r.id ? '[id="' + r.id + '"]' : ''});
+  }
+  const fields = [];
+  for (const name of order) {
+    const g = groups[name];
+    if (g.question && g.options.length >= 2) fields.push(g);
+  }
+  for (const s of document.querySelectorAll('select')) {
+    if (!visible(s)) continue;
+    const name = s.name || s.id || '';
+    if (!name || sensitive.test(name + ' ' + (s.id || ''))) continue;
+    const q = labelFor(s);
+    const opts = [...s.options].map((o) => norm(o.text)).filter(Boolean);
+    if (q && opts.length)
+      fields.push({kind: 'select', name, question: q,
+                   selector: s.id ? '[id="' + s.id + '"]' : '[name="' + name + '"]',
+                   options: opts.map((o) => ({label: o}))});
+  }
+  for (const t of document.querySelectorAll(
+      'input[type=text], input[type=tel], input[type=email], textarea')) {
+    if (!visible(t) || t.readOnly) continue;
+    const name = t.name || t.id || '';
+    if (!name || sensitive.test(name + ' ' + (t.id || ''))) continue;
+    const q = labelFor(t);
+    if (q)
+      fields.push({kind: 'text', name, question: q,
+                   selector: t.id ? '[id="' + t.id + '"]' : '[name="' + name + '"]'});
+  }
+  const hasFile = [...document.querySelectorAll('input[type=file]')]
+    .some((f) => f.offsetParent !== null);
+  return {fields, has_file_input: hasFile};
+}"""
+
+
+def _read_dynamic_questions(self) -> dict:
+    """Every askable control on the CURRENT page, with the page's own
+    question wording and options — values are never read back. Used by the
+    dynamic read->ask->transcribe cycle on adapters that opt in."""
+    try:
+        res = self.page.evaluate(_DYNAMIC_QUESTIONS_JS) or {}
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "detail": str(e)[:120], "fields": [],
+                "has_file_input": False}
+    return {"ok": True, "fields": list(res.get("fields") or []),
+            "has_file_input": bool(res.get("has_file_input"))}
+
+
+BrowserbasePageDriver.read_dynamic_questions = _read_dynamic_questions

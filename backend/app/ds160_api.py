@@ -217,6 +217,20 @@ def wizard_supplement(answers: dict | None = None) -> list[dict]:
     except Exception:  # noqa: BLE001 — no bank, no supplement
         return []
     out = []
+    # Pages LEARNED by the dynamic cycle join the up-front ask: a page any
+    # run has read once is asked at the start for every later case.
+    from .portal import dynamic_page as _dyn
+    seen_keys = set()
+    for key, q in sorted(_dyn.learned_questions().items()):
+        if not q.get("question"):
+            continue
+        seen_keys.add(key)
+        opts = [{"value": o, "label": o} for o in (q.get("options") or []) if o]
+        if not opts:
+            continue          # free-text learned fields stay the run's to ask
+        out.append({"key": key, "label": q["question"], "options": opts,
+                    "multi": False, "page": "learned",
+                    "answer": answers.get(key)})
     for page in bank.get("pages", []):
         page_key = page.get("page") or ""
         if page_key in _WIZARD_EXCLUDED_PAGES:
@@ -238,6 +252,8 @@ def wizard_supplement(answers: dict | None = None) -> list[dict]:
             if not opts:
                 continue
             key = f"ds160_{field}"
+            if key in seen_keys:
+                continue      # already served from the learned pages
             out.append({"key": key,
                         "label": q.get("question") or field,
                         "options": opts, "multi": False,

@@ -905,6 +905,25 @@ class FlowRunner:
         if action == "REGISTER_ACCOUNT":
             return self._register_account(node)
         if action == "APPLICANT_HANDOFF":
+            # Opt-in dynamic pages (usa-ceac-ds160): before the normal
+            # handoff, walk any page of questions the flow has no fills for —
+            # read the page's own questions, enter the answers the applicant
+            # already gave in Ellis, ask (as an additional_information pause)
+            # for the ones they have not, advance, repeat. Review, sign,
+            # captcha, credentials and payment are never walked; every other
+            # adapter passes straight through.
+            from ..portal import dynamic_page as _dyn
+            if _dyn.enabled(self.flow.manifest):
+                out = _dyn.cycle(self.driver, node=node, answers=self.answers)
+                if out["status"] == "ask":
+                    return {"status": "handoff",
+                            "handoff_kind": "additional_information",
+                            "questions": out["questions"]}
+                if out["status"] == "ok":
+                    return {"status": "ok",
+                            "detail": {"dynamic_pages_walked":
+                                       out.get("pages_walked", 0)}}
+                # "pass": the page is this handoff's own — normal behaviour.
             if node.get("handoff_kind") == "captcha":
                 # Never send the applicant hunting for a CAPTCHA that is not
                 # there. The flow DECLARES where one may appear; the page
