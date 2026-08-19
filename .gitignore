@@ -75,3 +75,6 @@ backend/.runtime-venv/
 backend/ellis.db-shm
 backend/ellis.db-wal
 backend/ellis.db-journal
+# plaintext provider secrets live only locally — the repo carries backend/secrets.enc
+backend/.env
+backend/google_adc.json

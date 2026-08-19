@@ -24,6 +24,37 @@ ENV_FILE="$ROOT/backend/.env"
 DB="$APPSUP/ellis.db"
 
 mkdir -p "$RUN" "$LOGS"
+
+# Fresh clone: the provider keys travel ENCRYPTED (backend/secrets.enc,
+# AES-256). The passphrase comes from the owner, not the repo — enter it
+# once here (or set ELLIS_UNLOCK) and the plaintext lives only on this
+# machine.
+if [ ! -f "$ENV_FILE" ] && [ -f "$ROOT/backend/secrets.enc" ]; then
+  if [ -n "$ELLIS_UNLOCK" ]; then PASS="$ELLIS_UNLOCK"; else
+    printf 'Enter the unlock passphrase (from the owner): '
+    read -rs PASS; printf '\n'
+  fi
+  if openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -pass "pass:$PASS" \
+       -in "$ROOT/backend/secrets.enc" | tar -C "$ROOT/backend" -xf -; then
+    printf '  %s\n' "provider keys unlocked"
+  else
+    printf 'error: wrong passphrase — ask the owner for the unlock phrase\n' >&2
+    exit 1
+  fi
+fi
+
+# Fresh clone: build what is missing, so download -> run is one command.
+if [ ! -x "$PY" ]; then
+  printf '  %s\n' "first run: creating the backend environment"
+  python3 -m venv "$ROOT/backend/.venv" \
+    && "$ROOT/backend/.venv/bin/pip" install -q -r "$ROOT/backend/requirements.txt" \
+    || { printf 'error: could not build the backend environment\n' >&2; exit 1; }
+fi
+if [ ! -x "$VITE" ]; then
+  printf '  %s\n' "first run: installing frontend dependencies"
+  (cd "$ROOT" && npm install --silent) \
+    || { printf 'error: npm install failed\n' >&2; exit 1; }
+fi
 for f in backend worker web; do : > "$LOGS/$f.log" 2>/dev/null || true; done
 
 log() { printf '  %s\n' "$*"; }

@@ -130,11 +130,10 @@ test('App.jsx imports no deleted screens and has no role selection', () => {
   // legacy prop name, is not a standalone word and is allowed).
   assert.ok(!/\brole\b/i.test(app), "App.jsx must not reference 'role' selection")
   assert.ok(!/\broles\b/i.test(app), "App.jsx must not reference 'roles'")
-  // Boots into the applicant intake surface by default. The Schengen lane is a
-  // REAL standalone surface (Germany's account-free RK-Termin calendar, live)
-  // reached by #schengen, so the boot default is 'schengen' on that hash else
-  // 'visa'. The deleted appointments SIMULATION must stay gone.
-  assert.match(app, /includes\('schengen'\) \? 'schengen' : 'visa'/)
+  // Boots INTO the Schengen lane (the Trip.com evaluation's front door —
+  // Germany's account-free RK-Termin calendar, live). The deleted
+  // appointments SIMULATION must stay gone.
+  assert.match(app, /useState\('schengen'\)/)
   assert.ok(!app.includes('AppointmentsDemo'), 'the appointments demo screen must stay deleted')
 })
 
