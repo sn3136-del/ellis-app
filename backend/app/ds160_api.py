@@ -194,3 +194,53 @@ def options_for_answer_key(key: str) -> list[str]:
                     out.append(label)
             return out
     return []
+
+
+# The complete up-front ask. The owner's contract for this lane: EVERY known
+# question is asked in Ellis before the portal is ever opened — mid-run
+# interruptions are reserved for questions the form genuinely springs. This
+# supplements the consular wizard with the bank's remaining unconditional
+# questions: the applicant-only series and the security & background pages,
+# each in the form's own words with the form's own options. Conditional
+# fields (explain-boxes, "if yes" texts) are NOT asked blind — they only
+# exist on the portal when an answer triggers them, and then the run pauses
+# and asks honestly.
+_WIZARD_EXCLUDED_PAGES = {"getting_started", "confirm_application_id",
+                          "photo", "review", "sign"}
+
+
+def wizard_supplement(answers: dict | None = None) -> list[dict]:
+    """Choice questions for the case wizard, keyed ds160_<portal field>."""
+    answers = answers or {}
+    try:
+        bank = _bank()
+    except Exception:  # noqa: BLE001 — no bank, no supplement
+        return []
+    out = []
+    for page in bank.get("pages", []):
+        page_key = page.get("page") or ""
+        if page_key in _WIZARD_EXCLUDED_PAGES:
+            continue
+        for q in page.get("questions", []):
+            if q.get("kind") not in ("radio", "select"):
+                continue          # conditional texts are the run's to ask
+            is_security = page_key.startswith("security_and_background")
+            if not q.get("applicant_only") and not is_security:
+                continue          # Ellis-fillable factuals are asked as fields
+            field = q.get("field") or ""
+            if not field:
+                continue
+            opts = []
+            for o in q.get("options") or []:
+                label = o if isinstance(o, str) else (o.get("label") or "")
+                if label:
+                    opts.append({"value": label, "label": label})
+            if not opts:
+                continue
+            key = f"ds160_{field}"
+            out.append({"key": key,
+                        "label": q.get("question") or field,
+                        "options": opts, "multi": False,
+                        "page": page_key,
+                        "answer": answers.get(key)})
+    return out

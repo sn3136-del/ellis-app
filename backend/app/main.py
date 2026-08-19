@@ -1612,6 +1612,10 @@ def case_form_questions(application_id: str, db=Depends(get_session),
             opts = ds160_api.options_for_answer_key(f["key"])
             if opts:
                 f["options"] = opts
+        # The complete up-front ask: the DS-160's remaining unconditional
+        # questions — the applicant-only series and the security pages — join
+        # the wizard so nothing known waits to interrupt the fill.
+        qs = qs + ds160_api.wizard_supplement(answers)
     return {"form_key": form_key, "title": cf.FORMS[form_key]["title"],
             "questions": qs, "fields": fields,
             "unanswered": [q["key"] for q in qs if q.get("answer") in (None, "", [])],
