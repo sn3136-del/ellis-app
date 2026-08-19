@@ -1784,8 +1784,13 @@ class _WindowDriver:
         """A PNG of one element, base64. Used to show the applicant the
         challenge image LARGE and legible. Reading the pixels of a
         cross-origin <img> through a canvas taints it and yields nothing, so
-        the screenshot is taken by the browser itself."""
+        the screenshot is taken by the browser itself. Asking for `body`
+        means the whole page: RK-Termin's confirmation page styles its body
+        as "hidden" to an element locator, while a page screenshot works."""
         import base64
+        if selector == "body":
+            return base64.b64encode(
+                self.page.screenshot(full_page=True)).decode()
         loc = self.page.locator(selector).first
         loc.wait_for(state="visible", timeout=15000)
         return base64.b64encode(loc.screenshot(type="png")).decode()

@@ -1271,7 +1271,10 @@ export default function SchengenVisa({ onBack }) {
               <label key={f.name} style={{ display: 'grid', gap: 5,
                                            textAlign: 'left' }}>
                 <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>
-                  {f.label}{f.required ? ' *' : ''}
+                  {f.label}
+                  {/phone|telefon|mobil|电话|手机/i.test(f.label)
+                    ? ' (add country code, such as +86 for China)' : ''}
+                  {f.required ? ' *' : ''}
                 </span>
                 {f.kind === 'select' ? (
                   <select value={formAnswers[f.name] || ''}
