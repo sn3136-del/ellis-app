@@ -603,6 +603,11 @@ export default function StartVisa({ client, onOpenCase }) {
                 )}
               </div>
             </div>
+            {/* H1B lanes hidden by owner decision (theming) for the
+                Trip.com evaluation: this build presents the USA DS-160
+                journey and the Germany appointment lane. Nothing removed —
+                the surfaces stay reachable by their hashes. */}
+            {false && (<>
             <div className="trip-lane trip-lane--tall card-hover anim-rise-2" data-testid="lane-h1b-employer">
               <FormFillIllustration size={150} className="trip-lane__art" />
               <div className="trip-lane__title">{t('start.lane.h1b.title')}</div>
@@ -623,6 +628,7 @@ export default function StartVisa({ client, onOpenCase }) {
                 </button>
               </div>
             </div>
+            </>)}
             <div className="trip-lane trip-lane--tall card-hover anim-rise-4" data-testid="lane-schengen">
               <AppointmentIllustration size={150} className="trip-lane__art" />
               <div className="trip-lane__title">{t('start.lane.schengen.title')}</div>

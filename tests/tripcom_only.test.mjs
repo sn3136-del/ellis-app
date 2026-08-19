@@ -133,7 +133,7 @@ test('App.jsx imports no deleted screens and has no role selection', () => {
   // Boots INTO the Schengen lane (the Trip.com evaluation's front door —
   // Germany's account-free RK-Termin calendar, live). The deleted
   // appointments SIMULATION must stay gone.
-  assert.match(app, /useState\('schengen'\)/)
+  assert.match(app, /includes\('applicant'\) \? 'visa' : 'schengen'/)
   assert.ok(!app.includes('AppointmentsDemo'), 'the appointments demo screen must stay deleted')
 })
 
