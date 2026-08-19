@@ -1851,30 +1851,36 @@ class BrowserbasePageDriver:
 
     # How far to blow the page up before capturing the challenge. These are
     # small bitmaps; screenshotting at 1x gives the applicant a postage stamp.
-    _CAPTCHA_ZOOM = 2.5
+    _CAPTCHA_ZOOM = 1.7
 
     def zoom_to_captcha(self, zoom: float = 0.0) -> bool:
-        """Blow the page up around the challenge and scroll it into view.
+        """Blow the page up around the challenge and CENTRE it in the viewport.
 
-        Purely presentational — it changes how the page is DISPLAYED, never
-        what it says or does. Two things depend on it: the capture below comes
-        back at usable resolution, and the applicant watching the live window
-        can actually read the characters. Safe to fail."""
+        Purely presentational — how the page is displayed, never what it says
+        or does. Two things depend on it: the capture below comes back at
+        usable resolution, and the applicant watching the live window can read
+        the characters.
+
+        Scaling from the top-left corner clips the form off the left edge, so
+        after zooming the challenge's own box is measured and the page scrolled
+        to put it in the middle. Safe to fail."""
         z = zoom or self._CAPTCHA_ZOOM
         try:
             self.page.evaluate(
                 "(z) => {"
-                "  document.body.style.transformOrigin = 'top left';"
                 "  document.body.style.zoom = z;"
                 "  const sels = ['captcha', 'img[src*=\"captcha\" i]',"
                 "                '[id*=\"captcha\" i]', '[class*=\"captcha\" i]'];"
-                "  for (const s of sels) {"
-                "    const el = document.querySelector(s);"
-                "    if (el && el.scrollIntoView) {"
-                "      el.scrollIntoView({block: 'center', inline: 'center'});"
-                "      break;"
-                "    }"
-                "  }"
+                "  let el = null;"
+                "  for (const s of sels) { el = document.querySelector(s); if (el) break; }"
+                "  if (!el) return false;"
+                "  const r = el.getBoundingClientRect();"
+                "  const cx = r.left + window.scrollX + r.width / 2;"
+                "  const cy = r.top + window.scrollY + r.height / 2;"
+                "  window.scrollTo({"
+                "    left: Math.max(0, cx - window.innerWidth / 2),"
+                "    top:  Math.max(0, cy - window.innerHeight / 2)"
+                "  });"
                 "  return true;"
                 "}", z)
             self.page.wait_for_timeout(250)

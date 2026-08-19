@@ -178,27 +178,39 @@ def captcha_image(driver) -> dict:
     return {"image": ""}
 
 
-def focus_captcha(driver, *, zoom: float = 2.2) -> dict:
-    """Zoom the live page in on the challenge and scroll it into view.
+def focus_captcha(driver, *, zoom: float = 1.7) -> dict:
+    """Zoom the live page around the challenge and CENTRE it in the viewport.
 
-    Purely presentational: the applicant is watching this window while they
-    read the characters, and at 100% the challenge is a postage stamp. Ellis
-    changes how the page is DISPLAYED, never what it says or does. Safe to
-    fail — an unzoomable page is still readable, just smaller.
+    Purely presentational: the applicant reads the characters from this window
+    while they type. Ellis changes how the page is displayed, never what it
+    says or does.
+
+    Zooming from the top-left corner (the obvious first attempt) pushes the
+    form off the left edge — the labels and the Continue button get clipped.
+    So after scaling, the captcha's own box is measured and the page is
+    scrolled so that box sits in the MIDDLE of the viewport, horizontally and
+    vertically. Safe to fail: an unzoomable page is still readable, just
+    smaller.
     """
     try:
-        driver.evaluate(
+        ok = driver.evaluate(
             "(z) => {"
-            "  document.body.style.transformOrigin = 'top left';"
             "  document.body.style.zoom = z;"
-            "  const el = document.querySelector('captcha')"
-            "          || document.querySelector('input[name=\"captchaText\"]');"
-            "  if (el && el.scrollIntoView) {"
-            "    el.scrollIntoView({block: 'center', inline: 'center'});"
-            "  }"
+            "  const sels = ['captcha', 'input[name=\"captchaText\"]',"
+            "                '[id*=\"captcha\" i]'];"
+            "  let el = null;"
+            "  for (const s of sels) { el = document.querySelector(s); if (el) break; }"
+            "  if (!el) return false;"
+            "  const r = el.getBoundingClientRect();"
+            "  const cx = r.left + window.scrollX + r.width / 2;"
+            "  const cy = r.top + window.scrollY + r.height / 2;"
+            "  window.scrollTo({"
+            "    left: Math.max(0, cx - window.innerWidth / 2),"
+            "    top:  Math.max(0, cy - window.innerHeight / 2)"
+            "  });"
             "  return true;"
             "}", zoom)
-        return {"zoomed": True, "zoom": zoom}
+        return {"zoomed": bool(ok), "zoom": zoom}
     except Exception:  # noqa: BLE001 — presentation only
         return {"zoomed": False, "zoom": 1.0}
 

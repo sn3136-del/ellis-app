@@ -532,7 +532,7 @@ export default function SchengenVisa({ onBack }) {
 
       {/* The challenge: shown BIG in Ellis, answered in Ellis. */}
       {phase === 'captcha' && (
-        <Card className="anim-rise-1" style={{ marginTop: 16 }}
+        <Card className="anim-rise-1" style={{ marginTop: 16, textAlign: 'center' }}
               data-testid="schengen-captcha">
           <div style={{ fontWeight: 800, fontSize: 15, color: NAVY }}>
             Type the characters you see
@@ -563,7 +563,8 @@ export default function SchengenVisa({ onBack }) {
                      onChange={(e) => setAnswer(e.target.value)}
                      onKeyDown={(e) => { if (e.key === 'Enter') answerCaptcha() }} />
               <button className="trip-cta trip-cta--sm"
-                      style={{ marginTop: 12, width: '100%' }}
+                      style={{ marginTop: 14, display: 'block',
+                               marginLeft: 'auto', marginRight: 'auto' }}
                       disabled={!answer.trim()} onClick={answerCaptcha}
                       data-testid="schengen-captcha-submit">
                 Complete Captcha
