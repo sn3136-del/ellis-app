@@ -302,6 +302,17 @@ export default function SchengenVisa({ onBack }) {
   const startedRef = useRef(false)
 
   const view = usePortalLiveView(client, caseId)
+  // A Browserbase session can idle out while the applicant reads the
+  // challenge. Rather than surface a reconnect card, reopen it silently — but
+  // only once per lapse, so a genuinely unavailable window does not loop.
+  const reconnectRef = useRef(false)
+  useEffect(() => {
+    if (phase === 'captcha' && (view.state === 'closed' || view.state === 'unavailable')) {
+      if (!reconnectRef.current) { reconnectRef.current = true; view.reconnect() }
+    } else if (view.state === 'embedded') {
+      reconnectRef.current = false
+    }
+  }, [phase, view.state])
 
   // The secure window is plumbing the applicant never asked for, so its
   // absence is never their problem to read about: reopen it and run the call
@@ -667,7 +678,12 @@ export default function SchengenVisa({ onBack }) {
           moment the applicant benefits from seeing the official page. The rest
           of the flow (opening, reading, picking) is Ellis's to run; a window
           open the whole time is noise and an idle Browserbase view. */}
-      {caseId && phase === 'captcha' && (
+      {/* The live window is a secondary aid — the challenge is already shown
+          large in Ellis above. Show the frame ONLY while it is actually
+          embedded; a timed-out Browserbase session must never leave a
+          dead-end 'reconnect' card on this surface. When it lapses, Ellis
+          quietly opens a fresh one in the background (reconnectRef). */}
+      {caseId && phase === 'captcha' && view.state === 'embedded' && (
         <div style={{ marginTop: 18 }}>
           <LiveFrame view={view} height="40vh" watchOnly
                      client={client} caseId={caseId} />
