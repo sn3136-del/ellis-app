@@ -739,9 +739,14 @@ export default function SchengenVisa({ onBack }) {
     if (!allTicked || !formCapAnswer.trim()) return
     setPhase('registering'); setError(null)
     try {
-      await withTimeout(
-        withWindow(() => client.calendarBookFormConfirm(caseId, labels)),
-        60000, 'relay your confirmations')
+      // Some queues (Chengdu) carry no confirmation statements at all —
+      // then there is nothing to relay and the relay is skipped, not sent
+      // empty into a fail-closed refusal.
+      if (labels.length) {
+        await withTimeout(
+          withWindow(() => client.calendarBookFormConfirm(caseId, labels)),
+          60000, 'relay your confirmations')
+      }
       await withTimeout(
         withWindow(() => client.calendarBookFormCaptcha(caseId, formCapAnswer.trim())),
         60000, 'enter your picture answer')
@@ -1320,10 +1325,12 @@ export default function SchengenVisa({ onBack }) {
       {(phase === 'confirm' || phase === 'registering') && form && (
         <Card className="anim-rise" style={{ marginTop: 16 }}
               data-testid="schengen-confirm">
+          {(form.fields || []).some((f) => f.kind === 'checkbox') && (
           <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 0.6,
                         color: GRAY, textTransform: 'uppercase' }}>
             Your confirmations
           </div>
+          )}
           <div style={{ display: 'grid', gap: 10, marginTop: 12 }}>
             {(form.fields || []).filter((f) => f.kind === 'checkbox').map((f) => (
               <label key={f.name} style={{ display: 'flex', gap: 10,
