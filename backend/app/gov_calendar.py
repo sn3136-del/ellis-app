@@ -130,9 +130,14 @@ def rk_termin_walk(driver, *, location_code: str, realm_id: str = "",
     # consular area often says "without a visa"/"ohne Visum", and matching
     # that would recreate the exact bug this default exists to prevent.
     def _visa_area(label: str) -> bool:
-        if re.search(r"\b(no|not|without|ohne|kein\w*)\s+(a\s+)?vis", label, re.I):
-            return False
-        return bool(re.search(r"visum|visa", label, re.I))
+        # Negations wear many coats: Shanghai says "without a visa", Peking
+        # says "(au\u00dfer Visa)" — except visas — on its CONSULAR area. Any
+        # excluding word directly before the visa word disqualifies the
+        # mention; it does not disqualify the area if it also names visas
+        # positively elsewhere in the label.
+        neg = r"\b(no|not|without|ohne|kein\w*|au\u00dfer|ausser|except\w*|excluding)\s+(a\s+)?(visum|visa)"
+        stripped = re.sub(neg, " ", label, flags=re.I)
+        return bool(re.search(r"visum|visa|\u7b7e\u8bc1", stripped, re.I))
 
     default_q = next((r["query"] for r in realms if _visa_area(r["text"])),
                      realms[0]["query"])
@@ -278,7 +283,14 @@ def submit_captcha(driver, *, text: str) -> dict:
     if not captcha_present(driver):
         raise CalendarUnavailable("no image check is showing right now")
     driver.fill(RK_CAPTCHA_INPUT, answer)
-    for sel in (RK_SUBMIT, 'input[type="submit"]', 'button[type="submit"]'):
+    # Continue, never "Load another picture": the day-page gate lists its
+    # refresh button FIRST, so a bare input[type=submit] click would refresh
+    # the challenge forever instead of continuing.
+    for sel in (RK_SUBMIT,
+                'input[type="submit"][name^="action:appointment_"]'
+                ':not([name*="efreshCaptcha"])',
+                'input[type="submit"]:not([name*="efreshCaptcha"])',
+                'button[type="submit"]'):
         try:
             if driver.evaluate("() => !!document.querySelector(%r)" % sel):
                 driver.click(sel)
@@ -388,7 +400,25 @@ def read_day_times(driver, *, href: str, known_hrefs: list[str] | None = None) -
     on these systems it is the CONFIRM at the end of the booking form that
     takes a slot, not looking at the list.
     """
-    opened = open_day(driver, href=href, known_hrefs=known_hrefs)
+    # An EMPTY href reads the page the applicant's window is already on —
+    # used right after they solve a day-page challenge, where re-navigating
+    # would only summon the gate again. Navigation still requires a real,
+    # known day link.
+    if str(href or "").strip():
+        opened = open_day(driver, href=href, known_hrefs=known_hrefs)
+    else:
+        landed = ""
+        try:
+            landed = driver.evaluate("() => location.href") or ""
+        except Exception:  # noqa: BLE001
+            pass
+        opened = {"opened": False, "url": landed}
+    # RK-Termin re-challenges on some navigations: the day arrives gated, not
+    # empty. Say which, so the applicant is asked for the picture again
+    # instead of being told there are no times.
+    if captcha_present(driver):
+        return {"url": opened.get("url", ""), "times": [], "count": 0,
+                "none_available": False, "captcha_required": True}
     times = []
     try:
         times = driver.evaluate(
@@ -403,6 +433,17 @@ def read_day_times(driver, *, href: str, known_hrefs: list[str] | None = None) -
             "    seen.add(time);"
             "    out.push({time, label: t.slice(0, 60), value: String(value || '')});"
             "  };"
+            "  const h4s = [...document.querySelectorAll('h4')];"
+            "  document.querySelectorAll('a[href*=\"appointment_showForm.do\"]')"
+            "    .forEach(a => {"
+            "      let head = null;"
+            "      for (const h of h4s) {"
+            "        if (h.compareDocumentPosition(a) & Node.DOCUMENT_POSITION_FOLLOWING)"
+            "          head = h;"
+            "        else break;"
+            "      }"
+            "      if (head) push(head.textContent, a.href);"
+            "    });"
             "  document.querySelectorAll('input[type=radio]').forEach(r => {"
             "    const lab = (r.id && document.querySelector('label[for=\"' + r.id + '\"]'))"
             "             || r.closest('label');"

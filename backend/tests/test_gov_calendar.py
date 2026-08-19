@@ -230,6 +230,15 @@ def test_the_visa_area_is_preferred_by_label_not_position():
     out = gc.rk_termin_walk(_W(realms, cats), location_code="shan")
     assert out["realm_id"] == "4"
 
+    # Peking's real trap: the consular area says "(außer Visa)" — except
+    # visas — and lists FIRST. An excluding word is a negation too.
+    peking = [
+        {"text": "Rechts- und Konsularsachen (außer Visa)", "query": "realmId=1224&locationCode=peki"},
+        {"text": "Visa / 签证", "query": "realmId=12&locationCode=peki"},
+    ]
+    out = gc.rk_termin_walk(_W(peking, cats), location_code="peki")
+    assert out["realm_id"] == "12"
+
     # No area mentions visa at all: fall back to the first, never invent.
     plain = [
         {"text": "Passport matters", "query": "realmId=1&locationCode=x"},

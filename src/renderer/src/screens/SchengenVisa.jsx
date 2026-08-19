@@ -481,6 +481,18 @@ export default function SchengenVisa({ onBack }) {
         setPhase('captcha')
         return
       }
+      // A challenge can stand before the month OR before a picked day. When
+      // a day was already picked, the solve landed on that day's own page —
+      // read its times in place (an empty href reads where the window is;
+      // re-navigating would only summon the gate again).
+      if (picked) {
+        const out = await withTimeout(
+          withWindow(() => client.calendarTimes(caseId, '', [])),
+          60000, 'read the times')
+        setTimes(out.times || [])
+        setPhase('dates')
+        return
+      }
       const grid = await withTimeout(
         withWindow(() => client.calendarMonth(caseId)), 60000, 'read the calendar')
       setMonth(grid)
@@ -500,6 +512,16 @@ export default function SchengenVisa({ onBack }) {
         withWindow(() => client.calendarTimes(caseId, d.href, known)),
         60000, 'read the times')
       setPicked({ ...d, opened: out })
+      // RK-Termin sometimes re-challenges on the way INTO a day. That is a
+      // gate, not an empty day — ask for the picture again, and after the
+      // applicant answers, the times are read from the page they land on.
+      if (out.captcha_required) {
+        const img = await client.calendarCaptcha(caseId).catch(() => ({}))
+        setCaptcha(img.image || '')
+        setAnswer(''); setCapNote('')
+        setPhase('captcha')
+        return
+      }
       setTimes(out.times || [])
     } catch (e) { fail(e) }
     setPhase('dates')
