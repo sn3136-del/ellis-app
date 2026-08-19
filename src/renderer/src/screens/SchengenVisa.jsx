@@ -1084,8 +1084,11 @@ export default function SchengenVisa({ onBack }) {
       )}
 
       {/* On to the official booking form — for waiting-list queues this is
-          the whole registration (they carry no date at all). */}
-      {phase === 'dates' && walkQuery && (
+          the whole registration (they carry no date at all). Hidden when the
+          calendar has real open dates (owner decision, theming): the dated
+          path goes day -> time -> Schedule instead. */}
+      {phase === 'dates' && walkQuery
+        && (!month || !month.readable || month.none_available) && (
         <Card className="anim-rise-2" style={{ marginTop: 16, textAlign: 'center' }}
               data-testid="schengen-continue-form">
           <button className="btn btn--primary" onClick={startBookForm}
