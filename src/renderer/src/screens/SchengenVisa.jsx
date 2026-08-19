@@ -537,20 +537,21 @@ export default function SchengenVisa({ onBack }) {
           <div style={{ fontWeight: 800, fontSize: 15, color: NAVY }}>
             Type the characters you see
           </div>
-          <div style={{ fontSize: 13, color: GRAY, marginTop: 4, marginBottom: 14 }}>
-            The official site asks this to prove a person is here. You read it,
-            Ellis types it in for you — Ellis never reads the picture itself.
-          </div>
-          <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap',
-                        alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap',
+                        alignItems: 'center', justifyContent: 'center' }}>
             {captcha ? (
+              // The challenge is a small bitmap; scale it up hard with
+              // smoothing off so the characters stay sharp instead of blurring.
               <img src={captcha} alt="Challenge image"
                    data-testid="schengen-captcha-img"
-                   style={{ height: 190, imageRendering: 'pixelated',
+                   style={{ height: 260, imageRendering: 'pixelated',
                             borderRadius: 14, border: '1px solid #dbe3ec',
-                            background: '#fff', padding: 10 }} />
+                            background: '#fff', padding: 14,
+                            display: 'block' }} />
             ) : (
-              <div style={{ fontSize: 12.5, color: GRAY }}>Loading the picture…</div>
+              // Placeholder kept sized so the row does not jump when the
+              // picture lands; the loading words are hidden by owner choice.
+              <div style={{ height: 260, width: 380 }} aria-hidden="true" />
             )}
             <div style={{ flex: '1 1 240px', minWidth: 220 }}>
               <input className="input" value={answer} autoFocus
@@ -564,7 +565,7 @@ export default function SchengenVisa({ onBack }) {
                       style={{ marginTop: 12, width: '100%' }}
                       disabled={!answer.trim()} onClick={answerCaptcha}
                       data-testid="schengen-captcha-submit">
-                Show me the dates
+                Complete Captcha
               </button>
               {capNote && (
                 <div style={{ fontSize: 12.5, color: '#b4231f', marginTop: 10 }}
@@ -666,9 +667,6 @@ export default function SchengenVisa({ onBack }) {
           open the whole time is noise and an idle Browserbase view. */}
       {caseId && phase === 'captcha' && (
         <div style={{ marginTop: 18 }}>
-          <div style={{ fontSize: 11.5, color: GRAY, marginBottom: 6 }}>
-            Your session on service2.diplo.de — watch only
-          </div>
           <LiveFrame view={view} height="40vh" watchOnly
                      client={client} caseId={caseId} />
         </div>

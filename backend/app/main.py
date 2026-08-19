@@ -1780,6 +1780,15 @@ class _WindowDriver:
     def click(self, selector):
         self.page.click(selector, timeout=15000)
         self.page.wait_for_timeout(2200)
+    def shot(self, selector):
+        """A PNG of one element, base64. Used to show the applicant the
+        challenge image LARGE and legible. Reading the pixels of a
+        cross-origin <img> through a canvas taints it and yields nothing, so
+        the screenshot is taken by the browser itself."""
+        import base64
+        loc = self.page.locator(selector).first
+        loc.wait_for(state="visible", timeout=15000)
+        return base64.b64encode(loc.screenshot(type="png")).decode()
 
 
 @app.get("/cases/{application_id}/calendar/missions")
