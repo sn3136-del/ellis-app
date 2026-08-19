@@ -92,12 +92,11 @@ function AppInner() {
   // to the employer console immediately after mount.
   // The Schengen lane is a standalone surface (its own case + secure window),
   // reachable by hash like the employer console.
-  // Boots INTO the Schengen lane: the Trip.com evaluation build's front
-  // door is the Germany appointment feature. The '#applicant' hash (the
-  // Schengen lane's own Menu button) reaches the visa console — without
-  // this exception the Menu button could only loop back to Schengen.
+  // Boots on the MAIN MENU (the visa console's lane cards — Travel visas
+  // and Schengen visa), per owner decision; '#schengen' still deep-links
+  // straight into the Germany appointment lane.
   const [view, setView] = useState(() =>
-    (window.location.hash || '').includes('applicant') ? 'visa' : 'schengen')
+    (window.location.hash || '').includes('schengen') ? 'schengen' : 'visa')
   useEffect(() => { if (persona === 'employer') setView('employer') }, [persona])
   // The floating Ask Ellis assistant follows whichever H1B case a surface has
   // registered (H1bPipeline registers the parent case); hidden when no case.
