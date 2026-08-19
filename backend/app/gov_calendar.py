@@ -827,6 +827,21 @@ def submit_book_form(driver, *, applicant_instructed: bool) -> dict:
     if state.get("captcha_empty"):
         raise CalendarUnavailable(
             "the picture answer box is empty — the applicant types that first")
+    # Dated queues: the Book link carries only dateStr, so the form's
+    # redundant hidden `date` starts EMPTY and the server bounces the first
+    # submit with a date-format complaint (its own re-render then fills the
+    # field). Transcribe the site's own slot value across before pressing —
+    # nothing is chosen here, dateStr IS the slot the applicant picked.
+    try:
+        driver.evaluate(
+            "() => {"
+            "  const d = document.querySelector('input[name=\"date\"]');"
+            "  const ds = document.querySelector('input[name=\"dateStr\"]');"
+            "  if (d && ds && !d.value.trim() && ds.value.trim())"
+            "    d.value = ds.value;"
+            "}")
+    except Exception:  # noqa: BLE001 — absent fields mean nothing to copy
+        pass
     driver.click('input[name="action:appointment_addAppointment"]')
     landed, text = "", ""
     after = None
