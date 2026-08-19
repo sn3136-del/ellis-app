@@ -25,6 +25,17 @@ import { createVisaClient } from '../lib/visaBackend.js'
 import { newSession } from '../lib/visaSession.js'
 
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+// The German missions in China with their official street addresses —
+// checked against the missions' own public listings, 2026-08-19. Shown on
+// the booked card; a mission not listed shows its name alone.
+const MISSION_ADDRESSES = {
+  peki: 'German Embassy, 17 Dongzhimenwai Dajie, Chaoyang District, Beijing',
+  shan: 'German Consulate General, 181 Yongfu Road, Xuhui District, Shanghai',
+  kant: 'German Consulate General, 14/F Teem Tower, 208 Tianhe Road, Tianhe District, Guangzhou',
+  cheng: 'German Consulate General, 25/F Western Tower, 19 Renmin Road South Section 4, Chengdu',
+  shen: 'German Consulate General, 21/F CR Building, 286 Qingnian Street, Shenyang',
+  hong: 'German Consulate General, 21/F United Centre, 95 Queensway, Admiralty, Hong Kong'
+}
 const NAVY = 'var(--trip-navy, #0f294d)'
 const GRAY = 'var(--trip-gray, #64748b)'
 const BLUE = 'var(--trip-blue, #287dfa)'
@@ -1371,9 +1382,17 @@ export default function SchengenVisa({ onBack }) {
               ? 'The official site accepted your registration'
               : 'The official site answered'}
           </div>
-          <div style={{ fontSize: 13, color: GRAY, marginTop: 8,
-                        textAlign: 'left', whiteSpace: 'pre-wrap' }}>
-            {booked.page_text || 'No message could be read from the page.'}
+          {(picked || pickedTime) && (
+            <div style={{ fontSize: 15, fontWeight: 800, color: NAVY,
+                          marginTop: 10 }} data-testid="schengen-booked-when">
+              {picked ? (picked.date || picked.label) : ''}
+              {pickedTime ? ` · ${pickedTime.label || pickedTime.time}` : ''}
+            </div>
+          )}
+          <div style={{ fontSize: 13.5, color: NAVY, marginTop: 6 }}
+               data-testid="schengen-booked-where">
+            {MISSION_ADDRESSES[loc]
+              || (missions.find((m) => m.code === loc)?.name || '')}
           </div>
           {booked.screenshot && (
             <img src={booked.screenshot}
@@ -1382,9 +1401,6 @@ export default function SchengenVisa({ onBack }) {
                  style={{ width: '100%', borderRadius: 12, marginTop: 12,
                           border: '1px solid var(--line, #e2e8f0)' }} />
           )}
-          <div style={{ fontSize: 12, color: GRAY, marginTop: 10 }}>
-            The confirmation email goes to the address on the form.
-          </div>
         </Card>
       )}
 
