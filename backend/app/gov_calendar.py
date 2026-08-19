@@ -131,6 +131,68 @@ def _param(query: str, key: str) -> str:
     return m.group(1) if m else ""
 
 
+def captcha_image(driver) -> dict:
+    """The CAPTCHA challenge image, read from the page and returned as a data
+    URI so Ellis can show it ENLARGED for legibility. This is a reading aid
+    only: the applicant still types the answer into their own window, and Ellis
+    never solves it. Returns an empty image when none is present."""
+    try:
+        data = driver.evaluate(
+            "() => {"
+            "  const img = [...document.querySelectorAll('img')]"
+            "    .find(i => /captcha/i.test(i.src) || /captcha/i.test(i.id)"
+            "            || /captcha/i.test(i.className));"
+            "  if (!img) return '';"
+            "  try {"
+            "    const c = document.createElement('canvas');"
+            "    c.width = img.naturalWidth || img.width;"
+            "    c.height = img.naturalHeight || img.height;"
+            "    c.getContext('2d').drawImage(img, 0, 0);"
+            "    return c.toDataURL('image/png');"
+            "  } catch (e) { return img.src || ''; }"
+            "}")
+    except Exception:  # noqa: BLE001
+        data = ""
+    return {"image": str(data or "")}
+
+
+def submit_captcha(driver, *, text: str) -> dict:
+    """Type the answer THE APPLICANT read, and continue.
+
+    The line this keeps: Ellis never READS the challenge image. No OCR, no
+    model, no solving service — `text` is what a human typed into Ellis after
+    looking at it. Ellis only transcribes their answer into the portal's own
+    field, exactly as it transcribes a signed declaration. If a machine ever
+    produced this string, the control these ministries put there would have
+    been defeated, so nothing in Ellis may generate it.
+
+    Refuses when no challenge is showing (nothing to answer) and when the
+    answer is empty or implausibly long.
+    """
+    answer = str(text or "").strip()
+    if not answer:
+        raise CalendarUnavailable("no answer given — the applicant reads the "
+                                  "image and types it themselves")
+    if len(answer) > 24:
+        raise CalendarUnavailable("that does not look like a challenge answer")
+    if not captcha_present(driver):
+        raise CalendarUnavailable("no image check is showing right now")
+    driver.fill(RK_CAPTCHA_INPUT, answer)
+    for sel in (RK_SUBMIT, 'input[type="submit"]', 'button[type="submit"]'):
+        try:
+            if driver.evaluate(
+                    "() => !!document.querySelector(%r)" % sel):
+                driver.click(sel)
+                break
+        except Exception:  # noqa: BLE001 — try the next candidate
+            continue
+    still = captcha_present(driver)
+    return {"submitted": True, "still_challenged": still,
+            "note": ("That answer was wrong or the image refreshed — read the "
+                     "new one and try again." if still else
+                     "Accepted. Reading the month.")}
+
+
 def captcha_present(driver) -> bool:
     """Is the image CAPTCHA standing in front of the month view?"""
     try:

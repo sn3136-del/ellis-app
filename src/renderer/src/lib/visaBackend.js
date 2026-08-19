@@ -249,6 +249,13 @@ export function createVisaClient(session) {
     // The applicant's OWN pick, carried to the government site. `knownHrefs`
     // is the grid Ellis displayed, so a stale link cannot open a day they
     // never saw. Ellis never chooses the day and never submits the form.
+    // The CAPTCHA challenge image, enlarged for legibility. A reading aid:
+    // the applicant still types the answer in their own window.
+    calendarCaptcha: (id) => call('GET', `/cases/${id}/calendar/captcha`, session),
+    // The answer THE APPLICANT read and typed into Ellis. Ellis transcribes it
+    // into the portal's field — it never reads the image itself.
+    calendarCaptchaSubmit: (id, text) =>
+      call('POST', `/cases/${id}/calendar/captcha`, session, { text }),
     calendarPick: (id, href, knownHrefs = []) =>
       call('POST', `/cases/${id}/calendar/pick`, session,
            { href, known_hrefs: knownHrefs }),

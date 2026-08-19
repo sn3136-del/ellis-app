@@ -1775,6 +1775,11 @@ class _WindowDriver:
         self.page.wait_for_timeout(2200)
     def evaluate(self, js, *a):
         return self.page.evaluate(js, *a) if a else self.page.evaluate(js)
+    def fill(self, selector, value):
+        self.page.fill(selector, value, timeout=15000)
+    def click(self, selector):
+        self.page.click(selector, timeout=15000)
+        self.page.wait_for_timeout(2200)
 
 
 @app.get("/cases/{application_id}/calendar/missions")
@@ -1832,6 +1837,52 @@ def case_calendar_open(application_id: str, location_code: str = "",
 class CalendarPickIn(BaseModel):
     href: str
     known_hrefs: list[str] = []
+
+
+class CalendarCaptchaIn(BaseModel):
+    text: str
+
+
+@app.post("/cases/{application_id}/calendar/captcha")
+def case_calendar_captcha_submit(application_id: str, body: CalendarCaptchaIn,
+                                 db=Depends(get_session),
+                                 p: Principal = Depends(get_principal)):
+    """Type the challenge answer THE APPLICANT read and typed into Ellis.
+
+    Ellis never reads the image: no OCR, no model, no solving service. This
+    transcribes a human's answer into the portal's own field, the same way a
+    signed declaration is transcribed. `still_challenged` tells the applicant
+    honestly when the answer was wrong or the image refreshed."""
+    app_row = _owned(db, p, application_id)
+    from . import gov_calendar as gc
+    sess = _attach_applicant_window(db, application_id, list(gc.DAY_LINK_HOSTS))
+    try:
+        out = gc.submit_captcha(_WindowDriver(sess._ensure_page()), text=body.text)
+    except gc.CalendarUnavailable as e:
+        raise HTTPException(409, detail={"reason": "captcha_not_submitted",
+                                         "detail": str(e)})
+    finally:
+        sess.close()
+    audit.record(db, org_id=app_row.org_id, application_id=application_id,
+                 action="calendar_captcha_answered",
+                 detail={"still_challenged": out.get("still_challenged")},
+                 actor=p.user_id)
+    return out
+
+
+@app.get("/cases/{application_id}/calendar/captcha")
+def case_calendar_captcha(application_id: str, db=Depends(get_session),
+                          p: Principal = Depends(get_principal)):
+    """The CAPTCHA challenge image, enlarged for legibility. Ellis READS the
+    image and shows it bigger; the applicant types the answer themselves in
+    their own window. Ellis never solves it."""
+    _owned(db, p, application_id)
+    from . import gov_calendar as gc
+    sess = _attach_applicant_window(db, application_id, list(gc.DAY_LINK_HOSTS))
+    try:
+        return gc.captcha_image(_WindowDriver(sess._ensure_page()))
+    finally:
+        sess.close()
 
 
 @app.post("/cases/{application_id}/calendar/pick")

@@ -17,7 +17,7 @@
 //
 // Nothing here is simulated: every mission, category and open day comes from
 // the applicant's own live session on the government site.
-import { useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Loading, ErrorNote } from '../components/ui.jsx'
 import { AppointmentIllustration } from '../components/visa/Illustrations.jsx'
 import { LiveFrame, usePortalLiveView } from '../components/visa/handoffs.jsx'
@@ -36,24 +36,28 @@ function Card({ children, style = {}, ...rest }) {
   )
 }
 
-function Step({ n, title, done, active, children }) {
-  return (
-    <Card className="anim-rise" style={{ marginTop: 14,
-          border: active ? `2px solid ${BLUE}` : '1px solid #e2e8f0',
-          opacity: (!active && !done) ? 0.55 : 1 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <span style={{ width: 28, height: 28, borderRadius: 999, flexShrink: 0,
-                       display: 'grid', placeItems: 'center', fontSize: 13,
-                       fontWeight: 800,
-                       background: done ? '#e8f7ee' : active ? '#eaf2ff' : '#f1f5f9',
-                       color: done ? '#0d7a37' : active ? BLUE : GRAY }}>
-          {done ? '✓' : n}
-        </span>
-        <span style={{ fontWeight: 800, fontSize: 15, color: NAVY }}>{title}</span>
-      </div>
-      {(active || done) && <div style={{ marginTop: 12 }}>{children}</div>}
-    </Card>
-  )
+// Days grouped into real calendar months. RK-Termin labels a day like
+// "20.09.2026"; anything unparseable keeps its own label in a trailing group
+// rather than being dropped or guessed at.
+function monthsOf(days) {
+  const MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+               'August', 'September', 'October', 'November', 'December']
+  const byKey = new Map()
+  const loose = []
+  for (const d of days) {
+    const m = (d.label || '').match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})/)
+    if (!m) { loose.push(d); continue }
+    const day = +m[1], mon = +m[2] - 1, year = +m[3]
+    const key = `${year}-${mon}`
+    if (!byKey.has(key)) {
+      byKey.set(key, { key, year, mon, title: `${MON[mon]} ${year}`, days: [] })
+    }
+    byKey.get(key).days.push({ ...d, day })
+  }
+  const months = [...byKey.values()].sort((a, b) =>
+    a.year - b.year || a.mon - b.mon)
+  for (const m of months) m.days.sort((a, b) => a.day - b.day)
+  return { months, loose }
 }
 
 export default function SchengenVisa({ onBack }) {
@@ -63,88 +67,124 @@ export default function SchengenVisa({ onBack }) {
   }
   const client = clientRef.current
 
+  // One flow, driven by phase — never a list of steps to click through.
+  //   starting -> picking -> opening -> captcha -> reading -> dates -> booking
+  const [phase, setPhase] = useState('starting')
   const [caseId, setCaseId] = useState('')
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [missions, setMissions] = useState(null)
+  const [missions, setMissions] = useState([])
   const [search, setSearch] = useState('')
+  const [listOpen, setListOpen] = useState(false)
   const [loc, setLoc] = useState('')
-  const [opened, setOpened] = useState(null)   // walk result: categories + captcha gate
-  const [month, setMonth] = useState(null)     // the real month grid
-  const [busy, setBusy] = useState('')
-  const [picked, setPicked] = useState(null)   // the day the applicant chose
+  const [captcha, setCaptcha] = useState('')
+  const [answer, setAnswer] = useState('')
+  const [capNote, setCapNote] = useState('')
+  const [month, setMonth] = useState(null)
+  const [picked, setPicked] = useState(null)
   const [error, setError] = useState(null)
+  const startedRef = useRef(false)
 
-  const view = usePortalLiveView(client, windowOpen ? caseId : '')
+  const view = usePortalLiveView(client, caseId)
 
   function fail(e) {
     setError({ message: e?.detail?.detail || e?.detail?.reason || e?.message
                         || 'That did not work.' })
   }
 
-  // 1. A case to hang the session on, then the applicant's OWN secure window.
-  async function startSession() {
-    setBusy('session'); setError(null)
+  // Everything that needs no decision happens on mount, in ONE pass: the case,
+  // the applicant's secure window and the live mission list are set up while
+  // they read the heading. The first thing they are asked is the only thing
+  // Ellis cannot know — which city.
+  useEffect(() => {
+    if (startedRef.current) return
+    startedRef.current = true
+    ;(async () => {
+      try {
+        const made = await client.createCase({
+          full_name: 'Schengen applicant', email: 'applicant@example.com',
+          destination_country: 'Germany', visa_type: 'tourist', answers: {}
+        })
+        setCaseId(made.id)
+        // The window and the mission list do not depend on each other.
+        const [, out] = await Promise.all([
+          client.createBrowserSession(made.id),
+          client.calendarMissions(made.id)
+        ])
+        setMissions(out.missions || [])
+        setPhase('picking')
+      } catch (e) { fail(e); setPhase('picking') }
+    })()
+  }, [])
+
+  // Choosing a city runs the whole rest of the chain without another click:
+  // open the calendar, and if the site challenges, fetch the image at once.
+  async function choose(m) {
+    setLoc(m.code); setSearch(m.name || ''); setListOpen(false)
+    setPhase('opening'); setError(null)
+    setMonth(null); setPicked(null); setCaptcha(''); setAnswer(''); setCapNote('')
     try {
-      const made = await client.createCase({
-        full_name: 'Schengen test applicant', email: 'test@example.com',
-        destination_country: 'Germany', visa_type: 'tourist', answers: {}
-      })
-      setCaseId(made.id)
-      await client.createBrowserSession(made.id)
-      setWindowOpen(true)
-    } catch (e) { fail(e) }
-    setBusy('')
+      const out = await client.calendarOpen(caseId, m.code)
+      if (out.captcha_required) {
+        setPhase('captcha')
+        const img = await client.calendarCaptcha(caseId).catch(() => ({}))
+        setCaptcha(img.image || '')
+      } else {
+        setPhase('reading')
+        setMonth(await client.calendarMonth(caseId))
+        setPhase('dates')
+      }
+    } catch (e) { fail(e); setPhase('picking') }
   }
 
-  // 2. Every mission RK-Termin serves, read from the live site.
-  async function loadMissions() {
-    setBusy('missions'); setError(null)
+  // The applicant read the image and typed it here. Ellis transcribes their
+  // answer into the portal's own field — it never reads the picture — then
+  // goes straight on to the month.
+  async function answerCaptcha() {
+    if (!answer.trim()) return
+    setPhase('reading'); setError(null); setCapNote('')
     try {
-      const out = await client.calendarMissions(caseId)
-      const list = out.missions || []
-      setMissions(list)
-      if (list.length && !loc) setLoc(list[0].code)
-    } catch (e) { fail(e) }
-    setBusy('')
+      const out = await client.calendarCaptchaSubmit(caseId, answer.trim())
+      if (out.still_challenged) {
+        setCapNote(out.note || 'That did not match — here is a fresh picture.')
+        setAnswer('')
+        const img = await client.calendarCaptcha(caseId).catch(() => ({}))
+        setCaptcha(img.image || '')
+        setPhase('captcha')
+        return
+      }
+      setMonth(await client.calendarMonth(caseId))
+      setPhase('dates')
+    } catch (e) { fail(e); setPhase('captcha') }
   }
 
-  // 3. Walk the applicant's window to that mission's calendar.
-  async function openCalendar() {
-    if (!loc) return
-    setBusy('open'); setError(null)
+  // The applicant's own pick, carried to the official site.
+  async function pickDay(d) {
+    setPhase('booking'); setError(null)
     try {
-      setMonth(null)
-      setOpened(await client.calendarOpen(caseId, loc))
+      const known = (month?.days || []).map((x) => x.href)
+      const out = await client.calendarPick(caseId, d.href, known)
+      setPicked({ ...d, opened: out })
     } catch (e) { fail(e) }
-    setBusy('')
+    setPhase('dates')
   }
 
-  // 4. Read the grid the applicant's own window is showing — after THEY
-  //    cleared the image check. Ellis reads; it never clicks a day.
-  async function readMonth() {
-    setBusy('month'); setError(null)
-    try { setMonth(await client.calendarMonth(caseId)) } catch (e) { fail(e) }
-    setBusy('')
-  }
+  const shown = useMemo(() => missions.filter(
+    (m) => !search || (m.name || '').toLowerCase().includes(search.toLowerCase())),
+    [missions, search])
+  const quick = useMemo(() => missions.filter(
+    (m) => /beijing|peking|shanghai|guangzhou|chengdu|hong kong/i.test(m.name || '')),
+    [missions])
+  const grouped = useMemo(() => monthsOf(month?.days || []), [month])
 
-  // 5. Carry the applicant's OWN choice to the government site: open exactly
-  //    the day they clicked in Ellis, in their own window. Ellis never picks
-  //    the day and never submits the form behind it.
-  async function pickDay(day) {
-    setBusy('pick:' + day.href); setError(null)
-    try {
-      const known = (month?.days || []).map((d) => d.href)
-      const out = await client.calendarPick(caseId, day.href, known)
-      setPicked({ ...day, opened: out })
-    } catch (e) { fail(e) }
-    setBusy('')
-  }
-
-  const shown = (missions || []).filter(
-    (m) => !search || (m.name || '').toLowerCase().includes(search.toLowerCase()))
+  const working = ['starting', 'opening', 'reading', 'booking'].includes(phase)
+  const workLabel = {
+    starting: 'Opening your secure session and reading the mission list',
+    opening: 'Opening the official calendar',
+    reading: 'Reading the open dates from the official calendar',
+    booking: 'Opening your date on the official site'
+  }[phase]
 
   return (
-    <div className="page" style={{ maxWidth: 900, margin: '0 auto',
+    <div className="page" style={{ maxWidth: 860, margin: '0 auto',
                                    padding: '26px 20px 60px' }}
          data-testid="schengen-visa">
       <button className="btn btn--sm btn--ghost" onClick={onBack}
@@ -157,159 +197,221 @@ export default function SchengenVisa({ onBack }) {
           <h1 style={{ fontSize: 30, fontWeight: 800, color: NAVY, margin: 0,
                        letterSpacing: -0.6 }}>Schengen visa</h1>
           <div style={{ fontSize: 14, color: GRAY, marginTop: 5 }}>
-            Germany’s official appointment calendar — the one Schengen system
-            with no account. Real dates, read live.
+            Germany’s official calendar — real dates, read live. Pick one and
+            Ellis opens it for you.
           </div>
         </div>
       </div>
 
       {error && <ErrorNote error={error} />}
 
-      <Step n={1} title="Open your secure window" active={!windowOpen} done={windowOpen}>
-        <div style={{ fontSize: 13, color: GRAY, marginBottom: 12 }}>
-          The calendar is read inside your own browser session, so the image
-          check you clear and the slot you pick belong to you.
-        </div>
-        {!windowOpen && (
-          <button className="trip-cta trip-cta--sm" disabled={busy === 'session'}
-                  onClick={startSession} data-testid="schengen-open-window">
-            {busy === 'session' ? 'Opening…' : 'Open secure window'}
-          </button>
-        )}
-        {windowOpen && (
-          <div style={{ fontSize: 12.5, color: GRAY }}>
-            Session open on case <code>{caseId.slice(0, 8)}</code>
+      {working && (
+        <Card className="anim-rise" style={{ marginTop: 16 }}
+              data-testid="schengen-working">
+          <div style={{ display: 'flex', justifyContent: 'center',
+                        padding: '10px 0 4px' }}>
+            <Loading size="big" label={workLabel} />
           </div>
-        )}
-      </Step>
+        </Card>
+      )}
 
-      <Step n={2} title="Choose the German mission" active={windowOpen && !opened}
-            done={!!opened}>
-        {missions === null ? (
-          <button className="btn btn--sm" disabled={busy === 'missions'}
-                  onClick={loadMissions} data-testid="schengen-load-missions">
-            {busy === 'missions' ? 'Reading the mission list…' : 'Load missions from the official site'}
-          </button>
-        ) : (
-          <>
-            <div style={{ fontSize: 12.5, color: GRAY, marginBottom: 8 }}>
-              {missions.length} missions, read live from service2.diplo.de
-            </div>
-            <input className="input" style={{ width: '100%' }} value={search}
-                   placeholder="Search — Beijing, Shanghai, Istanbul…"
-                   onChange={(e) => setSearch(e.target.value)}
-                   data-testid="schengen-search" />
-            <select className="select" size={7} value={loc}
-                    style={{ width: '100%', marginTop: 8 }}
-                    onChange={(e) => setLoc(e.target.value)}
-                    data-testid="schengen-mission">
-              {shown.map((m) => (
-                <option key={m.code} value={m.code}>{m.name}</option>
+      {/* City — the one thing Ellis cannot know. Everything else runs itself. */}
+      {(phase === 'picking' || phase === 'captcha' || phase === 'dates') && (
+        <Card className="anim-rise" style={{ marginTop: 16 }}
+              data-testid="schengen-picker">
+          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 0.6,
+                        color: GRAY, textTransform: 'uppercase' }}>
+            Where you are applying
+          </div>
+          {quick.length > 0 && (
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
+              {quick.map((m) => (
+                <button key={m.code} onClick={() => choose(m)}
+                  data-testid={`schengen-quick-${m.code}`}
+                  style={{ padding: '9px 16px', borderRadius: 999, fontSize: 13.5,
+                           fontWeight: 700, cursor: 'pointer',
+                           border: m.code === loc ? `2px solid ${BLUE}` : '1px solid #dbe3ec',
+                           background: m.code === loc ? '#f5f9ff' : '#fff', color: NAVY }}>
+                  {(m.name || '').replace(/^German[y]?\s*/i, '')}
+                </button>
               ))}
-            </select>
-            <button className="trip-cta trip-cta--sm" style={{ marginTop: 12 }}
-                    disabled={!loc || busy === 'open'} onClick={openCalendar}
-                    data-testid="schengen-open-calendar">
-              {busy === 'open' ? 'Opening the calendar…' : 'Open this calendar'}
-            </button>
-          </>
-        )}
-      </Step>
-
-      <Step n={3} title="Clear the image check yourself" active={!!opened && !month}
-            done={!!month}>
-        {opened && (
-          <>
-            {Array.isArray(opened.categories) && opened.categories.length > 0 && (
-              <div style={{ fontSize: 12.5, color: GRAY, marginBottom: 10 }}>
-                Categories offered here: {opened.categories.slice(0, 5)
-                  .map((c) => c.label).join(' · ')}
-              </div>
-            )}
-            {opened.captcha_required && !month && (
-              <div className="card card--soft" style={{ padding: 14, borderRadius: 14,
-                   fontSize: 13, marginBottom: 12 }} data-testid="schengen-captcha">
-                The site is showing its image check. Type the characters in the
-                window below — <b>Ellis never solves it</b>. Then read the month.
-              </div>
-            )}
-            {windowOpen && <LiveFrame view={view} height="52vh" />}
-            <button className="trip-cta trip-cta--sm" style={{ marginTop: 12 }}
-                    disabled={busy === 'month'} onClick={readMonth}
-                    data-testid="schengen-read-month">
-              {busy === 'month' ? 'Reading the month…' : 'Read the open dates'}
-            </button>
-          </>
-        )}
-      </Step>
-
-      <Step n={4} title="The open dates" active={!!month} done={!!month}>
-        {busy === 'month' && <Loading size="big" label="Reading the official calendar" />}
-        {month && !month.readable && (
-          <div className="card card--soft" style={{ padding: 14, borderRadius: 14,
-               fontSize: 13 }} data-testid="schengen-unreadable">
-            {month.reason || 'The calendar could not be read yet.'}
-          </div>
-        )}
-        {month && month.readable && month.none_available && (
-          <div className="card card--soft" style={{ padding: 14, borderRadius: 14,
-               fontSize: 13 }} data-testid="schengen-none">
-            This mission is showing no open dates right now. That is the real
-            answer from the government site, not a failure.
-          </div>
-        )}
-        {month && month.readable && !month.none_available && (
-          <div data-testid="schengen-days">
-            <div style={{ fontWeight: 800, fontSize: 15, color: NAVY,
-                          marginBottom: 4 }}>
-              {month.bookable_count} open {month.bookable_count === 1 ? 'day' : 'days'}
             </div>
-            <div style={{ fontSize: 12.5, color: GRAY, marginBottom: 12 }}>
-              Read from the official calendar just now. Ellis does not click a
-              day — opening one reserves a real slot, so that choice is yours.
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}
-                 data-testid="schengen-grid">
-              {(month.days || []).map((d) => {
-                const on = picked && picked.href === d.href
-                const loading = busy === ('pick:' + d.href)
-                return (
-                  <button key={d.href} onClick={() => pickDay(d)} disabled={!!busy}
-                    data-testid={`schengen-day-${d.label.replace(/\s+/g,'-')}`}
-                    title={d.title || ''}
-                    style={{ padding: '12px 16px', borderRadius: 14, minWidth: 84,
-                             cursor: 'pointer', fontSize: 13.5, fontWeight: 700,
-                             transition: 'all .15s ease',
-                             border: on ? `2px solid ${BLUE}` : '1px solid #dbe3ec',
-                             background: on ? BLUE : '#fff',
-                             color: on ? '#fff' : NAVY }}>
-                    {loading ? '…' : d.label}
+          )}
+          <div style={{ position: 'relative', marginTop: 12 }}>
+            <input className="input" style={{ width: '100%' }} value={search}
+                   placeholder="Or type any city — Istanbul, Cairo, New Delhi…"
+                   onChange={(e) => { setSearch(e.target.value); setListOpen(true) }}
+                   onFocus={() => setListOpen(true)}
+                   onBlur={() => setTimeout(() => setListOpen(false), 150)}
+                   onKeyDown={(e) => { if (e.key === 'Enter' && shown.length) choose(shown[0]) }}
+                   data-testid="schengen-search" />
+            {listOpen && shown.length > 0 && search && (
+              <div style={{ position: 'absolute', top: '100%', left: 0, right: 0,
+                            zIndex: 30, background: '#fff', borderRadius: 12,
+                            border: '1px solid #e2e8f0', marginTop: 4,
+                            maxHeight: 240, overflowY: 'auto',
+                            boxShadow: '0 12px 32px rgba(15,41,77,.10)' }}
+                   data-testid="schengen-mission-list">
+                {shown.slice(0, 30).map((m) => (
+                  <button key={m.code}
+                    onMouseDown={(e) => { e.preventDefault(); choose(m) }}
+                    style={{ display: 'block', width: '100%', textAlign: 'left',
+                             padding: '10px 14px', border: 'none', cursor: 'pointer',
+                             fontSize: 13.5, color: NAVY, background: '#fff' }}>
+                    {m.name}
                   </button>
-                )
-              })}
-            </div>
-            {picked && (
-              <div className="card card--soft anim-rise" style={{ padding: 16,
-                   borderRadius: 14, marginTop: 14 }} data-testid="schengen-picked">
-                <div style={{ fontWeight: 800, fontSize: 15, color: NAVY }}>
-                  {picked.label} — open in your window
-                </div>
-                <div style={{ fontSize: 13, color: GRAY, marginTop: 6 }}>
-                  {picked.opened?.note || ('Ellis opened this exact date on the '
-                    + 'official site, in your own secure window. Enter your '
-                    + 'details there and confirm — the booking and its '
-                    + 'confirmation email are yours to complete.')}
-                </div>
+                ))}
               </div>
             )}
           </div>
-        )}
-      </Step>
+        </Card>
+      )}
+
+      {/* The challenge: shown BIG in Ellis, answered in Ellis. */}
+      {phase === 'captcha' && (
+        <Card className="anim-rise-1" style={{ marginTop: 16 }}
+              data-testid="schengen-captcha">
+          <div style={{ fontWeight: 800, fontSize: 15, color: NAVY }}>
+            Type the characters you see
+          </div>
+          <div style={{ fontSize: 13, color: GRAY, marginTop: 4, marginBottom: 14 }}>
+            The official site asks this to prove a person is here. You read it,
+            Ellis types it in for you — Ellis never reads the picture itself.
+          </div>
+          <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap',
+                        alignItems: 'center' }}>
+            {captcha ? (
+              <img src={captcha} alt="Challenge image"
+                   data-testid="schengen-captcha-img"
+                   style={{ height: 190, imageRendering: 'pixelated',
+                            borderRadius: 14, border: '1px solid #dbe3ec',
+                            background: '#fff', padding: 10 }} />
+            ) : (
+              <div style={{ fontSize: 12.5, color: GRAY }}>Loading the picture…</div>
+            )}
+            <div style={{ flex: '1 1 240px', minWidth: 220 }}>
+              <input className="input" value={answer} autoFocus
+                     style={{ width: '100%', fontSize: 26, letterSpacing: 6,
+                              fontWeight: 800, textAlign: 'center',
+                              padding: '14px 12px' }}
+                     data-testid="schengen-captcha-input"
+                     onChange={(e) => setAnswer(e.target.value)}
+                     onKeyDown={(e) => { if (e.key === 'Enter') answerCaptcha() }} />
+              <button className="trip-cta trip-cta--sm"
+                      style={{ marginTop: 12, width: '100%' }}
+                      disabled={!answer.trim()} onClick={answerCaptcha}
+                      data-testid="schengen-captcha-submit">
+                Show me the dates
+              </button>
+              {capNote && (
+                <div style={{ fontSize: 12.5, color: '#b4231f', marginTop: 10 }}
+                     data-testid="schengen-captcha-note">{capNote}</div>
+              )}
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* The real dates, as a calendar. */}
+      {phase === 'dates' && month && (
+        <Card className="anim-rise-2" style={{ marginTop: 16 }}
+              data-testid="schengen-dates">
+          {!month.readable ? (
+            <div style={{ fontSize: 13.5, color: NAVY }}>
+              {month.reason || 'The calendar could not be read.'}
+            </div>
+          ) : month.none_available ? (
+            <div data-testid="schengen-none">
+              <div style={{ fontWeight: 800, fontSize: 15, color: NAVY }}>
+                No open dates at this mission right now
+              </div>
+              <div style={{ fontSize: 13, color: GRAY, marginTop: 6 }}>
+                That is the real answer from the government site. German
+                calendars are often empty — try another city, or check back.
+              </div>
+            </div>
+          ) : (
+            <>
+              <div style={{ display: 'flex', justifyContent: 'space-between',
+                            alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
+                <div style={{ fontWeight: 800, fontSize: 16, color: NAVY }}>
+                  {month.bookable_count} open {month.bookable_count === 1 ? 'date' : 'dates'}
+                </div>
+                <div style={{ fontSize: 12, color: GRAY }}>
+                  read from the official calendar just now
+                </div>
+              </div>
+              {grouped.months.map((mo) => (
+                <div key={mo.key} style={{ marginTop: 18 }}>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: NAVY,
+                                marginBottom: 10 }}>{mo.title}</div>
+                  <div style={{ display: 'grid', gap: 8,
+                                gridTemplateColumns: 'repeat(auto-fill, minmax(62px, 1fr))' }}>
+                    {mo.days.map((d) => {
+                      const on = picked && picked.href === d.href
+                      return (
+                        <button key={d.href} onClick={() => pickDay(d)}
+                          title={d.title || d.label}
+                          data-testid={`schengen-day-${d.day}`}
+                          style={{ padding: '14px 0', borderRadius: 12,
+                                   fontSize: 16, fontWeight: 800,
+                                   cursor: 'pointer', transition: 'all .15s ease',
+                                   border: on ? `2px solid ${BLUE}` : '1px solid #dbe3ec',
+                                   background: on ? BLUE : '#fff',
+                                   color: on ? '#fff' : NAVY }}>
+                          {d.day}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))}
+              {grouped.loose.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8,
+                              marginTop: 16 }}>
+                  {grouped.loose.map((d) => (
+                    <button key={d.href} onClick={() => pickDay(d)}
+                      style={{ padding: '10px 14px', borderRadius: 12,
+                               fontSize: 13.5, fontWeight: 700, cursor: 'pointer',
+                               border: '1px solid #dbe3ec', background: '#fff',
+                               color: NAVY }}>{d.label}</button>
+                  ))}
+                </div>
+              )}
+              {picked && (
+                <div className="card card--soft anim-rise" style={{ padding: 16,
+                     borderRadius: 14, marginTop: 18 }}
+                     data-testid="schengen-picked">
+                  <div style={{ fontWeight: 800, fontSize: 15, color: NAVY }}>
+                    {picked.label} — open on the official site
+                  </div>
+                  <div style={{ fontSize: 13, color: GRAY, marginTop: 6 }}>
+                    {picked.opened?.note || ('Ellis opened this date in your own '
+                      + 'session. Your name, passport and email go on the '
+                      + 'booking form there — they are yours to enter.')}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </Card>
+      )}
+
+      {/* Watch-only proof of what Ellis is doing, once anything is happening. */}
+      {caseId && phase !== 'starting' && (
+        <div style={{ marginTop: 18 }}>
+          <div style={{ fontSize: 11.5, color: GRAY, marginBottom: 6 }}>
+            Your session on service2.diplo.de — watch only
+          </div>
+          <LiveFrame view={view} height="40vh" watchOnly
+                     client={client} caseId={caseId} />
+        </div>
+      )}
 
       <div style={{ fontSize: 11.5, color: GRAY, marginTop: 20, lineHeight: 1.6 }}>
-        Germany’s RK-Termin is the Federal Foreign Office’s own booking system
-        and requires no account. Ellis reads its published calendar and never
-        solves the image check, never holds and never clicks a date.
+        Germany’s RK-Termin needs no account. Ellis reads its published
+        calendar, never solves the image check, and never chooses a date —
+        it opens the one you pick.
       </div>
     </div>
   )

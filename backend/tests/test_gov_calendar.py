@@ -64,19 +64,102 @@ def test_an_empty_month_says_so():
 
 
 def test_the_module_never_solves_a_captcha():
+    """Ellis may TRANSCRIBE the answer a human read; it may never PRODUCE one.
+
+    Checked as capability rather than as prose (the module legitimately says
+    "no OCR" in its own comments): no solving library or service is imported
+    or called, and submit_captcha structurally cannot invent an answer — its
+    text is caller-supplied, required, and has no default."""
     import inspect
     src = inspect.getsource(gc)
-    for forbidden in ("solve_captcha", "captcha_answer", "ocr", "2captcha", "anticaptcha"):
-        assert forbidden not in src.lower()
+    lowered = src.lower()
+    for forbidden in ("solve_captcha(", "2captcha", "anticaptcha", "capmonster",
+                      "deathbycaptcha", "pytesseract", "easyocr", "tesseract",
+                      "import cv2", "from pil", "image_to_string"):
+        assert forbidden not in lowered, f"captcha-solving capability: {forbidden}"
+    sig = inspect.signature(gc.submit_captcha)
+    text = sig.parameters["text"]
+    assert text.kind is inspect.Parameter.KEYWORD_ONLY
+    assert text.default is inspect.Parameter.empty, "an answer must never default"
+
+    class _D:
+        def evaluate(self, _js):
+            return True
+        def fill(self, *_a):
+            raise AssertionError("must not fill without an answer")
+        def click(self, *_a):
+            raise AssertionError("must not submit without an answer")
+    for blank in ("", "   "):
+        try:
+            gc.submit_captcha(_D(), text=blank)
+            assert False, "blank answers must be refused"
+        except gc.CalendarUnavailable:
+            pass
 
 
-def test_the_module_never_clicks_a_day():
+def test_the_module_never_chooses_a_day():
     """On e-Konsulat clicking a date places a one-hour hold on a real slot, so
-    there must be no code path that clicks one."""
+    Ellis must never CHOOSE one — not the earliest, not from preferences.
+
+    Opening the day the APPLICANT picked is a different act and is allowed
+    (open_day), but it must be driven entirely by an href they were shown."""
     import inspect
+    import io
+    import tokenize
     src = inspect.getsource(gc)
-    for forbidden in ("def book", ".click(", "click_day", "select_slot"):
-        assert forbidden not in src
+
+    def _code_only(text):
+        """Executable source with comments and docstrings stripped, so the
+        module can NAME the rules it keeps ("never the earliest") without the
+        prose reading as the capability itself."""
+        out = []
+        prev = tokenize.INDENT
+        for tok in tokenize.generate_tokens(io.StringIO(text).readline):
+            if tok.type == tokenize.COMMENT:
+                continue
+            if tok.type == tokenize.STRING and prev in (
+                    tokenize.INDENT, tokenize.DEDENT, tokenize.NEWLINE,
+                    tokenize.NL, tokenize.ENCODING):
+                prev = tok.type          # a docstring, not a value
+                continue
+            if tok.type not in (tokenize.NL, tokenize.NEWLINE):
+                prev = tok.type
+            out.append(tok.string)
+        return " ".join(out)
+
+    code = _code_only(src)
+    for forbidden in ("def book", "click_day", "select_slot", "def pick_day",
+                      "earliest"):
+        assert forbidden not in code, f"day-choosing capability: {forbidden}"
+    # Nothing may rank or pick from the DAY list. (Sorting the MISSION list
+    # alphabetically for display is fine and deliberately not caught here.)
+    for fn in (gc.read_month, gc.month_summary, gc.open_day):
+        body = _code_only(inspect.getsource(fn))
+        for forbidden in ("sort (", "sorted (", "min (", "max (", "[ 0 ]"):
+            assert forbidden not in body, (
+                f"{fn.__name__} must not rank or pick a day: {forbidden}")
+    for line in src.splitlines():
+        if ".click(" in line:
+            assert "showDay" not in line, "must never click a day link"
+    sig = inspect.signature(gc.open_day)
+    href = sig.parameters["href"]
+    assert href.kind is inspect.Parameter.KEYWORD_ONLY
+    assert href.default is inspect.Parameter.empty, "a day must never default"
+
+    class _D:
+        def __init__(self):
+            self.went = None
+        def goto(self, url):
+            self.went = url
+        def evaluate(self, _js):
+            return self.went or ""
+        def click(self, *_a):
+            raise AssertionError("open_day must navigate, never click a day")
+    real = ("https://service2.diplo.de/rktermin/extern/"
+            "appointment_showDay.do?dateStr=20.09.2026")
+    d = _D()
+    gc.open_day(d, href=real, known_hrefs=[real])
+    assert d.went == real
 
 
 def test_category_ids_are_read_live_not_pinned():
