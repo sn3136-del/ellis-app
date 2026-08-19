@@ -719,7 +719,7 @@ export default function SchengenVisa({ onBack }) {
   const working = ['starting', 'opening', 'reading', 'booking', 'form-opening'].includes(phase)
   const submitting = phase === 'submitting'
   const workLabel = {
-    starting: 'Opening your secure session and reading the mission list',
+    starting: 'Processing..',
     opening: 'Opening the official calendar',
     reading: 'Reading the open dates from the official calendar',
     booking: 'Opening your date on the official site',
