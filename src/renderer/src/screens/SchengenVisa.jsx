@@ -301,7 +301,11 @@ export default function SchengenVisa({ onBack }) {
   const [error, setError] = useState(null)
   const startedRef = useRef(false)
 
-  const view = usePortalLiveView(client, caseId)
+  // The live-view hook OPENS A SESSION of its own for whatever caseId it is
+  // given. During startup that raced the mount's createBrowserSession and the
+  // missions read landed mid-replacement (409 -> empty list, invisibly). It is
+  // only ever rendered on the captcha step, so it is only given the case then.
+  const view = usePortalLiveView(client, phase === 'captcha' ? caseId : '')
   // A Browserbase session can idle out while the applicant reads the
   // challenge. Rather than surface a reconnect card, reopen it silently — but
   // only once per lapse, so a genuinely unavailable window does not loop.
@@ -334,6 +338,9 @@ export default function SchengenVisa({ onBack }) {
   }
 
   function fail(e) {
+    // The banner is hidden on this surface by owner choice, so leave a trace
+    // in the console — otherwise a startup failure is completely invisible.
+    try { console.error('[schengen]', e?.detail || e?.message || e) } catch { /* noop */ }
     if (isWindowGone(e)) {
       setError({ message: 'That took too long and the connection dropped. '
                           + 'Pick your city again to start over.' })
