@@ -692,7 +692,7 @@ export default function SchengenVisa({ onBack }) {
         // RK-Termin's phone validator wants A NUMBER: "+86 130..." is
         // rejected. International prefix becomes 00, everything non-digit
         // goes — the number the applicant gave, in the shape the site takes.
-        if (f && /telephone|telefon|电话/i.test(f.label)) {
+        if (f && /phone|telefon|mobil|电话|手机/i.test(f.label)) {
           val = val.replace(/^\+/, '00').replace(/[^0-9]/g, '')
         }
         // Dates leave here in the site's own DD.MM.YYYY whatever separator
