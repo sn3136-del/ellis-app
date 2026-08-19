@@ -88,6 +88,14 @@ fi
 if [ -z "${GOOGLE_APPLICATION_CREDENTIALS:-}" ] && [ -f "$ROOT/backend/google_adc.json" ]; then
   export GOOGLE_APPLICATION_CREDENTIALS="$ROOT/backend/google_adc.json"
 fi
+# The env file names the credential RELATIVE to backend/ (so a clone works
+# from any folder). This launcher runs from the repo root, where that path
+# resolves to nothing — the liveness check then reported a healthy
+# credential as DEAD on every fresh clone. Absolutize before checking.
+if [ -n "${GOOGLE_APPLICATION_CREDENTIALS:-}" ] && [ ! -f "$GOOGLE_APPLICATION_CREDENTIALS" ] \
+   && [ -f "$ROOT/backend/$GOOGLE_APPLICATION_CREDENTIALS" ]; then
+  export GOOGLE_APPLICATION_CREDENTIALS="$ROOT/backend/$GOOGLE_APPLICATION_CREDENTIALS"
+fi
 # Whatever we ended up with, say whether it can actually mint a token, so a
 # dead credential is visible at launch instead of at the first upload.
 if [ -n "${GOOGLE_APPLICATION_CREDENTIALS:-}" ]; then
