@@ -766,6 +766,9 @@ function ConsularAsk({ t, client, caseId, packet, journey, onChanged }) {
   const [idx, setIdx] = useState(0)
   const [value, setValue] = useState(null)
   const [busy, setBusy] = useState(false)
+  // Questions the applicant skipped THIS sitting: an optional question they
+  // declined must not come straight back after a refetch.
+  const [skipped, setSkipped] = useState(() => new Set())
 
   const docsMissing = (packet.missing_documents || []).length > 0
 
@@ -790,7 +793,7 @@ function ConsularAsk({ t, client, caseId, packet, journey, onChanged }) {
   const list = useMemo(() => {
     if (!data) return []
     const fields = (data.fields || [])
-      .filter((f) => !f.answer || f.from_document)
+      .filter((f) => (!f.answer || f.from_document) && !skipped.has(f.key))
       .map((f) => ({ ...f, kind: 'text' }))
     const boxes = (data.questions || [])
       .filter((q) => q.answer == null || q.answer === '' ||
@@ -798,7 +801,7 @@ function ConsularAsk({ t, client, caseId, packet, journey, onChanged }) {
       .map((q) => ({ ...q, kind: 'choice', required: true }))
     return [...fields.filter((f) => f.required), ...boxes,
             ...fields.filter((f) => !f.required)]
-  }, [data])
+  }, [data, skipped])
 
   const q = list[idx]
   // Seed the input with what Ellis already knows the moment a question shows.
@@ -812,8 +815,17 @@ function ConsularAsk({ t, client, caseId, packet, journey, onChanged }) {
     setBusy(true)
     try {
       if (save) await client.updateAnswers(caseId, { [q.key]: value })
+      else setSkipped((prev) => new Set(prev).add(q.key))
       if (idx + 1 < list.length) setIdx(idx + 1)
-      else onChanged()          // the backend decides: ready, or still gaps
+      else {
+        // Last question: the loaded list is stale now — refetch, continue
+        // from the top of whatever remains, and let the backend flip the
+        // stage when it is truly done. Without the refetch this card simply
+        // stayed on screen and BOTH buttons looked dead.
+        const fresh = await client.consularFormQuestions(caseId).catch(() => null)
+        if (fresh) { setData(fresh); setIdx(0) }
+        onChanged()             // the backend decides: ready, or still gaps
+      }
     } catch (e) { toast(e.detail?.detail || e.message) }
     setBusy(false)
   }

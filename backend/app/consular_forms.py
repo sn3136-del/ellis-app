@@ -81,7 +81,7 @@ DS160_PREP = [
     ("Personal Information 1 - Marital Status", "marital_status", True),
     ("Personal Information 1 - Date of Birth", "birth_date", True),
     ("Personal Information 1 - City of Birth", "place_of_birth", True),
-    ("Personal Information 1 - Country/Region of Birth", "country_of_birth", False),
+    ("Personal Information 1 - Country/Region of Birth", "country_of_birth", True),
     ("Personal Information 2 - Country/Region of Origin (Nationality)",
      "nationality", True),
     ("Personal Information 2 - National Identification Number", "national_id", False),
@@ -101,18 +101,22 @@ DS160_PREP = [
     ("Travel - Intended Date of Arrival", "arrival_date", True),
     ("Travel - Intended Length of Stay", "days_of_stay", False),
     ("Travel - Address Where You Will Stay in the U.S.", "accommodation", True),
-    ("Work/Education - Primary Occupation", "occupation", False),
-    ("Work/Education - Present Employer or School Name", "employer", False),
-    ("Work/Education - Employer/School Address", "employer_address", False),
+    # Required flags mirror the REAL form: CEAC refuses to advance these
+    # screens unanswered, so a Skip here would only defer a hard stop.
+    # Genuinely optional stay optional (income has Does Not Apply; length of
+    # stay and departure date are conditional on specific plans).
+    ("Work/Education - Primary Occupation", "occupation", True),
+    ("Work/Education - Present Employer or School Name", "employer", True),
+    ("Work/Education - Employer/School Address", "employer_address", True),
     ("Work/Education - Monthly Income (local currency)", "monthly_income", False),
     # --- Travel section, continued: CEAC asks these on the same screens, and
     # an applicant who has them ready fills that screen in one pass.
-    ("Travel - Person/Entity Paying for Your Trip", "trip_payer", False),
-    ("Travel - Specific Travel Plans (Yes/No)", "has_specific_plans", False),
+    ("Travel - Person/Entity Paying for Your Trip", "trip_payer", True),
+    ("Travel - Specific Travel Plans (Yes/No)", "has_specific_plans", True),
     ("Travel - Intended Date of Departure from the U.S.", "departure_date", False),
-    ("Travel Companions - Are you travelling with anyone?", "travelling_with", False),
+    ("Travel Companions - Are you travelling with anyone?", "travelling_with", True),
     # --- Previous US travel: factual history the applicant supplies once.
-    ("Previous U.S. Travel - Have you ever been to the U.S.?", "been_to_us_before", False),
+    ("Previous U.S. Travel - Have you ever been to the U.S.?", "been_to_us_before", True),
     ("Previous U.S. Travel - Date of Last Arrival", "last_us_arrival_date", False),
     ("Previous U.S. Travel - Length of Last Stay", "last_us_stay_length", False),
     ("Previous U.S. Travel - Previous U.S. Visa Number", "previous_us_visa_number", False),
