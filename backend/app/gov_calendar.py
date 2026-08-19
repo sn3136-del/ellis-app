@@ -112,10 +112,21 @@ def rk_termin_walk(driver, *, location_code: str, realm_id: str = "",
     # A mission's AREAS are a real choice, not a detail to guess at. Shanghai
     # offers two — national visas (over 90 days) and consular matters without a
     # visa — and defaulting to the last one silently served passport/ID slots
-    # to someone who came for a visa. When the caller names no realm the first
-    # is used and the full list is returned so the applicant can choose.
+    # to someone who came for a visa. When the caller names no realm, prefer
+    # the area whose LABEL says visa (Visa/Visum — order across 196 missions
+    # is not a contract), fall back to the first, and always return the full
+    # list so the applicant can choose. Negated mentions do not count: the
+    # consular area often says "without a visa"/"ohne Visum", and matching
+    # that would recreate the exact bug this default exists to prevent.
+    def _visa_area(label: str) -> bool:
+        if re.search(r"\b(no|not|without|ohne|kein\w*)\s+(a\s+)?vis", label, re.I):
+            return False
+        return bool(re.search(r"visum|visa", label, re.I))
+
+    default_q = next((r["query"] for r in realms if _visa_area(r["text"])),
+                     realms[0]["query"])
     realm_q = next((r["query"] for r in realms if realm_id
-                    and f"realmId={realm_id}" in r["query"]), realms[0]["query"])
+                    and f"realmId={realm_id}" in r["query"]), default_q)
 
     driver.goto(f"{RK_BASE}choose_categoryList.do?{realm_q}")
     cats = links_matching("categoryId=")

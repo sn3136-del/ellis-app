@@ -198,3 +198,46 @@ def test_open_day_carries_the_applicants_choice_and_fails_closed():
             assert False, f"should have refused {bad}"
         except gc.CalendarUnavailable:
             pass
+
+
+def test_the_visa_area_is_preferred_by_label_not_position():
+    """Area order is not a contract across 196 missions. With no realm named,
+    the walk prefers the area whose label says visa wherever it sits, refuses
+    to be fooled by negated labels ("without a visa"), falls back to the first
+    when no area mentions visa, and an explicit choice always wins."""
+    class _W:
+        def __init__(self, realms, cats):
+            self._realms, self._cats = realms, cats
+        def goto(self, url):
+            pass
+        def evaluate(self, js, *a):
+            if "captchaText" in js:
+                return False
+            if a and a[0] == "realmId=":
+                return self._realms
+            if a and a[0] == "categoryId=":
+                return self._cats
+            return []
+
+    cats = [{"text": "Some queue", "query": "categoryId=7&realmId=4"}]
+
+    # The consular area lists FIRST and its label mentions "visa" negated —
+    # exactly the Shanghai trap. The walk must still land on the visa area.
+    realms = [
+        {"text": "Consular matters, without a visa", "query": "realmId=9&locationCode=shan"},
+        {"text": "Visa Application (over 90 days)", "query": "realmId=4&locationCode=shan"},
+    ]
+    out = gc.rk_termin_walk(_W(realms, cats), location_code="shan")
+    assert out["realm_id"] == "4"
+
+    # No area mentions visa at all: fall back to the first, never invent.
+    plain = [
+        {"text": "Passport matters", "query": "realmId=1&locationCode=x"},
+        {"text": "Certifications", "query": "realmId=2&locationCode=x"},
+    ]
+    out = gc.rk_termin_walk(_W(plain, cats), location_code="x")
+    assert out["realm_id"] == "1"
+
+    # The applicant's explicit choice beats the label default.
+    out = gc.rk_termin_walk(_W(realms, cats), location_code="shan", realm_id="9")
+    assert out["realm_id"] == "9"
