@@ -321,6 +321,7 @@ export default function SchengenVisa({ onBack }) {
   const [passport, setPassport] = useState(null)     // OCR result, once accepted
   const [passportBusy, setPassportBusy] = useState(false)
   const [passportMsg, setPassportMsg] = useState('')
+  const [confirmNote, setConfirmNote] = useState('')
   // Where the flow resumes after a solved challenge: gates can stand
   // before the month, before a day's times, or before a time's form.
   const afterCaptchaRef = useRef('month')
@@ -617,14 +618,25 @@ export default function SchengenVisa({ onBack }) {
   // attests correctness themselves before anything is submitted.
   function openFormQuestions(out) {
     setForm(out)
-    const pre = {}
+    // Existing answers survive a re-read (labels can be re-read after a fix,
+    // a gate, or a retry) — the applicant's work is never wiped. The passport
+    // reading and the visible self-employment default re-apply on top only
+    // where nothing is set yet.
+    const pre = { ...formAnswers }
     for (const f of out.fields || []) {
-      if (f.kind !== 'select') continue
-      const se = (f.options || []).find((o) => /self-employ|selbstständig|selbständig/i.test(o))
-      if (se) pre[f.name] = se
+      if (f.applicant_only) continue
+      if (passport) {
+        const key = passportKeyFor(f.label)
+        if (key && passport[key] && !pre[f.name]) pre[f.name] = passport[key]
+      }
+      if (f.kind === 'select' && !pre[f.name]) {
+        const se = (f.options || []).find((o) => /self-employ|selbstständig|selbständig/i.test(o))
+        if (se) pre[f.name] = se
+      }
     }
     setFormAnswers(pre)
     setConfirms({})
+    setConfirmNote('')
     setPhase('form')
   }
 
@@ -703,7 +715,13 @@ export default function SchengenVisa({ onBack }) {
         90000, 'register the appointment')
       setBooked(out)
       setPhase('booked')
-    } catch (e) { fail(e); setPhase('confirm') }
+    } catch (e) {
+      // The register step must never fail silently: the general error banner
+      // is hidden on this surface, so the card itself says what stopped it.
+      setConfirmNote(String(e?.detail?.detail || e?.message
+                     || 'That did not go through — try again.'))
+      fail(e); setPhase('confirm')
+    }
   }
 
   const shown = useMemo(
@@ -1274,6 +1292,12 @@ export default function SchengenVisa({ onBack }) {
               On your instruction Ellis ticks exactly the statements you
               confirmed, enters your picture answer, and presses Submit.
             </div>
+            {confirmNote && (
+              <div style={{ fontSize: 13, color: NAVY, fontWeight: 700,
+                            marginTop: 8 }} data-testid="schengen-confirm-note">
+                {confirmNote}
+              </div>
+            )}
           </div>
         </Card>
       )}
