@@ -10,7 +10,6 @@
 # (removed 2026-08-19) '!backend/.env' un-ignored the plaintext
 # provider keys and kept pushing them to a PUBLIC repo. The keys
 # travel only in backend/secrets.enc; the plaintext stays local.
-!backend/google_adc.json
 # Never commit credentials in ANY form — not even encrypted (2026-07-28).
 .env.enc
 *.env.enc
@@ -84,3 +83,6 @@ backend/ellis.db-journal
 # plaintext provider secrets live only locally — the repo carries backend/secrets.enc
 backend/.env
 backend/google_adc.json
+
+# (removed 2026-08-19) '!backend/google_adc.json' un-ignored the
+# plaintext Google credential — same leak class as the .env negation.
