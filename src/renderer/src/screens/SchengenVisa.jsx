@@ -750,6 +750,18 @@ export default function SchengenVisa({ onBack }) {
         90000, 'register the appointment')
       if (!out.looks_successful) {
         const errs = out.errors || []
+        // The site's stale-token page: the form session died and the old
+        // form is GONE — the only recovery is opening it afresh. Answers
+        // survive (openFormQuestions merges), so this reopens the same slot
+        // or queue and brings the applicant straight back to the questions.
+        if (out.session_expired) {
+          setConfirmNote('')
+          setFormNote('The official site\'s session expired before the '
+            + 'submission landed — Ellis reopened the form. Your answers are '
+            + 'kept; review, fill, and register again.')
+          if (pickedTime) { await scheduleTime() } else { await startBookForm() }
+          return
+        }
         // A wrong PICTURE answer is its own case: the site issues a fresh
         // picture on every re-render, so the fix is a new reading here —
         // not a trip back to the questions.

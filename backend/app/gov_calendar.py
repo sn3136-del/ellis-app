@@ -881,7 +881,15 @@ def submit_book_form(driver, *, applicant_instructed: bool) -> dict:
         pass
     after = after or {}
     errors = list(after.get("errors") or [])
-    succeeded = (not after.get("form_still", True)) and not errors
+    # RK-Termin's stale-token page ("An error occurred while processing your
+    # appointment... browser open for a very long time") means the form
+    # session died between opening and submitting. Nothing was booked; the
+    # only recovery is opening the form afresh.
+    expired = bool(re.search(
+        r"error occurred while processing your appointment|ref-id",
+        text, re.I))
+    succeeded = (not expired and not after.get("form_still", True)
+                 and not errors)
     # The applicant keeps a picture of the official confirmation, exactly as
     # their own window shows it — the page text can be forwarded, but the
     # page itself is the thing they saw.
@@ -893,4 +901,4 @@ def submit_book_form(driver, *, applicant_instructed: bool) -> dict:
             shot = ""
     return {"submitted": True, "url": landed, "page_text": text,
             "errors": errors, "looks_successful": succeeded,
-            "screenshot": shot}
+            "session_expired": expired, "screenshot": shot}
