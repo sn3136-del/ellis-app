@@ -85,3 +85,33 @@ def test_category_ids_are_read_live_not_pinned():
     import inspect
     src = inspect.getsource(gc.rk_termin_walk)
     assert "choose_categoryList" in src and "links_matching" in src
+
+
+def test_open_day_carries_the_applicants_choice_and_fails_closed():
+    """open_day carries out the day the APPLICANT picked from a grid Ellis
+    read — it never chooses one, and it refuses anything but a real day link
+    from this system, on-host, and present in the grid actually shown."""
+    from app import gov_calendar as gc
+
+    class Drv:
+        def goto(self, url):
+            self.url = url
+        def evaluate(self, _):
+            return getattr(self, "url", "")
+
+    real = ("https://service2.diplo.de/rktermin/extern/"
+            "appointment_showDay.do?dateStr=20.09.2026&locationCode=peki")
+    out = gc.open_day(Drv(), href=real, known_hrefs=[real])
+    assert out["opened"] is True and "showDay" in out["url"]
+
+    # Off-host, not-a-day-link, and not-in-the-shown-grid all fail closed.
+    other = ("https://service2.diplo.de/rktermin/extern/"
+             "appointment_showDay.do?dateStr=01.01.2027")
+    for bad in ("https://evil.example/appointment_showDay.do?x=1",
+                "https://service2.diplo.de/rktermin/extern/appointment_showMonth.do",
+                real):  # real link, but grid only showed `other`
+        try:
+            gc.open_day(Drv(), href=bad, known_hrefs=[other])
+            assert False, f"should have refused {bad}"
+        except gc.CalendarUnavailable:
+            pass

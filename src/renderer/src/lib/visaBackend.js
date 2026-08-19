@@ -246,6 +246,12 @@ export function createVisaClient(session) {
            (categoryId ? `&category_id=${encodeURIComponent(categoryId)}` : ''), session, {}),
     // Read the month AFTER the applicant completed the portal's image check.
     calendarMonth: (id) => call('GET', `/cases/${id}/calendar/month`, session),
+    // The applicant's OWN pick, carried to the government site. `knownHrefs`
+    // is the grid Ellis displayed, so a stale link cannot open a day they
+    // never saw. Ellis never chooses the day and never submits the form.
+    calendarPick: (id, href, knownHrefs = []) =>
+      call('POST', `/cases/${id}/calendar/pick`, session,
+           { href, known_hrefs: knownHrefs }),
     // The folder itself, as one download. Kept out of `call` because the body
     // is a zip, not JSON — same auth headers, raw blob back.
     // The whole application as ONE PDF: cover, the filled official form, then

@@ -1829,6 +1829,40 @@ def case_calendar_open(application_id: str, location_code: str = "",
     return out
 
 
+class CalendarPickIn(BaseModel):
+    href: str
+    known_hrefs: list[str] = []
+
+
+@app.post("/cases/{application_id}/calendar/pick")
+def case_calendar_pick(application_id: str, body: CalendarPickIn,
+                       db=Depends(get_session),
+                       p: Principal = Depends(get_principal)):
+    """Open the day the APPLICANT picked, in the applicant's own window.
+
+    Ellis reads the month and shows it; the applicant chooses a day in Ellis;
+    this carries that choice to the government site. Ellis never picks the day
+    itself, and it never fills or submits the booking form behind it — the
+    name, passport and email on that form are the applicant's, and so is the
+    confirmation email. `known_hrefs` is the grid Ellis actually displayed, so
+    a stale or edited link cannot steer someone to a day they never saw."""
+    app_row = _owned(db, p, application_id)
+    from . import gov_calendar as gc
+    sess = _attach_applicant_window(db, application_id, list(gc.DAY_LINK_HOSTS))
+    try:
+        out = gc.open_day(_WindowDriver(sess._ensure_page()),
+                          href=body.href, known_hrefs=body.known_hrefs)
+    except gc.CalendarUnavailable as e:
+        raise HTTPException(409, detail={"reason": "day_not_openable",
+                                         "detail": str(e)})
+    finally:
+        sess.close()
+    audit.record(db, org_id=app_row.org_id, application_id=application_id,
+                 action="calendar_day_opened",
+                 detail={"url": str(out.get("url"))[:200]}, actor=p.user_id)
+    return out
+
+
 @app.get("/cases/{application_id}/calendar/month")
 def case_calendar_month(application_id: str, db=Depends(get_session),
                         p: Principal = Depends(get_principal)):
