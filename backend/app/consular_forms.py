@@ -591,6 +591,76 @@ def load_checkbox_map(form_key: str) -> dict:
 # entry here is what Ellis ASKS, plus the kind of box to ask it in and a line
 # of help where the form's meaning is not obvious from its label.
 FIELD_QUESTIONS = {
+    # Every key a form spec can report as required-and-missing MUST have an
+    # entry here (or a checkbox map): a required question nothing asks leaves
+    # the case permanently un-ready — the applicant's screen said "preparing"
+    # forever while the packet waited for answers no surface collected
+    # (USA DS-160, 2026-08-19). Pinned by test_every_required_field_is_askable.
+    "marital_status": {
+        "label": "Your marital status",
+        "type": "text",
+        "help": "As the form lists it: Married, Single (never married), "
+                "Widowed, Divorced, or Legally Separated."},
+    "employer_address": {
+        "label": "Your employer's or school's address",
+        "type": "textarea",
+        "help": "Street, city and country — as you would write it on a letter."},
+    "trip_payer": {
+        "label": "Who is paying for your trip?",
+        "type": "text",
+        "help": "Self, a family member, your employer, or another person or "
+                "company — name them as the form asks."},
+    "has_specific_plans": {
+        "label": "Do you already have specific travel plans?",
+        "type": "text",
+        "help": "Yes or No. Yes means you can give exact dates and places."},
+    "travelling_with": {
+        "label": "Are you travelling with anyone?",
+        "type": "text",
+        "help": "Yes or No. If yes, the form will ask who."},
+    "been_to_us_before": {
+        "label": "Have you ever been to the United States?",
+        "type": "text",
+        "help": "Yes or No."},
+    "flight_number": {
+        "label": "Your arrival flight number",
+        "type": "text",
+        "help": "As on your ticket, for example CA123."},
+    "stay_length_days": {
+        "label": "How many days will you stay?",
+        "type": "text"},
+    "accommodation_phone": {
+        "label": "Phone number of where you are staying",
+        "type": "tel",
+        "help": "The hotel's or host's number, with country code."},
+    "deported_before": {
+        "label": "Have you ever been deported from, or refused entry to, this country?",
+        "type": "text",
+        "help": "Yes or No."},
+    "criminal_record": {
+        "label": "Have you ever been convicted of a crime, in any country?",
+        "type": "text",
+        "help": "Yes or No."},
+    "restricted_items": {
+        "label": "Are you carrying controlled drugs, guns, or swords?",
+        "type": "text",
+        "help": "Yes or No."},
+    "customs_over_allowance": {
+        "label": "Are you carrying goods over the duty-free allowance?",
+        "type": "text",
+        "help": "Yes or No."},
+    "commercial_goods": {
+        "label": "Are you carrying commercial goods or samples?",
+        "type": "text",
+        "help": "Yes or No."},
+    "cash_over_1m_jpy": {
+        "label": "Are you carrying cash or securities over 1,000,000 yen?",
+        "type": "text",
+        "help": "Yes or No."},
+    "unaccompanied_baggage": {
+        "label": "Did you send baggage separately (unaccompanied)?",
+        "type": "text",
+        "help": "Yes or No."},
     "surname_at_birth": {
         "label": "Surname at birth, if different from now",
         "type": "text",

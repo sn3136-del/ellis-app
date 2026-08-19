@@ -355,3 +355,31 @@ def test_japan_gets_the_visit_japan_web_sheet_and_it_says_no_visa():
     assert sections == {"Trip Registration", "Disembarkation Card",
                         "Customs Declaration"}
     assert cf.official_template_available("japan_vjw_prep") is False
+
+
+def test_every_required_field_is_askable():
+    """The guaranteed-source contract: any key a form spec can report as
+    required-and-missing must be collectable somewhere — a FIELD_QUESTIONS
+    entry, a checkbox map, or a passport/answers-derived key. A required
+    question nothing asks leaves the case permanently un-ready (the USA
+    DS-160 'preparing forever' screen, 2026-08-19)."""
+    from app import consular_forms as cf
+    derived = set(cf._PASSPORT_TO_ANSWER.values()) | {
+        # keys the case journey itself always collects before this stage
+        "surname", "given_names", "full_name", "birth_date", "sex",
+        "nationality", "email", "address_line1", "address_city",
+        "address_region", "address_country", "travel_purpose",
+        "arrival_date", "departure_date", "days_of_stay", "monthly_income",
+        # collected before any form stage: intake asks the document type,
+        # and a case cannot exist without its destination
+        "travel_document_type", "destination_country",
+    }
+    problems = []
+    for form_key, spec in cf.FORMS.items():
+        boxes = set(cf.load_checkbox_map(form_key))
+        for label, key, required in spec["fields"]:
+            if not required or key in boxes or key in derived:
+                continue
+            if key not in cf.FIELD_QUESTIONS:
+                problems.append(f"{form_key}: required '{key}' ({label}) is unaskable")
+    assert not problems, "\n".join(problems)
