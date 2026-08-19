@@ -390,6 +390,13 @@ _PASSPORT_TO_ANSWER = {
     "passport_number": "passport_number",
     "issuing_country": "issuing_country",
     "expiry_date": "passport_expiry_date",
+    # The biodata page also shows these in the visual zone; the reader
+    # extracts them with an MRZ cross-check where possible. When the reading
+    # is confident they fill the answer — the applicant is never asked to
+    # retype what their passport already says (the birth-city question on the
+    # DS-160 wizard, 2026-08-19). A low-confidence reading stays a question.
+    "place_of_birth": "place_of_birth",
+    "issue_date": "passport_issue_date",
 }
 
 
