@@ -1,7 +1,9 @@
 .env
 *.env
 # Trip.com demo exception (owner's decision, 2026-08-04): see root .gitignore.
-!.env
+# (removed 2026-08-19) this negation un-ignored the plaintext keys
+# and kept pushing them to a PUBLIC repo — they travel only in
+# backend/secrets.enc now.
 .venv/
 __pycache__/
 *.db

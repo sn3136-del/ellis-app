@@ -7,7 +7,9 @@
 # run with zero key entry. Rotate every credential and restore the blanket
 # ignore when the demo ends. The blanket rules below still cover everything
 # else.
-!backend/.env
+# (removed 2026-08-19) '!backend/.env' un-ignored the plaintext
+# provider keys and kept pushing them to a PUBLIC repo. The keys
+# travel only in backend/secrets.enc; the plaintext stays local.
 !backend/google_adc.json
 # Never commit credentials in ANY form — not even encrypted (2026-07-28).
 .env.enc
