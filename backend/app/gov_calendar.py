@@ -109,8 +109,13 @@ def rk_termin_walk(driver, *, location_code: str, realm_id: str = "",
     if not realms:
         raise CalendarUnavailable(
             f"no appointment areas listed for location {location_code!r}")
+    # A mission's AREAS are a real choice, not a detail to guess at. Shanghai
+    # offers two — national visas (over 90 days) and consular matters without a
+    # visa — and defaulting to the last one silently served passport/ID slots
+    # to someone who came for a visa. When the caller names no realm the first
+    # is used and the full list is returned so the applicant can choose.
     realm_q = next((r["query"] for r in realms if realm_id
-                    and f"realmId={realm_id}" in r["query"]), realms[-1]["query"])
+                    and f"realmId={realm_id}" in r["query"]), realms[0]["query"])
 
     driver.goto(f"{RK_BASE}choose_categoryList.do?{realm_q}")
     cats = links_matching("categoryId=")
@@ -121,6 +126,10 @@ def rk_termin_walk(driver, *, location_code: str, realm_id: str = "",
 
     driver.goto(f"{RK_BASE}appointment_showMonth.do?{cat_q}")
     return {"system": "rk_termin", "query": cat_q,
+            "realm_id": _param(realm_q, "realmId"),
+            "realms": [{"id": _param(r["query"], "realmId"),
+                        "label": r["text"]} for r in realms],
+            "category_id": _param(cat_q, "categoryId"),
             "categories": [{"id": _param(c["query"], "categoryId"),
                             "label": c["text"]} for c in cats],
             "captcha_required": captcha_present(driver)}

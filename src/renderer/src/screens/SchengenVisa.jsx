@@ -300,6 +300,10 @@ export default function SchengenVisa({ onBack }) {
   const [search, setSearch] = useState('')
   const [listOpen, setListOpen] = useState(false)
   const [loc, setLoc] = useState('')
+  const [realms, setRealms] = useState([])
+  const [realmId, setRealmId] = useState('')
+  const [cats, setCats] = useState([])
+  const [catId, setCatId] = useState('')
   const [captcha, setCaptcha] = useState('')
   const [answer, setAnswer] = useState('')
   const [capNote, setCapNote] = useState('')
@@ -404,14 +408,24 @@ export default function SchengenVisa({ onBack }) {
 
   // Choosing a city runs the whole rest of the chain without another click:
   // open the calendar, and if the site challenges, fetch the image at once.
-  async function choose(m) {
-    setLoc(m.code); setSearch(m.name || ''); setListOpen(false)
+  // Choosing a city opens that mission's own lists. RK-Termin missions differ:
+  // Shanghai offers national visas (over 90 days) and consular matters, and
+  // nothing for short-stay tourism — so what is bookable is READ, never
+  // assumed, and the applicant picks the area and queue themselves.
+  async function choose(m, opts = {}) {
+    if (!opts.keep) { setLoc(m.code); setSearch(m.name || ''); setListOpen(false) }
     setPhase('opening'); setError(null)
-    setMonth(null); setPicked(null); setCaptcha(''); setAnswer(''); setCapNote('')
+    setMonth(null); setPicked(null); setTimes(null)
+    setCaptcha(''); setAnswer(''); setCapNote('')
     try {
       const out = await withTimeout(
-        withWindow(() => client.calendarOpen(caseId, m.code)), 60000,
-        'open the calendar')
+        withWindow(() => client.calendarOpen(caseId, m.code, opts.categoryId || '',
+                                             opts.realmId || '')),
+        60000, 'open the calendar')
+      setRealms(out.realms || [])
+      setRealmId(out.realm_id || '')
+      setCats(out.categories || [])
+      setCatId(out.category_id || '')
       if (out.captcha_required) {
         setPhase('captcha')
         const img = await client.calendarCaptcha(caseId).catch(() => ({}))
@@ -423,6 +437,16 @@ export default function SchengenVisa({ onBack }) {
         setPhase('dates')
       }
     } catch (e) { fail(e); setPhase('picking') }
+  }
+
+  // Re-walk the same mission under a different area or queue.
+  function chooseRealm(id) {
+    const m = missions.find((x) => x.code === loc)
+    if (m) choose(m, { keep: true, realmId: id })
+  }
+  function chooseCategory(id) {
+    const m = missions.find((x) => x.code === loc)
+    if (m) choose(m, { keep: true, realmId, categoryId: id })
   }
 
   // The applicant read the image and typed it here. Ellis transcribes their
@@ -589,6 +613,62 @@ export default function SchengenVisa({ onBack }) {
               </div>
             )}
           </div>
+        </Card>
+      )}
+
+      {/* What this mission actually books. RK-Termin missions differ, and
+          neither of Shanghai's areas is short-stay tourism — so the real lists
+          are shown rather than a category being assumed. */}
+      {loc && (realms.length > 1 || cats.length > 1) && phase !== 'opening' && (
+        <Card className="anim-rise-1" style={{ marginTop: 14 }}
+              data-testid="schengen-queues">
+          {realms.length > 1 && (
+            <>
+              <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 0.6,
+                            color: GRAY, textTransform: 'uppercase' }}>
+                What you are applying for
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap',
+                            marginTop: 10 }}>
+                {realms.map((r) => (
+                  <button key={r.id} onClick={() => chooseRealm(r.id)}
+                    data-testid={`schengen-realm-${r.id}`}
+                    style={{ padding: '9px 14px', borderRadius: 12, fontSize: 13,
+                             fontWeight: 700, cursor: 'pointer', textAlign: 'left',
+                             maxWidth: 340,
+                             border: r.id === realmId ? `2px solid ${BLUE}` : '1px solid #dbe3ec',
+                             background: r.id === realmId ? '#f5f9ff' : '#fff',
+                             color: NAVY }}>
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+          {cats.length > 1 && (
+            <>
+              <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 0.6,
+                            color: GRAY, textTransform: 'uppercase',
+                            marginTop: realms.length > 1 ? 18 : 0 }}>
+                Appointment type
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap',
+                            marginTop: 10 }}>
+                {cats.map((c) => (
+                  <button key={c.id} onClick={() => chooseCategory(c.id)}
+                    data-testid={`schengen-cat-${c.id}`}
+                    style={{ padding: '9px 14px', borderRadius: 12, fontSize: 13,
+                             fontWeight: 600, cursor: 'pointer', textAlign: 'left',
+                             maxWidth: 340,
+                             border: c.id === catId ? `2px solid ${BLUE}` : '1px solid #dbe3ec',
+                             background: c.id === catId ? '#f5f9ff' : '#fff',
+                             color: NAVY }}>
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </Card>
       )}
 

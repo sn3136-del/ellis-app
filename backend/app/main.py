@@ -1810,7 +1810,8 @@ def case_calendar_missions(application_id: str, db=Depends(get_session),
 
 @app.post("/cases/{application_id}/calendar/open")
 def case_calendar_open(application_id: str, location_code: str = "",
-                       category_id: str = "", db=Depends(get_session),
+                       realm_id: str = "", category_id: str = "",
+                       db=Depends(get_session),
                        p: Principal = Depends(get_principal)):
     """Walk the applicant's secure window to a government appointment calendar.
 
@@ -1827,7 +1828,7 @@ def case_calendar_open(application_id: str, location_code: str = "",
     try:
         drv = _WindowDriver(sess._ensure_page())
         out = gc.rk_termin_walk(drv, location_code=location_code,
-                                category_id=category_id)
+                                realm_id=realm_id, category_id=category_id)
     except gc.CalendarUnavailable as e:
         raise HTTPException(409, detail={"reason": "calendar_unavailable",
                                          "detail": str(e)})

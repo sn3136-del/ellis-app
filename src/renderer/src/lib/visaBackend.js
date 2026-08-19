@@ -241,8 +241,12 @@ export function createVisaClient(session) {
     // Every mission the system serves, by NAME — an applicant knows 'Beijing',
     // not that their consulate's code is 'peki'.
     calendarMissions: (id) => call('GET', `/cases/${id}/calendar/missions`, session),
-    calendarOpen: (id, locationCode, categoryId = '') =>
+    // realmId is the mission's AREA (national visas vs consular matters) and
+    // categoryId the specific queue inside it. Both are real applicant choices
+    // — RK-Termin's own lists — so neither is guessed.
+    calendarOpen: (id, locationCode, categoryId = '', realmId = '') =>
       call('POST', `/cases/${id}/calendar/open?location_code=${encodeURIComponent(locationCode)}` +
+           (realmId ? `&realm_id=${encodeURIComponent(realmId)}` : '') +
            (categoryId ? `&category_id=${encodeURIComponent(categoryId)}` : ''), session, {}),
     // Read the month AFTER the applicant completed the portal's image check.
     calendarMonth: (id) => call('GET', `/cases/${id}/calendar/month`, session),
