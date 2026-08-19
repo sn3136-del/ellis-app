@@ -298,3 +298,54 @@ def test_the_form_is_reached_only_by_the_sites_own_query():
 def test_confirmations_need_statements_to_relay():
     with pytest.raises(gc.CalendarUnavailable):
         gc.relay_confirmations(object(), labels=[])
+
+
+def test_the_queue_default_finds_self_employment_not_the_first_seat():
+    """Shanghai lists specialty cooks first; the lane is offered for
+    self-employed applicants, so the default queue is the one whose label
+    covers self-employment (German or English), wherever it sits. No match
+    falls back to the first, and an explicit choice still wins."""
+    class _W:
+        def __init__(self, realms, cats):
+            self._realms, self._cats = realms, cats
+        def goto(self, url):
+            pass
+        def evaluate(self, js, *a):
+            if "captchaText" in js:
+                return False
+            if a and a[0] == "realmId=":
+                return self._realms
+            if a and a[0] == "categoryId=":
+                return self._cats
+            return []
+
+    realms = [{"text": "Wartelisten Visum (über 90 Tage)",
+               "query": "realmId=1315&locationCode=shan"}]
+    cats = [
+        {"text": "Nationale Visa für Spezialitätenköche und -köchinnen",
+         "query": "categoryId=3180&realmId=1315&locationCode=shan"},
+        {"text": "Warteliste für sonstige Erwerbstätigkeit (u.a. Selbständige "
+                 "Tätigkeiten, Praktikum, Au-pair)",
+         "query": "categoryId=3181&realmId=1315&locationCode=shan"},
+        {"text": "Warteliste für die Wiedereinreise",
+         "query": "categoryId=3175&realmId=1315&locationCode=shan"},
+    ]
+    out = gc.rk_termin_walk(_W(realms, cats), location_code="shan")
+    assert out["category_id"] == "3181"
+
+    # English session labels match too.
+    cats_en = [
+        {"text": "National Visa for specialty cooks", "query": "categoryId=1&realmId=9"},
+        {"text": "Waiting list for other employment (among others: "
+                 "self-employment, internship, au pair)", "query": "categoryId=2&realmId=9"},
+    ]
+    out = gc.rk_termin_walk(_W(realms, cats_en), location_code="shan")
+    assert out["category_id"] == "2"
+
+    # No self-employment queue at this mission: first, never invented.
+    out = gc.rk_termin_walk(_W(realms, cats[:1]), location_code="shan")
+    assert out["category_id"] == "3180"
+
+    # The applicant's explicit pick still beats the default.
+    out = gc.rk_termin_walk(_W(realms, cats), location_code="shan", category_id="3175")
+    assert out["category_id"] == "3175"

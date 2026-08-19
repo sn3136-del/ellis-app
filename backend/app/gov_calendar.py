@@ -80,26 +80,37 @@ def rk_termin_walk(driver, *, location_code: str, realm_id: str = "",
     trusting stored ids.
     """
     def links_matching(pattern: str) -> list[dict]:
-        # The link's own text is the button word ("Continue"), and RK-Termin
-        # gives each category no container of its own — the name the applicant
-        # needs ("Appointment waiting list A for students with APS procedure")
-        # simply PRECEDES the link in document order. So walk backwards from
-        # the link and take the nearest real text that is not another button.
+        # Each entry on these pages is a bold-14pt heading div, then a long
+        # description (paragraphs, external links), then the entry's own
+        # Continue link. The entry's NAME is that heading — the nearest text
+        # above the link is usually the description's LAST sentence ("To
+        # proceed, please click on Continue below"), which mislabelled every
+        # queue. So the label is the last heading before the link in document
+        # order; the nearest-text walk stays only as a fallback for pages
+        # without such headings.
         return driver.evaluate(
             "(p) => {"
+            "  const norm = s => String(s||'').replace(/\\s+/g,' ').trim();"
+            "  const heads = [...document.querySelectorAll("
+            "    'div[style*=\"14pt\"], h4, legend')].filter(h => norm(h.textContent));"
             "  const CHROME = /^(continue|return|back|weiter|zur.ck)$/i;"
             "  const all = [...document.body.querySelectorAll('*')];"
             "  return [...document.querySelectorAll('a')]"
             "    .filter(a => new RegExp(p).test(a.href))"
             "    .map(a => {"
             "      let label = '';"
+            "      for (const h of heads) {"
+            "        if (h.compareDocumentPosition(a) & Node.DOCUMENT_POSITION_FOLLOWING)"
+            "          label = norm(h.textContent);"
+            "        else break;"
+            "      }"
             "      for (let i = all.indexOf(a) - 1; i >= 0 && !label; i--) {"
             "        const el = all[i];"
             "        if (el.querySelector && el.querySelector('a')) continue;"
-            "        const t = (el.textContent||'').replace(/\\s+/g,' ').trim();"
+            "        const t = norm(el.textContent);"
             "        if (t && t.length > 3 && t.length < 200 && !CHROME.test(t)) label = t;"
             "      }"
-            "      return {text: label.slice(0,90) || (a.innerText||'').trim(),"
+            "      return {text: label.slice(0,160) || (a.innerText||'').trim(),"
             "              query: (a.href.split('?')[1]||'')};"
             "    });"
             "}", pattern) or []
@@ -132,8 +143,18 @@ def rk_termin_walk(driver, *, location_code: str, realm_id: str = "",
     cats = links_matching("categoryId=")
     if not cats:
         raise CalendarUnavailable("no appointment categories listed for this area")
+    # The QUEUE default mirrors the area default: this lane is offered for
+    # self-employed applicants (the owner's product scoping, told to
+    # Trip.com), so when the caller names no category the queue whose label
+    # covers self-employment is preferred — Shanghai lists specialty cooks
+    # first, and position is not a contract. No match falls back to the
+    # first, and the applicant's explicit choice always wins.
+    default_cat_q = next((c["query"] for c in cats
+                          if re.search(r"selbstst|selbst.ndig|self.?employ",
+                                       c["text"], re.I)),
+                         cats[0]["query"])
     cat_q = next((c["query"] for c in cats if category_id
-                  and f"categoryId={category_id}" in c["query"]), cats[0]["query"])
+                  and f"categoryId={category_id}" in c["query"]), default_cat_q)
 
     driver.goto(f"{RK_BASE}appointment_showMonth.do?{cat_q}")
     return {"system": "rk_termin", "query": cat_q,
