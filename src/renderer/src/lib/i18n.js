@@ -862,6 +862,9 @@ export const STRINGS = {
     'appt.booking.status.cancelled': 'Withdrawn',
     // Book your appointment (BookAppointment.jsx) — the themed booking desk.
     // Same pipeline as appt.booking.*; this is the applicant-facing journey.
+    'booka.gate.title': 'First, submit your DS-160',
+    'booka.gate.sub': 'You can schedule your interview once your DS-160 is signed and submitted on the official site — the scheduler needs its confirmation number.',
+    'booka.gate.cta': 'I’ve submitted my DS-160 — schedule my appointment',
     'booka.title': 'Book your appointment',
     'booka.sub': 'Pick your date here. Ellis books it on the official site for you.',
     'booka.destination': 'Destination',
@@ -1995,6 +1998,9 @@ export const STRINGS = {
     'appt.booking.status.failed': '未能预约',
     'appt.booking.status.cancelled': '已撤回',
     // 预约面谈（BookAppointment.jsx）
+    'booka.gate.title': '先提交你的 DS-160',
+    'booka.gate.sub': 'DS-160 在官方网站签署并提交后即可预约面谈——预约系统需要它的确认编号。',
+    'booka.gate.cta': '我已提交 DS-160 — 预约面谈',
     'booka.title': '预约面谈',
     'booka.sub': '在这里选日期，Ellis 到官方网站为你预约。',
     'booka.destination': '目的地',
@@ -3118,6 +3124,9 @@ export const STRINGS = {
     'appt.booking.status.failed': '未能預約',
     'appt.booking.status.cancelled': '已撤回',
     // 預約面談（BookAppointment.jsx）
+    'booka.gate.title': '先提交你的 DS-160',
+    'booka.gate.sub': 'DS-160 在官方網站簽署並提交後即可預約面談——預約系統需要它的確認編號。',
+    'booka.gate.cta': '我已提交 DS-160 — 預約面談',
     'booka.title': '預約面談',
     'booka.sub': '在這裡選日期，Ellis 到官方網站為你預約。',
     'booka.destination': '目的地',

@@ -1061,6 +1061,11 @@ function ConsularNext({ t, client, caseId, packet, destination = '',
   const toast = useToast()
   const [busy, setBusy] = useState(false)
   const [showDisclaimer, setShowDisclaimer] = useState(false)
+  // The appointment cannot be scheduled until the DS-160 is submitted: the
+  // official scheduler asks for the DS-160 confirmation number. So the booking
+  // surface stays hidden until the applicant confirms they have signed and
+  // submitted their DS-160 on CEAC.
+  const [ds160Submitted, setDs160Submitted] = useState(false)
   const post = packet.post || {}
   const steps = packet.next_steps || []
   // Destinations with an agent-channel booking route (US B1/B2, Schengen)
@@ -1128,7 +1133,26 @@ function ConsularNext({ t, client, caseId, packet, destination = '',
         </div>
       )}
 
-      {bookable && (
+      {/* Appointment scheduling unlocks only after the DS-160 is submitted —
+          the scheduler requires its confirmation number. Before that, one
+          honest step: confirm the form is signed and submitted on CEAC. */}
+      {bookable && !ds160Submitted && (
+        <div className="card card--soft" style={{ padding: '16px 20px',
+             margin: '6px 0 18px', textAlign: 'left' }}
+             data-testid="ds160-submit-gate">
+          <div style={{ fontWeight: 700, marginBottom: 4 }}>
+            {t('booka.gate.title')}
+          </div>
+          <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>
+            {t('booka.gate.sub')}
+          </div>
+          <button className="btn" data-testid="ds160-submit-confirm"
+            onClick={() => setDs160Submitted(true)}>
+            {t('booka.gate.cta')}
+          </button>
+        </div>
+      )}
+      {bookable && ds160Submitted && (
         <div style={{ textAlign: 'left', margin: '6px 0 18px' }}>
           <BookAppointment client={client} caseId={caseId}
             destination={destination} applicantName={applicantName} />

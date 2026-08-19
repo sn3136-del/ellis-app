@@ -588,6 +588,24 @@ def derive_document_checklist(guidance: dict, *, answers: dict | None = None) ->
     items: list[dict] = []
     seen: set[str] = set()
 
+    # The DS-160 is a TRANSCRIPTION form: the only documents it consumes are the
+    # passport (biodata -> identity fields) and the applicant's photograph.
+    # Bank statements, hotel bookings, itineraries and insurance are
+    # interview-DAY evidence the applicant brings to the consulate in person —
+    # they are NOT inputs to the form. So the US consular route requests
+    # exactly passport + photo and nothing else. Every other consular route
+    # (e.g. Schengen, which files those at submission) keeps the full list.
+    ds160_only = False
+    try:
+        from ..consular_forms import form_for_destination
+        from .registry import normalize_country
+        _dest_iso3 = normalize_country(
+            (answers.get("destination_country") or ""),
+            field="destination_country")
+        ds160_only = form_for_destination(_dest_iso3) == "ds160_prep"
+    except Exception:  # noqa: BLE001 - unknown destination keeps the full list
+        ds160_only = False
+
     def add(item_id, label, *, kind="document", required=True, satisfied_by=None,
             note=""):
         if item_id in seen:
@@ -605,7 +623,7 @@ def derive_document_checklist(guidance: dict, *, answers: dict | None = None) ->
         add("passport_validity", f"Passport validity: {g['passport_validity']}",
             kind="check", satisfied_by=[])
 
-    for label in (g.get("required_documents") or []):
+    for label in ([] if ds160_only else (g.get("required_documents") or [])):
         if is_health_label(label):
             continue  # handled via structured health_requirements only
         if is_payment_label(label):
@@ -630,23 +648,30 @@ def derive_document_checklist(guidance: dict, *, answers: dict | None = None) ->
 
     # Structured evidence fields imply their document even when the free list
     # omitted them.
-    if g.get("photo_requirements"):
-        add("photo", f"Passport photograph — {g['photo_requirements']}",
+    if ds160_only:
+        # The DS-160 requires a photograph; it needs no other document.
+        add("photo", f"Passport photograph — {g['photo_requirements']}"
+            if g.get("photo_requirements")
+            else "Passport photograph (US visa photo standard)",
             satisfied_by=["photo"])
-    if g.get("onward_travel_evidence"):
-        add("flight_itinerary", f"Onward/return travel — {g['onward_travel_evidence']}",
-            satisfied_by=["flight_itinerary"])
-    if g.get("accommodation_evidence"):
-        add("hotel_booking", f"Accommodation — {g['accommodation_evidence']}",
-            satisfied_by=["hotel_booking"])
-    if g.get("financial_evidence"):
-        add("bank_statement", f"Financial evidence — {g['financial_evidence']}",
-            satisfied_by=["bank_statement"])
-    if g.get("insurance_required"):
-        add("travel_insurance", "Travel insurance", satisfied_by=["travel_insurance"])
+    else:
+        if g.get("photo_requirements"):
+            add("photo", f"Passport photograph — {g['photo_requirements']}",
+                satisfied_by=["photo"])
+        if g.get("onward_travel_evidence"):
+            add("flight_itinerary", f"Onward/return travel — {g['onward_travel_evidence']}",
+                satisfied_by=["flight_itinerary"])
+        if g.get("accommodation_evidence"):
+            add("hotel_booking", f"Accommodation — {g['accommodation_evidence']}",
+                satisfied_by=["hotel_booking"])
+        if g.get("financial_evidence"):
+            add("bank_statement", f"Financial evidence — {g['financial_evidence']}",
+                satisfied_by=["bank_statement"])
+        if g.get("insurance_required"):
+            add("travel_insurance", "Travel insurance", satisfied_by=["travel_insurance"])
 
     # Health/vaccination evidence: structured, trigger-evaluated, honest.
-    for req in g.get("health_requirements") or []:
+    for req in ([] if ds160_only else (g.get("health_requirements") or [])):
         state = health_requirement_state(req, answers)
         if state != "required":
             continue  # not_applicable -> omitted; question -> asked separately
@@ -656,14 +681,14 @@ def derive_document_checklist(guidance: dict, *, answers: dict | None = None) ->
             satisfied_by=["vaccination_certificate", "document"], note=note)
 
     # Arrival card / electronic entry form (visa-exempt routes included).
-    card = g.get("arrival_card") or {}
+    card = {} if ds160_only else (g.get("arrival_card") or {})
     if isinstance(card, dict) and card.get("required"):
         label = str(card.get("name") or "Arrival card")
         window = str(card.get("submission_window") or "")
         add("arrival_card", label + (f" — {window}" if window else ""),
             kind="form", satisfied_by=["destination_form"])
 
-    for form in (g.get("forms") or []):
+    for form in ([] if ds160_only else (g.get("forms") or [])):
         add(f"form:{_slug(form)}", form, kind="form", satisfied_by=["destination_form"],
             required=disp != "VISA_EXEMPT")
     return items

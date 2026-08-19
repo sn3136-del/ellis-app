@@ -847,3 +847,31 @@ def test_a_profileless_upload_still_goes_through_normal_review(client):
     body = client.post(f"/intake/{iid}/continue", headers=H).json()
     passport_item = next(i for i in body["checklist"] if i["id"] == "passport")
     assert passport_item["status"] != "submitted"
+
+
+def test_ds160_checklist_requests_only_passport_and_photo():
+    """The DS-160 is a transcription form: its only document inputs are the
+    passport (identity fields) and the applicant's photograph. Bank
+    statements, hotel bookings, itineraries and insurance are interview-day
+    evidence, NOT form inputs, so the US consular checklist must not request
+    them — while other consular routes (Schengen) still do."""
+    from app.visa_snapshot import intake_flow
+    guidance = {
+        "disposition": "VISA_REQUIRED",
+        "required_documents": ["Bank statements (6 months)", "Hotel booking",
+                               "Flight itinerary", "Employment letter"],
+        "financial_evidence": "6 months of bank statements",
+        "accommodation_evidence": "hotel confirmation",
+        "onward_travel_evidence": "return flight",
+        "insurance_required": True,
+        "photo_requirements": "5x5cm, white background",
+    }
+    us = [i["id"] for i in intake_flow.derive_document_checklist(
+        guidance, answers={"destination_country": "USA"})]
+    assert set(us) == {"passport", "photo"}, us
+    # The same guidance on a Schengen route keeps the full evidence list.
+    sch = [i["id"] for i in intake_flow.derive_document_checklist(
+        guidance, answers={"destination_country": "DEU"})]
+    for needed in ("passport", "photo", "bank_statement", "hotel_booking",
+                   "flight_itinerary", "travel_insurance"):
+        assert needed in sch, (needed, sch)
