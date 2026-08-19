@@ -917,6 +917,16 @@ function ConsularAsk({ t, client, caseId, packet, journey, onChanged }) {
             )
           })}
         </div>
+      ) : (q.options || []).length > 0 ? (
+        /* The official form asks this as a DROPDOWN, so Ellis does too — the
+           recorded option list from the government form itself, nothing
+           invented, nothing typed that the form cannot accept. */
+        <select className="select" value={value || ''} autoFocus
+          style={{ marginBottom: 14 }}
+          onChange={(e) => setValue(e.target.value)}>
+          <option value="" disabled>{t('formq.choose')}</option>
+          {q.options.map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
       ) : q.type === 'textarea' ? (
         <textarea className="input" rows={3} value={value || ''} autoFocus
           style={{ marginBottom: 14 }}

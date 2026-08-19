@@ -152,3 +152,45 @@ def summary() -> dict:
             "fingerprints at the post are the final personal attestation",
         ],
     }
+
+
+# The official form's OWN dropdowns, surfaced to the asking UI. Keyed by the
+# Ellis answer key; each entry names the bank page and a fragment of the
+# question as CEAC words it. Serving the portal's recorded options keeps the
+# widget honest both ways: a dropdown on ceac.state.gov is a dropdown in
+# Ellis (the applicant can only choose what the form offers), and free text
+# stays free text.
+_ANSWER_KEY_OPTIONS = {
+    "marital_status": ("personal1", "Marital Status"),
+    "trip_payer": ("travel", "Person/Entity Paying"),
+    "has_specific_plans": ("travel", "specific travel plans"),
+    "travelling_with": ("travel_companions", "traveling with you"),
+    "been_to_us_before": ("previous_us_travel", "ever been in the U.S."),
+    "occupation": ("work_education_present", "Primary Occupation"),
+}
+
+
+def options_for_answer_key(key: str) -> list[str]:
+    """The recorded option LABELS for this answer key, or [] when the field
+    is free text on the official form."""
+    ref = _ANSWER_KEY_OPTIONS.get(key)
+    if ref is None:
+        return []
+    page_key, fragment = ref
+    try:
+        bank = _bank()
+    except Exception:  # noqa: BLE001 — no bank, no options; never invented
+        return []
+    for page in bank.get("pages", []):
+        if page.get("page") != page_key:
+            continue
+        for q in page.get("questions", []):
+            if fragment.lower() not in (q.get("question") or "").lower():
+                continue
+            out = []
+            for o in q.get("options") or []:
+                label = o if isinstance(o, str) else (o.get("label") or "")
+                if label:
+                    out.append(label)
+            return out
+    return []

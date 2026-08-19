@@ -1602,6 +1602,16 @@ def case_form_questions(application_id: str, db=Depends(get_session),
             # what it found; it may not answer in somebody else's name.
             f["answer"] = hit["value"]
             f["from_document"] = hit.get("document") or hit.get("doc_type") or ""
+    # The official form's own dropdowns become dropdowns here: CEAC's
+    # recorded option lists ride on the matching questions, so the applicant
+    # picks from exactly what the government form offers — and free-text
+    # fields stay free text.
+    if form_key == "ds160_prep":
+        from . import ds160_api
+        for f in fields:
+            opts = ds160_api.options_for_answer_key(f["key"])
+            if opts:
+                f["options"] = opts
     return {"form_key": form_key, "title": cf.FORMS[form_key]["title"],
             "questions": qs, "fields": fields,
             "unanswered": [q["key"] for q in qs if q.get("answer") in (None, "", [])],
