@@ -273,6 +273,11 @@ export function createVisaClient(session) {
     // the applicant's answers, relay the confirmations they ticked verbatim
     // in Ellis, enter the picture answer they typed, and press Submit only as
     // their explicit final instruction.
+    // The booking form behind the TIME the applicant picked — the href must
+    // be one of the Book links Ellis read off the day page and showed.
+    calendarOpenTime: (id, href, knownHrefs = []) =>
+      call('POST', `/cases/${id}/calendar/time`, session,
+           { href, known_hrefs: knownHrefs }),
     calendarBookForm: (id, query) =>
       call('POST', `/cases/${id}/calendar/book-form`, session, { query }),
     calendarBookFormFill: (id, answers) =>

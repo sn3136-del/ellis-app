@@ -230,6 +230,15 @@ def test_the_visa_area_is_preferred_by_label_not_position():
     out = gc.rk_termin_walk(_W(realms, cats), location_code="shan")
     assert out["realm_id"] == "4"
 
+    # Peking in ENGLISH: "(except for visa)" — a filler word rides between
+    # the negation and the visa word.
+    peki_en = [
+        {"text": "Consular matters (except for visa)", "query": "realmId=1224&locationCode=peki"},
+        {"text": "Visa", "query": "realmId=12&locationCode=peki"},
+    ]
+    out = gc.rk_termin_walk(_W(peki_en, cats), location_code="peki")
+    assert out["realm_id"] == "12"
+
     # Peking's real trap: the consular area says "(außer Visa)" — except
     # visas — and lists FIRST. An excluding word is a negation too.
     peking = [
@@ -302,6 +311,32 @@ def test_the_form_is_reached_only_by_the_sites_own_query():
                 "https://evil.example/?locationCode=shan&categoryId=1"):
         with pytest.raises(gc.CalendarUnavailable):
             gc.open_book_form(_D(), query=bad)
+
+
+def test_a_time_is_opened_only_from_the_list_ellis_showed():
+    """open_time carries the applicant's slot choice — a real Book link, on a
+    known host, from the exact list Ellis displayed. Everything else refuses
+    before navigating."""
+    class _D:
+        def __init__(self): self.went = None
+        def goto(self, url): self.went = url
+        def evaluate(self, js, *a): return ""
+    real = ("https://service2.diplo.de/rktermin/extern/appointment_showForm.do"
+            "?locationCode=peki&realmId=12&categoryId=2686&dateStr=24.08.2026"
+            "&openingPeriodId=67531")
+    for bad_href, known in (
+            ("", [real]),
+            ("https://evil.example/appointment_showForm.do?x=1", [real]),
+            ("https://service2.diplo.de/rktermin/extern/appointment_showMonth.do?x=1", [real]),
+            (real, []),                       # nothing was shown
+            (real, [real + "&other=1"])):     # not the shown link
+        d = _D()
+        with pytest.raises(gc.CalendarUnavailable):
+            gc.open_time(d, href=bad_href, known_hrefs=known)
+        assert d.went is None, "a refused time must not navigate"
+    d = _D()
+    out = gc.open_time(d, href=real, known_hrefs=[real])
+    assert d.went == real and out["opened"] is True
 
 
 def test_confirmations_need_statements_to_relay():

@@ -135,7 +135,11 @@ def rk_termin_walk(driver, *, location_code: str, realm_id: str = "",
         # excluding word directly before the visa word disqualifies the
         # mention; it does not disqualify the area if it also names visas
         # positively elsewhere in the label.
-        neg = r"\b(no|not|without|ohne|kein\w*|au\u00dfer|ausser|except\w*|excluding)\s+(a\s+)?(visum|visa)"
+        # Up to two filler words ride between the negation and the visa
+        # word: "except FOR visa" (Peking, English), "without A visa"
+        # (Shanghai), "au\u00dfer Visa" (Peking, German).
+        neg = (r"\b(no|not|without|ohne|kein\w*|au\u00dfer|ausser|except\w*|excluding)"
+               r"\s+(\w+\s+){0,2}(visum|visa)\w*")
         stripped = re.sub(neg, " ", label, flags=re.I)
         return bool(re.search(r"visum|visa|\u7b7e\u8bc1", stripped, re.I))
 
@@ -508,6 +512,39 @@ def open_day(driver, *, href: str, known_hrefs: list[str] | None = None) -> dict
 _FORM_QUERY_RE = re.compile(r"^[A-Za-z0-9=&_.\-]+$")
 
 
+_TIME_HREF_RE = re.compile(r"appointment_showForm\.do", re.IGNORECASE)
+
+
+def open_time(driver, *, href: str, known_hrefs: list[str]) -> dict:
+    """Open the booking form behind the TIME the applicant picked.
+
+    Same contract as open_day: this carries out a choice the applicant made
+    from a list Ellis read off the day page — it never makes one. The href
+    must be a real "Book this appointment" link, on a known host, and one of
+    the exact links Ellis showed; anything else is refused.
+    """
+    url = str(href or "").strip()
+    if not url or not _TIME_HREF_RE.search(url):
+        raise CalendarUnavailable("that is not a booking link from this day")
+    host = ""
+    m = re.match(r"https?://([^/]+)/", url)
+    if m:
+        host = m.group(1).lower()
+    if not any(host == h or host.endswith("." + h) for h in DAY_LINK_HOSTS):
+        raise CalendarUnavailable(f"refusing to open a booking link on {host!r}")
+    if not known_hrefs or url not in set(known_hrefs):
+        raise CalendarUnavailable(
+            "that time is not one of the ones Ellis showed — read the day "
+            "again and pick from the current list")
+    driver.goto(url)
+    landed = ""
+    try:
+        landed = driver.evaluate("() => location.href") or ""
+    except Exception:  # noqa: BLE001
+        pass
+    return {"opened": True, "url": landed or url}
+
+
 def open_book_form(driver, *, query: str) -> dict:
     """Open the new-appointment form for the category the APPLICANT chose.
 
@@ -540,7 +577,7 @@ def read_book_form(driver) -> dict:
             "() => {"
             "  const form = document.querySelector('form');"
             "  if (!form || !form.querySelector("
-            "      'input[name=\"captchaText\"], input[name^=\"fields\"]')) return null;"
+            "      'input[name^=\"fields\"], input[name=\"lastname\"]')) return null;"
             "  const all = [...document.body.querySelectorAll('*')];"
             "  const labelFor = (el) => {"
             "    let label = '';"

@@ -1971,13 +1971,50 @@ def case_calendar_book_form(application_id: str, body: CalendarFormOpenIn,
     from . import gov_calendar as gc
     sess = _attach_applicant_window(db, application_id, list(gc.DAY_LINK_HOSTS))
     try:
-        return gc.open_book_form(_WindowDriver(sess._ensure_page()),
-                                 query=body.query)
+        drv = _WindowDriver(sess._ensure_page())
+        if str(body.query or "").strip():
+            return gc.open_book_form(drv, query=body.query)
+        # No query: read the form on the page the applicant's window is
+        # already on (after a solved gate, re-navigating would re-summon it).
+        return gc.read_book_form(drv)
     except gc.CalendarUnavailable as e:
         raise HTTPException(409, detail={"reason": "form_unavailable",
                                          "detail": str(e)})
     finally:
         sess.close()
+
+
+@app.post("/cases/{application_id}/calendar/time")
+def case_calendar_time(application_id: str, body: CalendarPickIn,
+                       db=Depends(get_session),
+                       p: Principal = Depends(get_principal)):
+    """Open the booking form behind the TIME the applicant picked, and read
+    its questions. The href must be one of the Book links Ellis read off the
+    day page and showed; RK-Termin may re-challenge on the way in, which is
+    reported as a gate rather than an empty form."""
+    app_row = _owned(db, p, application_id)
+    from . import gov_calendar as gc
+    sess = _attach_applicant_window(db, application_id, list(gc.DAY_LINK_HOSTS))
+    try:
+        drv = _WindowDriver(sess._ensure_page())
+        opened = gc.open_time(drv, href=body.href, known_hrefs=body.known_hrefs)
+        try:
+            out = gc.read_book_form(drv)
+        except gc.CalendarUnavailable:
+            if gc.captcha_present(drv):
+                out = {"fields": [], "captcha_required": True, "gated": True,
+                       "url": opened.get("url", "")}
+            else:
+                raise
+    except gc.CalendarUnavailable as e:
+        raise HTTPException(409, detail={"reason": "time_not_openable",
+                                         "detail": str(e)})
+    finally:
+        sess.close()
+    audit.record(db, org_id=app_row.org_id, application_id=application_id,
+                 action="calendar_time_opened",
+                 detail={"url": str(out.get("url"))[:200]}, actor=p.user_id)
+    return out
 
 
 @app.post("/cases/{application_id}/calendar/book-form/fill")

@@ -317,6 +317,10 @@ export default function SchengenVisa({ onBack }) {
   const [formCaptcha, setFormCaptcha] = useState('')
   const [formCapAnswer, setFormCapAnswer] = useState('')
   const [booked, setBooked] = useState(null)   // the submit outcome
+  const [pickedTime, setPickedTime] = useState(null) // the applicant's slot
+  // Where the flow resumes after a solved challenge: gates can stand
+  // before the month, before a day's times, or before a time's form.
+  const afterCaptchaRef = useRef('month')
   const [error, setError] = useState(null)
   const startedRef = useRef(false)
 
@@ -425,6 +429,7 @@ export default function SchengenVisa({ onBack }) {
     setPhase('opening'); setError(null)
     setMonth(null); setPicked(null); setTimes(null)
     setForm(null); setFormAnswers({}); setConfirms({})
+    setPickedTime(null); afterCaptchaRef.current = 'month'
     setFormCaptcha(''); setFormCapAnswer(''); setBooked(null)
     setCaptcha(''); setAnswer(''); setCapNote('')
     try {
@@ -481,11 +486,19 @@ export default function SchengenVisa({ onBack }) {
         setPhase('captcha')
         return
       }
-      // A challenge can stand before the month OR before a picked day. When
-      // a day was already picked, the solve landed on that day's own page —
-      // read its times in place (an empty href reads where the window is;
-      // re-navigating would only summon the gate again).
-      if (picked) {
+      // A challenge can stand before the month, before a day's times, or
+      // before a time's booking form. The solve lands on the gated page —
+      // read it in place (re-navigating would only summon the gate again).
+      const dest = afterCaptchaRef.current
+      afterCaptchaRef.current = 'month'
+      if (dest === 'form') {
+        const f = await withTimeout(
+          withWindow(() => client.calendarBookForm(caseId, '')),
+          60000, 'read the booking form')
+        openFormQuestions(f)
+        return
+      }
+      if (dest === 'times' && picked) {
         const out = await withTimeout(
           withWindow(() => client.calendarTimes(caseId, '', [])),
           60000, 'read the times')
@@ -512,10 +525,12 @@ export default function SchengenVisa({ onBack }) {
         withWindow(() => client.calendarTimes(caseId, d.href, known)),
         60000, 'read the times')
       setPicked({ ...d, opened: out })
+      setPickedTime(null)
       // RK-Termin sometimes re-challenges on the way INTO a day. That is a
       // gate, not an empty day — ask for the picture again, and after the
       // applicant answers, the times are read from the page they land on.
       if (out.captcha_required) {
+        afterCaptchaRef.current = 'times'
         const img = await client.calendarCaptcha(caseId).catch(() => ({}))
         setCaptcha(img.image || '')
         setAnswer(''); setCapNote('')
@@ -537,21 +552,48 @@ export default function SchengenVisa({ onBack }) {
       const out = await withTimeout(
         withWindow(() => client.calendarBookForm(caseId, walkQuery)),
         60000, 'open the booking form')
-      setForm(out)
-      // Standardized default, visible and changeable: this lane is offered
-      // for self-employed applicants, so the purpose select STARTS on the
-      // site's own self-employment option when it carries one. All options
-      // stay shown; the applicant can change it and attests correctness
-      // themselves before anything is submitted.
-      const pre = {}
-      for (const f of out.fields || []) {
-        if (f.kind !== 'select') continue
-        const se = (f.options || []).find((o) => /self-employment|selbstständig/i.test(o))
-        if (se) pre[f.name] = se
+      openFormQuestions(out)
+    } catch (e) { fail(e); setPhase('dates') }
+  }
+
+  // Show the form's questions in Ellis. Standardized default, visible and
+  // changeable: this lane is offered for self-employed applicants, so the
+  // purpose select STARTS on the site's own self-employment option when it
+  // carries one. All options stay shown; the applicant can change it and
+  // attests correctness themselves before anything is submitted.
+  function openFormQuestions(out) {
+    setForm(out)
+    const pre = {}
+    for (const f of out.fields || []) {
+      if (f.kind !== 'select') continue
+      const se = (f.options || []).find((o) => /self-employ|selbstständig|selbständig/i.test(o))
+      if (se) pre[f.name] = se
+    }
+    setFormAnswers(pre)
+    setConfirms({})
+    setPhase('form')
+  }
+
+  // The applicant picked a TIME — carry that choice to its own Book link and
+  // read the form behind it. A re-challenge on the way in is a gate: ask for
+  // the picture, then read the form from the page they land on.
+  async function scheduleTime() {
+    if (!pickedTime) return
+    setPhase('form-opening'); setError(null)
+    try {
+      const known = (times || []).map((t) => t.value)
+      const out = await withTimeout(
+        withWindow(() => client.calendarOpenTime(caseId, pickedTime.value, known)),
+        60000, 'open the booking form')
+      if (out.captcha_required && !(out.fields || []).length) {
+        afterCaptchaRef.current = 'form'
+        const img = await client.calendarCaptcha(caseId).catch(() => ({}))
+        setCaptcha(img.image || '')
+        setAnswer(''); setCapNote('')
+        setPhase('captcha')
+        return
       }
-      setFormAnswers(pre)
-      setConfirms({})
-      setPhase('form')
+      openFormQuestions(out)
     } catch (e) { fail(e); setPhase('dates') }
   }
 
@@ -938,14 +980,38 @@ export default function SchengenVisa({ onBack }) {
                       </div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                         {times.map((t) => (
-                          <span key={t.time} className="chip"
+                          <button key={t.time}
                                 data-testid={`schengen-time-${t.time}`}
+                                onClick={() => setPickedTime(t)}
                                 style={{ fontSize: 14, fontWeight: 700,
-                                         padding: '8px 14px' }}>
+                                         padding: '8px 14px', borderRadius: 999,
+                                         cursor: 'pointer',
+                                         border: pickedTime?.time === t.time
+                                           ? `2px solid ${BLUE}`
+                                           : '1px solid var(--line, #e2e8f0)',
+                                         background: pickedTime?.time === t.time
+                                           ? BLUE : 'var(--card-bg, #fff)',
+                                         color: pickedTime?.time === t.time
+                                           ? '#fff' : NAVY }}>
                             {t.time}
-                          </span>
+                          </button>
                         ))}
                       </div>
+                      {pickedTime && (
+                        <div style={{ marginTop: 14, textAlign: 'center' }}>
+                          <button className="btn btn--primary"
+                                  data-testid="schengen-schedule"
+                                  onClick={scheduleTime}
+                                  style={{ fontSize: 15, fontWeight: 800,
+                                           padding: '12px 26px' }}>
+                            Schedule {pickedTime.time}
+                          </button>
+                          <div style={{ fontSize: 12.5, color: GRAY, marginTop: 8 }}>
+                            Ellis opens this time's own booking form and asks
+                            you its questions here.
+                          </div>
+                        </div>
+                      )}
                     </>
                   )}
                 </div>
