@@ -286,7 +286,10 @@ export default function SchengenVisa({ onBack }) {
   const client = clientRef.current
 
   // One flow, driven by phase — never a list of steps to click through.
-  //   starting -> picking -> opening -> captcha -> reading -> dates -> booking
+  //   starting -> picking -> opening -> captcha -> submitting -> reading
+  //   -> dates -> booking
+  // 'submitting' deliberately keeps the live window on screen: the applicant
+  // watches Ellis type their answer into the official field.
   const [phase, setPhase] = useState('starting')
   const [caseId, setCaseId] = useState('')
   const [missions, setMissions] = useState([])
@@ -305,13 +308,15 @@ export default function SchengenVisa({ onBack }) {
   // given. During startup that raced the mount's createBrowserSession and the
   // missions read landed mid-replacement (409 -> empty list, invisibly). It is
   // only ever rendered on the captcha step, so it is only given the case then.
-  const view = usePortalLiveView(client, phase === 'captcha' ? caseId : '')
+  const view = usePortalLiveView(
+    client, (phase === 'captcha' || phase === 'submitting') ? caseId : '')
   // A Browserbase session can idle out while the applicant reads the
   // challenge. Rather than surface a reconnect card, reopen it silently — but
   // only once per lapse, so a genuinely unavailable window does not loop.
   const reconnectRef = useRef(false)
   useEffect(() => {
-    if (phase === 'captcha' && (view.state === 'closed' || view.state === 'unavailable')) {
+    if ((phase === 'captcha' || phase === 'submitting')
+        && (view.state === 'closed' || view.state === 'unavailable')) {
       if (!reconnectRef.current) { reconnectRef.current = true; view.reconnect() }
     } else if (view.state === 'embedded') {
       reconnectRef.current = false
@@ -325,6 +330,19 @@ export default function SchengenVisa({ onBack }) {
   function isWindowGone(e) {
     const r = String(e?.detail?.reason || '')
     return r === 'no_secure_window' || r === 'session_ended'
+  }
+
+  // Every live call goes through the applicant's cloud browser: Ellis attaches
+  // over CDP, drives a real government page, detaches. That is usually seconds
+  // but can wedge, and an unbounded await leaves the surface on a spinner
+  // forever ("stuck at reading the open dates"). Nothing here waits without a
+  // bound; a timeout is reported as itself, not as a hang.
+  function withTimeout(promise, ms, what) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(
+        () => reject(Object.assign(new Error(what), { timedOut: true })), ms))
+    ])
   }
 
   async function withWindow(fn) {
@@ -341,6 +359,10 @@ export default function SchengenVisa({ onBack }) {
     // The banner is hidden on this surface by owner choice, so leave a trace
     // in the console — otherwise a startup failure is completely invisible.
     try { console.error('[schengen]', e?.detail || e?.message || e) } catch { /* noop */ }
+    if (e && e.timedOut) {
+      setCapNote('That took too long on the official site. Try again.')
+      return
+    }
     if (isWindowGone(e)) {
       setError({ message: 'That took too long and the connection dropped. '
                           + 'Pick your city again to start over.' })
@@ -382,14 +404,17 @@ export default function SchengenVisa({ onBack }) {
     setPhase('opening'); setError(null)
     setMonth(null); setPicked(null); setCaptcha(''); setAnswer(''); setCapNote('')
     try {
-      const out = await withWindow(() => client.calendarOpen(caseId, m.code))
+      const out = await withTimeout(
+        withWindow(() => client.calendarOpen(caseId, m.code)), 60000,
+        'open the calendar')
       if (out.captcha_required) {
         setPhase('captcha')
         const img = await client.calendarCaptcha(caseId).catch(() => ({}))
         setCaptcha(img.image || '')
       } else {
         setPhase('reading')
-        setMonth(await withWindow(() => client.calendarMonth(caseId)))
+        setMonth(await withTimeout(
+          withWindow(() => client.calendarMonth(caseId)), 60000, 'read the calendar'))
         setPhase('dates')
       }
     } catch (e) { fail(e); setPhase('picking') }
@@ -400,9 +425,14 @@ export default function SchengenVisa({ onBack }) {
   // goes straight on to the month.
   async function answerCaptcha() {
     if (!answer.trim()) return
-    setPhase('reading'); setError(null); setCapNote('')
+    // NOT 'reading': that swaps in a full-screen loader and unmounts the live
+    // window. The applicant asked to WATCH Ellis enter the answer, so the
+    // window stays and only the card's own controls change.
+    setPhase('submitting'); setError(null); setCapNote('')
     try {
-      const out = await withWindow(() => client.calendarCaptchaSubmit(caseId, answer.trim()))
+      const out = await withTimeout(
+        withWindow(() => client.calendarCaptchaSubmit(caseId, answer.trim())),
+        60000, 'enter the answer')
       if (out.still_challenged) {
         setCapNote(out.note || 'That did not match — here is a fresh picture.')
         setAnswer('')
@@ -411,7 +441,9 @@ export default function SchengenVisa({ onBack }) {
         setPhase('captcha')
         return
       }
-      setMonth(await withWindow(() => client.calendarMonth(caseId)))
+      const grid = await withTimeout(
+        withWindow(() => client.calendarMonth(caseId)), 60000, 'read the calendar')
+      setMonth(grid)
       setPhase('dates')
     } catch (e) { fail(e); setPhase('captcha') }
   }
@@ -438,6 +470,7 @@ export default function SchengenVisa({ onBack }) {
   const grouped = useMemo(() => monthsOf(month?.days || []), [month])
 
   const working = ['starting', 'opening', 'reading', 'booking'].includes(phase)
+  const submitting = phase === 'submitting'
   const workLabel = {
     starting: 'Opening your secure session and reading the mission list',
     opening: 'Opening the official calendar',
@@ -549,7 +582,7 @@ export default function SchengenVisa({ onBack }) {
       )}
 
       {/* The challenge: shown BIG in Ellis, answered in Ellis. */}
-      {phase === 'captcha' && (
+      {(phase === 'captcha' || submitting) && (
         <Card className="anim-rise-1" style={{ marginTop: 16, textAlign: 'center' }}
               data-testid="schengen-captcha">
           <div style={{ fontWeight: 800, fontSize: 15, color: NAVY }}>
@@ -574,6 +607,7 @@ export default function SchengenVisa({ onBack }) {
             )}
             <div style={{ width: '100%', maxWidth: 560 }}>
               <input className="input" value={answer} autoFocus
+                     readOnly={submitting}
                      style={{ width: '100%', fontSize: 26, letterSpacing: 6,
                               fontWeight: 800, textAlign: 'center',
                               padding: '14px 12px' }}
@@ -583,10 +617,17 @@ export default function SchengenVisa({ onBack }) {
               <button className="trip-cta trip-cta--sm"
                       style={{ marginTop: 14, display: 'block',
                                marginLeft: 'auto', marginRight: 'auto' }}
-                      disabled={!answer.trim()} onClick={answerCaptcha}
+                      disabled={!answer.trim() || submitting} onClick={answerCaptcha}
                       data-testid="schengen-captcha-submit">
-                Complete Captcha
+                {submitting ? 'Entering it below…' : 'Complete Captcha'}
               </button>
+              {submitting && (
+                <div style={{ fontSize: 12.5, color: GRAY, marginTop: 10 }}
+                     data-testid="schengen-submitting-note">
+                  Watch the window below — Ellis is typing your answer into the
+                  official field and opening the calendar.
+                </div>
+              )}
               {capNote && (
                 <div style={{ fontSize: 12.5, color: '#b4231f', marginTop: 10 }}
                      data-testid="schengen-captcha-note">{capNote}</div>
@@ -690,7 +731,7 @@ export default function SchengenVisa({ onBack }) {
           embedded; a timed-out Browserbase session must never leave a
           dead-end 'reconnect' card on this surface. When it lapses, Ellis
           quietly opens a fresh one in the background (reconnectRef). */}
-      {caseId && phase === 'captcha' && view.state === 'embedded' && (
+      {caseId && (phase === 'captcha' || submitting) && view.state === 'embedded' && (
         <div style={{ marginTop: 18 }}>
           <LiveFrame view={view} height="40vh" watchOnly
                      client={client} caseId={caseId} />
