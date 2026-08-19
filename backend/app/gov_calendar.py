@@ -338,6 +338,48 @@ DAY_LINK_HOSTS = ("service2.diplo.de", "secure.e-konsulat.gov.pl",
 _DAY_HREF_RE = re.compile(r"appointment_showDay\.do", re.IGNORECASE)
 
 
+def read_day_times(driver, *, href: str, known_hrefs: list[str] | None = None) -> dict:
+    """The TIMES offered on one open day, read without booking anything.
+
+    The month grid says WHICH DAYS are open; the times live on the day's own
+    page. This opens the day the applicant picked (same three guards as
+    open_day) and reads the slot labels it offers. Reading reserves nothing —
+    on these systems it is the CONFIRM at the end of the booking form that
+    takes a slot, not looking at the list.
+    """
+    opened = open_day(driver, href=href, known_hrefs=known_hrefs)
+    times = []
+    try:
+        times = driver.evaluate(
+            "() => {"
+            "  const seen = new Set(); const out = [];"
+            "  const push = (label, value) => {"
+            "    const t = String(label || '').replace(/\\s+/g, ' ').trim();"
+            "    const m = t.match(/([0-9]{1,2}[:.][0-9]{2})/);"
+            "    if (!m) return;"
+            "    const time = m[1].replace('.', ':');"
+            "    if (seen.has(time)) return;"
+            "    seen.add(time);"
+            "    out.push({time, label: t.slice(0, 60), value: String(value || '')});"
+            "  };"
+            "  document.querySelectorAll('input[type=radio]').forEach(r => {"
+            "    const lab = (r.id && document.querySelector('label[for=\"' + r.id + '\"]'))"
+            "             || r.closest('label');"
+            "    push(lab ? lab.textContent : (r.value || ''), r.value);"
+            "  });"
+            "  document.querySelectorAll('a').forEach(a => {"
+            "    if (/appointment_/.test(a.href || '')) push(a.textContent, a.href);"
+            "  });"
+            "  document.querySelectorAll('option').forEach(o => push(o.textContent, o.value));"
+            "  return out;"
+            "}") or []
+    except Exception:  # noqa: BLE001 — an unreadable day is an honest empty
+        times = []
+    return {"url": opened.get("url", ""), "times": times,
+            "count": len(times),
+            "none_available": not times}
+
+
 def open_day(driver, *, href: str, known_hrefs: list[str] | None = None) -> dict:
     """Open the day the APPLICANT picked, in their own window.
 

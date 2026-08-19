@@ -305,6 +305,7 @@ export default function SchengenVisa({ onBack }) {
   const [capNote, setCapNote] = useState('')
   const [month, setMonth] = useState(null)
   const [picked, setPicked] = useState(null)
+  const [times, setTimes] = useState(null)   // the picked day's slots
   const [error, setError] = useState(null)
   const startedRef = useRef(false)
 
@@ -453,12 +454,18 @@ export default function SchengenVisa({ onBack }) {
   }
 
   // The applicant's own pick, carried to the official site.
+  // The applicant's own pick, carried to the official site — and Ellis reads
+  // back the TIMES that day offers so they see them here rather than hunting
+  // for them in the window. Reading reserves nothing.
   async function pickDay(d) {
-    setPhase('booking'); setError(null)
+    setPhase('booking'); setError(null); setTimes(null)
     try {
       const known = (month?.days || []).map((x) => x.href)
-      const out = await withWindow(() => client.calendarPick(caseId, d.href, known))
+      const out = await withTimeout(
+        withWindow(() => client.calendarTimes(caseId, d.href, known)),
+        60000, 'read the times')
       setPicked({ ...d, opened: out })
+      setTimes(out.times || [])
     } catch (e) { fail(e) }
     setPhase('dates')
   }
@@ -715,16 +722,39 @@ export default function SchengenVisa({ onBack }) {
               )}
               {picked && (
                 <div className="card card--soft anim-rise" style={{ padding: 16,
-                     borderRadius: 14, marginTop: 18 }}
+                     borderRadius: 14, marginTop: 18, textAlign: 'left' }}
                      data-testid="schengen-picked">
                   <div style={{ fontWeight: 800, fontSize: 15, color: NAVY }}>
-                    {picked.label} — open on the official site
+                    {picked.label}
                   </div>
-                  <div style={{ fontSize: 13, color: GRAY, marginTop: 6 }}>
-                    {picked.opened?.note || ('Ellis opened this date in your own '
-                      + 'session. Your name, passport and email go on the '
-                      + 'booking form there — they are yours to enter.')}
-                  </div>
+                  {times === null ? (
+                    <div style={{ fontSize: 13, color: GRAY, marginTop: 6 }}>
+                      Reading the times for this day…
+                    </div>
+                  ) : times.length === 0 ? (
+                    <div style={{ fontSize: 13, color: GRAY, marginTop: 6 }}>
+                      This day is open, but Ellis could not read a list of times
+                      for it — the official page shows them in your window.
+                    </div>
+                  ) : (
+                    <>
+                      <div style={{ fontSize: 12.5, color: GRAY, marginTop: 4,
+                                    marginBottom: 10 }}>
+                        {times.length} {times.length === 1 ? 'time' : 'times'} on
+                        this day, read from the official page
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                        {times.map((t) => (
+                          <span key={t.time} className="chip"
+                                data-testid={`schengen-time-${t.time}`}
+                                style={{ fontSize: 14, fontWeight: 700,
+                                         padding: '8px 14px' }}>
+                            {t.time}
+                          </span>
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </>

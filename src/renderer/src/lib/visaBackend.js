@@ -256,6 +256,11 @@ export function createVisaClient(session) {
     // into the portal's field — it never reads the image itself.
     calendarCaptchaSubmit: (id, text) =>
       call('POST', `/cases/${id}/calendar/captcha`, session, { text }),
+    // The times offered on one open day. Read-only — the month says which
+    // DAYS are open; the times live on the day's own page.
+    calendarTimes: (id, href, knownHrefs = []) =>
+      call('POST', `/cases/${id}/calendar/times`, session,
+           { href, known_hrefs: knownHrefs }),
     calendarPick: (id, href, knownHrefs = []) =>
       call('POST', `/cases/${id}/calendar/pick`, session,
            { href, known_hrefs: knownHrefs }),

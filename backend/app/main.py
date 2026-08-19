@@ -1898,6 +1898,26 @@ def case_calendar_captcha(application_id: str, db=Depends(get_session),
         sess.close()
 
 
+@app.post("/cases/{application_id}/calendar/times")
+def case_calendar_times(application_id: str, body: CalendarPickIn,
+                        db=Depends(get_session),
+                        p: Principal = Depends(get_principal)):
+    """The TIMES offered on the day the applicant picked. Read-only: the month
+    grid says which DAYS are open, the times live on the day's own page, and
+    looking at them reserves nothing."""
+    _owned(db, p, application_id)
+    from . import gov_calendar as gc
+    sess = _attach_applicant_window(db, application_id, list(gc.DAY_LINK_HOSTS))
+    try:
+        return gc.read_day_times(_WindowDriver(sess._ensure_page()),
+                                 href=body.href, known_hrefs=body.known_hrefs)
+    except gc.CalendarUnavailable as e:
+        raise HTTPException(409, detail={"reason": "day_not_openable",
+                                         "detail": str(e)})
+    finally:
+        sess.close()
+
+
 @app.post("/cases/{application_id}/calendar/pick")
 def case_calendar_pick(application_id: str, body: CalendarPickIn,
                        db=Depends(get_session),
