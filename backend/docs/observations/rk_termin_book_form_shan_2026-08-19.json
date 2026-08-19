@@ -46,7 +46,7 @@
       "label": "Date of birth",
       "kind": "datepicker_hidden",
       "required": true,
-      "gotcha": "visible input #fields1content is READONLY jQuery-UI datepicker (dateFormat dd.mm.yy => DD.MM.YYYY); the POSTed value lives in hidden fields[1].content. Fill BOTH: hidden gets the value, visible shows it to the human."
+      "gotcha": "visible input #fields1content is READONLY jQuery-UI datepicker showing DD.MM.YYYY; the POSTed value lives in hidden fields[1].content and MUST be ISO yyyy-mm-dd — the site's own onSelect converts dd.mm.yyyy -> yyyy-mm-dd before writing the hidden. Writing DD.MM.YYYY into the hidden bounces the submit with a misleading 'Format dd.mm.yyyy' error (proven live on Kanton 2026-08-19). Fill BOTH halves, each in its own format."
     },
     {
       "name": "fields[2].content",

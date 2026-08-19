@@ -659,8 +659,10 @@ def fill_book_form(driver, *, answers: dict) -> dict:
     hidden plumbing, any field the live form does not carry, and any select
     value that is not one of the site's own options. It clicks nothing —
     Submit is the applicant's. A date answer lands in both halves of the
-    datepicker pair (the readonly face the human sees and the hidden twin
-    that actually POSTs).
+    datepicker pair IN EACH HALF'S OWN FORMAT: the readonly face the human
+    sees gets DD.MM.YYYY, and the hidden twin that actually POSTs gets ISO
+    yyyy-mm-dd — the site's own onSelect handler does exactly this
+    conversion, and the server parses only the ISO form.
     """
     if not isinstance(answers, dict) or not answers:
         raise CalendarUnavailable("no answers to transcribe")
@@ -692,7 +694,9 @@ def fill_book_form(driver, *, answers: dict) -> dict:
             "      const vis = [...form.querySelectorAll('input[readonly]')]"
             "        .find(v => strip(v.id||v.name) === strip(name));"
             "      if (!vis) { out.refused.push({name, why: 'hidden plumbing is not fillable'}); continue; }"
-            "      el.value = value; vis.value = value;"
+            "      const m = value.match(/^(\\d{2})\\.(\\d{2})\\.(\\d{4})$/);"
+            "      el.value = m ? `${m[3]}-${m[2]}-${m[1]}` : value;"
+            "      vis.value = value;"
             "      out.filled.push(name); continue;"
             "    }"
             "    if (el.tagName === 'SELECT') {"
@@ -707,8 +711,9 @@ def fill_book_form(driver, *, answers: dict) -> dict:
             "    if (el.readOnly) {"
             "      const hid = [...form.querySelectorAll('input[type=hidden]')]"
             "        .find(h => strip(h.name) === strip(el.id||el.name));"
+            "      const m = value.match(/^(\\d{2})\\.(\\d{2})\\.(\\d{4})$/);"
             "      el.value = value;"
-            "      if (hid) hid.value = value;"
+            "      if (hid) hid.value = m ? `${m[3]}-${m[2]}-${m[1]}` : value;"
             "      out.filled.push(name); continue;"
             "    }"
             "    el.value = value;"
