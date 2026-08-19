@@ -810,25 +810,41 @@ function ConsularAsk({ t, client, caseId, packet, journey, onChanged }) {
     setValue(q.kind === 'choice' ? (q.multi ? [] : '') : (q.answer || ''))
   }, [idx, q && q.key])
 
+  async function finishPass() {
+    // The loaded list is stale — refetch, continue from the top of whatever
+    // remains, and let the backend flip the stage when it is truly done.
+    const fresh = await client.consularFormQuestions(caseId).catch(() => null)
+    if (fresh) { setData(fresh); setIdx(0) }
+    onChanged()                 // the backend decides: ready, or still gaps
+  }
+
   async function advance(save) {
     if (!q) return
     setBusy(true)
     try {
-      if (save) await client.updateAnswers(caseId, { [q.key]: value })
-      else setSkipped((prev) => new Set(prev).add(q.key))
-      if (idx + 1 < list.length) setIdx(idx + 1)
-      else {
-        // Last question: the loaded list is stale now — refetch, continue
-        // from the top of whatever remains, and let the backend flip the
-        // stage when it is truly done. Without the refetch this card simply
-        // stayed on screen and BOTH buttons looked dead.
-        const fresh = await client.consularFormQuestions(caseId).catch(() => null)
-        if (fresh) { setData(fresh); setIdx(0) }
-        onChanged()             // the backend decides: ready, or still gaps
+      if (save) {
+        await client.updateAnswers(caseId, { [q.key]: value })
+        if (idx + 1 < list.length) setIdx(idx + 1)
+        else await finishPass()
+      } else {
+        // Skipping REMOVES the question from the list, so the same index
+        // already points at the next one — advancing too would skip a
+        // question or walk off the end (the stuck plane, 2026-08-19).
+        const wasLast = idx >= list.length - 1
+        setSkipped((prev) => new Set(prev).add(q.key))
+        if (wasLast) await finishPass()
       }
     } catch (e) { toast(e.detail?.detail || e.message) }
     setBusy(false)
   }
+
+  // Safety net: an empty list must always hand control back to the backend —
+  // this state must never be a place the applicant can simply sit.
+  const flippedRef = useRef(false)
+  useEffect(() => {
+    if (data && !q && !flippedRef.current) { flippedRef.current = true; onChanged() }
+    if (q) flippedRef.current = false
+  }, [data, q])
 
   if (!data || phase === null) return <Loading label={t('consular.ask.title')} />
 
