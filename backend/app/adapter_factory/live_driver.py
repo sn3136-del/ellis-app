@@ -1842,20 +1842,63 @@ class BrowserbasePageDriver:
             return None
 
     # The same static challenge markers _CAPTCHA_JS observes, as locators.
-    _CAPTCHA_WIDGETS = ('img[src*="captcha" i]', '.g-recaptcha', '.h-captcha',
-                        '[id*="captcha" i]', '[class*="captcha" i]',
+    # 'captcha' (a CUSTOM ELEMENT) comes from RK-Termin, which renders its
+    # challenge as <captcha><div style="background:url(data:image/jpg...)">
+    # — no <img> anywhere. Ordered most specific first.
+    _CAPTCHA_WIDGETS = ('img[src*="captcha" i]', 'captcha', '.g-recaptcha',
+                        '.h-captcha', '[id*="captcha" i]', '[class*="captcha" i]',
                         'iframe[src*="recaptcha"]', 'iframe[src*="hcaptcha"]')
+
+    # How far to blow the page up before capturing the challenge. These are
+    # small bitmaps; screenshotting at 1x gives the applicant a postage stamp.
+    _CAPTCHA_ZOOM = 2.5
+
+    def zoom_to_captcha(self, zoom: float = 0.0) -> bool:
+        """Blow the page up around the challenge and scroll it into view.
+
+        Purely presentational — it changes how the page is DISPLAYED, never
+        what it says or does. Two things depend on it: the capture below comes
+        back at usable resolution, and the applicant watching the live window
+        can actually read the characters. Safe to fail."""
+        z = zoom or self._CAPTCHA_ZOOM
+        try:
+            self.page.evaluate(
+                "(z) => {"
+                "  document.body.style.transformOrigin = 'top left';"
+                "  document.body.style.zoom = z;"
+                "  const sels = ['captcha', 'img[src*=\"captcha\" i]',"
+                "                '[id*=\"captcha\" i]', '[class*=\"captcha\" i]'];"
+                "  for (const s of sels) {"
+                "    const el = document.querySelector(s);"
+                "    if (el && el.scrollIntoView) {"
+                "      el.scrollIntoView({block: 'center', inline: 'center'});"
+                "      break;"
+                "    }"
+                "  }"
+                "  return true;"
+                "}", z)
+            self.page.wait_for_timeout(250)
+            return True
+        except Exception:  # noqa: BLE001 — presentation only
+            return False
 
     def captcha_screenshot_png(self):
         """PNG of the challenge widget itself (e.g. the digits image), so the
         applicant can read and solve it INSIDE Ellis. The image is shown, the
-        HUMAN solves — Ellis never interprets it."""
+        HUMAN solves — Ellis never interprets it.
+
+        The page is zoomed first so the capture is legible rather than a
+        postage stamp, and left zoomed so the live window matches what Ellis
+        is showing."""
+        self.zoom_to_captcha()
         for sel in self._CAPTCHA_WIDGETS:
             try:
                 loc = self.page.locator(f"{sel} >> visible=true").first
                 if loc.count() == 0:
                     continue
-                return loc.screenshot(timeout=8000)
+                shot = loc.screenshot(timeout=8000)
+                if shot:
+                    return shot
             except Exception:  # noqa: BLE001
                 continue
         return None

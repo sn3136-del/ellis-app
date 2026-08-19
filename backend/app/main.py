@@ -1889,7 +1889,11 @@ def case_calendar_captcha(application_id: str, db=Depends(get_session),
     from . import gov_calendar as gc
     sess = _attach_applicant_window(db, application_id, list(gc.DAY_LINK_HOSTS))
     try:
-        return gc.captcha_image(_WindowDriver(sess._ensure_page()))
+        drv = _WindowDriver(sess._ensure_page())
+        # Frame the live window on the challenge too: the applicant is reading
+        # from it while they type. Presentation only.
+        gc.focus_captcha(drv)
+        return gc.captcha_image(drv)
     finally:
         sess.close()
 

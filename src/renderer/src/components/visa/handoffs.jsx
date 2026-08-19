@@ -605,14 +605,23 @@ export function LiveViewModal({ client, caseId, pending, title, sub, onResolve, 
               </div>
             </div>
           )}
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 10,
-            flexWrap: 'wrap' }}>
+          {/* The challenge, LARGE. At 56px it was a postage stamp; these are
+              small bitmaps, so scale them up with smoothing off and stack the
+              answer box beneath rather than beside. */}
+          <div style={{ display: 'flex', gap: 14, flexDirection: 'column',
+            alignItems: 'center', marginTop: 12 }}>
             {capImg && (
               <img src={capImg} alt="The portal's CAPTCHA challenge"
                 data-testid="captcha-shot"
-                style={{ height: 56, border: '1px solid var(--line)', borderRadius: 8 }} />
+                style={{ height: 200, width: '100%', maxWidth: 520,
+                  objectFit: 'contain', imageRendering: 'pixelated',
+                  background: '#fff', padding: 12, display: 'block',
+                  border: '1px solid var(--line)', borderRadius: 12 }} />
             )}
-            <input className="input" style={{ maxWidth: 220 }}
+            <input className="input"
+              style={{ width: '100%', maxWidth: 520, fontSize: 24,
+                letterSpacing: 5, fontWeight: 800, textAlign: 'center',
+                padding: '12px 10px' }}
               inputMode="numeric" autoComplete="off"
               placeholder="Type the code shown" value={typedCode}
               onChange={(e) => setTypedCode(e.target.value)} />

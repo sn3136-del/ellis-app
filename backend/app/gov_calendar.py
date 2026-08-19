@@ -178,6 +178,31 @@ def captcha_image(driver) -> dict:
     return {"image": ""}
 
 
+def focus_captcha(driver, *, zoom: float = 2.2) -> dict:
+    """Zoom the live page in on the challenge and scroll it into view.
+
+    Purely presentational: the applicant is watching this window while they
+    read the characters, and at 100% the challenge is a postage stamp. Ellis
+    changes how the page is DISPLAYED, never what it says or does. Safe to
+    fail — an unzoomable page is still readable, just smaller.
+    """
+    try:
+        driver.evaluate(
+            "(z) => {"
+            "  document.body.style.transformOrigin = 'top left';"
+            "  document.body.style.zoom = z;"
+            "  const el = document.querySelector('captcha')"
+            "          || document.querySelector('input[name=\"captchaText\"]');"
+            "  if (el && el.scrollIntoView) {"
+            "    el.scrollIntoView({block: 'center', inline: 'center'});"
+            "  }"
+            "  return true;"
+            "}", zoom)
+        return {"zoomed": True, "zoom": zoom}
+    except Exception:  # noqa: BLE001 — presentation only
+        return {"zoomed": False, "zoom": 1.0}
+
+
 def submit_captcha(driver, *, text: str) -> dict:
     """Type the answer THE APPLICANT read, and continue.
 
