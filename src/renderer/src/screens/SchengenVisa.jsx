@@ -85,7 +85,31 @@ export default function SchengenVisa({ onBack }) {
 
   const view = usePortalLiveView(client, caseId)
 
+  // The secure window is plumbing the applicant never asked for, so its
+  // absence is never their problem to read about: reopen it and run the call
+  // again. Only a second failure is worth showing, and never in the backend's
+  // own words about sessions.
+  function isWindowGone(e) {
+    const r = String(e?.detail?.reason || '')
+    return r === 'no_secure_window' || r === 'session_ended'
+  }
+
+  async function withWindow(fn) {
+    try {
+      return await fn()
+    } catch (e) {
+      if (!isWindowGone(e) || !caseId) throw e
+      await client.createBrowserSession(caseId)
+      return await fn()
+    }
+  }
+
   function fail(e) {
+    if (isWindowGone(e)) {
+      setError({ message: 'That took too long and the connection dropped. '
+                          + 'Pick your city again to start over.' })
+      return
+    }
     setError({ message: e?.detail?.detail || e?.detail?.reason || e?.message
                         || 'That did not work.' })
   }
@@ -122,14 +146,14 @@ export default function SchengenVisa({ onBack }) {
     setPhase('opening'); setError(null)
     setMonth(null); setPicked(null); setCaptcha(''); setAnswer(''); setCapNote('')
     try {
-      const out = await client.calendarOpen(caseId, m.code)
+      const out = await withWindow(() => client.calendarOpen(caseId, m.code))
       if (out.captcha_required) {
         setPhase('captcha')
         const img = await client.calendarCaptcha(caseId).catch(() => ({}))
         setCaptcha(img.image || '')
       } else {
         setPhase('reading')
-        setMonth(await client.calendarMonth(caseId))
+        setMonth(await withWindow(() => client.calendarMonth(caseId)))
         setPhase('dates')
       }
     } catch (e) { fail(e); setPhase('picking') }
@@ -142,7 +166,7 @@ export default function SchengenVisa({ onBack }) {
     if (!answer.trim()) return
     setPhase('reading'); setError(null); setCapNote('')
     try {
-      const out = await client.calendarCaptchaSubmit(caseId, answer.trim())
+      const out = await withWindow(() => client.calendarCaptchaSubmit(caseId, answer.trim()))
       if (out.still_challenged) {
         setCapNote(out.note || 'That did not match — here is a fresh picture.')
         setAnswer('')
@@ -151,7 +175,7 @@ export default function SchengenVisa({ onBack }) {
         setPhase('captcha')
         return
       }
-      setMonth(await client.calendarMonth(caseId))
+      setMonth(await withWindow(() => client.calendarMonth(caseId)))
       setPhase('dates')
     } catch (e) { fail(e); setPhase('captcha') }
   }
@@ -161,7 +185,7 @@ export default function SchengenVisa({ onBack }) {
     setPhase('booking'); setError(null)
     try {
       const known = (month?.days || []).map((x) => x.href)
-      const out = await client.calendarPick(caseId, d.href, known)
+      const out = await withWindow(() => client.calendarPick(caseId, d.href, known))
       setPicked({ ...d, opened: out })
     } catch (e) { fail(e) }
     setPhase('dates')
@@ -196,10 +220,6 @@ export default function SchengenVisa({ onBack }) {
         <div>
           <h1 style={{ fontSize: 30, fontWeight: 800, color: NAVY, margin: 0,
                        letterSpacing: -0.6 }}>Schengen visa</h1>
-          <div style={{ fontSize: 14, color: GRAY, marginTop: 5 }}>
-            Germany’s official calendar — real dates, read live. Pick one and
-            Ellis opens it for you.
-          </div>
         </div>
       </div>
 
