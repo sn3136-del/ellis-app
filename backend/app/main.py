@@ -1865,6 +1865,13 @@ class CalendarFormConfirmIn(BaseModel):
     labels: list[str]
 
 
+class CalendarPassportIn(BaseModel):
+    mime: str
+    size_bytes: int
+    content_b64: str = ""
+    text: str = ""
+
+
 @app.post("/cases/{application_id}/calendar/captcha")
 def case_calendar_captcha_submit(application_id: str, body: CalendarCaptchaIn,
                                  db=Depends(get_session),
@@ -2015,6 +2022,75 @@ def case_calendar_time(application_id: str, body: CalendarPickIn,
                  action="calendar_time_opened",
                  detail={"url": str(out.get("url"))[:200]}, actor=p.user_id)
     return out
+
+
+@app.post("/cases/{application_id}/calendar/book-form/passport")
+def case_calendar_book_form_passport(application_id: str,
+                                     body: CalendarPassportIn,
+                                     db=Depends(get_session),
+                                     p: Principal = Depends(get_principal)):
+    """Answer the booking form's identity questions from the applicant's own
+    passport, read ONCE through the existing OCR/MRZ pipeline. Only a
+    checksum-validated biodata page seeds identity; anything else is an
+    honest rejection with retry guidance. Nothing is stored here — the
+    values go into the form the applicant reviews and attests."""
+    import base64
+
+    from .providers import ocr as ocr_provider
+    from .providers import passport_classifier
+    from . import execution as _execution  # noqa: F401 — parity with intake
+    from .visa_snapshot import intake_flow
+    from .visa_snapshot.api import _DOC_MAX_BYTES, _DOC_MIME_ALLOWLIST
+
+    _owned(db, p, application_id)
+    if body.mime not in _DOC_MIME_ALLOWLIST:
+        raise HTTPException(415, "unsupported document type")
+    if body.size_bytes > _DOC_MAX_BYTES:
+        raise HTTPException(413, "document too large")
+    content = b""
+    if body.content_b64:
+        try:
+            content = base64.b64decode(body.content_b64)
+        except Exception:
+            raise HTTPException(400, "invalid content_b64")
+        if len(content) > _DOC_MAX_BYTES:
+            raise HTTPException(413, "document too large")
+
+    result, ocr_meta = ocr_provider.process_with_failover(
+        content=content, text=body.text, mime=body.mime, expect_passport=True)
+    mrz = (ocr_provider.parse_mrz(result.recognized_text)
+           if result.recognized_text else None)
+    classification = passport_classifier.classify_page(
+        text=result.recognized_text, mrz=mrz, has_image=bool(content),
+        vision_hint=result.doc_type)
+    if classification["reject"] or not classification["accepted_as_passport_identity"]:
+        return {"accepted": False,
+                "message": classification["message"] or
+                "This page could not be used as the passport biodata page. "
+                "Upload a clear photo of the photo page of your passport."}
+
+    fields_map = {f.key: {"value": f.value, "confidence": f.confidence,
+                          "page": f.page} for f in result.fields}
+    profile = intake_flow.build_passport_profile(
+        ocr_fields=fields_map, mrz=mrz,
+        recognized_text=result.recognized_text,
+        mrz_valid=bool(mrz and mrz.get("valid")))
+    vals = {k: str(v.get("value") or "")
+            for k, v in (profile.get("fields") or {}).items()}
+    birth = vals.get("birth_date", "")
+    dd = ""
+    m = re.match(r"^(\d{4})-(\d{2})-(\d{2})$", birth)
+    if m:
+        dd = f"{m.group(3)}.{m.group(2)}.{m.group(1)}"
+    return {"accepted": True,
+            "surname": vals.get("surname", ""),
+            "given_names": vals.get("given_names", ""),
+            "passport_number": vals.get("passport_number", ""),
+            "birth_date": birth,
+            "birth_date_ddmmyyyy": dd,
+            "needs_confirmation": sorted(
+                k for k, v in (profile.get("fields") or {}).items()
+                if v.get("needs_confirmation"))}
 
 
 @app.post("/cases/{application_id}/calendar/book-form/fill")

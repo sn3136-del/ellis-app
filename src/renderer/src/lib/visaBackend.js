@@ -280,6 +280,11 @@ export function createVisaClient(session) {
            { href, known_hrefs: knownHrefs }),
     calendarBookForm: (id, query) =>
       call('POST', `/cases/${id}/calendar/book-form`, session, { query }),
+    // The booking form's identity answers, read once from the applicant's
+    // own passport (existing OCR/MRZ pipeline; checksum-validated biodata
+    // page only). doc = {mime, size_bytes, content_b64}.
+    calendarBookFormPassport: (id, doc) =>
+      call('POST', `/cases/${id}/calendar/book-form/passport`, session, doc),
     calendarBookFormFill: (id, answers) =>
       call('POST', `/cases/${id}/calendar/book-form/fill`, session, { answers }),
     calendarBookFormConfirm: (id, labels) =>

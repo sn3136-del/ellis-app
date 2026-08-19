@@ -318,6 +318,9 @@ export default function SchengenVisa({ onBack }) {
   const [formCapAnswer, setFormCapAnswer] = useState('')
   const [booked, setBooked] = useState(null)   // the submit outcome
   const [pickedTime, setPickedTime] = useState(null) // the applicant's slot
+  const [passport, setPassport] = useState(null)     // OCR result, once accepted
+  const [passportBusy, setPassportBusy] = useState(false)
+  const [passportMsg, setPassportMsg] = useState('')
   // Where the flow resumes after a solved challenge: gates can stand
   // before the month, before a day's times, or before a time's form.
   const afterCaptchaRef = useRef('month')
@@ -430,6 +433,7 @@ export default function SchengenVisa({ onBack }) {
     setMonth(null); setPicked(null); setTimes(null)
     setForm(null); setFormAnswers({}); setConfirms({})
     setPickedTime(null); afterCaptchaRef.current = 'month'
+    setPassport(null); setPassportBusy(false); setPassportMsg('')
     setFormCaptcha(''); setFormCapAnswer(''); setBooked(null)
     setCaptcha(''); setAnswer(''); setCapNote('')
     try {
@@ -556,6 +560,56 @@ export default function SchengenVisa({ onBack }) {
     } catch (e) { fail(e); setPhase('dates') }
   }
 
+  // Which of the form's questions the passport itself answers, by label —
+  // in whichever language the session is running.
+  function passportKeyFor(label) {
+    const l = String(label || '')
+    if (/last name|surname|nachname|familienname/i.test(l)) return 'surname'
+    if (/first name|given|vorname/i.test(l)) return 'given_names'
+    if (/passport|passnummer|reisepass/i.test(l)) return 'passport_number'
+    if (/birth|geburt/i.test(l)) return 'birth_date_ddmmyyyy'
+    return ''
+  }
+  const isRepeatEmail = (label) => /repeat|wiederhol/i.test(String(label || ''))
+
+  // The applicant's passport, read ONCE by the existing OCR/MRZ pipeline.
+  // Its answers land in the same formAnswers the fill transcribes; anything
+  // the passport cannot answer stays a question in Ellis.
+  function onPassportFile(e) {
+    const f = e.target.files && e.target.files[0]
+    if (!f) return
+    setPassportBusy(true); setPassportMsg('')
+    const reader = new FileReader()
+    reader.onload = async () => {
+      try {
+        const b64 = String(reader.result || '').split(',')[1] || ''
+        const res = await withTimeout(
+          client.calendarBookFormPassport(caseId,
+            { mime: f.type, size_bytes: f.size, content_b64: b64 }),
+          90000, 'read your passport')
+        if (!res.accepted) {
+          setPassportMsg(res.message || 'That page could not be read — upload '
+                         + 'a clear photo of the photo page of your passport.')
+          return
+        }
+        const next = { ...formAnswers }
+        for (const fld of (form?.fields || [])) {
+          if (fld.applicant_only) continue
+          const key = passportKeyFor(fld.label)
+          if (key && res[key]) next[fld.name] = res[key]
+        }
+        setFormAnswers(next)
+        setPassport(res)
+      } catch (err) {
+        setPassportMsg('That did not work — try another photo.')
+        try { console.error('[schengen passport]', err?.detail || err?.message || err) } catch { /* noop */ }
+      } finally {
+        setPassportBusy(false)
+      }
+    }
+    reader.readAsDataURL(f)
+  }
+
   // Show the form's questions in Ellis. Standardized default, visible and
   // changeable: this lane is offered for self-employed applicants, so the
   // purpose select STARTS on the site's own self-employment option when it
@@ -606,6 +660,14 @@ export default function SchengenVisa({ onBack }) {
       const send = {}
       for (const [k, v] of Object.entries(formAnswers)) {
         if (String(v || '').trim()) send[k] = String(v).trim()
+      }
+      // "Repeat email" is a transcription of the email answer, not a second
+      // question — the applicant is asked once.
+      const emailField = (form?.fields || []).find(
+        (f) => /mail/i.test(f.label) && !isRepeatEmail(f.label))
+      const repeatField = (form?.fields || []).find((f) => isRepeatEmail(f.label))
+      if (emailField && repeatField && send[emailField.name] && !send[repeatField.name]) {
+        send[repeatField.name] = send[emailField.name]
       }
       await withTimeout(
         withWindow(() => client.calendarBookFormFill(caseId, send)),
@@ -1049,8 +1111,60 @@ export default function SchengenVisa({ onBack }) {
             <div style={{ fontSize: 13.5, color: NAVY, fontWeight: 700,
                           marginTop: 8 }}>{form.title}</div>
           ) : null}
+          {/* The passport answers its own questions. Until it is read, the
+              identity fields are not asked as typing work — the applicant
+              uploads the photo page and Ellis reads it once. */}
+          {!passport && (
+            <div className="card card--soft" style={{ padding: 16, marginTop: 14,
+                 borderRadius: 14, textAlign: 'center' }}
+                 data-testid="schengen-passport-upload">
+              <div style={{ fontWeight: 800, fontSize: 14.5, color: NAVY }}>
+                Upload the photo page of your passport
+              </div>
+              <div style={{ fontSize: 12.5, color: GRAY, marginTop: 4 }}>
+                Ellis reads your name, passport number and date of birth from
+                it — you will not need to type them.
+              </div>
+              <input type="file" accept="image/jpeg,image/png,image/tiff,application/pdf"
+                     onChange={onPassportFile} disabled={passportBusy}
+                     data-testid="schengen-passport-file"
+                     style={{ marginTop: 10 }} />
+              {passportBusy && (
+                <div style={{ fontSize: 12.5, color: GRAY, marginTop: 8 }}>
+                  Reading your passport…
+                </div>
+              )}
+              {passportMsg && (
+                <div style={{ fontSize: 12.5, color: NAVY, marginTop: 8 }}>
+                  {passportMsg}
+                </div>
+              )}
+            </div>
+          )}
+          {passport && (
+            <div className="card card--soft" style={{ padding: 14, marginTop: 14,
+                 borderRadius: 14, textAlign: 'left' }}
+                 data-testid="schengen-passport-summary">
+              <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 0.6,
+                            color: GRAY, textTransform: 'uppercase' }}>
+                From your passport
+              </div>
+              <div style={{ fontSize: 13.5, color: NAVY, marginTop: 6 }}>
+                {[passport.given_names, passport.surname].filter(Boolean).join(' ')}
+                {' · '}{passport.passport_number}
+                {passport.birth_date_ddmmyyyy ? ` · ${passport.birth_date_ddmmyyyy}` : ''}
+              </div>
+              <div style={{ fontSize: 12, color: GRAY, marginTop: 4 }}>
+                Wrong passport? <button className="btn btn--sm btn--ghost"
+                  onClick={() => setPassport(null)}
+                  style={{ fontSize: 12, padding: '2px 8px' }}>Upload another</button>
+              </div>
+            </div>
+          )}
           <div style={{ display: 'grid', gap: 12, marginTop: 14 }}>
-            {(form.fields || []).filter((f) => !f.applicant_only).map((f) => (
+            {(form.fields || []).filter((f) => !f.applicant_only
+                && !isRepeatEmail(f.label)
+                && !(passport && passportKeyFor(f.label))).map((f) => (
               <label key={f.name} style={{ display: 'grid', gap: 5,
                                            textAlign: 'left' }}>
                 <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>
@@ -1086,7 +1200,8 @@ export default function SchengenVisa({ onBack }) {
             <button className="btn btn--primary" onClick={fillBookForm}
                     data-testid="schengen-fill-form"
                     disabled={phase === 'filling' || !(form.fields || [])
-                      .filter((f) => !f.applicant_only && f.required)
+                      .filter((f) => !f.applicant_only && f.required
+                                     && !isRepeatEmail(f.label))
                       .every((f) => String(formAnswers[f.name] || '').trim())}
                     style={{ fontSize: 15, fontWeight: 800,
                              padding: '12px 26px' }}>
