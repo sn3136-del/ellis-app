@@ -390,6 +390,16 @@ def test_the_queue_default_finds_self_employment_not_the_first_seat():
     out = gc.rk_termin_walk(_W(realms, cats[:1]), location_code="shan")
     assert out["category_id"] == "3180"
 
+    # Chengdu names no self-employment queue: the general WORK queue is the
+    # second preference, never the study queue that happens to list first.
+    chengdu = [
+        {"text": "LANGZEITVISA (nationale Visa): Studium (ohne phd)", "query": "categoryId=331&realmId=5"},
+        {"text": "LANGZEITVISA (nationale Visa): Arbeitsaufnahme/Praktikum/Berufsausbildung",
+         "query": "categoryId=733&realmId=5"},
+    ]
+    out = gc.rk_termin_walk(_W(realms, chengdu), location_code="cheng")
+    assert out["category_id"] == "733"
+
     # The applicant's explicit pick still beats the default.
     out = gc.rk_termin_walk(_W(realms, cats), location_code="shan", category_id="3175")
     assert out["category_id"] == "3175"

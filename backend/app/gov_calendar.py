@@ -158,10 +158,17 @@ def rk_termin_walk(driver, *, location_code: str, realm_id: str = "",
     # covers self-employment is preferred — Shanghai lists specialty cooks
     # first, and position is not a contract. No match falls back to the
     # first, and the applicant's explicit choice always wins.
+    # Two preference tiers: the queue NAMING self-employment first; failing
+    # that, the general employment queue (Chengdu names no self-employment
+    # queue — its work queue is the honest home for a self-employed
+    # applicant, not the study queue that happens to list first).
     default_cat_q = next((c["query"] for c in cats
                           if re.search(r"selbstst|selbst.ndig|self.?employ",
                                        c["text"], re.I)),
-                         cats[0]["query"])
+                         next((c["query"] for c in cats
+                               if re.search(r"erwerbst.tig|arbeitsaufnahme"
+                                            r"|employment", c["text"], re.I)),
+                              cats[0]["query"]))
     cat_q = next((c["query"] for c in cats if category_id
                   and f"categoryId={category_id}" in c["query"]), default_cat_q)
 
