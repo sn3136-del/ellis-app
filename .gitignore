@@ -7,7 +7,6 @@
 # run with zero key entry. Rotate every credential and restore the blanket
 # ignore when the demo ends. The blanket rules below still cover everything
 # else.
-!backend/.env
 !backend/google_adc.json
 # Never commit credentials in ANY form — not even encrypted (2026-07-28).
 .env.enc
@@ -75,3 +74,5 @@ backend/.runtime-venv/
 backend/ellis.db-shm
 backend/ellis.db-wal
 backend/ellis.db-journal
+
+# (removed 2026-08-19) negation that leaked plaintext keys to a public repo
