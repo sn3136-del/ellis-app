@@ -8,15 +8,17 @@ cd ellis-app
 npm run ellis:web
 ```
 
-First run builds its own environments (a minute or two). Then open
-http://localhost:5199 — the app opens directly on the Schengen lane.
+First run asks for the unlock passphrase (the owner sends it with this
+link), then builds its own environments (a minute or two). Open
+http://localhost:5199 — the menu shows the Schengen visa lane.
 
-Pick a city (Kanton has dated slots; Shanghai registers on waiting
-lists), read the calendar, pick a date and time, press Schedule, upload
-the passport photo page, answer the remaining questions, confirm the
-statements, type the picture text, and press Register. The booked card
-shows the date, the consulate address, and the official confirmation
-page. Every value entered on the government site is the applicant's own
+Open it, pick a city (Kanton has dated slots; Shanghai registers on
+waiting lists), read the calendar, pick a date and time, press
+Schedule, upload the passport photo page, answer the remaining
+questions, confirm the statements, type the picture text, and press
+Register. The booked card shows the date and time, the consulate's
+street address, and a screenshot of the official confirmation page.
+Every value entered on the government site is the applicant's own
 answer; Ellis never solves the picture check and never picks a date.
 
 Provider keys (Moonshot, Browserbase, Google OCR) travel encrypted in
