@@ -275,12 +275,35 @@ def read_month(driver) -> list[dict]:
         raise CalendarUnavailable(
             "the portal's image check has not been completed yet — the "
             "applicant completes it in the secure window, never Ellis")
+    # RK-Termin's available-day cells say "Appointments are available" as their
+    # visible text; the actual DATE lives in the link's href (dateStr=DD.MM.YYYY)
+    # or, failing that, the calendar cell. Pull the date out so the applicant
+    # sees a date, never the cell's phrasing.
     days = driver.evaluate(
-        "() => [...document.querySelectorAll('a')]"
-        ".filter(a => /appointment_showDay\\.do/.test(a.href))"
-        ".map(a => ({label:(a.innerText||'').trim().slice(0,40),"
-        "            href:a.href,"
-        "            title:(a.getAttribute('title')||'').slice(0,80)}))") or []
+        "() => {"
+        "  const dateOf = (a) => {"
+        "    const h = a.href || '';"
+        "    let m = h.match(/(?:dateStr|datum|date)=([0-9]{1,2}[.\\/-][0-9]{1,2}[.\\/-][0-9]{4})/i);"
+        "    if (m) return m[1];"
+        "    m = h.match(/([0-9]{1,2}[.\\/-][0-9]{1,2}[.\\/-][0-9]{4})/);"
+        "    if (m) return m[1];"
+        "    let n = a;"
+        "    for (let i=0;i<4 && n;i++,n=n.parentElement) {"
+        "      const t = (n.getAttribute && (n.getAttribute('title')||n.getAttribute('id'))) || '';"
+        "      const mm = String(t).match(/([0-9]{1,2}[.\\/-][0-9]{1,2}[.\\/-][0-9]{4})/);"
+        "      if (mm) return mm[1];"
+        "    }"
+        "    return '';"
+        "  };"
+        "  return [...document.querySelectorAll('a')]"
+        "    .filter(a => /appointment_showDay\\.do/.test(a.href))"
+        "    .map(a => {"
+        "      const d = dateOf(a);"
+        "      return {label: d || (a.innerText||'').trim().slice(0,40),"
+        "              date: d, href: a.href,"
+        "              title:(a.getAttribute('title')||'').slice(0,80)};"
+        "    });"
+        "}") or []
     return [d for d in days if d.get("href")]
 
 

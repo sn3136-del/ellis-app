@@ -24,6 +24,7 @@ import { LiveFrame, usePortalLiveView } from '../components/visa/handoffs.jsx'
 import { createVisaClient } from '../lib/visaBackend.js'
 import { newSession } from '../lib/visaSession.js'
 
+const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const NAVY = 'var(--trip-navy, #0f294d)'
 const GRAY = 'var(--trip-gray, #64748b)'
 const BLUE = 'var(--trip-blue, #287dfa)'
@@ -45,7 +46,10 @@ function monthsOf(days) {
   const byKey = new Map()
   const loose = []
   for (const d of days) {
-    const m = (d.label || '').match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})/)
+    // The backend parses the real date out of the day's href; the visible
+    // cell text on RK-Termin is 'Appointments are available', never a date.
+    const m = String(d.date || d.label || '')
+      .match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})/)
     if (!m) { loose.push(d); continue }
     const day = +m[1], mon = +m[2] - 1, year = +m[3]
     const key = `${year}-${mon}`
@@ -678,13 +682,19 @@ export default function SchengenVisa({ onBack }) {
                         <button key={d.href} onClick={() => pickDay(d)}
                           title={d.title || d.label}
                           data-testid={`schengen-day-${d.day}`}
-                          style={{ padding: '14px 0', borderRadius: 12,
-                                   fontSize: 16, fontWeight: 800,
+                          style={{ padding: '12px 0 10px', borderRadius: 12,
                                    cursor: 'pointer', transition: 'all .15s ease',
                                    border: on ? `2px solid ${BLUE}` : '1px solid #dbe3ec',
                                    background: on ? BLUE : '#fff',
                                    color: on ? '#fff' : NAVY }}>
-                          {d.day}
+                          <span style={{ display: 'block', fontSize: 11,
+                                         opacity: 0.7, fontWeight: 600 }}>
+                            {DOW[new Date(mo.year, mo.mon, d.day).getDay()]}
+                          </span>
+                          <span style={{ display: 'block', fontSize: 18,
+                                         fontWeight: 800, lineHeight: 1.25 }}>
+                            {d.day}
+                          </span>
                         </button>
                       )
                     })}
