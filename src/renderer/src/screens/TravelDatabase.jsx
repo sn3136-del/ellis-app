@@ -65,8 +65,25 @@ function asText(v) {
   return String(v)
 }
 
-const sentence = (s) =>
-  s && /^[a-z]/.test(s) ? s.charAt(0).toUpperCase() + s.slice(1) : s
+// The engine writes compact reference prose. This turns it into plain
+// sentences: semicolons become full stops, dashes become commas, each
+// sentence starts with a capital, and longer lines end with a full stop.
+// URLs are left exactly as they are.
+const humanize = (v) => {
+  if (!v) return v
+  let out = String(v)
+  if (/https?:\/\//.test(out)) return out
+  out = out
+    .replace(/\s*[\u2014\u2013]\s*/g, ', ')
+    .replace(/\s*;\s*/g, '. ')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+  out = out.replace(/(^|[.!?]\s+)([a-z])/g, (m, lead, ch) => lead + ch.toUpperCase())
+  if (out.length > 28 && !/[.!?)]$/.test(out)) out += '.'
+  return out
+}
+
+const sentence = (s) => humanize(s)
 
 function itemsOf(v) {
   if (!v) return []
@@ -153,12 +170,18 @@ function Section({ title, accent, children, wide }) {
 function Fact({ label, value }) {
   const v = sentence(asText(value))
   if (!v) return null
+  // A short answer sits opposite its label; a sentence gets its own line so
+  // it reads left to right instead of wrapping against the right edge.
+  const stacked = v.length > 42
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 20,
-                  padding: '11px 0', fontSize: 13.5, lineHeight: 1.55,
+    <div style={{ display: stacked ? 'block' : 'flex',
+                  justifyContent: 'space-between', gap: 20,
+                  padding: '12px 0', fontSize: 13.5, lineHeight: 1.6,
                   borderBottom: '1px solid #f3f5f9' }}>
-      <div style={{ color: GRAY, flex: 'none' }}>{label}</div>
-      <div style={{ color: NAVY, fontWeight: 600, textAlign: 'right' }}>{v}</div>
+      <div style={{ color: GRAY, flex: 'none',
+                    marginBottom: stacked ? 4 : 0 }}>{label}</div>
+      <div style={{ color: NAVY, fontWeight: 600,
+                    textAlign: stacked ? 'left' : 'right' }}>{v}</div>
     </div>
   )
 }
@@ -189,7 +212,7 @@ function Tile({ label, value }) {
       <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 0.9,
                     color: GRAY, textTransform: 'uppercase' }}>{label}</div>
       <div style={{ fontSize: 14, fontWeight: 700, color: NAVY, marginTop: 8,
-                    lineHeight: 1.45 }}>{sentence(v)}</div>
+                    lineHeight: 1.45 }}>{humanize(v)}</div>
     </div>
   )
 }
@@ -313,13 +336,17 @@ export default function TravelDatabase({ onBack }) {
       <button className="btn btn--sm btn--ghost" onClick={onBack}
               data-testid="database-back">← {t('db.menu')}</button>
 
-      <div style={{ margin: '16px 0 6px', textAlign: 'center' }}>
-        <h1 style={{ fontSize: 32, fontWeight: 800, color: NAVY, margin: 0,
-                     letterSpacing: -0.6 }}>{t('db.title')}</h1>
-        <div style={{ fontSize: 14.5, color: GRAY, marginTop: 8 }}>
-          {t('db.sub')}
+      {/* Heading only while searching; the answer page opens straight on
+          the verdict (owner decision, theming). */}
+      {!result && (
+        <div style={{ margin: '16px 0 6px', textAlign: 'center' }}>
+          <h1 style={{ fontSize: 32, fontWeight: 800, color: NAVY, margin: 0,
+                       letterSpacing: -0.6 }}>{t('db.title')}</h1>
+          <div style={{ fontSize: 14.5, color: GRAY, marginTop: 8 }}>
+            {t('db.sub')}
+          </div>
         </div>
-      </div>
+      )}
 
       {!result && (
         <div className="card anim-rise" style={{ padding: '26px 28px',
@@ -414,7 +441,7 @@ export default function TravelDatabase({ onBack }) {
             </div>
             {asText(g.visa_category) && (
               <div style={{ fontSize: 14, color: NAVY, marginTop: 8, opacity: 0.85 }}>
-                {T(asText(g.visa_category))}
+                {humanize(T(asText(g.visa_category)))}
               </div>
             )}
           </div>
