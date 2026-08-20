@@ -1,11 +1,11 @@
-// The Database — traveldoc-style requirements lookup, answered by the same
+// The Database: a traveldoc-style requirements lookup, answered by the same
 // Kimi-primary route decision the applicant journey trusts.
 //
 // One form, one designed answer page carrying trip information only. Static
 // strings run through t() (so the top-right language picker translates them
 // like every other screen), and the decision's own text is translated on
-// demand through the same masked, cached Kimi K3 catalog pipe — fast, and
-// honest English fallback when a string cannot round-trip.
+// demand through the same masked, cached Kimi K3 catalog pipe (fast, with
+// an honest English fallback when a string cannot round-trip).
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Loading } from '../components/ui.jsx'
 import { useLocale } from '../lib/locale.jsx'
@@ -48,7 +48,7 @@ const humanizeEnum = (v) => {
     (/^[a-z0-9_]+$/.test(s) ? s.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase()) : s)
 }
 
-// The decision's fields arrive as strings, lists, or small objects — always
+// The decision's fields arrive as strings, lists, or small objects, always
 // rendered as natural words: no raw objects, no snake_case keys.
 function asText(v) {
   if (v === null || v === undefined || v === '') return null
@@ -56,7 +56,7 @@ function asText(v) {
   if (typeof v === 'number') return String(v)
   if (Array.isArray(v)) return v.map((x) => asText(x)).filter(Boolean).join('; ')
   if (typeof v === 'object') {
-    if (v.reason) return String(v.reason)          // uncertainty rows: the reason IS the sentence
+    if (v.reason) return String(v.reason)          // uncertainty rows: the reason is the sentence
     if (v.name) return [v.name, v.applicability ? `(${v.applicability})` : '']
       .filter(Boolean).join(' ')
     return Object.values(v).map((x) => asText(x)).filter(Boolean).join(', ')
@@ -377,7 +377,7 @@ export default function TravelDatabase({ onBack }) {
           </div>
           {busy && (
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: 14 }}>
-              {/* The plane alone — no explanatory sentence (owner decision). */}
+              {/* The plane alone, no explanatory sentence (owner decision). */}
               <Loading label="" />
             </div>
           )}
