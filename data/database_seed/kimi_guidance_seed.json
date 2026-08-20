@@ -4764,5 +4764,285 @@
   },
   "generated_at": "2026-08-20T20:08:00.826687",
   "fresh_until": "2026-09-03T20:08:00.826687"
+ },
+ {
+  "cache_key": "USA|USA|VNM|tourism|default|unknown|v3",
+  "route": {
+   "passport_nationality": "USA",
+   "lawful_country_of_residence": "USA",
+   "destination_country": "VNM",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+   "visa_category": "tourist e-visa",
+   "permitted_stay": "up to 90 days",
+   "passport_validity": "valid at least 6 months beyond entry",
+   "required_documents": [
+    "valid US passport (machine-readable, one blank page)",
+    "digital passport photo",
+    "scanned passport bio page",
+    "travel itinerary with entry/exit dates",
+    "intended entry/exit border or airport"
+   ],
+   "application_channel": "online_portal",
+   "government_fee": {
+    "amount": 25,
+    "currency": "USD"
+   },
+   "processing_time": "3 working days",
+   "forms": [
+    "online e-visa application form"
+   ],
+   "official_portal_url": "https://evisa.xuatnhapcanh.gov.vn/",
+   "photo_requirements": "digital passport-size color photo, 4x6 cm, white background, taken within 6 months, full face, no glasses/headwear except religious",
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [
+    "No user account required; complete application directly on portal"
+   ],
+   "payment_process": [
+    "online credit/debit card payment on e-visa portal"
+   ],
+   "submission_process": [
+    "submit application online",
+    "download and print e-visa approval letter/email",
+    "present printed e-visa with passport at immigration"
+   ],
+   "onward_travel_evidence": "required: flight ticket or itinerary showing departure from Vietnam",
+   "accommodation_evidence": "required: hotel booking or temporary residence address in Vietnam",
+   "financial_evidence": "not required for e-visa application; proof of funds may be requested at entry",
+   "insurance_required": false,
+   "exceptions": [
+    "Phu Quoc island: 30-day visa exemption for direct entry/exit by air/sea",
+    "APEC Business Travel Card holders may have other arrangements"
+   ],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "Fee is 25 USD for single-entry e-visa; 50 USD for multiple-entry e-visa; applicant's choice not stated."
+    },
+    {
+     "field": "onward_travel_evidence",
+     "reason": "Required fields on the e-visa form; actual enforcement at entry can vary."
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination",
+     "applicability": "conditional",
+     "trigger_countries": [],
+     "trigger": "Arrival from or transit within 6 days in a yellow-fever endemic country",
+     "question": "Are you arriving directly from the USA with no transit in a yellow-fever endemic country?"
+    },
+    {
+     "name": "COVID-19 restrictions",
+     "applicability": "not_applicable",
+     "trigger_countries": [],
+     "trigger": null,
+     "question": null
+    }
+   ],
+   "route_workflow_type": "evisa_portal"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-20T20:49:48.664466",
+  "fresh_until": "2026-09-03T20:49:48.664466"
+ },
+ {
+  "cache_key": "USA|USA|SGP|tourism|default|unknown|v3",
+  "route": {
+   "passport_nationality": "USA",
+   "lawful_country_of_residence": "USA",
+   "destination_country": "SGP",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_EXEMPT",
+   "visa_category": "tourist_visa",
+   "permitted_stay": "90 days",
+   "passport_validity": "6 months beyond arrival",
+   "required_documents": [
+    "valid passport"
+   ],
+   "application_channel": "not_required",
+   "government_fee": {
+    "amount": null,
+    "currency": null
+   },
+   "processing_time": "not applicable",
+   "forms": [],
+   "official_portal_url": null,
+   "photo_requirements": null,
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [],
+   "payment_process": [],
+   "submission_process": [],
+   "onward_travel_evidence": "may be requested at entry",
+   "accommodation_evidence": "may be requested at entry",
+   "financial_evidence": "may be requested at entry",
+   "insurance_required": false,
+   "exceptions": [],
+   "uncertainty": [],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "SG Arrival Card",
+    "submission_window": "within 3 days before arrival"
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination certificate",
+     "applicability": "conditional",
+     "trigger_countries": [
+      "BRA",
+      "ARG",
+      "COL",
+      "PER",
+      "VEN",
+      "BOL",
+      "ECU",
+      "GUY",
+      "SUR",
+      "PAN",
+      "KEN",
+      "NGA",
+      "GHA",
+      "ETH",
+      "CIV",
+      "COD",
+      "UGA",
+      "TZA"
+     ],
+     "trigger": "arrival or transit in a yellow-fever risk country within the past 6 days",
+     "question": "Have you been in or transited through a yellow-fever risk country within the past 6 days?"
+    },
+    {
+     "name": "COVID-19 measures",
+     "applicability": "not_applicable",
+     "trigger_countries": [],
+     "trigger": null,
+     "question": null
+    }
+   ],
+   "route_workflow_type": "visa_exempt_preparation"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-20T21:04:45.649378",
+  "fresh_until": "2026-09-03T21:04:45.649378"
+ },
+ {
+  "cache_key": "USA|USA|ALB|tourism|default|unknown|v3",
+  "route": {
+   "passport_nationality": "USA",
+   "lawful_country_of_residence": "USA",
+   "destination_country": "ALB",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_EXEMPT",
+   "visa_category": "visa-exempt tourism",
+   "permitted_stay": "365 days",
+   "passport_validity": "valid at least 3 months beyond intended stay",
+   "required_documents": [
+    "valid U.S. passport",
+    "proof of onward/return travel (recommended)",
+    "proof of accommodation (recommended)",
+    "proof of sufficient funds (recommended)"
+   ],
+   "application_channel": "not_required",
+   "government_fee": {
+    "amount": null,
+    "currency": null
+   },
+   "processing_time": "not required",
+   "forms": [],
+   "official_portal_url": null,
+   "photo_requirements": null,
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [],
+   "payment_process": [],
+   "submission_process": [
+    "present passport and supporting documents at Albanian border"
+   ],
+   "onward_travel_evidence": "recommended at border",
+   "accommodation_evidence": "recommended at border",
+   "financial_evidence": "recommended at border",
+   "insurance_required": false,
+   "exceptions": [],
+   "uncertainty": [
+    {
+     "field": "passport_validity_requirement",
+     "reason": "Official Albanian sources state travel documents must be valid for at least 3 months beyond the intended stay; exact wording may vary by source."
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 365,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_exempt_preparation"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-20T21:08:53.465994",
+  "fresh_until": "2026-09-03T21:08:53.465994"
  }
 ]
