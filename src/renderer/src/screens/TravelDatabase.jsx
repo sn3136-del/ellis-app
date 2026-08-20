@@ -83,6 +83,47 @@ function listOf(v) {
   )
 }
 
+// Type-ahead country picker: type to filter, click to choose — the same
+// behaviour StartVisa's SearchSelect gives the intake.
+function CountryCombo({ value, options, onChange, placeholder, testid }) {
+  const [q, setQ] = useState('')
+  const [open, setOpen] = useState(false)
+  const current = options.find((o) => o.value === value)
+  const filtered = useMemo(() => {
+    const s = q.trim().toLowerCase()
+    const list = s ? options.filter((o) => o.search.includes(s)) : options
+    return list.slice(0, 60)
+  }, [q, options])
+  return (
+    <div style={{ position: 'relative' }}>
+      <input className="input" data-testid={testid}
+        style={{ fontSize: 14, padding: '10px 12px', borderRadius: 10, width: '100%' }}
+        value={open ? q : (current ? current.label : '')}
+        placeholder={current ? current.label : (placeholder || 'Type to search…')}
+        onFocus={() => { setOpen(true); setQ('') }}
+        onChange={(e) => setQ(e.target.value)}
+        onBlur={() => setTimeout(() => setOpen(false), 150)} />
+      {open && (
+        <div className="card" style={{ position: 'absolute', zIndex: 40,
+          top: '100%', left: 0, right: 0, maxHeight: 236, overflowY: 'auto',
+          marginTop: 4, background: 'var(--bg)',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+          {filtered.length === 0
+            ? <div style={{ padding: 10, fontSize: 13, color: GRAY }}>No match — keep typing</div>
+            : filtered.map((o) => (
+                <div key={o.value}
+                  onMouseDown={(e) => { e.preventDefault(); onChange(o.value); setOpen(false) }}
+                  style={{ padding: '8px 12px', cursor: 'pointer', fontSize: 13.5,
+                           background: o.value === value ? 'var(--bg-soft)' : undefined }}>
+                  {o.label}
+                </div>
+              ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function feeText(fee) {
   if (!fee || typeof fee !== 'object') return null
   const amt = fee.amount
@@ -115,6 +156,7 @@ export default function TravelDatabase({ onBack }) {
 
   const countries = useMemo(() => (reg?.countries || []).map((c) => ({
     value: c.alpha_3, label: `${c.flag ? c.flag + ' ' : ''}${c.name}`,
+    search: `${c.name} ${c.alpha_2 || ''} ${c.alpha_3}`.toLowerCase(),
   })), [reg])
   const docTypes = reg?.travel_document_types || []
 
@@ -161,12 +203,9 @@ export default function TravelDatabase({ onBack }) {
           <div style={{ display: 'grid', gap: 14 }}>
             <label style={{ display: 'grid', gap: 5, textAlign: 'left' }}>
               <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>Nationality *</span>
-              <select className="select" value={nat} data-testid="database-nationality"
-                      onChange={(e) => setNat(e.target.value)}
-                      style={{ fontSize: 14, padding: '10px 12px', borderRadius: 10 }}>
-                <option value="" disabled>Choose…</option>
-                {countries.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
-              </select>
+              <CountryCombo value={nat} options={countries} onChange={setNat}
+                            placeholder="Type a country or code…"
+                            testid="database-nationality" />
             </label>
             <label style={{ display: 'grid', gap: 5, textAlign: 'left' }}>
               <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>Travel document</span>
@@ -181,12 +220,9 @@ export default function TravelDatabase({ onBack }) {
             </label>
             <label style={{ display: 'grid', gap: 5, textAlign: 'left' }}>
               <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>Destination *</span>
-              <select className="select" value={dest} data-testid="database-destination"
-                      onChange={(e) => setDest(e.target.value)}
-                      style={{ fontSize: 14, padding: '10px 12px', borderRadius: 10 }}>
-                <option value="" disabled>Choose…</option>
-                {countries.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
-              </select>
+              <CountryCombo value={dest} options={countries} onChange={setDest}
+                            placeholder="Type a country or code…"
+                            testid="database-destination" />
             </label>
             <label style={{ display: 'grid', gap: 5, textAlign: 'left' }}>
               <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>Purpose of travel</span>
