@@ -167,21 +167,35 @@ function Section({ title, accent, children, wide }) {
   )
 }
 
-function Fact({ label, value }) {
+function Pill({ tone, children }) {
+  const styles = tone === 'yes'
+    ? { bg: '#eefaf1', fg: '#0f8a3d' }
+    : tone === 'no' ? { bg: '#f2f4f8', fg: GRAY }
+    : { bg: '#fff7e8', fg: '#9a6200' }
+  return (
+    <span style={{ fontSize: 12.5, fontWeight: 700, padding: '4px 12px',
+                   borderRadius: 999, background: styles.bg, color: styles.fg,
+                   whiteSpace: 'nowrap' }}>{children}</span>
+  )
+}
+
+function Fact({ label, value, pill }) {
   const v = sentence(asText(value))
   if (!v) return null
   // A short answer sits opposite its label; a sentence gets its own line so
   // it reads left to right instead of wrapping against the right edge.
-  const stacked = v.length > 42
+  const stacked = !pill && v.length > 42
   return (
     <div style={{ display: stacked ? 'block' : 'flex',
-                  justifyContent: 'space-between', gap: 20,
+                  justifyContent: 'space-between', alignItems: 'center', gap: 20,
                   padding: '12px 0', fontSize: 13.5, lineHeight: 1.6,
                   borderBottom: '1px solid #f3f5f9' }}>
       <div style={{ color: GRAY, flex: 'none',
                     marginBottom: stacked ? 4 : 0 }}>{label}</div>
-      <div style={{ color: NAVY, fontWeight: 600,
-                    textAlign: stacked ? 'left' : 'right' }}>{v}</div>
+      {pill
+        ? <Pill tone={pill}>{v}</Pill>
+        : <div style={{ color: NAVY, fontWeight: 600,
+                        textAlign: stacked ? 'left' : 'right' }}>{v}</div>}
     </div>
   )
 }
@@ -202,19 +216,27 @@ function Bullets({ items, mark = '•', markColor = BLUE }) {
   )
 }
 
-function Tile({ label, value }) {
+function Tile({ label, value, href }) {
   const v = asText(value)
   if (!v) return null
-  return (
-    <div className="card" style={{ borderRadius: 18, padding: '18px 20px',
-                                   textAlign: 'left', minWidth: 0, border: 'none',
-                                   boxShadow: '0 1px 3px rgba(15,41,77,0.06)' }}>
+  const inner = (
+    <>
       <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 0.9,
                     color: GRAY, textTransform: 'uppercase' }}>{label}</div>
-      <div style={{ fontSize: 14, fontWeight: 700, color: NAVY, marginTop: 8,
-                    lineHeight: 1.45 }}>{humanize(v)}</div>
-    </div>
+      <div style={{ fontSize: 14, fontWeight: 700, marginTop: 8, lineHeight: 1.45,
+                    color: href ? BLUE : NAVY,
+                    display: 'flex', alignItems: 'center', gap: 6 }}>
+        {humanize(v)}{href ? <span aria-hidden>↗</span> : null}
+      </div>
+    </>
   )
+  const style = { borderRadius: 18, padding: '18px 20px', textAlign: 'left',
+                  minWidth: 0, border: 'none', display: 'block',
+                  boxShadow: '0 1px 3px rgba(15,41,77,0.06)' }
+  return href
+    ? <a className="card" href={href} target="_blank" rel="noreferrer"
+         style={{ ...style, textDecoration: 'none' }}>{inner}</a>
+    : <div className="card" style={style}>{inner}</div>
 }
 
 export default function TravelDatabase({ onBack }) {
@@ -312,7 +334,8 @@ export default function TravelDatabase({ onBack }) {
         /register|portal|online|website|e-?visa|application form|apply/i.test(x))
     : -1
 
-  const yesNo = (v) => v === true ? t('db.required') : v === false ? t('db.notRequired') : null
+  const yesNo = (v) => v === true ? [t('db.required'), 'yes']
+    : v === false ? [t('db.notRequired'), 'no'] : null
   const entryFacts = g ? [
     [t('db.biometrics'), yesNo(g.biometrics_required)],
     [t('db.interview'), yesNo(g.interview_required)],
@@ -452,11 +475,13 @@ export default function TravelDatabase({ onBack }) {
             <Tile label={t('db.stay')} value={T(asText(g.permitted_stay))} />
             <Tile label={t('db.fee')} value={feeText(g.government_fee)} />
             <Tile label={t('db.processing')} value={T(asText(g.processing_time))} />
-            <Tile label={t('db.channel')} value={T(humanizeEnum(g.application_channel))} />
+            <Tile label={t('db.channel')}
+                  value={T(humanizeEnum(g.application_channel))}
+                  href={g.official_portal_url || undefined} />
           </div>
 
           {/* Organized two-column brief */}
-          <div style={{ display: 'grid', gap: 16, marginTop: 16,
+          <div style={{ display: 'grid', gap: 16, marginTop: 16, alignItems: 'start',
                         gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))' }}>
             {documents.length > 0 && (
               <Section title={t('db.documents')} accent="#0f8a3d" wide>
@@ -482,7 +507,7 @@ export default function TravelDatabase({ onBack }) {
 
             {(entryFacts.length > 0 || g.arrival_card?.required || health.length > 0) && (
               <Section title={t('db.entry')} accent={BLUE}>
-                {entryFacts.map(([l, v]) => <Fact key={l} label={l} value={v} />)}
+                {entryFacts.map(([l, [v, tone]]) => <Fact key={l} label={l} value={v} pill={tone} />)}
                 {g.arrival_card?.required ? (
                   <Fact label={t('db.arrivalCard')} value={
                     `${g.arrival_card.name || t('db.arrivalCard')}${g.arrival_card.submission_window ? ', ' + g.arrival_card.submission_window : ''}`} />
