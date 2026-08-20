@@ -216,6 +216,13 @@ export default function TravelDatabase({ onBack }) {
     ...itemsOf(g.payment_process),
     ...itemsOf(g.submission_process),
   ] : []
+  // The official-portal link rides ON the step it belongs to: the first step
+  // that happens on the portal (register / apply / online / the form). When
+  // no step reads that way, the link stands after the list instead.
+  const portalStepIndex = g?.official_portal_url
+    ? applySteps.findIndex((x) =>
+        /register|portal|online|website|e-?visa|application form|apply/i.test(x))
+    : -1
 
   const entryFacts = g ? [
     ['Biometrics', g.biometrics_required],
@@ -419,11 +426,21 @@ export default function TravelDatabase({ onBack }) {
                                    display: 'flex', alignItems: 'center',
                                    justifyContent: 'center' }}>{i + 1}</span>
                     <span style={{ fontSize: 13.5, color: NAVY,
-                                   lineHeight: '24px' }}>{x}</span>
+                                   lineHeight: '24px' }}>
+                      {x}
+                      {i === portalStepIndex && (
+                        <a href={g.official_portal_url} target="_blank"
+                           rel="noreferrer"
+                           style={{ marginLeft: 8, color: BLUE, fontWeight: 700,
+                                    whiteSpace: 'nowrap' }}>
+                          official portal ↗
+                        </a>
+                      )}
+                    </span>
                   </li>
                 ))}
               </ol>
-              {g.official_portal_url && (
+              {g.official_portal_url && portalStepIndex === -1 && (
                 <a href={g.official_portal_url} target="_blank" rel="noreferrer"
                    style={{ display: 'inline-block', marginTop: 10, color: BLUE,
                             fontSize: 13.5, fontWeight: 700 }}>
