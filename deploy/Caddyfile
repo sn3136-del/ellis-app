@@ -1,0 +1,15 @@
+# One shared password in front of everything; the frontend served as static
+# files; /api stripped and proxied to the backend.
+{$ELLIS_SITE} {
+	basic_auth {
+		tripcom {$ELLIS_PASSWORD_HASH}
+	}
+	handle_path /api/* {
+		reverse_proxy app:8000
+	}
+	handle {
+		root * /srv/web
+		try_files {path} /index.html
+		file_server
+	}
+}

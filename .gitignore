@@ -88,3 +88,4 @@ backend/google_adc.json
 # plaintext Google credential — same leak class as the .env negation.
 # stray embedded clone of this very repo (user-created); never track it
 ellis-app/
+deploy/.env*

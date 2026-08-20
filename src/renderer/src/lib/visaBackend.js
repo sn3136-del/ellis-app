@@ -5,14 +5,34 @@
 // docker-compose). Auth: Clerk session token in production; the dev token +
 // org/user headers locally. Every method returns parsed JSON or throws.
 
-export const BASE = (typeof process !== 'undefined' && process.env?.ELLIS_BACKEND_URL) || 'http://localhost:8000'
+// Local dev: the backend is a separate process on :8000. Deployed behind a
+// reverse proxy (Caddy): the API is same-origin under /api, so the browser
+// never needs to know the server's address. An explicit ELLIS_BACKEND_URL
+// build var still wins when set.
+function resolveBase() {
+  if (typeof process !== 'undefined' && process.env?.ELLIS_BACKEND_URL) {
+    return process.env.ELLIS_BACKEND_URL
+  }
+  if (typeof window !== 'undefined' && window.location) {
+    const h = window.location.hostname
+    if (h && h !== 'localhost' && h !== '127.0.0.1') {
+      return window.location.origin + '/api'   // served through the proxy
+    }
+  }
+  return 'http://localhost:8000'
+}
+export const BASE = resolveBase()
 
 function authHeaders(session) {
   // session = { token, orgId, userId }. In production `token` is the Clerk JWT
   // and org/user are derived server-side; the headers are dev-mode convenience.
+  const token = session?.token || 'dev-token'
   return {
     'content-type': 'application/json',
-    authorization: `Bearer ${session?.token || 'dev-token'}`,
+    // Bearer for local runs; x-ellis-token for deployments where a
+    // password-gated proxy owns the Authorization header.
+    authorization: `Bearer ${token}`,
+    'x-ellis-token': token,
     'x-org-id': session?.orgId || '',
     'x-user-id': session?.userId || ''
   }

@@ -1,0 +1,49 @@
+# Ellis on a server: the app (backend + worker + built frontend) behind Caddy,
+# which serves the frontend, proxies /api to the backend, terminates HTTPS
+# when a domain is set, and gates everything behind one shared password.
+#
+#   ELLIS_UNLOCK=...  ELLIS_SITE=:80  ELLIS_PASSWORD_HASH='...'  docker compose up -d
+#
+# ELLIS_SITE: ":80" for plain IP access, or "ellis.example.com" for automatic
+# HTTPS once the domain's DNS points at this server.
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.app
+    restart: unless-stopped
+    environment:
+      ELLIS_UNLOCK: ${ELLIS_UNLOCK:?set ELLIS_UNLOCK to the secrets passphrase}
+    volumes:
+      - ellis-data:/data
+    expose: ["8000"]
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on: [app]
+    ports: ["8080:8080", "80:80", "443:443"]
+    environment:
+      ELLIS_SITE: ${ELLIS_SITE:-:80}
+      ELLIS_PASSWORD_HASH: ${ELLIS_PASSWORD_HASH:?set ELLIS_PASSWORD_HASH (caddy hash-password)}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+      # the built frontend straight out of the app image
+      - web-dist:/srv/web:ro
+
+  # copies the frontend build out of the app image into the shared volume
+  web-sync:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.app
+    command: ["bash", "-c", "rm -rf /srv/web/* && cp -r /app/out/renderer/* /srv/web/ && echo frontend synced"]
+    volumes:
+      - web-dist:/srv/web
+
+volumes:
+  ellis-data:
+  caddy-data:
+  caddy-config:
+  web-dist:

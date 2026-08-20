@@ -33,12 +33,18 @@ def _require(cond: bool, code: int, msg: str):
 
 async def get_principal(
     authorization: str = Header(default=""),
+    x_ellis_token: str = Header(default=""),
     x_org_id: str = Header(default=""),
     x_user_id: str = Header(default=""),
     x_role: str = Header(default=""),
 ) -> Principal:
     s = settings()
-    token = authorization.replace("Bearer ", "").strip()
+    # Deployed behind a password-gated proxy, the browser spends the
+    # Authorization header on the site password, so the app's own token
+    # travels in x-ellis-token. Locally the Bearer header is used as before;
+    # whichever arrives is the token, and the same checks apply to both.
+    token = (x_ellis_token.strip()
+             or authorization.replace("Bearer ", "").strip())
     if s.clerk_secret_key:
         # Production path — verify a Clerk session token.
         return verify_clerk(token)

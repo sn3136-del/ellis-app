@@ -1,0 +1,16 @@
+# Build context for the deploy image: source only. The encrypted secrets.enc
+# DOES ship (it is useless without the passphrase); plaintext keys never do.
+node_modules
+out
+release
+.git
+**/.venv
+**/__pycache__
+**/*.pyc
+backend/.env
+backend/google_adc.json
+backend/ellis.db
+backend/ellis.db-*
+**/*.db-wal
+**/*.db-shm
+route_bundles/*.bak
