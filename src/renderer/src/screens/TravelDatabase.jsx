@@ -1,13 +1,14 @@
 // The Database — traveldoc-style requirements lookup, answered by the same
 // Kimi-primary route decision the applicant journey trusts.
 //
-// One form (nationality, document, destination, purpose, optional date), one
-// answer page carrying everything the decision knows. Repeat lookups are
-// instant (decision cache); a stale entry serves at once and refreshes
-// behind. The answer page shows TRIP INFORMATION ONLY — engine labels,
-// cache flags and boundary prose are hidden by owner decision (theming).
+// One form, one designed answer page carrying trip information only. Static
+// strings run through t() (so the top-right language picker translates them
+// like every other screen), and the decision's own text is translated on
+// demand through the same masked, cached Kimi K3 catalog pipe — fast, and
+// honest English fallback when a string cannot round-trip.
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Loading } from '../components/ui.jsx'
+import { useLocale } from '../lib/locale.jsx'
 import { createVisaClient } from '../lib/visaBackend.js'
 import { newSession } from '../lib/visaSession.js'
 
@@ -16,34 +17,49 @@ const GRAY = 'var(--trip-gray, #64748b)'
 const BLUE = 'var(--trip-blue, #287dfa)'
 
 const PURPOSES = [
-  ['tourism', 'Tourism'], ['business', 'Business'], ['family_visit', 'Family visit'],
-  ['study', 'Study'], ['work', 'Work'], ['transit', 'Transit'],
+  ['tourism', 'db.purpose.tourism'], ['business', 'db.purpose.business'],
+  ['family_visit', 'db.purpose.family'], ['study', 'db.purpose.study'],
+  ['work', 'db.purpose.work'], ['transit', 'db.purpose.transit'],
 ]
 
-// The engine's own vocabulary (kimi_primary.DISPOSITIONS), in a traveller's
-// words, each with its colour and tint.
+// The engine's own vocabulary, in a traveller's words, each with a colour.
 const DISPOSITION_VIEW = {
-  VISA_EXEMPT: { title: 'No visa needed', color: '#0f8a3d', tint: '#eefaf1' },
+  VISA_EXEMPT: { key: 'db.verdict.exempt', color: '#0f8a3d', tint: '#eefaf1' },
   ELECTRONIC_AUTHORIZATION_REQUIRED:
-    { title: 'Electronic travel authorization required', color: '#9a6200', tint: '#fff7e8' },
-  VISA_REQUIRED: { title: 'Visa required', color: '#b3261e', tint: '#fdeeed' },
-  CONDITIONAL: { title: 'Depends on your situation', color: '#9a6200', tint: '#fff7e8' },
+    { key: 'db.verdict.eta', color: '#9a6200', tint: '#fff7e8' },
+  VISA_REQUIRED: { key: 'db.verdict.required', color: '#b3261e', tint: '#fdeeed' },
+  CONDITIONAL: { key: 'db.verdict.conditional', color: '#9a6200', tint: '#fff7e8' },
 }
 
-// The decision's fields arrive as strings, lists, or small objects — render
-// them all as words, never as a raw object (a raw object crashes React).
+// Enum values the engine emits become words, never raw snake_case.
+const CHANNEL_WORDS = {
+  visa_center: 'Visa application centre',
+  embassy: 'Embassy or consulate',
+  consulate: 'Embassy or consulate',
+  evisa_portal: 'Online — official portal',
+  online: 'Online — official portal',
+  on_arrival: 'On arrival',
+  mail: 'By mail',
+}
+const humanizeEnum = (v) => {
+  const s = String(v || '').trim()
+  if (!s) return null
+  return CHANNEL_WORDS[s.toLowerCase()] ||
+    (/^[a-z0-9_]+$/.test(s) ? s.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase()) : s)
+}
+
+// The decision's fields arrive as strings, lists, or small objects — always
+// rendered as natural words: no raw objects, no snake_case keys.
 function asText(v) {
   if (v === null || v === undefined || v === '') return null
-  if (typeof v === 'string' || typeof v === 'number') return String(v)
-  if (typeof v === 'boolean') return v ? 'Yes' : 'No'
+  if (typeof v === 'string') return v
+  if (typeof v === 'number') return String(v)
   if (Array.isArray(v)) return v.map((x) => asText(x)).filter(Boolean).join('; ')
   if (typeof v === 'object') {
-    if (v.field && v.reason) return `${v.field}: ${v.reason}`
+    if (v.reason) return String(v.reason)          // uncertainty rows: the reason IS the sentence
     if (v.name) return [v.name, v.applicability ? `(${v.applicability})` : '']
       .filter(Boolean).join(' ')
-    return Object.entries(v)
-      .filter(([, x]) => x !== null && x !== undefined && x !== '')
-      .map(([k, x]) => `${k.replace(/_/g, ' ')}: ${asText(x)}`).join(' — ')
+    return Object.values(v).map((x) => asText(x)).filter(Boolean).join(' — ')
   }
   return String(v)
 }
@@ -62,7 +78,7 @@ function feeText(fee) {
 }
 
 // Type-ahead country picker: type to filter, click to choose.
-function CountryCombo({ value, options, onChange, placeholder, testid }) {
+function CountryCombo({ value, options, onChange, placeholder, noMatch, testid }) {
   const [q, setQ] = useState('')
   const [open, setOpen] = useState(false)
   const current = options.find((o) => o.value === value)
@@ -76,7 +92,7 @@ function CountryCombo({ value, options, onChange, placeholder, testid }) {
       <input className="input" data-testid={testid}
         style={{ fontSize: 14, padding: '11px 14px', borderRadius: 12, width: '100%' }}
         value={open ? q : (current ? current.label : '')}
-        placeholder={current ? current.label : (placeholder || 'Type to search…')}
+        placeholder={current ? current.label : placeholder}
         onFocus={() => { setOpen(true); setQ('') }}
         onChange={(e) => setQ(e.target.value)}
         onBlur={() => setTimeout(() => setOpen(false), 150)} />
@@ -86,7 +102,7 @@ function CountryCombo({ value, options, onChange, placeholder, testid }) {
           marginTop: 4, background: 'var(--bg)',
           boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
           {filtered.length === 0
-            ? <div style={{ padding: 10, fontSize: 13, color: GRAY }}>No match — keep typing</div>
+            ? <div style={{ padding: 10, fontSize: 13, color: GRAY }}>{noMatch}</div>
             : filtered.map((o) => (
                 <div key={o.value}
                   onMouseDown={(e) => { e.preventDefault(); onChange(o.value); setOpen(false) }}
@@ -103,13 +119,13 @@ function CountryCombo({ value, options, onChange, placeholder, testid }) {
 
 // ---- result-page building blocks -----------------------------------------
 
-function Section({ title, children }) {
-  if (children === null || children === undefined) return null
+function Section({ title, accent, children, wide }) {
   return (
-    <div className="card" style={{ padding: '18px 22px', borderRadius: 18,
-                                   marginTop: 14, textAlign: 'left' }}>
-      <div style={{ fontSize: 11.5, fontWeight: 800, letterSpacing: 1,
-                    color: GRAY, textTransform: 'uppercase', marginBottom: 10 }}>
+    <div className="card" style={{ padding: '20px 24px', borderRadius: 18,
+                                   textAlign: 'left', gridColumn: wide ? '1 / -1' : undefined,
+                                   borderTop: `3px solid ${accent || 'var(--line, #e8edf3)'}` }}>
+      <div style={{ fontSize: 11.5, fontWeight: 800, letterSpacing: 1.2,
+                    color: GRAY, textTransform: 'uppercase', marginBottom: 12 }}>
         {title}
       </div>
       {children}
@@ -121,23 +137,24 @@ function Fact({ label, value }) {
   const v = asText(value)
   if (!v) return null
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: 12,
-                  padding: '8px 0', fontSize: 13.5 }}>
-      <div style={{ color: GRAY }}>{label}</div>
-      <div style={{ color: NAVY, fontWeight: 600 }}>{v}</div>
+    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16,
+                  padding: '9px 0', fontSize: 13.5,
+                  borderBottom: '1px solid var(--line, #f0f3f7)' }}>
+      <div style={{ color: GRAY, flex: 'none' }}>{label}</div>
+      <div style={{ color: NAVY, fontWeight: 600, textAlign: 'right' }}>{v}</div>
     </div>
   )
 }
 
-function Bullets({ items }) {
-  const list = itemsOf(items)
-  if (!list.length) return null
+function Bullets({ items, mark = '•', markColor = BLUE }) {
+  if (!items.length) return null
   return (
     <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
-      {list.map((x, i) => (
+      {items.map((x, i) => (
         <li key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start',
-                             padding: '5px 0', fontSize: 13.5, color: NAVY }}>
-          <span style={{ color: BLUE, fontWeight: 800, lineHeight: '20px' }}>•</span>
+                             padding: '6px 0', fontSize: 13.5, color: NAVY,
+                             lineHeight: 1.5 }}>
+          <span style={{ color: markColor, fontWeight: 800, flex: 'none' }}>{mark}</span>
           <span>{x}</span>
         </li>
       ))}
@@ -149,12 +166,13 @@ function Tile({ label, value }) {
   const v = asText(value)
   if (!v) return null
   return (
-    <div style={{ background: 'var(--bg-soft, #f5f7fa)', borderRadius: 14,
-                  padding: '14px 16px', textAlign: 'left', minWidth: 0 }}>
-      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 0.8,
+    <div className="card" style={{ borderRadius: 14, padding: '14px 16px',
+                                   textAlign: 'left', minWidth: 0,
+                                   borderTop: `3px solid ${BLUE}` }}>
+      <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 0.9,
                     color: GRAY, textTransform: 'uppercase' }}>{label}</div>
-      <div style={{ fontSize: 14.5, fontWeight: 700, color: NAVY, marginTop: 5,
-                    lineHeight: 1.35 }}>{v}</div>
+      <div style={{ fontSize: 14, fontWeight: 700, color: NAVY, marginTop: 6,
+                    lineHeight: 1.4 }}>{v}</div>
     </div>
   )
 }
@@ -163,6 +181,7 @@ export default function TravelDatabase({ onBack }) {
   const clientRef = useRef(null)
   if (!clientRef.current) clientRef.current = createVisaClient(newSession())
   const client = clientRef.current
+  const { lang, t } = useLocale()
 
   const [reg, setReg] = useState(null)
   const [nat, setNat] = useState('')
@@ -173,6 +192,8 @@ export default function TravelDatabase({ onBack }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
+  // Dynamic-content translation overlay: original guidance string -> lang.
+  const [tx, setTx] = useState({})
 
   useEffect(() => {
     let live = true
@@ -187,6 +208,41 @@ export default function TravelDatabase({ onBack }) {
   })), [reg])
   const docTypes = reg?.travel_document_types || []
 
+  const g = result?.guidance || null
+
+  // Every user-facing string the decision carries, translated in ONE masked,
+  // cached Kimi catalog call whenever the UI language is not English.
+  useEffect(() => {
+    if (!g || lang === 'en') { setTx({}); return }
+    const texts = [...new Set([
+      asText(g.visa_category), asText(g.permitted_stay),
+      asText(g.processing_time), asText(g.passport_validity),
+      asText(g.photo_requirements), asText(g.onward_travel_evidence),
+      asText(g.accommodation_evidence), asText(g.financial_evidence),
+      humanizeEnum(g.application_channel),
+      ...itemsOf(g.required_documents), ...itemsOf(g.forms),
+      ...itemsOf(g.account_registration_steps), ...itemsOf(g.payment_process),
+      ...itemsOf(g.submission_process), ...itemsOf(g.health_requirements),
+      ...itemsOf(g.exceptions), ...itemsOf(g.uncertainty),
+      ...itemsOf(result?.advisories),
+    ].filter(Boolean))]
+    if (!texts.length) { setTx({}); return }
+    const entries = {}
+    texts.forEach((s, i) => { entries['g' + i] = s })
+    let live = true
+    client.i18nCatalog(lang, entries).then((out) => {
+      if (!live) return
+      const m = {}
+      texts.forEach((s, i) => {
+        const v = (out?.entries || {})['g' + i]
+        if (v) m[s] = v
+      })
+      setTx(m)
+    }).catch(() => { /* honest English fallback */ })
+    return () => { live = false }
+  }, [g, lang])
+  const T = (s) => (s && tx[s]) || s
+
   async function lookUp() {
     if (!nat || !dest) return
     setBusy(true); setError(''); setResult(null)
@@ -197,69 +253,73 @@ export default function TravelDatabase({ onBack }) {
       })
       setResult(out)
     } catch (e) {
-      setError(e?.detail?.reason || e?.detail?.detail || e?.message
-               || 'The lookup did not complete — try again.')
+      setError(e?.detail?.reason || e?.detail?.detail || e?.message || t('db.error'))
     }
     setBusy(false)
   }
 
-  const g = result?.guidance || null
-  const disp = g ? (DISPOSITION_VIEW[g.disposition] ||
-                    { title: String(g.disposition || 'Route decision'),
-                      color: NAVY, tint: '#eef4ff' }) : null
+  const disp = g ? (DISPOSITION_VIEW[g.disposition] || null) : null
   const countryName = (code) => countries.find((c) => c.value === code)?.label || code
 
-  // "How to apply", in the applicant's own sequence: registration, payment,
-  // submission — the route's real steps from the decision itself.
   const applySteps = g ? [
     ...itemsOf(g.account_registration_steps),
     ...itemsOf(g.payment_process),
     ...itemsOf(g.submission_process),
   ] : []
-  // The official-portal link rides ON the step it belongs to: the first step
-  // that happens on the portal (register / apply / online / the form). When
-  // no step reads that way, the link stands after the list instead.
+  // The official-portal link rides ON the step it belongs to.
   const portalStepIndex = g?.official_portal_url
     ? applySteps.findIndex((x) =>
         /register|portal|online|website|e-?visa|application form|apply/i.test(x))
     : -1
 
+  const yesNo = (v) => v === true ? t('db.required') : v === false ? t('db.notRequired') : null
   const entryFacts = g ? [
-    ['Biometrics', g.biometrics_required],
-    ['Interview', g.interview_required],
-    ['Appointment', g.appointment_required],
-    ['Travel insurance', g.insurance_required],
-  ].filter(([, v]) => v !== null && v !== undefined) : []
+    [t('db.biometrics'), yesNo(g.biometrics_required)],
+    [t('db.interview'), yesNo(g.interview_required)],
+    [t('db.appointment'), yesNo(g.appointment_required)],
+    [t('db.insurance'), yesNo(g.insurance_required)],
+  ].filter(([, v]) => v) : []
+
+  const documents = g ? itemsOf(g.required_documents).map(T) : []
+  const goodToKnow = g ? [...itemsOf(g.exceptions), ...itemsOf(result.advisories || []),
+                          ...itemsOf(g.uncertainty)].map(T) : []
+  const health = g ? itemsOf(g.health_requirements).map(T) : []
+
+  const label = (k) => (
+    <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>{t(k)}</span>
+  )
 
   return (
-    <div className="page" style={{ maxWidth: 880, margin: '0 auto',
+    <div className="page" style={{ maxWidth: 900, margin: '0 auto',
                                    padding: '26px 20px 60px' }}
          data-testid="travel-database">
       <button className="btn btn--sm btn--ghost" onClick={onBack}
-              data-testid="database-back">← Menu</button>
+              data-testid="database-back">← {t('db.menu')}</button>
 
-      <div style={{ margin: '14px 0 4px' }}>
-        <h1 style={{ fontSize: 30, fontWeight: 800, color: NAVY, margin: 0,
-                     letterSpacing: -0.6 }}>Database</h1>
-        <div style={{ fontSize: 14, color: GRAY, marginTop: 6 }}>
-          What does this trip need? Pick the route — the answer covers the
-          latest requirements end to end.
+      <div style={{ margin: '16px 0 6px', textAlign: 'center' }}>
+        <h1 style={{ fontSize: 32, fontWeight: 800, color: NAVY, margin: 0,
+                     letterSpacing: -0.6 }}>{t('db.title')}</h1>
+        <div style={{ fontSize: 14.5, color: GRAY, marginTop: 8 }}>
+          {t('db.sub')}
         </div>
       </div>
 
       {!result && (
-        <div className="card anim-rise" style={{ padding: 22, borderRadius: 20,
-                                                 marginTop: 16 }}
+        <div className="card anim-rise" style={{ padding: '26px 28px',
+                                                 borderRadius: 20, marginTop: 18,
+                                                 maxWidth: 560, marginLeft: 'auto',
+                                                 marginRight: 'auto' }}
              data-testid="database-form">
-          <div style={{ display: 'grid', gap: 14 }}>
-            <label style={{ display: 'grid', gap: 5, textAlign: 'left' }}>
-              <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>Nationality *</span>
+          <div style={{ display: 'grid', gap: 15 }}>
+            <label style={{ display: 'grid', gap: 6, textAlign: 'left' }}>
+              {label('db.nationality')}
               <CountryCombo value={nat} options={countries} onChange={setNat}
-                            placeholder="Type a country or code…"
+                            placeholder={t('db.typeCountry')}
+                            noMatch={t('db.noMatch')}
                             testid="database-nationality" />
             </label>
-            <label style={{ display: 'grid', gap: 5, textAlign: 'left' }}>
-              <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>Travel document</span>
+            <label style={{ display: 'grid', gap: 6, textAlign: 'left' }}>
+              {label('db.travelDoc')}
               <select className="select" value={doc}
                       onChange={(e) => setDoc(e.target.value)}
                       style={{ fontSize: 14, padding: '11px 14px', borderRadius: 12 }}>
@@ -269,35 +329,38 @@ export default function TravelDatabase({ onBack }) {
                   ))}
               </select>
             </label>
-            <label style={{ display: 'grid', gap: 5, textAlign: 'left' }}>
-              <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>Destination *</span>
+            <label style={{ display: 'grid', gap: 6, textAlign: 'left' }}>
+              {label('db.destination')}
               <CountryCombo value={dest} options={countries} onChange={setDest}
-                            placeholder="Type a country or code…"
+                            placeholder={t('db.typeCountry')}
+                            noMatch={t('db.noMatch')}
                             testid="database-destination" />
             </label>
-            <label style={{ display: 'grid', gap: 5, textAlign: 'left' }}>
-              <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>Purpose of travel</span>
+            <label style={{ display: 'grid', gap: 6, textAlign: 'left' }}>
+              {label('db.purpose')}
               <select className="select" value={purpose}
                       onChange={(e) => setPurpose(e.target.value)}
                       style={{ fontSize: 14, padding: '11px 14px', borderRadius: 12 }}>
-                {PURPOSES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                {PURPOSES.map(([v, k]) => <option key={v} value={v}>{t(k)}</option>)}
               </select>
             </label>
-            <label style={{ display: 'grid', gap: 5, textAlign: 'left' }}>
+            <label style={{ display: 'grid', gap: 6, textAlign: 'left' }}>
               <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>
-                Travel date <span style={{ color: GRAY, fontWeight: 400 }}>(optional)</span>
+                {t('db.travelDate')}{' '}
+                <span style={{ color: GRAY, fontWeight: 400 }}>({t('db.optional')})</span>
               </span>
               <input className="input" type="date" value={arrival}
                      onChange={(e) => setArrival(e.target.value)}
                      style={{ fontSize: 14, padding: '10px 14px', borderRadius: 12 }} />
             </label>
           </div>
-          <div style={{ marginTop: 18, textAlign: 'center' }}>
+          <div style={{ marginTop: 20, textAlign: 'center' }}>
             <button className="btn btn--primary" onClick={lookUp}
                     disabled={busy || !nat || !dest}
                     data-testid="database-check"
-                    style={{ fontSize: 15, fontWeight: 800, padding: '12px 28px' }}>
-              {busy ? 'Checking the latest requirements…' : 'Check requirements'}
+                    style={{ fontSize: 15, fontWeight: 800, padding: '13px 32px',
+                             borderRadius: 999 }}>
+              {busy ? t('db.checking') : t('db.check')}
             </button>
             {error && (
               <div style={{ fontSize: 13, color: NAVY, fontWeight: 700, marginTop: 10 }}>
@@ -307,8 +370,7 @@ export default function TravelDatabase({ onBack }) {
           </div>
           {busy && (
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: 14 }}>
-              {/* The plane alone — the explanatory sentence is hidden by
-                  owner decision (theming). */}
+              {/* The plane alone — no explanatory sentence (owner decision). */}
               <Loading label="" />
             </div>
           )}
@@ -318,151 +380,166 @@ export default function TravelDatabase({ onBack }) {
       {result && g && (
         <div className="anim-rise" data-testid="database-result">
           {/* Verdict hero */}
-          <div className="card" style={{ padding: '26px 28px', borderRadius: 20,
-                                         marginTop: 16, textAlign: 'left',
-                                         background: disp.tint, border: 'none' }}>
-            <div style={{ fontSize: 12.5, color: GRAY, fontWeight: 600 }}>
+          <div className="card" style={{ padding: '28px 32px', borderRadius: 20,
+                                         marginTop: 18, textAlign: 'center',
+                                         background: disp?.tint || '#eef4ff',
+                                         border: 'none' }}>
+            <div style={{ fontSize: 13, color: NAVY, fontWeight: 700,
+                          opacity: 0.75 }}>
               {countryName(nat)} → {countryName(dest)} ·{' '}
-              {PURPOSES.find(([v]) => v === purpose)?.[1]}
+              {t(PURPOSES.find(([v]) => v === purpose)?.[1] || 'db.purpose.tourism')}
             </div>
-            <div style={{ fontSize: 27, fontWeight: 800, color: disp.color,
-                          marginTop: 6, letterSpacing: -0.4 }}
+            <div style={{ fontSize: 29, fontWeight: 800,
+                          color: disp?.color || NAVY,
+                          marginTop: 8, letterSpacing: -0.4 }}
                  data-testid="database-disposition">
-              {disp.title}
+              {disp ? t(disp.key) : asText(g.disposition)}
             </div>
             {asText(g.visa_category) && (
-              <div style={{ fontSize: 14, color: NAVY, marginTop: 6 }}>
-                {asText(g.visa_category)}
+              <div style={{ fontSize: 14, color: NAVY, marginTop: 8, opacity: 0.85 }}>
+                {T(asText(g.visa_category))}
               </div>
             )}
           </div>
 
           {/* At a glance */}
-          <div style={{ display: 'grid', gap: 10, marginTop: 14,
+          <div style={{ display: 'grid', gap: 12, marginTop: 14,
                         gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))' }}>
-            <Tile label="Permitted stay" value={g.permitted_stay} />
-            <Tile label="Government fee" value={feeText(g.government_fee)} />
-            <Tile label="Processing time" value={g.processing_time} />
-            <Tile label="Passport validity" value={
-              g.passport_validity_requirement?.months
-                ? `${g.passport_validity_requirement.months}+ months`
-                : g.passport_validity} />
+            <Tile label={t('db.stay')} value={T(asText(g.permitted_stay))} />
+            <Tile label={t('db.fee')} value={feeText(g.government_fee)} />
+            <Tile label={t('db.processing')} value={T(asText(g.processing_time))} />
+            <Tile label={t('db.channel')} value={T(humanizeEnum(g.application_channel))} />
           </div>
 
-          {itemsOf(g.required_documents).length > 0 && (
-            <Section title="Documents you need">
-              <Bullets items={g.required_documents} />
-            </Section>
-          )}
-
-          {(itemsOf(g.forms).length > 0 || g.official_portal_url) && (
-            <Section title="Forms & official portal">
-              <Bullets items={g.forms} />
-              {g.official_portal_url && (
-                <a href={g.official_portal_url} target="_blank" rel="noreferrer"
-                   style={{ display: 'inline-block', marginTop: 8, color: BLUE,
-                            fontSize: 13.5, fontWeight: 700 }}>
-                  {g.official_portal_url} ↗
-                </a>
-              )}
-            </Section>
-          )}
-
-          {(asText(g.passport_validity) || asText(g.photo_requirements)) && (
-            <Section title="Passport & photo">
-              <Fact label="Passport validity" value={g.passport_validity} />
-              {g.passport_validity_requirement?.months ? (
-                <Fact label="Validity rule" value={
-                  `At least ${g.passport_validity_requirement.months} months (${String(g.passport_validity_requirement.kind || '').replace(/_/g, ' ')})`} />
-              ) : null}
-              <Fact label="Photo" value={g.photo_requirements} />
-            </Section>
-          )}
-
-          {(entryFacts.length > 0 || g.arrival_card?.required ||
-            itemsOf(g.health_requirements).length > 0) && (
-            <Section title="Entry formalities">
-              {entryFacts.map(([l, v]) => <Fact key={l} label={l} value={v} />)}
-              {g.arrival_card?.required ? (
-                <Fact label="Arrival card" value={
-                  `${g.arrival_card.name || 'Arrival card'}${g.arrival_card.submission_window ? ' — ' + g.arrival_card.submission_window : ''}`} />
-              ) : null}
-              {itemsOf(g.health_requirements).length > 0 && (
-                <div style={{ marginTop: 6 }}>
-                  <div style={{ fontSize: 12.5, color: GRAY, marginBottom: 4 }}>Health</div>
-                  <Bullets items={g.health_requirements} />
+          {/* Organized two-column brief */}
+          <div style={{ display: 'grid', gap: 14, marginTop: 14,
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))' }}>
+            {documents.length > 0 && (
+              <Section title={t('db.documents')} accent="#0f8a3d" wide>
+                <div style={{ columns: documents.length > 5 ? 2 : 1,
+                              columnGap: 32 }}>
+                  <Bullets items={documents} mark="✓" markColor="#0f8a3d" />
                 </div>
-              )}
-            </Section>
-          )}
+              </Section>
+            )}
 
-          {(asText(g.onward_travel_evidence) || asText(g.accommodation_evidence) ||
-            asText(g.financial_evidence)) && (
-            <Section title="Evidence to carry">
-              <Fact label="Onward travel" value={g.onward_travel_evidence} />
-              <Fact label="Accommodation" value={g.accommodation_evidence} />
-              <Fact label="Finances" value={g.financial_evidence} />
-            </Section>
-          )}
+            {(asText(g.passport_validity) || asText(g.photo_requirements) ||
+              g.passport_validity_requirement?.months) && (
+              <Section title={t('db.passportPhoto')} accent={BLUE}>
+                <Fact label={t('db.validity')} value={T(asText(g.passport_validity))} />
+                {g.passport_validity_requirement?.months ? (
+                  <Fact label={t('db.validityRule')}
+                        value={t('db.validityMonths',
+                                 { n: g.passport_validity_requirement.months })} />
+                ) : null}
+                <Fact label={t('db.photo')} value={T(asText(g.photo_requirements))} />
+              </Section>
+            )}
 
-          {(itemsOf(g.exceptions).length > 0 || itemsOf(g.uncertainty).length > 0 ||
-            itemsOf(result.advisories).length > 0) && (
-            <Section title="Good to know">
-              <Bullets items={[...itemsOf(g.exceptions),
-                               ...itemsOf(result.advisories),
-                               ...itemsOf(g.uncertainty)]} />
-            </Section>
-          )}
+            {(entryFacts.length > 0 || g.arrival_card?.required || health.length > 0) && (
+              <Section title={t('db.entry')} accent={BLUE}>
+                {entryFacts.map(([l, v]) => <Fact key={l} label={l} value={v} />)}
+                {g.arrival_card?.required ? (
+                  <Fact label={t('db.arrivalCard')} value={
+                    `${g.arrival_card.name || t('db.arrivalCard')}${g.arrival_card.submission_window ? ' — ' + g.arrival_card.submission_window : ''}`} />
+                ) : null}
+                {health.length > 0 && (
+                  <div style={{ marginTop: 8 }}>
+                    <div style={{ fontSize: 12.5, color: GRAY, marginBottom: 4 }}>
+                      {t('db.health')}
+                    </div>
+                    <Bullets items={health} />
+                  </div>
+                )}
+              </Section>
+            )}
 
-          {applySteps.length > 0 && (
-            <Section title="Steps to apply">
-              <ol style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
-                {applySteps.map((x, i) => (
-                  <li key={i} style={{ display: 'flex', gap: 12,
-                                       alignItems: 'flex-start', padding: '7px 0' }}>
-                    <span style={{ flex: 'none', width: 24, height: 24,
-                                   borderRadius: 999, background: BLUE,
-                                   color: '#fff', fontSize: 12.5, fontWeight: 800,
-                                   display: 'flex', alignItems: 'center',
-                                   justifyContent: 'center' }}>{i + 1}</span>
-                    <span style={{ fontSize: 13.5, color: NAVY,
-                                   lineHeight: '24px' }}>
-                      {x}
-                      {i === portalStepIndex && (
-                        <a href={g.official_portal_url} target="_blank"
-                           rel="noreferrer"
-                           style={{ marginLeft: 8, color: BLUE, fontWeight: 700,
-                                    whiteSpace: 'nowrap' }}>
-                          official portal ↗
-                        </a>
+            {(asText(g.onward_travel_evidence) || asText(g.accommodation_evidence) ||
+              asText(g.financial_evidence)) && (
+              <Section title={t('db.evidence')} accent={BLUE}>
+                <Fact label={t('db.onward')} value={T(asText(g.onward_travel_evidence))} />
+                <Fact label={t('db.accommodation')} value={T(asText(g.accommodation_evidence))} />
+                <Fact label={t('db.finances')} value={T(asText(g.financial_evidence))} />
+              </Section>
+            )}
+
+            {(itemsOf(g.forms).length > 0 || g.official_portal_url) && (
+              <Section title={t('db.formsPortal')} accent={BLUE}>
+                <Bullets items={itemsOf(g.forms).map(T)} />
+                {g.official_portal_url && (
+                  <a href={g.official_portal_url} target="_blank" rel="noreferrer"
+                     style={{ display: 'inline-block', marginTop: 10, color: BLUE,
+                              fontSize: 13.5, fontWeight: 700,
+                              wordBreak: 'break-all' }}>
+                    {g.official_portal_url} ↗
+                  </a>
+                )}
+              </Section>
+            )}
+
+            {goodToKnow.length > 0 && (
+              <Section title={t('db.goodToKnow')} accent="#9a6200" wide>
+                <Bullets items={goodToKnow} mark="→" markColor="#9a6200" />
+              </Section>
+            )}
+
+            {applySteps.length > 0 && (
+              <Section title={t('db.steps')} accent={NAVY} wide>
+                <ol style={{ margin: 0, paddingLeft: 0, listStyle: 'none',
+                             position: 'relative' }}>
+                  {applySteps.map((x, i) => (
+                    <li key={i} style={{ display: 'flex', gap: 14,
+                                         alignItems: 'flex-start',
+                                         padding: '8px 0', position: 'relative' }}>
+                      {i < applySteps.length - 1 && (
+                        <span style={{ position: 'absolute', left: 12, top: 34,
+                                       bottom: -6, width: 2,
+                                       background: 'var(--line, #e8edf3)' }} />
                       )}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-              {g.official_portal_url && portalStepIndex === -1 && (
-                <a href={g.official_portal_url} target="_blank" rel="noreferrer"
-                   style={{ display: 'inline-block', marginTop: 10, color: BLUE,
-                            fontSize: 13.5, fontWeight: 700 }}>
-                  Start on the official portal ↗
-                </a>
-              )}
-            </Section>
-          )}
+                      <span style={{ flex: 'none', width: 26, height: 26,
+                                     borderRadius: 999, background: BLUE,
+                                     color: '#fff', fontSize: 13, fontWeight: 800,
+                                     display: 'flex', alignItems: 'center',
+                                     justifyContent: 'center', zIndex: 1 }}>{i + 1}</span>
+                      <span style={{ fontSize: 13.5, color: NAVY,
+                                     lineHeight: '26px' }}>
+                        {T(x)}
+                        {i === portalStepIndex && (
+                          <a href={g.official_portal_url} target="_blank"
+                             rel="noreferrer"
+                             style={{ marginLeft: 8, color: BLUE, fontWeight: 700,
+                                      whiteSpace: 'nowrap' }}>
+                            {t('db.portalInline')} ↗
+                          </a>
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+                {g.official_portal_url && portalStepIndex === -1 && (
+                  <a href={g.official_portal_url} target="_blank" rel="noreferrer"
+                     style={{ display: 'inline-block', marginTop: 10, color: BLUE,
+                              fontSize: 13.5, fontWeight: 700 }}>
+                    {t('db.portalStart')} ↗
+                  </a>
+                )}
+              </Section>
+            )}
+          </div>
 
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center',
-                        marginTop: 20 }}>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center',
+                        marginTop: 24 }}>
             {/* Present but inert, per owner instruction. */}
             <button className="btn btn--primary" data-testid="database-process"
                     onClick={() => {}}
-                    style={{ fontSize: 15, fontWeight: 800, padding: '13px 30px',
+                    style={{ fontSize: 15, fontWeight: 800, padding: '13px 32px',
                              borderRadius: 999 }}>
-              Process my visa
+              {t('db.process')}
             </button>
             <button className="btn btn--ghost" onClick={() => { setResult(null) }}
                     data-testid="database-again"
                     style={{ fontSize: 14, borderRadius: 999 }}>
-              New search
+              {t('db.newSearch')}
             </button>
           </div>
         </div>
@@ -470,12 +547,14 @@ export default function TravelDatabase({ onBack }) {
 
       {result && !g && (
         <div className="card anim-rise" style={{ padding: 22, borderRadius: 20,
-                                                 marginTop: 16 }}>
+                                                 marginTop: 16, maxWidth: 560,
+                                                 marginLeft: 'auto',
+                                                 marginRight: 'auto' }}>
           <div style={{ fontSize: 14, color: NAVY, fontWeight: 700 }}>
-            No decision is available for this route right now.
+            {t('db.noDecision')}
           </div>
           <button className="btn btn--ghost" style={{ marginTop: 12 }}
-                  onClick={() => setResult(null)}>New search</button>
+                  onClick={() => setResult(null)}>{t('db.newSearch')}</button>
         </div>
       )}
     </div>
