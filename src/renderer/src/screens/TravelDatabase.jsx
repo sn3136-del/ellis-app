@@ -87,8 +87,17 @@ function CountryCombo({ value, options, onChange, placeholder, noMatch, testid }
   const current = options.find((o) => o.value === value)
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase()
-    const list = s ? options.filter((o) => o.search.includes(s)) : options
-    return list.slice(0, 60)
+    if (!s) return options.slice(0, 60)
+    // Name-prefix matches rank first: "united sta" offers United States
+    // before United States Minor Outlying Islands.
+    const starts = [], contains = []
+    for (const o of options) {
+      if (!o.search.includes(s)) continue
+      const name = o.label.replace(/^[^A-Za-z]*/, '').toLowerCase()
+      ;(name.startsWith(s) ? starts : contains).push(o)
+    }
+    starts.sort((a, b) => a.label.length - b.label.length)
+    return [...starts, ...contains].slice(0, 60)
   }, [q, options])
   return (
     <div style={{ position: 'relative' }}>
