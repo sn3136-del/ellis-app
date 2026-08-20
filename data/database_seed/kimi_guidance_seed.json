@@ -1,0 +1,4651 @@
+[
+ {
+  "cache_key": "CHN|CHN|FRA|tourism|default|2026-08|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "FRA",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-08-31",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Short-stay Schengen C visa",
+   "permitted_stay": "90 days in any 180-day Schengen period",
+   "passport_validity": "3 months beyond intended departure from Schengen",
+   "required_documents": [
+    "Valid passport",
+    "Completed Schengen visa application form",
+    "Two passport photos",
+    "Travel medical insurance (min. EUR 30,000)",
+    "Round-trip flight reservation",
+    "Proof of accommodation",
+    "Proof of financial means",
+    "Employment/income evidence",
+    "Travel itinerary/cover letter"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "processing_time": "Up to 15 calendar days",
+   "forms": [
+    "Schengen visa application form (France-Visas)"
+   ],
+   "official_portal_url": "https://france-visas.gouv.fr",
+   "photo_requirements": "2 recent colour photos, 35x45 mm, white background, face 70-80%, no head coverings except religious",
+   "biometrics_required": true,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Register on France-Visas",
+    "Complete and print the application form",
+    "Register on TLScontact China to book appointment"
+   ],
+   "payment_process": [
+    "Pay visa fee via France-Visas or at appointment",
+    "Pay TLScontact service fee as applicable"
+   ],
+   "submission_process": [
+    "Attend TLScontact appointment",
+    "Submit documents and provide biometrics",
+    "Collect passport or use courier return"
+   ],
+   "onward_travel_evidence": "Return/onward flight reservation",
+   "accommodation_evidence": "Hotel bookings or host invitation letter",
+   "financial_evidence": "Bank statements, payslips, employment letter, tax records",
+   "insurance_required": true,
+   "exceptions": [],
+   "uncertainty": [
+    {
+     "field": "transit_countries",
+     "reason": "Not provided; may affect health/entry requirements and supporting documents"
+    },
+    {
+     "field": "consular_jurisdiction",
+     "reason": "Default provided; exact TLScontact centre and local document requirements depend on applicant's city/region in China"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination certificate",
+     "applicability": "conditional",
+     "trigger_countries": [],
+     "trigger": "arrival/transit within 6 days in a yellow-fever risk area",
+     "question": "Have you travelled in or transited a yellow-fever risk country within the past 6 days?"
+    }
+   ],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:20:26.795305",
+  "fresh_until": "2026-08-31T19:20:26.795305"
+ },
+ {
+  "cache_key": "CHN|CHN|FRA|tourism|default|2026-11|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "FRA",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-11-05",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Schengen short-stay (C) tourist visa",
+   "permitted_stay": "90 days within any 180-day Schengen period",
+   "passport_validity": "Issued within last 10 years; valid 3 months beyond departure",
+   "required_documents": [
+    "Valid passport",
+    "Signed Schengen visa application form",
+    "Two recent passport photos",
+    "Travel medical insurance (30,000 EUR coverage)",
+    "Round-trip flight reservation",
+    "Hotel bookings or host invitation",
+    "Proof of financial means",
+    "Employment/study/income proof",
+    "Travel itinerary"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "processing_time": "Up to 15 calendar days; may extend to 30-60 days",
+   "forms": [
+    "Schengen visa application form (France-Visas online form)"
+   ],
+   "official_portal_url": "https://www.france-visas.gouv.fr",
+   "photo_requirements": "Two 35x45 mm color photos, white background, ICAO standard, no older than 6 months",
+   "biometrics_required": true,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Create account on France-Visas",
+    "Complete online application form",
+    "Print and sign the form"
+   ],
+   "payment_process": [
+    "Pay Schengen visa fee at visa center appointment",
+    "Pay TLScontact service fee separately if applicable"
+   ],
+   "submission_process": [
+    "Book appointment via TLScontact",
+    "Attend appointment in person",
+    "Submit documents and provide biometrics",
+    "Await passport return"
+   ],
+   "onward_travel_evidence": "Confirmed round-trip flight reservation",
+   "accommodation_evidence": "Hotel bookings or notarized invitation letter from French host with proof of address",
+   "financial_evidence": "Bank statements, payslips, or sponsor letter showing sufficient funds for stay",
+   "insurance_required": true,
+   "exceptions": [
+    "Holders of certain diplomatic/official passports may be exempt",
+    "Holders of valid Schengen residence permit or long-stay visa may not need new visa"
+   ],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "Applicant age not provided; standard adult fee is 90 EUR, but children 6-12 pay 45 EUR and under-6 are free"
+    },
+    {
+     "field": "biometrics_required",
+     "reason": "Biometrics normally required for applicants aged 12+; age not provided"
+    },
+    {
+     "field": "health_requirements",
+     "reason": "Transit/recent travel history not provided; yellow-fever certificate conditional on travel from endemic areas"
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination certificate",
+     "applicability": "conditional",
+     "trigger_countries": [],
+     "trigger": "Required if traveler has been in a yellow-fever endemic country within 6 days before arrival",
+     "question": "Have you visited a yellow-fever endemic country in the 6 days before arriving in France?"
+    }
+   ],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:22:39.615260",
+  "fresh_until": "2026-08-31T19:22:39.615260"
+ },
+ {
+  "cache_key": "CHN|CHN|FRA|tourism|default|2026-09|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "FRA",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-09-05",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Schengen short-stay tourist visa (C)",
+   "permitted_stay": "Up to 90 days in any 180-day period",
+   "passport_validity": "Valid at least 3 months after intended departure from Schengen; issued within last 10 years",
+   "required_documents": [
+    "Valid ordinary passport",
+    "Completed France-Visas application form",
+    "Recent passport photo",
+    "Travel medical insurance certificate",
+    "Round-trip flight reservation",
+    "Proof of accommodation",
+    "Proof of financial means",
+    "Travel itinerary",
+    "Employment/study proof",
+    "Cover letter"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": null,
+    "currency": "EUR"
+   },
+   "processing_time": "Up to 15 calendar days; may extend for individual cases",
+   "forms": [
+    "France-Visas Schengen short-stay visa application form"
+   ],
+   "official_portal_url": "https://www.france-visas.gouv.fr/en",
+   "photo_requirements": "One recent color photo, 35x45 mm, white background, face 70-80%",
+   "biometrics_required": true,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Create account on France-Visas portal",
+    "Complete and submit the online application",
+    "Book appointment at TLScontact visa center",
+    "Print the application receipt"
+   ],
+   "payment_process": "Pay Schengen visa fee and TLScontact service fee at the visa center as instructed",
+   "submission_process": "Attend appointment at TLScontact; submit documents and provide biometrics",
+   "onward_travel_evidence": "Confirmed round-trip flight reservation or travel itinerary",
+   "accommodation_evidence": "Hotel bookings or invitation letter (attestation d'accueil)",
+   "financial_evidence": "Bank statements, payslips, or sponsorship letter showing sufficient funds",
+   "insurance_required": true,
+   "exceptions": [
+    "Diplomatic/official/service passport holders may be exempt; not applicable here"
+   ],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "Applicant age not provided; standard adult Schengen short-stay visa fee is EUR 80, children 6-12 EUR 40, under 6 free"
+    },
+    {
+     "field": "submission_process",
+     "reason": "Exact TLScontact center and local requirements depend on city/consular jurisdiction in China, which was not specified"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:22:41.593722",
+  "fresh_until": "2026-08-31T19:22:41.593722"
+ },
+ {
+  "cache_key": "CHN|CHN|DEU|tourism|default|2026-09|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "DEU",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-09-05",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Schengen Type C short-stay tourist visa",
+   "permitted_stay": "90 days in any 180-day Schengen period",
+   "passport_validity": "issued within last 10 years; valid ≥3 months beyond Schengen departure; ≥2 blank pages",
+   "required_documents": [
+    "valid passport",
+    "completed Schengen visa application form",
+    "recent passport photo",
+    "travel medical insurance (€30,000)",
+    "return flight reservation",
+    "hotel booking or invitation letter",
+    "proof of financial means",
+    "employment/school letter",
+    "trip itinerary/cover letter",
+    "previous passports if any"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": null,
+    "currency": null
+   },
+   "processing_time": "up to 15 calendar days; may extend to 45 days",
+   "forms": [
+    "VIDEX Schengen visa application form"
+   ],
+   "official_portal_url": "https://china.diplo.de/cn-en/service/visa-einreise",
+   "photo_requirements": "35x45 mm, white background, recent, full face, no headwear except religious",
+   "biometrics_required": true,
+   "interview_required": null,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Register on VFS Global Germany-China appointment site"
+   ],
+   "payment_process": [
+    "Pay visa fee and VFS service fee at visa center during appointment"
+   ],
+   "submission_process": [
+    "Book appointment online",
+    "attend VFS Global visa application center",
+    "submit documents and provide biometrics",
+    "collect passport or use courier return"
+   ],
+   "onward_travel_evidence": "return/onward flight reservation required",
+   "accommodation_evidence": "hotel bookings or host invitation letter with host ID/residence proof",
+   "financial_evidence": "bank statements, salary proof, or sponsorship letter with sponsor documents",
+   "insurance_required": true,
+   "exceptions": [
+    "holders of valid EU/Schengen residence permits",
+    "diplomatic/official/service passport holders",
+    "family members of EU/EEA citizens"
+   ],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "Applicant age not provided; fee varies by age group (adult/child/under 6)."
+    },
+    {
+     "field": "passport_issue_date",
+     "reason": "Passport issue date not provided; Schengen requires passport issued within last 10 years."
+    },
+    {
+     "field": "passport_expiry_date",
+     "reason": "Passport expiry date not provided; must be valid at least 3 months beyond departure."
+    },
+    {
+     "field": "biometrics",
+     "reason": "Whether fingerprints were collected in a Schengen visa application within last 59 months is unknown."
+    },
+    {
+     "field": "official_portal_url",
+     "reason": "Provided URL is the German Missions information page; appointment booking is handled by authorized VFS Global."
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:22:42.431637",
+  "fresh_until": "2026-08-31T19:22:42.431637"
+ },
+ {
+  "cache_key": "CHN|CHN|FRA|tourism|default|2026-10|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "FRA",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-10-05",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Short-stay Schengen visa (Type C) — tourism",
+   "permitted_stay": "90 days in any 180-day Schengen period",
+   "passport_validity": "Valid 3 months beyond intended departure from Schengen; issued within last 10 years",
+   "required_documents": [
+    "Valid passport",
+    "Completed France-Visas Schengen application form",
+    "Two passport photos",
+    "Travel itinerary / return flight reservation",
+    "Proof of accommodation",
+    "Travel medical insurance (€30,000 coverage)",
+    "Proof of financial means",
+    "Employment / study / economic-activity proof",
+    "Cover letter",
+    "France-Visas application receipt",
+    "Visa application center appointment confirmation",
+    "Visa fee payment receipt"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "processing_time": "Usually up to 15 calendar days",
+   "forms": [
+    "Online Schengen visa application form on France-Visas"
+   ],
+   "official_portal_url": "https://france-visas.gouv.fr/en/web/france-visas",
+   "photo_requirements": "Two recent color photos, 35 x 45 mm, white background, face 70–80%, no head coverings except religious, no glasses",
+   "biometrics_required": true,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Register on France-Visas.gouv.fr",
+    "Complete the online visa application",
+    "Print the application form and receipt"
+   ],
+   "payment_process": [
+    "Pay the Schengen visa fee online via France-Visas or at the visa application center",
+    "Keep the payment receipt"
+   ],
+   "submission_process": [
+    "Book appointment at a TLScontact France Visa Application Center in China",
+    "Attend appointment, submit documents and provide biometrics",
+    "Collect passport in person or by courier"
+   ],
+   "onward_travel_evidence": "Confirmed return or onward travel reservation",
+   "accommodation_evidence": "Hotel booking(s) or invitation letter with host ID and proof of address",
+   "financial_evidence": "Recent 3-month bank statements, payslips, or sponsor affidavit and funds",
+   "insurance_required": true,
+   "exceptions": [
+    "EU/EEA/Swiss family members are exempt",
+    "Holders of a valid Schengen residence permit or certain long-stay visas are exempt",
+    "Diplomatic/service passport holders may be exempt under bilateral agreements"
+   ],
+   "uncertainty": [
+    {
+     "field": "age",
+     "reason": "Age not provided; visa fee and biometric/document rules differ for minors/children under 6/12"
+    },
+    {
+     "field": "passport_issue_date",
+     "reason": "Schengen requires passport issued within the last 10 years; issue date not provided"
+    },
+    {
+     "field": "passport_expiry_date",
+     "reason": "Need 3 months validity beyond departure; expiry date not provided"
+    },
+    {
+     "field": "transit_countries",
+     "reason": "Transit countries not provided; may affect health/vaccination requirements"
+    },
+    {
+     "field": "prior_refusals",
+     "reason": "Prior visa refusals not provided; may affect application assessment and required documents"
+    },
+    {
+     "field": "consular_jurisdiction",
+     "reason": "Only 'default' specified; actual TLScontact center/city in China is unknown"
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination certificate",
+     "applicability": "conditional",
+     "trigger_countries": [],
+     "trigger": "Arrival/transit within 6 days from a yellow-fever endemic country",
+     "question": "Have you visited or transited a yellow-fever endemic country within the past 6 days?"
+    }
+   ],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:22:48.889833",
+  "fresh_until": "2026-08-31T19:22:48.889833"
+ },
+ {
+  "cache_key": "CHN|CHN|DEU|tourism|default|2026-11|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "DEU",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-11-05",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Schengen Type C short-stay tourist visa",
+   "permitted_stay": "90 days in any 180-day period",
+   "passport_validity": "Issued within last 10 years; valid 3 months beyond Schengen departure",
+   "required_documents": [
+    "Valid ordinary PRC passport",
+    "Completed Schengen visa application form",
+    "Recent biometric passport photo",
+    "Travel medical insurance certificate",
+    "Return flight reservation",
+    "Hotel bookings or host invitation",
+    "Proof of financial means",
+    "Employment/study/income proof",
+    "Travel itinerary"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "processing_time": "15 calendar days; up to 45 days in individual cases",
+   "forms": [
+    "Schengen visa application form"
+   ],
+   "official_portal_url": "https://china.diplo.de/",
+   "photo_requirements": "One recent biometric passport photo, 35x45mm, white background, face 70-80% of frame",
+   "biometrics_required": true,
+   "interview_required": null,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Create account on Germany VFS Global China website",
+    "Select visa category and jurisdiction",
+    "Book appointment"
+   ],
+   "payment_process": [
+    "Pay Schengen visa fee and VFS service fee at visa application center"
+   ],
+   "submission_process": [
+    "Attend appointment at VFS Global Germany visa application center",
+    "Submit documents and provide biometrics",
+    "Collect passport or use courier return"
+   ],
+   "onward_travel_evidence": "Return or onward flight reservation matching itinerary",
+   "accommodation_evidence": "Hotel bookings for entire stay or notarized invitation letter from host in Germany",
+   "financial_evidence": "Bank statements, proof of regular income, or sponsorship letter with sponsor's financial proof",
+   "insurance_required": true,
+   "exceptions": [],
+   "uncertainty": [
+    {
+     "field": "applicant_age",
+     "reason": "Age not provided; visa fee differs for children under 6 (free) and 6-12 (EUR 45), and minor applications need additional documents"
+    },
+    {
+     "field": "passport_issue_and_expiry_dates",
+     "reason": "Cannot verify that passport was issued within last 10 years and remains valid for 3 months after 2026-11-20 without issue/expiry dates"
+    },
+    {
+     "field": "consular_jurisdiction",
+     "reason": "'default' is insufficient; the applicant's province/city of residence in China determines the competent German consulate and VFS Global center"
+    },
+    {
+     "field": "prior_visa_refusals",
+     "reason": "Not stated; any previous Schengen or other visa refusals must be disclosed and may affect assessment"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:22:50.741861",
+  "fresh_until": "2026-08-31T19:22:50.741861"
+ },
+ {
+  "cache_key": "CHN|CHN|DEU|tourism|default|2026-10|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "DEU",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-10-05",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Schengen C visa (tourism)",
+   "permitted_stay": "Up to 90 days within any 180-day Schengen period",
+   "passport_validity": "Issued within last 10 years; valid 3 months beyond Schengen departure; 2 blank pages",
+   "required_documents": [
+    "Valid ordinary passport",
+    "Completed Schengen visa application form",
+    "2 passport photos",
+    "Travel itinerary / round-trip booking",
+    "Proof of accommodation",
+    "Travel medical insurance (30,000 EUR coverage)",
+    "Proof of financial means",
+    "Employment / study proof",
+    "Recent bank statements",
+    "Sponsorship letter if applicable"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": null,
+    "currency": "EUR"
+   },
+   "processing_time": "Up to 15 calendar days; may extend to 45 days",
+   "forms": [
+    "Schengen visa application form"
+   ],
+   "official_portal_url": null,
+   "photo_requirements": "2 recent color photos, 35x45 mm, white background, no older than 6 months",
+   "biometrics_required": true,
+   "interview_required": true,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Create account on German visa application center portal (VFS Global / TLScontact)"
+   ],
+   "payment_process": [
+    "Pay visa fee online or at visa application center appointment"
+   ],
+   "submission_process": [
+    "Schedule appointment at German visa application center",
+    "Attend in person",
+    "Submit documents and biometrics"
+   ],
+   "onward_travel_evidence": "Round-trip flight booking or travel itinerary",
+   "accommodation_evidence": "Hotel reservations or invitation letter from host",
+   "financial_evidence": "Bank statements for last 3 months, proof of income, or sponsorship letter",
+   "insurance_required": true,
+   "exceptions": [
+    "Holders of valid EU/EEA residence permits may not need a Schengen visa",
+    "Family members of EU/EEA nationals may benefit from facilitations",
+    "Holders of diplomatic / service passports may be exempt"
+   ],
+   "uncertainty": [
+    {
+     "field": "age",
+     "reason": "Age not provided; visa fee and requirements differ for children / minors"
+    },
+    {
+     "field": "passport_issue_and_expiry_dates",
+     "reason": "Passport issue/expiration dates not provided; cannot verify 10-year issue rule and 3-month validity beyond departure"
+    },
+    {
+     "field": "prior_refusals",
+     "reason": "Prior visa refusals not stated; may affect application assessment"
+    },
+    {
+     "field": "official_portal_url",
+     "reason": "Exact official German visa application center portal URL for the applicant's city not confirmed"
+    },
+    {
+     "field": "government_fee",
+     "reason": "Fee depends on age at application (adult, child 6-12, or under 6) and may change before 2026"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:22:53.963211",
+  "fresh_until": "2026-08-31T19:22:53.963211"
+ },
+ {
+  "cache_key": "CHN|CHN|SGP|tourism|default|2026-11|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "SGP",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-11-05",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_EXEMPT",
+   "visa_category": "visa_exempt_tourism",
+   "permitted_stay": "30 days",
+   "passport_validity": "6 months beyond arrival",
+   "required_documents": [
+    "valid ordinary passport",
+    "confirmed onward/return ticket",
+    "proof of accommodation",
+    "proof of sufficient funds"
+   ],
+   "application_channel": "not_required",
+   "government_fee": {
+    "amount": null,
+    "currency": null
+   },
+   "processing_time": "Not applicable",
+   "forms": [],
+   "official_portal_url": null,
+   "photo_requirements": null,
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [],
+   "payment_process": [],
+   "submission_process": [],
+   "onward_travel_evidence": "Recommended",
+   "accommodation_evidence": "Recommended",
+   "financial_evidence": "Recommended",
+   "insurance_required": false,
+   "exceptions": [],
+   "uncertainty": [],
+   "confidence": "high",
+   "permitted_stay_days": 30,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "SG Arrival Card",
+    "submission_window": "within 3 days before arrival"
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_exempt_preparation"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:22:55.212491",
+  "fresh_until": "2026-08-31T19:22:55.212491"
+ },
+ {
+  "cache_key": "CHN|CHN|SGP|tourism|default|2026-09|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "SGP",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-09-05",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "tourist visa (Form 14A)",
+   "permitted_stay": "up to 30 days per entry",
+   "passport_validity": "at least 6 months beyond arrival",
+   "required_documents": [
+    "valid passport",
+    "completed Form 14A",
+    "recent passport-size photo",
+    "travel itinerary",
+    "proof of accommodation",
+    "proof of financial means",
+    "return/onward ticket",
+    "employment or student proof",
+    "visa fee payment"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 30,
+    "currency": "SGD"
+   },
+   "processing_time": "3-5 working days (may vary)",
+   "forms": [
+    "Form 14A"
+   ],
+   "official_portal_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+   "photo_requirements": "recent colour passport-size photo meeting ICA specifications",
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [],
+   "payment_process": [
+    "pay visa fee through authorized visa agent or local Singapore sponsor"
+   ],
+   "submission_process": [
+    "submit application via Singapore-authorized visa agent or local Singapore contact/sponsor",
+    "collect passport with issued visa"
+   ],
+   "onward_travel_evidence": "confirmed return or onward ticket required",
+   "accommodation_evidence": "hotel booking or host address required",
+   "financial_evidence": "bank statements or pay slips showing sufficient funds",
+   "insurance_required": false,
+   "exceptions": [
+    "96-hour Visa Free Transit Facility may apply only if transiting to/from a third country with a valid visa/long-term pass of Australia, Canada, Germany, Japan, New Zealand, Switzerland, UK, or USA"
+   ],
+   "uncertainty": [
+    {
+     "field": "transit_countries",
+     "reason": "Not provided; Visa Free Transit Facility and yellow-fever rules depend on transit/recent travel history."
+    },
+    {
+     "field": "appointment_required",
+     "reason": "Depends on the specific authorized visa agent's booking procedures."
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 30,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "SG Arrival Card",
+    "submission_window": "up to 3 days before arrival"
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination certificate",
+     "applicability": "conditional",
+     "trigger_countries": [],
+     "trigger": "arrival within 6 days after stay or transit in a yellow-fever endemic country",
+     "question": "Have you stayed in or transited through any yellow-fever endemic country within the past 6 days?"
+    }
+   ],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:22:55.748931",
+  "fresh_until": "2026-08-31T19:22:55.748931"
+ },
+ {
+  "cache_key": "CHN|CHN|USA|tourism|default|2026-11|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "USA",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-11-05",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "B1/B2 visitor visa",
+   "permitted_stay": "up to 6 months, decided by CBP at entry",
+   "passport_validity": "valid at least 6 months beyond intended stay",
+   "required_documents": [
+    "valid passport",
+    "DS-160 confirmation page",
+    "MRV fee receipt",
+    "2x2 inch passport photo",
+    "interview appointment confirmation",
+    "proof of ties to China",
+    "travel itinerary",
+    "financial evidence"
+   ],
+   "application_channel": "online_portal",
+   "government_fee": {
+    "amount": 185,
+    "currency": "USD"
+   },
+   "processing_time": "varies; interview wait plus possible administrative processing",
+   "forms": [
+    "DS-160 Online Nonimmigrant Visa Application"
+   ],
+   "official_portal_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html",
+   "photo_requirements": "2x2 inch (51x51 mm) color, white background, recent, full face",
+   "biometrics_required": true,
+   "interview_required": true,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Create account at USTravelDocs China",
+    "Complete DS-160 form",
+    "Pay MRV fee",
+    "Schedule VAC biometrics appointment",
+    "Schedule embassy/consulate interview"
+   ],
+   "payment_process": [
+    "Pay $185 MRV fee online or at authorized bank"
+   ],
+   "submission_process": [
+    "Submit DS-160 online",
+    "Attend Visa Application Center for biometrics",
+    "Attend interview at U.S. Embassy/Consulate",
+    "Receive passport with visa if approved"
+   ],
+   "onward_travel_evidence": "recommended: return/onward ticket",
+   "accommodation_evidence": "recommended: hotel reservation or host invitation",
+   "financial_evidence": "recommended: bank statements, pay slips, employment letter",
+   "insurance_required": false,
+   "exceptions": [],
+   "uncertainty": [
+    {
+     "field": "passport_issue_and_expiry_dates",
+     "reason": "not provided; cannot verify 6-month validity or blank pages"
+    },
+    {
+     "field": "processing_time",
+     "reason": "depends on appointment availability and any administrative processing"
+    },
+    {
+     "field": "interview_waiver_eligibility",
+     "reason": "depends on age, prior visas, and renewal criteria not provided"
+    },
+    {
+     "field": "current_MRV_payment_methods_in_China",
+     "reason": "payment channels may change; verify on USTravelDocs China"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 180,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": false,
+    "name": "Electronic I-94",
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "embassy_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:23:06.718725",
+  "fresh_until": "2026-08-31T19:23:06.718725"
+ },
+ {
+  "cache_key": "CHN|CHN|USA|tourism|default|2026-10|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "USA",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-10-05",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "B1/B2 visitor visa",
+   "permitted_stay": "Up to 6 months at CBP discretion",
+   "passport_validity": "6 months beyond intended departure",
+   "required_documents": [
+    "Valid passport",
+    "DS-160 confirmation page",
+    "MRV fee receipt",
+    "Visa photo",
+    "Interview appointment letter",
+    "Travel itinerary",
+    "Financial evidence",
+    "Ties-to-home-country evidence"
+   ],
+   "application_channel": "embassy",
+   "government_fee": {
+    "amount": 185,
+    "currency": "USD"
+   },
+   "processing_time": "Varies by post; typically days to weeks after interview",
+   "forms": [
+    "DS-160 Online Nonimmigrant Visa Application"
+   ],
+   "official_portal_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html",
+   "photo_requirements": "One 2x2 inch color photo, white background, taken within last 6 months; or upload compliant digital photo with DS-160",
+   "biometrics_required": true,
+   "interview_required": true,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Create profile on U.S. visa appointment service",
+    "Complete DS-160 and print confirmation",
+    "Pay MRV fee",
+    "Schedule interview"
+   ],
+   "payment_process": "Pay Machine Readable Visa (MRV) fee online or at designated bank; keep receipt number",
+   "submission_process": [
+    "Submit DS-160 online",
+    "Attend interview at U.S. Embassy/Consulate",
+    "Submit passport for visa stamping if approved"
+   ],
+   "onward_travel_evidence": "Return/onward ticket recommended; may be requested",
+   "accommodation_evidence": "Hotel booking or host invitation may be requested",
+   "financial_evidence": "Bank statements, payslips, or other proof of funds for the trip",
+   "insurance_required": false,
+   "exceptions": [
+    "Applicants under 14 or 80+ may qualify for interview waiver",
+    "10-year B1/B2 visa holders must enroll in EVUS before travel"
+   ],
+   "uncertainty": [
+    {
+     "field": "passport_expiry_date",
+     "reason": "Not provided; passport must be valid at least 6 months beyond 2026-10-20"
+    },
+    {
+     "field": "government_fee",
+     "reason": "MRV fee can change; current B1/B2 fee is $185 but verify for 2026"
+    },
+    {
+     "field": "health_requirements",
+     "reason": "2026 health/vaccination/entry rules are unknown and may change"
+    },
+    {
+     "field": "interview_waiver_eligibility",
+     "reason": "Depends on age, prior U.S. visa history, and post policy not provided"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 180,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "embassy_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:23:06.874738",
+  "fresh_until": "2026-08-31T19:23:06.874738"
+ },
+ {
+  "cache_key": "CHN|CHN|SGP|tourism|default|2026-10|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "SGP",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-10-05",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Singapore Entry Visa (tourist)",
+   "permitted_stay": "Up to 30 days at immigration discretion",
+   "passport_validity": "At least 6 months beyond date of entry",
+   "required_documents": [
+    "passport valid ≥6 months",
+    "Form 14A",
+    "recent passport photo",
+    "Chinese ID / household registration copy",
+    "flight itinerary",
+    "hotel booking or host address",
+    "bank statements / proof of funds",
+    "employment / student proof",
+    "cover letter"
+   ],
+   "application_channel": "online_portal",
+   "government_fee": {
+    "amount": 30,
+    "currency": "SGD"
+   },
+   "processing_time": "3-5 working days",
+   "forms": [
+    "Form 14A"
+   ],
+   "official_portal_url": "https://eservices.ica.gov.sg/esvclandingpage/save",
+   "photo_requirements": "One recent colour passport-size photo, 35×45 mm, white background, face height 25–35 mm, no headwear except religious, taken within last 3 months",
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [
+    "A Singapore-based local contact or an authorized visa agent logs into ICA SAVE; the applicant cannot submit directly without a sponsor/agent"
+   ],
+   "payment_process": [
+    "Pay SGD 30 visa fee plus any agent service charge; non-refundable"
+   ],
+   "submission_process": [
+    "Prepare documents",
+    "Submit to authorized visa agent or local sponsor",
+    "Agent/sponsor lodges application via ICA SAVE e-Service",
+    "Receive e-Visa outcome by email",
+    "Print e-Visa for boarding/entry"
+   ],
+   "onward_travel_evidence": "Return or onward ticket recommended",
+   "accommodation_evidence": "Hotel reservation or local host address in Singapore",
+   "financial_evidence": "Recent bank statements, payslips or proof of sufficient funds",
+   "insurance_required": false,
+   "exceptions": [
+    "No visa exemption for ordinary PRC passport holders on a tourist stay"
+   ],
+   "uncertainty": [
+    {
+     "field": "passport_issue_date / passport_expiry_date",
+     "reason": "Not provided; cannot confirm actual passport validity meets ≥6-month requirement"
+    },
+    {
+     "field": "transit_countries",
+     "reason": "Not provided; affects whether yellow-fever certificate is required"
+    },
+    {
+     "field": "local_sponsor_vs_authorized_agent",
+     "reason": "Not provided; determines whether the application is lodged by a Singapore-based sponsor or a China-based authorized visa agent"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 30,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "SG Arrival Card",
+    "submission_window": "Within 3 days before arrival via ICA website or mobile app"
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination certificate",
+     "applicability": "conditional",
+     "trigger_countries": [],
+     "trigger": "Travel or transit through a yellow-fever endemic country within 6 days before arrival",
+     "question": "Have you travelled through or stayed in any yellow-fever endemic country in the past 6 days?"
+    }
+   ],
+   "route_workflow_type": "evisa_portal"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:23:13.203648",
+  "fresh_until": "2026-08-31T19:23:13.203648"
+ },
+ {
+  "cache_key": "CHN|CHN|USA|tourism|default|2026-09|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "USA",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-09-05",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "B1/B2 (visitor for business/pleasure)",
+   "permitted_stay": "Up to 6 months per entry; CBP officer decides",
+   "passport_validity": "Valid at least 6 months beyond intended stay; one blank visa page",
+   "required_documents": [
+    "Valid passport (6+ months beyond stay, blank visa page)",
+    "DS-160 confirmation page",
+    "Visa appointment confirmation",
+    "MRV fee receipt",
+    "One 2x2 inch photo or DS-160 upload",
+    "Travel itinerary",
+    "Proof of accommodation",
+    "Financial evidence",
+    "Evidence of ties to China"
+   ],
+   "application_channel": "embassy",
+   "government_fee": {
+    "amount": 185,
+    "currency": "USD"
+   },
+   "processing_time": "Varies; appointment wait + possible administrative processing, allow weeks to months",
+   "forms": [
+    "DS-160 (Online Nonimmigrant Visa Application)"
+   ],
+   "official_portal_url": "https://travel.state.gov/content/travel/en/us-visas.html",
+   "photo_requirements": "2x2 inches (51x51 mm), white background, taken within last 6 months, full face, no glasses",
+   "biometrics_required": null,
+   "interview_required": null,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Register on USTravelDocs/CGI Federal portal",
+    "Link DS-160 confirmation number",
+    "Select visa type and pay fee",
+    "Schedule biometrics and interview appointments"
+   ],
+   "payment_process": [
+    "Pay non-refundable MRV visa application fee online or at designated bank",
+    "Keep receipt to schedule appointment"
+   ],
+   "submission_process": [
+    "Complete DS-160 online and print confirmation",
+    "Attend ASC for fingerprints/photo",
+    "Attend US embassy/consulate interview",
+    "Passport returned by courier if approved"
+   ],
+   "onward_travel_evidence": "Return/onward ticket recommended; not always mandatory",
+   "accommodation_evidence": "Hotel reservations or host invitation letter",
+   "financial_evidence": "Bank statements, payslips, tax records, sponsor letter if applicable",
+   "insurance_required": false,
+   "exceptions": [
+    "Interview waiver may apply to certain renewals within 48 months",
+    "Children under 14 and applicants 80+ may not require an interview"
+   ],
+   "uncertainty": [
+    {
+     "field": "passport_expiration_date",
+     "reason": "Not provided; cannot confirm 6-month validity beyond 2026-09-20"
+    },
+    {
+     "field": "applicant_age",
+     "reason": "Not provided; interview and biometrics requirements depend on age"
+    },
+    {
+     "field": "government_fee",
+     "reason": "Current official fee; may change before travel date"
+    },
+    {
+     "field": "health_requirements.COVID-19",
+     "reason": "Air-travel COVID-19 requirement can change; verify before departure"
+    },
+    {
+     "field": "processing_time",
+     "reason": "Appointment availability and administrative processing vary"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 180,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [
+    {
+     "name": "COVID-19 vaccination (air travel)",
+     "applicability": "conditional",
+     "trigger_countries": [],
+     "trigger": "Noncitizen nonimmigrant air travelers to the US must show proof unless exempt; policy may change",
+     "question": "Will you arrive by air and are you exempt from COVID-19 vaccination?"
+    }
+   ],
+   "route_workflow_type": "embassy_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:23:14.717853",
+  "fresh_until": "2026-08-31T19:23:14.717853"
+ },
+ {
+  "cache_key": "CHN|CHN|ESP|tourism|default|2026-10|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "ESP",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-10-05",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Short-stay Schengen visa (Type C) for tourism",
+   "permitted_stay": "90 days within any 180-day period",
+   "passport_validity": "3 months beyond intended departure from the Schengen Area",
+   "required_documents": [
+    "Valid ordinary passport issued within last 10 years with 2 blank pages",
+    "Completed Schengen visa application form",
+    "Two recent passport photos",
+    "Travel medical insurance",
+    "Round-trip reservation or travel itinerary",
+    "Proof of accommodation",
+    "Proof of financial means",
+    "Proof of employment, study, or self-employment",
+    "Cover letter or trip purpose letter",
+    "Appointment confirmation"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 80,
+    "currency": "EUR"
+   },
+   "processing_time": "Usually up to 15 calendar days; up to 45 days in individual cases",
+   "forms": [
+    "Schengen visa application form"
+   ],
+   "official_portal_url": "https://www.blsspainchina.com/",
+   "photo_requirements": "Two recent colour photos, 35x45 mm, white background, neutral expression, head uncovered unless religious",
+   "biometrics_required": true,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Register on the BLS Spain China portal",
+    "Complete the online application form",
+    "Book an appointment at the relevant BLS centre"
+   ],
+   "payment_process": [
+    "Pay Schengen visa fee and BLS service fee online or at the BLS centre as instructed"
+   ],
+   "submission_process": [
+    "Attend the BLS Spain Visa Application Centre",
+    "Submit documents and provide biometrics",
+    "Track application status online",
+    "Collect passport or receive courier return"
+   ],
+   "onward_travel_evidence": "Confirmed round-trip reservation or travel itinerary",
+   "accommodation_evidence": "Hotel bookings or invitation letter from a host in Spain",
+   "financial_evidence": "Recent 3-6 months bank statements, proof of income, or sponsorship documents",
+   "insurance_required": true,
+   "exceptions": [],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "Applicant age not provided; assuming adult fee of EUR 80, but children may pay reduced or no fee"
+    },
+    {
+     "field": "interview_required",
+     "reason": "A personal interview may be requested by the consulate at its discretion"
+    },
+    {
+     "field": "consular_jurisdiction",
+     "reason": "Jurisdiction set to default; exact BLS centre depends on the applicant's place of residence/Hukou in China"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:23:22.464277",
+  "fresh_until": "2026-08-31T19:23:22.464277"
+ },
+ {
+  "cache_key": "CHN|CHN|ESP|tourism|default|2026-11|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "ESP",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-11-05",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Schengen short-stay (Type C) tourist visa",
+   "permitted_stay": "Up to 90 days in any 180-day Schengen period",
+   "passport_validity": "Valid at least 3 months after departure from Schengen and issued within the last 10 years",
+   "required_documents": [
+    "Valid passport",
+    "Completed Schengen visa application form",
+    "Recent passport photo",
+    "Travel itinerary / return booking",
+    "Proof of accommodation",
+    "Travel medical insurance (EUR 30,000)",
+    "Proof of financial means",
+    "Proof of employment or studies",
+    "Cover letter (recommended)",
+    "Minors: birth certificate and consent if applicable"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "processing_time": "15 calendar days; up to 45 days in individual cases",
+   "forms": [
+    "Schengen visa application form (Spanish/English/Chinese)"
+   ],
+   "official_portal_url": "https://china.blsspainglobal.com/",
+   "photo_requirements": "One recent color photo, 35x45 mm, white background, facing camera, no head covering unless religious",
+   "biometrics_required": true,
+   "interview_required": null,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Create account on BLS Spain China online appointment system",
+    "Select visa type and nearest BLS center",
+    "Book appointment"
+   ],
+   "payment_process": [
+    "Pay Schengen visa fee at BLS Visa Application Centre",
+    "Service fee may be charged separately"
+   ],
+   "submission_process": [
+    "Attend appointment at BLS Visa Application Centre",
+    "Submit documents and provide biometrics",
+    "Collect passport or receive courier delivery"
+   ],
+   "onward_travel_evidence": "Return or onward ticket and detailed travel itinerary",
+   "accommodation_evidence": "Hotel reservations or invitation letter from host in Spain",
+   "financial_evidence": "Bank statements for last 3-6 months and proof of stable income",
+   "insurance_required": true,
+   "exceptions": [],
+   "uncertainty": [],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:23:24.104889",
+  "fresh_until": "2026-08-31T19:23:24.104889"
+ },
+ {
+  "cache_key": "CHN|CHN|ESP|tourism|default|2026-09|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "ESP",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-09-05",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Schengen short-stay C visa (tourism)",
+   "permitted_stay": "Up to 90 days in any 180-day Schengen period",
+   "passport_validity": "Issued within last 10 years and valid at least 3 months beyond departure from Schengen",
+   "required_documents": [
+    "Valid passport",
+    "Completed and signed Schengen visa application form",
+    "Two recent passport photos",
+    "Travel medical insurance",
+    "Return/onward flight reservation",
+    "Proof of accommodation",
+    "Proof of financial means",
+    "Bank statements (last 3-6 months)",
+    "Proof of employment or studies",
+    "Travel itinerary",
+    "Residence/hukou documentation (China)"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "processing_time": "Usually up to 15 calendar days; up to 45 days in individual cases",
+   "forms": [
+    "Schengen visa application form"
+   ],
+   "official_portal_url": null,
+   "photo_requirements": "2 recent color photos, 35x45 mm, white background, face centered, no head coverings except for religious reasons",
+   "biometrics_required": true,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Create account on the BLS Spain visa portal",
+    "Complete the online Schengen visa application form",
+    "Book an appointment at the nearest BLS center"
+   ],
+   "payment_process": [
+    "Pay Schengen visa fee and BLS service fee at the visa center, or as instructed during appointment booking"
+   ],
+   "submission_process": [
+    "Attend appointment at BLS Spain visa application center",
+    "Submit documents and provide biometrics",
+    "Collect passport in person or via courier when notified"
+   ],
+   "onward_travel_evidence": "Confirmed return or onward flight reservation",
+   "accommodation_evidence": "Hotel bookings or invitation letter from host with ID copy",
+   "financial_evidence": "Bank statements (last 3-6 months), proof of income, or sponsorship letter",
+   "insurance_required": true,
+   "exceptions": [
+    "Holders of a valid Schengen visa or Schengen residence permit",
+    "Holders of diplomatic, official, or service passports may be exempt",
+    "Family members of EU/EEA/Swiss citizens may have a facilitated procedure"
+   ],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "Fee assumes adult applicant; children 6-11 pay a reduced fee and under-6 are free, but age was not provided"
+    },
+    {
+     "field": "biometrics_required",
+     "reason": "Required for applicants aged 12 and over; children under 12 are exempt, but age was not provided"
+    },
+    {
+     "field": "official_portal_url",
+     "reason": "Exact BLS Spain application portal URL depends on the specific Chinese city/jurisdiction and was not provided"
+    },
+    {
+     "field": "permitted_stay_days",
+     "reason": "Maximum Schengen C visa stay is 90 days in any 180-day period; the consulate decides the actual days granted"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:23:32.068620",
+  "fresh_until": "2026-08-31T19:23:32.068620"
+ },
+ {
+  "cache_key": "CHN|CHN|ITA|tourism|default|2026-09|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "ITA",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-09-05",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Schengen Type C short-stay visa (tourism)",
+   "permitted_stay": "Up to 90 days in any 180-day Schengen period",
+   "passport_validity": "Valid at least 3 months beyond planned departure from Schengen; issued within last 10 years",
+   "required_documents": [
+    "Valid passport",
+    "Completed Schengen visa application form",
+    "Recent passport-size photo",
+    "Travel itinerary / flight reservation",
+    "Proof of accommodation",
+    "Travel medical insurance (30,000 EUR minimum)",
+    "Proof of financial means",
+    "Employment or study proof",
+    "Cover letter"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": null,
+    "currency": "EUR"
+   },
+   "processing_time": "Up to 15 calendar days; may extend to 30 or 60 days",
+   "forms": [
+    "Schengen visa application form"
+   ],
+   "official_portal_url": "https://vistoperitalia.esteri.it/home/en",
+   "photo_requirements": "One recent color photo, 35x45 mm, white background, Schengen standard",
+   "biometrics_required": true,
+   "interview_required": null,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Register on the VFS Global Italy-China portal to book an appointment"
+   ],
+   "payment_process": [
+    "Pay Schengen visa fee and VFS Global service fee at the visa application center"
+   ],
+   "submission_process": [
+    "Book appointment online via VFS Global",
+    "Complete the Schengen application form",
+    "Attend appointment in person",
+    "Submit documents and provide biometrics",
+    "Collect passport or receive courier delivery"
+   ],
+   "onward_travel_evidence": "Flight reservation or travel itinerary required",
+   "accommodation_evidence": "Hotel bookings or invitation letter required",
+   "financial_evidence": "Bank statements, payslips, or sponsorship letter showing sufficient funds",
+   "insurance_required": true,
+   "exceptions": [],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "Applicant age not provided; standard adult Schengen fee is 90 EUR, children 6-12 pay 45 EUR, under-6 exempt"
+    },
+    {
+     "field": "interview_required",
+     "reason": "Personal interview is at consular discretion; VFS appointment is for document submission and biometrics, not necessarily a formal interview"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:23:32.468207",
+  "fresh_until": "2026-08-31T19:23:32.468207"
+ },
+ {
+  "cache_key": "CHN|CHN|ITA|tourism|default|2026-10|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "ITA",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-10-05",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Schengen Type C short-stay visa (tourism)",
+   "permitted_stay": "90 days in any 180-day Schengen period",
+   "passport_validity": "Valid 3 months beyond intended Schengen departure; issued within last 10 years; 2 blank pages",
+   "required_documents": [
+    "Valid ordinary passport",
+    "Completed Schengen visa application form",
+    "Recent passport-size photo",
+    "Travel medical insurance (min EUR 30,000)",
+    "Round-trip flight reservation",
+    "Proof of accommodation",
+    "Proof of financial means",
+    "Employment or student certificate",
+    "Recent bank statements",
+    "Travel itinerary"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "processing_time": "Up to 15 calendar days; may extend to 45 days",
+   "forms": [
+    "Schengen visa application form (Italy)"
+   ],
+   "official_portal_url": null,
+   "photo_requirements": "35x45 mm, white background, recent, full face",
+   "biometrics_required": true,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Create account on Italy VFS Global China portal",
+    "Complete online application form",
+    "Book in-person appointment"
+   ],
+   "payment_process": [
+    "Pay Schengen visa fee and VFS service fee at application centre"
+   ],
+   "submission_process": [
+    "Attend appointment at Italy Visa Application Centre (VFS Global)",
+    "Submit documents and provide biometrics",
+    "Collect passport or receive courier return"
+   ],
+   "onward_travel_evidence": "Round-trip flight reservation or travel ticket",
+   "accommodation_evidence": "Hotel bookings or invitation letter with host documents",
+   "financial_evidence": "Bank statements, employment certificate, sponsor letter if applicable",
+   "insurance_required": true,
+   "exceptions": [
+    "Family members of EU/EEA/Swiss citizens may use free movement rules if applicable",
+    "Diplomatic/service passport holders have different rules"
+   ],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "Applicant age not provided; EUR 90 applies to adults aged 12+, children 6-12 pay EUR 45, under 6 free"
+    },
+    {
+     "field": "official_portal_url",
+     "reason": "No official Italian government visa application portal URL provided; applications in China are handled by VFS Global"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:23:33.393131",
+  "fresh_until": "2026-08-31T19:23:33.393131"
+ },
+ {
+  "cache_key": "CHN|CHN|ITA|tourism|default|2026-11|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "ITA",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-11-05",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Schengen short-stay visa (Type C)",
+   "permitted_stay": "90 days in any 180-day period",
+   "passport_validity": "valid at least 3 months after intended departure from Schengen, issued within last 10 years",
+   "required_documents": [
+    "valid passport",
+    "completed Schengen visa application form",
+    "recent passport photo",
+    "travel medical insurance",
+    "proof of accommodation",
+    "round-trip flight reservation",
+    "proof of financial means",
+    "proof of employment or studies",
+    "travel itinerary",
+    "visa fee payment receipt"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "processing_time": "up to 15 calendar days",
+   "forms": [
+    "Schengen visa application form"
+   ],
+   "official_portal_url": "https://www.esteri.it/",
+   "photo_requirements": "Schengen standard 35x45 mm, white background, recent, full face",
+   "biometrics_required": true,
+   "interview_required": null,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "register on Italy visa application center portal (VFS Global)",
+    "book appointment"
+   ],
+   "payment_process": [
+    "pay Schengen visa fee at visa application center or as instructed"
+   ],
+   "submission_process": [
+    "attend appointment at Italian visa application center",
+    "submit documents and provide biometrics",
+    "collect passport or receive courier delivery"
+   ],
+   "onward_travel_evidence": "return/onward ticket reservation required",
+   "accommodation_evidence": "hotel bookings or invitation letter from host",
+   "financial_evidence": "bank statements (last 3-6 months), proof of income, sponsorship letter if applicable",
+   "insurance_required": true,
+   "exceptions": [],
+   "uncertainty": [
+    {
+     "field": "interview_required",
+     "reason": "personal interview may be requested at consular discretion but is not standard for all applicants"
+    },
+    {
+     "field": "official_portal_url",
+     "reason": "provided official MFA domain; exact VFS Global Italy China appointment URL may differ and should be verified locally"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:23:34.336939",
+  "fresh_until": "2026-08-31T19:23:34.336939"
+ },
+ {
+  "cache_key": "CHN|CHN|GBR|tourism|default|2026-09|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "GBR",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-09-05",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Standard Visitor visa",
+   "permitted_stay": "Up to 6 months",
+   "passport_validity": "Valid for the entire stay; at least one blank page",
+   "required_documents": [
+    "Valid passport",
+    "Proof of funds",
+    "Accommodation details",
+    "Travel itinerary",
+    "Evidence of ties to China"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 115,
+    "currency": "GBP"
+   },
+   "processing_time": "Up to 3 weeks after biometrics",
+   "forms": [
+    "Online Standard Visitor visa application form"
+   ],
+   "official_portal_url": "https://www.gov.uk/standard-visitor-visa",
+   "photo_requirements": "Captured at biometric appointment",
+   "biometrics_required": true,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Create account on UK Visas and Immigration website",
+    "Complete online application",
+    "Pay visa fee",
+    "Book biometric appointment at VFS Global"
+   ],
+   "payment_process": [
+    "Credit/debit card online"
+   ],
+   "submission_process": [
+    "Attend VFS Global appointment",
+    "Provide passport and biometrics",
+    "Passport returned by courier or collection"
+   ],
+   "onward_travel_evidence": "Return or onward ticket recommended",
+   "accommodation_evidence": "Hotel booking or host invitation letter required",
+   "financial_evidence": "Bank statements and proof of income required",
+   "insurance_required": false,
+   "exceptions": [],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "Fee is current as of 2025 and may change before a 2026 application"
+    },
+    {
+     "field": "processing_time",
+     "reason": "Standard target is up to 3 weeks but can vary by location and season"
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": 180,
+   "passport_validity_requirement": {
+    "kind": "valid_through_departure",
+    "months": null
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:23:41.311357",
+  "fresh_until": "2026-08-31T19:23:41.311357"
+ },
+ {
+  "cache_key": "CHN|CHN|GBR|tourism|default|2026-11|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "GBR",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-11-05",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Standard Visitor visa",
+   "permitted_stay": "Up to 6 months",
+   "passport_validity": "Valid for the whole stay",
+   "required_documents": [
+    "Valid passport",
+    "Proof of funds (bank statements/payslips)",
+    "Travel itinerary",
+    "Accommodation evidence",
+    "Return or onward travel booking",
+    "Employment or study evidence",
+    "Invitation letter if staying with a host"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 115,
+    "currency": "GBP"
+   },
+   "processing_time": "Standard 3 weeks after biometrics",
+   "forms": [
+    "Online Standard Visitor visa application form"
+   ],
+   "official_portal_url": "https://www.gov.uk/standard-visitor",
+   "photo_requirements": "Digital passport photo uploaded online; biometric photo captured at Visa Application Centre",
+   "biometrics_required": true,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Create account on UK Visas and Immigration service",
+    "Complete online Standard Visitor application",
+    "Pay visa fee",
+    "Book biometric appointment at Visa Application Centre"
+   ],
+   "payment_process": [
+    "Pay online by debit/credit card during application",
+    "Optional priority/super priority services for additional fee"
+   ],
+   "submission_process": [
+    "Submit application online",
+    "Attend Visa Application Centre appointment",
+    "Provide biometrics and passport",
+    "Receive decision by email; collect passport or use courier"
+   ],
+   "onward_travel_evidence": "Return or onward booking recommended to show departure plans",
+   "accommodation_evidence": "Hotel reservations or host invitation letter",
+   "financial_evidence": "Bank statements or payslips covering the trip",
+   "insurance_required": false,
+   "exceptions": [],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "Fee is the current published amount and may be revised before a 2026 application"
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": 180,
+   "passport_validity_requirement": {
+    "kind": "valid_through_departure",
+    "months": null
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [
+    {
+     "name": "Tuberculosis test certificate",
+     "applicability": "not_applicable",
+     "trigger_countries": [],
+     "trigger": "Required only for UK visas longer than 6 months",
+     "question": null
+    }
+   ],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:23:48.896077",
+  "fresh_until": "2026-08-31T19:23:48.896077"
+ },
+ {
+  "cache_key": "CHN|CHN|GBR|tourism|default|2026-10|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "GBR",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-10-05",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Standard Visitor visa",
+   "permitted_stay": "up to 6 months",
+   "passport_validity": "valid for the whole stay; at least one blank page",
+   "required_documents": [
+    "valid passport",
+    "printed application form",
+    "appointment confirmation",
+    "proof of funds (bank statements/pay slips)",
+    "travel itinerary",
+    "accommodation booking",
+    "employment/study proof",
+    "ties to China (property/family)",
+    "host invitation letter if applicable"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 115,
+    "currency": "GBP"
+   },
+   "processing_time": "usually up to 3 weeks after biometrics appointment",
+   "forms": [
+    "online Standard Visitor application"
+   ],
+   "official_portal_url": "https://www.gov.uk/standard-visitor/apply-standard-visitor-visa",
+   "photo_requirements": "digital passport-style photo; biometric photo captured at VAC",
+   "biometrics_required": true,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "create account on gov.uk",
+    "complete the online application",
+    "pay the visa fee",
+    "book VFS Global appointment"
+   ],
+   "payment_process": [
+    "online card payment on gov.uk"
+   ],
+   "submission_process": [
+    "attend VFS Global Visa Application Centre",
+    "provide passport and biometrics",
+    "submit or upload supporting documents"
+   ],
+   "onward_travel_evidence": "recommended: confirmed return/onward booking",
+   "accommodation_evidence": "required: hotel reservations or host details/invitation",
+   "financial_evidence": "required: bank statements showing sufficient funds for the trip",
+   "insurance_required": false,
+   "exceptions": [
+    "none for ordinary Chinese passport holders"
+   ],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "Fees may change; amount reflects the current Standard Visitor fee and could differ for a 2026 application."
+    },
+    {
+     "field": "policy",
+     "reason": "UK visitor immigration rules and document requirements may be updated before October 2026."
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": 180,
+   "passport_validity_requirement": {
+    "kind": "valid_through_departure",
+    "months": null
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination certificate",
+     "applicability": "conditional",
+     "trigger_countries": [],
+     "trigger": "If arriving from or transiting a country with yellow-fever transmission risk",
+     "question": "Will you have been in a yellow-fever risk country within the relevant period before arrival?"
+    }
+   ],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:23:49.757225",
+  "fresh_until": "2026-08-31T19:23:49.757225"
+ },
+ {
+  "cache_key": "CHN|CHN|JPN|tourism|default|2026-10|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "JPN",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-10-05",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "temporary visitor visa (short-term stay)",
+   "permitted_stay": "up to 90 days",
+   "passport_validity": "valid for entire stay",
+   "required_documents": [
+    "valid passport",
+    "visa application form",
+    "recent passport photo",
+    "travel itinerary",
+    "flight/hotel bookings",
+    "financial evidence",
+    "employment or student certificate",
+    "household registration or residence proof if requested"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 3000,
+    "currency": "JPY"
+   },
+   "processing_time": "5-7 business days",
+   "forms": [
+    "visa application form"
+   ],
+   "official_portal_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+   "photo_requirements": "45mm x 35mm, white background, no head covering, taken within 6 months",
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [],
+   "payment_process": [
+    "pay visa fee and any service fee at designated travel agency or visa center"
+   ],
+   "submission_process": [
+    "submit through a Japanese-designated/accredited travel agency",
+    "Embassy/Consulate-General generally does not accept direct individual applications"
+   ],
+   "onward_travel_evidence": "return or onward flight booking required",
+   "accommodation_evidence": "hotel bookings or host invitation letter required",
+   "financial_evidence": "bank statements, income certificate, or tax payment certificate",
+   "insurance_required": false,
+   "exceptions": [],
+   "uncertainty": [],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "valid_through_departure",
+    "months": null
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "Visit Japan Web immigration and customs declaration",
+    "submission_window": "before arrival or on arrival"
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:23:57.862057",
+  "fresh_until": "2026-08-31T19:23:57.862057"
+ },
+ {
+  "cache_key": "CHN|CHN|JPN|tourism|default|2026-11|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "JPN",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-11-05",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+   "visa_category": "Temporary Visitor Visa (tourism)",
+   "permitted_stay": "up to 90 days (actual period granted depends on itinerary)",
+   "passport_validity": "valid for the entire intended stay",
+   "required_documents": [
+    "valid ordinary passport",
+    "passport with blank visa pages",
+    "recent passport-size photo",
+    "online application details",
+    "confirmed round-trip/onward flight itinerary",
+    "hotel/accommodation bookings",
+    "proof of financial means",
+    "travel itinerary"
+   ],
+   "application_channel": "online_portal",
+   "government_fee": {
+    "amount": null,
+    "currency": null
+   },
+   "processing_time": "about 5 business days",
+   "forms": [
+    "JAPAN eVISA online application form"
+   ],
+   "official_portal_url": "https://www.evisa.mofa.go.jp/",
+   "photo_requirements": "recent color passport photo, white background, 45mm x 35mm, taken within 6 months, digital upload as required",
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [
+    "Register on the JAPAN eVISA portal",
+    "Verify email address",
+    "Log in and start the application"
+   ],
+   "payment_process": [
+    "Pay the visa fee online by credit/debit card through the eVISA portal"
+   ],
+   "submission_process": [
+    "Complete the online application and upload documents",
+    "Submit and pay online",
+    "Receive the Visa Issuance Notice by email",
+    "Present the QR code at airline check-in and departure airport"
+   ],
+   "onward_travel_evidence": "confirmed round-trip or onward flight/itinerary",
+   "accommodation_evidence": "hotel reservations or lodging details for the stay",
+   "financial_evidence": "bank statements or proof of sufficient funds for the trip",
+   "insurance_required": false,
+   "exceptions": [
+    "Accredited travel-agency application route also exists for Chinese ordinary passport holders",
+    "Group-tourist and individual-tourist visa categories may apply"
+   ],
+   "uncertainty": [
+    {
+     "field": "passport_issue_date / passport_expiration_date",
+     "reason": "Not provided; needed to confirm validity through departure and blank-page requirements"
+    },
+    {
+     "field": "age",
+     "reason": "Not provided; minor applicants may need additional guardian/consent documents"
+    },
+    {
+     "field": "prior_refusals",
+     "reason": "Not provided; prior visa refusal can affect eligibility and processing"
+    },
+    {
+     "field": "transit_countries",
+     "reason": "Not provided; transit routing can affect entry/health requirements"
+    },
+    {
+     "field": "government_fee",
+     "reason": "Fee amount/currency not confirmed; may change and currency conversion applies"
+    },
+    {
+     "field": "arrival_card",
+     "reason": "Requirements may vary by port of entry and automated-gate use"
+    },
+    {
+     "field": "future_policy",
+     "reason": "Arrival date is in 2026; visa policy may be updated before travel"
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "valid_through_departure",
+    "months": null
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "Embarkation/Disembarkation Card (ED card)",
+    "submission_window": "on arrival / in-flight"
+   },
+   "health_requirements": [],
+   "route_workflow_type": "evisa_portal"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:24:12.759672",
+  "fresh_until": "2026-08-31T19:24:12.759672"
+ },
+ {
+  "cache_key": "CHN|CHN|JPN|tourism|default|2026-09|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "JPN",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-09-05",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Temporary Visitor Visa (tourism)",
+   "permitted_stay": "Up to 90 days",
+   "passport_validity": "Valid for the period of stay",
+   "required_documents": [
+    "Passport bio-data page",
+    "Recent passport photograph",
+    "Schedule of stay / travel itinerary",
+    "Round-trip or onward flight reservation",
+    "Proof of accommodation",
+    "Financial evidence (bank statements, employment/income proof)",
+    "Residence/ID documents if requested"
+   ],
+   "application_channel": "online_portal",
+   "government_fee": {
+    "amount": null,
+    "currency": null
+   },
+   "processing_time": "Approximately 5 business days",
+   "forms": [
+    "Japan short-term stay visa application form (completed online via e-Visa portal)"
+   ],
+   "official_portal_url": "https://www.evisa.mofa.go.jp/",
+   "photo_requirements": "35 mm x 45 mm, plain white/light background, taken within 6 months, digital upload per portal specs",
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [
+    "Access the official Japan e-Visa portal",
+    "Register an applicant account with a valid email",
+    "Verify email and log in",
+    "Select short-term tourism visa and start application"
+   ],
+   "payment_process": [
+    "Pay the visa fee online by credit/debit card during e-Visa submission, unless fee-exempt"
+   ],
+   "submission_process": [
+    "Upload required documents through the e-Visa portal",
+    "Submit the application",
+    "Wait for email notification of visa issuance",
+    "Present the electronic visa issuance notice (QR code) on your mobile device at check-in and Japanese immigration"
+   ],
+   "onward_travel_evidence": "Confirmed round-trip or onward ticket departing Japan",
+   "accommodation_evidence": "Hotel bookings or invitation letter covering the stay",
+   "financial_evidence": "Bank statements for the last 3-6 months and proof of stable income or sponsorship",
+   "insurance_required": false,
+   "exceptions": [
+    "Applicants ineligible for e-Visa may apply through a Japanese visa application center or accredited travel agency",
+    "Group/package tourists may apply via registered travel agencies"
+   ],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "Japan-China reciprocal arrangements may waive the single-entry short-stay visa fee for Chinese ordinary passport holders; confirm current fee on the official e-Visa portal"
+    },
+    {
+     "field": "e-Visa eligibility",
+     "reason": "e-Visa availability for Chinese ordinary passport holders residing in mainland China is subject to Japanese MOFA updates and individual circumstances; verify on the official portal"
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "valid_through_departure",
+    "months": null
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "Disembarkation/Embarkation Card or Visit Japan Web",
+    "submission_window": "Before arrival or at port of entry"
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination certificate",
+     "applicability": "conditional",
+     "trigger_countries": [
+      "BRA",
+      "ARG",
+      "AGO",
+      "COG",
+      "COD",
+      "GAB",
+      "GHA",
+      "GIN",
+      "CMR",
+      "KEN",
+      "LBR",
+      "MLI",
+      "MRT",
+      "NGA",
+      "CAF",
+      "SEN",
+      "SLE",
+      "SSD",
+      "TCD",
+      "UGA",
+      "VEN",
+      "BOL",
+      "COL",
+      "ECU",
+      "PER",
+      "PRY",
+      "GUY",
+      "SUR",
+      "PAN",
+      "TTO",
+      "SOM",
+      "ETH",
+      "RWA",
+      "BDI",
+      "TZA",
+      "ZMB"
+     ],
+     "trigger": "Stay/transit in a yellow fever endemic country within 6 days before arrival in Japan",
+     "question": "Have you stayed in or transited a yellow fever endemic country within the past 6 days?"
+    }
+   ],
+   "route_workflow_type": "evisa_portal"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-17T19:26:28.098867",
+  "fresh_until": "2026-08-31T19:26:28.098867"
+ },
+ {
+  "cache_key": "CHN|CHN|VNM|tourism|default|2026-08|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "VNM",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-08-31",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "tourist e-visa",
+   "permitted_stay": "90 days, multiple entry",
+   "passport_validity": "6 months beyond date of arrival",
+   "required_documents": [
+    "Passport bio-page scan",
+    "Digital passport photo",
+    "Entry/exit dates and border gates",
+    "Address in Vietnam",
+    "Payment card"
+   ],
+   "application_channel": "online_portal",
+   "government_fee": {
+    "amount": 25,
+    "currency": "USD"
+   },
+   "processing_time": "3 working days",
+   "forms": [
+    "Online Vietnam e-visa application form"
+   ],
+   "official_portal_url": "https://evisa.xuatnhapcanh.gov.vn/",
+   "photo_requirements": "Recent colour digital passport photo, white background, face centred, no headwear unless religious",
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [
+    "No account needed; apply as guest"
+   ],
+   "payment_process": [
+    "Pay online by credit/debit card",
+    "25 USD for single-entry e-visa; 50 USD for multiple-entry e-visa",
+    "Fee is non-refundable even if refused"
+   ],
+   "submission_process": [
+    "Submit application via official Vietnam e-visa portal",
+    "Receive e-visa by email within 3 working days",
+    "Print e-visa and present with passport on arrival"
+   ],
+   "onward_travel_evidence": "Return or onward ticket recommended; entry/exit dates required in form",
+   "accommodation_evidence": "Hotel booking or host address in Vietnam required in online form",
+   "financial_evidence": "Proof of sufficient funds may be requested at immigration",
+   "insurance_required": false,
+   "exceptions": [
+    "Phu Quoc only: 30-day visa exemption if arriving by direct international flight and staying only in Phu Quoc"
+   ],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "Fee depends on selected entry type: 25 USD single-entry or 50 USD multiple-entry"
+    },
+    {
+     "field": "arrival_card",
+     "reason": "Exact form and current enforcement of the entry/exit declaration may vary by port"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "Entry/Exit declaration form",
+    "submission_window": "on arrival at immigration"
+   },
+   "health_requirements": [],
+   "route_workflow_type": "evisa_portal"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-18T02:40:25.644638",
+  "fresh_until": "2026-09-01T02:40:25.644638"
+ },
+ {
+  "cache_key": "CHN|CHN|ALB|tourism|default|2026-09|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "ALB",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-09-01",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_EXEMPT",
+   "visa_category": "visa exempt tourist",
+   "permitted_stay": "90 days within any 180-day period",
+   "passport_validity": "valid at least 3 months after departure; issued within last 10 years",
+   "required_documents": [
+    "valid passport",
+    "return/onward ticket",
+    "proof of accommodation",
+    "sufficient funds"
+   ],
+   "application_channel": "not_required",
+   "government_fee": {
+    "amount": null,
+    "currency": null
+   },
+   "processing_time": "not applicable",
+   "forms": [],
+   "official_portal_url": null,
+   "photo_requirements": null,
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [],
+   "payment_process": [],
+   "submission_process": [],
+   "onward_travel_evidence": "may be requested at border",
+   "accommodation_evidence": "may be requested at border",
+   "financial_evidence": "may be requested at border",
+   "insurance_required": false,
+   "exceptions": [],
+   "uncertainty": [],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_exempt_preparation"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-20T01:45:49.412079",
+  "fresh_until": "2026-09-03T01:45:49.412079"
+ },
+ {
+  "cache_key": "CHN|CHN|ARE|tourism|default|2026-09|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "ARE",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-09-01",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_EXEMPT",
+   "visa_category": "visa-exempt tourism",
+   "permitted_stay": "30 days",
+   "passport_validity": "6 months beyond arrival",
+   "required_documents": [
+    "Valid ordinary passport",
+    "Return or onward ticket",
+    "Proof of accommodation",
+    "Evidence of sufficient funds"
+   ],
+   "application_channel": "not_required",
+   "government_fee": {
+    "amount": null,
+    "currency": null
+   },
+   "processing_time": "Not applicable",
+   "forms": [],
+   "official_portal_url": null,
+   "photo_requirements": null,
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [],
+   "payment_process": [],
+   "submission_process": [],
+   "onward_travel_evidence": "Return or onward ticket recommended",
+   "accommodation_evidence": "Hotel booking or host address recommended",
+   "financial_evidence": "Bank cards/cash/statements may be requested",
+   "insurance_required": null,
+   "exceptions": [
+    "UAE-China 30-day visa exemption applies to ordinary passports"
+   ],
+   "uncertainty": [
+    {
+     "field": "insurance_required",
+     "reason": "Official UAE tourist medical/travel insurance requirement is not confirmed for the travel date"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 30,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination certificate",
+     "applicability": "conditional",
+     "trigger_countries": [],
+     "trigger": "Arrival within 6 days from, or transit over 12 hours through, a yellow-fever endemic country",
+     "question": "Have you visited or transited a yellow-fever risk country within the past 6 days?"
+    }
+   ],
+   "route_workflow_type": "visa_exempt_preparation"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-20T01:48:34.937019",
+  "fresh_until": "2026-09-03T01:48:34.937019"
+ },
+ {
+  "cache_key": "USA|USA|CHN|tourism|default|2026-09|v3",
+  "route": {
+   "passport_nationality": "USA",
+   "lawful_country_of_residence": "USA",
+   "destination_country": "CHN",
+   "visa_category": null,
+   "travel_purpose": "tourism",
+   "arrival_date": "2026-09-01",
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "L visa (tourist)",
+   "permitted_stay": "up to 30 days per entry",
+   "passport_validity": "valid at least 6 months beyond intended departure",
+   "required_documents": [
+    "valid US ordinary passport",
+    "printed COVA online application confirmation page",
+    "recent passport-style color photo",
+    "proof of legal residence in the USA",
+    "round-trip flight itinerary",
+    "hotel bookings or invitation letter",
+    "recent bank statements or other financial proof",
+    "travel itinerary"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": null,
+    "currency": null
+   },
+   "processing_time": "4 working days standard",
+   "forms": [
+    "COVA online visa application form"
+   ],
+   "official_portal_url": "https://cova.mfa.gov.cn",
+   "photo_requirements": "33x48 mm color photo, white background, recent, full face, no glasses",
+   "biometrics_required": true,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Register an account on the China Online Visa Application (COVA) portal",
+    "Complete the visa application form accurately",
+    "Upload the required photo and supporting documents",
+    "Print and sign the application confirmation page",
+    "Book an appointment at the Chinese Visa Application Service Center"
+   ],
+   "payment_process": [
+    "Pay the visa fee at the Chinese Visa Application Service Center when submitting the application",
+    "Accepted payment methods vary by center; confirm locally"
+   ],
+   "submission_process": [
+    "Attend the booked appointment at the Chinese Visa Application Service Center",
+    "Submit passport, printed application confirmation, photo, and supporting documents",
+    "Provide fingerprints if required",
+    "Collect passport in person or request mail-back service"
+   ],
+   "onward_travel_evidence": "round-trip or onward flight reservation",
+   "accommodation_evidence": "hotel bookings or notarized invitation letter with host ID",
+   "financial_evidence": "recent bank statements showing sufficient funds",
+   "insurance_required": false,
+   "exceptions": [
+    "No tourist visa exemption for US ordinary passport holders",
+    "24/72/144-hour visa-free transit schemes do not apply to this direct tourism stay"
+   ],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "Exact current visa fee for US applicants is not verified; confirm with the Chinese Visa Application Service Center before applying"
+    },
+    {
+     "field": "health_requirements",
+     "reason": "No transit countries were provided; yellow-fever requirement depends on actual travel/transit history"
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": 30,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "Foreigner Arrival/Departure Card",
+    "submission_window": "on arrival at immigration"
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination certificate",
+     "applicability": "conditional",
+     "trigger_countries": [],
+     "trigger": "arrival/transit within 6 days from a yellow-fever endemic country",
+     "question": "Will you arrive from or transit through a yellow-fever endemic country within 6 days before entering China?"
+    }
+   ],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-20T02:37:00.842186",
+  "fresh_until": "2026-09-03T02:37:00.842186"
+ },
+ {
+  "cache_key": "CHN|CHN|JPN|tourism|default|unknown|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "JPN",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+   "visa_category": "Short-term stay (temporary visitor) - tourist, single-entry",
+   "permitted_stay": "Up to 90 days; actual duration determined by embassy/itinerary",
+   "passport_validity": "Valid for the entire intended stay",
+   "required_documents": [
+    "Valid passport",
+    "Completed visa application form",
+    "One passport-size photo",
+    "Chinese ID/household-registration copy per agency instructions",
+    "Round-trip/onward flight booking",
+    "Accommodation and daily itinerary",
+    "Financial proof (bank statements, income/tax certificate, etc.)",
+    "Employment/student/business certificate",
+    "Explanation of any prior Japan visa refusals if applicable"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": null,
+    "currency": null
+   },
+   "processing_time": "About 5 working days at embassy/consulate after agency acceptance; agency intake adds time",
+   "forms": [
+    "Japan short-term stay visa application form"
+   ],
+   "official_portal_url": "https://www.mofa.go.jp/j_info/visit/visa/",
+   "photo_requirements": "4.5 cm × 4.5 cm color photo, plain white background, within 6 months, full face, no head coverings unless religious/medical",
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "No direct applicant government-portal account required",
+    "Designated travel agency lodges the JAPAN eVISA application"
+   ],
+   "payment_process": [
+    "Pay any official visa fee and the agency service fee to the designated travel agency"
+   ],
+   "submission_process": [
+    "Contact a Japanese embassy/consulate-designated travel agency in China",
+    "Submit documents and passport to the agency",
+    "Agency enters the application into the JAPAN eVISA system",
+    "Embassy/consulate examines the application",
+    "Collect passport and visa-issuance notice (QR code) from the agency",
+    "Present passport and QR code at airport check-in/immigration"
+   ],
+   "onward_travel_evidence": "Round-trip or onward flight reservation",
+   "accommodation_evidence": "Hotel bookings or other lodging proof covering the stay",
+   "financial_evidence": "Bank statements, income/tax certificate, employment certificate, or other proof of funds",
+   "insurance_required": false,
+   "exceptions": [
+    "Multiple-entry tourist visas require a sticker visa, not the eVisa",
+    "Hong Kong/Macao/Taiwan passport holders have different visa rules",
+    "Diplomatic/official passport holders follow separate procedures"
+   ],
+   "uncertainty": [
+    {
+     "field": "permitted_stay_days",
+     "reason": "Exact stay granted is itinerary-dependent; maximum is 90 days"
+    },
+    {
+     "field": "government_fee",
+     "reason": "Official fee for Chinese ordinary passport short-term tourist eVisa is not confirmed; it may be waived or set by reciprocity"
+    },
+    {
+     "field": "application_process_details",
+     "reason": "Specific designated-agency list, submission method (paper vs fully electronic), and consular-district rules for China vary"
+    },
+    {
+     "field": "passport_issue_and_expiration_dates",
+     "reason": "Not provided; cannot confirm validity for the intended trip"
+    },
+    {
+     "field": "trip_dates_duration_transit",
+     "reason": "Missing travel dates, trip length, transit countries, and age, which can affect processing and document requirements"
+    },
+    {
+     "field": "prior_refusals",
+     "reason": "Not stated; any previous refusal may require additional explanation"
+    },
+    {
+     "field": "interview_or_additional_documents",
+     "reason": "Consulate may request an interview or extra documents in individual cases"
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": null,
+   "passport_validity_requirement": {
+    "kind": "valid_through_departure",
+    "months": null
+   },
+   "arrival_card": {
+    "required": false,
+    "name": "Visit Japan Web (optional)",
+    "submission_window": "Before arrival (optional)"
+   },
+   "health_requirements": [],
+   "route_workflow_type": "electronic_authorization"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-20T19:50:41.439483",
+  "fresh_until": "2026-09-03T19:50:41.439483"
+ },
+ {
+  "cache_key": "CHN|CHN|USA|tourism|default|unknown|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "USA",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "B1/B2 visitor visa",
+   "permitted_stay": "Up to 6 months (CBP discretion)",
+   "passport_validity": "Valid at least 6 months beyond intended stay",
+   "required_documents": [
+    "valid passport",
+    "DS-160 confirmation page",
+    "visa fee receipt",
+    "appointment confirmation",
+    "recent photo",
+    "travel itinerary",
+    "proof of financial support",
+    "evidence of ties to home country",
+    "accommodation details"
+   ],
+   "application_channel": "embassy",
+   "government_fee": {
+    "amount": 185,
+    "currency": "USD"
+   },
+   "processing_time": "Interview wait time varies by post; administrative processing possible",
+   "forms": [
+    "DS-160 Online Nonimmigrant Visa Application"
+   ],
+   "official_portal_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html",
+   "photo_requirements": "2x2 inch (51x51 mm) color photo, white background, taken within last 6 months",
+   "biometrics_required": true,
+   "interview_required": true,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Create account at USTravelDocs China",
+    "Complete DS-160 and print confirmation page",
+    "Pay MRV visa fee",
+    "Schedule biometrics and visa interview"
+   ],
+   "payment_process": [
+    "Pay non-refundable MRV application fee online or via designated bank",
+    "Print payment receipt"
+   ],
+   "submission_process": [
+    "Submit DS-160 online",
+    "Pay MRV fee",
+    "Schedule interview through USTravelDocs",
+    "Attend U.S. embassy/consulate for biometrics and interview",
+    "Receive passport with visa if approved"
+   ],
+   "onward_travel_evidence": "Recommended: return/onward ticket and itinerary",
+   "accommodation_evidence": "Hotel reservations or host letter",
+   "financial_evidence": "Bank statements, employment/income proof, sponsor letter if applicable",
+   "insurance_required": false,
+   "exceptions": [],
+   "uncertainty": [
+    {
+     "field": "interview_required",
+     "reason": "Interview waiver may apply for renewals or applicants under 14/over 79; not provided"
+    },
+    {
+     "field": "processing_time",
+     "reason": "Depends on current consular appointment wait times and any administrative processing"
+    },
+    {
+     "field": "permitted_stay_days",
+     "reason": "CBP officer decides admission period at port of entry"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 180,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "embassy_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-20T19:52:21.386071",
+  "fresh_until": "2026-09-03T19:52:21.386071"
+ },
+ {
+  "cache_key": "CHN|CHN|THA|tourism|default|unknown|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "THA",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_EXEMPT",
+   "visa_category": "Tourist exemption (TR)",
+   "permitted_stay": "60 days",
+   "passport_validity": "6 months beyond date of entry",
+   "required_documents": [
+    "Valid ordinary passport",
+    "Return or onward ticket within 60 days",
+    "Proof of accommodation",
+    "Proof of sufficient funds"
+   ],
+   "application_channel": "not_required",
+   "government_fee": {
+    "amount": null,
+    "currency": null
+   },
+   "processing_time": "Not applicable",
+   "forms": [],
+   "official_portal_url": null,
+   "photo_requirements": null,
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [],
+   "payment_process": [],
+   "submission_process": [
+    "Immigration inspection on arrival"
+   ],
+   "onward_travel_evidence": "Confirmed return or onward ticket within 60 days",
+   "accommodation_evidence": "Proof of accommodation for the initial stay",
+   "financial_evidence": "Funds equivalent to THB 20,000 per person or THB 40,000 per family",
+   "insurance_required": false,
+   "exceptions": [],
+   "uncertainty": [
+    {
+     "field": "arrival_card",
+     "reason": "Exact format (paper TM6 vs digital TDAC) and submission timing depend on entry date, mode and port, which were not provided."
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 60,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "Thailand arrival/departure card (TM6 or digital TDAC where implemented)",
+    "submission_window": "At immigration checkpoint, or online pre-submission where required"
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_exempt_preparation"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-20T19:52:46.286450",
+  "fresh_until": "2026-09-03T19:52:46.286450"
+ },
+ {
+  "cache_key": "CHN|CHN|KOR|tourism|default|unknown|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "KOR",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "C-3-9 individual tourist visa",
+   "permitted_stay": "up to 90 days",
+   "passport_validity": "valid for at least 6 months and for the duration of stay",
+   "required_documents": [
+    "valid ordinary passport with blank pages",
+    "completed visa application form",
+    "one passport photo",
+    "copy of Chinese national ID card",
+    "confirmed return/onward flight booking",
+    "hotel reservation or invitation letter",
+    "recent 6-month bank statements",
+    "employment certificate or student ID",
+    "travel itinerary"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 280,
+    "currency": "CNY"
+   },
+   "processing_time": "5-7 business days",
+   "forms": [
+    "Korean short-term visa application form"
+   ],
+   "official_portal_url": "https://www.visa.go.kr/",
+   "photo_requirements": "one recent 3.5x4.5 cm colour photo, white background, no head covering unless religious",
+   "biometrics_required": true,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [],
+   "payment_process": [
+    "pay visa fee at the Korean Visa Application Center when submitting the application"
+   ],
+   "submission_process": [
+    "book an appointment at the designated Korean Visa Application Center",
+    "attend in person to submit documents and provide biometrics",
+    "collect passport in person or by courier after decision"
+   ],
+   "onward_travel_evidence": "confirmed return or onward flight reservation",
+   "accommodation_evidence": "hotel booking or invitation letter from a Korean host",
+   "financial_evidence": "recent 6-month bank statements and/or proof of stable income",
+   "insurance_required": false,
+   "exceptions": [
+    "PRC ordinary passport holders may enter Jeju Island visa-free for up to 30 days if arriving directly and remaining on the island",
+    "K-ETA is not available for ordinary PRC passports",
+    "group tourist visa (C-3-2) has different documents and fee"
+   ],
+   "uncertainty": [
+    {
+     "field": "passport_issue_date / passport_expiry_date",
+     "reason": "Not provided; unable to confirm passport blank pages or exact validity at travel time"
+    },
+    {
+     "field": "transit_countries",
+     "reason": "Not provided; could affect health requirements or required itinerary evidence"
+    },
+    {
+     "field": "consular_jurisdiction",
+     "reason": "Set to default; actual jurisdiction in China determines exact VAC location, documents and fee variations"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "Korea Arrival/Departure Card",
+    "submission_window": "on arrival, before immigration inspection"
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination certificate",
+     "applicability": "not_applicable",
+     "trigger_countries": [],
+     "trigger": "arrival or transit through a yellow-fever-affected country within the previous 6 days",
+     "question": null
+    }
+   ],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-20T19:53:09.521473",
+  "fresh_until": "2026-09-03T19:53:09.521473"
+ },
+ {
+  "cache_key": "CHN|CHN|SGP|tourism|default|unknown|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "SGP",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Tourist Visa",
+   "permitted_stay": "Up to 30 days per entry",
+   "passport_validity": "Valid at least 6 months beyond arrival",
+   "required_documents": [
+    "Original ordinary passport valid at least 6 months beyond entry with blank pages",
+    "Completed Form 14A",
+    "One recent passport-sized colour photograph",
+    "Photocopy of passport bio-data page",
+    "Copy of Chinese national ID card",
+    "Confirmed return/onward flight booking",
+    "Hotel reservation or local host details",
+    "Proof of funds (bank statements or employment/income letter)",
+    "Travel itinerary"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 30,
+    "currency": "SGD"
+   },
+   "processing_time": "About 3-5 working days",
+   "forms": [
+    "Form 14A"
+   ],
+   "official_portal_url": "https://www.ica.gov.sg/enter-transit-depart/entry_requirements/visa_requirements",
+   "photo_requirements": "One recent colour passport-size photo, 35x45mm, white background, taken within the last 3 months",
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [
+    "No ICA applicant account is required; the authorized visa agent lodges the application on your behalf"
+   ],
+   "payment_process": [
+    "Pay the SGD 30 government visa fee plus the authorized agent's service charge to the agent"
+   ],
+   "submission_process": [
+    "Submit documents to an authorized Singapore visa agent in China",
+    "Agent forwards the application to ICA",
+    "Collect passport and visa or e-visa notification from the agent"
+   ],
+   "onward_travel_evidence": "Confirmed return or onward air ticket",
+   "accommodation_evidence": "Hotel booking or local host/sponsor address",
+   "financial_evidence": "Bank statements or employment/income proof showing sufficient funds",
+   "insurance_required": false,
+   "exceptions": [
+    "96-hour Visa Free Transit Facility may apply if transiting to/from a third country and holding a valid visa/residence permit from Australia, Canada, Germany, Japan, New Zealand, Switzerland, the UK, or the USA"
+   ],
+   "uncertainty": [
+    {
+     "field": "passport_validity",
+     "reason": "Passport issue/expiration dates not provided; compliance with the 6-month requirement cannot be verified"
+    },
+    {
+     "field": "permitted_stay",
+     "reason": "Trip duration/dates not provided; 30 days is the usual maximum but the exact grant is at ICA discretion"
+    },
+    {
+     "field": "exceptions",
+     "reason": "Transit countries and onward travel details not provided; VFTF eligibility cannot be assessed"
+    },
+    {
+     "field": "processing_time",
+     "reason": "May vary by authorized agent, document completeness, or ICA workload"
+    },
+    {
+     "field": "government_fee",
+     "reason": "Government fee is SGD 30 but may be collected in RMB equivalent; agent service charges are separate"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 30,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "SG Arrival Card",
+    "submission_window": "within 3 days before arrival"
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination certificate",
+     "applicability": "conditional",
+     "trigger_countries": [
+      "AGO",
+      "ARG",
+      "BEN",
+      "BOL",
+      "BRA",
+      "BFA",
+      "BDI",
+      "CMR",
+      "CAF",
+      "TCD",
+      "COL",
+      "COG",
+      "CIV",
+      "COD",
+      "ECU",
+      "GNQ",
+      "ETH",
+      "GAB",
+      "GMB",
+      "GHA",
+      "GIN",
+      "GNB",
+      "GUY",
+      "KEN",
+      "LBR",
+      "MLI",
+      "MRT",
+      "NER",
+      "NGA",
+      "PAN",
+      "PRY",
+      "PER",
+      "RWA",
+      "SEN",
+      "SLE",
+      "SDN",
+      "SUR",
+      "TGO",
+      "TZA",
+      "UGA",
+      "VEN",
+      "ZMB"
+     ],
+     "trigger": "Travel/residence in a yellow-fever-endemic country within the past 6 days before arrival",
+     "question": "Have you travelled in or transited a yellow-fever-endemic country within the past 6 days before arrival?"
+    }
+   ],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-20T19:53:43.972672",
+  "fresh_until": "2026-09-03T19:53:43.972672"
+ },
+ {
+  "cache_key": "CHN|CHN|MYS|tourism|default|unknown|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "MYS",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_EXEMPT",
+   "visa_category": "visa-free entry",
+   "permitted_stay": "30 days",
+   "passport_validity": "6 months beyond arrival",
+   "required_documents": [
+    "valid passport",
+    "Malaysia Digital Arrival Card (MDAC) confirmation",
+    "return or onward ticket",
+    "proof of accommodation",
+    "proof of sufficient funds"
+   ],
+   "application_channel": "not_required",
+   "government_fee": {
+    "amount": null,
+    "currency": null
+   },
+   "processing_time": "not applicable",
+   "forms": [],
+   "official_portal_url": "https://imigresen-online.imi.gov.my/mdac/main",
+   "photo_requirements": null,
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [
+    "complete the Malaysia Digital Arrival Card (MDAC) online"
+   ],
+   "payment_process": [],
+   "submission_process": [
+    "submit MDAC within 3 days before arrival"
+   ],
+   "onward_travel_evidence": "return or onward ticket required",
+   "accommodation_evidence": "proof of accommodation may be requested",
+   "financial_evidence": "proof of sufficient funds may be requested",
+   "insurance_required": false,
+   "exceptions": [
+    "stays over 30 days require a visa",
+    "work or study require a visa"
+   ],
+   "uncertainty": [
+    {
+     "field": "passport_issue_date",
+     "reason": "not provided; needed to verify passport meets validity requirements"
+    },
+    {
+     "field": "passport_expiry_date",
+     "reason": "not provided; needed to verify passport is valid for at least 6 months beyond arrival"
+    },
+    {
+     "field": "trip_dates",
+     "reason": "not provided; needed to confirm MDAC timing and entry rules on travel dates"
+    },
+    {
+     "field": "trip_duration",
+     "reason": "not provided; needed to confirm stay does not exceed 30 days"
+    },
+    {
+     "field": "transit_countries",
+     "reason": "not provided; needed to assess yellow fever and other health requirements"
+    },
+    {
+     "field": "age",
+     "reason": "not provided; minors may have additional entry considerations"
+    },
+    {
+     "field": "prior_refusals",
+     "reason": "not provided; prior immigration issues could affect admission"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 30,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "Malaysia Digital Arrival Card (MDAC)",
+    "submission_window": "within 3 days before arrival"
+   },
+   "health_requirements": [
+    {
+     "name": "yellow fever vaccination certificate",
+     "applicability": "conditional",
+     "trigger_countries": [],
+     "trigger": "arrival from or transit through a yellow fever endemic country within the past 6 days",
+     "question": "Have you visited or transited a yellow fever endemic country in the last 6 days?"
+    }
+   ],
+   "route_workflow_type": "visa_exempt_preparation"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-20T19:53:59.223177",
+  "fresh_until": "2026-09-03T19:53:59.223177"
+ },
+ {
+  "cache_key": "CHN|CHN|VNM|tourism|default|unknown|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "VNM",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+   "visa_category": "tourist e-Visa",
+   "permitted_stay": "up to 90 days, single or multiple entry",
+   "passport_validity": "valid at least 6 months beyond arrival; at least 2 blank pages",
+   "required_documents": [
+    "valid passport (6+ months validity, 2 blank pages)",
+    "passport data-page scan",
+    "digital passport-style photo",
+    "intended entry/exit dates and port of entry",
+    "active email address"
+   ],
+   "application_channel": "online_portal",
+   "government_fee": {
+    "amount": null,
+    "currency": "USD"
+   },
+   "processing_time": "3 working days",
+   "forms": [
+    "online e-Visa application form"
+   ],
+   "official_portal_url": "https://evisa.xuatnhapcanh.gov.vn/",
+   "photo_requirements": "digital color passport photo, 4x6 cm, white/plain background, full face, no glasses/headwear unless religious, JPEG format",
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [
+    "no account required; save the application code provided after starting the form"
+   ],
+   "payment_process": [
+    "pay online by international credit/debit card in USD on the e-Visa portal"
+   ],
+   "submission_process": [
+    "complete the online form",
+    "upload passport photo and passport data-page scan",
+    "pay the e-Visa fee",
+    "receive e-Visa by email or download from portal",
+    "print e-Visa and present with passport at immigration"
+   ],
+   "onward_travel_evidence": null,
+   "accommodation_evidence": null,
+   "financial_evidence": null,
+   "insurance_required": false,
+   "exceptions": [
+    "direct arrival at Phu Quoc Island only: visa-exempt up to 30 days",
+    "visa on arrival possible for air travelers with a pre-approved visa letter, then pay stamp fee at airport"
+   ],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "Fee depends on single-entry (USD 25) or multiple-entry (USD 50) e-Visa selection, which was not specified."
+    },
+    {
+     "field": "health_requirements",
+     "reason": "Transit countries were not provided; yellow-fever requirement is conditional on travel through endemic countries."
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination certificate (ICVP)",
+     "applicability": "conditional",
+     "trigger_countries": [],
+     "trigger": "Arrival or transit within the previous 10 days in a WHO yellow-fever endemic country",
+     "question": "Will you arrive from or transit through a yellow-fever endemic country within 10 days before entering Vietnam?"
+    }
+   ],
+   "route_workflow_type": "evisa_portal"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-20T19:54:23.530036",
+  "fresh_until": "2026-09-03T19:54:23.530036"
+ },
+ {
+  "cache_key": "CHN|CHN|GBR|tourism|default|unknown|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "GBR",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Standard Visitor visa",
+   "permitted_stay": "Up to 6 months",
+   "passport_validity": "Valid for the whole stay",
+   "required_documents": [
+    "Valid passport",
+    "Proof of funds (bank statements)",
+    "Accommodation evidence",
+    "Travel itinerary",
+    "Employment or study evidence (if applicable)"
+   ],
+   "application_channel": "online_portal",
+   "government_fee": {
+    "amount": 115,
+    "currency": "GBP"
+   },
+   "processing_time": "Usually within 3 weeks",
+   "forms": [
+    "Online Standard Visitor visa application form"
+   ],
+   "official_portal_url": "https://www.gov.uk/standard-visitor-visa",
+   "photo_requirements": "Digital passport photo uploaded online; photograph captured at biometric appointment",
+   "biometrics_required": true,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Create account on UK Visas and Immigration portal",
+    "Complete online application form",
+    "Pay visa fee online",
+    "Book biometric appointment at VFS Global/TLScontact centre"
+   ],
+   "payment_process": [
+    "Visa fee paid online during application",
+    "Optional priority services payable at appointment"
+   ],
+   "submission_process": [
+    "Submit application online",
+    "Attend biometric appointment in China",
+    "Upload or provide supporting documents as instructed"
+   ],
+   "onward_travel_evidence": "Recommended",
+   "accommodation_evidence": "Required",
+   "financial_evidence": "Required",
+   "insurance_required": false,
+   "exceptions": [
+    "None for ordinary PRC passport holders for tourism"
+   ],
+   "uncertainty": [
+    {
+     "field": "passport_expiration_date",
+     "reason": "Not provided; cannot confirm validity covers intended UK stay"
+    },
+    {
+     "field": "travel_dates",
+     "reason": "Not provided; cannot verify timing or validity"
+    },
+    {
+     "field": "trip_duration",
+     "reason": "Not provided; permitted stay must cover planned visit"
+    },
+    {
+     "field": "transit_countries",
+     "reason": "Not provided; may affect transit visa or health requirements"
+    },
+    {
+     "field": "age",
+     "reason": "Not provided; minor applicants need additional documents"
+    },
+    {
+     "field": "prior_refusals",
+     "reason": "Not provided; prior refusals may affect evidence requirements"
+    },
+    {
+     "field": "government_fee",
+     "reason": "Official fees may change; verify current amount before applying"
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": 180,
+   "passport_validity_requirement": {
+    "kind": "valid_through_departure",
+    "months": null
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-20T19:54:36.416945",
+  "fresh_until": "2026-09-03T19:54:36.416945"
+ },
+ {
+  "cache_key": "CHN|CHN|FRA|tourism|default|unknown|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "FRA",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Short-stay Schengen visa (Type C) - tourism",
+   "permitted_stay": "90 days within any 180-day period in the Schengen Area",
+   "passport_validity": "Valid for at least 3 months beyond intended departure from the Schengen Area",
+   "required_documents": [
+    "Valid passport",
+    "France-Visas application form (printed and signed)",
+    "Two biometric passport photos",
+    "Travel medical insurance certificate",
+    "Round-trip flight reservation",
+    "Proof of accommodation",
+    "Proof of financial means",
+    "Detailed travel itinerary",
+    "Employment/study proof or explanation of circumstances",
+    "Cover letter stating purpose of visit"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": null,
+    "currency": null
+   },
+   "processing_time": "Up to 15 calendar days; may extend to 45 days",
+   "forms": [
+    "France-Visas online short-stay visa application form"
+   ],
+   "official_portal_url": "https://france-visas.gouv.fr/en",
+   "photo_requirements": "Two recent 35x45 mm biometric photos; white/light background; face uncovered; no tinted glasses or headwear except religious",
+   "biometrics_required": true,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Create account on France-Visas portal",
+    "Complete online visa application form",
+    "Print and sign the generated application form",
+    "Register on TLScontact China to book biometric appointment",
+    "Attend appointment and submit documents"
+   ],
+   "payment_process": [
+    "Pay Schengen visa fee and TLScontact service fee at visa center during appointment (exact methods depend on TLScontact location)"
+   ],
+   "submission_process": [
+    "Book appointment via TLScontact",
+    "Attend in person to submit documents and provide biometrics",
+    "Passport returned by TLScontact after decision"
+   ],
+   "onward_travel_evidence": "Round-trip flight reservation or travel itinerary showing entry and exit from Schengen Area",
+   "accommodation_evidence": "Hotel bookings for all nights or invitation letter from host in France with proof of address",
+   "financial_evidence": "Recent 3-month bank statements, payslips, or sponsorship letter with sponsor's financial documents",
+   "insurance_required": true,
+   "exceptions": [
+    "None for ordinary Chinese passport holders"
+   ],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "Applicant age not provided; Schengen visa fee varies (EUR 90 adult, EUR 45 child 6-12, free under 6)"
+    },
+    {
+     "field": "biometrics_required",
+     "reason": "Assumes no prior Schengen biometric data recorded within last 59 months; personal situation not provided"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-20T19:54:45.252658",
+  "fresh_until": "2026-09-03T19:54:45.252658"
+ },
+ {
+  "cache_key": "CHN|CHN|DEU|tourism|default|unknown|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "DEU",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Schengen Type C short-stay visa",
+   "permitted_stay": "90 days in any 180-day period",
+   "passport_validity": "valid at least 3 months beyond intended departure from Schengen and issued within last 10 years",
+   "required_documents": [
+    "valid passport",
+    "completed Schengen visa application form",
+    "two recent passport photos",
+    "travel medical insurance (€30,000 minimum)",
+    "round-trip flight reservation",
+    "proof of accommodation",
+    "proof of financial means",
+    "travel itinerary",
+    "proof of employment or studies",
+    "bank statements (typically last 3 months)"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 80,
+    "currency": "EUR"
+   },
+   "processing_time": "up to 15 calendar days; up to 45-60 days in individual cases",
+   "forms": [
+    "Schengen visa application form (Type C)",
+    "declaration on accuracy and completeness"
+   ],
+   "official_portal_url": "https://visa.vfsglobal.com/chn/en/deu",
+   "photo_requirements": "two recent color passport photos, 35x45 mm, white background, face 70-80%",
+   "biometrics_required": true,
+   "interview_required": null,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "create account on VFS Global Germany visa portal or embassy appointment system",
+    "complete online application form",
+    "book biometric appointment"
+   ],
+   "payment_process": [
+    "pay visa fee and VFS service fee at visa center or as instructed during appointment"
+   ],
+   "submission_process": [
+    "book appointment",
+    "attend visa center/embassy in person",
+    "submit documents and provide biometrics",
+    "collect passport or receive courier delivery"
+   ],
+   "onward_travel_evidence": "round-trip flight reservation or travel itinerary showing exit from Schengen",
+   "accommodation_evidence": "confirmed hotel bookings or invitation letter with host proof",
+   "financial_evidence": "bank statements, payslips, or sponsor letter showing sufficient funds for duration of stay",
+   "insurance_required": true,
+   "exceptions": [
+    "holders of diplomatic or service passports may be exempt",
+    "holders of valid residence permits for Schengen/IE/UK/US may have streamlined procedures in some cases"
+   ],
+   "uncertainty": [
+    {
+     "field": "applicant_age",
+     "reason": "Age was not provided; affects visa fee and document requirements (minors need additional documents and parental consent)"
+    },
+    {
+     "field": "travel_dates_and_duration",
+     "reason": "Trip dates and duration were not provided; needed to verify permitted-stay calculation and insurance coverage period"
+    },
+    {
+     "field": "transit_countries",
+     "reason": "Transit countries not provided; affects whether additional transit visas are required"
+    },
+    {
+     "field": "prior_refusals",
+     "reason": "Prior visa refusals not provided; may affect required supporting documents"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [
+    {
+     "name": "COVID-19 restrictions",
+     "applicability": "not_applicable",
+     "trigger_countries": [],
+     "trigger": null,
+     "question": null
+    },
+    {
+     "name": "Yellow fever vaccination",
+     "applicability": "not_applicable",
+     "trigger_countries": [],
+     "trigger": "travel from/transit through yellow-fever endemic areas",
+     "question": "Will you arrive from or transit through a yellow-fever endemic country?"
+    }
+   ],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-20T19:54:52.682158",
+  "fresh_until": "2026-09-03T19:54:52.682158"
+ },
+ {
+  "cache_key": "CHN|CHN|ITA|tourism|default|unknown|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "ITA",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Schengen short-stay C visa (tourism)",
+   "permitted_stay": "90 days within any 180-day Schengen period",
+   "passport_validity": "3 months beyond intended departure from Schengen",
+   "required_documents": [
+    "Valid passport",
+    "Schengen visa application form",
+    "Recent passport photo",
+    "Travel medical insurance (EUR 30,000 minimum)",
+    "Flight reservation",
+    "Proof of accommodation",
+    "Proof of financial means",
+    "Employment/study proof",
+    "Cover letter"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 80,
+    "currency": "EUR"
+   },
+   "processing_time": "Up to 15 calendar days",
+   "forms": [
+    "Schengen visa application form"
+   ],
+   "official_portal_url": "https://vistoperitalia.esteri.it/home/en",
+   "photo_requirements": "35x45 mm, white background, recent, full face",
+   "biometrics_required": true,
+   "interview_required": null,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Create account on the Italy VFS Global China portal",
+    "Book appointment at chosen visa application center"
+   ],
+   "payment_process": [
+    "Pay Schengen visa fee and VFS service fee at the visa application center"
+   ],
+   "submission_process": [
+    "Attend VFS Global Italy visa application center in person",
+    "Submit documents and provide biometrics"
+   ],
+   "onward_travel_evidence": "Required (flight reservation)",
+   "accommodation_evidence": "Required (hotel booking or invitation)",
+   "financial_evidence": "Required (bank statements, salary slips, etc.)",
+   "insurance_required": true,
+   "exceptions": [],
+   "uncertainty": [],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination certificate",
+     "applicability": "not_applicable",
+     "trigger_countries": [],
+     "trigger": null,
+     "question": null
+    }
+   ],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-20T19:55:00.357592",
+  "fresh_until": "2026-09-03T19:55:00.357592"
+ },
+ {
+  "cache_key": "CHN|CHN|ESP|tourism|default|unknown|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "ESP",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Schengen Type C short-stay tourist visa",
+   "permitted_stay": "90 days in any 180-day Schengen period",
+   "passport_validity": "3 months beyond planned departure from Schengen; issued within last 10 years",
+   "required_documents": [
+    "valid ordinary passport",
+    "completed Schengen visa application form",
+    "2 passport photos",
+    "travel medical insurance (30,000 EUR, Schengen coverage)",
+    "round-trip flight reservation or travel itinerary",
+    "proof of accommodation",
+    "proof of financial means",
+    "employment/student certificate or sponsorship letter",
+    "cover letter explaining itinerary and purpose",
+    "copy of valid Chinese residence permit if applicable"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 80,
+    "currency": "EUR"
+   },
+   "processing_time": "up to 15 calendar days; up to 45 days in individual cases",
+   "forms": [
+    "Schengen visa application form",
+    "BLS service/consent forms as required"
+   ],
+   "official_portal_url": null,
+   "photo_requirements": "2 identical recent color photos, 35x45 mm, white background, face 70-80%, neutral expression, no head covering unless religious",
+   "biometrics_required": true,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "book appointment through BLS Spain visa service portal",
+    "complete online application form if offered",
+    "select preferred visa center city"
+   ],
+   "payment_process": [
+    "pay Schengen visa fee and BLS service fee at visa center or as instructed online",
+    "keep payment receipt"
+   ],
+   "submission_process": [
+    "attend appointment at BLS Spain visa application center",
+    "submit documents and provide biometrics",
+    "collect passport or use courier return service when notified"
+   ],
+   "onward_travel_evidence": "confirmed return/onward flight reservation or travel itinerary",
+   "accommodation_evidence": "hotel bookings or host invitation letter for entire stay",
+   "financial_evidence": "bank statements for last 3-6 months, proof of income, or sponsorship letter with sponsor's financial documents",
+   "insurance_required": true,
+   "exceptions": [],
+   "uncertainty": [
+    {
+     "field": "official_portal_url",
+     "reason": "Exact current official URL for Spain visa applications in China was not verified; BLS International operates the visa application centers"
+    },
+    {
+     "field": "government_fee",
+     "reason": "Fee is standard adult Schengen fee; may differ for minors or applicants covered by facilitation agreements"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_center_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-20T19:55:12.639301",
+  "fresh_until": "2026-09-03T19:55:12.639301"
+ },
+ {
+  "cache_key": "CHN|CHN|AUS|tourism|default|unknown|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "AUS",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Visitor visa Subclass 600 - Tourist stream",
+   "permitted_stay": "Up to 12 months; usually 3 months per visit",
+   "passport_validity": "Valid for intended stay; 6 months recommended",
+   "required_documents": [
+    "Valid passport biodata page",
+    "Recent passport-style photo",
+    "Proof of financial capacity",
+    "Travel itinerary / plans",
+    "Evidence of employment/study/ties to China",
+    "Invitation letter (if visiting family/friends)"
+   ],
+   "application_channel": "online_portal",
+   "government_fee": {
+    "amount": 190,
+    "currency": "AUD"
+   },
+   "processing_time": "Typically 20-30 days; check current times",
+   "forms": [
+    "Online Form 1419 activities via ImmiAccount (electronic lodgement)"
+   ],
+   "official_portal_url": "https://online.immi.gov.au/lusc/login",
+   "photo_requirements": "One recent passport-size colour photo; digital upload specifications in ImmiAccount",
+   "biometrics_required": true,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Create ImmiAccount at online.immi.gov.au",
+    "Start new application: Visitor (600) - Tourist stream",
+    "Complete all questions and upload documents",
+    "Pay visa application charge",
+    "Await biometrics/health instructions"
+   ],
+   "payment_process": [
+    "Credit/debit card via ImmiAccount",
+    "PayPal or BPay may be available"
+   ],
+   "submission_process": [
+    "Submit application online through ImmiAccount",
+    "Attend AVAC if requested for biometrics",
+    "Complete health examination if instructed",
+    "Await decision notification by email"
+   ],
+   "onward_travel_evidence": "Recommended: return/onward ticket or itinerary",
+   "accommodation_evidence": "Hotel bookings or host/inviter details",
+   "financial_evidence": "Bank statements, payslips, tax records; amount depends on trip length",
+   "insurance_required": false,
+   "exceptions": [
+    "No ETA/eVisitor eligibility for ordinary PRC passports",
+    "APEC Business Travel Card holders may have separate arrangements if used for business"
+   ],
+   "uncertainty": [
+    {
+     "field": "trip_duration_and_dates",
+     "reason": "Not provided; affects permitted stay, health-exam need and financial evidence amount"
+    },
+    {
+     "field": "passport_issue_expiry_dates",
+     "reason": "Not provided; needed to confirm passport validity for intended stay"
+    },
+    {
+     "field": "transit_countries",
+     "reason": "Not provided; affects yellow fever and health requirements"
+    },
+    {
+     "field": "age",
+     "reason": "Not provided; health examination requirements may depend on age"
+    },
+    {
+     "field": "prior_refusals",
+     "reason": "Not provided; affects assessment of genuine temporary entrant"
+    },
+    {
+     "field": "health_examination",
+     "reason": "Exact requirement depends on stay length, age and individual case"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": null,
+   "passport_validity_requirement": {
+    "kind": "valid_through_departure",
+    "months": null
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "Incoming Passenger Card (IPC)",
+    "submission_window": "on arrival before immigration clearance"
+   },
+   "health_requirements": [
+    {
+     "name": "COVID-19 vaccination/test",
+     "applicability": "not_applicable",
+     "trigger_countries": [],
+     "trigger": null,
+     "question": null
+    },
+    {
+     "name": "Yellow fever vaccination",
+     "applicability": "conditional",
+     "trigger_countries": [],
+     "trigger": "Arrival/transit in a yellow fever country within 6 days",
+     "question": "Will you transit or have stayed in a yellow fever affected country in the 6 days before arrival?"
+    },
+    {
+     "name": "Tuberculosis/medical examination",
+     "applicability": "conditional",
+     "trigger_countries": [],
+     "trigger": "Length of stay, age, intended activities or country risk",
+     "question": "What is your planned length of stay and age?"
+    }
+   ],
+   "route_workflow_type": "evisa_portal"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-20T19:55:23.918275",
+  "fresh_until": "2026-09-03T19:55:23.918275"
+ },
+ {
+  "cache_key": "CHN|CHN|ARE|tourism|default|unknown|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "ARE",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_EXEMPT",
+   "visa_category": "tourist visitor",
+   "permitted_stay": "30 days",
+   "passport_validity": "6 months on arrival",
+   "required_documents": [
+    "valid passport",
+    "return or onward ticket",
+    "proof of accommodation",
+    "sufficient funds"
+   ],
+   "application_channel": "not_required",
+   "government_fee": {
+    "amount": null,
+    "currency": null
+   },
+   "processing_time": "not applicable",
+   "forms": [],
+   "official_portal_url": null,
+   "photo_requirements": null,
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [],
+   "payment_process": [],
+   "submission_process": [
+    "no visa application required; present passport at UAE immigration"
+   ],
+   "onward_travel_evidence": "return or onward ticket may be requested",
+   "accommodation_evidence": "hotel booking or host address may be requested",
+   "financial_evidence": "proof of sufficient funds may be requested",
+   "insurance_required": false,
+   "exceptions": [
+    "stays longer than 30 days require a visa before travel"
+   ],
+   "uncertainty": [],
+   "confidence": "high",
+   "permitted_stay_days": 30,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [
+    {
+     "name": "yellow fever vaccination certificate",
+     "applicability": "conditional",
+     "trigger_countries": [],
+     "trigger": "arrival within 6 days from, or transit through, a yellow-fever endemic country",
+     "question": "Will you arrive from or transit through a yellow-fever affected country within 6 days before entry?"
+    }
+   ],
+   "route_workflow_type": "visa_exempt_preparation"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-20T19:55:34.146859",
+  "fresh_until": "2026-09-03T19:55:34.146859"
+ },
+ {
+  "cache_key": "CHN|CHN|TUR|tourism|default|unknown|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "TUR",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+   "visa_category": "Tourist e-Visa",
+   "permitted_stay": "30 days",
+   "passport_validity": "6 months beyond arrival date",
+   "required_documents": [
+    "valid ordinary passport",
+    "digital passport bio-page copy",
+    "return or onward travel ticket",
+    "proof of accommodation",
+    "proof of sufficient funds"
+   ],
+   "application_channel": "online_portal",
+   "government_fee": {
+    "amount": 60,
+    "currency": "USD"
+   },
+   "processing_time": "minutes to 24 hours",
+   "forms": [
+    "Turkish e-Visa online application form"
+   ],
+   "official_portal_url": "https://www.evisa.gov.tr/en/",
+   "photo_requirements": "passport-style digital photo not required; passport bio-page upload required",
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [
+    "no account required; apply as guest on portal"
+   ],
+   "payment_process": [
+    "pay visa fee online by credit/debit card during application"
+   ],
+   "submission_process": [
+    "complete online application",
+    "pay fee",
+    "receive e-Visa by email",
+    "print and carry with passport"
+   ],
+   "onward_travel_evidence": "return or onward ticket may be requested at entry",
+   "accommodation_evidence": "hotel reservation or host address may be requested",
+   "financial_evidence": "bank statements or cash evidence of funds may be requested",
+   "insurance_required": false,
+   "exceptions": [
+    "holders of valid Schengen, USA, UK, or Ireland visas/residence permits may still apply for e-Visa but do not become visa-exempt"
+   ],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "Official fee is subject to exchange-rate adjustments; a separate small service fee is added at checkout"
+    },
+    {
+     "field": "health_requirements",
+     "reason": "Travel dates and exact transit countries were not provided; only current known policy is reflected"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 30,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination",
+     "applicability": "not_applicable",
+     "trigger_countries": [],
+     "trigger": null,
+     "question": null
+    }
+   ],
+   "route_workflow_type": "evisa_portal"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-20T19:55:42.277488",
+  "fresh_until": "2026-09-03T19:55:42.277488"
+ },
+ {
+  "cache_key": "CHN|CHN|IDN|tourism|default|unknown|v3",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "IDN",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "B1 Visa on Arrival / e-VOA (tourism)",
+   "permitted_stay": "30 days; extendable once for another 30 days at an immigration office",
+   "passport_validity": "Valid at least 6 months beyond arrival and has at least one blank page",
+   "required_documents": [
+    "Passport valid 6+ months",
+    "Return or onward ticket within 30 days",
+    "Proof of accommodation",
+    "Proof of sufficient funds",
+    "Recent passport photo (for e-VOA)",
+    "Printed/digital e-VOA approval (if applied online)"
+   ],
+   "application_channel": "online_portal",
+   "government_fee": {
+    "amount": 500000,
+    "currency": "IDR"
+   },
+   "processing_time": "e-VOA: minutes to hours; VoA: issued at the port of entry",
+   "forms": [
+    "MOLINA e-VOA online application form"
+   ],
+   "official_portal_url": "https://molina.imigrasi.go.id/",
+   "photo_requirements": "Recent colour passport photo, typically 4x6 cm, white background; digital upload required for e-VOA",
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [
+    "Create an account on the MOLINA portal",
+    "Verify the registered email address"
+   ],
+   "payment_process": [
+    "Pay e-VOA fee online by credit/debit card",
+    "VoA fee is paid at designated Indonesian entry ports in IDR (cash/card as accepted)"
+   ],
+   "submission_process": [
+    "Complete the e-VOA application on MOLINA before departure (recommended)",
+    "Upload passport copy and photo",
+    "Receive e-VOA approval/QR code",
+    "Present passport and e-VOA at immigration, or obtain VoA at an eligible entry port instead"
+   ],
+   "onward_travel_evidence": "Confirmed return or onward ticket within the permitted stay",
+   "accommodation_evidence": "Confirmed hotel booking or address of stay in Indonesia",
+   "financial_evidence": "Bank statements, cards or cash showing sufficient funds for the stay; no fixed amount specified",
+   "insurance_required": false,
+   "exceptions": [
+    "Visa-free entry applies only to ASEAN nationals and selected others under separate policy",
+    "VoA is only available at designated air, sea and land border crossings",
+    "Holders of diplomatic/official passports may have different arrangements"
+   ],
+   "uncertainty": [
+    {
+     "field": "passport_issue_and_expiration_dates",
+     "reason": "Not provided; cannot verify the 6-month validity and blank-page requirement for this passport"
+    },
+    {
+     "field": "travel_dates_and_trip_duration",
+     "reason": "Not provided; needed to confirm stay fits within the 30-day VoA/e-VOA limit"
+    },
+    {
+     "field": "transit_countries",
+     "reason": "Not provided; needed to determine whether the yellow-fever certificate requirement applies"
+    },
+    {
+     "field": "age",
+     "reason": "Not provided; may affect minor documentation and vaccination age exemptions"
+    },
+    {
+     "field": "prior_refusals",
+     "reason": "Not provided; may affect admissibility and application assessment"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 30,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": null,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination certificate (ICVP)",
+     "applicability": "conditional",
+     "trigger_countries": [],
+     "trigger": "Arrival from or transit through a yellow-fever endemic country within the period specified by Indonesian authorities (verify current list)",
+     "question": "Will you arrive from or transit through any yellow-fever endemic country before entering Indonesia?"
+    }
+   ],
+   "route_workflow_type": "evisa_portal"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-20T19:56:23.316823",
+  "fresh_until": "2026-09-03T19:56:23.316823"
+ }
+]
