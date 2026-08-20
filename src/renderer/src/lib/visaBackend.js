@@ -197,6 +197,10 @@ export function createVisaClient(session) {
     // Snapshot route-intake (applicant "Start your visa" wizard).
     snapshotInfo: () => call('GET', '/snapshot/info', session),
     snapshotRegistries: () => call('GET', '/snapshot/registries', session),
+    // The Database: one route in, the full requirements picture out — the
+    // same Kimi-primary decision the applicant journey trusts, served from
+    // its cache instantly on repeat lookups.
+    databaseLookup: (body) => call('POST', '/database/lookup', session, body),
     createIntake: (body) => call('POST', '/intake', session, body),
     listIntakes: () => call('GET', '/intake', session),
     getIntake: (id) => call('GET', `/intake/${id}`, session),

@@ -147,6 +147,13 @@ if [ "${ROUTES:-0}" = "0" ] && ls "$ROOT/backend/route_bundles"/*.json >/dev/nul
   done
 fi
 
+# Ship-warm the Database: the repo carries pre-decided popular routes;
+# import them once so first lookups land on warm cache (idempotent, and a
+# locally-decided answer always wins over the seed).
+if [ -f "$ROOT/data/database_seed/kimi_guidance_seed.json" ]; then
+  ( cd "$ROOT/backend" && DATABASE_URL="sqlite:///$DB" "$PY" scripts/warm_database.py import >>"$LOGS/backend.log" 2>&1 ) || true
+fi
+
 cd "$ROOT/backend"
 "$PY" -m uvicorn app.main:app --host "$HOST" --port "$PORT" --log-level warning >>"$LOGS/backend.log" 2>&1 &
 echo $! > "$RUN/backend.pid"; log "backend pid  : $(cat "$RUN/backend.pid")"

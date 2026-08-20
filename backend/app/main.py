@@ -253,6 +253,73 @@ def get_passport_validity(application_id: str, db=Depends(get_session),
     return verdict
 
 
+class DatabaseLookupIn(BaseModel):
+    nationality: str
+    destination: str
+    travel_document_type: str = "ordinary_passport"
+    travel_purpose: str = "tourism"
+    residence: str = ""
+    arrival_date: str = ""
+
+
+@app.post("/database/lookup")
+def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
+                           p: Principal = Depends(get_principal)):
+    """The Database: one route in, the full requirements picture out.
+
+    Runs the same Kimi-primary single-pass decision the applicant journey
+    trusts — validated shape, deterministic advisories, the honest cached /
+    stale flags — keyed on sanitized route facts only. Repeat lookups serve
+    from the decision cache instantly; a stale entry is served at once and
+    refreshed in the background, so the reader never waits on research."""
+    from .visa_snapshot import kimi_primary
+    if not kimi_primary.is_available():
+        raise HTTPException(503, detail={
+            "status": kimi_primary.STATUS_UNAVAILABLE,
+            "reason": "the route engine is not configured on this install"})
+    nat = body.nationality.strip().upper()
+    dest = body.destination.strip().upper()
+    if not nat or not dest:
+        raise HTTPException(422, "nationality and destination are required")
+    route = {
+        "passport_nationality": nat,
+        "passport_issuing_country": nat,
+        "lawful_country_of_residence": (body.residence or nat).strip().upper(),
+        "travel_document_type": body.travel_document_type or "ordinary_passport",
+        "destination_country": dest,
+        "visa_category": "tourist_visa",
+        "travel_purpose": body.travel_purpose or "tourism",
+    }
+    if body.arrival_date:
+        route["arrival_date"] = body.arrival_date
+    try:
+        out = kimi_primary.get_route_guidance(db, route)
+    except kimi_primary.GuidanceTimeout:
+        raise HTTPException(504, detail={"status": kimi_primary.STATUS_TIMEOUT,
+                                         "reason": kimi_primary.TIMEOUT_MESSAGE})
+    except kimi_primary.GuidanceUnavailable as e:
+        raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
+                                         "reason": str(e)})
+    except kimi_primary.GuidanceProviderError as e:
+        raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
+                                         "reason": e.envelope.get("user_message"),
+                                         "category": e.envelope.get("category")})
+    # A stale cache entry was already served above — freshen it for the next
+    # reader without making this one wait.
+    if out.get("stale"):
+        try:
+            from .db import SessionLocal as _SL
+            kimi_primary.refresh_stale_async(_SL, route)
+        except Exception:  # noqa: BLE001 — refresh is best-effort
+            pass
+    audit.record(db, org_id=p.org_id, application_id="database",
+                 action="database_lookup",
+                 detail={"nationality": nat, "destination": dest,
+                         "cached": out.get("cached"),
+                         "status": out.get("status")}, actor=p.user_id)
+    return out
+
+
 class RenewalRequest(BaseModel):
     manual: bool = False   # True = the applicant chose "Renew my passport"
 

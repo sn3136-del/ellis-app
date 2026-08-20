@@ -586,6 +586,10 @@ export default function StartVisa({ client, onOpenCase }) {
               tourist wizard before they ever saw the three doors. Resume and
               start now live ON the Travel-visas card. */}
           <div className="trip-home__lanes" data-testid="product-lanes">
+            {/* Travel-visas and appointments lanes hidden by owner decision
+                (theming, 2026-08-20): this build presents the Database.
+                Nothing removed — journeys, adapters and hashes all remain. */}
+            {false && (
             <div className="trip-lane trip-lane--tall card-hover anim-rise-1"
               data-testid="lane-tourist">
               <DocumentsIllustration size={150} className="trip-lane__art" />
@@ -603,6 +607,7 @@ export default function StartVisa({ client, onOpenCase }) {
                 )}
               </div>
             </div>
+            )}
             {/* H1B lanes hidden by owner decision (theming) for the
                 Trip.com evaluation: this build presents the USA DS-160
                 journey and the Germany appointment lane. Nothing removed —
@@ -629,6 +634,7 @@ export default function StartVisa({ client, onOpenCase }) {
               </div>
             </div>
             </>)}
+            {false && (
             <div className="trip-lane trip-lane--tall card-hover anim-rise-4" data-testid="lane-schengen">
               <AppointmentIllustration size={150} className="trip-lane__art" />
               <div className="trip-lane__title">{t('start.lane.schengen.title')}</div>
@@ -636,6 +642,19 @@ export default function StartVisa({ client, onOpenCase }) {
                 <button className="trip-cta trip-cta--sm"
                   onClick={() => { window.location.hash = '#schengen'; window.location.reload() }}>
                   {t('start.lane.schengen.cta')}{arrow}
+                </button>
+              </div>
+            </div>
+            )}
+            {/* The Database: traveldoc-style route requirements, answered by
+                the Kimi-primary decision engine. */}
+            <div className="trip-lane trip-lane--tall card-hover anim-rise-1" data-testid="lane-database">
+              <FormFillIllustration size={150} className="trip-lane__art" />
+              <div className="trip-lane__title">Database</div>
+              <div className="trip-lane__ctas">
+                <button className="trip-cta trip-cta--sm"
+                  onClick={() => { window.location.hash = '#database'; window.location.reload() }}>
+                  Check requirements{arrow}
                 </button>
               </div>
             </div>

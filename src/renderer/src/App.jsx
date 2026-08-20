@@ -19,6 +19,7 @@ import AdminConsole from './screens/AdminConsole.jsx'
 import SetupWizard from './screens/SetupWizard.jsx'
 import EmployerConsole from './screens/EmployerConsole.jsx'
 import SchengenVisa from './screens/SchengenVisa.jsx'
+import TravelDatabase from './screens/TravelDatabase.jsx'
 import AskEllis from './components/visa/AskEllis.jsx'
 import { fetchRuntimeMode } from './lib/visaBackend.js'
 import {
@@ -96,7 +97,8 @@ function AppInner() {
   // and Schengen visa), per owner decision; '#schengen' still deep-links
   // straight into the Germany appointment lane.
   const [view, setView] = useState(() =>
-    (window.location.hash || '').includes('schengen') ? 'schengen' : 'visa')
+    (window.location.hash || '').includes('schengen') ? 'schengen'
+      : (window.location.hash || '').includes('database') ? 'database' : 'visa')
   useEffect(() => { if (persona === 'employer') setView('employer') }, [persona])
   // The floating Ask Ellis assistant follows whichever H1B case a surface has
   // registered (H1bPipeline registers the parent case); hidden when no case.
@@ -137,6 +139,13 @@ function AppInner() {
         <main className="main main--top">
           {view === 'visa' && <VisaConsole onNotify={() => {}} adminMode={adminMode} />}
           {/* Schengen: Germany's account-free RK-Termin calendar, read live. */}
+          {/* The Database: traveldoc-style requirements lookup, answered by
+              the Kimi-primary route decision. */}
+          {view === 'database' && (
+            <TravelDatabase onBack={() => {
+              window.location.hash = '#applicant'; window.location.reload()
+            }} />
+          )}
           {view === 'schengen' && (
             <SchengenVisa onBack={() => {
               window.location.hash = '#applicant'; window.location.reload()
