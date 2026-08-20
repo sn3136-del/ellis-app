@@ -403,11 +403,12 @@ export default function StartVisa({ client, onOpenCase }) {
     label: `${c.flag ? c.flag + ' ' : ''}${c.name}`,
     search: `${c.name} ${c.alpha_2} ${c.alpha_3}`.toLowerCase()
   })), [reg])
-  // Destination picker narrowed to the United States for the Trip.com
-  // evaluation (owner decision, theming 2026-08-19): this build presents the
-  // USA DS-160 journey, so every other destination is hidden — not removed;
-  // the registry still serves the full list.
-  const destinationOpts = countryOpts.filter((o) => o.value === 'USA')
+  // The DESTINATION picker lists every country the backend registry serves —
+  // the registry is the single owner of this list (owner decision 2026-08-19:
+  // the full world is back so the Kimi-primary route determiner can answer
+  // any pair). Coverage honesty lives where it belongs: the route resolver
+  // answers each pair with its real status, so nothing needs hiding here.
+  const destinationOpts = countryOpts
   const nationalityOpts = useMemo(() => (reg?.nationalities || []).map((n) => ({
     value: n.code, label: n.name, search: `${n.name} ${n.code}`.toLowerCase()
   })), [reg])
