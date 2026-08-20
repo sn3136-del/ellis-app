@@ -298,8 +298,6 @@ export default function TravelDatabase({ onBack }) {
   ].filter(([, v]) => v) : []
 
   const documents = g ? itemsOf(g.required_documents).map(T) : []
-  const goodToKnow = g ? [...itemsOf(g.exceptions), ...itemsOf(result.advisories || []),
-                          ...itemsOf(g.uncertainty)].map(T) : []
   const health = g ? itemsOf((g.health_requirements || []).filter((h) =>
     !h || typeof h !== 'object' ||
     String(h.applicability || '') !== 'not_applicable')).map(T) : []
@@ -498,11 +496,6 @@ export default function TravelDatabase({ onBack }) {
               </Section>
             )}
 
-            {goodToKnow.length > 0 && (
-              <Section title={t('db.goodToKnow')} accent="#9a6200" wide>
-                <Bullets items={goodToKnow} mark="→" markColor="#9a6200" />
-              </Section>
-            )}
 
             {applySteps.length > 0 && (
               <Section title={t('db.steps')} accent={NAVY} wide>
