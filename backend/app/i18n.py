@@ -21,6 +21,8 @@ Hard guarantees (deterministic, provider-independent, and tested):
 from __future__ import annotations
 
 import hashlib
+import json
+import pathlib
 import re
 
 # Supported UI languages. en / zh-CN / zh-Hant ship as maintained static
@@ -137,6 +139,47 @@ def restore_tokens(text: str, mapping: dict) -> str:
 # --- translation ------------------------------------------------------------
 _CACHE: dict[str, str] = {}
 
+# The cache survives restarts: an in-memory dict alone made every language
+# switch re-pay the full Kimi pass after each relaunch — and a fresh clone
+# ships PRE-WARMED translations for the seeded routes via data/database_seed.
+def _cache_path():
+    import os
+    base = os.environ.get("ELLIS_DATA_DIR") or os.path.join(
+        os.path.expanduser("~"), "Library", "Application Support", "Ellis")
+    return pathlib.Path(base) / "i18n_cache.json"
+
+
+def _load_disk_cache() -> None:
+    try:
+        path = _cache_path()
+        if path.is_file():
+            _CACHE.update(json.loads(path.read_text()))
+    except Exception:  # noqa: BLE001 — an unreadable cache warms itself again
+        pass
+
+
+_DIRTY = {"n": 0}
+
+
+def _persist_cache() -> None:
+    """Best-effort persistence, batched every few writes."""
+    _DIRTY["n"] += 1
+    if _DIRTY["n"] % 5 != 0:
+        return
+    flush_cache()
+
+
+def flush_cache() -> None:
+    try:
+        path = _cache_path()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(_CACHE, ensure_ascii=False))
+    except Exception:  # noqa: BLE001
+        pass
+
+
+_load_disk_cache()
+
 
 class TranslationUnavailable(Exception):
     pass
@@ -190,6 +233,7 @@ def translate(text: str, target_lang: str, source_lang: str = "auto", *, transla
                 "target_lang": target_lang, "status": "unavailable", "cached": False}
     translated = restore_tokens(masked_translation, mapping)
     _CACHE[key] = translated
+    _persist_cache()
     return {"original": text, "translated": translated, "source_lang": source_lang,
             "target_lang": target_lang, "status": "ok", "cached": False}
 
@@ -286,6 +330,7 @@ def translate_catalog(entries: dict, target_lang: str, *,
                 continue
             restored = restore_tokens(got, mappings[k])
             _CACHE[_cache_key(source_lang, target_lang, todo[k])] = restored
+            _persist_cache()
             out[k] = restored
     return {"status": "partial" if missed else "ok", "entries": out}
 
