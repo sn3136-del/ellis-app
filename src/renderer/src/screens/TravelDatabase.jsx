@@ -36,8 +36,8 @@ const CHANNEL_WORDS = {
   visa_center: 'Visa application centre',
   embassy: 'Embassy or consulate',
   consulate: 'Embassy or consulate',
-  evisa_portal: 'Online — official portal',
-  online: 'Online — official portal',
+  evisa_portal: 'Official online portal',
+  online: 'Official online portal',
   on_arrival: 'On arrival',
   mail: 'By mail',
 }
@@ -59,14 +59,17 @@ function asText(v) {
     if (v.reason) return String(v.reason)          // uncertainty rows: the reason IS the sentence
     if (v.name) return [v.name, v.applicability ? `(${v.applicability})` : '']
       .filter(Boolean).join(' ')
-    return Object.values(v).map((x) => asText(x)).filter(Boolean).join(' — ')
+    return Object.values(v).map((x) => asText(x)).filter(Boolean).join(', ')
   }
   return String(v)
 }
 
+const sentence = (s) =>
+  s && /^[a-z]/.test(s) ? s.charAt(0).toUpperCase() + s.slice(1) : s
+
 function itemsOf(v) {
   if (!v) return []
-  return (Array.isArray(v) ? v : [v]).map((x) => asText(x)).filter(Boolean)
+  return (Array.isArray(v) ? v : [v]).map((x) => sentence(asText(x))).filter(Boolean)
 }
 
 function feeText(fee) {
@@ -121,12 +124,16 @@ function CountryCombo({ value, options, onChange, placeholder, noMatch, testid }
 
 function Section({ title, accent, children, wide }) {
   return (
-    <div className="card" style={{ padding: '20px 24px', borderRadius: 18,
-                                   textAlign: 'left', gridColumn: wide ? '1 / -1' : undefined,
-                                   borderTop: `3px solid ${accent || 'var(--line, #e8edf3)'}` }}>
-      <div style={{ fontSize: 11.5, fontWeight: 800, letterSpacing: 1.2,
-                    color: GRAY, textTransform: 'uppercase', marginBottom: 12 }}>
-        {title}
+    <div className="card" style={{ padding: '26px 30px', borderRadius: 20,
+                                   textAlign: 'left', border: 'none',
+                                   boxShadow: '0 1px 3px rgba(15,41,77,0.06)',
+                                   gridColumn: wide ? '1 / -1' : undefined }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8,
+                    marginBottom: 16 }}>
+        <span style={{ width: 8, height: 8, borderRadius: 3, flex: 'none',
+                       background: accent || BLUE }} />
+        <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: 1.1,
+                       color: GRAY, textTransform: 'uppercase' }}>{title}</span>
       </div>
       {children}
     </div>
@@ -134,12 +141,12 @@ function Section({ title, accent, children, wide }) {
 }
 
 function Fact({ label, value }) {
-  const v = asText(value)
+  const v = sentence(asText(value))
   if (!v) return null
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16,
-                  padding: '9px 0', fontSize: 13.5,
-                  borderBottom: '1px solid var(--line, #f0f3f7)' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 20,
+                  padding: '11px 0', fontSize: 13.5, lineHeight: 1.55,
+                  borderBottom: '1px solid #f3f5f9' }}>
       <div style={{ color: GRAY, flex: 'none' }}>{label}</div>
       <div style={{ color: NAVY, fontWeight: 600, textAlign: 'right' }}>{v}</div>
     </div>
@@ -151,9 +158,9 @@ function Bullets({ items, mark = '•', markColor = BLUE }) {
   return (
     <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
       {items.map((x, i) => (
-        <li key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start',
-                             padding: '6px 0', fontSize: 13.5, color: NAVY,
-                             lineHeight: 1.5 }}>
+        <li key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start',
+                             padding: '7px 0', fontSize: 13.5, color: NAVY,
+                             lineHeight: 1.6 }}>
           <span style={{ color: markColor, fontWeight: 800, flex: 'none' }}>{mark}</span>
           <span>{x}</span>
         </li>
@@ -166,13 +173,13 @@ function Tile({ label, value }) {
   const v = asText(value)
   if (!v) return null
   return (
-    <div className="card" style={{ borderRadius: 14, padding: '14px 16px',
-                                   textAlign: 'left', minWidth: 0,
-                                   borderTop: `3px solid ${BLUE}` }}>
+    <div className="card" style={{ borderRadius: 18, padding: '18px 20px',
+                                   textAlign: 'left', minWidth: 0, border: 'none',
+                                   boxShadow: '0 1px 3px rgba(15,41,77,0.06)' }}>
       <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 0.9,
                     color: GRAY, textTransform: 'uppercase' }}>{label}</div>
-      <div style={{ fontSize: 14, fontWeight: 700, color: NAVY, marginTop: 6,
-                    lineHeight: 1.4 }}>{v}</div>
+      <div style={{ fontSize: 14, fontWeight: 700, color: NAVY, marginTop: 8,
+                    lineHeight: 1.45 }}>{sentence(v)}</div>
     </div>
   )
 }
@@ -380,8 +387,8 @@ export default function TravelDatabase({ onBack }) {
       {result && g && (
         <div className="anim-rise" data-testid="database-result">
           {/* Verdict hero */}
-          <div className="card" style={{ padding: '28px 32px', borderRadius: 20,
-                                         marginTop: 18, textAlign: 'center',
+          <div className="card" style={{ padding: '36px 36px', borderRadius: 22,
+                                         marginTop: 20, textAlign: 'center',
                                          background: disp?.tint || '#eef4ff',
                                          border: 'none' }}>
             <div style={{ fontSize: 13, color: NAVY, fontWeight: 700,
@@ -403,7 +410,7 @@ export default function TravelDatabase({ onBack }) {
           </div>
 
           {/* At a glance */}
-          <div style={{ display: 'grid', gap: 12, marginTop: 14,
+          <div style={{ display: 'grid', gap: 16, marginTop: 20,
                         gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))' }}>
             <Tile label={t('db.stay')} value={T(asText(g.permitted_stay))} />
             <Tile label={t('db.fee')} value={feeText(g.government_fee)} />
@@ -412,7 +419,7 @@ export default function TravelDatabase({ onBack }) {
           </div>
 
           {/* Organized two-column brief */}
-          <div style={{ display: 'grid', gap: 14, marginTop: 14,
+          <div style={{ display: 'grid', gap: 16, marginTop: 16,
                         gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))' }}>
             {documents.length > 0 && (
               <Section title={t('db.documents')} accent="#0f8a3d" wide>
@@ -441,7 +448,7 @@ export default function TravelDatabase({ onBack }) {
                 {entryFacts.map(([l, v]) => <Fact key={l} label={l} value={v} />)}
                 {g.arrival_card?.required ? (
                   <Fact label={t('db.arrivalCard')} value={
-                    `${g.arrival_card.name || t('db.arrivalCard')}${g.arrival_card.submission_window ? ' — ' + g.arrival_card.submission_window : ''}`} />
+                    `${g.arrival_card.name || t('db.arrivalCard')}${g.arrival_card.submission_window ? ', ' + g.arrival_card.submission_window : ''}`} />
                 ) : null}
                 {health.length > 0 && (
                   <div style={{ marginTop: 8 }}>
@@ -468,10 +475,12 @@ export default function TravelDatabase({ onBack }) {
                 <Bullets items={itemsOf(g.forms).map(T)} />
                 {g.official_portal_url && (
                   <a href={g.official_portal_url} target="_blank" rel="noreferrer"
-                     style={{ display: 'inline-block', marginTop: 10, color: BLUE,
+                     style={{ display: 'inline-flex', alignItems: 'center',
+                              gap: 6, marginTop: 14, color: BLUE,
                               fontSize: 13.5, fontWeight: 700,
-                              wordBreak: 'break-all' }}>
-                    {g.official_portal_url} ↗
+                              padding: '9px 16px', borderRadius: 999,
+                              background: 'rgba(40,125,250,0.08)' }}>
+                    {t('db.portalStart')} ↗
                   </a>
                 )}
               </Section>
@@ -528,7 +537,8 @@ export default function TravelDatabase({ onBack }) {
           </div>
 
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center',
-                        marginTop: 24 }}>
+                        marginTop: 32, paddingTop: 24,
+                        borderTop: '1px solid #eef1f6' }}>
             {/* Present but inert, per owner instruction. */}
             <button className="btn btn--primary" data-testid="database-process"
                     onClick={() => {}}
