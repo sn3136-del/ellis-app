@@ -74,6 +74,7 @@ const humanize = (v) => {
   let out = String(v)
   if (/https?:\/\//.test(out)) return out
   out = out
+    .replace(/([A-Za-z0-9])_+([A-Za-z0-9])/g, '$1 $2')
     .replace(/\s*[\u2014\u2013]\s*/g, ', ')
     .replace(/\s*;\s*/g, '. ')
     .replace(/\s{2,}/g, ' ')
@@ -149,12 +150,12 @@ function CountryCombo({ value, options, onChange, placeholder, noMatch, testid }
 
 // ---- result-page building blocks -----------------------------------------
 
-function Section({ title, accent, children, wide }) {
+function Section({ title, accent, children }) {
   return (
     <div className="card" style={{ padding: '26px 30px', borderRadius: 20,
                                    textAlign: 'left', border: 'none',
                                    boxShadow: '0 1px 3px rgba(15,41,77,0.06)',
-                                   gridColumn: wide ? '1 / -1' : undefined }}>
+                                   breakInside: 'avoid', marginBottom: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8,
                     marginBottom: 16 }}>
         <span style={{ width: 8, height: 8, borderRadius: 3, flex: 'none',
@@ -480,11 +481,11 @@ export default function TravelDatabase({ onBack }) {
                   href={g.official_portal_url || undefined} />
           </div>
 
-          {/* Organized two-column brief */}
-          <div style={{ display: 'grid', gap: 16, marginTop: 16, alignItems: 'start',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))' }}>
+          {/* The brief: documents full width, then the narrow cards in a
+              packed column flow, then the apply steps full width. */}
+          <div style={{ marginTop: 16 }}>
             {documents.length > 0 && (
-              <Section title={t('db.documents')} accent="#0f8a3d" wide>
+              <Section title={t('db.documents')} accent="#0f8a3d">
                 <div style={{ columns: documents.length > 5 ? 2 : 1,
                               columnGap: 32 }}>
                   <Bullets items={documents} mark="✓" markColor="#0f8a3d" />
@@ -492,6 +493,7 @@ export default function TravelDatabase({ onBack }) {
               </Section>
             )}
 
+            <div style={{ columns: '2 340px', columnGap: 16 }}>
             {(asText(g.passport_validity) || asText(g.photo_requirements) ||
               g.passport_validity_requirement?.months) && (
               <Section title={t('db.passportPhoto')} accent={BLUE}>
@@ -549,8 +551,10 @@ export default function TravelDatabase({ onBack }) {
             )}
 
 
+            </div>
+
             {applySteps.length > 0 && (
-              <Section title={t('db.steps')} accent={NAVY} wide>
+              <Section title={t('db.steps')} accent={NAVY}>
                 <ol style={{ margin: 0, paddingLeft: 0, listStyle: 'none',
                              position: 'relative' }}>
                   {applySteps.map((x, i) => (
