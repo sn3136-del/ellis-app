@@ -57,7 +57,8 @@ function asText(v) {
   if (Array.isArray(v)) return v.map((x) => asText(x)).filter(Boolean).join('; ')
   if (typeof v === 'object') {
     if (v.reason) return String(v.reason)          // uncertainty rows: the reason is the sentence
-    if (v.name) return [v.name, v.applicability ? `(${v.applicability})` : '']
+    if (v.name) return [v.name, v.applicability
+      ? `(${String(v.applicability).replace(/_/g, ' ')})` : '']
       .filter(Boolean).join(' ')
     return Object.values(v).map((x) => asText(x)).filter(Boolean).join(', ')
   }
@@ -299,7 +300,9 @@ export default function TravelDatabase({ onBack }) {
   const documents = g ? itemsOf(g.required_documents).map(T) : []
   const goodToKnow = g ? [...itemsOf(g.exceptions), ...itemsOf(result.advisories || []),
                           ...itemsOf(g.uncertainty)].map(T) : []
-  const health = g ? itemsOf(g.health_requirements).map(T) : []
+  const health = g ? itemsOf((g.health_requirements || []).filter((h) =>
+    !h || typeof h !== 'object' ||
+    String(h.applicability || '') !== 'not_applicable')).map(T) : []
 
   const label = (k) => (
     <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>{t(k)}</span>
