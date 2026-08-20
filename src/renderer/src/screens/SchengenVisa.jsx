@@ -832,7 +832,7 @@ export default function SchengenVisa({ onBack }) {
         <AppointmentIllustration size={72} />
         <div>
           <h1 style={{ fontSize: 30, fontWeight: 800, color: NAVY, margin: 0,
-                       letterSpacing: -0.6 }}>Schengen visa</h1>
+                       letterSpacing: -0.6 }}>Visa appointments</h1>
         </div>
       </div>
 
