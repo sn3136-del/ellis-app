@@ -1,78 +1,90 @@
-
-!.env.example
-!backend/app/portal_adapters/generated/usa-ceac-ds160/
-!backend/app/portal_adapters/generated/usa-ceac-ds160/**
-!data/demo_seed/ellis-demo.db
-# (removed 2026-08-19) '!backend/.env' un-ignored the plaintext
-# (removed 2026-08-19) '!backend/google_adc.json' un-ignored the
-# ...except the attended-mapped CEAC adapter: it is a curated artifact of
-# === Bundled slim Python runtime for the self-contained app (regenerate via scripts/build-runtime-venv.sh) ===
-# === Databases / generated data ===
-# === Generated adapter candidate bundles (DB is authoritative) ===
-# === Node / Electron build output ===
-# === OS / editor ===
-# === Private / personal data (NEVER commit) ===
-# === Python ===
 # === Secrets & credentials (NEVER commit) ===
-# === Temp / OCR scratch ===
-# Local Claude settings may contain embedded keys
-# NOTE: real passport fixtures live OUTSIDE the repo at ~/.ellis_private_fixtures
-# Never commit credentials in ANY form — not even encrypted (2026-07-28).
-# PRIVATE repo ships the demo credentials so a Trip.com tester can clone and
-# SQLite runtime companions: machine-local, never source.
-# TRIP.COM DEMO EXCEPTION (owner's explicit decision, 2026-08-04): this
-# Trip.com demo seed: a scrubbed, 3-destination copy of the app database so a
-# else.
-# fresh clone serves the released routes with zero setup (2026-08-04).
-# ignore when the demo ends. The blanket rules below still cover everything
-# plaintext Google credential — same leak class as the .env negation.ellis-app/
-# plaintext provider secrets live only locally — the repo carries backend/secrets.enc
-# provider keys and kept pushing them to a PUBLIC repo. The keys
-# record (ds160_api serves its question bank from disk) and must ship.
-# run with zero key entry. Rotate every credential and restore the blanket
-# travel only in backend/secrets.enc; the plaintext stays local.
-**/application_default_credentials.json
-**/private_fixtures/
-*.blockmap
-*.db
-*.dmg
-*.egg-info/
-*.env
-*.env.enc
-*.key
-*.passport
-*.pem
-*.pyc
-*.pyo
-*.sqlite
-*.sqlite3
-*.swp
-*.tmp
-.DS_Store
-.claude/settings.local.json
 .env
+*.env
+!.env.example
+# TRIP.COM DEMO EXCEPTION (owner's explicit decision, 2026-08-04): this
+# PRIVATE repo ships the demo credentials so a Trip.com tester can clone and
+# run with zero key entry. Rotate every credential and restore the blanket
+# ignore when the demo ends. The blanket rules below still cover everything
+# else.
+# (removed 2026-08-19) '!backend/.env' un-ignored the plaintext
+# provider keys and kept pushing them to a PUBLIC repo. The keys
+# travel only in backend/secrets.enc; the plaintext stays local.
+# Never commit credentials in ANY form — not even encrypted (2026-07-28).
 .env.enc
-.idea/
-.mypy_cache/
-.pytest_cache/
-.secrets/
-.venv/
-.vscode/
-__pycache__/
-backend/.env
-backend/.runtime-venv/
-backend/app/portal_adapters/generated/
-backend/ellis.db-journal
-backend/ellis.db-shm
-backend/ellis.db-wal
-backend/google_adc.json
-dist/
-node_modules/
-ocr_scratch/
-out/
-private_fixtures/
-release/
+*.env.enc
+**/application_default_credentials.json
+*.pem
+*.key
 resources/kimi.key
 secrets/
-tmp/
+.secrets/
+
+# === Private / personal data (NEVER commit) ===
+private_fixtures/
+**/private_fixtures/
+*.passport
+# NOTE: real passport fixtures live OUTSIDE the repo at ~/.ellis_private_fixtures
+
+# === Python ===
+.venv/
 venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+.mypy_cache/
+
+# === Databases / generated data ===
+*.db
+*.sqlite
+*.sqlite3
+# Trip.com demo seed: a scrubbed, 3-destination copy of the app database so a
+# fresh clone serves the released routes with zero setup (2026-08-04).
+!data/demo_seed/ellis-demo.db
+
+# === Node / Electron build output ===
+node_modules/
+out/
+dist/
+release/
+*.dmg
+*.blockmap
+
+# === OS / editor ===
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# === Temp / OCR scratch ===
+tmp/
+*.tmp
+ocr_scratch/
+
+# Local Claude settings may contain embedded keys
+.claude/settings.local.json
+
+# === Generated adapter candidate bundles (DB is authoritative) ===
+backend/app/portal_adapters/generated/
+# ...except the attended-mapped CEAC adapter: it is a curated artifact of
+# record (ds160_api serves its question bank from disk) and must ship.
+!backend/app/portal_adapters/generated/usa-ceac-ds160/
+!backend/app/portal_adapters/generated/usa-ceac-ds160/**
+
+# === Bundled slim Python runtime for the self-contained app (regenerate via scripts/build-runtime-venv.sh) ===
+backend/.runtime-venv/
+
+# SQLite runtime companions: machine-local, never source.
+backend/ellis.db-shm
+backend/ellis.db-wal
+backend/ellis.db-journal
+# plaintext provider secrets live only locally — the repo carries backend/secrets.enc
+backend/.env
+backend/google_adc.json
+
+# (removed 2026-08-19) '!backend/google_adc.json' un-ignored the
+# plaintext Google credential — same leak class as the .env negation.
+# stray embedded clone of this very repo (user-created); never track it
+ellis-app/
