@@ -2,12 +2,10 @@
 // Kimi-primary route decision the applicant journey trusts.
 //
 // One form (nationality, document, destination, purpose, optional date), one
-// answer page carrying EVERYTHING the decision knows: disposition, permitted
-// stay, passport validity, documents, forms, fee, processing time, channel,
-// arrival card, health requirements, advisories — with the honest freshness
-// flags (cached / stale / just decided). Repeat lookups are instant: the
-// decision cache serves them without a model call, and a stale entry is
-// served at once while a background refresh runs for the next reader.
+// answer page carrying everything the decision knows. Repeat lookups are
+// instant (decision cache); a stale entry serves at once and refreshes
+// behind. The answer page shows TRIP INFORMATION ONLY — engine labels,
+// cache flags and boundary prose are hidden by owner decision (theming).
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Loading } from '../components/ui.jsx'
 import { createVisaClient } from '../lib/visaBackend.js'
@@ -17,41 +15,19 @@ const NAVY = 'var(--trip-navy, #0f294d)'
 const GRAY = 'var(--trip-gray, #64748b)'
 const BLUE = 'var(--trip-blue, #287dfa)'
 
-function Card({ children, style = {}, ...rest }) {
-  return (
-    <div className="card" style={{ padding: 22, borderRadius: 20, ...style }} {...rest}>
-      {children}
-    </div>
-  )
-}
-
 const PURPOSES = [
   ['tourism', 'Tourism'], ['business', 'Business'], ['family_visit', 'Family visit'],
   ['study', 'Study'], ['work', 'Work'], ['transit', 'Transit'],
 ]
 
-// The disposition, in a traveller's words and a colour.
 // The engine's own vocabulary (kimi_primary.DISPOSITIONS), in a traveller's
-// words and a colour.
+// words, each with its colour and tint.
 const DISPOSITION_VIEW = {
-  VISA_EXEMPT: { title: 'No visa needed', color: '#0f8a3d' },
+  VISA_EXEMPT: { title: 'No visa needed', color: '#0f8a3d', tint: '#eefaf1' },
   ELECTRONIC_AUTHORIZATION_REQUIRED:
-    { title: 'Electronic travel authorization required', color: '#b06f00' },
-  VISA_REQUIRED: { title: 'Visa required', color: '#b3261e' },
-  CONDITIONAL: { title: 'Depends on your situation — see the details', color: '#b06f00' },
-}
-
-function Row({ k, children }) {
-  if (children === null || children === undefined || children === '' ||
-      (Array.isArray(children) && children.length === 0)) return null
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: '210px 1fr', gap: 12,
-                  padding: '10px 0', borderBottom: '1px solid var(--line, #eef1f5)',
-                  fontSize: 13.5, textAlign: 'left' }}>
-      <div style={{ color: GRAY, fontWeight: 700 }}>{k}</div>
-      <div style={{ color: NAVY }}>{children}</div>
-    </div>
-  )
+    { title: 'Electronic travel authorization required', color: '#9a6200', tint: '#fff7e8' },
+  VISA_REQUIRED: { title: 'Visa required', color: '#b3261e', tint: '#fdeeed' },
+  CONDITIONAL: { title: 'Depends on your situation', color: '#9a6200', tint: '#fff7e8' },
 }
 
 // The decision's fields arrive as strings, lists, or small objects — render
@@ -72,19 +48,20 @@ function asText(v) {
   return String(v)
 }
 
-function listOf(v) {
-  if (!v) return null
-  const items = (Array.isArray(v) ? v : [v]).map((x) => asText(x)).filter(Boolean)
-  if (!items.length) return null
-  return (
-    <ul style={{ margin: 0, paddingLeft: 18 }}>
-      {items.map((x, i) => <li key={i} style={{ marginBottom: 3 }}>{x}</li>)}
-    </ul>
-  )
+function itemsOf(v) {
+  if (!v) return []
+  return (Array.isArray(v) ? v : [v]).map((x) => asText(x)).filter(Boolean)
 }
 
-// Type-ahead country picker: type to filter, click to choose — the same
-// behaviour StartVisa's SearchSelect gives the intake.
+function feeText(fee) {
+  if (!fee || typeof fee !== 'object') return null
+  const amt = fee.amount
+  if (amt === 0) return 'None'
+  if (!amt && amt !== 0) return null
+  return `${amt} ${fee.currency || ''}`.trim()
+}
+
+// Type-ahead country picker: type to filter, click to choose.
 function CountryCombo({ value, options, onChange, placeholder, testid }) {
   const [q, setQ] = useState('')
   const [open, setOpen] = useState(false)
@@ -97,7 +74,7 @@ function CountryCombo({ value, options, onChange, placeholder, testid }) {
   return (
     <div style={{ position: 'relative' }}>
       <input className="input" data-testid={testid}
-        style={{ fontSize: 14, padding: '10px 12px', borderRadius: 10, width: '100%' }}
+        style={{ fontSize: 14, padding: '11px 14px', borderRadius: 12, width: '100%' }}
         value={open ? q : (current ? current.label : '')}
         placeholder={current ? current.label : (placeholder || 'Type to search…')}
         onFocus={() => { setOpen(true); setQ('') }}
@@ -124,12 +101,62 @@ function CountryCombo({ value, options, onChange, placeholder, testid }) {
   )
 }
 
-function feeText(fee) {
-  if (!fee || typeof fee !== 'object') return null
-  const amt = fee.amount
-  if (amt === 0) return 'None'
-  if (!amt && amt !== 0) return null
-  return `${amt} ${fee.currency || ''}`.trim() + (fee.notes ? ` — ${fee.notes}` : '')
+// ---- result-page building blocks -----------------------------------------
+
+function Section({ title, children }) {
+  if (children === null || children === undefined) return null
+  return (
+    <div className="card" style={{ padding: '18px 22px', borderRadius: 18,
+                                   marginTop: 14, textAlign: 'left' }}>
+      <div style={{ fontSize: 11.5, fontWeight: 800, letterSpacing: 1,
+                    color: GRAY, textTransform: 'uppercase', marginBottom: 10 }}>
+        {title}
+      </div>
+      {children}
+    </div>
+  )
+}
+
+function Fact({ label, value }) {
+  const v = asText(value)
+  if (!v) return null
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: 12,
+                  padding: '8px 0', fontSize: 13.5 }}>
+      <div style={{ color: GRAY }}>{label}</div>
+      <div style={{ color: NAVY, fontWeight: 600 }}>{v}</div>
+    </div>
+  )
+}
+
+function Bullets({ items }) {
+  const list = itemsOf(items)
+  if (!list.length) return null
+  return (
+    <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
+      {list.map((x, i) => (
+        <li key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start',
+                             padding: '5px 0', fontSize: 13.5, color: NAVY }}>
+          <span style={{ color: BLUE, fontWeight: 800, lineHeight: '20px' }}>•</span>
+          <span>{x}</span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function Tile({ label, value }) {
+  const v = asText(value)
+  if (!v) return null
+  return (
+    <div style={{ background: 'var(--bg-soft, #f5f7fa)', borderRadius: 14,
+                  padding: '14px 16px', textAlign: 'left', minWidth: 0 }}>
+      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 0.8,
+                    color: GRAY, textTransform: 'uppercase' }}>{label}</div>
+      <div style={{ fontSize: 14.5, fontWeight: 700, color: NAVY, marginTop: 5,
+                    lineHeight: 1.35 }}>{v}</div>
+    </div>
+  )
 }
 
 export default function TravelDatabase({ onBack }) {
@@ -178,8 +205,24 @@ export default function TravelDatabase({ onBack }) {
 
   const g = result?.guidance || null
   const disp = g ? (DISPOSITION_VIEW[g.disposition] ||
-                    { title: String(g.disposition || 'Route decision'), color: NAVY }) : null
+                    { title: String(g.disposition || 'Route decision'),
+                      color: NAVY, tint: '#eef4ff' }) : null
   const countryName = (code) => countries.find((c) => c.value === code)?.label || code
+
+  // "How to apply", in the applicant's own sequence: registration, payment,
+  // submission — the route's real steps from the decision itself.
+  const applySteps = g ? [
+    ...itemsOf(g.account_registration_steps),
+    ...itemsOf(g.payment_process),
+    ...itemsOf(g.submission_process),
+  ] : []
+
+  const entryFacts = g ? [
+    ['Biometrics', g.biometrics_required],
+    ['Interview', g.interview_required],
+    ['Appointment', g.appointment_required],
+    ['Travel insurance', g.insurance_required],
+  ].filter(([, v]) => v !== null && v !== undefined) : []
 
   return (
     <div className="page" style={{ maxWidth: 880, margin: '0 auto',
@@ -198,8 +241,9 @@ export default function TravelDatabase({ onBack }) {
       </div>
 
       {!result && (
-        <Card className="anim-rise" style={{ marginTop: 16 }}
-              data-testid="database-form">
+        <div className="card anim-rise" style={{ padding: 22, borderRadius: 20,
+                                                 marginTop: 16 }}
+             data-testid="database-form">
           <div style={{ display: 'grid', gap: 14 }}>
             <label style={{ display: 'grid', gap: 5, textAlign: 'left' }}>
               <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>Nationality *</span>
@@ -211,7 +255,7 @@ export default function TravelDatabase({ onBack }) {
               <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>Travel document</span>
               <select className="select" value={doc}
                       onChange={(e) => setDoc(e.target.value)}
-                      style={{ fontSize: 14, padding: '10px 12px', borderRadius: 10 }}>
+                      style={{ fontSize: 14, padding: '11px 14px', borderRadius: 12 }}>
                 {(docTypes.length ? docTypes : [{ code: 'ordinary_passport', name: 'Ordinary passport' }])
                   .map((d) => (
                     <option key={d.code || d} value={d.code || d}>{d.name || d}</option>
@@ -228,7 +272,7 @@ export default function TravelDatabase({ onBack }) {
               <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>Purpose of travel</span>
               <select className="select" value={purpose}
                       onChange={(e) => setPurpose(e.target.value)}
-                      style={{ fontSize: 14, padding: '10px 12px', borderRadius: 10 }}>
+                      style={{ fontSize: 14, padding: '11px 14px', borderRadius: 12 }}>
                 {PURPOSES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
               </select>
             </label>
@@ -238,7 +282,7 @@ export default function TravelDatabase({ onBack }) {
               </span>
               <input className="input" type="date" value={arrival}
                      onChange={(e) => setArrival(e.target.value)}
-                     style={{ fontSize: 14, padding: '9px 12px', borderRadius: 10 }} />
+                     style={{ fontSize: 14, padding: '10px 14px', borderRadius: 12 }} />
             </label>
           </div>
           <div style={{ marginTop: 18, textAlign: 'center' }}>
@@ -256,113 +300,166 @@ export default function TravelDatabase({ onBack }) {
           </div>
           {busy && (
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: 14 }}>
-              <Loading label="Reading the current rules for this route — a route checked for the first time can take up to a minute; repeats are instant" />
+              {/* The plane alone — the explanatory sentence is hidden by
+                  owner decision (theming). */}
+              <Loading label="" />
             </div>
           )}
-        </Card>
+        </div>
       )}
 
       {result && g && (
-        <Card className="anim-rise" style={{ marginTop: 16 }}
-              data-testid="database-result">
-          <div style={{ textAlign: 'left', fontSize: 12.5, color: GRAY }}>
-            {countryName(nat)} → {countryName(dest)} · {PURPOSES.find(([v]) => v === purpose)?.[1]}
-          </div>
-          <div style={{ fontSize: 24, fontWeight: 800, color: disp.color,
-                        margin: '8px 0 2px', textAlign: 'left' }}
-               data-testid="database-disposition">
-            {disp.title}
-          </div>
-          <div style={{ fontSize: 12, color: GRAY, textAlign: 'left', marginBottom: 8 }}>
-            {result.label}{result.cached ? ' · served from the decision cache' : ' · decided just now'}
-            {result.stale ? ' · refreshing in the background' : ''}
-          </div>
-
-          <Row k="Visa category">{asText(g.visa_category)}</Row>
-          <Row k="Permitted stay">{asText(g.permitted_stay)}</Row>
-          <Row k="Passport validity">{asText(g.passport_validity)}</Row>
-          {g.passport_validity_requirement?.months ? (
-            <Row k="Validity rule">
-              {`At least ${g.passport_validity_requirement.months} months (${(g.passport_validity_requirement.kind || '').replace(/_/g, ' ')})`}
-            </Row>
-          ) : null}
-          <Row k="Application channel">{asText(g.application_channel)}</Row>
-          {g.official_portal_url ? (
-            <Row k="Official portal">
-              <a href={g.official_portal_url} target="_blank" rel="noreferrer"
-                 style={{ color: BLUE }}>{g.official_portal_url}</a>
-            </Row>
-          ) : null}
-          <Row k="Required documents">{listOf(g.required_documents)}</Row>
-          <Row k="Forms">{listOf(g.forms)}</Row>
-          <Row k="Government fee">{feeText(g.government_fee)}</Row>
-          <Row k="Processing time">{asText(g.processing_time)}</Row>
-          <Row k="Photo requirements">{asText(g.photo_requirements)}</Row>
-          <Row k="Biometrics">{g.biometrics_required === true ? 'Required'
-            : g.biometrics_required === false ? 'Not required' : null}</Row>
-          <Row k="Interview">{g.interview_required === true ? 'Required'
-            : g.interview_required === false ? 'Not required' : null}</Row>
-          <Row k="Appointment">{g.appointment_required === true ? 'Required'
-            : g.appointment_required === false ? 'Not required' : null}</Row>
-          <Row k="Onward travel evidence">{asText(g.onward_travel_evidence)}</Row>
-          <Row k="Accommodation evidence">{asText(g.accommodation_evidence)}</Row>
-          <Row k="Financial evidence">{asText(g.financial_evidence)}</Row>
-          <Row k="Travel insurance">{g.insurance_required === true ? 'Required'
-            : g.insurance_required === false ? 'Not required' : null}</Row>
-          {g.arrival_card?.required ? (
-            <Row k="Arrival card">
-              {`${g.arrival_card.name || 'Arrival card'}${g.arrival_card.submission_window ? ' — ' + g.arrival_card.submission_window : ''}`}
-            </Row>
-          ) : null}
-          <Row k="Health requirements">{listOf(g.health_requirements)}</Row>
-          <Row k="Exceptions">{listOf(g.exceptions)}</Row>
-          <Row k="Account registration">{listOf(g.account_registration_steps)}</Row>
-          <Row k="Payment">{listOf(g.payment_process)}</Row>
-          <Row k="Submission">{listOf(g.submission_process)}</Row>
-          <Row k="Uncertainty">{listOf(g.uncertainty)}</Row>
-
-          {(result.advisories || []).length > 0 && (
-            <div style={{ marginTop: 12, textAlign: 'left' }}>
-              <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 0.6,
-                            color: GRAY, textTransform: 'uppercase' }}>Advisories</div>
-              {listOf(result.advisories)}
+        <div className="anim-rise" data-testid="database-result">
+          {/* Verdict hero */}
+          <div className="card" style={{ padding: '26px 28px', borderRadius: 20,
+                                         marginTop: 16, textAlign: 'left',
+                                         background: disp.tint, border: 'none' }}>
+            <div style={{ fontSize: 12.5, color: GRAY, fontWeight: 600 }}>
+              {countryName(nat)} → {countryName(dest)} ·{' '}
+              {PURPOSES.find(([v]) => v === purpose)?.[1]}
             </div>
+            <div style={{ fontSize: 27, fontWeight: 800, color: disp.color,
+                          marginTop: 6, letterSpacing: -0.4 }}
+                 data-testid="database-disposition">
+              {disp.title}
+            </div>
+            {asText(g.visa_category) && (
+              <div style={{ fontSize: 14, color: NAVY, marginTop: 6 }}>
+                {asText(g.visa_category)}
+              </div>
+            )}
+          </div>
+
+          {/* At a glance */}
+          <div style={{ display: 'grid', gap: 10, marginTop: 14,
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))' }}>
+            <Tile label="Permitted stay" value={g.permitted_stay} />
+            <Tile label="Government fee" value={feeText(g.government_fee)} />
+            <Tile label="Processing time" value={g.processing_time} />
+            <Tile label="Passport validity" value={
+              g.passport_validity_requirement?.months
+                ? `${g.passport_validity_requirement.months}+ months`
+                : g.passport_validity} />
+          </div>
+
+          {itemsOf(g.required_documents).length > 0 && (
+            <Section title="Documents you need">
+              <Bullets items={g.required_documents} />
+            </Section>
           )}
-          {result.safety_boundary || result.boundary ? (
-            <div style={{ fontSize: 11.5, color: GRAY, marginTop: 12, textAlign: 'left' }}>
-              {result.safety_boundary || result.boundary}
-            </div>
-          ) : null}
+
+          {(itemsOf(g.forms).length > 0 || g.official_portal_url) && (
+            <Section title="Forms & official portal">
+              <Bullets items={g.forms} />
+              {g.official_portal_url && (
+                <a href={g.official_portal_url} target="_blank" rel="noreferrer"
+                   style={{ display: 'inline-block', marginTop: 8, color: BLUE,
+                            fontSize: 13.5, fontWeight: 700 }}>
+                  {g.official_portal_url} ↗
+                </a>
+              )}
+            </Section>
+          )}
+
+          {(asText(g.passport_validity) || asText(g.photo_requirements)) && (
+            <Section title="Passport & photo">
+              <Fact label="Passport validity" value={g.passport_validity} />
+              {g.passport_validity_requirement?.months ? (
+                <Fact label="Validity rule" value={
+                  `At least ${g.passport_validity_requirement.months} months (${String(g.passport_validity_requirement.kind || '').replace(/_/g, ' ')})`} />
+              ) : null}
+              <Fact label="Photo" value={g.photo_requirements} />
+            </Section>
+          )}
+
+          {(entryFacts.length > 0 || g.arrival_card?.required ||
+            itemsOf(g.health_requirements).length > 0) && (
+            <Section title="Entry formalities">
+              {entryFacts.map(([l, v]) => <Fact key={l} label={l} value={v} />)}
+              {g.arrival_card?.required ? (
+                <Fact label="Arrival card" value={
+                  `${g.arrival_card.name || 'Arrival card'}${g.arrival_card.submission_window ? ' — ' + g.arrival_card.submission_window : ''}`} />
+              ) : null}
+              {itemsOf(g.health_requirements).length > 0 && (
+                <div style={{ marginTop: 6 }}>
+                  <div style={{ fontSize: 12.5, color: GRAY, marginBottom: 4 }}>Health</div>
+                  <Bullets items={g.health_requirements} />
+                </div>
+              )}
+            </Section>
+          )}
+
+          {(asText(g.onward_travel_evidence) || asText(g.accommodation_evidence) ||
+            asText(g.financial_evidence)) && (
+            <Section title="Evidence to carry">
+              <Fact label="Onward travel" value={g.onward_travel_evidence} />
+              <Fact label="Accommodation" value={g.accommodation_evidence} />
+              <Fact label="Finances" value={g.financial_evidence} />
+            </Section>
+          )}
+
+          {(itemsOf(g.exceptions).length > 0 || itemsOf(g.uncertainty).length > 0 ||
+            itemsOf(result.advisories).length > 0) && (
+            <Section title="Good to know">
+              <Bullets items={[...itemsOf(g.exceptions),
+                               ...itemsOf(result.advisories),
+                               ...itemsOf(g.uncertainty)]} />
+            </Section>
+          )}
+
+          {applySteps.length > 0 && (
+            <Section title="Steps to apply">
+              <ol style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
+                {applySteps.map((x, i) => (
+                  <li key={i} style={{ display: 'flex', gap: 12,
+                                       alignItems: 'flex-start', padding: '7px 0' }}>
+                    <span style={{ flex: 'none', width: 24, height: 24,
+                                   borderRadius: 999, background: BLUE,
+                                   color: '#fff', fontSize: 12.5, fontWeight: 800,
+                                   display: 'flex', alignItems: 'center',
+                                   justifyContent: 'center' }}>{i + 1}</span>
+                    <span style={{ fontSize: 13.5, color: NAVY,
+                                   lineHeight: '24px' }}>{x}</span>
+                  </li>
+                ))}
+              </ol>
+              {g.official_portal_url && (
+                <a href={g.official_portal_url} target="_blank" rel="noreferrer"
+                   style={{ display: 'inline-block', marginTop: 10, color: BLUE,
+                            fontSize: 13.5, fontWeight: 700 }}>
+                  Start on the official portal ↗
+                </a>
+              )}
+            </Section>
+          )}
 
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center',
-                        marginTop: 18 }}>
-            {/* Present but inert, per owner instruction: the button exists so
-                the flow reads right; it processes nothing yet. */}
+                        marginTop: 20 }}>
+            {/* Present but inert, per owner instruction. */}
             <button className="btn btn--primary" data-testid="database-process"
                     onClick={() => {}}
-                    style={{ fontSize: 15, fontWeight: 800, padding: '12px 26px' }}>
+                    style={{ fontSize: 15, fontWeight: 800, padding: '13px 30px',
+                             borderRadius: 999 }}>
               Process my visa
             </button>
             <button className="btn btn--ghost" onClick={() => { setResult(null) }}
                     data-testid="database-again"
-                    style={{ fontSize: 14 }}>
+                    style={{ fontSize: 14, borderRadius: 999 }}>
               New search
             </button>
           </div>
-        </Card>
+        </div>
       )}
 
       {result && !g && (
-        <Card className="anim-rise" style={{ marginTop: 16 }}>
+        <div className="card anim-rise" style={{ padding: 22, borderRadius: 20,
+                                                 marginTop: 16 }}>
           <div style={{ fontSize: 14, color: NAVY, fontWeight: 700 }}>
             No decision is available for this route right now.
           </div>
-          <div style={{ fontSize: 13, color: GRAY, marginTop: 6 }}>
-            {result.status || ''} — try again in a moment.
-          </div>
           <button className="btn btn--ghost" style={{ marginTop: 12 }}
                   onClick={() => setResult(null)}>New search</button>
-        </Card>
+        </div>
       )}
     </div>
   )
