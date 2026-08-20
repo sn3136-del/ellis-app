@@ -4647,5 +4647,122 @@
   },
   "generated_at": "2026-08-20T19:56:23.316823",
   "fresh_until": "2026-09-03T19:56:23.316823"
+ },
+ {
+  "cache_key": "USA|USA|CHN|tourism|default|unknown|v3",
+  "route": {
+   "passport_nationality": "USA",
+   "lawful_country_of_residence": "USA",
+   "destination_country": "CHN",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "L (Tourist)",
+   "permitted_stay": "30 to 90 days per entry; determined by consulate",
+   "passport_validity": "at least 6 months beyond intended stay",
+   "required_documents": [
+    "valid US passport with blank visa pages",
+    "completed visa application form (COVA online)",
+    "recent passport photo (33x48mm, white background)",
+    "proof of round-trip travel / itinerary",
+    "hotel bookings or invitation letter from China host",
+    "proof of legal residence (US passport suffices for US residents)"
+   ],
+   "application_channel": "embassy",
+   "government_fee": {
+    "amount": 140,
+    "currency": "USD"
+   },
+   "processing_time": "4 business days regular; 2-3 express; 1 rush at some posts",
+   "forms": [
+    "Online visa application form (COVA)",
+    "printed confirmation page with barcode",
+    "appointment confirmation (if required)"
+   ],
+   "official_portal_url": "https://cova.mfa.gov.cn",
+   "photo_requirements": "33 x 48 mm, color, white background, no head covering unless religious, taken within last 6 months",
+   "biometrics_required": true,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Create account on COVA (Chinese Online Visa Application) portal",
+    "Fill in application and upload photo",
+    "Print signed confirmation page"
+   ],
+   "payment_process": [
+    "Pay visa fee at embassy/consulate or CVASC; cash, money order, or card depending on post"
+   ],
+   "submission_process": [
+    "Complete online application (COVA)",
+    "Schedule appointment if required by post",
+    "Submit passport, photo, form, and supporting documents in person or via CVASC",
+    "Collect passport with visa or use mail-back service where offered"
+   ],
+   "onward_travel_evidence": "round-trip flight reservation or onward ticket",
+   "accommodation_evidence": "hotel bookings covering stay or notarized invitation letter with host ID",
+   "financial_evidence": null,
+   "insurance_required": false,
+   "exceptions": [
+    "US passport holders generally require a visa; no visa-free tourism",
+    "transit without visa (TWOV) up to 144 hours available only in eligible cities for eligible onward itineraries, not for tourism as final destination",
+    "Hong Kong SAR and Macao SAR have separate visa policies"
+   ],
+   "uncertainty": [
+    {
+     "field": "permitted_stay_days",
+     "reason": "Exact stay duration is decided by the issuing consulate based on itinerary and not fixed in advance"
+    },
+    {
+     "field": "government_fee",
+     "reason": "Fees can change by policy or reciprocity; confirm with embassy/CVASC before payment"
+    },
+    {
+     "field": "appointment_required",
+     "reason": "Some posts/CVASC centers may allow walk-ins or require appointments; verify with local jurisdiction"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": null,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "China Arrival/Departure Card",
+    "submission_window": "on arrival at port of entry"
+   },
+   "health_requirements": [
+    {
+     "name": "COVID-19 testing or vaccination",
+     "applicability": "not_applicable",
+     "trigger_countries": [],
+     "trigger": null,
+     "question": null
+    },
+    {
+     "name": "Yellow fever vaccination",
+     "applicability": "not_applicable",
+     "trigger_countries": [],
+     "trigger": null,
+     "question": null
+    }
+   ],
+   "route_workflow_type": "embassy_submission"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-20T20:08:00.826687",
+  "fresh_until": "2026-09-03T20:08:00.826687"
  }
 ]

@@ -78,6 +78,11 @@ def export() -> int:
     SEED.parent.mkdir(parents=True, exist_ok=True)
     SEED.write_text(json.dumps(rows, indent=1, ensure_ascii=False))
     print(f"exported {len(rows)} cached decisions -> {SEED}")
+    from app import i18n
+    i18n.flush_cache()
+    if i18n._cache_path().is_file():
+        (SEED.parent / "i18n_cache.json").write_text(i18n._cache_path().read_text())
+        print("exported translation cache")
     return 0
 
 
@@ -109,6 +114,21 @@ def import_seed() -> int:
     db.commit()
     db.close()
     print(f"imported {added} cached decisions")
+    # Seed the shipped translation cache so the language picker is instant on
+    # the demo routes; a locally-cached translation always wins on merge.
+    tx = SEED.parent / "i18n_cache.json"
+    if tx.is_file():
+        from app import i18n
+        cur = i18n._cache_path()
+        try:
+            existing = json.loads(cur.read_text()) if cur.is_file() else {}
+        except Exception:  # noqa: BLE001
+            existing = {}
+        merged = json.loads(tx.read_text())
+        merged.update(existing)
+        cur.parent.mkdir(parents=True, exist_ok=True)
+        cur.write_text(json.dumps(merged, ensure_ascii=False))
+        print(f"seeded {len(merged)} translations")
     return 0
 
 
