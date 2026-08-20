@@ -493,65 +493,88 @@ export default function TravelDatabase({ onBack }) {
               </Section>
             )}
 
-            <div style={{ columns: '2 340px', columnGap: 16 }}>
-            {(asText(g.passport_validity) || asText(g.photo_requirements) ||
-              g.passport_validity_requirement?.months) && (
-              <Section title={t('db.passportPhoto')} accent={BLUE}>
-                <Fact label={t('db.validity')} value={T(asText(g.passport_validity))} />
-                {g.passport_validity_requirement?.months ? (
-                  <Fact label={t('db.validityRule')}
-                        value={t('db.validityMonths',
-                                 { n: g.passport_validity_requirement.months })} />
-                ) : null}
-                <Fact label={t('db.photo')} value={T(asText(g.photo_requirements))} />
-              </Section>
-            )}
-
-            {(entryFacts.length > 0 || g.arrival_card?.required || health.length > 0) && (
-              <Section title={t('db.entry')} accent={BLUE}>
-                {entryFacts.map(([l, [v, tone]]) => <Fact key={l} label={l} value={v} pill={tone} />)}
-                {g.arrival_card?.required ? (
-                  <Fact label={t('db.arrivalCard')} value={
-                    `${g.arrival_card.name || t('db.arrivalCard')}${g.arrival_card.submission_window ? ', ' + g.arrival_card.submission_window : ''}`} />
-                ) : null}
-                {health.length > 0 && (
-                  <div style={{ marginTop: 8 }}>
-                    <div style={{ fontSize: 12.5, color: GRAY, marginBottom: 4 }}>
-                      {t('db.health')}
-                    </div>
-                    <Bullets items={health} />
-                  </div>
-                )}
-              </Section>
-            )}
-
-            {(asText(g.onward_travel_evidence) || asText(g.accommodation_evidence) ||
-              asText(g.financial_evidence)) && (
-              <Section title={t('db.evidence')} accent={BLUE}>
-                <Fact label={t('db.onward')} value={T(asText(g.onward_travel_evidence))} />
-                <Fact label={t('db.accommodation')} value={T(asText(g.accommodation_evidence))} />
-                <Fact label={t('db.finances')} value={T(asText(g.financial_evidence))} />
-              </Section>
-            )}
-
-            {(itemsOf(g.forms).length > 0 || g.official_portal_url) && (
-              <Section title={t('db.formsPortal')} accent={BLUE}>
-                <Bullets items={itemsOf(g.forms).map(T)} />
-                {g.official_portal_url && (
-                  <a href={g.official_portal_url} target="_blank" rel="noreferrer"
-                     style={{ display: 'inline-flex', alignItems: 'center',
-                              gap: 6, marginTop: 14, color: BLUE,
-                              fontSize: 13.5, fontWeight: 700,
-                              padding: '9px 16px', borderRadius: 999,
-                              background: 'rgba(40,125,250,0.08)' }}>
-                    {t('db.portalStart')} ↗
-                  </a>
-                )}
-              </Section>
-            )}
-
-
-            </div>
+            {(() => {
+              // Balanced two-column pack: each card lands in the currently
+              // shorter column (weighted by its row count), so short and
+              // tall cards sit flush with no stranded white space.
+              const cards = []
+              if (asText(g.passport_validity) || asText(g.photo_requirements) ||
+                  g.passport_validity_requirement?.months) {
+                cards.push({ key: 'passport', weight: 3, node: (
+                  <Section title={t('db.passportPhoto')} accent={BLUE} key="passport">
+                    <Fact label={t('db.validity')} value={T(asText(g.passport_validity))} />
+                    {g.passport_validity_requirement?.months ? (
+                      <Fact label={t('db.validityRule')}
+                            value={t('db.validityMonths',
+                                     { n: g.passport_validity_requirement.months })} />
+                    ) : null}
+                    <Fact label={t('db.photo')} value={T(asText(g.photo_requirements))} />
+                  </Section>
+                ) })
+              }
+              if (entryFacts.length > 0 || g.arrival_card?.required || health.length > 0) {
+                cards.push({ key: 'entry',
+                  weight: entryFacts.length + (g.arrival_card?.required ? 2 : 0)
+                          + health.length + 1, node: (
+                  <Section title={t('db.entry')} accent={BLUE} key="entry">
+                    {entryFacts.map(([l, [v, tone]]) => <Fact key={l} label={l} value={v} pill={tone} />)}
+                    {g.arrival_card?.required ? (
+                      <Fact label={t('db.arrivalCard')} value={
+                        `${g.arrival_card.name || t('db.arrivalCard')}${g.arrival_card.submission_window ? ', ' + g.arrival_card.submission_window : ''}`} />
+                    ) : null}
+                    {health.length > 0 && (
+                      <div style={{ marginTop: 8 }}>
+                        <div style={{ fontSize: 12.5, color: GRAY, marginBottom: 4 }}>
+                          {t('db.health')}
+                        </div>
+                        <Bullets items={health} />
+                      </div>
+                    )}
+                  </Section>
+                ) })
+              }
+              if (asText(g.onward_travel_evidence) || asText(g.accommodation_evidence) ||
+                  asText(g.financial_evidence)) {
+                cards.push({ key: 'evidence', weight: 3, node: (
+                  <Section title={t('db.evidence')} accent={BLUE} key="evidence">
+                    <Fact label={t('db.onward')} value={T(asText(g.onward_travel_evidence))} />
+                    <Fact label={t('db.accommodation')} value={T(asText(g.accommodation_evidence))} />
+                    <Fact label={t('db.finances')} value={T(asText(g.financial_evidence))} />
+                  </Section>
+                ) })
+              }
+              if (itemsOf(g.forms).length > 0 || g.official_portal_url) {
+                cards.push({ key: 'forms', weight: itemsOf(g.forms).length + 2, node: (
+                  <Section title={t('db.formsPortal')} accent={BLUE} key="forms">
+                    <Bullets items={itemsOf(g.forms).map(T)} />
+                    {g.official_portal_url && (
+                      <a href={g.official_portal_url} target="_blank" rel="noreferrer"
+                         style={{ display: 'inline-flex', alignItems: 'center',
+                                  gap: 6, marginTop: 14, color: BLUE,
+                                  fontSize: 13.5, fontWeight: 700,
+                                  padding: '9px 16px', borderRadius: 999,
+                                  background: 'rgba(40,125,250,0.08)' }}>
+                        {t('db.portalStart')} ↗
+                      </a>
+                    )}
+                  </Section>
+                ) })
+              }
+              const left = [], right = []
+              let lw = 0, rw = 0
+              for (const c of cards) {
+                if (lw <= rw) { left.push(c.node); lw += c.weight }
+                else { right.push(c.node); rw += c.weight }
+              }
+              if (!right.length) return left
+              return (
+                <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start',
+                              flexWrap: 'wrap' }}>
+                  <div style={{ flex: '1 1 340px', minWidth: 340 }}>{left}</div>
+                  <div style={{ flex: '1 1 340px', minWidth: 340 }}>{right}</div>
+                </div>
+              )
+            })()}
 
             {applySteps.length > 0 && (
               <Section title={t('db.steps')} accent={NAVY}>
