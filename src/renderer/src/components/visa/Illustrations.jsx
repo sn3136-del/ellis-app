@@ -103,7 +103,7 @@ export function PassportIllustration({ size = 120, className = '' }) {
 // alongside; the checkbox ticks itself last.
 export function FormFillIllustration({ size = 120, className = '' }) {
   return (
-    <svg width={size} viewBox="0 0 160 120" fill="none" className={`illo ${className}`} aria-hidden="true">
+    <svg width={size} viewBox="8 0 160 120" fill="none" className={`illo ${className}`} aria-hidden="true">
       {/* the form — titled by the real Trip.com wordmark */}
       <g className="illo-part illo-rise">
         <rect x="28" y="14" width="82" height="94" rx="8" fill="#ffffff" stroke={NAVY} strokeWidth="2.4" />
