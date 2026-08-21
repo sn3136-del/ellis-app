@@ -701,3 +701,35 @@ def maybe_start_adapter_build(db, *, org_id: str, user_id: str, case_id: str,
         state["disposition"] = "EVISA_REQUIRED"
     out = ondemand._evaluate_adapter_readiness(db, job, state)
     return {"started": bool(out.get("auto_build_started")), "detail": out}
+
+
+# --- AI Q&A: natural language -> route (Trip.com feature 3) -------------------
+_ASK_SYSTEM = ("""Extract the travel route from the user's question. Reply STRICT
+JSON: {"nationality": ISO3 or null, "destination": ISO3 or null,
+"travel_purpose": one of tourism|business|family_visit|study|work|transit or
+null, "travel_document_type": "ordinary_passport" unless another is named}.
+Use ISO3 country codes (CHN, JPN, USA, GBR...). Null anything not stated. No
+prose, JSON only.""")
+
+
+def parse_question(question: str, *, timeout: float = 20.0) -> dict:
+    """Turn 'What visa for tourism in Japan with a Chinese passport?' into a
+    route dict the Database lookup understands. Deterministic shape-check on
+    the model's answer; never invents a country the user did not name."""
+    q = str(question or "").strip()
+    if not q:
+        raise GuidanceUnavailable("no question to read")
+    raw = _call(_ASK_SYSTEM, json.dumps({"question": q[:500]}),
+                timeout=timeout, max_tokens=2000)
+    if not isinstance(raw, dict):
+        raise GuidanceUnavailable("could not read the question")
+    nat = str(raw.get("nationality") or "").strip().upper()
+    dest = str(raw.get("destination") or "").strip().upper()
+    purpose = str(raw.get("travel_purpose") or "tourism").strip().lower()
+    if len(nat) != 3 or len(dest) != 3:
+        return {"understood": False, "nationality": nat, "destination": dest}
+    doc = str(raw.get("travel_document_type") or "ordinary_passport").strip()
+    return {"understood": True, "nationality": nat, "destination": dest,
+            "travel_purpose": purpose if purpose in
+            ("tourism", "business", "family_visit", "study", "work", "transit")
+            else "tourism", "travel_document_type": doc or "ordinary_passport"}

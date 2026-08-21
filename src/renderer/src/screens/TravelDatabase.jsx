@@ -255,6 +255,9 @@ export default function TravelDatabase({ onBack }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
+  const [question, setQuestion] = useState('')
+  const [askBusy, setAskBusy] = useState(false)
+  const [askMsg, setAskMsg] = useState('')
   // Dynamic-content translation overlay: original guidance string -> lang.
   const [tx, setTx] = useState({})
 
@@ -305,6 +308,28 @@ export default function TravelDatabase({ onBack }) {
     return () => { live = false }
   }, [g, lang])
   const T = (s) => (s && tx[s]) || s
+
+  // AI Q&A: a plain-language question, answered by the same engine as the form.
+  async function askQuestion() {
+    const q = question.trim()
+    if (!q) return
+    setAskBusy(true); setAskMsg(''); setError(''); setResult(null)
+    try {
+      const out = await client.databaseAsk(q)
+      if (out.understood === false) {
+        setAskMsg(t('db.askUnclear'))
+      } else {
+        if (out.route) {
+          setNat(out.route.nationality); setDest(out.route.destination)
+          if (out.route.travel_purpose) setPurpose(out.route.travel_purpose)
+        }
+        setResult(out)
+      }
+    } catch (e) {
+      setAskMsg(e?.detail?.reason || e?.message || t('db.error'))
+    }
+    setAskBusy(false)
+  }
 
   async function lookUp() {
     if (!nat || !dest) return
@@ -373,8 +398,40 @@ export default function TravelDatabase({ onBack }) {
       )}
 
       {!result && (
-        <div className="card anim-rise" style={{ padding: '26px 28px',
+        <div className="card anim-rise" style={{ padding: '20px 24px',
                                                  borderRadius: 20, marginTop: 18,
+                                                 maxWidth: 560, marginLeft: 'auto',
+                                                 marginRight: 'auto' }}
+             data-testid="database-ask">
+          <div style={{ fontSize: 13, fontWeight: 700, color: NAVY,
+                        marginBottom: 8, textAlign: 'left' }}>{t('db.askTitle')}</div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input className="input" value={question}
+                   data-testid="database-question"
+                   placeholder={t('db.askPlaceholder')}
+                   onChange={(e) => setQuestion(e.target.value)}
+                   onKeyDown={(e) => { if (e.key === 'Enter') askQuestion() }}
+                   style={{ fontSize: 14, padding: '11px 14px', borderRadius: 12,
+                            flex: 1 }} />
+            <button className="btn btn--primary" onClick={askQuestion}
+                    data-testid="database-ask-btn" disabled={askBusy || !question.trim()}
+                    style={{ fontSize: 14, fontWeight: 800, borderRadius: 12,
+                             padding: '0 18px' }}>
+              {askBusy ? t('db.askBusy') : t('db.askBtn')}
+            </button>
+          </div>
+          {askMsg && (
+            <div style={{ fontSize: 12.5, color: NAVY, marginTop: 8,
+                          textAlign: 'left' }}>{askMsg}</div>
+          )}
+          <div style={{ fontSize: 11.5, color: GRAY, marginTop: 10,
+                        textAlign: 'center' }}>{t('db.askOr')}</div>
+        </div>
+      )}
+
+      {!result && (
+        <div className="card anim-rise" style={{ padding: '26px 28px',
+                                                 borderRadius: 20, marginTop: 14,
                                                  maxWidth: 560, marginLeft: 'auto',
                                                  marginRight: 'auto' }}
              data-testid="database-form">

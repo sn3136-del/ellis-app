@@ -253,6 +253,63 @@ def get_passport_validity(application_id: str, db=Depends(get_session),
     return verdict
 
 
+class DatabaseAskIn(BaseModel):
+    question: str
+
+
+@app.post("/database/ask")
+def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
+                        p: Principal = Depends(get_principal)):
+    """AI Q&A: a natural-language question is read into a route, then answered
+    by the same Kimi-primary decision the form uses — identical answer,
+    sources and honesty. An unclear question is reported, never guessed."""
+    from .visa_snapshot import kimi_primary
+    if not kimi_primary.is_available():
+        raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
+                                         "reason": "the route engine is not configured"})
+    try:
+        parsed = kimi_primary.parse_question(body.question)
+    except kimi_primary.GuidanceTimeout:
+        raise HTTPException(504, detail={"status": kimi_primary.STATUS_TIMEOUT,
+                                         "reason": kimi_primary.TIMEOUT_MESSAGE})
+    except kimi_primary.GuidanceUnavailable as e:
+        raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
+                                         "reason": str(e)})
+    if not parsed.get("understood"):
+        return {"understood": False,
+                "nationality": parsed.get("nationality") or "",
+                "destination": parsed.get("destination") or ""}
+    route = {
+        "passport_nationality": parsed["nationality"],
+        "passport_issuing_country": parsed["nationality"],
+        "lawful_country_of_residence": parsed["nationality"],
+        "travel_document_type": parsed["travel_document_type"],
+        "destination_country": parsed["destination"],
+        "visa_category": "tourist_visa",
+        "travel_purpose": parsed["travel_purpose"],
+    }
+    try:
+        out = kimi_primary.get_route_guidance(db, route)
+    except kimi_primary.GuidanceTimeout:
+        raise HTTPException(504, detail={"status": kimi_primary.STATUS_TIMEOUT,
+                                         "reason": kimi_primary.TIMEOUT_MESSAGE})
+    except kimi_primary.GuidanceUnavailable as e:
+        raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
+                                         "reason": str(e)})
+    except kimi_primary.GuidanceProviderError as e:
+        raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
+                                         "reason": e.envelope.get("user_message")})
+    out["understood"] = True
+    out["route"] = {"nationality": parsed["nationality"],
+                    "destination": parsed["destination"],
+                    "travel_purpose": parsed["travel_purpose"]}
+    audit.record(db, org_id=p.org_id, application_id="database",
+                 action="database_ask",
+                 detail={"nationality": parsed["nationality"],
+                         "destination": parsed["destination"]}, actor=p.user_id)
+    return out
+
+
 class DatabaseLookupIn(BaseModel):
     nationality: str
     destination: str

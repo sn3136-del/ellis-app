@@ -221,6 +221,8 @@ export function createVisaClient(session) {
     // same Kimi-primary decision the applicant journey trusts, served from
     // its cache instantly on repeat lookups.
     databaseLookup: (body) => call('POST', '/database/lookup', session, body),
+    // AI Q&A: a plain-language question, answered by the same decision engine.
+    databaseAsk: (question) => call('POST', '/database/ask', session, { question }),
     createIntake: (body) => call('POST', '/intake', session, body),
     listIntakes: () => call('GET', '/intake', session),
     getIntake: (id) => call('GET', `/intake/${id}`, session),
