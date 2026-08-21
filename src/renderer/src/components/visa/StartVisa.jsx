@@ -586,10 +586,8 @@ export default function StartVisa({ client, onOpenCase }) {
               tourist wizard before they ever saw the three doors. Resume and
               start now live ON the Travel-visas card. */}
           <div className="trip-home__lanes" data-testid="product-lanes">
-            {/* Travel-visas and appointments lanes hidden by owner decision
-                (theming, 2026-08-20): this build presents the Database.
-                Nothing removed — journeys, adapters and hashes all remain. */}
-            {false && (
+            {/* The appointments lane stays hidden (theming); Travel visas
+                and the Database are both on the menu. */}
             <div className="trip-lane trip-lane--tall card-hover anim-rise-1"
               data-testid="lane-tourist">
               <DocumentsIllustration size={150} className="trip-lane__art" />
@@ -607,7 +605,6 @@ export default function StartVisa({ client, onOpenCase }) {
                 )}
               </div>
             </div>
-            )}
             {/* H1B lanes hidden by owner decision (theming) for the
                 Trip.com evaluation: this build presents the USA DS-160
                 journey and the Germany appointment lane. Nothing removed —
