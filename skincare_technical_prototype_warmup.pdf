@@ -1,0 +1,68 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+6 0 obj
+<< /Length 2865 >>
+stream
+BT /F2 18 Tf 54 740 Td (Technical Prototype Warm-Up: Skin Care Website) Tj ET
+BT /F2 11 Tf 54 706 Td (Group: Solo group - Sam) Tj ET
+BT /F2 13 Tf 54 684 Td (1. TA Feedback on Technical Prototype) Tj ET
+BT /F2 11 Tf 54 661 Td (What is working well from HW10:) Tj ET
+BT /F1 11 Tf 68 643 Td (- The technical prototype has a clear direction and purpose: a functional) Tj ET
+BT /F1 11 Tf 68 628 Td (  website focused on skin care.) Tj ET
+BT /F1 11 Tf 68 610 Td (- The main idea is understandable, and the prototype shows the basic structure) Tj ET
+BT /F1 11 Tf 68 595 Td (  of the website experience.) Tj ET
+BT /F1 11 Tf 68 577 Td (- The project is moving toward a useful product where users can interact with) Tj ET
+BT /F1 11 Tf 68 562 Td (  skin care-related content and features.) Tj ET
+BT /F2 11 Tf 54 544 Td (What still needs work:) Tj ET
+BT /F1 11 Tf 68 526 Td (- The TA feedback was that the prototype needs less text and more images so) Tj ET
+BT /F1 11 Tf 68 511 Td (  the website feels more visual and user-friendly.) Tj ET
+BT /F1 11 Tf 68 493 Td (- The site should rely more on product images, skin care visuals, icons, or) Tj ET
+BT /F1 11 Tf 68 478 Td (  visual sections instead of large blocks of writing.) Tj ET
+BT /F1 11 Tf 68 460 Td (- The website still needs more technical implementation so it works as a fully) Tj ET
+BT /F1 11 Tf 68 445 Td (  functional prototype, not just a static layout.) Tj ET
+BT /F1 11 Tf 68 427 Td (- The next step is to make the user flow clearer and more interactive,) Tj ET
+BT /F1 11 Tf 68 412 Td (  especially for skin care recommendations, product/content browsing, and any) Tj ET
+BT /F1 11 Tf 68 397 Td (  main website features.) Tj ET
+BT /F2 13 Tf 54 375 Td (2. Job Assignments / Solo Implementation Plan) Tj ET
+BT /F1 11 Tf 54 352 Td (Since this is a solo group, Sam is responsible for all roles, including design,) Tj ET
+BT /F1 11 Tf 54 337 Td (technical implementation, content, testing, and final submission.) Tj ET
+BT /F2 11 Tf 54 319 Td (Sam's implementation plan for this week:) Tj ET
+BT /F1 11 Tf 68 301 Td (- Reduce the amount of text on the website and replace long written sections) Tj ET
+BT /F1 11 Tf 68 286 Td (  with more images and visual elements.) Tj ET
+BT /F1 11 Tf 68 268 Td (- Add skin care-related images, product cards, icons, or visual sections to) Tj ET
+BT /F1 11 Tf 68 253 Td (  make the site more engaging.) Tj ET
+BT /F1 11 Tf 68 235 Td (- Continue building the functional parts of the website so users can interact) Tj ET
+BT /F1 11 Tf 68 220 Td (  with the prototype.) Tj ET
+BT /F1 11 Tf 68 202 Td (- Improve the layout so the website looks cleaner, easier to navigate, and) Tj ET
+BT /F1 11 Tf 68 187 Td (  more polished.) Tj ET
+BT /F1 11 Tf 68 169 Td (- Test the website flow and fix any issues so the technical prototype feels) Tj ET
+BT /F1 11 Tf 68 154 Td (  complete and ready to use.) Tj ET
+endstream
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000251 00000 n 
+0000000321 00000 n 
+0000000396 00000 n 
+trailer << /Size 7 /Root 1 0 R >>
+startxref
+3313
+%%EOF

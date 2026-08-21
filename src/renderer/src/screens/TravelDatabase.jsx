@@ -480,6 +480,45 @@ export default function TravelDatabase({ onBack }) {
                   value={T(humanizeEnum(g.application_channel))}
                   href={g.official_portal_url || undefined} />
           </div>
+          {asText(g.application_channel_detail) && (
+            <div style={{ fontSize: 13, color: NAVY, marginTop: 12,
+                          padding: '12px 16px', borderRadius: 12,
+                          background: 'var(--bg-soft, #f5f7fa)' }}>
+              {sentence(asText(g.application_channel_detail))}
+            </div>
+          )}
+
+          {/* Available visa types — every product for this route, each with
+              its own entry, validity, stay and fee (Trip.com feedback: never
+              one generic product). */}
+          {Array.isArray(g.visa_products) && g.visa_products.length > 0 && (
+            <div style={{ marginTop: 16 }}>
+              <Section title={t('db.visaTypes')} accent="#0f8a3d">
+                <div style={{ display: 'grid', gap: 10 }}>
+                  {g.visa_products.map((vp, i) => (
+                    <div key={i} style={{ display: 'grid',
+                         gridTemplateColumns: '1.4fr 1fr 1fr 1fr', gap: 12,
+                         padding: '10px 0',
+                         borderBottom: i < g.visa_products.length - 1
+                           ? '1px solid var(--line, #eef1f5)' : 'none',
+                         fontSize: 13.5, alignItems: 'baseline' }}>
+                      <div style={{ fontWeight: 700, color: NAVY }}>
+                        {T(asText(vp.type))}
+                        {vp.entry ? <span style={{ color: GRAY, fontWeight: 400 }}>
+                          {' · ' + asText(vp.entry)}</span> : null}
+                      </div>
+                      <div style={{ color: NAVY }}>{T(asText(vp.validity)) || '—'}</div>
+                      <div style={{ color: NAVY }}>
+                        {vp.max_stay_days ? `${vp.max_stay_days} days`
+                          : (T(asText(vp.notes)) || '—')}</div>
+                      <div style={{ color: NAVY, fontWeight: 600 }}>
+                        {feeText(vp.fee) || '—'}</div>
+                    </div>
+                  ))}
+                </div>
+              </Section>
+            </div>
+          )}
 
           {/* The brief: documents full width, then the narrow cards in a
               packed column flow, then the apply steps full width. */}
@@ -636,6 +675,21 @@ export default function TravelDatabase({ onBack }) {
               {t('db.newSearch')}
             </button>
           </div>
+
+          {/* Source + confidence — Trip.com's traceability requirement. */}
+          {(g.source_url || g.confidence) && (
+            <div style={{ fontSize: 12, color: GRAY, marginTop: 16,
+                          textAlign: 'center' }}>
+              {g.source_url && (
+                <a href={g.source_url} target="_blank" rel="noreferrer"
+                   style={{ color: GRAY, textDecoration: 'underline' }}>
+                  {t('db.source')}
+                </a>
+              )}
+              {g.source_url && g.confidence ? ' · ' : ''}
+              {g.confidence ? t('db.confidence.' + g.confidence) : ''}
+            </div>
+          )}
         </div>
       )}
 

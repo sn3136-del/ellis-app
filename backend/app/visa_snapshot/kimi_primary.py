@@ -80,6 +80,14 @@ ALL_FIELDS = MANDATORY_FIELDS + (
     "arrival_card",                   # {required, name, submission_window}
     "health_requirements",            # [{name, applicability, trigger_countries, trigger, question}]
     "route_workflow_type",            # one of WORKFLOW_TYPES
+    # Trip.com feedback (2026-08): a route offers MORE than one product, and
+    # the honest channel matters. visa_products lists every option for the
+    # purpose with its own entry/validity/stay/fee; application_channel_detail
+    # says plainly whether individuals may apply directly or must use an
+    # authorised agent; source_url backs the answer for their traceability.
+    "visa_products",                  # [{type, entry, validity, max_stay_days, fee:{amount,currency}, notes}]
+    "application_channel_detail",     # honest sentence: who may lodge, and how
+    "source_url",                     # the official page the facts come from
 )
 
 # The user-facing decision label (replaces every "checked against official
@@ -105,7 +113,7 @@ PASS1_MAX_TOKENS = 12000
 
 # Cache-schema version: bumping invalidates two-pass-era rows so a cached
 # route always carries the honest single-pass label and verification shape.
-CACHE_VERSION = "v3"
+CACHE_VERSION = "v4"  # visa_products + honest channel + source (Trip.com 2026-08)
 
 # Default freshness window; stale entries are reused instantly and refreshed in
 # the background (never blocking the applicant).
@@ -120,8 +128,11 @@ passport_validity_requirement: {"kind": "valid_on_arrival"|"valid_through_depart
 required_documents, forms, account_registration_steps, payment_process,
 submission_process, exceptions: arrays of short strings
 application_channel: online_portal | embassy | visa_center | on_arrival | not_required
-official_portal_url: the official government portal URL or null (NEVER invent one)
-government_fee: {"amount": number|null, "currency": string|null}
+official_portal_url: the official government portal URL or null (NEVER invent one) — for THIS destination and visa type; do not point at an unrelated page
+government_fee: {"amount": number|null, "currency": string|null} — the OFFICIAL consular fee only; if a service/agency fee also applies say so in application_channel_detail, never fold it in
+visa_products: array of EVERY visa product available for this nationality + destination + purpose — each {"type": e.g. "Single-entry tourist"|"3-year multiple"|"5-year multiple"|"B1/B2", "entry": "single"|"multiple"|null, "validity": short string, "max_stay_days": integer|null, "fee": {"amount": number|null, "currency": string|null}, "notes": short string|null}; list them ALL, never just one; [] only when truly a single product
+application_channel_detail: one honest sentence naming WHO may lodge and HOW — e.g. "Individuals cannot apply directly; the application must go through a designated authorised agent" or "Apply yourself on the official portal" — never claim a walk-in visa centre where the destination refuses individual filings
+source_url: the single official government page these facts come from, or null (NEVER invent one)
 photo_requirements, onward_travel_evidence, accommodation_evidence,
 financial_evidence: short strings or null
 biometrics_required, interview_required, appointment_required,
@@ -133,7 +144,13 @@ uncertainty: array of {"field":..., "reason":...} for anything not certain
 confidence: high | medium | low
 Rules: never guess a URL or a fee; unknown means null + uncertainty entry;
 missing information is NEVER visa-exempt; answer for THIS nationality only;
-keep every string short — no prose."""
+list ALL visa products for the purpose, each with its OWN stay and fee (never a
+single generic "90 days" when products differ); name the real application
+channel honestly; when the destination offers facilitation policies relevant to
+tourists (e.g. simplified rules for accompanying family / secondary applicants,
+asset-proof waivers, frequent-traveller lanes) note them in exceptions; if a
+transit is implied, state transit-visa need in exceptions; keep every string
+short — no prose."""
 
 _SYSTEM = ("""You are a visa-requirements engine. For the EXACT route in the user
 message (passport nationality, issuing country, travel-document type, lawful
