@@ -100,7 +100,7 @@ TIMEOUT_MESSAGE = ("Ellis could not complete the AI route analysis within one "
                    "minute. Please retry.")
 
 # Total wall-clock budget for the analysis + its single malformed-retry.
-DEFAULT_DEADLINE_SECONDS = 60
+DEFAULT_DEADLINE_SECONDS = 90  # richer schema (visa_products) needs more room
 # Never start a Kimi call with less than this much budget left.
 MIN_CALL_BUDGET_SECONDS = 5
 # Output cap bounds Kimi latency inside the deadline. Kimi is a REASONING
