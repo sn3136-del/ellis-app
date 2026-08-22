@@ -253,6 +253,51 @@ def get_passport_validity(application_id: str, db=Depends(get_session),
     return verdict
 
 
+class DatabaseIssueUpdateIn(BaseModel):
+    """An operator moving a flagged issue along."""
+    status: str = ""          # acknowledged | corrected | dismissed
+    resolution: str = ""
+
+
+# open -> acknowledged -> corrected | dismissed. An issue never silently
+# disappears: dismissing one requires saying why, in the same field a
+# correction is recorded in.
+DATABASE_ISSUE_STATUSES = ("open", "acknowledged", "corrected", "dismissed")
+
+
+@app.post("/database/issues/{issue_id}")
+def travel_database_issue_update(issue_id: str, body: DatabaseIssueUpdateIn,
+                                 db=Depends(get_session),
+                                 p: Principal = Depends(get_principal)):
+    """Track a flagged issue to resolution (their progress-tracking
+    requirement). Closing an issue — corrected or dismissed — requires a
+    written resolution, so the queue can never be emptied silently."""
+    from datetime import datetime, timezone
+    from .visa_snapshot.models import DatabaseIssueReport
+    require_admin(p)
+    status = (body.status or "").strip().lower()
+    if status not in DATABASE_ISSUE_STATUSES:
+        raise HTTPException(422, f"status must be one of {DATABASE_ISSUE_STATUSES}")
+    row = db.get(DatabaseIssueReport, issue_id)
+    if row is None or row.org_id != p.org_id:
+        raise HTTPException(404, "no such issue")
+    if status in ("corrected", "dismissed") and not (body.resolution or "").strip():
+        raise HTTPException(422, "say what was corrected, or why this is "
+                                 "being dismissed")
+    row.status = status
+    if body.resolution:
+        row.resolution = body.resolution[:1000]
+    if status in ("corrected", "dismissed"):
+        row.resolved_by = p.user_id
+        row.resolved_at = datetime.now(timezone.utc)
+    db.commit()
+    audit.record(db, org_id=p.org_id, application_id="database",
+                 action="database_issue_" + status,
+                 detail={"issue_id": issue_id}, actor=p.user_id)
+    return {"ok": True, "id": row.id, "status": row.status,
+            "resolution": row.resolution}
+
+
 class DatabaseApproveIn(BaseModel):
     """An operator releasing a held (low-confidence) answer for display."""
     nationality: str = ""
