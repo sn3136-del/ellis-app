@@ -667,17 +667,17 @@
     },
     "verified_at": "2026-08-22",
     "verified_by": "Ellis source audit",
-    "source_url": "https://www.cn.emb-japan.go.jp/",
-    "note": "The single-entry tourist stay is 15 OR 30 days, decided case by case by the issuing mission, not a fixed 15. The consular fee for applications lodged on or after 1 July 2026 is CNY 715 single-entry and CNY 1,430 for double/multiple; the agency's service fee is separate. Channel pinned: the generic ministry page does not state the China-specific agency rule.",
+    "source_url": "https://www.cn.emb-japan.go.jp/itpr_zh/visa_kanko.html",
+    "note": "Verified 2026-08-22 against MOFA and the Embassy of Japan in China. Single-entry tourist visas for mainland residents are issued electronically (Visa issuance notice shown online at the airport); stay 15 or 30 days, set by the mission. Fees CNY 715 single / 1,430 multiple from 1 July 2026, charged only on issuance; the designated agency's fee is separate. Group tour visa (5 to 40 people) up to 15 days. No double-entry tourist product exists on the official pages.",
     "fields": {
-      "permitted_stay": "15 or 30 days for a single-entry tourist visa, decided by the issuing mission; 30 days per stay on 3-year multiple, 90 on 5-year multiple",
+      "permitted_stay": "15 or 30 days on a single-entry tourist visa, set by the mission; up to 15 days on a group tour visa; 30 days per visit on the 3-year multiple, 90 on the 5-year",
       "government_fee": {
         "amount": 715,
         "currency": "CNY"
       },
       "visa_products": [
         {
-          "type": "Single-entry Temporary Visitor (tourism)",
+          "type": "Individual single-entry tourist visa",
           "entry": "single",
           "validity": "3 months",
           "max_stay_days": 30,
@@ -685,21 +685,21 @@
             "amount": 715,
             "currency": "CNY"
           },
-          "notes": "Stay granted is 15 or 30 days, decided case by case. Lodged by an accredited agency; issued electronically, and the visa issuance notice must be shown online at the airport."
+          "notes": "Stay granted is 15 or 30 days, decided by the mission. Issued electronically: show the Visa issuance notice online at the airport (no PDF, screenshot or printout). Lodged only through a designated travel agency."
         },
         {
-          "type": "Double-entry Temporary Visitor (tourism)",
-          "entry": "multiple",
-          "validity": "6 months",
-          "max_stay_days": 30,
+          "type": "Group tour visa (5 to 40 people)",
+          "entry": "single",
+          "validity": "3 months",
+          "max_stay_days": 15,
           "fee": {
-            "amount": 1430,
+            "amount": 715,
             "currency": "CNY"
           },
-          "notes": "For applicants with a reason for two visits."
+          "notes": "Organised tour with a tour leader, under the ADS scheme, through a designated travel agency."
         },
         {
-          "type": "Multiple-entry Temporary Visitor (3-year)",
+          "type": "3-year multiple-entry tourist visa",
           "entry": "multiple",
           "validity": "3 years",
           "max_stay_days": 30,
@@ -707,10 +707,10 @@
             "amount": 1430,
             "currency": "CNY"
           },
-          "notes": "Requires proof of income or assets and travel record."
+          "notes": "For applicants with sufficient financial means (or the Okinawa / Tohoku variant). The designated agency arranges the first trip's itinerary and accommodation."
         },
         {
-          "type": "Multiple-entry Temporary Visitor (5-year)",
+          "type": "5-year multiple-entry visa (high income)",
           "entry": "multiple",
           "validity": "5 years",
           "max_stay_days": 90,
@@ -718,7 +718,7 @@
             "amount": 1430,
             "currency": "CNY"
           },
-          "notes": "Requires higher income or asset proof; tax certificates are often requested."
+          "notes": "For substantially high-income applicants and family. Usable for tourism, business and visiting relatives or friends; no expedited issuance."
         }
       ],
       "arrival_card": {
@@ -729,7 +729,13 @@
       "application_channel": "authorised_agent",
       "application_channel_detail": "Chinese ordinary-passport holders cannot apply directly to the embassy. The application must be lodged through a travel agency accredited by the Japanese embassy or consulate-general, which charges its own service fee on top of the consular fee.",
       "permitted_stay_days": 30,
-      "requirement_detail": "paper_visa"
+      "requirement_detail": "evisa",
+      "processing_time": "Result on the 5th working day after the mission receives the file from the designated agency, plus the agency's own handling days each side",
+      "exceptions": [
+        "Single-entry tourist visas for mainland residents are electronic since 19 June 2023: the Visa issuance notice must be shown online at the airport",
+        "The consular fee is charged only if the visa is issued; the designated agency charges its own handling fee on top",
+        "Individuals cannot apply at the embassy or consulate: every tourist application goes through a designated travel agency, which also books flights and hotels except for the 5-year visa"
+      ]
     }
   },
   {
