@@ -99,6 +99,37 @@ const humanize = (v) => {
 
 const sentence = (s) => humanize(s)
 
+// Each "passport x destination" answer has its OWN address, so it can be
+// linked, bookmarked and shared:  #database/CHN/JPN/tourism/ordinary_passport
+// Purpose and document are part of the address because they change the answer.
+function routeFromHash() {
+  const raw = (typeof window !== 'undefined' && window.location.hash) || ''
+  const m = raw.replace(/^#\/?/, '').split('/')
+  if ((m[0] || '').toLowerCase() !== 'database') return null
+  const [, nat, dest, purpose, doc] = m
+  if (!/^[A-Za-z]{3}$/.test(nat || '') || !/^[A-Za-z]{3}$/.test(dest || '')) return null
+  return {
+    nat: nat.toUpperCase(), dest: dest.toUpperCase(),
+    purpose: PURPOSES.some(([v]) => v === purpose) ? purpose : 'tourism',
+    doc: /^[a-z_]+$/.test(doc || '') ? doc : 'ordinary_passport',
+  }
+}
+
+function clearHash() {
+  if (typeof window === 'undefined') return
+  if ((window.location.hash || '').startsWith('#database/')) {
+    window.history.replaceState(null, '', '#database')
+  }
+}
+
+function writeHash({ nat, dest, purpose, doc }) {
+  if (typeof window === 'undefined' || !nat || !dest) return
+  const next = `#database/${nat}/${dest}/${purpose || 'tourism'}/${doc || 'ordinary_passport'}`
+  if (window.location.hash !== next) {
+    window.history.replaceState(null, '', next)
+  }
+}
+
 function itemsOf(v) {
   if (!v) return []
   return (Array.isArray(v) ? v : [v]).map((x) => sentence(asText(x))).filter(Boolean)
@@ -279,6 +310,18 @@ export default function TravelDatabase({ onBack }) {
   // Dynamic-content translation overlay: original guidance string -> lang.
   const [tx, setTx] = useState({})
 
+  // Arriving on a linked answer opens it straight away — that link IS the
+  // page. Runs once; a warm route resolves from cache immediately.
+  const booted = useRef(false)
+  useEffect(() => {
+    if (booted.current) return
+    booted.current = true
+    const r = routeFromHash()
+    if (!r) return
+    setNat(r.nat); setDest(r.dest); setPurpose(r.purpose); setDoc(r.doc)
+    lookUp({ nat: r.nat, dest: r.dest, purpose: r.purpose, doc: r.doc })
+  }, [])
+
   useEffect(() => {
     let live = true
     client.snapshotRegistries().then((r) => { if (live) setReg(r) })
@@ -344,6 +387,8 @@ export default function TravelDatabase({ onBack }) {
         if (out.route) {
           setNat(out.route.nationality); setDest(out.route.destination)
           if (out.route.travel_purpose) setPurpose(out.route.travel_purpose)
+          writeHash({ nat: out.route.nationality, dest: out.route.destination,
+                      purpose: out.route.travel_purpose, doc })
         }
         setResult(out)
       }
@@ -360,17 +405,22 @@ export default function TravelDatabase({ onBack }) {
   async function lookUp(override = {}) {
     const useDoc = override.doc ?? doc
     const usePurpose = override.purpose ?? purpose
-    if (!nat || !dest) return
+    // nat/dest can be passed explicitly by the deep-link boot, which runs
+    // before the state it just set has flushed.
+    const useNat = override.nat ?? nat
+    const useDest = override.dest ?? dest
+    if (!useNat || !useDest) return
     setBusy(true); setError(''); setIssueOpen(false); setIssueDone(false)
     if (!override.keepResult) setResult(null)
     try {
       const out = await client.databaseLookup({
-        nationality: nat, destination: dest, travel_document_type: useDoc,
+        nationality: useNat, destination: useDest, travel_document_type: useDoc,
         travel_purpose: usePurpose, arrival_date: arrival || '',
         departure_city: departureCity || '',
         transit_countries: transit,
       })
       setResult(out)
+      writeHash({ nat: useNat, dest: useDest, purpose: usePurpose, doc: useDoc })
     } catch (e) {
       setError(e?.detail?.reason || e?.detail?.detail || e?.message || t('db.error'))
       if (override.keepResult) setResult(null)
@@ -875,7 +925,7 @@ export default function TravelDatabase({ onBack }) {
                              borderRadius: 999 }}>
               {t('db.process')}
             </button>
-            <button className="btn btn--ghost" onClick={() => { setResult(null) }}
+            <button className="btn btn--ghost" onClick={() => { setResult(null); clearHash() }}
                     data-testid="database-again"
                     style={{ fontSize: 14, borderRadius: 999 }}>
               {t('db.newSearch')}
@@ -959,7 +1009,7 @@ export default function TravelDatabase({ onBack }) {
             {t('db.heldBody', { route: `${countryName(nat)} → ${countryName(dest)}` })}
           </div>
           <div style={{ marginTop: 18 }}>
-            <button className="btn btn--ghost" onClick={() => setResult(null)}
+            <button className="btn btn--ghost" onClick={() => { setResult(null); clearHash() }}
                     data-testid="database-held-again"
                     style={{ fontSize: 14, borderRadius: 999 }}>
               {t('db.newSearch')}
@@ -977,7 +1027,7 @@ export default function TravelDatabase({ onBack }) {
             {t('db.noDecision')}
           </div>
           <button className="btn btn--ghost" style={{ marginTop: 12 }}
-                  onClick={() => setResult(null)}>{t('db.newSearch')}</button>
+                  onClick={() => { setResult(null); clearHash() }}>{t('db.newSearch')}</button>
         </div>
       )}
     </div>
