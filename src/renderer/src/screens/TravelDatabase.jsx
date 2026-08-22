@@ -31,6 +31,19 @@ const DISPOSITION_VIEW = {
   CONDITIONAL: { key: 'db.verdict.conditional', color: '#9a6200', tint: '#fff7e8' },
 }
 
+// The requirement subcategory (Trip.com's field spec: the primary
+// classification splits further). Each maps to an i18n key.
+const REQUIREMENT_DETAIL_KEYS = {
+  unconditional_visa_free: 'db.detail.unconditionalVisaFree',
+  conditional_visa_free: 'db.detail.conditionalVisaFree',
+  transit_visa_free: 'db.detail.transitVisaFree',
+  evisa_on_arrival: 'db.detail.evisaOnArrival',
+  paper_visa_on_arrival: 'db.detail.paperVisaOnArrival',
+  evisa: 'db.detail.evisa',
+  paper_visa: 'db.detail.paperVisa',
+  eta_electronic_authorization: 'db.detail.eta',
+}
+
 // Enum values the engine emits become words, never raw snake_case.
 const CHANNEL_WORDS = {
   visa_center: 'Visa application centre',
@@ -258,6 +271,11 @@ export default function TravelDatabase({ onBack }) {
   const [question, setQuestion] = useState('')
   const [askBusy, setAskBusy] = useState(false)
   const [askMsg, setAskMsg] = useState('')
+  const [departureCity, setDepartureCity] = useState('')
+  const [transit, setTransit] = useState([])       // ISO3 stopover countries
+  const [issueOpen, setIssueOpen] = useState(false)
+  const [issueNote, setIssueNote] = useState('')
+  const [issueDone, setIssueDone] = useState(false)
   // Dynamic-content translation overlay: original guidance string -> lang.
   const [tx, setTx] = useState({})
 
@@ -331,19 +349,43 @@ export default function TravelDatabase({ onBack }) {
     setAskBusy(false)
   }
 
-  async function lookUp() {
+  // One query path. The form calls it bare; the switchers on the answer page
+  // call it with an override, so changing document type or purpose re-asks
+  // the engine for THAT combination instead of showing the old answer under
+  // a new label.
+  async function lookUp(override = {}) {
+    const useDoc = override.doc ?? doc
+    const usePurpose = override.purpose ?? purpose
     if (!nat || !dest) return
-    setBusy(true); setError(''); setResult(null)
+    setBusy(true); setError(''); setIssueOpen(false); setIssueDone(false)
+    if (!override.keepResult) setResult(null)
     try {
       const out = await client.databaseLookup({
-        nationality: nat, destination: dest, travel_document_type: doc,
-        travel_purpose: purpose, arrival_date: arrival || '',
+        nationality: nat, destination: dest, travel_document_type: useDoc,
+        travel_purpose: usePurpose, arrival_date: arrival || '',
+        departure_city: departureCity || '',
+        transit_countries: transit,
       })
       setResult(out)
     } catch (e) {
       setError(e?.detail?.reason || e?.detail?.detail || e?.message || t('db.error'))
+      if (override.keepResult) setResult(null)
     }
     setBusy(false)
+  }
+
+  // A switcher on the answer page: set the control, then re-ask for it.
+  function switchDoc(v) { setDoc(v); lookUp({ doc: v, keepResult: true }) }
+  function switchPurpose(v) { setPurpose(v); lookUp({ purpose: v, keepResult: true }) }
+
+  async function reportIssue() {
+    try {
+      await client.databaseReportIssue({
+        nationality: nat, destination: dest, travel_purpose: purpose,
+        travel_document_type: doc, field: '', note: issueNote.slice(0, 1000),
+      })
+      setIssueDone(true); setIssueNote('')
+    } catch { setIssueDone(true) }   // a flag is never lost to the reader
   }
 
   const disp = g ? (DISPOSITION_VIEW[g.disposition] || null) : null
@@ -471,6 +513,46 @@ export default function TravelDatabase({ onBack }) {
             </label>
             <label style={{ display: 'grid', gap: 6, textAlign: 'left' }}>
               <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>
+                {t('db.departure')}{' '}
+                <span style={{ color: GRAY, fontWeight: 400 }}>({t('db.optional')})</span>
+              </span>
+              <input className="input" value={departureCity}
+                     data-testid="database-departure"
+                     placeholder={t('db.departurePlaceholder')}
+                     onChange={(e) => setDepartureCity(e.target.value)}
+                     style={{ fontSize: 14, padding: '11px 14px', borderRadius: 12 }} />
+            </label>
+            <label style={{ display: 'grid', gap: 6, textAlign: 'left' }}>
+              <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>
+                {t('db.transit')}{' '}
+                <span style={{ color: GRAY, fontWeight: 400 }}>({t('db.optional')})</span>
+              </span>
+              {transit.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6,
+                              marginBottom: 2 }}>
+                  {transit.map((c) => (
+                    <span key={c} style={{ fontSize: 12.5, fontWeight: 700,
+                          padding: '4px 10px', borderRadius: 999,
+                          background: '#eef4ff', color: NAVY,
+                          display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+                      {countryName(c)}
+                      <span role="button" tabIndex={0}
+                            onClick={() => setTransit(transit.filter((x) => x !== c))}
+                            style={{ cursor: 'pointer', color: GRAY,
+                                     fontWeight: 800 }}>×</span>
+                    </span>
+                  ))}
+                </div>
+              )}
+              <CountryCombo value="" options={countries}
+                            onChange={(v) => { if (v && !transit.includes(v))
+                              setTransit([...transit, v].slice(0, 5)) }}
+                            placeholder={t('db.transitPlaceholder')}
+                            noMatch={t('db.noMatch')}
+                            testid="database-transit" />
+            </label>
+            <label style={{ display: 'grid', gap: 6, textAlign: 'left' }}>
+              <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>
                 {t('db.travelDate')}{' '}
                 <span style={{ color: GRAY, fontWeight: 400 }}>({t('db.optional')})</span>
               </span>
@@ -525,6 +607,52 @@ export default function TravelDatabase({ onBack }) {
                 {humanize(T(asText(g.visa_category)))}
               </div>
             )}
+            {REQUIREMENT_DETAIL_KEYS[g.requirement_detail] && (
+              <div style={{ marginTop: 12 }}>
+                <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: 0.4,
+                               padding: '5px 14px', borderRadius: 999,
+                               background: 'rgba(255,255,255,0.72)',
+                               color: disp?.color || NAVY }}
+                      data-testid="database-requirement-detail">
+                  {t(REQUIREMENT_DETAIL_KEYS[g.requirement_detail])}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Switchers, on the page itself: change the travel document or the
+              purpose and the answer is re-asked for THAT combination — never
+              the old answer relabelled. */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10,
+                        marginTop: 14, alignItems: 'center',
+                        justifyContent: 'center' }}
+               data-testid="database-switchers">
+            <span style={{ fontSize: 12, color: GRAY, fontWeight: 700 }}>
+              {t('db.travelDoc')}
+            </span>
+            <select className="select" value={doc} disabled={busy}
+                    data-testid="database-switch-doc"
+                    onChange={(e) => switchDoc(e.target.value)}
+                    style={{ fontSize: 13, padding: '7px 12px', borderRadius: 10 }}>
+              {(docTypes.length ? docTypes
+                : [{ code: 'ordinary_passport', name: 'Ordinary passport' }])
+                .map((d) => (
+                  <option key={d.code || d} value={d.code || d}>{d.name || d}</option>
+                ))}
+            </select>
+            <span style={{ fontSize: 12, color: GRAY, fontWeight: 700,
+                           marginLeft: 6 }}>
+              {t('db.purpose')}
+            </span>
+            <select className="select" value={purpose} disabled={busy}
+                    data-testid="database-switch-purpose"
+                    onChange={(e) => switchPurpose(e.target.value)}
+                    style={{ fontSize: 13, padding: '7px 12px', borderRadius: 10 }}>
+              {PURPOSES.map(([v, k]) => <option key={v} value={v}>{t(k)}</option>)}
+            </select>
+            {busy && (
+              <span style={{ fontSize: 12, color: GRAY }}>{t('db.checking')}</span>
+            )}
           </div>
 
           {/* At a glance */}
@@ -542,6 +670,23 @@ export default function TravelDatabase({ onBack }) {
                           padding: '12px 16px', borderRadius: 12,
                           background: 'var(--bg-soft, #f5f7fa)' }}>
               {sentence(asText(g.application_channel_detail))}
+            </div>
+          )}
+
+          {/* Transit: answered ONLY when a stopover was named, so an empty
+              answer is never dressed up as "no transit visa needed". */}
+          {transit.length > 0 && g.transit_requirement
+            && g.transit_requirement.required !== null && (
+            <div style={{ marginTop: 16 }}>
+              <Section title={t('db.transitReq')} accent={BLUE}>
+                <Fact label={transit.map(countryName).join(', ')}
+                      value={sentence(asText(g.transit_requirement.note))
+                             || (g.transit_requirement.required
+                                 ? t('db.transitNeeded') : t('db.transitNotNeeded'))}
+                      pill={g.transit_requirement.required
+                            ? <Pill tone="warn">{t('db.transitNeeded')}</Pill>
+                            : <Pill tone="no">{t('db.transitNotNeeded')}</Pill>} />
+              </Section>
             </div>
           )}
 
@@ -745,6 +890,51 @@ export default function TravelDatabase({ onBack }) {
               )}
               {g.source_url && g.confidence ? ' · ' : ''}
               {g.confidence ? t('db.confidence.' + g.confidence) : ''}
+              {' · '}
+              <span role="button" tabIndex={0}
+                    data-testid="database-report"
+                    onClick={() => setIssueOpen(!issueOpen)}
+                    style={{ color: GRAY, textDecoration: 'underline',
+                             cursor: 'pointer' }}>
+                {t('db.reportIssue')}
+              </span>
+            </div>
+          )}
+
+          {/* Information-quality feedback: a reader flags what looks wrong.
+              Ellis records the flag against this exact route for a person to
+              work — it never silently rewrites the answer on a report. */}
+          {issueOpen && (
+            <div className="card" style={{ padding: '18px 20px', borderRadius: 16,
+                                           marginTop: 12, maxWidth: 560,
+                                           marginLeft: 'auto', marginRight: 'auto' }}>
+              {issueDone ? (
+                <div style={{ fontSize: 13, color: NAVY, textAlign: 'center' }}
+                     data-testid="database-report-done">
+                  {t('db.reportThanks')}
+                </div>
+              ) : (
+                <>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: NAVY,
+                                marginBottom: 8 }}>{t('db.reportTitle')}</div>
+                  <textarea className="input" rows={3} value={issueNote}
+                            data-testid="database-report-note"
+                            placeholder={t('db.reportPlaceholder')}
+                            onChange={(e) => setIssueNote(e.target.value)}
+                            style={{ fontSize: 13.5, padding: '10px 12px',
+                                     borderRadius: 12, width: '100%',
+                                     resize: 'vertical' }} />
+                  <div style={{ marginTop: 10, textAlign: 'right' }}>
+                    <button className="btn btn--primary" onClick={reportIssue}
+                            data-testid="database-report-send"
+                            disabled={!issueNote.trim()}
+                            style={{ fontSize: 13, fontWeight: 800,
+                                     borderRadius: 999, padding: '8px 20px' }}>
+                      {t('db.reportSend')}
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>

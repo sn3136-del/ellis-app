@@ -1,7 +1,8 @@
 """Agent-channel booking endpoints (app/appt_booking.py holds the rules).
 
 Two seats, enforced with the existing auth helpers:
-* the APPLICANT (case owner): create, pick a slot, cancel, read their view;
+* the APPLICANT (case owner): create, pick a slot (or rank up to five of them
+  in their own order of preference), cancel, read their view;
 * the OPERATOR (admin role — Trip.com's own staff): read the queue, record
   the slots they saw, record the booked evidence, or fail honestly.
 
@@ -212,6 +213,36 @@ def pick_slot(request_id: str, body: PickIn,
          actor=principal.user_id)
     _record(db, row, "appt_booking_slot_picked", principal,
             {"slot": row.picked_slot})
+    db.commit()
+    return booking.view(row)
+
+
+class RankIn(BaseModel):
+    # The offered-slot positions the applicant chose, IN THEIR OWN ORDER of
+    # preference (first = rank 1). At most booking.MAX_RANKED of them.
+    indices: list[int] = []
+    # The slots they SAW at those positions, echoed back in the same order, so
+    # a concurrent re-offer can never bind their ranking to different slots.
+    slots: list[dict] = []          # [{post, when}]
+
+
+@router.post("/{request_id}/rank")
+def rank_slots(request_id: str, body: RankIn,
+               principal: Principal = Depends(get_principal),
+               db=Depends(get_session)):
+    """The applicant names up to five preferred times in one session, in their
+    own order. Same seat as /pick (it IS a pick — of a shortlist), and the same
+    honesty: Ellis books the highest-ranked one still available and nothing
+    else. See booking.rank_slots for why that is still the applicant's choice
+    and not Ellis choosing."""
+    row = _request_row(db, request_id)
+    _applicant_case(db, row.application_id, principal)
+    _run(booking.rank_slots, db, row, indices=body.indices,
+         expect=body.slots, actor=principal.user_id)
+    _record(db, row, "appt_booking_slots_ranked", principal,
+            {"ranked": [{"rank": s.get("rank"), "post": s.get("post"),
+                         "when": s.get("when")}
+                        for s in (row.ranked_slots or [])]})
     db.commit()
     return booking.view(row)
 

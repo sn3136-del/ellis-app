@@ -88,6 +88,17 @@ ALL_FIELDS = MANDATORY_FIELDS + (
     "visa_products",                  # [{type, entry, validity, max_stay_days, fee:{amount,currency}, notes}]
     "application_channel_detail",     # honest sentence: who may lodge, and how
     "source_url",                     # the official page the facts come from
+    "requirement_detail",             # the field-spec subcategory (see REQUIREMENT_DETAILS)
+    "transit_requirement",            # {required, note} for the stated transit points
+)
+
+# Trip.com's field spec asks the requirement to be reported at TWO levels: the
+# primary classification (our disposition) and a subcategory. This is that
+# subcategory vocabulary, verbatim from their spec.
+REQUIREMENT_DETAILS = (
+    "unconditional_visa_free", "conditional_visa_free", "transit_visa_free",
+    "evisa_on_arrival", "paper_visa_on_arrival",
+    "evisa", "paper_visa", "eta_electronic_authorization",
 )
 
 # The user-facing decision label (replaces every "checked against official
@@ -113,7 +124,7 @@ PASS1_MAX_TOKENS = 12000
 
 # Cache-schema version: bumping invalidates two-pass-era rows so a cached
 # route always carries the honest single-pass label and verification shape.
-CACHE_VERSION = "v4"  # visa_products + honest channel + source (Trip.com 2026-08)
+CACHE_VERSION = "v5"  # + requirement_detail, transit_requirement (Trip.com 2026-08)
 
 # Default freshness window; stale entries are reused instantly and refreshed in
 # the background (never blocking the applicant).
@@ -133,6 +144,8 @@ government_fee: {"amount": number|null, "currency": string|null} — the OFFICIA
 visa_products: array of EVERY visa product available for this nationality + destination + purpose — each {"type": e.g. "Single-entry tourist"|"3-year multiple"|"5-year multiple"|"B1/B2", "entry": "single"|"multiple"|null, "validity": short string, "max_stay_days": integer|null, "fee": {"amount": number|null, "currency": string|null}, "notes": short string|null}; list them ALL, never just one; [] only when truly a single product
 application_channel_detail: one honest sentence naming WHO may lodge and HOW — e.g. "Individuals cannot apply directly; the application must go through a designated authorised agent" or "Apply yourself on the official portal" — never claim a walk-in visa centre where the destination refuses individual filings
 source_url: the single official government page these facts come from, or null (NEVER invent one)
+requirement_detail: the precise subcategory, one of unconditional_visa_free | conditional_visa_free | transit_visa_free | evisa_on_arrival | paper_visa_on_arrival | evisa | paper_visa | eta_electronic_authorization — pick the one matching disposition (visa-free splits into unconditional/conditional/transit; on-arrival into electronic/paper; advance into eVisa/paper/ETA), or null if genuinely none fits
+transit_requirement: {"required": true|false|null, "note": short string|null} — answer ONLY for the transit points named in the route facts; if none were named use {"required": null, "note": null}, never invent a transit
 photo_requirements, onward_travel_evidence, accommodation_evidence,
 financial_evidence: short strings or null
 biometrics_required, interview_required, appointment_required,
@@ -236,6 +249,7 @@ ROUTE_FACT_KEYS = (
     "passport_nationality", "passport_issuing_country", "travel_document_type",
     "lawful_country_of_residence", "destination_country", "visa_category",
     "travel_purpose", "arrival_date", "departure_date", "transit_countries",
+    "departure_city",
     "age", "prior_refusals", "existing_destination_visas",
     "existing_residence_permits", "recent_travel_countries",
     "passport_issue_date", "passport_expiry_date",

@@ -17,7 +17,10 @@ official site, with Ellis doing everything around that person:
   requested        the applicant asked, inside Trip.com (posts + date windows)
   slots_offered    an operator READ the official calendar in their own session
                    and recorded what they saw — stamped who and when
-  slot_picked      the applicant chose one of those, inside Trip.com
+  slot_picked      the applicant chose one of those, inside Trip.com — either
+                   one slot, or up to MAX_RANKED of them in their own order of
+                   preference (rank_slots), which is still ONE person's own
+                   choice and never Ellis's: see the note on rank_slots
   booked           the operator executed the booking and recorded EVIDENCE:
                    a confirmation number + the confirmation document on file
   failed           honest terminal state, reason required
@@ -33,8 +36,13 @@ Hard rules, enforced here and pinned by tests:
 * `booked` exists only behind evidence. No confirmation number + stored
   confirmation document on the same case -> no booked, ever.
 * Operator acts (offer / booked / failed) require the admin role; applicant
-  acts (create / pick / cancel) require case ownership. Neither can do the
-  other's part.
+  acts (create / pick / rank / cancel) require case ownership. Neither can do
+  the other's part.
+* ELLIS NEVER PICKS THE SLOT — the same line drawn in gov_calendar.py ("Ellis
+  READS the grid and never picks from it... The applicant chooses") and
+  assisted_booking.py. Ranking does not bend it: the candidates are the
+  applicant's own named choices and nothing else, so every slot Ellis can
+  reach is one they already consented to. Read rank_slots before changing it.
 """
 from __future__ import annotations
 
@@ -61,6 +69,17 @@ EVIDENCE_DOC_TYPE = "booking_confirmation"
 MAX_POSTS = 10
 MAX_POST_LEN = 80
 MAX_WINDOWS = 6
+
+# How many preferred times the applicant may name in one session (Trip.com's
+# ask). A cap, not a target: one is a complete answer. See rank_slots for why a
+# ranked list is still the applicant's own choice and not Ellis picking.
+MAX_RANKED = 5
+
+# One sentence, used by both applicant acts (pick and rank): consent must land
+# on the slot the applicant actually SAW, never on a position in a list that
+# moved underneath them.
+SLOTS_CHANGED = ("the offered dates changed before your pick — please look "
+                 "again and pick from the current list")
 
 # Cited on every payload, beside the acts. Anchors: the two texts the user of
 # this feature will be asked about, stated with their limits.
@@ -213,7 +232,9 @@ def offer_slots(db, row, *, slots: list, actor: str,
     session. `source` says HOW it was read: 'ellis_agent' (Ellis's browser
     agent read the calendar) or 'operator_manual' (a person typed what they
     saw). Re-offering supersedes the old list (the calendar moved on) and
-    clears any pick made against it."""
+    clears any pick OR ranking made against it — a preference order over slots
+    that no longer exist is not a choice, so it is dropped rather than
+    re-pointed at whatever now sits at those positions."""
     if row.status not in ("requested", "slots_offered", "slot_picked"):
         raise BookingError(409, f"cannot offer slots on a {row.status} request")
     recorded, at = [], _iso(_now())
@@ -234,6 +255,8 @@ def offer_slots(db, row, *, slots: list, actor: str,
     row.offered_slots = recorded
     row.picked_slot = {}
     row.picked_at = None
+    row.ranked_slots = []
+    row.ranked_at = None
     row.status = "slots_offered"
 
 
@@ -254,12 +277,130 @@ def pick_slot(db, row, *, index: int, actor: str,
     if expect_post or expect_when:
         if (expect_post and chosen.get("post") != expect_post) or \
                 (expect_when and chosen.get("when") != expect_when):
-            raise BookingError(409, "the offered dates changed before your "
-                                    "pick — please look again and pick from "
-                                    "the current list")
+            raise BookingError(409, SLOTS_CHANGED)
     row.picked_slot = dict(chosen, picked_by=actor)
     row.picked_at = _now()
     row.status = "slot_picked"
+
+
+def rank_slots(db, row, *, indices: list, actor: str, expect: list = None):
+    """The applicant names up to MAX_RANKED of the offered slots, in their own
+    order of preference — Trip.com's "five preferred times in one session".
+
+    THIS IS NOT ELLIS PICKING THE SLOT, and the design is what makes that true
+    rather than a promise:
+
+    * Every ranked entry is a slot the applicant PERSONALLY SELECTED from the
+      slots they were offered and saw. Ellis contributes no candidate, scores
+      nothing, and never adds "the earliest one" to the list.
+    * The ORDER is theirs. It is preference, not a computed ranking.
+    * At booking time the agent takes the highest-ranked entry that is STILL
+      AVAILABLE (`next_available_rank`). Every outcome it can produce is a slot
+      this person already named and consented to.
+    * If all of their choices are gone, the honest answer is NEW offered slots
+      — the request goes back to the desk. Ellis does not widen the window, does
+      not fall back to whatever is earliest, and does not book a slot the
+      applicant never named. There is no code path here that could.
+
+    So the only thing ranking automates is the RETRY, across choices the
+    applicant made. That is the same line gov_calendar.py draws when it lets
+    Ellis open the day the applicant selected: carrying out their choice is not
+    making one. A reader looking for "Ellis picks the slot" will not find it
+    here, because it is not here.
+
+    Ranking is one act, from the same precondition as pick_slot: rank 1 becomes
+    the picked slot, so everything downstream (evidence, `booked`) is unchanged.
+    `expect` optionally echoes the {post, when} of each ranked slot IN THE SAME
+    ORDER — the same staleness protection pick_slot has, so a re-offer between
+    render and rank can never bind consent to slots the applicant never saw."""
+    if row.status != "slots_offered":
+        raise BookingError(409, f"cannot rank on a {row.status} request")
+    slots = list(row.offered_slots or [])
+    if not isinstance(indices, (list, tuple)) or not indices:
+        raise BookingError(422, "choose at least one of the offered slots")
+    if len(indices) > MAX_RANKED:
+        raise BookingError(422, f"at most {MAX_RANKED} preferred times can be "
+                                f"ranked in one session; {len(indices)} given")
+    chosen, seen = [], set()
+    for i in indices:
+        # bool is an int in Python — a True in the list is malformed input, not
+        # index 1, so it is refused rather than silently ranked.
+        if isinstance(i, bool) or not isinstance(i, int) \
+                or i < 0 or i >= len(slots):
+            raise BookingError(422, f"slot index {i} is not one of the "
+                                    f"{len(slots)} offered")
+        if i in seen:
+            raise BookingError(422, f"slot index {i} is ranked twice — each "
+                                    f"preferred time can be named once")
+        seen.add(i)
+        chosen.append(slots[i])
+    echo = [e for e in (expect or []) if isinstance(e, dict)]
+    if echo:
+        if len(echo) != len(chosen):
+            raise BookingError(409, SLOTS_CHANGED)
+        for want, got in zip(echo, chosen):
+            want_post = str(want.get("post") or "").strip()
+            want_when = str(want.get("when") or "").strip()
+            if (want_post and got.get("post") != want_post) or \
+                    (want_when and got.get("when") != want_when):
+                raise BookingError(409, SLOTS_CHANGED)
+    at = _now()
+    row.ranked_slots = [dict(s, rank=n, ranked_by=actor)
+                        for n, s in enumerate(chosen, start=1)]
+    row.ranked_at = at
+    # Rank 1 IS the pick: the applicant's first preference, recorded through the
+    # same field every downstream step already reads. The lower ranks are the
+    # fallbacks they authorised in advance, used only if their first choice is
+    # gone by the time the operator reaches the official site.
+    row.picked_slot = dict(chosen[0], picked_by=actor, rank=1)
+    row.picked_at = at
+    row.status = "slot_picked"
+
+
+def next_available_rank(row, still_available):
+    """The applicant's highest-ranked choice that is STILL available, or None.
+
+    Pure: no I/O, no clock, no ordering by time. It can only ever return an
+    entry from the applicant's OWN ranked list, matched on (post, when) against
+    what is actually on offer right now.
+
+    None means exactly one thing — every slot this applicant named is gone. The
+    honest response to that is a fresh set of offered slots, never a substitute
+    Ellis chose for them."""
+    have = set()
+    for s in (still_available or []):
+        if isinstance(s, dict):
+            key = (str(s.get("post") or "").strip(),
+                   str(s.get("when") or "").strip())
+        elif isinstance(s, (list, tuple)) and len(s) == 2:
+            key = (str(s[0]).strip(), str(s[1]).strip())
+        else:
+            continue
+        if key != ("", ""):
+            have.add(key)
+    for entry in ranked_in_order(row):
+        key = (str(entry.get("post") or "").strip(),
+               str(entry.get("when") or "").strip())
+        if key in have:
+            return dict(entry)
+    return None
+
+
+def ranked_in_order(row) -> list[dict]:
+    """The ranked entries, first preference first. Ordered by the stored `rank`
+    (falling back to stored position) so a hand-edited or legacy row can never
+    silently reorder the applicant's preferences."""
+    entries = [e for e in (getattr(row, "ranked_slots", None) or [])
+               if isinstance(e, dict)]
+
+    def _key(pair):
+        i, entry = pair
+        try:
+            return (int(entry.get("rank") or (i + 1)), i)
+        except (TypeError, ValueError):
+            return (i + 1, i)
+
+    return [e for _i, e in sorted(enumerate(entries), key=_key)]
 
 
 def record_booked(db, row, *, confirmation_number: str,
@@ -335,6 +476,16 @@ def view(row) -> dict:
                          "operator, shown per slot. Not live inventory, and "
                          "not held: it can be gone by the time the booking is "
                          "made."),
+        # The applicant's own shortlist, first preference first. Rank 1 is also
+        # `picked_slot`; the rest are the fallbacks they authorised in advance.
+        "ranked_slots": ranked_in_order(row),
+        "ranked_at": _iso(getattr(row, "ranked_at", None)),
+        "max_ranked": MAX_RANKED,
+        "ranking_notice": ("You choose these, in your own order. Ellis books "
+                           "the highest one still available when it reaches "
+                           "the official site, and nothing outside this list "
+                           "— if they are all taken, you are asked again with "
+                           "fresh dates."),
         "picked_slot": dict(row.picked_slot or {}),
         "picked_at": _iso(row.picked_at),
         "confirmation": dict(row.confirmation or {}),

@@ -285,6 +285,13 @@ class AppointmentBookingRequest(Base, TimestampMixin):
     # [{post, when, label, recorded_by, recorded_at}] — a person's own reading
     # of the official calendar, never a scrape.
     offered_slots: Mapped[list] = mapped_column(JSON, default=list)
+    # [{post, when, label, rank, ...}] — up to MAX_RANKED slots the APPLICANT
+    # picked out of offered_slots, in their OWN order of preference. Not a
+    # ranking Ellis computed: every entry is a slot this person selected and
+    # consented to, and Ellis books the highest-ranked one still available and
+    # nothing else (see rank_slots in app/appt_booking.py).
+    ranked_slots: Mapped[list] = mapped_column(JSON, default=list)
+    ranked_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     picked_slot: Mapped[dict] = mapped_column(JSON, default=dict)
     picked_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     # {number, evidence_document_id, note, recorded_by, recorded_at}

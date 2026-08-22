@@ -23,11 +23,17 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 SEED = pathlib.Path(__file__).resolve().parents[2] / "data" / "database_seed" / \
     "kimi_guidance_seed.json"
 
-# The starter set: the nationalities and destinations a Trip.com tester
-# reaches for first. Everything else warms itself on first lookup.
-WARM_ROUTES = [("CHN", d) for d in (
-    "JPN", "USA", "THA", "KOR", "SGP", "MYS", "VNM", "GBR", "FRA", "DEU",
-    "ITA", "ESP", "AUS", "ARE", "TUR", "IDN")]
+# The starter set. Trip.com's requirements name Phase 1 coverage as the
+# stations TRIP Station covers, and the TEST stations as their two
+# highest-traffic ones: Hong Kong and the US. So all three origins are warmed
+# across the Phase 1 destination list. Everything else warms itself on first
+# lookup.
+PHASE1 = ("HKG", "TWN", "JPN", "KOR", "USA", "THA", "SGP", "MYS", "GBR",
+          "RUS", "AUS", "IDN", "PHL", "FRA", "VNM", "ESP", "IND", "CAN")
+# The origins: mainland China (the app's own applicants) plus Trip.com's two
+# named test stations.
+ORIGINS = ("CHN", "HKG", "USA")
+WARM_ROUTES = [(o, d) for o in ORIGINS for d in PHASE1 if o != d]
 
 
 def _route(nat: str, dest: str) -> dict:
@@ -38,23 +44,33 @@ def _route(nat: str, dest: str) -> dict:
             "travel_purpose": "tourism"}
 
 
-def warm() -> int:
+def _warm_one(pair: tuple) -> tuple:
+    """One route, on this thread's own session. Returns (ok, line)."""
     from app.db import SessionLocal
     from app.visa_snapshot import kimi_primary
+    nat, dest = pair
     db = SessionLocal()
+    try:
+        out = kimi_primary.get_route_guidance(db, _route(nat, dest))
+        disp = (out.get("guidance") or {}).get("disposition", "?")
+        return True, (f"  {nat}->{dest}: {out.get('status')} {disp}"
+                      f"{' (cached)' if out.get('cached') else ''}")
+    except Exception as e:  # noqa: BLE001 — warmth is best-effort
+        return False, f"  {nat}->{dest}: FAILED {str(e)[:80]}"
+    finally:
+        db.close()
+
+
+def warm(workers: int = 4) -> int:
+    """Warm every starter route. The work is HTTP-bound on the model, so a
+    small thread pool cuts a long serial pass to a few minutes; each worker
+    holds its own session."""
+    from concurrent.futures import ThreadPoolExecutor
     ok = fail = 0
-    for nat, dest in WARM_ROUTES:
-        route = _route(nat, dest)
-        try:
-            out = kimi_primary.get_route_guidance(db, route)
-            disp = (out.get("guidance") or {}).get("disposition", "?")
-            print(f"  {nat}->{dest}: {out.get('status')} {disp}"
-                  f"{' (cached)' if out.get('cached') else ''}", flush=True)
-            ok += 1
-        except Exception as e:  # noqa: BLE001 — warmth is best-effort
-            print(f"  {nat}->{dest}: FAILED {str(e)[:80]}", flush=True)
-            fail += 1
-    db.close()
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        for good, line in pool.map(_warm_one, WARM_ROUTES):
+            print(line, flush=True)
+            ok, fail = (ok + 1, fail) if good else (ok, fail + 1)
     print(f"warmed {ok}, failed {fail}")
     return 0
 

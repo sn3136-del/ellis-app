@@ -422,6 +422,32 @@ class KimiRouteGuidanceCache(Base, TimestampMixin):
     fresh_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
+class DatabaseIssueReport(Base, TimestampMixin):
+    """A reader saying "this looks wrong".
+
+    Trip.com's information-quality requirement: a reader can flag a field,
+    the flag is tracked to resolution, and the route it came from is
+    identifiable so the answer can actually be corrected. The reported route
+    and field are recorded verbatim; the answer itself is NOT copied here (the
+    cache row it points at holds it, and stays the single source of truth).
+
+    Status walks: open -> acknowledged -> corrected | dismissed. Only an
+    operator moves it; a reader can only open one."""
+    __tablename__ = "database_issue_reports"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    org_id: Mapped[str] = mapped_column(String(64), index=True, default="")
+    cache_key: Mapped[str] = mapped_column(String(200), index=True, default="")
+    route: Mapped[dict] = mapped_column(JSON, default=dict)
+    field: Mapped[str] = mapped_column(String(64), default="")
+    note: Mapped[str] = mapped_column(String(1000), default="")
+    reported_by: Mapped[str] = mapped_column(String(64), default="")
+    status: Mapped[str] = mapped_column(String(16), default="open", index=True)
+    resolution: Mapped[str] = mapped_column(String(1000), default="")
+    resolved_by: Mapped[str] = mapped_column(String(64), default="")
+    resolved_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True)
+
+
 class RouteIntakeDocument(Base, TimestampMixin):
     """A document the applicant uploads DURING intake (before a case exists) —
     today always the passport biodata page. Bytes are kept so continuation can

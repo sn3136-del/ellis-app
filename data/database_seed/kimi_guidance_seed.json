@@ -5044,5 +5044,2375 @@
   },
   "generated_at": "2026-08-20T21:08:53.465994",
   "fresh_until": "2026-09-03T21:08:53.465994"
+ },
+ {
+  "cache_key": "CHN|CHN|JPN|tourism|default|unknown|v4",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "JPN",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Tourist (Temporary Visitor)",
+   "permitted_stay": "Up to 90 days per entry",
+   "passport_validity": "Valid for the duration of intended stay",
+   "required_documents": [
+    "Original passport",
+    "Completed visa application form",
+    "Recent passport-size photo",
+    "Round-trip flight itinerary",
+    "Hotel bookings or host invitation letter",
+    "Financial documents (bank statements, employment/income proof)",
+    "Travel itinerary",
+    "Residence permit (if applying outside China)"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": null,
+    "currency": null
+   },
+   "processing_time": "Typically 5-7 working days",
+   "forms": [
+    "Japanese short-term stay visa application form"
+   ],
+   "official_portal_url": null,
+   "photo_requirements": "One recent 45mm x 45mm color photo, plain white background, full face, no headwear except for religious reasons",
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Create an account on the authorized visa center portal if required to book an appointment"
+   ],
+   "payment_process": [
+    "Pay the visa fee at the visa application center or through the accredited travel agency/visa agent as instructed"
+   ],
+   "submission_process": [
+    "Submit the application and documents in person or via an accredited travel agency/visa agent to the Japanese embassy/consulate-general or authorized visa application center"
+   ],
+   "onward_travel_evidence": "Confirmed return or onward flight ticket",
+   "accommodation_evidence": "Hotel reservations covering the entire stay or invitation letter with host/guarantor documents",
+   "financial_evidence": "Bank statements, employment/income certificate, tax records, or sponsor's financial proof",
+   "insurance_required": false,
+   "exceptions": [
+    "Group tourist visa available for organized tours through designated travel agencies",
+    "Multiple-entry visas require proof of stable income/assets and prior travel history"
+   ],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "Exact current consular fee in CNY is not verified; single-entry and multiple-entry fees differ"
+    },
+    {
+     "field": "official_portal_url",
+     "reason": "No exact official online application portal URL verified for Chinese applicants to Japan"
+    },
+    {
+     "field": "source_url",
+     "reason": "No single official source page URL verified"
+    },
+    {
+     "field": "e-visa_availability",
+     "reason": "Japan e-visa availability for Chinese ordinary passport holders residing in China is not confirmed"
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "valid_through_departure",
+    "months": null
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "Embarkation/Disembarkation Card",
+    "submission_window": "On arrival and departure"
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_center_submission",
+   "visa_products": [
+    {
+     "type": "Single-entry tourist",
+     "entry": "single",
+     "validity": "3 months",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "Fee applies; confirm current amount at embassy/visa center"
+    },
+    {
+     "type": "Group tourist visa",
+     "entry": "single",
+     "validity": "Tour dates",
+     "max_stay_days": 15,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "For organized group tours via designated agencies"
+    },
+    {
+     "type": "3-year multiple-entry tourist",
+     "entry": "multiple",
+     "validity": "3 years",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "For eligible applicants meeting income/asset criteria"
+    },
+    {
+     "type": "5-year multiple-entry tourist",
+     "entry": "multiple",
+     "validity": "5 years",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "For eligible applicants meeting higher income/asset criteria"
+    }
+   ],
+   "application_channel_detail": "Chinese ordinary passport holders must apply through a Japanese embassy/consulate-general or an authorized visa application center; many jurisdictions require submission via an accredited travel agency or visa agent.",
+   "source_url": null
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-21T19:21:25.271909",
+  "fresh_until": "2026-09-04T19:21:25.271909"
+ },
+ {
+  "cache_key": "CHN|CHN|USA|tourism|default|unknown|v4",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "USA",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "B1/B2 visitor (tourist/business combination)",
+   "permitted_stay": "Up to 6 months as determined by CBP officer at port of entry",
+   "passport_validity": "Valid at least 6 months beyond intended departure date",
+   "required_documents": [
+    "Valid passport",
+    "DS-160 confirmation page",
+    "Visa application fee receipt",
+    "Appointment confirmation",
+    "One 2x2 inch passport photo (if upload failed)",
+    "Evidence of purpose of trip",
+    "Evidence of financial support",
+    "Evidence of ties to China/residence abroad",
+    "Travel itinerary"
+   ],
+   "application_channel": "embassy",
+   "government_fee": {
+    "amount": 185,
+    "currency": "USD"
+   },
+   "processing_time": "Appointment wait times vary; after interview, several days to several weeks if no administrative processing",
+   "forms": [
+    "DS-160 Online Nonimmigrant Visa Application"
+   ],
+   "official_portal_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html",
+   "photo_requirements": "2 x 2 inches (51 x 51 mm), color, white/off-white background, taken within last 6 months, full face, no glasses unless medically necessary",
+   "biometrics_required": true,
+   "interview_required": true,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Complete DS-160 at ceac.state.gov and save the confirmation barcode",
+    "Create account at U.S. visa appointment service for China",
+    "Pay non-refundable MRV visa application fee",
+    "Schedule biometrics appointment at Visa Application Center",
+    "Schedule interview at U.S. Embassy or Consulate"
+   ],
+   "payment_process": [
+    "Pay $185 MRV fee online or via designated bank/Alipay per U.S. visa appointment service instructions",
+    "Fee is non-refundable and non-transferable"
+   ],
+   "submission_process": [
+    "Submit DS-160 online",
+    "Attend biometrics collection at Visa Application Center",
+    "Attend visa interview at U.S. Embassy/Consulate",
+    "Passport with visa returned via courier or designated pickup location"
+   ],
+   "onward_travel_evidence": "Recommended; may be requested at interview or port of entry",
+   "accommodation_evidence": "Recommended; hotel bookings or host letter",
+   "financial_evidence": "Required; bank statements, employment/income proof, or sponsor's evidence",
+   "insurance_required": false,
+   "exceptions": [
+    "Interview waiver may be available for certain B1/B2 renewals meeting age, prior visa validity, and other conditions",
+    "Applicants under 14 or over 79 may qualify for interview waiver",
+    "Consular officer may issue visa validity shorter than 10 years based on individual circumstances"
+   ],
+   "uncertainty": [
+    {
+     "field": "processing_time",
+     "reason": "Appointment availability and any administrative processing vary by post and individual case"
+    },
+    {
+     "field": "permitted_stay_days",
+     "reason": "CBP officer determines actual admission period at port of entry; 180 days is the usual maximum but not guaranteed"
+    },
+    {
+     "field": "visa_validity",
+     "reason": "While 10-year multiple-entry B1/B2 is common for Chinese nationals under reciprocal arrangements, consular officers may issue shorter validity"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 180,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [
+    {
+     "name": "COVID-19 vaccination/testing",
+     "applicability": "not_applicable",
+     "trigger_countries": [],
+     "trigger": null,
+     "question": null
+    },
+    {
+     "name": "Yellow fever vaccination",
+     "applicability": "conditional",
+     "trigger_countries": [
+      "YEM",
+      "AGO",
+      "BOL",
+      "BRA",
+      "BDI",
+      "CMR",
+      "CAF",
+      "COG",
+      "CIV",
+      "COD",
+      "ECU",
+      "GAB",
+      "GHA",
+      "GIN",
+      "GNB",
+      "GUY",
+      "KEN",
+      "LBR",
+      "MLI",
+      "NGA",
+      "PAN",
+      "PNG",
+      "PRY",
+      "PER",
+      "RWA",
+      "SLE",
+      "SDN",
+      "SUR",
+      "TGO",
+      "TRINIDAD_TOBAGO",
+      "UGA",
+      "VEN"
+     ],
+     "trigger": "Arrival from or transit through a yellow-fever affected country",
+     "question": "Will you arrive in the U.S. within 6 days after leaving or transiting a yellow-fever affected country?"
+    }
+   ],
+   "route_workflow_type": "embassy_submission",
+   "visa_products": [
+    {
+     "type": "B1/B2 combination visitor visa",
+     "entry": "multiple",
+     "validity": "Up to 10 years (reciprocal; officer may issue shorter)",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 185,
+      "currency": "USD"
+     },
+     "notes": "For tourism or business; actual admission period decided by CBP at entry"
+    }
+   ],
+   "application_channel_detail": "Applicants first complete the DS-160 online, then use the U.S. visa appointment service to schedule biometrics at a Visa Application Center and an interview at a U.S. Embassy or Consulate in China; no third-party agent is required.",
+   "source_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-21T19:23:04.926844",
+  "fresh_until": "2026-09-04T19:23:04.926844"
+ },
+ {
+  "cache_key": "CHN|CHN|KOR|tourism|default|unknown|v4",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "KOR",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "C-3-9 tourist",
+   "permitted_stay": "Up to 90 days",
+   "passport_validity": "Valid for duration of stay",
+   "required_documents": [
+    "Original passport and any previous passports",
+    "Completed C-3-9 visa application form",
+    "One recent passport-size colour photo",
+    "Copy of PRC national ID card (front and back)",
+    "Round-trip flight booking",
+    "Hotel reservation or accommodation proof",
+    "Bank statement / financial proof",
+    "Employment, study or business proof",
+    "Travel itinerary"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": null,
+    "currency": null
+   },
+   "processing_time": "5-7 working days",
+   "forms": [
+    "C-3-9 short-term tourist visa application form"
+   ],
+   "official_portal_url": "https://www.visa.go.kr",
+   "photo_requirements": "One recent 35x45 mm colour photo on a white background, taken within the last 6 months",
+   "biometrics_required": null,
+   "interview_required": false,
+   "appointment_required": null,
+   "account_registration_steps": [],
+   "payment_process": [
+    "Pay the consular visa fee and any KVAC service fee at the visa application centre; accepted methods vary by location"
+   ],
+   "submission_process": [
+    "Submit passport, form and documents in person or through an authorised representative at the Korea Visa Application Centre in your jurisdiction",
+    "Collect passport when notified or use courier return if available"
+   ],
+   "onward_travel_evidence": "Round-trip flight reservation",
+   "accommodation_evidence": "Hotel booking or host invitation letter",
+   "financial_evidence": "Bank statements and/or income proof showing sufficient funds for the trip",
+   "insurance_required": false,
+   "exceptions": [
+    "Direct travel to Jeju Island only: Chinese ordinary passport holders may enter visa-free for up to 30 days",
+    "Visa-free transit of up to 30 days may apply if entering Korea from one third country and leaving to another with confirmed onward ticket/visa",
+    "Group tourist visa (C-3-2) for Chinese groups of 5+ may be processed through designated travel agencies",
+    "Airlines and Chinese exit controls may require at least 6 months passport validity even if Korea does not"
+   ],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "Exact official consular fee for Chinese ordinary passport holders is not confirmed; fee may also differ by reciprocity"
+    },
+    {
+     "field": "visa_products",
+     "reason": "Exact fees, stay limits and availability of each validity class for Chinese nationals are not confirmed"
+    },
+    {
+     "field": "biometrics_required",
+     "reason": "It is unclear whether fingerprints are collected from Chinese C-3-9 applicants at the KVAC"
+    },
+    {
+     "field": "appointment_required",
+     "reason": "Walk-in policy at KVAC offices in China may vary by location and current instructions"
+    },
+    {
+     "field": "arrival_card",
+     "reason": "Current format (paper arrival/departure card vs electronic declaration) for visa holders is not confirmed"
+    },
+    {
+     "field": "required_documents",
+     "reason": "KVAC jurisdictions may request additional or fewer documents depending on applicant circumstances"
+    },
+    {
+     "field": "passport_validity",
+     "reason": "Exact months-beyond-stay requirement enforced by airlines and Chinese exit controls is not confirmed"
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "valid_through_departure",
+    "months": null
+   },
+   "arrival_card": {
+    "required": null,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_center_submission",
+   "visa_products": [
+    {
+     "type": "Single-entry tourist C-3-9",
+     "entry": "single",
+     "validity": "3 months",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "Standard individual tourist visa; actual stay granted by consul"
+    },
+    {
+     "type": "Double-entry tourist C-3-9",
+     "entry": null,
+     "validity": "6 months",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "Two entries for a stated double itinerary"
+    },
+    {
+     "type": "Multiple-entry tourist C-3-9",
+     "entry": "multiple",
+     "validity": "1 year",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "Available to applicants meeting income or prior-visit conditions"
+    },
+    {
+     "type": "Multiple-entry tourist C-3-9",
+     "entry": "multiple",
+     "validity": "3 years",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "Available to qualified frequent travellers"
+    },
+    {
+     "type": "Multiple-entry tourist C-3-9",
+     "entry": "multiple",
+     "validity": "5 years",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "Available to qualified frequent travellers"
+    },
+    {
+     "type": "Group tourist C-3-2",
+     "entry": "single",
+     "validity": "3 months",
+     "max_stay_days": 15,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "For groups of 5+ Chinese nationals via designated travel agency"
+    }
+   ],
+   "application_channel_detail": "Chinese ordinary passport holders in China must lodge at a Korea Visa Application Centre (KVAC); individual walk-ins at the embassy/consulate are generally not accepted for short-term tourist visas, and a separate KVAC service fee applies.",
+   "source_url": "https://www.visa.go.kr"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-21T19:24:45.605561",
+  "fresh_until": "2026-09-04T19:24:45.605561"
+ },
+ {
+  "cache_key": "CHN|CHN|SGP|tourism|default|unknown|v4",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "SGP",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Tourist visa",
+   "permitted_stay": "Up to 30 days per visit",
+   "passport_validity": "At least 6 months beyond date of entry",
+   "required_documents": [
+    "Original passport valid at least 6 months with blank pages",
+    "Completed Form 14A",
+    "One recent passport-size colour photograph",
+    "Photocopy of passport biodata page",
+    "Copy of Chinese national ID card",
+    "Return or onward flight booking",
+    "Hotel reservation or local host address",
+    "Recent bank statements or other financial proof",
+    "Employment or student supporting letter if applicable",
+    "Form V39A Letter of Introduction if applying via a local sponsor"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 30,
+    "currency": "SGD"
+   },
+   "processing_time": "3–5 working days",
+   "forms": [
+    "Form 14A (visa application form)",
+    "Form V39A (Letter of Introduction) – if locally sponsored"
+   ],
+   "official_portal_url": "https://eservices.ica.gov.sg/save/",
+   "photo_requirements": "Recent colour passport-size photo, 35 mm x 45 mm, white background, no borders, taken within last 3 months, full face with ears visible",
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": null,
+   "account_registration_steps": [
+    "Applicant does not register directly with ICA",
+    "Authorized visa agent lodges the e-application",
+    "If using a local sponsor, sponsor logs in with Singpass to ICA SAVE"
+   ],
+   "payment_process": [
+    "Official visa fee paid through the authorized agent or local sponsor",
+    "Agent/service charges are paid separately to the authorized agent"
+   ],
+   "submission_process": [
+    "Submit documents to a Singapore-authorized visa agent/strategic partner in China",
+    "Agent enters the application via ICA SAVE",
+    "Collect passport with visa label or receive e-visa notification"
+   ],
+   "onward_travel_evidence": "Return or onward ticket required",
+   "accommodation_evidence": "Hotel booking or host address in Singapore required",
+   "financial_evidence": "Bank statements or proof of sufficient funds for the stay",
+   "insurance_required": false,
+   "exceptions": [
+    "Eligible frequent travellers may receive a multiple-journey visa valid up to 5 years",
+    "Visa-free transit facility may apply only with valid visa/long-term pass of eligible countries and confirmed onward ticket",
+    "APEC Business Travel Card endorsed for Singapore is for business visits, not tourism"
+   ],
+   "uncertainty": [
+    {
+     "field": "single_journey_validity_days",
+     "reason": "ICA states single-journey visa validity is case-specific; common practice is 35 days but not guaranteed"
+    },
+    {
+     "field": "form_v39a_requirement",
+     "reason": "Form V39A is required for local-sponsor SAVE applications; authorized agents may use their own introducer arrangement"
+    },
+    {
+     "field": "appointment_required",
+     "reason": "No ICA appointment is needed, but individual authorized agents may require their own appointment or walk-in slot"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 30,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "SG Arrival Card",
+    "submission_window": "Up to 3 days before arrival"
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_center_submission",
+   "visa_products": [
+    {
+     "type": "Single Journey Visa",
+     "entry": "single",
+     "validity": "Typically 35 days",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 30,
+      "currency": "SGD"
+     },
+     "notes": "Valid for a single entry; stay granted on arrival up to 30 days"
+    },
+    {
+     "type": "Multiple Journey Visa",
+     "entry": "multiple",
+     "validity": "Up to 5 years",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 30,
+      "currency": "SGD"
+     },
+     "notes": "For eligible applicants; each stay up to 30 days"
+    }
+   ],
+   "application_channel_detail": "Applicants must apply through a Singapore-authorized visa agent or strategic partner; individual direct filing on the ICA portal is not available unless a local sponsor in Singapore uses Singpass to apply via SAVE.",
+   "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-21T19:25:11.352423",
+  "fresh_until": "2026-09-04T19:25:11.352423"
+ },
+ {
+  "cache_key": "CHN|CHN|MYS|tourism|default|unknown|v4",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "MYS",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "CONDITIONAL",
+   "visa_category": "tourist",
+   "permitted_stay": "30 days visa-free",
+   "passport_validity": "6 months beyond arrival",
+   "required_documents": [
+    "Passport valid at least 6 months",
+    "MDAC confirmation",
+    "Return or onward ticket",
+    "Proof of accommodation",
+    "Proof of sufficient funds"
+   ],
+   "application_channel": "not_required",
+   "government_fee": {
+    "amount": 0,
+    "currency": "MYR"
+   },
+   "processing_time": "Not applicable for exemption; eVisa usually 2-3 working days",
+   "forms": [
+    "Malaysia Digital Arrival Card (MDAC)"
+   ],
+   "official_portal_url": "https://imigresen-online.imi.gov.my/mdac/main",
+   "photo_requirements": null,
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [
+    "No account required; complete MDAC online as a guest"
+   ],
+   "payment_process": [
+    "No visa fee for visa-free entry; MDAC is free"
+   ],
+   "submission_process": [
+    "Submit MDAC online within 3 days before arrival",
+    "Present passport and MDAC at immigration"
+   ],
+   "onward_travel_evidence": "Return or onward ticket may be requested",
+   "accommodation_evidence": "Hotel booking or host address may be requested",
+   "financial_evidence": "Bank statements or cash may be requested",
+   "insurance_required": false,
+   "exceptions": [
+    "Chinese ordinary passport tourists are visa-exempt for stays up to 30 days",
+    "Stays over 30 days require an eVisa or embassy visa",
+    "eVisa/sticker visas available if a visa is needed",
+    "Transit without visa is allowed if remaining airside"
+   ],
+   "uncertainty": [
+    {
+     "field": "trip_duration",
+     "reason": "Stays over 30 days require a visa; exact itinerary/duration was not provided"
+    },
+    {
+     "field": "visa_exempt_end_date",
+     "reason": "Malaysia's 30-day visa-free facilitation for Chinese nationals is subject to extension; confirm before travel"
+    },
+    {
+     "field": "eNTRI_availability",
+     "reason": "eNTRI may be suspended or replaced by the visa-free/eVisa arrangement; verify on the official portal"
+    },
+    {
+     "field": "eVisa_consular_fees",
+     "reason": "Official consular fees vary by nationality and processing location"
+    },
+    {
+     "field": "official_portal_url",
+     "reason": "Verify the current MDAC/eVisa portal URL on the Immigration Department of Malaysia website"
+    },
+    {
+     "field": "source_url",
+     "reason": "No single official page was confidently identified for all facts"
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": 30,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "Malaysia Digital Arrival Card (MDAC)",
+    "submission_window": "Within 3 days before arrival"
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination certificate",
+     "applicability": "conditional",
+     "trigger_countries": [],
+     "trigger": "Travel from or transit through a yellow-fever endemic country within the past 6 days",
+     "question": "Have you visited a yellow-fever endemic country in the past 6 days?"
+    }
+   ],
+   "route_workflow_type": "conditional",
+   "visa_products": [
+    {
+     "type": "eVISA Single-entry tourist",
+     "entry": "single",
+     "validity": "3 months",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": null,
+      "currency": "USD"
+     },
+     "notes": "Online tourist visa for stays beyond visa-free limit"
+    },
+    {
+     "type": "eNTRI",
+     "entry": "single",
+     "validity": "3 months",
+     "max_stay_days": 15,
+     "fee": {
+      "amount": null,
+      "currency": "USD"
+     },
+     "notes": "For Chinese/Indian nationals; verify current availability"
+    },
+    {
+     "type": "Single Entry Visa (sticker)",
+     "entry": "single",
+     "validity": "3 months",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": null,
+      "currency": "MYR"
+     },
+     "notes": "Apply at a Malaysian embassy/consulate"
+    },
+    {
+     "type": "Multiple Entry Visa (sticker)",
+     "entry": "multiple",
+     "validity": "up to 12 months",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": null,
+      "currency": "MYR"
+     },
+     "notes": "Apply at a Malaysian embassy/consulate; justification usually required"
+    }
+   ],
+   "application_channel_detail": "Chinese ordinary passport holders may enter visa-free for short tourism up to 30 days after completing the MDAC online; a visa is required for longer or non-tourism stays.",
+   "source_url": null
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-21T19:26:05.770758",
+  "fresh_until": "2026-09-04T19:26:05.770758"
+ },
+ {
+  "cache_key": "CHN|CHN|VNM|tourism|default|unknown|v4",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "VNM",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+   "visa_category": "Tourist e-visa",
+   "permitted_stay": "30 days (single-entry e-visa) or 90 days (multiple-entry e-visa)",
+   "passport_validity": "6 months beyond arrival",
+   "required_documents": [
+    "PRC ordinary passport with ≥6 months validity and ≥2 blank pages",
+    "Digital passport photo 4x6 cm, white background",
+    "Travel dates and intended entry/exit border gates",
+    "Email address for correspondence",
+    "Payment card"
+   ],
+   "application_channel": "online_portal",
+   "government_fee": {
+    "amount": 25,
+    "currency": "USD"
+   },
+   "processing_time": "3 working days for e-visa",
+   "forms": [
+    "Online e-visa application form"
+   ],
+   "official_portal_url": "https://evisa.xuatnhapcanh.gov.vn/",
+   "photo_requirements": "Digital colour passport photo, 4x6 cm, white background, no headwear/glasses, JPG format, max 2 MB",
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [
+    "No account required; enter email and receive a registration code to check status"
+   ],
+   "payment_process": [
+    "Pay online by international credit/debit card during application",
+    "Fee is non-refundable"
+   ],
+   "submission_process": [
+    "Complete and submit the e-visa form on the official portal",
+    "Pay the fee",
+    "Wait for approval (normally 3 working days)",
+    "Download/print the e-visa and present it with passport on arrival"
+   ],
+   "onward_travel_evidence": "Recommended but not mandatory for e-visa",
+   "accommodation_evidence": "Recommended; provide hotel or host address in the application",
+   "financial_evidence": "Not required for e-visa; sufficient funds recommended",
+   "insurance_required": false,
+   "exceptions": [
+    "Phu Quoc direct-entry exemption: foreign visitors arriving directly on Phu Quoc Island may stay up to 30 days on the island without a visa",
+    "Longer-stay or multiple-entry sticker tourist visas require application at a Vietnamese embassy/consulate"
+   ],
+   "uncertainty": [
+    {
+     "field": "trip_duration",
+     "reason": "Not provided; applicant must choose e-visa validity or sticker visa accordingly"
+    },
+    {
+     "field": "transit_countries",
+     "reason": "Not provided; cannot assess transit-visa requirements"
+    },
+    {
+     "field": "passport_expiration_date",
+     "reason": "Not provided; must be at least 6 months beyond arrival"
+    },
+    {
+     "field": "prior_refusals",
+     "reason": "Not provided; may affect eligibility"
+    },
+    {
+     "field": "embassy_sticker_fees",
+     "reason": "Fees vary by Vietnamese embassy/consulate in China and were not verified"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "Entry/exit declaration",
+    "submission_window": "On arrival/departure at immigration"
+   },
+   "health_requirements": [],
+   "route_workflow_type": "evisa_portal",
+   "visa_products": [
+    {
+     "type": "Single-entry e-visa",
+     "entry": "single",
+     "validity": "30 days",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 25,
+      "currency": "USD"
+     },
+     "notes": "Apply online; 3 working days processing"
+    },
+    {
+     "type": "Multiple-entry e-visa",
+     "entry": "multiple",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": "Apply online; 3 working days processing"
+    },
+    {
+     "type": "Embassy tourist visa — 1 month single",
+     "entry": "single",
+     "validity": "1 month",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "Sticker visa at Vietnamese embassy/consulate; fee set by post"
+    },
+    {
+     "type": "Embassy tourist visa — 1 month multiple",
+     "entry": "multiple",
+     "validity": "1 month",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "Sticker visa at Vietnamese embassy/consulate; fee set by post"
+    },
+    {
+     "type": "Embassy tourist visa — 3 months single",
+     "entry": "single",
+     "validity": "3 months",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "Sticker visa at Vietnamese embassy/consulate; fee set by post"
+    },
+    {
+     "type": "Embassy tourist visa — 3 months multiple",
+     "entry": "multiple",
+     "validity": "3 months",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "Sticker visa at Vietnamese embassy/consulate; fee set by post"
+    }
+   ],
+   "application_channel_detail": "Chinese ordinary passport holders can apply individually on Vietnam’s official e-visa portal; longer-stay sticker visas must be lodged at a Vietnamese embassy/consulate or its authorised agent.",
+   "source_url": "https://evisa.xuatnhapcanh.gov.vn/"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-21T19:26:39.928528",
+  "fresh_until": "2026-09-04T19:26:39.928528"
+ },
+ {
+  "cache_key": "CHN|CHN|GBR|tourism|default|unknown|v4",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "GBR",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Standard Visitor visa",
+   "permitted_stay": "Up to 6 months",
+   "passport_validity": "Valid for the whole stay in the UK",
+   "required_documents": [
+    "Valid passport or travel document",
+    "Proof of funds (bank statements, payslips, sponsor evidence)",
+    "Travel itinerary and return/onward booking",
+    "Accommodation proof (hotel booking or host invitation/address)",
+    "Employment, study, or ties-to-home evidence",
+    "Invitation letter if staying with a sponsor"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 115,
+    "currency": "GBP"
+   },
+   "processing_time": "Usually 3 weeks after biometrics; priority services may be faster",
+   "forms": [
+    "Online Standard Visitor visa application form on GOV.UK"
+   ],
+   "official_portal_url": "https://www.gov.uk/standard-visitor/apply-standard-visitor-visa",
+   "photo_requirements": "Digital photograph taken at the VFS Global biometrics appointment; paper photo not normally required",
+   "biometrics_required": true,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Create a GOV.UK account",
+    "Complete the Standard Visitor visa application form",
+    "Pay the visa fee online",
+    "Book an appointment at a VFS Global UK Visa Application Centre"
+   ],
+   "payment_process": [
+    "Visa fee paid online by credit/debit card during application",
+    "VFS Global may charge a separate service fee at the appointment"
+   ],
+   "submission_process": [
+    "Submit the application online",
+    "Attend the VFS Global appointment to provide passport and biometrics",
+    "Upload supporting documents online or pay VFS Global to scan them"
+   ],
+   "onward_travel_evidence": "Return or onward ticket and travel itinerary recommended",
+   "accommodation_evidence": "Hotel booking or host address and invitation letter",
+   "financial_evidence": "Recent bank statements, payslips, or sponsor funds showing you can cover the trip",
+   "insurance_required": false,
+   "exceptions": [
+    "Long-term 2/5/10-year Standard Visitor visas are multiple-entry but each stay is normally limited to 6 months; no work or recourse to public funds",
+    "Chinese nationals with an eligible Irish short-stay visa endorsed BIVS may enter the UK without a separate UK visa under the British-Irish Visa Scheme",
+    "Organised Chinese tour groups may use the Approved Destination Status (ADS) scheme",
+    "Children under 5 must attend the appointment but are not fingerprinted",
+    "Chinese nationals may have access to a reduced-fee 2-year/5-year Standard Visitor arrangement; confirm the current fee on GOV.UK"
+   ],
+   "uncertainty": [
+    {
+     "field": "visa_products.2-year and 5-year fee",
+     "reason": "Chinese nationals may have a reduced-fee 2-year and/or 5-year Standard Visitor visa arrangement; current official fees should be verified on the UK fee list"
+    },
+    {
+     "field": "visa_products.6-month entry",
+     "reason": "Whether a 6-month Standard Visitor is issued as single or multiple entry is at the entry clearance officer's discretion"
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": 180,
+   "passport_validity_requirement": {
+    "kind": "valid_through_departure",
+    "months": null
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [
+    {
+     "name": "COVID-19 vaccination or test",
+     "applicability": "not_applicable",
+     "trigger_countries": [],
+     "trigger": null,
+     "question": null
+    },
+    {
+     "name": "Tuberculosis screening",
+     "applicability": "not_applicable",
+     "trigger_countries": [],
+     "trigger": "Required only for visas longer than 6 months from listed countries; not required for a 6-month Standard Visitor",
+     "question": null
+    }
+   ],
+   "route_workflow_type": "visa_center_submission",
+   "visa_products": [
+    {
+     "type": "Standard Visitor (up to 6 months)",
+     "entry": null,
+     "validity": "6 months",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 115,
+      "currency": "GBP"
+     },
+     "notes": "Single or multiple entry at entry clearance officer discretion"
+    },
+    {
+     "type": "Long-term Standard Visitor 2-year",
+     "entry": "multiple",
+     "validity": "2 years",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": null,
+      "currency": "GBP"
+     },
+     "notes": "Multiple entry; each stay up to 6 months. Chinese nationals may have a reduced fee"
+    },
+    {
+     "type": "Long-term Standard Visitor 5-year",
+     "entry": "multiple",
+     "validity": "5 years",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": null,
+      "currency": "GBP"
+     },
+     "notes": "Multiple entry; each stay up to 6 months. Chinese nationals may have a reduced fee"
+    },
+    {
+     "type": "Long-term Standard Visitor 10-year",
+     "entry": "multiple",
+     "validity": "10 years",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 963,
+      "currency": "GBP"
+     },
+     "notes": "Multiple entry; each stay up to 6 months"
+    }
+   ],
+   "application_channel_detail": "Apply online on GOV.UK, then attend a VFS Global UK Visa Application Centre in China to submit your passport and provide biometrics.",
+   "source_url": "https://www.gov.uk/standard-visitor"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-21T19:27:23.440520",
+  "fresh_until": "2026-09-04T19:27:23.440520"
+ },
+ {
+  "cache_key": "CHN|CHN|FRA|tourism|default|unknown|v4",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "FRA",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Short-stay Schengen C-type tourist visa",
+   "permitted_stay": "90 days in any 180-day Schengen period",
+   "passport_validity": "Issued within last 10 years; valid 3 months beyond intended Schengen departure",
+   "required_documents": [
+    "Valid ordinary passport (issued <10 years ago, 3 months validity beyond departure, 2 blank pages)",
+    "France-Visas online application form receipt",
+    "Two recent Schengen-format photos",
+    "TLScontact appointment confirmation",
+    "Return/onward travel reservation",
+    "Proof of accommodation (hotel bookings or attestation d'accueil)",
+    "Travel medical insurance (€30,000 minimum, Schenge coverage)",
+    "Proof of financial means (bank statements, payslips, tax records)",
+    "Proof of employment/studies or stable income",
+    "Proof of ties to China (family, property, employment)",
+    "Copies of previous Schengen/US/UK/Canada visas if any"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "processing_time": "Up to 15 calendar days; may extend to 45 days in individual cases",
+   "forms": [
+    "France-Visas online Schengen visa application form"
+   ],
+   "official_portal_url": "https://france-visas.gouv.fr/en/web/france-visas/accueil",
+   "photo_requirements": "Two identical colour photos, 35 mm x 45 mm, white background, face 70–80%, taken within last 6 months",
+   "biometrics_required": true,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Create an account on France-Visas and complete the application form",
+    "Save and print the France-Visas receipt with the file number",
+    "Create a TLScontact China account and book an appointment",
+    "Upload/attach supporting documents as requested",
+    "Attend the TLScontact appointment in person"
+   ],
+   "payment_process": [
+    "Pay TLScontact service fee online when booking",
+    "Pay consular visa fee at the TLScontact centre when submitting",
+    "Optional passport-return/courier fee paid at centre"
+   ],
+   "submission_process": [
+    "Attend TLScontact centre in person",
+    "Submit passport and documents",
+    "Provide biometrics",
+    "Collect passport or receive it by courier"
+   ],
+   "onward_travel_evidence": "Return or onward ticket/reservation showing exit from the Schengen area",
+   "accommodation_evidence": "Hotel bookings covering all nights, or a notarised host invitation (attestation d'accueil)",
+   "financial_evidence": "Recent bank statements (3–6 months), payslips, tax records, or a sponsorship letter with sponsor's financial proof",
+   "insurance_required": true,
+   "exceptions": [
+    "Children under 6 are exempt from the consular fee (service fee still applies)",
+    "Diplomatic/service passport holders and certain EU/EEA/Swiss family members may be exempt",
+    "Frequent travellers with prior Schengen visas may receive a multiple-entry visa valid 1–5 years",
+    "ADS group-tourism visas follow a separate accredited-tour-operator procedure",
+    "A valid French Schengen visa also permits tourism in other Schengen states if France is the main destination",
+    "Airport transit through France may require an ATV unless an exemption applies"
+   ],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "Applicant age not provided; the standard adult consular fee is €90, but children 6–12 pay €45 and under-6 are exempt"
+    },
+    {
+     "field": "consular_jurisdiction",
+     "reason": "TLScontact appointment centre depends on the applicant's place of residence, which was not specified"
+    },
+    {
+     "field": "multiple-entry eligibility",
+     "reason": "Exact validity issued (1–5 years) depends on travel history and consular discretion, not guaranteed"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination",
+     "applicability": "conditional",
+     "trigger_countries": [],
+     "trigger": "Arrival/transit through a yellow-fever endemic area within 6 days before entry",
+     "question": "Will you have travelled through a yellow-fever endemic country in the 6 days before arriving in France?"
+    },
+    {
+     "name": "COVID-19 restrictions",
+     "applicability": "not_applicable",
+     "trigger_countries": [],
+     "trigger": null,
+     "question": null
+    }
+   ],
+   "route_workflow_type": "visa_center_submission",
+   "visa_products": [
+    {
+     "type": "Single-entry short-stay Schengen C tourist visa",
+     "entry": "single",
+     "validity": "As determined by consulate (typically aligned with trip dates)",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "One entry; stay counted in 90/180-day Schengen limit"
+    },
+    {
+     "type": "Double-entry short-stay Schengen C tourist visa",
+     "entry": "multiple",
+     "validity": "As determined by consulate",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Two entries; total stay max 90/180 days"
+    },
+    {
+     "type": "Multiple-entry short-stay Schengen C tourist visa",
+     "entry": "multiple",
+     "validity": "1 to 5 years for eligible frequent travellers",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Each stay max 90 days in any 180-day Schengen period"
+    }
+   ],
+   "application_channel_detail": "Applicants in mainland China must file through TLScontact after completing the France-Visas online form; the French embassy/consulate does not accept direct individual applications.",
+   "source_url": "https://france-visas.gouv.fr/en/web/france-visas/accueil"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-21T19:27:53.476187",
+  "fresh_until": "2026-09-04T19:27:53.476187"
+ },
+ {
+  "cache_key": "CHN|CHN|DEU|tourism|default|unknown|v4",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "DEU",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Short-stay Schengen (C) visa",
+   "permitted_stay": "90 days in any 180-day period",
+   "passport_validity": "Issued within last 10 years; valid at least 3 months after intended departure from Schengen; at least 2 blank pages",
+   "required_documents": [
+    "Valid ordinary passport",
+    "Completed and signed Schengen visa application form",
+    "Two recent passport photographs",
+    "Travel medical insurance (minimum €30,000)",
+    "Round-trip flight reservation or travel itinerary",
+    "Proof of accommodation (hotel bookings or invitation)",
+    "Proof of sufficient financial means (bank statements, payslips, etc.)",
+    "Proof of employment or studies",
+    "Chinese ID card and household registration book (hukou) copies (standard China submission)",
+    "Visa fee payment receipt",
+    "Cover letter explaining the trip"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "processing_time": "Up to 15 calendar days; may extend to 45 days in individual cases",
+   "forms": [
+    "Schengen visa application form (German short-stay visa)"
+   ],
+   "official_portal_url": null,
+   "photo_requirements": "2 recent colour photos, 35x45 mm, light background, face centred and clear, no headgear except for religious reasons",
+   "biometrics_required": true,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Create an account on the Germany visa appointment service portal for China",
+    "Select the relevant VFS Global centre by place of residence",
+    "Complete the application form and book an appointment"
+   ],
+   "payment_process": [
+    "Pay the €90 Schengen visa fee online or at the visa centre",
+    "Pay the separate VFS Global service fee (amount set by centre, not included in government fee)"
+   ],
+   "submission_process": [
+    "Attend the Germany Visa Application Centre in person by appointment",
+    "Submit documents and provide biometrics",
+    "Collect passport in person or by courier after decision"
+   ],
+   "onward_travel_evidence": "Required: confirmed return/onward flight reservation or travel itinerary",
+   "accommodation_evidence": "Required: hotel bookings or a formal invitation letter from a host in Germany",
+   "financial_evidence": "Required: recent bank statements, proof of income, or a sponsorship letter with sponsor's financial documents",
+   "insurance_required": true,
+   "exceptions": [
+    "Accompanying family members of EU/EEA/Swiss citizens may be exempt from the visa fee and some documentary requirements under EU Directive 2004/38/EC",
+    "Airport transit through a German airport to a non-Schengen destination generally does not require an airport-transit visa if remaining in the international transit area",
+    "Holders of valid residence permits for certain Schengen/EEA states or specific Schengen visas may have facilitated entry rules"
+   ],
+   "uncertainty": [
+    {
+     "field": "official_portal_url",
+     "reason": "Exact destination-specific online appointment/booking portal URL for Germany visa applications in China was not confirmed; apply via the VFS Global Germany Visa Application Centre site."
+    },
+    {
+     "field": "service_fee_amount",
+     "reason": "VFS Global charges an additional service fee separate from the consular fee; the current amount was not provided and varies by centre."
+    },
+    {
+     "field": "applicant_age",
+     "reason": "Age was not supplied; fees and biometrics rules differ for children under 6 and 6-12, and for applicants under 12 fingerprints are not required."
+    },
+    {
+     "field": "consular_jurisdiction",
+     "reason": "The exact VFS Global centre and German consular district depend on the applicant's place of residence in China, which was not specified."
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_center_submission",
+   "visa_products": [
+    {
+     "type": "Single-entry tourist Schengen visa",
+     "entry": "single",
+     "validity": "Up to the trip itinerary; maximum 90 days stay",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Adult fee; children 6-12 pay €45, under 6 free"
+    },
+    {
+     "type": "Double-entry tourist Schengen visa",
+     "entry": "multiple",
+     "validity": "Up to the trip itinerary; maximum 90 days stay",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Allows two entries within validity; adult fee"
+    },
+    {
+     "type": "Multiple-entry tourist Schengen visa",
+     "entry": "multiple",
+     "validity": "Typically 6 months to 5 years for frequent travellers",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Granted based on travel history; each stay max 90 days in any 180-day period"
+    }
+   ],
+   "application_channel_detail": "Chinese ordinary-passport holders must apply through the Germany Visa Application Centre operated by VFS Global in China; appointments are booked online and the applicant must attend in person to submit documents and biometrics.",
+   "source_url": "https://www.auswaertiges-amt.de/en/visa-service/short-term-visa/schengen-visa"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-21T19:28:20.784806",
+  "fresh_until": "2026-09-04T19:28:20.784806"
+ },
+ {
+  "cache_key": "CHN|CHN|ITA|tourism|default|unknown|v4",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "ITA",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Short-stay Schengen C visa (tourism)",
+   "permitted_stay": "90 days within any 180-day period",
+   "passport_validity": "Valid at least 3 months beyond intended departure from Schengen; issued within last 10 years; 2 blank pages",
+   "required_documents": [
+    "Valid passport",
+    "Completed Schengen visa application form",
+    "Recent passport photo",
+    "Travel medical insurance",
+    "Round-trip flight reservation",
+    "Accommodation bookings or invitation letter",
+    "Proof of financial means",
+    "Employment or study proof",
+    "Travel itinerary"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "processing_time": "Up to 15 calendar days; may extend to 30 or 60 days in individual cases",
+   "forms": [
+    "Harmonised Schengen visa application form"
+   ],
+   "official_portal_url": "https://vistoperitalia.esteri.it/home/en",
+   "photo_requirements": "One recent 35 x 45 mm colour photo, white background, face uncovered, no head covering except for religious reasons",
+   "biometrics_required": true,
+   "interview_required": null,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Create an account on the VFS Global Italy visa appointment system",
+    "Book an appointment at the centre under your Italian consular jurisdiction"
+   ],
+   "payment_process": [
+    "Pay the EUR 90 consular visa fee at the visa application centre",
+    "Pay the separate VFS Global service fee as instructed during appointment booking"
+   ],
+   "submission_process": [
+    "Attend the scheduled appointment at the VFS Global Italy visa centre",
+    "Submit documents, provide biometrics, and pay fees",
+    "Collect passport when notified or receive courier return"
+   ],
+   "onward_travel_evidence": "Confirmed return or onward flight reservation out of the Schengen area",
+   "accommodation_evidence": "Hotel bookings, rental agreement, or invitation letter from a host in Italy",
+   "financial_evidence": "Bank statements for the last 3-6 months and proof of stable income or sponsorship",
+   "insurance_required": true,
+   "exceptions": [
+    "Children under 6 are exempt from the visa fee; children 6-12 pay a reduced fee",
+    "Holders of certain valid Schengen/EEA residence permits or visas may be exempt",
+    "Multiple-entry visas may be issued to frequent travellers with a positive Schengen history",
+    "Family members of EU/EEA/Swiss nationals may be exempt under Directive 2004/38"
+   ],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "Age was not provided; children 6-12 pay EUR 45 and under-6 are free, while the standard adult fee is EUR 90"
+    },
+    {
+     "field": "passport_issue_date / passport_expiry_date",
+     "reason": "Passport issue and expiry dates were not provided, so compliance with the 10-year issuance rule and 3-month validity rule cannot be verified"
+    },
+    {
+     "field": "age",
+     "reason": "Age determines fee reductions, biometrics rules for minors, and guardian documentation"
+    },
+    {
+     "field": "transit_countries",
+     "reason": "Transit countries were not provided; a possible airport transit visa requirement through other Schengen states cannot be assessed"
+    },
+    {
+     "field": "prior_refusals",
+     "reason": "Prior visa refusals were not provided and may affect admissibility or required additional documents"
+    },
+    {
+     "field": "trip_dates / duration",
+     "reason": "Travel dates and trip duration were not provided; exact insurance cover dates and permitted-stay calculation cannot be confirmed"
+    },
+    {
+     "field": "interview_required",
+     "reason": "Italian consulates may request an interview in individual cases; standard procedure is document and biometric submission only"
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_center_submission",
+   "visa_products": [
+    {
+     "type": "Single-entry short-stay Schengen C (tourism)",
+     "entry": "single",
+     "validity": "Up to 90 days within any 180-day period",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Standard adult consular fee; reduced or free for eligible minors"
+    },
+    {
+     "type": "Multiple-entry short-stay Schengen C (tourism)",
+     "entry": "multiple",
+     "validity": "Up to 5 years depending on consular decision",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Usually granted to applicants with proven Schengen travel history"
+    }
+   ],
+   "application_channel_detail": "Applicants in China must lodge through a VFS Global Italy visa application centre under the relevant Italian consulate's jurisdiction; direct embassy walk-ins are generally not accepted.",
+   "source_url": "https://vistoperitalia.esteri.it/home/en"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-21T19:28:41.760245",
+  "fresh_until": "2026-09-04T19:28:41.760245"
+ },
+ {
+  "cache_key": "CHN|CHN|ESP|tourism|default|unknown|v4",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "ESP",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Short-stay Schengen (Type C) tourist visa",
+   "permitted_stay": "90 days within any 180-day period in the Schengen Area",
+   "passport_validity": "Issued within the last 10 years and valid at least 3 months beyond intended departure from Schengen",
+   "required_documents": [
+    "Valid passport",
+    "Completed Schengen visa application form",
+    "Two recent passport photos",
+    "Travel medical insurance",
+    "Round-trip flight reservation or itinerary",
+    "Proof of accommodation",
+    "Proof of sufficient funds",
+    "Employment or study proof",
+    "Recent bank statements",
+    "Visa fee payment",
+    "BLS appointment confirmation"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "processing_time": "Up to 15 calendar days; up to 45 days in complex cases",
+   "forms": [
+    "Harmonised Schengen visa application form",
+    "BLS appointment confirmation"
+   ],
+   "official_portal_url": "https://www.spainvisa.cn/",
+   "photo_requirements": "Two recent colour photos, 35x45 mm, white background, full face, no head coverings except for religious reasons",
+   "biometrics_required": true,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Register on the BLS Spain visa portal",
+    "Complete the online application form",
+    "Book an appointment",
+    "Pay the visa fee",
+    "Attend the visa centre in person"
+   ],
+   "payment_process": [
+    "Pay the EUR 90 visa fee online or at the BLS centre",
+    "Keep the payment receipt"
+   ],
+   "submission_process": [
+    "Attend the BLS Spain Visa Application Centre in person",
+    "Submit documents and provide biometrics",
+    "Collect passport in person or by courier"
+   ],
+   "onward_travel_evidence": "Confirmed round-trip flight reservation or detailed travel itinerary",
+   "accommodation_evidence": "Hotel bookings or notarised invitation letter from host in Spain with host identification/residence proof",
+   "financial_evidence": "Bank statements for the last 3–6 months and proof of income; roughly EUR 90–100 per day of stay",
+   "insurance_required": true,
+   "exceptions": [
+    "Family members of EU/EEA/Swiss nationals may be exempt from the visa fee and use a facilitated procedure",
+    "Frequent travellers with positive Schengen history may be granted multiple-entry visas valid 1, 2, 3 or 5 years",
+    "Applicants whose fingerprints were captured within the last 59 months may not need new biometrics"
+   ],
+   "uncertainty": [
+    {
+     "field": "source_url",
+     "reason": "Exact URL path of the official Spanish Ministry of Foreign Affairs Schengen visa page was not verified"
+    },
+    {
+     "field": "BLS service fee",
+     "reason": "BLS charges an additional service fee separate from the official EUR 90 consular fee; amount varies by centre"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_center_submission",
+   "visa_products": [
+    {
+     "type": "Single-entry short-stay Schengen (C) tourist",
+     "entry": "single",
+     "validity": "Up to 6 months",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Adult fee; children 6–12 pay EUR 45, under 6 free"
+    },
+    {
+     "type": "Multiple-entry short-stay Schengen (C) tourist",
+     "entry": "multiple",
+     "validity": "6 months to 5 years",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Issued based on travel history and consular discretion"
+    }
+   ],
+   "application_channel_detail": "Chinese ordinary passport holders must apply through BLS International Spain Visa Application Centres in mainland China, booking an appointment online and attending in person; BLS charges a separate service fee in addition to the official consular fee.",
+   "source_url": null
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-21T19:29:11.271806",
+  "fresh_until": "2026-09-04T19:29:11.271806"
+ },
+ {
+  "cache_key": "CHN|CHN|AUS|tourism|default|unknown|v4",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "AUS",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Visitor visa (subclass 600) Tourist stream",
+   "permitted_stay": "up to 3, 6 or 12 months as granted",
+   "passport_validity": "valid for the entire intended stay in Australia",
+   "required_documents": [
+    "Valid passport biodata page",
+    "National ID card (PRC)",
+    "Household registration (hukou), if applicable",
+    "Recent passport-format digital photo",
+    "Form 54 family details",
+    "Evidence of funds (bank statements, payslips, tax records)",
+    "Employment/business/school letter",
+    "Travel itinerary and accommodation bookings",
+    "Ties-to-home-country evidence",
+    "Invitation letter and host documents, if applicable"
+   ],
+   "application_channel": "online_portal",
+   "government_fee": {
+    "amount": 195,
+    "currency": "AUD"
+   },
+   "processing_time": "typically 2–4 weeks; varies by case",
+   "forms": [
+    "Online application form via ImmiAccount (paper Form 1419 also exists)"
+   ],
+   "official_portal_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream",
+   "photo_requirements": "Digital passport photo 45 x 35 mm, head 32–36 mm, plain light background, taken within last 6 months, upload via ImmiAccount",
+   "biometrics_required": true,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Create an ImmiAccount at the Department of Home Affairs",
+    "Start a new application and select Visitor (subclass 600) Tourist stream",
+    "Complete the application form and answer all questions truthfully",
+    "Upload required documents in the correct format",
+    "Pay the visa application charge online",
+    "Submit the application and wait for a biometrics request letter"
+   ],
+   "payment_process": [
+    "Pay the base application charge by credit/debit card through ImmiAccount",
+    "Pay any AVAC biometrics service fee separately when attending the centre"
+   ],
+   "submission_process": [
+    "Submit application online via ImmiAccount",
+    "Receive request to provide biometrics",
+    "Attend an Australian Visa Application Centre (AVAC) in China",
+    "Await decision; visa grant notice is emailed and linked electronically to passport"
+   ],
+   "onward_travel_evidence": "Return or onward ticket and travel itinerary recommended",
+   "accommodation_evidence": "Hotel bookings or host invitation letter plus host passport/visa status",
+   "financial_evidence": "Bank statements for 3–6 months, payslips, tax records and employment letter showing sufficient funds",
+   "insurance_required": false,
+   "exceptions": [
+    "Approved Destination Status (ADS) stream available for Chinese nationals on organised group tours via approved agents",
+    "APEC Business Travel Card holders with 'AUS' on the reverse may enter Australia without a visa for short stays",
+    "Chinese ordinary passport holders are not eligible for ETA (subclass 601) or eVisitor (subclass 651)",
+    "Transit passengers may need a Transit visa (subclass 771) unless exempt"
+   ],
+   "uncertainty": [
+    {
+     "field": "processing_time",
+     "reason": "Current service standards vary and are not guaranteed; some cases take longer if additional documents or checks are needed"
+    },
+    {
+     "field": "permitted_stay_days",
+     "reason": "The grant letter determines the actual stay period (3, 6 or 12 months), not the applicant"
+    },
+    {
+     "field": "visa_products.ADS.fee",
+     "reason": "Official ADS-stream base charge is not confirmed here; verify with the approved tour agent or Home Affairs"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": null,
+   "passport_validity_requirement": {
+    "kind": "valid_through_departure",
+    "months": null
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "Incoming Passenger Card (IPC)",
+    "submission_window": "provided on aircraft/vessel before arrival; present at immigration"
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination certificate",
+     "applicability": "conditional",
+     "trigger_countries": [],
+     "trigger": "Arrival or transit within 6 days in a yellow-fever endemic country",
+     "question": "Will you travel through or stay in a yellow-fever affected country within 6 days before arriving in Australia?"
+    }
+   ],
+   "route_workflow_type": "evisa_portal",
+   "visa_products": [
+    {
+     "type": "Visitor (subclass 600) Tourist stream",
+     "entry": "single/multiple",
+     "validity": "up to 12 months",
+     "max_stay_days": 365,
+     "fee": {
+      "amount": 195,
+      "currency": "AUD"
+     },
+     "notes": "Granted stay may be 3, 6 or 12 months depending on application"
+    },
+    {
+     "type": "Visitor (subclass 600) Approved Destination Status (ADS) stream",
+     "entry": "single",
+     "validity": "as per approved tour",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "For Chinese nationals travelling with an approved ADS tour agent; confirm current fee and stay with agent"
+    }
+   ],
+   "application_channel_detail": "Individual applicants lodge online via ImmiAccount; Chinese nationals must attend an Australian Visa Application Centre (AVAC) for biometrics collection, which may charge a separate service fee.",
+   "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-21T19:29:40.199178",
+  "fresh_until": "2026-09-04T19:29:40.199178"
+ },
+ {
+  "cache_key": "CHN|CHN|ARE|tourism|default|unknown|v4",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "ARE",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_EXEMPT",
+   "visa_category": "tourist_visa",
+   "permitted_stay": "30 days per entry",
+   "passport_validity": "valid at least 6 months on arrival",
+   "required_documents": [
+    "Passport valid at least 6 months",
+    "Return or onward ticket",
+    "Proof of accommodation or host address"
+   ],
+   "application_channel": "not_required",
+   "government_fee": {
+    "amount": null,
+    "currency": null
+   },
+   "processing_time": "not applicable",
+   "forms": [],
+   "official_portal_url": null,
+   "photo_requirements": null,
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [],
+   "payment_process": [],
+   "submission_process": [],
+   "onward_travel_evidence": "Return or onward ticket may be requested at immigration",
+   "accommodation_evidence": "Hotel booking or host address may be requested at immigration",
+   "financial_evidence": "Proof of sufficient funds may be requested",
+   "insurance_required": false,
+   "exceptions": [
+    "30-day visa-free entry is normally granted on arrival; a local extension may be possible for a fee",
+    "Stays longer than 30 days require a pre-arranged UAE visit visa sponsored by an airline, hotel, or UAE resident/entity"
+   ],
+   "uncertainty": [
+    {
+     "field": "visa_products",
+     "reason": "Optional pre-arranged UAE tourist/visit visa types and fees for longer stays were not enumerated because the stated route uses the 30-day visa-free facility."
+    },
+    {
+     "field": "source_url",
+     "reason": "An exact official UAE government page URL for this fact was not provided to avoid inventing a URL."
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 30,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination certificate",
+     "applicability": "conditional",
+     "trigger_countries": [],
+     "trigger": "Arrival or transit through a yellow-fever affected country within 6 days before entering the UAE",
+     "question": "Will you have been in a yellow-fever affected country within 6 days before arrival in the UAE?"
+    }
+   ],
+   "route_workflow_type": "visa_exempt_preparation",
+   "visa_products": null,
+   "application_channel_detail": "Chinese ordinary passport holders do not apply in advance; present documents at UAE immigration to receive a 30-day entry stamp.",
+   "source_url": null
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-21T19:30:03.355319",
+  "fresh_until": "2026-09-04T19:30:03.355319"
+ },
+ {
+  "cache_key": "CHN|CHN|TUR|tourism|default|unknown|v4",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "TUR",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+   "visa_category": "e-Visa (tourism)",
+   "permitted_stay": "30 days",
+   "passport_validity": "At least 6 months from arrival; must also cover authorised stay plus 60 days under Turkish law",
+   "required_documents": [
+    "Ordinary PRC passport valid at least 6 months from arrival",
+    "Return or onward travel ticket",
+    "Proof of accommodation in Türkiye",
+    "Evidence of funds: at least USD 50 per day",
+    "Credit/debit card for online payment"
+   ],
+   "application_channel": "online_portal",
+   "government_fee": {
+    "amount": 60,
+    "currency": "USD"
+   },
+   "processing_time": "Usually minutes to 48 hours; apply at least 48 hours before travel",
+   "forms": [
+    "Turkish e-Visa online application form"
+   ],
+   "official_portal_url": "https://www.evisa.gov.tr/en/",
+   "photo_requirements": "No photograph upload is required for the e-Visa",
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [
+    "No account required; complete the application directly on the portal"
+   ],
+   "payment_process": [
+    "Pay the government fee online by credit/debit card before the e-Visa is issued"
+   ],
+   "submission_process": [
+    "Submit the application online",
+    "Download and print or save the approved e-Visa",
+    "Present passport and e-Visa at Turkish border control"
+   ],
+   "onward_travel_evidence": "Return or onward ticket required",
+   "accommodation_evidence": "Hotel reservation or address in Türkiye required",
+   "financial_evidence": "At least USD 50 per day of stay",
+   "insurance_required": false,
+   "exceptions": [
+    "Diplomatic/service passport holders are subject to different rules",
+    "For stays longer than 30 days or other purposes, apply for a sticker visa at a Turkish embassy/consulate",
+    "Holders of valid Schengen, US, UK or Ireland visas/residence permits may use the same e-Visa product but do not need such documents to be eligible as ordinary PRC passport holders"
+   ],
+   "uncertainty": [
+    {
+     "field": "e-Visa entry type and exact government fee",
+     "reason": "Entry type (single/multiple) and the live fee are set by the Turkish e-Visa portal fee schedule; confirm at application before paying."
+    },
+    {
+     "field": "Sticker-visa products for longer stays",
+     "reason": "Sticker tourist visas at Turkish embassies/consulates may exist for stays over 30 days; specific fees and validity are not confirmed here."
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": 30,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination certificate",
+     "applicability": "conditional",
+     "trigger_countries": [],
+     "trigger": "Arrival or transit within the previous 7 days from a yellow-fever endemic country",
+     "question": "Have you been in a yellow-fever endemic country within the last 7 days?"
+    }
+   ],
+   "route_workflow_type": "evisa_portal",
+   "visa_products": [
+    {
+     "type": "Multiple-entry tourist e-Visa",
+     "entry": "multiple",
+     "validity": "180 days from date of issue",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 60,
+      "currency": "USD"
+     },
+     "notes": "Tourism or business; a small portal service fee may be added at checkout"
+    }
+   ],
+   "application_channel_detail": "The applicant applies individually on the official Turkish e-Visa portal and pays online; intermediaries are not required, though the portal may add a small service fee at checkout.",
+   "source_url": "https://www.evisa.gov.tr/en/info/"
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-21T19:30:43.666973",
+  "fresh_until": "2026-09-04T19:30:43.666973"
+ },
+ {
+  "cache_key": "CHN|CHN|IDN|tourism|default|unknown|v4",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "IDN",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Tourist Visa on Arrival (VoA) / e-VOA",
+   "permitted_stay": "30 days, extendable once for 30 days",
+   "passport_validity": "6 months beyond arrival",
+   "required_documents": [
+    "Passport bio page",
+    "Return or onward ticket",
+    "Proof of accommodation",
+    "Valid email address",
+    "Payment method"
+   ],
+   "application_channel": "online_portal",
+   "government_fee": {
+    "amount": 500000,
+    "currency": "IDR"
+   },
+   "processing_time": "e-VOA: minutes to 24 hours; VoA: immediate at counter",
+   "forms": [
+    "e-VOA online application"
+   ],
+   "official_portal_url": "https://molina.imigrasi.go.id",
+   "photo_requirements": "Digital passport photo required for e-VOA; not required for airport VoA",
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [
+    "Register on molina.imigrasi.go.id",
+    "Verify email address"
+   ],
+   "payment_process": [
+    "Pay IDR 500,000 online by card for e-VOA",
+    "Pay IDR 500,000 cash/card at arrival counter for VoA"
+   ],
+   "submission_process": [
+    "Fill e-VOA form online",
+    "Pay fee",
+    "Download approval/QR code",
+    "Present at Indonesian immigration"
+   ],
+   "onward_travel_evidence": "Return or onward ticket required",
+   "accommodation_evidence": "Hotel booking or stay address in Indonesia required",
+   "financial_evidence": "Proof of sufficient funds may be requested on arrival",
+   "insurance_required": false,
+   "exceptions": [
+    "VoA can also be bought at designated airports/seaports/land borders without prior application",
+    "B211A visit visa available for longer tourist/social stays"
+   ],
+   "uncertainty": [
+    {
+     "field": "B211A government fee",
+     "reason": "Current official fee for the B211A visit visa could not be verified in this response"
+    },
+    {
+     "field": "source_url",
+     "reason": "Exact official sub-page URL for the visa policy could not be verified; the official e-VOA portal is used for official_portal_url"
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 30,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination certificate",
+     "applicability": "not_applicable",
+     "trigger_countries": [
+      "AGO",
+      "BRA",
+      "COD",
+      "GHA",
+      "NGA",
+      "ETH",
+      "KEN",
+      "UGA"
+     ],
+     "trigger": "Arrival from or transit in a yellow-fever endemic country within the past 6-9 days",
+     "question": "Have you spent time in a yellow-fever endemic country within the past 9 days?"
+    },
+    {
+     "name": "COVID-19 vaccination/test",
+     "applicability": "not_applicable",
+     "trigger_countries": [],
+     "trigger": "Indonesia has lifted COVID-19 entry restrictions for most travellers",
+     "question": null
+    }
+   ],
+   "route_workflow_type": "evisa_portal",
+   "visa_products": [
+    {
+     "type": "Electronic Visa on Arrival (e-VOA)",
+     "entry": "single",
+     "validity": "30 days from arrival",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 500000,
+      "currency": "IDR"
+     },
+     "notes": "Apply before travel; extendable once for 30 days at immigration office"
+    },
+    {
+     "type": "Visa on Arrival (VoA)",
+     "entry": "single",
+     "validity": "30 days from arrival",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 500000,
+      "currency": "IDR"
+     },
+     "notes": "Purchase at designated entry points; extendable once for 30 days"
+    },
+    {
+     "type": "B211A Visit Visa (tourism/social)",
+     "entry": "single",
+     "validity": "60 days from arrival",
+     "max_stay_days": 60,
+     "fee": {
+      "amount": null,
+      "currency": "IDR"
+     },
+     "notes": "Apply online or at embassy; extendable up to 180 days total"
+    }
+   ],
+   "application_channel_detail": "Chinese ordinary passport holders may apply online via the official e-VOA portal before travel, or obtain a Visa on Arrival at designated Indonesian entry points.",
+   "source_url": null
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-21T19:31:03.631286",
+  "fresh_until": "2026-09-04T19:31:03.631286"
+ },
+ {
+  "cache_key": "CHN|CHN|THA|tourism|default|unknown|v4",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "THA",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_EXEMPT",
+   "visa_category": "Tourist visa exemption",
+   "permitted_stay": "30 days",
+   "passport_validity": "6 months beyond arrival",
+   "required_documents": [
+    "Passport valid ≥6 months from arrival",
+    "Confirmed return/onward ticket within 30 days",
+    "Proof of accommodation",
+    "Proof of funds: THB 10,000 per person or THB 20,000 per family",
+    "Arrival/departure card if required by port"
+   ],
+   "application_channel": "not_required",
+   "government_fee": {
+    "amount": 0,
+    "currency": "THB"
+   },
+   "processing_time": "not applicable",
+   "forms": [],
+   "official_portal_url": null,
+   "photo_requirements": null,
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [],
+   "payment_process": [],
+   "submission_process": [],
+   "onward_travel_evidence": "Confirmed return or onward ticket within 30 days",
+   "accommodation_evidence": "Hotel booking or address of stay in Thailand",
+   "financial_evidence": "THB 10,000 per person or THB 20,000 per family in cash or equivalent",
+   "insurance_required": false,
+   "exceptions": [
+    "Ellis: 30-day entry may be extended once at Thai Immigration for up to 30 days",
+    "For stays over 30 days, apply for a 60-day tourist visa (TR) instead",
+    "Visa on Arrival is limited to designated checkpoints only"
+   ],
+   "uncertainty": [
+    {
+     "field": "visa_product_fees",
+     "reason": "Exact official consular fees for single-entry and multiple-entry tourist visas vary by Thai embassy/consulate and e-Visa portal; set to null pending confirmation"
+    },
+    {
+     "field": "arrival_card.required",
+     "reason": "Arrival mode not stated; TM6 waiver applies to air arrivals but land/sea ports may still require a card"
+    },
+    {
+     "field": "source_url",
+     "reason": "No official government URL was provided or confirmed for this response"
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": 30,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": null,
+    "name": "TM6 Arrival/Departure Card",
+    "submission_window": "on arrival; currently waived for air arrivals but still required at many land/sea ports"
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination certificate",
+     "applicability": "not_applicable",
+     "trigger_countries": [],
+     "trigger": null,
+     "question": null
+    },
+    {
+     "name": "COVID-19 vaccination or test",
+     "applicability": "not_applicable",
+     "trigger_countries": [],
+     "trigger": null,
+     "question": null
+    }
+   ],
+   "route_workflow_type": "visa_exempt_preparation",
+   "visa_products": [
+    {
+     "type": "Visa-exempt tourist entry",
+     "entry": "single",
+     "validity": "30 days per entry",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 0,
+      "currency": "THB"
+     },
+     "notes": "No application; entry by air, land or sea"
+    },
+    {
+     "type": "Single-entry tourist visa (TR/e-Visa)",
+     "entry": "single",
+     "validity": "3 months from issue",
+     "max_stay_days": 60,
+     "fee": {
+      "amount": null,
+      "currency": "THB"
+     },
+     "notes": "Apply via Thai e-Visa or embassy; fee set by issuing office"
+    },
+    {
+     "type": "Multiple-entry tourist visa (METV/e-Visa)",
+     "entry": "multiple",
+     "validity": "6 months from issue",
+     "max_stay_days": 60,
+     "fee": {
+      "amount": null,
+      "currency": "THB"
+     },
+     "notes": "Apply via Thai e-Visa or embassy; fee set by issuing office"
+    },
+    {
+     "type": "Visa on Arrival",
+     "entry": "single",
+     "validity": "15 days per entry",
+     "max_stay_days": 15,
+     "fee": {
+      "amount": 2000,
+      "currency": "THB"
+     },
+     "notes": "Available only at designated immigration checkpoints"
+    }
+   ],
+   "application_channel_detail": "Ellis: Chinese ordinary passport holders do not need a visa for tourism stays up to 30 days; present passport and entry documents directly at Thai immigration.",
+   "source_url": null
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision"
+  },
+  "generated_at": "2026-08-21T19:31:42.672471",
+  "fresh_until": "2026-09-04T19:31:42.672471"
  }
 ]

@@ -253,6 +253,68 @@ def get_passport_validity(application_id: str, db=Depends(get_session),
     return verdict
 
 
+class DatabaseIssueIn(BaseModel):
+    """A reader flagging a field that looks wrong."""
+    nationality: str = ""
+    destination: str = ""
+    travel_purpose: str = "tourism"
+    travel_document_type: str = "ordinary_passport"
+    field: str = ""
+    note: str = ""
+
+
+@app.post("/database/report-issue")
+def travel_database_report_issue(body: DatabaseIssueIn, db=Depends(get_session),
+                                 p: Principal = Depends(get_principal)):
+    """Information-quality feedback: a reader marks an answer as wrong.
+
+    The report is stored against the exact route (so the cached answer is
+    identifiable and correctable) and tracked open -> corrected. Ellis does
+    NOT silently change the answer on a report: a claim from a reader is not
+    evidence, and quietly rewriting government facts because someone objected
+    would be worse than the error. It goes to a queue a person works."""
+    from .visa_snapshot import kimi_primary
+    from .visa_snapshot.models import DatabaseIssueReport
+    nat = body.nationality.strip().upper()
+    dest = body.destination.strip().upper()
+    if not nat or not dest:
+        raise HTTPException(422, "nationality and destination are required")
+    route = {"passport_nationality": nat, "passport_issuing_country": nat,
+             "lawful_country_of_residence": nat,
+             "travel_document_type": body.travel_document_type or "ordinary_passport",
+             "destination_country": dest, "visa_category": "tourist_visa",
+             "travel_purpose": body.travel_purpose or "tourism"}
+    row = DatabaseIssueReport(
+        org_id=p.org_id, cache_key=kimi_primary.cache_key(route), route=route,
+        field=(body.field or "")[:64], note=(body.note or "")[:1000],
+        reported_by=p.user_id, status="open")
+    db.add(row)
+    db.commit()
+    audit.record(db, org_id=p.org_id, application_id="database",
+                 action="database_issue_reported",
+                 detail={"nationality": nat, "destination": dest,
+                         "field": row.field}, actor=p.user_id)
+    return {"ok": True, "id": row.id, "status": row.status}
+
+
+@app.get("/database/issues")
+def travel_database_issues(db=Depends(get_session),
+                           p: Principal = Depends(get_principal)):
+    """The operator queue: what readers flagged, oldest first."""
+    from sqlalchemy import select as _select
+    from .visa_snapshot.models import DatabaseIssueReport
+    require_admin(p)
+    rows = db.execute(_select(DatabaseIssueReport).where(
+        DatabaseIssueReport.org_id == p.org_id).order_by(
+        DatabaseIssueReport.created_at)).scalars().all()
+    return {"issues": [{"id": r.id, "route": r.route, "field": r.field,
+                        "note": r.note, "status": r.status,
+                        "resolution": r.resolution,
+                        "reported_by": r.reported_by,
+                        "created_at": r.created_at.isoformat()
+                        if r.created_at else None} for r in rows]}
+
+
 class DatabaseAskIn(BaseModel):
     question: str
 
@@ -317,6 +379,11 @@ class DatabaseLookupIn(BaseModel):
     travel_purpose: str = "tourism"
     residence: str = ""
     arrival_date: str = ""
+    # Itinerary start (a city, e.g. Beijing) and any stopover/transfer points.
+    # Both are optional; a transit point is what makes a transit-visa answer
+    # possible at all, so Ellis answers transit ONLY when one is given.
+    departure_city: str = ""
+    transit_countries: list[str] = []
 
 
 @app.post("/database/lookup")
@@ -349,6 +416,12 @@ def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
     }
     if body.arrival_date:
         route["arrival_date"] = body.arrival_date
+    if body.departure_city.strip():
+        route["departure_city"] = body.departure_city.strip()[:80]
+    transit = [c.strip().upper() for c in (body.transit_countries or [])
+               if c and c.strip()][:5]
+    if transit:
+        route["transit_countries"] = transit
     try:
         out = kimi_primary.get_route_guidance(db, route)
     except kimi_primary.GuidanceTimeout:
