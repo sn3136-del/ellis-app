@@ -620,6 +620,14 @@ export function createVisaClient(session) {
     bookingPick: (requestId, index, slot = {}) =>
       call('POST', `/appointments/booking/${requestId}/pick`, session,
            { index, post: slot.post || '', when: slot.when || '' }),
+    // Up to five slots the applicant picked themselves, in THEIR order. Ellis
+    // books the highest one still available and nothing outside the list.
+    // The slots echo lets the server 409 if the offer changed under them.
+    bookingRank: (requestId, slots = []) =>
+      call('POST', `/appointments/booking/${requestId}/rank`, session, {
+        indices: slots.map((s) => s.index),
+        slots: slots.map((s) => ({ post: s.post || '', when: s.when || '' })),
+      }),
     bookingCancel: (requestId) =>
       call('POST', `/appointments/booking/${requestId}/cancel`, session, {}),
     // Operator (admin role) side.
@@ -1451,6 +1459,16 @@ export function bookingView(payload) {
     offeredSlots: slots,
     agentRead: p.agent_read === true,
     slotsNotice: _text(p.slots_notice),
+    // The applicant's own shortlist, first preference first. Rank 1 is also
+    // pickedSlot; the rest are fallbacks they authorised in advance.
+    rankedSlots: _arr(p.ranked_slots).map((raw) => {
+      const o = _obj(raw)
+      return { post: _text(o.post), when: _text(o.when), label: _text(o.label),
+               rank: _num(o.rank) }
+    }).filter((s) => s.post && s.when),
+    rankedAt: _text(p.ranked_at),
+    maxRanked: _num(p.max_ranked) || 5,
+    rankingNotice: _text(p.ranking_notice),
     // The agent's own honest outcome block, when an agent endpoint answered.
     agent: p.agent ? {
       ran: _obj(p.agent).ran === true,

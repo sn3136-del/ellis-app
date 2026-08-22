@@ -161,7 +161,15 @@ function CentreRow({ t, centre, selected, recommended, onSelect }) {
 // The REAL offered slots, grouped by day when the recorded `when` starts with
 // an ISO date. Whatever a person recorded renders verbatim — no reformatting
 // of their words into claims they did not make.
-function OfferedSlots({ t, slots, picked, onPick, busy }) {
+// The applicant builds a shortlist: click to add, click again to remove.
+// The number on a chosen slot is its rank — first choice, second choice, and
+// so on. Ellis books the highest one still available and nothing else, so
+// every slot Ellis can book is one the applicant put there themselves.
+function OfferedSlots({ t, slots, shortlist, onToggle, busy, max }) {
+  const rankOf = (i) => {
+    const at = shortlist.findIndex((s) => s.index === i)
+    return at < 0 ? 0 : at + 1
+  }
   const groups = useMemo(() => {
     const byDate = new Map()
     slots.forEach((s, index) => {
@@ -189,20 +197,35 @@ function OfferedSlots({ t, slots, picked, onPick, busy }) {
             </div>
             <div style={{ display: 'flex', gap: 9, flexWrap: 'wrap' }}>
               {g.items.map((s) => {
-                const on = picked === s.index
+                const rank = rankOf(s.index)
+                const on = rank > 0
+                const full = !on && shortlist.length >= max
                 const label = g.date ? (s.time || s.label || g.date) : (s.label || s.when)
                 return (
                   <button key={s.index} data-testid={`booka-slot-${s.index}`}
-                    disabled={busy} onClick={() => onPick(s)}
+                    disabled={busy || full} onClick={() => onToggle(s)}
                     title={s.source === 'ellis_agent'
                       ? t('booka.readByAgent', { at: s.recordedAt })
                       : t('booka.seenBy', { who: s.recordedBy, at: s.recordedAt })}
                     style={{ padding: '9px 16px', borderRadius: 12, fontSize: 13.5,
-                             fontWeight: 700, cursor: 'pointer',
+                             fontWeight: 700,
+                             cursor: full ? 'not-allowed' : 'pointer',
                              transition: 'all .16s ease',
+                             display: 'inline-flex', alignItems: 'center', gap: 7,
+                             opacity: full ? 0.45 : 1,
                              border: on ? `2px solid ${BLUE}` : '1px solid #dbe3ec',
                              background: on ? BLUE : '#fff',
                              color: on ? '#fff' : NAVY }}>
+                    {on && (
+                      <span data-testid={`booka-rank-${s.index}`}
+                            style={{ width: 18, height: 18, borderRadius: 999,
+                                     background: '#fff', color: BLUE,
+                                     fontSize: 11, fontWeight: 800,
+                                     display: 'inline-flex', alignItems: 'center',
+                                     justifyContent: 'center', flex: 'none' }}>
+                        {rank}
+                      </span>
+                    )}
                     {label}
                   </button>
                 )
@@ -255,6 +278,10 @@ export default function BookAppointment({ client, caseId, destination = 'USA',
   const [view, setView] = useState(null)   // null = first fetch unresolved
   const [error, setError] = useState(null)
   const [busy, setBusy] = useState(false)
+  // The shortlist being built, in the applicant's own click order, and the
+  // server's own cap on how many preferences it will accept.
+  const [shortlist, setShortlist] = useState([])
+  const maxRanked = view?.maxRanked || 5
   const timer = useRef(null)
   const caseRef = useRef(caseId)
 
@@ -271,6 +298,22 @@ export default function BookAppointment({ client, caseId, destination = 'USA',
     }
   }
   useEffect(() => { caseRef.current = caseId; setView(null); refresh() }, [caseId])
+  // A fresh offer wipes the shortlist. The server does the same to any
+  // ranking already stored, so a choice made against dates that no longer
+  // exist can never ride along into the new offer.
+  const offerSignature = (view?.offeredSlots || [])
+    .map((s) => `${s.post}@${s.when}`).join('|')
+  useEffect(() => { setShortlist([]) }, [offerSignature])
+
+  function toggleSlot(s) {
+    setShortlist((cur) => {
+      const at = cur.findIndex((x) => x.index === s.index)
+      if (at >= 0) return cur.filter((x) => x.index !== s.index)
+      if (cur.length >= maxRanked) return cur
+      return [...cur, s]
+    })
+  }
+
   useEffect(() => {
     clearInterval(timer.current)
     if (view?.active) timer.current = setInterval(refresh, 4000)
@@ -386,7 +429,7 @@ export default function BookAppointment({ client, caseId, destination = 'USA',
   // start: the history is honest, not swept away.
   const ended = view && view.exists &&
     (status === 'failed' || status === 'cancelled')
-  const pickedIndex = null
+
   const bookedCentre = view?.pickedSlot
     ? centreForPost(centreRoute, view.pickedSlot.post) : null
 
@@ -598,9 +641,59 @@ export default function BookAppointment({ client, caseId, destination = 'USA',
             </div>
             {view.agentRead && <Chip tone="info">{t('booka.agentRead')}</Chip>}
           </div>
-          <OfferedSlots t={t} slots={view.offeredSlots} picked={pickedIndex}
-                        busy={busy}
-                        onPick={(s) => act(() => client.bookingPick(view.id, s.index, s))} />
+          <OfferedSlots t={t} slots={view.offeredSlots} shortlist={shortlist}
+                        busy={busy} max={maxRanked} onToggle={toggleSlot} />
+
+          {/* The shortlist, in the applicant's own order, and what Ellis will
+              do with it — stated before they commit, not after. */}
+          <div style={{ marginTop: 14, padding: '14px 16px', borderRadius: 14,
+                        background: '#f6f9ff' }}
+               data-testid="booka-shortlist">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10,
+                          flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 13.5, fontWeight: 800, color: NAVY }}>
+                {t('booka.rankTitle', { n: shortlist.length, max: maxRanked })}
+              </span>
+              {shortlist.length > 0 && (
+                <button className="btn btn--sm btn--ghost" disabled={busy}
+                        data-testid="booka-rank-clear"
+                        onClick={() => setShortlist([])}>
+                  {t('booka.rankClear')}
+                </button>
+              )}
+            </div>
+            {shortlist.length === 0 ? (
+              <div style={{ fontSize: 12.5, color: GRAY, marginTop: 6 }}>
+                {t('booka.rankEmpty', { max: maxRanked })}
+              </div>
+            ) : (
+              <ol style={{ margin: '10px 0 0', paddingLeft: 20, fontSize: 13,
+                           color: NAVY }}>
+                {shortlist.map((s) => {
+                  const { date, time } = splitWhen(s.when)
+                  return (
+                    <li key={s.index} style={{ marginBottom: 3 }}>
+                      {date ? `${prettyDate(date)}${time ? ' · ' + time : ''}`
+                            : (s.label || s.when)}
+                      <span style={{ color: GRAY }}>{' · ' + s.post}</span>
+                    </li>
+                  )
+                })}
+              </ol>
+            )}
+            <div style={{ fontSize: 12, color: GRAY, marginTop: 10 }}>
+              {view.rankingNotice}
+            </div>
+            <div style={{ marginTop: 12, textAlign: 'right' }}>
+              <button className="btn btn--primary" disabled={busy || !shortlist.length}
+                      data-testid="booka-rank-confirm"
+                      onClick={() => act(() =>
+                        client.bookingRank(view.id, shortlist))}>
+                {t('booka.rankConfirm', { n: shortlist.length })}
+              </button>
+            </div>
+          </div>
+
           <div style={{ display: 'flex', justifyContent: 'space-between',
                         alignItems: 'center', gap: 12, marginTop: 14, flexWrap: 'wrap' }}>
             <div style={{ fontSize: 12, color: GRAY, maxWidth: 380 }}>
@@ -631,6 +724,27 @@ export default function BookAppointment({ client, caseId, destination = 'USA',
               <div style={{ fontSize: 13, color: GRAY, marginTop: 4 }}>
                 {view.pickedSlot.post}
               </div>
+              {/* The fallbacks they authorised, so it is visible what else
+                  Ellis is allowed to book if this one is gone. */}
+              {view.rankedSlots.length > 1 && (
+                <div style={{ marginTop: 12, paddingTop: 12,
+                              borderTop: '1px solid #dbe7fb' }}
+                     data-testid="booka-ranked-confirmed">
+                  <div style={{ fontSize: 12, fontWeight: 800, color: GRAY,
+                                letterSpacing: 0.5, textTransform: 'uppercase' }}>
+                    {t('booka.rankFallbacks')}
+                  </div>
+                  <ol style={{ margin: '6px 0 0', paddingLeft: 20, fontSize: 12.5,
+                               color: NAVY }} start={2}>
+                    {view.rankedSlots.slice(1).map((r, i) => (
+                      <li key={i} style={{ marginBottom: 2 }}>
+                        {r.label || r.when}
+                        <span style={{ color: GRAY }}>{' · ' + r.post}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
             </div>
           )}
           <div style={{ fontSize: 12.5, color: GRAY, textAlign: 'center',
