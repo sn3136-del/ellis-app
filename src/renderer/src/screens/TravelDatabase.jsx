@@ -308,6 +308,7 @@ export default function TravelDatabase({ onBack }) {
   const [question, setQuestion] = useState('')
   const [askBusy, setAskBusy] = useState(false)
   const [askMsg, setAskMsg] = useState('')
+  const [askSlow, setAskSlow] = useState(false)   // a first-time route is being worked out
   const [departureCity, setDepartureCity] = useState('')
   const [transit, setTransit] = useState([])       // ISO3 stopover countries
   const [issueOpen, setIssueOpen] = useState(false)
@@ -386,7 +387,10 @@ export default function TravelDatabase({ onBack }) {
   async function askQuestion() {
     const q = question.trim()
     if (!q) return
-    setAskBusy(true); setAskMsg(''); setError(''); setResult(null)
+    setAskBusy(true); setAskMsg(''); setError(''); setResult(null); setAskSlow(false)
+    // Warm routes answer in milliseconds. If nothing is back after two
+    // seconds, this is a first-time route: say so instead of looking stuck.
+    const slowTimer = setTimeout(() => setAskSlow(true), 2000)
     try {
       const out = await client.databaseAsk(q)
       if (out.understood === false) {
@@ -403,6 +407,7 @@ export default function TravelDatabase({ onBack }) {
     } catch (e) {
       setAskMsg(e?.detail?.reason || e?.message || t('db.error'))
     }
+    clearTimeout(slowTimer); setAskSlow(false)
     setAskBusy(false)
   }
 
@@ -575,6 +580,12 @@ export default function TravelDatabase({ onBack }) {
           {askMsg && (
             <div style={{ fontSize: 12.5, color: NAVY, marginTop: 8,
                           textAlign: 'left' }}>{askMsg}</div>
+          )}
+          {askBusy && askSlow && (
+            <div style={{ fontSize: 12.5, color: GRAY, marginTop: 8,
+                          textAlign: 'left' }} data-testid="database-ask-slow">
+              {t('db.askFirstTime')}
+            </div>
           )}
           <div style={{ fontSize: 11.5, color: GRAY, marginTop: 10,
                         textAlign: 'center' }}>{t('db.askOr')}</div>

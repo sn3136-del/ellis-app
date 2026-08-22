@@ -1173,6 +1173,40 @@ _ALIASES = {
     "CUB": ("cuba", "古巴", "cuban"),
     "ISL": ("iceland", "冰岛", "冰島", "icelandic"),
 }
+# Cities people type instead of countries. A city is a destination hint only
+# (nobody says "from Tokyo" meaning a Japanese passport — but if they do, the
+# country rule still reads it).
+_CITIES = {
+    "JPN": ("tokyo", "osaka", "kyoto", "东京", "東京", "大阪", "京都"),
+    "CHN": ("beijing", "shanghai", "guangzhou", "shenzhen", "chengdu", "hangzhou", "北京", "上海", "广州", "深圳", "成都"),
+    "HKG": (), "TWN": ("taipei", "台北"),
+    "KOR": ("seoul", "busan", "首尔", "首爾", "釜山"),
+    "THA": ("bangkok", "phuket", "chiang mai", "曼谷", "普吉"),
+    "SGP": (), "MYS": ("kuala lumpur", "吉隆坡"),
+    "VNM": ("hanoi", "ho chi minh", "saigon", "da nang", "河内", "胡志明", "岘港"),
+    "IDN": ("jakarta", "雅加达", "巴厘岛", "峇里島"),
+    "PHL": ("manila", "cebu", "马尼拉", "宿务"),
+    "IND": ("delhi", "new delhi", "mumbai", "bangalore", "新德里", "孟买"),
+    "ARE": (), "TUR": ("istanbul", "伊斯坦布尔"),
+    "GBR": ("london", "manchester", "edinburgh", "伦敦", "倫敦"),
+    "FRA": ("paris", "nice", "lyon", "巴黎"),
+    "DEU": ("berlin", "munich", "frankfurt", "柏林", "慕尼黑", "法兰克福"),
+    "ITA": ("rome", "milan", "venice", "florence", "罗马", "羅馬", "米兰", "米蘭"),
+    "ESP": ("madrid", "barcelona", "马德里", "巴塞罗那"),
+    "NLD": ("amsterdam", "阿姆斯特丹"), "CHE": ("zurich", "geneva", "苏黎世", "日内瓦"),
+    "USA": ("new york", "los angeles", "san francisco", "las vegas", "chicago", "纽约", "紐約", "洛杉矶", "洛杉磯", "旧金山", "舊金山"),
+    "CAN": ("toronto", "vancouver", "montreal", "多伦多", "多倫多", "温哥华", "溫哥華"),
+    "AUS": ("sydney", "melbourne", "悉尼", "雪梨", "墨尔本", "墨爾本"),
+    "NZL": ("auckland", "奥克兰"), "RUS": ("moscow", "莫斯科", "圣彼得堡"),
+    "EGY": ("cairo", "开罗"), "BRA": ("rio", "sao paulo", "里约"),
+    "MEX": ("cancun", "mexico city", "坎昆"), "PRT": ("lisbon", "里斯本"),
+    "GRC": ("athens", "santorini", "雅典", "圣托里尼"), "AUT": ("vienna", "维也纳"),
+    "CZE": ("prague", "布拉格"), "HUN": ("budapest", "布达佩斯"),
+    "ISR": ("tel aviv", "jerusalem", "特拉维夫", "耶路撒冷"),
+    "MDV": ("male", "马累"), "KHM": ("siem reap", "phnom penh", "暹粒", "金边"),
+    "NPL": ("kathmandu", "加德满都"), "LKA": ("colombo", "科伦坡"),
+}
+
 _PURPOSE_WORDS = (
     ("business", ("business", "商务", "商務", "出差", "conference", "meeting")),
     ("study", ("study", "student", "留学", "留學", "university", "school")),
@@ -1198,7 +1232,8 @@ def _country_mentions(text: str) -> list:
         names = []
     aliases = [(iso, a, (i == len(al) - 1 and a.isascii()))
                for iso, al in _ALIASES.items() for i, a in enumerate(al)]
-    for iso, alias, demonym in sorted(names + aliases, key=lambda x: -len(x[1])):
+    cities = [(iso, c, False) for iso, cs in _CITIES.items() for c in cs]
+    for iso, alias, demonym in sorted(names + aliases + cities, key=lambda x: -len(x[1])):
         start = 0
         while True:
             i = low.find(alias, start)
@@ -1276,8 +1311,12 @@ def parse_question(question: str, *, timeout: float = 20.0) -> dict:
     direct = _deterministic_route(q)
     if direct is not None:
         return direct
+    # The model is only the fallback for a sentence the matcher could not
+    # read, and it is held to a short budget: a miss must answer "please
+    # name both places" in seconds, never leave the box reading for half a
+    # minute.
     raw = _call(_ASK_SYSTEM, json.dumps({"question": q[:500]}),
-                timeout=timeout, max_tokens=2000)
+                timeout=min(timeout, 8.0), max_tokens=600)
     if not isinstance(raw, dict):
         raise GuidanceUnavailable("could not read the question")
     nat = str(raw.get("nationality") or "").strip().upper()
