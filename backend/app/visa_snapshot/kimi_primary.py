@@ -171,6 +171,11 @@ message (passport nationality, issuing country, travel-document type, lawful
 residence, destination, the stated travel purpose, dates, trip duration, transit
 countries, age, prior refusals, passport issue/expiration dates), answer from
 your knowledge of official visa policy.
+The facts include today's date. Visa policy CHANGES: exemptions are introduced
+and withdrawn, fees are revised, channels move. If your knowledge of this
+route could predate a change — the rule is volatile, recently announced, or
+politically driven — say so in uncertainty and rate confidence low rather
+than presenting a possibly outdated rule as current.
 """ + _SCHEMA_SPEC)
 
 class GuidanceUnavailable(Exception):
@@ -285,6 +290,9 @@ def route_facts(route: dict) -> dict:
     if a and d and d > a:
         facts["trip_duration_days"] = (d - a).days
     facts["consular_jurisdiction"] = (route or {}).get("consular_jurisdiction") or "default"
+    # The model must reason about TIME: policies move, and its knowledge has a
+    # cutoff. Today's date lets it say "this may have changed" honestly.
+    facts["today"] = date.today().isoformat()
     return facts
 
 
@@ -731,12 +739,21 @@ def get_route_guidance(db, route: dict, *, force_refresh: bool = False) -> dict:
     row = _cached(db, key)
     if row is not None and not force_refresh:
         released = bool((row.verification or {}).get("operator_released"))
-        return apply_verified_overrides(_result(
+        gc = (row.verification or {}).get("grounded_check")
+        out = apply_verified_overrides(_result(
             row.status, row.guidance, cached=True, stale=_is_stale(row),
             released=released,
             missing=row.missing_fields, contradictions=row.contradictions,
             model=row.model,
             advisories=deterministic_advisories(route, row.guidance or {})), route)
+        if isinstance(gc, dict) and gc.get("outcome") == "checked":
+            # Machine provenance, deliberately WEAKER than the human badge:
+            # "the official page was read on this date and agreed / was
+            # applied", never "a person verified this".
+            out["grounded_check"] = {k: gc.get(k) for k in
+                                     ("at", "source_url", "consistent",
+                                      "changed_fields")}
+        return out
 
     if not is_available():
         raise GuidanceUnavailable("Kimi K3 not configured — guidance unavailable")
@@ -818,11 +835,34 @@ def get_route_guidance(db, route: dict, *, force_refresh: bool = False) -> dict:
 
 
 def refresh_stale_async(db_factory, route: dict) -> None:
-    """Background refresh for a stale cache entry (never blocks the applicant).
-    db_factory() must yield a NEW session (thread-safe)."""
+    """Background renewal for a stale cache entry (never blocks the reader).
+
+    Renewal is GROUNDED first: the stored answer is re-checked against its own
+    official government page (freshness.recheck_route), which is the only way
+    a policy change actually reaches the answer — re-asking the model's memory
+    just renews the same staleness with a new timestamp. Memory regeneration
+    remains only as the fallback for a row that has never been grounded and
+    names no official page; once a row has been checked against its page, a
+    failed recheck keeps the existing answer (still honestly marked stale)
+    rather than reverting to whatever the model remembers today."""
     db = db_factory()
     try:
-        get_route_guidance(db, route, force_refresh=True)
+        from . import freshness
+        row_key = cache_key(route)
+        row = db.execute(select(KimiRouteGuidanceCache).where(
+            KimiRouteGuidanceCache.cache_key == row_key)).scalars().first()
+        outcome = None
+        try:
+            outcome = freshness.recheck_route(db, route)
+        except Exception:  # noqa: BLE001 - grounded renewal is best-effort
+            outcome = None
+        ok = bool(outcome) and outcome.get("outcome") == "checked"
+        grounded_before = row is not None and freshness.has_been_grounded(row)
+        if not ok and not grounded_before:
+            # Never grounded and the page path failed (usually: no source
+            # URL): the old memory refresh is still better than serving a
+            # schema-stale row forever.
+            get_route_guidance(db, route, force_refresh=True)
     except Exception:  # noqa: BLE001 - background refresh is best-effort
         pass
     finally:

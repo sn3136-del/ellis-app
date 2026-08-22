@@ -412,6 +412,53 @@ def travel_database_report_issue(body: DatabaseIssueIn, db=Depends(get_session),
     return {"ok": True, "id": row.id, "status": row.status}
 
 
+@app.get("/database/freshness")
+def travel_database_freshness(db=Depends(get_session),
+                              p: Principal = Depends(get_principal)):
+    """The operator's answer to "is all of it still correct and current?" —
+    one row per cached answer: when it was generated, when its freshness
+    window ends, whether and when it was last checked against its official
+    page, what that check changed or disputed, and whether a human-verified
+    override covers it. Admin only; read only."""
+    from datetime import datetime, timezone
+    from sqlalchemy import select as _select
+    from .visa_snapshot import verified_overrides
+    from .visa_snapshot.models import KimiRouteGuidanceCache
+    require_admin(p)
+    now = datetime.now(timezone.utc)
+    rows = []
+    for r in db.execute(_select(KimiRouteGuidanceCache).order_by(
+            KimiRouteGuidanceCache.fresh_until)).scalars():
+        gc = (r.verification or {}).get("grounded_check") or {}
+        fresh_until = r.fresh_until
+        rows.append({
+            "cache_key": r.cache_key,
+            "route": {k: (r.route or {}).get(k) for k in
+                      ("passport_nationality", "destination_country",
+                       "travel_purpose")},
+            "generated_at": r.generated_at.isoformat() if r.generated_at else None,
+            "fresh_until": fresh_until.isoformat() if fresh_until else None,
+            "stale": bool(fresh_until and
+                          fresh_until.replace(tzinfo=fresh_until.tzinfo or timezone.utc)
+                          < now),
+            "grounded": gc.get("outcome") == "checked",
+            "grounded_at": gc.get("at"),
+            "grounded_source": gc.get("source_url"),
+            "grounded_consistent": gc.get("consistent"),
+            "changed_fields": gc.get("changed_fields") or [],
+            "disputed_fields": gc.get("disputed_fields") or [],
+            "human_override": verified_overrides.find(r.route or {}) is not None,
+        })
+    return {"answers": rows,
+            "summary": {
+                "total": len(rows),
+                "stale": sum(1 for x in rows if x["stale"]),
+                "grounded": sum(1 for x in rows if x["grounded"]),
+                "human_verified": sum(1 for x in rows if x["human_override"]),
+                "disputed": sum(1 for x in rows if x["disputed_fields"]),
+            }}
+
+
 @app.get("/database/issues")
 def travel_database_issues(db=Depends(get_session),
                            p: Principal = Depends(get_principal)):

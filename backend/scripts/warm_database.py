@@ -165,7 +165,36 @@ def import_seed() -> int:
     return 0
 
 
+def recheck() -> int:
+    """Check EVERY cached answer against its own official government page.
+
+    This is the "is all of it still correct?" sweep: run it on a schedule
+    (cron) or by hand before a hand-off. Each row's page is fetched, the
+    stored answer compared against the page text, drift corrected (or filed
+    for a person when it collides with a human-verified fact), and the
+    freshness window extended only for what was actually checked."""
+    from sqlalchemy import select
+    from app.db import SessionLocal
+    from app.visa_snapshot import freshness
+    from app.visa_snapshot.models import KimiRouteGuidanceCache as C
+    db = SessionLocal()
+    rows = list(db.execute(select(C).order_by(C.fresh_until)).scalars())
+    counts = {}
+    for row in rows:
+        r = freshness.recheck_row(db, row)
+        out = r["outcome"]
+        counts[out] = counts.get(out, 0) + 1
+        extra = ""
+        if out == "checked":
+            extra = (" CONSISTENT" if r.get("consistent") else
+                     f" changed={r.get('changed')} disputed={r.get('disputed')}")
+        print(f"  {row.cache_key[:44]:<46} {out}{extra}", flush=True)
+    db.close()
+    print("recheck summary:", counts)
+    return 0
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "warm"
     raise SystemExit({"warm": warm, "export": export,
-                      "import": import_seed}[cmd]())
+                      "import": import_seed, "recheck": recheck}[cmd]())

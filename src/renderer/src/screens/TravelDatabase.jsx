@@ -1038,6 +1038,27 @@ export default function TravelDatabase({ onBack }) {
             </div>
           )}
 
+          {/* Machine provenance, deliberately weaker than the green human
+              badge: the official page was READ on this date and agreed (or
+              corrections were applied) — never "a person verified this". */}
+          {!result.source_verified && result.grounded_check?.at && (
+            <div style={{ fontSize: 12, color: GRAY, marginTop: 14,
+                          textAlign: 'center' }}
+                 data-testid="database-grounded">
+              {t('db.groundedOn', { date: String(result.grounded_check.at).slice(0, 10) })}
+              {result.grounded_check.source_url && (
+                <>
+                  {' '}
+                  <a href={result.grounded_check.source_url} target="_blank"
+                     rel="noreferrer" style={{ color: GRAY,
+                                               textDecoration: 'underline' }}>
+                    {t('db.verifiedSource')}
+                  </a>
+                </>
+              )}
+            </div>
+          )}
+
           {/* Source + confidence — Trip.com's traceability requirement. */}
           {(g.source_url || ['high', 'medium', 'low'].includes(g.confidence)) && (
             <div style={{ fontSize: 12, color: GRAY, marginTop: 16,

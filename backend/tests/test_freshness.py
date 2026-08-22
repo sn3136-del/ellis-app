@@ -1,0 +1,225 @@
+"""Grounded renewal: an answer is re-checked against its own official page.
+
+Includes the JAPAN REGRESSION: the exact failure Trip.com found in their demo
+— a stored answer whose stay/channel/fee no longer match the official page —
+must be caught by a recheck and corrected from the page, and can never again
+be "renewed" by re-asking the model's memory once the row is grounded.
+"""
+import pytest
+
+from app.visa_snapshot import fetching, freshness, kimi_primary
+from app.visa_snapshot.fetching import FetchResult
+from app.visa_snapshot.models import DatabaseIssueReport, KimiRouteGuidanceCache
+
+
+ROUTE = {"passport_nationality": "CHN", "passport_issuing_country": "CHN",
+         "lawful_country_of_residence": "CHN",
+         "travel_document_type": "ordinary_passport",
+         "destination_country": "JPN", "visa_category": "tourist_visa",
+         "travel_purpose": "tourism"}
+
+# The Japan-shaped stored answer: superficially complete, quietly outdated —
+# a blanket 90-day stay and a "visa centre" channel, the two headline errors
+# from Trip.com's demo test.
+STALE_JPN = {
+    "disposition": "VISA_REQUIRED", "visa_category": "Temporary visitor",
+    "permitted_stay": "90 days", "passport_validity": "valid for the stay",
+    "required_documents": ["passport"], "application_channel": "authorised_agent",
+    "application_channel_detail": "Applications must be lodged through an "
+                                  "accredited travel agency.",
+    "government_fee": {"amount": 200, "currency": "CNY"},
+    "processing_time": "5 working days", "confidence": "high",
+    "source_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+    "visa_products": [{"type": "Single-entry Temporary Visitor",
+                       "entry": "single", "validity": "3 months",
+                       "max_stay_days": 90,
+                       "fee": {"amount": 200, "currency": "CNY"},
+                       "notes": None}],
+}
+
+OFFICIAL_PAGE = FetchResult(
+    requested_url="https://www.mofa.go.jp/j_info/visit/visa/index.html",
+    ok=True, final_url="https://www.mofa.go.jp/j_info/visit/visa/index.html",
+    final_hostname="www.mofa.go.jp", http_status=200,
+    content_text=("Visa fees revised 1 July 2026: single entry 715 CNY. "
+                  "Single-entry temporary visitor visas for tourism permit a "
+                  "stay of 15 days or 30 days as decided by the mission."),
+    content_hash="abc123", retrieved_at="2026-08-22T00:00:00Z")
+
+
+@pytest.fixture()
+def db():
+    from app.db import SessionLocal, engine
+    from app.models import Base
+    Base.metadata.create_all(engine)
+    s = SessionLocal()
+    yield s
+    s.rollback()
+    s.close()
+
+
+@pytest.fixture(autouse=True)
+def _clean(db, tmp_path, monkeypatch):
+    # Isolate from the SHIPPED overrides: several of these routes are
+    # human-verified in production, and this file is about what the machine
+    # does on its own. The override-collision case installs its own file.
+    from app.visa_snapshot import verified_overrides as vo
+    empty = tmp_path / "no_overrides.json"
+    empty.write_text("[]")
+    monkeypatch.setattr(vo, "OVERRIDES", empty)
+    vo.reload()
+    for r in db.query(KimiRouteGuidanceCache).all():
+        db.delete(r)
+    for r in db.query(DatabaseIssueReport).all():
+        db.delete(r)
+    db.commit()
+    yield
+    fetching.set_fetcher(None)
+    freshness.set_provider(None)
+    kimi_primary.set_provider(None)
+    vo.reload()
+
+
+def _seed(db, guidance=STALE_JPN, route=ROUTE):
+    row = KimiRouteGuidanceCache(cache_key=kimi_primary.cache_key(route),
+                                 route=dict(route), status="KIMI_PRIMARY",
+                                 guidance=dict(guidance))
+    db.add(row)
+    db.commit()
+    return row
+
+
+def test_japan_regression_the_page_corrects_the_stored_answer(db):
+    """The demo failure, replayed: the official page contradicts the stored
+    stay and fee; the recheck corrects BOTH from the page, quotes required."""
+    _seed(db)
+    fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
+    freshness.set_provider(lambda system, user: {
+        "page_relevant": True, "consistent": False,
+        "corrected_fields": {
+            "permitted_stay": "15 or 30 days, decided by the mission",
+            "government_fee": {"amount": 715, "currency": "CNY"}},
+        "evidence": {
+            "permitted_stay": "a stay of 15 days or 30 days as decided",
+            "government_fee": "single entry 715 CNY"},
+        "note": "fee and stay revised"})
+    out = freshness.recheck_route(db, ROUTE)
+    assert out["outcome"] == "checked"
+    assert out["changed"] == ["government_fee", "permitted_stay"]
+    row = db.query(KimiRouteGuidanceCache).one()
+    assert row.guidance["permitted_stay"].startswith("15 or 30 days")
+    assert row.guidance["government_fee"] == {"amount": 715, "currency": "CNY"}
+    gc = row.verification["grounded_check"]
+    assert gc["outcome"] == "checked" and gc["changed_fields"]
+    assert gc["source_url"] == OFFICIAL_PAGE.final_url
+    assert row.fresh_until is not None       # checked -> fresh again
+
+
+def test_a_correction_without_a_page_quote_is_discarded(db):
+    _seed(db)
+    fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
+    freshness.set_provider(lambda system, user: {
+        "page_relevant": True, "consistent": False,
+        "corrected_fields": {"permitted_stay": "7 days"},
+        "evidence": {}, "note": "no quote offered"})
+    out = freshness.recheck_route(db, ROUTE)
+    assert out["outcome"] == "checked" and out["changed"] == []
+    assert db.query(KimiRouteGuidanceCache).one() \
+             .guidance["permitted_stay"] == "90 days"
+
+
+def test_the_machine_never_outvotes_a_human_override(db, tmp_path, monkeypatch):  # noqa: F811
+    """A page contradiction on a HUMAN-verified field files an operator issue
+    and leaves both the override and the freshness window untouched."""
+    import json as _json
+    from app.visa_snapshot import verified_overrides as vo
+    f = tmp_path / "verified_overrides.json"
+    f.write_text(_json.dumps([{
+        "route": {"nationality": "CHN", "destination": "JPN"},
+        "verified_at": "2026-08-22", "source_url": "https://www.mofa.go.jp/x",
+        "fields": {"permitted_stay": "15 or 30 days, mission decides"}}]))
+    monkeypatch.setattr(vo, "OVERRIDES", f)
+    vo.reload()
+    _seed(db)
+    fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
+    freshness.set_provider(lambda system, user: {
+        "page_relevant": True, "consistent": False,
+        "corrected_fields": {"permitted_stay": "60 days"},
+        "evidence": {"permitted_stay": "some new wording"}, "note": ""})
+    out = freshness.recheck_route(db, ROUTE)
+    assert out["outcome"] == "checked"
+    assert out["changed"] == [] and out["disputed"] == ["permitted_stay"]
+    row = db.query(KimiRouteGuidanceCache).one()
+    assert row.fresh_until is None            # disputed -> NOT refreshed
+    issue = db.query(DatabaseIssueReport).one()
+    assert issue.reported_by == "freshness_monitor"
+    assert issue.status == "open"
+    assert "60 days" in issue.note
+    vo.reload()
+
+
+def test_a_blocked_page_is_an_honest_failure_never_a_guess(db):
+    _seed(db)
+    fetching.set_fetcher(lambda url, timeout_seconds=0: FetchResult(
+        requested_url=url, ok=True, final_url=url,
+        final_hostname="www.mofa.go.jp", content_text="checking your browser",
+        challenge=True))
+    freshness.set_provider(lambda system, user: (_ for _ in ()).throw(
+        AssertionError("the model must never be called for a blocked page")))
+    out = freshness.recheck_route(db, ROUTE)
+    assert out["outcome"] == "fetch_failed"
+    row = db.query(KimiRouteGuidanceCache).one()
+    assert row.guidance["permitted_stay"] == "90 days"   # untouched
+    assert row.fresh_until is None                        # NOT renewed
+
+
+def test_a_non_government_source_is_never_fetched(db):
+    bad = dict(STALE_JPN, source_url="https://travel-blog.example.com/japan",
+               official_portal_url=None)
+    _seed(db, guidance=bad)
+    fetching.set_fetcher(lambda url, timeout_seconds=0: (_ for _ in ()).throw(
+        AssertionError("a non-government URL must never be fetched")))
+    out = freshness.recheck_route(db, ROUTE)
+    assert out["outcome"] == "no_official_source"
+
+
+def test_a_correction_that_contradicts_itself_is_refused_and_filed(db):
+    """The deterministic gate: a page 'correction' that makes the answer
+    contradict itself (visa products dropped from a visa-required route) is
+    refused wholesale and routed to the operator queue."""
+    _seed(db)
+    fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
+    freshness.set_provider(lambda system, user: {
+        "page_relevant": True, "consistent": False,
+        "corrected_fields": {"visa_products": []},
+        "evidence": {"visa_products": "some quote"}, "note": ""})
+    out = freshness.recheck_route(db, ROUTE)
+    assert out["outcome"] == "checked"
+    assert out["changed"] == [] and out["disputed"] == ["visa_products"]
+    assert db.query(KimiRouteGuidanceCache).one() \
+             .guidance["visa_products"], "products must survive"
+
+
+def test_once_grounded_memory_regen_never_reverts_the_answer(db, monkeypatch):
+    """The renewal doctrine: after a row has been checked against its page, a
+    failed later recheck keeps the corrected answer — it must never fall back
+    to regenerating from model memory, which is how a grounded correction
+    would silently revert to the stale value."""
+    row = _seed(db)
+    fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
+    freshness.set_provider(lambda system, user: {
+        "page_relevant": True, "consistent": False,
+        "corrected_fields": {"government_fee": {"amount": 715, "currency": "CNY"}},
+        "evidence": {"government_fee": "single entry 715 CNY"}, "note": ""})
+    assert freshness.recheck_route(db, ROUTE)["changed"] == ["government_fee"]
+
+    # Later, the page is unreachable AND the model's memory still says 200.
+    fetching.set_fetcher(lambda url, timeout_seconds=0: FetchResult(
+        requested_url=url, ok=False, error="timeout"))
+    kimi_primary.set_provider(lambda system, user: (_ for _ in ()).throw(
+        AssertionError("memory regeneration must not run for a grounded row")))
+    from app.db import SessionLocal
+    kimi_primary.refresh_stale_async(SessionLocal, ROUTE)
+    db.expire_all()
+    assert db.query(KimiRouteGuidanceCache).one() \
+             .guidance["government_fee"] == {"amount": 715, "currency": "CNY"}
