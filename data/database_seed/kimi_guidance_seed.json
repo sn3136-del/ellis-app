@@ -165,155 +165,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-22T02:16:26.645812",
-  "fresh_until": "2026-09-05T02:16:26.645812"
- },
- {
-  "cache_key": "CHN|CHN|JPN|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "CHN",
-   "lawful_country_of_residence": "CHN",
-   "destination_country": "JPN",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_REQUIRED",
-   "visa_category": "Short-term stay / Temporary Visitor (tourism)",
-   "permitted_stay": "Up to 15 days for a standard single-entry tourist visa (longer stays may be granted depending on itinerary)",
-   "passport_validity": "Valid for the entire stay and issued within the last 10 years",
-   "required_documents": [
-    "Valid passport with blank pages",
-    "Completed visa application form",
-    "One recent passport photo",
-    "Copy of Chinese national ID card",
-    "Round-trip flight booking/itinerary",
-    "Hotel reservations or accommodation proof",
-    "Bank statements / proof of income",
-    "Employment or student certificate",
-    "Travel itinerary in Japan"
-   ],
-   "application_channel": "authorised_agent",
-   "government_fee": {
-    "amount": 3000,
-    "currency": "JPY"
-   },
-   "processing_time": "About 5 working days at the embassy/consulate after the agency lodges the application; allow 1–2 weeks total",
-   "forms": [
-    "Japan short-term visa application form"
-   ],
-   "official_portal_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
-   "photo_requirements": "One 45 mm × 45 mm colour photo, white/off-white background, taken within the last 6 months, full face, no headwear except religious",
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": true,
-   "account_registration_steps": [],
-   "payment_process": [
-    "Pay the government visa fee and the agency service fee to the Japan-accredited travel agency",
-    "The agency remits the visa fee to the Japanese embassy/consulate-general"
-   ],
-   "submission_process": [
-    "Prepare documents with a Japan-accredited travel agency in China",
-    "The agency reviews and lodges the application at the Japanese embassy/consulate-general",
-    "Collect passport and visa from the agency"
-   ],
-   "onward_travel_evidence": "Confirmed round-trip flight booking or itinerary showing departure from Japan",
-   "accommodation_evidence": "Hotel reservations covering the whole stay, or an invitation letter and guarantor documents if staying with a resident",
-   "financial_evidence": "Bank statements for the last 3–6 months, proof of regular income/employment, and tax certificates for multiple-entry applications",
-   "insurance_required": false,
-   "exceptions": [
-    "Multiple-entry 3-year/5-year visas may be available for applicants with strong financial capacity and travel history",
-    "Applicants under 18 may need a birth certificate and parental consent; minors not travelling with parents may need extra documents",
-    "If transiting Japan to a third country within 24 hours and staying in the international transit area, a transit visa may not be required",
-    "Group-tour visas follow agency-specific rules"
-   ],
-   "uncertainty": [
-    {
-     "field": "government_fee_local_currency",
-     "reason": "The embassy sets the RMB equivalent of the JPY visa fee and it may change with exchange rates; agency service fees are separate and vary"
-    }
-   ],
-   "confidence": "high",
-   "permitted_stay_days": 15,
-   "passport_validity_requirement": {
-    "kind": "valid_through_departure",
-    "months": null
-   },
-   "arrival_card": {
-    "required": true,
-    "name": "Embarkation/Disembarkation Card (ED card)",
-    "submission_window": "Completed before immigration inspection at port of entry"
-   },
-   "health_requirements": [],
-   "route_workflow_type": "embassy_submission",
-   "visa_products": [
-    {
-     "type": "Single-entry Temporary Visitor (tourism)",
-     "entry": "single",
-     "validity": "3 months",
-     "max_stay_days": 15,
-     "fee": {
-      "amount": 3000,
-      "currency": "JPY"
-     },
-     "notes": "Standard tourist product; actual stay granted according to itinerary"
-    },
-    {
-     "type": "Double-entry Temporary Visitor (tourism)",
-     "entry": "multiple",
-     "validity": "6 months",
-     "max_stay_days": 15,
-     "fee": {
-      "amount": 6000,
-      "currency": "JPY"
-     },
-     "notes": "For applicants with a reason for two visits"
-    },
-    {
-     "type": "Multiple-entry Temporary Visitor (3-year)",
-     "entry": "multiple",
-     "validity": "3 years",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 6000,
-      "currency": "JPY"
-     },
-     "notes": "Requires proof of income/assets and travel record"
-    },
-    {
-     "type": "Multiple-entry Temporary Visitor (5-year)",
-     "entry": "multiple",
-     "validity": "5 years",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 6000,
-      "currency": "JPY"
-     },
-     "notes": "Requires higher income/asset proof; tax certificates often requested"
-    }
-   ],
-   "application_channel_detail": "Chinese ordinary-passport holders cannot apply directly to the embassy; the application must be lodged through a Japan-accredited travel agency, which then submits it to the Japanese embassy/consulate-general.",
-   "source_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
-   "requirement_detail": "paper_visa",
-   "transit_requirement": {
-    "required": null,
-    "note": null
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:50:04.783481+00:00",
+    "outcome": "checked",
+    "source_url": "https://overseas.mofa.go.kr/cn-zh/index.do",
+    "content_hash": "0f31915903331db854c08a5a9db3b96f187869b86c76892efcb3f804035baf40",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The provided text is a navigational embassy homepage and does not state any specific visa requirements for Chinese nationals."
    }
   },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-22T02:16:47.187798",
-  "fresh_until": "2026-09-05T02:16:47.187798"
+  "generated_at": "2026-08-22T02:16:26.645812",
+  "fresh_until": "2026-09-05T06:50:22.189078"
  },
  {
   "cache_key": "CHN|CHN|HKG|tourism|default|unknown|v6",
@@ -473,7 +339,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:45:16.583192+00:00",
+    "outcome": "page_not_relevant",
+    "sources_tried": [
+     "https://www.immd.gov.hk/eng/services/visas/visit-transit.html"
+    ]
+   }
   },
   "generated_at": "2026-08-22T02:17:08.250747",
   "fresh_until": "2026-09-05T02:17:08.250747"
@@ -668,10 +541,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:50:09.870795+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.immigration.gov.tw/",
+    "content_hash": "4c9d5410b043deecf4cf8c1d51a67a85e8c03c6627ac0fe548649c8b27bb5046",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The provided text is the NIA homepage navigation and does not state any specific rules for mainland Chinese tourists."
+   }
   },
   "generated_at": "2026-08-22T02:17:14.402367",
-  "fresh_until": "2026-09-05T02:17:14.402367"
+  "fresh_until": "2026-09-05T06:50:18.386224"
  },
  {
   "cache_key": "CHN|CHN|THA|tourism|default|unknown|v6",
@@ -851,10 +735,17 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:50:18.389046+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://www.thaievisa.go.th/"
+    ]
+   }
   },
   "generated_at": "2026-08-22T02:17:14.532693",
-  "fresh_until": "2026-09-05T02:17:14.532693"
+  "fresh_until": "2026-09-05T06:07:22.172147"
  },
  {
   "cache_key": "CHN|CHN|SGP|tourism|default|unknown|v6",
@@ -911,7 +802,7 @@
    "financial_evidence": "Bank statements or other proof of sufficient funds for the stay",
    "insurance_required": false,
    "exceptions": [
-    "Chinese passport holders may use the 96-hour Visa-Free Transit Facility if holding a valid visa/PR of Australia, Canada, Germany, Japan, New Zealand, Switzerland, UK or USA and transiting with onward ticket",
+    "Selected nationals of the People's Republic of China (PRC) who are not holding ordinary, diplomatic, public affairs or service PRC passports — such as PRC Travel Document, Hong Kong SAR Document of Identity (DOI) and Macau SAR Travel Permit holders — may be eligible for the 96-hour Visa-Free Transit Facility; refer to the Visa-Free Transit Facility page for details",
     "Multiple-journey visas may be granted at ICA discretion for frequent travellers",
     "Family members may be lodged together under the same agent/sponsor"
    ],
@@ -991,269 +882,23 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:45:16.587388+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+    "content_hash": "036ae0d49757e15e9f376ded13f7643aaa5c73af8b34319fa6d5eca23a033d74",
+    "consistent": false,
+    "changed_fields": [
+     "exceptions"
+    ],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page explicitly restricts the 96-hour VFTF for PRC nationals to selected non-ordinary PRC travel documents, contradicting the stored exception for ordinary Chinese passport holders."
+   }
   },
   "generated_at": "2026-08-22T02:17:31.839570",
-  "fresh_until": "2026-09-05T02:17:31.839570"
- },
- {
-  "cache_key": "CHN|CHN|GBR|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "CHN",
-   "lawful_country_of_residence": "CHN",
-   "destination_country": "GBR",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_REQUIRED",
-   "visa_category": "Standard Visitor visa",
-   "permitted_stay": "Up to 6 months per visit",
-   "passport_validity": "Must be valid for the entire stay in the UK",
-   "required_documents": [
-    "Valid passport with at least one blank page",
-    "Proof of accommodation (hotel booking or host invitation)",
-    "Proof of funds (bank statements/payslips)",
-    "Travel itinerary and return/onward booking",
-    "Employment, study or business registration evidence",
-    "Invitation letter if staying with family/friend"
-   ],
-   "application_channel": "visa_center",
-   "government_fee": {
-    "amount": 115,
-    "currency": "GBP"
-   },
-   "processing_time": "Standard up to 3 weeks; priority 5 working days; super priority next working day",
-   "forms": [
-    "Online Standard Visitor visa application form"
-   ],
-   "official_portal_url": "https://www.gov.uk/standard-visitor/apply-standard-visitor-visa",
-   "photo_requirements": "Digital photo taken at the VFS Global biometric appointment; full face visible, plain expression, no head covering except religious/medical",
-   "biometrics_required": true,
-   "interview_required": false,
-   "appointment_required": true,
-   "account_registration_steps": [
-    "Create/sign in to a UK Visas and Immigration account on gov.uk",
-    "Complete the Standard Visitor application form",
-    "Pay the visa fee online",
-    "Book a biometric appointment at VFS Global"
-   ],
-   "payment_process": [
-    "Pay the visa fee online by credit/debit card during application",
-    "Pay VFS Global service fees separately for optional services"
-   ],
-   "submission_process": [
-    "Submit the online application and pay the fee",
-    "Attend the VFS Global appointment to provide biometrics, photograph and passport",
-    "Collect the passport or receive it by courier"
-   ],
-   "onward_travel_evidence": "Recommended; return or onward ticket supports the application",
-   "accommodation_evidence": "Required; hotel booking or host invitation/letter",
-   "financial_evidence": "Required; bank statements and payslips showing sufficient funds for the trip",
-   "insurance_required": false,
-   "exceptions": [
-    "2-, 5- and 10-year Standard Visitor visas allow multiple visits up to 6 months each",
-    "Chinese ADS group tours may apply through accredited tour operators",
-    "No visa on arrival or ETA for Chinese ordinary passport holders"
-   ],
-   "uncertainty": [],
-   "confidence": "high",
-   "permitted_stay_days": 180,
-   "passport_validity_requirement": {
-    "kind": "valid_through_departure",
-    "months": null
-   },
-   "arrival_card": {
-    "required": false,
-    "name": null,
-    "submission_window": null
-   },
-   "health_requirements": [],
-   "route_workflow_type": "visa_center_submission",
-   "visa_products": [
-    {
-     "type": "6-month Standard Visitor",
-     "entry": "multiple",
-     "validity": "6 months",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 115,
-      "currency": "GBP"
-     },
-     "notes": null
-    },
-    {
-     "type": "2-year Standard Visitor",
-     "entry": "multiple",
-     "validity": "2 years",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 432,
-      "currency": "GBP"
-     },
-     "notes": null
-    },
-    {
-     "type": "5-year Standard Visitor",
-     "entry": "multiple",
-     "validity": "5 years",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 771,
-      "currency": "GBP"
-     },
-     "notes": null
-    },
-    {
-     "type": "10-year Standard Visitor",
-     "entry": "multiple",
-     "validity": "10 years",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 963,
-      "currency": "GBP"
-     },
-     "notes": null
-    }
-   ],
-   "application_channel_detail": "Apply online on the UKVI portal and attend a VFS Global visa application centre in China for biometrics and passport submission.",
-   "source_url": "https://www.gov.uk/standard-visitor",
-   "requirement_detail": "paper_visa",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-22T02:17:52.954666",
-  "fresh_until": "2026-09-05T02:17:52.954666"
- },
- {
-  "cache_key": "CHN|CHN|MYS|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "CHN",
-   "lawful_country_of_residence": "CHN",
-   "destination_country": "MYS",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_EXEMPT",
-   "visa_category": "Tourist visit (visa-free)",
-   "permitted_stay": "30 days",
-   "passport_validity": "6 months beyond arrival",
-   "required_documents": [
-    "Passport valid at least 6 months",
-    "Return or onward ticket",
-    "Proof of sufficient funds"
-   ],
-   "application_channel": "not_required",
-   "government_fee": {
-    "amount": 0,
-    "currency": "MYR"
-   },
-   "processing_time": "Not applicable",
-   "forms": [
-    "Malaysia Digital Arrival Card (MDAC)"
-   ],
-   "official_portal_url": "https://imigresen-online.imi.gov.my/mdac/main?registerMain",
-   "photo_requirements": null,
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [
-    "Create or use an email account on the MDAC portal"
-   ],
-   "payment_process": [
-    "No visa fee payable"
-   ],
-   "submission_process": [
-    "Complete MDAC online within 3 days before arrival",
-    "Present passport and MDAC confirmation at immigration"
-   ],
-   "onward_travel_evidence": "Return or onward ticket may be requested at entry",
-   "accommodation_evidence": "Hotel booking or address of stay may be requested",
-   "financial_evidence": "Evidence of sufficient funds for the stay may be requested",
-   "insurance_required": false,
-   "exceptions": [
-    "Chinese ordinary passport holders are visa-exempt for short tourist visits",
-    "Stays longer than 30 days require a visa application"
-   ],
-   "uncertainty": [
-    {
-     "field": "source_url",
-     "reason": "Exact official visa-free announcement URL not verified; MDAC portal URL is known"
-    },
-    {
-     "field": "visa_products",
-     "reason": "Array left empty because the route is visa-exempt; optional longer-stay visa products were not enumerated"
-    }
-   ],
-   "confidence": "high",
-   "permitted_stay_days": 30,
-   "passport_validity_requirement": {
-    "kind": "months_after_arrival",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": true,
-    "name": "Malaysia Digital Arrival Card (MDAC)",
-    "submission_window": "Within 3 days before arrival"
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination certificate",
-     "applicability": "conditional",
-     "trigger_countries": [
-      "AGO",
-      "BRA",
-      "COD",
-      "GHA",
-      "KEN",
-      "NGA",
-      "UGA"
-     ],
-     "trigger": "Arrival from or transit through a yellow-fever endemic country within 6 days",
-     "question": "Have you visited or transited a yellow-fever endemic country in the past 6 days?"
-    },
-    {
-     "name": "COVID-19 measures",
-     "applicability": "not_applicable",
-     "trigger_countries": [],
-     "trigger": null,
-     "question": null
-    }
-   ],
-   "route_workflow_type": "visa_exempt_preparation",
-   "visa_products": [],
-   "application_channel_detail": "No visa application is required; the traveller must submit the Malaysia Digital Arrival Card online before travel.",
-   "requirement_detail": "unconditional_visa_free",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-22T02:17:53.297914",
-  "fresh_until": "2026-09-05T02:17:53.297914"
+  "fresh_until": "2026-09-05T06:45:43.284046"
  },
  {
   "cache_key": "CHN|CHN|AUS|tourism|default|unknown|v6",
@@ -1416,10 +1061,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:50:22.191621+00:00",
+    "outcome": "checked",
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600",
+    "content_hash": "c1b224cfe2846b019ce59b45f5fbd4f6c2a4df7eba17a3a62aba919a5f3e95fb",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page is generic and confirms only 3/6/12-month tourist stays without nationality-specific rules, so no stored fields are contradicted."
+   }
   },
   "generated_at": "2026-08-22T02:17:55.820410",
-  "fresh_until": "2026-09-05T02:17:55.820410"
+  "fresh_until": "2026-09-05T06:50:29.704761"
  },
  {
   "cache_key": "CHN|CHN|RUS|tourism|default|unknown|v6",
@@ -1551,296 +1207,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:50:25.476515+00:00",
+    "outcome": "checked",
+    "source_url": "http://publication.pravo.gov.ru/document/0001202607200004",
+    "content_hash": "d70e894cc8fef50eae83e93553f3de4f16d9667979fe61a9db847664dd0a786a",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page is a Russian presidential decree title concerning Chinese citizens' temporary entry/exit procedure but contains no specific visa requirement details to contradict the stored answer."
+   }
   },
   "generated_at": "2026-08-22T02:17:58.907447",
-  "fresh_until": "2026-09-05T02:17:58.907447"
- },
- {
-  "cache_key": "CHN|CHN|PHL|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "CHN",
-   "lawful_country_of_residence": "CHN",
-   "destination_country": "PHL",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_REQUIRED",
-   "visa_category": "9(a) Temporary Visitors/Tourist visa",
-   "permitted_stay": "Up to 59 days per entry (issuing officer decides)",
-   "passport_validity": "Valid at least 6 months beyond intended stay",
-   "required_documents": [
-    "Valid passport",
-    "Completed visa application form",
-    "Recent passport-size photo",
-    "Proof of financial capacity",
-    "Confirmed round-trip/onward ticket",
-    "Hotel booking or accommodation arrangement",
-    "Proof of employment/business or sponsor support (if applicable)"
-   ],
-   "application_channel": "online_portal",
-   "government_fee": {
-    "amount": null,
-    "currency": null
-   },
-   "processing_time": "5 to 15 working days",
-   "forms": [
-    "Philippine visa application form (online eVisa form or paper Form FA-36)"
-   ],
-   "official_portal_url": "https://evisa.gov.ph/",
-   "photo_requirements": "One recent passport-size color photograph with white background",
-   "biometrics_required": null,
-   "interview_required": false,
-   "appointment_required": null,
-   "account_registration_steps": [
-    "Create an account on the Philippines eVisa portal, or register for an appointment at the relevant Philippine embassy/consulate"
-   ],
-   "payment_process": [
-    "Pay the visa fee online through the eVisa portal, or at the embassy/consulate cashier as instructed"
-   ],
-   "submission_process": [
-    "Submit application and documents through the official eVisa portal, or lodge a paper application in person at the Philippine embassy/consulate with jurisdiction over your residence"
-   ],
-   "onward_travel_evidence": "Confirmed round-trip or onward airline ticket",
-   "accommodation_evidence": "Hotel reservation or letter of invitation from a Philippine resident host",
-   "financial_evidence": "Bank statements, payslips, or other evidence of sufficient funds for the trip",
-   "insurance_required": false,
-   "exceptions": [
-    "7-day visa-free entry if holding a valid visa or residence permit from the US, Canada, Japan, Australia, or Schengen Area",
-    "Visa-on-arrival may be available for Chinese nationals joining accredited Philippine tour group packages arranged by DOT/BOI-accredited operators",
-    "Simplified documentary requirements may apply for minors, senior citizens, or repeat travelers at the consul's discretion"
-   ],
-   "uncertainty": [
-    {
-     "field": "government_fee",
-     "reason": "Philippine visa fees vary by reciprocity, visa type, and processing location; the exact official fee for this nationality was not verified"
-    },
-    {
-     "field": "permitted_stay_days",
-     "reason": "The actual number of days granted is decided by the issuing officer (commonly up to 59 days but not guaranteed)"
-    },
-    {
-     "field": "biometrics_required",
-     "reason": "It is unclear whether the eVisa process for Chinese nationals requires in-person biometric enrolment or only a digital photo"
-    },
-    {
-     "field": "appointment_required",
-     "reason": "Whether an in-person appointment is mandatory depends on whether the applicant uses the eVisa portal or a specific embassy/consulate paper process"
-    },
-    {
-     "field": "visa_products.fee",
-     "reason": "Official fee amounts for single-entry, multiple-entry, and group visa-on-arrival products were not verified"
-    },
-    {
-     "field": "source_url",
-     "reason": "No single official Philippine government URL was verified for all of the above facts"
-    }
-   ],
-   "confidence": "medium",
-   "permitted_stay_days": null,
-   "passport_validity_requirement": {
-    "kind": "months_after_departure",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": true,
-    "name": "eTravel registration",
-    "submission_window": "Within 72 hours before arrival"
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination certificate",
-     "applicability": "conditional",
-     "trigger_countries": [],
-     "trigger": "Required if the traveler has been in or transited through a yellow-fever endemic country within 6 days before arrival in the Philippines; not triggered by China alone",
-     "question": "Will you arrive directly from China without transiting any yellow-fever endemic country in the 6 days before arrival?"
-    }
-   ],
-   "route_workflow_type": "evisa_portal",
-   "visa_products": [
-    {
-     "type": "Single-entry tourist visa",
-     "entry": "single",
-     "validity": "3 months from issue",
-     "max_stay_days": 59,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "Available via eVisa portal or embassy/consulate; actual stay granted at officer discretion"
-    },
-    {
-     "type": "Multiple-entry tourist visa",
-     "entry": "multiple",
-     "validity": "6 months or 1 year from issue",
-     "max_stay_days": 59,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "Usually requires prior travel history to the Philippines and stronger justification"
-    },
-    {
-     "type": "Group tourist visa-on-arrival",
-     "entry": "single",
-     "validity": "Per approved tour itinerary",
-     "max_stay_days": null,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "For accredited group tours only; must be pre-arranged by a Philippines-accredited tour operator"
-    }
-   ],
-   "application_channel_detail": "Chinese nationals may apply directly online through the Philippine eVisa portal, or submit a paper application at the Philippine embassy or consulate-general with jurisdiction over their place of residence in China.",
-   "requirement_detail": "evisa",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-22T02:18:09.573921",
-  "fresh_until": "2026-09-05T02:18:09.573921"
- },
- {
-  "cache_key": "CHN|CHN|VNM|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "CHN",
-   "lawful_country_of_residence": "CHN",
-   "destination_country": "VNM",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_REQUIRED",
-   "visa_category": "tourist visa",
-   "permitted_stay": "90 days",
-   "passport_validity": "6 months beyond arrival",
-   "required_documents": [
-    "passport bio-data page scan",
-    "digital passport photo",
-    "return/onward travel booking",
-    "proof of accommodation or host address",
-    "proof of sufficient funds"
-   ],
-   "application_channel": "online_portal",
-   "government_fee": {
-    "amount": 25,
-    "currency": "USD"
-   },
-   "processing_time": "3 working days",
-   "forms": [
-    "online Vietnam e-Visa application form"
-   ],
-   "official_portal_url": "https://evisa.xuatnhapcanh.gov.vn/",
-   "photo_requirements": "One recent digital passport photo, colour, white/plain background, full face, no glasses or headwear unless religious/medical",
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [
-    "create account on e-Visa portal",
-    "verify email address"
-   ],
-   "payment_process": [
-    "pay e-Visa fee online by international credit/debit card"
-   ],
-   "submission_process": [
-    "complete online application",
-    "upload passport scan and photo",
-    "pay fee",
-    "receive e-Visa PDF by email",
-    "print e-Visa and present at immigration"
-   ],
-   "onward_travel_evidence": "Return or onward ticket may be requested by immigration officers on entry",
-   "accommodation_evidence": "Hotel booking or residential address in Vietnam",
-   "financial_evidence": "Bank statement or other evidence of funds to cover the stay",
-   "insurance_required": false,
-   "exceptions": [
-    "Visa-free entry to Phu Quoc Island only for up to 30 days if flying direct to Phu Quoc without transiting mainland Vietnam",
-    "APEC Business Travel Card holders may enter visa-free for business up to 60 days (not tourism)",
-    "Paper tourist visas may also be lodged at Vietnamese embassies/consulates with mission-specific fees and validity"
-   ],
-   "uncertainty": [
-    {
-     "field": "source_url",
-     "reason": "Exact official policy source page URL is not confirmed; applicants should verify on the Vietnam Immigration Department e-Visa portal"
-    }
-   ],
-   "confidence": "high",
-   "permitted_stay_days": 90,
-   "passport_validity_requirement": {
-    "kind": "months_after_arrival",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": true,
-    "name": "Vietnam entry/exit declaration",
-    "submission_window": "completed on arrival at the port of entry"
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination",
-     "applicability": "not_applicable",
-     "trigger_countries": [],
-     "trigger": null,
-     "question": null
-    }
-   ],
-   "route_workflow_type": "evisa_portal",
-   "visa_products": [
-    {
-     "type": "Single-entry e-Visa tourist",
-     "entry": "single",
-     "validity": "90 days",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 25,
-      "currency": "USD"
-     },
-     "notes": "Valid for 90 days from the nominated date of entry"
-    },
-    {
-     "type": "Multiple-entry e-Visa tourist",
-     "entry": "multiple",
-     "validity": "90 days",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 50,
-      "currency": "USD"
-     },
-     "notes": "Valid for 90 days from the nominated date of entry"
-    }
-   ],
-   "application_channel_detail": "Chinese ordinary passport holders must obtain a visa; most apply directly online via the official Vietnam e-Visa portal, or alternatively through a Vietnamese embassy/consulate for a paper sticker visa.",
-   "requirement_detail": "evisa",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-22T02:18:20.648706",
-  "fresh_until": "2026-09-05T02:18:20.648706"
+  "fresh_until": "2026-09-05T06:50:34.308211"
  },
  {
   "cache_key": "CHN|CHN|ESP|tourism|default|unknown|v6",
@@ -1983,7 +1364,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:45:16.587300+00:00",
+    "outcome": "page_not_relevant",
+    "sources_tried": [
+     "https://www.exteriores.gob.es/es/Paginas/index.aspx"
+    ]
+   }
   },
   "generated_at": "2026-08-22T02:18:25.177887",
   "fresh_until": "2026-09-05T02:18:25.177887"
@@ -2135,7 +1523,15 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:45:16.587657+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://france-visas.gouv.fr/",
+     "https://www.france-visas.gouv.fr/en"
+    ]
+   }
   },
   "generated_at": "2026-08-22T02:18:25.179767",
   "fresh_until": "2026-09-05T02:18:25.179767"
@@ -2227,10 +1623,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:50:29.707010+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.immigration.gov.tw/5385/7244/7250/7296/",
+    "content_hash": "119315bd4eb9065603b42ba3546945bc4ae4121b078b66d94ded0e09ca4ac9bc",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page is a Hong Kong/Macau residents section but contains only navigation and headings, with no specific rules that contradict the stored answer."
+   }
   },
   "generated_at": "2026-08-22T02:18:33.556106",
-  "fresh_until": "2026-09-05T02:18:33.556106"
+  "fresh_until": "2026-09-05T06:50:36.881049"
  },
  {
   "cache_key": "CHN|CHN|CAN|tourism|default|unknown|v6",
@@ -2356,10 +1763,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:50:34.310633+00:00",
+    "outcome": "checked",
+    "source_url": "https://ircc.canada.ca/english/information/fees/fees.asp",
+    "content_hash": "f992668675a319fb6088d446529a489b5970cb127ebeecf088b8459b0d9cb3e6",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The official IRCC fee list confirms the CAD 100 visitor visa fee and CAD 170 family biometric cap, with no contradictions to the stored answer."
+   }
   },
   "generated_at": "2026-08-22T02:18:39.763793",
-  "fresh_until": "2026-09-05T02:18:39.763793"
+  "fresh_until": "2026-09-05T06:50:40.612922"
  },
  {
   "cache_key": "CHN|CHN|IND|tourism|default|unknown|v6",
@@ -2509,124 +1927,17 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:45:21.550309+00:00",
+    "outcome": "page_not_relevant",
+    "sources_tried": [
+     "https://indianvisaonline.gov.in/evisa/tvoa.html"
+    ]
+   }
   },
   "generated_at": "2026-08-22T02:18:46.978073",
   "fresh_until": "2026-09-05T02:18:46.978073"
- },
- {
-  "cache_key": "HKG|HKG|KOR|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "HKG",
-   "lawful_country_of_residence": "HKG",
-   "destination_country": "KOR",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
-   "visa_category": "K-ETA (Korea Electronic Travel Authorization) for visa-free tourist entry",
-   "permitted_stay": "90 days per entry",
-   "passport_validity": "At least 6 months beyond intended stay",
-   "required_documents": [
-    "Valid HKSAR ordinary passport",
-    "Digital passport photo",
-    "Email address",
-    "Credit/debit card for fee"
-   ],
-   "application_channel": "online_portal",
-   "government_fee": {
-    "amount": 10000,
-    "currency": "KRW"
-   },
-   "processing_time": "Usually within 72 hours",
-   "forms": [
-    "K-ETA online application form"
-   ],
-   "official_portal_url": "https://www.k-eta.go.kr/portal/apply/index.do?locale=EN",
-   "photo_requirements": "Digital passport-style colour photo, white background, recent, taken within last 6 months",
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [
-    "Register an account on the K-ETA portal",
-    "Verify your email address"
-   ],
-   "payment_process": [
-    "Pay the 10,000 KRW fee online by credit/debit card during application"
-   ],
-   "submission_process": [
-    "Complete the K-ETA application online",
-    "Submit and wait for email approval before boarding"
-   ],
-   "onward_travel_evidence": "Return or onward ticket may be checked at immigration; not required to apply for K-ETA",
-   "accommodation_evidence": "Hotel address or contact in Korea is requested on the K-ETA form",
-   "financial_evidence": "Proof of sufficient funds may be requested at immigration",
-   "insurance_required": false,
-   "exceptions": [
-    "HKSAR passport holders are visa-exempt for up to 90 days but must hold a K-ETA before travel",
-    "Each traveler including minors normally requires a separate K-ETA"
-   ],
-   "uncertainty": [
-    {
-     "field": "arrival_card",
-     "reason": "Not certain whether Korea currently requires a separate paper arrival/departure card for HKSAR tourists; official guidance should be checked before travel."
-    }
-   ],
-   "confidence": "high",
-   "permitted_stay_days": 90,
-   "passport_validity_requirement": {
-    "kind": "months_after_departure",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": null,
-    "name": null,
-    "submission_window": null
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination certificate",
-     "applicability": "conditional",
-     "trigger_countries": [],
-     "trigger": "Recent travel or residence in a yellow-fever endemic country before arrival in Korea",
-     "question": "Have you visited a yellow-fever endemic country within the 6–10 days before arrival in Korea?"
-    }
-   ],
-   "route_workflow_type": "electronic_authorization",
-   "visa_products": [
-    {
-     "type": "K-ETA tourist authorization",
-     "entry": "multiple",
-     "validity": "3 years from approval",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 10000,
-      "currency": "KRW"
-     },
-     "notes": "Required for HKSAR ordinary passport holders entering under the 90-day visa-waiver arrangement"
-    }
-   ],
-   "application_channel_detail": "Individuals must apply themselves online through the official K-ETA portal before departure; the approval is linked electronically to the passport.",
-   "source_url": "https://www.k-eta.go.kr/portal/apply/index.do?locale=EN",
-   "requirement_detail": "eta_electronic_authorization",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-22T02:18:56.061543",
-  "fresh_until": "2026-09-05T02:18:56.061543"
  },
  {
   "cache_key": "HKG|HKG|USA|tourism|default|unknown|v6",
@@ -2729,7 +2040,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:45:43.288947+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html"
+    ]
+   }
   },
   "generated_at": "2026-08-22T02:19:00.156360",
   "fresh_until": "2026-09-05T02:19:00.156360"
@@ -2837,7 +2155,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:46:26.828032+00:00",
+    "outcome": "page_not_relevant",
+    "sources_tried": [
+     "https://www.mofa.go.jp/j_info/visit/visa/short/visa_exempt.html"
+    ]
+   }
   },
   "generated_at": "2026-08-22T02:19:06.549725",
   "fresh_until": "2026-09-05T02:19:06.549725"
@@ -2876,7 +2201,7 @@
    "forms": [
     "Online e-VOA application form; no paper form needed for VoA"
    ],
-   "official_portal_url": "https://molina.imigrasi.go.id",
+   "official_portal_url": "https://evisa.imigrasi.go.id/",
    "photo_requirements": "One recent colour photograph, white/plain background, 4x6 cm; digital upload required for e-VOA",
    "biometrics_required": false,
    "interview_required": false,
@@ -2978,10 +2303,23 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:46:28.504064+00:00",
+    "outcome": "checked",
+    "source_url": "https://evisa.imigrasi.go.id/",
+    "content_hash": "eab196422ceed71218b0da55ef572b7105f30821919999c33efac6a4cc808e7d",
+    "consistent": false,
+    "changed_fields": [
+     "official_portal_url"
+    ],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page identifies itself as the official Indonesian e-Visa portal at evisa.imigrasi.go.id, not molina.imigrasi.go.id."
+   }
   },
   "generated_at": "2026-08-22T02:19:26.125936",
-  "fresh_until": "2026-09-05T02:19:26.125936"
+  "fresh_until": "2026-09-05T06:46:43.529305"
  },
  {
   "cache_key": "HKG|HKG|GBR|tourism|default|unknown|v6",
@@ -3016,7 +2354,7 @@
    "forms": [
     "Online Standard Visitor visa application form"
    ],
-   "official_portal_url": "https://www.gov.uk/standard-visitor-visa",
+   "official_portal_url": null,
    "photo_requirements": "Digital passport-style photo uploaded online; VAC may capture photo; 45 mm x 35 mm, colour, plain light background",
    "biometrics_required": true,
    "interview_required": false,
@@ -3133,7 +2471,28 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:46:43.531889+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.gov.uk/guidance/immigration-rules/immigration-rules-appendix-visitor-visa-national-list",
+    "content_hash": "6f53c0e19b7e157c57111a078e2ad17bb281f85fb6502da3ce48e7c1368e32ba",
+    "consistent": false,
+    "changed_fields": [
+     "official_portal_url"
+    ],
+    "disputed_fields": [
+     "application_channel",
+     "application_channel_detail",
+     "disposition",
+     "government_fee",
+     "requirement_detail",
+     "visa_category",
+     "visa_products"
+    ],
+    "generic_page_skipped": [],
+    "note": "The UK visa national list explicitly exempts Hong Kong SAR passport holders from needing a visit visa for tourism up to six months."
+   }
   },
   "generated_at": "2026-08-22T02:19:48.633137",
   "fresh_until": "2026-09-05T02:19:48.633137"
@@ -3216,7 +2575,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:46:46.196675+00:00",
+    "outcome": "page_not_relevant",
+    "sources_tried": [
+     "https://www.immd.gov.hk/hks/services/visas/visa-free-access.html"
+    ]
+   }
   },
   "generated_at": "2026-08-22T02:20:03.869125",
   "fresh_until": "2026-09-05T02:20:03.869125"
@@ -3249,7 +2615,7 @@
     "amount": 20,
     "currency": "AUD"
    },
-   "processing_time": "Most within 24 hours",
+   "processing_time": "In most cases we will tell you of the result of your ETA application immediately. Your application may take longer if you do not complete the application process correctly or we require further information.",
    "forms": [
     "AustralianETA mobile app questionnaire"
    ],
@@ -3347,10 +2713,23 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:46:49.804647+00:00",
+    "outcome": "checked",
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/electronic-travel-authority-601",
+    "content_hash": "84c17799c8ce57d0d3503a65dab1465f91db432e0a506c9dc09c9d054e562300",
+    "consistent": false,
+    "changed_fields": [
+     "processing_time"
+    ],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page is generic and does not specify rules for Hong Kong passport holders, but it does state that ETA results are usually given immediately, not within 24 hours."
+   }
   },
   "generated_at": "2026-08-22T02:20:07.457187",
-  "fresh_until": "2026-09-05T02:20:07.457187"
+  "fresh_until": "2026-09-05T06:47:03.509778"
  },
  {
   "cache_key": "HKG|HKG|IDN|tourism|default|unknown|v6",
@@ -3481,10 +2860,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:46:50.560370+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa",
+    "content_hash": "6e2c806c84b05b78cc7fd29d25838ff525cea56e076ddd6d94beda1747c37df4",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page lists Hong Kong as a subject under Indonesia's VoA/BVK/Calling Visa categories but does not specify which regime applies, and it does not address stay length, fees, documents, or e-CD."
+   }
   },
   "generated_at": "2026-08-22T02:20:14.229799",
-  "fresh_until": "2026-09-05T02:20:14.229799"
+  "fresh_until": "2026-09-05T06:47:00.427798"
  },
  {
   "cache_key": "HKG|HKG|THA|tourism|default|unknown|v6",
@@ -3614,7 +3004,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:47:00.431717+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://www.mfa.go.th/"
+    ]
+   }
   },
   "generated_at": "2026-08-22T02:20:19.053769",
   "fresh_until": "2026-09-05T02:20:19.053769"
@@ -3742,10 +3139,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:47:02.146784+00:00",
+    "outcome": "checked",
+    "source_url": "https://etravel.gov.ph",
+    "content_hash": "eebd8e7763d2ecf34e12e5447337a6824510dfdf761c8e788795f6f30d0ce776",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page confirms eTravel exists and is free but does not state nationality-specific rules or stay durations."
+   }
   },
   "generated_at": "2026-08-22T02:20:39.490926",
-  "fresh_until": "2026-09-05T02:20:39.490926"
+  "fresh_until": "2026-09-05T06:47:09.581478"
  },
  {
   "cache_key": "HKG|HKG|VNM|tourism|default|unknown|v6",
@@ -3778,7 +3186,7 @@
    "forms": [
     "Online e-visa application form"
    ],
-   "official_portal_url": "https://evisa.xuatnhapcanh.gov.vn/",
+   "official_portal_url": "https://evisa.gov.vn",
    "photo_requirements": "4x6 cm colour photo, white background, frontal view, no glasses/hats, digital JPG, max 2 MB",
    "biometrics_required": false,
    "interview_required": false,
@@ -3918,10 +3326,23 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:47:03.511175+00:00",
+    "outcome": "checked",
+    "source_url": "https://evisa.xuatnhapcanh.gov.vn/",
+    "content_hash": "0147a33b6c816d84ac69f6585f0e1baffa58f319ba1b24dc43e460115b87363e",
+    "consistent": false,
+    "changed_fields": [
+     "official_portal_url"
+    ],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The official e-visa portal has moved to new domains, so the stored URL is outdated."
+   }
   },
   "generated_at": "2026-08-22T02:20:49.662773",
-  "fresh_until": "2026-09-05T02:20:49.662773"
+  "fresh_until": "2026-09-05T06:47:13.417813"
  },
  {
   "cache_key": "HKG|HKG|CAN|tourism|default|unknown|v6",
@@ -4051,7 +3472,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:47:05.181370+00:00",
+    "outcome": "page_not_relevant",
+    "sources_tried": [
+     "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/operational-bulletins-manuals/temporary-residents/visitors/visa-requirements.html"
+    ]
+   }
   },
   "generated_at": "2026-08-22T02:20:57.508796",
   "fresh_until": "2026-09-05T02:20:57.508796"
@@ -4196,7 +3624,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:47:09.583366+00:00",
+    "outcome": "checked",
+    "source_url": "https://cgihk.gov.in/page/visa-information/",
+    "content_hash": "167bbe015d919f2f29d83dc4642f4735b1b118795558255b567da3a76103bb0d",
+    "consistent": false,
+    "changed_fields": [],
+    "disputed_fields": [
+     "application_channel",
+     "application_channel_detail"
+    ],
+    "generic_page_skipped": [],
+    "note": "The page directs all Hong Kong/Macau visa applicants to apply in person at the Consulate and does not mention an e-Tourist Visa option."
+   }
   },
   "generated_at": "2026-08-22T02:20:57.843216",
   "fresh_until": "2026-09-05T02:20:57.843216"
@@ -4283,10 +3725,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:47:11.293889+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+    "content_hash": "5dcbed0f9f72800fe9b3008aa0ac0d0e162c93a1d78372a35777f1f76cd91eac",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page confirms ordinary US passport holders may visit visa-free for up to 90 days, matching the stored answer."
+   }
   },
   "generated_at": "2026-08-22T02:21:01.077501",
-  "fresh_until": "2026-09-05T02:21:01.077501"
+  "fresh_until": "2026-09-05T06:47:21.607183"
  },
  {
   "cache_key": "USA|USA|KOR|tourism|default|unknown|v6",
@@ -4322,7 +3775,7 @@
    "forms": [
     "K-ETA online application form"
    ],
-   "official_portal_url": "https://www.k-eta.go.kr/portal/apply/index.html",
+   "official_portal_url": "https://www.k-eta.go.kr/portal/apply/index.do",
    "photo_requirements": "Digital passport-style color photo (recent, front-facing, plain background, no headwear except religious/medical)",
    "biometrics_required": false,
    "interview_required": false,
@@ -4406,7 +3859,7 @@
       "amount": 10000,
       "currency": "KRW"
      },
-     "notes": "Required for visa-free short-term tourism/business visits; must be obtained before departure"
+     "notes": "Optional during the temporary exemption; travelers who want K-ETA benefits (e.g., no arrival card) may apply before departure"
     },
     {
      "type": "C-3-2 Short-term tourist visa (single-entry)",
@@ -4444,7 +3897,25 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:47:13.419879+00:00",
+    "outcome": "checked",
+    "source_url": "https://overseas.mofa.go.kr/us-en/brd/m_4502/view.do?seq=715890",
+    "content_hash": "7e06f15c205f571de179e5b0e43e918df7a8b20710c3e2aaa3525b2265b154d6",
+    "consistent": false,
+    "changed_fields": [
+     "official_portal_url",
+     "visa_products"
+    ],
+    "disputed_fields": [
+     "disposition",
+     "requirement_detail",
+     "visa_category"
+    ],
+    "generic_page_skipped": [],
+    "note": "U.S. travelers are temporarily exempt from K-ETA through Dec 31, 2026, so K-ETA is optional rather than required."
+   }
   },
   "generated_at": "2026-08-22T02:21:11.429107",
   "fresh_until": "2026-09-05T02:21:11.429107"
@@ -4538,10 +4009,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:47:21.610409+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+    "content_hash": "036ae0d49757e15e9f376ded13f7643aaa5c73af8b34319fa6d5eca23a033d74",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page lists countries requiring visas and USA is not included; no stored fields are contradicted."
+   }
   },
   "generated_at": "2026-08-22T02:21:20.568660",
-  "fresh_until": "2026-09-05T02:21:20.568660"
+  "fresh_until": "2026-09-05T06:48:17.880269"
  },
  {
   "cache_key": "USA|USA|JPN|tourism|default|unknown|v6",
@@ -4622,7 +4104,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:47:36.955641+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html"
+    ]
+   }
   },
   "generated_at": "2026-08-22T02:21:29.358513",
   "fresh_until": "2026-09-05T02:21:29.358513"
@@ -4737,7 +4226,13 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:48:04.190964+00:00",
+    "outcome": "provider_error",
+    "source_url": "https://www.boca.gov.tw/np-137-2.html",
+    "error": "Something unexpected happened. Your case data is saved; you can retry or ask for a manual review."
+   }
   },
   "generated_at": "2026-08-22T02:21:43.307581",
   "fresh_until": "2026-09-05T02:21:43.307581"
@@ -4850,10 +4345,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:48:17.883008+00:00",
+    "outcome": "checked",
+    "source_url": "https://imigresen-online.imi.gov.my/mdac/main",
+    "content_hash": "a4194e950b10d35a578395159fde0a6ee4ef6e99ae14174f42c47425c1bab127",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page confirms MDAC is required for foreign visitors and specifically lists U.S. visitors under autogate-eligible countries, but it does not address permitted stay duration or visa-free status."
+   }
   },
   "generated_at": "2026-08-22T02:21:43.376595",
-  "fresh_until": "2026-09-05T02:21:43.376595"
+  "fresh_until": "2026-09-05T06:48:29.533290"
  },
  {
   "cache_key": "USA|USA|GBR|tourism|default|unknown|v6",
@@ -5013,10 +4519,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:48:22.432981+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.gov.uk/eta",
+    "content_hash": "3b6ab72fc398e9078523e57f4e35bc6076dde0f79d852d2117dc773a1fb37c99",
+    "consistent": false,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The official page states the ETA fee is £20, not £10."
+   }
   },
   "generated_at": "2026-08-22T02:21:54.570915",
-  "fresh_until": "2026-09-05T02:21:54.570915"
+  "fresh_until": "2026-09-05T06:48:30.083765"
  },
  {
   "cache_key": "USA|USA|AUS|tourism|default|unknown|v6",
@@ -5159,10 +4676,24 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:48:29.537353+00:00",
+    "outcome": "checked",
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/electronic-travel-authority-601",
+    "content_hash": "84c17799c8ce57d0d3503a65dab1465f91db432e0a506c9dc09c9d054e562300",
+    "consistent": false,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [
+     "government_fee",
+     "visa_products"
+    ],
+    "note": "The page confirms a AUD20 ETA app service charge, which should replace the null fee fields."
+   }
   },
   "generated_at": "2026-08-22T02:22:13.409607",
-  "fresh_until": "2026-09-05T02:22:13.409607"
+  "fresh_until": "2026-09-05T06:48:40.848415"
  },
  {
   "cache_key": "USA|USA|RUS|tourism|default|unknown|v6",
@@ -5312,10 +4843,25 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:48:30.087212+00:00",
+    "outcome": "checked",
+    "source_url": "https://evisa.kdmid.ru/",
+    "content_hash": "c94aaef0a78a41c6c5643fdadae4002b00dff7ea99a2ba9487e1724228f0b76d",
+    "consistent": false,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [
+     "permitted_stay",
+     "permitted_stay_days",
+     "visa_products"
+    ],
+    "note": "The official e-visa page states a 30-day permitted stay and 120-day visa validity, not 16 days and 60 days."
+   }
   },
   "generated_at": "2026-08-22T02:22:20.078648",
-  "fresh_until": "2026-09-05T02:22:20.078648"
+  "fresh_until": "2026-09-05T06:48:53.651096"
  },
  {
   "cache_key": "USA|USA|IDN|tourism|default|unknown|v6",
@@ -5489,10 +5035,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:48:40.852707+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa",
+    "content_hash": "4c70ea277175c25d6d1d3a3828e678c0689d066c336dc7a6a64dcaa5f84a4be9",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page lists the United States among VoA/BVK/Calling Visa countries but provides no specific rules, fees, or stay limits to contradict the stored answer."
+   }
   },
   "generated_at": "2026-08-22T02:22:21.159298",
-  "fresh_until": "2026-09-05T02:22:21.159298"
+  "fresh_until": "2026-09-05T06:48:49.311069"
  },
  {
   "cache_key": "USA|USA|CAN|tourism|default|unknown|v6",
@@ -5565,7 +5122,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:48:49.313405+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/entry-requirements-country.html"
+    ]
+   }
   },
   "generated_at": "2026-08-22T02:22:35.008564",
   "fresh_until": "2026-09-05T02:22:35.008564"
@@ -5651,7 +5215,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:48:49.948569+00:00",
+    "outcome": "page_not_relevant",
+    "sources_tried": [
+     "https://www.ica.gov.sg/enter-transit-depart/entry_requirements/visa_requirements"
+    ]
+   }
   },
   "generated_at": "2026-08-22T02:23:19.234464",
   "fresh_until": "2026-09-05T02:23:19.234464"
@@ -5785,10 +5356,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:48:53.667365+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.evus.gov/",
+    "content_hash": "16032616f9ff87c6af6becd3b30087b16db4cf0cb6b22c00887eacf1242c38f9",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The EVUS page confirms Chinese passport holders with 10-year B1/B2 visas must enroll and pay a $30.75 USD fee; it does not contradict any stored visa-application details."
+   }
   },
   "generated_at": "2026-08-22T02:23:46.866224",
-  "fresh_until": "2026-09-05T02:23:46.866224"
+  "fresh_until": "2026-09-05T06:49:39.881388"
  },
  {
   "cache_key": "HKG|HKG|FRA|tourism|default|unknown|v6",
@@ -5877,10 +5459,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:48:59.896672+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.diplomatie.gouv.fr/en/services-to-foreigners/visiting-france",
+    "content_hash": "74a371f387eebb511a84d9ee5a9a012e8d1e40f28f296cff20d4e47fa3322a01",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page is a generic tourism overview and does not state entry or visa rules for HKSAR passport holders."
+   }
   },
   "generated_at": "2026-08-22T02:23:57.954708",
-  "fresh_until": "2026-09-05T02:23:57.954708"
+  "fresh_until": "2026-09-05T06:49:04.217370"
  },
  {
   "cache_key": "HKG|HKG|ESP|tourism|default|unknown|v6",
@@ -5973,7 +5566,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:49:04.219855+00:00",
+    "outcome": "page_not_relevant",
+    "sources_tried": [
+     "https://home-affairs.ec.europa.eu/policies/schengen/visa-policy/who-must-apply-visa_en"
+    ]
+   }
   },
   "generated_at": "2026-08-22T02:24:32.375981",
   "fresh_until": "2026-09-05T02:24:32.375981"
@@ -6073,7 +5673,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:49:39.885498+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://france-visas.gouv.fr/en/web/france-visas/who-needs-visa"
+    ]
+   }
   },
   "generated_at": "2026-08-22T02:25:05.054751",
   "fresh_until": "2026-09-05T02:25:05.054751"
@@ -6096,7 +5703,7 @@
    "permitted_stay": "30 days",
    "passport_validity": "6 months beyond arrival",
    "required_documents": [
-    "Passport valid at least 6 months on arrival",
+    "Passport valid at least 6 months beyond intended stay",
     "Return or onward ticket",
     "Proof of accommodation and sufficient funds if requested"
    ],
@@ -6171,10 +5778,23 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:49:41.099991+00:00",
+    "outcome": "checked",
+    "source_url": "https://evisa.gov.ph/page/policy",
+    "content_hash": "2e634d9cb58fb629cf41c2e96d5ce1bed7b585836d21c84bb50753dfb2347474",
+    "consistent": false,
+    "changed_fields": [
+     "required_documents"
+    ],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page confirms U.S. tourists may enter visa-free for 30 days but requires passport validity for six months beyond the intended stay, not merely six months on arrival."
+   }
   },
   "generated_at": "2026-08-22T02:25:13.210191",
-  "fresh_until": "2026-09-05T02:25:13.210191"
+  "fresh_until": "2026-09-05T06:49:53.060241"
  },
  {
   "cache_key": "USA|USA|ESP|tourism|default|unknown|v6",
@@ -6242,7 +5862,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:49:53.064490+00:00",
+    "outcome": "page_not_relevant",
+    "sources_tried": [
+     "https://www.exteriores.gob.es/es/Paginas/index.aspx"
+    ]
+   }
   },
   "generated_at": "2026-08-22T02:25:20.609948",
   "fresh_until": "2026-09-05T02:25:20.609948"
@@ -6279,7 +5906,7 @@
    "forms": [
     "Online e-Visa application form"
    ],
-   "official_portal_url": "https://evisa.xuatnhapcanh.gov.vn/",
+   "official_portal_url": "https://evisa.gov.vn",
    "photo_requirements": "Recent color passport-style digital photo, white/plain background, full face, no glasses/headwear except for religious/medical reasons, per portal specifications",
    "biometrics_required": false,
    "interview_required": false,
@@ -6385,10 +6012,23 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:49:54.086916+00:00",
+    "outcome": "checked",
+    "source_url": "https://evisa.xuatnhapcanh.gov.vn/",
+    "content_hash": "c78fcb7d9bc017fe8500db4e5837081519850f62f88651f3d89e1cf3e2369614",
+    "consistent": false,
+    "changed_fields": [
+     "official_portal_url"
+    ],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "Page only gives generic portal-domain update; it does not state USA-specific rules."
+   }
   },
   "generated_at": "2026-08-22T02:25:29.387123",
-  "fresh_until": "2026-09-05T02:25:29.387123"
+  "fresh_until": "2026-09-05T06:50:04.779950"
  },
  {
   "cache_key": "USA|USA|IND|tourism|default|unknown|v6",
@@ -6528,7 +6168,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:49:54.285541+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://indianvisaonline.gov.in/evisa/tvoa.html"
+    ]
+   }
   },
   "generated_at": "2026-08-22T02:25:31.346092",
   "fresh_until": "2026-09-05T02:25:31.346092"
@@ -6676,7 +6323,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:49:56.187030+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-22T02:25:59.846269",
   "fresh_until": "2026-09-05T02:25:59.846269"
@@ -6768,9 +6420,996 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:49:56.188004+00:00",
+    "outcome": "checked",
+    "source_url": "https://imigresen-online.imi.gov.my/mdac/main",
+    "content_hash": "a91df23ff2649e5690918b732f5c741e204780fb5802786afa9801e7bcc4ad4d",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page confirms MDAC is required for foreign visitors from other countries but does not state any details that contradict the stored answer."
+   }
   },
   "generated_at": "2026-08-22T02:26:12.835204",
-  "fresh_until": "2026-09-05T02:26:12.835204"
+  "fresh_until": "2026-09-05T06:50:09.868131"
+ },
+ {
+  "cache_key": "CHN|CHN|MYS|tourism|default|unknown|v6",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "MYS",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_EXEMPT",
+   "visa_category": "Tourist / social visit (visa-free)",
+   "permitted_stay": "30 days",
+   "passport_validity": "6 months beyond arrival",
+   "required_documents": [
+    "Valid PRC ordinary passport (≥6 months validity)",
+    "Return or onward travel ticket",
+    "Proof of sufficient funds for the stay",
+    "Malaysia Digital Arrival Card (MDAC) acknowledgement"
+   ],
+   "application_channel": "not_required",
+   "government_fee": {
+    "amount": 0,
+    "currency": "MYR"
+   },
+   "processing_time": "Not applicable",
+   "forms": [
+    "Malaysia Digital Arrival Card (MDAC) online form"
+   ],
+   "official_portal_url": null,
+   "photo_requirements": null,
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [
+    "Register traveller details on the official MDAC website",
+    "Submit the MDAC within 3 days before arrival",
+    "Save or print the MDAC acknowledgement"
+   ],
+   "payment_process": [
+    "No visa fee or MDAC fee payable"
+   ],
+   "submission_process": [
+    "Complete the MDAC online before departure",
+    "Present passport and MDAC acknowledgement at Malaysian immigration on arrival"
+   ],
+   "onward_travel_evidence": "Recommended; immigration officers may request a return or onward ticket",
+   "accommodation_evidence": "Recommended; immigration officers may ask for accommodation details",
+   "financial_evidence": "Sufficient funds for the stay may be requested at entry",
+   "insurance_required": false,
+   "exceptions": [
+    "Stays longer than 30 days or purposes other than tourism/social visit require an appropriate visa",
+    "Extension of the 30-day stay is not automatic and requires Immigration Department approval",
+    "Airside transit within 24 hours is normally allowed without a visa; confirm with the airline",
+    "Holders of diplomatic/official/service PRC passports are subject to different rules"
+   ],
+   "uncertainty": [
+    {
+     "field": "disposition/permitted_stay",
+     "reason": "Malaysia's visa exemption for PRC ordinary-passport tourists has been repeatedly extended; by 2026-08-22 the policy may differ from the 30-day visa-free rule known up to early 2025."
+    },
+    {
+     "field": "official_portal_url",
+     "reason": "Cannot provide a verified MDAC registration URL without risking hallucination; confirm the current MDAC portal on the Immigration Department of Malaysia website."
+    },
+    {
+     "field": "source_url",
+     "reason": "No single official page URL can be verified from training data for the exact 2026 date."
+    }
+   ],
+   "confidence": "low",
+   "permitted_stay_days": 30,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "Malaysia Digital Arrival Card (MDAC)",
+    "submission_window": "within 3 days before arrival"
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination certificate",
+     "applicability": "conditional",
+     "trigger_countries": [],
+     "trigger": "Arrival or transit longer than 12 hours from a country/area with risk of yellow fever transmission within the past 6 days",
+     "question": "Have you visited or transited a yellow-fever risk country for more than 12 hours in the past 6 days?"
+    }
+   ],
+   "route_workflow_type": "visa_exempt_preparation",
+   "visa_products": [],
+   "application_channel_detail": "No visa application is required; Chinese ordinary-passport tourists must complete the Malaysia Digital Arrival Card (MDAC) online within 3 days before arrival.",
+   "requirement_detail": "unconditional_visa_free",
+   "transit_requirement": {
+    "required": null,
+    "note": null
+   }
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:50:36.883422+00:00",
+    "outcome": "checked",
+    "source_url": "https://imigresen-online.imi.gov.my/mdac/main",
+    "content_hash": "d5101633499cad13e74b8b9fa0a72f8c16270420ee8c6a774836588e9d2dace8",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page confirms MDAC registration for foreign visitors generally but does not address China-specific visa-free stay rules."
+   }
+  },
+  "generated_at": "2026-08-22T06:26:24.801321",
+  "fresh_until": "2026-09-05T06:50:50.638316"
+ },
+ {
+  "cache_key": "CHN|CHN|GBR|tourism|default|unknown|v6",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "GBR",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Standard Visitor visa",
+   "permitted_stay": "up to 6 months per visit",
+   "passport_validity": "valid for the whole stay",
+   "required_documents": [
+    "Valid passport",
+    "Proof of funds (bank statements/payslips)",
+    "Accommodation and travel itinerary",
+    "Evidence of ties to China (employment, family, property)",
+    "Letter of invitation if staying with a host"
+   ],
+   "application_channel": "online_portal",
+   "government_fee": {
+    "amount": 115,
+    "currency": "GBP"
+   },
+   "processing_time": "up to 3 weeks after biometrics",
+   "forms": [
+    "Online Standard Visitor visa application form on gov.uk"
+   ],
+   "official_portal_url": "https://www.gov.uk/standard-visitor-visa",
+   "photo_requirements": "Digital passport-style photo uploaded with the online form; biometric photograph taken at the VFS appointment",
+   "biometrics_required": true,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Create an account on the gov.uk visa application service",
+    "Complete the Standard Visitor visa online form",
+    "Pay the UK government visa fee online",
+    "Book a biometric appointment at a VFS Global centre",
+    "Upload or bring supporting documents as instructed"
+   ],
+   "payment_process": [
+    "Pay the UK government visa fee online by debit/credit card",
+    "Pay the VFS Global biometric/service fee separately when booking",
+    "Optional priority/super-priority fees are paid to VFS Global if selected"
+   ],
+   "submission_process": [
+    "Submit the application online via gov.uk",
+    "Attend the biometric appointment at a VFS Global UK Visa Application Centre",
+    "Provide passport and documents as requested",
+    "Receive passport with vignette by collection or courier"
+   ],
+   "onward_travel_evidence": "Return or onward ticket may be requested",
+   "accommodation_evidence": "Hotel bookings or host address/invitation letter",
+   "financial_evidence": "Bank statements or payslips showing sufficient funds for the trip",
+   "insurance_required": false,
+   "exceptions": [
+    "Chinese nationals may be eligible for a 2-year Standard Visitor visa at the 6-month fee under a long-standing concession; verify current fee on gov.uk",
+    "Approved Destination Status (ADS) Chinese group tours use a separate route",
+    "No Immigration Health Surcharge applies to Standard Visitor visas",
+    "Optional priority (5 working days) and super-priority (1 working day) services may be available at extra cost"
+   ],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "UK visa fees are revised periodically in the Immigration and Nationality (Fees) Regulations and may have changed by 2026; amounts reflect the 2024 fee schedule"
+    },
+    {
+     "field": "visa_products",
+     "reason": "The Chinese 2-year Standard Visitor visa concession fee and availability could have changed by 2026; verify on gov.uk before applying"
+    },
+    {
+     "field": "processing_time",
+     "reason": "Service standards and VFS Global appointment capacity can vary by post and date"
+    },
+    {
+     "field": "requirement_detail",
+     "reason": "The UK is transitioning toward digital immigration status; by 2026 visitor entry clearance may be issued as an e-visa or vignette for some applicants"
+    }
+   ],
+   "confidence": "low",
+   "permitted_stay_days": 180,
+   "passport_validity_requirement": {
+    "kind": "valid_through_departure",
+    "months": null
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [
+    {
+     "name": "Tuberculosis test certificate",
+     "applicability": "conditional",
+     "trigger_countries": [
+      "CHN"
+     ],
+     "trigger": "Applying for a visa valid for more than 6 months",
+     "question": "Will your intended stay in the UK exceed 6 months?"
+    }
+   ],
+   "route_workflow_type": "visa_center_submission",
+   "visa_products": [
+    {
+     "type": "6-month multiple-entry tourist",
+     "entry": "multiple",
+     "validity": "6 months",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 115,
+      "currency": "GBP"
+     },
+     "notes": "Standard short-stay visitor product"
+    },
+    {
+     "type": "2-year multiple-entry tourist",
+     "entry": "multiple",
+     "validity": "2 years",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 432,
+      "currency": "GBP"
+     },
+     "notes": "Chinese nationals may qualify for the 6-month fee under a UK-China concession; confirm at application"
+    },
+    {
+     "type": "5-year multiple-entry tourist",
+     "entry": "multiple",
+     "validity": "5 years",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 771,
+      "currency": "GBP"
+     },
+     "notes": "Multiple-entry; maximum 180 days per visit"
+    },
+    {
+     "type": "10-year multiple-entry tourist",
+     "entry": "multiple",
+     "validity": "10 years",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 963,
+      "currency": "GBP"
+     },
+     "notes": "Multiple-entry; maximum 180 days per visit"
+    }
+   ],
+   "application_channel_detail": "Apply directly via the official gov.uk online portal, then attend a mandatory biometric appointment at a VFS Global UK Visa Application Centre in China.",
+   "source_url": "https://www.gov.uk/standard-visitor-visa",
+   "requirement_detail": "paper_visa",
+   "transit_requirement": {
+    "required": null,
+    "note": null
+   }
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:50:40.615612+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.gov.uk/standard-visitor",
+    "content_hash": "5fe6094ca8e08b65e036d89a6a81fc0c46c4e87c32a8cac385250294893e622b",
+    "consistent": false,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [
+     "government_fee",
+     "requirement_detail",
+     "visa_products"
+    ],
+    "note": "The page is generic and updates the 6-month Standard Visitor fee to £135 and confirms applications are made online."
+   }
+  },
+  "generated_at": "2026-08-22T06:26:37.015146",
+  "fresh_until": "2026-09-05T06:50:57.029183"
+ },
+ {
+  "cache_key": "CHN|CHN|JPN|tourism|default|unknown|v6",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "JPN",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Temporary Visitor (tourist)",
+   "permitted_stay": "Single-entry tourist: normally 15 days; 3-year multiple: 30 days/visit; 5-year multiple: 90 days/visit",
+   "passport_validity": "Valid for the duration of the intended stay in Japan",
+   "required_documents": [
+    "Valid ordinary PRC passport",
+    "Completed visa application form",
+    "Recent passport photo",
+    "Travel itinerary / schedule of stay",
+    "Confirmed return/onward flight reservation",
+    "Proof of accommodation",
+    "Financial proof (bank statements, income/tax certificate)",
+    "Employment/student certificate if applicable",
+    "Copy of Chinese ID/household registration if requested by agency"
+   ],
+   "application_channel": "authorised_agent",
+   "government_fee": {
+    "amount": null,
+    "currency": null
+   },
+   "processing_time": "About 5–7 working days after the accredited agency lodges the application; may vary",
+   "forms": [
+    "Japan short-term visa application form (available from the accredited agency/embassy)"
+   ],
+   "official_portal_url": null,
+   "photo_requirements": "One recent color passport photo; commonly 45 mm × 45 mm or 45 mm × 35 mm, white/plain background, taken within 6 months (follow agency/consulate guidance)",
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [
+    "No online applicant account required; apply through an accredited travel agency"
+   ],
+   "payment_process": [
+    "Pay any official consular fee and the agency service fee to the accredited travel agency per its instructions"
+   ],
+   "submission_process": [
+    "Deliver documents to a Japanese diplomatic mission-accredited travel agency in China",
+    "The agency checks and lodges the application at the relevant Japanese embassy/consulate",
+    "Collect passport with visa from the agency"
+   ],
+   "onward_travel_evidence": "Confirmed return or onward flight reservation",
+   "accommodation_evidence": "Hotel bookings or other lodging plan for the itinerary",
+   "financial_evidence": "Bank statements, proof of regular income/tax payment, and/or employment certificate showing sufficient funds",
+   "insurance_required": false,
+   "exceptions": [
+    "3-year and 5-year multiple-entry tourist visas may be available for applicants meeting income/asset/tax criteria",
+    "Group tourist visas may be arranged by designated agencies for organized tours",
+    "Ordinary PRC passports are not visa-exempt for Japan"
+   ],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "Consular fee for Chinese ordinary passport holders is not confirmed; agencies may report it is waived, but verify with the accredited agent/embassy"
+    },
+    {
+     "field": "official_portal_url",
+     "reason": "No single direct government applicant portal applies; this route uses accredited travel agencies"
+    },
+    {
+     "field": "permitted_stay_days",
+     "reason": "Standard single-entry Chinese tourist visa is often issued for 15 days, but the consul may grant a different duration; confirm with agency/embassy"
+    },
+    {
+     "field": "evisa_eligibility",
+     "reason": "Japan's eVISA list for Chinese residents may have changed; this response assumes paper filing via authorised agent; verify current eligibility"
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": 15,
+   "passport_validity_requirement": {
+    "kind": "valid_through_departure",
+    "months": null
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "Disembarkation/Embarkation Card or Visit Japan Web",
+    "submission_window": "Before arrival via Visit Japan Web or on entry with paper card"
+   },
+   "health_requirements": [],
+   "route_workflow_type": "embassy_submission",
+   "visa_products": [
+    {
+     "type": "Single-entry tourist",
+     "entry": "single",
+     "validity": "3 months",
+     "max_stay_days": 15,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "Common stay for Chinese individual tourists; consul may decide a different duration"
+    },
+    {
+     "type": "3-year multiple-entry tourist",
+     "entry": "multiple",
+     "validity": "3 years",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "For applicants meeting financial/tax criteria"
+    },
+    {
+     "type": "5-year multiple-entry tourist",
+     "entry": "multiple",
+     "validity": "5 years",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "For applicants meeting higher financial/asset criteria"
+    }
+   ],
+   "application_channel_detail": "Individuals cannot apply directly; the application must be lodged through a Japanese diplomatic mission-accredited travel agency (authorised agent) in China.",
+   "source_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+   "requirement_detail": "paper_visa",
+   "transit_requirement": {
+    "required": null,
+    "note": null
+   }
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:50:42.101731+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+    "content_hash": "6a0be5d7e1a8e8b35c6030040ead0d581cdbd6387d3c5fe714458fab7809ea2e",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "Generic MOFA Japan visa index page; it confirms China is a visa-required country but does not state nationality-specific application rules for Chinese applicants."
+   }
+  },
+  "generated_at": "2026-08-22T06:26:37.118692",
+  "fresh_until": "2026-09-05T06:51:55.515523"
+ },
+ {
+  "cache_key": "CHN|CHN|VNM|tourism|default|unknown|v6",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "VNM",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "tourist visa (DL)",
+   "permitted_stay": "up to 90 days",
+   "passport_validity": "valid at least 6 months beyond date of arrival",
+   "required_documents": [
+    "passport biodata page scan",
+    "digital passport-style photo",
+    "intended entry/exit dates and port of entry",
+    "payment card for the e-visa fee"
+   ],
+   "application_channel": "online_portal",
+   "government_fee": {
+    "amount": 25,
+    "currency": "USD"
+   },
+   "processing_time": "3 working days for e-visa",
+   "forms": [
+    "online Vietnam e-visa application form"
+   ],
+   "official_portal_url": "https://evisa.gov.vn",
+   "photo_requirements": "Recent passport-style colour digital photo, plain white/light background, full face, no glasses/headwear unless medically/religiously required, per portal specifications",
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [
+    "no permanent account required; the portal issues an application registration code after submission"
+   ],
+   "payment_process": [
+    "pay the non-refundable e-visa fee online by international payment card during application"
+   ],
+   "submission_process": [
+    "complete the online form on the official e-visa portal",
+    "upload passport scan and photo",
+    "pay the fee",
+    "save the application registration code",
+    "download and print the e-visa PDF when issued by email",
+    "present passport, printed e-visa and completed arrival card on entry"
+   ],
+   "onward_travel_evidence": "Not required for the e-visa application, but carry a return/onward ticket as officers may ask on arrival",
+   "accommodation_evidence": "Not required for the e-visa application, but carry a hotel booking or local address",
+   "financial_evidence": "Not required for the e-visa application, but be prepared to show sufficient funds if asked on arrival",
+   "insurance_required": false,
+   "exceptions": [
+    "Phu Quoc Island only, arriving by direct international flight and staying within Phu Quoc: 30-day visa exemption",
+    "Organised Chinese tour groups may qualify for separate visa-exemption pilots; verify with the registered Vietnamese travel agency/authorities before travel"
+   ],
+   "uncertainty": [
+    {
+     "field": "government_fee / e-visa product fees",
+     "reason": "Fees are widely reported as USD 25 (single-entry) and USD 50 (multiple-entry), but Vietnam can revise them; confirm the exact amount on the official portal before paying."
+    },
+    {
+     "field": "Chinese organised-group-tour visa exemption",
+     "reason": "Pilot or unilateral visa exemptions for Chinese tourists travelling in registered groups have been reported and may be in force; this answer assumes an independent individual applicant."
+    },
+    {
+     "field": "source_url",
+     "reason": "I do not have a single official policy summary page URL to cite; the official e-visa portal is the authoritative channel."
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "Vietnam entry/exit declaration (arrival card)",
+    "submission_window": "complete before immigration inspection; paper forms may be distributed on the aircraft or available at the border"
+   },
+   "health_requirements": [],
+   "route_workflow_type": "evisa_portal",
+   "visa_products": [
+    {
+     "type": "Single-entry tourist e-visa",
+     "entry": "single",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 25,
+      "currency": "USD"
+     },
+     "notes": "Apply online; one entry within the validity period"
+    },
+    {
+     "type": "Multiple-entry tourist e-visa",
+     "entry": "multiple",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": "Apply online; multiple entries within the validity period"
+    },
+    {
+     "type": "Embassy/consulate tourist visa",
+     "entry": "single",
+     "validity": "typically 30 days; longer validity available",
+     "max_stay_days": 30,
+     "notes": "Fee and stay vary by embassy/consulate and entry type; apply in person or by post"
+    },
+    {
+     "type": "Visa on arrival with pre-arranged approval letter",
+     "entry": "single",
+     "validity": "as stated in the approval letter",
+     "max_stay_days": null,
+     "notes": "Airport entry only; obtain approval letter via an authorised Vietnamese agency before travel, then pay stamping fee at the VOA counter"
+    }
+   ],
+   "application_channel_detail": "Ellis: Chinese ordinary passport holders are not visa-exempt for Vietnam; an individual tourist should apply for an e-visa on Vietnam's official Immigration e-visa portal. Embassy/consulate visas and pre-arranged visa-on-arrival are alternative channels.",
+   "requirement_detail": "evisa",
+   "transit_requirement": {
+    "required": null,
+    "note": null
+   }
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:50:50.642656+00:00",
+    "outcome": "checked",
+    "source_url": "https://evisa.xuatnhapcanh.gov.vn/",
+    "content_hash": "f753e5f2096fae3674f778794d2f2cfbdedde08dbe4a12b97d0c1f8512c730d2",
+    "consistent": false,
+    "changed_fields": [
+     "official_portal_url"
+    ],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The e-visa portal moved to new domains on 11 November 2024; the stored URL is no longer current."
+   }
+  },
+  "generated_at": "2026-08-22T06:26:53.206337",
+  "fresh_until": "2026-09-05T06:51:47.322447"
+ },
+ {
+  "cache_key": "HKG|HKG|KOR|tourism|default|unknown|v6",
+  "route": {
+   "passport_nationality": "HKG",
+   "lawful_country_of_residence": "HKG",
+   "destination_country": "KOR",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+   "visa_category": "K-ETA / B-2 visa-free entry",
+   "permitted_stay": "90 days",
+   "passport_validity": "6 months beyond entry recommended/usually required",
+   "required_documents": [
+    "Valid HKSAR ordinary passport",
+    "Digital passport photo",
+    "Email address",
+    "Credit/debit card for fee"
+   ],
+   "application_channel": "online_portal",
+   "government_fee": {
+    "amount": 10000,
+    "currency": "KRW"
+   },
+   "processing_time": "Usually within 72 hours",
+   "forms": [
+    "Online K-ETA application form"
+   ],
+   "official_portal_url": "https://www.k-eta.go.kr",
+   "photo_requirements": "Digital passport photo, JPEG, max 300KB; face centred, plain background",
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [],
+   "payment_process": [
+    "10,000 KRW non-refundable fee paid online by credit/debit card"
+   ],
+   "submission_process": [
+    "Complete application on the K-ETA portal",
+    "Pay the fee",
+    "Receive approval email before travel"
+   ],
+   "onward_travel_evidence": "Not required for K-ETA; return/onward ticket may be checked at immigration",
+   "accommodation_evidence": "Accommodation address in Korea requested on form; booking confirmation not mandatory",
+   "financial_evidence": "Not required for K-ETA; sufficient funds may be checked at entry",
+   "insurance_required": false,
+   "exceptions": [
+    "Group/family applications: primary applicant can add co-travelers on one K-ETA application",
+    "Direct airside transit without entering Korea generally does not require K-ETA"
+   ],
+   "uncertainty": [
+    {
+     "field": "K-ETA_requirement",
+     "reason": "K-ETA policy and eligible nationalities can change; verify current requirement on the official K-ETA portal before travel"
+    },
+    {
+     "field": "passport_validity_months",
+     "reason": "Exact passport validity rule for K-ETA entrants varies by source; commonly cited as 6 months at entry, but confirm with official guidance"
+    },
+    {
+     "field": "government_fee",
+     "reason": "K-ETA fee has been 10,000 KRW but is subject to revision; check the official portal"
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "Arrival Card (Immigration Card)",
+    "submission_window": "On arrival / during flight"
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination",
+     "applicability": "conditional",
+     "trigger_countries": [
+      "AGO",
+      "ARG",
+      "BEN",
+      "BOL",
+      "BRA",
+      "BFA",
+      "BDI",
+      "CMR",
+      "CAF",
+      "TCD",
+      "COL",
+      "COG",
+      "CRI",
+      "CIV",
+      "COD",
+      "ECU",
+      "GNQ",
+      "ETH",
+      "GAB",
+      "GMB",
+      "GHA",
+      "GIN",
+      "GNB",
+      "GUY",
+      "KEN",
+      "LBR",
+      "MLI",
+      "MRT",
+      "NER",
+      "NGA",
+      "PAN",
+      "PRY",
+      "PER",
+      "RWA",
+      "SEN",
+      "SLE",
+      "SSD",
+      "SUR",
+      "TGO",
+      "TZA",
+      "UGA",
+      "VEN",
+      "ZMB"
+     ],
+     "trigger": "Travel/transit within 5 days in a yellow-fever risk country",
+     "question": "Have you visited or transited a yellow-fever risk country within the last 5 days?"
+    }
+   ],
+   "route_workflow_type": "electronic_authorization",
+   "visa_products": [],
+   "application_channel_detail": "Apply yourself online via the official K-ETA portal; approval must be obtained before boarding.",
+   "source_url": "https://www.k-eta.go.kr",
+   "requirement_detail": "eta_electronic_authorization",
+   "transit_requirement": {
+    "required": null,
+    "note": null
+   }
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:50:57.033897+00:00",
+    "outcome": "checked",
+    "source_url": "https://overseas.mofa.go.kr/gb-en/brd/m_23721/view.do?seq=39&page=1",
+    "content_hash": "657ecdd7fa4f18e31161500850ab96fd29fc012272ce8323b830072e7853364a",
+    "consistent": false,
+    "changed_fields": [
+     "visa_products"
+    ],
+    "disputed_fields": [
+     "application_channel_detail",
+     "disposition",
+     "requirement_detail",
+     "visa_category"
+    ],
+    "generic_page_skipped": [],
+    "note": "Hong Kong passport holders are temporarily exempted from K-ETA for tourism in 2025, so the stored K-ETA requirement is incorrect for this route during that period."
+   }
+  },
+  "generated_at": "2026-08-22T06:44:10.309751",
+  "fresh_until": "2026-09-05T06:44:10.309751"
+ },
+ {
+  "cache_key": "CHN|CHN|PHL|tourism|default|unknown|v6",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "PHL",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "9(a) Temporary Visitor's Visa (tourist)",
+   "permitted_stay": "up to 59 days per entry",
+   "passport_validity": "valid at least 6 months beyond arrival",
+   "required_documents": [
+    "Passport valid for at least six (6) months beyond the intended stay",
+    "Confirmed hotel accommodation or booking",
+    "Return or onward ticket to the next country of destination"
+   ],
+   "application_channel": "authorised_agent",
+   "government_fee": {
+    "amount": null,
+    "currency": null
+   },
+   "processing_time": "5 to 10 working days",
+   "forms": [
+    "Philippine visa application form (obtained via accredited agency)"
+   ],
+   "official_portal_url": null,
+   "photo_requirements": "Recent passport-size colour photographs; exact size and background specified by the accredited agency",
+   "biometrics_required": null,
+   "interview_required": null,
+   "appointment_required": null,
+   "account_registration_steps": [],
+   "payment_process": [
+    "Pay the visa fee in CNY to the accredited travel agency; the agency remits to the Philippine Embassy/Consulate"
+   ],
+   "submission_process": [
+    "Contact a Philippine Embassy/Consulate-accredited travel agency in China",
+    "Submit documents and pay the fee to the agency",
+    "The agency lodges the application at the Philippine Embassy/Consulate",
+    "Collect the passport and visa from the agency after processing"
+   ],
+   "onward_travel_evidence": "Confirmed round-trip or onward ticket required",
+   "accommodation_evidence": "Hotel booking or host invitation letter required",
+   "financial_evidence": "Bank statements, employment certificate, or other proof of sufficient funds required",
+   "insurance_required": false,
+   "exceptions": [
+    "A conditional visa-free entry may apply if the applicant holds a valid visa from the US, Japan, Australia, Canada, or Schengen; verify current eligibility before travel because this exemption has been volatile",
+    "Minors require additional documents such as a birth certificate and parental consent",
+    "Longer-validity multiple-entry visas may be available to frequent travellers or those with strong ties"
+   ],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "Philippine visa fees for Chinese applicants are set in CNY by the embassy/consulate and fluctuate with exchange rates; the current single-entry 9(a) fee is not verified"
+    },
+    {
+     "field": "eVisa availability",
+     "reason": "The Philippines launched, suspended, and adjusted an e-visa channel for Chinese nationals; current operational status and eligibility are volatile and not confirmed"
+    },
+    {
+     "field": "conditional visa-free exemption",
+     "reason": "Policy allowing visa-free entry for Chinese holders of valid US/Japan/Australia/Canada/Schengen visas has changed repeatedly; verify current rules before travel"
+    },
+    {
+     "field": "biometrics_required",
+     "reason": "Personal appearance or biometrics may be required depending on jurisdiction and agency instructions; not confirmed for this route"
+    },
+    {
+     "field": "interview_required",
+     "reason": "The embassy or consulate may request an interview on a case-by-case basis; not confirmed for this route"
+    },
+    {
+     "field": "appointment_required",
+     "reason": "Appointment or walk-in arrangements depend on the accredited agency and embassy/consulate practice; not confirmed"
+    },
+    {
+     "field": "12-month multiple-entry availability",
+     "reason": "Longer-validity multiple-entry tourist visas are normally reserved for qualified applicants; standard tourist eligibility is not confirmed"
+    }
+   ],
+   "confidence": "low",
+   "permitted_stay_days": 59,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "eTravel registration",
+    "submission_window": "within 72 hours before arrival"
+   },
+   "health_requirements": [
+    {
+     "name": "COVID-19 vaccination or testing",
+     "applicability": "not_applicable",
+     "trigger_countries": [],
+     "trigger": null,
+     "question": null
+    },
+    {
+     "name": "Yellow fever vaccination",
+     "applicability": "not_applicable",
+     "trigger_countries": [],
+     "trigger": null,
+     "question": null
+    }
+   ],
+   "route_workflow_type": "embassy_submission",
+   "visa_products": [
+    {
+     "type": "Single-entry 9(a) tourist",
+     "entry": "single",
+     "validity": "3 months from issue",
+     "max_stay_days": 59,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "Standard tourist visa for Chinese ordinary passport holders"
+    },
+    {
+     "type": "Multiple-entry 9(a) tourist",
+     "entry": "multiple",
+     "validity": "6 months from issue",
+     "max_stay_days": 59,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "Usually requires prior Philippine travel or strong justification"
+    },
+    {
+     "type": "Multiple-entry 9(a) tourist",
+     "entry": "multiple",
+     "validity": "12 months from issue",
+     "max_stay_days": 59,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "Available to qualified frequent travellers; additional requirements apply"
+    }
+   ],
+   "application_channel_detail": "Chinese nationals generally cannot apply directly; the application must be lodged through a Philippine Embassy/Consulate-accredited travel agency, which submits the passport and documents to the embassy or consulate.",
+   "requirement_detail": "paper_visa",
+   "transit_requirement": {
+    "required": null,
+    "note": null
+   }
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T06:51:05.902049+00:00",
+    "outcome": "checked",
+    "source_url": "https://evisa.gov.ph/page/policy",
+    "content_hash": "2e634d9cb58fb629cf41c2e96d5ce1bed7b585836d21c84bb50753dfb2347474",
+    "consistent": false,
+    "changed_fields": [
+     "required_documents"
+    ],
+    "disputed_fields": [
+     "application_channel",
+     "application_channel_detail",
+     "disposition",
+     "permitted_stay",
+     "requirement_detail",
+     "visa_category",
+     "visa_products"
+    ],
+    "generic_page_skipped": [],
+    "note": "The page states Chinese tourists may enter visa-free for 14 days effective 16 January 2026, only via NAIA or Mactan-Cebu; Chinese holders of valid Australian, Japanese, Canadian, Schengen or US visas "
+   }
+  },
+  "generated_at": "2026-08-22T06:45:16.305857",
+  "fresh_until": "2026-09-05T06:45:16.305857"
  }
 ]

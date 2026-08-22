@@ -1225,5 +1225,199 @@
         "submission_window": null
       }
     }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "FRA",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.diplomatie.gouv.fr/",
+    "note": "Visa-free is correct; the EU Entry/Exit System now registers biometrics at the border on first entry.",
+    "fields": {
+      "arrival_card": {
+        "required": true,
+        "name": "EU Entry/Exit System (EES) biometric registration",
+        "submission_window": "Taken at the border on first entry"
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "USA",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html",
+    "note": "Category, fee and portal were missing. Hong Kong is not a Visa Waiver country, so there is no ESTA route: a B-1/B-2 visa is required, MRV fee USD 185. Appointments and fee payment for Hong Kong run through ustraveldocs.com/hk.",
+    "fields": {
+      "visa_category": "B-1/B-2 visitor visa",
+      "government_fee": {
+        "amount": 185,
+        "currency": "USD"
+      },
+      "official_portal_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html",
+      "requirement_detail": "paper_visa",
+      "arrival_card": {
+        "required": false,
+        "name": null,
+        "submission_window": null
+      },
+      "application_channel_detail": "Hong Kong is not in the Visa Waiver Program, so ESTA is not available. Complete the DS-160, pay the USD 185 MRV fee and attend an interview at the US Consulate General.",
+      "visa_products": [
+        {
+          "type": "B-1/B-2 visitor visa",
+          "entry": "multiple",
+          "validity": "as granted",
+          "max_stay_days": 180,
+          "fee": {
+            "amount": 185,
+            "currency": "USD"
+          },
+          "notes": "Stay per admission is set by CBP, usually up to 6 months."
+        }
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "VNM",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://evisa.gov.vn/",
+    "note": "Fee, portal and the multiple-entry product were missing: USD 25 single, USD 50 multiple.",
+    "fields": {
+      "official_portal_url": "https://evisa.gov.vn/",
+      "requirement_detail": "evisa",
+      "government_fee": {
+        "amount": 25,
+        "currency": "USD"
+      },
+      "arrival_card": {
+        "required": false,
+        "name": null,
+        "submission_window": null
+      },
+      "visa_products": [
+        {
+          "type": "Single-entry tourist e-visa",
+          "entry": "single",
+          "validity": "up to 90 days",
+          "max_stay_days": 90,
+          "fee": {
+            "amount": 25,
+            "currency": "USD"
+          },
+          "notes": "Entry and exit through the designated international ports."
+        },
+        {
+          "type": "Multiple-entry tourist e-visa",
+          "entry": "multiple",
+          "validity": "up to 90 days",
+          "max_stay_days": 90,
+          "fee": {
+            "amount": 50,
+            "currency": "USD"
+          },
+          "notes": "Entry and exit through the designated international ports."
+        }
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "USA",
+      "destination": "VNM",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://evisa.gov.vn/",
+    "note": "Fee, portal, category and the multiple-entry product were missing: USD 25 single, USD 50 multiple.",
+    "fields": {
+      "official_portal_url": "https://evisa.gov.vn/",
+      "requirement_detail": "evisa",
+      "visa_category": "Tourist e-visa",
+      "government_fee": {
+        "amount": 25,
+        "currency": "USD"
+      },
+      "arrival_card": {
+        "required": false,
+        "name": null,
+        "submission_window": null
+      },
+      "visa_products": [
+        {
+          "type": "Single-entry tourist e-visa",
+          "entry": "single",
+          "validity": "up to 90 days",
+          "max_stay_days": 90,
+          "fee": {
+            "amount": 25,
+            "currency": "USD"
+          },
+          "notes": "Entry and exit through the designated international ports."
+        },
+        {
+          "type": "Multiple-entry tourist e-visa",
+          "entry": "multiple",
+          "validity": "up to 90 days",
+          "max_stay_days": 90,
+          "fee": {
+            "amount": 50,
+            "currency": "USD"
+          },
+          "notes": "Entry and exit through the designated international ports."
+        }
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "USA",
+      "destination": "THA",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://tdac.immigration.go.th",
+    "note": "Visa-free is correct; the Thailand Digital Arrival Card is mandatory before arrival and was missing.",
+    "fields": {
+      "arrival_card": {
+        "required": true,
+        "name": "Thailand Digital Arrival Card (TDAC)",
+        "submission_window": "Within 3 days before arrival"
+      },
+      "official_portal_url": "https://tdac.immigration.go.th",
+      "permitted_stay": "60 days, extendable once by up to 30 days at the officer's discretion",
+      "application_channel_detail": "No visa is needed, but the Thailand Digital Arrival Card must be filed before arrival."
+    }
+  },
+  {
+    "route": {
+      "nationality": "USA",
+      "destination": "TWN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.immigration.gov.tw/",
+    "note": "Visa-free is correct; the online arrival card is the pre-arrival step and was unrecorded.",
+    "fields": {
+      "arrival_card": {
+        "required": true,
+        "name": "Taiwan Online Arrival Card",
+        "submission_window": "Any time before arrival, or on the paper form"
+      },
+      "official_portal_url": "https://oac.immigration.gov.tw/"
+    }
   }
 ]

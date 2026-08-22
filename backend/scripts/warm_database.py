@@ -178,10 +178,22 @@ def recheck() -> int:
     from app.db import SessionLocal
     from app.visa_snapshot import freshness
     from app.visa_snapshot.models import KimiRouteGuidanceCache as C
+    from app.visa_snapshot.kimi_primary import CACHE_VERSION
     db = SessionLocal()
-    keys = [r.cache_key for r in
-            db.execute(select(C).order_by(C.fresh_until)).scalars()]
+    # Current-version rows only: rows written under an older answer schema can
+    # never be served (the version is part of the key), so checking their
+    # pages is pure waste. They are deleted here rather than skipped forever.
+    keys, dead = [], 0
+    for r in db.execute(select(C).order_by(C.fresh_until)).scalars():
+        if f"|{CACHE_VERSION}" in r.cache_key:
+            keys.append(r.cache_key)
+        else:
+            db.delete(r); dead += 1
+    db.commit()
     db.close()
+    if dead:
+        print(f"purged {dead} unreachable rows from older answer schemas", flush=True)
+    print(f"rechecking {len(keys)} current answers", flush=True)
 
     def _one(key):
         s = SessionLocal()
