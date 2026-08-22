@@ -283,7 +283,8 @@ def pick_slot(db, row, *, index: int, actor: str,
     row.status = "slot_picked"
 
 
-def rank_slots(db, row, *, indices: list, actor: str, expect: list = None):
+def rank_slots(db, row, *, indices: list, actor: str,
+               expect: list | None = None):
     """The applicant names up to MAX_RANKED of the offered slots, in their own
     order of preference — Trip.com's "five preferred times in one session".
 

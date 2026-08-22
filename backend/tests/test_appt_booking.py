@@ -678,6 +678,369 @@ def test_input_caps_bound_posts_and_windows(client, db):
     assert row.date_windows[0]["to"] == "2026-11-15"
 
 
+# ------------------------------------ ranked preferred times (up to five)
+#
+# Trip.com's ask: "up to 5 preferred appointment times in one session; the
+# system prioritizes and schedules the earliest available time slot based on
+# the order of preference." What these tests pin is that honouring it did NOT
+# cost the doctrine: every candidate is a slot the applicant personally named,
+# the order is theirs, and when they are all gone Ellis books nothing at all
+# rather than substituting a time they never chose.
+
+FIVE = [{"post": "Beijing", "when": f"2026-10-{d}T09:30", "label": "morning"}
+        for d in ("05", "12", "19", "26")] + \
+       [{"post": "Shanghai", "when": "2026-11-02T14:00"}]
+
+
+def _offer(client, rid, slots=None):
+    r = client.post(f"/appointments/booking/{rid}/offer-slots", headers=ADMIN,
+                    json={"slots": slots if slots is not None else FIVE})
+    assert r.status_code == 200, r.text
+    return r.json()
+
+
+def _rank(client, rid, indices, slots=None):
+    body = {"indices": indices}
+    if slots is not None:
+        body["slots"] = slots
+    return client.post(f"/appointments/booking/{rid}/rank", headers=AUTH,
+                       json=body)
+
+
+def test_ranking_five_preferred_times_is_one_applicants_own_choice(client, db):
+    from app import models
+    cid = _case(client)
+    rid = _request(client, cid)["id"]
+    _offer(client, rid)
+    # Their order, not the calendar's: the 26th first, then the 5th, and so on.
+    r = _rank(client, rid, [3, 0, 4, 1, 2])
+    assert r.status_code == 200, r.text
+    out = r.json()
+    assert out["status"] == "slot_picked"
+    assert out["max_ranked"] == 5
+    ranked = out["ranked_slots"]
+    assert [s["rank"] for s in ranked] == [1, 2, 3, 4, 5]
+    assert [s["when"] for s in ranked] == [FIVE[i]["when"]
+                                           for i in (3, 0, 4, 1, 2)]
+    # Every ranked entry is one of the slots that was OFFERED — nothing Ellis
+    # added, and each keeps the provenance of the reading it came from.
+    offered = {(s["post"], s["when"]) for s in out["offered_slots"]}
+    for s in ranked:
+        assert (s["post"], s["when"]) in offered
+        assert s["recorded_by"] == "operator-1" and s["recorded_at"]
+        assert s["ranked_by"] == "user1"
+    # Rank 1 IS the pick, so every downstream step is unchanged.
+    assert out["picked_slot"]["when"] == FIVE[3]["when"]
+    assert out["picked_slot"]["rank"] == 1
+    assert out["picked_at"] and out["ranked_at"]
+    row = db.get(models.AppointmentBookingRequest, rid)
+    db.refresh(row)
+    assert len(row.ranked_slots) == 5
+
+
+def test_ranking_is_capped_deduplicated_and_range_checked(client):
+    cid = _case(client)
+    rid = _request(client, cid)["id"]
+    _offer(client, rid)
+    # Six preferred times is more than the applicant was offered the chance to
+    # name — refused, never silently truncated to five.
+    r = _rank(client, rid, [0, 1, 2, 3, 4, 0])
+    assert r.status_code == 422
+    assert "at most 5" in r.json()["detail"]["reason"]
+    # The same slot twice is not a preference order.
+    r = _rank(client, rid, [1, 3, 1])
+    assert r.status_code == 422
+    assert "twice" in r.json()["detail"]["reason"]
+    # A position nobody was offered.
+    for bad in ([9], [0, 5], [-1]):
+        r = _rank(client, rid, bad)
+        assert r.status_code == 422, bad
+        assert "not one of the 5 offered" in r.json()["detail"]["reason"]
+    # An empty list is not a choice.
+    assert _rank(client, rid, []).status_code == 422
+    # Nothing landed: the request is still waiting on the applicant.
+    view = client.get(f"/appointments/booking/cases/{cid}", headers=AUTH).json()
+    assert view["status"] == "slots_offered"
+    assert view["ranked_slots"] == []
+
+
+def test_ranking_is_only_possible_from_slots_offered(client):
+    cid = _case(client)
+    rid = _request(client, cid)["id"]
+    # Before any slots exist there is nothing to rank.
+    r = _rank(client, rid, [0])
+    assert r.status_code == 409
+    assert "cannot rank on a requested request" in r.json()["detail"]["reason"]
+    _offer(client, rid)
+    assert _rank(client, rid, [0, 1]).status_code == 200
+    # And ranking is one act: a second one needs a fresh offer, so a stale tab
+    # cannot quietly re-order a choice the desk is already working.
+    assert _rank(client, rid, [2, 3]).status_code == 409
+    # The operator cannot rank for the applicant either.
+    assert client.post(f"/appointments/booking/{rid}/rank", headers=ADMIN,
+                       json={"indices": [0]}).status_code == 403
+
+
+def test_a_reoffer_clears_the_ranking_with_the_pick(client, db):
+    from app import models
+    cid = _case(client)
+    rid = _request(client, cid)["id"]
+    _offer(client, rid)
+    assert _rank(client, rid, [0, 1, 2]).status_code == 200
+    # The calendar moved on: those five slots are superseded. A preference
+    # order over slots that no longer exist is not a choice — it is dropped,
+    # never re-pointed at whatever now sits at those positions.
+    out = _offer(client, rid, [{"post": "Beijing", "when": "2026-12-01T09:00"}])
+    assert out["status"] == "slots_offered"
+    assert out["ranked_slots"] == [] and out["picked_slot"] == {}
+    assert out["ranked_at"] == ""
+    row = db.get(models.AppointmentBookingRequest, rid)
+    db.refresh(row)
+    assert row.ranked_slots == [] and row.ranked_at is None
+
+
+def test_ranking_binds_to_the_slots_the_applicant_saw(client):
+    cid = _case(client)
+    rid = _request(client, cid)["id"]
+    _offer(client, rid)
+    # The echo is what the applicant had on screen. A mismatch means the
+    # operator re-offered between render and rank -> refused, honestly.
+    stale = [{"post": "Beijing", "when": FIVE[0]["when"]},
+             {"post": "Beijing", "when": "STALE-TIME"}]
+    r = _rank(client, rid, [0, 1], slots=stale)
+    assert r.status_code == 409
+    assert "changed" in r.json()["detail"]["reason"]
+    # A short echo is a mismatch too, not a partial check.
+    r = _rank(client, rid, [0, 1], slots=[{"post": "Beijing",
+                                           "when": FIVE[0]["when"]}])
+    assert r.status_code == 409
+    # Echoing what they really saw succeeds.
+    honest = [{"post": s["post"], "when": s["when"]} for s in (FIVE[0], FIVE[1])]
+    r = _rank(client, rid, [0, 1], slots=honest)
+    assert r.status_code == 200, r.text
+    assert r.json()["picked_slot"]["when"] == FIVE[0]["when"]
+
+
+# ------------------------------------------- next_available_rank (pure rules)
+
+class _Ranked:
+    """A bare carrier of ranked_slots — next_available_rank does no I/O, so it
+    needs no database, no clock and no request row."""
+
+    def __init__(self, entries):
+        self.ranked_slots = entries
+
+
+def _entries(*pairs):
+    return [{"post": p, "when": w, "rank": i}
+            for i, (p, w) in enumerate(pairs, start=1)]
+
+
+def test_next_available_rank_walks_down_the_applicants_own_list():
+    from app.appt_booking import next_available_rank as nxt
+    row = _Ranked(_entries(("Beijing", "2026-10-05T09:30"),
+                           ("Beijing", "2026-10-12T09:30"),
+                           ("Shanghai", "2026-11-02T14:00")))
+    everything = [{"post": "Beijing", "when": "2026-10-05T09:30"},
+                  {"post": "Beijing", "when": "2026-10-12T09:30"},
+                  {"post": "Shanghai", "when": "2026-11-02T14:00"}]
+    # First choice open -> first choice.
+    assert nxt(row, everything)["rank"] == 1
+    # First choice gone -> their SECOND choice, not the earliest on offer.
+    gone_first = everything[1:] + [{"post": "Beijing", "when": "2026-09-01T08:00"}]
+    picked = nxt(row, gone_first)
+    assert picked["rank"] == 2 and picked["when"] == "2026-10-12T09:30"
+    # ...and the 1 September slot, earlier than anything they chose, is never
+    # returned: it is not on their list.
+    assert picked["when"] != "2026-09-01T08:00"
+    # Only the last choice left -> the last choice.
+    assert nxt(row, [everything[2]])["rank"] == 3
+    # Every choice gone -> None. Not a substitute, not the nearest match.
+    assert nxt(row, [{"post": "Beijing", "when": "2026-09-01T08:00"}]) is None
+    assert nxt(row, []) is None
+    # Post and time must BOTH match: same time at another post is another slot.
+    assert nxt(row, [{"post": "Shanghai", "when": "2026-10-05T09:30"}]) is None
+    # A row with no ranking at all has no ranked answer.
+    assert nxt(_Ranked([]), everything) is None
+
+
+def test_next_available_rank_honours_rank_over_stored_position():
+    """Ordered by the applicant's rank, not by however the list was stored — a
+    hand-edited or legacy row can never silently reorder their preferences."""
+    from app.appt_booking import next_available_rank as nxt
+    row = _Ranked([{"post": "B", "when": "T2", "rank": 2},
+                   {"post": "B", "when": "T1", "rank": 1}])
+    assert nxt(row, [{"post": "B", "when": "T1"},
+                     {"post": "B", "when": "T2"}])["when"] == "T1"
+
+
+# ------------------------------- the agent works down the list, and stops
+
+class _RankedDriver(_FakeSchedulingDriver):
+    """Books only the times it still shows as open; anything else answers with
+    the codebase's SLOT_GONE — 'someone took it first, nothing was booked'."""
+
+    def __init__(self, open_whens, echo_fresh=False, ambiguous=False):
+        super().__init__(confirmation="USV-RANK-1",
+                         capture=b"\x89PNG\r\n\x1a\ncapture")
+        self.open = set(open_whens)
+        self.echo_fresh = echo_fresh
+        self.ambiguous = ambiguous
+        self.tried = []
+
+    def book_appointment(self, *, slot, **kw):
+        self.tried.append(slot["when"])
+        if slot["when"] in self.open:
+            return {"ok": True, "confirmation": self._confirmation,
+                    "confirmation_capture": self._capture,
+                    "capture_mime": "image/png"}
+        if self.ambiguous:
+            return {"ok": False, "status": "OUTCOME_UNCERTAIN"}
+        out = {"ok": False, "code": "SLOT_GONE"}
+        if self.echo_fresh:
+            out["slots"] = [{"post": "Beijing", "when": w}
+                            for w in sorted(self.open)]
+        return out
+
+
+def _ranked_case(client, db, indices):
+    """A request sitting at slot_picked with the applicant's ranked list."""
+    from app import models
+    cid = _case(client)
+    rid = _request(client, cid)["id"]
+    _offer(client, rid)
+    assert _rank(client, rid, indices).status_code == 200
+    db.expire_all()
+    return db.get(models.AppointmentBookingRequest, rid)
+
+
+def _store_evidence(db, row, stored):
+    from app import models
+
+    def _save(name, mime, content):
+        doc = models.StoredDocument(org_id=row.org_id,
+                                    application_id=row.application_id,
+                                    name=name, mime=mime,
+                                    size_bytes=len(content), sha256="x",
+                                    doc_type="booking_confirmation")
+        db.add(doc)
+        db.flush()
+        stored["id"] = doc.id
+        return doc.id
+    return _save
+
+
+def test_agent_books_the_next_ranked_choice_when_the_first_is_gone(client, db):
+    from app import appt_booking_agent
+    row = _ranked_case(client, db, [0, 1, 2])
+    stored = {}
+    drv = _RankedDriver(open_whens=[FIVE[1]["when"]])   # only their 2nd choice
+    out = appt_booking_agent.book(db, row, operator="operator-1", driver=drv,
+                                  store_evidence=_store_evidence(db, row, stored))
+    # It tried their first choice FIRST, then stopped at the first that booked.
+    assert drv.tried == [FIVE[0]["when"], FIVE[1]["when"]]
+    assert out["booked_rank"] == 2 and out["ranks_gone"] == [1]
+    assert row.status == "booked"
+    # The record names what was ACTUALLY booked, not the choice that was taken.
+    assert row.picked_slot["when"] == FIVE[1]["when"]
+    assert row.picked_slot["rank"] == 2
+    assert "ranked 2" in row.confirmation["note"]
+    assert row.confirmation["evidence_document_id"] == stored["id"]
+
+
+def test_agent_uses_the_sites_own_fresh_list_to_skip_to_their_next_choice(
+        client, db):
+    """When the site hands back what it still shows, the agent jumps to the
+    applicant's highest-ranked choice that is really on it — still only ever
+    one of theirs — instead of knocking on dead slots one by one."""
+    from app import appt_booking_agent
+    row = _ranked_case(client, db, [0, 1, 2])
+    drv = _RankedDriver(open_whens=[FIVE[2]["when"]], echo_fresh=True)
+    out = appt_booking_agent.book(db, row, operator="op", driver=drv,
+                                  store_evidence=_store_evidence(db, row, {}))
+    assert drv.tried == [FIVE[0]["when"], FIVE[2]["when"]]   # rank 2 skipped
+    assert out["booked_rank"] == 3
+
+
+def test_agent_never_substitutes_a_slot_the_applicant_did_not_rank(client, db):
+    from app import appt_booking_agent
+    row = _ranked_case(client, db, [0, 1, 2])
+    # Their three choices are gone; a fourth and fifth slot ARE open on the
+    # calendar — and Ellis books neither, because they were never chosen.
+    drv = _RankedDriver(open_whens=[FIVE[3]["when"], FIVE[4]["when"]])
+    try:
+        appt_booking_agent.book(db, row, operator="op", driver=drv,
+                                store_evidence=_store_evidence(db, row, {}))
+        raise AssertionError("must not book a time the applicant never chose")
+    except appt_booking_agent.AgentUnavailable as e:
+        assert e.kind == "not_ready"
+        assert "did not choose" in e.reason
+    # Only their own three were ever attempted, and nothing was booked.
+    assert drv.tried == [FIVE[0]["when"], FIVE[1]["when"], FIVE[2]["when"]]
+    assert row.status == "slot_picked"
+    assert row.confirmation == {}
+
+
+def test_agent_stops_rather_than_guessing_when_the_site_is_ambiguous(client, db):
+    """'The page did not confirm' is not 'the slot is gone' — it could mean the
+    booking went through unseen. Walking to the next preference on that guess
+    is how someone ends up with two appointments, so the agent stops."""
+    from app import appt_booking_agent
+    row = _ranked_case(client, db, [0, 1, 2])
+    drv = _RankedDriver(open_whens=[FIVE[2]["when"]], ambiguous=True)
+    try:
+        appt_booking_agent.book(db, row, operator="op", driver=drv,
+                                store_evidence=_store_evidence(db, row, {}))
+        raise AssertionError("an uncertain outcome must not walk the list")
+    except appt_booking_agent.AgentUnavailable as e:
+        assert e.kind == "not_ready"
+        assert "did not confirm" in e.reason
+    assert drv.tried == [FIVE[0]["when"]]      # it did not move on
+    assert row.status == "slot_picked"
+
+
+def test_a_human_check_mid_list_never_advances_the_ranking(client, db):
+    """A CAPTCHA says nothing about whether the slot is free. It surfaces to
+    the operator with the list untouched, not as 'that one must be taken'."""
+    from app import appt_booking_agent
+    row = _ranked_case(client, db, [0, 1])
+
+    class _Challenged(_RankedDriver):
+        def book_appointment(self, *, slot, **kw):
+            self.tried.append(slot["when"])
+            raise RuntimeError("portal presented a CAPTCHA challenge")
+
+    drv = _Challenged(open_whens=[])
+    try:
+        appt_booking_agent.book(db, row, operator="op", driver=drv,
+                                store_evidence=_store_evidence(db, row, {}))
+        raise AssertionError("a human check must surface, not vanish")
+    except appt_booking_agent.AgentUnavailable as e:
+        assert e.kind == "human_check"
+    assert drv.tried == [FIVE[0]["when"]]
+    assert row.status == "slot_picked"
+
+
+def test_an_unranked_pick_still_books_exactly_as_before(client, db):
+    """The single-pick path is untouched: one slot, one attempt, no rank in the
+    payload."""
+    from app import appt_booking_agent, models
+    cid = _case(client)
+    rid = _request(client, cid)["id"]
+    _offer(client, rid, [{"post": "Beijing", "when": "2026-10-12"}])
+    client.post(f"/appointments/booking/{rid}/pick", headers=AUTH,
+                json={"index": 0})
+    db.expire_all()
+    row = db.get(models.AppointmentBookingRequest, rid)
+    assert row.ranked_slots in ([], None)
+    drv = _RankedDriver(open_whens=["2026-10-12"])
+    out = appt_booking_agent.book(db, row, operator="op", driver=drv,
+                                  store_evidence=_store_evidence(db, row, {}))
+    assert out == {"ran": True, "confirmation_number": "USV-RANK-1"}
+    assert drv.tried == ["2026-10-12"]
+    assert row.status == "booked"
+
+
 # --------------------------------------------------- nearest-centre (Kimi K3)
 
 def test_nearest_centre_is_authenticated_and_fails_closed(client):

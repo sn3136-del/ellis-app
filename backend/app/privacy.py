@@ -98,6 +98,8 @@ def export_case(db, application_id: str) -> dict:
              "requested_by": b.requested_by,
              "requested_at": b.created_at.isoformat() if b.created_at else "",
              "offered_slots": b.offered_slots,
+             "ranked_slots": b.ranked_slots,
+             "ranked_at": b.ranked_at.isoformat() if b.ranked_at else "",
              "picked_slot": b.picked_slot,
              "picked_at": b.picked_at.isoformat() if b.picked_at else "",
              "confirmation": b.confirmation,

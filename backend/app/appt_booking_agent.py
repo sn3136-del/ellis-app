@@ -155,12 +155,58 @@ def read_slots(db, row, *, operator: str, driver=None) -> dict:
     return {"ran": True, "count": len(slots)}
 
 
+# The codebase's own vocabulary for "someone took it first, and NOTHING was
+# booked" (portal/synthetic.py, adapter_factory/runtime.py §24). It is the only
+# answer that lets the agent move down the applicant's ranked list: it means the
+# attempt was reversible and left no appointment behind.
+_SLOT_GONE_CODES = ("SLOT_GONE", "NO_SLOTS", "SLOT_TAKEN", "SLOT_UNAVAILABLE")
+
+
+def _slot_is_gone(result: dict) -> bool:
+    """True ONLY when the driver said the slot is no longer available. An
+    ambiguous "the page did not confirm" is deliberately not this: that answer
+    could also mean the booking went through unseen, and moving to the next
+    preference on a guess is how someone ends up with two appointments (and
+    both cancelled). If the driver cannot tell, the agent stops."""
+    code = str(result.get("code") or result.get("status") or "").strip().upper()
+    return code in _SLOT_GONE_CODES
+
+
+def _candidates(row) -> list[dict]:
+    """What the agent may attempt, in the applicant's own order.
+
+    Every candidate is a slot the APPLICANT NAMED: their ranked shortlist if
+    they gave one (rank 1 first), else the single slot they picked. Ellis adds
+    nothing to this list — there is no branch here that reaches for an unranked
+    slot, "the earliest", or anything else off the calendar. If all of these
+    fail, the agent fails closed and the desk offers fresh slots."""
+    out = []
+    for entry in booking.ranked_in_order(row):
+        if entry.get("post") and entry.get("when"):
+            out.append({"rank": entry.get("rank") or (len(out) + 1),
+                        "post": entry.get("post"), "when": entry.get("when")})
+    if out:
+        return out
+    picked = dict(row.picked_slot or {})
+    if picked.get("post") and picked.get("when"):
+        return [{"rank": picked.get("rank") or 0, "post": picked["post"],
+                 "when": picked["when"]}]
+    return []
+
+
 def book(db, row, *, operator: str, driver=None,
          store_evidence=None) -> dict:
-    """The agent drives the picked slot to the official confirmation and
-    records `booked` WITH the confirmation it captured. Evidence discipline is
-    unchanged: no captured confirmation document -> no booked (the operator
-    attaches it), so a real booking is never lost and a fake one never shown.
+    """The agent drives the applicant's chosen slot to the official
+    confirmation and records `booked` WITH the confirmation it captured.
+    Evidence discipline is unchanged: no captured confirmation document -> no
+    booked (the operator attaches it), so a real booking is never lost and a
+    fake one never shown.
+
+    When the applicant ranked several preferred times, the agent works DOWN
+    THEIR LIST — first choice first, stopping at the first that books — and
+    only steps to the next one when the official site said that slot is gone.
+    It never substitutes a slot they did not rank; if every one of their
+    choices is taken, it fails closed and the desk offers fresh slots.
 
     `store_evidence(name, mime, content) -> document_id` persists the captured
     confirmation page; injected by the API layer (and tests)."""
@@ -169,18 +215,56 @@ def book(db, row, *, operator: str, driver=None,
             "there is no picked slot to book yet.", kind="not_ready")
     if driver is None:
         _adapter, driver = _resolve_driver(row)
-    picked = dict(row.picked_slot or {})
-    try:
-        result = driver.book_appointment(
-            slot={"post": picked.get("post"), "when": picked.get("when")},
-            route=row.route)
-    except Exception as e:  # noqa: BLE001
-        raise _as_agent_error(e, driver)
-    if not (isinstance(result, dict) and result.get("ok")):
+    queue = _candidates(row)
+    if not queue:
+        raise AgentUnavailable(
+            "there is no picked slot to book yet.", kind="not_ready")
+    gone = []
+    result, chosen = None, None
+    while queue:
+        candidate = queue.pop(0)
+        try:
+            attempt = driver.book_appointment(
+                slot={"post": candidate["post"], "when": candidate["when"]},
+                route=row.route)
+        except Exception as e:  # noqa: BLE001
+            # A human check or a broken session says nothing about whether the
+            # slot is free. Surface it; never walk the list on a guess.
+            raise _as_agent_error(e, driver)
+        if isinstance(attempt, dict) and attempt.get("ok"):
+            result, chosen = attempt, candidate
+            break
+        if isinstance(attempt, dict) and _slot_is_gone(attempt):
+            gone.append(candidate)
+            fresh = _normalize_slots(attempt.get("slots"))
+            if fresh:
+                # The site handed back what it still shows. Skip straight to the
+                # applicant's next choice that is actually on it — still only
+                # ever one of their own — instead of trying dead slots in turn.
+                nxt = booking.next_available_rank(row, fresh)
+                if nxt is None:
+                    queue = []
+                    break
+                floor = nxt.get("rank") or 0
+                queue = [c for c in queue if (c.get("rank") or 0) >= floor]
+            continue
         raise AgentUnavailable(
             "the agent reached the booking step but the official page did not "
             "confirm; nothing was booked.",
             kind="not_ready", live_view_url=_live_view(driver))
+    if result is None:
+        # Every slot the applicant named is taken. The honest next step is a
+        # fresh reading of the calendar and a fresh choice by them — Ellis does
+        # not pick a replacement, so `booked` simply does not happen here.
+        which = ("the time this applicant chose is" if len(gone) <= 1 else
+                 f"none of the {len(gone)} preferred times this applicant "
+                 f"chose are")
+        raise AgentUnavailable(
+            f"{which} still open on the official site; nothing was booked. "
+            "Read the calendar again so they can choose from what is open now "
+            "— Ellis will not book a time they did not choose.",
+            kind="not_ready", needs=list(_REQUIRES),
+            live_view_url=_live_view(driver))
     number = str(result.get("confirmation") or "").strip()
     capture = result.get("confirmation_capture")
     capture_mime = str(result.get("capture_mime") or "image/png")
@@ -196,12 +280,26 @@ def book(db, row, *, operator: str, driver=None,
             "Ellis completed the booking steps but could not capture the "
             "official confirmation document; attach it to record the booking.",
             kind="capture_missing", confirmation_hint=number)
+    rank = int(chosen.get("rank") or 0)
+    if gone:
+        # The record must name what was ACTUALLY booked, not the first choice
+        # that was already taken. This is not Ellis choosing: `chosen` came out
+        # of the applicant's own ranked list.
+        row.picked_slot = dict(row.picked_slot or {}, post=chosen["post"],
+                               when=chosen["when"], rank=rank)
     doc_id = store_evidence("agent-confirmation", capture_mime, capture)
+    ranked_note = (f" (their choice ranked {rank}; ranks "
+                   f"{', '.join(str(g.get('rank')) for g in gone)} were "
+                   f"already taken)") if gone else ""
     booking.record_booked(db, row, confirmation_number=number,
                           evidence_document_id=doc_id,
-                          note=f"booked by Ellis agent in operator {operator}'s session",
+                          note=f"booked by Ellis agent in operator {operator}'s session{ranked_note}",
                           actor=f"Ellis agent (operator {operator})")
-    return {"ran": True, "confirmation_number": number}
+    out = {"ran": True, "confirmation_number": number}
+    if rank:
+        out["booked_rank"] = rank
+        out["ranks_gone"] = [g.get("rank") for g in gone]
+    return out
 
 
 def _live_view(driver) -> str:
