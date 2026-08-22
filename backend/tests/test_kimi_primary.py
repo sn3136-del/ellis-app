@@ -500,3 +500,32 @@ def test_new_answer_fields_survive_validation():
     for f in ("visa_products", "application_channel_detail", "source_url",
               "requirement_detail", "transit_requirement"):
         assert f in ALL_FIELDS, f
+
+
+# --- information-quality gate (Trip.com requirement 4) -----------------------
+
+def test_low_confidence_answers_are_held_until_a_person_releases_them():
+    """Their requirement: low-confidence content is blocked until an operator
+    confirms it. The engine's OWN doubt is the trigger, and holding means the
+    reader sees nothing — showing the claims under a warning is still
+    showing them."""
+    from app.visa_snapshot.kimi_primary import _result
+    held = _result("KIMI_PRIMARY", {"confidence": "low"},
+                   cached=False, stale=False)
+    assert held["review_required"] is True
+    assert held["operator_released"] is False
+    for ok in ("high", "medium"):
+        assert _result("KIMI_PRIMARY", {"confidence": ok},
+                       cached=False, stale=False)["review_required"] is False
+
+
+def test_an_operator_release_lifts_the_hold_for_that_answer_only():
+    from app.visa_snapshot.kimi_primary import _result
+    released = _result("KIMI_PRIMARY", {"confidence": "low"},
+                       cached=True, stale=False, released=True)
+    assert released["review_required"] is False
+    assert released["operator_released"] is True
+    # An answer with no guidance at all is not "held" — it is simply absent,
+    # and the unavailable/timeout messaging covers it.
+    assert _result("KIMI_UNAVAILABLE", {}, cached=False,
+                   stale=False)["review_required"] is False

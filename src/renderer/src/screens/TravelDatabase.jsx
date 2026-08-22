@@ -292,7 +292,11 @@ export default function TravelDatabase({ onBack }) {
   })), [reg])
   const docTypes = reg?.travel_document_types || []
 
-  const g = result?.guidance || null
+  // An answer the engine itself rated low confidence is HELD until a person
+  // confirms it. Holding means the reader does not see the claims at all —
+  // showing them under a warning would still be showing them.
+  const held = result?.review_required === true
+  const g = (result && !held) ? (result.guidance || null) : null
 
   // Every user-facing string the decision carries, translated in ONE masked,
   // cached Kimi catalog call whenever the UI language is not English.
@@ -940,7 +944,31 @@ export default function TravelDatabase({ onBack }) {
         </div>
       )}
 
-      {result && !g && (
+      {result && held && (
+        <div className="card anim-rise" style={{ padding: '30px 28px',
+                                                 borderRadius: 20, marginTop: 18,
+                                                 maxWidth: 560, marginLeft: 'auto',
+                                                 marginRight: 'auto',
+                                                 textAlign: 'center' }}
+             data-testid="database-held">
+          <div style={{ fontSize: 15, fontWeight: 800, color: NAVY }}>
+            {t('db.heldTitle')}
+          </div>
+          <div style={{ fontSize: 13.5, color: GRAY, marginTop: 10,
+                        lineHeight: 1.55 }}>
+            {t('db.heldBody', { route: `${countryName(nat)} → ${countryName(dest)}` })}
+          </div>
+          <div style={{ marginTop: 18 }}>
+            <button className="btn btn--ghost" onClick={() => setResult(null)}
+                    data-testid="database-held-again"
+                    style={{ fontSize: 14, borderRadius: 999 }}>
+              {t('db.newSearch')}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {result && !held && !g && (
         <div className="card anim-rise" style={{ padding: 22, borderRadius: 20,
                                                  marginTop: 16, maxWidth: 560,
                                                  marginLeft: 'auto',

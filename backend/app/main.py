@@ -253,6 +253,53 @@ def get_passport_validity(application_id: str, db=Depends(get_session),
     return verdict
 
 
+class DatabaseApproveIn(BaseModel):
+    """An operator releasing a held (low-confidence) answer for display."""
+    nationality: str = ""
+    destination: str = ""
+    travel_purpose: str = "tourism"
+    travel_document_type: str = "ordinary_passport"
+    note: str = ""
+
+
+@app.post("/database/approve")
+def travel_database_approve(body: DatabaseApproveIn, db=Depends(get_session),
+                            p: Principal = Depends(get_principal)):
+    """Release a held answer. The engine holds back anything it rates LOW
+    confidence; a person who has checked it against the official source marks
+    it releasable here. The approval is recorded on the cached answer with WHO
+    released it and WHEN, and it dies with the answer: a refresh writes a new
+    row, which is held again on its own merits."""
+    from datetime import datetime, timezone
+    from sqlalchemy import select as _select
+    from .visa_snapshot import kimi_primary
+    from .visa_snapshot.models import KimiRouteGuidanceCache
+    require_admin(p)
+    nat = body.nationality.strip().upper()
+    dest = body.destination.strip().upper()
+    if not nat or not dest:
+        raise HTTPException(422, "nationality and destination are required")
+    key = kimi_primary.cache_key({
+        "passport_nationality": nat, "lawful_country_of_residence": nat,
+        "destination_country": dest,
+        "travel_purpose": body.travel_purpose or "tourism",
+        "travel_document_type": body.travel_document_type or "ordinary_passport"})
+    row = db.execute(_select(KimiRouteGuidanceCache).where(
+        KimiRouteGuidanceCache.cache_key == key)).scalars().first()
+    if row is None:
+        raise HTTPException(404, "no cached answer for that route")
+    ver = dict(row.verification or {})
+    ver["operator_released"] = {
+        "by": p.user_id, "at": datetime.now(timezone.utc).isoformat(),
+        "note": (body.note or "")[:500]}
+    row.verification = ver
+    db.commit()
+    audit.record(db, org_id=p.org_id, application_id="database",
+                 action="database_answer_released",
+                 detail={"nationality": nat, "destination": dest}, actor=p.user_id)
+    return {"ok": True, "cache_key": key, "released_by": p.user_id}
+
+
 class DatabaseIssueIn(BaseModel):
     """A reader flagging a field that looks wrong."""
     nationality: str = ""

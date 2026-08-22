@@ -491,7 +491,8 @@ def _is_stale(row) -> bool:
 
 def _result(status: str, guidance: dict, *, cached: bool, stale: bool,
             missing=None, contradictions=None, model: str = "",
-            advisories=None, elapsed_seconds: float | None = None) -> dict:
+            advisories=None, elapsed_seconds: float | None = None,
+            released: bool = False) -> dict:
     # Exactly one Kimi pass produced this — the verification field says so
     # honestly for a complete decision and is empty otherwise.
     decided = status == STATUS_PRIMARY
@@ -509,6 +510,14 @@ def _result(status: str, guidance: dict, *, cached: bool, stale: bool,
         "verification": verification,
         # The safety boundary the UI must show with any guidance-driven flow:
         "irreversible_requires_confirmation": True,
+        # Information-quality gate (Trip.com requirement 4): an answer the
+        # engine itself rates LOW confidence is held back from the reader
+        # until a person confirms it, rather than shown as if it were solid.
+        # The engine's own doubt is the trigger — this is not a second
+        # opinion about whether it is right.
+        "review_required": bool(guidance) and not released
+                           and str((guidance or {}).get("confidence", "")).lower() == "low",
+        "operator_released": released,
     }
     if elapsed_seconds is not None:
         out["elapsed_seconds"] = round(elapsed_seconds, 2)
@@ -610,7 +619,9 @@ def get_route_guidance(db, route: dict, *, force_refresh: bool = False) -> dict:
     key = cache_key(route)
     row = _cached(db, key)
     if row is not None and not force_refresh:
+        released = bool((row.verification or {}).get("operator_released"))
         return _result(row.status, row.guidance, cached=True, stale=_is_stale(row),
+                       released=released,
                        missing=row.missing_fields, contradictions=row.contradictions,
                        model=row.model,
                        advisories=deterministic_advisories(route, row.guidance or {}))
