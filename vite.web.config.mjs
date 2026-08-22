@@ -19,8 +19,8 @@ const webCsp = [
   // authenticated backend (connect-src) and rendered from a local blob URL,
   // never by framing/hotlinking a cross-origin page.
   "img-src 'self' data: blob:",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "font-src 'self' https://fonts.gstatic.com",
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self'",
   // Vite dev needs its module preamble; loopback backend + HMR websocket only.
   "script-src 'self' 'unsafe-inline'",
   `connect-src 'self' ws://${HOST}:${PORT} http://${HOST}:8000 http://localhost:8000`,

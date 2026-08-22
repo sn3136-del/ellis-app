@@ -47,11 +47,17 @@ fi
 if [ ! -x "$PY" ]; then
   printf '  %s\n' "first run: creating the backend environment"
   python3 -m venv "$ROOT/backend/.venv" \
+    && { curl -fsS -m 6 https://pypi.org/simple/ >/dev/null 2>&1 || export PIP_INDEX_URL="https://pypi.tuna.tsinghua.edu.cn/simple"; } \
     && "$ROOT/backend/.venv/bin/pip" install -q -r "$ROOT/backend/requirements.txt" \
     || { printf 'error: could not build the backend environment\n' >&2; exit 1; }
 fi
 if [ ! -x "$VITE" ]; then
   printf '  %s\n' "first run: installing frontend dependencies"
+  # Where npmjs.org is unreachable or slow (mainland China), use the mirror.
+  if ! curl -fsS -m 6 https://registry.npmjs.org/ >/dev/null 2>&1; then
+    export NPM_CONFIG_REGISTRY="https://registry.npmmirror.com"
+    log "npm registry     : using the China mirror (npmjs.org not reachable)"
+  fi
   (cd "$ROOT" && npm install --silent) \
     || { printf 'error: npm install failed\n' >&2; exit 1; }
 fi
@@ -98,12 +104,28 @@ if [ -n "${GOOGLE_APPLICATION_CREDENTIALS:-}" ] && [ ! -f "$GOOGLE_APPLICATION_C
 fi
 # Whatever we ended up with, say whether it can actually mint a token, so a
 # dead credential is visible at launch instead of at the first upload.
+# Bounded to six seconds: where Google is unreachable (mainland China) the
+# token call would otherwise hang for two minutes and make the launch look
+# stuck. The Database does not use Google at all, so an unreachable
+# credential is reported and the launch continues.
 if [ -n "${GOOGLE_APPLICATION_CREDENTIALS:-}" ]; then
-  if "$PY" -c "import google.auth,google.auth.transport.requests as r;c,_=google.auth.default(scopes=['https://www.googleapis.com/auth/cloud-platform']);c.refresh(r.Request())" >/dev/null 2>&1; then
-    log "google credential : OK ($(basename "$GOOGLE_APPLICATION_CREDENTIALS"))"
-  else
-    log "google credential : DEAD ($(basename "$GOOGLE_APPLICATION_CREDENTIALS")) — passport OCR will fail closed"
-  fi
+  gcheck="$("$PY" - <<'PYCHK' 2>/dev/null
+import signal, sys
+def bail(*_): print("UNREACHABLE"); sys.exit(0)
+signal.signal(signal.SIGALRM, bail); signal.alarm(6)
+try:
+    import google.auth, google.auth.transport.requests as r
+    c, _ = google.auth.default(scopes=['https://www.googleapis.com/auth/cloud-platform'])
+    c.refresh(r.Request()); print("OK")
+except Exception as e:
+    print("UNREACHABLE" if "timed out" in str(e).lower() or "connection" in str(e).lower() else "DEAD")
+PYCHK
+)"
+  case "${gcheck:-DEAD}" in
+    OK) log "google credential : OK ($(basename "$GOOGLE_APPLICATION_CREDENTIALS"))" ;;
+    UNREACHABLE) log "google credential : not reachable from this network — passport OCR unavailable here; the Database does not need it" ;;
+    *) log "google credential : DEAD ($(basename "$GOOGLE_APPLICATION_CREDENTIALS")) — passport OCR will fail closed" ;;
+  esac
 fi
 export ELLIS_RUNTIME_MODE="local_real_services"
 export DATABASE_URL="sqlite:///$DB"

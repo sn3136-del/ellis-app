@@ -23,7 +23,11 @@ if ! command -v node >/dev/null 2>&1; then
   say "Node is not installed — installing it"
   if ! command -v brew >/dev/null 2>&1; then
     say "installing Homebrew first (it will ask for your Mac password)"
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" \
+    # GitHub is often unreachable from mainland China; fall back to the
+    # Tsinghua mirror of the same installer.
+    HB_INSTALL="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
+    curl -fsS -m 6 "$HB_INSTALL" >/dev/null 2>&1 || { HB_INSTALL="https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/install.git/plain/install.sh"; export HOMEBREW_INSTALL_FROM_API=1 HOMEBREW_API_DOMAIN="https://mirrors.tuna.tsinghua.edu.cn/homebrew-bottles/api" HOMEBREW_BOTTLE_DOMAIN="https://mirrors.tuna.tsinghua.edu.cn/homebrew-bottles" HOMEBREW_BREW_GIT_REMOTE="https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/brew.git"; say "using the China mirror for Homebrew"; }
+    /bin/bash -c "$(curl -fsSL "$HB_INSTALL")" \
       || die "Homebrew install did not finish. Install Node yourself from https://nodejs.org (LTS), then run: npm run ellis:web"
     # Apple silicon puts brew outside the default PATH for this shell.
     [ -x /opt/homebrew/bin/brew ] && eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -55,6 +59,7 @@ if [ ! -x "$ROOT/backend/.venv/bin/python" ]; then
   say "building the backend environment (a minute or two)"
   "$PYBIN" -m venv "$ROOT/backend/.venv" || die "could not create the backend environment"
   "$ROOT/backend/.venv/bin/pip" install -q --upgrade pip >/dev/null 2>&1
+  curl -fsS -m 6 https://pypi.org/simple/ >/dev/null 2>&1 || export PIP_INDEX_URL="https://pypi.tuna.tsinghua.edu.cn/simple"
   "$ROOT/backend/.venv/bin/pip" install -q -r "$ROOT/backend/requirements.txt" \
     || die "could not install backend dependencies — see the output above"
 fi
@@ -62,6 +67,7 @@ fi
 # --- Frontend dependencies -------------------------------------------------
 if [ ! -x "$ROOT/node_modules/.bin/vite" ]; then
   say "installing frontend dependencies"
+  curl -fsS -m 6 https://registry.npmjs.org/ >/dev/null 2>&1 || export NPM_CONFIG_REGISTRY="https://registry.npmmirror.com"
   (cd "$ROOT" && npm install --silent) || die "npm install failed"
 fi
 
