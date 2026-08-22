@@ -125,7 +125,7 @@ PASS1_MAX_TOKENS = 12000
 
 # Cache-schema version: bumping invalidates two-pass-era rows so a cached
 # route always carries the honest single-pass label and verification shape.
-CACHE_VERSION = "v5"  # + requirement_detail, transit_requirement (Trip.com 2026-08)
+CACHE_VERSION = "v6"  # + authorised_agent channel, purpose-driven category, stay notes
 
 # Default freshness window; stale entries are reused instantly and refreshed in
 # the background (never blocking the applicant).
