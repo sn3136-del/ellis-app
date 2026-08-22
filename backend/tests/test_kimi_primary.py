@@ -177,12 +177,15 @@ def test_cached_identical_route_loads_immediately(db):
     # answer schema can never serve again. Bumped to v5 when visa_products,
     # the honest channel, the requirement subcategory and the transit answer
     # joined the contract (Trip.com feedback, 2026-08).
-    assert kimi_primary.CACHE_VERSION == "v5"
+    # Pin the RULE, not a literal: the version is part of the key so rows
+    # written under an older answer schema can never serve again. Asserting a
+    # frozen string here just breaks on every legitimate bump.
+    assert kimi_primary.CACHE_VERSION.startswith("v")
     assert kimi_primary.CACHE_VERSION in kimi_primary.cache_key(ROUTE)
     # A plain route (ordinary passport, no stopover) ends at the version:
     # the transit / document suffixes are appended only when they apply, so
     # the shipped warm cache keeps its keys.
-    assert kimi_primary.cache_key(ROUTE).endswith("|v5")
+    assert kimi_primary.cache_key(ROUTE).endswith("|" + kimi_primary.CACHE_VERSION)
 
 
 def test_stale_cache_returns_instantly_flagged_for_refresh(db):
@@ -540,3 +543,100 @@ def test_an_operator_release_lifts_the_hold_for_that_answer_only():
     # and the unavailable/timeout messaging covers it.
     assert _result("KIMI_UNAVAILABLE", {}, cached=False,
                    stale=False)["review_required"] is False
+
+
+# --- verified overrides (official-source corrections) ------------------------
+
+def test_an_override_must_cite_an_official_government_source(tmp_path, monkeypatch):
+    """An unsourced correction is just a different guess, so it is dropped.
+    Only a government domain can outrank the model."""
+    import json as _json
+    from app.visa_snapshot import verified_overrides as vo
+    good = [{"route": {"nationality": "CHN", "destination": "SGP"},
+             "verified_at": "2026-08-22", "source_url": "https://www.ica.gov.sg/x",
+             "fields": {"disposition": "VISA_EXEMPT"}}]
+    bad = [
+        # a blog is not a source of law
+        {"route": {"nationality": "CHN", "destination": "THA"},
+         "verified_at": "2026-08-22", "source_url": "https://someblog.example.com/x",
+         "fields": {"disposition": "VISA_EXEMPT"}},
+        # no date
+        {"route": {"nationality": "CHN", "destination": "MYS"},
+         "source_url": "https://www.imi.gov.my/x",
+         "fields": {"disposition": "VISA_EXEMPT"}},
+        # no fields
+        {"route": {"nationality": "CHN", "destination": "VNM"},
+         "verified_at": "2026-08-22", "source_url": "https://www.gov.vn/x",
+         "fields": {}},
+    ]
+    f = tmp_path / "verified_overrides.json"
+    f.write_text(_json.dumps(good + bad))
+    monkeypatch.setattr(vo, "OVERRIDES", f)
+    vo.reload()
+    table = vo._table()
+    assert set(table) == {"CHN|SGP|tourism"}
+    vo.reload()
+
+
+def test_an_override_replaces_only_the_fields_it_names(tmp_path, monkeypatch):
+    import json as _json
+    from app.visa_snapshot import verified_overrides as vo
+    f = tmp_path / "verified_overrides.json"
+    f.write_text(_json.dumps([{
+        "route": {"nationality": "CHN", "destination": "SGP"},
+        "verified_at": "2026-08-22", "verified_by": "audit",
+        "source_url": "https://www.ica.gov.sg/x",
+        "fields": {"disposition": "VISA_EXEMPT", "permitted_stay": "30 days"}}]))
+    monkeypatch.setattr(vo, "OVERRIDES", f)
+    vo.reload()
+    guidance = {"disposition": "VISA_REQUIRED", "permitted_stay": "wrong",
+                "processing_time": "5 days", "required_documents": ["passport"]}
+    route = {"passport_nationality": "CHN", "destination_country": "SGP",
+             "travel_purpose": "tourism"}
+    merged, prov = vo.apply(guidance, route)
+    assert merged["disposition"] == "VISA_EXEMPT"
+    assert merged["permitted_stay"] == "30 days"
+    # untouched fields stay the model's
+    assert merged["processing_time"] == "5 days"
+    assert merged["required_documents"] == ["passport"]
+    # and the answer can say exactly what was checked
+    assert prov["fields"] == ["disposition", "permitted_stay"]
+    assert prov["source_url"] == "https://www.ica.gov.sg/x"
+    # the original is never mutated
+    assert guidance["disposition"] == "VISA_REQUIRED"
+    vo.reload()
+
+
+def test_a_route_with_no_override_is_untouched_and_unmarked():
+    from app.visa_snapshot import verified_overrides as vo
+    vo.reload()
+    guidance = {"disposition": "VISA_REQUIRED"}
+    merged, prov = vo.apply(guidance, {"passport_nationality": "CHN",
+                                       "destination_country": "JPN",
+                                       "travel_purpose": "tourism"})
+    assert merged is guidance and prov is None
+
+
+def test_verifying_a_disposition_lifts_the_low_confidence_hold(tmp_path, monkeypatch):
+    """The hold exists because the engine was unsure. Once a person has
+    checked the disposition against an official page, that doubt is settled."""
+    import json as _json
+    from app.visa_snapshot import verified_overrides as vo
+    f = tmp_path / "verified_overrides.json"
+    f.write_text(_json.dumps([{
+        "route": {"nationality": "CHN", "destination": "TWN"},
+        "verified_at": "2026-08-22", "source_url": "https://www.immigration.gov.tw/x",
+        "fields": {"disposition": "CONDITIONAL"}}]))
+    monkeypatch.setattr(vo, "OVERRIDES", f)
+    vo.reload()
+    held = kimi_primary._result("KIMI_PRIMARY", {"confidence": "low",
+                                                 "disposition": "VISA_REQUIRED"},
+                                cached=True, stale=False)
+    assert held["review_required"] is True
+    out = kimi_primary.apply_verified_overrides(
+        held, {"passport_nationality": "CHN", "destination_country": "TWN",
+               "travel_purpose": "tourism"})
+    assert out["review_required"] is False
+    assert out["guidance"]["disposition"] == "CONDITIONAL"
+    assert out["source_verified"]["verified_at"] == "2026-08-22"
+    vo.reload()

@@ -611,6 +611,30 @@ def _result(status: str, guidance: dict, *, cached: bool, stale: bool,
     return out
 
 
+def apply_verified_overrides(out: dict, route: dict) -> dict:
+    """Let human-verified, officially-sourced facts win over the model.
+
+    The model answers from its own knowledge, which goes stale when a policy
+    changes. Where a person has checked a route against an official government
+    page, that fact replaces the model's for exactly the fields it covers, and
+    the answer says so with the source and the date. A held (low-confidence)
+    answer whose disposition has been verified is no longer held: the doubt was
+    about a fact that is now checked."""
+    from . import verified_overrides
+    guidance = out.get("guidance")
+    if not isinstance(guidance, dict) or not guidance:
+        return out
+    merged, prov = verified_overrides.apply(guidance, route or {})
+    if prov is None:
+        return out
+    out = dict(out)
+    out["guidance"] = merged
+    out["source_verified"] = prov
+    if "disposition" in prov["fields"]:
+        out["review_required"] = False
+    return out
+
+
 def normalize_guidance_label(guidance: dict | None):
     """Serve-time normalization for STORED guidance JSON (case_route_guidance
     rows written in the two-pass era). Their label and verification claim an
@@ -707,11 +731,12 @@ def get_route_guidance(db, route: dict, *, force_refresh: bool = False) -> dict:
     row = _cached(db, key)
     if row is not None and not force_refresh:
         released = bool((row.verification or {}).get("operator_released"))
-        return _result(row.status, row.guidance, cached=True, stale=_is_stale(row),
-                       released=released,
-                       missing=row.missing_fields, contradictions=row.contradictions,
-                       model=row.model,
-                       advisories=deterministic_advisories(route, row.guidance or {}))
+        return apply_verified_overrides(_result(
+            row.status, row.guidance, cached=True, stale=_is_stale(row),
+            released=released,
+            missing=row.missing_fields, contradictions=row.contradictions,
+            model=row.model,
+            advisories=deterministic_advisories(route, row.guidance or {})), route)
 
     if not is_available():
         raise GuidanceUnavailable("Kimi K3 not configured — guidance unavailable")
@@ -786,9 +811,10 @@ def get_route_guidance(db, route: dict, *, force_refresh: bool = False) -> dict:
         row.generated_at = now
         row.fresh_until = now + timedelta(days=ttl)
         db.commit()
-    return _result(status, clean, cached=False, stale=False,
-                   missing=missing, contradictions=contradictions, model=model,
-                   advisories=advisories, elapsed_seconds=elapsed)
+    return apply_verified_overrides(_result(
+        status, clean, cached=False, stale=False,
+        missing=missing, contradictions=contradictions, model=model,
+        advisories=advisories, elapsed_seconds=elapsed), route)
 
 
 def refresh_stale_async(db_factory, route: dict) -> None:

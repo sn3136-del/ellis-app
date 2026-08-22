@@ -1,0 +1,200 @@
+[
+  {
+    "route": {"nationality": "CHN", "destination": "PHL", "travel_purpose": "tourism"},
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://evisa.gov.ph/page/policy",
+    "note": "The Philippines granted visa-free entry to Chinese nationals for tourism, 14 days, non-extendible and non-convertible, effective 16 January 2026. The model still reported a visa requirement.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "conditional_visa_free",
+      "visa_category": "Visa-free tourist entry",
+      "permitted_stay": "14 days, non-extendible",
+      "permitted_stay_days": 14,
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa is applied for. Entry is granted on arrival to eligible Chinese tourists.",
+      "government_fee": {"amount": 0, "currency": null},
+      "visa_products": [
+        {"type": "Visa-free tourist entry", "entry": "single", "validity": "on arrival",
+         "max_stay_days": 14, "fee": {"amount": 0, "currency": null},
+         "notes": "Non-extendible and non-convertible. Conditions apply, including the designated ports of entry and passport validity."}
+      ]
+    }
+  },
+  {
+    "route": {"nationality": "CHN", "destination": "SGP", "travel_purpose": "tourism"},
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+    "note": "China and Singapore have a mutual 30-day visa exemption in force since 9 February 2024. Holders of ordinary PRC passports need no visa for a short tourist visit; the model reported a visa requirement lodged through an authorised agent.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "conditional_visa_free",
+      "visa_category": "Visa-free short visit (mutual exemption)",
+      "permitted_stay": "Up to 30 days per entry",
+      "permitted_stay_days": 30,
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa is applied for. The length of stay is granted by the immigration officer on arrival.",
+      "government_fee": {"amount": 0, "currency": null},
+      "visa_products": [
+        {"type": "Visa-free entry (mutual 30-day exemption)", "entry": "single",
+         "validity": "on arrival", "max_stay_days": 30,
+         "fee": {"amount": 0, "currency": null},
+         "notes": "In force since 9 February 2024. An SG Arrival Card is still required before arrival."}
+      ]
+    }
+  },
+  {
+    "route": {"nationality": "CHN", "destination": "RUS", "travel_purpose": "tourism"},
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "http://publication.pravo.gov.ru/document/0001202607200004",
+    "note": "A Russian presidential decree established a temporary visa-free regime for holders of ordinary PRC passports. The model still reported an e-visa or paper visa requirement.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "conditional_visa_free",
+      "visa_category": "Temporary visa-free entry (presidential decree)",
+      "permitted_stay": "Up to 30 days per visit",
+      "permitted_stay_days": 30,
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa is applied for under the temporary visa-free regime. Check the decree's current validity before travel, as it is time-limited.",
+      "government_fee": {"amount": 0, "currency": null},
+      "confidence": "medium"
+    }
+  },
+  {
+    "route": {"nationality": "HKG", "destination": "CAN", "travel_purpose": "tourism"},
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/entry-requirements-country.html",
+    "note": "Holders of an HKSAR passport are eTA-eligible, not visa nationals. The model reported a temporary resident visa requirement.",
+    "fields": {
+      "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+      "requirement_detail": "eta_electronic_authorization",
+      "visa_category": "Electronic Travel Authorization (eTA)",
+      "permitted_stay": "Usually up to 6 months, decided at the port of entry",
+      "permitted_stay_days": 180,
+      "application_channel": "online_portal",
+      "application_channel_detail": "Apply for the eTA yourself online before flying. It is required for air travel only.",
+      "official_portal_url": "https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/eta.html",
+      "visa_products": [
+        {"type": "Electronic Travel Authorization (eTA)", "entry": "multiple",
+         "validity": "5 years or until the passport expires", "max_stay_days": 180,
+         "fee": {"amount": 7, "currency": "CAD"},
+         "notes": "Required for air travel. An HKSAR passport must be held."}
+      ]
+    }
+  },
+  {
+    "route": {"nationality": "HKG", "destination": "GBR", "travel_purpose": "tourism"},
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.gov.uk/guidance/immigration-rules/immigration-rules-appendix-visitor-visa-national-list",
+    "note": "Appendix Visitor: Visa national list exempts holders of an HKSAR passport, so no visit visa is needed. The model reported a Standard Visitor visa requirement.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "conditional_visa_free",
+      "visa_category": "Non-visa national visitor",
+      "permitted_stay": "Up to 6 months per visit",
+      "permitted_stay_days": 180,
+      "application_channel": "not_required",
+      "application_channel_detail": "No visit visa is applied for. A UK Electronic Travel Authorisation may be required before travel, so check the current ETA rollout for HKSAR passport holders.",
+      "government_fee": {"amount": 0, "currency": null},
+      "confidence": "medium"
+    }
+  },
+  {
+    "route": {"nationality": "HKG", "destination": "KOR", "travel_purpose": "tourism"},
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://overseas.mofa.go.kr/gb-en/brd/m_23721/view.do?seq=39&page=1",
+    "note": "HKSAR passport holders enter Korea visa-free for short tourism, and the K-ETA requirement is temporarily waived for Hong Kong. The model reported a K-ETA as required.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "conditional_visa_free",
+      "visa_category": "Visa-free short-term visit",
+      "permitted_stay": "Up to 90 days per entry",
+      "permitted_stay_days": 90,
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and, during the current temporary waiver, no K-ETA. The waiver is time-limited, so confirm it is still in force before travel.",
+      "government_fee": {"amount": 0, "currency": null},
+      "confidence": "medium"
+    }
+  },
+  {
+    "route": {"nationality": "HKG", "destination": "IND", "travel_purpose": "tourism"},
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://cgihk.gov.in/page/visa-information/",
+    "note": "Hong Kong is not on India's e-Visa eligible list; an HKSAR passport holder needs a regular sticker visa in advance. The model offered e-Tourist visa products.",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": "paper_visa",
+      "visa_category": "Regular (sticker) tourist visa",
+      "application_channel": "embassy",
+      "application_channel_detail": "Apply in advance to the Consulate General of India, Hong Kong. The e-Visa is not available to HKSAR passport holders.",
+      "official_portal_url": "https://cgihk.gov.in/page/visa-information/"
+    }
+  },
+  {
+    "route": {"nationality": "HKG", "destination": "TWN", "travel_purpose": "tourism"},
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.immigration.gov.tw/5385/7244/7250/7296/",
+    "note": "HKSAR passport holders are outside Taiwan's visa regime and travel under the Hong Kong and Macau arrangements administered by the National Immigration Agency, needing an entry permit rather than visa-free entry.",
+    "fields": {
+      "disposition": "CONDITIONAL",
+      "visa_category": "Entry permit for Hong Kong residents",
+      "application_channel": "online_portal",
+      "application_channel_detail": "Not visa-free. Apply for an entry permit with the National Immigration Agency; eligibility depends on place of birth and previous entries.",
+      "official_portal_url": "https://www.immigration.gov.tw/",
+      "confidence": "medium"
+    }
+  },
+  {
+    "route": {"nationality": "USA", "destination": "IDN", "travel_purpose": "tourism"},
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/",
+    "note": "The Directorate General of Immigration lists the United States as visa-on-arrival, not visa-exempt. The model reported visa-free entry.",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": "evisa_on_arrival",
+      "visa_category": "Visa on Arrival (index B1)",
+      "permitted_stay": "30 days, extendable once by 30 days",
+      "permitted_stay_days": 30,
+      "application_channel": "online_portal",
+      "application_channel_detail": "Buy the e-VOA online before departure, or the visa on arrival at the airport counter. There is no visa-free entry for US nationals.",
+      "official_portal_url": "https://evisa.imigrasi.go.id/",
+      "government_fee": {"amount": 500000, "currency": "IDR"},
+      "visa_products": [
+        {"type": "e-VOA (bought online before departure)", "entry": "single",
+         "validity": "90 days to use", "max_stay_days": 30,
+         "fee": {"amount": 500000, "currency": "IDR"},
+         "notes": "Extendable once for a further 30 days."},
+        {"type": "Visa on Arrival (bought at the airport)", "entry": "single",
+         "validity": "on arrival", "max_stay_days": 30,
+         "fee": {"amount": 500000, "currency": "IDR"},
+         "notes": "Extendable once for a further 30 days."}
+      ]
+    }
+  },
+  {
+    "route": {"nationality": "USA", "destination": "KOR", "travel_purpose": "tourism"},
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://overseas.mofa.go.kr/us-en/brd/m_4502/view.do?seq=715890",
+    "note": "US nationals are temporarily exempt from the K-ETA under an extension by the Ministry of Justice. The model reported a K-ETA as required.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "conditional_visa_free",
+      "visa_category": "Visa-free short-term visit (K-ETA temporarily waived)",
+      "permitted_stay": "Up to 90 days",
+      "permitted_stay_days": 90,
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa, and no K-ETA during the current temporary exemption. The exemption is time-limited, so confirm it is still in force before travel.",
+      "government_fee": {"amount": 0, "currency": null},
+      "confidence": "medium"
+    }
+  }
+]

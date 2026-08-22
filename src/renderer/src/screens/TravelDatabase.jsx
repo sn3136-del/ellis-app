@@ -1009,6 +1009,28 @@ export default function TravelDatabase({ onBack }) {
             </button>
           </div>
 
+          {/* Checked against an official source: shown ONLY for the fields a
+              person actually verified, with the source and the date. An
+              answer without this badge is the engine's own, and says so
+              rather than borrowing the authority of a checked one. */}
+          {result.source_verified && (
+            <div style={{ marginTop: 16, padding: '12px 16px', borderRadius: 12,
+                          background: '#eefaf1', fontSize: 12.5, color: NAVY }}
+                 data-testid="database-source-verified">
+              <span style={{ fontWeight: 800 }}>{t('db.verifiedTitle')}</span>{' '}
+              {t('db.verifiedOn', { date: result.source_verified.verified_at })}{' '}
+              <a href={result.source_verified.source_url} target="_blank"
+                 rel="noreferrer" style={{ color: '#0f8a3d' }}>
+                {t('db.verifiedSource')}
+              </a>
+              {result.source_verified.note && (
+                <div style={{ color: GRAY, marginTop: 6, lineHeight: 1.5 }}>
+                  {result.source_verified.note}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Source + confidence — Trip.com's traceability requirement. */}
           {(g.source_url || ['high', 'medium', 'low'].includes(g.confidence)) && (
             <div style={{ fontSize: 12, color: GRAY, marginTop: 16,
