@@ -40,6 +40,7 @@ from __future__ import annotations
 
 import json
 import os
+import re as _re
 import time
 from datetime import date, datetime, timedelta, timezone
 
@@ -138,10 +139,10 @@ permitted_stay_days: integer number of days of permitted stay, or null
 passport_validity_requirement: {"kind": "valid_on_arrival"|"valid_through_departure"|"months_after_arrival"|"months_after_departure", "months": integer|null}
 required_documents, forms, account_registration_steps, payment_process,
 submission_process, exceptions: arrays of short strings
-application_channel: online_portal | embassy | visa_center | on_arrival | not_required
+application_channel: online_portal | embassy | visa_center | authorised_agent | on_arrival | not_required — use authorised_agent when individuals may NOT file directly and a designated agency must lodge for them (e.g. Chinese nationals applying for Japan); never call that a visa_center
 official_portal_url: the official government portal URL or null (NEVER invent one) — for THIS destination and visa type; do not point at an unrelated page
 government_fee: {"amount": number|null, "currency": string|null} — the OFFICIAL consular fee only; if a service/agency fee also applies say so in application_channel_detail, never fold it in
-visa_products: array of EVERY visa product available for this nationality + destination + purpose — each {"type": e.g. "Single-entry tourist"|"3-year multiple"|"5-year multiple"|"B1/B2", "entry": "single"|"multiple"|null, "validity": short string, "max_stay_days": integer|null, "fee": {"amount": number|null, "currency": string|null}, "notes": short string|null}; list them ALL, never just one; [] only when truly a single product
+visa_products: array of EVERY visa product available for this nationality + destination + purpose — each {"type": e.g. "Single-entry tourist"|"3-year multiple"|"5-year multiple"|"B1/B2", "entry": "single"|"multiple"|null, "validity": short string, "max_stay_days": integer|null, "fee": {"amount": number|null, "currency": string|null}, "notes": short string|null}; list them ALL; when only one product exists, still list that one, never an empty array for a route that needs a visa
 application_channel_detail: one honest sentence naming WHO may lodge and HOW — e.g. "Individuals cannot apply directly; the application must go through a designated authorised agent" or "Apply yourself on the official portal" — never claim a walk-in visa centre where the destination refuses individual filings
 source_url: the single official government page these facts come from, or null (NEVER invent one)
 requirement_detail: the precise subcategory, one of unconditional_visa_free | conditional_visa_free | transit_visa_free | evisa_on_arrival | paper_visa_on_arrival | evisa | paper_visa | eta_electronic_authorization — pick the one matching disposition (visa-free splits into unconditional/conditional/transit; on-arrival into electronic/paper; advance into eVisa/paper/ETA), or null if genuinely none fits
@@ -167,7 +168,7 @@ short — no prose."""
 
 _SYSTEM = ("""You are a visa-requirements engine. For the EXACT route in the user
 message (passport nationality, issuing country, travel-document type, lawful
-residence, destination, tourism purpose, dates, trip duration, transit
+residence, destination, the stated travel purpose, dates, trip duration, transit
 countries, age, prior refusals, passport issue/expiration dates), answer from
 your knowledge of official visa policy.
 """ + _SCHEMA_SPEC)
@@ -256,6 +257,20 @@ ROUTE_FACT_KEYS = (
 )
 
 
+# The purpose the reader picked decides which visa product family the answer
+# is about. Sending "tourist_visa" for a Study lookup asked the wrong question.
+CATEGORY_FOR_PURPOSE = {
+    "tourism": "tourist_visa", "business": "business_visa",
+    "family_visit": "visitor_visa", "study": "student_visa",
+    "work": "work_visa", "transit": "transit_visa", "other": "visitor_visa",
+}
+
+
+def category_for_purpose(purpose: str) -> str:
+    return CATEGORY_FOR_PURPOSE.get(str(purpose or "").strip().lower(),
+                                    "tourist_visa")
+
+
 def route_facts(route: dict) -> dict:
     """The sanitized fact set sent to Kimi (whitelist — nothing else leaves)."""
     facts = {}
@@ -263,8 +278,9 @@ def route_facts(route: dict) -> dict:
         v = (route or {}).get(k)
         if v not in (None, "", []):
             facts[k] = v
-    facts.setdefault("visa_category", "tourist_visa")
     facts.setdefault("travel_purpose", "tourism")
+    facts.setdefault("visa_category",
+                     category_for_purpose(facts.get("travel_purpose")))
     a, d = _iso(facts.get("arrival_date")), _iso(facts.get("departure_date"))
     if a and d and d > a:
         facts["trip_duration_days"] = (d - a).days
@@ -314,6 +330,38 @@ def validate_answer(raw: dict) -> tuple[dict, list, list]:
     else:
         clean["health_requirements"] = [h for h in clean["health_requirements"]
                                         if isinstance(h, dict) and h.get("name")]
+    # The Trip.com additions get the same treatment: a wrong shape is dropped,
+    # never rendered. transit_requirement in particular must carry an explicit
+    # `required` key — without one the UI would read a missing answer as a
+    # confident "no transit visa needed".
+    tr = clean.get("transit_requirement")
+    if not isinstance(tr, dict) or "required" not in tr \
+            or tr.get("required") not in (True, False, None):
+        clean.pop("transit_requirement", None)
+    if not isinstance(clean.get("visa_products"), list):
+        clean.pop("visa_products", None)
+    else:
+        products = []
+        for vp in clean["visa_products"]:
+            if not isinstance(vp, dict) or not str(vp.get("type") or "").strip():
+                continue
+            if not isinstance(vp.get("fee"), dict):
+                vp.pop("fee", None)
+            d = vp.get("max_stay_days")
+            if d is not None and (not isinstance(d, (int, float))
+                                  or d < 0 or d > 3660):
+                vp.pop("max_stay_days", None)
+            products.append(vp)
+        clean["visa_products"] = products
+    rd = str(clean.get("requirement_detail") or "").strip().lower()
+    clean["requirement_detail"] = rd if rd in REQUIREMENT_DETAILS else None
+    # Confidence drives the display hold, so an unexpected word must not slip
+    # through as an unknown label (or as "not low").
+    conf = str(clean.get("confidence") or "").strip().lower()
+    clean["confidence"] = conf if conf in ("high", "medium", "low") else "low"
+    for k in ("application_channel_detail", "source_url"):
+        if k in clean and not isinstance(clean[k], str):
+            clean.pop(k, None)
     wt = str(clean.get("route_workflow_type") or "").strip().lower()
     if wt not in WORKFLOW_TYPES:
         clean["route_workflow_type"] = derive_workflow_type(clean)
@@ -335,6 +383,42 @@ def validate_answer(raw: dict) -> tuple[dict, list, list]:
     if ps_days is not None and (not isinstance(ps_days, (int, float)) or ps_days < 0
                                 or ps_days > 3660):
         clean.pop("permitted_stay_days", None)
+
+    # --- the Trip.com appendix defects, caught deterministically -------------
+    # (iii) The headline channel must not contradict the honest sentence. If
+    # the detail says individuals cannot file directly, calling it a visa
+    # centre or an embassy counter is the exact mislabel they rejected.
+    detail = str(clean.get("application_channel_detail") or "").lower()
+    channel = str(clean.get("application_channel") or "").lower()
+    cannot_self_file = any(t in detail for t in (
+        "cannot apply directly", "not accept individual", "does not accept direct",
+        "must apply through", "must be lodged by", "must go through",
+        "through a designated", "through an authorised", "through an authorized",
+        "accredited travel agency", "designated agency", "authorised agent",
+        "authorized agent"))
+    if cannot_self_file and channel in ("visa_center", "embassy", "online_portal"):
+        contradictions.append(
+            f"application_channel '{channel}' but the channel detail says "
+            "individuals may not file directly (use authorised_agent)")
+
+    # (i)/(iv) A visa-required route should list its products, and a product's
+    # own note must not contradict the stay printed beside it.
+    products = clean.get("visa_products") or []
+    if clean.get("disposition") == "VISA_REQUIRED" and not products:
+        contradictions.append("disposition VISA_REQUIRED but no visa_products "
+                              "were listed for this purpose")
+    for vp in products:
+        if not isinstance(vp, dict):
+            continue
+        note = str(vp.get("notes") or "")
+        d = vp.get("max_stay_days")
+        if d is None or not note:
+            continue
+        named = [int(n) for n in _re.findall(r"\b(\d{1,3})\s*days?\b", note.lower())]
+        if named and max(named) < d:
+            contradictions.append(
+                f"visa product '{vp.get('type')}' says {d} days but its note "
+                f"names a shorter granted stay ({max(named)} days)")
     return clean, missing, contradictions
 
 
@@ -349,7 +433,10 @@ def derive_workflow_type(g: dict) -> str:
     if disp == "VISA_REQUIRED":
         if chan == "online_portal":
             return "evisa_portal"
-        if chan == "visa_center":
+        if chan in ("visa_center", "authorised_agent"):
+            # An authorised agent lodges on the applicant's behalf: the
+            # workflow is the same drop-off shape as a visa centre, even
+            # though the label the reader sees must stay honest.
             return "visa_center_submission"
         if chan == "on_arrival":
             return "visa_on_arrival"

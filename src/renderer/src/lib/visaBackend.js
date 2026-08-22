@@ -226,6 +226,11 @@ export function createVisaClient(session) {
     // Information-quality feedback: a reader flags a field that looks wrong.
     databaseReportIssue: (body) =>
       call('POST', '/database/report-issue', session, body),
+    // Operator side of the quality loop (admin session).
+    databaseIssues: () => call('GET', '/database/issues', session),
+    databaseIssueUpdate: (id, status, resolution = '') =>
+      call('POST', `/database/issues/${id}`, session, { status, resolution }),
+    databaseApprove: (body) => call('POST', '/database/approve', session, body),
     createIntake: (body) => call('POST', '/intake', session, body),
     listIntakes: () => call('GET', '/intake', session),
     getIntake: (id) => call('GET', `/intake/${id}`, session),

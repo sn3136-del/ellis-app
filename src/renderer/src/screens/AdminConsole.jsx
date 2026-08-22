@@ -74,7 +74,8 @@ export default function AdminConsole() {
       <div className="page page--wide">
         {error && <ErrorNote error={error} />}
         <div className="tabs">
-          {['adapters', 'review queue', 'coverage', 'booking desk'].map((name) => (
+          {['adapters', 'review queue', 'coverage', 'booking desk',
+            'database quality'].map((name) => (
             <button key={name} className={'tab' + (tab === name ? ' is-active' : '')} onClick={() => setTab(name)}>
               {name[0].toUpperCase() + name.slice(1)}
             </button>
@@ -85,6 +86,8 @@ export default function AdminConsole() {
             </button>
           ))}
         </div>
+
+        {tab === 'database quality' && <DatabaseQuality client={client} />}
 
         {tab === 'adapters' && (
           <div className="tabpanel">
@@ -1130,6 +1133,109 @@ function AdapterDetail({ client, id, isAdmin, onBack, onChanged }) {
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+
+// ---------------------------------------------------------------------------
+// Database quality: the operator side of the information-quality loop.
+// Readers flag answers that look wrong; this is where a person works that
+// queue and releases an answer the engine held back. Nothing here edits a
+// government fact — "corrected" expires the cached answer so the engine is
+// asked again, and a release is recorded against the exact answer reviewed.
+function DatabaseQuality({ client }) {
+  const [issues, setIssues] = useState(null)
+  const [err, setErr] = useState(null)
+  const [busy, setBusy] = useState('')
+  const [notes, setNotes] = useState({})
+
+  async function load() {
+    try { setIssues((await client.databaseIssues()).issues || []); setErr(null) }
+    catch (e) { setErr(e) }
+  }
+  useEffect(() => { load() }, [])
+
+  async function close(id, status) {
+    const resolution = (notes[id] || '').trim()
+    if (!resolution) {
+      setErr({ message: 'Say what was corrected, or why this is dismissed.' })
+      return
+    }
+    setBusy(id)
+    try {
+      await client.databaseIssueUpdate(id, status, resolution)
+      setNotes((n) => ({ ...n, [id]: '' }))
+      await load()
+      setErr(null)
+    } catch (e) { setErr(e) }
+    setBusy('')
+  }
+
+  const route = (r) => `${(r || {}).passport_nationality || '?'} → ` +
+    `${(r || {}).destination_country || '?'} · ${(r || {}).travel_purpose || ''}`
+
+  const open = (issues || []).filter((i) => i.status !== 'corrected' &&
+                                            i.status !== 'dismissed')
+  const done = (issues || []).filter((i) => i.status === 'corrected' ||
+                                            i.status === 'dismissed')
+
+  return (
+    <div className="tabpanel" data-testid="admin-database-quality">
+      {err && <ErrorNote error={err} />}
+      <div className="row" style={{ alignItems: 'center' }}>
+        <div className="row__main">
+          <div className="row__title">Reader reports</div>
+          <div className="row__sub">
+            Marking one corrected expires the cached answer, so the next reader
+            gets a fresh decision instead of the one just declared wrong.
+          </div>
+        </div>
+        <button className="btn btn--sm btn--ghost" onClick={load}>Refresh</button>
+      </div>
+
+      {!issues ? <Loading label="Loading reports" />
+        : open.length === 0
+          ? <Empty title="Nothing flagged" sub="Reader reports land here." />
+          : open.map((i) => (
+              <div key={i.id} className="row" style={{ display: 'block' }}>
+                <div className="row__title">{route(i.route)}</div>
+                <div className="row__sub">
+                  {(i.field || 'unspecified field')} · {i.status} · {i.created_at || ''}
+                </div>
+                <div style={{ fontSize: 13, margin: '8px 0' }}>{i.note}</div>
+                <input className="input" placeholder="What was corrected, or why dismissed"
+                       value={notes[i.id] || ''}
+                       data-testid={`admin-issue-note-${i.id}`}
+                       onChange={(e) => setNotes((n) => ({ ...n, [i.id]: e.target.value }))}
+                       style={{ fontSize: 13, padding: '8px 11px', borderRadius: 10,
+                                width: '100%' }} />
+                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                  <button className="btn btn--sm btn--primary" disabled={busy === i.id}
+                          onClick={() => close(i.id, 'corrected')}>
+                    Corrected
+                  </button>
+                  <button className="btn btn--sm btn--ghost" disabled={busy === i.id}
+                          onClick={() => close(i.id, 'dismissed')}>
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            ))}
+
+      {done.length > 0 && (
+        <div style={{ marginTop: 18 }}>
+          <div className="row__title" style={{ fontSize: 13 }}>Closed</div>
+          {done.map((i) => (
+            <div key={i.id} className="row">
+              <div className="row__main">
+                <div className="row__title">{route(i.route)}</div>
+                <div className="row__sub">{i.status} · {i.resolution}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

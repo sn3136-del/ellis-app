@@ -279,7 +279,7 @@ def travel_database_issue_update(issue_id: str, body: DatabaseIssueUpdateIn,
     if status not in DATABASE_ISSUE_STATUSES:
         raise HTTPException(422, f"status must be one of {DATABASE_ISSUE_STATUSES}")
     row = db.get(DatabaseIssueReport, issue_id)
-    if row is None or row.org_id != p.org_id:
+    if row is None:
         raise HTTPException(404, "no such issue")
     if status in ("corrected", "dismissed") and not (body.resolution or "").strip():
         raise HTTPException(422, "say what was corrected, or why this is "
@@ -290,6 +290,18 @@ def travel_database_issue_update(issue_id: str, body: DatabaseIssueUpdateIn,
     if status in ("corrected", "dismissed"):
         row.resolved_by = p.user_id
         row.resolved_at = datetime.now(timezone.utc)
+    # "Corrected" has to change what readers actually see. Without this the
+    # cached wrong answer kept serving for the rest of its TTL and the queue
+    # said the problem was fixed. Expiring the row makes the next lookup
+    # re-ask the engine; the reader is never shown a stale answer that an
+    # operator has just declared wrong.
+    if status == "corrected" and row.cache_key:
+        from sqlalchemy import select as _sel
+        from .visa_snapshot.models import KimiRouteGuidanceCache
+        cached = db.execute(_sel(KimiRouteGuidanceCache).where(
+            KimiRouteGuidanceCache.cache_key == row.cache_key)).scalars().first()
+        if cached is not None:
+            db.delete(cached)
     db.commit()
     audit.record(db, org_id=p.org_id, application_id="database",
                  action="database_issue_" + status,
@@ -305,6 +317,10 @@ class DatabaseApproveIn(BaseModel):
     travel_purpose: str = "tourism"
     travel_document_type: str = "ordinary_passport"
     note: str = ""
+    # The exact answer being released, as reported by the lookup. Without it
+    # a release could only ever reach answers with no travel date and no
+    # transit, silently missing every other one.
+    cache_key: str = ""
 
 
 @app.post("/database/approve")
@@ -324,7 +340,7 @@ def travel_database_approve(body: DatabaseApproveIn, db=Depends(get_session),
     dest = body.destination.strip().upper()
     if not nat or not dest:
         raise HTTPException(422, "nationality and destination are required")
-    key = kimi_primary.cache_key({
+    key = body.cache_key.strip() or kimi_primary.cache_key({
         "passport_nationality": nat, "lawful_country_of_residence": nat,
         "destination_country": dest,
         "travel_purpose": body.travel_purpose or "tourism",
@@ -353,6 +369,9 @@ class DatabaseIssueIn(BaseModel):
     travel_document_type: str = "ordinary_passport"
     field: str = ""
     note: str = ""
+    # The identity of the answer actually on screen, echoed back from the
+    # lookup. Authoritative when present.
+    cache_key: str = ""
 
 
 @app.post("/database/report-issue")
@@ -374,10 +393,14 @@ def travel_database_report_issue(body: DatabaseIssueIn, db=Depends(get_session),
     route = {"passport_nationality": nat, "passport_issuing_country": nat,
              "lawful_country_of_residence": nat,
              "travel_document_type": body.travel_document_type or "ordinary_passport",
-             "destination_country": dest, "visa_category": "tourist_visa",
-             "travel_purpose": body.travel_purpose or "tourism"}
+             "destination_country": dest, "travel_purpose": body.travel_purpose or "tourism"}
+    route["visa_category"] = kimi_primary.category_for_purpose(
+        route["travel_purpose"])
     row = DatabaseIssueReport(
-        org_id=p.org_id, cache_key=kimi_primary.cache_key(route), route=route,
+        org_id=p.org_id,
+        cache_key=(body.cache_key.strip()[:200]
+                   or kimi_primary.cache_key(route)),
+        route=route,
         field=(body.field or "")[:64], note=(body.note or "")[:1000],
         reported_by=p.user_id, status="open")
     db.add(row)
@@ -396,8 +419,12 @@ def travel_database_issues(db=Depends(get_session),
     from sqlalchemy import select as _select
     from .visa_snapshot.models import DatabaseIssueReport
     require_admin(p)
-    rows = db.execute(_select(DatabaseIssueReport).where(
-        DatabaseIssueReport.org_id == p.org_id).order_by(
+    # NOT filtered by org. The Database is one shared knowledge base: a report
+    # is feedback about a public government fact, carries no applicant data by
+    # construction (a route, a field name, and a capped note), and is filed by
+    # readers whose org is never the operator's. Scoping this to the admin's
+    # own org meant no reader report was ever visible to anyone.
+    rows = db.execute(_select(DatabaseIssueReport).order_by(
         DatabaseIssueReport.created_at)).scalars().all()
     return {"issues": [{"id": r.id, "route": r.route, "field": r.field,
                         "note": r.note, "status": r.status,
@@ -439,7 +466,8 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
         "lawful_country_of_residence": parsed["nationality"],
         "travel_document_type": parsed["travel_document_type"],
         "destination_country": parsed["destination"],
-        "visa_category": "tourist_visa",
+        "visa_category": kimi_primary.category_for_purpose(
+            parsed["travel_purpose"]),
         "travel_purpose": parsed["travel_purpose"],
     }
     try:
@@ -503,9 +531,10 @@ def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
         "lawful_country_of_residence": (body.residence or nat).strip().upper(),
         "travel_document_type": body.travel_document_type or "ordinary_passport",
         "destination_country": dest,
-        "visa_category": "tourist_visa",
         "travel_purpose": body.travel_purpose or "tourism",
     }
+    route["visa_category"] = kimi_primary.category_for_purpose(
+        route["travel_purpose"])
     if body.arrival_date:
         route["arrival_date"] = body.arrival_date
     if body.departure_city.strip():
@@ -526,6 +555,11 @@ def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
         raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
                                          "reason": e.envelope.get("user_message"),
                                          "category": e.envelope.get("category")})
+    # The answer carries the identity of the cached row it came from. A reader
+    # flagging it, or an operator releasing it, then names THAT answer instead
+    # of re-deriving a key from a subset of the inputs (which silently missed
+    # any lookup carrying a travel date or a transit point).
+    out["cache_key"] = kimi_primary.cache_key(route)
     # A stale cache entry was already served above — freshen it for the next
     # reader without making this one wait.
     if out.get("stale"):

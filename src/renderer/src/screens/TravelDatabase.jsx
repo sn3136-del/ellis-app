@@ -47,6 +47,11 @@ const REQUIREMENT_DETAIL_KEYS = {
 // Enum values the engine emits become words, never raw snake_case.
 const CHANNEL_WORDS = {
   visa_center: 'Visa application centre',
+  // Not a visa centre: the destination refuses individual filings and a
+  // designated agency must lodge for the applicant. Trip.com rejected the
+  // "visa application centre" label for exactly this case.
+  authorised_agent: 'Designated authorised agent',
+  authorized_agent: 'Designated authorised agent',
   embassy: 'Embassy or consulate',
   consulate: 'Embassy or consulate',
   evisa_portal: 'Official online portal',
@@ -307,6 +312,8 @@ export default function TravelDatabase({ onBack }) {
   const [issueOpen, setIssueOpen] = useState(false)
   const [issueNote, setIssueNote] = useState('')
   const [issueDone, setIssueDone] = useState(false)
+  const [issueError, setIssueError] = useState('')
+  const [issueField, setIssueField] = useState('')
   // Dynamic-content translation overlay: original guidance string -> lang.
   const [tx, setTx] = useState({})
 
@@ -448,13 +455,22 @@ export default function TravelDatabase({ onBack }) {
   }
 
   async function reportIssue() {
+    setIssueError('')
     try {
       await client.databaseReportIssue({
         nationality: nat, destination: dest, travel_purpose: purpose,
-        travel_document_type: doc, field: '', note: issueNote.slice(0, 1000),
+        travel_document_type: doc, field: issueField,
+        note: issueNote.slice(0, 1000),
+        // Bind the report to the answer actually on screen, not to a key
+        // re-derived from a subset of the inputs.
+        cache_key: result?.cache_key || '',
       })
       setIssueDone(true); setIssueNote('')
-    } catch { setIssueDone(true) }   // a flag is never lost to the reader
+    } catch (e) {
+      // Never claim a report landed when it did not: the reader would think
+      // a wrong answer was flagged and it never was.
+      setIssueError(e?.detail?.reason || e?.message || t('db.reportFailed'))
+    }
   }
 
   const disp = g ? (DISPOSITION_VIEW[g.disposition] || null) : null
@@ -759,12 +775,29 @@ export default function TravelDatabase({ onBack }) {
             <div style={{ marginTop: 16 }}>
               <Section title={t('db.transitReq')} accent={BLUE}>
                 <Fact label={transit.map(countryName).join(', ')}
-                      value={sentence(asText(g.transit_requirement.note))
-                             || (g.transit_requirement.required
-                                 ? t('db.transitNeeded') : t('db.transitNotNeeded'))}
-                      pill={g.transit_requirement.required
-                            ? <Pill tone="warn">{t('db.transitNeeded')}</Pill>
-                            : <Pill tone="no">{t('db.transitNotNeeded')}</Pill>} />
+                      value={g.transit_requirement.required
+                             ? t('db.transitNeeded') : t('db.transitNotNeeded')}
+                      pill={g.transit_requirement.required ? 'warn' : 'no'} />
+                {sentence(asText(g.transit_requirement.note)) && (
+                  <div style={{ fontSize: 13, color: NAVY, lineHeight: 1.6,
+                                paddingTop: 10 }}
+                       data-testid="database-transit-note">
+                    {T(sentence(asText(g.transit_requirement.note)))}
+                  </div>
+                )}
+              </Section>
+            </div>
+          )}
+
+          {/* Good to know: the facilitation policies and caveats the engine
+              produces. These were being fetched and translated but never
+              shown, so Trip.com's "special policies missing" defect survived
+              in the UI even after the engine started answering it. */}
+          {itemsOf(g.exceptions).length > 0 && (
+            <div style={{ marginTop: 16 }}>
+              <Section title={t('db.goodToKnow')} accent="#9a6200">
+                <Bullets items={itemsOf(g.exceptions).map((x) => T(x))}
+                         mark="•" markColor="#9a6200" />
               </Section>
             </div>
           )}
@@ -776,6 +809,17 @@ export default function TravelDatabase({ onBack }) {
             <div style={{ marginTop: 16 }}>
               <Section title={t('db.visaTypes')} accent="#0f8a3d">
                 <div style={{ display: 'grid', gap: 10 }}>
+                  <div style={{ display: 'grid',
+                                gridTemplateColumns: '1.4fr 1fr 1fr 1fr', gap: 12,
+                                fontSize: 11, fontWeight: 800, color: GRAY,
+                                letterSpacing: 0.6, textTransform: 'uppercase',
+                                paddingBottom: 6,
+                                borderBottom: '1px solid var(--line, #eef1f5)' }}>
+                    <div>{t('db.colType')}</div>
+                    <div>{t('db.colValidity')}</div>
+                    <div>{t('db.colStay')}</div>
+                    <div>{t('db.colFee')}</div>
+                  </div>
                   {g.visa_products.map((vp, i) => (
                     <div key={i} style={{ display: 'grid',
                          gridTemplateColumns: '1.4fr 1fr 1fr 1fr', gap: 12,
@@ -790,8 +834,16 @@ export default function TravelDatabase({ onBack }) {
                       </div>
                       <div style={{ color: NAVY }}>{T(asText(vp.validity)) || '—'}</div>
                       <div style={{ color: NAVY }}>
-                        {vp.max_stay_days ? `${vp.max_stay_days} days`
-                          : (T(asText(vp.notes)) || '—')}</div>
+                        {vp.max_stay_days
+                          ? t('db.upToDays', { n: vp.max_stay_days })
+                          : (T(asText(vp.notes)) ? '' : '—')}
+                        {T(asText(vp.notes)) && (
+                          <div style={{ color: GRAY, fontSize: 12,
+                                        marginTop: 3, lineHeight: 1.45 }}>
+                            {T(asText(vp.notes))}
+                          </div>
+                        )}
+                      </div>
                       <div style={{ color: NAVY, fontWeight: 600 }}>
                         {feeText(vp.fee) || '—'}</div>
                     </div>
@@ -958,7 +1010,7 @@ export default function TravelDatabase({ onBack }) {
           </div>
 
           {/* Source + confidence — Trip.com's traceability requirement. */}
-          {(g.source_url || g.confidence) && (
+          {(g.source_url || ['high', 'medium', 'low'].includes(g.confidence)) && (
             <div style={{ fontSize: 12, color: GRAY, marginTop: 16,
                           textAlign: 'center' }}>
               {g.source_url && (
@@ -968,7 +1020,8 @@ export default function TravelDatabase({ onBack }) {
                 </a>
               )}
               {g.source_url && g.confidence ? ' · ' : ''}
-              {g.confidence ? t('db.confidence.' + g.confidence) : ''}
+              {['high', 'medium', 'low'].includes(g.confidence)
+                ? t('db.confidence.' + g.confidence) : ''}
               {' · '}
               <span role="button" tabIndex={0}
                     data-testid="database-report"
@@ -996,6 +1049,24 @@ export default function TravelDatabase({ onBack }) {
                 <>
                   <div style={{ fontSize: 13, fontWeight: 700, color: NAVY,
                                 marginBottom: 8 }}>{t('db.reportTitle')}</div>
+                  <select className="select" value={issueField}
+                          data-testid="database-report-field"
+                          onChange={(e) => setIssueField(e.target.value)}
+                          style={{ fontSize: 13, padding: '9px 12px',
+                                   borderRadius: 10, width: '100%',
+                                   marginBottom: 8 }}>
+                    <option value="">{t('db.reportWhich')}</option>
+                    {[['visa_products', 'db.visaTypes'],
+                      ['permitted_stay', 'db.stay'],
+                      ['government_fee', 'db.fee'],
+                      ['application_channel', 'db.channel'],
+                      ['processing_time', 'db.processing'],
+                      ['required_documents', 'db.documents'],
+                      ['official_portal_url', 'db.formsPortal'],
+                      ['other', 'db.reportOther']].map(([v, k]) => (
+                        <option key={v} value={v}>{t(k)}</option>
+                      ))}
+                  </select>
                   <textarea className="input" rows={3} value={issueNote}
                             data-testid="database-report-note"
                             placeholder={t('db.reportPlaceholder')}
@@ -1003,6 +1074,13 @@ export default function TravelDatabase({ onBack }) {
                             style={{ fontSize: 13.5, padding: '10px 12px',
                                      borderRadius: 12, width: '100%',
                                      resize: 'vertical' }} />
+                  {issueError && (
+                    <div style={{ fontSize: 12.5, color: NAVY, fontWeight: 600,
+                                  marginTop: 8 }}
+                         data-testid="database-report-error">
+                      {issueError}
+                    </div>
+                  )}
                   <div style={{ marginTop: 10, textAlign: 'right' }}>
                     <button className="btn btn--primary" onClick={reportIssue}
                             data-testid="database-report-send"

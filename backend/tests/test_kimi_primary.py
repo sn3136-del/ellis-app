@@ -123,6 +123,13 @@ def test_visa_required_plan_keeps_irreversible_confirmations(db):
                government_fee={"amount": 140, "currency": "USD"},
                official_portal_url="https://cova.mfa.gov.cn/", forms=["V.2013"],
                appointment_required=True, route_workflow_type="embassy_submission",
+               # A visa-required answer must name its products: "only the
+               # 3-month single was listed" was Trip.com's first complaint,
+               # so an empty product list is now a contradiction.
+               visa_products=[{"type": "Single-entry tourist L", "entry": "single",
+                               "validity": "3 months", "max_stay_days": 30,
+                               "fee": {"amount": 140, "currency": "USD"},
+                               "notes": None}],
                arrival_card=None)
     kimi_primary.set_provider(single_pass(ans))
     g = kimi_primary.get_route_guidance(db, dict(ROUTE, destination_country="CHN"))

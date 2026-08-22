@@ -4,8 +4,21 @@
     {
       "name": "ellis-web",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "ellis:web"],
+      "runtimeArgs": [
+        "run",
+        "ellis:web"
+      ],
       "port": 5199
+    },
+    {
+      "name": "ellis-verify",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--config",
+        "vite.verify.config.mjs"
+      ],
+      "port": 5210
     }
   ]
 }

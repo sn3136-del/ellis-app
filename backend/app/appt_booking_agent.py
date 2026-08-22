@@ -256,11 +256,16 @@ def book(db, row, *, operator: str, driver=None,
         # Every slot the applicant named is taken. The honest next step is a
         # fresh reading of the calendar and a fresh choice by them — Ellis does
         # not pick a replacement, so `booked` simply does not happen here.
-        which = ("the time this applicant chose is" if len(gone) <= 1 else
+        # Both branches must read as "gone". The singular used to share the
+        # plural's tail and came out as "the time this applicant chose is
+        # still open ... nothing was booked" — the exact opposite of what
+        # happened, and the operator acts on this sentence.
+        which = ("the time this applicant chose is no longer"
+                 if len(gone) <= 1 else
                  f"none of the {len(gone)} preferred times this applicant "
-                 f"chose are")
+                 f"chose are still")
         raise AgentUnavailable(
-            f"{which} still open on the official site; nothing was booked. "
+            f"{which} open on the official site; nothing was booked. "
             "Read the calendar again so they can choose from what is open now "
             "— Ellis will not book a time they did not choose.",
             kind="not_ready", needs=list(_REQUIRES),
