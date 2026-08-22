@@ -581,11 +581,12 @@ export default function TravelDatabase({ onBack }) {
             <div style={{ fontSize: 12.5, color: NAVY, marginTop: 8,
                           textAlign: 'left' }}>{askMsg}</div>
           )}
-          {/* The first-time-route hint is hidden by owner decision (theming). */}
-          {false && askBusy && askSlow && (
-            <div style={{ fontSize: 12.5, color: GRAY, marginTop: 8,
-                          textAlign: 'left' }} data-testid="database-ask-slow">
-              {t('db.askFirstTime')}
+          {/* While a first-time route is being worked out: the plane alone,
+              no sentence (owner decision). Warm routes answer before it
+              would appear. */}
+          {askBusy && askSlow && (
+            <div style={{ marginTop: 10 }} data-testid="database-ask-slow">
+              <Loading label="" />
             </div>
           )}
           <div style={{ fontSize: 11.5, color: GRAY, marginTop: 10,
