@@ -748,11 +748,13 @@ def get_route_guidance(db, route: dict, *, force_refresh: bool = False) -> dict:
             advisories=deterministic_advisories(route, row.guidance or {})), route)
         if isinstance(gc, dict) and gc.get("outcome") == "checked":
             # Machine provenance, deliberately WEAKER than the human badge:
-            # "the official page was read on this date and agreed / was
-            # applied", never "a person verified this".
+            # "the official page was read on this date and matched", never
+            # "a person verified this". `consistent` is passed through so the
+            # UI can only claim a match when there actually was one — a check
+            # that found a disagreement is not a clean bill of health.
             out["grounded_check"] = {k: gc.get(k) for k in
                                      ("at", "source_url", "consistent",
-                                      "changed_fields")}
+                                      "changed_fields", "disputed_fields")}
         return out
 
     if not is_available():

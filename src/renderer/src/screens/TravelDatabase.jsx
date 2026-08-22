@@ -1041,7 +1041,8 @@ export default function TravelDatabase({ onBack }) {
           {/* Machine provenance, deliberately weaker than the green human
               badge: the official page was READ on this date and agreed (or
               corrections were applied) — never "a person verified this". */}
-          {!result.source_verified && result.grounded_check?.at && (
+          {!result.source_verified && result.grounded_check?.at
+            && result.grounded_check.consistent === true && (
             <div style={{ fontSize: 12, color: GRAY, marginTop: 14,
                           textAlign: 'center' }}
                  data-testid="database-grounded">

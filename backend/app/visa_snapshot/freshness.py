@@ -137,42 +137,56 @@ def recheck_row(db, row, *, today: str | None = None) -> dict:
         db.commit()
         return {"outcome": "no_official_source", "route_key": row.cache_key}
 
+    # Walk the sources until one is BOTH readable and actually about this
+    # route. A landing page that does not state the rule is not a check: the
+    # first Japan recheck stopped at the embassy homepage, called it
+    # irrelevant (honestly) and left the route unchecked. Irrelevance is a
+    # reason to try the next page, not to give up.
     page = None
+    raw = None
+    fetched_any = False
+    tried = []
     for url in sources:
         fr = fetch(url, timeout_seconds=FETCH_TIMEOUT_SECONDS)
-        if fr.ok and fr.content_text and not fr.challenge \
-                and is_government_host(fr.final_hostname):
-            page = fr
+        if not (fr.ok and fr.content_text and not fr.challenge
+                and is_government_host(fr.final_hostname)):
+            continue
+        fetched_any = True
+        tried.append(fr.final_url)
+        payload = {
+            "route": {k: route.get(k) for k in
+                      ("passport_nationality", "destination_country",
+                       "travel_purpose", "travel_document_type")},
+            "stored_answer": {k: guidance.get(k) for k in OVERRIDABLE
+                              if k in guidance},
+            "official_page_url": fr.final_url,
+            "official_page_text": fr.content_text[:MAX_PAGE_CHARS],
+        }
+        try:
+            answer = _call(_SYSTEM, json.dumps(payload, ensure_ascii=False))
+        except Exception as e:  # noqa: BLE001 — provider trouble is an outcome
+            _stamp(row, {"at": when, "outcome": "provider_error",
+                         "source_url": fr.final_url, "error": str(e)[:160]})
+            db.commit()
+            return {"outcome": "provider_error", "route_key": row.cache_key}
+        if isinstance(answer, dict) and answer.get("page_relevant"):
+            page, raw = fr, answer
             break
-    if page is None:
+
+    if not fetched_any:
         _stamp(row, {"at": when, "outcome": "fetch_failed", "sources": sources})
         db.commit()
         return {"outcome": "fetch_failed", "route_key": row.cache_key,
                 "sources": sources}
-
-    payload = {
-        "route": {k: route.get(k) for k in
-                  ("passport_nationality", "destination_country",
-                   "travel_purpose", "travel_document_type")},
-        "stored_answer": {k: guidance.get(k) for k in OVERRIDABLE
-                          if k in guidance},
-        "official_page_url": page.final_url,
-        "official_page_text": page.content_text[:MAX_PAGE_CHARS],
-    }
-    try:
-        raw = _call(_SYSTEM, json.dumps(payload, ensure_ascii=False))
-    except Exception as e:  # noqa: BLE001 — provider trouble is an outcome
-        _stamp(row, {"at": when, "outcome": "provider_error",
-                     "source_url": page.final_url, "error": str(e)[:160]})
-        db.commit()
-        return {"outcome": "provider_error", "route_key": row.cache_key}
-
-    if not isinstance(raw, dict) or not raw.get("page_relevant"):
+    if page is None:
+        # Read, but none of the pages actually state this route's rule. Honest
+        # non-answer: nothing is changed and the row is NOT marked fresh, so
+        # it stays due for a better source.
         _stamp(row, {"at": when, "outcome": "page_not_relevant",
-                     "source_url": page.final_url,
-                     "content_hash": page.content_hash})
+                     "sources_tried": tried})
         db.commit()
-        return {"outcome": "page_not_relevant", "route_key": row.cache_key}
+        return {"outcome": "page_not_relevant", "route_key": row.cache_key,
+                "sources_tried": tried}
 
     # Corrections: whitelisted, quote-backed, override-protected.
     proposed = raw.get("corrected_fields") or {}

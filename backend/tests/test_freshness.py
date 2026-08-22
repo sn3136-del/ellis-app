@@ -223,3 +223,86 @@ def test_once_grounded_memory_regen_never_reverts_the_answer(db, monkeypatch):
     db.expire_all()
     assert db.query(KimiRouteGuidanceCache).one() \
              .guidance["government_fee"] == {"amount": 715, "currency": "CNY"}
+
+
+def test_an_irrelevant_landing_page_falls_through_to_the_real_one(db):
+    """The Japan miss, fixed: the first source was the embassy homepage, which
+    does not state the rule. An irrelevant page is a reason to try the NEXT
+    source, not to abandon the route unchecked."""
+    landing = FetchResult(
+        requested_url="https://www.cn.emb-japan.go.jp/", ok=True,
+        final_url="https://www.cn.emb-japan.go.jp/",
+        final_hostname="www.cn.emb-japan.go.jp", http_status=200,
+        content_text="Embassy of Japan in China. News, events, about us.",
+        content_hash="home1")
+    pages = {landing.final_url: landing,
+             OFFICIAL_PAGE.final_url: OFFICIAL_PAGE}
+    seen = []
+
+    def _fetch(url, timeout_seconds=0):
+        seen.append(url)
+        return pages.get(url, FetchResult(requested_url=url, ok=False))
+    fetching.set_fetcher(_fetch)
+
+    def _judge(system, user):
+        # Irrelevant for the homepage, a real verdict for the visa page.
+        if "News, events" in user:
+            return {"page_relevant": False, "consistent": True,
+                    "corrected_fields": {}, "evidence": {}, "note": "landing"}
+        return {"page_relevant": True, "consistent": False,
+                "corrected_fields": {"government_fee": {"amount": 715,
+                                                        "currency": "CNY"}},
+                "evidence": {"government_fee": "single entry 715 CNY"},
+                "note": "fee revised"}
+    freshness.set_provider(_judge)
+
+    _seed(db, guidance=dict(STALE_JPN,
+                            official_portal_url=OFFICIAL_PAGE.final_url,
+                            source_url=landing.final_url))
+    out = freshness.recheck_route(db, ROUTE)
+    assert seen[0] == landing.final_url, "the stored source is tried first"
+    assert out["outcome"] == "checked"
+    assert out["changed"] == ["government_fee"]
+    assert out["source_url"] == OFFICIAL_PAGE.final_url
+
+
+def test_when_no_source_states_the_rule_nothing_is_changed_or_refreshed(db):
+    """Every page read, none of them about this route: an honest non-answer.
+    The row keeps its answer and stays due — it is not marked fresh on the
+    strength of pages that said nothing."""
+    landing = FetchResult(
+        requested_url="https://www.mofa.go.jp/j_info/visit/visa/index.html",
+        ok=True, final_url="https://www.mofa.go.jp/j_info/visit/visa/index.html",
+        final_hostname="www.mofa.go.jp", content_text="Ministry news index.",
+        content_hash="h")
+    fetching.set_fetcher(lambda url, timeout_seconds=0: landing)
+    freshness.set_provider(lambda system, user: {
+        "page_relevant": False, "consistent": True,
+        "corrected_fields": {}, "evidence": {}, "note": ""})
+    _seed(db)
+    out = freshness.recheck_route(db, ROUTE)
+    assert out["outcome"] == "page_not_relevant"
+    row = db.query(KimiRouteGuidanceCache).one()
+    assert row.guidance["permitted_stay"] == "90 days"
+    assert row.fresh_until is None
+
+
+def test_a_disagreeing_check_is_not_served_as_a_clean_bill_of_health(db):
+    """The page was read but disagreed. The served payload must carry
+    consistent=False so the UI cannot print "read and matched" over a route
+    whose own source contradicted it."""
+    from app.db import SessionLocal
+    _seed(db)
+    fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
+    freshness.set_provider(lambda system, user: {
+        "page_relevant": True, "consistent": False,
+        "corrected_fields": {"permitted_stay": "15 or 30 days"},
+        "evidence": {"permitted_stay": "15 days or 30 days as decided"},
+        "note": ""})
+    freshness.recheck_route(db, ROUTE)
+    db.commit()
+    kimi_primary.set_provider(lambda system, user: STALE_JPN)
+    served = kimi_primary.get_route_guidance(SessionLocal(), ROUTE)
+    assert served["cached"] is True
+    assert served["grounded_check"]["consistent"] is False
+    assert served["grounded_check"]["changed_fields"] == ["permitted_stay"]
