@@ -590,15 +590,18 @@ def test_an_override_replaces_only_the_fields_it_names(tmp_path, monkeypatch):
     monkeypatch.setattr(vo, "OVERRIDES", f)
     vo.reload()
     guidance = {"disposition": "VISA_REQUIRED", "permitted_stay": "wrong",
-                "processing_time": "5 days", "required_documents": ["passport"]}
+                "photo_requirements": "35mm", "required_documents": ["passport"]}
     route = {"passport_nationality": "CHN", "destination_country": "SGP",
              "travel_purpose": "tourism"}
     merged, prov = vo.apply(guidance, route)
     assert merged["disposition"] == "VISA_EXEMPT"
     assert merged["permitted_stay"] == "30 days"
-    # untouched fields stay the model's
-    assert merged["processing_time"] == "5 days"
+    # Untouched fields stay the model's. (processing_time is NOT checked here:
+    # this override declares the route visa-free, and a visa-free verdict
+    # deliberately clears application-only leftovers — see
+    # test_a_verified_visa_free_verdict_clears_application_leftovers.)
     assert merged["required_documents"] == ["passport"]
+    assert merged["photo_requirements"] == "35mm"
     # and the answer can say exactly what was checked
     assert prov["fields"] == ["disposition", "permitted_stay"]
     assert prov["source_url"] == "https://www.ica.gov.sg/x"
@@ -639,4 +642,35 @@ def test_verifying_a_disposition_lifts_the_low_confidence_hold(tmp_path, monkeyp
     assert out["review_required"] is False
     assert out["guidance"]["disposition"] == "CONDITIONAL"
     assert out["source_verified"]["verified_at"] == "2026-08-22"
+    vo.reload()
+
+
+def test_a_verified_visa_free_verdict_clears_application_leftovers(tmp_path, monkeypatch):
+    """"No visa needed" and "processing time: 3 working days" cannot both be
+    true on the same page. When a verified fact says no visa is needed, the
+    model's leftovers about applying for one are dropped rather than left to
+    contradict the verdict."""
+    import json as _json
+    from app.visa_snapshot import verified_overrides as vo
+    f = tmp_path / "verified_overrides.json"
+    f.write_text(_json.dumps([{
+        "route": {"nationality": "CHN", "destination": "SGP"},
+        "verified_at": "2026-08-22", "source_url": "https://www.ica.gov.sg/x",
+        "fields": {"disposition": "VISA_EXEMPT",
+                   "government_fee": {"amount": 0, "currency": None}}}]))
+    monkeypatch.setattr(vo, "OVERRIDES", f)
+    vo.reload()
+    merged, _ = vo.apply(
+        {"disposition": "VISA_REQUIRED", "processing_time": "About 3 working days",
+         "forms": ["Form 14A"], "submission_process": ["Lodge at the centre"],
+         "interview_required": True, "required_documents": ["passport"]},
+        {"passport_nationality": "CHN", "destination_country": "SGP",
+         "travel_purpose": "tourism"})
+    for gone in ("processing_time", "forms", "submission_process"):
+        assert gone not in merged, gone
+    assert merged["interview_required"] is False
+    # the override's OWN value still wins, even for an application-only field
+    assert merged["government_fee"] == {"amount": 0, "currency": None}
+    # and what a visa-free traveller still needs is untouched
+    assert merged["required_documents"] == ["passport"]
     vo.reload()

@@ -101,6 +101,30 @@ def find(route: dict) -> dict | None:
                              route.get("travel_purpose", "tourism")))
 
 
+# Fields that only describe APPLYING for a visa. When a verified override
+# says no visa is needed, whatever the model wrote in these is about an
+# application that does not happen, and would contradict the verdict on the
+# same page ("No visa needed ... processing time about 3 working days").
+_APPLICATION_ONLY = ("processing_time", "forms", "account_registration_steps",
+                     "payment_process", "submission_process",
+                     "official_portal_url", "government_fee")
+
+
+def _drop_application_leftovers(merged: dict, fields: dict) -> None:
+    """A verified visa-free verdict clears application-only leftovers, unless
+    the override itself supplied them. Never invents a value: it removes
+    claims that the verified verdict has made false."""
+    if str(fields.get("disposition") or "").upper() != "VISA_EXEMPT":
+        return
+    for k in _APPLICATION_ONLY:
+        if k in fields:
+            continue          # the verified fact wins, whatever it says
+        merged.pop(k, None)
+    if not merged.get("appointment_required"):
+        merged["appointment_required"] = False
+    merged["interview_required"] = False
+
+
 def apply(guidance: dict, route: dict) -> tuple[dict, dict | None]:
     """Return (guidance, provenance). The guidance is a COPY with the verified
     fields replaced; provenance names the source, the date and the fields so
@@ -110,6 +134,7 @@ def apply(guidance: dict, route: dict) -> tuple[dict, dict | None]:
         return guidance, None
     merged = dict(guidance)
     merged.update(hit["fields"])
+    _drop_application_leftovers(merged, hit["fields"])
     return merged, {
         "source_url": hit["source_url"], "verified_at": hit["verified_at"],
         "verified_by": hit["verified_by"], "note": hit["note"],
