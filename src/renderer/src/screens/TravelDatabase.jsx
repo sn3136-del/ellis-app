@@ -581,7 +581,8 @@ export default function TravelDatabase({ onBack }) {
             <div style={{ fontSize: 12.5, color: NAVY, marginTop: 8,
                           textAlign: 'left' }}>{askMsg}</div>
           )}
-          {askBusy && askSlow && (
+          {/* The first-time-route hint is hidden by owner decision (theming). */}
+          {false && askBusy && askSlow && (
             <div style={{ fontSize: 12.5, color: GRAY, marginTop: 8,
                           textAlign: 'left' }} data-testid="database-ask-slow">
               {t('db.askFirstTime')}
