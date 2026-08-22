@@ -304,8 +304,12 @@ export function guidanceStepMeta(step) {
 
 // True only for a usable, applicant-facing AI result. KIMI_UNCERTAIN and unknown
 // statuses are shown honestly (gaps surfaced), never as a confident answer.
+// review_required means the engine itself rated the answer low confidence and
+// it is held for a person to check — the Database refuses to display it, and
+// a REAL case must not be built on it either.
 export function guidanceIsUsable(g) {
-  return !!g && g.status === 'KIMI_PRIMARY' && g.ai_generated === true
+  return !!g && g.status === 'KIMI_PRIMARY' && g.ai_generated === true &&
+    g.review_required !== true
 }
 
 // ---------------------------------------------------------------------------

@@ -109,7 +109,6 @@ const MISSION_ALIASES = {
   mexi: ['mexico city'],
   guat: ['guatemala city'],
   hava: ['havana', 'la habana'],
-  niko: ['nicosia'],
   kiew: ['kyiv', 'kiev'],
   krak: ['krakow', 'cracow'],
   danz: ['gdansk'],

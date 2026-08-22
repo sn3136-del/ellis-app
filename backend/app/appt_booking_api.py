@@ -374,6 +374,12 @@ class BookedIn(BaseModel):
     confirmation_number: str
     evidence_document_id: str
     note: str = ""
+    # When the desk worked the applicant's RANKED list by hand and the first
+    # choice was gone, these name the slot actually booked. The rules layer
+    # refuses anything the applicant did not rank, so an operator can no more
+    # book an unchosen time than the agent can.
+    booked_post: str = ""
+    booked_when: str = ""
 
 
 @router.post("/{request_id}/booked")
@@ -385,7 +391,12 @@ def record_booked(request_id: str, body: BookedIn,
     _run(booking.record_booked, db, row,
          confirmation_number=body.confirmation_number,
          evidence_document_id=body.evidence_document_id,
-         note=body.note, actor=principal.user_id)
+         note=body.note, actor=principal.user_id,
+         # When the desk worked the ranked list by hand and the first choice
+         # was gone, name the one actually booked. The rules layer refuses
+         # anything the applicant did not rank.
+         booked_slot=({"post": body.booked_post, "when": body.booked_when}
+                      if body.booked_when.strip() else None))
     _record(db, row, "appt_booking_booked", principal,
             {"confirmation_number": row.confirmation.get("number", ""),
              "evidence_document_id":

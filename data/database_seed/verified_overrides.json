@@ -223,14 +223,41 @@
     "verified_at": "2026-08-22",
     "verified_by": "Ellis source audit",
     "source_url": "https://www.immigration.gov.tw/5385/7244/7250/7296/",
-    "note": "HKSAR passport holders are outside Taiwan's visa regime and travel under the Hong Kong and Macau arrangements administered by the National Immigration Agency, needing an entry permit rather than visa-free entry.",
+    "note": "HKSAR passport holders are outside Taiwan's visa regime and travel under the Hong Kong and Macau arrangements administered by the National Immigration Agency, needing an entry permit rather than visa-free entry. The free online entry permit is the real channel for eligible HKSAR passport holders, applied for directly with no agency and no fee.",
     "fields": {
       "disposition": "CONDITIONAL",
       "visa_category": "Entry permit for Hong Kong residents",
       "application_channel": "online_portal",
-      "application_channel_detail": "Not visa-free. Apply for an entry permit with the National Immigration Agency; eligibility depends on place of birth and previous entries.",
-      "official_portal_url": "https://www.immigration.gov.tw/",
-      "confidence": "medium"
+      "application_channel_detail": "Apply directly online with the National Immigration Agency. It is free for HKSAR passport holders born in Hong Kong or Macau, or who have entered Taiwan before; others use the paid permit route.",
+      "official_portal_url": "https://egate.immigration.gov.tw/NIA_OnlineApply_inter/visafreeApply/visafreeApplyIndex.action",
+      "confidence": "medium",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "arrival_card": {
+        "required": false,
+        "name": null,
+        "submission_window": null
+      },
+      "submission_process": [
+        "Apply online with the National Immigration Agency",
+        "Print the travel authorization certificate yourself",
+        "Carry the printout and your HKSAR passport to the airport"
+      ],
+      "visa_products": [
+        {
+          "type": "Online entry permit (travel authorization certificate)",
+          "entry": "single",
+          "validity": "as granted",
+          "max_stay_days": 30,
+          "fee": {
+            "amount": 0,
+            "currency": null
+          },
+          "notes": "Free for eligible HKSAR passport holders; self-printed."
+        }
+      ]
     }
   },
   {
@@ -242,7 +269,7 @@
     "verified_at": "2026-08-22",
     "verified_by": "Ellis source audit",
     "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/",
-    "note": "The Directorate General of Immigration lists the United States as visa-on-arrival, not visa-exempt. The model reported visa-free entry.",
+    "note": "The Directorate General of Immigration lists the United States as visa-on-arrival, not visa-exempt. The model reported visa-free entry. Self-lodged: buy the e-VOA online before departure or the visa on arrival at the counter; no agency, sponsor or guarantor.",
     "fields": {
       "disposition": "VISA_REQUIRED",
       "requirement_detail": "evisa_on_arrival",
@@ -279,7 +306,17 @@
           },
           "notes": "Extendable once for a further 30 days."
         }
-      ]
+      ],
+      "submission_process": [
+        "Buy the e-VOA online before departure, or pay at the visa-on-arrival counter",
+        "Present the e-VOA or receipt at immigration on arrival",
+        "Extend once in country if staying beyond 30 days"
+      ],
+      "arrival_card": {
+        "required": false,
+        "name": null,
+        "submission_window": null
+      }
     }
   },
   {
@@ -316,27 +353,36 @@
     "verified_at": "2026-08-22",
     "verified_by": "Ellis source audit",
     "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
-    "note": "Chinese nationals are not on India's e-Visa eligible list, so the e-Tourist products the model offered cannot be applied for. A regular visa must be obtained from an Indian mission.",
+    "note": "Chinese nationals are not on India's e-Visa eligible list, so the e-Tourist products the model offered cannot be applied for. A regular visa must be obtained from an Indian mission. Fee and lodgement channel added: USD 100 for a tourist visa up to one year, the form completed online and lodged in person at the Indian visa application centre.",
     "fields": {
       "disposition": "VISA_REQUIRED",
       "requirement_detail": "paper_visa",
       "visa_category": "Regular (sticker) tourist visa",
-      "application_channel": "embassy",
-      "application_channel_detail": "Apply in advance at an Indian embassy or consulate. The e-Visa is not available to Chinese nationals.",
-      "official_portal_url": "https://indianvisaonline.gov.in/",
+      "application_channel": "visa_center",
+      "application_channel_detail": "Complete the form online, then lodge it in person at the Indian Visa Application Centre or at the mission. The e-Visa is not open to Chinese nationals.",
+      "official_portal_url": "https://indianvisaonline.gov.in/visa/",
       "visa_products": [
         {
-          "type": "Regular tourist visa (sticker)",
+          "type": "Tourist visa (T-1), up to 1 year",
           "entry": "single or multiple",
-          "validity": "as granted by the mission",
+          "validity": "up to 1 year",
           "max_stay_days": 90,
           "fee": {
-            "amount": null,
-            "currency": null
+            "amount": 100,
+            "currency": "USD"
           },
-          "notes": "Applied for at an Indian mission. Chinese nationals cannot use the e-Visa route."
+          "notes": "Plus the ICWF levy. Lodged in person; the e-Visa is not available to Chinese nationals."
         }
-      ]
+      ],
+      "government_fee": {
+        "amount": 100,
+        "currency": "USD"
+      },
+      "arrival_card": {
+        "required": false,
+        "name": null,
+        "submission_window": null
+      }
     }
   },
   {
@@ -348,7 +394,7 @@
     "verified_at": "2026-08-22",
     "verified_by": "Ellis source audit",
     "source_url": "https://www.immigration.gov.tw/",
-    "note": "A mainland resident does not travel to Taiwan on a PRC ordinary passport, and the individual-tourism (G) endorsement has been suspended. Travel is under the mainland travel-permit regime administered by the National Immigration Agency, with group travel the practical channel.",
+    "note": "A mainland resident does not travel to Taiwan on a PRC ordinary passport, and the individual-tourism (G) endorsement has been suspended. Travel is under the mainland travel-permit regime administered by the National Immigration Agency, with group travel the practical channel. Permit fees added: NT$600 single entry, NT$600 one-year sequential endorsement, NT$1,000 one-year multiple.",
     "fields": {
       "disposition": "CONDITIONAL",
       "visa_category": "Entry permit for mainland residents (Taiwan)",
@@ -356,7 +402,40 @@
       "application_channel_detail": "Not a visa and not a PRC passport route. A mainland resident needs a Taiwan travel permit plus an endorsement; individual tourism has been suspended, so an approved travel agency is the practical channel. Confirm the current position before selling.",
       "official_portal_url": "https://www.immigration.gov.tw/",
       "confidence": "medium",
-      "visa_products": []
+      "visa_products": [
+        {
+          "type": "Single-entry entry/exit permit",
+          "entry": "single",
+          "validity": "as granted",
+          "max_stay_days": 15,
+          "fee": {
+            "amount": 600,
+            "currency": "TWD"
+          },
+          "notes": "Individual tourism is suspended; group travel through an approved agency is the practical channel."
+        },
+        {
+          "type": "One-year multiple-entry permit",
+          "entry": "multiple",
+          "validity": "1 year",
+          "max_stay_days": 15,
+          "fee": {
+            "amount": 1000,
+            "currency": "TWD"
+          },
+          "notes": "Eligibility is restricted."
+        }
+      ],
+      "government_fee": {
+        "amount": 600,
+        "currency": "TWD"
+      },
+      "arrival_card": {
+        "required": false,
+        "name": null,
+        "submission_window": null
+      },
+      "requirement_detail": null
     }
   },
   {
@@ -526,7 +605,7 @@
     "verified_at": "2026-08-22",
     "verified_by": "Ellis source audit",
     "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
-    "note": "The model reported the e-Visa VALIDITY periods (30 days, 1 year, 5 years) as if they were the permitted stay. They are different things.",
+    "note": "The model reported the e-Visa VALIDITY periods (30 days, 1 year, 5 years) as if they were the permitted stay. They are different things. e-Tourist fee schedule added: USD 10 or 25 for the 30-day product depending on season, with the longer products priced separately.",
     "fields": {
       "permitted_stay": "Up to 90 days per visit on the 1-year and 5-year e-Tourist visas; the 30-day product allows a stay within its 30-day validity",
       "visa_products": [
@@ -563,7 +642,575 @@
           },
           "notes": "Validity is 5 years; each stay is limited separately."
         }
+      ],
+      "government_fee": {
+        "amount": 25,
+        "currency": "USD"
+      },
+      "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+      "arrival_card": {
+        "required": false,
+        "name": null,
+        "submission_window": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "JPN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.cn.emb-japan.go.jp/",
+    "note": "The single-entry tourist stay is 15 OR 30 days, decided case by case by the issuing mission, not a fixed 15. The consular fee for applications lodged on or after 1 July 2026 is CNY 715 single-entry and CNY 1,430 for double/multiple; the agency's service fee is separate.",
+    "fields": {
+      "permitted_stay": "15 or 30 days for a single-entry tourist visa, decided by the issuing mission; 30 days per stay on 3-year multiple, 90 on 5-year multiple",
+      "government_fee": {
+        "amount": 715,
+        "currency": "CNY"
+      },
+      "visa_products": [
+        {
+          "type": "Single-entry Temporary Visitor (tourism)",
+          "entry": "single",
+          "validity": "3 months",
+          "max_stay_days": 30,
+          "fee": {
+            "amount": 715,
+            "currency": "CNY"
+          },
+          "notes": "Stay granted is 15 or 30 days, decided case by case. Lodged by an accredited agency; issued electronically, and the visa issuance notice must be shown online at the airport."
+        },
+        {
+          "type": "Double-entry Temporary Visitor (tourism)",
+          "entry": "multiple",
+          "validity": "6 months",
+          "max_stay_days": 30,
+          "fee": {
+            "amount": 1430,
+            "currency": "CNY"
+          },
+          "notes": "For applicants with a reason for two visits."
+        },
+        {
+          "type": "Multiple-entry Temporary Visitor (3-year)",
+          "entry": "multiple",
+          "validity": "3 years",
+          "max_stay_days": 30,
+          "fee": {
+            "amount": 1430,
+            "currency": "CNY"
+          },
+          "notes": "Requires proof of income or assets and travel record."
+        },
+        {
+          "type": "Multiple-entry Temporary Visitor (5-year)",
+          "entry": "multiple",
+          "validity": "5 years",
+          "max_stay_days": 90,
+          "fee": {
+            "amount": 1430,
+            "currency": "CNY"
+          },
+          "notes": "Requires higher income or asset proof; tax certificates are often requested."
+        }
       ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "AUS",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600",
+    "note": "One Tourist-stream product at one charge, not three duration tiers: the Department sets the stay case by case (generally 3 months, up to 12). AUD 250 lodged outside Australia. The ADS and Frequent Traveller streams are the China-specific alternatives.",
+    "fields": {
+      "government_fee": {
+        "amount": 250,
+        "currency": "AUD"
+      },
+      "official_portal_url": "https://online.immi.gov.au/lusc/login",
+      "application_channel_detail": "Apply online in ImmiAccount. There is no paper channel, and the applicant cannot choose a stay length: the Department sets it in the grant letter.",
+      "permitted_stay": "Set case by case: generally 3 months, up to 12 months in certain circumstances",
+      "visa_products": [
+        {
+          "type": "Visitor (subclass 600) Tourist stream",
+          "entry": "single or multiple",
+          "validity": "as granted",
+          "max_stay_days": 365,
+          "fee": {
+            "amount": 250,
+            "currency": "AUD"
+          },
+          "notes": "One product at one charge. Stay set case by case: generally 3 months, up to 12."
+        },
+        {
+          "type": "Visitor (subclass 600) Approved Destination Status stream",
+          "entry": "single",
+          "validity": "as granted",
+          "max_stay_days": null,
+          "fee": {
+            "amount": 250,
+            "currency": "AUD"
+          },
+          "notes": "PRC citizens on an organised tour; an approved travel agent applies on the applicant's behalf, who must be in the PRC at lodgement and decision."
+        },
+        {
+          "type": "Visitor (subclass 600) Frequent Traveller stream",
+          "entry": "multiple",
+          "validity": "up to 10 years",
+          "max_stay_days": 90,
+          "fee": {
+            "amount": 1845,
+            "currency": "AUD"
+          },
+          "notes": "Up to 3 months per entry, 12 months total in any 24. Biometrics at an Australian Biometric Collection Centre are required."
+        }
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "CAN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://ircc.canada.ca/english/information/fees/fees.asp",
+    "note": "The visitor visa is CAD 100, and biometrics are mandatory for Chinese nationals at CAD 85 more — the real government cost for one tourist is CAD 185.",
+    "fields": {
+      "government_fee": {
+        "amount": 100,
+        "currency": "CAD"
+      },
+      "application_channel_detail": "Apply online. Biometrics are mandatory for Chinese nationals (CAD 85 per person, CAD 170 family maximum), so the total government cost for one applicant is CAD 185.",
+      "visa_products": [
+        {
+          "type": "Visitor visa (single or multiple entry)",
+          "entry": "single or multiple",
+          "validity": "up to passport expiry (multiple)",
+          "max_stay_days": 180,
+          "fee": {
+            "amount": 100,
+            "currency": "CAD"
+          },
+          "notes": "Plus mandatory biometrics CAD 85 per person; CAD 500 family maximum on the visa fee for five or more applying together."
+        }
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "GBR",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.gov.uk/standard-visitor",
+    "note": "The fee schedule was missing: GBP 135 for the 6-month Standard Visitor; long-term visas at 506 (2-year), 903 (5-year), 1128 (10-year), each still limited to 6 months per visit.",
+    "fields": {
+      "government_fee": {
+        "amount": 135,
+        "currency": "GBP"
+      },
+      "visa_products": [
+        {
+          "type": "Standard Visitor (6 months)",
+          "entry": "multiple",
+          "validity": "6 months",
+          "max_stay_days": 180,
+          "fee": {
+            "amount": 135,
+            "currency": "GBP"
+          },
+          "notes": null
+        },
+        {
+          "type": "Long-term Standard Visitor (2 years)",
+          "entry": "multiple",
+          "validity": "2 years",
+          "max_stay_days": 180,
+          "fee": {
+            "amount": 506,
+            "currency": "GBP"
+          },
+          "notes": "Up to 6 months per visit."
+        },
+        {
+          "type": "Long-term Standard Visitor (5 years)",
+          "entry": "multiple",
+          "validity": "5 years",
+          "max_stay_days": 180,
+          "fee": {
+            "amount": 903,
+            "currency": "GBP"
+          },
+          "notes": "Up to 6 months per visit."
+        },
+        {
+          "type": "Long-term Standard Visitor (10 years)",
+          "entry": "multiple",
+          "validity": "10 years",
+          "max_stay_days": 180,
+          "fee": {
+            "amount": 1128,
+            "currency": "GBP"
+          },
+          "notes": "Up to 6 months per visit."
+        }
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "FRA",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://france-visas.gouv.fr/",
+    "note": "The Schengen short-stay fee was missing: EUR 90 for adults, EUR 45 for children aged 6 to under 12, free under 6; the visa centre's service fee is separate.",
+    "fields": {
+      "government_fee": {
+        "amount": 90,
+        "currency": "EUR"
+      },
+      "application_channel_detail": "Lodge at the visa application centre serving your region. The EUR 90 consular fee is separate from the centre's own service fee. Children 6 to under 12 pay EUR 45; under 6, free."
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "ESP",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.exteriores.gob.es/",
+    "note": "The Schengen short-stay fee was missing: EUR 90 adults, EUR 45 children 6 to under 12, free under 6; payable at the visa centre in CNY cash, non-refundable on refusal.",
+    "fields": {
+      "government_fee": {
+        "amount": 90,
+        "currency": "EUR"
+      },
+      "application_channel_detail": "Lodge at the visa application centre. The EUR 90 consular fee is paid on submission (in CNY cash at the centre) and is not refunded if the visa is refused; the centre's service fee is separate."
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "IDN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://evisa.imigrasi.go.id/",
+    "note": "The route is a visa on arrival (index B1): IDR 500,000 for 30 days, extendable once to 60 total, bought online as an e-VOA before departure or at the border. The fee was missing and the subcategory unstated.",
+    "fields": {
+      "requirement_detail": "evisa_on_arrival",
+      "government_fee": {
+        "amount": 500000,
+        "currency": "IDR"
+      },
+      "visa_products": [
+        {
+          "type": "e-VOA (online before departure)",
+          "entry": "single",
+          "validity": "90 days to use",
+          "max_stay_days": 30,
+          "fee": {
+            "amount": 500000,
+            "currency": "IDR"
+          },
+          "notes": "Extendable once for a further 30 days, 60 total."
+        },
+        {
+          "type": "Visa on Arrival (at the border)",
+          "entry": "single",
+          "validity": "on arrival",
+          "max_stay_days": 30,
+          "fee": {
+            "amount": 500000,
+            "currency": "IDR"
+          },
+          "notes": "Extendable once for a further 30 days, 60 total."
+        },
+        {
+          "type": "Advance visit visa (C1 single / D1 multiple)",
+          "entry": "single or multiple",
+          "validity": "as granted",
+          "max_stay_days": 60,
+          "fee": {
+            "amount": null,
+            "currency": null
+          },
+          "notes": "The advance-application alternative to the visa on arrival."
+        }
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "VNM",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://evisa.gov.vn/",
+    "note": "The e-visa fee was missing: USD 25 single-entry, USD 50 multiple-entry, up to 90 days, paid online and non-refundable.",
+    "fields": {
+      "requirement_detail": "evisa",
+      "government_fee": {
+        "amount": 25,
+        "currency": "USD"
+      },
+      "visa_products": [
+        {
+          "type": "Single-entry tourist e-visa",
+          "entry": "single",
+          "validity": "up to 90 days",
+          "max_stay_days": 90,
+          "fee": {
+            "amount": 25,
+            "currency": "USD"
+          },
+          "notes": "Entry and exit through the designated international ports."
+        },
+        {
+          "type": "Multiple-entry tourist e-visa",
+          "entry": "multiple",
+          "validity": "up to 90 days",
+          "max_stay_days": 90,
+          "fee": {
+            "amount": 50,
+            "currency": "USD"
+          },
+          "notes": "Entry and exit through the designated international ports."
+        }
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "KOR",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://overseas.mofa.go.kr/cn-zh/index.do",
+    "note": "Mainland South Korea requires a visa, but Jeju is visa-free for Chinese tourists (individual and group) — a facilitation the answer must mention. Consular fee and the official portal added.",
+    "fields": {
+      "exceptions": [
+        "Jeju Island is visa-free for Chinese tourists arriving directly, for both individual and group tourism, under the Jeju Special Act",
+        "Group tourists on approved itineraries may use simplified group-visa arrangements",
+        "Transit passengers on qualifying itineraries may enter visa-free for a limited period under the transit-tourism programmes"
+      ],
+      "government_fee": {
+        "amount": 260,
+        "currency": "CNY"
+      },
+      "official_portal_url": "https://www.visa.go.kr",
+      "arrival_card": {
+        "required": false,
+        "name": null,
+        "submission_window": null
+      },
+      "application_channel_detail": "Lodge through the Korean visa application centre serving your region. The consular fee is separate from the centre's service fee."
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "USA",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.evus.gov/",
+    "note": "The MRV application fee (USD 185) was missing, and so was EVUS: Chinese nationals with a 10-year B1/B2 visa must also hold a valid EVUS enrolment (USD 30.75) to travel.",
+    "fields": {
+      "government_fee": {
+        "amount": 185,
+        "currency": "USD"
+      },
+      "application_channel_detail": "Complete the DS-160, pay the USD 185 MRV fee, and attend the interview at the embassy or consulate. After issuance, Chinese passport holders with a 10-year B1/B2 visa must also keep a valid EVUS enrolment (USD 30.75 at evus.gov) to board.",
+      "exceptions": [
+        "EVUS enrolment at evus.gov is mandatory for Chinese passport holders with a 10-year B1/B2 visa; without a valid enrolment boarding is denied",
+        "The 10-year multiple-entry B1/B2 is the standard issuance for Chinese nationals; no separate reciprocity fee applies"
+      ],
+      "visa_products": [
+        {
+          "type": "B1/B2 visitor visa (10-year multiple-entry)",
+          "entry": "multiple",
+          "validity": "10 years",
+          "max_stay_days": 180,
+          "fee": {
+            "amount": 185,
+            "currency": "USD"
+          },
+          "notes": "Stay per admission is set by CBP, usually up to 6 months. EVUS enrolment (USD 30.75) is required alongside the visa."
+        }
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "USA",
+      "destination": "GBR",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.gov.uk/guidance/apply-for-an-electronic-travel-authorisation-eta",
+    "note": "The UK ETA fee (GBP 20) and its official application page were missing.",
+    "fields": {
+      "government_fee": {
+        "amount": 20,
+        "currency": "GBP"
+      },
+      "official_portal_url": "https://www.gov.uk/eta/apply",
+      "requirement_detail": "eta_electronic_authorization",
+      "arrival_card": {
+        "required": false,
+        "name": null,
+        "submission_window": null
+      },
+      "application_channel_detail": "Apply for the ETA online or in the UK ETA app before travelling. It is not a visa.",
+      "visa_products": [
+        {
+          "type": "UK Electronic Travel Authorisation",
+          "entry": "multiple",
+          "validity": "2 years or until the passport expires",
+          "max_stay_days": 180,
+          "fee": {
+            "amount": 20,
+            "currency": "GBP"
+          },
+          "notes": "Permits visits of up to 6 months."
+        }
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "THA",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.thaievisa.go.th/",
+    "note": "Source recorded for the visa exemption.",
+    "fields": {
+      "arrival_card": {
+        "required": false,
+        "name": null,
+        "submission_window": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "IDN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/",
+    "note": "Source recorded: HKSAR passport holders are on Indonesia's visa-exempt list.",
+    "fields": {
+      "arrival_card": {
+        "required": false,
+        "name": null,
+        "submission_window": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "PHL",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://etravel.gov.ph",
+    "note": "Visa-free is correct, but the eTravel registration is mandatory for every arriving passenger and was missing.",
+    "fields": {
+      "arrival_card": {
+        "required": true,
+        "name": "eTravel registration (Philippines)",
+        "submission_window": "Within 72 hours before arrival"
+      },
+      "application_channel_detail": "No visa is needed, but every arriving passenger must complete the eTravel registration at etravel.gov.ph before arrival.",
+      "official_portal_url": "https://etravel.gov.ph"
+    }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "THA",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.mfa.go.th/",
+    "note": "Visa-free is correct; the Thailand Digital Arrival Card must be filed before arrival.",
+    "fields": {
+      "arrival_card": {
+        "required": true,
+        "name": "Thailand Digital Arrival Card (TDAC)",
+        "submission_window": "Within 3 days before arrival"
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "USA",
+      "destination": "PHL",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://evisa.gov.ph/page/policy",
+    "note": "Visa-free is correct; the eTravel registration is mandatory before arrival.",
+    "fields": {
+      "arrival_card": {
+        "required": true,
+        "name": "eTravel registration (Philippines)",
+        "submission_window": "Within 72 hours before arrival"
+      },
+      "official_portal_url": "https://etravel.gov.ph"
+    }
+  },
+  {
+    "route": {
+      "nationality": "USA",
+      "destination": "ESP",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.exteriores.gob.es/",
+    "note": "Source recorded for the Schengen visa exemption, with the subcategory and the absence of an arrival card stated rather than left blank.",
+    "fields": {
+      "requirement_detail": "conditional_visa_free",
+      "arrival_card": {
+        "required": false,
+        "name": null,
+        "submission_window": null
+      }
     }
   }
 ]

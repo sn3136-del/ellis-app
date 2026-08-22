@@ -92,11 +92,16 @@ def export() -> int:
         if f"|{CACHE_VERSION}" not in (r.cache_key or ""):
             skipped += 1
             continue
+        # An operator's release is a statement that a person ON THIS INSTALL
+        # checked this answer. Shipping it in the repo seed would un-hold
+        # low-confidence answers on machines where no one did.
+        ver = dict(r.verification or {})
+        ver.pop("operator_released", None)
         rows.append({
             "cache_key": r.cache_key, "route": r.route, "status": r.status,
             "guidance": r.guidance, "missing_fields": r.missing_fields,
             "contradictions": r.contradictions, "model": r.model,
-            "verification": r.verification or {},
+            "verification": ver,
             "generated_at": r.generated_at.isoformat() if r.generated_at else None,
             "fresh_until": r.fresh_until.isoformat() if r.fresh_until else None,
         })

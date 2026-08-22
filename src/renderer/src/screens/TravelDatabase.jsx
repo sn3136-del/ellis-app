@@ -20,6 +20,7 @@ const PURPOSES = [
   ['tourism', 'db.purpose.tourism'], ['business', 'db.purpose.business'],
   ['family_visit', 'db.purpose.family'], ['study', 'db.purpose.study'],
   ['work', 'db.purpose.work'], ['transit', 'db.purpose.transit'],
+  ['other', 'db.purpose.other'],
 ]
 
 // The engine's own vocabulary, in a traveller's words, each with a colour.
@@ -685,7 +686,10 @@ export default function TravelDatabase({ onBack }) {
                           color: disp?.color || NAVY,
                           marginTop: 8, letterSpacing: -0.4 }}
                  data-testid="database-disposition">
-              {disp ? t(disp.key) : asText(g.disposition)}
+              {['evisa_on_arrival', 'paper_visa_on_arrival']
+                 .includes(g.requirement_detail)
+                ? t('db.verdict.voa')
+                : disp ? t(disp.key) : asText(g.disposition)}
             </div>
             {asText(g.visa_category) && (
               <div style={{ fontSize: 14, color: NAVY, marginTop: 8, opacity: 0.85 }}>
@@ -754,7 +758,10 @@ export default function TravelDatabase({ onBack }) {
           <div style={{ display: 'grid', gap: 16, marginTop: 20,
                         gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))' }}>
             <Tile label={t('db.stay')} value={T(asText(g.permitted_stay))} />
-            <Tile label={t('db.fee')} value={feeText(g.government_fee)} />
+            <Tile label={t('db.fee')}
+                  value={feeText(g.government_fee)
+                         || ((g.visa_products || []).some((vp) => feeText(vp.fee))
+                             ? t('db.feeSeeProducts') : null)} />
             <Tile label={t('db.processing')} value={T(asText(g.processing_time))} />
             <Tile label={t('db.channel')}
                   value={T(humanizeEnum(g.application_channel))}

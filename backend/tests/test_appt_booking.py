@@ -1069,3 +1069,39 @@ def test_nearest_centre_is_authenticated_and_fails_closed(client):
                     json={"address": "", "centres": []})
     assert r.status_code == 200
     assert r.json()["available"] is False
+
+
+def test_the_manual_desk_can_record_a_lower_ranked_slot_but_not_an_unranked_one(client, db):
+    """An operator working the ranked list by hand hits the same wall the
+    agent does. They may record that the applicant's SECOND choice was the one
+    still open, and the record then names that slot rather than the first
+    choice that was already gone. They may not record a time the applicant
+    never chose, however convenient it was on the day."""
+    row = _ranked_case(client, db, [2, 0])
+    rid = row.id
+    first, second = row.ranked_slots[0], row.ranked_slots[1]
+    assert row.picked_slot["when"] == first["when"]
+    r = client.post(f"/appointments/booking/{rid}/evidence", headers=ADMIN,
+                    json={"name": "confirmation.png", "mime": "image/png",
+                          "content_b64": PNG})
+    doc_id = r.json()["document_id"]
+
+    # A slot nobody ranked is refused, even with valid evidence.
+    bad = client.post(f"/appointments/booking/{rid}/booked", headers=ADMIN,
+                      json={"confirmation_number": "US-9", "evidence_document_id": doc_id,
+                            "booked_post": second["post"],
+                            "booked_when": "2099-01-01 08:00"})
+    assert bad.status_code == 409
+
+    # The applicant's own second choice is accepted, and becomes the record.
+    ok = client.post(f"/appointments/booking/{rid}/booked", headers=ADMIN,
+                     json={"confirmation_number": "US-9", "evidence_document_id": doc_id,
+                           "booked_post": second["post"],
+                           "booked_when": second["when"]})
+    assert ok.status_code == 200, ok.text
+    view = ok.json()
+    assert view["status"] == "booked"
+    assert view["picked_slot"]["when"] == second["when"]
+    # The shortlist itself is untouched: what they chose is still on record.
+    assert [e["when"] for e in view["ranked_slots"]] == \
+        [first["when"], second["when"]]

@@ -481,6 +481,9 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
     except kimi_primary.GuidanceProviderError as e:
         raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
                                          "reason": e.envelope.get("user_message")})
+    if out.get("review_required"):
+        out = {k: v for k, v in out.items() if k != "guidance"}
+        out["guidance"] = None
     out["understood"] = True
     out["route"] = {"nationality": parsed["nationality"],
                     "destination": parsed["destination"],
@@ -555,6 +558,13 @@ def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
         raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
                                          "reason": e.envelope.get("user_message"),
                                          "category": e.envelope.get("category")})
+    # The hold is enforced HERE, not in the JSX: a held answer's claims never
+    # leave the server, so no client (curious dev tools included) can read
+    # what the reader is told is being checked. The envelope keeps the flag
+    # and the identity so the page can say WHY there is nothing to show.
+    if out.get("review_required"):
+        out = {k: v for k, v in out.items() if k != "guidance"}
+        out["guidance"] = None
     # The answer carries the identity of the cached row it came from. A reader
     # flagging it, or an operator releasing it, then names THAT answer instead
     # of re-deriving a key from a subset of the inputs (which silently missed

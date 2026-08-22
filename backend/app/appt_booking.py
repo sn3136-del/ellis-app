@@ -405,12 +405,39 @@ def ranked_in_order(row) -> list[dict]:
 
 
 def record_booked(db, row, *, confirmation_number: str,
-                  evidence_document_id: str, note: str, actor: str):
+                  evidence_document_id: str, note: str, actor: str,
+                  booked_slot: dict | None = None):
     """`booked` only behind evidence: number + confirmation document stored on
-    THIS case. Anything less is refused, not softened."""
+    THIS case. Anything less is refused, not softened.
+
+    booked_slot: when the operator worked the applicant's RANKED list by hand
+    and the first choice was gone, this names the entry actually booked. It
+    must be one of the slots the applicant ranked (or the picked slot itself)
+    — an operator can no more book an unranked time than the agent can — and
+    picked_slot is updated so the record names what really happened instead of
+    a slot that was already taken."""
     if row.status != "slot_picked":
         raise BookingError(409, f"cannot mark a {row.status} request booked — "
                                 "the applicant has not picked a slot")
+    if booked_slot:
+        want = (str(booked_slot.get("post") or "").strip(),
+                str(booked_slot.get("when") or "").strip())
+        allowed = {(str(e.get("post") or "").strip(),
+                    str(e.get("when") or "").strip())
+                   for e in ranked_in_order(row)}
+        picked = row.picked_slot or {}
+        allowed.add((str(picked.get("post") or "").strip(),
+                     str(picked.get("when") or "").strip()))
+        allowed.discard(("", ""))
+        if want not in allowed:
+            raise BookingError(409, "that slot is not one the applicant chose "
+                                    "— only a ranked choice can be recorded "
+                                    "as booked")
+        match = next((dict(e) for e in ranked_in_order(row)
+                      if (str(e.get("post") or "").strip(),
+                          str(e.get("when") or "").strip()) == want),
+                     dict(picked))
+        row.picked_slot = match
     number = str(confirmation_number or "").strip()
     if not number:
         raise BookingError(422, "a confirmation number is required")

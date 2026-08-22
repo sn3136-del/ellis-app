@@ -611,12 +611,16 @@ def test_an_override_replaces_only_the_fields_it_names(tmp_path, monkeypatch):
 
 
 def test_a_route_with_no_override_is_untouched_and_unmarked():
+    """A verified answer must never lend its badge to an unverified one, so a
+    route with no override comes back byte-identical and unmarked. Uses a
+    route deliberately outside the shipped override set."""
     from app.visa_snapshot import verified_overrides as vo
     vo.reload()
+    route = {"passport_nationality": "CHN", "destination_country": "ISL",
+             "travel_purpose": "tourism"}
+    assert vo.find(route) is None, "pick a route with no shipped override"
     guidance = {"disposition": "VISA_REQUIRED"}
-    merged, prov = vo.apply(guidance, {"passport_nationality": "CHN",
-                                       "destination_country": "JPN",
-                                       "travel_purpose": "tourism"})
+    merged, prov = vo.apply(guidance, route)
     assert merged is guidance and prov is None
 
 

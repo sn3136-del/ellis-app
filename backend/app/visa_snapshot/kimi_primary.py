@@ -858,8 +858,8 @@ def maybe_start_adapter_build(db, *, org_id: str, user_id: str, case_id: str,
 # --- AI Q&A: natural language -> route (Trip.com feature 3) -------------------
 _ASK_SYSTEM = ("""Extract the travel route from the user's question. Reply STRICT
 JSON: {"nationality": ISO3 or null, "destination": ISO3 or null,
-"travel_purpose": one of tourism|business|family_visit|study|work|transit or
-null, "travel_document_type": "ordinary_passport" unless another is named}.
+"travel_purpose": one of tourism|business|family_visit|study|work|transit|other
+or null, "travel_document_type": "ordinary_passport" unless another is named}.
 Use ISO3 country codes (CHN, JPN, USA, GBR...). Null anything not stated. No
 prose, JSON only.""")
 
@@ -883,5 +883,6 @@ def parse_question(question: str, *, timeout: float = 20.0) -> dict:
     doc = str(raw.get("travel_document_type") or "ordinary_passport").strip()
     return {"understood": True, "nationality": nat, "destination": dest,
             "travel_purpose": purpose if purpose in
-            ("tourism", "business", "family_visit", "study", "work", "transit")
+            ("tourism", "business", "family_visit", "study", "work",
+             "transit", "other")
             else "tourism", "travel_document_type": doc or "ordinary_passport"}
