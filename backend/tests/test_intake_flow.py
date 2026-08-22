@@ -335,7 +335,10 @@ def test_uncertain_guidance_without_disposition_shows_precise_blocker(client):
 
 def test_uncertain_guidance_with_disposition_continues_with_available(client):
     partial = dict(EXEMPT_ANSWER)
-    partial.pop("processing_time")           # a gap that does NOT block safe prep
+    # A gap that does NOT block safe prep. (processing_time is no longer
+    # demanded of a visa-free route — there is nothing to process — so a
+    # still-mandatory field stands in for the gap.)
+    partial.pop("required_documents")
     iid, g = _resolve_with_guidance(
         client, partial, dict(ANSWERS_SGP, destination_country="KOR"))
     assert g["status"] == "KIMI_UNCERTAIN"

@@ -359,8 +359,15 @@ def validate_answer(raw: dict, *, detail_known: bool = True) -> tuple[dict, list
         if k in (raw or {}):
             clean[k] = raw[k]
     missing = []
+    exempt = str(clean.get("disposition") or "").upper() == "VISA_EXEMPT"
     for k in MANDATORY_FIELDS:
         v = clean.get(k)
+        if exempt and k in ("processing_time", "government_fee") and v in (None, "", {}):
+            # A visa-free route has no application to process or pay for;
+            # demanding these marked 26 correct answers uncertain in one sweep.
+            clean.setdefault("processing_time", "Not applicable (no visa)")
+            clean.setdefault("government_fee", {"amount": 0, "currency": None})
+            continue
         if v in (None, "", [], {}):
             missing.append(k)
         elif k == "disposition" and str(v).upper() not in DISPOSITIONS:
@@ -451,12 +458,14 @@ def validate_answer(raw: dict, *, detail_known: bool = True) -> tuple[dict, list
     # centre or an embassy counter is the exact mislabel they rejected.
     detail = str(clean.get("application_channel_detail") or "").lower()
     channel = str(clean.get("application_channel") or "").lower()
+    # Only an AGENCY requirement contradicts a direct channel. "Must apply
+    # through the official portal" is a direct channel and was being read as
+    # a contradiction (18 false positives in one warm set).
     cannot_self_file = any(t in detail for t in (
         "cannot apply directly", "not accept individual", "does not accept direct",
-        "must apply through", "must be lodged by", "must go through",
         "through a designated", "through an authorised", "through an authorized",
-        "accredited travel agency", "designated agency", "authorised agent",
-        "authorized agent"))
+        "accredited travel agency", "designated agency", "designated travel",
+        "authorised agent", "authorized agent", "accredited agency"))
     if cannot_self_file and channel in ("visa_center", "embassy", "online_portal"):
         contradictions.append(
             f"application_channel '{channel}' but the channel detail says "
@@ -475,7 +484,14 @@ def validate_answer(raw: dict, *, detail_known: bool = True) -> tuple[dict, list
         d = vp.get("max_stay_days")
         if d is None or not note:
             continue
-        named = [int(n) for n in _re.findall(r"\b(\d{1,3})\s*days?\b", note.lower())]
+        # Only a number that describes the STAY counts ("stay of 15 days",
+        # "granted 15 days", 停留15天). "Apply 45 days before travel" does not.
+        nl = note.lower()
+        named = [int(n) for n in _re.findall(
+            r"(?:stay|granted|allowed|permit)[^.;]{0,30}?(\d{1,3})\s*days?", nl)]
+        named += [int(n) for n in _re.findall(
+            r"(\d{1,3})\s*days?[^.;]{0,20}?(?:stay|granted|per visit|per entry)", nl)]
+        named += [int(n) for n in _re.findall(r"停留(\d{1,3})天", note)]
         if named and max(named) < d:
             contradictions.append(
                 f"visa product '{vp.get('type')}' says {d} days but its note "

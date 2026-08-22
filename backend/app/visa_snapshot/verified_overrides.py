@@ -58,10 +58,26 @@ def _key(nat: str, dest: str, purpose: str = "tourism") -> str:
     return f"{str(nat).upper()}|{str(dest).upper()}|{str(purpose).lower()}"
 
 
-@lru_cache(maxsize=1)
+_CACHE: dict = {"mtime": None, "table": {}}
+
+
 def _table() -> dict:
-    """route key -> override entry. Entries missing a source or a date, or
-    citing a non-government domain, are dropped with no effect."""
+    """route key -> override entry, rebuilt whenever the file changes on disk
+    so a newly verified fact reaches readers without a restart. Entries
+    missing a source or a date, or citing a non-government domain, are
+    dropped with no effect."""
+    try:
+        mtime = OVERRIDES.stat().st_mtime if OVERRIDES.is_file() else None
+    except OSError:
+        mtime = None
+    if _CACHE["mtime"] == mtime and _CACHE["table"] is not None:
+        return _CACHE["table"]
+    table = _load_table()
+    _CACHE["mtime"], _CACHE["table"] = mtime, table
+    return table
+
+
+def _load_table() -> dict:
     if not OVERRIDES.is_file():
         return {}
     try:
@@ -95,8 +111,8 @@ def _table() -> dict:
 
 
 def reload() -> None:
-    """Drop the cached table (after editing the file in a running process)."""
-    _table.cache_clear()
+    """Forget the cached table (tests swap the file path)."""
+    _CACHE["mtime"], _CACHE["table"] = None, None
 
 
 def find(route: dict) -> dict | None:

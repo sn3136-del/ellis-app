@@ -292,7 +292,9 @@ def test_an_incomplete_answer_is_served_at_once_without_a_slow_retry(db):
     _clear_cache(db)
     counter = {}
     bad = dict(GOOD_ANSWER)
-    bad.pop("permitted_stay"); bad.pop("processing_time")
+    # (processing_time is no longer demanded of a visa-free route — there is
+    # nothing to process — so a still-mandatory field is removed instead.)
+    bad.pop("permitted_stay"); bad.pop("required_documents")
 
     def provider(system, user):
         assert "verifier" not in system
@@ -305,7 +307,7 @@ def test_an_incomplete_answer_is_served_at_once_without_a_slow_retry(db):
     assert counter == {"analyze": 1}                      # served at once
     assert g["status"] == "KIMI_UNCERTAIN"
     assert g["guidance"]["disposition"] == GOOD_ANSWER["disposition"]
-    assert set(g["missing_fields"]) == {"permitted_stay", "processing_time"}
+    assert set(g["missing_fields"]) == {"permitted_stay", "required_documents"}
     # No broad research auto-started; no administrator task created.
     assert db.query(OnDemandRouteResearchJob).count() == before_jobs
     assert db.query(HumanReviewTask).count() == before_tasks

@@ -224,7 +224,32 @@ def recheck() -> int:
     return 0
 
 
+def revalidate() -> int:
+    """Re-run deterministic validation over every stored answer (no model
+    call): after a validation rule changes, rows marked uncertain by a rule
+    that was wrong become complete again, with the full freshness window."""
+    from datetime import timedelta
+    from sqlalchemy import select
+    from app.db import SessionLocal
+    from app.visa_snapshot import kimi_primary as k
+    from app.visa_snapshot.models import KimiRouteGuidanceCache as C
+    db = SessionLocal()
+    flipped = 0
+    for r in db.execute(select(C)).scalars():
+        clean, missing, contra = k.validate_answer(dict(r.guidance or {}))
+        status = k.STATUS_PRIMARY if clean.get("disposition") and not missing and not contra \
+            else k.STATUS_UNCERTAIN
+        if status != r.status or missing != (r.missing_fields or []) or contra != (r.contradictions or []):
+            if status == k.STATUS_PRIMARY and r.status != k.STATUS_PRIMARY:
+                r.fresh_until = (r.generated_at or k._now()) + timedelta(days=k.TTL_DAYS)
+                flipped += 1
+            r.guidance, r.status, r.missing_fields, r.contradictions = clean, status, missing, contra
+    db.commit(); db.close()
+    print(f"revalidated; {flipped} rows became complete")
+    return 0
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "warm"
-    raise SystemExit({"warm": warm, "export": export,
-                      "import": import_seed, "recheck": recheck}[cmd]())
+    raise SystemExit({"warm": warm, "export": export, "import": import_seed,
+                      "recheck": recheck, "revalidate": revalidate}[cmd]())
