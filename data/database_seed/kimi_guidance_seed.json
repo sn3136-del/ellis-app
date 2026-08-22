@@ -44857,5 +44857,300 @@
   },
   "generated_at": "2026-08-22T20:34:00.824578",
   "fresh_until": "2026-09-05T20:34:00.824578"
+ },
+ {
+  "cache_key": "JPN|JPN|CHN|tourism|default|unknown|v6",
+  "route": {
+   "passport_nationality": "JPN",
+   "lawful_country_of_residence": "JPN",
+   "destination_country": "CHN",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_UNCERTAIN",
+  "guidance": {
+   "disposition": "VISA_EXEMPT",
+   "visa_category": "Tourist visa exemption",
+   "permitted_stay": "15 or 30 days (verify current rule)",
+   "passport_validity": null,
+   "required_documents": [
+    "Valid Japanese ordinary passport"
+   ],
+   "application_channel": "not_required",
+   "government_fee": null,
+   "processing_time": null,
+   "forms": [],
+   "official_portal_url": null,
+   "photo_requirements": null,
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [],
+   "payment_process": [],
+   "submission_process": [],
+   "onward_travel_evidence": "Return or onward ticket may be requested at immigration.",
+   "accommodation_evidence": "Hotel booking or host address may be requested.",
+   "financial_evidence": "Proof of sufficient funds may be requested.",
+   "insurance_required": false,
+   "exceptions": [
+    "Japanese ordinary passport holders currently qualify for China's unilateral tourist visa-free entry; the allowed stay is 15 or 30 days under trial policies, so verify the current rule immediately before travel."
+   ],
+   "uncertainty": [
+    {
+     "field": "policy_status/permitted_stay",
+     "reason": "China's unilateral visa-free treatment for Japanese ordinary passport holders has been temporary and repeatedly extended or modified; the original Japan-specific arrangement was announced through 31 Dec 2025, so its status on 22 Aug 2026 must be confirmed with the National Immigration Administration or Chinese embassy."
+    },
+    {
+     "field": "permitted_stay_days",
+     "reason": "Reports have cited both 15-day and 30-day authorised stays during different phases of the policy; verify the current duration before travel."
+    },
+    {
+     "field": "passport_validity",
+     "reason": "The exact passport-validity rule for visa-free entry (e.g., valid for intended stay only, or 3/6 months beyond stay) is not confirmed from an official source."
+    },
+    {
+     "field": "source_url",
+     "reason": "No official Chinese government URL is confirmed from the available data; do not rely on third-party summaries."
+    }
+   ],
+   "confidence": "low",
+   "permitted_stay_days": null,
+   "arrival_card": {
+    "required": true,
+    "name": "Foreigner Arrival/Departure Card",
+    "submission_window": "On arrival, before immigration inspection"
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_exempt_preparation",
+   "visa_products": [],
+   "application_channel_detail": "No advance visa application is required while the unilateral short-stay visa-free arrangement for Japanese ordinary passport holders remains in force; verify the current status before departure.",
+   "requirement_detail": "conditional_visa_free",
+   "transit_requirement": {
+    "required": null,
+    "note": null
+   }
+  },
+  "missing_fields": [
+   "passport_validity"
+  ],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T20:37:57.376643+00:00",
+    "outcome": "checked",
+    "source_url": "https://cs.mfa.gov.cn/gyls/lsgz/fwxx/202511/t20251110_11749824.shtml",
+    "content_hash": "9c7aa0858a3745ae5a62efdfe44956918dabcc2e2d7ec85e258c87e0897970a8",
+    "consistent": false,
+    "changed_fields": [],
+    "disputed_fields": [
+     "exceptions",
+     "permitted_stay"
+    ],
+    "generic_page_skipped": [],
+    "note": "The page explicitly lists Japan among the covered countries for a 30-day unilateral visa waiver effective until 31 December 2026, so the stored '15 or 30 days' wording is incorrect."
+   }
+  },
+  "generated_at": "2026-08-22T20:37:42.158757",
+  "fresh_until": "2026-08-24T20:37:42.158757"
+ },
+ {
+  "cache_key": "ISL|ISL|MNG|tourism|default|unknown|v6",
+  "route": {
+   "passport_nationality": "ISL",
+   "lawful_country_of_residence": "ISL",
+   "destination_country": "MNG",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "tourist",
+   "permitted_stay": "30 days",
+   "passport_validity": "6 months beyond arrival",
+   "required_documents": [
+    "passport bio-page copy",
+    "digital passport photo",
+    "return or onward ticket",
+    "proof of accommodation",
+    "proof of sufficient funds",
+    "travel itinerary"
+   ],
+   "application_channel": "online_portal",
+   "government_fee": {
+    "amount": null,
+    "currency": null
+   },
+   "processing_time": "3 business days",
+   "forms": null,
+   "official_portal_url": null,
+   "photo_requirements": null,
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": null,
+   "payment_process": null,
+   "submission_process": null,
+   "onward_travel_evidence": null,
+   "accommodation_evidence": null,
+   "financial_evidence": null,
+   "insurance_required": false,
+   "exceptions": null,
+   "uncertainty": [
+    {
+     "field": "disposition",
+     "reason": "Mongolia has run time-bound unilateral visa-free schemes for tourists from developed countries that may have included Iceland; the original scheme was due to expire at the end of 2025 and it is unclear whether it was extended or made permanent as of the stated 2026 travel date."
+    },
+    {
+     "field": "official_portal_url",
+     "reason": "Cannot verify the exact current official Mongolian eVisa portal URL without browsing."
+    },
+    {
+     "field": "government_fee",
+     "reason": "Official eVisa fee amount not verified."
+    },
+    {
+     "field": "required_documents",
+     "reason": "Document list is based on typical Mongolian tourist eVisa requirements and may have changed."
+    },
+    {
+     "field": "processing_time",
+     "reason": "Standard processing time not verified for the current eVisa system."
+    },
+    {
+     "field": "source_url",
+     "reason": "No single official government source URL available from current knowledge."
+    }
+   ],
+   "confidence": "low",
+   "permitted_stay_days": 30,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "route_workflow_type": "evisa_portal",
+   "application_channel_detail": "Apply online through the official Mongolian eVisa portal; individuals may lodge their own application.",
+   "requirement_detail": "evisa",
+   "transit_requirement": {
+    "required": null,
+    "note": null
+   }
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision",
+   "detail_pending": true
+  },
+  "generated_at": "2026-08-22T20:46:28.207295",
+  "fresh_until": "2026-09-05T20:46:28.207295"
+ },
+ {
+  "cache_key": "CHN|CHN|THA|tourism|default|unknown|v6|doc:diplomatic_passport",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "THA",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_EXEMPT",
+   "visa_category": "Tourist (visa-exempt)",
+   "permitted_stay": "30 days",
+   "passport_validity": "Valid at least 6 months on arrival",
+   "required_documents": [
+    "Valid Chinese diplomatic passport",
+    "Return or onward travel ticket",
+    "Proof of accommodation",
+    "Evidence of sufficient funds"
+   ],
+   "application_channel": "not_required",
+   "government_fee": {
+    "amount": 0,
+    "currency": "THB"
+   },
+   "processing_time": "Not applicable",
+   "forms": [],
+   "official_portal_url": null,
+   "photo_requirements": null,
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [],
+   "payment_process": [],
+   "submission_process": [],
+   "onward_travel_evidence": "Immigration may request a confirmed onward or return ticket",
+   "accommodation_evidence": "Immigration may request a hotel booking or local address",
+   "financial_evidence": "Immigration may request proof of funds (about 10,000 THB per person)",
+   "insurance_required": false,
+   "exceptions": [],
+   "uncertainty": [
+    {
+     "field": "permitted_stay",
+     "reason": "Ordinary PRC passports gained a 60-day Thai visa-free entry in 2024; the separate China-Thailand diplomatic/service-passport agreement grants 30 days, and it is unclear whether the 60-day general exemption also applies to diplomatic passports."
+    },
+    {
+     "field": "source_url / official_portal_url",
+     "reason": "Exact current Thai MFA visa-exemption URLs were not verified; left null to avoid inventing links."
+    },
+    {
+     "field": "passport_validity",
+     "reason": "Standard Thai entry requirement is at least 6 months' validity on arrival; verify before travel."
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": 30,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "TM6 Arrival/Departure Card (or digital equivalent)",
+    "submission_window": "On arrival"
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_exempt_preparation",
+   "visa_products": [],
+   "application_channel_detail": "No visa application is required; present the diplomatic passport at Thai immigration for visa-free entry.",
+   "requirement_detail": "unconditional_visa_free",
+   "transit_requirement": {
+    "required": null,
+    "note": null
+   }
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T20:51:09.912418+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.thaievisa.go.th/",
+    "content_hash": "191e226b44992a82ac0f1b4979637384f9b2d41e51f04a1a025e0569b09dc3cc",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page is a generic Thai e-visa homepage and does not state any nationality-specific rules for Chinese passport holders."
+   }
+  },
+  "generated_at": "2026-08-22T20:50:50.681339",
+  "fresh_until": "2026-09-05T20:51:29.599398"
  }
 ]
