@@ -47,6 +47,10 @@ OVERRIDABLE = frozenset({
     "permitted_stay_days", "application_channel", "application_channel_detail",
     "government_fee", "official_portal_url", "visa_products", "processing_time",
     "exceptions", "required_documents", "confidence",
+    # A mandatory pre-arrival filing (Malaysia's MDAC, the SG Arrival Card) is
+    # the difference between boarding and not boarding, so a verified fact
+    # must be able to correct it.
+    "arrival_card",
 })
 
 
@@ -105,6 +109,8 @@ def find(route: dict) -> dict | None:
 # says no visa is needed, whatever the model wrote in these is about an
 # application that does not happen, and would contradict the verdict on the
 # same page ("No visa needed ... processing time about 3 working days").
+# NOTE: arrival_card is deliberately NOT here. A visa-free route can still
+# require a pre-arrival filing, and dropping it would strand a traveller.
 _APPLICATION_ONLY = ("processing_time", "forms", "account_registration_steps",
                      "payment_process", "submission_process",
                      "official_portal_url", "government_fee")

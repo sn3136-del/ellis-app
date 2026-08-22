@@ -1,6 +1,10 @@
 [
   {
-    "route": {"nationality": "CHN", "destination": "PHL", "travel_purpose": "tourism"},
+    "route": {
+      "nationality": "CHN",
+      "destination": "PHL",
+      "travel_purpose": "tourism"
+    },
     "verified_at": "2026-08-22",
     "verified_by": "Ellis source audit",
     "source_url": "https://evisa.gov.ph/page/policy",
@@ -13,16 +17,31 @@
       "permitted_stay_days": 14,
       "application_channel": "not_required",
       "application_channel_detail": "No visa is applied for. Entry is granted on arrival to eligible Chinese tourists.",
-      "government_fee": {"amount": 0, "currency": null},
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
       "visa_products": [
-        {"type": "Visa-free tourist entry", "entry": "single", "validity": "on arrival",
-         "max_stay_days": 14, "fee": {"amount": 0, "currency": null},
-         "notes": "Non-extendible and non-convertible. Conditions apply, including the designated ports of entry and passport validity."}
+        {
+          "type": "Visa-free tourist entry",
+          "entry": "single",
+          "validity": "on arrival",
+          "max_stay_days": 14,
+          "fee": {
+            "amount": 0,
+            "currency": null
+          },
+          "notes": "Non-extendible and non-convertible. Conditions apply, including the designated ports of entry and passport validity."
+        }
       ]
     }
   },
   {
-    "route": {"nationality": "CHN", "destination": "SGP", "travel_purpose": "tourism"},
+    "route": {
+      "nationality": "CHN",
+      "destination": "SGP",
+      "travel_purpose": "tourism"
+    },
     "verified_at": "2026-08-22",
     "verified_by": "Ellis source audit",
     "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
@@ -35,17 +54,31 @@
       "permitted_stay_days": 30,
       "application_channel": "not_required",
       "application_channel_detail": "No visa is applied for. The length of stay is granted by the immigration officer on arrival.",
-      "government_fee": {"amount": 0, "currency": null},
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
       "visa_products": [
-        {"type": "Visa-free entry (mutual 30-day exemption)", "entry": "single",
-         "validity": "on arrival", "max_stay_days": 30,
-         "fee": {"amount": 0, "currency": null},
-         "notes": "In force since 9 February 2024. An SG Arrival Card is still required before arrival."}
+        {
+          "type": "Visa-free entry (mutual 30-day exemption)",
+          "entry": "single",
+          "validity": "on arrival",
+          "max_stay_days": 30,
+          "fee": {
+            "amount": 0,
+            "currency": null
+          },
+          "notes": "In force since 9 February 2024. An SG Arrival Card is still required before arrival."
+        }
       ]
     }
   },
   {
-    "route": {"nationality": "CHN", "destination": "RUS", "travel_purpose": "tourism"},
+    "route": {
+      "nationality": "CHN",
+      "destination": "RUS",
+      "travel_purpose": "tourism"
+    },
     "verified_at": "2026-08-22",
     "verified_by": "Ellis source audit",
     "source_url": "http://publication.pravo.gov.ru/document/0001202607200004",
@@ -58,12 +91,19 @@
       "permitted_stay_days": 30,
       "application_channel": "not_required",
       "application_channel_detail": "No visa is applied for under the temporary visa-free regime. Check the decree's current validity before travel, as it is time-limited.",
-      "government_fee": {"amount": 0, "currency": null},
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
       "confidence": "medium"
     }
   },
   {
-    "route": {"nationality": "HKG", "destination": "CAN", "travel_purpose": "tourism"},
+    "route": {
+      "nationality": "HKG",
+      "destination": "CAN",
+      "travel_purpose": "tourism"
+    },
     "verified_at": "2026-08-22",
     "verified_by": "Ellis source audit",
     "source_url": "https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/entry-requirements-country.html",
@@ -78,15 +118,26 @@
       "application_channel_detail": "Apply for the eTA yourself online before flying. It is required for air travel only.",
       "official_portal_url": "https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/eta.html",
       "visa_products": [
-        {"type": "Electronic Travel Authorization (eTA)", "entry": "multiple",
-         "validity": "5 years or until the passport expires", "max_stay_days": 180,
-         "fee": {"amount": 7, "currency": "CAD"},
-         "notes": "Required for air travel. An HKSAR passport must be held."}
+        {
+          "type": "Electronic Travel Authorization (eTA)",
+          "entry": "multiple",
+          "validity": "5 years or until the passport expires",
+          "max_stay_days": 180,
+          "fee": {
+            "amount": 7,
+            "currency": "CAD"
+          },
+          "notes": "Air travel only. Entering by land or sea does not require an eTA."
+        }
       ]
     }
   },
   {
-    "route": {"nationality": "HKG", "destination": "GBR", "travel_purpose": "tourism"},
+    "route": {
+      "nationality": "HKG",
+      "destination": "GBR",
+      "travel_purpose": "tourism"
+    },
     "verified_at": "2026-08-22",
     "verified_by": "Ellis source audit",
     "source_url": "https://www.gov.uk/guidance/immigration-rules/immigration-rules-appendix-visitor-visa-national-list",
@@ -99,12 +150,32 @@
       "permitted_stay_days": 180,
       "application_channel": "not_required",
       "application_channel_detail": "No visit visa is applied for. A UK Electronic Travel Authorisation may be required before travel, so check the current ETA rollout for HKSAR passport holders.",
-      "government_fee": {"amount": 0, "currency": null},
-      "confidence": "medium"
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "confidence": "medium",
+      "visa_products": [
+        {
+          "type": "Visa-free visit (non-visa national)",
+          "entry": "single",
+          "validity": "on arrival",
+          "max_stay_days": 180,
+          "fee": {
+            "amount": 0,
+            "currency": null
+          },
+          "notes": "No visit visa is applied for. Check whether a UK Electronic Travel Authorisation applies before travel."
+        }
+      ]
     }
   },
   {
-    "route": {"nationality": "HKG", "destination": "KOR", "travel_purpose": "tourism"},
+    "route": {
+      "nationality": "HKG",
+      "destination": "KOR",
+      "travel_purpose": "tourism"
+    },
     "verified_at": "2026-08-22",
     "verified_by": "Ellis source audit",
     "source_url": "https://overseas.mofa.go.kr/gb-en/brd/m_23721/view.do?seq=39&page=1",
@@ -117,12 +188,19 @@
       "permitted_stay_days": 90,
       "application_channel": "not_required",
       "application_channel_detail": "No visa and, during the current temporary waiver, no K-ETA. The waiver is time-limited, so confirm it is still in force before travel.",
-      "government_fee": {"amount": 0, "currency": null},
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
       "confidence": "medium"
     }
   },
   {
-    "route": {"nationality": "HKG", "destination": "IND", "travel_purpose": "tourism"},
+    "route": {
+      "nationality": "HKG",
+      "destination": "IND",
+      "travel_purpose": "tourism"
+    },
     "verified_at": "2026-08-22",
     "verified_by": "Ellis source audit",
     "source_url": "https://cgihk.gov.in/page/visa-information/",
@@ -137,7 +215,11 @@
     }
   },
   {
-    "route": {"nationality": "HKG", "destination": "TWN", "travel_purpose": "tourism"},
+    "route": {
+      "nationality": "HKG",
+      "destination": "TWN",
+      "travel_purpose": "tourism"
+    },
     "verified_at": "2026-08-22",
     "verified_by": "Ellis source audit",
     "source_url": "https://www.immigration.gov.tw/5385/7244/7250/7296/",
@@ -152,7 +234,11 @@
     }
   },
   {
-    "route": {"nationality": "USA", "destination": "IDN", "travel_purpose": "tourism"},
+    "route": {
+      "nationality": "USA",
+      "destination": "IDN",
+      "travel_purpose": "tourism"
+    },
     "verified_at": "2026-08-22",
     "verified_by": "Ellis source audit",
     "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/",
@@ -166,21 +252,42 @@
       "application_channel": "online_portal",
       "application_channel_detail": "Buy the e-VOA online before departure, or the visa on arrival at the airport counter. There is no visa-free entry for US nationals.",
       "official_portal_url": "https://evisa.imigrasi.go.id/",
-      "government_fee": {"amount": 500000, "currency": "IDR"},
+      "government_fee": {
+        "amount": 500000,
+        "currency": "IDR"
+      },
       "visa_products": [
-        {"type": "e-VOA (bought online before departure)", "entry": "single",
-         "validity": "90 days to use", "max_stay_days": 30,
-         "fee": {"amount": 500000, "currency": "IDR"},
-         "notes": "Extendable once for a further 30 days."},
-        {"type": "Visa on Arrival (bought at the airport)", "entry": "single",
-         "validity": "on arrival", "max_stay_days": 30,
-         "fee": {"amount": 500000, "currency": "IDR"},
-         "notes": "Extendable once for a further 30 days."}
+        {
+          "type": "e-VOA (bought online before departure)",
+          "entry": "single",
+          "validity": "90 days to use",
+          "max_stay_days": 30,
+          "fee": {
+            "amount": 500000,
+            "currency": "IDR"
+          },
+          "notes": "Extendable once for a further 30 days."
+        },
+        {
+          "type": "Visa on Arrival (bought at the airport)",
+          "entry": "single",
+          "validity": "on arrival",
+          "max_stay_days": 30,
+          "fee": {
+            "amount": 500000,
+            "currency": "IDR"
+          },
+          "notes": "Extendable once for a further 30 days."
+        }
       ]
     }
   },
   {
-    "route": {"nationality": "USA", "destination": "KOR", "travel_purpose": "tourism"},
+    "route": {
+      "nationality": "USA",
+      "destination": "KOR",
+      "travel_purpose": "tourism"
+    },
     "verified_at": "2026-08-22",
     "verified_by": "Ellis source audit",
     "source_url": "https://overseas.mofa.go.kr/us-en/brd/m_4502/view.do?seq=715890",
@@ -193,8 +300,270 @@
       "permitted_stay_days": 90,
       "application_channel": "not_required",
       "application_channel_detail": "No visa, and no K-ETA during the current temporary exemption. The exemption is time-limited, so confirm it is still in force before travel.",
-      "government_fee": {"amount": 0, "currency": null},
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
       "confidence": "medium"
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "IND",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+    "note": "Chinese nationals are not on India's e-Visa eligible list, so the e-Tourist products the model offered cannot be applied for. A regular visa must be obtained from an Indian mission.",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": "paper_visa",
+      "visa_category": "Regular (sticker) tourist visa",
+      "application_channel": "embassy",
+      "application_channel_detail": "Apply in advance at an Indian embassy or consulate. The e-Visa is not available to Chinese nationals.",
+      "official_portal_url": "https://indianvisaonline.gov.in/",
+      "visa_products": [
+        {
+          "type": "Regular tourist visa (sticker)",
+          "entry": "single or multiple",
+          "validity": "as granted by the mission",
+          "max_stay_days": 90,
+          "fee": {
+            "amount": null,
+            "currency": null
+          },
+          "notes": "Applied for at an Indian mission. Chinese nationals cannot use the e-Visa route."
+        }
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "TWN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.immigration.gov.tw/",
+    "note": "A mainland resident does not travel to Taiwan on a PRC ordinary passport, and the individual-tourism (G) endorsement has been suspended. Travel is under the mainland travel-permit regime administered by the National Immigration Agency, with group travel the practical channel.",
+    "fields": {
+      "disposition": "CONDITIONAL",
+      "visa_category": "Entry permit for mainland residents (Taiwan)",
+      "application_channel": "authorised_agent",
+      "application_channel_detail": "Not a visa and not a PRC passport route. A mainland resident needs a Taiwan travel permit plus an endorsement; individual tourism has been suspended, so an approved travel agency is the practical channel. Confirm the current position before selling.",
+      "official_portal_url": "https://www.immigration.gov.tw/",
+      "confidence": "medium",
+      "visa_products": []
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "HKG",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://s.nia.gov.cn/",
+    "note": "A mainland resident visiting Hong Kong does not use a PRC ordinary passport. They need the Exit-Entry Permit for Travelling to and from Hong Kong and Macao with a valid endorsement, applied for in advance with the National Immigration Administration. The model reported no application as required.",
+    "fields": {
+      "disposition": "CONDITIONAL",
+      "visa_category": "Exit-Entry Permit endorsement (not a passport route)",
+      "application_channel": "online_portal",
+      "application_channel_detail": "An application IS required in advance, in mainland China, with the National Immigration Administration. It is not lodged with a Hong Kong office and it is not visa-free.",
+      "official_portal_url": "https://s.nia.gov.cn/",
+      "confidence": "medium"
+    }
+  },
+  {
+    "route": {
+      "nationality": "USA",
+      "destination": "RUS",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://evisa.kdmid.ru/",
+    "note": "US nationals are not on the eligible-nationality list for Russia's unified e-visa. The model offered the e-visa as the route, which cannot be applied for.",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": "paper_visa",
+      "visa_category": "Ordinary tourist visa (consular)",
+      "application_channel": "embassy",
+      "application_channel_detail": "A US national cannot use the unified e-visa. Apply for an ordinary tourist visa through the Russian consular system, which requires a tourist confirmation from an authorised host.",
+      "permitted_stay": "As granted on the visa",
+      "visa_products": [
+        {
+          "type": "Ordinary single-entry tourist visa",
+          "entry": "single",
+          "validity": "as granted",
+          "max_stay_days": 30,
+          "fee": {
+            "amount": null,
+            "currency": null
+          },
+          "notes": "Requires a tourist confirmation (voucher) from an authorised Russian host."
+        }
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "MYS",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://imigresen-online.imi.gov.my/mdac/main",
+    "note": "Visa-free is correct, but the Malaysia Digital Arrival Card is mandatory before arrival and the model reported nothing to submit.",
+    "fields": {
+      "arrival_card": {
+        "required": true,
+        "name": "Malaysia Digital Arrival Card (MDAC)",
+        "submission_window": "Complete online no later than 3 days before arrival"
+      },
+      "application_channel_detail": "No visa is needed, but the Malaysia Digital Arrival Card must be completed online before arrival.",
+      "permitted_stay": "Up to 30 days per entry, not extendable"
+    }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "MYS",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://imigresen-online.imi.gov.my/mdac/main",
+    "note": "The Malaysia Digital Arrival Card is mandatory before arrival; the model reported nothing to submit.",
+    "fields": {
+      "arrival_card": {
+        "required": true,
+        "name": "Malaysia Digital Arrival Card (MDAC)",
+        "submission_window": "Complete online no later than 3 days before arrival"
+      },
+      "application_channel_detail": "No visa is needed, but the Malaysia Digital Arrival Card must be completed online before arrival."
+    }
+  },
+  {
+    "route": {
+      "nationality": "USA",
+      "destination": "MYS",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://imigresen-online.imi.gov.my/mdac/main",
+    "note": "The Malaysia Digital Arrival Card is mandatory before arrival; the model reported no pre-travel filing of any kind.",
+    "fields": {
+      "arrival_card": {
+        "required": true,
+        "name": "Malaysia Digital Arrival Card (MDAC)",
+        "submission_window": "Complete online no later than 3 days before arrival"
+      },
+      "application_channel_detail": "No visa is needed, but the Malaysia Digital Arrival Card must be completed online before arrival."
+    }
+  },
+  {
+    "route": {
+      "nationality": "USA",
+      "destination": "SGP",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://eservices.ica.gov.sg/sgarrivalcard/",
+    "note": "Visa-free is correct, but every traveller must submit the SG Arrival Card before arrival and the model reported nothing to submit.",
+    "fields": {
+      "arrival_card": {
+        "required": true,
+        "name": "SG Arrival Card with Electronic Health Declaration",
+        "submission_window": "Submit within 3 days before arrival"
+      },
+      "application_channel_detail": "No visa is needed, but the SG Arrival Card with the electronic health declaration must be submitted before arrival."
+    }
+  },
+  {
+    "route": {
+      "nationality": "USA",
+      "destination": "AUS",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/electronic-travel-authority-601",
+    "note": "The ETA is applied for in the Australian ETA mobile app, not a web portal. The model implied an online portal.",
+    "fields": {
+      "application_channel_detail": "Apply for the ETA in the Australian ETA mobile app. There is no web form for this authorisation.",
+      "official_portal_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/electronic-travel-authority-601"
+    }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "AUS",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/electronic-travel-authority-601",
+    "note": "The ETA is applied for in the Australian ETA mobile app, not a web portal.",
+    "fields": {
+      "application_channel_detail": "Apply for the ETA in the Australian ETA mobile app. There is no web form for this authorisation.",
+      "official_portal_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/electronic-travel-authority-601"
+    }
+  },
+  {
+    "route": {
+      "nationality": "USA",
+      "destination": "IND",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+    "note": "The model reported the e-Visa VALIDITY periods (30 days, 1 year, 5 years) as if they were the permitted stay. They are different things.",
+    "fields": {
+      "permitted_stay": "Up to 90 days per visit on the 1-year and 5-year e-Tourist visas; the 30-day product allows a stay within its 30-day validity",
+      "visa_products": [
+        {
+          "type": "30-day e-Tourist Visa",
+          "entry": "double",
+          "validity": "30 days from first entry",
+          "max_stay_days": 30,
+          "fee": {
+            "amount": null,
+            "currency": null
+          },
+          "notes": "Validity and stay coincide on this product."
+        },
+        {
+          "type": "1-year e-Tourist Visa",
+          "entry": "multiple",
+          "validity": "1 year",
+          "max_stay_days": 90,
+          "fee": {
+            "amount": null,
+            "currency": null
+          },
+          "notes": "Validity is 1 year; each stay is limited separately."
+        },
+        {
+          "type": "5-year e-Tourist Visa",
+          "entry": "multiple",
+          "validity": "5 years",
+          "max_stay_days": 90,
+          "fee": {
+            "amount": null,
+            "currency": null
+          },
+          "notes": "Validity is 5 years; each stay is limited separately."
+        }
+      ]
     }
   }
 ]
