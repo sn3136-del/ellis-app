@@ -815,3 +815,30 @@ def test_full_stage_is_unchanged_for_the_applicant_journey(db):
     g = kimi_primary.get_route_guidance(db, ROUTE)          # default stage
     assert counter == {"analyze": 1}
     assert g.get("detail_pending") in (None, False)
+
+
+# ---- the ask box reads plain questions without a model call ------------------
+@pytest.mark.parametrize("question, nat, dest, purpose", [
+    ("wanna go from france to china", "FRA", "CHN", "tourism"),
+    ("What visa do I need for tourism in Japan with a Chinese passport?", "CHN", "JPN", "tourism"),
+    ("持中国护照去日本旅游需要什么签证？", "CHN", "JPN", "tourism"),
+    ("持中國護照去日本旅遊需要什麼簽證？", "CHN", "JPN", "tourism"),
+    ("I'm American, business trip to Vietnam", "USA", "VNM", "business"),
+    ("UK passport, studying in South Korea", "GBR", "KOR", "study"),
+    ("hong kong to dubai", "HKG", "ARE", "tourism"),
+    ("from germany to new zealand for work", "DEU", "NZL", "work"),
+])
+def test_plain_questions_are_read_deterministically(question, nat, dest, purpose):
+    kimi_primary.set_provider(lambda system, user: (_ for _ in ()).throw(
+        AssertionError("a plain question must not need the model")))
+    r = kimi_primary.parse_question(question)
+    assert (r["understood"], r["nationality"], r["destination"], r["travel_purpose"]) \
+        == (True, nat, dest, purpose), r
+
+
+def test_a_question_naming_one_place_falls_back_to_the_model():
+    kimi_primary.set_provider(lambda system, user: {
+        "nationality": None, "destination": "JPN", "travel_purpose": None,
+        "travel_document_type": "ordinary_passport"})
+    r = kimi_primary.parse_question("do i need a visa for japan")
+    assert r["understood"] is False                 # one place is not a route

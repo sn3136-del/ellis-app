@@ -1084,6 +1084,172 @@ Use ISO3 country codes (CHN, JPN, USA, GBR...). Null anything not stated. No
 prose, JSON only.""")
 
 
+# Deterministic question reading: country names matched straight from the
+# registry (plus the everyday names and Chinese names people actually type),
+# instantly and without a model call. "from France" is read as a French
+# passport — the sensible reading for a visa tool — and the form below keeps
+# the nationality visible so the reader can change it.
+_ALIASES = {
+    "USA": ("usa", "us", "u.s.", "america", "united states", "the states", "美国", "美國", "american"),
+    "GBR": ("uk", "u.k.", "britain", "great britain", "england", "united kingdom", "英国", "英國", "british", "english"),
+    "CHN": ("china", "mainland china", "prc", "中国", "中國", "中国大陆", "chinese"),
+    "HKG": ("hong kong", "hongkong", "hk", "香港", "hong konger"),
+    "TWN": ("taiwan", "台湾", "台灣", "taiwanese"),
+    "JPN": ("japan", "日本", "japanese"),
+    "KOR": ("korea", "south korea", "韩国", "韓國", "korean"),
+    "SGP": ("singapore", "新加坡", "singaporean"),
+    "MYS": ("malaysia", "马来西亚", "馬來西亞", "malaysian"),
+    "THA": ("thailand", "泰国", "泰國", "thai"),
+    "VNM": ("vietnam", "viet nam", "越南", "vietnamese"),
+    "IDN": ("indonesia", "bali", "印尼", "印度尼西亚", "indonesian"),
+    "PHL": ("philippines", "菲律宾", "菲律賓", "filipino"),
+    "IND": ("india", "印度", "indian"),
+    "RUS": ("russia", "俄罗斯", "俄羅斯", "russian"),
+    "AUS": ("australia", "澳大利亚", "澳洲", "australian"),
+    "NZL": ("new zealand", "新西兰", "紐西蘭", "new zealander"),
+    "CAN": ("canada", "加拿大", "canadian"),
+    "FRA": ("france", "法国", "法國", "french"),
+    "DEU": ("germany", "德国", "德國", "german"),
+    "ITA": ("italy", "意大利", "義大利", "italian"),
+    "ESP": ("spain", "西班牙", "spanish"),
+    "NLD": ("netherlands", "holland", "荷兰", "荷蘭", "dutch"),
+    "CHE": ("switzerland", "瑞士", "swiss"),
+    "ARE": ("uae", "united arab emirates", "dubai", "abu dhabi", "阿联酋", "阿聯酋", "emirati"),
+    "TUR": ("turkey", "türkiye", "土耳其", "turkish"),
+    "EGY": ("egypt", "埃及", "egyptian"),
+    "BRA": ("brazil", "巴西", "brazilian"),
+    "MEX": ("mexico", "墨西哥", "mexican"),
+    "MAC": ("macau", "macao", "澳门", "澳門"),
+    "KHM": ("cambodia", "柬埔寨", "cambodian"),
+    "PRT": ("portugal", "葡萄牙", "portuguese"),
+    "GRC": ("greece", "希腊", "希臘", "greek"),
+    "AUT": ("austria", "奥地利", "奧地利", "austrian"),
+    "BEL": ("belgium", "比利时", "比利時", "belgian"),
+    "SWE": ("sweden", "瑞典", "swedish"),
+    "NOR": ("norway", "挪威", "norwegian"),
+    "DNK": ("denmark", "丹麦", "丹麥", "danish"),
+    "FIN": ("finland", "芬兰", "芬蘭", "finnish"),
+    "IRL": ("ireland", "爱尔兰", "愛爾蘭", "irish"),
+    "POL": ("poland", "波兰", "波蘭", "polish"),
+    "CZE": ("czech republic", "czechia", "捷克", "czech"),
+    "HUN": ("hungary", "匈牙利", "hungarian"),
+    "ISR": ("israel", "以色列", "israeli"),
+    "SAU": ("saudi arabia", "saudi", "沙特", "沙烏地", "saudi"),
+    "QAT": ("qatar", "卡塔尔", "卡達", "qatari"),
+    "ZAF": ("south africa", "南非", "south african"),
+    "ARG": ("argentina", "阿根廷", "argentine", "argentinian"),
+    "CHL": ("chile", "智利", "chilean"),
+    "PER": ("peru", "秘鲁", "秘魯", "peruvian"),
+    "MAR": ("morocco", "摩洛哥", "moroccan"),
+    "KEN": ("kenya", "肯尼亚", "肯亞", "kenyan"),
+    "LKA": ("sri lanka", "斯里兰卡", "斯里蘭卡", "sri lankan"),
+    "NPL": ("nepal", "尼泊尔", "尼泊爾", "nepali", "nepalese"),
+    "MDV": ("maldives", "马尔代夫", "馬爾地夫", "maldivian"),
+    "PAK": ("pakistan", "巴基斯坦", "pakistani"),
+    "BGD": ("bangladesh", "孟加拉", "bangladeshi"),
+    "MNG": ("mongolia", "蒙古", "mongolian"),
+    "KAZ": ("kazakhstan", "哈萨克斯坦", "哈薩克", "kazakh"),
+    "UZB": ("uzbekistan", "乌兹别克斯坦", "烏茲別克", "uzbek"),
+    "GEO": ("georgia", "格鲁吉亚", "喬治亞", "georgian"),
+    "ARM": ("armenia", "亚美尼亚", "亞美尼亞", "armenian"),
+    "JOR": ("jordan", "约旦", "約旦", "jordanian"),
+    "IRN": ("iran", "伊朗", "iranian"),
+    "CUB": ("cuba", "古巴", "cuban"),
+    "ISL": ("iceland", "冰岛", "冰島", "icelandic"),
+}
+_PURPOSE_WORDS = (
+    ("business", ("business", "商务", "商務", "出差", "conference", "meeting")),
+    ("study", ("study", "student", "留学", "留學", "university", "school")),
+    ("work", ("work", "job", "工作", "employment")),
+    ("family_visit", ("family", "relatives", "探亲", "探親", "visit my", "親友", "亲友")),
+    ("transit", ("transit", "layover", "stopover", "过境", "過境", "转机", "轉機")),
+)
+
+
+def _country_mentions(text: str) -> list:
+    """[(position, ISO3, is_demonym)] for every country named in the text,
+    longest alias first so "south korea" beats "korea" and "new zealand"
+    is not read as two words."""
+    low = text.lower()
+    found = []
+    taken = [False] * len(low)
+    try:
+        from .registry import load_registry
+        names = [(e["alpha_3"], n.lower(), False)
+                 for e in load_registry("countries")["entries"]
+                 for n in (e.get("name"), e.get("common_name")) if n and len(n) > 2]
+    except Exception:  # noqa: BLE001 - aliases alone still work
+        names = []
+    aliases = [(iso, a, (i == len(al) - 1 and a.isascii()))
+               for iso, al in _ALIASES.items() for i, a in enumerate(al)]
+    for iso, alias, demonym in sorted(names + aliases, key=lambda x: -len(x[1])):
+        start = 0
+        while True:
+            i = low.find(alias, start)
+            if i < 0:
+                break
+            j = i + len(alias)
+            ascii_word = alias.isascii()
+            boundary_ok = (not ascii_word) or (
+                (i == 0 or not low[i - 1].isalpha()) and (j >= len(low) or not low[j].isalpha()))
+            if boundary_ok and not any(taken[i:j]):
+                for k in range(i, j):
+                    taken[k] = True
+                found.append((i, iso, demonym))
+            start = j
+    return sorted(found)
+
+
+def _deterministic_route(question: str) -> dict | None:
+    """A route read straight from the words, or None when the text does not
+    name two places. Instant; no model call."""
+    q = str(question or "").strip()
+    low = q.lower()
+    mentions = _country_mentions(q)
+    isos = []
+    for _pos, iso, _d in mentions:
+        if iso not in isos:
+            isos.append(iso)
+    if len(isos) < 2:
+        return None
+    nat = dest = None
+    # Nationality: a demonym ("Chinese passport"), "with a X passport", or "from X".
+    for pos, iso, demonym in mentions:
+        if demonym:
+            nat = iso
+            break
+    if nat is None:
+        for pos, iso, _d in mentions:
+            before = low[max(0, pos - 12):pos]
+            if "from " in before or before.rstrip().endswith("from") or "持" in q[max(0, pos - 3):pos]:
+                nat = iso
+                break
+    # Destination: "to X", "go to X", "visit X", "in X", 去X / 到X / 赴X.
+    for pos, iso, _d in mentions:
+        if iso == nat:
+            continue
+        before = low[max(0, pos - 10):pos]
+        if any(w in before for w in (" to ", "to ", "visit", " in ", "going", "travel")) \
+                or q[max(0, pos - 1):pos] in ("去", "到", "赴", "往"):
+            dest = iso
+            break
+    if nat is None:
+        nat = next(i for i in isos if i != dest)
+    if dest is None:
+        dest = next(i for i in isos if i != nat)
+    purpose = "tourism"
+    for name, words in _PURPOSE_WORDS:
+        if any(w in low or w in q for w in words):
+            purpose = name
+            break
+    doc = "diplomatic_passport" if ("diplomatic" in low or "外交护照" in q or "外交護照" in q) \
+        else "service_passport" if ("official passport" in low or "公务护照" in q or "公務護照" in q) \
+        else "ordinary_passport"
+    return {"understood": True, "nationality": nat, "destination": dest,
+            "travel_purpose": purpose, "travel_document_type": doc,
+            "read_by": "deterministic"}
+
+
 def parse_question(question: str, *, timeout: float = 20.0) -> dict:
     """Turn 'What visa for tourism in Japan with a Chinese passport?' into a
     route dict the Database lookup understands. Deterministic shape-check on
@@ -1091,6 +1257,9 @@ def parse_question(question: str, *, timeout: float = 20.0) -> dict:
     q = str(question or "").strip()
     if not q:
         raise GuidanceUnavailable("no question to read")
+    direct = _deterministic_route(q)
+    if direct is not None:
+        return direct
     raw = _call(_ASK_SYSTEM, json.dumps({"question": q[:500]}),
                 timeout=timeout, max_tokens=2000)
     if not isinstance(raw, dict):
