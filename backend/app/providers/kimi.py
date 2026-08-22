@@ -280,7 +280,8 @@ class LiveKimiProvider:  # pragma: no cover - needs a real key/network
             text, max_tokens=budget, temperature=0.0)
         return out.get("translated", text)
 
-    def translate_batch(self, items: dict, target: str, source: str) -> dict:  # pragma: no cover - needs key
+    def translate_batch(self, items: dict, target: str, source: str,
+                        model: str | None = None) -> dict:  # pragma: no cover - needs key
         """One call per catalog chunk: translate every VALUE of a JSON object
         of short UI strings, keys untouched. K3 is a reasoning model — the
         generous max_tokens keeps the answer out of reasoning_content."""
@@ -293,7 +294,7 @@ class LiveKimiProvider:  # pragma: no cover - needs a real key/network
             f"Keys must stay EXACTLY as given. Preserve every ⟦T…⟧ sentinel "
             f"EXACTLY as written. Reply as a JSON object with the SAME keys.",
             json.dumps(items, ensure_ascii=False),
-            max_tokens=8000, timeout=120)
+            max_tokens=8000, timeout=120, model=model)
         return {str(k): str(v) for k, v in (out or {}).items()}
 
     def run(self, goal: str, context: dict) -> AgentResult:

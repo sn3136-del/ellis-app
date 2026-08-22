@@ -203,7 +203,11 @@ def test_stale_cache_returns_instantly_flagged_for_refresh(db):
     assert counter == {}                                # refresh is async, not inline
 
 
-def test_uncertain_results_are_never_cached(db):
+def test_uncertain_results_are_cached_briefly_and_replaced_when_complete(db):
+    """The owner's rule: every route is answered, fast. An incomplete answer
+    is still an answer — it is served, and cached BRIEFLY so a repeat reader
+    is instant — while the background refresh keeps trying; a later complete
+    answer replaces it for the full window."""
     _clear_cache(db)
     bad = dict(GOOD_ANSWER)
     bad.pop("permitted_stay")
@@ -212,7 +216,28 @@ def test_uncertain_results_are_never_cached(db):
     assert g["status"] == "KIMI_UNCERTAIN"
     assert g["verification"] == {}                     # no decision, no claim
     assert g["label"] == "AI-generated route guidance"
-    assert db.query(KimiRouteGuidanceCache).count() == 0   # retry is always possible
+    assert g["guidance"]["disposition"] == GOOD_ANSWER["disposition"]   # still an answer
+    row = db.query(KimiRouteGuidanceCache).one()
+    assert row.status == "KIMI_UNCERTAIN"
+    short = (row.fresh_until - row.generated_at).days
+    assert short <= kimi_primary.UNCERTAIN_TTL_DAYS
+    # A complete answer replaces it for the full window.
+    kimi_primary.set_provider(single_pass(GOOD_ANSWER))
+    g2 = kimi_primary.get_route_guidance(db, ROUTE, force_refresh=True)
+    assert g2["status"] == "KIMI_PRIMARY"
+    row = db.query(KimiRouteGuidanceCache).one()
+    assert row.status == "KIMI_PRIMARY"
+    assert (row.fresh_until - row.generated_at).days > short
+
+
+def test_an_empty_answer_is_never_cached(db):
+    """validate_answer fills defaults even for {}; those defaults alone must
+    never be written over a real cached answer."""
+    _clear_cache(db)
+    kimi_primary.set_provider(single_pass({}))
+    g = kimi_primary.get_route_guidance(db, ROUTE)
+    assert g["status"] == "KIMI_UNCERTAIN"
+    assert db.query(KimiRouteGuidanceCache).count() == 0
 
 
 # ---- deadline ----------------------------------------------------------------
@@ -233,17 +258,17 @@ def test_deadline_exceeded_is_honest_retryable_error(db, monkeypatch):
 
 
 def test_slow_malformed_analysis_exhausts_budget_before_retry(db, monkeypatch):
+    """An answer with NO verdict at all earns one retry — but never past the
+    deadline. (An answer that merely has gaps is served at once, see above.)"""
     _clear_cache(db)
     import time as _time
     calls = {"n": 0}
-    incomplete = dict(GOOD_ANSWER)
-    incomplete.pop("permitted_stay")
 
     def slow(system, user):
         calls["n"] += 1
         assert calls["n"] == 1, "the malformed retry must not start after the deadline"
         _time.sleep(0.3)
-        return dict(incomplete)
+        return {"confidence": "low"}            # no disposition: nothing to show
     kimi_primary.set_provider(slow)
     monkeypatch.setenv("ELLIS_GUIDANCE_DEADLINE_SECONDS", "5.2")  # 5.2-0.3 < 5 min budget
     with pytest.raises(kimi_primary.GuidanceTimeout):
@@ -259,28 +284,46 @@ def test_default_deadline_is_ninety_seconds():
 
 
 # ---- honest failure ----------------------------------------------------------
-def test_missing_fields_retry_once_then_honest_uncertain(db):
+def test_an_incomplete_answer_is_served_at_once_without_a_slow_retry(db):
+    """The owner's rule: fast and always answered. An answer WITH a verdict
+    but gaps is served immediately as KIMI_UNCERTAIN (one call, no retry);
+    the background refresh keeps trying for a complete one. The slow full
+    retry used to turn a 30-second answer into a timeout."""
     _clear_cache(db)
     counter = {}
     bad = dict(GOOD_ANSWER)
     bad.pop("permitted_stay"); bad.pop("processing_time")
 
-    def flaky(system, user):
+    def provider(system, user):
         assert "verifier" not in system
         counter["analyze"] = counter.get("analyze", 0) + 1
-        if counter["analyze"] > 1:
-            assert "permitted_stay" in user and "processing_time" in user  # targeted retry
         return dict(bad)
-    kimi_primary.set_provider(flaky)
+    kimi_primary.set_provider(provider)
     before_jobs = db.query(OnDemandRouteResearchJob).count()
     before_tasks = db.query(HumanReviewTask).count()
     g = kimi_primary.get_route_guidance(db, ROUTE)
-    assert counter == {"analyze": 2}                      # exactly one retry, no verify
+    assert counter == {"analyze": 1}                      # served at once
     assert g["status"] == "KIMI_UNCERTAIN"
+    assert g["guidance"]["disposition"] == GOOD_ANSWER["disposition"]
     assert set(g["missing_fields"]) == {"permitted_stay", "processing_time"}
     # No broad research auto-started; no administrator task created.
     assert db.query(OnDemandRouteResearchJob).count() == before_jobs
     assert db.query(HumanReviewTask).count() == before_tasks
+
+
+def test_no_verdict_at_all_gets_exactly_one_retry(db):
+    """Only when there is nothing to show (no disposition) is a retry worth
+    its time — and then exactly one."""
+    _clear_cache(db)
+    counter = {}
+
+    def provider(system, user):
+        counter["analyze"] = counter.get("analyze", 0) + 1
+        return {"confidence": "low"} if counter["analyze"] == 1 else dict(GOOD_ANSWER)
+    kimi_primary.set_provider(provider)
+    g = kimi_primary.get_route_guidance(db, ROUTE)
+    assert counter == {"analyze": 2}
+    assert g["status"] == "KIMI_PRIMARY"
 
 
 def test_contradictory_answer_flagged_precisely(db):
@@ -708,3 +751,67 @@ def test_shipped_overrides_are_internally_consistent():
         # A verified visa-free verdict must not also quote a positive fee.
         if str(f.get("disposition") or "") == "VISA_EXEMPT" and head:
             raise AssertionError(f"{route}: visa-free but a fee of {head}")
+
+
+# ---- two-stage answering (the Database's fast path) --------------------------
+def _staged_provider(core_answer, detail_answer, counter):
+    """Answers the CORE and DETAIL calls differently, like the live model."""
+    def provider(system, user):
+        counter.setdefault("calls", []).append(
+            "core" if "THIS CALL (CORE)" in system else
+            "detail" if "THIS CALL (DETAIL)" in system else "full")
+        if "THIS CALL (DETAIL)" in system:
+            assert "ALREADY DECIDED" in system      # the verdict travels with it
+            return dict(detail_answer)
+        return dict(core_answer)
+    return provider
+
+
+def test_core_first_serves_the_verdict_then_fills_detail_consistently(db):
+    """Stage 1 answers with the core verdict; stage 2 fills the detail told
+    the verdict it must respect; the row ends complete and un-pending."""
+    _clear_cache(db)
+    counter = {}
+    core = {k: v for k, v in GOOD_ANSWER.items() if k in kimi_primary.CORE_FIELDS}
+    detail = {"visa_products": [{"type": "Tourist", "entry": "single",
+                                 "validity": "3 months", "max_stay_days": 30,
+                                 "fee": {"amount": 10, "currency": "USD"}}],
+              "forms": ["Arrival card"], "exceptions": ["None"]}
+    kimi_primary.set_provider(_staged_provider(core, detail, counter))
+    g = kimi_primary.get_route_guidance(db, ROUTE, stage="core")
+    assert counter["calls"] == ["core", "detail"]
+    assert g["detail_pending"] is False               # inline with an injected provider
+    row = db.query(KimiRouteGuidanceCache).one()
+    assert "detail_pending" not in (row.verification or {})
+    assert row.guidance["disposition"] == GOOD_ANSWER["disposition"]
+    if GOOD_ANSWER["disposition"] == "VISA_EXEMPT":
+        # The verdict wins: a visa-exempt route keeps no visa products.
+        assert row.guidance.get("visa_products") == []
+    else:
+        assert row.guidance["visa_products"][0]["type"] == "Tourist"
+    assert row.guidance.get("exceptions") == ["None"]
+
+
+def test_detail_stage_failure_leaves_the_core_answer_served_and_unpending(db):
+    _clear_cache(db)
+    core = {k: v for k, v in GOOD_ANSWER.items() if k in kimi_primary.CORE_FIELDS}
+
+    def provider(system, user):
+        if "THIS CALL (DETAIL)" in system:
+            raise RuntimeError("detail model down")
+        return dict(core)
+    kimi_primary.set_provider(provider)
+    g = kimi_primary.get_route_guidance(db, ROUTE, stage="core")
+    assert g["guidance"]["disposition"] == GOOD_ANSWER["disposition"]
+    row = db.query(KimiRouteGuidanceCache).one()
+    assert "detail_pending" not in (row.verification or {})   # readers stop polling
+    assert row.guidance["disposition"] == GOOD_ANSWER["disposition"]
+
+
+def test_full_stage_is_unchanged_for_the_applicant_journey(db):
+    _clear_cache(db)
+    counter = {}
+    kimi_primary.set_provider(single_pass(GOOD_ANSWER, counter=counter))
+    g = kimi_primary.get_route_guidance(db, ROUTE)          # default stage
+    assert counter == {"analyze": 1}
+    assert g.get("detail_pending") in (None, False)

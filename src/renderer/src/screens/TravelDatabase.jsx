@@ -346,7 +346,7 @@ export default function TravelDatabase({ onBack }) {
   // An answer the engine itself rated low confidence is HELD until a person
   // confirms it. Holding means the reader does not see the claims at all —
   // showing them under a warning would still be showing them.
-  const held = result?.review_required === true
+  const held = result?.held === true   // server decides; off by default
   const g = (result && !held) ? (result.guidance || null) : null
 
   // Every user-facing string the decision carries, translated in ONE masked,
@@ -406,6 +406,25 @@ export default function TravelDatabase({ onBack }) {
     setAskBusy(false)
   }
 
+  // Two-stage answers: a route nobody asked before paints its verdict first
+  // and fills the detail sections in the background. Poll until they land
+  // (the cached lookup is instant), then swap the fuller answer in.
+  const pollRef = useRef(0)
+  function pollDetail(body) {
+    const mine = ++pollRef.current
+    let tries = 0
+    const tick = async () => {
+      if (pollRef.current !== mine || tries++ > 12) return
+      try {
+        const out = await client.databaseLookup(body)
+        if (pollRef.current !== mine) return
+        if (!out.detail_pending) { setResult(out); return }
+      } catch { /* keep what we have */ }
+      setTimeout(tick, 4000)
+    }
+    setTimeout(tick, 4000)
+  }
+
   // One query path. The form calls it bare; the switchers on the answer page
   // call it with an override, so changing document type or purpose re-asks
   // the engine for THAT combination instead of showing the old answer under
@@ -430,6 +449,11 @@ export default function TravelDatabase({ onBack }) {
       setResult(out)
       writeHash({ nat: useNat, dest: useDest, purpose: usePurpose, doc: useDoc })
       setBusy(false)
+      if (out.detail_pending) pollDetail({
+        nationality: useNat, destination: useDest, travel_document_type: useDoc,
+        travel_purpose: usePurpose, arrival_date: arrival || '',
+        departure_city: departureCity || '', transit_countries: transit,
+      })
       return true
     } catch (e) {
       setError(e?.detail?.reason || e?.detail?.detail || e?.message || t('db.error'))
@@ -810,6 +834,13 @@ export default function TravelDatabase({ onBack }) {
                 <Bullets items={itemsOf(g.exceptions).map((x) => T(x))}
                          mark="•" markColor="#9a6200" />
               </Section>
+            </div>
+          )}
+
+          {result.detail_pending && (
+            <div style={{ fontSize: 12.5, color: GRAY, marginTop: 14,
+                          textAlign: 'center' }} data-testid="database-detail-pending">
+              {t('db.detailPending')}
             </div>
           )}
 

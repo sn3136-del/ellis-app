@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import pathlib
 import re
 
@@ -247,7 +248,12 @@ def _kimi_batch_translator(items: dict, target: str, source: str) -> dict:
         raise TranslationUnavailable("live Kimi translation not configured")
     if not hasattr(provider, "translate_batch"):
         raise TranslationUnavailable("provider has no batch translate capability")
-    return provider.translate_batch(items, target, source)  # pragma: no cover - needs key
+    # Translation is not a reasoning task. It runs on the fast model (the same
+    # tier the route engine uses) unless KIMI_TRANSLATE_MODEL says otherwise;
+    # on the reasoning model three strings took ten seconds.
+    model = (os.getenv("KIMI_TRANSLATE_MODEL") or os.getenv("KIMI_GUIDANCE_MODEL")
+             or "").strip() or None
+    return provider.translate_batch(items, target, source, model=model)  # pragma: no cover - needs key
 
 
 _CATALOG_CHUNK = 40

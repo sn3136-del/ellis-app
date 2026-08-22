@@ -55,9 +55,11 @@ def test_lookup_returns_the_answer_and_its_cache_identity(client):
     assert body["cache_key"].startswith("CHN|CHN|KHM|tourism|")
 
 
-def test_a_held_answer_ships_no_claims(client):
-    """review_required strips the guidance server-side: what the reader is
-    told is being checked must not be readable in dev tools either."""
+def test_a_held_answer_ships_no_claims(client, monkeypatch):
+    """With the hold switched ON, a low-confidence answer's claims never leave
+    the server. The switch is OFF by default (Ellis always answers); this
+    pins the behaviour for a deployment that turns it on."""
+    monkeypatch.setenv("ELLIS_DATABASE_HOLD_LOW_CONFIDENCE", "1")
     _provide(dict(ANSWER, confidence="low"))
     r = client.post("/database/lookup", headers=READER,
                     json={"nationality": "CHN", "destination": "BTN"})
@@ -101,7 +103,8 @@ def test_the_quality_loop_report_queue_correct_refresh(client):
     assert again["guidance"]["government_fee"]["amount"] == 60
 
 
-def test_release_binds_to_the_exact_answer_via_its_key(client):
+def test_release_binds_to_the_exact_answer_via_its_key(client, monkeypatch):
+    monkeypatch.setenv("ELLIS_DATABASE_HOLD_LOW_CONFIDENCE", "1")
     _provide(dict(ANSWER, confidence="low"))
     held = client.post("/database/lookup", headers=READER,
                        json={"nationality": "CHN", "destination": "NPL",
@@ -134,3 +137,16 @@ def test_ask_refuses_to_guess_an_unnamed_route(client):
                     json={"question": "do i need a visa"})
     assert r.status_code == 200
     assert r.json()["understood"] is False
+
+
+
+def test_by_default_a_low_confidence_answer_is_still_answered(client):
+    """The owner's rule: Ellis always answers. Low confidence is flagged for
+    the operator queue and the grounded recheck, never withheld."""
+    _provide(dict(ANSWER, confidence="low"))
+    r = client.post("/database/lookup", headers=READER,
+                    json={"nationality": "CHN", "destination": "MNG"})
+    body = r.json()
+    assert body["review_required"] is True      # still flagged for operators
+    assert body["held"] is False                 # but not withheld
+    assert body["guidance"]["disposition"] == "VISA_REQUIRED"

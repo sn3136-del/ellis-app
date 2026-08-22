@@ -136,6 +136,42 @@ CACHE_VERSION = "v6"  # + authorised_agent channel, purpose-driven category, sta
 # Default freshness window; stale entries are reused instantly and refreshed in
 # the background (never blocking the applicant).
 TTL_DAYS = 14
+# An incomplete (KIMI_UNCERTAIN) answer is ALSO cached, briefly: the reader
+# gets an instant answer on repeat instead of a fresh 30-second model pass
+# every time, and the background refresh keeps trying for a complete one.
+UNCERTAIN_TTL_DAYS = 2
+
+
+def hold_enabled() -> bool:
+    """Whether a low-confidence answer is withheld from readers until a person
+    confirms it. Trip.com's requirements doc asked for this gate; the owner
+    decided Ellis must ALWAYS answer, so it is OFF unless switched on. The
+    confidence flag is still computed and still feeds the operator queue and
+    the grounded recheck — only the withholding is switched."""
+    return os.getenv("ELLIS_DATABASE_HOLD_LOW_CONFIDENCE", "0").strip() == "1"
+
+
+# Two-STAGE answering (the fast path for a route nobody has asked before):
+# stage 1 asks for the CORE verdict only (what the reader needs first) and is
+# served the moment it lands; stage 2 fills the DETAIL (products, steps,
+# health, evidence) in the background, told the verdict it must respect, and
+# the reader's next poll picks it up. One consistent answer, first paint in a
+# fraction of the time.
+CORE_FIELDS = (
+    "disposition", "requirement_detail", "visa_category", "permitted_stay",
+    "permitted_stay_days", "passport_validity", "passport_validity_requirement",
+    "application_channel", "application_channel_detail", "official_portal_url",
+    "government_fee", "processing_time", "required_documents",
+    "biometrics_required", "interview_required", "appointment_required",
+    "insurance_required", "route_workflow_type", "source_url",
+    "transit_requirement", "confidence", "uncertainty",
+)
+DETAIL_FIELDS = (
+    "visa_products", "forms", "account_registration_steps", "payment_process",
+    "submission_process", "exceptions", "photo_requirements",
+    "onward_travel_evidence", "accommodation_evidence", "financial_evidence",
+    "arrival_card", "health_requirements",
+)
 
 _SCHEMA_SPEC = """Reply STRICT JSON with these fields (omit nothing; use null
 when genuinely unknown and add an entry to "uncertainty" naming the field and why):
@@ -314,7 +350,7 @@ def _iso(v) -> date | None:
         return None
 
 
-def validate_answer(raw: dict) -> tuple[dict, list, list]:
+def validate_answer(raw: dict, *, detail_known: bool = True) -> tuple[dict, list, list]:
     """Whitelist + shape-check one answer. Returns (clean, missing, contradictions).
     Purely deterministic — schema validity, mandatory fields, and internal
     contradictions; never a model judgement."""
@@ -429,7 +465,7 @@ def validate_answer(raw: dict) -> tuple[dict, list, list]:
     # (i)/(iv) A visa-required route should list its products, and a product's
     # own note must not contradict the stay printed beside it.
     products = clean.get("visa_products") or []
-    if clean.get("disposition") == "VISA_REQUIRED" and not products:
+    if detail_known and clean.get("disposition") == "VISA_REQUIRED" and not products:
         contradictions.append("disposition VISA_REQUIRED but no visa_products "
                               "were listed for this purpose")
     for vp in products:
@@ -631,6 +667,10 @@ def _result(status: str, guidance: dict, *, cached: bool, stale: bool,
                            and str((guidance or {}).get("confidence", "")).lower() == "low",
         "operator_released": released,
     }
+    # `held` is what actually withholds: the flag above AND the switch. With
+    # the switch off (the default) a low-confidence answer is shown like any
+    # other, still flagged for the operator queue and the grounded recheck.
+    out["held"] = bool(out["review_required"]) and hold_enabled()
     if elapsed_seconds is not None:
         out["elapsed_seconds"] = round(elapsed_seconds, 2)
     return out
@@ -743,7 +783,92 @@ def reconcile_guidance_with_route(db, guidance: dict, *, nationality: str,
     return g
 
 
-def get_route_guidance(db, route: dict, *, force_refresh: bool = False) -> dict:
+def _stage_system(fields: tuple, label: str, verdict: dict | None = None) -> str:
+    head = _SYSTEM + f"\n\nTHIS CALL ({label}): fill ONLY these fields and set every other field to null: {', '.join(fields)}. Keep the JSON shape exactly as specified."
+    if verdict:
+        head += ("\nThe verdict is ALREADY DECIDED and must be respected exactly: "
+                 + json.dumps(verdict, ensure_ascii=False)
+                 + ". Fill the detail consistently with it: a visa-exempt route "
+                 "lists NO visa products and NO visa application form.")
+    return head
+
+
+def _detail_consistent(core: dict, detail: dict) -> dict:
+    """Deterministic consistency between the served verdict and the detail:
+    the verdict wins. A visa-exempt route keeps no visa products and no visa
+    application form, whatever the detail call said."""
+    out = {k: v for k, v in (detail or {}).items() if k in DETAIL_FIELDS and v is not None}
+    if str(core.get("disposition") or "").upper() == "VISA_EXEMPT":
+        out["visa_products"] = []
+        out["forms"] = [f for f in (out.get("forms") or [])
+                        if "visa application" not in str(f).lower()]
+    return out
+
+
+def fill_detail(db, key: str, route: dict, user: str, *, after=None) -> None:
+    """Stage 2: the DETAIL for a row that was served core-first. Told the
+    verdict it must respect; merged deterministically; the row's pending flag
+    cleared whatever happens so readers stop polling; `after` (recheck +
+    pre-translation) runs once the full answer exists."""
+    row = _cached(db, key)
+    if row is None:
+        return
+    core = dict(row.guidance or {})
+    verdict = {k: core.get(k) for k in ("disposition", "requirement_detail",
+                                          "visa_category", "application_channel",
+                                          "permitted_stay", "government_fee")}
+    try:
+        detail = _call(_stage_system(DETAIL_FIELDS, "DETAIL", verdict), user,
+                       timeout=60.0, max_tokens=PASS1_MAX_TOKENS)
+    except Exception:  # noqa: BLE001 — the core answer stands on its own
+        detail = None
+    merged = dict(core)
+    if isinstance(detail, dict):
+        merged.update(_detail_consistent(core, detail))
+    clean, missing, contradictions = validate_answer(merged, detail_known=isinstance(detail, dict))
+    status = STATUS_PRIMARY if clean.get("disposition") and not missing and not contradictions \
+        else STATUS_UNCERTAIN
+    ttl = int(os.getenv("ELLIS_KIMI_GUIDANCE_TTL_DAYS", TTL_DAYS) or TTL_DAYS) \
+        if status == STATUS_PRIMARY else UNCERTAIN_TTL_DAYS
+    ver = dict(row.verification or {})
+    ver.pop("detail_pending", None)
+    row.guidance, row.status = clean, status
+    row.missing_fields, row.contradictions = missing, contradictions
+    row.verification = ver
+    row.fresh_until = (row.generated_at or _now()) + timedelta(days=ttl)
+    db.commit()
+    if after is not None:
+        try:
+            after(route, apply_verified_overrides(_result(
+                status, clean, cached=True, stale=False, missing=missing,
+                contradictions=contradictions, model=row.model), route))
+        except Exception:  # noqa: BLE001
+            pass
+
+
+def _fill_detail_async(key: str, route: dict, user: str, *, after=None) -> None:
+    import threading
+    from ..db import SessionLocal
+
+    def _work():
+        s = SessionLocal()
+        try:
+            fill_detail(s, key, route, user, after=after)
+        except Exception:  # noqa: BLE001
+            try:
+                row = _cached(s, key)
+                if row is not None:
+                    ver = dict(row.verification or {}); ver.pop("detail_pending", None)
+                    row.verification = ver; s.commit()
+            except Exception:  # noqa: BLE001
+                pass
+        finally:
+            s.close()
+    threading.Thread(target=_work, name="ellis-detail-stage", daemon=True).start()
+
+
+def get_route_guidance(db, route: dict, *, force_refresh: bool = False,
+                       stage: str = "full", after=None) -> dict:
     """The authoritative single-pass route decision under one hard deadline.
 
     Cached identical routes return instantly. A fresh route runs exactly ONE
@@ -763,6 +888,7 @@ def get_route_guidance(db, route: dict, *, force_refresh: bool = False) -> dict:
             missing=row.missing_fields, contradictions=row.contradictions,
             model=row.model,
             advisories=deterministic_advisories(route, row.guidance or {})), route)
+        out["detail_pending"] = bool((row.verification or {}).get("detail_pending"))
         if isinstance(gc, dict) and gc.get("outcome") == "checked":
             # Machine provenance, deliberately WEAKER than the human badge:
             # "the official page was read on this date and matched", never
@@ -793,25 +919,36 @@ def get_route_guidance(db, route: dict, *, force_refresh: bool = False) -> dict:
     model = (os.getenv("KIMI_GUIDANCE_MODEL", "").strip() or settings().kimi_model) \
         if _PROVIDER is None else "injected-test-provider"
 
-    # ---- the ONE structured Kimi analysis ----------------------------------
+    # ---- the ONE structured analysis -----------------------------------------
+    # (A concurrent core/detail split was tried and reverted: the halves could
+    # contradict each other — the verdict half said visa-exempt while the
+    # detail half, not knowing that, listed visa products — and it was not
+    # faster. Speed comes from the two-STAGE path below instead.)
+    staged = stage == "core"
+    system = _stage_system(CORE_FIELDS, "CORE") if staged else _SYSTEM
     try:
-        raw = _call(_SYSTEM, user, timeout=budget(), max_tokens=PASS1_MAX_TOKENS)
+        raw = _call(system, user, timeout=budget(), max_tokens=PASS1_MAX_TOKENS)
     except (GuidanceUnavailable, GuidanceTimeout, GuidanceProviderError):
         raise
     except Exception:  # noqa: BLE001 - malformed transport/JSON -> one retry below
         raw = None
-    clean, missing, contradictions = validate_answer(raw or {})
+    clean, missing, contradictions = validate_answer(raw or {}, detail_known=not staged)
+    detail_ok = not staged
 
-    if missing or contradictions:
-        # ONE controlled retry, only for a malformed/incomplete answer and only
-        # inside the remaining budget.
+    if not clean.get("disposition"):
+        # ONE controlled retry, ONLY when there is no verdict at all (nothing
+        # to show the reader) and only inside the remaining budget. An answer
+        # that merely has gaps is served immediately as KIMI_UNCERTAIN and
+        # cached briefly; the background refresh keeps trying for a complete
+        # one. A slow retry for a gap was the difference between a 30-second
+        # answer and a timeout.
         retry_user = (user + "\n\nYour previous answer was incomplete. "
                       + (f"Missing or invalid fields: {', '.join(missing)}. " if missing else "")
                       + (f"Contradictions to resolve: {'; '.join(contradictions)}. " if contradictions else "")
                       + "Reply the FULL corrected JSON.")
         try:
-            raw2 = _call(_SYSTEM, retry_user, timeout=budget(), max_tokens=PASS1_MAX_TOKENS)
-            clean2, missing2, contradictions2 = validate_answer(raw2 or {})
+            raw2 = _call(system, retry_user, timeout=budget(), max_tokens=PASS1_MAX_TOKENS)
+            clean2, missing2, contradictions2 = validate_answer(raw2 or {}, detail_known=detail_ok)
             if len(missing2) + len(contradictions2) < len(missing) + len(contradictions):
                 clean, missing, contradictions = clean2, missing2, contradictions2
         except (GuidanceUnavailable, GuidanceTimeout, GuidanceProviderError):
@@ -824,12 +961,15 @@ def get_route_guidance(db, route: dict, *, force_refresh: bool = False) -> dict:
     elapsed = time.monotonic() - started
     advisories = deterministic_advisories(route, clean)
 
-    # Cache ONLY complete, verified results — a failed or uncertain attempt is
-    # returned honestly but never poisons the cache (the applicant can simply
-    # retry).
-    if status == STATUS_PRIMARY:
+    # Cache every answer that HAS content: a complete one for the full window,
+    # an incomplete one briefly (UNCERTAIN_TTL_DAYS) so a repeat reader gets it
+    # instantly while the background refresh keeps trying for a complete one.
+    # A failed attempt (no content) is never cached.
+    has_content = bool(clean.get("disposition"))   # defaults alone are not an answer
+    if has_content and status in (STATUS_PRIMARY, STATUS_UNCERTAIN):
         now = _now()
-        ttl = int(os.getenv("ELLIS_KIMI_GUIDANCE_TTL_DAYS", TTL_DAYS) or TTL_DAYS)
+        ttl = int(os.getenv("ELLIS_KIMI_GUIDANCE_TTL_DAYS", TTL_DAYS) or TTL_DAYS) \
+            if status == STATUS_PRIMARY else UNCERTAIN_TTL_DAYS
         if row is None:
             row = _cached(db, key)
         if row is None:
@@ -843,14 +983,35 @@ def get_route_guidance(db, route: dict, *, force_refresh: bool = False) -> dict:
         row.missing_fields = missing
         row.contradictions = contradictions
         row.model = model
-        row.verification = {"passes": 1, "label": VERIFIED_LABEL}
+        row.verification = {"passes": 1, "label": VERIFIED_LABEL,
+                            **({"detail_pending": True} if staged else {})}
         row.generated_at = now
         row.fresh_until = now + timedelta(days=ttl)
         db.commit()
-    return apply_verified_overrides(_result(
+    out = apply_verified_overrides(_result(
         status, clean, cached=False, stale=False,
         missing=missing, contradictions=contradictions, model=model,
         advisories=advisories, elapsed_seconds=elapsed), route)
+    if staged and has_content:
+        if _PROVIDER is not None:
+            # Injected provider (tests): stage 2 runs inline, deterministically.
+            fill_detail(db, key, route, user, after=after)
+            row = _cached(db, key)
+            out = apply_verified_overrides(_result(
+                row.status, row.guidance, cached=False, stale=False,
+                missing=row.missing_fields, contradictions=row.contradictions,
+                model=row.model, advisories=advisories,
+                elapsed_seconds=elapsed), route)
+            out["detail_pending"] = False
+        else:
+            _fill_detail_async(key, route, user, after=after)
+            out["detail_pending"] = True
+    elif after is not None and not out.get("cached"):
+        try:
+            after(route, out)
+        except Exception:  # noqa: BLE001
+            pass
+    return out
 
 
 def refresh_stale_async(db_factory, route: dict) -> None:

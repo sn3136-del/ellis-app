@@ -32,7 +32,9 @@ PHASE1 = ("HKG", "TWN", "JPN", "KOR", "USA", "THA", "SGP", "MYS", "GBR",
           "RUS", "AUS", "IDN", "PHL", "FRA", "VNM", "ESP", "IND", "CAN")
 # The origins: mainland China (the app's own applicants) plus Trip.com's two
 # named test stations.
-ORIGINS = ("CHN", "HKG", "USA")
+ORIGINS = ("CHN", "HKG", "USA", "TWN", "JPN", "KOR", "SGP", "MYS", "THA",
+           "GBR", "FRA", "DEU", "AUS", "CAN", "IND", "IDN", "PHL", "VNM",
+           "ESP", "RUS")
 WARM_ROUTES = [(o, d) for o in ORIGINS for d in PHASE1 if o != d]
 
 

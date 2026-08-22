@@ -309,7 +309,7 @@ export function guidanceStepMeta(step) {
 // a REAL case must not be built on it either.
 export function guidanceIsUsable(g) {
   return !!g && g.status === 'KIMI_PRIMARY' && g.ai_generated === true &&
-    g.review_required !== true
+    g.held !== true
 }
 
 // ---------------------------------------------------------------------------

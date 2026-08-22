@@ -361,6 +361,59 @@ def travel_database_approve(body: DatabaseApproveIn, db=Depends(get_session),
     return {"ok": True, "cache_key": key, "released_by": p.user_id}
 
 
+def _after_cold_answer(route: dict, out: dict) -> None:
+    """Background work after a route was decided for the first time.
+
+    1. Grounded recheck: read the answer's official page and apply quote-backed
+       corrections (or file a dispute), so every NEW route is checked against
+       an official source within about a minute of first being asked.
+    2. Pre-translate the answer's strings into both Chinese variants into the
+       translation cache, so the language switch is instant.
+    Never blocks the reader; never runs in test mode."""
+    import os as _os
+    import threading as _threading
+    from .config import settings as _settings
+    if _settings().runtime_mode == "test" or \
+            _os.getenv("ELLIS_BACKGROUND_RENEWAL", "1").strip() != "1":
+        return
+    guidance = out.get("guidance") or {}
+
+    def _work():
+        try:
+            from .db import SessionLocal as _SL
+            from .visa_snapshot import freshness
+            s = _SL()
+            try:
+                freshness.recheck_route(s, route)
+            finally:
+                s.close()
+        except Exception:  # noqa: BLE001 — best effort, never surfaces
+            pass
+        try:
+            from . import i18n as _i18n
+            strings: dict = {}
+
+            def _walk(v):
+                if isinstance(v, str):
+                    t = v.strip()
+                    if 2 < len(t) <= 240 and not t.startswith("http"):
+                        strings[f"g{len(strings)}"] = t
+                elif isinstance(v, dict):
+                    for x in v.values():
+                        _walk(x)
+                elif isinstance(v, list):
+                    for x in v:
+                        _walk(x)
+            _walk(guidance)
+            for lang in ("zh-CN", "zh-Hant"):
+                _i18n.translate_catalog(strings, lang)
+            _i18n.flush_cache()
+        except Exception:  # noqa: BLE001
+            pass
+    _threading.Thread(target=_work, name="ellis-after-cold-answer",
+                      daemon=True).start()
+
+
 class DatabaseIssueIn(BaseModel):
     """A reader flagging a field that looks wrong."""
     nationality: str = ""
@@ -518,7 +571,8 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
         "travel_purpose": parsed["travel_purpose"],
     }
     try:
-        out = kimi_primary.get_route_guidance(db, route)
+        out = kimi_primary.get_route_guidance(db, route, stage="core",
+                                              after=_after_cold_answer)
     except kimi_primary.GuidanceTimeout:
         raise HTTPException(504, detail={"status": kimi_primary.STATUS_TIMEOUT,
                                          "reason": kimi_primary.TIMEOUT_MESSAGE})
@@ -528,7 +582,7 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
     except kimi_primary.GuidanceProviderError as e:
         raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
                                          "reason": e.envelope.get("user_message")})
-    if out.get("review_required"):
+    if out.get("held"):
         out = {k: v for k, v in out.items() if k != "guidance"}
         out["guidance"] = None
     out["understood"] = True
@@ -594,7 +648,11 @@ def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
     if transit:
         route["transit_countries"] = transit
     try:
-        out = kimi_primary.get_route_guidance(db, route)
+        # Core-first: a route nobody asked before paints its verdict in about
+        # half the time; the detail sections fill in behind it (the page
+        # polls), consistent with the verdict. Cached routes are instant.
+        out = kimi_primary.get_route_guidance(db, route, stage="core",
+                                              after=_after_cold_answer)
     except kimi_primary.GuidanceTimeout:
         raise HTTPException(504, detail={"status": kimi_primary.STATUS_TIMEOUT,
                                          "reason": kimi_primary.TIMEOUT_MESSAGE})
@@ -609,7 +667,7 @@ def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
     # leave the server, so no client (curious dev tools included) can read
     # what the reader is told is being checked. The envelope keeps the flag
     # and the identity so the page can say WHY there is nothing to show.
-    if out.get("review_required"):
+    if out.get("held"):
         out = {k: v for k, v in out.items() if k != "guidance"}
         out["guidance"] = None
     # The answer carries the identity of the cached row it came from. A reader
