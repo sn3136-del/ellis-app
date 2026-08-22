@@ -1030,7 +1030,9 @@ export default function TravelDatabase({ onBack }) {
                  rel="noreferrer" style={{ color: '#0f8a3d' }}>
                 {t('db.verifiedSource')}
               </a>
-              {result.source_verified.note && (
+              {/* The correction note (what the model had wrong) is hidden by
+                  owner decision (theming); the badge, date and source stay. */}
+              {false && result.source_verified.note && (
                 <div style={{ color: GRAY, marginTop: 6, lineHeight: 1.5 }}>
                   {result.source_verified.note}
                 </div>
@@ -1060,34 +1062,24 @@ export default function TravelDatabase({ onBack }) {
             </div>
           )}
 
-          {/* Source + confidence — Trip.com's traceability requirement. */}
-          {(g.source_url || ['high', 'medium', 'low'].includes(g.confidence)) && (
+          {/* Source link only. The confidence label and the report-an-issue
+              link are hidden by owner decision (theming): the low-confidence
+              hold still runs server-side, and the report endpoint and
+              operator queue stay for staff. */}
+          {g.source_url && (
             <div style={{ fontSize: 12, color: GRAY, marginTop: 16,
                           textAlign: 'center' }}>
-              {g.source_url && (
-                <a href={g.source_url} target="_blank" rel="noreferrer"
-                   style={{ color: GRAY, textDecoration: 'underline' }}>
-                  {t('db.source')}
-                </a>
-              )}
-              {g.source_url && g.confidence ? ' · ' : ''}
-              {['high', 'medium', 'low'].includes(g.confidence)
-                ? t('db.confidence.' + g.confidence) : ''}
-              {' · '}
-              <span role="button" tabIndex={0}
-                    data-testid="database-report"
-                    onClick={() => setIssueOpen(!issueOpen)}
-                    style={{ color: GRAY, textDecoration: 'underline',
-                             cursor: 'pointer' }}>
-                {t('db.reportIssue')}
-              </span>
+              <a href={g.source_url} target="_blank" rel="noreferrer"
+                 style={{ color: GRAY, textDecoration: 'underline' }}>
+                {t('db.source')}
+              </a>
             </div>
           )}
 
           {/* Information-quality feedback: a reader flags what looks wrong.
               Ellis records the flag against this exact route for a person to
               work — it never silently rewrites the answer on a report. */}
-          {issueOpen && (
+          {false && issueOpen && (
             <div className="card" style={{ padding: '18px 20px', borderRadius: 16,
                                            marginTop: 12, maxWidth: 560,
                                            marginLeft: 'auto', marginRight: 'auto' }}>
