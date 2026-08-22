@@ -214,7 +214,11 @@ def test_deadline_exceeded_is_honest_retryable_error(db, monkeypatch):
     with pytest.raises(kimi_primary.GuidanceTimeout) as exc:
         kimi_primary.get_route_guidance(db, ROUTE)
     assert str(exc.value) == kimi_primary.TIMEOUT_MESSAGE
-    assert "one minute" in str(exc.value)
+    # The message must NOT promise a specific duration: the deadline is
+    # configurable (and is 90s by default), so naming "one minute" in the
+    # text was a promise the code did not keep.
+    assert "minute" not in str(exc.value)
+    assert "try again" in str(exc.value).lower()
     assert db.query(KimiRouteGuidanceCache).count() == 0   # never cached
 
 

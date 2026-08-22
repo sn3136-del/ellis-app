@@ -421,16 +421,31 @@ export default function TravelDatabase({ onBack }) {
       })
       setResult(out)
       writeHash({ nat: useNat, dest: useDest, purpose: usePurpose, doc: useDoc })
+      setBusy(false)
+      return true
     } catch (e) {
       setError(e?.detail?.reason || e?.detail?.detail || e?.message || t('db.error'))
-      if (override.keepResult) setResult(null)
+      // A failed switch leaves the answer the reader was already looking at
+      // on screen. Clearing it would throw away a good answer because a
+      // DIFFERENT question could not be answered.
+      setBusy(false)
+      return false
     }
-    setBusy(false)
   }
 
   // A switcher on the answer page: set the control, then re-ask for it.
-  function switchDoc(v) { setDoc(v); lookUp({ doc: v, keepResult: true }) }
-  function switchPurpose(v) { setPurpose(v); lookUp({ purpose: v, keepResult: true }) }
+  async function switchDoc(v) {
+    const was = doc
+    setDoc(v)
+    const ok = await lookUp({ doc: v, keepResult: true })
+    if (!ok) setDoc(was)          // the page must never label an old answer anew
+  }
+  async function switchPurpose(v) {
+    const was = purpose
+    setPurpose(v)
+    const ok = await lookUp({ purpose: v, keepResult: true })
+    if (!ok) setPurpose(was)
+  }
 
   async function reportIssue() {
     try {
@@ -708,6 +723,16 @@ export default function TravelDatabase({ onBack }) {
               <span style={{ fontSize: 12, color: GRAY }}>{t('db.checking')}</span>
             )}
           </div>
+          {/* A switch that could not be answered says so here, and the
+              controls above have already snapped back to the combination
+              actually on screen. */}
+          {error && (
+            <div style={{ fontSize: 12.5, color: NAVY, fontWeight: 600,
+                          marginTop: 10, textAlign: 'center' }}
+                 data-testid="database-switch-error">
+              {error}
+            </div>
+          )}
 
           {/* At a glance */}
           <div style={{ display: 'grid', gap: 16, marginTop: 20,

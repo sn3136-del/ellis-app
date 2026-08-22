@@ -107,8 +107,8 @@ REQUIREMENT_DETAILS = (
 VERIFIED_LABEL = "Kimi route decision"
 
 # The honest hard-deadline message (shown instead of an endless spinner).
-TIMEOUT_MESSAGE = ("Ellis could not complete the AI route analysis within one "
-                   "minute. Please retry.")
+TIMEOUT_MESSAGE = ("Ellis could not finish working out this route in time. "
+                   "Please try again.")
 
 # Total wall-clock budget for the analysis + its single malformed-retry.
 DEFAULT_DEADLINE_SECONDS = 90  # richer schema (visa_products) needs more room
