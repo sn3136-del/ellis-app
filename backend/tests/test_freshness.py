@@ -95,7 +95,7 @@ def test_japan_regression_the_page_corrects_the_stored_answer(db):
     _seed(db)
     fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
     freshness.set_provider(lambda system, user: {
-        "page_relevant": True, "consistent": False,
+        "page_relevant": True, "page_is_nationality_specific": True, "consistent": False,
         "corrected_fields": {
             "permitted_stay": "15 or 30 days, decided by the mission",
             "government_fee": {"amount": 715, "currency": "CNY"}},
@@ -119,7 +119,7 @@ def test_a_correction_without_a_page_quote_is_discarded(db):
     _seed(db)
     fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
     freshness.set_provider(lambda system, user: {
-        "page_relevant": True, "consistent": False,
+        "page_relevant": True, "page_is_nationality_specific": True, "consistent": False,
         "corrected_fields": {"permitted_stay": "7 days"},
         "evidence": {}, "note": "no quote offered"})
     out = freshness.recheck_route(db, ROUTE)
@@ -143,7 +143,7 @@ def test_the_machine_never_outvotes_a_human_override(db, tmp_path, monkeypatch):
     _seed(db)
     fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
     freshness.set_provider(lambda system, user: {
-        "page_relevant": True, "consistent": False,
+        "page_relevant": True, "page_is_nationality_specific": True, "consistent": False,
         "corrected_fields": {"permitted_stay": "60 days"},
         "evidence": {"permitted_stay": "some new wording"}, "note": ""})
     out = freshness.recheck_route(db, ROUTE)
@@ -190,7 +190,7 @@ def test_a_correction_that_contradicts_itself_is_refused_and_filed(db):
     _seed(db)
     fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
     freshness.set_provider(lambda system, user: {
-        "page_relevant": True, "consistent": False,
+        "page_relevant": True, "page_is_nationality_specific": True, "consistent": False,
         "corrected_fields": {"visa_products": []},
         "evidence": {"visa_products": "some quote"}, "note": ""})
     out = freshness.recheck_route(db, ROUTE)
@@ -208,7 +208,7 @@ def test_once_grounded_memory_regen_never_reverts_the_answer(db, monkeypatch):
     row = _seed(db)
     fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
     freshness.set_provider(lambda system, user: {
-        "page_relevant": True, "consistent": False,
+        "page_relevant": True, "page_is_nationality_specific": True, "consistent": False,
         "corrected_fields": {"government_fee": {"amount": 715, "currency": "CNY"}},
         "evidence": {"government_fee": "single entry 715 CNY"}, "note": ""})
     assert freshness.recheck_route(db, ROUTE)["changed"] == ["government_fee"]
@@ -249,7 +249,7 @@ def test_an_irrelevant_landing_page_falls_through_to_the_real_one(db):
         if "News, events" in user:
             return {"page_relevant": False, "consistent": True,
                     "corrected_fields": {}, "evidence": {}, "note": "landing"}
-        return {"page_relevant": True, "consistent": False,
+        return {"page_relevant": True, "page_is_nationality_specific": True, "consistent": False,
                 "corrected_fields": {"government_fee": {"amount": 715,
                                                         "currency": "CNY"}},
                 "evidence": {"government_fee": "single entry 715 CNY"},
@@ -295,7 +295,7 @@ def test_a_disagreeing_check_is_not_served_as_a_clean_bill_of_health(db):
     _seed(db)
     fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
     freshness.set_provider(lambda system, user: {
-        "page_relevant": True, "consistent": False,
+        "page_relevant": True, "page_is_nationality_specific": True, "consistent": False,
         "corrected_fields": {"permitted_stay": "15 or 30 days"},
         "evidence": {"permitted_stay": "15 days or 30 days as decided"},
         "note": ""})
@@ -306,3 +306,73 @@ def test_a_disagreeing_check_is_not_served_as_a_clean_bill_of_health(db):
     assert served["cached"] is True
     assert served["grounded_check"]["consistent"] is False
     assert served["grounded_check"]["changed_fields"] == ["permitted_stay"]
+
+
+def test_a_generic_page_cannot_touch_nationality_specific_fields(db):
+    """THE ROOT CAUSE OF THE JAPAN DEMO FAILURE, pinned. A ministry page that
+    describes the destination's rules for the WORLD (every channel listed, a
+    90-day ceiling) is true in general and wrong for this applicant. Unless
+    the page speaks for THIS nationality, it may not correct a
+    nationality-specific field — enforced in code, not requested in the
+    prompt."""
+    _seed(db)
+    fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
+    freshness.set_provider(lambda system, user: {
+        "page_relevant": True, "page_is_nationality_specific": False,
+        "consistent": False,
+        "corrected_fields": {
+            "permitted_stay_days": 90,
+            "application_channel": "embassy",
+            "processing_time": "5 working days from application"},
+        "evidence": {"permitted_stay_days": "stay of up to 90 days",
+                     "application_channel": "apply at the diplomatic mission",
+                     "processing_time": "five working days"},
+        "note": "generic page"})
+    out = freshness.recheck_route(db, ROUTE)
+    assert out["outcome"] == "checked"
+    # The nationality-specific corrections were skipped...
+    assert "permitted_stay_days" not in out["changed"]
+    assert "application_channel" not in out["changed"]
+    assert set(out["generic_skipped"]) == {"application_channel",
+                                           "permitted_stay_days"}
+    # ...while a non-nationality field from the same page still applies.
+    assert out["changed"] == ["processing_time"]
+    row = db.query(KimiRouteGuidanceCache).one()
+    assert row.guidance["permitted_stay"] == "90 days"  # untouched original
+    assert row.guidance["application_channel"] == "authorised_agent"
+
+
+def test_a_nationality_specific_page_may_correct_those_fields(db):
+    _seed(db)
+    fetching.set_fetcher(lambda url, timeout_seconds=0: OFFICIAL_PAGE)
+    freshness.set_provider(lambda system, user: {
+        "page_relevant": True, "page_is_nationality_specific": True,
+        "consistent": False,
+        "corrected_fields": {"permitted_stay_days": 30},
+        "evidence": {"permitted_stay_days":
+                     "Chinese nationals: 15 or 30 days as decided"},
+        "note": "China-specific page"})
+    out = freshness.recheck_route(db, ROUTE)
+    assert out["changed"] == ["permitted_stay_days"]
+    assert db.query(KimiRouteGuidanceCache).one() \
+             .guidance["permitted_stay_days"] == 30
+
+
+def test_a_prose_channel_can_never_survive_validation(db):
+    """The recheck once wrote "diplomatic mission, accredited agency, Japan
+    Visa Application Centre, or online" INTO the channel enum, which the UI
+    renders through a fixed vocabulary. validate_answer now drops any value
+    outside that vocabulary, on every path that produces an answer."""
+    from app.visa_snapshot.kimi_primary import validate_answer
+    base = {"disposition": "VISA_REQUIRED", "visa_category": "x",
+            "permitted_stay": "x", "passport_validity": "x",
+            "required_documents": ["p"], "processing_time": "x",
+            "government_fee": {"amount": 1, "currency": "CNY"},
+            "visa_products": [{"type": "t"}]}
+    prose = "diplomatic mission, accredited agency, or online"
+    clean, _m, _c = validate_answer({**base, "application_channel": prose})
+    assert "application_channel" not in clean
+    for ok in ("authorised_agent", "embassy", "visa_center",
+               "online_portal", "on_arrival", "not_required"):
+        clean, _m, _c = validate_answer({**base, "application_channel": ok})
+        assert clean["application_channel"] == ok

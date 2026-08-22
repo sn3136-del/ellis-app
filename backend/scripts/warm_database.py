@@ -173,23 +173,39 @@ def recheck() -> int:
     stored answer compared against the page text, drift corrected (or filed
     for a person when it collides with a human-verified fact), and the
     freshness window extended only for what was actually checked."""
+    from concurrent.futures import ThreadPoolExecutor
     from sqlalchemy import select
     from app.db import SessionLocal
     from app.visa_snapshot import freshness
     from app.visa_snapshot.models import KimiRouteGuidanceCache as C
     db = SessionLocal()
-    rows = list(db.execute(select(C).order_by(C.fresh_until)).scalars())
-    counts = {}
-    for row in rows:
-        r = freshness.recheck_row(db, row)
-        out = r["outcome"]
-        counts[out] = counts.get(out, 0) + 1
-        extra = ""
-        if out == "checked":
-            extra = (" CONSISTENT" if r.get("consistent") else
-                     f" changed={r.get('changed')} disputed={r.get('disputed')}")
-        print(f"  {row.cache_key[:44]:<46} {out}{extra}", flush=True)
+    keys = [r.cache_key for r in
+            db.execute(select(C).order_by(C.fresh_until)).scalars()]
     db.close()
+
+    def _one(key):
+        s = SessionLocal()
+        try:
+            row = s.execute(select(C).where(C.cache_key == key)).scalars().first()
+            if row is None:
+                return key, {"outcome": "gone"}
+            return key, freshness.recheck_row(s, row)
+        except Exception as e:  # noqa: BLE001 — one route must not sink the sweep
+            return key, {"outcome": "error", "err": str(e)[:80]}
+        finally:
+            s.close()
+
+    counts = {}
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        for key, r in pool.map(_one, keys):
+            out = r["outcome"]
+            counts[out] = counts.get(out, 0) + 1
+            extra = ""
+            if out == "checked":
+                extra = (" CONSISTENT" if r.get("consistent") else
+                         f" changed={r.get('changed')} disputed={r.get('disputed')}"
+                         f" generic_skipped={r.get('generic_skipped')}")
+            print(f"  {key[:44]:<46} {out}{extra}", flush=True)
     print("recheck summary:", counts)
     return 0
 

@@ -96,6 +96,12 @@ ALL_FIELDS = MANDATORY_FIELDS + (
 # Trip.com's field spec asks the requirement to be reported at TWO levels: the
 # primary classification (our disposition) and a subcategory. This is that
 # subcategory vocabulary, verbatim from their spec.
+# The channel vocabulary the UI knows how to label. Anything else is dropped
+# rather than rendered raw.
+APPLICATION_CHANNELS = ("online_portal", "embassy", "visa_center",
+                        "authorised_agent", "authorized_agent",
+                        "on_arrival", "not_required")
+
 REQUIREMENT_DETAILS = (
     "unconditional_visa_free", "conditional_visa_free", "transit_visa_free",
     "evisa_on_arrival", "paper_visa_on_arrival",
@@ -363,6 +369,17 @@ def validate_answer(raw: dict) -> tuple[dict, list, list]:
         clean["visa_products"] = products
     rd = str(clean.get("requirement_detail") or "").strip().lower()
     clean["requirement_detail"] = rd if rd in REQUIREMENT_DETAILS else None
+    # application_channel is an ENUM the UI renders through a fixed
+    # vocabulary. It was never checked, so a grounded recheck was able to
+    # write a prose sentence into it ("diplomatic mission, accredited agency,
+    # Japan Visa Application Centre, or online"), which renders as raw text
+    # where a label belongs. An unrecognised value is dropped, and the honest
+    # sentence still lives in application_channel_detail.
+    ch = str(clean.get("application_channel") or "").strip().lower().replace(" ", "_")
+    if ch in APPLICATION_CHANNELS:
+        clean["application_channel"] = ch
+    elif "application_channel" in clean:
+        clean.pop("application_channel")
     # Confidence drives the display hold, so an unexpected word must not slip
     # through as an unknown label (or as "not low").
     conf = str(clean.get("confidence") or "").strip().lower()

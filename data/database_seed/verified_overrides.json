@@ -668,7 +668,7 @@
     "verified_at": "2026-08-22",
     "verified_by": "Ellis source audit",
     "source_url": "https://www.cn.emb-japan.go.jp/",
-    "note": "The single-entry tourist stay is 15 OR 30 days, decided case by case by the issuing mission, not a fixed 15. The consular fee for applications lodged on or after 1 July 2026 is CNY 715 single-entry and CNY 1,430 for double/multiple; the agency's service fee is separate.",
+    "note": "The single-entry tourist stay is 15 OR 30 days, decided case by case by the issuing mission, not a fixed 15. The consular fee for applications lodged on or after 1 July 2026 is CNY 715 single-entry and CNY 1,430 for double/multiple; the agency's service fee is separate. Channel pinned: the generic ministry page does not state the China-specific agency rule.",
     "fields": {
       "permitted_stay": "15 or 30 days for a single-entry tourist visa, decided by the issuing mission; 30 days per stay on 3-year multiple, 90 on 5-year multiple",
       "government_fee": {
@@ -725,7 +725,11 @@
         "required": true,
         "name": "Visit Japan Web",
         "submission_window": "Register before departure for immigration and customs"
-      }
+      },
+      "application_channel": "authorised_agent",
+      "application_channel_detail": "Chinese ordinary-passport holders cannot apply directly to the embassy. The application must be lodged through a travel agency accredited by the Japanese embassy or consulate-general, which charges its own service fee on top of the consular fee.",
+      "permitted_stay_days": 30,
+      "requirement_detail": "paper_visa"
     }
   },
   {

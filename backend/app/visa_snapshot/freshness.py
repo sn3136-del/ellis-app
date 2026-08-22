@@ -49,6 +49,15 @@ from .models import DatabaseIssueReport, KimiRouteGuidanceCache
 # deterministic gate below).
 from .verified_overrides import OVERRIDABLE
 
+# Fields whose correct value depends on WHO is travelling. A page that does
+# not name this nationality cannot correct these, however confidently it
+# describes the destination's general rules.
+NATIONALITY_SPECIFIC = frozenset({
+    "disposition", "requirement_detail", "visa_category", "permitted_stay",
+    "permitted_stay_days", "application_channel", "application_channel_detail",
+    "government_fee", "visa_products",
+})
+
 FETCH_TIMEOUT_SECONDS = 20.0
 CALL_TIMEOUT_SECONDS = 45.0
 MAX_PAGE_CHARS = 28_000
@@ -56,8 +65,23 @@ MAX_SOURCES = 2
 
 _SYSTEM = """You are checking a stored visa-requirements answer against the
 OFFICIAL PAGE TEXT provided. Judge ONLY from the page text — never from your
-own knowledge. Reply STRICT JSON:
+own knowledge.
+
+CRITICAL — NATIONALITY. Most government pages describe the destination's
+rules for the WORLD, or for a different nationality than the one in the
+route. Those pages must NOT be used to correct a fact that is specific to
+this applicant's nationality. A generic page saying "you may apply at the
+embassy, an accredited agency or a visa centre" does NOT contradict a stored
+answer saying THIS nationality must use an accredited agency, and a generic
+"stay up to 90 days" does NOT contradict a stored nationality-specific 15 or
+30 days. Correct such a field ONLY when the page names this nationality (or
+the applicant's country) and states the rule for them. When the page is
+generic, treat those fields as unaddressed and leave them alone.
+
+Reply STRICT JSON:
 {"page_relevant": true|false  (does this page actually cover this route/topic?),
+ "page_is_nationality_specific": true|false  (does the page state rules FOR
+    this applicant's nationality, rather than general/worldwide rules?),
  "consistent": true|false     (does the page contradict any stored field?),
  "corrected_fields": {field: new value, ...}  (ONLY fields the page text
     contradicts, with the value the page states; use the stored answer's own
@@ -67,7 +91,9 @@ own knowledge. Reply STRICT JSON:
  "note": "one short sentence"}
 Rules: if the page does not mention a field, it is NOT a contradiction — leave
 it alone. Never invent a fee, date or URL the page does not state. If the page
-is irrelevant or unreadable, say page_relevant false and change nothing."""
+is irrelevant or unreadable, say page_relevant false and change nothing.
+When in doubt about whether the page speaks for THIS nationality, say
+page_is_nationality_specific false and correct nothing nationality-specific."""
 
 _PROVIDER = None
 
@@ -146,6 +172,7 @@ def recheck_row(db, row, *, today: str | None = None) -> dict:
     raw = None
     fetched_any = False
     tried = []
+    generic_skipped: list = []
     for url in sources:
         fr = fetch(url, timeout_seconds=FETCH_TIMEOUT_SECONDS)
         if not (fr.ok and fr.content_text and not fr.challenge
@@ -193,6 +220,18 @@ def recheck_row(db, row, *, today: str | None = None) -> dict:
     evidence = raw.get("evidence") or {}
     proposed = {k: v for k, v in proposed.items()
                 if k in OVERRIDABLE and str(evidence.get(k) or "").strip()}
+    # A page that does not speak for THIS nationality may not touch a
+    # nationality-specific field. This is the Japan failure exactly: the
+    # ministry's worldwide page lists every channel and a 90-day stay, which
+    # is true in general and wrong for a Chinese applicant. Enforced here and
+    # not left to the prompt, because the prompt is a request and this is a
+    # rule.
+    if not raw.get("page_is_nationality_specific"):
+        blocked = [k for k in proposed if k in NATIONALITY_SPECIFIC]
+        for k in blocked:
+            proposed.pop(k)
+        if blocked:
+            generic_skipped.extend(sorted(blocked))
     protected = set((override or {}).get("fields") or {})
     disputed = {}
     applied = {}
@@ -231,6 +270,7 @@ def recheck_row(db, row, *, today: str | None = None) -> dict:
         "source_url": page.final_url, "content_hash": page.content_hash,
         "consistent": consistent,
         "changed_fields": sorted(applied), "disputed_fields": sorted(disputed),
+        "generic_page_skipped": sorted(set(generic_skipped)),
         "note": str(raw.get("note") or "")[:200],
     })
     # A checked answer — confirmed or corrected — is fresh again. A disputed
@@ -241,6 +281,7 @@ def recheck_row(db, row, *, today: str | None = None) -> dict:
     return {"outcome": "checked", "route_key": row.cache_key,
             "consistent": consistent,
             "changed": sorted(applied), "disputed": sorted(disputed),
+            "generic_skipped": sorted(set(generic_skipped)),
             "source_url": page.final_url}
 
 
