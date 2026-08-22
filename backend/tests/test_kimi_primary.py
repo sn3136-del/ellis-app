@@ -678,3 +678,33 @@ def test_a_verified_visa_free_verdict_clears_application_leftovers(tmp_path, mon
     # and what a visa-free traveller still needs is untouched
     assert merged["required_documents"] == ["passport"]
     vo.reload()
+
+
+def test_shipped_overrides_are_internally_consistent():
+    """A guard for the class of mistake that shipped an eTA at the CAD 100
+    visitor-visa price: when an override states BOTH a headline fee and the
+    products' own fees, the headline must be one of the product prices —
+    otherwise the tile and the table contradict each other on the same page.
+    Also checks every shipped override still meets the module's own rules."""
+    import json
+    import pathlib
+    from app.visa_snapshot import verified_overrides as vo
+    from app.visa_snapshot.authority import hostname, is_government_host
+    rows = json.loads(pathlib.Path(vo.OVERRIDES).read_text())
+    assert rows, "the shipped overrides must not be empty"
+    for r in rows:
+        route = f"{r['route']['nationality']}->{r['route']['destination']}"
+        assert is_government_host(hostname(r["source_url"])), route
+        assert r.get("verified_at"), route
+        f = r["fields"]
+        head = (f.get("government_fee") or {}).get("amount")
+        prices = [(p.get("fee") or {}).get("amount")
+                  for p in (f.get("visa_products") or [])]
+        prices = [p for p in prices if p is not None]
+        if head is not None and prices:
+            assert head in prices, (
+                f"{route}: headline fee {head} is not any product price "
+                f"{prices} — the tile would contradict the table")
+        # A verified visa-free verdict must not also quote a positive fee.
+        if str(f.get("disposition") or "") == "VISA_EXEMPT" and head:
+            raise AssertionError(f"{route}: visa-free but a fee of {head}")

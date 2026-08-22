@@ -107,7 +107,7 @@
     "verified_at": "2026-08-22",
     "verified_by": "Ellis source audit",
     "source_url": "https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/entry-requirements-country.html",
-    "note": "Holders of an HKSAR passport are eTA-eligible, not visa nationals. The model reported a temporary resident visa requirement.",
+    "note": "Holders of an HKSAR passport are eTA-eligible, not visa nationals. The model reported a temporary resident visa requirement. The headline fee was the visitor-visa figure; an eTA is CAD 7.",
     "fields": {
       "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
       "requirement_detail": "eta_electronic_authorization",
@@ -129,7 +129,11 @@
           },
           "notes": "Air travel only. Entering by land or sea does not require an eTA."
         }
-      ]
+      ],
+      "government_fee": {
+        "amount": 7,
+        "currency": "CAD"
+      }
     }
   },
   {
@@ -716,7 +720,12 @@
           },
           "notes": "Requires higher income or asset proof; tax certificates are often requested."
         }
-      ]
+      ],
+      "arrival_card": {
+        "required": true,
+        "name": "Visit Japan Web",
+        "submission_window": "Register before departure for immigration and customs"
+      }
     }
   },
   {
