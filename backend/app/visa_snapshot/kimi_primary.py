@@ -446,7 +446,7 @@ def derive_workflow_plan(g: dict) -> list[dict]:
 def cache_key(route: dict) -> str:
     arrival = str(route.get("arrival_date") or route.get("policy_period") or "")
     policy_month = arrival[:7] or "unknown"          # YYYY-MM: the policy date bucket
-    return "|".join((
+    parts = [
         str(route.get("passport_nationality", "")).upper(),
         str(route.get("lawful_country_of_residence", "")).upper(),
         str(route.get("destination_country", "")).upper(),
@@ -454,7 +454,21 @@ def cache_key(route: dict) -> str:
         str(route.get("consular_jurisdiction") or "default").lower(),
         policy_month,
         CACHE_VERSION,
-    ))
+    ]
+    # A stopover changes the answer (it can add a transit-visa requirement), so
+    # it must change the key — otherwise a transit query is served the cached
+    # non-transit answer and the transit question is never actually asked. The
+    # suffix is APPENDED only when transit exists, so plain routes keep their
+    # existing key and the shipped warm cache stays valid.
+    transit = sorted({str(c).upper() for c in
+                      (route.get("transit_countries") or []) if c})
+    if transit:
+        parts.append("via:" + ",".join(transit))
+    # Document type likewise: a diplomatic passport is a different answer.
+    doc = str(route.get("travel_document_type") or "ordinary_passport").lower()
+    if doc and doc != "ordinary_passport":
+        parts.append("doc:" + doc)
+    return "|".join(parts)
 
 
 def _now() -> datetime:

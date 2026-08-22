@@ -76,12 +76,22 @@ def warm(workers: int = 4) -> int:
 
 
 def export() -> int:
+    """Write the shipped seed.
+
+    Only rows for the CURRENT cache version are exported. A row written under
+    an older answer schema can never be served again (the version is part of
+    the key), so shipping it would be dead weight in the clone Trip.com
+    downloads and would misrepresent how much is actually warm."""
     from sqlalchemy import select
     from app.db import SessionLocal
+    from app.visa_snapshot.kimi_primary import CACHE_VERSION
     from app.visa_snapshot.models import KimiRouteGuidanceCache as C
     db = SessionLocal()
-    rows = []
+    rows, skipped = [], 0
     for r in db.execute(select(C)).scalars():
+        if f"|{CACHE_VERSION}" not in (r.cache_key or ""):
+            skipped += 1
+            continue
         rows.append({
             "cache_key": r.cache_key, "route": r.route, "status": r.status,
             "guidance": r.guidance, "missing_fields": r.missing_fields,
@@ -93,7 +103,9 @@ def export() -> int:
     db.close()
     SEED.parent.mkdir(parents=True, exist_ok=True)
     SEED.write_text(json.dumps(rows, indent=1, ensure_ascii=False))
-    print(f"exported {len(rows)} cached decisions -> {SEED}")
+    print(f"exported {len(rows)} cached decisions ({CACHE_VERSION}) -> {SEED}")
+    if skipped:
+        print(f"skipped {skipped} rows from older answer schemas")
     from app import i18n
     i18n.flush_cache()
     if i18n._cache_path().is_file():

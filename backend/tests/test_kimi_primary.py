@@ -166,10 +166,16 @@ def test_cached_identical_route_loads_immediately(db):
         dict(ROUTE, arrival_date="2026-09-25"))
     assert kimi_primary.cache_key(ROUTE) != kimi_primary.cache_key(
         dict(ROUTE, destination_country="KOR"))
-    # The single-pass schema version is part of the key, so two-pass-era rows
-    # (v2) can never serve again.
-    assert kimi_primary.CACHE_VERSION == "v3"
-    assert kimi_primary.cache_key(ROUTE).endswith("|v3")
+    # The schema version is part of the key, so rows written under an older
+    # answer schema can never serve again. Bumped to v5 when visa_products,
+    # the honest channel, the requirement subcategory and the transit answer
+    # joined the contract (Trip.com feedback, 2026-08).
+    assert kimi_primary.CACHE_VERSION == "v5"
+    assert kimi_primary.CACHE_VERSION in kimi_primary.cache_key(ROUTE)
+    # A plain route (ordinary passport, no stopover) ends at the version:
+    # the transit / document suffixes are appended only when they apply, so
+    # the shipped warm cache keeps its keys.
+    assert kimi_primary.cache_key(ROUTE).endswith("|v5")
 
 
 def test_stale_cache_returns_instantly_flagged_for_refresh(db):
@@ -230,9 +236,12 @@ def test_slow_malformed_analysis_exhausts_budget_before_retry(db, monkeypatch):
         kimi_primary.get_route_guidance(db, ROUTE)
 
 
-def test_default_deadline_is_sixty_seconds():
-    assert kimi_primary.DEFAULT_DEADLINE_SECONDS == 60
-    assert kimi_primary._deadline_seconds() == 60
+def test_default_deadline_is_ninety_seconds():
+    # 90s, raised from 60s: the richer answer (every visa product, each with
+    # its own stay and fee) legitimately takes the model longer, and a cold
+    # route timing out is worse for the reader than waiting.
+    assert kimi_primary.DEFAULT_DEADLINE_SECONDS == 90
+    assert kimi_primary._deadline_seconds() == 90
 
 
 # ---- honest failure ----------------------------------------------------------
@@ -438,3 +447,56 @@ def test_timeout_maps_to_504_with_retry_message(client, db, monkeypatch):
     g = client.post(f"/intake/{iid}/guidance", headers=H)
     assert g.status_code == 504
     assert g.json()["detail"]["reason"] == kimi_primary.TIMEOUT_MESSAGE
+
+
+# --- cache-key separation (Trip.com Database: transit + document type) -------
+
+def test_transit_gets_its_own_cache_key_but_plain_routes_are_unchanged():
+    """A stopover can add a transit-visa requirement, so it MUST change the
+    key. If it did not, a transit query would be served the cached
+    non-transit answer and the transit question would never be asked.
+    Plain routes must keep their existing key so the shipped warm cache
+    stays valid."""
+    from app.visa_snapshot.kimi_primary import cache_key
+    base = {"passport_nationality": "CHN",
+            "lawful_country_of_residence": "CHN",
+            "destination_country": "JPN", "travel_purpose": "tourism"}
+    assert cache_key({**base, "transit_countries": ["SGP"]}) != cache_key(base)
+    # Order and duplicates must not produce a different key.
+    assert (cache_key({**base, "transit_countries": ["SGP", "THA"]})
+            == cache_key({**base, "transit_countries": ["THA", "SGP", "SGP"]}))
+    # An empty transit list is the plain route.
+    assert cache_key({**base, "transit_countries": []}) == cache_key(base)
+
+
+def test_non_ordinary_travel_document_gets_its_own_cache_key():
+    """The answer page lets a reader switch to a diplomatic/official
+    passport. Those are genuinely different answers, so they must not be
+    served the ordinary-passport cache entry."""
+    from app.visa_snapshot.kimi_primary import cache_key
+    base = {"passport_nationality": "CHN",
+            "lawful_country_of_residence": "CHN",
+            "destination_country": "JPN", "travel_purpose": "tourism"}
+    assert (cache_key({**base, "travel_document_type": "ordinary_passport"})
+            == cache_key(base))
+    for doc in ("diplomatic_passport", "service_passport", "laissez_passer"):
+        assert cache_key({**base, "travel_document_type": doc}) != cache_key(base)
+
+
+def test_requirement_detail_vocabulary_matches_the_field_spec():
+    """Trip.com's field spec fixes the subcategory vocabulary; the UI maps
+    each one to a label, so the two lists must not drift apart."""
+    from app.visa_snapshot.kimi_primary import REQUIREMENT_DETAILS
+    assert set(REQUIREMENT_DETAILS) == {
+        "unconditional_visa_free", "conditional_visa_free", "transit_visa_free",
+        "evisa_on_arrival", "paper_visa_on_arrival",
+        "evisa", "paper_visa", "eta_electronic_authorization"}
+
+
+def test_new_answer_fields_survive_validation():
+    """visa_products / channel detail / source / subcategory / transit are
+    whitelisted, so a model answer carrying them is not silently stripped."""
+    from app.visa_snapshot.kimi_primary import ALL_FIELDS
+    for f in ("visa_products", "application_channel_detail", "source_url",
+              "requirement_detail", "transit_requirement"):
+        assert f in ALL_FIELDS, f
