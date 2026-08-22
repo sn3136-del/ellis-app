@@ -767,7 +767,11 @@ export default function TravelDatabase({ onBack }) {
                   value={T(humanizeEnum(g.application_channel))}
                   href={g.official_portal_url || undefined} />
           </div>
-          {asText(g.application_channel_detail) && (
+          {/* The channel sentence under the tiles is hidden by owner decision
+              (theming) for every route: the "Where to apply" tile carries
+              the honest channel label itself. The field still ships in the
+              answer and still drives the channel contradiction check. */}
+          {false && asText(g.application_channel_detail) && (
             <div style={{ fontSize: 13, color: NAVY, marginTop: 12,
                           padding: '12px 16px', borderRadius: 12,
                           background: 'var(--bg-soft, #f5f7fa)' }}>
