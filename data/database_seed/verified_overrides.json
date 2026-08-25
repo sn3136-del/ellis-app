@@ -142,21 +142,21 @@
       "destination": "GBR",
       "travel_purpose": "tourism"
     },
-    "verified_at": "2026-08-22",
+    "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
-    "source_url": "https://www.gov.uk/guidance/immigration-rules/immigration-rules-appendix-visitor-visa-national-list",
-    "note": "Appendix Visitor: Visa national list exempts holders of an HKSAR passport, so no visit visa is needed. The model reported a Standard Visitor visa requirement.",
+    "source_url": "https://www.gov.uk/guidance/immigration-rules/immigration-rules-appendix-eta-national-list",
+    "note": "UK Immigration Rules, Appendix ETA National List: Hong Kong SAR is on the ETA list for travel on or after 8 January 2025. The earlier hedged wording is replaced; the traveldoc cross-check caught it.",
     "fields": {
-      "disposition": "VISA_EXEMPT",
-      "requirement_detail": "conditional_visa_free",
-      "visa_category": "Non-visa national visitor",
+      "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+      "requirement_detail": "eta_electronic_authorization",
+      "visa_category": "UK Electronic Travel Authorisation (ETA)",
       "permitted_stay": "Up to 6 months per visit",
       "permitted_stay_days": 180,
-      "application_channel": "not_required",
-      "application_channel_detail": "No visit visa is applied for. A UK Electronic Travel Authorisation may be required before travel, so check the current ETA rollout for HKSAR passport holders.",
+      "application_channel": "online_portal",
+      "application_channel_detail": "A UK ETA is mandatory for HKSAR ordinary passport holders before travel, in force for travel on or after 8 January 2025. Apply on GOV.UK or the official app; GBP 20, valid 2 years or until the passport expires.",
       "government_fee": {
-        "amount": 0,
-        "currency": null
+        "amount": 20,
+        "currency": "GBP"
       },
       "confidence": "medium",
       "visa_products": [
@@ -171,7 +171,8 @@
           },
           "notes": "No visit visa is applied for. Check whether a UK Electronic Travel Authorisation applies before travel."
         }
-      ]
+      ],
+      "official_portal_url": "https://www.gov.uk/eta"
     }
   },
   {
@@ -606,45 +607,45 @@
       "destination": "IND",
       "travel_purpose": "tourism"
     },
-    "verified_at": "2026-08-22",
+    "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
     "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
-    "note": "The model reported the e-Visa VALIDITY periods (30 days, 1 year, 5 years) as if they were the permitted stay. They are different things. e-Tourist fee schedule added: USD 10 or 25 for the 30-day product depending on season, with the longer products priced separately.",
+    "note": "The model reported the e-Visa VALIDITY periods (30 days, 1 year, 5 years) as if they were the permitted stay. They are different things. e-Tourist fee schedule added: USD 10 or 25 for the 30-day product depending on season, with the longer products priced separately. Stay corrected 2026-08-25: for nationals of the USA (with UK, Canada, Japan) continuous stay per visit on the 1-year and 5-year e-Tourist visas is up to 180 days, per the High Commission of India e-Visa FAQ; the traveldoc cross-check caught it.",
     "fields": {
-      "permitted_stay": "Up to 90 days per visit on the 1-year and 5-year e-Tourist visas; the 30-day product allows a stay within its 30-day validity",
+      "permitted_stay": "Up to 180 days per visit for US nationals on the 1-year and 5-year e-Tourist visas (total stay capped at 180 days per calendar year); the 30-day e-Tourist visa is limited to its 30-day validity",
       "visa_products": [
         {
-          "type": "30-day e-Tourist Visa",
-          "entry": "double",
-          "validity": "30 days from first entry",
+          "type": "e-Tourist Visa (30 days)",
+          "entry": "single",
+          "validity": "30 days from first arrival",
           "max_stay_days": 30,
           "fee": {
-            "amount": null,
-            "currency": null
+            "amount": 25,
+            "currency": "USD"
           },
-          "notes": "Validity and stay coincide on this product."
+          "notes": "Fee varies by season; double entry."
         },
         {
-          "type": "1-year e-Tourist Visa",
+          "type": "e-Tourist Visa (1 year)",
           "entry": "multiple",
           "validity": "1 year",
-          "max_stay_days": 90,
+          "max_stay_days": 180,
           "fee": {
-            "amount": null,
-            "currency": null
+            "amount": 40,
+            "currency": "USD"
           },
-          "notes": "Validity is 1 year; each stay is limited separately."
+          "notes": "US nationals: up to 180 days continuous stay per visit; total 180 days per calendar year."
         },
         {
-          "type": "5-year e-Tourist Visa",
+          "type": "e-Tourist Visa (5 years)",
           "entry": "multiple",
           "validity": "5 years",
-          "max_stay_days": 90,
+          "max_stay_days": 180,
           "fee": {
-            "amount": null,
-            "currency": null
+            "amount": 80,
+            "currency": "USD"
           },
-          "notes": "Validity is 5 years; each stay is limited separately."
+          "notes": "US nationals: up to 180 days continuous stay per visit; total 180 days per calendar year."
         }
       ],
       "government_fee": {
@@ -656,7 +657,8 @@
         "required": false,
         "name": null,
         "submission_window": null
-      }
+      },
+      "permitted_stay_days": 180
     }
   },
   {
