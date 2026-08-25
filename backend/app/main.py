@@ -504,6 +504,37 @@ def _after_cold_answer(route: dict, out: dict) -> None:
                       daemon=True).start()
 
 
+def _answer_anyway(db, route: dict, exc) -> dict:
+    """The Database always answers. When the exact variant cannot be decided
+    right now — a timeout, a provider outage — serve the closest real answer
+    we hold for the SAME nationality and destination, marked as approximate,
+    and keep working on the exact one in the background. Only when we hold
+    nothing at all for that pair does the honest retry message surface."""
+    from .visa_snapshot import kimi_primary
+    near = None
+    try:
+        near = kimi_primary.nearest_cached_answer(db, route)
+    except Exception:  # noqa: BLE001 — a failing fallback must not mask the answer
+        near = None
+    if near is None:
+        detail = {"status": getattr(exc, "status", None)
+                  or kimi_primary.STATUS_TIMEOUT,
+                  "reason": str(getattr(exc, "envelope", {}).get("user_message", exc)
+                               if hasattr(exc, "envelope") else exc)}
+        raise HTTPException(503 if not isinstance(exc, kimi_primary.GuidanceTimeout)
+                            else 504, detail=detail)
+    near["approximate"] = True
+    near["approximate_reason"] = (
+        "This route's exact combination is still being worked out, so the "
+        "answer shown is for the same passport and destination.")
+    # Keep trying for the exact answer so the next reader gets it.
+    try:
+        _ground_on_access(route, near)
+    except Exception:  # noqa: BLE001
+        pass
+    return near
+
+
 class DatabaseIssueIn(BaseModel):
     """A reader flagging a field that looks wrong."""
     nationality: str = ""
@@ -671,15 +702,9 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
     try:
         out = kimi_primary.get_route_guidance(db, route, stage="core",
                                               after=_after_cold_answer)
-    except kimi_primary.GuidanceTimeout:
-        raise HTTPException(504, detail={"status": kimi_primary.STATUS_TIMEOUT,
-                                         "reason": kimi_primary.TIMEOUT_MESSAGE})
-    except kimi_primary.GuidanceUnavailable as e:
-        raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
-                                         "reason": str(e)})
-    except kimi_primary.GuidanceProviderError as e:
-        raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
-                                         "reason": e.envelope.get("user_message")})
+    except (kimi_primary.GuidanceTimeout, kimi_primary.GuidanceUnavailable,
+            kimi_primary.GuidanceProviderError) as e:
+        out = _answer_anyway(db, route, e)
     if out.get("cached"):
         _ground_on_access(route, out)
     if out.get("held"):
@@ -757,16 +782,9 @@ def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
         # polls), consistent with the verdict. Cached routes are instant.
         out = kimi_primary.get_route_guidance(db, route, stage="core",
                                               after=_after_cold_answer)
-    except kimi_primary.GuidanceTimeout:
-        raise HTTPException(504, detail={"status": kimi_primary.STATUS_TIMEOUT,
-                                         "reason": kimi_primary.TIMEOUT_MESSAGE})
-    except kimi_primary.GuidanceUnavailable as e:
-        raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
-                                         "reason": str(e)})
-    except kimi_primary.GuidanceProviderError as e:
-        raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
-                                         "reason": e.envelope.get("user_message"),
-                                         "category": e.envelope.get("category")})
+    except (kimi_primary.GuidanceTimeout, kimi_primary.GuidanceUnavailable,
+            kimi_primary.GuidanceProviderError) as e:
+        out = _answer_anyway(db, route, e)
     if out.get("cached"):
         _ground_on_access(route, out)
     # The hold is enforced HERE, not in the JSX: a held answer's claims never

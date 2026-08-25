@@ -166,3 +166,38 @@ def test_should_reground_asks_for_a_fresh_page_check_when_due():
     fresh = datetime.datetime.now(datetime.timezone.utc).isoformat()
     assert should_reground(dict(g, grounded_check={"at": fresh})) is False
     assert should_reground({"guidance": None}) is False           # nothing to check
+
+
+def test_the_database_answers_even_when_the_engine_fails(client):
+    """The owner's rule: Ellis always answers. A timeout or provider outage on
+    one variant must not leave a reader with nothing — the closest real answer
+    for the SAME passport and destination is served, marked approximate."""
+    _provide(ANSWER)
+    first = client.post("/database/lookup", headers=READER,
+                        json={"nationality": "CHN", "destination": "KHM"})
+    assert first.status_code == 200
+
+    def boom(system, user):
+        raise kimi_primary.GuidanceTimeout()
+    kimi_primary.set_provider(boom)
+    r = client.post("/database/lookup", headers=READER,
+                    json={"nationality": "CHN", "destination": "KHM",
+                          "travel_purpose": "business"})
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["approximate"] is True
+    assert body["guidance"]["disposition"] == "VISA_REQUIRED"
+    assert body["approximate_reason"]
+    assert body["approximate_for"]["asked"]["travel_purpose"] == "business"
+
+
+def test_a_route_we_hold_nothing_for_still_fails_honestly(client):
+    """The fallback never crosses to a different route: with nothing at all
+    for the pair, the honest retry message surfaces rather than another
+    country's answer."""
+    def boom(system, user):
+        raise kimi_primary.GuidanceTimeout()
+    kimi_primary.set_provider(boom)
+    r = client.post("/database/lookup", headers=READER,
+                    json={"nationality": "ISL", "destination": "TUV"})
+    assert r.status_code == 504

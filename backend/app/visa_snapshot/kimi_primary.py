@@ -1082,6 +1082,47 @@ def _fill_detail_async(key: str, route: dict, user: str, *, after=None) -> None:
     threading.Thread(target=_work, name="ellis-detail-stage", daemon=True).start()
 
 
+def nearest_cached_answer(db, route: dict) -> dict | None:
+    """The closest real answer we already hold for this nationality and
+    destination, when the exact variant cannot be decided right now.
+
+    The owner's rule: the Database always answers. A timeout or a provider
+    outage must not leave a reader with nothing, so an answer for the SAME
+    nationality and destination — differing only in purpose, document type,
+    travel month or stopover — is served instead, marked as the approximation
+    it is. It never crosses to another route, and it never invents anything:
+    if we hold nothing for this pair, this returns None."""
+    nat = str(route.get("passport_nationality") or "").upper()
+    dest = str(route.get("destination_country") or "").upper()
+    if not nat or not dest:
+        return None
+    want_purpose = str(route.get("travel_purpose") or "tourism").lower()
+    rows = db.execute(select(KimiRouteGuidanceCache).where(
+        KimiRouteGuidanceCache.cache_key.like(f"{nat}|%|{dest}|%"))).scalars().all()
+    rows = [r for r in rows if r.guidance and f"|{CACHE_VERSION}" in (r.cache_key or "")]
+    if not rows:
+        return None
+    def rank(r):
+        parts = r.cache_key.split("|")
+        same_purpose = len(parts) > 3 and parts[3] == want_purpose
+        plain_doc = "doc:" not in r.cache_key
+        no_transit = "via:" not in r.cache_key
+        complete = r.status == STATUS_PRIMARY
+        return (not complete, not same_purpose, not plain_doc, not no_transit)
+    best = sorted(rows, key=rank)[0]
+    out = _result(best.status, best.guidance, cached=True, stale=_is_stale(best),
+                  missing=best.missing_fields, contradictions=best.contradictions,
+                  model=best.model,
+                  advisories=deterministic_advisories(route, best.guidance or {}))
+    out["approximate_for"] = {
+        "asked": {"travel_purpose": want_purpose,
+                  "travel_document_type": route.get("travel_document_type"),
+                  "arrival_date": route.get("arrival_date")},
+        "served": best.route or {},
+    }
+    return apply_portal_fallback(apply_verified_overrides(out, route), route)
+
+
 def get_route_guidance(db, route: dict, *, force_refresh: bool = False,
                        stage: str = "full", after=None) -> dict:
     """The authoritative single-pass route decision under one hard deadline.

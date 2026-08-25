@@ -60,6 +60,46 @@ const CHANNEL_WORDS = {
   on_arrival: 'On arrival',
   mail: 'By mail',
 }
+// The link label should name the site it actually opens, not a generic
+// category. Derived from the URL's own host so it can never drift from where
+// the link goes: "Apply on ImmiAccount", "Apply on france-visas.gouv.fr".
+const SITE_NAMES = {
+  'ceac.state.gov': 'CEAC (DS-160)',
+  'travel.state.gov': 'travel.state.gov',
+  'immi.homeaffairs.gov.au': 'Home Affairs',
+  'online.immi.gov.au': 'ImmiAccount',
+  'france-visas.gouv.fr': 'France-Visas',
+  'gov.uk': 'GOV.UK',
+  'www.gov.uk': 'GOV.UK',
+  'evisa.imigrasi.go.id': 'Indonesian e-Visa',
+  'www.visa.go.kr': 'Korea Visa Portal',
+  'www.k-eta.go.kr': 'K-ETA',
+  'evisa.kdmid.ru': 'Russian e-Visa',
+  'visawebapp.boca.gov.tw': 'BOCA online form',
+  'www.ica.gov.sg': 'ICA Singapore',
+  'www.immd.gov.hk': 'Hong Kong ImmD',
+  'www.mofa.go.jp': 'MOFA Japan',
+  'evisa.gov.vn': 'Vietnam e-Visa',
+  'www.migracija.lt': 'MIGRIS Lithuania',
+  'evisa.mn': 'Mongolia e-Visa',
+  'indianvisaonline.gov.in': 'Indian Visa Online',
+  'visa2egypt.gov.eg': 'Egypt e-Visa',
+  'visa.gov.bd': 'Bangladesh Visa',
+  'www.thaievisa.go.th': 'Thai e-Visa',
+  'visa.mofa.gov.sa': 'Saudi MOFA',
+  'www.exteriores.gob.es': 'Spain MFA',
+  'cs.mfa.gov.cn': 'China MFA consular',
+}
+function siteLabel(url) {
+  if (!url) return null
+  let host
+  try { host = new URL(url).hostname } catch { return null }
+  if (SITE_NAMES[host]) return SITE_NAMES[host]
+  const bare = host.replace(/^www\./, '')
+  // A government host reads best as its own name: "evisa.gov.gh".
+  return bare.length <= 34 ? bare : bare.split('.').slice(-3).join('.')
+}
+
 const humanizeEnum = (v) => {
   const s = String(v || '').trim()
   if (!s) return null
@@ -267,7 +307,7 @@ function Bullets({ items, mark = '•', markColor = BLUE }) {
   )
 }
 
-function Tile({ label, value, href }) {
+function Tile({ label, value, href, sub = null }) {
   const v = asText(value)
   if (!v) return null
   const inner = (
@@ -279,6 +319,12 @@ function Tile({ label, value, href }) {
                     display: 'flex', alignItems: 'center', gap: 6 }}>
         {humanize(v)}{href ? <span aria-hidden>↗</span> : null}
       </div>
+      {/* What kind of channel it is, under the site's own name. */}
+      {sub && asText(sub) && (
+        <div style={{ fontSize: 12, color: GRAY, marginTop: 3 }}>
+          {humanize(asText(sub))}
+        </div>
+      )}
     </>
   )
   const style = { borderRadius: 18, padding: '18px 20px', textAlign: 'left',
@@ -845,7 +891,12 @@ export default function TravelDatabase({ onBack }) {
                              ? t('db.feeSeeProducts') : null)} />
             <Tile label={t('db.processing')} value={T(asText(g.processing_time))} />
             <Tile label={t('db.channel')}
-                  value={T(humanizeEnum(g.application_channel))}
+                  value={g.official_portal_url
+                    ? (siteLabel(g.official_portal_url)
+                       || T(humanizeEnum(g.application_channel)))
+                    : T(humanizeEnum(g.application_channel))}
+                  sub={g.official_portal_url
+                    ? T(humanizeEnum(g.application_channel)) : null}
                   href={g.official_portal_url || undefined} />
           </div>
           {/* The channel sentence under the tiles is hidden by owner decision
