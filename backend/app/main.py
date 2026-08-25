@@ -606,7 +606,8 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
     out["understood"] = True
     out["route"] = {"nationality": parsed["nationality"],
                     "destination": parsed["destination"],
-                    "travel_purpose": parsed["travel_purpose"]}
+                    "travel_purpose": parsed["travel_purpose"],
+                    "travel_document_type": parsed["travel_document_type"]}
     audit.record(db, org_id=p.org_id, application_id="database",
                  action="database_ask",
                  detail={"nationality": parsed["nationality"],

@@ -200,6 +200,10 @@ uncertainty: array of {"field":..., "reason":...} for anything not certain
 confidence: high | medium | low
 Rules: never guess a URL or a fee; unknown means null + uncertainty entry;
 missing information is NEVER visa-exempt; answer for THIS nationality only;
+answer for THIS travel document type: a diplomatic or service/official
+passport often has its own bilateral exemption agreement that ordinary
+passports do not — when one is stated, answer from those agreements, never
+from the ordinary-passport rule;
 list ALL visa products for the purpose, each with its OWN stay and fee (never a
 single generic "90 days" when products differ); name the real application
 channel honestly; when the destination offers facilitation policies relevant to

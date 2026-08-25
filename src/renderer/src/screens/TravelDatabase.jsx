@@ -399,8 +399,12 @@ export default function TravelDatabase({ onBack }) {
         if (out.route) {
           setNat(out.route.nationality); setDest(out.route.destination)
           if (out.route.travel_purpose) setPurpose(out.route.travel_purpose)
+          // "with a diplomatic passport" must SHOW as a diplomatic passport:
+          // the answer was computed for it, so the control follows the words.
+          const askedDoc = out.route.travel_document_type || doc
+          if (out.route.travel_document_type) setDoc(out.route.travel_document_type)
           writeHash({ nat: out.route.nationality, dest: out.route.destination,
-                      purpose: out.route.travel_purpose, doc })
+                      purpose: out.route.travel_purpose, doc: askedDoc })
         }
         setResult(out)
       }

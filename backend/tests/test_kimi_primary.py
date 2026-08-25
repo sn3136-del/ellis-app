@@ -867,3 +867,12 @@ def test_a_non_government_link_never_survives_validation():
         "source_url": "https://www.mofa.go.jp/"})
     assert clean["official_portal_url"] == "https://www.evisa.gov.kr/"
     assert clean["source_url"] == "https://www.mofa.go.jp/"
+
+
+def test_diplomatic_passport_phrasing_is_read_with_the_document_type():
+    kimi_primary.set_provider(lambda system, user: (_ for _ in ()).throw(
+        AssertionError("plain question must not need the model")))
+    r = kimi_primary.parse_question(
+        "i have a diplomatic passport and i wanna go to angola from china")
+    assert (r["nationality"], r["destination"]) == ("CHN", "AGO")
+    assert r["travel_document_type"] == "diplomatic_passport"
