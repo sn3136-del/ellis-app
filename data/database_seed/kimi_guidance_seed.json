@@ -3658,19 +3658,19 @@
    "passes": 1,
    "label": "Kimi route decision",
    "grounded_check": {
-    "at": "2026-08-22T06:47:21.610409+00:00",
+    "at": "2026-08-25T22:14:44.883700+00:00",
     "outcome": "checked",
-    "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
-    "content_hash": "036ae0d49757e15e9f376ded13f7643aaa5c73af8b34319fa6d5eca23a033d74",
+    "source_url": "https://eservices.ica.gov.sg/sgarrivalcard/",
+    "content_hash": "aff99955eb4ba06d4144833244376abc3e5fb1682dd2d952c19fe1c3b1d45bb0",
     "consistent": true,
     "changed_fields": [],
     "disputed_fields": [],
     "generic_page_skipped": [],
-    "note": "The page lists countries requiring visas and USA is not included; no stored fields are contradicted."
+    "note": "The page confirms the SG Arrival Card requirement for all travellers but does not address nationality-specific visa-free stay length or submission window."
    }
   },
   "generated_at": "2026-08-22T02:21:20.568660",
-  "fresh_until": "2026-09-05T06:48:17.880269"
+  "fresh_until": "2026-09-08T22:15:03.657302"
  },
  {
   "cache_key": "USA|USA|JPN|tourism|default|unknown|v6",
@@ -21826,182 +21826,6 @@
   "fresh_until": "2026-09-05T20:17:07.287080"
  },
  {
-  "cache_key": "DEU|DEU|IDN|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "DEU",
-   "lawful_country_of_residence": "DEU",
-   "destination_country": "IDN",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "CONDITIONAL",
-   "visa_category": "tourist_visa",
-   "permitted_stay": "30 days",
-   "passport_validity": "6 months beyond arrival",
-   "required_documents": [
-    "Valid German ordinary passport (6 months validity)",
-    "Return or onward ticket",
-    "Proof of accommodation",
-    "Evidence of sufficient funds"
-   ],
-   "application_channel": "not_required",
-   "government_fee": {
-    "amount": 0,
-    "currency": "IDR"
-   },
-   "processing_time": "Immediate at border for visa-free; e-VOA/VOA issued on arrival or online within minutes to hours",
-   "forms": [],
-   "official_portal_url": "https://www.imigrasi.go.id",
-   "photo_requirements": "Not required for 30-day visa-free entry; required if applying for a visa",
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [],
-   "payment_process": [],
-   "submission_process": [],
-   "onward_travel_evidence": "Return or onward ticket required",
-   "accommodation_evidence": "Proof of accommodation may be requested on entry",
-   "financial_evidence": "Evidence of sufficient funds for the stay may be requested",
-   "insurance_required": false,
-   "exceptions": [
-    "Visa-free entry is for stays of up to 30 days only, is non-extendable, and cannot be converted to another visa type",
-    "Stays over 30 days require a Visa on Arrival, e-VOA, or a visit visa",
-    "VOA/e-VOA may be extended once for up to 30 days at an Indonesian immigration office",
-    "Visit visa (B211A) allows longer tourism stays with extensions"
-   ],
-   "uncertainty": [
-    {
-     "field": "disposition",
-     "reason": "Trip duration and dates were not provided; the visa-free exemption applies only to stays up to 30 days, otherwise a visa/VOA is required"
-    },
-    {
-     "field": "visit_visa_fees_and_rules",
-     "reason": "Exact current government fees for B211A/D212 visit visas and the precise extension limits could not be verified; they may have changed after recent fee revisions"
-    },
-    {
-     "field": "source_url",
-     "reason": "The exact official English-language page for Indonesia's visa-exemption list could not be verified; confirm on the official immigration portal before travel"
-    },
-    {
-     "field": "arrival_card",
-     "reason": "e-CD submission window and enforcement details may vary by port/airline"
-    },
-    {
-     "field": "visa_policy_volatility",
-     "reason": "Indonesia's visa-exemption list and entry rules have changed recently (2024 expansion) and may change again; re-verify close to departure"
-    }
-   ],
-   "confidence": "medium",
-   "permitted_stay_days": 30,
-   "passport_validity_requirement": {
-    "kind": "months_after_arrival",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": true,
-    "name": "Electronic Customs Declaration (e-CD)",
-    "submission_window": "Online before arrival or at the port of entry"
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination certificate",
-     "applicability": "conditional",
-     "trigger_countries": [],
-     "trigger": "Travel or residence in a yellow-fever endemic country within 9 days before arrival",
-     "question": "Has the applicant been in a yellow-fever endemic country in the 9 days before entering Indonesia?"
-    }
-   ],
-   "route_workflow_type": "conditional",
-   "visa_products": [
-    {
-     "type": "Visa-free tourist entry",
-     "entry": "single",
-     "validity": "30 days",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 0,
-      "currency": "IDR"
-     },
-     "notes": "Non-extendable; cannot be converted to another visa"
-    },
-    {
-     "type": "Visa on Arrival (VOA) - tourist",
-     "entry": "single",
-     "validity": "30 days, extendable once for 30 days",
-     "max_stay_days": 60,
-     "fee": {
-      "amount": 500000,
-      "currency": "IDR"
-     },
-     "notes": "Purchased at designated air, sea, and land border crossings"
-    },
-    {
-     "type": "Electronic Visa on Arrival (e-VOA) - tourist",
-     "entry": "single",
-     "validity": "30 days, extendable once for 30 days",
-     "max_stay_days": 60,
-     "fee": {
-      "amount": 500000,
-      "currency": "IDR"
-     },
-     "notes": "Apply online before travel; same conditions as VOA"
-    },
-    {
-     "type": "Single-entry Visit Visa B211A - tourism",
-     "entry": "single",
-     "validity": "60 days, extendable up to 180 days total",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "For tourism/social visits; extensions processed in Indonesia"
-    },
-    {
-     "type": "Multiple-entry Visit Visa D212 - tourism",
-     "entry": "multiple",
-     "validity": "1 year, max 60 days per visit",
-     "max_stay_days": 60,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "For tourism/business visits; not valid for employment"
-    }
-   ],
-   "application_channel_detail": "No advance application is needed for the 30-day visa-free entry; for longer tourist stays, Germans may apply online for e-VOA or a visit visa via the official e-visa portal, or obtain VOA at eligible ports of entry.",
-   "requirement_detail": "conditional_visa_free",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision",
-   "grounded_check": {
-    "at": "2026-08-25T21:46:35.153845+00:00",
-    "outcome": "checked",
-    "source_url": "https://www.imigrasi.go.id",
-    "content_hash": "1106141eb4db5e5224067465236b580a22e11522ee5a999505085e840dba7aac",
-    "consistent": true,
-    "changed_fields": [],
-    "disputed_fields": [],
-    "generic_page_skipped": [],
-    "note": "The provided page is the generic Indonesian immigration portal homepage and does not state nationality-specific visa rules or contradict the stored answer."
-   }
-  },
-  "generated_at": "2026-08-22T20:17:09.381623",
-  "fresh_until": "2026-09-08T21:46:44.016243"
- },
- {
   "cache_key": "DEU|DEU|CAN|tourism|default|unknown|v6",
   "route": {
    "passport_nationality": "DEU",
@@ -35896,105 +35720,6 @@
   "fresh_until": "2026-09-05T20:31:02.504413"
  },
  {
-  "cache_key": "ESP|ESP|IDN|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "ESP",
-   "lawful_country_of_residence": "ESP",
-   "destination_country": "IDN",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_EXEMPT",
-   "visa_category": "Visa-free tourist entry",
-   "permitted_stay": "30 days",
-   "passport_validity": "6 months beyond arrival",
-   "required_documents": [
-    "Valid ordinary passport with at least 6 months validity",
-    "At least one blank passport page",
-    "Confirmed return or onward travel ticket within 30 days",
-    "Proof of accommodation",
-    "Evidence of sufficient funds for the stay"
-   ],
-   "application_channel": "not_required",
-   "government_fee": {
-    "amount": 0,
-    "currency": null
-   },
-   "processing_time": "Not applicable",
-   "forms": [],
-   "official_portal_url": null,
-   "photo_requirements": null,
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [],
-   "payment_process": [],
-   "submission_process": [],
-   "onward_travel_evidence": "Required: confirmed return or onward ticket within 30 days",
-   "accommodation_evidence": "Required: hotel booking or invitation letter/address",
-   "financial_evidence": "Required: sufficient funds for the stay (no fixed amount prescribed)",
-   "insurance_required": false,
-   "exceptions": [
-    "Stay is limited to 30 days and cannot be extended or converted to another visa type",
-    "Authorised paid/voluntary work is not permitted under visa-free entry",
-    "Entry must be via designated Indonesian immigration checkpoints (international airports/seaports)",
-    "A longer tourist stay may be obtained in advance through a Visit Visa or VoA, but these are not required for this route"
-   ],
-   "uncertainty": [
-    {
-     "field": "official_portal_url and source_url",
-     "reason": "Exact official Indonesian immigration URL for the current visa-exemption list is not confirmed; left null to avoid inventing a link"
-    }
-   ],
-   "confidence": "high",
-   "permitted_stay_days": 30,
-   "passport_validity_requirement": {
-    "kind": "months_after_arrival",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": false,
-    "name": null,
-    "submission_window": null
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination",
-     "applicability": "conditional",
-     "trigger_countries": [],
-     "trigger": "Passengers arriving directly from or transiting yellow-fever endemic countries may be required to show an International Certificate of Vaccination or Prophylaxis",
-     "question": "Have you been in a yellow-fever endemic country within the past 6 days?"
-    }
-   ],
-   "route_workflow_type": "visa_exempt_preparation",
-   "visa_products": [],
-   "application_channel_detail": "No advance visa application is required; Spanish ordinary passport holders receive visa-free entry at Indonesian immigration checkpoints.",
-   "requirement_detail": "unconditional_visa_free",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision",
-   "grounded_check": {
-    "at": "2026-08-25T21:48:10.244843+00:00",
-    "outcome": "no_official_source",
-    "note": "the answer names no government page to check"
-   }
-  },
-  "generated_at": "2026-08-22T20:31:10.632133",
-  "fresh_until": "2026-09-05T20:31:10.632133"
- },
- {
   "cache_key": "ESP|ESP|PHL|tourism|default|unknown|v6",
   "route": {
    "passport_nationality": "ESP",
@@ -40506,7 +40231,7 @@
    "passes": 1,
    "label": "Kimi route decision",
    "grounded_check": {
-    "at": "2026-08-25T19:50:37.247627+00:00",
+    "at": "2026-08-25T22:13:20.831475+00:00",
     "outcome": "no_official_source",
     "note": "the answer names no government page to check"
    }
@@ -43203,158 +42928,6 @@
   },
   "generated_at": "2026-08-25T20:10:08.842927",
   "fresh_until": "2026-09-08T20:10:08.842927"
- },
- {
-  "cache_key": "CHN|CHN|BRB|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "CHN",
-   "lawful_country_of_residence": "CHN",
-   "destination_country": "BRB",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_REQUIRED",
-   "visa_category": "Tourist visa",
-   "permitted_stay": "Up to 90 days as determined by immigration officer",
-   "passport_validity": "Valid for at least 6 months beyond intended departure from Barbados",
-   "required_documents": [
-    "Valid passport",
-    "Completed visa application form",
-    "Passport-size photographs",
-    "Proof of accommodation",
-    "Return or onward travel ticket",
-    "Evidence of sufficient funds",
-    "Travel itinerary"
-   ],
-   "application_channel": "embassy",
-   "government_fee": {
-    "amount": null,
-    "currency": null
-   },
-   "processing_time": "15-21 business days",
-   "forms": [
-    "Barbados visa application form"
-   ],
-   "official_portal_url": null,
-   "photo_requirements": "Recent passport-size photographs meeting embassy specifications",
-   "biometrics_required": null,
-   "interview_required": null,
-   "appointment_required": null,
-   "account_registration_steps": [
-    "If applying online, register on the official Barbados eVisa portal"
-   ],
-   "payment_process": [
-    "Pay the visa fee as instructed by the embassy or online portal"
-   ],
-   "submission_process": [
-    "Submit application and supporting documents to the Barbados High Commission/Embassy or through the official eVisa portal"
-   ],
-   "onward_travel_evidence": "Confirmed return or onward ticket",
-   "accommodation_evidence": "Hotel reservation or host invitation letter",
-   "financial_evidence": "Bank statements or other proof of sufficient funds",
-   "insurance_required": null,
-   "exceptions": [],
-   "uncertainty": [
-    {
-     "field": "official_portal_url",
-     "reason": "Exact current official Barbados eVisa/government portal URL is not confirmed; do not use guessed URLs"
-    },
-    {
-     "field": "government_fee",
-     "reason": "Official consular fee for a Barbados tourist visa for a Chinese applicant is not confirmed"
-    },
-    {
-     "field": "visa_products",
-     "reason": "Only the single-entry tourist product is listed with confidence; other products such as multiple-entry may exist but are not confirmed"
-    },
-    {
-     "field": "application_channel",
-     "reason": "Embassy submission is certain; availability and eligibility of Barbados eVisa portal for PRC ordinary passport holders is not fully confirmed"
-    },
-    {
-     "field": "processing_time",
-     "reason": "Processing time is an estimate and may vary by embassy workload and application completeness"
-    },
-    {
-     "field": "permitted_stay_days",
-     "reason": "Default maximum stay is an estimate; the immigration officer determines actual permitted stay"
-    },
-    {
-     "field": "source_url",
-     "reason": "No single official government source URL confirmed for this route"
-    },
-    {
-     "field": "biometrics_required",
-     "reason": "Barbados biometric requirement for Chinese tourist applicants is not confirmed"
-    },
-    {
-     "field": "interview_required",
-     "reason": "Interview requirement is not confirmed"
-    },
-    {
-     "field": "appointment_required",
-     "reason": "Appointment requirement at the Barbados embassy is not confirmed"
-    },
-    {
-     "field": "insurance_required",
-     "reason": "Travel health insurance requirement for Barbados tourists is not confirmed"
-    },
-    {
-     "field": "arrival_card",
-     "reason": "Barbados arrival card requirement and submission window are not confirmed"
-    }
-   ],
-   "confidence": "medium",
-   "permitted_stay_days": 90,
-   "passport_validity_requirement": {
-    "kind": "months_after_departure",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": null,
-    "name": null,
-    "submission_window": null
-   },
-   "health_requirements": [],
-   "route_workflow_type": "embassy_submission",
-   "visa_products": [
-    {
-     "type": "Single-entry tourist visa",
-     "entry": "single",
-     "validity": "Typically 90 days or as specified",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": null
-    }
-   ],
-   "application_channel_detail": "Chinese nationals normally apply in advance at the Barbados High Commission/Embassy; an online eVisa option may be available but direct individual filing at the embassy is permitted.",
-   "requirement_detail": "paper_visa",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision",
-   "grounded_check": {
-    "at": "2026-08-25T21:48:04.017465+00:00",
-    "outcome": "no_official_source",
-    "note": "the answer names no government page to check"
-   }
-  },
-  "generated_at": "2026-08-25T20:10:21.839487",
-  "fresh_until": "2026-09-08T20:10:21.839487"
  },
  {
   "cache_key": "CHN|CHN|BHR|tourism|default|unknown|v6",
@@ -49333,113 +48906,6 @@
   "fresh_until": "2026-09-08T20:14:20.204779"
  },
  {
-  "cache_key": "CHN|CHN|HND|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "CHN",
-   "lawful_country_of_residence": "CHN",
-   "destination_country": "HND",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_UNCERTAIN",
-  "guidance": {
-   "disposition": "VISA_EXEMPT",
-   "visa_category": "tourist",
-   "permitted_stay": "30 days per entry",
-   "passport_validity": null,
-   "required_documents": [
-    "valid ordinary passport",
-    "return or onward ticket",
-    "proof of accommodation",
-    "evidence of sufficient funds"
-   ],
-   "application_channel": "not_required",
-   "government_fee": {
-    "amount": null,
-    "currency": null
-   },
-   "processing_time": "N/A",
-   "forms": [],
-   "official_portal_url": null,
-   "photo_requirements": null,
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [],
-   "payment_process": [],
-   "submission_process": [],
-   "onward_travel_evidence": "Return or onward ticket may be requested at entry",
-   "accommodation_evidence": "Hotel reservation or host address may be requested at entry",
-   "financial_evidence": "Bank statements or evidence of sufficient funds may be requested at entry",
-   "insurance_required": false,
-   "exceptions": [
-    "Cumulative stay normally capped at 90 days per 180-day period under the waiver agreement",
-    "Stays longer than 30 days, paid work, or study require a visa or residence permit",
-    "Entry is at the discretion of Honduran immigration officials"
-   ],
-   "uncertainty": [
-    {
-     "field": "disposition",
-     "reason": "China and Honduras signed an ordinary-passport visa-waiver agreement in June 2024, but its ratification and entry-into-force status for 2026 are not confirmed in available knowledge"
-    },
-    {
-     "field": "passport_validity",
-     "reason": "Exact passport validity rule for visa-exempt Chinese nationals entering Honduras is not confirmed"
-    },
-    {
-     "field": "source_url",
-     "reason": "No official government source URL is available in current knowledge"
-    }
-   ],
-   "confidence": "low",
-   "permitted_stay_days": 30,
-   "passport_validity_requirement": {
-    "kind": null,
-    "months": null
-   },
-   "arrival_card": {
-    "required": null,
-    "name": null,
-    "submission_window": null
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination certificate",
-     "applicability": "conditional",
-     "trigger_countries": [],
-     "trigger": "required if arriving from or transiting through a yellow-fever risk area within the previous 6 days",
-     "question": "Have you been in a yellow-fever risk country in the past 6 days?"
-    }
-   ],
-   "route_workflow_type": "visa_exempt_preparation",
-   "visa_products": [],
-   "application_channel_detail": "No visa application is required; present a valid ordinary Chinese passport at the Honduran immigration checkpoint for visa-free entry.",
-   "requirement_detail": "unconditional_visa_free",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [
-   "passport_validity"
-  ],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision",
-   "grounded_check": {
-    "at": "2026-08-25T21:47:31.405520+00:00",
-    "outcome": "no_official_source",
-    "note": "the answer names no government page to check"
-   }
-  },
-  "generated_at": "2026-08-25T20:14:21.175484",
-  "fresh_until": "2026-08-27T20:14:21.175484"
- },
- {
   "cache_key": "CHN|CHN|HTI|tourism|default|unknown|v6",
   "route": {
    "passport_nationality": "CHN",
@@ -51548,166 +51014,6 @@
   "fresh_until": "2026-09-08T20:15:42.842083"
  },
  {
-  "cache_key": "CHN|CHN|KNA|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "CHN",
-   "lawful_country_of_residence": "CHN",
-   "destination_country": "KNA",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_UNCERTAIN",
-  "guidance": {
-   "disposition": "VISA_REQUIRED",
-   "visa_category": "Tourist/visitor visa",
-   "permitted_stay": null,
-   "passport_validity": "At least 6 months beyond arrival",
-   "required_documents": [
-    "Completed Saint Kitts and Nevis visa application form",
-    "Original passport valid at least 6 months beyond arrival",
-    "Recent passport-size photograph",
-    "Confirmed return or onward ticket",
-    "Confirmed accommodation booking or host invitation",
-    "Evidence of sufficient funds",
-    "Travel itinerary"
-   ],
-   "application_channel": "embassy",
-   "government_fee": {
-    "amount": null,
-    "currency": null
-   },
-   "processing_time": null,
-   "forms": [
-    "Saint Kitts and Nevis visa application form"
-   ],
-   "official_portal_url": null,
-   "photo_requirements": "One recent passport-size photograph",
-   "biometrics_required": false,
-   "interview_required": null,
-   "appointment_required": null,
-   "account_registration_steps": [],
-   "payment_process": [
-    "Fee payment method is set by the receiving mission; usually bank draft or money order"
-   ],
-   "submission_process": [
-    "Submit by mail/courier to the nearest Saint Kitts and Nevis embassy or high commission, or to the Immigration Department in Basseterre",
-    "Passport is returned by mail/courier or collected in person as instructed"
-   ],
-   "onward_travel_evidence": "Confirmed return or onward ticket",
-   "accommodation_evidence": "Confirmed hotel booking or host invitation",
-   "financial_evidence": "Bank statement or other proof of sufficient funds",
-   "insurance_required": false,
-   "exceptions": [
-    "No resident Saint Kitts and Nevis mission in mainland China; applicants normally use the nearest mission or the Basseterre Immigration Department",
-    "Holders of valid visas from major countries should check with the receiving mission whether any facilitation applies"
-   ],
-   "uncertainty": [
-    {
-     "field": "requirement_detail",
-     "reason": "Could not confirm whether KNA now offers an e-visa option for Chinese ordinary passport holders or still requires a paper advance visa"
-    },
-    {
-     "field": "route_workflow_type",
-     "reason": "Unclear whether the current channel is embassy/courier paper submission or an online e-visa portal"
-    },
-    {
-     "field": "government_fee",
-     "reason": "Official KNA visa fee schedule not reliably retrieved"
-    },
-    {
-     "field": "processing_time",
-     "reason": "No verified official processing-time guidance available"
-    },
-    {
-     "field": "official_portal_url",
-     "reason": "No verified official government visa portal URL available"
-    },
-    {
-     "field": "source_url",
-     "reason": "No verified single official government source page available"
-    },
-    {
-     "field": "visa_products",
-     "reason": "Exact validity, max stay, and product options for Chinese applicants not confirmed"
-    },
-    {
-     "field": "permitted_stay",
-     "reason": "Actual stay granted on a KNA tourist visa for Chinese nationals not confirmed"
-    }
-   ],
-   "confidence": "low",
-   "permitted_stay_days": null,
-   "passport_validity_requirement": {
-    "kind": "months_after_arrival",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": null,
-    "name": null,
-    "submission_window": null
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination certificate",
-     "applicability": "conditional",
-     "trigger_countries": [],
-     "trigger": "Arrival from or transit through a yellow-fever endemic country within the relevant period",
-     "question": "Have you travelled from or through a yellow-fever endemic country within the relevant period?"
-    }
-   ],
-   "route_workflow_type": "embassy_submission",
-   "visa_products": [
-    {
-     "type": "Single-entry tourist visa",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": null,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "Standard advance tourist visa; length of stay granted on entry"
-    },
-    {
-     "type": "Multiple-entry visitor visa",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": null,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "May be available on application at the discretion of the immigration authority"
-    }
-   ],
-   "application_channel_detail": "Chinese residents must apply in advance; there is no Saint Kitts and Nevis embassy in China, so the application is normally lodged by mail/courier through the nearest KNA diplomatic mission or the Immigration Department in Basseterre.",
-   "requirement_detail": null,
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [
-   "permitted_stay",
-   "processing_time"
-  ],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision",
-   "grounded_check": {
-    "at": "2026-08-25T21:46:36.019903+00:00",
-    "outcome": "no_official_source",
-    "note": "the answer names no government page to check"
-   }
-  },
-  "generated_at": "2026-08-25T20:16:00.021462",
-  "fresh_until": "2026-08-27T20:16:00.021462"
- },
- {
   "cache_key": "CHN|CHN|PRK|tourism|default|unknown|v6",
   "route": {
    "passport_nationality": "CHN",
@@ -52149,165 +51455,6 @@
   },
   "generated_at": "2026-08-25T20:16:24.778387",
   "fresh_until": "2026-09-08T20:16:24.778387"
- },
- {
-  "cache_key": "CHN|CHN|LCA|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "CHN",
-   "lawful_country_of_residence": "CHN",
-   "destination_country": "LCA",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_REQUIRED",
-   "visa_category": "Tourist visa",
-   "permitted_stay": "Up to 30 days per entry (confirm on portal)",
-   "passport_validity": "Valid at least 6 months beyond intended departure from Saint Lucia",
-   "required_documents": [
-    "Passport biodata-page scan (valid at least 6 months beyond stay)",
-    "Recent digital passport photograph",
-    "Confirmed return or onward travel booking",
-    "Proof of accommodation (hotel reservation or host invitation)",
-    "Evidence of sufficient funds (bank statement, payslip, or sponsorship letter)",
-    "Online application form"
-   ],
-   "application_channel": "online_portal",
-   "government_fee": {
-    "amount": null,
-    "currency": null
-   },
-   "processing_time": "Usually 5–7 business days",
-   "forms": [
-    "Online e-Visa application form completed on the portal"
-   ],
-   "official_portal_url": null,
-   "photo_requirements": "Recent colour digital passport photo, plain white background, face clearly visible; exact dimensions set by portal",
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [
-    "Create an account on the official Saint Lucia e-Visa portal",
-    "Verify the email address",
-    "Log in and start a new tourist visa application"
-   ],
-   "payment_process": [
-    "Pay the visa fee online by credit/debit card before submission",
-    "Keep the payment receipt/confirmation"
-   ],
-   "submission_process": [
-    "Upload required documents and submit the application online",
-    "Wait for the approval email",
-    "Print the e-Visa approval and present it with the passport on arrival"
-   ],
-   "onward_travel_evidence": "Confirmed return or onward ticket",
-   "accommodation_evidence": "Hotel booking or host invitation letter",
-   "financial_evidence": "Bank statements, payslip, or sponsor letter showing sufficient funds for the stay",
-   "insurance_required": false,
-   "exceptions": [
-    "No transit countries were named; Saint Lucia does not publish an airside transit-without-visa scheme for visa-required nationals",
-    "Diplomatic/service passport holders may have separate bilateral exemptions not assessed here",
-    "Saint Lucia has no diplomatic mission in mainland China (it recognises Taiwan), so the e-Visa portal is the practical channel"
-   ],
-   "uncertainty": [
-    {
-     "field": "official_portal_url",
-     "reason": "Saint Lucia e-Visa portal URL and current eligibility for PRC ordinary passports may have changed after my knowledge cutoff; verify on the live government site"
-    },
-    {
-     "field": "visa_products",
-     "reason": "Product validity periods and fees are based on common Saint Lucia e-Visa practice but are not verified as current; check the portal fee schedule"
-    },
-    {
-     "field": "government_fee",
-     "reason": "Cannot separate the official consular fee from any online platform or card-processing charge; verify the current breakdown on the portal"
-    },
-    {
-     "field": "application_channel_detail",
-     "reason": "Confirm whether paper applications can still be lodged at a third-country mission or whether online e-Visa is the only option for applicants resident in mainland China"
-    },
-    {
-     "field": "arrival_card",
-     "reason": "Not confirmed whether Saint Lucia currently requires a paper immigration/disembarkation card on arrival"
-    }
-   ],
-   "confidence": "medium",
-   "permitted_stay_days": 30,
-   "passport_validity_requirement": {
-    "kind": "months_after_departure",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": null,
-    "name": null,
-    "submission_window": null
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination certificate",
-     "applicability": "conditional",
-     "trigger_countries": [
-      "AGO",
-      "BRA",
-      "COD",
-      "GHA",
-      "KEN",
-      "NGA"
-     ],
-     "trigger": "Arrival from or recent travel through a yellow-fever risk country (typically within 6 days)",
-     "question": "Have you visited a yellow-fever risk country within the past 6 days?"
-    }
-   ],
-   "route_workflow_type": "evisa_portal",
-   "visa_products": [
-    {
-     "type": "Single-entry tourist e-Visa",
-     "entry": "single",
-     "validity": "3 months from issue",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 75,
-      "currency": "USD"
-     },
-     "notes": "Fee may include a portal processing charge; verify current schedule"
-    },
-    {
-     "type": "Multiple-entry tourist e-Visa",
-     "entry": "multiple",
-     "validity": "1 year from issue",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 150,
-      "currency": "USD"
-     },
-     "notes": "Fee may include a portal processing charge; verify current schedule"
-    }
-   ],
-   "application_channel_detail": "Apply yourself on the official Saint Lucia e-Visa portal; there is no Saint Lucia embassy in mainland China, so online application is normally the practical channel.",
-   "source_url": null,
-   "requirement_detail": "evisa",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision",
-   "grounded_check": {
-    "at": "2026-08-25T21:47:31.406348+00:00",
-    "outcome": "no_official_source",
-    "note": "the answer names no government page to check"
-   }
-  },
-  "generated_at": "2026-08-25T20:16:38.855793",
-  "fresh_until": "2026-09-08T20:16:38.855793"
  },
  {
   "cache_key": "CHN|CHN|LUX|tourism|default|unknown|v6",
@@ -55949,125 +55096,6 @@
   "fresh_until": "2026-09-08T20:18:54.064202"
  },
  {
-  "cache_key": "CHN|CHN|NIC|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "CHN",
-   "lawful_country_of_residence": "CHN",
-   "destination_country": "NIC",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_EXEMPT",
-   "visa_category": "visa-free tourist",
-   "permitted_stay": "90 days",
-   "passport_validity": "6 months beyond arrival",
-   "required_documents": [
-    "valid ordinary PRC passport",
-    "onward/return ticket",
-    "proof of funds",
-    "proof of accommodation"
-   ],
-   "application_channel": "not_required",
-   "government_fee": {
-    "amount": null,
-    "currency": null
-   },
-   "processing_time": null,
-   "forms": [],
-   "official_portal_url": null,
-   "photo_requirements": null,
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [],
-   "payment_process": [],
-   "submission_process": [],
-   "onward_travel_evidence": "confirmed onward or return ticket",
-   "accommodation_evidence": "hotel booking or host address",
-   "financial_evidence": "sufficient funds for the stay",
-   "insurance_required": false,
-   "exceptions": [
-    "Stays over 90 days or paid work/study require a visa before travel",
-    "Diplomatic/service passports are covered by a separate bilateral agreement",
-    "A USD 10 tourist-card/arrival fee may be collected at entry (often included in airfare)"
-   ],
-   "uncertainty": [
-    {
-     "field": "official_portal_url/source_url",
-     "reason": "No stable official government URL for the China-Nicaragua ordinary-passport visa-exemption policy could be verified"
-    },
-    {
-     "field": "arrival_card",
-     "reason": "Could not confirm whether Nicaragua currently requires a separate tourist arrival card"
-    },
-    {
-     "field": "passport_validity",
-     "reason": "Nicaragua's standard 6-month validity rule is assumed; exact wording of the bilateral agreement was not verified"
-    },
-    {
-     "field": "tourist_card/arrival_fee",
-     "reason": "Reports of a USD 10 arrival fee/tourist card exist but could not be confirmed as currently applied to Chinese nationals"
-    }
-   ],
-   "confidence": "medium",
-   "permitted_stay_days": 90,
-   "passport_validity_requirement": {
-    "kind": "months_after_arrival",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": null,
-    "name": null,
-    "submission_window": null
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination",
-     "applicability": "conditional",
-     "trigger_countries": [
-      "AGO",
-      "BRA",
-      "COD",
-      "COL",
-      "GHA",
-      "KEN",
-      "NGA",
-      "PER",
-      "VEN"
-     ],
-     "trigger": "arrival within 6 days from or through a yellow-fever endemic country",
-     "question": "Have you been in a yellow-fever endemic country within the past 6 days?"
-    }
-   ],
-   "route_workflow_type": "visa_exempt_preparation",
-   "visa_products": [],
-   "application_channel_detail": "No advance visa application is required; Chinese ordinary passport holders present their passport and supporting documents at Nicaraguan immigration for a 90-day tourist entry.",
-   "requirement_detail": "unconditional_visa_free",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision",
-   "grounded_check": {
-    "at": "2026-08-25T21:46:36.153618+00:00",
-    "outcome": "no_official_source",
-    "note": "the answer names no government page to check"
-   }
-  },
-  "generated_at": "2026-08-25T20:19:12.048191",
-  "fresh_until": "2026-09-08T20:19:12.048191"
- },
- {
   "cache_key": "CHN|CHN|NOR|tourism|default|unknown|v6",
   "route": {
    "passport_nationality": "CHN",
@@ -58400,109 +57428,6 @@
   "fresh_until": "2026-09-08T20:20:38.065661"
  },
  {
-  "cache_key": "CHN|CHN|SYC|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "CHN",
-   "lawful_country_of_residence": "CHN",
-   "destination_country": "SYC",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_EXEMPT",
-   "visa_category": "tourist visitor's permit",
-   "permitted_stay": "up to 3 months",
-   "passport_validity": "valid for the intended stay",
-   "required_documents": [
-    "valid passport",
-    "return or onward ticket",
-    "proof of accommodation",
-    "proof of sufficient funds"
-   ],
-   "application_channel": "not_required",
-   "government_fee": {
-    "amount": null,
-    "currency": null
-   },
-   "processing_time": "issued on arrival",
-   "forms": [],
-   "official_portal_url": null,
-   "photo_requirements": "not required",
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [],
-   "payment_process": [],
-   "submission_process": [
-    "present passport and supporting documents to immigration on arrival",
-    "visitor's permit stamped/issued at port of entry"
-   ],
-   "onward_travel_evidence": "confirmed return or onward ticket",
-   "accommodation_evidence": "confirmed accommodation booking",
-   "financial_evidence": "proof of funds covering stay, approximately USD 150 per day",
-   "insurance_required": false,
-   "exceptions": [
-    "initial permit may be extended in-country for further periods, normally up to 12 months total",
-    "no pre-application required regardless of nationality"
-   ],
-   "uncertainty": [
-    {
-     "field": "passport_validity_requirement",
-     "reason": "Seychelles generally requires validity for the duration of stay, but some carriers/officials may apply a 6-month rule; confirm with the carrier before travel."
-    },
-    {
-     "field": "source_url",
-     "reason": "Official Seychelles immigration URL could not be verified; user should confirm on the Seychelles Immigration Department website."
-    }
-   ],
-   "confidence": "high",
-   "permitted_stay_days": 90,
-   "passport_validity_requirement": {
-    "kind": "valid_through_departure",
-    "months": null
-   },
-   "arrival_card": {
-    "required": true,
-    "name": "Embarkation/Disembarkation card",
-    "submission_window": "completed on arrival/departure"
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination certificate",
-     "applicability": "conditional",
-     "trigger_countries": [],
-     "trigger": "arrival or transit within 6 days from a yellow-fever endemic country",
-     "question": "Has the traveller recently been in or transited a yellow-fever endemic country?"
-    }
-   ],
-   "route_workflow_type": "visa_exempt_preparation",
-   "visa_products": [],
-   "application_channel_detail": "No advance visa application; all visitors receive a free Visitor's Permit on arrival at a Seychelles port of entry.",
-   "requirement_detail": "unconditional_visa_free",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision",
-   "grounded_check": {
-    "at": "2026-08-25T21:47:48.449139+00:00",
-    "outcome": "no_official_source",
-    "note": "the answer names no government page to check"
-   }
-  },
-  "generated_at": "2026-08-25T20:20:40.419900",
-  "fresh_until": "2026-09-08T20:20:40.419900"
- },
- {
   "cache_key": "CHN|CHN|SAU|tourism|default|unknown|v6",
   "route": {
    "passport_nationality": "CHN",
@@ -60518,149 +59443,6 @@
   "fresh_until": "2026-09-08T20:22:04.196164"
  },
  {
-  "cache_key": "CHN|CHN|SLV|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "CHN",
-   "lawful_country_of_residence": "CHN",
-   "destination_country": "SLV",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
-   "visa_category": "Tourist",
-   "permitted_stay": "Up to 90 days",
-   "passport_validity": "6 months beyond arrival",
-   "required_documents": [
-    "Valid ordinary passport",
-    "Recent passport-style photo",
-    "Completed online visa application",
-    "Proof of accommodation",
-    "Return or onward travel ticket",
-    "Proof of sufficient funds",
-    "Email address for correspondence"
-   ],
-   "application_channel": "online_portal",
-   "government_fee": {
-    "amount": null,
-    "currency": null
-   },
-   "processing_time": "5-10 business days",
-   "forms": [
-    "DGME online tourist visa application form"
-   ],
-   "official_portal_url": "https://www.migracion.gob.sv",
-   "photo_requirements": "One recent digital passport-style colour photo with white background and face centred",
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [
-    "Create a user account on the DGME eVisa portal",
-    "Activate the account via email verification"
-   ],
-   "payment_process": [
-    "Pay the visa fee online by credit or debit card"
-   ],
-   "submission_process": [
-    "Log in to the DGME eVisa portal",
-    "Complete the application and upload documents",
-    "Pay the fee",
-    "Await approval by email",
-    "Print the approved eVisa and carry it with the passport"
-   ],
-   "onward_travel_evidence": "Return or onward ticket out of El Salvador",
-   "accommodation_evidence": "Hotel booking or host address in El Salvador",
-   "financial_evidence": "Bank statements or other proof of funds covering the trip",
-   "insurance_required": false,
-   "exceptions": [
-    "Holders of a valid visa or residence from the United States, Canada, or the Schengen Area may be visa-exempt for up to 90 days; confirm current DGME policy",
-    "Diplomatic or service passport holders are covered by a separate bilateral exemption",
-    "Admission is under the CA-4 agreement; time in El Salvador counts toward the 90-day limit for Guatemala, Honduras and Nicaragua"
-   ],
-   "uncertainty": [
-    {
-     "field": "disposition / eVisa eligibility",
-     "reason": "El Salvador's eVisa eligible-country list can change; confirm that PRC ordinary passports currently qualify, otherwise a paper embassy visa is required"
-    },
-    {
-     "field": "government_fee",
-     "reason": "Current official consular/eVisa fee not confirmed from an authoritative source; verify on the DGME fee schedule"
-    },
-    {
-     "field": "visa_products",
-     "reason": "Only the single-entry tourist eVisa is listed with certainty; additional consular products may exist"
-    },
-    {
-     "field": "processing_time",
-     "reason": "Processing timeframe is approximate and may vary by workload"
-    },
-    {
-     "field": "official_portal_url",
-     "reason": "The exact eVisa application sub-path on migracion.gob.sv is not confirmed; use the root domain to locate the service"
-    }
-   ],
-   "confidence": "medium",
-   "permitted_stay_days": 90,
-   "passport_validity_requirement": {
-    "kind": "months_after_arrival",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": false,
-    "name": null,
-    "submission_window": null
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination certificate",
-     "applicability": "conditional",
-     "trigger_countries": [],
-     "trigger": "Arrival from or transit through a yellow-fever risk country within 90 days before entry",
-     "question": "Have you visited or transited a yellow-fever risk country in the 90 days before arrival?"
-    }
-   ],
-   "route_workflow_type": "evisa_portal",
-   "visa_products": [
-    {
-     "type": "Single-entry tourist eVisa",
-     "entry": "single",
-     "validity": "90 days",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "Electronic tourist visa; consular single or multiple-entry paper visas may also be available"
-    }
-   ],
-   "application_channel_detail": "Chinese ordinary-passport tourists may apply through the DGME eVisa portal; a paper application at a Salvadoran embassy or consulate may also be possible.",
-   "requirement_detail": "evisa",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision",
-   "grounded_check": {
-    "at": "2026-08-25T21:47:21.312535+00:00",
-    "outcome": "page_not_relevant",
-    "sources_tried": [
-     "https://www.migracion.gob.sv"
-    ]
-   }
-  },
-  "generated_at": "2026-08-25T20:22:07.914562",
-  "fresh_until": "2026-09-08T20:22:07.914562"
- },
- {
   "cache_key": "CHN|CHN|TGO|tourism|default|unknown|v6",
   "route": {
    "passport_nationality": "CHN",
@@ -61385,143 +60167,6 @@
   },
   "generated_at": "2026-08-25T20:22:54.096305",
   "fresh_until": "2026-09-08T20:22:54.096305"
- },
- {
-  "cache_key": "CHN|CHN|TON|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "CHN",
-   "lawful_country_of_residence": "CHN",
-   "destination_country": "TON",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_REQUIRED",
-   "visa_category": "Visitor visa (tourist)",
-   "permitted_stay": "Up to 31 days",
-   "passport_validity": "6 months beyond intended departure",
-   "required_documents": [
-    "Valid passport with at least one blank page",
-    "Return or onward travel ticket",
-    "Proof of accommodation",
-    "Evidence of sufficient funds",
-    "Completed arrival/departure card"
-   ],
-   "application_channel": "on_arrival",
-   "government_fee": {
-    "amount": null,
-    "currency": null
-   },
-   "processing_time": "Issued at port of entry",
-   "forms": [
-    "Arrival/departure card (provided on arrival)"
-   ],
-   "official_portal_url": null,
-   "photo_requirements": "Passport-style photo may be requested",
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [],
-   "payment_process": [
-    "Pay the visa fee in cash at the immigration counter on arrival"
-   ],
-   "submission_process": [
-    "Proceed to immigration control on arrival",
-    "Present passport, arrival card and supporting documents",
-    "Receive visa stamp after fee payment"
-   ],
-   "onward_travel_evidence": "Return or onward ticket required",
-   "accommodation_evidence": "Confirmed accommodation booking or host address required",
-   "financial_evidence": "Evidence of sufficient funds for the stay",
-   "insurance_required": false,
-   "exceptions": [
-    "Advance single-entry visitor visa may be obtained from the Tongan Embassy in Beijing",
-    "Diplomatic/service passport holders may have separate bilateral exemptions",
-    "Airlines may require proof of visa-on-arrival eligibility before boarding"
-   ],
-   "uncertainty": [
-    {
-     "field": "government_fee",
-     "reason": "Official on-arrival visa fee for Chinese nationals is not confirmed in current sources"
-    },
-    {
-     "field": "visa_products",
-     "reason": "Exact advance-visa validity, fees and product names are unverified"
-    },
-    {
-     "field": "permitted_stay_days",
-     "reason": "Reported 31-day limit may have changed; verify with Tonga Immigration"
-    },
-    {
-     "field": "official_portal_url/source_url",
-     "reason": "No verified official government URL available in current knowledge"
-    },
-    {
-     "field": "health_requirements",
-     "reason": "Health rules can change and no transit countries were stated"
-    }
-   ],
-   "confidence": "low",
-   "permitted_stay_days": 31,
-   "passport_validity_requirement": {
-    "kind": "months_after_departure",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": true,
-    "name": "Arrival/departure card",
-    "submission_window": "On arrival, before immigration inspection"
-   },
-   "health_requirements": [],
-   "route_workflow_type": "visa_on_arrival",
-   "visa_products": [
-    {
-     "type": "Single-entry tourist visa on arrival",
-     "entry": "single",
-     "validity": "31 days from date of entry",
-     "max_stay_days": 31,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "Issued at Fua'amotu International Airport and designated ports; verify current fee before travel"
-    },
-    {
-     "type": "Single-entry visitor visa (advance)",
-     "entry": "single",
-     "validity": "Usually 3 months from issue",
-     "max_stay_days": 31,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "Apply at the Tongan Embassy in Beijing if not using visa on arrival"
-    }
-   ],
-   "application_channel_detail": "Chinese tourists may obtain a visitor visa on arrival at a Tongan port of entry, or apply in advance through the Tongan Embassy in Beijing.",
-   "requirement_detail": "paper_visa_on_arrival",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision",
-   "grounded_check": {
-    "at": "2026-08-25T21:48:15.006907+00:00",
-    "outcome": "no_official_source",
-    "note": "the answer names no government page to check"
-   }
-  },
-  "generated_at": "2026-08-25T20:22:58.486306",
-  "fresh_until": "2026-09-08T20:22:58.486306"
  },
  {
   "cache_key": "CHN|CHN|TLS|tourism|default|unknown|v6",
@@ -64245,312 +62890,6 @@
   "fresh_until": "2026-09-08T20:25:25.047607"
  },
  {
-  "cache_key": "HKG|HKG|BIH|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "HKG",
-   "lawful_country_of_residence": "HKG",
-   "destination_country": "BIH",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_REQUIRED",
-   "visa_category": "tourist visa",
-   "permitted_stay": "up to 90 days per visit if visa granted",
-   "passport_validity": "3 months beyond intended departure; issued within last 10 years",
-   "required_documents": [
-    "valid passport",
-    "completed visa application form",
-    "recent passport photo",
-    "proof of accommodation",
-    "proof of sufficient funds",
-    "return or onward ticket",
-    "travel medical insurance",
-    "proof of tourism purpose"
-   ],
-   "application_channel": "embassy",
-   "government_fee": {
-    "amount": null,
-    "currency": null
-   },
-   "processing_time": "up to 30 days",
-   "forms": [
-    "visa application form"
-   ],
-   "official_portal_url": null,
-   "photo_requirements": "recent passport-size photograph",
-   "biometrics_required": false,
-   "interview_required": null,
-   "appointment_required": true,
-   "account_registration_steps": [],
-   "payment_process": [
-    "consular fee paid as instructed by the BIH embassy/consulate"
-   ],
-   "submission_process": [
-    "submit application and passport in person at the BIH embassy/consulate or designated visa centre",
-    "collect passport with visa when notified"
-   ],
-   "onward_travel_evidence": "required",
-   "accommodation_evidence": "required",
-   "financial_evidence": "required",
-   "insurance_required": true,
-   "exceptions": [
-    "If HKSAR passport holders are required to hold a visa, entry without a BIH visa may be permitted for up to 30 days when holding a valid multiple-entry Schengen visa, a valid visa/residence permit of an EU member state, or a valid visa/residence permit of the United States",
-    " holders of diplomatic/service/official passports may be covered by separate bilateral agreements"
-   ],
-   "uncertainty": [
-    {
-     "field": "disposition",
-     "reason": "Current BIH visa policy for HKSAR ordinary passport holders is uncertain; BIH may grant visa-free entry or may require a visa. Confirm with the BIH Ministry of Foreign Affairs or nearest embassy before making non-refundable travel plans."
-    },
-    {
-     "field": "requirement_detail",
-     "reason": "BIH has introduced electronic visa services; it is unclear whether HKG nationals may apply via the e-visa portal or must lodge a paper application."
-    },
-    {
-     "field": "application_channel",
-     "reason": "No BIH diplomatic mission in Hong Kong; nearest embassy/visa centre jurisdiction and accepted channels are unconfirmed."
-    },
-    {
-     "field": "government_fee",
-     "reason": "Exact consular fee not confirmed."
-    },
-    {
-     "field": "visa_products",
-     "reason": "Product names, validity periods, maximum stay and fees are approximate pending official confirmation."
-    },
-    {
-     "field": "insurance_required",
-     "reason": "Travel medical insurance is typically required for visa issuance; verify current amount and coverage rules."
-    }
-   ],
-   "confidence": "low",
-   "permitted_stay_days": 90,
-   "passport_validity_requirement": {
-    "kind": "months_after_departure",
-    "months": 3
-   },
-   "arrival_card": {
-    "required": false,
-    "name": null,
-    "submission_window": null
-   },
-   "health_requirements": [],
-   "route_workflow_type": "embassy_submission",
-   "visa_products": [
-    {
-     "type": "Single-entry tourist visa",
-     "entry": "single",
-     "validity": "up to 90 days",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": null
-    },
-    {
-     "type": "Multiple-entry tourist visa",
-     "entry": "multiple",
-     "validity": "up to 1 year",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "maximum 90 days per visit"
-    }
-   ],
-   "application_channel_detail": "Individuals apply in person at the Embassy of Bosnia and Herzegovina or its designated visa centre; verify whether an online e-visa option is currently available for this nationality.",
-   "requirement_detail": "paper_visa",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision",
-   "grounded_check": {
-    "at": "2026-08-25T22:07:48.920524+00:00",
-    "outcome": "no_official_source",
-    "note": "the answer names no government page to check"
-   }
-  },
-  "generated_at": "2026-08-25T20:25:32.737073",
-  "fresh_until": "2026-09-08T20:25:32.737073"
- },
- {
-  "cache_key": "HKG|HKG|BHR|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "HKG",
-   "lawful_country_of_residence": "HKG",
-   "destination_country": "BHR",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
-   "visa_category": "e-Visa tourist",
-   "permitted_stay": "14 or 30 days depending on product",
-   "passport_validity": "generally 6 months beyond arrival",
-   "required_documents": [
-    "Valid HKSAR ordinary passport",
-    "Recent digital passport photograph",
-    "Return or onward travel ticket",
-    "Proof of accommodation in Bahrain",
-    "Evidence of sufficient funds"
-   ],
-   "application_channel": "online_portal",
-   "government_fee": {
-    "amount": null,
-    "currency": "BHD"
-   },
-   "processing_time": "3-5 working days typically",
-   "forms": [
-    "Online e-Visa application form"
-   ],
-   "official_portal_url": "https://evisa.gov.bh",
-   "photo_requirements": "Digital passport-style photograph meeting Bahrain e-Visa portal specifications",
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [
-    "Create an account on the Bahrain e-Visa portal",
-    "Verify your email address"
-   ],
-   "payment_process": [
-    "Pay the e-Visa fee online by credit/debit card"
-   ],
-   "submission_process": [
-    "Log in to the portal",
-    "Complete the application",
-    "Upload required documents",
-    "Submit and wait for approval",
-    "Receive e-Visa by email"
-   ],
-   "onward_travel_evidence": "Return or onward ticket",
-   "accommodation_evidence": "Hotel booking or host address in Bahrain",
-   "financial_evidence": "Bank statement or other proof of sufficient funds",
-   "insurance_required": false,
-   "exceptions": [
-    "GCC nationals enjoy freedom of movement; this does not apply to HKSAR ordinary passport holders"
-   ],
-   "uncertainty": [
-    {
-     "field": "disposition",
-     "reason": "Bahrain's visa policy for HKSAR ordinary passport holders has changed over time and may have been updated; verify current e-Visa/visa-on-arrival eligibility on evisa.gov.bh."
-    },
-    {
-     "field": "passport_validity_requirement",
-     "reason": "Exact passport validity rule for HKSAR ordinary passport holders entering Bahrain is not confirmed."
-    },
-    {
-     "field": "government_fee",
-     "reason": "Official e-Visa product fees are not known with certainty."
-    },
-    {
-     "field": "visa_products",
-     "reason": "Exact products, validity periods and fees available to HKG nationals are not confirmed."
-    },
-    {
-     "field": "source_url",
-     "reason": "No single official government source URL is known with certainty for this nationality/route."
-    }
-   ],
-   "confidence": "low",
-   "permitted_stay_days": null,
-   "passport_validity_requirement": {
-    "kind": "months_after_arrival",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": null,
-    "name": null,
-    "submission_window": null
-   },
-   "health_requirements": [],
-   "route_workflow_type": "evisa_portal",
-   "visa_products": [
-    {
-     "type": "Single-entry tourist 14 days",
-     "entry": "single",
-     "validity": "2 weeks",
-     "max_stay_days": 14,
-     "fee": {
-      "amount": null,
-      "currency": "BHD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Single-entry tourist 30 days",
-     "entry": "single",
-     "validity": "3 months",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": null,
-      "currency": "BHD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Multiple-entry tourist 30 days",
-     "entry": "multiple",
-     "validity": "1 month",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": null,
-      "currency": "BHD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Multiple-entry tourist 90 days",
-     "entry": "multiple",
-     "validity": "1 year",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": null,
-      "currency": "BHD"
-     },
-     "notes": null
-    }
-   ],
-   "application_channel_detail": "Hong Kong ordinary passport holders may apply online through the Bahrain e-Visa portal; a visa on arrival may also be available for eligible travellers but current eligibility should be confirmed before travel.",
-   "requirement_detail": "evisa",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision",
-   "grounded_check": {
-    "at": "2026-08-25T21:54:03.004729+00:00",
-    "outcome": "fetch_failed",
-    "sources": [
-     "https://evisa.gov.bh"
-    ]
-   }
-  },
-  "generated_at": "2026-08-25T20:25:41.477684",
-  "fresh_until": "2026-09-08T20:25:41.477684"
- },
- {
   "cache_key": "HKG|HKG|BGR|tourism|default|unknown|v6",
   "route": {
    "passport_nationality": "HKG",
@@ -64978,169 +63317,6 @@
   },
   "generated_at": "2026-08-25T20:25:53.764267",
   "fresh_until": "2026-08-27T20:25:53.764267"
- },
- {
-  "cache_key": "HKG|HKG|BRN|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "HKG",
-   "lawful_country_of_residence": "HKG",
-   "destination_country": "BRN",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_UNCERTAIN",
-  "guidance": {
-   "disposition": "VISA_REQUIRED",
-   "visa_category": "tourist visa",
-   "permitted_stay": "up to 30 days per entry, as annotated on visa",
-   "passport_validity": "6 months beyond intended departure from Brunei",
-   "required_documents": [
-    "completed Brunei tourist visa application form",
-    "HKSAR ordinary passport valid at least 6 months with blank pages",
-    "one recent passport-size photograph",
-    "confirmed return or onward travel ticket",
-    "proof of accommodation in Brunei",
-    "proof of sufficient funds for the stay",
-    "travel itinerary"
-   ],
-   "application_channel": "embassy",
-   "government_fee": {
-    "amount": null,
-    "currency": null
-   },
-   "processing_time": "3 to 10 working days; confirm with the consulate",
-   "forms": [
-    "Brunei tourist visa application form"
-   ],
-   "official_portal_url": null,
-   "photo_requirements": "one recent passport-size colour photograph; exact size and background specifications to be confirmed with the consulate",
-   "biometrics_required": false,
-   "interview_required": null,
-   "appointment_required": null,
-   "account_registration_steps": [],
-   "payment_process": [
-    "pay the official visa fee as instructed by the Consulate General of Brunei Darussalam in Hong Kong; accepted methods vary"
-   ],
-   "submission_process": [
-    "submit application in person or by post to the Consulate General of Brunei Darussalam in Hong Kong",
-    "collect passport with visa sticker or receive it by return post"
-   ],
-   "onward_travel_evidence": "confirmed return or onward ticket out of Brunei required",
-   "accommodation_evidence": "confirmed hotel booking or invitation letter from a Brunei resident required",
-   "financial_evidence": "recent bank statement or other proof of sufficient funds required",
-   "insurance_required": false,
-   "exceptions": [
-    "diplomatic and official passport holders may be covered by separate bilateral arrangements",
-    "airside transit passengers who do not pass immigration may not require a visa",
-    "visa facilitation for accompanying family members or repeat travellers is at consular discretion"
-   ],
-   "uncertainty": [
-    {
-     "field": "government_fee",
-     "reason": "Official consular fee for HKSAR ordinary-passport tourist visas is not known and must be confirmed with the Consulate General of Brunei Darussalam in Hong Kong"
-    },
-    {
-     "field": "official_portal_url",
-     "reason": "No verified Brunei government e-visa portal for HKSAR applicants is known"
-    },
-    {
-     "field": "source_url",
-     "reason": "No single verified official government page was retrieved for this route"
-    },
-    {
-     "field": "appointment_required",
-     "reason": "Consulate walk-in versus appointment policy is not confirmed"
-    },
-    {
-     "field": "arrival_card",
-     "reason": "Brunei arrival-card format and submission window have changed recently; current rules must be confirmed before travel"
-    },
-    {
-     "field": "permitted_stay_days",
-     "reason": "Exact stay granted may vary by consular annotation"
-    },
-    {
-     "field": "disposition",
-     "reason": "Brunei visa exemptions are occasionally updated; verify that no new HKSAR waiver has been introduced"
-    }
-   ],
-   "confidence": "medium",
-   "permitted_stay_days": 30,
-   "passport_validity_requirement": {
-    "kind": "months_after_departure",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": true,
-    "name": "e-Arrival card / arrival declaration",
-    "submission_window": "typically within 72 hours before arrival; confirm current format with airline or immigration"
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination",
-     "applicability": "conditional",
-     "trigger_countries": [],
-     "trigger": "arrival within 6 days from or through a yellow-fever endemic country",
-     "question": "Have you travelled in or transited a yellow-fever endemic country within the past 6 days?"
-    },
-    {
-     "name": "COVID-19 / infectious disease measures",
-     "applicability": "conditional",
-     "trigger_countries": [],
-     "trigger": "active public-health orders or outbreak declarations",
-     "question": "Are you arriving from a country subject to current Brunei health entry requirements?"
-    }
-   ],
-   "route_workflow_type": "embassy_submission",
-   "visa_products": [
-    {
-     "type": "Single-entry tourist visa",
-     "entry": "single",
-     "validity": "3 months",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "standard tourist visa; fee to be confirmed with the consulate"
-    },
-    {
-     "type": "Multiple-entry tourist visa",
-     "entry": "multiple",
-     "validity": "up to 1 year",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "issued at consular discretion; fee to be confirmed with the consulate"
-    }
-   ],
-   "application_channel_detail": "Individuals may lodge directly at the Consulate General of Brunei Darussalam in Hong Kong, in person or by post; no authorised agent is required.",
-   "requirement_detail": "paper_visa",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [
-   "application_channel 'embassy' but the channel detail says individuals may not file directly (use authorised_agent)"
-  ],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision",
-   "grounded_check": {
-    "at": "2026-08-25T21:54:02.991076+00:00",
-    "outcome": "no_official_source",
-    "note": "the answer names no government page to check"
-   }
-  },
-  "generated_at": "2026-08-25T20:26:08.600191",
-  "fresh_until": "2026-08-27T20:26:08.600191"
  },
  {
   "cache_key": "HKG|HKG|BHS|tourism|default|unknown|v6",
@@ -66820,162 +64996,6 @@
   },
   "generated_at": "2026-08-25T20:27:18.641372",
   "fresh_until": "2026-09-08T20:27:18.641372"
- },
- {
-  "cache_key": "HKG|HKG|CHN|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "HKG",
-   "lawful_country_of_residence": "HKG",
-   "destination_country": "CHN",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_REQUIRED",
-   "visa_category": "L visa (tourist)",
-   "permitted_stay": "Up to 90 days per entry depending on visa issued",
-   "passport_validity": "At least 6 months beyond intended stay",
-   "required_documents": [
-    "Valid HKSAR passport",
-    "Completed visa application form",
-    "Recent passport photo",
-    "Proof of travel itinerary",
-    "Hotel bookings or invitation letter",
-    "Financial proof",
-    "HKSAR permanent identity card or residence proof"
-   ],
-   "application_channel": "visa_center",
-   "government_fee": {
-    "amount": null,
-    "currency": null
-   },
-   "processing_time": "4 working days regular; express available",
-   "forms": [
-    "Visa Application Form of the People's Republic of China"
-   ],
-   "official_portal_url": null,
-   "photo_requirements": "One recent colour passport-size photo with white background",
-   "biometrics_required": true,
-   "interview_required": null,
-   "appointment_required": true,
-   "account_registration_steps": [],
-   "payment_process": [
-    "Pay visa fee at application centre when submitting"
-   ],
-   "submission_process": [
-    "Submit application in person at China Visa Application Service Center Hong Kong",
-    "Collect passport or choose courier return"
-   ],
-   "onward_travel_evidence": "Flight or train itinerary showing entry and exit from mainland China",
-   "accommodation_evidence": "Hotel bookings covering intended stay or invitation letter from mainland host",
-   "financial_evidence": "Bank statements or other proof of funds for the trip",
-   "insurance_required": false,
-   "exceptions": [
-    "Hong Kong permanent residents may enter mainland China visa-free with a valid Mainland Travel Permit for Hong Kong and Macao Residents (Home Return Permit)",
-    "Holders of foreign passports resident in HKSAR are assessed under different rules"
-   ],
-   "uncertainty": [
-    {
-     "field": "government_fee",
-     "reason": "China visa fees for HKSAR passport holders vary by entry type and processing time; exact current fee not verified"
-    },
-    {
-     "field": "official_portal_url",
-     "reason": "Official government portal URL for HKSAR passport holders applying for mainland China visas is not confirmed; CVASC sites are service-centre platforms"
-    },
-    {
-     "field": "visa_products",
-     "reason": "Specific validity periods, stay limits and fees for HKSAR applicants may differ from generic Chinese tourist visa products"
-    },
-    {
-     "field": "application_channel",
-     "reason": "Applications are generally handled by the China Visa Application Service Center in Hong Kong; confirm whether direct submission to the Commissioner's Office is also permitted"
-    },
-    {
-     "field": "disposition",
-     "reason": "Most Hong Kong permanent residents use the Mainland Travel Permit (Home Return Permit) and do not require a visa; the visa-required answer applies only to travel on an HKSAR ordinary passport without that permit"
-    }
-   ],
-   "confidence": "medium",
-   "permitted_stay_days": null,
-   "passport_validity_requirement": {
-    "kind": "months_after_departure",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": false,
-    "name": null,
-    "submission_window": null
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination",
-     "applicability": "conditional",
-     "trigger_countries": [],
-     "trigger": "Recent travel to or transit through a yellow-fever-affected country",
-     "question": "Have you visited a yellow-fever-affected country within the past 6 days?"
-    }
-   ],
-   "route_workflow_type": "visa_center_submission",
-   "visa_products": [
-    {
-     "type": "Single-entry tourist L",
-     "entry": "single",
-     "validity": "3 months",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "Standard single-entry tourist visa"
-    },
-    {
-     "type": "Double-entry tourist L",
-     "entry": "multiple",
-     "validity": "6 months",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "Two entries during validity"
-    },
-    {
-     "type": "Multiple-entry tourist L",
-     "entry": "multiple",
-     "validity": "6 months to 10 years",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "Frequent-traveller product; exact validity and stay discretionary"
-    }
-   ],
-   "application_channel_detail": "HKSAR passport holders lodge paper applications in person at the China Visa Application Service Center in Hong Kong for processing by the Office of the Commissioner of the Ministry of Foreign Affairs of China in the HKSAR.",
-   "requirement_detail": "paper_visa",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision",
-   "grounded_check": {
-    "at": "2026-08-25T21:54:03.014400+00:00",
-    "outcome": "no_official_source",
-    "note": "the answer names no government page to check"
-   }
-  },
-  "generated_at": "2026-08-25T20:27:29.777747",
-  "fresh_until": "2026-09-08T20:27:29.777747"
  },
  {
   "cache_key": "HKG|HKG|CYP|tourism|default|unknown|v6",
@@ -83367,7 +81387,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:49.041701+00:00",
+    "outcome": "page_not_relevant",
+    "sources_tried": [
+     "https://punetejashtme.gov.al/en/services/consular-services/visa-regime-for-foreigners-travelling-to-the-republic-of-albania/"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:40:36.335486",
   "fresh_until": "2026-09-08T20:40:36.335486"
@@ -83459,7 +81486,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:12:04.433832+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:40:40.582129",
   "fresh_until": "2026-08-27T20:40:40.582129"
@@ -83548,10 +81580,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:49.089027+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.mfa.am/en/visa/",
+    "content_hash": "bf0a6a88befb362b1f3d46784caf17405e2d729aec3794eb7c3bd0dd941db8a4",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page is generic and does not display the nationality-specific dropdown result for U.S. ordinary passport holders, but its generic 180-days-in-one-year visa-free limit matches the stored answer."
+   }
   },
   "generated_at": "2026-08-25T20:40:44.446805",
-  "fresh_until": "2026-09-08T20:40:44.446805"
+  "fresh_until": "2026-09-08T22:10:54.968674"
  },
  {
   "cache_key": "USA|USA|AFG|tourism|default|unknown|v6",
@@ -83919,10 +81962,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:49.029805+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.smevisa.gov.ao",
+    "content_hash": "f909f4f5df5071b65f03a48952c8c93b18ba1745ecf55cc432a4ecba68afad39",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page is only a generic portal welcome screen and does not state any nationality-specific requirements, fees, or validity periods."
+   }
   },
   "generated_at": "2026-08-25T20:40:49.493841",
-  "fresh_until": "2026-09-08T20:40:49.493841"
+  "fresh_until": "2026-09-08T22:11:13.144314"
  },
  {
   "cache_key": "USA|USA|ARG|tourism|default|unknown|v6",
@@ -84012,10 +82066,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:49.077755+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.argentina.gob.ar/migraciones",
+    "content_hash": "c2ca569b9fe07eb49aa601053d1ed3a5ebfeb7be74bff8e9f1348e4d99519a5f",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page is a general Migraciones portal and does not state specific entry rules for US tourist passport holders."
+   }
   },
   "generated_at": "2026-08-25T20:40:50.150569",
-  "fresh_until": "2026-08-27T20:40:50.150569"
+  "fresh_until": "2026-09-08T22:10:58.253257"
  },
  {
   "cache_key": "HKG|HKG|ZWE|tourism|default|unknown|v6",
@@ -84265,7 +82330,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:12:04.470530+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:40:58.252580",
   "fresh_until": "2026-08-27T20:40:58.252580"
@@ -84348,7 +82418,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:50.091782+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "http://www.mfa.gov.ba/consular_information/visa_regime/Default.aspx?lang=eng"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:41:03.791770",
   "fresh_until": "2026-09-08T20:41:03.791770"
@@ -84447,7 +82524,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:11:39.681311+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:41:05.989749",
   "fresh_until": "2026-09-08T20:41:05.989749"
@@ -84537,7 +82619,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:12:04.556781+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:41:08.124748",
   "fresh_until": "2026-09-08T20:41:08.124748"
@@ -84763,7 +82850,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:12:04.499975+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://evisa.gov.az/en/"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:41:23.102556",
   "fresh_until": "2026-09-08T20:41:23.102556"
@@ -84922,7 +83016,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:12:04.614411+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:41:28.885061",
   "fresh_until": "2026-09-08T20:41:28.885061"
@@ -85067,7 +83166,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:11:39.707219+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:41:40.044427",
   "fresh_until": "2026-09-08T20:41:40.044427"
@@ -85217,7 +83321,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:12:04.584094+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://evisa.gouv.bj"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:41:43.291453",
   "fresh_until": "2026-09-08T20:41:43.291453"
@@ -85379,7 +83490,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:50.040941+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://www.visa.gov.bd"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:41:48.146064",
   "fresh_until": "2026-09-08T20:41:48.146064"
@@ -85540,7 +83658,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:12:04.527890+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:41:51.028008",
   "fresh_until": "2026-09-08T20:41:51.028008"
@@ -85732,10 +83855,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:11:39.757179+00:00",
+    "outcome": "checked",
+    "source_url": "https://evisa.gov.bw/#/",
+    "content_hash": "f7d3298fc089371d3e203ecdfbb7e567be7f366e12d82198bd67c59cafb0bd34",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The official page is a generic Botswana e-Visa portal homepage and does not list U.S.-specific requirements."
+   }
   },
   "generated_at": "2026-08-25T20:41:59.552724",
-  "fresh_until": "2026-08-27T20:41:59.552724"
+  "fresh_until": "2026-09-08T22:12:01.654661"
  },
  {
   "cache_key": "USA|USA|BHR|tourism|default|unknown|v6",
@@ -86081,7 +84215,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:11:39.656913+00:00",
+    "outcome": "page_not_relevant",
+    "sources_tried": [
+     "https://www.gov.br/mre/en/contact/visa-information/e-visa"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:42:11.636823",
   "fresh_until": "2026-09-08T20:42:11.636823"
@@ -86295,7 +84436,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:11:39.732828+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:42:17.735150",
   "fresh_until": "2026-09-08T20:42:17.735150"
@@ -86381,7 +84527,7 @@
    "passes": 1,
    "label": "Kimi route decision",
    "grounded_check": {
-    "at": "2026-08-25T22:10:46.044174+00:00",
+    "at": "2026-08-25T22:12:39.772657+00:00",
     "outcome": "no_official_source",
     "note": "the answer names no government page to check"
    }
@@ -86523,7 +84669,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:11:39.628605+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:42:27.823937",
   "fresh_until": "2026-09-08T20:42:27.823937"
@@ -86660,7 +84811,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:11:39.782386+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:42:35.505574",
   "fresh_until": "2026-09-08T20:42:35.505574"
@@ -86799,7 +84955,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:12:40.609844+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:42:38.249545",
   "fresh_until": "2026-09-08T20:42:38.249545"
@@ -86933,7 +85094,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:12:40.788210+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:42:51.183510",
   "fresh_until": "2026-09-08T20:42:51.183510"
@@ -87185,7 +85351,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:12:39.944604+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://travel.state.gov/content/travel/en/international-travel/International-Travel-Country-Information-Pages/Chile.html"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:42:54.067468",
   "fresh_until": "2026-09-08T20:42:54.067468"
@@ -87329,7 +85502,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:12:40.279640+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:43:01.202497",
   "fresh_until": "2026-09-08T20:43:01.202497"
@@ -87489,10 +85667,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:12:40.109607+00:00",
+    "outcome": "checked",
+    "source_url": "https://us.china-embassy.gov.cn/eng/lsfw/zj/",
+    "content_hash": "65e3f447b5b8a7828d1ed08b145c7c16cc7d43cdbec490b84237ed1fc60a0bc3",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page only lists embassy contact details and navigation links; it does not state specific visa requirements, fees, processing times, or nationality-specific rules."
+   }
   },
   "generated_at": "2026-08-25T20:43:03.234570",
-  "fresh_until": "2026-09-08T20:43:03.234570"
+  "fresh_until": "2026-09-08T22:12:44.239693"
  },
  {
   "cache_key": "USA|USA|CMR|tourism|default|unknown|v6",
@@ -87645,7 +85834,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:12:40.439277+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:43:07.166433",
   "fresh_until": "2026-09-08T20:43:07.166433"
@@ -87748,7 +85942,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:12:41.330243+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:43:15.694943",
   "fresh_until": "2026-09-08T20:43:15.694943"
@@ -87890,7 +86089,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:12:41.497907+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:43:19.366755",
   "fresh_until": "2026-09-08T20:43:19.366755"
@@ -88018,7 +86222,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:12:41.019654+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://www.migracioncolombia.gov.co/"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:43:23.978359",
   "fresh_until": "2026-09-08T20:43:23.978359"
@@ -88106,7 +86317,7 @@
    "passes": 1,
    "label": "Kimi route decision",
    "grounded_check": {
-    "at": "2026-08-25T22:10:49.959386+00:00",
+    "at": "2026-08-25T22:14:20.312296+00:00",
     "outcome": "no_official_source",
     "note": "the answer names no government page to check"
    }
@@ -88195,7 +86406,7 @@
    "passes": 1,
    "label": "Kimi route decision",
    "grounded_check": {
-    "at": "2026-08-25T22:10:49.972692+00:00",
+    "at": "2026-08-25T22:14:20.333466+00:00",
     "outcome": "no_official_source",
     "note": "the answer names no government page to check"
    }
@@ -88363,10 +86574,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:13:20.986066+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.evisa.gouv.dj/applicant-api/#/",
+    "content_hash": "16be76f398b3545265cffe2374d09a04c31033ef0a5fbf83ecbd1a0f5a5f0bff",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page is a generic e-Visa portal and does not contradict any stored field."
+   }
   },
   "generated_at": "2026-08-25T20:43:53.480903",
-  "fresh_until": "2026-09-08T20:43:53.480903"
+  "fresh_until": "2026-09-08T22:13:46.910415"
  },
  {
   "cache_key": "USA|USA|DOM|tourism|default|unknown|v6",
@@ -88516,10 +86738,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:49.986348+00:00",
+    "outcome": "checked",
+    "source_url": "https://eticket.migracion.gob.do/",
+    "content_hash": "b7aed8c9b0e9d61abcd96ab8de9dfc22bd3c70dc3d89a82d65bfbb2a7563f69e",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page describes the mandatory, free e-Ticket process for all passengers entering or leaving the Dominican Republic but does not state nationality-specific visa or stay rules for U.S. citizens."
+   }
   },
   "generated_at": "2026-08-25T20:43:54.275134",
-  "fresh_until": "2026-09-08T20:43:54.275134"
+  "fresh_until": "2026-09-08T22:11:06.283066"
  },
  {
   "cache_key": "USA|USA|ECU|tourism|default|unknown|v6",
@@ -88623,7 +86856,7 @@
    "passes": 1,
    "label": "Kimi route decision",
    "grounded_check": {
-    "at": "2026-08-25T22:10:50.014464+00:00",
+    "at": "2026-08-25T22:14:20.398564+00:00",
     "outcome": "no_official_source",
     "note": "the answer names no government page to check"
    }
@@ -88708,7 +86941,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:20.464467+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:44:12.319058",
   "fresh_until": "2026-08-27T20:44:12.319058"
@@ -88876,7 +87114,7 @@
    "passes": 1,
    "label": "Kimi route decision",
    "grounded_check": {
-    "at": "2026-08-25T22:10:50.044059+00:00",
+    "at": "2026-08-25T22:14:20.441823+00:00",
     "outcome": "no_official_source",
     "note": "the answer names no government page to check"
    }
@@ -89012,10 +87250,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:50.029788+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.visa2egypt.gov.eg/eVisa/Home;jsessionid=HAlVieucDspPqswJIuKjZ8fN0o9GtvNLEyDQxTy1.pp-ui-02?VISTK=9ZXU-L32U-3CI6-S9Z7-H2ZT-XIU1-Q6CJ-A0LY-UUAI-UZQ1-5GX4-EE3B-E1HR-3VYU-0X8W-2IMB",
+    "content_hash": "9c922a0d51d090b0ee935c2081dffbb1b628abe27e8cb6ccde0e20c0ea70261e",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The official page is a generic Egypt e-Visa landing page; it does not state nationality-specific rules or contradict any stored field."
+   }
   },
   "generated_at": "2026-08-25T20:44:15.762256",
-  "fresh_until": "2026-09-08T20:44:15.762256"
+  "fresh_until": "2026-09-08T22:11:07.300621"
  },
  {
   "cache_key": "USA|USA|DZA|tourism|default|unknown|v6",
@@ -89166,7 +87415,7 @@
    "passes": 1,
    "label": "Kimi route decision",
    "grounded_check": {
-    "at": "2026-08-25T22:10:50.000012+00:00",
+    "at": "2026-08-25T22:14:20.376173+00:00",
     "outcome": "no_official_source",
     "note": "the answer names no government page to check"
    }
@@ -89274,10 +87523,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:41.703106+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.immigration.gov.fj/visa-exempted-countries/",
+    "content_hash": "5cd58f770fe4fb1f8ded912b6090153f322842dcfdd86103c9dc8c2c406da9ec",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page confirms U.S. citizens are visa-exempt for Fiji but does not state stay length, arrival card, or document requirements."
+   }
   },
   "generated_at": "2026-08-25T20:44:36.744998",
-  "fresh_until": "2026-09-08T20:44:36.744998"
+  "fresh_until": "2026-09-08T22:14:45.710985"
  },
  {
   "cache_key": "USA|USA|ETH|tourism|default|unknown|v6",
@@ -89426,10 +87686,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:20.485383+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.evisa.gov.et/",
+    "content_hash": "3e49f775e1f64157b7f41960d74576f82eb429d8e0158dab157e95ce1b5ff60a",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page is generic marketing content for the Ethiopian e-Visa portal and does not state nationality-specific rules, fees, stay lengths, or VOA details for U.S. citizens."
+   }
   },
   "generated_at": "2026-08-25T20:44:39.614530",
-  "fresh_until": "2026-09-08T20:44:39.614530"
+  "fresh_until": "2026-09-08T22:14:33.781411"
  },
  {
   "cache_key": "USA|USA|GEO|tourism|default|unknown|v6",
@@ -89517,7 +87788,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:41.755923+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:44:46.421369",
   "fresh_until": "2026-09-08T20:44:46.421369"
@@ -89666,7 +87942,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:41.731094+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:44:47.084498",
   "fresh_until": "2026-09-08T20:44:47.084498"
@@ -89771,7 +88052,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:11:19.765373+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:44:48.195334",
   "fresh_until": "2026-09-08T20:44:48.195334"
@@ -89958,7 +88244,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:41.781194+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:44:49.022499",
   "fresh_until": "2026-08-27T20:44:49.022499"
@@ -90166,7 +88457,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:11:19.780215+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:45:13.180906",
   "fresh_until": "2026-09-08T20:45:13.180906"
@@ -90296,7 +88592,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:52.037660+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:45:15.991010",
   "fresh_until": "2026-09-08T20:45:15.991010"
@@ -90429,7 +88730,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:52.047100+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:45:16.139724",
   "fresh_until": "2026-09-08T20:45:16.139724"
@@ -90509,7 +88815,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:11:19.852896+00:00",
+    "outcome": "page_not_relevant",
+    "sources_tried": [
+     "https://mvep.gov.hr/en/consular-information/visa-regime/"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:45:21.474231",
   "fresh_until": "2026-09-08T20:45:21.474231"
@@ -90640,7 +88953,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:52.080926+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:45:28.004168",
   "fresh_until": "2026-09-08T20:45:28.004168"
@@ -90746,7 +89064,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:11:19.829353+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:45:28.303198",
   "fresh_until": "2026-09-08T20:45:28.303198"
@@ -90850,7 +89173,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:11:19.879786+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:45:31.405966",
   "fresh_until": "2026-09-08T20:45:31.405966"
@@ -90928,7 +89256,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:11:19.929065+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:45:33.404536",
   "fresh_until": "2026-09-08T20:45:33.404536"
@@ -91013,10 +89346,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:11:19.902354+00:00",
+    "outcome": "checked",
+    "source_url": "https://home-affairs.ec.europa.eu/policies/schengen/visa-policy_en",
+    "content_hash": "cb5a4b19fadf96e91f9c1646989a4bbbcc31a7e93574563823cfa1057a7e1daa",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The generic Schengen visa policy page confirms the 90/180-day rule and visa-exempt framework but does not address U.S.-specific entry rules, so no corrections are made."
+   }
   },
   "generated_at": "2026-08-25T20:45:33.425361",
-  "fresh_until": "2026-09-08T20:45:33.425361"
+  "fresh_until": "2026-09-08T22:11:24.178727"
  },
  {
   "cache_key": "USA|USA|ISR|tourism|default|unknown|v6",
@@ -91114,7 +89458,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:16:18.950235+00:00",
+    "outcome": "page_not_relevant",
+    "sources_tried": [
+     "https://www.gov.il/en/error"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:45:50.635786",
   "fresh_until": "2026-09-08T20:45:50.635786"
@@ -91219,7 +89570,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:11:19.804601+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:45:51.062455",
   "fresh_until": "2026-09-08T20:45:51.062455"
@@ -91453,7 +89809,7 @@
    "passes": 1,
    "label": "Kimi route decision",
    "grounded_check": {
-    "at": "2026-08-25T22:10:51.338211+00:00",
+    "at": "2026-08-25T22:11:04.338821+00:00",
     "outcome": "no_official_source",
     "note": "the answer names no government page to check"
    }
@@ -91607,7 +89963,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:52.059522+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://travel.state.gov/content/travel/en/international-travel/International-Travel-Country-Information-Pages/GuineaBissau.html"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:45:55.074791",
   "fresh_until": "2026-09-08T20:45:55.074791"
@@ -91817,7 +90180,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:11:19.951589+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:45:57.001158",
   "fresh_until": "2026-08-27T20:45:57.001158"
@@ -92053,7 +90421,7 @@
    "passes": 1,
    "label": "Kimi route decision",
    "grounded_check": {
-    "at": "2026-08-25T22:10:51.404138+00:00",
+    "at": "2026-08-25T22:11:04.525675+00:00",
     "outcome": "no_official_source",
     "note": "the answer names no government page to check"
    }
@@ -92153,7 +90521,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:11:04.574490+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:46:09.571010",
   "fresh_until": "2026-09-08T20:46:09.571010"
@@ -92289,7 +90662,7 @@
    "passes": 1,
    "label": "Kimi route decision",
    "grounded_check": {
-    "at": "2026-08-25T22:10:51.366947+00:00",
+    "at": "2026-08-25T22:11:04.440117+00:00",
     "outcome": "no_official_source",
     "note": "the answer names no government page to check"
    }
@@ -92407,7 +90780,7 @@
    "passes": 1,
    "label": "Kimi route decision",
    "grounded_check": {
-    "at": "2026-08-25T22:10:51.357982+00:00",
+    "at": "2026-08-25T22:16:18.976311+00:00",
     "outcome": "no_official_source",
     "note": "the answer names no government page to check"
    }
@@ -92560,7 +90933,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:16:19.024414+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://www.evisa.gov.kh"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:46:24.162100",
   "fresh_until": "2026-09-08T20:46:24.162100"
@@ -92699,10 +91079,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:51.392303+00:00",
+    "outcome": "checked",
+    "source_url": "https://etakenya.go.ke/",
+    "content_hash": "6a2cd9f9735d650df177f8e8e631a71705a836ec1fc223753dac872a5c19b385",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page is the generic Kenya eTA portal homepage and does not state any nationality-specific rules or contradict the stored details."
+   }
   },
   "generated_at": "2026-08-25T20:46:24.722124",
-  "fresh_until": "2026-09-08T20:46:24.722124"
+  "fresh_until": "2026-09-08T22:10:54.653903"
  },
  {
   "cache_key": "USA|USA|KNA|tourism|default|unknown|v6",
@@ -92796,7 +91187,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:16:19.000412+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://travel.state.gov/content/travel/en/international-travel/International-Travel-Country-Information-Pages/SaintKittsandNevis.html"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:46:29.319703",
   "fresh_until": "2026-09-08T20:46:29.319703"
@@ -92926,7 +91324,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:12:41.196395+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:46:30.165247",
   "fresh_until": "2026-09-08T20:46:30.165247"
@@ -93216,7 +91619,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:13:40.436762+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:46:39.139807",
   "fresh_until": "2026-08-27T20:46:39.139807"
@@ -93415,7 +91823,7 @@
    "passes": 1,
    "label": "Kimi route decision",
    "grounded_check": {
-    "at": "2026-08-25T22:10:51.379662+00:00",
+    "at": "2026-08-25T22:11:04.465428+00:00",
     "outcome": "no_official_source",
     "note": "the answer names no government page to check"
    }
@@ -93561,7 +91969,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:16:19.049214+00:00",
+    "outcome": "page_not_relevant",
+    "sources_tried": [
+     "https://evisa.moi.gov.kw/"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:46:54.931529",
   "fresh_until": "2026-09-08T20:46:54.931529"
@@ -93727,7 +92142,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:16:19.077738+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:47:01.816462",
   "fresh_until": "2026-09-08T20:47:01.816462"
@@ -93853,7 +92273,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:11:04.660076+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:47:06.735699",
   "fresh_until": "2026-09-08T20:47:06.735699"
@@ -93984,7 +92409,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:11:04.314412+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:47:12.143501",
   "fresh_until": "2026-08-27T20:47:12.143501"
@@ -94074,7 +92504,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:11:04.350444+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:47:12.193014",
   "fresh_until": "2026-09-08T20:47:12.193014"
@@ -94353,7 +92788,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:11:04.681337+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:47:34.050338",
   "fresh_until": "2026-09-08T20:47:34.050338"
@@ -94460,7 +92900,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:13:50.406946+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:47:36.982236",
   "fresh_until": "2026-09-08T20:47:36.982236"
@@ -94702,7 +93147,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:13:50.475715+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:47:44.784760",
   "fresh_until": "2026-09-08T20:47:44.784760"
@@ -94788,7 +93238,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:13:50.436354+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:47:45.979486",
   "fresh_until": "2026-09-08T20:47:45.979486"
@@ -94907,7 +93362,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:11:04.333643+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:47:47.056127",
   "fresh_until": "2026-09-08T20:47:47.056127"
@@ -94997,7 +93457,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:59.163904+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:47:51.943488",
   "fresh_until": "2026-09-08T20:47:51.943488"
@@ -95190,7 +93655,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:59.177655+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:48:05.378615",
   "fresh_until": "2026-09-08T20:48:05.378615"
@@ -95754,7 +94224,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:09.229561+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:48:29.417958",
   "fresh_until": "2026-09-08T20:48:29.417958"
@@ -95857,7 +94332,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:47.109736+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:48:29.969542",
   "fresh_until": "2026-09-08T20:48:29.969542"
@@ -95958,7 +94438,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:09.273765+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:48:37.595050",
   "fresh_until": "2026-09-08T20:48:37.595050"
@@ -96053,7 +94538,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:13:50.549283+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://www.inm.gob.mx/"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:48:38.095862",
   "fresh_until": "2026-09-08T20:48:38.095862"
@@ -96173,10 +94665,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:13:50.524322+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.immigration.gov.mv/",
+    "content_hash": "d5d08bee2ecebf1fa029cf61ca34242ee40e253d268ad8e897d9bc96fbac5211",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page is a generic Maldives Immigration homepage that does not state nationality-specific rules or detailed tourist visa requirements for U.S. citizens."
+   }
   },
   "generated_at": "2026-08-25T20:48:42.973701",
-  "fresh_until": "2026-09-08T20:48:42.973701"
+  "fresh_until": "2026-09-08T22:13:55.665628"
  },
  {
   "cache_key": "USA|USA|MOZ|tourism|default|unknown|v6",
@@ -96299,7 +94802,24 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:09.203722+00:00",
+    "outcome": "checked",
+    "source_url": "https://evisa.gov.mz",
+    "content_hash": "e5baec320862cd99dd2cab8a39786d7dff00f0653975e18e7ff737dfa9b56db9",
+    "consistent": false,
+    "changed_fields": [],
+    "disputed_fields": [
+     "application_channel",
+     "application_channel_detail",
+     "disposition",
+     "requirement_detail",
+     "visa_products"
+    ],
+    "generic_page_skipped": [],
+    "note": "The page lists the United States under the eTA program, not visa-exempt, requiring an online application and fee before travel."
+   }
   },
   "generated_at": "2026-08-25T20:48:49.262445",
   "fresh_until": "2026-09-08T20:48:49.262445"
@@ -96400,7 +94920,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:13:27.949960+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:48:53.033699",
   "fresh_until": "2026-09-08T20:48:53.033699"
@@ -96481,7 +95006,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:13:27.973851+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:48:59.581220",
   "fresh_until": "2026-08-27T20:48:59.581220"
@@ -96629,7 +95159,20 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:09.341912+00:00",
+    "outcome": "checked",
+    "source_url": "https://immigration.gov.ng/",
+    "content_hash": "56880216fa1d1c69c0babde10a1a4693d754ba96931e0cb94134103e7d94b27d",
+    "consistent": false,
+    "changed_fields": [],
+    "disputed_fields": [
+     "arrival_card"
+    ],
+    "generic_page_skipped": [],
+    "note": "The generic NIS homepage confirms e-Visa/visa services and newly mandatory Landing and Exit Cards, but does not specify U.S.-nationality rules on stay length or fees."
+   }
   },
   "generated_at": "2026-08-25T20:49:05.180487",
   "fresh_until": "2026-08-27T20:49:05.180487"
@@ -96713,7 +95256,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:13:27.961338+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:49:08.639165",
   "fresh_until": "2026-09-08T20:49:08.639165"
@@ -96858,7 +95406,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:09.319010+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:49:09.975328",
   "fresh_until": "2026-08-27T20:49:09.975328"
@@ -97014,7 +95567,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:13:50.498459+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://www.evisamada.gov.mg"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:49:12.294649",
   "fresh_until": "2026-09-08T20:49:12.294649"
@@ -97140,7 +95700,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:13:28.052704+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:49:22.087405",
   "fresh_until": "2026-09-08T20:49:22.087405"
@@ -97239,7 +95804,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:13:28.063431+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:49:31.885161",
   "fresh_until": "2026-09-08T20:49:31.885161"
@@ -97386,7 +95956,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:13:27.986297+00:00",
+    "outcome": "page_not_relevant",
+    "sources_tried": [
+     "https://immigration.gov.np/page/tourist-visa"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:49:35.407582",
   "fresh_until": "2026-09-08T20:49:35.407582"
@@ -97532,7 +96109,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:13:28.086249+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:49:42.560419",
   "fresh_until": "2026-09-08T20:49:42.560419"
@@ -97682,7 +96264,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:09.297740+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:49:44.919576",
   "fresh_until": "2026-09-08T20:49:44.919576"
@@ -97844,10 +96431,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:13:28.037132+00:00",
+    "outcome": "checked",
+    "source_url": "https://visa.nadra.gov.pk/",
+    "content_hash": "3229d1f57eb1cb2e279b0d571dc4decb16351059be42c5ff64ab5ca2c8a3ecc5",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page is a generic Pakistan e-Visa portal homepage and confirms online applications are accepted; it does not address U.S.-specific rules or contradict any stored field."
+   }
   },
   "generated_at": "2026-08-25T20:49:47.827031",
-  "fresh_until": "2026-09-08T20:49:47.827031"
+  "fresh_until": "2026-09-08T22:14:00.136308"
  },
  {
   "cache_key": "USA|USA|NZL|tourism|default|unknown|v6",
@@ -97981,7 +96579,20 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:13:28.013388+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.immigration.govt.nz/visas/new-zealand-electronic-travel-authority-nzeta/",
+    "content_hash": "3ea83de848fc53dabc9951e075f49cf3ab55f79a3f44b7f870dfedbbf2f75a48",
+    "consistent": false,
+    "changed_fields": [],
+    "disputed_fields": [
+     "required_documents"
+    ],
+    "generic_page_skipped": [],
+    "note": "The page confirms the NZeTA route for visa-waiver nationals but adds a required photo for the NZeTA request."
+   }
   },
   "generated_at": "2026-08-25T20:49:54.877217",
   "fresh_until": "2026-08-27T20:49:54.877217"
@@ -98106,7 +96717,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:13:28.002130+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:49:57.611976",
   "fresh_until": "2026-09-08T20:49:57.611976"
@@ -98195,7 +96811,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:44.772461+00:00",
+    "outcome": "page_not_relevant",
+    "sources_tried": [
+     "https://eur-lex.europa.eu/TodayOJ/index.html?uri=CELEX:32009R0810"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:49:58.676741",
   "fresh_until": "2026-09-08T20:49:58.676741"
@@ -98292,7 +96915,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:13:28.073325+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:50:00.543516",
   "fresh_until": "2026-09-08T20:50:00.543516"
@@ -98448,7 +97076,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:13:28.029000+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://evisa.rop.gov.om/"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:50:04.390809",
   "fresh_until": "2026-09-08T20:50:04.390809"
@@ -98533,10 +97168,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:58.258489+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.mfa.gov.rs/en/citizens/travel-serbia/visa-regime",
+    "content_hash": "da35f3d607ab7627749e426b240c2629783b6ca00dd95d03c8286929137a4e07",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "Page includes United States in the visa-regime search list but the extracted text contains no nationality-specific rules for US citizens."
+   }
   },
   "generated_at": "2026-08-25T20:50:12.487193",
-  "fresh_until": "2026-09-08T20:50:12.487193"
+  "fresh_until": "2026-09-08T22:15:03.467543"
  },
  {
   "cache_key": "USA|USA|ROU|tourism|default|unknown|v6",
@@ -98620,7 +97266,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:44.813553+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:50:14.845906",
   "fresh_until": "2026-09-08T20:50:14.845906"
@@ -98756,7 +97407,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:44.847203+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:50:23.520601",
   "fresh_until": "2026-09-08T20:50:23.520601"
@@ -98869,7 +97525,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:36.244419+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:50:29.362634",
   "fresh_until": "2026-09-08T20:50:29.362634"
@@ -98994,7 +97655,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:44.784754+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:50:33.454531",
   "fresh_until": "2026-09-08T20:50:33.454531"
@@ -99157,7 +97823,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:44.857747+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:50:40.504067",
   "fresh_until": "2026-08-27T20:50:40.504067"
@@ -99277,7 +97948,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:44.897036+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:50:44.896454",
   "fresh_until": "2026-09-08T20:50:44.896454"
@@ -99406,7 +98082,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:44.798464+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://www.moi.gov.qa"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:50:48.057081",
   "fresh_until": "2026-09-08T20:50:48.057081"
@@ -99490,7 +98173,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:44.931343+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:51:03.890041",
   "fresh_until": "2026-08-27T20:51:03.890041"
@@ -99646,7 +98334,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:44.822681+00:00",
+    "outcome": "page_not_relevant",
+    "sources_tried": [
+     "https://irembo.gov.rw/home/citizen/all_services"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:51:07.007094",
   "fresh_until": "2026-09-08T20:51:07.007094"
@@ -99753,7 +98448,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:15.624652+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://www.mzz.gov.si/en/entry_and_residence/visa_regime/visa_requirements_for_foreigners/"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:51:12.227486",
   "fresh_until": "2026-09-08T20:51:12.227486"
@@ -99893,7 +98595,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:44.907939+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:51:16.903374",
   "fresh_until": "2026-09-08T20:51:16.903374"
@@ -100004,7 +98711,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:44.870602+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:51:28.383790",
   "fresh_until": "2026-09-08T20:51:28.383790"
@@ -100278,7 +98990,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:58.300478+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:51:35.521346",
   "fresh_until": "2026-09-08T20:51:35.521346"
@@ -100404,7 +99121,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:44.919296+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:51:38.226554",
   "fresh_until": "2026-09-08T20:51:38.226554"
@@ -100542,7 +99264,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:36.226126+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:51:42.843175",
   "fresh_until": "2026-09-08T20:51:42.843175"
@@ -100670,7 +99397,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:58.273614+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:51:43.605608",
   "fresh_until": "2026-09-08T20:51:43.605608"
@@ -100804,7 +99536,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:44.941321+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:51:54.280076",
   "fresh_until": "2026-09-08T20:51:54.280076"
@@ -100951,7 +99688,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:14:58.289033+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:51:54.962258",
   "fresh_until": "2026-09-08T20:51:54.962258"
@@ -101071,7 +99813,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:36.293322+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:51:59.102756",
   "fresh_until": "2026-09-08T20:51:59.102756"
@@ -101257,7 +100004,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:36.269163+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:52:00.730283",
   "fresh_until": "2026-09-08T20:52:00.730283"
@@ -101429,7 +100181,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:36.279801+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:52:10.434794",
   "fresh_until": "2026-09-08T20:52:10.434794"
@@ -101587,7 +100344,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:36.257735+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:52:15.169416",
   "fresh_until": "2026-08-27T20:52:15.169416"
@@ -101672,7 +100434,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:32.800188+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://travel.state.gov/content/travel/en/international-travel/International-Travel-Country-Information-Pages/Tunisia.html"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:52:25.914520",
   "fresh_until": "2026-09-08T20:52:25.914520"
@@ -101780,7 +100549,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:51.238249+00:00",
+    "outcome": "page_not_relevant",
+    "sources_tried": [
+     "https://immigration.gov.tt/"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:52:30.077475",
   "fresh_until": "2026-09-08T20:52:30.077475"
@@ -102002,7 +100778,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:51.227547+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:52:31.098699",
   "fresh_until": "2026-09-08T20:52:31.098699"
@@ -102122,7 +100903,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:51.258215+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:52:34.519150",
   "fresh_until": "2026-09-08T20:52:34.519150"
@@ -102255,7 +101041,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:36.304726+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:52:35.260222",
   "fresh_until": "2026-09-08T20:52:35.260222"
@@ -102403,7 +101194,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:51.215639+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:52:38.357113",
   "fresh_until": "2026-09-08T20:52:38.357113"
@@ -102488,7 +101284,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:51.309303+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:52:42.215618",
   "fresh_until": "2026-08-27T20:52:42.215618"
@@ -102613,7 +101414,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:32.839907+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://visas.immigration.go.ug"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:52:45.683006",
   "fresh_until": "2026-09-08T20:52:45.683006"
@@ -102709,7 +101517,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:51.286966+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:52:50.037869",
   "fresh_until": "2026-09-08T20:52:50.037869"
@@ -102790,7 +101603,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:51.297838+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:52:56.643848",
   "fresh_until": "2026-09-08T20:52:56.643848"
@@ -102887,7 +101705,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:51.329230+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:52:59.166759",
   "fresh_until": "2026-09-08T20:52:59.166759"
@@ -103045,7 +101868,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:51.338654+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:53:02.505835",
   "fresh_until": "2026-09-08T20:53:02.505835"
@@ -103193,10 +102021,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:32.825909+00:00",
+    "outcome": "checked",
+    "source_url": "https://visa.immigration.go.tz/",
+    "content_hash": "c85e677ed74e4f41fab10ff79421a9c3d946ad2668da909e921dc7d7086eae79",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page is a generic Tanzania e-Visa portal landing page and does not state any nationality-specific rules or contradict the stored answer."
+   }
   },
   "generated_at": "2026-08-25T20:53:04.505047",
-  "fresh_until": "2026-09-08T20:53:04.505047"
+  "fresh_until": "2026-09-08T22:16:01.044620"
  },
  {
   "cache_key": "USA|USA|VUT|tourism|default|unknown|v6",
@@ -103285,10 +102124,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:43.371209+00:00",
+    "outcome": "checked",
+    "source_url": "https://immigration.gov.vu",
+    "content_hash": "03a9a428de6cfc8f331e8ab756362041d5a9dd4e2df95594165a7b37099f9175",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page is a general Vanuatu immigration portal and does not address U.S. nationality-specific rules, so no stored fields are contradicted."
+   }
   },
   "generated_at": "2026-08-25T20:53:06.046996",
-  "fresh_until": "2026-09-08T20:53:06.046996"
+  "fresh_until": "2026-09-08T22:15:45.464323"
  },
  {
   "cache_key": "USA|USA|YEM|tourism|default|unknown|v6",
@@ -103423,7 +102273,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:32.537607+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:53:10.587633",
   "fresh_until": "2026-08-27T20:53:10.587633"
@@ -103624,7 +102479,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:32.526268+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:53:22.630623",
   "fresh_until": "2026-08-27T20:53:22.630623"
@@ -103775,7 +102635,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:32.549276+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:53:27.528408",
   "fresh_until": "2026-09-08T20:53:27.528408"
@@ -103937,10 +102802,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:15:32.560476+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.evisa.gov.zw",
+    "content_hash": "ed29bbe28d2886df8164174dbc681dd6a2775fbca8b704b5f7dec6e29579fe0f",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The official eVisa portal page is generic and does not state any specific visa rules, fees, or U.S. national requirements, so no stored fields are contradicted."
+   }
   },
   "generated_at": "2026-08-25T20:54:08.316369",
-  "fresh_until": "2026-09-08T20:54:08.316369"
+  "fresh_until": "2026-09-08T22:15:35.913116"
  },
  {
   "cache_key": "CHN|CHN|JPN|tourism|default|2027-01|v6",

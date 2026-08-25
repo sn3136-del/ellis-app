@@ -129,7 +129,15 @@ def find(route: dict) -> dict | None:
 # require a pre-arrival filing, and dropping it would strand a traveller.
 _APPLICATION_ONLY = ("processing_time", "forms", "account_registration_steps",
                      "payment_process", "submission_process",
-                     "official_portal_url", "government_fee")
+                     "official_portal_url", "government_fee",
+                     # An independent re-verification found visa-free answers
+                     # still carrying the machinery of an application: a
+                     # "Tourist eVisa" category, an eVisa workflow type, a
+                     # channel sentence sending the traveller to a portal, and
+                     # a product table with fees. A verified visa-free verdict
+                     # clears those too.
+                     "visa_products", "visa_category", "application_channel",
+                     "application_channel_detail", "route_workflow_type")
 
 
 def _drop_application_leftovers(merged: dict, fields: dict) -> None:
@@ -142,8 +150,11 @@ def _drop_application_leftovers(merged: dict, fields: dict) -> None:
         if k in fields:
             continue          # the verified fact wins, whatever it says
         merged.pop(k, None)
-    if not merged.get("appointment_required"):
-        merged["appointment_required"] = False
+    # Both are about applying for a visa. With no visa to apply for they are
+    # false, whatever the model said. (This previously only wrote False when
+    # the value was ALREADY falsy, so a visa-free answer could still show
+    # "Appointment: Required".)
+    merged["appointment_required"] = False
     merged["interview_required"] = False
 
 

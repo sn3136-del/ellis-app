@@ -9644,13 +9644,23 @@
     "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
     "source_url": "https://www.gov.br/mre/pt-br/embaixada-pequim/setor-consular-2/novas-regras-de-visto-para-nacionais-chineses-4e2d56fd516c6c118d745df47b7e8bc165b089c4",
-    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Chinese travelers may enter Brazil visa-free only from 11 May 2026 through 31 December 2026 for tourism, business, transit, or artistic/sporting activities, with a total stay not exceeding 30 days per migratory year; work, longer stays, and other purposes require a visa via the VFS Visa Center. Official text: \"A partir de 11 de maio de 2026 ... cidadãos chineses estarão isentos de visto para estadas de até 30 dias, não prorrogáveis, com possibilidade de múltiplas entradas, desde que o prazo total de estada não ultrapasse os 3",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. The 30-day figure is right, but the disposition and the whole served payload are wrong for a tourism trip taken today (2026-08-25, inside the 11 May – 31 Dec 2026 window). Ellis serves disposition CONDITIONAL with visa_category 'tourist_visa', appointment_required=true, processing_time '10–15 workin Official text: Com a medida, cidadãos chineses estarão isentos de visto para estadas de até 30 dias, não prorrogáveis, com possibilidade de múltiplas entradas, desde que o prazo total de estada não ultrapasse os 30 dias a cada ano migr",
     "fields": {
-      "disposition": "CONDITIONAL",
-      "requirement_detail": "conditional_visa_free",
-      "permitted_stay": "30 days maximum, non-extendable, multiple entries allowed, with cumulative stay capped at 30 days per 12-month migratory year",
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "Up to 30 days, non-extendable, multiple entries allowed, with total stay not exceeding 30 days per migratory year (the 12-month period starting on the date of first entry). Exemption in force from 11 May 2026 and valid until 31 December 2026.",
       "permitted_stay_days": 30,
-      "application_channel": "not_required"
+      "application_channel": "not_required",
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "forms": [],
+      "account_registration_steps": [],
+      "payment_process": [],
+      "submission_process": [],
+      "appointment_required": false
     }
   },
   {
@@ -9727,11 +9737,11 @@
     "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
     "source_url": "https://dominica.gov.dm/services/passports-and-travel-documents-non-nationals/do-i-need-a-visa-to-enter-into-dominica",
-    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Chinese passport holders may enter Dominica visa-free for a stay of up to three months, not 21 days. Official text: \"Persons from the following countries wishing to enter into the Commonwealth of Dominica for a period not exceeding three months: ... People's Republic of China ...\" — Government of Dominica Web Portal. (Corroborating: C",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. The corrected fields (disposition VISA_EXEMPT, requirement_detail unconditional_visa_free, permitted_stay \"not exceeding three months\", permitted_stay_days 90) are all right and match the official page. But the correction was not applied to every field: Ellis still serves guidance.application_channe Official text: Persons from the following countries wishing to enter into the Commonwealth of Dominica for a period not exceeding three months: Argentina Belgium Costa Rica Denmark France Germany Greece Ireland Israel Italy Japan Luxem",
     "fields": {
       "disposition": "VISA_EXEMPT",
       "requirement_detail": "unconditional_visa_free",
-      "permitted_stay": "not exceeding three months",
+      "permitted_stay": "a period not exceeding three months",
       "permitted_stay_days": 90,
       "visa_category": "Visa exemption",
       "application_channel": "not_required",
@@ -9739,7 +9749,12 @@
       "government_fee": {
         "amount": 0,
         "currency": null
-      }
+      },
+      "forms": [],
+      "account_registration_steps": [],
+      "payment_process": [],
+      "submission_process": [],
+      "appointment_required": false
     }
   },
   {
@@ -9750,12 +9765,12 @@
     },
     "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
-    "source_url": "https://cs.mfa.gov.cn/zggmcg/ljmdd/nmz_657827/blwy_658077/",
-    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Apply at a Bolivian consulate in advance (officially recommended) or request a tourist visa on arrival, carrying a passport valid 6+ months, return ticket, hotel booking or notarized invitation, proof of funds, and yellow fever certificate where applicable. Official text: \"持普通护照来玻人员需办签证……我公民确因旅游目的来玻可申办旅游落地签\" (ordinary-passport holders need a visa; tourists may apply for a visa on arrival)",
+    "source_url": "http://www.gacetaoficialdebolivia.gob.bo/normas/verGratis_gob/168945",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. VISA_REQUIRED is right, but nearly everything around it is not. (1) The cited official_source is https://cs.mfa.gov.cn/... — the CHINESE foreign ministry, i.e. the origin country's advice, not the destination's law. Bolivia's own instrument (DS 1923 art. 8 and 10 as amended by DS 4828) was never con Official text: b) Países Grupo II: Las personas extranjeras pertenecientes al Grupo II de países requieren visa de turismo o visita, o autorización de ingreso por turismo o visita, para su ingreso a territorio boliviano ... ARTÍCULO 10",
     "fields": {
       "disposition": "VISA_REQUIRED",
       "requirement_detail": "paper_visa_on_arrival",
-      "permitted_stay": "30 days per entry, extendable up to 90 days per year",
+      "permitted_stay": "30 calendar days on entry, extendable by a transitory-stay permit of up to 60 further calendar days (90 days in total)",
       "permitted_stay_days": 30,
       "visa_category": "tourist visa",
       "application_channel": "on_arrival"
@@ -9815,13 +9830,13 @@
     },
     "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
-    "source_url": "https://evisa.immigration.gov.gh/",
-    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Chinese passport holders must apply online at evisa.immigration.gov.gh or through an embassy for a 90-day-valid tourist eVisa that permits a 30-day stay per entry. Official text: For nationality CN the official eligibility engine returns: {\"nationality\":\"CN\",\"authorization_required\":\"evisa\",\"application_flow\":\"visa_application\",\"details\":{\"type\":\"visa_required\",\"authorization\":\"evisa\",\"message\":\"",
+    "source_url": "https://evisa.immigration.gov.gh/api/visa-types",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. The permitted stay is wrong. Ellis serves permitted_stay '30 days per entry' / permitted_stay_days 30, and its stored audit note asserts 'a 90-day-valid tourist eVisa that permits a 30-day stay per entry'. No Ghanaian government page states 30 days: the GIS portal's Tourist Visa (B2) record gives ma Official text: {\"name\":\"Tourist Visa\",\"visa_code\":\"B2\",\"slug\":\"tourism\",\"description\":\"For holidays, visiting friends/family, or short-term recreation (up to 3 months). Yellow Fever certificate mandatory for all travellers to Ghana.\",\"",
     "fields": {
       "disposition": "VISA_REQUIRED",
       "requirement_detail": "evisa",
-      "permitted_stay": "30 days per entry",
-      "permitted_stay_days": 30,
+      "permitted_stay": "Up to 90 days (up to 3 months), single entry",
+      "permitted_stay_days": 90,
       "visa_category": "tourist visa",
       "application_channel": "online_portal"
     }
@@ -9835,10 +9850,10 @@
     "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
     "source_url": "https://kuwaitvisa.moi.gov.kw/",
-    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. A Kuwait Tourism Visa permits a stay of no more than 90 days from the date of entry, while the entry permit itself is valid for only 30 days from issuance. Official text: Tourism Visa — Passport validity: No less than 6 months. Entry permit validity: 30 days from the date of issuance. Stay duration: No more than 90 days from the date of entry. Number of entries: Single entry. Prohibition:",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. The 90-day figure Ellis serves is right and is quotable from the MOI portal, but the rest of the record contradicts it and contradicts itself. Ellis serves disposition VISA_REQUIRED while simultaneously serving requirement_detail 'unconditional_visa_free', application_channel 'not_required', route_w Official text: Applicant is not eligible for applying e-visa. / You are eligible for applying online e-visa. / Tourism Visa - Passport validity: No less than 6 months; Entry permit validity: 30 days from the date of issuance; Stay dura",
     "fields": {
       "disposition": "VISA_REQUIRED",
-      "permitted_stay": "up to 90 days from the date of entry",
+      "permitted_stay": "No more than 90 days from the date of entry (single entry; the entry permit itself is valid 30 days from issuance)",
       "permitted_stay_days": 90,
       "visa_category": "Tourism Visa"
     }
@@ -9851,13 +9866,14 @@
     },
     "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
-    "source_url": "https://evisa.gov.mw/",
-    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Chinese nationals must obtain a visa or prior authorization in advance through evisa.gov.mw before departing for Malawi, as China is in Category One and is not eligible for visa on arrival. Official text: \"nationals of Category One Countries must obtain a visa or prior authorization before departure\" — and the official Category One PDF (\"COUNTRIES AND REGIONS THAT REQUIRE A VISA WELL IN ADVANCE, OR PRIOR AUTHORIZATION\") l",
+    "source_url": "https://evisa.gov.mw/PDFs/CategoryOneCountries.pdf",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. The disposition and channel Ellis now serves are right: VISA_REQUIRED via the evisa.gov.mw portal, matching the Category One PDF and the homepage notice 'nationals of Category One Countries must obtain a visa or prior authorization before departure.' Two served values still do not match the official Official text: CATEGORY ONE COUNTRIES - COUNTRIES AND REGIONS THAT REQUIRE A VISA WELL IN ADVANCE, OR PRIOR AUTHORIZATION ... 9. China",
     "fields": {
       "disposition": "VISA_REQUIRED",
       "requirement_detail": "evisa",
       "visa_category": "eVisa/prior authorization",
-      "application_channel": "online_portal"
+      "application_channel": "online_portal",
+      "permitted_stay": "Not published as a stay figure. The Department of Immigration states only that the tourist / single-entry visa 'is valid for 3 months and can only be used once', which is validity from issue, not a permitted length of stay."
     }
   },
   {
@@ -9868,13 +9884,13 @@
     },
     "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
-    "source_url": "https://www.mfa.gov.cn/wjbzwfwpt/kzx/tzgg/202412/t20241204_11538024.html",
-    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Chinese ordinary passport holders may enter visa-free for single stays up to 30 days (maximum 90 days cumulative per 180 days) and need a visa only for stays over 30 days (or over 90/180 cumulative) or for work/study/settlement/journalism. Official text: China MFA (verbatim): \"持有效的中国普通护照或持有效的所罗门群岛普通护照公民，在缔约另一方入境、出境或者过境，单次停留不超过30日，每180日累计停留不超过90日，免办签证。\" (Citizens holding a valid Chinese ordinary passport or a valid Solomon Islands ordinary passport, entering, leaving, or ",
+    "source_url": "https://immigration.gov.sb/mutual-visa-peoples-republic-of-china/",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. Ellis serves VISA_EXEMPT with application_channel \"not_required\", requirement_detail \"conditional_visa_free\", permitted_stay \"30 days per single stay, capped at 90 days cumulative per 180 days\" and permitted_stay_days 30. Two problems against the destination's own immigration site: (1) an advance on Official text: Visa fee: Exempted [...] Visa validity: 90 days accumulative [...] Maximum stay: 90 days [...] Entry option: Single [...] Work Rights: Work prohibited [...] Who Should Apply: People's Republic of China citizens with – Of",
     "fields": {
-      "disposition": "VISA_EXEMPT",
+      "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
       "requirement_detail": "conditional_visa_free",
-      "permitted_stay": "30 days per single stay, capped at 90 days cumulative per 180 days",
-      "permitted_stay_days": 30,
+      "permitted_stay": "90 days accumulative, single entry, not extendable (visa fee exempted)",
+      "permitted_stay_days": 90,
       "application_channel": "not_required",
       "visa_products": [],
       "government_fee": {
@@ -9892,7 +9908,7 @@
     "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
     "source_url": "https://www.mfa.gov.tr/visa-information-for-foreigners.en.mfa",
-    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Ordinary passport holder Chinese nationals can enter Türkiye visa-free for up to 90 days in any 180-day period as of 2 January 2026. Official text: People's Republic of China: Ordinary passport holder People’s Republic of China nationals are exempt from visa up to 90 days in any 180 day period as of 2 January 2026. Holders of official passports are exempt from visa ",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. The headline values are right: disposition VISA_EXEMPT, permitted_stay \"90 days in any 180-day period\", permitted_stay_days 90 and requirement_detail \"unconditional_visa_free\" all match the official MFA text verbatim. Marked not-correct only because the rest of the served payload still contradicts t Official text: Ordinary passport holder People's Republic of China nationals are exempt from visa up to 90 days in any 180 day period as of 2 January 2026.",
     "fields": {
       "disposition": "VISA_EXEMPT",
       "requirement_detail": "unconditional_visa_free",
@@ -9903,7 +9919,12 @@
       "government_fee": {
         "amount": 0,
         "currency": null
-      }
+      },
+      "forms": [],
+      "account_registration_steps": [],
+      "payment_process": [],
+      "submission_process": [],
+      "appointment_required": false
     }
   },
   {
@@ -9914,14 +9935,15 @@
     },
     "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
-    "source_url": "https://www.smf.st/fq.php",
-    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Chinese nationals must apply for the Autorização de Entrada (AE) online through eVisaST before travel, as visa on arrival is not issued, but those holding a valid Schengen or US visa and a passport valid for more than 3 months may enter visa-free for up to 15 days. Official text: SMF FAQ — Q: \"EU RESIDO NUM ESTRANGEIRO ONDE NÃO EXISTE UMA REPRESENTAÇÃO CONSULAR SÃOTOMENSE POSSO OBTER O VISTO A CHEGADA NA FRONTEIRA?\" A: \"Não, Decreto-Lei nº 11/2009 Artigo 20º. Ponto 2. Preciso de uma Autorização d",
+    "source_url": "https://turismo.gov.st/pt/guia-pratico/informacoes-uteis",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. Three separate problems. (1) Disposition: Ellis serves a flat VISA_REQUIRED. The official government position is conditional — 15 days visa-free for holders of a Schengen or US visa with a passport valid over 3 months, visa otherwise. (2) The stay fields contradict each other: permitted_stay says 'n Official text: A mesma isenção de visto de entrada e permanência, pelo mesmo período, é concedida a cidadãos de quaisquer outros países, desde que preencham cumulativamente as seguintes condições: Titulem passaporte com validade superi",
     "fields": {
-      "disposition": "VISA_REQUIRED",
+      "disposition": "CONDITIONAL",
       "requirement_detail": "evisa",
-      "permitted_stay": "not officially specified",
+      "permitted_stay": "15 days visa-free if the traveller holds a Schengen or US visa and a passport valid more than 3 months; otherwise an entry authorisation (visa) must be obtained and the stay is that granted on the visa",
       "visa_category": "Autorização de Entrada (AE) / eVisaST",
-      "application_channel": "online_portal"
+      "application_channel": "online_portal",
+      "permitted_stay_days": 15
     }
   },
   {
@@ -9999,12 +10021,12 @@
     "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
     "source_url": "https://www.evisa.gov.zw/faq.html",
-    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Ordinary Chinese passport holders must pay USD 60 to obtain a single-entry tourist visa on arrival at a Zimbabwe port of entry; the 30-day stay may be extended twice by 30 days each. Official text: Category B: \"Visitors from the countries listed below are not required to apply for a visa before travelling, but will pay for and obtain a visa upon entering Zimbabwe.\" — CHINA appears in this Category B list (evisa.gov",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. Disposition and channel are right, but two served values do not match the official source. (1) permitted_stay_days is 90 and permitted_stay reads \"30 days on entry, extendable twice by 30 days, maximum about 90 days\". No Zimbabwe government page states that. evisa.gov.zw says the visa on arrival \"is Official text: Visitors from the countries listed below are not required to apply for a visa before travelling, but will pay for and obtain a visa upon entering Zimbabwe. The entering declaration can be submitted online prior to travel",
     "fields": {
       "disposition": "VISA_REQUIRED",
       "requirement_detail": "paper_visa_on_arrival",
-      "permitted_stay": "30 days on entry, extendable twice by 30 days, maximum about 90 days",
-      "permitted_stay_days": 90,
+      "permitted_stay": "Single-entry visa on arrival valid for one (1) month",
+      "permitted_stay_days": 30,
       "visa_category": "Category B tourist visa on arrival",
       "application_channel": "on_arrival"
     }
@@ -10017,19 +10039,24 @@
     },
     "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
-    "source_url": "https://cs.mfa.gov.cn/zggmcg/ljmdd/yz_645708/wzbkst_647880/",
-    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Nationals of China may enter Uzbekistan visa-free for stays of up to 30 days per entry under the China-Uzbekistan mutual visa exemption agreement effective 1 June 2025, but must not exceed 90 days cumulative within any 180-day period. Official text: China MFA (verbatim): \"《中乌互免签证协定》2025年6月1日生效...单次停留不超过30日、每180日累计停留不超过90日，免办签证。\" — the China-Uzbekistan mutual visa exemption agreement took effect June 1, 2025; holders of (incl. ordinary) passports are visa-free for si",
+    "source_url": "https://gov.uz/en/mfa/news/view/53659",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. Disposition (VISA_EXEMPT) and the 30-day figure are correct and match the Uzbek MFA. The conversion around them is not. Ellis still serves route_workflow_type 'evisa_portal' with source_url https://e-visa.gov.uz and a workflow_plan containing generate_route_adapter, account_registration, display_exa Official text: citizens of both countries can travel to each other's territory without a visa for up to 30 days per visit, and for a total of no more than 90 days within any 180-day period",
     "fields": {
       "disposition": "VISA_EXEMPT",
       "requirement_detail": "conditional_visa_free",
-      "permitted_stay": "30 days per entry",
+      "permitted_stay": "Up to 30 days per entry, and no more than 90 days in total within any 180-day period",
       "permitted_stay_days": 30,
       "application_channel": "not_required",
       "visa_products": [],
       "government_fee": {
         "amount": 0,
         "currency": null
-      }
+      },
+      "forms": [],
+      "account_registration_steps": [],
+      "payment_process": [],
+      "submission_process": [],
+      "appointment_required": false
     }
   },
   {
@@ -10057,13 +10084,13 @@
     },
     "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
-    "source_url": "https://www.imigrasi.go.id/wna/visa-kunjungan-saat-kedatangan",
-    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. French tourists must obtain an Indonesia B1 tourism Visa on Arrival (also available as e-VOA) for IDR 500,000, valid for 30 days and extendable once for a total stay of up to 60 days. Official text: \"Daftar Negara ... 63. Perancis;\" — France is No. 63 on the Visa on Arrival country list; \"Visa Kunjungan saat Kedatangan/ Visa On Arrival (Indeks Visa B dan F): 30 hari untuk Indeks Visa B ... Dapat diperpanjang satu ka",
+    "source_url": "https://www.imigrasi.go.id/wna/daftar-visa-indonesia/B1",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. Disposition, channel, visa category and fee are all correct — France is No. 63 on the official Visa on Arrival subject list ('63. Perancis;') and is not on the visa-free list, so VISA_REQUIRED / B1 VoA / IDR 500,000 is right. The defect is the stay number: Ellis sets permitted_stay_days = 60. The of Official text: Anda dapat tinggal di Indonesia maksimal 30 hari, dihitung sejak tanggal kedatangan. Anda dapat memperpanjang izin tinggal ini satu kali hingga (keseluruhan masa tinggal) maksimal 60 hari.",
     "fields": {
       "disposition": "VISA_REQUIRED",
       "requirement_detail": "evisa_on_arrival",
-      "permitted_stay": "30 days, extendable once for a further 30 days (max 60 days)",
-      "permitted_stay_days": 60,
+      "permitted_stay": "30 days from date of arrival, extendable once for a further 30 days (60 days maximum total)",
+      "permitted_stay_days": 30,
       "visa_category": "B1 tourism Visa on Arrival / e-VOA",
       "application_channel": "on_arrival"
     }
@@ -10142,11 +10169,11 @@
     "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
     "source_url": "https://mfa.gov.az/en/category/visa/visa-free-countries",
-    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Hong Kong SAR ordinary passport holders may enter Azerbaijan visa-free for up to 30 days per entry from February 2, 2026 to February 2, 2027, with a visa required from the fourth entry. Official text: IV Group: \"A visa-free regime is being applied by the Republic of Azerbaijan for the ordinary passport holders of the following countries on a unilateral basis within the relevant period: 1. Citizens of the People's Repu",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. The disposition (VISA_EXEMPT) and the 30-day figure are right, but the record Ellis serves contradicts them and would push a traveller into paying for a visa they do not need. It carries route_workflow_type \"evisa_portal\", source_url https://evisa.gov.az/en/, application_channel_detail \"Apply person Official text: IV Group | A visa-free regime is being applied by the Republic of Azerbaijan for the ordinary passport holders of the following countries on a unilateral basis within the relevant period: 1. Citizens of the People's Repu",
     "fields": {
       "disposition": "VISA_EXEMPT",
       "requirement_detail": "conditional_visa_free",
-      "permitted_stay": "Up to 30 days per entry",
+      "permitted_stay": "30 days per entry, maximum 3 entries, only between 2 February 2026 and 2 February 2027",
       "permitted_stay_days": 30,
       "visa_category": "Unilateral visa waiver",
       "application_channel": "not_required",
@@ -10154,7 +10181,12 @@
       "government_fee": {
         "amount": 0,
         "currency": null
-      }
+      },
+      "forms": [],
+      "account_registration_steps": [],
+      "payment_process": [],
+      "submission_process": [],
+      "appointment_required": false
     }
   },
   {
@@ -10165,19 +10197,24 @@
     },
     "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
-    "source_url": "https://www.info.gov.hk/gia/general/200309/13/0913117.htm",
-    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. HKSAR passport holders can visit Burkina Faso visa-free for up to 14 days; an application through the official visa portal is only needed for stays beyond that period. Official text: Burkina Faso agreed to \"grant visa-free access to HKSAR passport holders for a stay up to 14 days\" (HKSAR Government press release, 13 Sep 2003, confirming notification from Burkina Faso's foreign ministry). Note: this o",
+    "source_url": "https://www.immd.gov.hk/pdf/Visa-free%20Access%20or%20Visa-on-arrival%20for%20HKSAR%20passport%20list_Eng.pdf",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. Two problems. (1) Sourcing: Burkina Faso's own government publishes nothing that confirms this. The official eVisa portal visaburkina.bf and its entry-conditions page list no exempt nationalities and never mention Hong Kong; police.gov.bf describes visa types and fees but no exemption list. The only Official text: HKSAR passport holders have been granted visa-free access or visa-on-arrival to visit the following countries/territories (updated on 26 August 2026): ... 27. Burkina Faso 14 days",
     "fields": {
       "disposition": "VISA_EXEMPT",
       "requirement_detail": "unconditional_visa_free",
-      "permitted_stay": "up to 14 days",
+      "permitted_stay": "14 days",
       "permitted_stay_days": 14,
       "application_channel": "not_required",
       "visa_products": [],
       "government_fee": {
         "amount": 0,
         "currency": null
-      }
+      },
+      "forms": [],
+      "account_registration_steps": [],
+      "payment_process": [],
+      "submission_process": [],
+      "appointment_required": false
     }
   },
   {
@@ -10560,6 +10597,296 @@
       "requirement_detail": "evisa",
       "permitted_stay": "30 or 90 days depending on the e-visa option chosen, renewable",
       "permitted_stay_days": 30
+    }
+  },
+  {
+    "route": {
+      "nationality": "DEU",
+      "destination": "IDN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit (Opus re-verification)",
+    "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. Ellis serves disposition CONDITIONAL with requirement_detail 'conditional_visa_free', application_channel 'not_required' and a government fee of 0, describing a 30-day visa-free entry for Germans. That is flatly wrong and is the opposite of the correction that was supposed to be applied ('visa on ar Official text: 34. Jerman;",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "permitted_stay": "30 days from date of arrival, extendable once for a further 30 days (60 days maximum total)",
+      "permitted_stay_days": 30
+    }
+  },
+  {
+    "route": {
+      "nationality": "ESP",
+      "destination": "IDN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit (Opus re-verification)",
+    "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. Ellis serves disposition VISA_EXEMPT with requirement_detail 'unconditional_visa_free', application_channel 'not_required', fee 0 and confidence 'high'. This is wrong and is the opposite of the correction that was supposed to be applied ('visa on arrival'). Spain appears as No. 79 on the official Vi Official text: 79. Spanyol;",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "permitted_stay": "30 days from date of arrival, extendable once for a further 30 days (60 days maximum total)",
+      "permitted_stay_days": 30
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "NIC",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit (Opus re-verification)",
+    "source_url": "https://www.inac.gob.ni/wp-content/uploads/2026/02/Disposicion-N%C2%B0-002-2026-Cambio-de-Categorias-Migratorias-de-Visa-para-Ingresar-a-Nicaragua-%E2%80%93-Direccion-General-de-Migracion-y-Extranjeria.pdf",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. Ellis now serves VISA_EXEMPT, \"90 days\" visa-free, application_channel \"not_required\", requirement_detail \"unconditional_visa_free\" for CHN->NIC. That is the opposite of the official rule and would send a traveller to the airport with no visa. The applied correction (VISA_REQUIRED) never reached the Official text: TERCERO: Los ciudadanos y ciudadanas de las siguientes nacionalidades, requieren de Visa Consultada, Categoría Migratoria \"C\", para entrar a Nicaragua. [...] 19. China (sólo para portadores de pasaportes ordinarios) [...",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "permitted_stay": "Not stated in the official disposition; stay is whatever the consulted visa (Categoría Migratoria \"C\") granted by DGME authorises"
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "SLV",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit (Opus re-verification)",
+    "source_url": "https://rree.gob.sv/visas/",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. Ellis serves ELECTRONIC_AUTHORIZATION_REQUIRED, requirement_detail \"evisa\", application_channel \"online_portal\" with a DGME eVisa portal at https://www.migracion.gob.sv, account registration, online card payment and \"Up to 90 days\" / 90 permitted_stay_days. None of that is on the official source: th Official text: Categoría A: Exento de visa. Categoría B: Visa Consular o Sin Consulta. Categoría C: Visa Consultada. [...] (República Popular China + Ordinario + no US/Canada/Schengen visa + no foreign residence) \"Usted califica para V",
+    "fields": {
+      "disposition": "CONDITIONAL",
+      "permitted_stay": "Not stated on the official source; length of stay is set by the consular visa granted (the rree.gob.sv tool publishes no day figure)"
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "TON",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit (Opus re-verification)",
+    "source_url": "http://www.tongaembassycn.gov.to/en/going-to-tonga-en/visas-en",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. The VISA_EXEMPT correction never reached what Ellis serves. Ellis still returns disposition VISA_REQUIRED with requirement_detail paper_visa_on_arrival, application_channel on_arrival, and a payment_process step reading \"Pay the visa fee in cash at the immigration counter on arrival\" — but the Tonga Official text: Visa Waiver Countries. Conditions for Visa Waiver Entries to Tonga. A valid return ticket out of the Kingdom to a country which s/he shall be able to enter. ... The following countries are NOT required to apply for a vis",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "Visitor's visa issued on arrival for 31 days, free of charge, extendable up to six months",
+      "permitted_stay_days": 31,
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "forms": [],
+      "account_registration_steps": [],
+      "payment_process": [],
+      "submission_process": [],
+      "appointment_required": false,
+      "application_channel": "not_required"
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "LCA",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit (Opus re-verification)",
+    "source_url": "https://www.govt.lc/media.govt.lc/www/resources/publications/saint-lucia-visa-requirements-updated.docx",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. The VISA_EXEMPT correction never reached what Ellis serves. The lookup returns cached:true with no source_verified block and still serves disposition VISA_REQUIRED, requirement_detail 'evisa', application_channel 'online_portal', route_workflow_type 'evisa_portal', permitted_stay 30 days, and invent Official text: SAINT LUCIA VISA REQUIREMENTS ... COUNTRY/TERRITORY | ENTRY VISA REQUIREMENTS | Foreigners visiting Saint Lucia ... 42. CHINA, PEOPLE'S REPUBLIC OF | NO | YES",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "permitted_stay": "Not stated by the official source. The Department of External Affairs list gives an explicit 'up to N days' note for some countries (e.g. Argentina 'Up to 90 days', Singapore 'up to 15 days') but records China with no duration, so length of stay is set by the immigration officer on entry.",
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "forms": [],
+      "account_registration_steps": [],
+      "payment_process": [],
+      "submission_process": [],
+      "appointment_required": false,
+      "application_channel": "not_required"
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "HND",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit (Opus re-verification)",
+    "source_url": "https://www.tsc.gob.hn/biblioteca/index.php/varios/1246-acuerdo-entre-el-gobierno-de-la-republica-de-honduras-y-el-gobierno-de-la-republica-popular-china-sobre-la-exoneracion-mutua-de-visas-para",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. The VISA_REQUIRED correction never reached what Ellis serves. The lookup still returns disposition VISA_EXEMPT with requirement_detail 'unconditional_visa_free', application_channel 'not_required', 30 days, status KIMI_UNCERTAIN and review_required:true, with no source_verified block. The premise be Official text: Acuerdo entre el Gobierno de la Republica de Honduras y el Gobierno de la Republica Popular China sobre la exoneracion mutua de visas para portadores de Pasaportes Diplomaticos, Pasaportes Oficiales, Pasaportes de Servic",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "permitted_stay": "Maximum 90 days as a tourist, extendable by a further 30 days on application to the INM. The consular visa itself is priced as single entry (30 days) or multiple entry (90 days).",
+      "permitted_stay_days": 90
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "BRB",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit (Opus re-verification)",
+    "source_url": "https://cs.mfa.gov.cn/zggmcg/ljmdd/bmz_655327/bbds_655515/rjjl_655525/",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. The applied correction is NOT what Ellis serves. The live lookup returns a stale cached record (cached=true, no source_verified block) with disposition VISA_REQUIRED, requirement_detail 'paper_visa', application_channel 'embassy', permitted_stay_days 90, a Barbados visa application form, a 15-21 bus Official text: 持普通护照的中国公民出于旅游、商务合作、探亲、国际中转等目的，可免签入境，停留期不超过30天。",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "Up to 30 days visa-free; extension possible after arrival at the Barbados Immigration Department (application form, valid return ticket, valid passport, one passport photo, BBD 100 fee)",
+      "permitted_stay_days": 30,
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "forms": [],
+      "account_registration_steps": [],
+      "payment_process": [],
+      "submission_process": [],
+      "appointment_required": false,
+      "application_channel": "not_required"
+    }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "BRN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit (Opus re-verification)",
+    "source_url": "https://www.mfa.gov.bn/Pages/D3---D14.aspx",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. The applied correction (VISA_EXEMPT) is not what Ellis serves. The live lookup still returns disposition VISA_REQUIRED, visa_category \"tourist visa\", requirement_detail \"paper_visa\", application_channel \"embassy\" (Consulate General of Brunei in Hong Kong), route_workflow_type \"embassy_submission\", p Official text: Countries which have Visa Waiver Arrangement with Brunei Darussalam. Foreign nationals of countries under this category do not require any visas to enter Brunei Darussalam and are allowed to stay in the country for up to",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "up to 14 days per entry, visa-free",
+      "permitted_stay_days": 14,
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "forms": [],
+      "account_registration_steps": [],
+      "payment_process": [],
+      "submission_process": [],
+      "appointment_required": false,
+      "application_channel": "not_required"
+    }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "BHR",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit (Opus re-verification)",
+    "source_url": "https://www.immd.gov.hk/pdf/Visa-free%20Access%20or%20Visa-on-arrival%20for%20HKSAR%20passport%20list_Eng.pdf",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. Two problems. (a) Sourcing: I could NOT verify this on Bahrain's own government pages. evisa.gov.bh (both list-of-onarrival-visa-country.html and list-of-online-visa-country.html) sits behind a Cloudflare bot challenge and returns HTTP 403 to every non-interactive fetch, and www.mofa.gov.bh/en/visit Official text: Remark 5 : HKSAR passport holders can apply for a visa upon arrival for a stay of up to 14 days in Bahrain. HKSAR passport holders are also eligible to apply for E-visas to visit Bahrain prior to the visit. For details, ",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "permitted_stay": "up to 14 days (visa on arrival)",
+      "permitted_stay_days": 14
+    }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "CHN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit (Opus re-verification)",
+    "source_url": "https://s.nia.gov.cn/mps/bszy/wldl/ndtxz/202008/t20200828_1260.html",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. The applied correction (\"HKSAR holders are Chinese citizens - home return permit\") did not reach the served record. Ellis still serves disposition VISA_REQUIRED, visa_category \"L visa (tourist)\", application_channel \"visa_center\" (China Visa Application Service Center Hong Kong), biometrics_required Official text: 五、申请条件（一）在香港或者澳门出生具有中国国籍的香港或者澳门永久性居民。…… 十二、审批结果 审批通过后，为未满十八周岁的申请人签发有效期为5年的港澳居民来往内地通行证，为十八周岁以上（含十八周岁）的申请人签发有效期为10年的港澳居民来往内地通行证。",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "permitted_stay": "not governed by a visa; the Home Return Permit is valid 10 years (applicants aged 18+) or 5 years (under 18) and there is no visa-imposed stay limit",
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "forms": [],
+      "account_registration_steps": [],
+      "payment_process": [],
+      "submission_process": [],
+      "appointment_required": false,
+      "application_channel": "not_required"
+    }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "BIH",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit (Opus re-verification)",
+    "source_url": "https://fipa.vijeceministara.gov.ba/en/visasinformation-for-visitors",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. The VISA_EXEMPT correction is NOT what Ellis serves. The live lookup returns a cached VISA_REQUIRED answer (requirement_detail paper_visa, embassy submission, 'up to 90 days per visit if visa granted', confidence low, review_required true, no source_verified block) — i.e. the correction never reache Official text: D) Holders of business passports of the following countries do not require a visa to enter, exit or transit the territory of Bosnia and Herzegovina: 1. Hong Kong, People's Republic of China 2. Macau, People's Republic of",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "up to 90 days in any 180-day period (Odluka o vizama: 90 days within six months from first entry)",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "forms": [],
+      "account_registration_steps": [],
+      "payment_process": [],
+      "submission_process": [],
+      "appointment_required": false,
+      "application_channel": "not_required"
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "KNA",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit (Opus re-verification)",
+    "source_url": "https://www.sknis.gov.kn/2025/05/22/saint-kitts-and-nevis-introduces-effortless-digital-entry-enhanced-security-smoother-travel-for-visitors/",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. The correction never landed. Ellis still returns disposition VISA_REQUIRED (status KIMI_UNCERTAIN, cached, no source_verified block) with an embassy/courier paper workflow, a 'Saint Kitts and Nevis visa application form', evisa.gov.kn as portal and permitted_stay null. That is wrong on the official  Official text: Every visitor must present an approved eTA before departing their country of origin and on arrival in Saint Kitts and Nevis.",
+    "fields": {
+      "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+      "permitted_stay": "Length of stay is set by Immigration on arrival; the maximum is initially one month (extendable in-country)",
+      "permitted_stay_days": 30
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "SYC",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit (Opus re-verification)",
+    "source_url": "https://www.ics.gov.sc/permits/visitors-permit",
+    "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. The correction ('mandatory travel authorisation') never landed. Ellis still serves disposition VISA_EXEMPT with requirement_detail 'unconditional_visa_free', application_channel 'not_required', route_workflow_type 'visa_exempt_preparation', processing_time 'issued on arrival', and an exceptions line Official text: All visitors to Seychelles must possess a valid Electronic Travel Authorisation (ETA) prior to departing from their country of origin.",
+    "fields": {
+      "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+      "permitted_stay": "Visitor's Permit initially granted for a stay of up to three months, extendable in three-month blocks to a maximum of twelve months",
+      "permitted_stay_days": 90
     }
   }
 ]

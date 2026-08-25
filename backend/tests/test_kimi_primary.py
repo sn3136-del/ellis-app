@@ -990,3 +990,39 @@ def test_a_repeated_model_parse_is_served_from_the_cache():
     kimi_primary.parse_question(q.upper() + "!!")   # same words, different case
     assert calls["n"] == 1                            # the repeat cost nothing
     kimi_primary._PARSE_CACHE.clear()
+
+
+def test_a_verified_visa_free_verdict_clears_the_application_machinery():
+    """An independent re-verification found visa-free answers still telling
+    travellers to apply on an eVisa portal, with a product table and fees.
+    A verified visa-free verdict must clear every application-only claim it
+    has made false — unless the override itself supplies one."""
+    from app.visa_snapshot import verified_overrides as vo
+    guidance = {
+        "disposition": "VISA_REQUIRED", "visa_category": "Tourist eVisa",
+        "requirement_detail": "evisa", "application_channel": "online_portal",
+        "application_channel_detail": "Apply on the eVisa portal before travel.",
+        "route_workflow_type": "evisa_portal",
+        "official_portal_url": "https://evisa.example.gov",
+        "visa_products": [{"type": "eVisa", "fee": {"amount": 50, "currency": "USD"}}],
+        "government_fee": {"amount": 50, "currency": "USD"},
+        "forms": ["eVisa application"], "account_registration_steps": ["Register"],
+        "payment_process": ["Pay online"], "submission_process": ["Submit"],
+        "appointment_required": True, "interview_required": True,
+        "permitted_stay": "30 days",
+    }
+    merged = dict(guidance)
+    vo._drop_application_leftovers(merged, {"disposition": "VISA_EXEMPT"})
+    for gone in ("visa_category", "application_channel", "application_channel_detail",
+                 "route_workflow_type", "official_portal_url", "visa_products",
+                 "government_fee", "forms", "account_registration_steps",
+                 "payment_process", "submission_process", "processing_time"):
+        assert gone not in merged, gone
+    assert merged["appointment_required"] is False
+    assert merged["interview_required"] is False
+    assert merged["permitted_stay"] == "30 days"        # facts survive
+    # A field the override itself supplies is kept, whatever it says.
+    merged2 = dict(guidance)
+    vo._drop_application_leftovers(merged2, {"disposition": "VISA_EXEMPT",
+                                             "official_portal_url": "https://gov.example"})
+    assert merged2["official_portal_url"] == "https://evisa.example.gov"
