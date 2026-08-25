@@ -1,0 +1,25 @@
+{
+  "comment": "Official government application/entry pages per destination, each verified in a real browser with a quote before entry. Serve-time fallback: filled ONLY when an answer requires an application and carries no portal link of its own.",
+  "verified_at": "2026-08-22",
+  "portals": {
+    "AUS": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600",
+    "ESP": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+    "FRA": "https://france-visas.gouv.fr/en/demande-de-visa",
+    "GBR": "https://www.gov.uk/standard-visitor",
+    "HKG": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+    "IDN": "https://evisa.imigrasi.go.id/",
+    "JPN": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+    "KOR": "https://www.visa.go.kr/openPage.do?MENU_ID=10101&LANG_TYPE=EN",
+    "LTU": "https://www.migracija.lt/service/uzsienieciams?lang=en#v-sv-isduoti-sengeno-viza",
+    "MNG": "https://evisa.mn/",
+    "RUS": "https://evisa.kdmid.ru/",
+    "SGP": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+    "TWN": "https://visawebapp.boca.gov.tw/",
+    "USA": "https://ceac.state.gov/genniv/",
+    "CHN": "https://cs.mfa.gov.cn/",
+    "CAN": "https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada.html",
+    "VNM": "https://evisa.gov.vn/",
+    "THA": "https://www.thaievisa.go.th/",
+    "IND": "https://indianvisaonline.gov.in/evisa/tvoa.html"
+  }
+}

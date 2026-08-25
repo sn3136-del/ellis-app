@@ -708,6 +708,51 @@ def _result(status: str, guidance: dict, *, cached: bool, stale: bool,
     return out
 
 
+_PORTAL_TABLE: dict = {"mtime": None, "portals": {}}
+
+
+def _official_portals() -> dict:
+    """Destination -> verified official portal URL, reloaded when the file
+    changes. Every entry was loaded in a real browser and quoted before it
+    was written down; the file ships with the seed."""
+    import pathlib
+    path = pathlib.Path(os.getenv("ELLIS_DATA_DIR") or str(
+        pathlib.Path(__file__).resolve().parents[3] / "data")) / \
+        "database_seed" / "official_portals.json"
+    try:
+        mtime = path.stat().st_mtime
+    except OSError:
+        return {}
+    if _PORTAL_TABLE["mtime"] != mtime:
+        try:
+            _PORTAL_TABLE["portals"] = json.loads(path.read_text()).get("portals", {})
+            _PORTAL_TABLE["mtime"] = mtime
+        except Exception:  # noqa: BLE001 — a broken file must not break serving
+            return _PORTAL_TABLE["portals"] or {}
+    return _PORTAL_TABLE["portals"]
+
+
+def apply_portal_fallback(out: dict, route: dict) -> dict:
+    """The owner's rule: when a link is possible, it has to be there. A route
+    that requires an application but carries no portal link is served the
+    destination's VERIFIED official portal from the reference table. Answers
+    that already carry a link (their own, or a human override's) keep it, and
+    a visa-exempt route stays linkless because there is nothing to apply
+    for."""
+    g = out.get("guidance")
+    if not isinstance(g, dict) or g.get("official_portal_url"):
+        return out
+    if g.get("disposition") not in ("VISA_REQUIRED",
+                                    "ELECTRONIC_AUTHORIZATION_REQUIRED"):
+        return out
+    url = _official_portals().get(
+        str(route.get("destination_country") or "").upper())
+    if url:
+        out = dict(out)
+        out["guidance"] = dict(g, official_portal_url=url)
+    return out
+
+
 def apply_verified_overrides(out: dict, route: dict) -> dict:
     """Let human-verified, officially-sourced facts win over the model.
 
@@ -871,9 +916,9 @@ def fill_detail(db, key: str, route: dict, user: str, *, after=None) -> None:
     db.commit()
     if after is not None:
         try:
-            after(route, apply_verified_overrides(_result(
+            after(route, apply_portal_fallback(apply_verified_overrides(_result(
                 status, clean, cached=True, stale=False, missing=missing,
-                contradictions=contradictions, model=row.model), route))
+                contradictions=contradictions, model=row.model), route), route))
         except Exception:  # noqa: BLE001
             pass
 
@@ -914,12 +959,12 @@ def get_route_guidance(db, route: dict, *, force_refresh: bool = False,
     if row is not None and not force_refresh:
         released = bool((row.verification or {}).get("operator_released"))
         gc = (row.verification or {}).get("grounded_check")
-        out = apply_verified_overrides(_result(
+        out = apply_portal_fallback(apply_verified_overrides(_result(
             row.status, row.guidance, cached=True, stale=_is_stale(row),
             released=released,
             missing=row.missing_fields, contradictions=row.contradictions,
             model=row.model,
-            advisories=deterministic_advisories(route, row.guidance or {})), route)
+            advisories=deterministic_advisories(route, row.guidance or {})), route), route)
         out["detail_pending"] = bool((row.verification or {}).get("detail_pending"))
         if isinstance(gc, dict) and gc.get("outcome") == "checked":
             # Machine provenance, deliberately WEAKER than the human badge:
@@ -1020,20 +1065,20 @@ def get_route_guidance(db, route: dict, *, force_refresh: bool = False,
         row.generated_at = now
         row.fresh_until = now + timedelta(days=ttl)
         db.commit()
-    out = apply_verified_overrides(_result(
+    out = apply_portal_fallback(apply_verified_overrides(_result(
         status, clean, cached=False, stale=False,
         missing=missing, contradictions=contradictions, model=model,
-        advisories=advisories, elapsed_seconds=elapsed), route)
+        advisories=advisories, elapsed_seconds=elapsed), route), route)
     if staged and has_content:
         if _PROVIDER is not None:
             # Injected provider (tests): stage 2 runs inline, deterministically.
             fill_detail(db, key, route, user, after=after)
             row = _cached(db, key)
-            out = apply_verified_overrides(_result(
+            out = apply_portal_fallback(apply_verified_overrides(_result(
                 row.status, row.guidance, cached=False, stale=False,
                 missing=row.missing_fields, contradictions=row.contradictions,
                 model=row.model, advisories=advisories,
-                elapsed_seconds=elapsed), route)
+                elapsed_seconds=elapsed), route), route)
             out["detail_pending"] = False
         else:
             _fill_detail_async(key, route, user, after=after)

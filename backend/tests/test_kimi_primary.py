@@ -876,3 +876,27 @@ def test_diplomatic_passport_phrasing_is_read_with_the_document_type():
         "i have a diplomatic passport and i wanna go to angola from china")
     assert (r["nationality"], r["destination"]) == ("CHN", "AGO")
     assert r["travel_document_type"] == "diplomatic_passport"
+
+
+def test_when_a_link_is_possible_it_has_to_be_there(db):
+    """The owner's rule. A visa-required answer with no portal link of its
+    own is served the destination's VERIFIED portal from the reference table;
+    an answer that already carries a link keeps it; a visa-exempt route stays
+    linkless because there is nothing to apply for."""
+    from app.visa_snapshot.kimi_primary import apply_portal_fallback
+    route = {"destination_country": "JPN"}
+    out = apply_portal_fallback({"guidance": {
+        "disposition": "VISA_REQUIRED", "official_portal_url": None}}, route)
+    assert out["guidance"]["official_portal_url"] == \
+        "https://www.mofa.go.jp/j_info/visit/visa/index.html"
+    kept = apply_portal_fallback({"guidance": {
+        "disposition": "VISA_REQUIRED",
+        "official_portal_url": "https://www.gov.example"}}, route)
+    assert kept["guidance"]["official_portal_url"] == "https://www.gov.example"
+    exempt = apply_portal_fallback({"guidance": {
+        "disposition": "VISA_EXEMPT", "official_portal_url": None}}, route)
+    assert exempt["guidance"]["official_portal_url"] is None
+    unknown = apply_portal_fallback({"guidance": {
+        "disposition": "VISA_REQUIRED", "official_portal_url": None}},
+        {"destination_country": "XKX"})
+    assert unknown["guidance"]["official_portal_url"] is None   # no invented link

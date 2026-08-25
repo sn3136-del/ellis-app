@@ -150,3 +150,19 @@ def test_by_default_a_low_confidence_answer_is_still_answered(client):
     assert body["review_required"] is True      # still flagged for operators
     assert body["held"] is False                 # but not withheld
     assert body["guidance"]["disposition"] == "VISA_REQUIRED"
+
+
+def test_should_reground_asks_for_a_fresh_page_check_when_due():
+    """The owner's rule: a route someone asks about now gets checked against
+    the most recent official data — never grounded means due, an old
+    grounding means due, a fresh one does not."""
+    import datetime
+    from app.main import should_reground
+    g = {"guidance": {"disposition": "VISA_REQUIRED"}}
+    assert should_reground(dict(g)) is True                       # never grounded
+    old = (datetime.datetime.now(datetime.timezone.utc)
+           - datetime.timedelta(days=10)).isoformat()
+    assert should_reground(dict(g, grounded_check={"at": old})) is True
+    fresh = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    assert should_reground(dict(g, grounded_check={"at": fresh})) is False
+    assert should_reground({"guidance": None}) is False           # nothing to check

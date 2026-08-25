@@ -368,6 +368,69 @@ def travel_database_approve(body: DatabaseApproveIn, db=Depends(get_session),
     return {"ok": True, "cache_key": key, "released_by": p.user_id}
 
 
+# One in-flight page check per route at a time; re-ground when the last check
+# is older than this many days (or never happened).
+_GROUNDING_IN_FLIGHT: set = set()
+GROUND_ON_ACCESS_DAYS = 3
+
+
+def should_reground(out: dict) -> bool:
+    """Does this served answer deserve a fresh official-page check?
+
+    The owner's rule: a route someone is asking about RIGHT NOW should be
+    checked against the most recent official data — serve instantly, verify
+    in the background, so the next viewer (or the same one, refreshing) sees
+    the page-checked answer. True when the answer has never been grounded, or
+    its last grounding is older than GROUND_ON_ACCESS_DAYS."""
+    import datetime as _dt
+    if not out.get("guidance"):
+        return False
+    gc = out.get("grounded_check") or {}
+    at = str(gc.get("at") or "")
+    if not at:
+        return True
+    try:
+        then = _dt.datetime.fromisoformat(at)
+        age = _dt.datetime.now(then.tzinfo) - then
+        return age.days >= int(os.getenv("ELLIS_GROUND_ON_ACCESS_DAYS",
+                                         GROUND_ON_ACCESS_DAYS))
+    except ValueError:
+        return True
+
+
+def _ground_on_access(route: dict, out: dict) -> None:
+    """Background official-page check for a route someone just asked about.
+    Cold answers already get one from the engine's after-hook; this covers
+    the CACHED answers everyone actually hits."""
+    from .config import settings as _settings
+    if _settings().runtime_mode == "test" or \
+            os.getenv("ELLIS_BACKGROUND_RENEWAL", "1").strip() != "1":
+        return
+    if not should_reground(out):
+        return
+    from .visa_snapshot import kimi_primary as _kp
+    key = _kp.cache_key(route)
+    if key in _GROUNDING_IN_FLIGHT:
+        return
+    _GROUNDING_IN_FLIGHT.add(key)
+
+    def _work():
+        try:
+            from .db import SessionLocal as _SL
+            from .visa_snapshot import freshness
+            s = _SL()
+            try:
+                freshness.recheck_route(s, route)
+            finally:
+                s.close()
+        except Exception:  # noqa: BLE001 — best effort, never surfaces
+            pass
+        finally:
+            _GROUNDING_IN_FLIGHT.discard(key)
+    threading.Thread(target=_work, name="ellis-ground-on-access",
+                     daemon=True).start()
+
+
 def _after_cold_answer(route: dict, out: dict) -> None:
     """Background work after a route was decided for the first time.
 
@@ -607,6 +670,8 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
     except kimi_primary.GuidanceProviderError as e:
         raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
                                          "reason": e.envelope.get("user_message")})
+    if out.get("cached"):
+        _ground_on_access(route, out)
     if out.get("held"):
         out = {k: v for k, v in out.items() if k != "guidance"}
         out["guidance"] = None
@@ -689,6 +754,8 @@ def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
         raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
                                          "reason": e.envelope.get("user_message"),
                                          "category": e.envelope.get("category")})
+    if out.get("cached"):
+        _ground_on_access(route, out)
     # The hold is enforced HERE, not in the JSX: a held answer's claims never
     # leave the server, so no client (curious dev tools included) can read
     # what the reader is told is being checked. The envelope keeps the flag
