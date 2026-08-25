@@ -52,9 +52,14 @@ def url_is_dead(url: str) -> bool:
             return any(m in head for m in _SOFT_404)
         return False
     except Exception as e:  # noqa: BLE001
-        import httpx
-        # No such host / refused: dead. Timeouts and TLS quirks: keep.
-        return isinstance(e, httpx.ConnectError)
+        # Only a name that does not RESOLVE is dead on a connection error.
+        # Government sites routinely ship broken TLS chains (evisa.gov.vn,
+        # boca.gov.tw) or reset automated clients (indianvisaonline.gov.in)
+        # and still open fine in a real browser — those links are kept.
+        msg = str(e).lower()
+        return any(t in msg for t in ("nodename nor servname",
+                                      "name or service not known",
+                                      "getaddrinfo", "no address associated"))
 
 
 def collect_urls(guidance: dict) -> list[str]:

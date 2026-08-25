@@ -844,3 +844,26 @@ def test_a_question_naming_one_place_falls_back_to_the_model():
         "travel_document_type": "ordinary_passport"})
     r = kimi_primary.parse_question("do i need a visa for japan")
     assert r["understood"] is False                 # one place is not a route
+
+
+def test_a_non_government_link_never_survives_validation():
+    """The owner's rule: all links official and correct. A commercial or
+    contractor URL in official_portal_url / source_url is dropped on every
+    path an answer is produced; the government one is kept."""
+    from app.visa_snapshot.kimi_primary import validate_answer
+    base = {"disposition": "VISA_REQUIRED", "visa_category": "x",
+            "permitted_stay": "x", "passport_validity": "x",
+            "required_documents": ["p"], "processing_time": "x",
+            "application_channel": "visa_center",
+            "government_fee": {"amount": 1, "currency": "CNY"},
+            "visa_products": [{"type": "t"}]}
+    clean, _m, _c = validate_answer({**base,
+        "official_portal_url": "https://www.korea-evisa.com",
+        "source_url": "https://www.vfsglobal.com/lithuania/china/"})
+    assert clean["official_portal_url"] is None
+    assert clean["source_url"] is None
+    clean, _m, _c = validate_answer({**base,
+        "official_portal_url": "https://www.evisa.gov.kr/",
+        "source_url": "https://www.mofa.go.jp/"})
+    assert clean["official_portal_url"] == "https://www.evisa.gov.kr/"
+    assert clean["source_url"] == "https://www.mofa.go.jp/"

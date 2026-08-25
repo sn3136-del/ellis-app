@@ -182,7 +182,7 @@ passport_validity_requirement: {"kind": "valid_on_arrival"|"valid_through_depart
 required_documents, forms, account_registration_steps, payment_process,
 submission_process, exceptions: arrays of short strings
 application_channel: online_portal | embassy | visa_center | authorised_agent | on_arrival | not_required — use authorised_agent when individuals may NOT file directly and a designated agency must lodge for them (e.g. Chinese nationals applying for Japan); never call that a visa_center
-official_portal_url: the official government portal URL or null (NEVER invent one) — for THIS destination and visa type; do not point at an unrelated page
+official_portal_url: the official GOVERNMENT portal URL or null (NEVER invent one) — for THIS destination and visa type, on a government domain; contractor or commercial sites (VFS, BLS, "visa service" sites) are never accepted here
 government_fee: {"amount": number|null, "currency": string|null} — the OFFICIAL consular fee only; if a service/agency fee also applies say so in application_channel_detail, never fold it in
 visa_products: array of EVERY visa product available for this nationality + destination + purpose — each {"type": e.g. "Single-entry tourist"|"3-year multiple"|"5-year multiple"|"B1/B2", "entry": "single"|"multiple"|null, "validity": short string, "max_stay_days": integer|null, "fee": {"amount": number|null, "currency": string|null}, "notes": short string|null}; list them ALL; when only one product exists, still list that one, never an empty array for a route that needs a visa
 application_channel_detail: one honest sentence naming WHO may lodge and HOW — e.g. "Individuals cannot apply directly; the application must go through a designated authorised agent" or "Apply yourself on the official portal" — never claim a walk-in visa centre where the destination refuses individual filings
@@ -430,6 +430,18 @@ def validate_answer(raw: dict, *, detail_known: bool = True) -> tuple[dict, list
     for k in ("application_channel_detail", "source_url"):
         if k in clean and not isinstance(clean[k], str):
             clean.pop(k, None)
+    # Links must be OFFICIAL: every URL an answer carries must sit on a
+    # government domain, or it is dropped here — the model has offered
+    # commercial lookalikes (korea-evisa.com) and contractor sites, and a
+    # prompt rule alone does not stop it. The channel label still renders;
+    # only the link goes.
+    from .authority import is_government_host
+    from urllib.parse import urlparse
+    for k in ("official_portal_url", "source_url"):
+        u = clean.get(k)
+        if isinstance(u, str) and u.startswith("http"):
+            if not is_government_host(urlparse(u).hostname or ""):
+                clean[k] = None
     wt = str(clean.get("route_workflow_type") or "").strip().lower()
     if wt not in WORKFLOW_TYPES:
         clean["route_workflow_type"] = derive_workflow_type(clean)

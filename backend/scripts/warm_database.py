@@ -229,16 +229,25 @@ def checkurls() -> int:
     Unique URLs are checked once, concurrently; a dead link is removed from
     every answer that carried it."""
     from concurrent.futures import ThreadPoolExecutor
+    from urllib.parse import urlparse
     from sqlalchemy import select
     from app.db import SessionLocal
     from app.visa_snapshot import url_health
+    from app.visa_snapshot.authority import is_government_host
     from app.visa_snapshot.models import KimiRouteGuidanceCache as C
     db = SessionLocal()
     rows = list(db.execute(select(C)).scalars())
     urls = sorted({u for r in rows for u in url_health.collect_urls(r.guidance or {})})
+    # Official first: a link off a government domain is dead to us whatever
+    # its server says.
+    unofficial = {u for u in urls if not is_government_host(urlparse(u).hostname or "")}
+    for u in sorted(unofficial):
+        print(f"  NOT OFFICIAL {u}", flush=True)
+    urls = [u for u in urls if u not in unofficial]
     print(f"checking {len(urls)} unique links across {len(rows)} answers", flush=True)
     with ThreadPoolExecutor(max_workers=12) as pool:
         dead = {u for u, d in zip(urls, pool.map(url_health.url_is_dead, urls)) if d}
+    dead |= unofficial
     for u in sorted(dead):
         print(f"  DEAD {u}", flush=True)
     stripped = 0
