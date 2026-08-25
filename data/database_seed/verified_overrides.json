@@ -182,23 +182,29 @@
       "destination": "KOR",
       "travel_purpose": "tourism"
     },
-    "verified_at": "2026-08-22",
+    "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
-    "source_url": "https://overseas.mofa.go.kr/gb-en/brd/m_23721/view.do?seq=39&page=1",
-    "note": "HKSAR passport holders enter Korea visa-free for short tourism, and the K-ETA requirement is temporarily waived for Hong Kong. The model reported a K-ETA as required.",
+    "source_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+    "note": "Verified 2026-08-25 against the K-ETA portal's own notice \"대한민국 전자여행허가제(K-ETA) 한시 면제 기간 연장 알림\" (2026-03-20) and Korea's MOFA: the temporary K-ETA exemption for 22 countries is extended to 31 December 2026. K-ETA is OPTIONAL for these nationalities during the exemption (a voluntary application only buys the arrival-card exemption). Review on 2026-12-31: the requirement returns if the exemption is not extended again.",
     "fields": {
       "disposition": "VISA_EXEMPT",
-      "requirement_detail": "conditional_visa_free",
+      "requirement_detail": "unconditional_visa_free",
       "visa_category": "Visa-free short-term visit",
       "permitted_stay": "Up to 90 days per entry",
       "permitted_stay_days": 90,
       "application_channel": "not_required",
-      "application_channel_detail": "No visa and, during the current temporary waiver, no K-ETA. The waiver is time-limited, so confirm it is still in force before travel.",
+      "application_channel_detail": "No visa and no K-ETA are required during Korea's temporary K-ETA exemption, which runs to 31 December 2026. Applying for K-ETA voluntarily only exempts you from the paper arrival card.",
       "government_fee": {
         "amount": 0,
         "currency": null
       },
-      "confidence": "medium"
+      "confidence": "medium",
+      "official_portal_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+      "visa_products": [],
+      "exceptions": [
+        "Korea's temporary K-ETA exemption runs to 31 December 2026; check again for travel after that date",
+        "A voluntary K-ETA application exempts you from filling the arrival card on the plane"
+      ]
     }
   },
   {
@@ -331,23 +337,29 @@
       "destination": "KOR",
       "travel_purpose": "tourism"
     },
-    "verified_at": "2026-08-22",
+    "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
-    "source_url": "https://overseas.mofa.go.kr/us-en/brd/m_4502/view.do?seq=715890",
-    "note": "US nationals are temporarily exempt from the K-ETA under an extension by the Ministry of Justice. The model reported a K-ETA as required.",
+    "source_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+    "note": "Verified 2026-08-25 against the K-ETA portal's own notice \"대한민국 전자여행허가제(K-ETA) 한시 면제 기간 연장 알림\" (2026-03-20) and Korea's MOFA: the temporary K-ETA exemption for 22 countries is extended to 31 December 2026. K-ETA is OPTIONAL for these nationalities during the exemption (a voluntary application only buys the arrival-card exemption). Review on 2026-12-31: the requirement returns if the exemption is not extended again.",
     "fields": {
       "disposition": "VISA_EXEMPT",
-      "requirement_detail": "conditional_visa_free",
-      "visa_category": "Visa-free short-term visit (K-ETA temporarily waived)",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa-free short-term visit",
       "permitted_stay": "Up to 90 days",
       "permitted_stay_days": 90,
       "application_channel": "not_required",
-      "application_channel_detail": "No visa, and no K-ETA during the current temporary exemption. The exemption is time-limited, so confirm it is still in force before travel.",
+      "application_channel_detail": "No visa and no K-ETA are required during Korea's temporary K-ETA exemption, which runs to 31 December 2026. Applying for K-ETA voluntarily only exempts you from the paper arrival card.",
       "government_fee": {
         "amount": 0,
         "currency": null
       },
-      "confidence": "medium"
+      "confidence": "medium",
+      "official_portal_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+      "visa_products": [],
+      "exceptions": [
+        "Korea's temporary K-ETA exemption runs to 31 December 2026; check again for travel after that date",
+        "A voluntary K-ETA application exempts you from filling the arrival card on the plane"
+      ]
     }
   },
   {
@@ -8065,12 +8077,28 @@
       "destination": "ESP",
       "travel_purpose": "tourism"
     },
-    "verified_at": "2026-08-22",
+    "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
-    "source_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
-    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Spain MFA Schengen visa information page (English); applications are lodged through consulates and their centres.",
+    "source_url": "https://travel-europe.europa.eu/etias_en",
+    "note": "Verified 2026-08-25 against the official ETIAS site, the European Commission and eu-LISA, all carrying the same sentence: \"ETIAS is currently not in operation and no applications for travel authorisations are collected at this point.\" No start date is announced. A visa-exempt tourist therefore needs NO travel authorisation today; the Entry/Exit System (EES) biometric registration at the border does apply, in force since 12 October 2025.",
     "fields": {
-      "official_portal_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+      "official_portal_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Short-stay visa-free (Schengen)",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no travel authorisation are required today: ETIAS is not yet in operation. Present a valid passport at the border, where the EU Entry/Exit System registers biometrics.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "exceptions": [
+        "ETIAS is not in operation and collects no applications; the EU will give several months' notice before it starts",
+        "The Entry/Exit System (EES) registers biometrics at the border, in force since 12 October 2025 and replacing passport stamping since 10 April 2026"
+      ]
     }
   },
   {
@@ -8079,12 +8107,28 @@
       "destination": "FRA",
       "travel_purpose": "tourism"
     },
-    "verified_at": "2026-08-22",
+    "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
-    "source_url": "https://france-visas.gouv.fr/en/demande-de-visa",
-    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. France-Visas application entry page; the online form starts here.",
+    "source_url": "https://travel-europe.europa.eu/etias_en",
+    "note": "Verified 2026-08-25 against the official ETIAS site, the European Commission and eu-LISA, all carrying the same sentence: \"ETIAS is currently not in operation and no applications for travel authorisations are collected at this point.\" No start date is announced. A visa-exempt tourist therefore needs NO travel authorisation today; the Entry/Exit System (EES) biometric registration at the border does apply, in force since 12 October 2025.",
     "fields": {
-      "official_portal_url": "https://france-visas.gouv.fr/en/demande-de-visa"
+      "official_portal_url": "https://france-visas.gouv.fr/en/demande-de-visa",
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Short-stay visa-free (Schengen)",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no travel authorisation are required today: ETIAS is not yet in operation. Present a valid passport at the border, where the EU Entry/Exit System registers biometrics.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "exceptions": [
+        "ETIAS is not in operation and collects no applications; the EU will give several months' notice before it starts",
+        "The Entry/Exit System (EES) registers biometrics at the border, in force since 12 October 2025 and replacing passport stamping since 10 April 2026"
+      ]
     }
   },
   {
@@ -8205,12 +8249,26 @@
       "destination": "KOR",
       "travel_purpose": "tourism"
     },
-    "verified_at": "2026-08-22",
+    "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
-    "source_url": "https://www.visa.go.kr/openPage.do?MENU_ID=10101&LANG_TYPE=EN",
-    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Korea Visa Portal (Ministry of Justice); K-ETA for visa-free nationals at k-eta.go.kr.",
+    "source_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+    "note": "Verified 2026-08-25 against the K-ETA portal's own notice \"대한민국 전자여행허가제(K-ETA) 한시 면제 기간 연장 알림\" (2026-03-20) and Korea's MOFA: the temporary K-ETA exemption for 22 countries is extended to 31 December 2026. K-ETA is OPTIONAL for these nationalities during the exemption (a voluntary application only buys the arrival-card exemption). Review on 2026-12-31: the requirement returns if the exemption is not extended again.",
     "fields": {
-      "official_portal_url": "https://www.visa.go.kr/openPage.do?MENU_ID=10101&LANG_TYPE=EN"
+      "official_portal_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa-free short-term visit",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no K-ETA are required during Korea's temporary K-ETA exemption, which runs to 31 December 2026. Applying for K-ETA voluntarily only exempts you from the paper arrival card.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "visa_products": [],
+      "exceptions": [
+        "Korea's temporary K-ETA exemption runs to 31 December 2026; check again for travel after that date",
+        "A voluntary K-ETA application exempts you from filling the arrival card on the plane"
+      ]
     }
   },
   {
@@ -8345,12 +8403,22 @@
       "destination": "HKG",
       "travel_purpose": "tourism"
     },
-    "verified_at": "2026-08-22",
+    "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
     "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
-    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Hong Kong ImmD visit visa / entry permit requirements page.",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Indonesian nationals do not require a visa for a tourist visit to Hong Kong and may stay for up to 30 days. Official text: \"Nationals of other foreign countries do not require visas for a visit\" — table entry: \"INDONESIA | 30 Days\" (visa free period for visit not exceeding 30 days; no footnote or exception attached to the Indonesia entry)",
     "fields": {
-      "official_portal_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html"
+      "official_portal_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "30 days",
+      "permitted_stay_days": 30,
+      "application_channel": "not_required",
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
     }
   },
   {
@@ -8589,6 +8657,1515 @@
     "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Lithuania's MIGRIS system (Migration Department): the Schengen visa request starts here.",
     "fields": {
       "official_portal_url": "https://www.migracija.lt/service/uzsienieciams?lang=en#v-sv-isduoti-sengeno-viza"
+    }
+  },
+  {
+    "route": {
+      "nationality": "CAN",
+      "destination": "FRA",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://travel-europe.europa.eu/etias_en",
+    "note": "Verified 2026-08-25 against the official ETIAS site, the European Commission and eu-LISA, all carrying the same sentence: \"ETIAS is currently not in operation and no applications for travel authorisations are collected at this point.\" No start date is announced. A visa-exempt tourist therefore needs NO travel authorisation today; the Entry/Exit System (EES) biometric registration at the border does apply, in force since 12 October 2025.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Short-stay visa-free (Schengen)",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no travel authorisation are required today: ETIAS is not yet in operation. Present a valid passport at the border, where the EU Entry/Exit System registers biometrics.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "exceptions": [
+        "ETIAS is not in operation and collects no applications; the EU will give several months' notice before it starts",
+        "The Entry/Exit System (EES) registers biometrics at the border, in force since 12 October 2025 and replacing passport stamping since 10 April 2026"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "GBR",
+      "destination": "ESP",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://travel-europe.europa.eu/etias_en",
+    "note": "Verified 2026-08-25 against the official ETIAS site, the European Commission and eu-LISA, all carrying the same sentence: \"ETIAS is currently not in operation and no applications for travel authorisations are collected at this point.\" No start date is announced. A visa-exempt tourist therefore needs NO travel authorisation today; the Entry/Exit System (EES) biometric registration at the border does apply, in force since 12 October 2025.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Short-stay visa-free (Schengen)",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no travel authorisation are required today: ETIAS is not yet in operation. Present a valid passport at the border, where the EU Entry/Exit System registers biometrics.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "exceptions": [
+        "ETIAS is not in operation and collects no applications; the EU will give several months' notice before it starts",
+        "The Entry/Exit System (EES) registers biometrics at the border, in force since 12 October 2025 and replacing passport stamping since 10 April 2026"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "FIN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://travel-europe.europa.eu/etias_en",
+    "note": "Verified 2026-08-25 against the official ETIAS site, the European Commission and eu-LISA, all carrying the same sentence: \"ETIAS is currently not in operation and no applications for travel authorisations are collected at this point.\" No start date is announced. A visa-exempt tourist therefore needs NO travel authorisation today; the Entry/Exit System (EES) biometric registration at the border does apply, in force since 12 October 2025.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Short-stay visa-free (Schengen)",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no travel authorisation are required today: ETIAS is not yet in operation. Present a valid passport at the border, where the EU Entry/Exit System registers biometrics.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "exceptions": [
+        "ETIAS is not in operation and collects no applications; the EU will give several months' notice before it starts",
+        "The Entry/Exit System (EES) registers biometrics at the border, in force since 12 October 2025 and replacing passport stamping since 10 April 2026"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "GRC",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://travel-europe.europa.eu/etias_en",
+    "note": "Verified 2026-08-25 against the official ETIAS site, the European Commission and eu-LISA, all carrying the same sentence: \"ETIAS is currently not in operation and no applications for travel authorisations are collected at this point.\" No start date is announced. A visa-exempt tourist therefore needs NO travel authorisation today; the Entry/Exit System (EES) biometric registration at the border does apply, in force since 12 October 2025.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Short-stay visa-free (Schengen)",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no travel authorisation are required today: ETIAS is not yet in operation. Present a valid passport at the border, where the EU Entry/Exit System registers biometrics.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "exceptions": [
+        "ETIAS is not in operation and collects no applications; the EU will give several months' notice before it starts",
+        "The Entry/Exit System (EES) registers biometrics at the border, in force since 12 October 2025 and replacing passport stamping since 10 April 2026"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "LUX",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://travel-europe.europa.eu/etias_en",
+    "note": "Verified 2026-08-25 against the official ETIAS site, the European Commission and eu-LISA, all carrying the same sentence: \"ETIAS is currently not in operation and no applications for travel authorisations are collected at this point.\" No start date is announced. A visa-exempt tourist therefore needs NO travel authorisation today; the Entry/Exit System (EES) biometric registration at the border does apply, in force since 12 October 2025.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Short-stay visa-free (Schengen)",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no travel authorisation are required today: ETIAS is not yet in operation. Present a valid passport at the border, where the EU Entry/Exit System registers biometrics.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "exceptions": [
+        "ETIAS is not in operation and collects no applications; the EU will give several months' notice before it starts",
+        "The Entry/Exit System (EES) registers biometrics at the border, in force since 12 October 2025 and replacing passport stamping since 10 April 2026"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "MCO",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://travel-europe.europa.eu/etias_en",
+    "note": "Verified 2026-08-25 against the official ETIAS site, the European Commission and eu-LISA, all carrying the same sentence: \"ETIAS is currently not in operation and no applications for travel authorisations are collected at this point.\" No start date is announced. A visa-exempt tourist therefore needs NO travel authorisation today; the Entry/Exit System (EES) biometric registration at the border does apply, in force since 12 October 2025.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Short-stay visa-free (Schengen)",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no travel authorisation are required today: ETIAS is not yet in operation. Present a valid passport at the border, where the EU Entry/Exit System registers biometrics.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "exceptions": [
+        "ETIAS is not in operation and collects no applications; the EU will give several months' notice before it starts",
+        "The Entry/Exit System (EES) registers biometrics at the border, in force since 12 October 2025 and replacing passport stamping since 10 April 2026"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "POL",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://travel-europe.europa.eu/etias_en",
+    "note": "Verified 2026-08-25 against the official ETIAS site, the European Commission and eu-LISA, all carrying the same sentence: \"ETIAS is currently not in operation and no applications for travel authorisations are collected at this point.\" No start date is announced. A visa-exempt tourist therefore needs NO travel authorisation today; the Entry/Exit System (EES) biometric registration at the border does apply, in force since 12 October 2025.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Short-stay visa-free (Schengen)",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no travel authorisation are required today: ETIAS is not yet in operation. Present a valid passport at the border, where the EU Entry/Exit System registers biometrics.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "exceptions": [
+        "ETIAS is not in operation and collects no applications; the EU will give several months' notice before it starts",
+        "The Entry/Exit System (EES) registers biometrics at the border, in force since 12 October 2025 and replacing passport stamping since 10 April 2026"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "PRT",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://travel-europe.europa.eu/etias_en",
+    "note": "Verified 2026-08-25 against the official ETIAS site, the European Commission and eu-LISA, all carrying the same sentence: \"ETIAS is currently not in operation and no applications for travel authorisations are collected at this point.\" No start date is announced. A visa-exempt tourist therefore needs NO travel authorisation today; the Entry/Exit System (EES) biometric registration at the border does apply, in force since 12 October 2025.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Short-stay visa-free (Schengen)",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no travel authorisation are required today: ETIAS is not yet in operation. Present a valid passport at the border, where the EU Entry/Exit System registers biometrics.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "exceptions": [
+        "ETIAS is not in operation and collects no applications; the EU will give several months' notice before it starts",
+        "The Entry/Exit System (EES) registers biometrics at the border, in force since 12 October 2025 and replacing passport stamping since 10 April 2026"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "VAT",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://travel-europe.europa.eu/etias_en",
+    "note": "Verified 2026-08-25 against the official ETIAS site, the European Commission and eu-LISA, all carrying the same sentence: \"ETIAS is currently not in operation and no applications for travel authorisations are collected at this point.\" No start date is announced. A visa-exempt tourist therefore needs NO travel authorisation today; the Entry/Exit System (EES) biometric registration at the border does apply, in force since 12 October 2025.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Short-stay visa-free (Schengen)",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no travel authorisation are required today: ETIAS is not yet in operation. Present a valid passport at the border, where the EU Entry/Exit System registers biometrics.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "exceptions": [
+        "ETIAS is not in operation and collects no applications; the EU will give several months' notice before it starts",
+        "The Entry/Exit System (EES) registers biometrics at the border, in force since 12 October 2025 and replacing passport stamping since 10 April 2026"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "TWN",
+      "destination": "FRA",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://travel-europe.europa.eu/etias_en",
+    "note": "Verified 2026-08-25 against the official ETIAS site, the European Commission and eu-LISA, all carrying the same sentence: \"ETIAS is currently not in operation and no applications for travel authorisations are collected at this point.\" No start date is announced. A visa-exempt tourist therefore needs NO travel authorisation today; the Entry/Exit System (EES) biometric registration at the border does apply, in force since 12 October 2025.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Short-stay visa-free (Schengen)",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no travel authorisation are required today: ETIAS is not yet in operation. Present a valid passport at the border, where the EU Entry/Exit System registers biometrics.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "exceptions": [
+        "ETIAS is not in operation and collects no applications; the EU will give several months' notice before it starts",
+        "The Entry/Exit System (EES) registers biometrics at the border, in force since 12 October 2025 and replacing passport stamping since 10 April 2026"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "USA",
+      "destination": "CYP",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://travel-europe.europa.eu/etias_en",
+    "note": "Verified 2026-08-25 against the official ETIAS site, the European Commission and eu-LISA, all carrying the same sentence: \"ETIAS is currently not in operation and no applications for travel authorisations are collected at this point.\" No start date is announced. A visa-exempt tourist therefore needs NO travel authorisation today; the Entry/Exit System (EES) biometric registration at the border does apply, in force since 12 October 2025.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Short-stay visa-free (Schengen)",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no travel authorisation are required today: ETIAS is not yet in operation. Present a valid passport at the border, where the EU Entry/Exit System registers biometrics.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "exceptions": [
+        "ETIAS is not in operation and collects no applications; the EU will give several months' notice before it starts",
+        "The Entry/Exit System (EES) registers biometrics at the border, in force since 12 October 2025 and replacing passport stamping since 10 April 2026"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "USA",
+      "destination": "CZE",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://travel-europe.europa.eu/etias_en",
+    "note": "Verified 2026-08-25 against the official ETIAS site, the European Commission and eu-LISA, all carrying the same sentence: \"ETIAS is currently not in operation and no applications for travel authorisations are collected at this point.\" No start date is announced. A visa-exempt tourist therefore needs NO travel authorisation today; the Entry/Exit System (EES) biometric registration at the border does apply, in force since 12 October 2025.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Short-stay visa-free (Schengen)",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no travel authorisation are required today: ETIAS is not yet in operation. Present a valid passport at the border, where the EU Entry/Exit System registers biometrics.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "exceptions": [
+        "ETIAS is not in operation and collects no applications; the EU will give several months' notice before it starts",
+        "The Entry/Exit System (EES) registers biometrics at the border, in force since 12 October 2025 and replacing passport stamping since 10 April 2026"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "USA",
+      "destination": "FIN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://travel-europe.europa.eu/etias_en",
+    "note": "Verified 2026-08-25 against the official ETIAS site, the European Commission and eu-LISA, all carrying the same sentence: \"ETIAS is currently not in operation and no applications for travel authorisations are collected at this point.\" No start date is announced. A visa-exempt tourist therefore needs NO travel authorisation today; the Entry/Exit System (EES) biometric registration at the border does apply, in force since 12 October 2025.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Short-stay visa-free (Schengen)",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no travel authorisation are required today: ETIAS is not yet in operation. Present a valid passport at the border, where the EU Entry/Exit System registers biometrics.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "exceptions": [
+        "ETIAS is not in operation and collects no applications; the EU will give several months' notice before it starts",
+        "The Entry/Exit System (EES) registers biometrics at the border, in force since 12 October 2025 and replacing passport stamping since 10 April 2026"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "USA",
+      "destination": "GRC",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://travel-europe.europa.eu/etias_en",
+    "note": "Verified 2026-08-25 against the official ETIAS site, the European Commission and eu-LISA, all carrying the same sentence: \"ETIAS is currently not in operation and no applications for travel authorisations are collected at this point.\" No start date is announced. A visa-exempt tourist therefore needs NO travel authorisation today; the Entry/Exit System (EES) biometric registration at the border does apply, in force since 12 October 2025.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Short-stay visa-free (Schengen)",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no travel authorisation are required today: ETIAS is not yet in operation. Present a valid passport at the border, where the EU Entry/Exit System registers biometrics.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "exceptions": [
+        "ETIAS is not in operation and collects no applications; the EU will give several months' notice before it starts",
+        "The Entry/Exit System (EES) registers biometrics at the border, in force since 12 October 2025 and replacing passport stamping since 10 April 2026"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "USA",
+      "destination": "LIE",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://travel-europe.europa.eu/etias_en",
+    "note": "Verified 2026-08-25 against the official ETIAS site, the European Commission and eu-LISA, all carrying the same sentence: \"ETIAS is currently not in operation and no applications for travel authorisations are collected at this point.\" No start date is announced. A visa-exempt tourist therefore needs NO travel authorisation today; the Entry/Exit System (EES) biometric registration at the border does apply, in force since 12 October 2025.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Short-stay visa-free (Schengen)",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no travel authorisation are required today: ETIAS is not yet in operation. Present a valid passport at the border, where the EU Entry/Exit System registers biometrics.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "exceptions": [
+        "ETIAS is not in operation and collects no applications; the EU will give several months' notice before it starts",
+        "The Entry/Exit System (EES) registers biometrics at the border, in force since 12 October 2025 and replacing passport stamping since 10 April 2026"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "USA",
+      "destination": "LUX",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://travel-europe.europa.eu/etias_en",
+    "note": "Verified 2026-08-25 against the official ETIAS site, the European Commission and eu-LISA, all carrying the same sentence: \"ETIAS is currently not in operation and no applications for travel authorisations are collected at this point.\" No start date is announced. A visa-exempt tourist therefore needs NO travel authorisation today; the Entry/Exit System (EES) biometric registration at the border does apply, in force since 12 October 2025.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Short-stay visa-free (Schengen)",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no travel authorisation are required today: ETIAS is not yet in operation. Present a valid passport at the border, where the EU Entry/Exit System registers biometrics.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "exceptions": [
+        "ETIAS is not in operation and collects no applications; the EU will give several months' notice before it starts",
+        "The Entry/Exit System (EES) registers biometrics at the border, in force since 12 October 2025 and replacing passport stamping since 10 April 2026"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "USA",
+      "destination": "MLT",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://travel-europe.europa.eu/etias_en",
+    "note": "Verified 2026-08-25 against the official ETIAS site, the European Commission and eu-LISA, all carrying the same sentence: \"ETIAS is currently not in operation and no applications for travel authorisations are collected at this point.\" No start date is announced. A visa-exempt tourist therefore needs NO travel authorisation today; the Entry/Exit System (EES) biometric registration at the border does apply, in force since 12 October 2025.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Short-stay visa-free (Schengen)",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no travel authorisation are required today: ETIAS is not yet in operation. Present a valid passport at the border, where the EU Entry/Exit System registers biometrics.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "exceptions": [
+        "ETIAS is not in operation and collects no applications; the EU will give several months' notice before it starts",
+        "The Entry/Exit System (EES) registers biometrics at the border, in force since 12 October 2025 and replacing passport stamping since 10 April 2026"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "USA",
+      "destination": "POL",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://travel-europe.europa.eu/etias_en",
+    "note": "Verified 2026-08-25 against the official ETIAS site, the European Commission and eu-LISA, all carrying the same sentence: \"ETIAS is currently not in operation and no applications for travel authorisations are collected at this point.\" No start date is announced. A visa-exempt tourist therefore needs NO travel authorisation today; the Entry/Exit System (EES) biometric registration at the border does apply, in force since 12 October 2025.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Short-stay visa-free (Schengen)",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no travel authorisation are required today: ETIAS is not yet in operation. Present a valid passport at the border, where the EU Entry/Exit System registers biometrics.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "exceptions": [
+        "ETIAS is not in operation and collects no applications; the EU will give several months' notice before it starts",
+        "The Entry/Exit System (EES) registers biometrics at the border, in force since 12 October 2025 and replacing passport stamping since 10 April 2026"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "USA",
+      "destination": "SVK",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://travel-europe.europa.eu/etias_en",
+    "note": "Verified 2026-08-25 against the official ETIAS site, the European Commission and eu-LISA, all carrying the same sentence: \"ETIAS is currently not in operation and no applications for travel authorisations are collected at this point.\" No start date is announced. A visa-exempt tourist therefore needs NO travel authorisation today; the Entry/Exit System (EES) biometric registration at the border does apply, in force since 12 October 2025.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Short-stay visa-free (Schengen)",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no travel authorisation are required today: ETIAS is not yet in operation. Present a valid passport at the border, where the EU Entry/Exit System registers biometrics.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "exceptions": [
+        "ETIAS is not in operation and collects no applications; the EU will give several months' notice before it starts",
+        "The Entry/Exit System (EES) registers biometrics at the border, in force since 12 October 2025 and replacing passport stamping since 10 April 2026"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "USA",
+      "destination": "SWE",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://travel-europe.europa.eu/etias_en",
+    "note": "Verified 2026-08-25 against the official ETIAS site, the European Commission and eu-LISA, all carrying the same sentence: \"ETIAS is currently not in operation and no applications for travel authorisations are collected at this point.\" No start date is announced. A visa-exempt tourist therefore needs NO travel authorisation today; the Entry/Exit System (EES) biometric registration at the border does apply, in force since 12 October 2025.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Short-stay visa-free (Schengen)",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no travel authorisation are required today: ETIAS is not yet in operation. Present a valid passport at the border, where the EU Entry/Exit System registers biometrics.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "exceptions": [
+        "ETIAS is not in operation and collects no applications; the EU will give several months' notice before it starts",
+        "The Entry/Exit System (EES) registers biometrics at the border, in force since 12 October 2025 and replacing passport stamping since 10 April 2026"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "USA",
+      "destination": "VAT",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://travel-europe.europa.eu/etias_en",
+    "note": "Verified 2026-08-25 against the official ETIAS site, the European Commission and eu-LISA, all carrying the same sentence: \"ETIAS is currently not in operation and no applications for travel authorisations are collected at this point.\" No start date is announced. A visa-exempt tourist therefore needs NO travel authorisation today; the Entry/Exit System (EES) biometric registration at the border does apply, in force since 12 October 2025.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Short-stay visa-free (Schengen)",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no travel authorisation are required today: ETIAS is not yet in operation. Present a valid passport at the border, where the EU Entry/Exit System registers biometrics.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "exceptions": [
+        "ETIAS is not in operation and collects no applications; the EU will give several months' notice before it starts",
+        "The Entry/Exit System (EES) registers biometrics at the border, in force since 12 October 2025 and replacing passport stamping since 10 April 2026"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "AUS",
+      "destination": "KOR",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+    "note": "Verified 2026-08-25 against the K-ETA portal's own notice \"대한민국 전자여행허가제(K-ETA) 한시 면제 기간 연장 알림\" (2026-03-20) and Korea's MOFA: the temporary K-ETA exemption for 22 countries is extended to 31 December 2026. K-ETA is OPTIONAL for these nationalities during the exemption (a voluntary application only buys the arrival-card exemption). Review on 2026-12-31: the requirement returns if the exemption is not extended again.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa-free short-term visit",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no K-ETA are required during Korea's temporary K-ETA exemption, which runs to 31 December 2026. Applying for K-ETA voluntarily only exempts you from the paper arrival card.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "official_portal_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+      "visa_products": [],
+      "exceptions": [
+        "Korea's temporary K-ETA exemption runs to 31 December 2026; check again for travel after that date",
+        "A voluntary K-ETA application exempts you from filling the arrival card on the plane"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "DEU",
+      "destination": "KOR",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+    "note": "Verified 2026-08-25 against the K-ETA portal's own notice \"대한민국 전자여행허가제(K-ETA) 한시 면제 기간 연장 알림\" (2026-03-20) and Korea's MOFA: the temporary K-ETA exemption for 22 countries is extended to 31 December 2026. K-ETA is OPTIONAL for these nationalities during the exemption (a voluntary application only buys the arrival-card exemption). Review on 2026-12-31: the requirement returns if the exemption is not extended again.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa-free short-term visit",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no K-ETA are required during Korea's temporary K-ETA exemption, which runs to 31 December 2026. Applying for K-ETA voluntarily only exempts you from the paper arrival card.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "official_portal_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+      "visa_products": [],
+      "exceptions": [
+        "Korea's temporary K-ETA exemption runs to 31 December 2026; check again for travel after that date",
+        "A voluntary K-ETA application exempts you from filling the arrival card on the plane"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "ESP",
+      "destination": "KOR",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+    "note": "Verified 2026-08-25 against the K-ETA portal's own notice \"대한민국 전자여행허가제(K-ETA) 한시 면제 기간 연장 알림\" (2026-03-20) and Korea's MOFA: the temporary K-ETA exemption for 22 countries is extended to 31 December 2026. K-ETA is OPTIONAL for these nationalities during the exemption (a voluntary application only buys the arrival-card exemption). Review on 2026-12-31: the requirement returns if the exemption is not extended again.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa-free short-term visit",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no K-ETA are required during Korea's temporary K-ETA exemption, which runs to 31 December 2026. Applying for K-ETA voluntarily only exempts you from the paper arrival card.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "official_portal_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+      "visa_products": [],
+      "exceptions": [
+        "Korea's temporary K-ETA exemption runs to 31 December 2026; check again for travel after that date",
+        "A voluntary K-ETA application exempts you from filling the arrival card on the plane"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "FRA",
+      "destination": "KOR",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+    "note": "Verified 2026-08-25 against the K-ETA portal's own notice \"대한민국 전자여행허가제(K-ETA) 한시 면제 기간 연장 알림\" (2026-03-20) and Korea's MOFA: the temporary K-ETA exemption for 22 countries is extended to 31 December 2026. K-ETA is OPTIONAL for these nationalities during the exemption (a voluntary application only buys the arrival-card exemption). Review on 2026-12-31: the requirement returns if the exemption is not extended again.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa-free short-term visit",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no K-ETA are required during Korea's temporary K-ETA exemption, which runs to 31 December 2026. Applying for K-ETA voluntarily only exempts you from the paper arrival card.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "official_portal_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+      "visa_products": [],
+      "exceptions": [
+        "Korea's temporary K-ETA exemption runs to 31 December 2026; check again for travel after that date",
+        "A voluntary K-ETA application exempts you from filling the arrival card on the plane"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "GBR",
+      "destination": "KOR",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+    "note": "Verified 2026-08-25 against the K-ETA portal's own notice \"대한민국 전자여행허가제(K-ETA) 한시 면제 기간 연장 알림\" (2026-03-20) and Korea's MOFA: the temporary K-ETA exemption for 22 countries is extended to 31 December 2026. K-ETA is OPTIONAL for these nationalities during the exemption (a voluntary application only buys the arrival-card exemption). Review on 2026-12-31: the requirement returns if the exemption is not extended again.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa-free short-term visit",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no K-ETA are required during Korea's temporary K-ETA exemption, which runs to 31 December 2026. Applying for K-ETA voluntarily only exempts you from the paper arrival card.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "official_portal_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+      "visa_products": [],
+      "exceptions": [
+        "Korea's temporary K-ETA exemption runs to 31 December 2026; check again for travel after that date",
+        "A voluntary K-ETA application exempts you from filling the arrival card on the plane"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "IDN",
+      "destination": "KOR",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+    "note": "Verified 2026-08-25 against the K-ETA portal's own notice \"대한민국 전자여행허가제(K-ETA) 한시 면제 기간 연장 알림\" (2026-03-20) and Korea's MOFA: the temporary K-ETA exemption for 22 countries is extended to 31 December 2026. K-ETA is OPTIONAL for these nationalities during the exemption (a voluntary application only buys the arrival-card exemption). Review on 2026-12-31: the requirement returns if the exemption is not extended again.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa-free short-term visit",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no K-ETA are required during Korea's temporary K-ETA exemption, which runs to 31 December 2026. Applying for K-ETA voluntarily only exempts you from the paper arrival card.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "official_portal_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+      "visa_products": [],
+      "exceptions": [
+        "Korea's temporary K-ETA exemption runs to 31 December 2026; check again for travel after that date",
+        "A voluntary K-ETA application exempts you from filling the arrival card on the plane"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "JPN",
+      "destination": "KOR",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+    "note": "Verified 2026-08-25 against the K-ETA portal's own notice \"대한민국 전자여행허가제(K-ETA) 한시 면제 기간 연장 알림\" (2026-03-20) and Korea's MOFA: the temporary K-ETA exemption for 22 countries is extended to 31 December 2026. K-ETA is OPTIONAL for these nationalities during the exemption (a voluntary application only buys the arrival-card exemption). Review on 2026-12-31: the requirement returns if the exemption is not extended again.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa-free short-term visit",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no K-ETA are required during Korea's temporary K-ETA exemption, which runs to 31 December 2026. Applying for K-ETA voluntarily only exempts you from the paper arrival card.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "official_portal_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+      "visa_products": [],
+      "exceptions": [
+        "Korea's temporary K-ETA exemption runs to 31 December 2026; check again for travel after that date",
+        "A voluntary K-ETA application exempts you from filling the arrival card on the plane"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "MYS",
+      "destination": "KOR",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+    "note": "Verified 2026-08-25 against the K-ETA portal's own notice \"대한민국 전자여행허가제(K-ETA) 한시 면제 기간 연장 알림\" (2026-03-20) and Korea's MOFA: the temporary K-ETA exemption for 22 countries is extended to 31 December 2026. K-ETA is OPTIONAL for these nationalities during the exemption (a voluntary application only buys the arrival-card exemption). Review on 2026-12-31: the requirement returns if the exemption is not extended again.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa-free short-term visit",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no K-ETA are required during Korea's temporary K-ETA exemption, which runs to 31 December 2026. Applying for K-ETA voluntarily only exempts you from the paper arrival card.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "official_portal_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+      "visa_products": [],
+      "exceptions": [
+        "Korea's temporary K-ETA exemption runs to 31 December 2026; check again for travel after that date",
+        "A voluntary K-ETA application exempts you from filling the arrival card on the plane"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "SGP",
+      "destination": "KOR",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+    "note": "Verified 2026-08-25 against the K-ETA portal's own notice \"대한민국 전자여행허가제(K-ETA) 한시 면제 기간 연장 알림\" (2026-03-20) and Korea's MOFA: the temporary K-ETA exemption for 22 countries is extended to 31 December 2026. K-ETA is OPTIONAL for these nationalities during the exemption (a voluntary application only buys the arrival-card exemption). Review on 2026-12-31: the requirement returns if the exemption is not extended again.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa-free short-term visit",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no K-ETA are required during Korea's temporary K-ETA exemption, which runs to 31 December 2026. Applying for K-ETA voluntarily only exempts you from the paper arrival card.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "official_portal_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+      "visa_products": [],
+      "exceptions": [
+        "Korea's temporary K-ETA exemption runs to 31 December 2026; check again for travel after that date",
+        "A voluntary K-ETA application exempts you from filling the arrival card on the plane"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "THA",
+      "destination": "KOR",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+    "note": "Verified 2026-08-25 against the K-ETA portal's own notice \"대한민국 전자여행허가제(K-ETA) 한시 면제 기간 연장 알림\" (2026-03-20) and Korea's MOFA: the temporary K-ETA exemption for 22 countries is extended to 31 December 2026. K-ETA is OPTIONAL for these nationalities during the exemption (a voluntary application only buys the arrival-card exemption). Review on 2026-12-31: the requirement returns if the exemption is not extended again.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa-free short-term visit",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no K-ETA are required during Korea's temporary K-ETA exemption, which runs to 31 December 2026. Applying for K-ETA voluntarily only exempts you from the paper arrival card.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "official_portal_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+      "visa_products": [],
+      "exceptions": [
+        "Korea's temporary K-ETA exemption runs to 31 December 2026; check again for travel after that date",
+        "A voluntary K-ETA application exempts you from filling the arrival card on the plane"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "TWN",
+      "destination": "KOR",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+    "note": "Verified 2026-08-25 against the K-ETA portal's own notice \"대한민국 전자여행허가제(K-ETA) 한시 면제 기간 연장 알림\" (2026-03-20) and Korea's MOFA: the temporary K-ETA exemption for 22 countries is extended to 31 December 2026. K-ETA is OPTIONAL for these nationalities during the exemption (a voluntary application only buys the arrival-card exemption). Review on 2026-12-31: the requirement returns if the exemption is not extended again.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "visa_category": "Visa-free short-term visit",
+      "application_channel": "not_required",
+      "application_channel_detail": "No visa and no K-ETA are required during Korea's temporary K-ETA exemption, which runs to 31 December 2026. Applying for K-ETA voluntarily only exempts you from the paper arrival card.",
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      },
+      "official_portal_url": "https://www.k-eta.go.kr/portal/apply/index.do",
+      "visa_products": [],
+      "exceptions": [
+        "Korea's temporary K-ETA exemption runs to 31 December 2026; check again for travel after that date",
+        "A voluntary K-ETA application exempts you from filling the arrival card on the plane"
+      ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "BEN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://sgg.gouv.bj/doc/decret-2023-489/",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Chinese ordinary passport holders may enter Benin visa-free for up to 30 days within any 90-day period, provided the passport is valid for at least 6 months on first entry and entry is via an officially designated international border point. Official text: Decret N 2023-489, Article premier: \"Les ressortissants de la Republique Populaire de Chine, detenteurs de passeport ordinaire en cours de validite, sont autorises a entrer, sortir, transiter et sejourner sans visa sur l",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "conditional_visa_free",
+      "permitted_stay": "max 30 days (in one or more periods) within any 90-day period from first entry",
+      "permitted_stay_days": 30,
+      "application_channel": "not_required",
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "BRA",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.gov.br/mre/pt-br/embaixada-pequim/setor-consular-2/novas-regras-de-visto-para-nacionais-chineses-4e2d56fd516c6c118d745df47b7e8bc165b089c4",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Chinese travelers may enter Brazil visa-free only from 11 May 2026 through 31 December 2026 for tourism, business, transit, or artistic/sporting activities, with a total stay not exceeding 30 days per migratory year; work, longer stays, and other purposes require a visa via the VFS Visa Center. Official text: \"A partir de 11 de maio de 2026 ... cidadãos chineses estarão isentos de visto para estadas de até 30 dias, não prorrogáveis, com possibilidade de múltiplas entradas, desde que o prazo total de estada não ultrapasse os 3",
+    "fields": {
+      "disposition": "CONDITIONAL",
+      "requirement_detail": "conditional_visa_free",
+      "permitted_stay": "30 days maximum, non-extendable, multiple entries allowed, with cumulative stay capped at 30 days per 12-month migratory year",
+      "permitted_stay_days": 30,
+      "application_channel": "not_required"
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "ARE",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://cs.mfa.gov.cn/zggmcg/ljmdd/yz_645708/alq_645772/rjjl_645782/",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Chinese citizens with ordinary passports valid for at least 6 months enter the UAE visa-free, with a total stay capped at 90 days within each 180-day window counted from first entry, and overstays are fined 50 AED per day. Official text: \"持有效期6个月以上普通护照的中国公民可免签入境阿联酋，每180天内总停留时间不超过90天。自首次入境之日开始计算180天，连续或间断停留满90天的，应在期满后离开阿联酋，首次入境之日180天后方可返回。180天内停留超过90天的，超出天数每天罚款50迪拉姆。\" (Chinese citizens holding ordinary passports valid 6+ months enter the UAE visa-free; to",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "90 days total within any 180-day period, counted from first entry",
+      "permitted_stay_days": 90,
+      "application_channel": "not_required",
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "DZA",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://embbeijing.mfa.gov.dz/en/services-for-foreigners/entry-visa-to-algeria-1",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Ordinary Chinese passport holders must apply for a visa at the Algerian Embassy in Beijing, as the bilateral exemption applies only to diplomatic and service passports. Official text: \"All applicants residing in the People's Republic of China who wish to travel to Algeria may need a visa issued by the Visa section of the Embassy of Algeria in Beijing. ... Holders of diplomatic and service passports ar",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": "paper_visa",
+      "permitted_stay": "30, 60, or 90 days as granted",
+      "visa_category": "Consular visa",
+      "application_channel": "embassy"
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "FJI",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.immigration.gov.fj/visit-fiji/",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Chinese nationals do not need a Fiji visa; a visitor permit is issued on arrival for up to 4 months and can be extended once by 2 months. Official text: Fiji Immigration (visa-exempted list, includes China): \"Citizens of the following countries are not required to obtain a Fiji visa when travelling to Fiji.\" Fiji Immigration (Visit Fiji): \"This visitor permit will allow ",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "up to 4 months",
+      "permitted_stay_days": 120,
+      "visa_category": "Visitor Permit",
+      "application_channel": "not_required",
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "DMA",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://dominica.gov.dm/services/passports-and-travel-documents-non-nationals/do-i-need-a-visa-to-enter-into-dominica",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Chinese passport holders may enter Dominica visa-free for a stay of up to three months, not 21 days. Official text: \"Persons from the following countries wishing to enter into the Commonwealth of Dominica for a period not exceeding three months: ... People's Republic of China ...\" — Government of Dominica Web Portal. (Corroborating: C",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "not exceeding three months",
+      "permitted_stay_days": 90,
+      "visa_category": "Visa exemption",
+      "application_channel": "not_required",
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "BOL",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://cs.mfa.gov.cn/zggmcg/ljmdd/nmz_657827/blwy_658077/",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Apply at a Bolivian consulate in advance (officially recommended) or request a tourist visa on arrival, carrying a passport valid 6+ months, return ticket, hotel booking or notarized invitation, proof of funds, and yellow fever certificate where applicable. Official text: \"持普通护照来玻人员需办签证……我公民确因旅游目的来玻可申办旅游落地签\" (ordinary-passport holders need a visa; tourists may apply for a visa on arrival)",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": "paper_visa_on_arrival",
+      "permitted_stay": "30 days per entry, extendable up to 90 days per year",
+      "permitted_stay_days": 30,
+      "visa_category": "tourist visa",
+      "application_channel": "on_arrival"
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "JAM",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.pica.gov.jm/immigration/entry-visa-requirements",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Chinese ordinary passport holders visiting Jamaica for tourism do not require a visa and may stay up to 30 days (effective Feb 21, 2014). Official text: China: \"NO visa required for 30 days (effective Feb 21, 2014 for Tourism ONLY)\" and \"NO visa required for holders of Diplomatic & Official passports\"",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "Maximum 30 days visa-free (tourism only, effective Feb 21, 2014)",
+      "permitted_stay_days": 30,
+      "application_channel": "not_required",
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "KIR",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.mfa.gov.ki/wp-content/uploads/2023/09/VISA-EXEMPTION-ORDER-2023-1.pdf",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Chinese ordinary-passport holders may travel to Kiribati visa-free for up to 90 days in any 12-month period with no pre-travel authorization required. Official text: \"3.1) The requirement to hold a visa permitting travel to Kiribati is waived for the citizens of countries in the list of Countries and Regions exempted from visa (the list) requirements. ... 3.3) To avoid doubt, citizen",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "up to 90 days in any 12-month period",
+      "permitted_stay_days": 90,
+      "application_channel": "not_required",
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "GHA",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://evisa.immigration.gov.gh/",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Chinese passport holders must apply online at evisa.immigration.gov.gh or through an embassy for a 90-day-valid tourist eVisa that permits a 30-day stay per entry. Official text: For nationality CN the official eligibility engine returns: {\"nationality\":\"CN\",\"authorization_required\":\"evisa\",\"application_flow\":\"visa_application\",\"details\":{\"type\":\"visa_required\",\"authorization\":\"evisa\",\"message\":\"",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": "evisa",
+      "permitted_stay": "30 days per entry",
+      "permitted_stay_days": 30,
+      "visa_category": "tourist visa",
+      "application_channel": "online_portal"
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "KWT",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://kuwaitvisa.moi.gov.kw/",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. A Kuwait Tourism Visa permits a stay of no more than 90 days from the date of entry, while the entry permit itself is valid for only 30 days from issuance. Official text: Tourism Visa — Passport validity: No less than 6 months. Entry permit validity: 30 days from the date of issuance. Stay duration: No more than 90 days from the date of entry. Number of entries: Single entry. Prohibition:",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "permitted_stay": "up to 90 days from the date of entry",
+      "permitted_stay_days": 90,
+      "visa_category": "Tourism Visa"
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "MWI",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://evisa.gov.mw/",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Chinese nationals must obtain a visa or prior authorization in advance through evisa.gov.mw before departing for Malawi, as China is in Category One and is not eligible for visa on arrival. Official text: \"nationals of Category One Countries must obtain a visa or prior authorization before departure\" — and the official Category One PDF (\"COUNTRIES AND REGIONS THAT REQUIRE A VISA WELL IN ADVANCE, OR PRIOR AUTHORIZATION\") l",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": "evisa",
+      "visa_category": "eVisa/prior authorization",
+      "application_channel": "online_portal"
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "SLB",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.mfa.gov.cn/wjbzwfwpt/kzx/tzgg/202412/t20241204_11538024.html",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Chinese ordinary passport holders may enter visa-free for single stays up to 30 days (maximum 90 days cumulative per 180 days) and need a visa only for stays over 30 days (or over 90/180 cumulative) or for work/study/settlement/journalism. Official text: China MFA (verbatim): \"持有效的中国普通护照或持有效的所罗门群岛普通护照公民，在缔约另一方入境、出境或者过境，单次停留不超过30日，每180日累计停留不超过90日，免办签证。\" (Citizens holding a valid Chinese ordinary passport or a valid Solomon Islands ordinary passport, entering, leaving, or ",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "conditional_visa_free",
+      "permitted_stay": "30 days per single stay, capped at 90 days cumulative per 180 days",
+      "permitted_stay_days": 30,
+      "application_channel": "not_required",
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "TUR",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.mfa.gov.tr/visa-information-for-foreigners.en.mfa",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Ordinary passport holder Chinese nationals can enter Türkiye visa-free for up to 90 days in any 180-day period as of 2 January 2026. Official text: People's Republic of China: Ordinary passport holder People’s Republic of China nationals are exempt from visa up to 90 days in any 180 day period as of 2 January 2026. Holders of official passports are exempt from visa ",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "application_channel": "not_required",
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "STP",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.smf.st/fq.php",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Chinese nationals must apply for the Autorização de Entrada (AE) online through eVisaST before travel, as visa on arrival is not issued, but those holding a valid Schengen or US visa and a passport valid for more than 3 months may enter visa-free for up to 15 days. Official text: SMF FAQ — Q: \"EU RESIDO NUM ESTRANGEIRO ONDE NÃO EXISTE UMA REPRESENTAÇÃO CONSULAR SÃOTOMENSE POSSO OBTER O VISTO A CHEGADA NA FRONTEIRA?\" A: \"Não, Decreto-Lei nº 11/2009 Artigo 20º. Ponto 2. Preciso de uma Autorização d",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": "evisa",
+      "permitted_stay": "not officially specified",
+      "visa_category": "Autorização de Entrada (AE) / eVisaST",
+      "application_channel": "online_portal"
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "ZMB",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.zambiaimmigration.gov.zm/nationals-who-dont-require-visa/",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Chinese ordinary passport holders may enter Zambia without a visa; for official immigration services, use eservices.zambiaimmigration.gov.zm, not the non-resolving evisa hostname. Official text: \"Nationals of the countries listed below do not require visas to enter Zambia.\" — China appears on this list as entry \"34 China\" (Zambia Department of Immigration, 'Nationals Who Do Not Require Visa'). China is absent fr",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "up to 90 days",
+      "permitted_stay_days": 90,
+      "application_channel": "not_required",
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "TJK",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.evisa.tj/#/help",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Apply for a Tourist e-Visa online and stay no more than 60 calendar days, as the e-Visa is valid for 90 days but permits a maximum stay of 60 days. Official text: \"Electronic visa of the Republic of Tajikistan is valid for 90 days, however the visa holder can stay in the territory of the country for no more than 60 calendar days.\" (FAQ, 'Do I need to enter Tajikistan on the exact ",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": "evisa",
+      "permitted_stay": "60 calendar days",
+      "permitted_stay_days": 60,
+      "visa_category": "Tourist e-Visa",
+      "application_channel": "online_portal"
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "WSM",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://mpmc.gov.ws/divisions/immigration/attheborder/",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. All foreign nationals, including Chinese passport holders, receive a free 90-day Visitors Permit upon arrival in Samoa. Official text: \"Foreign nationals who do not hold a valid Temporary Resident Permit or Samoan Citizenship will be issued with a free 90 days Visitors Permit upon arrival.\"",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "90 days",
+      "permitted_stay_days": 90,
+      "visa_category": "Visitors Permit",
+      "application_channel": "on_arrival",
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "ZWE",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.evisa.gov.zw/faq.html",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Ordinary Chinese passport holders must pay USD 60 to obtain a single-entry tourist visa on arrival at a Zimbabwe port of entry; the 30-day stay may be extended twice by 30 days each. Official text: Category B: \"Visitors from the countries listed below are not required to apply for a visa before travelling, but will pay for and obtain a visa upon entering Zimbabwe.\" — CHINA appears in this Category B list (evisa.gov",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": "paper_visa_on_arrival",
+      "permitted_stay": "30 days on entry, extendable twice by 30 days, maximum about 90 days",
+      "permitted_stay_days": 90,
+      "visa_category": "Category B tourist visa on arrival",
+      "application_channel": "on_arrival"
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "UZB",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://cs.mfa.gov.cn/zggmcg/ljmdd/yz_645708/wzbkst_647880/",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Nationals of China may enter Uzbekistan visa-free for stays of up to 30 days per entry under the China-Uzbekistan mutual visa exemption agreement effective 1 June 2025, but must not exceed 90 days cumulative within any 180-day period. Official text: China MFA (verbatim): \"《中乌互免签证协定》2025年6月1日生效...单次停留不超过30日、每180日累计停留不超过90日，免办签证。\" — the China-Uzbekistan mutual visa exemption agreement took effect June 1, 2025; holders of (incl. ordinary) passports are visa-free for si",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "conditional_visa_free",
+      "permitted_stay": "30 days per entry",
+      "permitted_stay_days": 30,
+      "application_channel": "not_required",
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "VEN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://mppre.gob.ve/detalle_turismo/2-quienes-deben-solicitar-la-visa-de-turista",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Chinese ordinary passport holders must apply for a tourist visa at a Venezuelan embassy or consulate; the bilateral visa exemption applies only to diplomatic, service, and public-affairs passports. Official text: MPPRE: \"LISTA DE PAÍSES CON EXENCIÓN DE VISA DE TURISMO PARA INGRESAR A LA REPÚBLICA BOLIVARIANA DE VENEZUELA POR VÍA AÉREA\" — 71 countries listed; China is not among them. China MFA (Venezuela page, 入境居留): \"中国公民赴委需持中国政府",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": "paper_visa",
+      "visa_category": "Consular tourist visa",
+      "application_channel": "embassy"
+    }
+  },
+  {
+    "route": {
+      "nationality": "FRA",
+      "destination": "IDN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.imigrasi.go.id/wna/visa-kunjungan-saat-kedatangan",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. French tourists must obtain an Indonesia B1 tourism Visa on Arrival (also available as e-VOA) for IDR 500,000, valid for 30 days and extendable once for a total stay of up to 60 days. Official text: \"Daftar Negara ... 63. Perancis;\" — France is No. 63 on the Visa on Arrival country list; \"Visa Kunjungan saat Kedatangan/ Visa On Arrival (Indeks Visa B dan F): 30 hari untuk Indeks Visa B ... Dapat diperpanjang satu ka",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": "evisa_on_arrival",
+      "permitted_stay": "30 days, extendable once for a further 30 days (max 60 days)",
+      "permitted_stay_days": 60,
+      "visa_category": "B1 tourism Visa on Arrival / e-VOA",
+      "application_channel": "on_arrival"
+    }
+  },
+  {
+    "route": {
+      "nationality": "GBR",
+      "destination": "IDN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. British citizens must pay for a B1 Tourist Visa on Arrival, which can be obtained on arrival or applied for in advance as an e-VOA via evisa.imigrasi.go.id, for a 30-day tourist stay in Indonesia. Official text: For passport \"UNITED KINGDOM - BRITISH CITIZEN\" with purpose \"Tourism, Family Visit, and Transit\", the official eVisa portal offers only: \"B1 - Tourist (Visa On Arrival)\" / \"I am planning to stay 30 Days\", \"C1 - Tourist ",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": "evisa_on_arrival",
+      "permitted_stay": "30 days",
+      "permitted_stay_days": 30,
+      "visa_category": "B1 Tourist Visa on Arrival",
+      "application_channel": "on_arrival"
+    }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "ARG",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://chong.cancilleria.gob.ar/en/visas-argentina-0",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Hong Kong SAR passport holders may enter Argentina visa-free for up to 90 days; BNO passport holders are visa-free for 30 days, while Hong Kong Document of Identity holders require a visa. Official text: Hong Kong SAR passport . Do not require visa, may stay up to 90 days.",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "90 days",
+      "permitted_stay_days": 90,
+      "application_channel": "not_required",
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "BLZ",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://immigration.gov.bz/visa/visa-who-qualify/",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Hong Kong passport holders may enter Belize without a visa for visits up to 30 days and must apply for a Belize Visitor's Permit Extension to stay longer. Official text: Table \"Country Name / Visa Required\": \"Hong Kong — NO\". Page text: \"Exemption for Belize Entry Visa for visits not exceeding 30 days.\" and \"A visa allows you to enter Belize and remain legal in Belize for a maximum of 30",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "up to 30 days",
+      "permitted_stay_days": 30,
+      "application_channel": "not_required",
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "AZE",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://mfa.gov.az/en/category/visa/visa-free-countries",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Hong Kong SAR ordinary passport holders may enter Azerbaijan visa-free for up to 30 days per entry from February 2, 2026 to February 2, 2027, with a visa required from the fourth entry. Official text: IV Group: \"A visa-free regime is being applied by the Republic of Azerbaijan for the ordinary passport holders of the following countries on a unilateral basis within the relevant period: 1. Citizens of the People's Repu",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "conditional_visa_free",
+      "permitted_stay": "Up to 30 days per entry",
+      "permitted_stay_days": 30,
+      "visa_category": "Unilateral visa waiver",
+      "application_channel": "not_required",
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "BFA",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.info.gov.hk/gia/general/200309/13/0913117.htm",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. HKSAR passport holders can visit Burkina Faso visa-free for up to 14 days; an application through the official visa portal is only needed for stays beyond that period. Official text: Burkina Faso agreed to \"grant visa-free access to HKSAR passport holders for a stay up to 14 days\" (HKSAR Government press release, 13 Sep 2003, confirming notification from Burkina Faso's foreign ministry). Note: this o",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "up to 14 days",
+      "permitted_stay_days": 14,
+      "application_channel": "not_required",
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "COL",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.cancilleria.gov.co/sites/default/files/Normograma/docs/resolucion_minrelaciones_5488_2022.htm",
+    "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. HKSAR ordinary passport holders do not need a Visitor visa or online application; Migración Colombia will grant an entry permit at the border for short stays under 90 days per entry, extendable up to 180 days per calendar year. Official text: \"ARTÍCULO 3o. Los titulares de pasaporte expedido por los Estados, territorios o sujetos internacionales que se listan en los siguientes literales podrán ingresar, permanecer y salir de Colombia, exentos de requisito de ",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "short stay under 90 days per entry, extendable up to 180 days per calendar year",
+      "permitted_stay_days": 90,
+      "visa_category": "entry permit",
+      "application_channel": "not_required",
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
     }
   }
 ]
