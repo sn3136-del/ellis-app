@@ -526,11 +526,15 @@ export default function TravelDatabase({ onBack }) {
   const disp = g ? (DISPOSITION_VIEW[g.disposition] || null) : null
   const countryName = (code) => countries.find((c) => c.value === code)?.label || code
 
-  const applySteps = g ? [
-    ...itemsOf(g.account_registration_steps),
-    ...itemsOf(g.payment_process),
-    ...itemsOf(g.submission_process),
-  ] : []
+  // The 3-5 key steps, already deduplicated and ordered by the server (the
+  // engine's three arrays overlap and repeat — one answer carried 135 steps).
+  // The concatenation is only the fallback for an older cached answer.
+  const applySteps = !g ? []
+    : (Array.isArray(result?.apply_steps) && result.apply_steps.length
+        ? result.apply_steps.map((x) => sentence(asText(x))).filter(Boolean)
+        : [...itemsOf(g.account_registration_steps),
+           ...itemsOf(g.payment_process),
+           ...itemsOf(g.submission_process)].slice(0, 5))
   // The official-portal link rides ON the step it belongs to.
   const portalStepIndex = g?.official_portal_url
     ? applySteps.findIndex((x) =>

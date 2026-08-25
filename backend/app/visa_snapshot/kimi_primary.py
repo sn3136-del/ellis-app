@@ -515,6 +515,137 @@ def validate_answer(raw: dict, *, detail_known: bool = True) -> tuple[dict, list
     return clean, missing, contradictions
 
 
+# ---- "Steps to apply": 3-5 key steps, in the order they happen ------------
+# The engine returns three step arrays that overlap and repeat ("Pay the visa
+# fee online" and "Credit/debit card payment through ImmiAccount at time of
+# lodgement" are one step), sometimes dozens deep. Trip.com's spec asks for
+# 3-5 KEY steps. Each step is therefore classified into the stage it belongs
+# to, one line is kept per stage — the shortest clear one — and the stages are
+# emitted in the order a traveller meets them.
+# Biometrics come BEFORE the decisive submission: the US biometrics (OFC)
+# visit precedes the interview, and a visa centre takes them as you hand the
+# file in.
+_STAGE_ORDER = ("account", "form", "documents", "appointment", "pay",
+                "biometrics", "submit", "collect")
+_STAGE_WORDS = {
+    "account": ("create an account", "register an account", "create account",
+                "sign up", "registration", "immiaccount", "create a profile"),
+    "form": ("fill", "complete the application", "complete the form",
+             "application form", "ds-160", "online form", "questionnaire"),
+    # "photo" alone is too broad — it caught "Attend OFC appointment for
+    # fingerprints/photo", which is a biometrics visit, not paperwork.
+    "documents": ("upload", "gather", "prepare the document", "attach",
+                  "supporting document", "passport photo", "photo requirement"),
+    "appointment": ("appointment", "book a slot", "schedule", "interview slot"),
+    "pay": ("pay", "payment", "fee online", "charge", "card"),
+    "submit": ("submit", "lodge", "attend", "hand in", "deliver", "drop off",
+               "in person", "apply at"),
+    "biometrics": ("biometric", "fingerprint", "photograph at", "vfs biometric",
+                   "ofc appointment", "ofc visit", "applicant service centre",
+                   "applicant service center"),
+    "collect": ("collect", "pick up", "courier", "receive the passport",
+                "receive your visa", "track"),
+}
+_STAGE_MAX = 5
+
+
+# Lines that describe a CIRCUMSTANCE rather than an action ("Payment methods
+# vary by centre", "Accepted methods vary by center"). They belong in the
+# notes, not in a numbered list of things to do.
+_NOT_A_STEP = ("vary by", "varies by", "may differ", "differs by",
+               "depends on the", "accepted methods", "methods vary",
+               "where offered", "if applicable")
+
+
+def _is_actionable(step: str) -> bool:
+    low = step.lower().strip()
+    if any(w in low for w in _NOT_A_STEP):
+        return False
+    return len(low.split()) >= 2
+
+
+def _stage_of(step: str) -> str | None:
+    low = step.lower()
+    for stage in _STAGE_ORDER:
+        if any(w in low for w in _STAGE_WORDS[stage]):
+            return stage
+    return None
+
+
+def _pay_goes_early(step: str) -> bool:
+    """A fee paid ONLINE or in advance happens before the appointment (the US
+    MRV fee is paid before an interview can be booked). A fee paid AT the
+    centre happens with the submission, so it stays after."""
+    low = step.lower()
+    if any(w in low for w in ("at the visa application centre", "at the centre",
+                              "at the center", "on submission", "when submitting",
+                              "at time of submission", "on collection")):
+        return False
+    return any(w in low for w in ("online", "in advance", "before", "bank",
+                                 "portal", "website"))
+
+
+def _tidy_step(step: str) -> str:
+    """One short sentence, sentence-cased, no trailing full stop."""
+    t = " ".join(str(step or "").split()).strip(" .;·-")
+    if not t:
+        return t
+    # Cut a trailing qualifier that turns a step into a paragraph.
+    for sep in (" according to ", " as required by ", " depending on ",
+                " at time of ", "; ", " — ", " - "):
+        if len(t) > 90 and sep in t:
+            t = t.split(sep)[0].strip(" .;,-")
+    if len(t) > 110:
+        cut = t[:110].rsplit(" ", 1)[0]
+        t = cut.rstrip(" ,;:") 
+    return t[0].upper() + t[1:] if t else t
+
+
+def canonical_steps(g: dict) -> list:
+    """The 3-5 key steps for this answer, deduplicated and ordered.
+
+    Deterministic: no model call. An unclassifiable step is kept only if
+    there is room, so a route whose steps are all unusual still shows
+    something rather than nothing."""
+    raw = []
+    for key in ("account_registration_steps", "payment_process",
+                "submission_process"):
+        for s in (g or {}).get(key) or []:
+            if isinstance(s, str) and s.strip():
+                raw.append(s.strip())
+    if not raw:
+        return []
+    best: dict = {}
+    extra: list = []
+    for s in raw:
+        t = _tidy_step(s)
+        if not t or not _is_actionable(t):
+            continue
+        stage = _stage_of(t)
+        if stage is None:
+            if t not in extra:
+                extra.append(t)
+            continue
+        # The clearest line for a stage is the shortest one that still says
+        # something (very short fragments lose to a fuller sentence).
+        cur = best.get(stage)
+        if cur is None or (len(t) >= 18 and len(t) < len(cur)) or len(cur) < 18:
+            best[stage] = t
+    # A fee paid online/in advance sorts before the appointment; a fee paid at
+    # the centre stays with the submission.
+    order = list(_STAGE_ORDER)
+    if "pay" in best and _pay_goes_early(best["pay"]):
+        order.remove("pay")
+        order.insert(order.index("appointment"), "pay")
+    steps = [best[st] for st in order if st in best]
+    for t in extra:
+        if len(steps) >= _STAGE_MAX:
+            break
+        if t not in steps:
+            steps.append(t)
+    return steps[:_STAGE_MAX]
+
+
 def derive_workflow_type(g: dict) -> str:
     """Deterministic fallback mapping disposition/channel -> workflow type."""
     disp = str((g or {}).get("disposition") or "").upper()
@@ -683,6 +814,10 @@ def _result(status: str, guidance: dict, *, cached: bool, stale: bool,
         "label": VERIFIED_LABEL if decided else "AI-generated route guidance",
         "guidance": guidance,
         "workflow_plan": derive_workflow_plan(guidance) if guidance else [],
+        # The 3-5 key steps a traveller actually follows, deduplicated and
+        # ordered (Trip.com's spec). The raw arrays stay in the guidance for
+        # anything that needs them.
+        "apply_steps": canonical_steps(guidance) if guidance else [],
         "missing_fields": list(missing or []),
         "contradictions": list(contradictions or []),
         "advisories": list(advisories or []),

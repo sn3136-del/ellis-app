@@ -1026,3 +1026,75 @@ def test_a_verified_visa_free_verdict_clears_the_application_machinery():
     vo._drop_application_leftovers(merged2, {"disposition": "VISA_EXEMPT",
                                              "official_portal_url": "https://gov.example"})
     assert merged2["official_portal_url"] == "https://evisa.example.gov"
+
+
+def test_apply_steps_are_three_to_five_ordered_and_deduplicated():
+    """Trip.com's spec: 3-5 KEY steps. The engine's three arrays overlap and
+    repeat — a real answer carried 135 steps, another said both "Pay the visa
+    application charge online" and "Credit/debit card payment through
+    ImmiAccount at time of lodgement" — so one line per stage is kept, in the
+    order a traveller meets them."""
+    from app.visa_snapshot.kimi_primary import canonical_steps
+    g = {"account_registration_steps": [
+            "Create an individual ImmiAccount",
+            "Start a new application and select Visitor (subclass 600)",
+            "Complete all questions and upload required documents"],
+         "payment_process": [
+            "Pay the visa application charge online",
+            "Credit/debit card payment through ImmiAccount at time of lodgement"],
+         "submission_process": [
+            "Submit the application and wait for a decision",
+            "Lodge the application online through ImmiAccount",
+            "Provide biometrics at an Australian Visa Application Centre if requested",
+            "Collect passport or receive courier delivery after decision"]}
+    steps = canonical_steps(g)
+    assert 3 <= len(steps) <= 5, steps
+    joined = " | ".join(steps).lower()
+    assert joined.count("pay") == 1                     # one payment step
+    assert joined.count("biometric") <= 1
+    order = [i for i, s in enumerate(steps)
+             if "immiaccount" in s.lower() and "create" in s.lower()]
+    assert order == [0]                                  # account first
+    assert all(len(s) <= 110 for s in steps)             # readable length
+    assert all(s[0].isupper() for s in steps)            # sentence case
+    assert all(not s.endswith(".") for s in steps)
+
+
+def test_apply_steps_survive_an_answer_with_no_recognisable_stages():
+    from app.visa_snapshot.kimi_primary import canonical_steps
+    g = {"submission_process": ["Ask the tour operator to file the group list",
+                                "Wait for the provincial notice"]}
+    steps = canonical_steps(g)
+    assert steps and len(steps) <= 5
+    assert canonical_steps({}) == []
+
+
+def test_apply_steps_order_and_filter_the_way_a_traveller_meets_them():
+    """Two failures found on live answers, pinned. A US fee is paid ONLINE
+    before the biometrics visit and the interview, so it must not sort last;
+    and "Attend OFC appointment for fingerprints/photo" is a biometrics
+    visit, not paperwork (bare "photo" once classified it as documents).
+    Advisory lines like "Accepted methods vary by center" are not steps."""
+    from app.visa_snapshot.kimi_primary import canonical_steps
+    usa = {"account_registration_steps": ["Create account on US Travel Docs China",
+                                          "Complete DS-160 and save confirmation number"],
+           "payment_process": ["Pay $185 MRV fee online via CGI Federal",
+                               "Accepted methods vary by center (card, cash)"],
+           "submission_process": ["Attend OFC appointment for fingerprints/photo",
+                                  "Attend the visa interview at the consulate",
+                                  "Collect passport by courier"]}
+    steps = canonical_steps(usa)
+    low = [s.lower() for s in steps]
+    pay = next(i for i, s in enumerate(low) if s.startswith("pay"))
+    ofc = next(i for i, s in enumerate(low) if "ofc" in s)
+    interview = next(i for i, s in enumerate(low) if "interview" in s)
+    assert pay < ofc < interview, steps            # the real-world order
+    assert not any("vary by" in s for s in low)     # advisory lines are not steps
+    # A fee paid AT the centre stays with the submission, not before booking.
+    fra = {"account_registration_steps": ["Complete the online application form"],
+           "payment_process": ["Pay the Schengen visa fee at the visa application centre"],
+           "submission_process": ["Book an appointment through TLScontact",
+                                  "Submit documents and provide biometrics"]}
+    fs = [s.lower() for s in canonical_steps(fra)]
+    assert fs.index(next(s for s in fs if "book an appointment" in s)) < \
+        fs.index(next(s for s in fs if s.startswith("pay")))
