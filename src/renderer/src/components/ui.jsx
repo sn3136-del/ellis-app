@@ -42,9 +42,10 @@ export function TripPlane({ width = 168 }) {
       {/* livery: the Trip.com name on the fuselage */}
       <text x="66" y="47" fontFamily="Inter, system-ui, sans-serif" fontSize="14.5"
             fontWeight="800" fill="#287dfa" letterSpacing="0.2">Trip<tspan fill="#fcaf17">.</tspan><tspan fill="#0f294d">com</tspan></text>
-      {/* window strip */}
+      {/* window strip — only aft of the wordmark, so nothing sits on the
+          Trip.com livery (owner decision) */}
       <g fill="#8592a6" opacity="0.55">
-        {[58, 66, 74, 82, 90, 152, 160, 168].map((x) => (
+        {[152, 160, 168].map((x) => (
           <rect key={x} x={x} y={37.4} width="3.4" height="3.4" rx="1.6" />
         ))}
       </g>

@@ -735,7 +735,8 @@
         "Single-entry tourist visas for mainland residents are electronic since 19 June 2023: the Visa issuance notice must be shown online at the airport",
         "The consular fee is charged only if the visa is issued; the designated agency charges its own handling fee on top",
         "Individuals cannot apply at the embassy or consulate: every tourist application goes through a designated travel agency, which also books flights and hotels except for the 5-year visa"
-      ]
+      ],
+      "official_portal_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html"
     }
   },
   {
@@ -920,7 +921,8 @@
         "amount": 90,
         "currency": "EUR"
       },
-      "application_channel_detail": "Lodge at the visa application centre. The EUR 90 consular fee is paid on submission (in CNY cash at the centre) and is not refunded if the visa is refused; the centre's service fee is separate."
+      "application_channel_detail": "Lodge at the visa application centre. The EUR 90 consular fee is paid on submission (in CNY cash at the centre) and is not refunded if the visa is refused; the centre's service fee is separate.",
+      "official_portal_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
     }
   },
   {
@@ -1423,7 +1425,7 @@
         "name": "Taiwan Online Arrival Card",
         "submission_window": "Any time before arrival, or on the paper form"
       },
-      "official_portal_url": "https://oac.immigration.gov.tw/"
+      "official_portal_url": "https://twac.immigration.gov.tw/"
     }
   },
   {
@@ -8024,6 +8026,566 @@
         "The policy runs until 31 December 2026; check before travelling after that date",
         "Stay is counted from 00:00 on the day after entry; there is no cap on the number of entries"
       ]
+    }
+  },
+  {
+    "route": {
+      "nationality": "TWN",
+      "destination": "AUS",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Department of Home Affairs Visitor visa (subclass 600) page; lodgement continues in ImmiAccount.",
+    "fields": {
+      "official_portal_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600"
+    }
+  },
+  {
+    "route": {
+      "nationality": "TWN",
+      "destination": "GBR",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.gov.uk/standard-visitor",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. GOV.UK Standard Visitor visa page; the online application starts here.",
+    "fields": {
+      "official_portal_url": "https://www.gov.uk/standard-visitor"
+    }
+  },
+  {
+    "route": {
+      "nationality": "JPN",
+      "destination": "ESP",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Spain MFA Schengen visa information page (English); applications are lodged through consulates and their centres.",
+    "fields": {
+      "official_portal_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+    }
+  },
+  {
+    "route": {
+      "nationality": "KOR",
+      "destination": "FRA",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://france-visas.gouv.fr/en/demande-de-visa",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. France-Visas application entry page; the online form starts here.",
+    "fields": {
+      "official_portal_url": "https://france-visas.gouv.fr/en/demande-de-visa"
+    }
+  },
+  {
+    "route": {
+      "nationality": "KOR",
+      "destination": "ESP",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Spain MFA Schengen visa information page (English); applications are lodged through consulates and their centres.",
+    "fields": {
+      "official_portal_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+    }
+  },
+  {
+    "route": {
+      "nationality": "MYS",
+      "destination": "HKG",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Hong Kong ImmD visit visa / entry permit requirements page.",
+    "fields": {
+      "official_portal_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html"
+    }
+  },
+  {
+    "route": {
+      "nationality": "MYS",
+      "destination": "USA",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://ceac.state.gov/genniv/",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. CEAC DS-160 start page; the visitor-visa application begins here.",
+    "fields": {
+      "official_portal_url": "https://ceac.state.gov/genniv/"
+    }
+  },
+  {
+    "route": {
+      "nationality": "THA",
+      "destination": "USA",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://ceac.state.gov/genniv/",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. CEAC DS-160 start page; the visitor-visa application begins here.",
+    "fields": {
+      "official_portal_url": "https://ceac.state.gov/genniv/"
+    }
+  },
+  {
+    "route": {
+      "nationality": "THA",
+      "destination": "ESP",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Spain MFA Schengen visa information page (English); applications are lodged through consulates and their centres.",
+    "fields": {
+      "official_portal_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+    }
+  },
+  {
+    "route": {
+      "nationality": "GBR",
+      "destination": "AUS",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Department of Home Affairs Visitor visa (subclass 600) page; lodgement continues in ImmiAccount.",
+    "fields": {
+      "official_portal_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600"
+    }
+  },
+  {
+    "route": {
+      "nationality": "AUS",
+      "destination": "RUS",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://evisa.kdmid.ru/",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Unified e-visa portal of the Russian MFA consular department.",
+    "fields": {
+      "official_portal_url": "https://evisa.kdmid.ru/"
+    }
+  },
+  {
+    "route": {
+      "nationality": "AUS",
+      "destination": "IDN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://evisa.imigrasi.go.id/",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Indonesia's official e-Visa portal (Directorate General of Immigration).",
+    "fields": {
+      "official_portal_url": "https://evisa.imigrasi.go.id/"
+    }
+  },
+  {
+    "route": {
+      "nationality": "CAN",
+      "destination": "KOR",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.visa.go.kr/openPage.do?MENU_ID=10101&LANG_TYPE=EN",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Korea Visa Portal (Ministry of Justice); K-ETA for visa-free nationals at k-eta.go.kr.",
+    "fields": {
+      "official_portal_url": "https://www.visa.go.kr/openPage.do?MENU_ID=10101&LANG_TYPE=EN"
+    }
+  },
+  {
+    "route": {
+      "nationality": "CAN",
+      "destination": "IDN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://evisa.imigrasi.go.id/",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Indonesia's official e-Visa portal (Directorate General of Immigration).",
+    "fields": {
+      "official_portal_url": "https://evisa.imigrasi.go.id/"
+    }
+  },
+  {
+    "route": {
+      "nationality": "IND",
+      "destination": "JPN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. MOFA Japan visa information page; applications go through missions and accredited agencies.",
+    "fields": {
+      "official_portal_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html"
+    }
+  },
+  {
+    "route": {
+      "nationality": "IND",
+      "destination": "TWN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://visawebapp.boca.gov.tw/",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Taiwan BOCA online visa application form.",
+    "fields": {
+      "official_portal_url": "https://visawebapp.boca.gov.tw/"
+    }
+  },
+  {
+    "route": {
+      "nationality": "IND",
+      "destination": "KOR",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.visa.go.kr/openPage.do?MENU_ID=10101&LANG_TYPE=EN",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Korea Visa Portal (Ministry of Justice); K-ETA for visa-free nationals at k-eta.go.kr.",
+    "fields": {
+      "official_portal_url": "https://www.visa.go.kr/openPage.do?MENU_ID=10101&LANG_TYPE=EN"
+    }
+  },
+  {
+    "route": {
+      "nationality": "IND",
+      "destination": "USA",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://ceac.state.gov/genniv/",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. CEAC DS-160 start page; the visitor-visa application begins here.",
+    "fields": {
+      "official_portal_url": "https://ceac.state.gov/genniv/"
+    }
+  },
+  {
+    "route": {
+      "nationality": "IND",
+      "destination": "SGP",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. ICA's entry-visa requirements page; applications go through ICA's e-Service via a local contact or a mission.",
+    "fields": {
+      "official_portal_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements"
+    }
+  },
+  {
+    "route": {
+      "nationality": "IND",
+      "destination": "ESP",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Spain MFA Schengen visa information page (English); applications are lodged through consulates and their centres.",
+    "fields": {
+      "official_portal_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+    }
+  },
+  {
+    "route": {
+      "nationality": "IND",
+      "destination": "IDN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://evisa.imigrasi.go.id/",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Indonesia's official e-Visa portal (Directorate General of Immigration).",
+    "fields": {
+      "official_portal_url": "https://evisa.imigrasi.go.id/"
+    }
+  },
+  {
+    "route": {
+      "nationality": "IDN",
+      "destination": "JPN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. MOFA Japan visa information page; applications go through missions and accredited agencies.",
+    "fields": {
+      "official_portal_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html"
+    }
+  },
+  {
+    "route": {
+      "nationality": "IDN",
+      "destination": "HKG",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Hong Kong ImmD visit visa / entry permit requirements page.",
+    "fields": {
+      "official_portal_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html"
+    }
+  },
+  {
+    "route": {
+      "nationality": "IDN",
+      "destination": "SGP",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. ICA's entry-visa requirements page; applications go through ICA's e-Service via a local contact or a mission.",
+    "fields": {
+      "official_portal_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements"
+    }
+  },
+  {
+    "route": {
+      "nationality": "IDN",
+      "destination": "ESP",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Spain MFA Schengen visa information page (English); applications are lodged through consulates and their centres.",
+    "fields": {
+      "official_portal_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+    }
+  },
+  {
+    "route": {
+      "nationality": "PHL",
+      "destination": "USA",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://ceac.state.gov/genniv/",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. CEAC DS-160 start page; the visitor-visa application begins here.",
+    "fields": {
+      "official_portal_url": "https://ceac.state.gov/genniv/"
+    }
+  },
+  {
+    "route": {
+      "nationality": "PHL",
+      "destination": "ESP",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Spain MFA Schengen visa information page (English); applications are lodged through consulates and their centres.",
+    "fields": {
+      "official_portal_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+    }
+  },
+  {
+    "route": {
+      "nationality": "VNM",
+      "destination": "HKG",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Hong Kong ImmD visit visa / entry permit requirements page.",
+    "fields": {
+      "official_portal_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html"
+    }
+  },
+  {
+    "route": {
+      "nationality": "VNM",
+      "destination": "JPN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. MOFA Japan visa information page; applications go through missions and accredited agencies.",
+    "fields": {
+      "official_portal_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html"
+    }
+  },
+  {
+    "route": {
+      "nationality": "VNM",
+      "destination": "KOR",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.visa.go.kr/openPage.do?MENU_ID=10101&LANG_TYPE=EN",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Korea Visa Portal (Ministry of Justice); K-ETA for visa-free nationals at k-eta.go.kr.",
+    "fields": {
+      "official_portal_url": "https://www.visa.go.kr/openPage.do?MENU_ID=10101&LANG_TYPE=EN"
+    }
+  },
+  {
+    "route": {
+      "nationality": "VNM",
+      "destination": "AUS",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Department of Home Affairs Visitor visa (subclass 600) page; lodgement continues in ImmiAccount.",
+    "fields": {
+      "official_portal_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600"
+    }
+  },
+  {
+    "route": {
+      "nationality": "VNM",
+      "destination": "ESP",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Spain MFA Schengen visa information page (English); applications are lodged through consulates and their centres.",
+    "fields": {
+      "official_portal_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+    }
+  },
+  {
+    "route": {
+      "nationality": "ESP",
+      "destination": "AUS",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Department of Home Affairs Visitor visa (subclass 600) page; lodgement continues in ImmiAccount.",
+    "fields": {
+      "official_portal_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600"
+    }
+  },
+  {
+    "route": {
+      "nationality": "RUS",
+      "destination": "JPN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. MOFA Japan visa information page; applications go through missions and accredited agencies.",
+    "fields": {
+      "official_portal_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html"
+    }
+  },
+  {
+    "route": {
+      "nationality": "RUS",
+      "destination": "SGP",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. ICA's entry-visa requirements page; applications go through ICA's e-Service via a local contact or a mission.",
+    "fields": {
+      "official_portal_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements"
+    }
+  },
+  {
+    "route": {
+      "nationality": "RUS",
+      "destination": "AUS",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Department of Home Affairs Visitor visa (subclass 600) page; lodgement continues in ImmiAccount.",
+    "fields": {
+      "official_portal_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600"
+    }
+  },
+  {
+    "route": {
+      "nationality": "RUS",
+      "destination": "IDN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://evisa.imigrasi.go.id/",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Indonesia's official e-Visa portal (Directorate General of Immigration).",
+    "fields": {
+      "official_portal_url": "https://evisa.imigrasi.go.id/"
+    }
+  },
+  {
+    "route": {
+      "nationality": "RUS",
+      "destination": "ESP",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Spain MFA Schengen visa information page (English); applications are lodged through consulates and their centres.",
+    "fields": {
+      "official_portal_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+    }
+  },
+  {
+    "route": {
+      "nationality": "ISL",
+      "destination": "MNG",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://evisa.mn/",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Mongolia's official e-visa portal.",
+    "fields": {
+      "official_portal_url": "https://evisa.mn/"
+    }
+  },
+  {
+    "route": {
+      "nationality": "CHN",
+      "destination": "LTU",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-22",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.migracija.lt/service/uzsienieciams?lang=en#v-sv-isduoti-sengeno-viza",
+    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Lithuania's MIGRIS system (Migration Department): the Schengen visa request starts here.",
+    "fields": {
+      "official_portal_url": "https://www.migracija.lt/service/uzsienieciams?lang=en#v-sv-isduoti-sengeno-viza"
     }
   }
 ]

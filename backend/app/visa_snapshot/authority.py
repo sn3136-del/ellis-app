@@ -67,6 +67,10 @@ GOV_SUFFIXES = (
     # Armenia MFA (evisa.mfa.am), Iran MFA (evisatraveller.mfa.ir), and the
     # Kyrgyz state e-government platform (www.evisa.e-gov.kg).
     "mfa.am", "mfa.ir", "e-gov.kg",
+    # State-run systems verified 2026-08-22: Mongolia's e-visa, Lithuania's
+    # MIGRIS (Migration Department), the Russian MFA consular department, and
+    # France's state public-administration portal.
+    "evisa.mn", "migracija.lt", "kdmid.ru", "service-public.fr",
 )
 
 AUTHORITY_KINDS = (

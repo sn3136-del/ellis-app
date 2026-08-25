@@ -45488,5 +45488,87 @@
   },
   "generated_at": "2026-08-25T19:25:42.021666",
   "fresh_until": "2026-08-27T19:25:42.021666"
+ },
+ {
+  "cache_key": "CHN|CHN|AGO|tourism|default|unknown|v6|doc:diplomatic_passport",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "AGO",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_UNCERTAIN",
+  "guidance": {
+   "disposition": "VISA_EXEMPT",
+   "visa_category": "Tourist (visa-exempt)",
+   "permitted_stay": "30 days",
+   "passport_validity": "6 months beyond arrival",
+   "required_documents": [],
+   "application_channel": "not_required",
+   "government_fee": {
+    "amount": null,
+    "currency": null
+   },
+   "processing_time": "Not applicable",
+   "forms": [],
+   "official_portal_url": null,
+   "photo_requirements": null,
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [],
+   "payment_process": [],
+   "submission_process": [],
+   "onward_travel_evidence": null,
+   "accommodation_evidence": null,
+   "financial_evidence": null,
+   "insurance_required": false,
+   "exceptions": [],
+   "uncertainty": [
+    {
+     "field": "disposition",
+     "reason": "Angola's visa-exemption regulations, including bilateral agreements, can be amended; verify current rules with the Angolan embassy/consulate before travel."
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": 30,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": null,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_exempt_preparation",
+   "visa_products": [],
+   "application_channel_detail": "No visa application is required for Chinese diplomatic passport holders entering Angola for short tourism stays.",
+   "requirement_detail": "unconditional_visa_free",
+   "transit_requirement": {
+    "required": null,
+    "note": null
+   }
+  },
+  "missing_fields": [
+   "required_documents"
+  ],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T19:42:12.689770+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
+  },
+  "generated_at": "2026-08-25T19:42:06.094951",
+  "fresh_until": "2026-08-27T19:42:06.094951"
  }
 ]
