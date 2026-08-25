@@ -71,6 +71,18 @@ GOV_SUFFIXES = (
     # MIGRIS (Migration Department), the Russian MFA consular department, and
     # France's state public-administration portal.
     "evisa.mn", "migracija.lt", "kdmid.ru", "service-public.fr",
+    # Verified 2026-08-25 (portal-verify-116): each loaded and quoted by its
+    # own verifier as the state's own visa domain — ministries of foreign
+    # affairs, immigration authorities and state e-visa systems that do not
+    # use a gov.<cc> pattern.
+    "gv.at", "gub.uy", "gov.lb", "gov.mr", "gouv.ne", "gouv.cf", "gouv.cd",
+    "gouv.ci", "gouv.cg", "gouv.td",
+    "um.fi", "vm.ee", "mzv.sk", "mfa.bg", "mfa.gr", "island.is", "llv.li",
+    "mae.gouvernement.lu", "evisa.mae.ro", "migrationsverket.se", "udi.no",
+    "netherlandsworldwide.nl", "govt.lc", "smf.st",
+    "evisa.iq", "evisa.sl", "evisa.td", "evisa.tj", "evisacuba.cu",
+    "evisacam.cm", "evisa.dgdi.ga", "applicant.visaburkina.bf",
+    "anrpts.gov.mr", "general-security.gov.lb", "bcbp.pw", "rmiimmigration.org",
 )
 
 AUTHORITY_KINDS = (
