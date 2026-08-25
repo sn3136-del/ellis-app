@@ -217,7 +217,7 @@
    "forms": [
     "PSB Exit-Entry Permit/endorsement application form"
    ],
-   "official_portal_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit.html",
+   "official_portal_url": null,
    "photo_requirements": "One recent passport-style photo for the Exit-Entry Permit/endorsement application",
    "biometrics_required": true,
    "interview_required": false,
@@ -329,7 +329,7 @@
     }
    ],
    "application_channel_detail": "Mainland residents do not lodge a HKSAR tourist visa; they must obtain the Exit-Entry Permit and Hong Kong endorsement from the local Public Security Bureau Exit-Entry Administration.",
-   "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit.html",
+   "source_url": null,
    "requirement_detail": "conditional_visa_free",
    "transit_requirement": {
     "required": null,
@@ -784,7 +784,7 @@
     "Form 14A",
     "Form V39A (Letter of Introduction) if sponsor/agent requires"
    ],
-   "official_portal_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/overview",
+   "official_portal_url": null,
    "photo_requirements": "Recent passport-sized colour photo, 35 mm x 45 mm, white background, taken within last 3 months, face clearly visible",
    "biometrics_required": false,
    "interview_required": false,
@@ -872,7 +872,7 @@
     }
    ],
    "application_channel_detail": "Individuals cannot apply directly; the application must be lodged by an authorised visa agent/strategic partner in China or a Singapore citizen/PR local sponsor through the ICA SAVE e-Service.",
-   "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements/overview",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -938,7 +938,7 @@
    "forms": [
     "Online application via ImmiAccount; paper form 1419 only if online application is not possible"
    ],
-   "official_portal_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream",
+   "official_portal_url": null,
    "photo_requirements": "One digital passport-size photograph uploaded with the online application; two recent photos if lodging a paper form",
    "biometrics_required": true,
    "interview_required": false,
@@ -1567,7 +1567,7 @@
    },
    "processing_time": "None",
    "forms": [],
-   "official_portal_url": "https://www.boca.gov.tw/np-142-2.html",
+   "official_portal_url": null,
    "photo_requirements": null,
    "biometrics_required": false,
    "interview_required": false,
@@ -1613,7 +1613,7 @@
     }
    ],
    "application_channel_detail": "No advance application is required; eligible HKSAR ordinary passport holders enter Taiwan visa-free at the port of entry.",
-   "source_url": "https://www.boca.gov.tw/np-142-2.html",
+   "source_url": null,
    "requirement_detail": "unconditional_visa_free",
    "transit_requirement": {
     "required": null,
@@ -1815,7 +1815,7 @@
    "forms": [
     "Online e-Tourist Visa application form"
    ],
-   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "official_portal_url": null,
    "photo_requirements": "Recent colour digital photo, white/light background, 350x350–1000x1000 pixels, 10 KB–1 MB, face covering ~80% of frame",
    "biometrics_required": false,
    "interview_required": false,
@@ -1917,7 +1917,7 @@
     }
    ],
    "application_channel_detail": "Chinese ordinary-passport holders may apply individually for an e-Tourist Visa on the official Indian e-Visa portal; sticker tourist visas are lodged through VFS Global/authorised visa application centres, not directly at the embassy.",
-   "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -2565,7 +2565,7 @@
    "route_workflow_type": "visa_exempt_preparation",
    "visa_products": [],
    "application_channel_detail": "No visa application is required; Hong Kong SAR ordinary passport holders may enter Russia visa-free for short tourism stays.",
-   "source_url": "https://www.immd.gov.hk/hks/services/visas/visa-free-access.html",
+   "source_url": null,
    "requirement_detail": "unconditional_visa_free",
    "transit_requirement": {
     "required": null,
@@ -3188,7 +3188,7 @@
    "forms": [
     "Online e-visa application form"
    ],
-   "official_portal_url": "https://evisa.gov.vn",
+   "official_portal_url": null,
    "photo_requirements": "4x6 cm colour photo, white background, frontal view, no glasses/hats, digital JPG, max 2 MB",
    "biometrics_required": false,
    "interview_required": false,
@@ -3462,7 +3462,7 @@
     }
    ],
    "application_channel_detail": "Individuals apply directly through the IRCC online portal; biometrics are collected at the VFS Global Visa Application Centre in Hong Kong, and a separate biometrics fee of CAD 85 and VFS service charges may apply.",
-   "source_url": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/operational-bulletins-manuals/temporary-residents/visitors/visa-requirements.html",
+   "source_url": null,
    "requirement_detail": "paper_visa",
    "transit_requirement": {
     "required": null,
@@ -3518,7 +3518,7 @@
    "forms": [
     "Online Indian e-Tourist Visa application form"
    ],
-   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "official_portal_url": null,
    "photo_requirements": "Recent colour digital passport photo, white background, no glasses/head covering except religious, minimum 350x350 px / maximum 1000x1000 px, JPEG, under 1 MB",
    "biometrics_required": false,
    "interview_required": false,
@@ -3614,7 +3614,7 @@
     }
    ],
    "application_channel_detail": "Apply yourself on the official Indian e-Visa portal; no agent or embassy visit is required.",
-   "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -4216,7 +4216,7 @@
     }
    ],
    "application_channel_detail": "No visa application is needed; U.S. citizens travel visa-exempt and present a passport at a Taiwan port of entry.",
-   "source_url": "https://www.boca.gov.tw/np-137-2.html",
+   "source_url": null,
    "requirement_detail": "unconditional_visa_free",
    "transit_requirement": {
     "required": null,
@@ -4335,7 +4335,7 @@
     }
    ],
    "application_channel_detail": "No application is required; U.S. ordinary passport holders are admitted visa-free for short tourism.",
-   "source_url": "https://www.imi.gov.my/index.php/en/main-services/visa/visa-requirement-by-country.html",
+   "source_url": null,
    "requirement_detail": "unconditional_visa_free",
    "transit_requirement": {
     "required": null,
@@ -5205,7 +5205,7 @@
    "route_workflow_type": "visa_exempt_preparation",
    "visa_products": [],
    "application_channel_detail": "No visa application is required; Hong Kong SAR passport holders enter visa-free for 30 days and must complete the SG Arrival Card online before arrival.",
-   "source_url": "https://www.ica.gov.sg/enter-transit-depart/entry_requirements/visa_requirements",
+   "source_url": null,
    "requirement_detail": "unconditional_visa_free",
    "transit_requirement": {
     "required": null,
@@ -5556,7 +5556,7 @@
     }
    ],
    "application_channel_detail": "No advance visa application is required; HKSAR passport holders are admitted visa-free for short-stay tourism.",
-   "source_url": "https://home-affairs.ec.europa.eu/policies/schengen/visa-policy/who-must-apply-visa_en",
+   "source_url": null,
    "requirement_detail": "unconditional_visa_free",
    "transit_requirement": {
     "required": null,
@@ -5908,7 +5908,7 @@
    "forms": [
     "Online e-Visa application form"
    ],
-   "official_portal_url": "https://evisa.gov.vn",
+   "official_portal_url": null,
    "photo_requirements": "Recent color passport-style digital photo, white/plain background, full face, no glasses/headwear except for religious/medical reasons, per portal specifications",
    "biometrics_required": false,
    "interview_required": false,
@@ -6065,7 +6065,7 @@
    "forms": [
     "Online e-Tourist Visa application form"
    ],
-   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "official_portal_url": null,
    "photo_requirements": "Digital colour passport photo; white or light background; face centred; no head covering except religious reasons; specs listed on portal",
    "biometrics_required": true,
    "interview_required": false,
@@ -6158,7 +6158,7 @@
     }
    ],
    "application_channel_detail": "Apply yourself on the official Indian e-Visa portal; no intermediary or embassy filing is required for ordinary tourist e-Visa.",
-   "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -6313,7 +6313,7 @@
     }
    ],
    "application_channel_detail": "No advance application is required for a U.S. citizen making a tourist visit of up to 60 days; apply for a Tourist Visa only if the stay will exceed 60 days or if seeking multiple entries.",
-   "source_url": "https://thaiembdc.org/visa/",
+   "source_url": null,
    "requirement_detail": "unconditional_visa_free",
    "transit_requirement": {
     "required": null,
@@ -6936,7 +6936,7 @@
    "forms": [
     "online Vietnam e-visa application form"
    ],
-   "official_portal_url": "https://evisa.gov.vn",
+   "official_portal_url": null,
    "photo_requirements": "Recent passport-style colour digital photo, plain white/light background, full face, no glasses/headwear unless medically/religiously required, per portal specifications",
    "biometrics_required": false,
    "interview_required": false,
@@ -9160,7 +9160,7 @@
    "forms": [
     "Online EVW application form"
    ],
-   "official_portal_url": "https://www.gov.uk/electronic-visa-waiver",
+   "official_portal_url": null,
    "photo_requirements": "Digital passport-style photograph uploaded online",
    "biometrics_required": false,
    "interview_required": false,
@@ -9281,7 +9281,7 @@
     }
    ],
    "application_channel_detail": "Individuals apply online through the UK Electronic Visa Waiver service without an appointment or authorised agent.",
-   "source_url": "https://www.gov.uk/guidance/apply-for-an-electronic-visa-waiver-to-enter-the-uk",
+   "source_url": null,
    "requirement_detail": "eta_electronic_authorization",
    "transit_requirement": {
     "required": null,
@@ -9588,7 +9588,7 @@
    "forms": [
     "Online e-Tourist Visa application form"
    ],
-   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "official_portal_url": null,
    "photo_requirements": "Recent colour digital passport photo, 2x2 inches (51x51mm), white background, full face, no glasses",
    "biometrics_required": false,
    "interview_required": false,
@@ -9692,7 +9692,7 @@
     }
    ],
    "application_channel_detail": "Apply individually online through the official Indian e-Visa portal; no authorised agent or embassy visit is required.",
-   "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -10376,7 +10376,7 @@
    "forms": [
     "SG Arrival Card"
    ],
-   "official_portal_url": "https://www.ica.gov.sg/enter-transit-depart/entering_singapore/visa_requirements",
+   "official_portal_url": null,
    "photo_requirements": null,
    "biometrics_required": null,
    "interview_required": null,
@@ -10459,7 +10459,7 @@
    "route_workflow_type": "visa_exempt_preparation",
    "visa_products": [],
    "application_channel_detail": "No visa is required; Japanese ordinary passport holders must complete the SG Arrival Card online before entry.",
-   "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering_singapore/visa_requirements",
+   "source_url": null,
    "requirement_detail": "unconditional_visa_free",
    "transit_requirement": {
     "required": null,
@@ -11447,7 +11447,7 @@
    "forms": [
     "ETIAS online application form (completed on the official portal)"
    ],
-   "official_portal_url": "https://etias.ec.europa.eu",
+   "official_portal_url": null,
    "photo_requirements": null,
    "biometrics_required": false,
    "interview_required": false,
@@ -11513,7 +11513,7 @@
     }
    ],
    "application_channel_detail": "Individuals apply directly online via the official ETIAS portal; no embassy, consulate or visa centre filing is required for Japanese tourist visitors.",
-   "source_url": "https://etias.ec.europa.eu",
+   "source_url": null,
    "requirement_detail": "eta_electronic_authorization",
    "transit_requirement": {
     "required": null,
@@ -11955,7 +11955,7 @@
    "forms": [
     "Online e-Visa application form"
    ],
-   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "official_portal_url": null,
    "photo_requirements": "Recent colour digital photo, plain white/light background, face clearly visible; check portal for exact pixel/file format requirements",
    "biometrics_required": false,
    "interview_required": false,
@@ -12072,7 +12072,7 @@
     }
    ],
    "application_channel_detail": "Most tourist applicants apply online themselves through the official Indian e-Visa portal; Japanese nationals may alternatively use visa-on-arrival if eligible, and paper visas must go through the Indian Embassy/VFS Global.",
-   "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -12119,7 +12119,7 @@
    },
    "processing_time": null,
    "forms": [],
-   "official_portal_url": "https://www.boca.gov.tw",
+   "official_portal_url": null,
    "photo_requirements": null,
    "biometrics_required": false,
    "interview_required": false,
@@ -12596,7 +12596,7 @@
    "route_workflow_type": "visa_exempt_preparation",
    "visa_products": [],
    "application_channel_detail": "No advance visa application is required; present documents at immigration to receive a Visit Pass.",
-   "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa-requirements",
+   "source_url": null,
    "requirement_detail": "unconditional_visa_free",
    "transit_requirement": {
     "required": null,
@@ -13500,7 +13500,7 @@
     }
    ],
    "application_channel_detail": "The applicant applies individually through the official ETIAS online portal or mobile app; no embassy, visa centre or authorised agent is required.",
-   "source_url": "https://home-affairs.ec.europa.eu/policies/schengen-borders-and-visa/visa-policy/etias_en",
+   "source_url": null,
    "requirement_detail": "eta_electronic_authorization",
    "transit_requirement": {
     "required": null,
@@ -13805,7 +13805,7 @@
    },
    "processing_time": null,
    "forms": [],
-   "official_portal_url": "https://www.immd.gov.hk/hkt/services/visas/visit-transit/visa-free-access.html",
+   "official_portal_url": null,
    "photo_requirements": null,
    "biometrics_required": false,
    "interview_required": false,
@@ -13858,7 +13858,7 @@
     }
    ],
    "application_channel_detail": "No visa application is required; present a valid passport and supporting documents to Hong Kong immigration on arrival.",
-   "source_url": "https://www.immd.gov.hk/hkt/services/visas/visit-transit/visa-free-access.html",
+   "source_url": null,
    "requirement_detail": "unconditional_visa_free",
    "transit_requirement": {
     "required": null,
@@ -13908,7 +13908,7 @@
    "forms": [
     "online e-Tourist Visa application form"
    ],
-   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "official_portal_url": null,
    "photo_requirements": "digital colour photograph, front-facing, white background, no shadows/glasses/headwear except for religious/medical reasons, dimensions as specified on the portal",
    "biometrics_required": false,
    "interview_required": false,
@@ -14007,7 +14007,7 @@
     }
    ],
    "application_channel_detail": "Apply yourself on the official Indian e-Visa portal; no authorised agent or embassy visit is required for the e-Visa.",
-   "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -14057,7 +14057,7 @@
    "forms": [
     "Online Arrival Card (OAC) if currently required"
    ],
-   "official_portal_url": "https://oaica.immigration.gov.tw/",
+   "official_portal_url": null,
    "photo_requirements": null,
    "biometrics_required": false,
    "interview_required": false,
@@ -15963,7 +15963,7 @@
    "forms": [
     "Application for Visit/Transit Visa (ID 1003A)"
    ],
-   "official_portal_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit.html",
+   "official_portal_url": null,
    "photo_requirements": "One recent passport-sized colour photograph",
    "biometrics_required": null,
    "interview_required": null,
@@ -16050,7 +16050,7 @@
     }
    ],
    "application_channel_detail": "Individuals may lodge applications themselves through the Hong Kong Immigration Department e-Visa portal, but confirm current eligibility for Malaysian ordinary passport holders before applying.",
-   "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit.html",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -16098,7 +16098,7 @@
    "forms": [
     "Online e-Visa application form on the Indian e-Visa portal"
    ],
-   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "official_portal_url": null,
    "photo_requirements": "Recent colour passport-size photograph, 2x2 inch (51x51 mm), white/light background, full face, no spectacles, digital JPEG for e-Visa upload",
    "biometrics_required": false,
    "interview_required": false,
@@ -16216,7 +16216,7 @@
     }
    ],
    "application_channel_detail": "Singapore ordinary passport holders may apply directly online for the Indian e-Tourist Visa; a sticker tourist visa must be lodged through the Indian Visa Application Centre/High Commission of India in Singapore.",
-   "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -17020,7 +17020,7 @@
    "route_workflow_type": "visa_exempt_preparation",
    "visa_products": [],
    "application_channel_detail": "No advance visa application required; Malaysian ordinary passport holders receive a 30-day Visit Pass on arrival after completing the free SG Arrival Card.",
-   "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering_singapore/visa_requirements",
+   "source_url": null,
    "requirement_detail": "unconditional_visa_free",
    "transit_requirement": {
     "required": null,
@@ -18059,7 +18059,7 @@
    "forms": [
     "Indian e-Visa online application form"
    ],
-   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "official_portal_url": null,
    "photo_requirements": "Recent colour digital passport photo, white background, front-facing, 350x350–1000x1000 px, JPEG, 10 KB–1 MB",
    "biometrics_required": false,
    "interview_required": false,
@@ -18190,7 +18190,7 @@
     }
    ],
    "application_channel_detail": "Apply yourself directly on the official Indian e-Visa portal; a regular sticker visa must be lodged through an Indian Visa Application Centre if the e-Visa route is not used.",
-   "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -18449,7 +18449,7 @@
     }
    ],
    "application_channel_detail": "Applicants file personally: complete DS-160, pay the fee, and schedule an interview through ustraveldocs.com/th; no authorised agent or visa centre is required.",
-   "source_url": "https://th.usembassy.gov/visas/nonimmigrant-visas/",
+   "source_url": null,
    "requirement_detail": "paper_visa",
    "transit_requirement": {
     "required": null,
@@ -19604,7 +19604,7 @@
    "forms": [
     "Online e-Tourist Visa application form"
    ],
-   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "official_portal_url": null,
    "photo_requirements": "Recent color passport-size photo, white background, specific dimensions per portal guidelines",
    "biometrics_required": false,
    "interview_required": false,
@@ -19694,7 +19694,7 @@
     }
    ],
    "application_channel_detail": "Apply yourself on the official Indian e-Visa portal; no authorised agent or embassy visit is required.",
-   "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -20423,7 +20423,7 @@
    "forms": [
     "SG Arrival Card (electronic)"
    ],
-   "official_portal_url": "https://www.ica.gov.sg/enter-transit-depart/entry_requirements/sg-arrival-card",
+   "official_portal_url": null,
    "photo_requirements": null,
    "biometrics_required": false,
    "interview_required": false,
@@ -20469,7 +20469,7 @@
    "route_workflow_type": "visa_exempt_preparation",
    "visa_products": [],
    "application_channel_detail": "No visa application is required; British ordinary passport holders must complete the free SG Arrival Card online before arrival.",
-   "source_url": "https://www.ica.gov.sg/enter-transit-depart/entry_requirements/visa-free-countries",
+   "source_url": null,
    "requirement_detail": "unconditional_visa_free",
    "transit_requirement": {
     "required": null,
@@ -21542,7 +21542,7 @@
    "forms": [
     "Online e-Tourist Visa application form"
    ],
-   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "official_portal_url": null,
    "photo_requirements": "Recent passport-size colour photograph, white/plain background, face clearly visible, no headwear except religious",
    "biometrics_required": false,
    "interview_required": false,
@@ -21645,7 +21645,7 @@
     }
    ],
    "application_channel_detail": "British tourists normally apply online for an Indian e-Tourist Visa; a regular paper visa can alternatively be lodged through VFS Global or the relevant Indian mission.",
-   "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -22195,7 +22195,7 @@
    },
    "processing_time": "Immediate at border",
    "forms": [],
-   "official_portal_url": "https://molina.imigrasi.go.id/",
+   "official_portal_url": null,
    "photo_requirements": "Not required for visa-free entry",
    "biometrics_required": false,
    "interview_required": false,
@@ -23452,7 +23452,7 @@
    },
    "processing_time": "Not applicable",
    "forms": [],
-   "official_portal_url": "https://molina.imigrasi.go.id/",
+   "official_portal_url": null,
    "photo_requirements": null,
    "biometrics_required": false,
    "interview_required": false,
@@ -23708,7 +23708,7 @@
    "forms": [
     "Online e-Tourist Visa application form"
    ],
-   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "official_portal_url": null,
    "photo_requirements": "Recent colour photograph, white background, minimum 350x350 pixels, no head covering unless religious",
    "biometrics_required": false,
    "interview_required": false,
@@ -23860,7 +23860,7 @@
     }
    ],
    "application_channel_detail": "French tourists apply directly online through India's official e-Visa portal; no agent, appointment, or embassy visit is required.",
-   "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -24205,7 +24205,7 @@
    "route_workflow_type": "visa_exempt_preparation",
    "visa_products": [],
    "application_channel_detail": "German ordinary passport holders may enter Hong Kong visa-free for tourism; no application is required.",
-   "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visa-free-entry.html",
+   "source_url": null,
    "requirement_detail": "unconditional_visa_free",
    "transit_requirement": {
     "required": null,
@@ -24857,7 +24857,7 @@
     }
    ],
    "application_channel_detail": "German nationals enter Malaysia visa-free for tourism; no visa application is required, but an online arrival card (MDAC) may need to be submitted before travel.",
-   "source_url": "https://www.imi.gov.my/index.php/en/visa/visa-information/visa-requirements-by-country/",
+   "source_url": null,
    "requirement_detail": "unconditional_visa_free",
    "transit_requirement": {
     "required": null,
@@ -26270,7 +26270,7 @@
    "route_workflow_type": "visa_exempt_preparation",
    "visa_products": [],
    "application_channel_detail": "Australian ordinary passport holders do not apply for a visa for short tourism visits; entry is granted at the port of entry by immigration officers.",
-   "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+   "source_url": null,
    "requirement_detail": "unconditional_visa_free",
    "transit_requirement": {
     "required": null,
@@ -26320,7 +26320,7 @@
    "forms": [
     "Online e-Visa application completed on the official Indian e-Visa portal"
    ],
-   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "official_portal_url": null,
    "photo_requirements": "Recent colour digital photo, 2 inch x 2 inch (51x51mm), white or plain light background, full face, no head covering except for religious reasons; JPEG format per portal specifications",
    "biometrics_required": false,
    "interview_required": false,
@@ -26432,7 +26432,7 @@
     }
    ],
    "application_channel_detail": "Individuals apply directly on the official Indian e-Visa portal; a bank transaction fee may be added by the payment gateway.",
-   "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -27078,7 +27078,7 @@
    "route_workflow_type": "visa_exempt_preparation",
    "visa_products": [],
    "application_channel_detail": "No visa application is required; Australian ordinary passport holders must complete the free Malaysia Digital Arrival Card (MDAC) online before travel.",
-   "source_url": "https://www.imi.gov.my/index.php/en/main-services/syarat-kemasukan-ke-malaysia.html",
+   "source_url": null,
    "requirement_detail": "unconditional_visa_free",
    "transit_requirement": {
     "required": null,
@@ -27850,7 +27850,7 @@
     "e-VOA: online application form on the Molina portal",
     "VOA: no pre-departure form"
    ],
-   "official_portal_url": "https://visa-online.imigrasi.go.id/",
+   "official_portal_url": null,
    "photo_requirements": "Digital passport-style photo required for e-VOA; no photo needed for VOA counter purchase",
    "biometrics_required": false,
    "interview_required": false,
@@ -28347,7 +28347,7 @@
    "forms": [
     "Online e-Visa application form"
    ],
-   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "official_portal_url": null,
    "photo_requirements": "Recent colour passport-size digital photo, plain white/off-white background, no spectacles/headwear except religious; minimum dimensions set by portal",
    "biometrics_required": false,
    "interview_required": false,
@@ -28545,7 +28545,7 @@
     }
    ],
    "application_channel_detail": "Most Australian tourists apply directly on the official Indian e-Visa portal; sticker tourist visas must be lodged through VFS Global or the Indian mission.",
-   "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -29480,7 +29480,7 @@
     }
    ],
    "application_channel_detail": "No visa application is required; Canadians receive a 30-day visa-free entry at the port of entry after completing the mandatory eTravel registration.",
-   "source_url": "https://immigration.gov.ph/index.php/faqs/visa-free-entry",
+   "source_url": null,
    "requirement_detail": "unconditional_visa_free",
    "transit_requirement": {
     "required": null,
@@ -29532,7 +29532,7 @@
     "e-VOA application form (online)",
     "B211A application form (if applying for visit visa)"
    ],
-   "official_portal_url": "https://molina.imigrasi.go.id/",
+   "official_portal_url": null,
    "photo_requirements": "Recent passport-style colour photograph, white background, digital upload",
    "biometrics_required": false,
    "interview_required": false,
@@ -29661,7 +29661,7 @@
     }
    ],
    "application_channel_detail": "Canadian tourists may apply directly online via the official e-VOA portal before departure, obtain a Visa on Arrival at designated entry points, or apply separately for a B211A visit visa.",
-   "source_url": "https://molina.imigrasi.go.id/",
+   "source_url": null,
    "requirement_detail": "evisa_on_arrival",
    "transit_requirement": {
     "required": null,
@@ -29994,7 +29994,7 @@
    "route_workflow_type": "visa_exempt_preparation",
    "visa_products": [],
    "application_channel_detail": "No advance visa or authorization is required; present a valid passport at the Schengen border.",
-   "source_url": "https://www.exteriores.gob.es/Portal/es/ServiciosConsulares/Paginas/Visados.aspx",
+   "source_url": null,
    "requirement_detail": "unconditional_visa_free",
    "transit_requirement": {
     "required": null,
@@ -30370,7 +30370,7 @@
    "forms": [
     "Online e-Tourist Visa application form"
    ],
-   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "official_portal_url": null,
    "photo_requirements": "Recent colour photo, white background, 2x2 inch (350x350–1000x1000 pixels), front-facing, no glasses/head covering unless religious",
    "biometrics_required": false,
    "interview_required": false,
@@ -30484,7 +30484,7 @@
     }
    ],
    "application_channel_detail": "Canadian ordinary passport holders may apply themselves on the Indian e-Visa portal; a regular/sticker tourist visa must be lodged through an Indian Visa Application Center (IVAC).",
-   "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -30859,7 +30859,7 @@
    "forms": [
     "C-3-1 short-term visa application form"
    ],
-   "official_portal_url": "https://www.korea-evisa.com",
+   "official_portal_url": null,
    "photo_requirements": "One recent colour photo, 35 mm x 45 mm, white background, face clearly visible, no head covering unless religious",
    "biometrics_required": false,
    "interview_required": null,
@@ -31013,7 +31013,7 @@
    "forms": [
     "DS-160 Online Nonimmigrant Visa Application"
    ],
-   "official_portal_url": "https://www.ustraveldocs.com/in/en/nonimmigrant-visa",
+   "official_portal_url": null,
    "photo_requirements": "2 x 2 inches (51 x 51 mm), white background, taken within last 6 months, full face",
    "biometrics_required": true,
    "interview_required": true,
@@ -31464,7 +31464,7 @@
     }
    ],
    "application_channel_detail": "Indian tourists do not require a visa but must complete the free Malaysia Digital Arrival Card (MDAC) online before travel and present documents on arrival.",
-   "source_url": "https://www.imi.gov.my/entry-requirements-foreigners/",
+   "source_url": null,
    "requirement_detail": "unconditional_visa_free",
    "transit_requirement": {
     "required": null,
@@ -31519,7 +31519,7 @@
     "Form 14A (visa application form)",
     "Form V39A (Letter of Introduction) if sponsored by a Singapore contact"
    ],
-   "official_portal_url": "https://www.ica.gov.sg/enter-transit-depart/entering_singapore/visa_requirements/overview",
+   "official_portal_url": null,
    "photo_requirements": "One recent colour 35mm x 45mm photo, white background, face visible, no headgear unless religious, taken within last 3 months",
    "biometrics_required": false,
    "interview_required": false,
@@ -31609,7 +31609,7 @@
     }
    ],
    "application_channel_detail": "Individuals cannot apply directly to the Singapore High Commission; applications must be lodged through an authorised visa agent designated for India.",
-   "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering_singapore/visa_requirements/overview",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -32700,7 +32700,7 @@
     "VOA application at immigration counter",
     "Visit Visa (B211A) form if applying in advance"
    ],
-   "official_portal_url": "https://molina.imigrasi.go.id",
+   "official_portal_url": null,
    "photo_requirements": "One passport-size photo required for e-VOA/Visit Visa applications",
    "biometrics_required": false,
    "interview_required": false,
@@ -32855,7 +32855,7 @@
    "forms": [
     "online e-Visa application form"
    ],
-   "official_portal_url": "https://visawebapp.boca.gov.tw/BOCA_MRVWeb/",
+   "official_portal_url": null,
    "photo_requirements": "Recent colour passport photo, white/plain background, full face visible, no headwear except for religious purposes",
    "biometrics_required": false,
    "interview_required": false,
@@ -33268,7 +33268,7 @@
    "forms": [
     "Form ID 1001A – Application for Entry for Visit/Transit in Hong Kong"
    ],
-   "official_portal_url": "https://www.immd.gov.hk/hks/services/visa/e-visa.html",
+   "official_portal_url": null,
    "photo_requirements": "One recent colour passport photo, 40 mm x 50 mm, white background",
    "biometrics_required": false,
    "interview_required": false,
@@ -33346,7 +33346,7 @@
     }
    ],
    "application_channel_detail": "Individuals may apply directly through the Hong Kong Immigration Department e-Visa portal, or alternatively submit through the Chinese Embassy/Consulate General in Indonesia.",
-   "source_url": "https://www.immd.gov.hk/hks/services/visa/visit_transit.html",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -33795,7 +33795,7 @@
    "forms": [
     "Form 14A"
    ],
-   "official_portal_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa-requirements",
+   "official_portal_url": null,
    "photo_requirements": "One recent colour passport-sized photograph with white background, taken within the last 3 months",
    "biometrics_required": false,
    "interview_required": false,
@@ -33876,7 +33876,7 @@
     }
    ],
    "application_channel_detail": "Indonesian ordinary passport holders cannot apply directly to ICA; the application must be lodged through a designated authorised visa agent.",
-   "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa-requirements",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -34662,7 +34662,7 @@
    "forms": [
     "Online Indian e-Tourist Visa application form"
    ],
-   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "official_portal_url": null,
    "photo_requirements": "Recent colour passport-size photograph, white/light background, face clearly visible, no head covering except for religious reasons",
    "biometrics_required": false,
    "interview_required": false,
@@ -35141,7 +35141,7 @@
    "forms": [
     "Schengen short-stay visa application form"
    ],
-   "official_portal_url": "https://www.exteriores.gob.es/Portal/en/ServiciosConsulares/Visados/Paginas/Visados.aspx",
+   "official_portal_url": null,
    "photo_requirements": "Two recent colour photos, 35x45 mm, white background, face 70-80%, no headwear except religious",
    "biometrics_required": true,
    "interview_required": false,
@@ -35258,7 +35258,7 @@
     }
    ],
    "application_channel_detail": "Indonesian ordinary-passport holders must apply in person through a BLS International Spain visa application centre in Indonesia; BLS schedules appointments and forwards applications to the Spanish Embassy/Consulate.",
-   "source_url": "https://www.exteriores.gob.es/Portal/en/ServiciosConsulares/Visados/Paginas/Visados.aspx",
+   "source_url": null,
    "requirement_detail": "paper_visa",
    "transit_requirement": {
     "required": null,
@@ -37066,7 +37066,7 @@
     "Printed and signed COVA confirmation page",
     "CVASC appointment confirmation"
    ],
-   "official_portal_url": "https://www.visaforchina.cn/gbr_en/",
+   "official_portal_url": null,
    "photo_requirements": "One recent colour passport photo, 33 mm × 48 mm, white background, full face, no headwear or dark glasses; digital upload to COVA plus one physical print",
    "biometrics_required": true,
    "interview_required": false,
@@ -37197,7 +37197,7 @@
     }
    ],
    "application_channel_detail": "Applications must be lodged through the Chinese Visa Application Service Centre (CVASC) in the UK; the Chinese embassy/consulate does not accept direct applications from ordinary applicants. A separate CVASC service fee applies.",
-   "source_url": "https://www.visaforchina.cn/gbr_en/",
+   "source_url": null,
    "requirement_detail": "paper_visa",
    "transit_requirement": {
     "required": null,
@@ -37736,7 +37736,7 @@
    "forms": [
     "Schengen visa application form (Spain)"
    ],
-   "official_portal_url": "https://spain.blsspainglobal.com/PHL/",
+   "official_portal_url": null,
    "photo_requirements": "One recent colour photo, 35x45 mm, white background, face clearly visible, no head coverings except for religious reasons",
    "biometrics_required": true,
    "interview_required": null,
@@ -37819,7 +37819,7 @@
     }
    ],
    "application_channel_detail": "Apply through the BLS Spain Visa Application Centre in the Philippines; direct filing at the embassy is generally not available for ordinary tourist visas.",
-   "source_url": "https://www.exteriores.gob.es/Embajadas/manila/en/ServiciosConsulares/Paginas/Visados.aspx",
+   "source_url": null,
    "requirement_detail": "paper_visa",
    "transit_requirement": {
     "required": null,
@@ -37869,7 +37869,7 @@
    "forms": [
     "Online e-Visa application form completed on the official portal"
    ],
-   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "official_portal_url": null,
    "photo_requirements": "Recent colour passport photo, white background, 350x350–1000x1000 pixels, 10KB–1MB JPEG for e-Visa",
    "biometrics_required": false,
    "interview_required": false,
@@ -38009,7 +38009,7 @@
     }
    ],
    "application_channel_detail": "Ellis: Filipino tourist applicants may lodge an e-Visa directly on the official Indian e-Visa portal; if a sticker visa is needed, file through the Indian Visa Application Centre/High Commission.",
-   "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -38608,7 +38608,7 @@
     "Online Travel Authorization Certificate form",
     "Paper visitor-visa application (for sticker)"
    ],
-   "official_portal_url": "https://visawebapp.boca.gov.tw",
+   "official_portal_url": null,
    "photo_requirements": "Colour, white background, 35x45 mm or 2x2 in, recent, full face, no headwear unless religious",
    "biometrics_required": false,
    "interview_required": null,
@@ -39109,7 +39109,7 @@
    "route_workflow_type": "visa_exempt_preparation",
    "visa_products": [],
    "application_channel_detail": "No visa is required; Vietnamese ordinary passport holders must complete the Malaysia Digital Arrival Card online before entry.",
-   "source_url": "https://www.imi.gov.my/index.php/en/main-services/visa/who-requires-visa-to-enter-malaysia.html",
+   "source_url": null,
    "requirement_detail": "unconditional_visa_free",
    "transit_requirement": {
     "required": null,
@@ -40062,7 +40062,7 @@
     "Online application form via ImmiAccount",
     "Form 1419 if lodging a paper application"
    ],
-   "official_portal_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream",
+   "official_portal_url": null,
    "photo_requirements": "One recent passport-style photograph; digital upload for online applications or paper specifications if lodging in person",
    "biometrics_required": true,
    "interview_required": false,
@@ -40154,7 +40154,7 @@
     }
    ],
    "application_channel_detail": "Apply online through the Australian ImmiAccount portal; biometrics, if requested, are collected at a VFS Global Australian Visa Application Centre in Vietnam, which may charge a separate service fee.",
-   "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -40208,7 +40208,7 @@
    "forms": [
     "Schengen visa application form for Spain (English/Spanish)"
    ],
-   "official_portal_url": "https://www.blsspainvietnam.com/",
+   "official_portal_url": null,
    "photo_requirements": "Two recent colour photos, 35 x 45 mm, white/light background, face 70-80%, no head covering unless religious, no dark glasses",
    "biometrics_required": true,
    "interview_required": false,
@@ -40310,7 +40310,7 @@
     }
    ],
    "application_channel_detail": "Ordinary applicants must submit in person at the BLS International Spain Visa Application Centre in Hanoi or Ho Chi Minh City by appointment; the official consular fee is collected by BLS and a separate BLS service fee applies.",
-   "source_url": "https://www.exteriores.gob.es/en/ServiciosConsulares/Paginas/Visados.aspx",
+   "source_url": null,
    "requirement_detail": "paper_visa",
    "transit_requirement": {
     "required": null,
@@ -40449,7 +40449,7 @@
    },
    "processing_time": "Not applicable",
    "forms": [],
-   "official_portal_url": "https://www.boca.gov.tw/",
+   "official_portal_url": null,
    "photo_requirements": null,
    "biometrics_required": null,
    "interview_required": null,
@@ -40748,7 +40748,7 @@
    "forms": [
     "Online Indian e-Visa application form"
    ],
-   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "official_portal_url": null,
    "photo_requirements": "Recent color passport photo, white or light background, 350x350 to 1000x1000 pixels, 10 KB to 1 MB, full face, no borders",
    "biometrics_required": false,
    "interview_required": false,
@@ -40865,7 +40865,7 @@
     }
    ],
    "application_channel_detail": "Vietnamese tourists may apply themselves on the official Indian e-Visa portal; alternatively, a sticker tourist visa can be lodged through the Indian embassy/consulate or its authorised visa application centre in Vietnam.",
-   "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -42451,7 +42451,7 @@
     }
    ],
    "application_channel_detail": "No visa or advance application is required; Russian ordinary passport holders may travel to Hong Kong and request visa-free entry on arrival for tourism.",
-   "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visa-free-entry.html",
+   "source_url": null,
    "requirement_detail": "unconditional_visa_free",
    "transit_requirement": {
     "required": null,
@@ -42502,7 +42502,7 @@
    "forms": [
     "Online e-Tourist Visa application form"
    ],
-   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "official_portal_url": null,
    "photo_requirements": "Recent colour digital passport photo, white or light background, face clearly visible, 10KB–1MB, 350x350 to 1000x1000 pixels",
    "biometrics_required": false,
    "interview_required": false,
@@ -42603,7 +42603,7 @@
     }
    ],
    "application_channel_detail": "Apply yourself online through the official Indian e-Visa portal; no authorised agent or embassy visit is required.",
-   "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -42919,7 +42919,7 @@
    "forms": [
     "Online ROC (Taiwan) eVisa application form"
    ],
-   "official_portal_url": "https://visawebapp.boca.gov.tw/",
+   "official_portal_url": null,
    "photo_requirements": "Recent color digital passport photo, plain white background, face clearly visible, exact dimensions as specified by the portal",
    "biometrics_required": false,
    "interview_required": false,
@@ -43780,7 +43780,7 @@
    "forms": [
     "Online application via ImmiAccount (paper Form 1419 where eligible)"
    ],
-   "official_portal_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream",
+   "official_portal_url": null,
    "photo_requirements": "One recent passport-style colour photograph",
    "biometrics_required": true,
    "interview_required": false,
@@ -43854,7 +43854,7 @@
     }
    ],
    "application_channel_detail": "Individual applicants must lodge the Visitor visa application themselves through the Department of Home Affairs' ImmiAccount online portal; biometrics may need to be collected at an Australian Visa Application Centre or Biometrics Collection Centre if requested.",
-   "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/tourist-stream",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -44010,7 +44010,7 @@
     "e-VOA online application form",
     "VoA form at immigration counter"
    ],
-   "official_portal_url": "https://molina.imigrasi.go.id",
+   "official_portal_url": null,
    "photo_requirements": "Digital passport-style photo with white background required for e-VOA; not required for VoA",
    "biometrics_required": false,
    "interview_required": false,
@@ -44573,7 +44573,7 @@
    "forms": [
     "Schengen short-stay visa application form"
    ],
-   "official_portal_url": "https://www.exteriores.gob.es/Portal/es/ServiciosAlCiudadano/InformacionParaExtranjeros/Paginas/VisadosSchengen.aspx",
+   "official_portal_url": null,
    "photo_requirements": "1 recent colour photo, 35 x 45 mm, white background, face 70-80%, ICAO/Schengen standard",
    "biometrics_required": true,
    "interview_required": false,
@@ -44668,7 +44668,7 @@
     }
    ],
    "application_channel_detail": "Apply through BLS International, the external service provider for Spain in Russia; book an appointment online and attend a Spain Visa Application Centre.",
-   "source_url": "https://www.exteriores.gob.es/Portal/es/ServiciosAlCiudadano/InformacionParaExtranjeros/Paginas/VisadosSchengen.aspx",
+   "source_url": null,
    "requirement_detail": "paper_visa",
    "transit_requirement": {
     "required": null,
@@ -44718,7 +44718,7 @@
    "forms": [
     "Online e-Tourist Visa application"
    ],
-   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "official_portal_url": null,
    "photo_requirements": "Recent colour digital passport photo, white/light background, square, 350x350 to 1000x1000 pixels, 10KB–1MB, no glasses or head coverings unless religious/medical",
    "biometrics_required": false,
    "interview_required": false,
@@ -44841,7 +44841,7 @@
     }
    ],
    "application_channel_detail": "Russian tourists may apply directly on the official Indian e-Visa portal without an agent or embassy visit for standard e-Visa processing.",
-   "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "source_url": null,
    "requirement_detail": "evisa",
    "transit_requirement": {
     "required": null,
@@ -45152,5 +45152,341 @@
   },
   "generated_at": "2026-08-22T20:50:50.681339",
   "fresh_until": "2026-09-05T20:51:29.599398"
+ },
+ {
+  "cache_key": "CHN|CHN|ARE|tourism|default|unknown|v6|doc:diplomatic_passport",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "ARE",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_UNCERTAIN",
+  "guidance": {
+   "disposition": "VISA_EXEMPT",
+   "visa_category": "Tourist",
+   "permitted_stay": "30 days",
+   "passport_validity": "6 months beyond arrival",
+   "required_documents": [],
+   "application_channel": "not_required",
+   "government_fee": null,
+   "processing_time": null,
+   "forms": [],
+   "official_portal_url": null,
+   "photo_requirements": null,
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [],
+   "payment_process": [],
+   "submission_process": [
+    "No visa submission required; present passport at UAE immigration."
+   ],
+   "onward_travel_evidence": "Return or onward ticket may be requested at immigration.",
+   "accommodation_evidence": "Hotel reservation or host address may be requested at immigration.",
+   "financial_evidence": "Evidence of sufficient funds may be requested at immigration.",
+   "insurance_required": false,
+   "exceptions": [
+    "Chinese diplomatic passport holders are visa-exempt under the China-UAE bilateral agreement.",
+    "Ordinary PRC passport holders are also visa-exempt for up to 30 days, but this answer is for the stated diplomatic passport only."
+   ],
+   "uncertainty": [
+    {
+     "field": "permitted_stay_days",
+     "reason": "The exact stay limit for Chinese diplomatic passport holders is based on pre-2024 knowledge; today's date is 2026-08-22 and bilateral rules could have changed."
+    },
+    {
+     "field": "source_url",
+     "reason": "No official UAE or Chinese government URL for the diplomatic-passport exemption is available in current knowledge."
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": 30,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_exempt_preparation",
+   "visa_products": [],
+   "application_channel_detail": "No visa application is required; the applicant presents the valid Chinese diplomatic passport at UAE immigration for entry.",
+   "requirement_detail": "unconditional_visa_free",
+   "transit_requirement": {
+    "required": null,
+    "note": null
+   }
+  },
+  "missing_fields": [
+   "required_documents"
+  ],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T21:02:59.113877+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
+  },
+  "generated_at": "2026-08-22T21:02:35.253130",
+  "fresh_until": "2026-08-24T21:02:35.253130"
+ },
+ {
+  "cache_key": "CHN|CHN|ARE|tourism|default|unknown|v6",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "ARE",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "VISA_EXEMPT",
+   "visa_category": "tourist visa",
+   "permitted_stay": "30 days",
+   "passport_validity": "6 months beyond arrival",
+   "required_documents": [
+    "Passport valid 6 months beyond arrival",
+    "Return/onward ticket",
+    "Proof of accommodation",
+    "Sufficient funds"
+   ],
+   "application_channel": "not_required",
+   "government_fee": {
+    "amount": null,
+    "currency": null
+   },
+   "processing_time": "Not applicable",
+   "forms": [],
+   "official_portal_url": null,
+   "photo_requirements": null,
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [],
+   "payment_process": [],
+   "submission_process": [],
+   "onward_travel_evidence": "Return or onward ticket may be requested at immigration.",
+   "accommodation_evidence": "Proof of accommodation (hotel booking or host details) may be requested at immigration.",
+   "financial_evidence": "Evidence of sufficient funds for the stay may be requested at immigration.",
+   "insurance_required": false,
+   "exceptions": [
+    "Chinese ordinary passport holders receive visa-free entry for up to 30 days; extensions are handled by UAE immigration if required."
+   ],
+   "uncertainty": [
+    {
+     "field": "source_url",
+     "reason": "Official UAE portal page for Chinese ordinary passport tourist entry could not be verified."
+    },
+    {
+     "field": "requirement_detail",
+     "reason": "UAE implementation may issue a free 30-day entry permit/visa on arrival; verify whether official classification is visa-free or visa-on-arrival."
+    }
+   ],
+   "confidence": "high",
+   "permitted_stay_days": 30,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 6
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [],
+   "route_workflow_type": "visa_exempt_preparation",
+   "visa_products": [],
+   "application_channel_detail": "Chinese ordinary passport holders enter visa-free for tourism; no advance visa application is required.",
+   "requirement_detail": "unconditional_visa_free",
+   "transit_requirement": {
+    "required": null,
+    "note": null
+   }
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-22T21:04:11.384112+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
+  },
+  "generated_at": "2026-08-22T21:04:05.160218",
+  "fresh_until": "2026-09-05T21:04:05.160218"
+ },
+ {
+  "cache_key": "CHN|CHN|LTU|tourism|default|unknown|v6",
+  "route": {
+   "passport_nationality": "CHN",
+   "lawful_country_of_residence": "CHN",
+   "destination_country": "LTU",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_UNCERTAIN",
+  "guidance": {
+   "disposition": "VISA_REQUIRED",
+   "visa_category": "Short-stay Schengen C visa",
+   "permitted_stay": "90 days in any 180-day period",
+   "passport_validity": "3 months beyond intended departure from Schengen, issued within last 10 years",
+   "required_documents": [
+    "Valid passport",
+    "Completed Schengen visa application form",
+    "Recent passport photo",
+    "Travel medical insurance",
+    "Round-trip flight reservation",
+    "Proof of accommodation",
+    "Proof of financial means",
+    "Travel itinerary"
+   ],
+   "application_channel": "visa_center",
+   "government_fee": null,
+   "processing_time": "Up to 15 calendar days; up to 45 days in individual cases",
+   "forms": [
+    "Schengen visa application form (completed, dated and signed)",
+    "VFS Global appointment confirmation/letter",
+    "Parental consent form if applicant is a minor"
+   ],
+   "official_portal_url": null,
+   "photo_requirements": "Two recent identical colour photos, 35 x 45 mm, white background, face covering 70-80%, no headgear except religious/medical, ICAO standard",
+   "biometrics_required": true,
+   "interview_required": false,
+   "appointment_required": true,
+   "account_registration_steps": [
+    "Register or log in on the VFS Global Lithuania visa application portal",
+    "Select Short-stay Schengen C visa and purpose Tourism",
+    "Choose the nearest application centre/city and book an appointment"
+   ],
+   "payment_process": [
+    "Pay the EUR 90 consular visa fee and the VFS Global service fee as instructed during online booking or at the centre"
+   ],
+   "submission_process": [
+    "Attend the booked appointment at the Lithuania Visa Application Centre (VFS Global) in China",
+    "Submit the application form, passport, photo and supporting documents",
+    "Provide biometrics and pay applicable fees",
+    "Collect passport in person or choose courier return"
+   ],
+   "onward_travel_evidence": "Confirmed return or onward flight reservation/travel itinerary",
+   "accommodation_evidence": "Hotel booking(s) for the whole stay, or a notarised invitation letter from a Lithuanian host with proof of accommodation",
+   "financial_evidence": "Bank statements for the last 3-6 months and proof of income; means of subsistence around EUR 40/day, lower if accommodation is prepaid or covered by an invitation",
+   "insurance_required": true,
+   "exceptions": [
+    "Children under 6 are exempt from the consular visa fee; VFS service fee may still apply",
+    "Long-validity multiple-entry visas may be issued to reliable frequent travellers with lawful use of previous Schengen visas",
+    "Certain categories such as EU/EEA family members or holders of diplomatic/service passports may be exempt; verify with VFS/consulate"
+   ],
+   "uncertainty": [
+    {
+     "field": "government_fee",
+     "reason": "Standard Schengen short-stay fee is EUR 90 for adults, but the EU-China Visa Facilitation Agreement may set a lower amount for Chinese nationals; fee also varies for children and applicants under 6. Confirm with VFS Global/embassy before paying."
+    },
+    {
+     "field": "official_portal_url",
+     "reason": "VFS Global is the outsourced service provider; the Lithuanian government may also list guidance on an MFA/migration portal."
+    },
+    {
+     "field": "source_url",
+     "reason": "No single official Lithuanian government page was retrieved to cite."
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_departure",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "health_requirements": [
+    {
+     "name": "Schengen travel medical insurance",
+     "applicability": "always_required",
+     "trigger_countries": [],
+     "trigger": null,
+     "question": null
+    }
+   ],
+   "route_workflow_type": "visa_center_submission",
+   "visa_products": [
+    {
+     "type": "Single-entry short-stay C (tourism)",
+     "entry": "single",
+     "validity": "Usually up to 6 months",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Adult consular fee; VFS service fee is additional"
+    },
+    {
+     "type": "Double-entry short-stay C (tourism)",
+     "entry": null,
+     "validity": "Usually up to 6 months",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Double-entry at consular discretion; VFS service fee is additional"
+    },
+    {
+     "type": "Multiple-entry short-stay C (tourism)",
+     "entry": "multiple",
+     "validity": "Up to 1, 2 or 5 years based on travel record",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "For reliable applicants with previous lawful Schengen visas; VFS service fee is additional"
+    }
+   ],
+   "application_channel_detail": "Individuals apply themselves but must submit in person at a VFS Global Lithuania visa application centre in China; VFS service fees are additional to the consular fee.",
+   "requirement_detail": "paper_visa",
+   "transit_requirement": {
+    "required": null,
+    "note": null
+   }
+  },
+  "missing_fields": [
+   "government_fee"
+  ],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T19:26:06.765112+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
+  },
+  "generated_at": "2026-08-25T19:25:42.021666",
+  "fresh_until": "2026-08-27T19:25:42.021666"
  }
 ]

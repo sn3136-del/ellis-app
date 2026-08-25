@@ -172,6 +172,12 @@ fi
 # Ship-warm the Database: the repo carries pre-decided popular routes;
 # import them once so first lookups land on warm cache (idempotent, and a
 # locally-decided answer always wins over the seed).
+# Link health, in the background after every launch: any dead portal or
+# source link still sitting in this install's cached answers (an older seed,
+# for instance) is stripped within a couple of minutes of boot, without
+# blocking the launch. Readers meanwhile see the answer without the link.
+( cd "$ROOT/backend" && DATABASE_URL="sqlite:///$DB" "$PY" scripts/warm_database.py checkurls >>"$LOGS/backend.log" 2>&1 & ) 2>/dev/null
+
 if [ -f "$ROOT/data/database_seed/kimi_guidance_seed.json" ]; then
   ( cd "$ROOT/backend" && DATABASE_URL="sqlite:///$DB" "$PY" scripts/warm_database.py import >>"$LOGS/backend.log" 2>&1 ) || true
 fi

@@ -376,3 +376,21 @@ def test_a_prose_channel_can_never_survive_validation(db):
                "online_portal", "on_arrival", "not_required"):
         clean, _m, _c = validate_answer({**base, "application_channel": ok})
         assert clean["application_channel"] == ok
+
+
+def test_dead_links_are_stripped_and_bot_walls_are_kept():
+    """Trip.com's demo complaint: the official-site link pointed nowhere.
+    A dead link (hard 404 or a soft-404 page saying 'not found' under a 200)
+    is removed from the answer; a bot-walled or slow page is NOT dead."""
+    from app.visa_snapshot import url_health
+    url_health.set_checker(lambda u: "dead" in u)
+    try:
+        g = {"official_portal_url": "https://example.com/dead/path",
+             "source_url": "https://example.com/alive",
+             "application_channel": "visa_center"}
+        removed = url_health.strip_dead_links(g)
+        assert removed == ["https://example.com/dead/path"]
+        assert g["official_portal_url"] is None
+        assert g["source_url"] == "https://example.com/alive"
+    finally:
+        url_health.set_checker(None)

@@ -224,6 +224,34 @@ def recheck() -> int:
     return 0
 
 
+def checkurls() -> int:
+    """Check every link every stored answer carries, and strip the dead ones.
+    Unique URLs are checked once, concurrently; a dead link is removed from
+    every answer that carried it."""
+    from concurrent.futures import ThreadPoolExecutor
+    from sqlalchemy import select
+    from app.db import SessionLocal
+    from app.visa_snapshot import url_health
+    from app.visa_snapshot.models import KimiRouteGuidanceCache as C
+    db = SessionLocal()
+    rows = list(db.execute(select(C)).scalars())
+    urls = sorted({u for r in rows for u in url_health.collect_urls(r.guidance or {})})
+    print(f"checking {len(urls)} unique links across {len(rows)} answers", flush=True)
+    with ThreadPoolExecutor(max_workers=12) as pool:
+        dead = {u for u, d in zip(urls, pool.map(url_health.url_is_dead, urls)) if d}
+    for u in sorted(dead):
+        print(f"  DEAD {u}", flush=True)
+    stripped = 0
+    for r in rows:
+        g = dict(r.guidance or {})
+        if url_health.strip_dead_links(g, dead=dead):
+            r.guidance = g
+            stripped += 1
+    db.commit(); db.close()
+    print(f"{len(dead)} dead links removed from {stripped} answers")
+    return 0
+
+
 def revalidate() -> int:
     """Re-run deterministic validation over every stored answer (no model
     call): after a validation rule changes, rows marked uncertain by a rule
@@ -252,4 +280,5 @@ def revalidate() -> int:
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "warm"
     raise SystemExit({"warm": warm, "export": export, "import": import_seed,
-                      "recheck": recheck, "revalidate": revalidate}[cmd]())
+                      "recheck": recheck, "revalidate": revalidate,
+                      "checkurls": checkurls}[cmd]())

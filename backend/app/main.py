@@ -379,6 +379,24 @@ def _after_cold_answer(route: dict, out: dict) -> None:
     guidance = out.get("guidance") or {}
 
     def _work():
+        # Links first: a dead portal URL must not sit clickable while the
+        # slower page recheck runs.
+        try:
+            from .db import SessionLocal as _SL
+            from .visa_snapshot import kimi_primary as _kp, url_health
+            s = _SL()
+            try:
+                row = s.query(_kp.KimiRouteGuidanceCache).filter_by(
+                    cache_key=_kp.cache_key(route)).first()
+                if row is not None:
+                    g = dict(row.guidance or {})
+                    if url_health.strip_dead_links(g):
+                        row.guidance = g
+                        s.commit()
+            finally:
+                s.close()
+        except Exception:  # noqa: BLE001
+            pass
         try:
             from .db import SessionLocal as _SL
             from .visa_snapshot import freshness
