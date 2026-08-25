@@ -21,12 +21,18 @@ def _family(db, fid="qatar-hayya-test", hosts=("hayya.qa",)):
 
 
 def test_new_government_suffixes_are_factual():
-    """Each added suffix is the state's own domain, verified live 2026-08-02."""
+    """Each added suffix is the state's own domain, verified live (2026-08-02
+    batch, plus the 2026-08-22 batch: Mongolia's evisa.mn — loaded in a real
+    browser, footer links to immigration.gov.mn and mfa.gov.mn — Lithuania's
+    MIGRIS, the Russian MFA consular department, and France's state portal)."""
     for host in ("evisa.gouv.dj", "voyage.gouv.tg", "evisa.mfa.am",
-                 "evisatraveller.mfa.ir", "www.evisa.e-gov.kg"):
+                 "evisatraveller.mfa.ir", "www.evisa.e-gov.kg",
+                 "evisa.mn", "www.migracija.lt", "evisa.kdmid.ru",
+                 "www.service-public.fr"):
         assert is_government_host(host), host
     # And the additions did not accidentally bless whole ccTLDs.
-    for host in ("evil.dj", "hayya.qa", "visa.visitsaudi.com", "evisa.mn"):
+    for host in ("evil.dj", "hayya.qa", "visa.visitsaudi.com", "evil.mn",
+                 "korea-evisa.com", "www.vfsglobal.com"):
         assert not is_government_host(host), host
 
 
