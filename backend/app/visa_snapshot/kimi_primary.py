@@ -1153,12 +1153,34 @@ def maybe_start_adapter_build(db, *, org_id: str, user_id: str, case_id: str,
 
 
 # --- AI Q&A: natural language -> route (Trip.com feature 3) -------------------
-_ASK_SYSTEM = ("""Extract the travel route from the user's question. Reply STRICT
-JSON: {"nationality": ISO3 or null, "destination": ISO3 or null,
-"travel_purpose": one of tourism|business|family_visit|study|work|transit|other
-or null, "travel_document_type": "ordinary_passport" unless another is named}.
-Use ISO3 country codes (CHN, JPN, USA, GBR...). Null anything not stated. No
-prose, JSON only.""")
+_ASK_SYSTEM = ("""You read a traveller's message and extract their route. The
+message can be casual, indirect, misspelled, in English or Chinese or mixed,
+and may mention places that are NOT part of the route (a friend's origin, an
+aside). Work out what the person actually holds and where they are actually
+going.
+
+Reply STRICT JSON:
+{"nationality": ISO3 of the PASSPORT they hold ("I'm Chinese", "my UK
+passport", "from France" when it means them, 持中国护照...) or null,
+"destination": ISO3 of where THEY are going or null,
+"transit_countries": [ISO3...] for stopovers/layovers ("via Dubai",
+经新加坡转机), else [],
+"travel_purpose": tourism|business|family_visit|study|work|transit or null,
+"travel_document_type": "diplomatic_passport"|"service_passport"|
+"emergency_passport"|"ordinary_passport" (default ordinary_passport),
+"focus": "fee"|"stay"|"documents"|"processing"|null — the ONE fact asked for,
+if any}
+
+Examples:
+"im meeting my friend from paris in new york, i have a chinese passport"
+ -> nationality CHN, destination USA (the friend being from France is not the route)
+"wife and i wanna do bali then bangkok, we're german" -> nationality DEU,
+ destination IDN (first destination; Bangkok is a later leg, not transit)
+"how long can singaporeans stay in the uk" -> nationality SGP, destination GBR, focus "stay"
+"日本人去美国出差要办什么" -> nationality JPN, destination USA, purpose business
+"i wanna go somewhere warm" -> destination null (never invent)
+
+Null anything not stated. NEVER invent a country. No prose, JSON only.""")
 
 
 # Deterministic question reading: country names matched straight from the
@@ -1369,6 +1391,7 @@ def _deterministic_route(question: str) -> dict | None:
                 or q[max(0, pos - 1):pos] in ("去", "到", "赴", "往"):
             dest = iso
             break
+    nat_marked, dest_marked = nat is not None, dest is not None
     if nat is None:
         nat = next(i for i in isos if i != dest)
     if dest is None:
@@ -1392,9 +1415,17 @@ def _deterministic_route(question: str) -> dict | None:
     doc = "diplomatic_passport" if ("diplomatic" in low or "外交护照" in q or "外交護照" in q) \
         else "service_passport" if ("official passport" in low or "公务护照" in q or "公務護照" in q) \
         else "ordinary_passport"
+    # SURE only when the words themselves say which is which: both sides
+    # marked ("from X ... to Y", a demonym, 持X护照去Y), or exactly two
+    # countries with at least one marker. "Meeting my friend from Paris in
+    # New York" mentions two countries and marks neither as a route — that
+    # is the model's question, not this function's.
+    extra = len(isos) - len(transit)          # countries that are not stopovers
+    confident = (extra == 2 and (nat_marked or dest_marked)) or \
+        (extra <= 2 and nat_marked and dest_marked)
     return {"understood": True, "nationality": nat, "destination": dest,
             "travel_purpose": purpose, "travel_document_type": doc,
-            "transit_countries": transit[:5],
+            "transit_countries": transit[:5], "confident": confident,
             "focus": _question_focus(q), "read_by": "deterministic"}
 
 
@@ -1456,24 +1487,34 @@ def parse_question(question: str, *, timeout: float = 20.0) -> dict:
     if not q:
         raise GuidanceUnavailable("no question to read")
     direct = _deterministic_route(q)
-    if direct is not None:
+    if direct is not None and direct.get("confident"):
         return direct
-    # The model is only the fallback for a sentence the matcher could not
-    # read, and it is held to a short budget: a miss must answer "please
-    # name both places" in seconds, never leave the box reading for half a
-    # minute.
+    # Anything the fast matcher is not SURE about goes to the model, whose
+    # whole job is messy wording — asides, typos, mixed languages. Held to a
+    # short budget so a miss answers in seconds; if the model cannot read it
+    # either, the matcher's best two-country guess beats a refusal.
     raw = _call(_ASK_SYSTEM, json.dumps({"question": q[:500]}),
-                timeout=min(timeout, 8.0), max_tokens=600)
+                timeout=min(timeout, 10.0), max_tokens=800)
     if not isinstance(raw, dict):
         raise GuidanceUnavailable("could not read the question")
     nat = str(raw.get("nationality") or "").strip().upper()
     dest = str(raw.get("destination") or "").strip().upper()
     purpose = str(raw.get("travel_purpose") or "tourism").strip().lower()
     if len(nat) != 3 or len(dest) != 3:
+        if direct is not None:
+            return direct          # the matcher's guess beats a refusal
         return {"understood": False, "nationality": nat, "destination": dest}
     doc = str(raw.get("travel_document_type") or "ordinary_passport").strip()
+    transit = [str(c).strip().upper() for c in
+               (raw.get("transit_countries") or [])
+               if isinstance(c, str) and len(str(c).strip()) == 3][:5]
+    focus = raw.get("focus")
     return {"understood": True, "nationality": nat, "destination": dest,
             "travel_purpose": purpose if purpose in
             ("tourism", "business", "family_visit", "study", "work",
              "transit", "other")
-            else "tourism", "travel_document_type": doc or "ordinary_passport"}
+            else "tourism", "travel_document_type": doc or "ordinary_passport",
+            "transit_countries": transit,
+            "focus": focus if focus in ("fee", "stay", "documents",
+                                        "processing") else _question_focus(q),
+            "read_by": "model"}

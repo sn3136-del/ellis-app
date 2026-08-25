@@ -926,3 +926,34 @@ def test_ask_reads_transit_focus_and_context_followups():
         "usa to france for study", ctx)
     assert (full["nationality"], full["destination"], full["travel_purpose"]) \
         == ("USA", "FRA", "study")
+
+
+def test_clear_questions_never_touch_the_model_and_messy_ones_do():
+    """Smart routing: a phrasing whose words mark the route is answered
+    instantly with no model call; a phrasing with asides or extra countries
+    goes to the model, whose job is messy wording; and when the model cannot
+    read it either, the matcher's two-country guess beats a refusal."""
+    kimi_primary.set_provider(lambda system, user: (_ for _ in ()).throw(
+        AssertionError("clear phrasings must not call the model")))
+    for q in ("from china to japan", "hong kong to bali",
+              "uk passport, studying in south korea", "持中国护照去日本旅游"):
+        assert kimi_primary.parse_question(q)["read_by"] == "deterministic", q
+    calls = {}
+
+    def model(system, user):
+        calls["n"] = calls.get("n", 0) + 1
+        return {"nationality": "USA", "destination": "ITA",
+                "travel_purpose": "tourism",
+                "travel_document_type": "ordinary_passport",
+                "transit_countries": [], "focus": None}
+    kimi_primary.set_provider(model)
+    r = kimi_primary.parse_question(
+        "we did thailand, vietnam and japan before, this time italy, we are american")
+    assert calls["n"] == 1 and (r["nationality"], r["destination"]) == ("USA", "ITA")
+    assert r["read_by"] == "model"
+    # model returns nulls -> the deterministic guess is served, marked as such
+    kimi_primary.set_provider(lambda system, user: {"nationality": None,
+                                                    "destination": None})
+    r = kimi_primary.parse_question(
+        "i moved from china to japan last year, now taking my korean wife to france")
+    assert r["understood"] is True and r["read_by"] == "deterministic"
