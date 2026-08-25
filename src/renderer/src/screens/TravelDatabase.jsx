@@ -429,9 +429,9 @@ export default function TravelDatabase({ onBack }) {
         if (pollRef.current !== mine) return
         if (!out.detail_pending) { setResult(out); return }
       } catch { /* keep what we have */ }
-      setTimeout(tick, 4000)
+      setTimeout(tick, 2500)
     }
-    setTimeout(tick, 4000)
+    setTimeout(tick, 2500)
   }
 
   // One query path. The form calls it bare; the switchers on the answer page

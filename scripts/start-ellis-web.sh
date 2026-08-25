@@ -177,6 +177,10 @@ fi
 # for instance) is stripped within a couple of minutes of boot, without
 # blocking the launch. Readers meanwhile see the answer without the link.
 ( cd "$ROOT/backend" && DATABASE_URL="sqlite:///$DB" "$PY" scripts/warm_database.py checkurls >>"$LOGS/backend.log" 2>&1 & ) 2>/dev/null
+# Translations likewise: any cached answer not yet translated into both
+# Chinese scripts gets translated in the background, so the language switch
+# is instant by the time a tester reaches for it.
+( cd "$ROOT/backend" && DATABASE_URL="sqlite:///$DB" "$PY" scripts/warm_database.py pretranslate >>"$LOGS/backend.log" 2>&1 & ) 2>/dev/null
 
 if [ -f "$ROOT/data/database_seed/kimi_guidance_seed.json" ]; then
   ( cd "$ROOT/backend" && DATABASE_URL="sqlite:///$DB" "$PY" scripts/warm_database.py import >>"$LOGS/backend.log" 2>&1 ) || true

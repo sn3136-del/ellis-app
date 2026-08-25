@@ -63,7 +63,7 @@ def _warm_one(pair: tuple) -> tuple:
         db.close()
 
 
-def warm(workers: int = 4) -> int:
+def warm(workers: int = 6) -> int:
     """Warm every starter route. The work is HTTP-bound on the model, so a
     small thread pool cuts a long serial pass to a few minutes; each worker
     holds its own session."""
@@ -261,6 +261,42 @@ def checkurls() -> int:
     return 0
 
 
+def pretranslate() -> int:
+    """Translate every cached answer's strings into both Chinese scripts, into
+    the translation cache — so the language switch is instant on every route,
+    not only the ones someone already viewed in Chinese. Cache-aware: strings
+    already translated cost nothing."""
+    from sqlalchemy import select
+    from app.db import SessionLocal
+    from app import i18n
+    from app.visa_snapshot.models import KimiRouteGuidanceCache as C
+    db = SessionLocal()
+    strings: dict[str, str] = {}
+
+    def walk(v):
+        if isinstance(v, str):
+            t = v.strip()
+            if 2 < len(t) <= 240 and not t.startswith("http"):
+                strings.setdefault(f"g{len(strings)}", t)
+        elif isinstance(v, dict):
+            for x in v.values():
+                walk(x)
+        elif isinstance(v, list):
+            for x in v:
+                walk(x)
+    for r in db.execute(select(C)).scalars():
+        walk(r.guidance or {})
+    db.close()
+    print(f"{len(strings)} distinct strings across all answers", flush=True)
+    for lang in ("zh-CN", "zh-Hant"):
+        out = i18n.translate_catalog(strings, lang)
+        ok = sum(1 for k, v in (out.get("entries") or {}).items()
+                 if v != strings.get(k))
+        print(f"  {lang}: {out.get('status')} ({ok} translated or cached)", flush=True)
+    i18n.flush_cache()
+    return 0
+
+
 def revalidate() -> int:
     """Re-run deterministic validation over every stored answer (no model
     call): after a validation rule changes, rows marked uncertain by a rule
@@ -290,4 +326,5 @@ if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "warm"
     raise SystemExit({"warm": warm, "export": export, "import": import_seed,
                       "recheck": recheck, "revalidate": revalidate,
-                      "checkurls": checkurls}[cmd]())
+                      "checkurls": checkurls,
+                      "pretranslate": pretranslate}[cmd]())
