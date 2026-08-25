@@ -900,3 +900,29 @@ def test_when_a_link_is_possible_it_has_to_be_there(db):
         "disposition": "VISA_REQUIRED", "official_portal_url": None}},
         {"destination_country": "XKX"})
     assert unknown["guidance"]["official_portal_url"] is None   # no invented link
+
+
+def test_ask_reads_transit_focus_and_context_followups():
+    """The ask box stays a route-answerer, sharper: stopovers in the words
+    become transit points, "how much" leads with the fee, and a follow-up
+    modifies the route on screen instead of being refused."""
+    kimi_primary.set_provider(lambda system, user: (_ for _ in ()).throw(
+        AssertionError("deterministic paths must not need the model")))
+    r = kimi_primary.parse_question(
+        "from china to japan via singapore, how much does it cost")
+    assert (r["nationality"], r["destination"]) == ("CHN", "JPN")
+    assert r["transit_countries"] == ["SGP"] and r["focus"] == "fee"
+    ctx = {"nationality": "CHN", "destination": "JPN",
+           "travel_purpose": "tourism", "travel_document_type": "ordinary_passport"}
+    assert kimi_primary.parse_question_with_context("what about business?", ctx)[
+        "travel_purpose"] == "business"
+    assert kimi_primary.parse_question_with_context("to korea instead", ctx)[
+        "destination"] == "KOR"
+    assert kimi_primary.parse_question_with_context(
+        "and with a diplomatic passport", ctx)["travel_document_type"] == \
+        "diplomatic_passport"
+    # A full question overrides the context entirely.
+    full = kimi_primary.parse_question_with_context(
+        "usa to france for study", ctx)
+    assert (full["nationality"], full["destination"], full["travel_purpose"]) \
+        == ("USA", "FRA", "study")

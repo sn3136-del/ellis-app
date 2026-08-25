@@ -1312,6 +1312,30 @@ def _country_mentions(text: str) -> list:
     return sorted(found)
 
 
+# What single fact is the question really after? Detected from plain words so
+# the answer page can lead with it.
+_FOCUS_WORDS = (
+    ("fee", ("how much", "cost", "price", "fee", "多少钱", "多少錢", "费用", "費用")),
+    ("stay", ("how long can", "how many days", "length of stay", "stay",
+              "住多久", "待多久", "停留", "几天能待", "幾天")),
+    ("documents", ("documents", "what do i need to bring", "materials",
+                   "paperwork", "材料", "资料", "資料", "文件")),
+    ("processing", ("how long does it take", "processing", "how fast",
+                    "几天出签", "幾天出簽", "办理时间", "辦理時間", "多久出")),
+)
+
+_TRANSIT_MARKERS = ("via ", "through ", "layover in ", "stopover in ",
+                    "transit in ", "transiting ")
+
+
+def _question_focus(question: str) -> str | None:
+    low = str(question or "").lower()
+    for name, words in _FOCUS_WORDS:
+        if any(w in low or w in question for w in words):
+            return name
+    return None
+
+
 def _deterministic_route(question: str) -> dict | None:
     """A route read straight from the words, or None when the text does not
     name two places. Instant; no model call."""
@@ -1349,6 +1373,17 @@ def _deterministic_route(question: str) -> dict | None:
         nat = next(i for i in isos if i != dest)
     if dest is None:
         dest = next(i for i in isos if i != nat)
+    # Stopovers: "via singapore", "layover in dubai", 经/途经/转机.
+    transit = []
+    for pos, iso, _d in mentions:
+        if iso in (nat, dest):
+            continue
+        before = low[max(0, pos - 14):pos]
+        zh = q[max(0, pos - 3):pos]
+        if any(m in before for m in _TRANSIT_MARKERS) or \
+                any(z in zh for z in ("经", "經", "转机", "轉機", "途经", "途經")):
+            if iso not in transit:
+                transit.append(iso)
     purpose = "tourism"
     for name, words in _PURPOSE_WORDS:
         if any(w in low or w in q for w in words):
@@ -1359,7 +1394,58 @@ def _deterministic_route(question: str) -> dict | None:
         else "ordinary_passport"
     return {"understood": True, "nationality": nat, "destination": dest,
             "travel_purpose": purpose, "travel_document_type": doc,
-            "read_by": "deterministic"}
+            "transit_countries": transit[:5],
+            "focus": _question_focus(q), "read_by": "deterministic"}
+
+
+def parse_question_with_context(question: str, context: dict | None,
+                                *, timeout: float = 20.0) -> dict:
+    """A follow-up like "what about business?" or "and with a diplomatic
+    passport?" or "to korea instead" modifies the route ON SCREEN rather than
+    being refused for not naming two places. Deterministic only — a follow-up
+    never guesses."""
+    q = str(question or "").strip()
+    ctx = context or {}
+    if ctx.get("nationality") and ctx.get("destination"):
+        low = q.lower()
+        mentions = _country_mentions(q)
+        isos = []
+        for _pos, iso, _dem in mentions:
+            if iso not in isos:
+                isos.append(iso)
+        purpose = None
+        for name, words in _PURPOSE_WORDS:
+            if any(w in low or w in q for w in words):
+                purpose = name
+                break
+        doc = None
+        if "diplomatic" in low or "外交护照" in q or "外交護照" in q:
+            doc = "diplomatic_passport"
+        elif "official passport" in low or "service passport" in low \
+                or "公务护照" in q or "公務護照" in q:
+            doc = "service_passport"
+        elif "ordinary" in low or "普通护照" in q or "普通護照" in q:
+            doc = "ordinary_passport"
+        if len(isos) <= 1 and (isos or purpose or doc):
+            nat = str(ctx.get("nationality")).upper()
+            dest = str(ctx.get("destination")).upper()
+            if isos:
+                one = isos[0]
+                before = low[:low.find(one.lower())] if False else low
+                # "from X" changes the passport; anything else the destination
+                pos = mentions[0][0]
+                lead = low[max(0, pos - 12):pos]
+                if "from " in lead or "持" in q[max(0, pos - 3):pos]:
+                    nat = one
+                elif one != nat:
+                    dest = one
+            return {"understood": True, "nationality": nat, "destination": dest,
+                    "travel_purpose": purpose or ctx.get("travel_purpose", "tourism"),
+                    "travel_document_type": doc or ctx.get("travel_document_type",
+                                                           "ordinary_passport"),
+                    "transit_countries": [], "focus": _question_focus(q),
+                    "read_by": "context"}
+    return parse_question(q, timeout=timeout)
 
 
 def parse_question(question: str, *, timeout: float = 20.0) -> dict:

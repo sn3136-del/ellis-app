@@ -309,6 +309,12 @@ export default function TravelDatabase({ onBack }) {
   const [askBusy, setAskBusy] = useState(false)
   const [askMsg, setAskMsg] = useState('')
   const [askSlow, setAskSlow] = useState(false)   // a first-time route is being worked out
+  // What the ANSWER on screen was asked for. The hero renders these, so an
+  // in-flight switch can never show the old answer under a new heading.
+  const [shown, setShown] = useState({ purpose: 'tourism', doc: 'ordinary_passport' })
+  // When the question asked for ONE fact ("how much..."), the answer page
+  // leads with it. Cleared on any form lookup.
+  const [focus, setFocus] = useState(null)
   const [departureCity, setDepartureCity] = useState('')
   const [transit, setTransit] = useState([])       // ISO3 stopover countries
   const [issueOpen, setIssueOpen] = useState(false)
@@ -392,7 +398,12 @@ export default function TravelDatabase({ onBack }) {
     // seconds, this is a first-time route: say so instead of looking stuck.
     const slowTimer = setTimeout(() => setAskSlow(true), 2000)
     try {
-      const out = await client.databaseAsk(q)
+      // The route on screen travels with a follow-up, so "what about
+      // business?" modifies it instead of being refused.
+      const out = await client.databaseAsk(q, result && g ? {
+        nationality: nat, destination: dest, travel_purpose: shown.purpose,
+        travel_document_type: shown.doc,
+      } : null)
       if (out.understood === false) {
         setAskMsg(t('db.askUnclear'))
       } else {
@@ -403,6 +414,9 @@ export default function TravelDatabase({ onBack }) {
           // the answer was computed for it, so the control follows the words.
           const askedDoc = out.route.travel_document_type || doc
           if (out.route.travel_document_type) setDoc(out.route.travel_document_type)
+          setShown({ purpose: out.route.travel_purpose || 'tourism', doc: askedDoc })
+          setTransit(out.route.transit_countries || [])
+          setFocus(out.focus || null)
           writeHash({ nat: out.route.nationality, dest: out.route.destination,
                       purpose: out.route.travel_purpose, doc: askedDoc })
         }
@@ -456,6 +470,8 @@ export default function TravelDatabase({ onBack }) {
         transit_countries: transit,
       })
       setResult(out)
+      setShown({ purpose: usePurpose, doc: useDoc })
+      if (!override.keepFocus) setFocus(null)
       writeHash({ nat: useNat, dest: useDest, purpose: usePurpose, doc: useDoc })
       setBusy(false)
       if (out.detail_pending) pollDetail({
@@ -749,6 +765,26 @@ export default function TravelDatabase({ onBack }) {
               </div>
             )}
           </div>
+
+          {/* The fact the question asked for, answered first. */}
+          {focus && (() => {
+            const v = focus === 'fee'
+              ? (feeText(g.government_fee) || t('db.feeSeeProducts'))
+              : focus === 'stay' ? T(asText(g.permitted_stay))
+              : focus === 'processing' ? T(asText(g.processing_time))
+              : focus === 'documents' ? (itemsOf(g.required_documents).length
+                  ? itemsOf(g.required_documents).length + ' - ' + t('db.documents')
+                  : null)
+              : null
+            return v ? (
+              <div style={{ marginTop: 14, padding: '12px 18px', borderRadius: 14,
+                            background: '#eef4ff', textAlign: 'center',
+                            fontSize: 15, fontWeight: 700, color: NAVY }}
+                   data-testid="database-focus">
+                {t('db.focus.' + focus)}: {v}
+              </div>
+            ) : null
+          })()}
 
           {/* Switchers, on the page itself: change the travel document or the
               purpose and the answer is re-asked for THAT combination — never

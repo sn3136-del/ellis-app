@@ -626,6 +626,9 @@ def travel_database_issues(db=Depends(get_session),
 
 class DatabaseAskIn(BaseModel):
     question: str
+    # The route currently on screen, so a follow-up like "what about
+    # business?" or "to korea instead" modifies it instead of being refused.
+    context: dict | None = None
 
 
 @app.post("/database/ask")
@@ -639,7 +642,8 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
         raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
                                          "reason": "the route engine is not configured"})
     try:
-        parsed = kimi_primary.parse_question(body.question)
+        parsed = kimi_primary.parse_question_with_context(body.question,
+                                                           body.context)
     except kimi_primary.GuidanceTimeout:
         raise HTTPException(504, detail={"status": kimi_primary.STATUS_TIMEOUT,
                                          "reason": kimi_primary.TIMEOUT_MESSAGE})
@@ -660,6 +664,8 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
             parsed["travel_purpose"]),
         "travel_purpose": parsed["travel_purpose"],
     }
+    if parsed.get("transit_countries"):
+        route["transit_countries"] = parsed["transit_countries"]
     try:
         out = kimi_primary.get_route_guidance(db, route, stage="core",
                                               after=_after_cold_answer)
@@ -681,7 +687,10 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
     out["route"] = {"nationality": parsed["nationality"],
                     "destination": parsed["destination"],
                     "travel_purpose": parsed["travel_purpose"],
-                    "travel_document_type": parsed["travel_document_type"]}
+                    "travel_document_type": parsed["travel_document_type"],
+                    "transit_countries": parsed.get("transit_countries") or []}
+    if parsed.get("focus"):
+        out["focus"] = parsed["focus"]
     audit.record(db, org_id=p.org_id, application_id="database",
                  action="database_ask",
                  detail={"nationality": parsed["nationality"],
