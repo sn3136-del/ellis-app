@@ -78,6 +78,18 @@ answer saying THIS nationality must use an accredited agency, and a generic
 the applicant's country) and states the rule for them. When the page is
 generic, treat those fields as unaddressed and leave them alone.
 
+MONEY, VALIDITY AND STAY ARE THE HIGHEST-VALUE CHECKS. Government fees and
+validity periods change by law and the stored answer's figure may predate the
+change: a 2026 audit found a stored GBP 10 where the page said GBP 20, a
+stored USD 21 where the fee had become USD 40.27, and a stored 60-day/16-day
+e-visa where the rule had been 120/30 for a year. When the page states a fee
+amount, a validity period, or a stay length for a product the stored answer
+also carries, compare digit for digit — a different number IS a contradiction
+and must be corrected with the page's own figure and quote. A single price the
+page states for all applicants (an ESTA, an ETA, an e-visa) is not
+nationality-specific; a country-wise fee table is, so read THIS nationality's
+row and no other.
+
 Reply STRICT JSON:
 {"page_relevant": true|false  (does this page actually cover this route/topic?),
  "page_is_nationality_specific": true|false  (does the page state rules FOR
