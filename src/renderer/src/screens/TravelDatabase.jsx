@@ -721,7 +721,7 @@ export default function TravelDatabase({ onBack }) {
             <div style={{ fontSize: 13, color: NAVY, fontWeight: 700,
                           opacity: 0.75 }}>
               {countryName(nat)} → {countryName(dest)} ·{' '}
-              {t(PURPOSES.find(([v]) => v === purpose)?.[1] || 'db.purpose.tourism')}
+              {t(PURPOSES.find(([v]) => v === shown.purpose)?.[1] || 'db.purpose.tourism')}
             </div>
             <div style={{ fontSize: 29, fontWeight: 800,
                           color: disp?.color || NAVY,

@@ -340,6 +340,13 @@ def travel_database_approve(body: DatabaseApproveIn, db=Depends(get_session),
     dest = body.destination.strip().upper()
     if not nat or not dest:
         raise HTTPException(422, "nationality and destination are required")
+    # The document type is an enum from the registry, enforced here and not
+    # just by the UI select — a typo must fail loudly, not become a distinct
+    # cache key with a nonsense answer.
+    from .visa_snapshot.registry import load_registry
+    doc_codes = {e["code"] for e in load_registry("travel_document_types")["entries"]}
+    if body.travel_document_type and body.travel_document_type not in doc_codes:
+        raise HTTPException(422, f"unknown travel_document_type; one of {sorted(doc_codes)}")
     key = body.cache_key.strip() or kimi_primary.cache_key({
         "passport_nationality": nat, "lawful_country_of_residence": nat,
         "destination_country": dest,
