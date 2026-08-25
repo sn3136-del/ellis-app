@@ -361,6 +361,10 @@ export default function TravelDatabase({ onBack }) {
   // When the question asked for ONE fact ("how much..."), the answer page
   // leads with it. Cleared on any form lookup.
   const [focus, setFocus] = useState(null)
+  // A switch re-asks the engine for a DIFFERENT combination. Warm ones come
+  // back in milliseconds; a first-time combination takes the model a moment,
+  // and without this the page looked frozen under the old answer.
+  const [switching, setSwitching] = useState(false)
   const [departureCity, setDepartureCity] = useState('')
   const [transit, setTransit] = useState([])       // ISO3 stopover countries
   const [issueOpen, setIssueOpen] = useState(false)
@@ -539,14 +543,16 @@ export default function TravelDatabase({ onBack }) {
   // A switcher on the answer page: set the control, then re-ask for it.
   async function switchDoc(v) {
     const was = doc
-    setDoc(v)
+    setDoc(v); setSwitching(true)
     const ok = await lookUp({ doc: v, keepResult: true })
+    setSwitching(false)
     if (!ok) setDoc(was)          // the page must never label an old answer anew
   }
   async function switchPurpose(v) {
     const was = purpose
-    setPurpose(v)
+    setPurpose(v); setSwitching(true)
     const ok = await lookUp({ purpose: v, keepResult: true })
+    setSwitching(false)
     if (!ok) setPurpose(was)
   }
 
@@ -881,7 +887,19 @@ export default function TravelDatabase({ onBack }) {
             </div>
           )}
 
+          {/* While a switch is in flight the page shows the plane rather than
+              the previous answer: that answer was for a DIFFERENT document or
+              purpose, so leaving it up reads as the new one. */}
+          {switching && (
+            <div style={{ display: 'flex', justifyContent: 'center',
+                          padding: '26px 0 6px' }}
+                 data-testid="database-switching">
+              <Loading label="" />
+            </div>
+          )}
+
           {/* At a glance */}
+          {!switching && (
           <div style={{ display: 'grid', gap: 16, marginTop: 20,
                         gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))' }}>
             <Tile label={t('db.stay')} value={T(asText(g.permitted_stay))} />
@@ -899,6 +917,7 @@ export default function TravelDatabase({ onBack }) {
                     ? T(humanizeEnum(g.application_channel)) : null}
                   href={g.official_portal_url || undefined} />
           </div>
+          )}
           {/* The channel sentence under the tiles is hidden by owner decision
               (theming) for every route: the "Where to apply" tile carries
               the honest channel label itself. The field still ships in the

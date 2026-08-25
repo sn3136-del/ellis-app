@@ -224,6 +224,55 @@ def recheck() -> int:
     return 0
 
 
+def variants(workers: int = 6) -> int:
+    """Warm the OTHER purposes and document types for the routes a tester is
+    most likely to open, so the switchers on the answer page are instant.
+
+    Switching purpose or travel document re-asks the engine for a different
+    combination — a different cache key — and an unwarmed one waits on a cold
+    model call while the page appears to stall. These are the combinations
+    behind those switches."""
+    from concurrent.futures import ThreadPoolExecutor
+    from app.db import SessionLocal
+    from app.visa_snapshot import kimi_primary
+    ORIGINS = ("CHN", "HKG", "USA")
+    PURPOSES = ("business", "family_visit", "study", "work", "transit", "other")
+    DOCS = ("diplomatic_passport", "service_passport")
+    jobs = []
+    for o in ORIGINS:
+        for d in PHASE1:
+            if o == d:
+                continue
+            for p in PURPOSES:
+                jobs.append((o, d, p, "ordinary_passport"))
+            for doc in DOCS:
+                jobs.append((o, d, "tourism", doc))
+
+    def one(job):
+        o, d, purpose, doc = job
+        s = SessionLocal()
+        try:
+            route = _route(o, d)
+            route["travel_purpose"] = purpose
+            route["travel_document_type"] = doc
+            route["visa_category"] = kimi_primary.category_for_purpose(purpose)
+            out = kimi_primary.get_route_guidance(s, route)
+            return True, f"  {o}->{d} {purpose}/{doc.split('_')[0]}: {out.get('status')}"
+        except Exception as e:  # noqa: BLE001 — warmth is best-effort
+            return False, f"  {o}->{d} {purpose}/{doc.split('_')[0]}: FAILED {str(e)[:60]}"
+        finally:
+            s.close()
+
+    print(f"warming {len(jobs)} switcher combinations", flush=True)
+    ok = fail = 0
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        for good, line in pool.map(one, jobs):
+            print(line, flush=True)
+            ok, fail = (ok + 1, fail) if good else (ok, fail + 1)
+    print(f"variants warmed {ok}, failed {fail}")
+    return 0
+
+
 def checkurls() -> int:
     """Check every link every stored answer carries, and strip the dead ones.
     Unique URLs are checked once, concurrently; a dead link is removed from
@@ -326,5 +375,5 @@ if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "warm"
     raise SystemExit({"warm": warm, "export": export, "import": import_seed,
                       "recheck": recheck, "revalidate": revalidate,
-                      "checkurls": checkurls,
+                      "checkurls": checkurls, "variants": variants,
                       "pretranslate": pretranslate}[cmd]())
