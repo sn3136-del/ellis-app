@@ -161,18 +161,19 @@
       "confidence": "medium",
       "visa_products": [
         {
-          "type": "Visa-free visit (non-visa national)",
-          "entry": "single",
-          "validity": "on arrival",
+          "type": "UK Electronic Travel Authorisation (ETA)",
+          "entry": "multiple",
+          "validity": "2 years or until the passport expires",
           "max_stay_days": 180,
           "fee": {
-            "amount": 0,
-            "currency": null
+            "amount": 20,
+            "currency": "GBP"
           },
-          "notes": "No visit visa is applied for. Check whether a UK Electronic Travel Authorisation applies before travel."
+          "notes": "Mandatory before travel for HKSAR passport holders; visits of up to 6 months each."
         }
       ],
-      "official_portal_url": "https://www.gov.uk/eta"
+      "official_portal_url": "https://www.gov.uk/eta",
+      "forms": []
     }
   },
   {
