@@ -8137,12 +8137,21 @@
       "destination": "ESP",
       "travel_purpose": "tourism"
     },
-    "verified_at": "2026-08-22",
+    "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
-    "source_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
-    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Spain MFA Schengen visa information page (English); applications are lodged through consulates and their centres.",
+    "source_url": "https://www.exteriores.gob.es/Consulados/SAOPAULO/es/ServiciosConsulares/Documents/listapaisesvisado.pdf",
+    "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Korean passport holders fly to Spain with no visa and no travel authorisation — ETIAS is not in operation, so just carry proof of funds, onward ticket and a passport issued within the last 10 years and valid 3 months past departure. Official text: Lista de terceros países cuyos nacionales están exentos de la obligación de estar en posesión de un visado para cruzar las fronteras exteriores … COREA DEL SUR",
     "fields": {
-      "official_portal_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+      "official_portal_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "90 days in any 180-day period",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
     }
   },
   {
@@ -8151,12 +8160,21 @@
       "destination": "HKG",
       "travel_purpose": "tourism"
     },
-    "verified_at": "2026-08-22",
+    "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
     "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
-    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Hong Kong ImmD visit visa / entry permit requirements page.",
+    "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Malaysian passport holders need no visa or pre-arrival registration for a Hong Kong visit of up to 90 days, but a visa is still required for work, study or residence. Official text: Visa free period for visit not exceeding [...] 119. MALAYSIA 90 Days",
     "fields": {
-      "official_portal_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html"
+      "official_portal_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "90 days",
+      "permitted_stay_days": 90,
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
     }
   },
   {
@@ -8427,12 +8445,21 @@
       "destination": "SGP",
       "travel_purpose": "tourism"
     },
-    "verified_at": "2026-08-22",
+    "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
     "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
-    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. ICA's entry-visa requirements page; applications go through ICA's e-Service via a local contact or a mission.",
+    "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Indonesia is absent from ICA's visa-required list, so travel visa-free and just submit the SG Arrival Card within 3 days before arrival — the exact stay (typically 30 days) is set by the ICA officer on your e-Pass. Official text: If your travel document is issued by one of the countries/ places listed below, you will require a valid visa to enter Singapore.",
     "fields": {
-      "official_portal_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements"
+      "official_portal_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "Up to 30 days; ICA issues the short-term visit pass (e-Pass) at the checkpoint",
+      "permitted_stay_days": 30,
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
     }
   },
   {
@@ -8637,12 +8664,21 @@
       "destination": "MNG",
       "travel_purpose": "tourism"
     },
-    "verified_at": "2026-08-22",
+    "verified_at": "2026-08-25",
     "verified_by": "Ellis source audit",
-    "source_url": "https://evisa.mn/",
-    "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Mongolia's official e-visa portal.",
+    "source_url": "https://immigration.gov.mn/en/articles/537/",
+    "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Icelandic passport holders can enter Mongolia visa-free for up to 30 days for tourism, but this is an annual exemption granted for 2026 only, so confirm on immigration.gov.mn if travelling in 2027. Official text: The Government of Mongolia has decided to exempt nationals of 34 countries from the 30-day visa requirements for tourism purposes in 2026. ... 25. Republic of Iceland",
     "fields": {
-      "official_portal_url": "https://evisa.mn/"
+      "official_portal_url": "https://evisa.mn/",
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "Up to 30 days for tourism (exemption granted for calendar year 2026)",
+      "permitted_stay_days": 30,
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
     }
   },
   {
@@ -10166,6 +10202,364 @@
         "amount": 0,
         "currency": null
       }
+    }
+  },
+  {
+    "route": {
+      "nationality": "TWN",
+      "destination": "THA",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://image.mfa.go.th/mfa/0/YLjhuT4Hho/Consular_Service/Tourist_Visa_Exempt_60_days.pdf",
+    "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Taiwan passport holders still receive 60 days visa-free on arrival in Thailand, so plan on 60 rather than 30, but re-check consular.mfa.go.th shortly before departure because a Cabinet-approved cut to 30 days is awaiting Royal Gazette publication and starts 15 days after it appears, and file the Thailand Digital Arrival Card within 72 hours of arrival. Official text: List of Countries and Territories whose Nationals are entitled to Visa Exemption Scheme for the Purpose of Tourism and Short-Term Business Engagements for a Period Not Exceeding 60 Days ... Ordinary P",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "60 days per entry, extendable once by up to 30 days at immigration discretion",
+      "permitted_stay_days": 60,
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "TWN",
+      "destination": "HKG",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.immd.gov.hk/eng/services/visas/pre-arrival_registration_for_taiwan_residents.html",
+    "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Complete the free online Pre-arrival Registration for Taiwan Residents on the Hong Kong Immigration Department site before you fly, since it is not visa-free entry, and if you are not eligible for the online registration you must instead apply to the Immigration Department for an entry permit. Official text: A pre-arrival registration is valid for two months and good for two entries to the HKSAR with a stay up to 30 days as a visitor on each landing.",
+    "fields": {
+      "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+      "requirement_detail": "eta_electronic_authorization",
+      "permitted_stay": "30 days per landing; registration valid 2 months and good for 2 entries",
+      "permitted_stay_days": 30
+    }
+  },
+  {
+    "route": {
+      "nationality": "TWN",
+      "destination": "IDN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-visa-on-arrival",
+    "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Taiwan is on Indonesia's Visa on Arrival subject list and is absent from the 20-entry Bebas Visa Kunjungan visa-free list, so buy the e-VOA at evisa.imigrasi.go.id before departure or pay at the airport VOA counter for a 30-day stay that can be extended once by another 30 days. Official text: Daftar Subjek VoA, BVK & Calling Visa ... 82. Swiss; 83. Taiwan; 84. Tanzania;",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": "evisa_on_arrival",
+      "permitted_stay": "30 days, extendable once for a further 30 days (60 days total)",
+      "permitted_stay_days": 30
+    }
+  },
+  {
+    "route": {
+      "nationality": "KOR",
+      "destination": "RUS",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.kdmid.ru/cons/visas/conditions-of-entry-foreign-citizens-in-russian-federation/",
+    "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Fly to Russia on your ordinary Korean passport with no visa and no e-visa for stays up to 60 days, since the 2014 bilateral waiver covers tourism and Korea is not even on Russia's e-visa country list. Official text: Республика Корея [...] Безвизовой режим: по общегражданским паспортам – до 60 дней",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "60 days per entry, not more than 90 days in any 180-day period",
+      "permitted_stay_days": 60,
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "MYS",
+      "destination": "CAN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/eta/eligibility/eta-x.html",
+    "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Apply for a Canadian visitor visa unless you are flying and have either held a Canadian visitor visa in the past 10 years or hold a valid US non-immigrant visa, in which case the CAD$7 eTA replaces it (never for arrival by car, bus, train or boat). Official text: Eligible visa-required countries [...] Malaysia New [...] If you do not meet all of the requirements, you need a visitor visa (temporary resident visa) to travel to Canada.",
+    "fields": {
+      "disposition": "CONDITIONAL",
+      "requirement_detail": "paper_visa",
+      "permitted_stay": "Normally up to 6 months per entry",
+      "permitted_stay_days": 180
+    }
+  },
+  {
+    "route": {
+      "nationality": "RUS",
+      "destination": "KOR",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.k-eta.go.kr/portal/guide/viewetaalification.do",
+    "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. No C-3-9 visa is needed: apply for K-ETA at least 72 hours before boarding, since Russia is a K-ETA eligible country and is not covered by the 22-country temporary K-ETA waiver running to 31 December 2026. Official text: You can apply for K-ETA if you hold a passport from countries or regions listed below. [...] RUSSIA Allowed Period of Stay : 60 days in a row, not exceeding 90 days within 180 days",
+    "fields": {
+      "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+      "requirement_detail": "eta_electronic_authorization",
+      "permitted_stay": "60 days in a row, not exceeding 90 days within 180 days",
+      "permitted_stay_days": 60
+    }
+  },
+  {
+    "route": {
+      "nationality": "SGP",
+      "destination": "RUS",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.kdmid.ru/cons/visas/conditions-of-entry-foreign-citizens-in-russian-federation/",
+    "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Singapore ordinary passport holders get no visa exemption for Russia, so apply for the unified e-visa at evisa.kdmid.ru for a stay of up to 30 days (the visa-free listing covers only diplomatic and service passports and APEC card holders). Official text: Сингапур. Без виз по дипломатическим и служебным паспортам – до 90 дней. Могут въезжать по электронной визе на срок до 30 дней.",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": "evisa",
+      "permitted_stay": "Up to 30 days per entry on the unified e-visa",
+      "permitted_stay_days": 30
+    }
+  },
+  {
+    "route": {
+      "nationality": "JPN",
+      "destination": "IDN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-visa-on-arrival",
+    "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Japanese passport holders must buy a visa on arrival (IDR 500,000, 30 days, extendable once) - apply in advance at evisa.imigrasi.go.id for the e-VoA or pay at the airport bank counter, because Japan is not on Indonesia's visa-free list. Official text: Daftar Subjek Visa on Arrival ... 33. Jepang;",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": "evisa_on_arrival",
+      "permitted_stay": "30 days, extendable once to a maximum of 60 days total",
+      "permitted_stay_days": 30
+    }
+  },
+  {
+    "route": {
+      "nationality": "JPN",
+      "destination": "THA",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/0303/%E0%B8%9C.60.pdf",
+    "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Japanese passport holders still get 60 days visa-free per entry, but the Cabinet approved cutting this to 30 days on 19 May 2026, so re-check mfa.go.th before travel because the change takes effect 15 days after Royal Gazette publication. Official text: List of Countries and Territories whose Nationals are entitled to Visa Exemption Scheme for the Purpose of Tourism and Short-Term Business Engagements for a Period Not Exceeding 60 Days ... 40. Japan",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "60 days per entry",
+      "permitted_stay_days": 60,
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "IND",
+      "destination": "PHL",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa",
+    "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Indian passport holders need no visa for 14 days but must show a passport valid 6+ months, confirmed hotel booking, proof of funds and a return or onward ticket; a valid US, Japanese, Australian, Canadian, Schengen, Singapore or UK visa or residence permit raises this to 30 days. Official text: Indian nationals may enter the Philippines without a visa for a non-extendible and non-convertible period of 14 days for tourism and business purposes",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "conditional_visa_free",
+      "permitted_stay": "14 days, non-extendible (30 days if holding a valid AJACSSUK visa or residence permit)",
+      "permitted_stay_days": 14,
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "THA",
+      "destination": "AUS",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/electronic-travel-authority-601",
+    "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Thai passport holders cannot use an ETA or eVisitor; lodge a Visitor visa (subclass 600) Tourist stream online through ImmiAccount before booking travel. Official text: You must hold a valid passport from one of these countries or jurisdictions to be eligible for an ETA. You cannot apply for an ETA with a non-citizen passport, certificate of identity or other travel ",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": "evisa",
+      "permitted_stay": "Up to 12 months as granted on a Visitor visa (subclass 600), Tourist stream; most tourist grants are 3 months",
+      "permitted_stay_days": 365
+    }
+  },
+  {
+    "route": {
+      "nationality": "VNM",
+      "destination": "PHL",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://evisa.gov.ph/page/policy",
+    "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Vietnamese tourists enter visa-free for 30 days under E.O. 408 - carry a passport valid at least six months beyond the stay and a return or onward ticket. Official text: Nationals from the following countries are allowed to enter the Philippines without a visa for an initial stay of thirty (30) days: ... Vanuatu Vatican Venezuela Vietnam Zambia Zimbabwe",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "30 days per entry, extendable in the Philippines",
+      "permitted_stay_days": 30,
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "VNM",
+      "destination": "RUS",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://electronic-visa.kdmid.ru/country_en.html",
+    "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Vietnamese tourists do need a Russian visa; the easiest route is the unified e-visa (apply online about four days ahead, no invitation needed, stay up to 30 days) - Ellis's 45 days is Vietnam's rule for Russians, the opposite direction. Official text: The list of foreign States whose nationals can apply for e-visa: ... Turkmenistan Turkey Vatican Vietnam Zimbabwe",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": "evisa",
+      "permitted_stay": "Up to 30 days per entry on a unified e-visa (e-visa valid 120 days from issue)",
+      "permitted_stay_days": 30
+    }
+  },
+  {
+    "route": {
+      "nationality": "VNM",
+      "destination": "SGP",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+    "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Vietnamese nationals need no Singapore visa - just submit the SG Arrival Card within three days before arrival; the e-Pass granted at the checkpoint is normally 30 days. Official text: If your travel document is issued by one of the countries/ places listed below, you will require a valid visa to enter Singapore. [list: Afghanistan, Algeria, Armenia, Azerbaijan, Bangladesh, Belarus,",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "Up to 30 days, set by the electronic visit pass issued at the checkpoint",
+      "permitted_stay_days": 30,
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "TWN",
+      "destination": "PHL",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://immigration.gov.ph/wp-content/uploads/2023/12/SBM-2015-018A.pdf",
+    "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Taiwan passport holders do not lodge a consular 9(a) application - they obtain a MECO ETA online for a 30-day stay; a separate 14-day visa-free scheme for Taiwanese tourists is also reported in force to 30 June 2027, but I could not confirm it on any Philippine government domain (dfa.gov.ph is bot-walled), so the ETA is the safe instruction. Official text: The ETA shall be valid for thirty (30) days from issue and approval date and may be either for single entry or multiple entries with a maximum initial authorized duration stay of thirty (30) days from",
+    "fields": {
+      "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+      "requirement_detail": "eta_electronic_authorization",
+      "permitted_stay": "30 days per entry on a MECO ETA",
+      "permitted_stay_days": 30
+    }
+  },
+  {
+    "route": {
+      "nationality": "IDN",
+      "destination": "RUS",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.kdmid.ru/cons/visas/conditions-of-entry-foreign-citizens-in-russian-federation/",
+    "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Indonesian ordinary-passport tourists need a Russian visa: apply for the unified e-visa at evisa.kdmid.ru before you fly (max 30 days per entry) — the visa-free entry Russia grants Indonesia covers diplomatic and service passports only, so Ellis's 'conditional visa-free' is wrong. Official text: Без виз по дипломатическим и служебным паспортам – до 14 дней. Могут въезжать по электронной визе на срок до 30 дней.",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": "evisa",
+      "permitted_stay": "Up to 30 days per entry on a unified e-visa (e-visa itself valid 120 days from issue)",
+      "permitted_stay_days": 30
+    }
+  },
+  {
+    "route": {
+      "nationality": "IDN",
+      "destination": "VNM",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/viet-nam-39-s-visa-exemption-list-57163-596.html",
+    "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Plan a trip of 14 days or less: Vietnam's Foreign Ministry list (last updated 14/3/2025) still shows 30 days, but the reported 15 July 2026 cut to 14 days is what airlines are checking, so anything longer needs a Vietnamese visa. Official text: 14 days for Diplomatic and Official passport/30 days for Ordinary Passport",
+    "fields": {
+      "disposition": "VISA_EXEMPT",
+      "requirement_detail": "unconditional_visa_free",
+      "permitted_stay": "Vietnam's own published list still says 30 days; an official Indonesian Embassy Hanoi advisory says 14 days from 15 July 2026 and no Vietnamese government page confirms either way",
+      "permitted_stay_days": 14,
+      "visa_products": [],
+      "government_fee": {
+        "amount": 0,
+        "currency": null
+      }
+    }
+  },
+  {
+    "route": {
+      "nationality": "KOR",
+      "destination": "IDN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
+    "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Korean tourists must buy Indonesia's visa on arrival (B1) — do it in advance as an e-VOA at evisa.imigrasi.go.id or at the airport counter; Korea is not on Indonesia's Bebas Visa Kunjungan list, which now covers only ASEAN plus Timor-Leste, Suriname, Colombia, Hong Kong, Turkey, Brazil, Peru, Kazakhstan, Macau and Belarus. Official text: Daftar Subjek Visa on Arrival … Korea Selatan",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": "evisa_on_arrival",
+      "permitted_stay": "30 days, extendable once for a further 30 days (60 days maximum)",
+      "permitted_stay_days": 30
+    }
+  },
+  {
+    "route": {
+      "nationality": "HKG",
+      "destination": "BEN",
+      "travel_purpose": "tourism"
+    },
+    "verified_at": "2026-08-25",
+    "verified_by": "Ellis source audit",
+    "source_url": "https://sgg.gouv.bj/doc/decret-2026-049/",
+    "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Buy the Benin e-visa online at evisa.bj before you fly, because Benin's published entry exemption covers only the 53 African countries for 90 days and the widely repeated 14-day Hong Kong figure is Hong Kong's grant to Beninese travellers, not Benin's grant to you. Official text: Article 2 : Obligation de visa d'entree. Tout etranger desirant se rendre au Benin doit etre muni d'un visa d'entree, sauf s'il en est dispense par les lois et reglements, ou par une decision de l'aut",
+    "fields": {
+      "disposition": "VISA_REQUIRED",
+      "requirement_detail": "evisa",
+      "permitted_stay": "30 or 90 days depending on the e-visa option chosen, renewable",
+      "permitted_stay_days": 30
     }
   }
 ]

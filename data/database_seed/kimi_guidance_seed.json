@@ -6858,101 +6858,6 @@
   "fresh_until": "2026-09-05T19:36:46.077750"
  },
  {
-  "cache_key": "TWN|TWN|HKG|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "TWN",
-   "lawful_country_of_residence": "TWN",
-   "destination_country": "HKG",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_EXEMPT",
-   "visa_category": "Tourist visit (visa-exempt)",
-   "permitted_stay": "30 days",
-   "passport_validity": "Valid for at least 1 month beyond intended departure",
-   "required_documents": [
-    "Valid ordinary ROC (Taiwan) passport"
-   ],
-   "application_channel": "not_required",
-   "government_fee": {
-    "amount": 0,
-    "currency": "HKD"
-   },
-   "processing_time": "N/A (immigration inspection on arrival)",
-   "forms": [],
-   "official_portal_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
-   "photo_requirements": null,
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [],
-   "payment_process": [],
-   "submission_process": [],
-   "onward_travel_evidence": "Return or onward ticket required",
-   "accommodation_evidence": null,
-   "financial_evidence": "Adequate funds for the stay required",
-   "insurance_required": false,
-   "exceptions": [
-    "No advance visa application required; entry is subject to standard immigration inspection",
-    "Rules differ for holders of non-ordinary or non-ROC Taiwan travel documents"
-   ],
-   "uncertainty": [
-    {
-     "field": "passport_validity_requirement",
-     "reason": "Assumes standard HKSAR visa-free rule; verify official current guidance for Taiwan passport holders"
-    },
-    {
-     "field": "health_requirements",
-     "reason": "Health and vaccination rules can change with little notice; check HKSAR Department of Health before travel"
-    },
-    {
-     "field": "official_portal_url",
-     "reason": "URL drawn from recollection of the HKSAR Immigration Department site; confirm current page"
-    }
-   ],
-   "confidence": "high",
-   "permitted_stay_days": 30,
-   "passport_validity_requirement": {
-    "kind": "months_after_departure",
-    "months": 1
-   },
-   "arrival_card": {
-    "required": false,
-    "name": null,
-    "submission_window": null
-   },
-   "health_requirements": [],
-   "route_workflow_type": "visa_exempt_preparation",
-   "visa_products": [],
-   "application_channel_detail": "No application is required; Taiwanese ordinary passport holders may present their passport at Hong Kong immigration for visa-free entry.",
-   "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
-   "requirement_detail": "unconditional_visa_free",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision",
-   "grounded_check": {
-    "at": "2026-08-25T20:45:43.746418+00:00",
-    "outcome": "provider_error",
-    "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
-    "error": "Something unexpected happened. Your case data is saved; you can retry or ask for a manual review."
-   }
-  },
-  "generated_at": "2026-08-22T20:01:15.278167",
-  "fresh_until": "2026-09-05T20:01:15.278167"
- },
- {
   "cache_key": "TWN|TWN|USA|tourism|default|unknown|v6",
   "route": {
    "passport_nationality": "TWN",
@@ -7371,164 +7276,6 @@
   "fresh_until": "2026-09-05T20:01:29.938327"
  },
  {
-  "cache_key": "TWN|TWN|THA|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "TWN",
-   "lawful_country_of_residence": "TWN",
-   "destination_country": "THA",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
-   "visa_category": "tourist",
-   "permitted_stay": "60 days",
-   "passport_validity": "6 months beyond arrival",
-   "required_documents": [
-    "Valid Republic of China (Taiwan) ordinary passport",
-    "Confirmed return or onward ticket",
-    "Proof of accommodation or local address",
-    "Evidence of sufficient funds",
-    "At least one blank passport page"
-   ],
-   "application_channel": "online_portal",
-   "government_fee": {
-    "amount": 0,
-    "currency": "THB"
-   },
-   "processing_time": "ETA/TDAC: usually minutes to 72 hours; advance tourist visa: 3-5 business days",
-   "forms": [
-    "Online Thailand Digital Arrival Card (TDAC) form",
-    "Online ETA application form if Thailand's ETA scheme is active"
-   ],
-   "official_portal_url": null,
-   "photo_requirements": "Digital passport-style photo required for ETA/visa application; not normally required at the border for visa-exempt entry",
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [
-    "Create an account on the official Thailand ETA/TDAC portal",
-    "Enter passport, travel and contact details",
-    "Upload a digital passport photo and passport copy",
-    "Submit the application and save the approval/QR code"
-   ],
-   "payment_process": [
-    "TDAC and ETA are reported to be free of charge",
-    "Advance tourist visas require a separate consular fee"
-   ],
-   "submission_process": [
-    "Submit TDAC/ETA online before travel",
-    "Present passport and electronic approval at Thai immigration on arrival"
-   ],
-   "onward_travel_evidence": "Confirmed return or onward ticket within the permitted stay",
-   "accommodation_evidence": "Hotel booking, rental agreement or host address for the stay",
-   "financial_evidence": "Funds equivalent to 20,000 THB per person or 40,000 THB per family (cash, bank statement, credit line or sponsor letter)",
-   "insurance_required": false,
-   "exceptions": [
-    "Air, land and sea entry permitted under the visa-exempt/ETA arrangement",
-    "Stays longer than 60 days require an advance tourist visa",
-    "Visa-exempt/ETA entry does not allow employment or paid activity",
-    "Other travel documents may have different rules"
-   ],
-   "uncertainty": [
-    {
-     "field": "disposition",
-     "reason": "Thailand has announced an ETA for visa-exempt travellers but launch dates have shifted; by Aug 2026 it may be mandatory, or entry may remain visa-exempt with only TDAC required"
-    },
-    {
-     "field": "official_portal_url",
-     "reason": "The official ETA application URL has not been verified; the TDAC URL is also subject to change"
-    },
-    {
-     "field": "government_fee",
-     "reason": "ETA/TDAC are reported to be free but fees could be introduced; advance tourist visa fees for Taiwanese applicants are not confirmed"
-    },
-    {
-     "field": "visa_products",
-     "reason": "Fees and exact validity of advance Thai tourist visas for Taiwan passport holders are not confirmed"
-    },
-    {
-     "field": "arrival_card",
-     "reason": "TDAC requirement and submission window have been recently introduced and may be revised"
-    }
-   ],
-   "confidence": "low",
-   "permitted_stay_days": 60,
-   "passport_validity_requirement": {
-    "kind": "months_after_arrival",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": true,
-    "name": "Thailand Digital Arrival Card (TDAC)",
-    "submission_window": "Within 3 days before arrival"
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination",
-     "applicability": "conditional",
-     "trigger_countries": [],
-     "trigger": "Arrival from or transit through a yellow-fever endemic country within 9 days",
-     "question": "Will you arrive from or transit through a yellow-fever endemic country within 9 days before entering Thailand?"
-    }
-   ],
-   "route_workflow_type": "electronic_authorization",
-   "visa_products": [
-    {
-     "type": "ETA / visa-exempt tourist entry",
-     "entry": "single",
-     "validity": "60 days per entry",
-     "max_stay_days": 60,
-     "fee": {
-      "amount": 0,
-      "currency": "THB"
-     },
-     "notes": "If Thailand's ETA scheme is active; otherwise passport-only visa-exempt entry with TDAC"
-    },
-    {
-     "type": "Single-entry tourist visa (TR)",
-     "entry": "single",
-     "validity": "3 months",
-     "max_stay_days": 60,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "For longer stays or applicants not using ETA/visa exemption"
-    },
-    {
-     "type": "Multiple-entry tourist visa (METV)",
-     "entry": "multiple",
-     "validity": "6 months",
-     "max_stay_days": 60,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "Each stay up to 60 days"
-    }
-   ],
-   "application_channel_detail": "Travellers apply directly online for the Thailand Digital Arrival Card and, if active, an ETA before travel; advance tourist visas may be lodged at a Thai embassy/consulate.",
-   "requirement_detail": "eta_electronic_authorization",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-25T20:43:50.369327",
-  "fresh_until": "2026-09-08T20:43:50.369327"
- },
- {
   "cache_key": "TWN|TWN|MYS|tourism|default|unknown|v6",
   "route": {
    "passport_nationality": "TWN",
@@ -7932,129 +7679,6 @@
   "fresh_until": "2026-08-27T20:44:08.418716"
  },
  {
-  "cache_key": "TWN|TWN|IDN|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "TWN",
-   "lawful_country_of_residence": "TWN",
-   "destination_country": "IDN",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_EXEMPT",
-   "visa_category": "Tourist (visa-free visit)",
-   "permitted_stay": "30 days",
-   "passport_validity": "6 months beyond arrival",
-   "required_documents": [
-    "Valid passport",
-    "Return or onward travel ticket",
-    "Proof of sufficient funds",
-    "Accommodation details (may be requested)"
-   ],
-   "application_channel": "not_required",
-   "government_fee": {
-    "amount": null,
-    "currency": null
-   },
-   "processing_time": "Not applicable (entry at border)",
-   "forms": [],
-   "official_portal_url": null,
-   "photo_requirements": null,
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [],
-   "payment_process": [],
-   "submission_process": [
-    "Present passport and documents at Indonesian immigration on arrival"
-   ],
-   "onward_travel_evidence": "Return or onward ticket required",
-   "accommodation_evidence": "Proof of accommodation may be requested on arrival",
-   "financial_evidence": "Proof of sufficient funds may be requested",
-   "insurance_required": false,
-   "exceptions": [
-    "Visa-free stay is non-extendable and cannot be converted to another visa",
-    "e-VOA/VOA is available as an alternative for a 30-day extendable stay if desired",
-    "Entry/exit must be via designated immigration checkpoints"
-   ],
-   "uncertainty": [
-    {
-     "field": "disposition",
-     "reason": "Indonesia's visa-free policy for Taiwan has been politically adjusted before and my knowledge may predate a 2025/2026 change; verify current official announcement before travel."
-    },
-    {
-     "field": "source_url",
-     "reason": "I do not have the exact official visa-exemption list URL for this nationality at this stated date."
-    },
-    {
-     "field": "passport_validity_requirement",
-     "reason": "Common requirement is 6 months from arrival, but the exact wording can vary by checkpoint/official notice."
-    },
-    {
-     "field": "health_requirements",
-     "reason": "Yellow fever certificate list of endemic trigger countries and COVID-19/other health rules may have changed after my knowledge cutoff."
-    }
-   ],
-   "confidence": "low",
-   "permitted_stay_days": 30,
-   "passport_validity_requirement": {
-    "kind": "months_after_arrival",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": false,
-    "name": null,
-    "submission_window": null
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination certificate",
-     "applicability": "conditional",
-     "trigger_countries": [],
-     "trigger": "Travel within the previous 6 days from or through a yellow-fever endemic country",
-     "question": "Have you visited or transited a yellow-fever endemic country within the last 6 days?"
-    }
-   ],
-   "route_workflow_type": "visa_exempt_preparation",
-   "visa_products": [
-    {
-     "type": "Visa-free tourist entry",
-     "entry": "single",
-     "validity": "30 days from arrival",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "Non-extendable; available at designated border checkpoints"
-    }
-   ],
-   "application_channel_detail": "No advance application is required; Taiwanese passport holders may use the visa-free facility on arrival.",
-   "requirement_detail": "unconditional_visa_free",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision",
-   "grounded_check": {
-    "at": "2026-08-25T20:45:43.756640+00:00",
-    "outcome": "no_official_source",
-    "note": "the answer names no government page to check"
-   }
-  },
-  "generated_at": "2026-08-22T20:02:46.830681",
-  "fresh_until": "2026-09-05T20:02:46.830681"
- },
- {
   "cache_key": "TWN|TWN|VNM|tourism|default|unknown|v6",
   "route": {
    "passport_nationality": "TWN",
@@ -8376,181 +8000,6 @@
   },
   "generated_at": "2026-08-25T20:45:43.722610",
   "fresh_until": "2026-09-08T20:45:43.722610"
- },
- {
-  "cache_key": "TWN|TWN|PHL|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "TWN",
-   "lawful_country_of_residence": "TWN",
-   "destination_country": "PHL",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_REQUIRED",
-   "visa_category": "9(a) Temporary Visitor's Visa (tourist)",
-   "permitted_stay": "30 days (eVisa) or up to 59 days (paper visa)",
-   "passport_validity": "6 months beyond intended stay",
-   "required_documents": [
-    "Passport valid ≥6 months",
-    "Completed visa application form",
-    "Recent passport photo",
-    "Confirmed onward/return ticket",
-    "Proof of accommodation",
-    "Proof of sufficient funds",
-    "Visa fee payment",
-    "Host invitation/affidavit of support if staying with a host"
-   ],
-   "application_channel": "online_portal",
-   "government_fee": {
-    "amount": null,
-    "currency": "USD"
-   },
-   "processing_time": "3-5 working days (eVisa); 5-10 working days (paper)",
-   "forms": [
-    "Philippine 9(a) visa application form (paper) or online eVisa form"
-   ],
-   "official_portal_url": "https://evisa.gov.ph",
-   "photo_requirements": "2 x 2 inches (51x51mm), recent, white background, no glasses; digital upload for eVisa",
-   "biometrics_required": false,
-   "interview_required": null,
-   "appointment_required": null,
-   "account_registration_steps": [
-    "Create an account on the Philippine eVisa portal for online filing, or book an appointment with MECO for paper filing"
-   ],
-   "payment_process": [
-    "Pay online by credit/debit card for eVisa",
-    "Pay as instructed by MECO for paper applications"
-   ],
-   "submission_process": [
-    "Submit application and documents online via the eVisa portal",
-    "Or submit in person at the Manila Economic and Cultural Office (MECO) in Taipei/Kaohsiung"
-   ],
-   "onward_travel_evidence": "Confirmed return or onward ticket",
-   "accommodation_evidence": "Hotel bookings or host invitation/affidavit of support",
-   "financial_evidence": "Bank statements, payslips, or income tax return showing capacity for the trip",
-   "insurance_required": false,
-   "exceptions": [
-    "Conditional 30-day visa-free entry may apply if holding a valid visa or residence permit from the US, Japan, Australia, Canada, Schengen, UK, Singapore or similar; verify the current eligible-country list",
-    "Paper 9(a) visas at MECO may allow longer stays and multiple entries",
-    "Stay extensions are possible at Bureau of Immigration offices after entry"
-   ],
-   "uncertainty": [
-    {
-     "field": "evisa_eligibility_and_fee",
-     "reason": "Philippine eVisa for Taiwan was launched recently (Nov 2024); by 2026 eligibility, fees and surcharges may have changed"
-    },
-    {
-     "field": "government_fee",
-     "reason": "Fees differ by product and may be charged in TWD by MECO; eVisa may add card/portal surcharges"
-    },
-    {
-     "field": "permitted_stay_days",
-     "reason": "Depends on chosen product: eVisa is typically 30 days, paper 9(a) up to 59 days"
-    },
-    {
-     "field": "conditional_visa_free_countries",
-     "reason": "The exact list of qualifying third-country visas/residence permits and validity rules is subject to change"
-    },
-    {
-     "field": "required_documents",
-     "reason": "MECO or the eVisa portal may request additional supporting documents at discretion"
-    },
-    {
-     "field": "processing_time",
-     "reason": "Varies by channel and workload"
-    },
-    {
-     "field": "arrival_card",
-     "reason": "eTravel requirements and timing can change"
-    }
-   ],
-   "confidence": "low",
-   "permitted_stay_days": null,
-   "passport_validity_requirement": {
-    "kind": "months_after_departure",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": true,
-    "name": "eTravel",
-    "submission_window": "within 72 hours before arrival"
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination",
-     "applicability": "not_applicable",
-     "trigger_countries": [],
-     "trigger": "Required only if arriving within 6 days from/through a yellow-fever endemic country; not triggered for Taiwan",
-     "question": null
-    }
-   ],
-   "route_workflow_type": "evisa_portal",
-   "visa_products": [
-    {
-     "type": "Single-entry eVisa tourist",
-     "entry": "single",
-     "validity": "3 months",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 50,
-      "currency": "USD"
-     },
-     "notes": "Launched for Taiwan passport holders in Nov 2024; verify current availability and any portal/card surcharges"
-    },
-    {
-     "type": "Single-entry 9(a) tourist",
-     "entry": "single",
-     "validity": "3 months",
-     "max_stay_days": 59,
-     "fee": {
-      "amount": 30,
-      "currency": "USD"
-     },
-     "notes": "Paper visa lodged at MECO; fees may be collected in TWD equivalent"
-    },
-    {
-     "type": "Multiple-entry 9(a) tourist",
-     "entry": "multiple",
-     "validity": "6 months",
-     "max_stay_days": 59,
-     "fee": {
-      "amount": 60,
-      "currency": "USD"
-     },
-     "notes": "Consular discretion; MECO may collect TWD equivalent"
-    },
-    {
-     "type": "Multiple-entry 9(a) tourist",
-     "entry": "multiple",
-     "validity": "1 year",
-     "max_stay_days": 59,
-     "fee": {
-      "amount": 90,
-      "currency": "USD"
-     },
-     "notes": "Consular discretion; MECO may collect TWD equivalent"
-    }
-   ],
-   "application_channel_detail": "Taiwan passport holders can apply for the Philippine tourist visa online through the official eVisa portal; a paper 9(a) visa can also be lodged directly with the Manila Economic and Cultural Office (MECO) in Taipei or Kaohsiung for longer-stay or multiple-entry options.",
-   "requirement_detail": "evisa",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-22T20:03:24.577034",
-  "fresh_until": "2026-09-05T20:03:24.577034"
  },
  {
   "cache_key": "JPN|JPN|HKG|tourism|default|unknown|v6",
@@ -9185,144 +8634,6 @@
   "fresh_until": "2026-09-05T20:04:02.193476"
  },
  {
-  "cache_key": "JPN|JPN|THA|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "JPN",
-   "lawful_country_of_residence": "JPN",
-   "destination_country": "THA",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_EXEMPT",
-   "visa_category": "Tourist (visa-exempt)",
-   "permitted_stay": "Standard bilateral exemption is 30 days; Thailand has repeatedly introduced and modified temporary 60-day visa-exempt schemes",
-   "passport_validity": "6 months beyond arrival",
-   "required_documents": [
-    "Valid Japanese ordinary passport",
-    "Return or onward ticket",
-    "Proof of accommodation",
-    "Evidence of sufficient funds"
-   ],
-   "application_channel": "not_required",
-   "government_fee": {
-    "amount": 0,
-    "currency": "THB"
-   },
-   "processing_time": "Not applicable",
-   "forms": [],
-   "official_portal_url": null,
-   "photo_requirements": null,
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [],
-   "payment_process": [],
-   "submission_process": [],
-   "onward_travel_evidence": "Return or onward ticket within permitted stay",
-   "accommodation_evidence": "Hotel booking or address of stay recommended",
-   "financial_evidence": "Evidence of sufficient funds (cash, bank statement, or credit card)",
-   "insurance_required": false,
-   "exceptions": [
-    "Visa exemption applies only to tourism and short visits; any paid work or long stay requires a visa",
-    "Temporary extensions of visa-exempt stay to 60 days have been announced and modified repeatedly; verify the current rule before travel",
-    "If a stay longer than the exemption is needed, a Tourist Visa (TR) must be obtained in advance"
-   ],
-   "uncertainty": [
-    {
-     "field": "permitted_stay_days",
-     "reason": "Thailand has repeatedly adjusted visa-exempt stay durations (30 vs 60 days) for Japanese nationals through temporary measures; the exact permitted length for 2026-08-22 cannot be confirmed without an official Thai Immigration / Foreign Affairs notice"
-    },
-    {
-     "field": "arrival_card",
-     "reason": "Thailand is transitioning from paper TM.6 to the Digital Arrival Card (TDAC); the exact form, timing, and submission window may differ by travel date"
-    },
-    {
-     "field": "visa_products.fee for TR and TR-M",
-     "reason": "Official consular fees for Thai tourist visas vary by application channel and currency; exact figures not confirmed here"
-    },
-    {
-     "field": "source_url",
-     "reason": "No single official government URL is available in this response"
-    }
-   ],
-   "confidence": "low",
-   "permitted_stay_days": null,
-   "passport_validity_requirement": {
-    "kind": "months_after_arrival",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": true,
-    "name": "Thailand Digital Arrival Card (TDAC) / TM.6 arrival card",
-    "submission_window": "Within 3 days before arrival if TDAC is in force; paper TM.6 may still be accepted depending on implementation"
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination certificate",
-     "applicability": "conditional",
-     "trigger_countries": [],
-     "trigger": "Arrival within 6 days after leaving or transiting a yellow-fever endemic country",
-     "question": "Has the applicant recently travelled through or transited a yellow-fever endemic country?"
-    }
-   ],
-   "route_workflow_type": "visa_exempt_preparation",
-   "visa_products": [
-    {
-     "type": "Visa-exempt tourist entry",
-     "entry": "single",
-     "validity": "Duration of permitted stay",
-     "max_stay_days": null,
-     "fee": {
-      "amount": 0,
-      "currency": "THB"
-     },
-     "notes": "No advance visa; standard stay 30 days, subject to temporary extensions"
-    },
-    {
-     "type": "Single-entry Tourist Visa (TR)",
-     "entry": "single",
-     "validity": "60 days from entry; extendable once by 30 days",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": null,
-      "currency": "THB"
-     },
-     "notes": "Apply at Thai embassy/consulate or authorised visa centre if longer stay needed"
-    },
-    {
-     "type": "Multiple-entry Tourist Visa (TR-M)",
-     "entry": "multiple",
-     "validity": "6 months",
-     "max_stay_days": null,
-     "fee": {
-      "amount": null,
-      "currency": "THB"
-     },
-     "notes": "For frequent tourists; apply at Thai embassy/consulate or authorised visa centre"
-    }
-   ],
-   "application_channel_detail": "No advance visa application is required for ordinary Japanese passport holders travelling for tourism; present passport and supporting documents directly to Thai immigration on arrival.",
-   "requirement_detail": "unconditional_visa_free",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-22T20:04:06.133135",
-  "fresh_until": "2026-09-05T20:04:06.133135"
- },
- {
   "cache_key": "JPN|JPN|SGP|tourism|default|unknown|v6",
   "route": {
    "passport_nationality": "JPN",
@@ -9715,142 +9026,6 @@
   },
   "generated_at": "2026-08-22T20:04:34.090615",
   "fresh_until": "2026-09-08T20:39:25.512653"
- },
- {
-  "cache_key": "JPN|JPN|IDN|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "JPN",
-   "lawful_country_of_residence": "JPN",
-   "destination_country": "IDN",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_EXEMPT",
-   "visa_category": "Not required / visa-free entry",
-   "permitted_stay": "30 days",
-   "passport_validity": "6 months beyond arrival",
-   "required_documents": [
-    "Passport valid at least 6 months beyond date of arrival",
-    "Return or onward ticket",
-    "Proof of sufficient funds (may be requested on arrival)"
-   ],
-   "application_channel": "not_required",
-   "government_fee": {
-    "amount": null,
-    "currency": null
-   },
-   "processing_time": null,
-   "forms": [],
-   "official_portal_url": null,
-   "photo_requirements": null,
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [],
-   "payment_process": [],
-   "submission_process": [
-    "Proceed directly to Indonesian immigration on arrival; no advance visa application needed"
-   ],
-   "onward_travel_evidence": "Return or onward ticket required",
-   "accommodation_evidence": "May be requested by immigration officers",
-   "financial_evidence": "Proof of sufficient funds may be requested on arrival",
-   "insurance_required": false,
-   "exceptions": [
-    "Visa-free stay is generally non-extendable and not convertible to another visa type while in Indonesia"
-   ],
-   "uncertainty": [
-    {
-     "field": "source_url",
-     "reason": "No official Indonesian immigration source URL was verified for this response."
-    },
-    {
-     "field": "arrival_card",
-     "reason": "Indonesia has shifted to electronic customs/health declarations; the current exact arrival-card requirement at the travel date is not confirmed."
-    },
-    {
-     "field": "visa_exemption_policy",
-     "reason": "Indonesian visa-free policies have been politically volatile and subject to withdrawal or reinstatement; confirm with the Indonesian embassy or immigration website before travel."
-    }
-   ],
-   "confidence": "medium",
-   "permitted_stay_days": 30,
-   "passport_validity_requirement": {
-    "kind": "months_after_arrival",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": false,
-    "name": null,
-    "submission_window": null
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination (ICVP)",
-     "applicability": "conditional",
-     "trigger_countries": [
-      "AGO",
-      "BOL",
-      "BRA",
-      "CMR",
-      "CAF",
-      "COD",
-      "COG",
-      "CIV",
-      "ECU",
-      "GAB",
-      "GHA",
-      "GIN",
-      "GNB",
-      "GUY",
-      "KEN",
-      "LBR",
-      "MLI",
-      "NGA",
-      "PAN",
-      "PNG",
-      "SEN",
-      "SLE",
-      "SDN",
-      "SUR",
-      "TGO",
-      "TTO",
-      "UGA",
-      "VEN",
-      "ZMB"
-     ],
-     "trigger": "Arrival from or transit through a yellow-fever endemic country within the past 6 days",
-     "question": "Has the applicant travelled in or transited any yellow-fever endemic country in the 6 days before arrival in Indonesia?"
-    },
-    {
-     "name": "COVID-19 vaccination/test",
-     "applicability": "not_applicable",
-     "trigger_countries": [],
-     "trigger": null,
-     "question": null
-    }
-   ],
-   "route_workflow_type": "visa_exempt_preparation",
-   "visa_products": [],
-   "application_channel_detail": "No visa application required; Japanese ordinary passport holders may enter Indonesia visa-free for tourism by presenting a valid passport at immigration.",
-   "requirement_detail": "unconditional_visa_free",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-22T20:04:45.843723",
-  "fresh_until": "2026-09-05T20:04:45.843723"
  },
  {
   "cache_key": "JPN|JPN|RUS|tourism|default|unknown|v6",
@@ -11318,192 +10493,6 @@
   "fresh_until": "2026-09-05T20:05:58.190888"
  },
  {
-  "cache_key": "KOR|KOR|IDN|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "KOR",
-   "lawful_country_of_residence": "KOR",
-   "destination_country": "IDN",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_EXEMPT",
-   "visa_category": "Visa exemption (tourist)",
-   "permitted_stay": "30 days",
-   "passport_validity": "6 months beyond arrival",
-   "required_documents": [
-    "Valid passport",
-    "Return or onward ticket",
-    "Proof of sufficient funds (may be checked)",
-    "Proof of accommodation (may be checked)"
-   ],
-   "application_channel": "not_required",
-   "government_fee": {
-    "amount": 0,
-    "currency": null
-   },
-   "processing_time": "Stamped on arrival",
-   "forms": [],
-   "official_portal_url": null,
-   "photo_requirements": null,
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [],
-   "payment_process": [
-    "No government fee for visa-exempt entry"
-   ],
-   "submission_process": [
-    "Proceed to immigration counter on arrival",
-    "Present passport and onward ticket",
-    "Receive entry stamp"
-   ],
-   "onward_travel_evidence": "Return or onward ticket out of Indonesia required",
-   "accommodation_evidence": "Hotel booking or host address may be requested on arrival",
-   "financial_evidence": "Evidence of sufficient funds for the stay may be requested",
-   "insurance_required": false,
-   "exceptions": [
-    "Optional Visa on Arrival (VoA) and e-VOA allow a 30-day stay extendable once for another 30 days if a longer stay is needed"
-   ],
-   "uncertainty": [
-    {
-     "field": "source_url",
-     "reason": "No official Indonesian immigration source URL was verified at response time; the visa-exemption rule for South Korea is well-established but the source URL is not confirmed."
-    },
-    {
-     "field": "visa_products.fee",
-     "reason": "VoA/e-VOA fees can be revised by Indonesian authorities; the IDR 500,000 figure is the widely published official rate but should be confirmed before travel."
-    }
-   ],
-   "confidence": "high",
-   "permitted_stay_days": 30,
-   "passport_validity_requirement": {
-    "kind": "months_after_arrival",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": true,
-    "name": "Indonesian e-Customs Declaration (e-CD)",
-    "submission_window": "Within 3 days before arrival"
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination (International Certificate of Vaccination or Prophylaxis)",
-     "applicability": "conditional",
-     "trigger_countries": [
-      "BRA",
-      "AGO",
-      "COD",
-      "NGA",
-      "SDN",
-      "VEN",
-      "COL",
-      "PER",
-      "BOL",
-      "ECU",
-      "GUY",
-      "PAN",
-      "ETH",
-      "KEN",
-      "GAB",
-      "CMR",
-      "CIV",
-      "GHA",
-      "GIN",
-      "LBR",
-      "MLI",
-      "SLE",
-      "SSD",
-      "UGA",
-      "CAF",
-      "TCD",
-      "COG",
-      "GNQ",
-      "BDI",
-      "ERI",
-      "RWA",
-      "SOM",
-      "TZA",
-      "ZMB",
-      "ARG",
-      "PRY",
-      "SUR",
-      "TTO",
-      "BRB",
-      "BHS",
-      "BLZ",
-      "BEN",
-      "BFA",
-      "CPV",
-      "GMB",
-      "GNB",
-      "MRT",
-      "NER",
-      "SEN",
-      "TGO",
-      "DJI"
-     ],
-     "trigger": "Arrival from or transit through a yellow-fever endemic country within the past 6 days",
-     "question": "Have you been in a yellow-fever endemic country within the past 6 days?"
-    }
-   ],
-   "route_workflow_type": "visa_exempt_preparation",
-   "visa_products": [
-    {
-     "type": "Visa Exemption Stamp",
-     "entry": "single",
-     "validity": "30 days",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 0,
-      "currency": null
-     },
-     "notes": "Granted on arrival to eligible South Korean passport holders; not extendable"
-    },
-    {
-     "type": "Visa on Arrival (VoA)",
-     "entry": "single",
-     "validity": "30 days",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 500000,
-      "currency": "IDR"
-     },
-     "notes": "Purchased at designated airport/seaport immigration counters; extendable once for 30 days"
-    },
-    {
-     "type": "Electronic Visa on Arrival (e-VOA)",
-     "entry": "single",
-     "validity": "30 days",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 500000,
-      "currency": "IDR"
-     },
-     "notes": "Apply and pay online before travel; extendable once for 30 days"
-    }
-   ],
-   "application_channel_detail": "No advance visa application is required; South Korean ordinary passport holders receive a visa-exemption stamp directly at Indonesian immigration counters on arrival.",
-   "requirement_detail": "unconditional_visa_free",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-22T20:06:09.924489",
-  "fresh_until": "2026-09-05T20:06:09.924489"
- },
- {
   "cache_key": "KOR|KOR|GBR|tourism|default|unknown|v6",
   "route": {
    "passport_nationality": "KOR",
@@ -11973,149 +10962,6 @@
   "fresh_until": "2026-09-05T20:06:24.652082"
  },
  {
-  "cache_key": "KOR|KOR|RUS|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "KOR",
-   "lawful_country_of_residence": "KOR",
-   "destination_country": "RUS",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
-   "visa_category": "Unified e-visa (tourist)",
-   "permitted_stay": "16 days",
-   "passport_validity": "6 months beyond intended departure from Russia",
-   "required_documents": [
-    "Valid passport (machine-readable, at least 6 months validity, blank pages recommended)",
-    "Digital colour passport photograph (35x45 mm, white background)",
-    "Email address",
-    "Payment card"
-   ],
-   "application_channel": "online_portal",
-   "government_fee": {
-    "amount": 40,
-    "currency": "USD"
-   },
-   "processing_time": "Up to 4 calendar days",
-   "forms": [
-    "MFA unified e-visa application form"
-   ],
-   "official_portal_url": "https://evisa.kdmid.ru/",
-   "photo_requirements": "Digital colour photo 35x45 mm, white background, no headwear except religious, recent, high resolution",
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [
-    "Complete the online application form on the MFA e-visa portal",
-    "Upload a digital passport photo",
-    "Pay the fee and save the application ID"
-   ],
-   "payment_process": [
-    "Pay the non-refundable consular fee online by card during application"
-   ],
-   "submission_process": [
-    "Submit the e-visa application on the official MFA portal",
-    "Receive the e-visa by email within 4 calendar days",
-    "Print or save the e-visa to present at the Russian border"
-   ],
-   "onward_travel_evidence": "Not required for e-visa application",
-   "accommodation_evidence": "Not required for e-visa application",
-   "financial_evidence": "Not required for e-visa application",
-   "insurance_required": false,
-   "exceptions": [
-    "E-visa is single-entry and cannot be extended or converted to another visa category",
-    "Enter and exit only via border checkpoints designated for e-visa",
-    "For stays over 16 days or multiple entries, apply for a regular paper tourist visa",
-    "Travel medical insurance valid in Russia is strongly recommended and may be checked at entry"
-   ],
-   "uncertainty": [
-    {
-     "field": "Republic_of_Korea_e-visa_eligibility",
-     "reason": "Eligibility list is subject to Russian government updates; policy known as of 2024 may have changed by August 2026."
-    },
-    {
-     "field": "government_fee",
-     "reason": "Fee is based on the 2023-2024 unified e-visa rate; it may have been revised by 2026."
-    },
-    {
-     "field": "source_url",
-     "reason": "Exact current official policy page not verified; only the e-visa portal URL is known."
-    },
-    {
-     "field": "regular_tourist_visa_fee",
-     "reason": "Reciprocity-based consular fee for South Korean applicants not confirmed."
-    }
-   ],
-   "confidence": "low",
-   "permitted_stay_days": 16,
-   "passport_validity_requirement": {
-    "kind": "months_after_departure",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": false,
-    "name": null,
-    "submission_window": null
-   },
-   "health_requirements": [],
-   "route_workflow_type": "evisa_portal",
-   "visa_products": [
-    {
-     "type": "Single-entry unified e-visa (tourist)",
-     "entry": "single",
-     "validity": "60 days from issue",
-     "max_stay_days": 16,
-     "fee": {
-      "amount": 40,
-      "currency": "USD"
-     },
-     "notes": "Applied online; no invitation or hotel voucher required"
-    },
-    {
-     "type": "Regular single-entry tourist visa",
-     "entry": "single",
-     "validity": "Up to 30 days",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "Requires tourist invitation/voucher; lodge at Russian embassy or visa centre"
-    },
-    {
-     "type": "Regular double-entry tourist visa",
-     "entry": "multiple",
-     "validity": "Up to 30 days",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "Requires tourist invitation/voucher; lodge at Russian embassy or visa centre"
-    }
-   ],
-   "application_channel_detail": "South Korean ordinary passport holders may apply individually online for the unified e-visa on the MFA portal; regular paper tourist visas are lodged through the Russian embassy or a visa application centre.",
-   "requirement_detail": "evisa",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-22T20:06:40.669199",
-  "fresh_until": "2026-09-05T20:06:40.669199"
- },
- {
   "cache_key": "KOR|KOR|VNM|tourism|default|unknown|v6",
   "route": {
    "passport_nationality": "KOR",
@@ -12260,91 +11106,6 @@
   },
   "generated_at": "2026-08-22T20:06:57.417438",
   "fresh_until": "2026-08-24T20:06:57.417438"
- },
- {
-  "cache_key": "KOR|KOR|ESP|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "KOR",
-   "lawful_country_of_residence": "KOR",
-   "destination_country": "ESP",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_EXEMPT",
-   "visa_category": "Short-stay tourist",
-   "permitted_stay": "90 days in any 180-day Schengen period",
-   "passport_validity": "Valid 3 months beyond intended departure; issued within last 10 years",
-   "required_documents": [
-    "Valid ordinary passport",
-    "Proof of purpose/cover letter",
-    "Proof of accommodation",
-    "Proof of sufficient funds",
-    "Return or onward ticket"
-   ],
-   "application_channel": "not_required",
-   "government_fee": {
-    "amount": null,
-    "currency": null
-   },
-   "processing_time": "Not applicable",
-   "forms": [],
-   "official_portal_url": null,
-   "photo_requirements": null,
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [],
-   "payment_process": [],
-   "submission_process": [],
-   "onward_travel_evidence": "Return or onward ticket required",
-   "accommodation_evidence": "Hotel reservation or host invitation required",
-   "financial_evidence": "Proof of sufficient funds required, approximately EUR 90 per day",
-   "insurance_required": false,
-   "exceptions": [
-    "Long-term stays, work, or study require a national visa",
-    "Family members of EU/EEA/Swiss citizens may use facilitated entry rules"
-   ],
-   "uncertainty": [
-    {
-     "field": "ETIAS/electronic_authorization requirement",
-     "reason": "ETIAS is planned to become mandatory for visa-exempt travellers to the Schengen Area; as the stated travel date is 2026-08-25, it may already be operational, which would change entry from purely visa-free to electronic-authorization-required. Current knowledge may predate the final operational date."
-    }
-   ],
-   "confidence": "medium",
-   "permitted_stay_days": 90,
-   "passport_validity_requirement": {
-    "kind": "months_after_departure",
-    "months": 3
-   },
-   "arrival_card": {
-    "required": false,
-    "name": null,
-    "submission_window": null
-   },
-   "health_requirements": [],
-   "route_workflow_type": "visa_exempt_preparation",
-   "visa_products": [],
-   "application_channel_detail": "No advance visa application is required; South Korean ordinary passport holders enter Spain visa-free for short-stay tourism.",
-   "source_url": null,
-   "requirement_detail": "unconditional_visa_free",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-25T20:39:45.374834",
-  "fresh_until": "2026-09-08T20:39:45.374834"
  },
  {
   "cache_key": "SGP|SGP|HKG|tourism|default|unknown|v6",
@@ -13697,169 +12458,6 @@
   "fresh_until": "2026-09-05T20:08:13.566667"
  },
  {
-  "cache_key": "SGP|SGP|RUS|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "SGP",
-   "lawful_country_of_residence": "SGP",
-   "destination_country": "RUS",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_UNCERTAIN",
-  "guidance": {
-   "disposition": "VISA_EXEMPT",
-   "visa_category": "Visa-free tourist entry",
-   "permitted_stay": "30 days",
-   "passport_validity": "At least 6 months beyond entry",
-   "required_documents": [],
-   "application_channel": "not_required",
-   "government_fee": {
-    "amount": 0,
-    "currency": "USD"
-   },
-   "processing_time": null,
-   "forms": [],
-   "official_portal_url": "https://evisa.kdmid.ru/",
-   "photo_requirements": null,
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [],
-   "payment_process": [],
-   "submission_process": [],
-   "onward_travel_evidence": "May be requested at border",
-   "accommodation_evidence": "Migration registration required for stays over 7 working days",
-   "financial_evidence": "Proof of funds may be requested at border; no fixed amount",
-   "insurance_required": false,
-   "exceptions": [
-    "Singapore ordinary passport holders are visa-exempt for tourism up to 30 days",
-    "Cumulative visa-free stay may be capped at 90 days in any 180-day period",
-    "Stay longer than 30 days requires a visa",
-    "Migration registration is required if staying more than 7 working days",
-    "No paid work or study permitted on visa-free entry"
-   ],
-   "uncertainty": [
-    {
-     "field": "source_url",
-     "reason": "Exact official MFA/embassy page for the Singapore-Russia visa-free agreement was not verified"
-    },
-    {
-     "field": "passport_validity",
-     "reason": "Precise passport-validity rule for visa-free entry (6 months beyond entry vs. departure) could not be fully confirmed"
-    },
-    {
-     "field": "visa_products.fee",
-     "reason": "Unified e-visa and regular tourist-visa consular fees for Singapore nationals may have changed and were not verified"
-    },
-    {
-     "field": "arrival_card",
-     "reason": "Russia replaced paper migration cards with electronic processing; current short-stay registration rules are subject to change"
-    },
-    {
-     "field": "health_requirements",
-     "reason": "Exact yellow-fever trigger-country list and any active COVID/other health orders were not verified"
-    }
-   ],
-   "confidence": "medium",
-   "permitted_stay_days": 30,
-   "passport_validity_requirement": {
-    "kind": "months_after_arrival",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": false,
-    "name": null,
-    "submission_window": null
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination certificate",
-     "applicability": "conditional",
-     "trigger_countries": [],
-     "trigger": "Arrival from a yellow-fever-endemic country within 9 days",
-     "question": "Were you in a yellow-fever-endemic country in the 9 days before arrival?"
-    }
-   ],
-   "route_workflow_type": "visa_exempt_preparation",
-   "visa_products": [
-    {
-     "type": "Visa-free tourist entry",
-     "entry": "single",
-     "validity": "30 days from entry",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 0,
-      "currency": "USD"
-     },
-     "notes": "Singapore ordinary passport holders only; no paid work"
-    },
-    {
-     "type": "Unified e-visa tourist",
-     "entry": "single",
-     "validity": "60 days for entry, stay up to 16 days",
-     "max_stay_days": 16,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "Apply online at evisa.kdmid.ru; typically 4 calendar days"
-    },
-    {
-     "type": "Single-entry tourist visa",
-     "entry": "single",
-     "validity": "30 days",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "Paper visa via embassy/visa centre for longer or non-visa-free needs"
-    },
-    {
-     "type": "Double-entry tourist visa",
-     "entry": "multiple",
-     "validity": "30 days",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "Paper visa via embassy/visa centre"
-    }
-   ],
-   "application_channel_detail": "No visa application is required for a Singapore ordinary passport holder visiting Russia as a tourist for up to 30 days; for longer stays or other purposes, apply for a visa (e-visa online or paper visa through the Russian embassy/visa centre).",
-   "requirement_detail": "unconditional_visa_free",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [
-   "required_documents"
-  ],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision",
-   "grounded_check": {
-    "at": "2026-08-25T20:43:01.320312+00:00",
-    "outcome": "checked",
-    "source_url": "https://evisa.kdmid.ru/",
-    "content_hash": "c94aaef0a78a41c6c5643fdadae4002b00dff7ea99a2ba9487e1724228f0b76d",
-    "consistent": false,
-    "changed_fields": [],
-    "disputed_fields": [],
-    "generic_page_skipped": [],
-    "note": "The page corrects the unified e-visa validity to 120 days and max stay to 30 days, but does not address Singapore's visa-free status."
-   }
-  },
-  "generated_at": "2026-08-22T20:08:19.048749",
-  "fresh_until": "2026-09-08T20:43:11.295238"
- },
- {
   "cache_key": "SGP|SGP|VNM|tourism|default|unknown|v6",
   "route": {
    "passport_nationality": "SGP",
@@ -14429,145 +13027,6 @@
   },
   "generated_at": "2026-08-22T20:08:45.793112",
   "fresh_until": "2026-09-05T20:08:45.793112"
- },
- {
-  "cache_key": "MYS|MYS|HKG|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "MYS",
-   "lawful_country_of_residence": "MYS",
-   "destination_country": "HKG",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_REQUIRED",
-   "visa_category": "Visit/Transit (Entry Permit)",
-   "permitted_stay": "As granted by Immigration Department",
-   "passport_validity": "Usually valid at least 1 month beyond visa expiry",
-   "required_documents": [
-    "Valid Malaysian ordinary passport",
-    "Completed application form",
-    "Recent passport-sized colour photo",
-    "Proof of purpose of visit",
-    "Proof of financial means",
-    "Confirmed return/onward ticket",
-    "Proof of accommodation"
-   ],
-   "application_channel": "online_portal",
-   "government_fee": {
-    "amount": null,
-    "currency": "HKD"
-   },
-   "processing_time": "4-6 weeks",
-   "forms": [
-    "Application for Visit/Transit Visa (ID 1003A)"
-   ],
-   "official_portal_url": null,
-   "photo_requirements": "One recent passport-sized colour photograph",
-   "biometrics_required": null,
-   "interview_required": null,
-   "appointment_required": false,
-   "account_registration_steps": [
-    "Register on Hong Kong Immigration Department e-Visa portal",
-    "Verify email address"
-   ],
-   "payment_process": [
-    "Pay visa fee online by credit/debit card"
-   ],
-   "submission_process": [
-    "Complete online application",
-    "Upload supporting documents",
-    "Submit and pay",
-    "Await electronic visa/entry permit",
-    "Print and carry with passport"
-   ],
-   "onward_travel_evidence": "Confirmed return or onward ticket",
-   "accommodation_evidence": "Hotel reservation or host invitation",
-   "financial_evidence": "Bank statements or other evidence of sufficient funds",
-   "insurance_required": false,
-   "exceptions": [
-    "Diplomatic/official passport holders may have separate arrangements",
-    "Accompanying children normally require separate applications"
-   ],
-   "uncertainty": [
-    {
-     "field": "disposition",
-     "reason": "Hong Kong-Malaysia visa policy has changed recently and may have changed again by 2026-08-22; verify current requirement before travel"
-    },
-    {
-     "field": "government_fee",
-     "reason": "Current fee schedule for 2026 is uncertain; check official portal for exact amounts"
-    },
-    {
-     "field": "permitted_stay_days",
-     "reason": "Duration of stay is granted at discretion and current typical length for Malaysian tourists is not confirmed"
-    },
-    {
-     "field": "application_channel",
-     "reason": "Confirm whether Malaysian ordinary passport holders are currently eligible for e-Visa online filing or must submit by paper/mail"
-    },
-    {
-     "field": "official_portal_url",
-     "reason": "URL believed correct but could have been reorganised; verify on immd.gov.hk homepage"
-    }
-   ],
-   "confidence": "low",
-   "permitted_stay_days": null,
-   "passport_validity_requirement": {
-    "kind": "months_after_departure",
-    "months": 1
-   },
-   "arrival_card": {
-    "required": null,
-    "name": null,
-    "submission_window": null
-   },
-   "health_requirements": [],
-   "route_workflow_type": "evisa_portal",
-   "visa_products": [
-    {
-     "type": "Single-entry visit visa",
-     "entry": "single",
-     "validity": "3 months from issue",
-     "max_stay_days": null,
-     "fee": {
-      "amount": null,
-      "currency": "HKD"
-     },
-     "notes": "Duration of stay granted at discretion; fee subject to current schedule"
-    },
-    {
-     "type": "Multiple-entry visit visa",
-     "entry": "multiple",
-     "validity": "1 to 5 years",
-     "max_stay_days": null,
-     "fee": {
-      "amount": null,
-      "currency": "HKD"
-     },
-     "notes": "For frequent visitors; fee and validity subject to current schedule"
-    }
-   ],
-   "application_channel_detail": "Individuals may lodge applications themselves through the Hong Kong Immigration Department e-Visa portal, but confirm current eligibility for Malaysian ordinary passport holders before applying.",
-   "source_url": null,
-   "requirement_detail": "evisa",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-22T20:08:58.617634",
-  "fresh_until": "2026-09-05T20:08:58.617634"
  },
  {
   "cache_key": "SGP|SGP|IND|tourism|default|unknown|v6",
@@ -16247,161 +14706,6 @@
   },
   "generated_at": "2026-08-22T20:10:13.031992",
   "fresh_until": "2026-09-05T20:10:13.031992"
- },
- {
-  "cache_key": "MYS|MYS|CAN|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "MYS",
-   "lawful_country_of_residence": "MYS",
-   "destination_country": "CAN",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
-   "visa_category": "eTA (air) / Temporary Resident Visa (land or sea)",
-   "permitted_stay": "Up to 6 months",
-   "passport_validity": "Valid for the whole intended stay",
-   "required_documents": [
-    "Valid Malaysian passport",
-    "Email address",
-    "Credit/debit card",
-    "For TRV: passport photos, proof of funds, travel purpose, ties to Malaysia"
-   ],
-   "application_channel": "online_portal",
-   "government_fee": {
-    "amount": 7,
-    "currency": "CAD"
-   },
-   "processing_time": "eTA often minutes to a few days; TRV several weeks",
-   "forms": [
-    "IRCC eTA online form",
-    "IMM 5257 if applying for TRV"
-   ],
-   "official_portal_url": "https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/eta.html",
-   "photo_requirements": "Not required for eTA; passport-style photo required for TRV",
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [
-    "Create an IRCC account (GCKey or Sign-In Partner)",
-    "Complete the eTA/TRV online form",
-    "Pay the fee",
-    "Receive decision by email"
-   ],
-   "payment_process": [
-    "Online credit/debit card payment through IRCC portal"
-   ],
-   "submission_process": [
-    "Submit eTA application online",
-    "For TRV, submit online or via VFS Global"
-   ],
-   "onward_travel_evidence": "Recommended; may be requested at the port of entry",
-   "accommodation_evidence": "Recommended; may be requested at the port of entry",
-   "financial_evidence": "Recommended; proof of sufficient funds may be requested at the port of entry",
-   "insurance_required": false,
-   "exceptions": [
-    "eTA is valid for air travel and air transit only; land/sea/most rail entry requires a TRV",
-    "CAN+ stream may expedite TRV processing if applicant held a Canadian visa in the last 10 years or holds a valid US non-immigrant visa"
-   ],
-   "uncertainty": [
-    {
-     "field": "eTA eligibility for Malaysian ordinary passport holders",
-     "reason": "Canada expanded eTA eligibility for some visa-required countries in 2023; confirm Malaysia's current status on the official IRCC website as the list may have changed by August 2026"
-    },
-    {
-     "field": "arrival mode",
-     "reason": "User did not specify air/land/sea; eTA is valid for air travel only and a TRV is required for land/sea/most rail entry"
-    },
-    {
-     "field": "government_fee",
-     "reason": "eTA and TRV/biometrics fees may have been revised since the last knowledge update"
-    },
-    {
-     "field": "biometrics_required",
-     "reason": "Biometrics are not required for eTA but are required for a TRV; the field reflects the eTA route"
-    },
-    {
-     "field": "health_requirements",
-     "reason": "Health and vaccination rules can change with little notice"
-    }
-   ],
-   "confidence": "low",
-   "permitted_stay_days": 180,
-   "passport_validity_requirement": {
-    "kind": "valid_through_departure",
-    "months": null
-   },
-   "arrival_card": {
-    "required": false,
-    "name": null,
-    "submission_window": null
-   },
-   "health_requirements": [
-    {
-     "name": "COVID-19 vaccination or testing",
-     "applicability": "not_applicable",
-     "trigger_countries": [],
-     "trigger": null,
-     "question": "Have Canada's COVID-19 entry requirements changed since the last update?"
-    }
-   ],
-   "route_workflow_type": "electronic_authorization",
-   "visa_products": [
-    {
-     "type": "Electronic Travel Authorization (eTA)",
-     "entry": "multiple",
-     "validity": "Up to 5 years or until passport expires",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 7,
-      "currency": "CAD"
-     },
-     "notes": "Air travel only; linked to passport"
-    },
-    {
-     "type": "Single-entry visitor visa (TRV)",
-     "entry": "single",
-     "validity": "Up to 6 months",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 100,
-      "currency": "CAD"
-     },
-     "notes": "Required for land/sea entry; plus biometrics fee CAD 85"
-    },
-    {
-     "type": "Multiple-entry visitor visa (TRV)",
-     "entry": "multiple",
-     "validity": "Up to 10 years or until passport expires",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 100,
-      "currency": "CAD"
-     },
-     "notes": "Officer decides single or multiple; plus biometrics fee CAD 85"
-    }
-   ],
-   "application_channel_detail": "Apply yourself online through the Immigration, Refugees and Citizenship Canada (IRCC) portal; if a visitor visa is required, apply online or lodge through VFS Global.",
-   "source_url": "https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/eta.html",
-   "requirement_detail": "eta_electronic_authorization",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-22T20:10:32.700422",
-  "fresh_until": "2026-09-05T20:10:32.700422"
  },
  {
   "cache_key": "THA|THA|TWN|tourism|default|unknown|v6",
@@ -18248,143 +16552,6 @@
   },
   "generated_at": "2026-08-22T20:11:53.690842",
   "fresh_until": "2026-09-05T20:11:53.690842"
- },
- {
-  "cache_key": "THA|THA|AUS|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "THA",
-   "lawful_country_of_residence": "THA",
-   "destination_country": "AUS",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
-   "visa_category": "ETA subclass 601 / Visitor visa subclass 600 Tourist stream",
-   "permitted_stay": "Up to 3 months per visit on ETA; Visitor visa grant may be 3, 6 or 12 months",
-   "passport_validity": "Valid for the intended stay; must be valid on entry and departure",
-   "required_documents": [
-    "Valid Thai ordinary passport",
-    "AustralianETA mobile app (or ImmiAccount for subclass 600)",
-    "Credit/debit card for payment",
-    "Email address"
-   ],
-   "application_channel": "online_portal",
-   "government_fee": {
-    "amount": 20,
-    "currency": "AUD"
-   },
-   "processing_time": "ETA: usually minutes to a few business days; Visitor visa 600: several days to weeks",
-   "forms": [
-    "No paper form for ETA; online digital application via ImmiAccount for subclass 600"
-   ],
-   "official_portal_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/electronic-travel-authority-601",
-   "photo_requirements": "ETA: in-app passport-style photo/selfie; Visitor visa 600: one digital passport photo",
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [
-    "Download the AustralianETA app and scan passport",
-    "Or create an ImmiAccount to complete the Visitor visa 600 application"
-   ],
-   "payment_process": [
-    "In-app card payment for ETA",
-    "Online card payment through ImmiAccount for subclass 600"
-   ],
-   "submission_process": [
-    "Submit ETA application in the AustralianETA app",
-    "Or submit Visitor visa 600 online via ImmiAccount"
-   ],
-   "onward_travel_evidence": "Return/onward booking required for subclass 600 application; recommended for ETA travellers at the border",
-   "accommodation_evidence": "Accommodation details required for subclass 600; not needed for ETA application but may be requested at the border",
-   "financial_evidence": "Bank statements/payslips required for subclass 600; ETA holders should carry evidence of funds for intended stay",
-   "insurance_required": false,
-   "exceptions": [
-    "Visitor visa subclass 600 Tourist stream remains available if ETA is unavailable or a longer stay is needed",
-    "ETA allows tourism and limited study but not work",
-    "Each ETA is individual; families must apply separately",
-    "Subclass 600 may be granted for single or multiple entries with variable stay periods",
-    "Verify Thailand's current ETA eligibility before applying, as the expansion was recent"
-   ],
-   "uncertainty": [
-    {
-     "field": "disposition / ETA eligibility",
-     "reason": "Thailand's inclusion in Australia's ETA program was announced in late 2024/early 2025; confirm it remains operational and covers ordinary Thai passports for the travel date"
-    },
-    {
-     "field": "visa_products[Visitor visa 600].fee / government_fee",
-     "reason": "Australian visa fees are revised each financial year; the current subclass 600 Tourist stream fee for August 2026 is not confirmed here"
-    },
-    {
-     "field": "biometrics_required",
-     "reason": "Biometrics may be required for some Visitor visa 600 applicants from Thailand; verify with the nearest Australian Visa Application Centre"
-    },
-    {
-     "field": "processing_time",
-     "reason": "Published processing times change frequently; check the latest Home Affairs global visa processing times"
-    },
-    {
-     "field": "source_url / official_portal_url",
-     "reason": "URLs are based on known Home Affairs structure; confirm the exact current links on the official site"
-    }
-   ],
-   "confidence": "low",
-   "permitted_stay_days": 90,
-   "passport_validity_requirement": {
-    "kind": "valid_through_departure",
-    "months": null
-   },
-   "arrival_card": {
-    "required": true,
-    "name": "Incoming Passenger Card",
-    "submission_window": "Before immigration clearance; issued on inbound transport or available on arrival"
-   },
-   "health_requirements": [],
-   "route_workflow_type": "electronic_authorization",
-   "visa_products": [
-    {
-     "type": "Electronic Travel Authority (subclass 601)",
-     "entry": "multiple",
-     "validity": "12 months from grant or until passport expires",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 20,
-      "currency": "AUD"
-     },
-     "notes": "Apply via the AustralianETA app; for tourism/business; no work; 3 months per visit"
-    },
-    {
-     "type": "Visitor visa (subclass 600) Tourist stream",
-     "entry": "single or multiple as granted",
-     "validity": "Up to 12 months",
-     "max_stay_days": null,
-     "fee": {
-      "amount": null,
-      "currency": "AUD"
-     },
-     "notes": "Alternative to ETA; grant period commonly 3, 6 or 12 months; fee changes annually"
-    }
-   ],
-   "application_channel_detail": "Thai ordinary passport holders may apply for an ETA through the AustralianETA mobile app; the Visitor visa 600 Tourist stream is lodged online via an ImmiAccount.",
-   "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing",
-   "requirement_detail": "eta_electronic_authorization",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-22T20:12:02.455099",
-  "fresh_until": "2026-09-05T20:12:02.455099"
  },
  {
   "cache_key": "THA|THA|CAN|tourism|default|unknown|v6",
@@ -23818,10 +21985,21 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T21:46:35.153845+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.imigrasi.go.id",
+    "content_hash": "1106141eb4db5e5224067465236b580a22e11522ee5a999505085e840dba7aac",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The provided page is the generic Indonesian immigration portal homepage and does not state nationality-specific visa rules or contradict the stored answer."
+   }
   },
   "generated_at": "2026-08-22T20:17:09.381623",
-  "fresh_until": "2026-09-05T20:17:09.381623"
+  "fresh_until": "2026-09-08T21:46:44.016243"
  },
  {
   "cache_key": "DEU|DEU|CAN|tourism|default|unknown|v6",
@@ -29644,161 +27822,6 @@
   "fresh_until": "2026-09-05T20:22:37.727367"
  },
  {
-  "cache_key": "IND|IND|PHL|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "IND",
-   "lawful_country_of_residence": "IND",
-   "destination_country": "PHL",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_REQUIRED",
-   "visa_category": "Temporary Visitor's Visa (9a) - tourism",
-   "permitted_stay": "Varies by product: eVisa up to 30 days; sticker visa up to 59 days",
-   "passport_validity": "Valid at least 6 months beyond arrival",
-   "required_documents": [
-    "Valid Indian passport bio page",
-    "Recent passport-size colour photo",
-    "Completed visa application form",
-    "Confirmed round-trip or onward ticket",
-    "Proof of accommodation",
-    "Proof of sufficient funds",
-    "Travel itinerary"
-   ],
-   "application_channel": "online_portal",
-   "government_fee": {
-    "amount": null,
-    "currency": null
-   },
-   "processing_time": "3 to 10 working days for eVisa; embassy varies",
-   "forms": [
-    "DFA online/sticker visa application form"
-   ],
-   "official_portal_url": "https://evisa.gov.ph",
-   "photo_requirements": "Recent passport-size colour photo on white background, per portal specifications",
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": null,
-   "account_registration_steps": [
-    "Create an account on the Philippine eVisa portal",
-    "Verify the registered email address",
-    "Start a new tourist visa application"
-   ],
-   "payment_process": [
-    "Pay the visa fee online by credit/debit card for eVisa",
-    "Embassy/visa centre may accept cash/demand draft for sticker applications"
-   ],
-   "submission_process": [
-    "Complete the online form, upload documents, pay and submit via the eVisa portal",
-    "Alternatively, submit documents in person at the Philippine embassy/consulate or authorised visa centre"
-   ],
-   "onward_travel_evidence": "Confirmed return or onward ticket",
-   "accommodation_evidence": "Confirmed hotel booking or host invitation",
-   "financial_evidence": "Bank statements, income-tax return or sponsorship letter",
-   "insurance_required": false,
-   "exceptions": [
-    "Conditional visa-free entry may be available for Indian nationals holding valid visas/residence permits from certain developed countries; confirm current eligible countries and permitted stay with the Bureau of Immigration before travel"
-   ],
-   "uncertainty": [
-    {
-     "field": "eVisa availability and stay",
-     "reason": "Philippine eVisa eligibility, stay length and product rules for Indian nationals have changed; confirm on the official eVisa portal near travel date"
-    },
-    {
-     "field": "government_fee",
-     "reason": "Official visa fee for Indian nationals is not confirmed; never rely on unofficial quotes"
-    },
-    {
-     "field": "multiple-entry eligibility",
-     "reason": "Multiple-entry tourist visas may be restricted to frequent travellers or not universally offered"
-    },
-    {
-     "field": "conditional third-country visa exemption",
-     "reason": "Eligible countries and permitted stay length for visa-free entry based on valid OECD/developed-country visas have varied over time"
-    },
-    {
-     "field": "source_url",
-     "reason": "No single official DFA/BI page could be cited with certainty"
-    }
-   ],
-   "confidence": "low",
-   "permitted_stay_days": null,
-   "passport_validity_requirement": {
-    "kind": "months_after_arrival",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": true,
-    "name": "eTravel",
-    "submission_window": "Within 72 hours before arrival"
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination certificate",
-     "applicability": "conditional",
-     "trigger_countries": [],
-     "trigger": "Arrival within 6 days after stay in a yellow fever endemic country",
-     "question": "Have you visited a yellow fever endemic country within 6 days before arrival?"
-    }
-   ],
-   "route_workflow_type": "evisa_portal",
-   "visa_products": [
-    {
-     "type": "Single-entry eVisa tourist",
-     "entry": "single",
-     "validity": "3 months",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "Philippine eVisa for tourism; availability for Indian nationals should be confirmed near travel date"
-    },
-    {
-     "type": "Single-entry Temporary Visitor's Visa (9a) sticker",
-     "entry": "single",
-     "validity": "3 months",
-     "max_stay_days": 59,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "Standard sticker tourist visa lodged at embassy/consulate or authorised visa centre"
-    },
-    {
-     "type": "Multiple-entry Temporary Visitor's Visa (9a)",
-     "entry": "multiple",
-     "validity": "6 months",
-     "max_stay_days": 59,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "Usually limited to frequent travellers or those with prior visits; confirm eligibility"
-    }
-   ],
-   "application_channel_detail": "Indian nationals may apply through the Philippine eVisa portal if eligible; otherwise they lodge a sticker Temporary Visitor's Visa at the Philippine embassy/consulate or its authorised visa centre.",
-   "requirement_detail": "evisa",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-22T20:22:49.438611",
-  "fresh_until": "2026-09-05T20:22:49.438611"
- },
- {
   "cache_key": "IND|IND|VNM|tourism|default|unknown|v6",
   "route": {
    "passport_nationality": "IND",
@@ -30918,140 +28941,6 @@
   "fresh_until": "2026-09-05T20:24:08.771178"
  },
  {
-  "cache_key": "IDN|IDN|SGP|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "IDN",
-   "lawful_country_of_residence": "IDN",
-   "destination_country": "SGP",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_REQUIRED",
-   "visa_category": "Tourist visa",
-   "permitted_stay": "Up to 30 days per entry",
-   "passport_validity": "At least 6 months beyond date of arrival",
-   "required_documents": [
-    "Passport valid at least 6 months beyond arrival",
-    "One recent passport-sized colour photograph",
-    "Completed Form 14A",
-    "Proof of return or onward travel",
-    "Proof of accommodation in Singapore",
-    "Bank statements or other financial evidence",
-    "Copy of Indonesian identity card (KTP)",
-    "Employment or student proof if applicable"
-   ],
-   "application_channel": "authorised_agent",
-   "government_fee": {
-    "amount": 30,
-    "currency": "SGD"
-   },
-   "processing_time": "3-5 working days; up to 7 in some cases",
-   "forms": [
-    "Form 14A"
-   ],
-   "official_portal_url": null,
-   "photo_requirements": "One recent colour passport-sized photograph with white background, taken within the last 3 months",
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": null,
-   "account_registration_steps": [
-    "Applicants do not register directly with ICA; the authorised visa agent lodges the e-Visa application on the applicant's behalf"
-   ],
-   "payment_process": [
-    "Pay the official visa fee and the agent's service fee to the authorised visa agent"
-   ],
-   "submission_process": [
-    "Submit documents to an authorised visa agent",
-    "Agent enters the application into ICA's e-Visa system",
-    "Collect the e-Visa grant notice from the agent"
-   ],
-   "onward_travel_evidence": "Confirmed return or onward ticket within the permitted stay",
-   "accommodation_evidence": "Hotel booking or host address and contact details in Singapore",
-   "financial_evidence": "Recent bank statements or other proof of sufficient funds for the trip",
-   "insurance_required": false,
-   "exceptions": [
-    "Diplomatic and official Indonesian passport holders may have visa exemption or simplified arrangements",
-    "Airside transit within 24 hours without clearing immigration may not require a visa",
-    "Authorised agents include designated visa application centres and travel agencies; direct individual filing with ICA is not permitted"
-   ],
-   "uncertainty": [
-    {
-     "field": "government_fee and visa_products",
-     "reason": "Singapore visa fees and validity periods have been stable but may be revised; confirm the current fee and product options with the authorised agent or ICA before applying"
-    },
-    {
-     "field": "requirement_detail",
-     "reason": "Singapore and Indonesia have discussed reciprocal visa facilitation; verify that ordinary-passport visa-free entry has not been introduced for this nationality since the last policy update"
-    }
-   ],
-   "confidence": "medium",
-   "permitted_stay_days": 30,
-   "passport_validity_requirement": {
-    "kind": "months_after_arrival",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": true,
-    "name": "SG Arrival Card",
-    "submission_window": "Within 3 days before arrival"
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination",
-     "applicability": "conditional",
-     "trigger_countries": [],
-     "trigger": "Required only if travelling from or transiting through a yellow-fever endemic country within 6 days before arrival",
-     "question": "Will the applicant travel from or through a yellow-fever endemic country within 6 days before arrival?"
-    }
-   ],
-   "route_workflow_type": "evisa_portal",
-   "visa_products": [
-    {
-     "type": "Single Journey Visa",
-     "entry": "single",
-     "validity": "35 or 63 days from issue",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 30,
-      "currency": "SGD"
-     },
-     "notes": "Validity period is determined by ICA"
-    },
-    {
-     "type": "Multiple Journey Visa",
-     "entry": "multiple",
-     "validity": "1 or 2 years from issue",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 90,
-      "currency": "SGD"
-     },
-     "notes": "Granted at ICA's discretion, usually based on travel history"
-    }
-   ],
-   "application_channel_detail": "Indonesian ordinary passport holders cannot apply directly to ICA; the application must be lodged through a designated authorised visa agent.",
-   "source_url": null,
-   "requirement_detail": "evisa",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-22T20:24:16.761147",
-  "fresh_until": "2026-09-05T20:24:16.761147"
- },
- {
   "cache_key": "IDN|IDN|MYS|tourism|default|unknown|v6",
   "route": {
    "passport_nationality": "IDN",
@@ -31708,131 +29597,6 @@
   "fresh_until": "2026-09-05T20:24:49.182296"
  },
  {
-  "cache_key": "IDN|IDN|VNM|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "IDN",
-   "lawful_country_of_residence": "IDN",
-   "destination_country": "VNM",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_EXEMPT",
-   "visa_category": "Visa-exempt tourist entry",
-   "permitted_stay": "30 days",
-   "passport_validity": "6 months beyond arrival",
-   "required_documents": [
-    "Valid ordinary passport",
-    "Return or onward travel ticket",
-    "Proof of accommodation",
-    "Evidence of sufficient funds"
-   ],
-   "application_channel": "not_required",
-   "government_fee": {
-    "amount": null,
-    "currency": null
-   },
-   "processing_time": "Not applicable",
-   "forms": [],
-   "official_portal_url": null,
-   "photo_requirements": "Not required for visa-free entry; e-visa requires one digital passport photo",
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [],
-   "payment_process": [],
-   "submission_process": [
-    "Present passport at Vietnamese immigration port of entry"
-   ],
-   "onward_travel_evidence": "Return or onward ticket recommended; immigration may request it",
-   "accommodation_evidence": "Hotel booking or local host address may be requested",
-   "financial_evidence": "Bank statements, cards, or cash proof may be requested",
-   "insurance_required": false,
-   "exceptions": [
-    "30-day visa-free stay is for tourism only; employment or study not permitted",
-    "E-visa available for longer or multiple-entry tourist visits",
-    "Visa-free stay may be extendable; confirm current extension rules before travel"
-   ],
-   "uncertainty": [
-    {
-     "field": "current ASEAN visa-exemption duration",
-     "reason": "Vietnam has adjusted visa-exemption lengths in recent years; confirm the 30-day exemption for Indonesian ordinary passport holders is still in force on the travel date"
-    },
-    {
-     "field": "passport validity enforcement",
-     "reason": "Standard requirement is 6 months beyond arrival, but border officers may enforce blank-page or validity rules differently"
-    },
-    {
-     "field": "source_url",
-     "reason": "I do not have the exact official Vietnamese government exemption page URL to cite"
-    }
-   ],
-   "confidence": "medium",
-   "permitted_stay_days": 30,
-   "passport_validity_requirement": {
-    "kind": "months_after_arrival",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": false,
-    "name": null,
-    "submission_window": null
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination certificate",
-     "applicability": "conditional",
-     "trigger_countries": [],
-     "trigger": "Recent travel or transit in a yellow-fever risk country within 6 days before arrival",
-     "question": "Have you visited or transited a yellow-fever risk country in the past 6 days?"
-    }
-   ],
-   "route_workflow_type": "visa_exempt_preparation",
-   "visa_products": [
-    {
-     "type": "Single-entry e-Visa (tourist)",
-     "entry": "single",
-     "validity": "90 days",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 25,
-      "currency": "USD"
-     },
-     "notes": "Electronic visa applied online; not needed for 30-day visa-free entry"
-    },
-    {
-     "type": "Multiple-entry e-Visa (tourist)",
-     "entry": "multiple",
-     "validity": "90 days",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 50,
-      "currency": "USD"
-     },
-     "notes": "Electronic visa applied online; not needed for 30-day visa-free entry"
-    }
-   ],
-   "application_channel_detail": "No advance visa application is required; Indonesian ordinary passport holders may enter Vietnam visa-free for tourism. For stays over 30 days or multiple entries, apply online for an e-visa via the official Vietnam Immigration portal.",
-   "requirement_detail": "unconditional_visa_free",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-25T20:40:33.810298",
-  "fresh_until": "2026-09-08T20:40:33.810298"
- },
- {
   "cache_key": "IDN|IDN|IND|tourism|default|unknown|v6",
   "route": {
    "passport_nationality": "IDN",
@@ -32127,183 +29891,6 @@
   },
   "generated_at": "2026-08-22T20:25:09.358067",
   "fresh_until": "2026-09-05T20:25:09.358067"
- },
- {
-  "cache_key": "IDN|IDN|RUS|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "IDN",
-   "lawful_country_of_residence": "IDN",
-   "destination_country": "RUS",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "CONDITIONAL",
-   "visa_category": "tourist",
-   "permitted_stay": "30 days visa-free per entry; total may not exceed 90 days in any 180-day period",
-   "passport_validity": "At least 6 months beyond intended departure",
-   "required_documents": [
-    "Valid ordinary passport with at least 2 blank pages",
-    "Return/onward ticket",
-    "Proof of accommodation or invitation address",
-    "Proof of sufficient funds",
-    "Medical insurance valid in Russia",
-    "For e-visa: digital passport copy and digital colour photo",
-    "For sticker visa: completed form, photo, and tourist invitation/voucher"
-   ],
-   "application_channel": "not_required",
-   "government_fee": {
-    "amount": null,
-    "currency": null
-   },
-   "processing_time": "E-visa: up to 4 calendar days; sticker visa: 4–20 working days standard, 1–3 working days urgent",
-   "forms": [
-    "Online unified e-visa application at evisa.kdmid.ru",
-    "Embassy/consular visa application form for sticker visa"
-   ],
-   "official_portal_url": "https://evisa.kdmid.ru/",
-   "photo_requirements": "Recent colour 35×45 mm photo on white background for e-visa/sticker; no specific photo for visa-free entry",
-   "biometrics_required": null,
-   "interview_required": false,
-   "appointment_required": null,
-   "account_registration_steps": [
-    "Register or log in at https://evisa.kdmid.ru",
-    "Complete the application and upload passport image and digital photo",
-    "Pay the consular fee online",
-    "Download the issued e-visa from your account/email"
-   ],
-   "payment_process": [
-    "E-visa: online card payment via the e-visa portal",
-    "Sticker visa: pay at the embassy/visa centre per local instructions"
-   ],
-   "submission_process": [
-    "E-visa: submit online and present the printed/PDF e-visa with passport",
-    "Sticker visa: submit in person at the Russian Embassy/Consulate or its outsourced visa application centre in Indonesia"
-   ],
-   "onward_travel_evidence": "Return/onward ticket recommended",
-   "accommodation_evidence": "Hotel booking or invitation address recommended",
-   "financial_evidence": "Proof of sufficient funds for the stay",
-   "insurance_required": true,
-   "exceptions": [
-    "Indonesian ordinary passport holders may enter Russia visa-free for up to 30 days, capped at 90 days in any 180-day period",
-    "Stays longer than 30 days require a visa",
-    "Children under 6 are exempt from the unified e-visa consular fee"
-   ],
-   "uncertainty": [
-    {
-     "field": "disposition / visa-free policy",
-     "reason": "Trip duration was not provided; the 30-day visa-free exemption applies only if the stay is 30 days or less. Verify the current Indonesia-Russia agreement before travel."
-    },
-    {
-     "field": "government_fee / sticker-visa fees",
-     "reason": "Sticker-tourist consular fees depend on reciprocity and processing time; not confirmed here."
-    },
-    {
-     "field": "source_url",
-     "reason": "No single official URL covering both the bilateral visa-free agreement and visa products was provided."
-    },
-    {
-     "field": "biometrics_required / appointment_required",
-     "reason": "Sticker visas may require fingerprints and/or an appointment, while e-visa/visa-free do not; confirm with the embassy/visa centre."
-    }
-   ],
-   "confidence": "medium",
-   "permitted_stay_days": 30,
-   "passport_validity_requirement": {
-    "kind": "months_after_departure",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": true,
-    "name": "Migration card",
-    "submission_window": "Issued/completed at border on arrival; keep until departure"
-   },
-   "health_requirements": [
-    {
-     "name": "COVID-19 vaccination/test",
-     "applicability": "not_applicable",
-     "trigger_countries": [],
-     "trigger": null,
-     "question": null
-    }
-   ],
-   "route_workflow_type": "conditional",
-   "visa_products": [
-    {
-     "type": "30-day visa-free tourist entry",
-     "entry": "multiple",
-     "validity": "30 days per entry; 90 days in any 180-day period",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "Ordinary Indonesian passport; no application required"
-    },
-    {
-     "type": "Unified e-visa tourist",
-     "entry": "single",
-     "validity": "60 days from issue; stay up to 16 days",
-     "max_stay_days": 16,
-     "fee": {
-      "amount": 52,
-      "currency": "USD"
-     },
-     "notes": "Apply online; no invitation letter required"
-    },
-    {
-     "type": "Single-entry sticker tourist visa",
-     "entry": "single",
-     "validity": "Up to 3 months",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "Requires tourist invitation/voucher"
-    },
-    {
-     "type": "Double-entry sticker tourist visa",
-     "entry": "multiple",
-     "validity": "Up to 3 months",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "Requires tourist invitation/voucher"
-    },
-    {
-     "type": "Multiple-entry sticker tourist visa",
-     "entry": "multiple",
-     "validity": "6 or 12 months",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "Usually requires prior Russian visas or justification"
-    }
-   ],
-   "application_channel_detail": "No channel is needed for stays of up to 30 days; if a visa is required, apply online via the unified e-visa portal or lodge a sticker visa at the Russian Embassy/Consulate/outsourced visa centre in Indonesia.",
-   "requirement_detail": "conditional_visa_free",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-22T20:25:14.071596",
-  "fresh_until": "2026-09-05T20:25:14.071596"
  },
  {
   "cache_key": "IDN|IDN|ESP|tourism|default|unknown|v6",
@@ -36298,137 +33885,6 @@
   "fresh_until": "2026-09-05T20:28:40.410616"
  },
  {
-  "cache_key": "VNM|VNM|SGP|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "VNM",
-   "lawful_country_of_residence": "VNM",
-   "destination_country": "SGP",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_REQUIRED",
-   "visa_category": "tourist",
-   "permitted_stay": "up to 30 days per visit, granted at entry",
-   "passport_validity": "valid for at least 6 months beyond date of entry",
-   "required_documents": [
-    "Completed Form 14A",
-    "Passport biodata-page copy",
-    "Recent passport-size colour photograph",
-    "Confirmed return or onward air ticket",
-    "Proof of accommodation or local host address",
-    "Financial evidence (bank statements / payslips)",
-    "Employment, student, or retirement status letter"
-   ],
-   "application_channel": "authorised_agent",
-   "government_fee": {
-    "amount": 30,
-    "currency": "SGD"
-   },
-   "processing_time": "3–5 working days",
-   "forms": [
-    "Form 14A"
-   ],
-   "official_portal_url": "https://eservices.ica.gov.sg/esvclandingpage/save",
-   "photo_requirements": "One recent passport-size colour photograph with white background",
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [],
-   "payment_process": [
-    "Official visa fee SGD 30 is paid through the authorised visa agent",
-    "Authorised agent charges a separate service fee"
-   ],
-   "submission_process": [
-    "Book/lodge through an authorised visa agent in Vietnam",
-    "Agent submits the application via ICA SAVE",
-    "Receive e-Visa printout from the agent once approved"
-   ],
-   "onward_travel_evidence": "Confirmed return or onward ticket",
-   "accommodation_evidence": "Hotel booking or local host/sponsor address in Singapore",
-   "financial_evidence": "Bank statements or other proof of sufficient funds",
-   "insurance_required": false,
-   "exceptions": [
-    "Single Journey Visa is valid for 9 weeks from date of issue for entry only",
-    "Multiple Journey Visa may be granted at ICA discretion for frequent travellers",
-    "APEC Business Travel Card holders with SGP code may enter visa-free for business visits only"
-   ],
-   "uncertainty": [
-    {
-     "field": "source_url",
-     "reason": "Exact ICA visa-requirements page path may have been restructured; only the SAVE e-service URL is provided with confidence"
-    },
-    {
-     "field": "permitted_stay_days",
-     "reason": "Actual stay length is determined by the ICA officer at the checkpoint; 30 days is the usual maximum"
-    },
-    {
-     "field": "multiple_journey_visa_eligibility",
-     "reason": "Granted only at ICA discretion based on travel history; not an automatic product"
-    },
-    {
-     "field": "transit_requirement",
-     "reason": "No transit countries or airports were provided in the route facts"
-    }
-   ],
-   "confidence": "high",
-   "permitted_stay_days": 30,
-   "passport_validity_requirement": {
-    "kind": "months_after_arrival",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": true,
-    "name": "SG Arrival Card",
-    "submission_window": "up to 3 days before arrival"
-   },
-   "health_requirements": [],
-   "route_workflow_type": "evisa_portal",
-   "visa_products": [
-    {
-     "type": "Single Journey Visa",
-     "entry": "single",
-     "validity": "9 weeks from date of issue",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 30,
-      "currency": "SGD"
-     },
-     "notes": "Max stay granted by ICA officer at entry; for tourism"
-    },
-    {
-     "type": "Multiple Journey Visa",
-     "entry": "multiple",
-     "validity": "1–5 years (ICA discretion)",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 30,
-      "currency": "SGD"
-     },
-     "notes": "For frequent travellers with good travel history; not guaranteed"
-    }
-   ],
-   "application_channel_detail": "Vietnamese ordinary passport holders cannot apply directly online; the application must be lodged through an authorised visa agent, which submits via ICA SAVE.",
-   "requirement_detail": "evisa",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-22T20:28:44.913833",
-  "fresh_until": "2026-09-05T20:28:44.913833"
- },
- {
   "cache_key": "VNM|VNM|GBR|tourism|default|unknown|v6",
   "route": {
    "passport_nationality": "VNM",
@@ -36585,101 +34041,6 @@
   },
   "generated_at": "2026-08-22T20:28:48.686160",
   "fresh_until": "2026-09-05T20:28:48.686160"
- },
- {
-  "cache_key": "VNM|VNM|RUS|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "VNM",
-   "lawful_country_of_residence": "VNM",
-   "destination_country": "RUS",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_EXEMPT",
-   "visa_category": "tourist",
-   "permitted_stay": "45 days per entry",
-   "passport_validity": "Valid for the intended stay",
-   "required_documents": [
-    "Valid Vietnamese ordinary passport",
-    "Return or onward ticket",
-    "Proof of accommodation",
-    "Evidence of sufficient funds",
-    "Travel medical insurance valid in Russia"
-   ],
-   "application_channel": "not_required",
-   "government_fee": {
-    "amount": null,
-    "currency": null
-   },
-   "processing_time": "Not applicable",
-   "forms": [],
-   "official_portal_url": null,
-   "photo_requirements": null,
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [],
-   "payment_process": [],
-   "submission_process": [
-    "No visa application required; present passport and supporting documents at the Russian border"
-   ],
-   "onward_travel_evidence": "Return or onward ticket may be requested at entry",
-   "accommodation_evidence": "Hotel reservation or host address may be requested",
-   "financial_evidence": "Bank statements, cash or cards may be requested",
-   "insurance_required": true,
-   "exceptions": [
-    "45-day visa-free limit per entry; longer stays require a visa",
-    "Migration registration is required for stays longer than 7 working days (hotels usually handle this)",
-    "Compulsory medical insurance may be checked on entry"
-   ],
-   "uncertainty": [
-    {
-     "field": "passport_validity",
-     "reason": "Exact passport-validity rule for Vietnamese visa-free entry to Russia is not confirmed in current official guidance."
-    },
-    {
-     "field": "insurance_required",
-     "reason": "Compulsory medical insurance may be checked at entry; enforcement can vary."
-    },
-    {
-     "field": "official_portal_url",
-     "reason": "No verified official URL for this route was available."
-    }
-   ],
-   "confidence": "medium",
-   "permitted_stay_days": 45,
-   "passport_validity_requirement": {
-    "kind": "valid_through_departure",
-    "months": null
-   },
-   "arrival_card": {
-    "required": false,
-    "name": null,
-    "submission_window": null
-   },
-   "health_requirements": [],
-   "route_workflow_type": "visa_exempt_preparation",
-   "visa_products": [],
-   "application_channel_detail": "Vietnamese ordinary passport holders are visa-exempt for short tourist stays in Russia; no visa application is required.",
-   "requirement_detail": "unconditional_visa_free",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-22T20:28:59.251131",
-  "fresh_until": "2026-09-05T20:28:59.251131"
  },
  {
   "cache_key": "VNM|VNM|FRA|tourism|default|unknown|v6",
@@ -36943,114 +34304,6 @@
   },
   "generated_at": "2026-08-22T20:29:17.374278",
   "fresh_until": "2026-09-05T20:29:17.374278"
- },
- {
-  "cache_key": "VNM|VNM|PHL|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "VNM",
-   "lawful_country_of_residence": "VNM",
-   "destination_country": "PHL",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_EXEMPT",
-   "visa_category": "Tourist visa-free entry",
-   "permitted_stay": "21 days",
-   "passport_validity": "6 months beyond intended stay",
-   "required_documents": [
-    "Valid passport with at least 6 months validity beyond stay",
-    "Return or onward ticket",
-    "Proof of accommodation",
-    "Proof of sufficient funds",
-    "eTravel registration confirmation"
-   ],
-   "application_channel": "not_required",
-   "government_fee": {
-    "amount": null,
-    "currency": null
-   },
-   "processing_time": null,
-   "forms": [],
-   "official_portal_url": "https://etravel.gov.ph",
-   "photo_requirements": null,
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [
-    "Register on the Philippines eTravel portal within 72 hours before arrival and save the QR/code"
-   ],
-   "payment_process": [],
-   "submission_process": [
-    "No visa submission required; present passport, eTravel QR/code, return/onward ticket, and supporting documents at Philippine immigration"
-   ],
-   "onward_travel_evidence": "Return or onward ticket required",
-   "accommodation_evidence": "Proof of accommodation (hotel booking or host invitation) recommended",
-   "financial_evidence": "Evidence of sufficient funds (cash, bank/card, or sponsor letter) recommended",
-   "insurance_required": false,
-   "exceptions": [
-    "A stay longer than 21 days requires an extension application at a Bureau of Immigration office after arrival",
-    "Visa-free admission is a discretionary immigration decision and may be refused for incomplete documents or derogatory records"
-   ],
-   "uncertainty": [
-    {
-     "field": "permitted_stay_days",
-     "reason": "Philippines-Vietnam visa exemption is widely reported as 21 days, but some BI listings may show 30 days; verify the current official visa-free list before travel"
-    },
-    {
-     "field": "source_url",
-     "reason": "Could not verify the exact current Bureau of Immigration visa-free-entry page URL"
-    },
-    {
-     "field": "arrival_card / eTravel requirement",
-     "reason": "eTravel registration rules and portal may change; confirm shortly before departure"
-    }
-   ],
-   "confidence": "medium",
-   "permitted_stay_days": 21,
-   "passport_validity_requirement": {
-    "kind": "months_after_departure",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": true,
-    "name": "eTravel registration",
-    "submission_window": "within 72 hours before arrival"
-   },
-   "health_requirements": [],
-   "route_workflow_type": "visa_exempt_preparation",
-   "visa_products": [
-    {
-     "type": "Visa-free tourist entry",
-     "entry": "single",
-     "validity": "21 days",
-     "max_stay_days": 21,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "No application fee; extension possible after entry via BI"
-    }
-   ],
-   "application_channel_detail": "No visa application is required; Vietnamese ordinary passport holders may enter the Philippines for tourism for up to 21 days, but must complete the eTravel registration before arrival.",
-   "requirement_detail": "unconditional_visa_free",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-22T20:29:17.945992",
-  "fresh_until": "2026-09-05T20:29:17.945992"
  },
  {
   "cache_key": "VNM|VNM|CAN|tourism|default|unknown|v6",
@@ -38731,7 +35984,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T21:48:10.244843+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-22T20:31:10.632133",
   "fresh_until": "2026-09-05T20:31:10.632133"
@@ -40134,153 +37392,6 @@
   },
   "generated_at": "2026-08-22T20:32:34.193096",
   "fresh_until": "2026-09-05T20:32:34.193096"
- },
- {
-  "cache_key": "RUS|RUS|KOR|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "RUS",
-   "lawful_country_of_residence": "RUS",
-   "destination_country": "KOR",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_PRIMARY",
-  "guidance": {
-   "disposition": "VISA_REQUIRED",
-   "visa_category": "C-3-9 short-term visitor (tourist)",
-   "permitted_stay": "Up to 90 days",
-   "passport_validity": "Valid at least 6 months beyond intended stay",
-   "required_documents": [
-    "Valid passport",
-    "Completed visa application form",
-    "One passport photo",
-    "Flight itinerary",
-    "Proof of accommodation",
-    "Bank statements / proof of income",
-    "Employment or study certificate",
-    "Visa fee payment"
-   ],
-   "application_channel": "embassy",
-   "government_fee": {
-    "amount": null,
-    "currency": null
-   },
-   "processing_time": "5–15 working days",
-   "forms": [
-    "C-3-9 application form via Korea Visa Portal"
-   ],
-   "official_portal_url": "https://www.visa.go.kr",
-   "photo_requirements": "One recent colour photo, 35 mm × 45 mm, white background, taken within the last 6 months",
-   "biometrics_required": false,
-   "interview_required": null,
-   "appointment_required": true,
-   "account_registration_steps": [
-    "Register on the Korea Visa Portal",
-    "Complete the online application",
-    "Print, sign and date the form"
-   ],
-   "payment_process": [
-    "Pay the consular fee as instructed by the Korean embassy/consulate-general"
-   ],
-   "submission_process": [
-    "Book an appointment",
-    "Attend the Korean embassy/consulate-general in person",
-    "Submit passport and documents",
-    "Collect passport with visa after processing"
-   ],
-   "onward_travel_evidence": "Confirmed return or onward flight reservation",
-   "accommodation_evidence": "Hotel booking or invitation from a host in Korea",
-   "financial_evidence": "Recent bank statements and proof of stable income showing sufficient funds",
-   "insurance_required": false,
-   "exceptions": [
-    "Russian nationals may enter Jeju Island visa-free for up to 30 days on direct flights",
-    "Group tourist visas (C-3-2) for 5+ travellers via a designated agency may have reduced documentation",
-    "Multiple-entry visas may be granted at consular discretion to frequent travellers"
-   ],
-   "uncertainty": [
-    {
-     "field": "government_fee and visa product fees",
-     "reason": "Official consular fee is set by reciprocity and may have changed; not verified for 2026."
-    },
-    {
-     "field": "processing_time",
-     "reason": "Current embassy processing times in Russia may vary due to staffing or sanctions-related payment issues."
-    },
-    {
-     "field": "source_url",
-     "reason": "No exact official page URL for the specific Russia-to-Korea tourist route was available."
-    },
-    {
-     "field": "visa policy",
-     "reason": "Korea-Russia visa relations are politically sensitive; exemptions or issuance practices may have changed after my knowledge cutoff."
-    }
-   ],
-   "confidence": "low",
-   "permitted_stay_days": 90,
-   "passport_validity_requirement": {
-    "kind": "months_after_departure",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": true,
-    "name": "Arrival/Departure Card",
-    "submission_window": "distributed on flight or at immigration on arrival"
-   },
-   "health_requirements": [],
-   "route_workflow_type": "embassy_submission",
-   "visa_products": [
-    {
-     "type": "C-3-9 Single-entry tourist",
-     "entry": "single",
-     "validity": "3 months from issue",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "Standard tourist visa; stay up to 90 days"
-    },
-    {
-     "type": "C-3-9 Multiple-entry tourist",
-     "entry": "multiple",
-     "validity": "1–3 years (consular discretion)",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "For frequent travellers meeting income/prior-visit criteria"
-    },
-    {
-     "type": "C-3-2 Group tourist",
-     "entry": "single",
-     "validity": "3 months from issue",
-     "max_stay_days": 15,
-     "fee": {
-      "amount": null,
-      "currency": null
-     },
-     "notes": "For groups of 5+ via a designated travel agency"
-    }
-   ],
-   "application_channel_detail": "Russian ordinary passport holders must lodge in person at a Korean embassy or consulate-general in Russia; the Korea Visa Portal is used to prepare the form, not for electronic visa issuance.",
-   "requirement_detail": "paper_visa",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-22T20:32:39.299774",
-  "fresh_until": "2026-09-05T20:32:39.299774"
  },
  {
   "cache_key": "RUS|RUS|THA|tourism|default|unknown|v6",
@@ -42077,104 +39188,6 @@
   },
   "generated_at": "2026-08-22T20:37:42.158757",
   "fresh_until": "2026-08-24T20:37:42.158757"
- },
- {
-  "cache_key": "ISL|ISL|MNG|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "ISL",
-   "lawful_country_of_residence": "ISL",
-   "destination_country": "MNG",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_UNCERTAIN",
-  "guidance": {
-   "disposition": "VISA_REQUIRED",
-   "visa_category": "tourist",
-   "permitted_stay": "30 days",
-   "passport_validity": "6 months beyond arrival",
-   "required_documents": [
-    "passport bio-page copy",
-    "digital passport photo",
-    "return or onward ticket",
-    "proof of accommodation",
-    "proof of sufficient funds",
-    "travel itinerary"
-   ],
-   "application_channel": "online_portal",
-   "government_fee": {
-    "amount": null,
-    "currency": null
-   },
-   "processing_time": "3 business days",
-   "forms": null,
-   "official_portal_url": null,
-   "photo_requirements": null,
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": null,
-   "payment_process": null,
-   "submission_process": null,
-   "onward_travel_evidence": null,
-   "accommodation_evidence": null,
-   "financial_evidence": null,
-   "insurance_required": false,
-   "exceptions": null,
-   "uncertainty": [
-    {
-     "field": "disposition",
-     "reason": "Mongolia has run time-bound unilateral visa-free schemes for tourists from developed countries that may have included Iceland; the original scheme was due to expire at the end of 2025 and it is unclear whether it was extended or made permanent as of the stated 2026 travel date."
-    },
-    {
-     "field": "official_portal_url",
-     "reason": "Cannot verify the exact current official Mongolian eVisa portal URL without browsing."
-    },
-    {
-     "field": "government_fee",
-     "reason": "Official eVisa fee amount not verified."
-    },
-    {
-     "field": "required_documents",
-     "reason": "Document list is based on typical Mongolian tourist eVisa requirements and may have changed."
-    },
-    {
-     "field": "processing_time",
-     "reason": "Standard processing time not verified for the current eVisa system."
-    },
-    {
-     "field": "source_url",
-     "reason": "No single official government source URL available from current knowledge."
-    }
-   ],
-   "confidence": "low",
-   "permitted_stay_days": 30,
-   "passport_validity_requirement": {
-    "kind": "months_after_arrival",
-    "months": 6
-   },
-   "route_workflow_type": "evisa_portal",
-   "application_channel_detail": "Apply online through the official Mongolian eVisa portal; individuals may lodge their own application.",
-   "requirement_detail": "evisa",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [
-   "disposition VISA_REQUIRED but no visa_products were listed for this purpose"
-  ],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision",
-   "detail_pending": true
-  },
-  "generated_at": "2026-08-22T20:46:28.207295",
-  "fresh_until": "2026-09-05T20:46:28.207295"
  },
  {
   "cache_key": "CHN|CHN|THA|tourism|default|unknown|v6|doc:diplomatic_passport",
@@ -46333,7 +43346,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T21:48:04.017465+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:10:21.839487",
   "fresh_until": "2026-09-08T20:10:21.839487"
@@ -52411,7 +49429,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T21:47:31.405520+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:14:21.175484",
   "fresh_until": "2026-08-27T20:14:21.175484"
@@ -53962,7 +50985,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T21:46:49.463109+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://www.evisa.gov.kh/"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:15:23.795082",
   "fresh_until": "2026-09-08T20:15:23.795082"
@@ -54667,7 +51697,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T21:46:36.019903+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:16:00.021462",
   "fresh_until": "2026-08-27T20:16:00.021462"
@@ -55264,7 +52299,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T21:47:31.406348+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:16:38.855793",
   "fresh_until": "2026-09-08T20:16:38.855793"
@@ -59017,7 +56057,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T21:46:36.153618+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:19:12.048191",
   "fresh_until": "2026-09-08T20:19:12.048191"
@@ -61447,7 +58492,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T21:47:48.449139+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:20:40.419900",
   "fresh_until": "2026-09-08T20:20:40.419900"
@@ -63598,7 +60648,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T21:47:21.312535+00:00",
+    "outcome": "page_not_relevant",
+    "sources_tried": [
+     "https://www.migracion.gob.sv"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:22:07.914562",
   "fresh_until": "2026-09-08T20:22:07.914562"
@@ -64456,7 +61513,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T21:48:15.006907+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:22:58.486306",
   "fresh_until": "2026-09-08T20:22:58.486306"
@@ -67314,7 +64376,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:07:48.920524+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:25:32.737073",
   "fresh_until": "2026-09-08T20:25:32.737073"
@@ -67471,7 +64538,14 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T21:54:03.004729+00:00",
+    "outcome": "fetch_failed",
+    "sources": [
+     "https://evisa.gov.bh"
+    ]
+   }
   },
   "generated_at": "2026-08-25T20:25:41.477684",
   "fresh_until": "2026-09-08T20:25:41.477684"
@@ -67906,159 +64980,6 @@
   "fresh_until": "2026-08-27T20:25:53.764267"
  },
  {
-  "cache_key": "HKG|HKG|BEN|tourism|default|unknown|v6",
-  "route": {
-   "passport_nationality": "HKG",
-   "lawful_country_of_residence": "HKG",
-   "destination_country": "BEN",
-   "visa_category": "tourist_visa",
-   "travel_purpose": "tourism",
-   "arrival_date": null,
-   "consular_jurisdiction": null
-  },
-  "status": "KIMI_UNCERTAIN",
-  "guidance": {
-   "disposition": "VISA_REQUIRED",
-   "visa_category": "Tourist e-Visa",
-   "permitted_stay": "30, 60 or 90 days depending on e-Visa selected",
-   "passport_validity": "Valid for at least 6 months beyond arrival",
-   "required_documents": [
-    "Passport bio-data page scan",
-    "Recent passport-style digital photo",
-    "Confirmed return or onward ticket",
-    "Proof of accommodation",
-    "Proof of sufficient funds",
-    "Travel itinerary"
-   ],
-   "application_channel": "online_portal",
-   "government_fee": {
-    "amount": null,
-    "currency": null
-   },
-   "processing_time": "2-5 working days",
-   "forms": [
-    "Online Benin tourist e-Visa application form"
-   ],
-   "official_portal_url": "https://evisa.gouv.bj/",
-   "photo_requirements": "Recent digital passport photo, colour, plain white background, 35x45 mm equivalent, full face, no headwear except religious",
-   "biometrics_required": false,
-   "interview_required": false,
-   "appointment_required": false,
-   "account_registration_steps": [
-    "Create an account on the official Benin e-Visa portal",
-    "Verify email address and log in"
-   ],
-   "payment_process": [
-    "Pay the visa fee online by credit/debit card during application"
-   ],
-   "submission_process": [
-    "Complete and submit the application online",
-    "Receive the approved e-Visa by email",
-    "Print the e-Visa and present it with the passport on arrival"
-   ],
-   "onward_travel_evidence": "Confirmed return or onward ticket",
-   "accommodation_evidence": "Hotel booking or host invitation letter",
-   "financial_evidence": "Recent bank statement or proof of sufficient funds",
-   "insurance_required": false,
-   "exceptions": [
-    "Diplomatic/service passport holders may have separate bilateral exemptions not covered here.",
-    "Hong Kong permanent identity card or BNO status does not affect Benin visa requirements.",
-    "No transit points were named; any stopover may require its own visa."
-   ],
-   "uncertainty": [
-    {
-     "field": "visa_products",
-     "reason": "Published durations/fees for Benin tourist e-Visa are approximate; exact products and currency should be confirmed on the current payment page."
-    },
-    {
-     "field": "yellow fever requirement",
-     "reason": "Benin may require a yellow fever certificate for all travellers 9 months and older regardless of origin; verify current health regulations before travel."
-    },
-    {
-     "field": "government_fee",
-     "reason": "Fees vary by duration and may be charged in EUR, USD or XOF; confirm exact amount at the time of online payment."
-    },
-    {
-     "field": "source_url",
-     "reason": "No single official source page was available from memory; facts are drawn from the Benin e-Visa programme generally."
-    }
-   ],
-   "confidence": "medium",
-   "permitted_stay_days": null,
-   "passport_validity_requirement": {
-    "kind": "months_after_arrival",
-    "months": 6
-   },
-   "arrival_card": {
-    "required": null,
-    "name": null,
-    "submission_window": null
-   },
-   "health_requirements": [
-    {
-     "name": "Yellow fever vaccination certificate",
-     "applicability": "conditional",
-     "trigger_countries": [],
-     "trigger": "Required for travellers aged 9 months and over arriving from or transiting a yellow-fever risk country; direct travel from Hong Kong is generally not a trigger.",
-     "question": "Will you travel directly from Hong Kong without transiting a yellow-fever risk country, and are you aged 9 months or over?"
-    }
-   ],
-   "route_workflow_type": "evisa_portal",
-   "visa_products": [
-    {
-     "type": "Single-entry tourist 30-day e-Visa",
-     "entry": "single",
-     "validity": "30 days from issue or arrival",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 50,
-      "currency": "EUR"
-     },
-     "notes": null
-    },
-    {
-     "type": "Single-entry tourist 60-day e-Visa",
-     "entry": "single",
-     "validity": "60 days from issue or arrival",
-     "max_stay_days": 60,
-     "fee": {
-      "amount": 75,
-      "currency": "EUR"
-     },
-     "notes": null
-    },
-    {
-     "type": "Single-entry tourist 90-day e-Visa",
-     "entry": "single",
-     "validity": "90 days from issue or arrival",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 100,
-      "currency": "EUR"
-     },
-     "notes": null
-    }
-   ],
-   "application_channel_detail": "Individual applicants lodge directly through Benin's official e-Visa portal; no authorised agent or in-person submission is required.",
-   "requirement_detail": "evisa",
-   "transit_requirement": {
-    "required": null,
-    "note": null
-   }
-  },
-  "missing_fields": [],
-  "contradictions": [
-   "application_channel 'online_portal' but the channel detail says individuals may not file directly (use authorised_agent)"
-  ],
-  "model": "kimi-k2.7-code-highspeed",
-  "verification": {
-   "passes": 1,
-   "label": "Kimi route decision"
-  },
-  "generated_at": "2026-08-25T20:26:07.701216",
-  "fresh_until": "2026-08-27T20:26:07.701216"
- },
- {
   "cache_key": "HKG|HKG|BRN|tourism|default|unknown|v6",
   "route": {
    "passport_nationality": "HKG",
@@ -68211,7 +65132,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T21:54:02.991076+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:26:08.600191",
   "fresh_until": "2026-08-27T20:26:08.600191"
@@ -70041,7 +66967,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T21:54:03.014400+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:27:29.777747",
   "fresh_until": "2026-09-08T20:27:29.777747"
@@ -85793,7 +82724,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:49.053587+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:40:15.436845",
   "fresh_until": "2026-09-08T20:40:15.436845"
@@ -86243,7 +83179,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:49.065916+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:40:30.981360",
   "fresh_until": "2026-09-08T20:40:30.981360"
@@ -86829,7 +83770,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:49.014612+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:40:45.704663",
   "fresh_until": "2026-09-08T20:40:45.704663"
@@ -87682,7 +84628,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:50.053670+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:41:12.358404",
   "fresh_until": "2026-09-08T20:41:12.358404"
@@ -88884,7 +85835,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:50.070170+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:42:09.218821",
   "fresh_until": "2026-09-08T20:42:09.218821"
@@ -88978,7 +85934,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:50.081087+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:42:10.195138",
   "fresh_until": "2026-09-08T20:42:10.195138"
@@ -89205,7 +86166,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:50.111637+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:42:17.144970",
   "fresh_until": "2026-09-08T20:42:17.144970"
@@ -89413,7 +86379,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:46.044174+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:42:26.770285",
   "fresh_until": "2026-08-27T20:42:26.770285"
@@ -90086,7 +87057,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:50.103326+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:42:53.385091",
   "fresh_until": "2026-09-08T20:42:53.385091"
@@ -91128,7 +88104,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:49.959386+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:43:30.393167",
   "fresh_until": "2026-09-08T20:43:30.393167"
@@ -91212,7 +88193,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:49.972692+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:43:48.811005",
   "fresh_until": "2026-09-08T20:43:48.811005"
@@ -91635,7 +88621,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:50.014464+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:44:06.788419",
   "fresh_until": "2026-09-08T20:44:06.788419"
@@ -91883,7 +88874,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:50.044059+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:44:14.873410",
   "fresh_until": "2026-09-08T20:44:14.873410"
@@ -92168,7 +89164,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:50.000012+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:44:30.925658",
   "fresh_until": "2026-09-08T20:44:30.925658"
@@ -94450,7 +91451,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:51.338211+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:45:53.189442",
   "fresh_until": "2026-09-08T20:45:53.189442"
@@ -95045,7 +92051,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:51.404138+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:46:06.089386",
   "fresh_until": "2026-09-08T20:46:06.089386"
@@ -95276,7 +92287,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:51.366947+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:46:14.747757",
   "fresh_until": "2026-09-08T20:46:14.747757"
@@ -95389,7 +92405,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:51.357982+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:46:19.543442",
   "fresh_until": "2026-09-08T20:46:19.543442"
@@ -96286,7 +93307,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:51.520832+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:46:39.950384",
   "fresh_until": "2026-09-08T20:46:39.950384"
@@ -96387,7 +93413,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:51.379662+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:46:49.500851",
   "fresh_until": "2026-09-08T20:46:49.500851"
@@ -97580,7 +94611,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:51.508680+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:47:41.014453",
   "fresh_until": "2026-09-08T20:47:41.014453"
@@ -98046,7 +95082,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:50.872098+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:48:01.763384",
   "fresh_until": "2026-08-27T20:48:01.763384"
@@ -98304,7 +95345,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:50.884756+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:48:12.003102",
   "fresh_until": "2026-09-08T20:48:12.003102"
@@ -98422,7 +95468,12 @@
   "model": "kimi-k2.7-code-highspeed",
   "verification": {
    "passes": 1,
-   "label": "Kimi route decision"
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:10:50.857994+00:00",
+    "outcome": "no_official_source",
+    "note": "the answer names no government page to check"
+   }
   },
   "generated_at": "2026-08-25T20:48:12.287593",
   "fresh_until": "2026-09-08T20:48:12.287593"
