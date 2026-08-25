@@ -666,6 +666,8 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
     }
     if parsed.get("transit_countries"):
         route["transit_countries"] = parsed["transit_countries"]
+    if parsed.get("arrival_date"):
+        route["arrival_date"] = parsed["arrival_date"]
     try:
         out = kimi_primary.get_route_guidance(db, route, stage="core",
                                               after=_after_cold_answer)

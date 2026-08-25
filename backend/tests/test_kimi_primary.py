@@ -957,3 +957,36 @@ def test_clear_questions_never_touch_the_model_and_messy_ones_do():
     r = kimi_primary.parse_question(
         "i moved from china to japan last year, now taking my korean wife to france")
     assert r["understood"] is True and r["read_by"] == "deterministic"
+
+
+def test_travel_dates_in_the_words_reach_the_route():
+    """"Going in january 2027" must answer for January 2027 — policies carry
+    end dates, and the cache is bucketed by policy month. Also pins the
+    month-table bug where january parsed as February."""
+    kimi_primary.set_provider(lambda system, user: (_ for _ in ()).throw(
+        AssertionError("deterministic paths must not call the model")))
+    r = kimi_primary.parse_question(
+        "chinese passport, going to japan in january 2027")
+    assert r["arrival_date"] == "2027-01-01"
+    assert kimi_primary.parse_question("持中国护照明年三月去日本")[
+        "arrival_date"].endswith("-03-01")
+    assert kimi_primary.parse_question("from china to japan")[
+        "arrival_date"] is None            # absent means now, never a guess
+
+
+def test_a_repeated_model_parse_is_served_from_the_cache():
+    kimi_primary._PARSE_CACHE.clear()
+    calls = {}
+
+    def model(system, user):
+        calls["n"] = calls.get("n", 0) + 1
+        return {"nationality": "USA", "destination": "ITA",
+                "travel_purpose": "tourism",
+                "travel_document_type": "ordinary_passport",
+                "transit_countries": [], "focus": None, "arrival_date": None}
+    kimi_primary.set_provider(model)
+    q = "we did thailand, vietnam and japan before, this time italy, we are american"
+    kimi_primary.parse_question(q)
+    kimi_primary.parse_question(q.upper() + "!!")   # same words, different case
+    assert calls["n"] == 1                            # the repeat cost nothing
+    kimi_primary._PARSE_CACHE.clear()

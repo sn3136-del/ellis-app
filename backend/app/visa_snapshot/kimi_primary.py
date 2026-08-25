@@ -743,7 +743,10 @@ def apply_portal_fallback(out: dict, route: dict) -> dict:
     if not isinstance(g, dict) or g.get("official_portal_url"):
         return out
     if g.get("disposition") not in ("VISA_REQUIRED",
-                                    "ELECTRONIC_AUTHORIZATION_REQUIRED"):
+                                    "ELECTRONIC_AUTHORIZATION_REQUIRED",
+                                    "CONDITIONAL"):
+        # A conditional verdict still helps more with the official page in
+        # hand; only a plain visa-exempt route has nothing to link to.
         return out
     url = _official_portals().get(
         str(route.get("destination_country") or "").upper())
@@ -1168,6 +1171,8 @@ passport", "from France" when it means them, 持中国护照...) or null,
 "travel_purpose": tourism|business|family_visit|study|work|transit or null,
 "travel_document_type": "diplomatic_passport"|"service_passport"|
 "emergency_passport"|"ordinary_passport" (default ordinary_passport),
+"arrival_date": "YYYY-MM-DD" if they say WHEN they are going ("in january
+2027", 明年三月 — use the first of that month) else null,
 "focus": "fee"|"stay"|"documents"|"processing"|null — the ONE fact asked for,
 if any}
 
@@ -1349,6 +1354,46 @@ _FOCUS_WORDS = (
 _TRANSIT_MARKERS = ("via ", "through ", "layover in ", "stopover in ",
                     "transit in ", "transiting ")
 
+_MONTHS = {m: i + 1 for i, m in enumerate((
+    "january", "february", "march", "april", "may", "june", "july",
+    "august", "september", "october", "november", "december"))}
+_MONTHS.update({m[:3]: v for m, v in list(_MONTHS.items())})
+
+
+def _extract_arrival(question: str) -> str | None:
+    """When the words say WHEN, the answer must be for THEN: policies carry
+    end dates (China's visa-free window runs to 31 Dec 2026), and the cache
+    is bucketed by policy month. Deterministic patterns only; absent means
+    now, never a guess."""
+    from datetime import date
+    q = str(question or "").lower()
+    today = date.today()
+    m = _re.search(r"\b(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|"
+                   r"jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|"
+                   r"nov(?:ember)?|dec(?:ember)?)\.?\s*(?:of\s*)?(20\d\d)?\b", q)
+    if m and (m.group(2) or "next year" in q or "明年" in question):
+        month = _MONTHS[m.group(1)[:3]]
+        year = int(m.group(2)) if m.group(2) else today.year + 1
+        return f"{year:04d}-{month:02d}-01"
+    if m and m.group(1) not in ("may",):      # bare month: the next occurrence
+        month = _MONTHS[m.group(1)[:3]]
+        year = today.year + (1 if month < today.month else 0)
+        return f"{year:04d}-{month:02d}-01"
+    zh = _re.search(r"(明年|今年)?\s*([一二三四五六七八九十]{1,2}|\d{1,2})月", question)
+    if zh:
+        raw = zh.group(2)
+        nums = {"一":1,"二":2,"三":3,"四":4,"五":5,"六":6,"七":7,"八":8,"九":9,
+                "十":10,"十一":11,"十二":12}
+        month = nums.get(raw) or (int(raw) if raw.isdigit() else None)
+        if month and 1 <= month <= 12:
+            year = today.year + (1 if zh.group(1) == "明年"
+                                 or month < today.month else 0)
+            return f"{year:04d}-{month:02d}-01"
+    if "next month" in q or "下个月" in question or "下個月" in question:
+        y, mo = (today.year, today.month + 1) if today.month < 12 else (today.year + 1, 1)
+        return f"{y:04d}-{mo:02d}-01"
+    return None
+
 
 def _question_focus(question: str) -> str | None:
     low = str(question or "").lower()
@@ -1426,6 +1471,7 @@ def _deterministic_route(question: str) -> dict | None:
     return {"understood": True, "nationality": nat, "destination": dest,
             "travel_purpose": purpose, "travel_document_type": doc,
             "transit_countries": transit[:5], "confident": confident,
+            "arrival_date": _extract_arrival(q),
             "focus": _question_focus(q), "read_by": "deterministic"}
 
 
@@ -1479,6 +1525,16 @@ def parse_question_with_context(question: str, context: dict | None,
     return parse_question(q, timeout=timeout)
 
 
+# Questions repeat — the same tester types the same sentence, demos rerun the
+# same lines. A parse (even one the model produced) is remembered by its
+# normalized wording, so the repeat costs nothing.
+_PARSE_CACHE: dict = {}
+
+
+def _parse_cache_key(q: str) -> str:
+    return _re.sub(r"[^a-z0-9\u4e00-\u9fff]+", " ", q.lower()).strip()
+
+
 def parse_question(question: str, *, timeout: float = 20.0) -> dict:
     """Turn 'What visa for tourism in Japan with a Chinese passport?' into a
     route dict the Database lookup understands. Deterministic shape-check on
@@ -1486,6 +1542,10 @@ def parse_question(question: str, *, timeout: float = 20.0) -> dict:
     q = str(question or "").strip()
     if not q:
         raise GuidanceUnavailable("no question to read")
+    ck = _parse_cache_key(q)
+    hit = _PARSE_CACHE.get(ck)
+    if hit is not None:
+        return dict(hit)
     direct = _deterministic_route(q)
     if direct is not None and direct.get("confident"):
         return direct
@@ -1509,12 +1569,19 @@ def parse_question(question: str, *, timeout: float = 20.0) -> dict:
                (raw.get("transit_countries") or [])
                if isinstance(c, str) and len(str(c).strip()) == 3][:5]
     focus = raw.get("focus")
-    return {"understood": True, "nationality": nat, "destination": dest,
-            "travel_purpose": purpose if purpose in
-            ("tourism", "business", "family_visit", "study", "work",
-             "transit", "other")
-            else "tourism", "travel_document_type": doc or "ordinary_passport",
-            "transit_countries": transit,
-            "focus": focus if focus in ("fee", "stay", "documents",
-                                        "processing") else _question_focus(q),
-            "read_by": "model"}
+    out = {"understood": True, "nationality": nat, "destination": dest,
+           "travel_purpose": purpose if purpose in
+           ("tourism", "business", "family_visit", "study", "work",
+            "transit", "other")
+           else "tourism", "travel_document_type": doc or "ordinary_passport",
+           "transit_countries": transit,
+           "arrival_date": raw.get("arrival_date")
+           if _re.fullmatch(r"20\d\d-\d\d-\d\d", str(raw.get("arrival_date") or ""))
+           else _extract_arrival(q),
+           "focus": focus if focus in ("fee", "stay", "documents",
+                                       "processing") else _question_focus(q),
+           "read_by": "model"}
+    if len(_PARSE_CACHE) > 500:
+        _PARSE_CACHE.clear()
+    _PARSE_CACHE[ck] = dict(out)
+    return out
