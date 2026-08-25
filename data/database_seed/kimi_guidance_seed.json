@@ -1065,19 +1065,19 @@
    "passes": 1,
    "label": "Kimi route decision",
    "grounded_check": {
-    "at": "2026-08-22T06:50:22.191621+00:00",
+    "at": "2026-08-25T22:23:27.542706+00:00",
     "outcome": "checked",
     "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600",
-    "content_hash": "c1b224cfe2846b019ce59b45f5fbd4f6c2a4df7eba17a3a62aba919a5f3e95fb",
+    "content_hash": "d44d6945160b4ad630c19d2de5b0723991cf0d5ea72bc834ae17485f31b43b4b",
     "consistent": true,
     "changed_fields": [],
     "disputed_fields": [],
     "generic_page_skipped": [],
-    "note": "The page is generic and confirms only 3/6/12-month tourist stays without nationality-specific rules, so no stored fields are contradicted."
+    "note": "The page only provides a generic description of the Visitor visa (subclass 600) and does not address nationality-specific rules for Chinese applicants."
    }
   },
   "generated_at": "2026-08-22T02:17:55.820410",
-  "fresh_until": "2026-09-05T06:50:29.704761"
+  "fresh_until": "2026-09-08T22:23:30.762752"
  },
  {
   "cache_key": "CHN|CHN|RUS|tourism|default|unknown|v6",
@@ -1527,16 +1527,19 @@
    "passes": 1,
    "label": "Kimi route decision",
    "grounded_check": {
-    "at": "2026-08-22T06:45:16.587657+00:00",
-    "outcome": "fetch_failed",
-    "sources": [
-     "https://france-visas.gouv.fr/",
-     "https://www.france-visas.gouv.fr/en"
-    ]
+    "at": "2026-08-25T22:24:32.949945+00:00",
+    "outcome": "checked",
+    "source_url": "https://france-visas.gouv.fr/",
+    "content_hash": "9f94ff8eb5d091b61f31cd299e4a20d7fcde7641c3858c5547798f017313dcea",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The page is the generic France-Visas homepage and does not state nationality-specific rules for Chinese applicants."
    }
   },
   "generated_at": "2026-08-22T02:18:25.179767",
-  "fresh_until": "2026-09-05T02:18:25.179767"
+  "fresh_until": "2026-09-08T22:24:50.770936"
  },
  {
   "cache_key": "HKG|HKG|TWN|tourism|default|unknown|v6",
@@ -5005,19 +5008,19 @@
    "passes": 1,
    "label": "Kimi route decision",
    "grounded_check": {
-    "at": "2026-08-22T06:48:53.667365+00:00",
+    "at": "2026-08-25T22:24:32.910273+00:00",
     "outcome": "checked",
     "source_url": "https://www.evus.gov/",
-    "content_hash": "16032616f9ff87c6af6becd3b30087b16db4cf0cb6b22c00887eacf1242c38f9",
+    "content_hash": "b7e0a607a51e082a1b67f3792f35f354d0f1c341f9f07f4f9c3a35c2a2a5bd4d",
     "consistent": true,
     "changed_fields": [],
     "disputed_fields": [],
     "generic_page_skipped": [],
-    "note": "The EVUS page confirms Chinese passport holders with 10-year B1/B2 visas must enroll and pay a $30.75 USD fee; it does not contradict any stored visa-application details."
+    "note": "The EVUS page confirms the stored rule that Chinese 10-year B1/B2 holders must enroll in EVUS and does not contradict any stored field."
    }
   },
   "generated_at": "2026-08-22T02:23:46.866224",
-  "fresh_until": "2026-09-05T06:49:39.881388"
+  "fresh_until": "2026-09-08T22:24:51.509974"
  },
  {
   "cache_key": "HKG|HKG|FRA|tourism|default|unknown|v6",
@@ -31800,23 +31803,23 @@
    "passes": 1,
    "label": "Kimi route decision",
    "grounded_check": {
-    "at": "2026-08-25T20:36:17.822329+00:00",
+    "at": "2026-08-25T22:24:32.971271+00:00",
     "outcome": "checked",
     "source_url": "https://cs.mfa.gov.cn/gyls/lsgz/fwxx/202511/t20251110_11749824.shtml",
     "content_hash": "9c7aa0858a3745ae5a62efdfe44956918dabcc2e2d7ec85e258c87e0897970a8",
     "consistent": false,
     "changed_fields": [],
     "disputed_fields": [
+     "application_channel",
      "application_channel_detail",
      "disposition",
-     "exceptions",
      "permitted_stay",
      "required_documents",
      "requirement_detail",
      "visa_category"
     ],
     "generic_page_skipped": [],
-    "note": "The official page confirms UK ordinary passport holders may enter China visa-free for tourism for up to 30 days until 31 December 2026, so no Chinese visa or CVASC application is required."
+    "note": "The official FAQ confirms UK ordinary passport holders may enter China visa-free for tourism for up to 30 days, so the stored visa-required details no longer apply."
    }
   },
   "generated_at": "2026-08-22T20:27:04.192320",
@@ -102993,5 +102996,179 @@
   },
   "generated_at": "2026-08-25T21:31:38.565000",
   "fresh_until": "2026-09-08T21:31:38.565000"
+ },
+ {
+  "cache_key": "USA|USA|KOR|tourism|default|unknown|v6",
+  "route": {
+   "passport_nationality": "USA",
+   "lawful_country_of_residence": "USA",
+   "destination_country": "KOR",
+   "visa_category": "tourist_visa",
+   "travel_purpose": "tourism",
+   "arrival_date": null,
+   "consular_jurisdiction": null
+  },
+  "status": "KIMI_PRIMARY",
+  "guidance": {
+   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+   "visa_category": "K-ETA (short-term tourist visit)",
+   "permitted_stay": "90 days",
+   "passport_validity": "Valid for at least 3 months from K-ETA application date; must be valid on arrival",
+   "required_documents": [
+    "Valid U.S. passport",
+    "Digital passport-style photo",
+    "Active email address",
+    "Credit/debit card for fee payment"
+   ],
+   "application_channel": "online_portal",
+   "government_fee": {
+    "amount": 10000,
+    "currency": "KRW"
+   },
+   "processing_time": "Usually within 72 hours; apply at least 72 hours before departure",
+   "forms": [
+    "Online K-ETA application form (personal details, passport information, travel plans, contact info, health/security and declaration questions)"
+   ],
+   "official_portal_url": "https://www.k-eta.go.kr",
+   "photo_requirements": "One recent digital passport-type photo, color, plain white or light background, face clearly visible; exact dimensions and file size follow the K-ETA portal specifications",
+   "biometrics_required": false,
+   "interview_required": false,
+   "appointment_required": false,
+   "account_registration_steps": [
+    "Provide an active email address and set an application password on the K-ETA portal to start and track the application"
+   ],
+   "payment_process": [
+    "Pay the 10,000 KRW fee online by international credit/debit card before submitting the application"
+   ],
+   "submission_process": [
+    "Submit the completed K-ETA application through the official online portal",
+    "Wait for approval, usually within minutes to 72 hours",
+    "Board with the passport linked to the approved K-ETA; save the approval reference"
+   ],
+   "onward_travel_evidence": "Return or onward ticket within the 90-day permitted stay may be requested by immigration officers at entry",
+   "accommodation_evidence": "An overnight address in Korea must be entered on the K-ETA form; hotel booking or host address is accepted",
+   "financial_evidence": "Proof of sufficient funds may be requested at the port of entry; not routinely required during the online K-ETA application",
+   "insurance_required": false,
+   "exceptions": [
+    "Holders of a valid ROK visa or alien registration card do not need K-ETA",
+    "Diplomatic/official passport holders on official duty are visa-exempt and do not use K-ETA",
+    "APEC Business Travel Card holders may use dedicated immigration lanes but generally still need K-ETA for tourist visits unless holding a valid visa"
+   ],
+   "uncertainty": [
+    {
+     "field": "passport_validity",
+     "reason": "K-ETA eligibility states passport must be valid for more than 3 months from application; the exact entry-validity rule is subject to official update."
+    },
+    {
+     "field": "government_fee",
+     "reason": "K-ETA fee has been revised before; confirm current amount on the official K-ETA portal."
+    }
+   ],
+   "confidence": "medium",
+   "permitted_stay_days": 90,
+   "passport_validity_requirement": {
+    "kind": "months_after_arrival",
+    "months": 3
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "Foreigner arrival/departure declaration (entry card)",
+    "submission_window": "Completed before immigration inspection on arrival; airlines may distribute it en route; Smart Entry Service can replace it for pre-registered eligible travelers"
+   },
+   "health_requirements": [
+    {
+     "name": "Yellow fever vaccination",
+     "applicability": "conditional",
+     "trigger_countries": [
+      "AGO",
+      "ARG",
+      "BEN",
+      "BOL",
+      "BRA",
+      "BFA",
+      "BDI",
+      "CMR",
+      "CAF",
+      "TCD",
+      "COL",
+      "COG",
+      "CIV",
+      "COD",
+      "ECU",
+      "GNQ",
+      "ETH",
+      "GAB",
+      "GMB",
+      "GHA",
+      "GIN",
+      "GNB",
+      "GUY",
+      "KEN",
+      "LBR",
+      "MLI",
+      "MRT",
+      "NER",
+      "NGA",
+      "PAN",
+      "PRY",
+      "PER",
+      "RWA",
+      "SEN",
+      "SLE",
+      "SSD",
+      "SUR",
+      "TGO",
+      "TTO",
+      "UGA",
+      "VEN",
+      "ZMB",
+      "ZWE"
+     ],
+     "trigger": "Travel from or through a yellow-fever endemic country within 6–10 days before arrival",
+     "question": "Have you visited any yellow-fever risk countries in the 6–10 days before arriving in Korea?"
+    }
+   ],
+   "route_workflow_type": "electronic_authorization",
+   "visa_products": [
+    {
+     "type": "K-ETA short-term tourist",
+     "entry": "multiple",
+     "validity": "3 years from approval date",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 10000,
+      "currency": "KRW"
+     },
+     "notes": "Each stay may not exceed 90 days for US nationals; approval must be obtained before boarding"
+    }
+   ],
+   "application_channel_detail": "U.S. citizens must apply themselves online via the official K-ETA portal before boarding; embassy/visa centre submission is not used for this route.",
+   "source_url": "https://www.k-eta.go.kr",
+   "requirement_detail": "eta_electronic_authorization",
+   "transit_requirement": {
+    "required": null,
+    "note": null
+   }
+  },
+  "missing_fields": [],
+  "contradictions": [],
+  "model": "kimi-k2.7-code-highspeed",
+  "verification": {
+   "passes": 1,
+   "label": "Kimi route decision",
+   "grounded_check": {
+    "at": "2026-08-25T22:48:37.517297+00:00",
+    "outcome": "checked",
+    "source_url": "https://www.k-eta.go.kr/portal/newapply/index.do",
+    "content_hash": "925072993acb2a2663ebe8bf06e9ba9e0abc98c7301a65877b03d37b59303994",
+    "consistent": true,
+    "changed_fields": [],
+    "disputed_fields": [],
+    "generic_page_skipped": [],
+    "note": "The official K-ETA portal confirms online-only application, a KRW 10,000 fee, and assessment within 72 hours, but does not state nationality-specific stay length or validity details for U.S. citizens."
+   }
+  },
+  "generated_at": "2026-08-25T22:48:13.224407",
+  "fresh_until": "2026-09-08T22:48:46.666015"
  }
 ]
