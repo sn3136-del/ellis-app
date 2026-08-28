@@ -1,0 +1,277 @@
+"""The T-Station 25-field record — Trip.com's own data dictionary, exactly.
+
+Trip.com's requirements specification defines a 25-field record (6 core,
+10 visa-detail, 4 additional, 5 data-source) with exact English field names
+and enumerations. Their acceptance standard measures field completeness and
+accuracy against THIS shape, per "passport type × destination" unit, and the
+quality-control backend, the Excel export and the sampling checklists must
+all speak it. This module converts Ellis's internal guidance into that
+record, one record per visa product (or one for the route when no products
+exist), without inventing a value it does not hold: a field Ellis cannot
+fill stays None and shows as "missing" in the checklist — the honest state.
+"""
+from __future__ import annotations
+
+import re
+
+# Their field order, exactly as numbered 1-25 in the requirements document.
+FIELD_ORDER = (
+    "travel_document_type", "travel_document_country", "destination_country",
+    "travel_purpose", "visa_requirement", "visa_type_name",
+    "validity_duration", "validity_unit", "max_stay_duration", "max_stay_unit",
+    "entries", "processing_min_days", "processing_unit",
+    "visa_fee_amount", "visa_fee_currency", "application_method",
+    "required_documents", "consulate_district", "entry_requirements",
+    "special_conditions",
+    "data_source", "source_url", "collected_at", "info_validity",
+    "confidence_level",
+)
+
+# 6 core + the detail/source fields their completeness metric counts as
+# required. "Provide if available" fields (12, 13, 18, 19, 20) are excluded
+# from the completeness denominator, per the spec's own Required column.
+REQUIRED_FIELDS = frozenset({
+    "travel_document_type", "travel_document_country", "destination_country",
+    "travel_purpose", "visa_requirement", "visa_type_name",
+    "validity_duration", "validity_unit", "max_stay_duration", "max_stay_unit",
+    "entries", "visa_fee_amount", "visa_fee_currency", "application_method",
+    "required_documents",
+    "data_source", "source_url", "collected_at", "info_validity",
+    "confidence_level",
+})
+
+FIELD_DESCRIPTIONS = {
+    "travel_document_type": "Type of travel document held",
+    "travel_document_country": "Document issuing country (applicant nationality)",
+    "destination_country": "Visa destination",
+    "travel_purpose": "User's travel purpose",
+    "visa_requirement": "Visa-free / Visa on Arrival / Visa Required in Advance",
+    "visa_type_name": "Visa type name for this purpose and destination",
+    "validity_duration": "How long the visa is valid after approval (number)",
+    "validity_unit": "Day / Month / Year / Long-term Valid",
+    "max_stay_duration": "Maximum length of stay per entry (number)",
+    "max_stay_unit": "Hour / Day",
+    "entries": "Single / Multiple / Unlimited",
+    "processing_min_days": "Shortest time from submission to visa issuance",
+    "processing_unit": "Working Day / Calendar Day",
+    "visa_fee_amount": "Official visa fee amount (consular fee only)",
+    "visa_fee_currency": "ISO 4217 currency code",
+    "application_method": "Embassy Submission / Online Application / Agency "
+                          "Service / On-arrival Processing / Other",
+    "required_documents": "Core document checklist, comma separated",
+    "consulate_district": "Consulate district divisions, if any",
+    "entry_requirements": "Other entry requirements besides the visa",
+    "special_conditions": "Special policies or restrictions",
+    "data_source": "Information source website / organization",
+    "source_url": "Specific page link",
+    "collected_at": "Data collection date",
+    "info_validity": "Policy validity period until",
+    "confidence_level": "High / Medium / Low",
+}
+
+_DISPOSITION_TO_REQUIREMENT = {
+    "VISA_EXEMPT": "Visa-free",
+    "VISA_ON_ARRIVAL": "Visa on Arrival",
+    "ELECTRONIC_AUTHORIZATION_REQUIRED": "Visa Required in Advance",
+    "VISA_REQUIRED": "Visa Required in Advance",
+    "CONDITIONAL": "Conditional",
+    "NOT_ADMITTED": "Not admitted",
+}
+
+_CHANNEL_TO_METHOD = {
+    "EMBASSY_OR_CONSULATE": "Embassy Submission",
+    "OFFICIAL_ONLINE_PORTAL": "Online Application",
+    "GOVERNMENT_ONLINE_PORTAL": "Online Application",
+    "VISA_APPLICATION_CENTRE": "Agency Service",
+    "ACCREDITED_AGENCY": "Agency Service",
+    "DESIGNATED_AGENCY": "Agency Service",
+    "ON_ARRIVAL": "On-arrival Processing",
+    "NOT_APPLICABLE": "Other",
+}
+
+
+def _num_unit(text) -> tuple[float | None, str | None]:
+    """'90 days' -> (90, 'Day'); '5 years' -> (5, 'Year'); '6 months' ->
+    (6, 'Month'). Returns (None, None) when the text carries no single
+    number — a range or prose is not silently collapsed to a guess."""
+    t = str(text or "").strip().lower()
+    if not t:
+        return None, None
+    m = re.search(r"(\d+(?:\.\d+)?)\s*(?:working\s+|business\s+|calendar\s+)?"
+                  r"(hour|day|month|year|week)s?", t)
+    if not m:
+        return None, None
+    n = float(m.group(1))
+    unit = {"hour": "Hour", "day": "Day", "month": "Month",
+            "year": "Year", "week": "Day"}[m.group(2)]
+    if m.group(2) == "week":
+        n *= 7
+    return (int(n) if n == int(n) else n), unit
+
+
+def _entries(text) -> str | None:
+    t = str(text or "").lower()
+    if "single" in t or t == "1":
+        return "Single"
+    if "unlimit" in t:
+        return "Unlimited"
+    if "multiple" in t or "double" in t or "two" in t:
+        return "Multiple"
+    return None
+
+
+def _fee(product: dict, guidance: dict) -> tuple[float | None, str | None]:
+    fee = product.get("fee") if isinstance(product.get("fee"), dict) else None
+    if not fee:
+        g = guidance.get("government_fee")
+        fee = g if isinstance(g, dict) else None
+    if not fee:
+        return None, None
+    amount = fee.get("amount")
+    currency = fee.get("currency")
+    try:
+        amount = float(amount)
+    except (TypeError, ValueError):
+        return None, str(currency) if currency else None
+    if amount == int(amount):
+        amount = int(amount)
+    return amount, str(currency) if currency else None
+
+
+def _confidence(guidance: dict, provenance: dict | None) -> str:
+    """High: a person verified it against a named official page. Medium: the
+    engine's own confident answer. Low: the engine said low confidence."""
+    if provenance:
+        return "High"
+    c = str(guidance.get("confidence") or "").lower()
+    return "Low" if c == "low" else "Medium"
+
+
+def _processing(guidance: dict) -> tuple[float | None, str | None]:
+    n, unit = _num_unit(guidance.get("processing_time"))
+    if n is None:
+        return None, None
+    text = str(guidance.get("processing_time") or "").lower()
+    return n, ("Working Day" if "working" in text or "business" in text
+               else "Calendar Day")
+
+
+def records_for_route(route: dict, guidance: dict,
+                      provenance: dict | None = None,
+                      collected_at: str | None = None,
+                      valid_until: str | None = None) -> list[dict]:
+    """The route's answer as T-Station 25-field records, one per visa
+    product; a product-less route (visa-free, or detail still filling)
+    yields a single route-level record."""
+    g = guidance or {}
+    disposition = str(g.get("disposition") or "").upper()
+    requirement = _DISPOSITION_TO_REQUIREMENT.get(disposition)
+    docs = g.get("required_documents")
+    docs = ", ".join(str(d) for d in docs if d) if isinstance(docs, list) else (
+        str(docs) if docs else None)
+    channel = str(g.get("application_channel") or "").upper()
+    method = _CHANNEL_TO_METHOD.get(channel) or (None if not channel else "Other")
+    if disposition == "VISA_EXEMPT":
+        method = "Other"
+    entry_req = g.get("entry_requirements")
+    if isinstance(entry_req, list):
+        entry_req = "; ".join(str(x) for x in entry_req if x) or None
+    exceptions = g.get("exceptions")
+    if isinstance(exceptions, list):
+        exceptions = "; ".join(str(x) for x in exceptions if x) or None
+    proc_n, proc_unit = _processing(g)
+    base = {
+        "travel_document_type": route.get("travel_document_type")
+                                or "ordinary_passport",
+        "travel_document_country": route.get("passport_nationality"),
+        "destination_country": route.get("destination_country"),
+        "travel_purpose": route.get("travel_purpose") or "tourism",
+        "visa_requirement": requirement,
+        "visa_type_name": None,
+        "validity_duration": None, "validity_unit": None,
+        "max_stay_duration": None, "max_stay_unit": None,
+        "entries": None,
+        "processing_min_days": proc_n, "processing_unit": proc_unit,
+        "visa_fee_amount": None, "visa_fee_currency": None,
+        "application_method": method,
+        "required_documents": docs,
+        "consulate_district": None,
+        "entry_requirements": entry_req if isinstance(entry_req, str) else None,
+        "special_conditions": exceptions if isinstance(exceptions, str) else None,
+        "data_source": (provenance or {}).get("verified_by")
+                       or ("Ellis verified route engine" if g else None),
+        "source_url": (provenance or {}).get("source_url")
+                      or g.get("source_url") or g.get("official_portal_url"),
+        "collected_at": ((provenance or {}).get("verified_at")
+                         or (collected_at or "")[:10]) or None,
+        # The date until which the pipeline actively stands behind this
+        # answer: the policy's own end date when known, else the freshness
+        # window that triggers the next official-source recheck.
+        "info_validity": g.get("policy_valid_until")
+                         or ((valid_until or "")[:10] or None),
+        "confidence_level": _confidence(g, provenance),
+    }
+    products = [p for p in (g.get("visa_products") or [])
+                if isinstance(p, dict) and p.get("type")]
+    if disposition == "VISA_EXEMPT" or not products:
+        row = dict(base)
+        if disposition == "VISA_EXEMPT":
+            row["visa_type_name"] = "No visa needed"
+            if not row["required_documents"]:
+                row["required_documents"] = "Valid passport"
+            n, unit = _num_unit(g.get("permitted_stay"))
+            if n is None and g.get("permitted_stay_days"):
+                n, unit = g.get("permitted_stay_days"), "Day"
+            row["max_stay_duration"], row["max_stay_unit"] = n, unit
+            row["validity_duration"], row["validity_unit"] = n, unit
+            row["entries"] = "Unlimited"
+            row["visa_fee_amount"], row["visa_fee_currency"] = 0, "USD"
+        else:
+            row["visa_type_name"] = g.get("visa_category") or None
+            n, unit = _num_unit(g.get("permitted_stay"))
+            if n is None and g.get("permitted_stay_days"):
+                n, unit = g.get("permitted_stay_days"), "Day"
+            row["max_stay_duration"], row["max_stay_unit"] = n, unit
+            amt, cur = _fee({}, g)
+            row["visa_fee_amount"], row["visa_fee_currency"] = amt, cur
+        return [row]
+    rows = []
+    for p in products:
+        row = dict(base)
+        row["visa_type_name"] = str(p.get("type"))
+        n, unit = _num_unit(p.get("validity"))
+        row["validity_duration"], row["validity_unit"] = n, unit
+        stay = p.get("max_stay_days")
+        if stay:
+            row["max_stay_duration"], row["max_stay_unit"] = stay, "Day"
+        else:
+            n2, u2 = _num_unit(g.get("permitted_stay"))
+            row["max_stay_duration"], row["max_stay_unit"] = n2, u2
+        row["entries"] = _entries(p.get("entry"))
+        amt, cur = _fee(p, g)
+        row["visa_fee_amount"], row["visa_fee_currency"] = amt, cur
+        note = p.get("notes")
+        if note:
+            row["special_conditions"] = (str(note) if not row["special_conditions"]
+                                         else f"{row['special_conditions']}; {note}")
+        rows.append(row)
+    return rows
+
+
+def field_status(row: dict) -> dict:
+    """Their per-field checklist verdict: filled / missing / optional-empty."""
+    out = {}
+    for f in FIELD_ORDER:
+        v = row.get(f)
+        filled = v is not None and str(v).strip() != ""
+        out[f] = "filled" if filled else (
+            "missing" if f in REQUIRED_FIELDS else "optional-empty")
+    return out
+
+
+def completeness(row: dict) -> float:
+    """Share of REQUIRED fields filled — the acceptance metric's numerator
+    rule (records with all required fields filled count as complete)."""
+    st = field_status(row)
+    need = [f for f in FIELD_ORDER if f in REQUIRED_FIELDS]
+    return sum(1 for f in need if st[f] == "filled") / len(need)

@@ -14,6 +14,7 @@ import { LocaleProvider, useLocale, LanguagePicker } from './lib/locale.jsx'
 import { ToastProvider } from './components/ui.jsx'
 import Settings from './screens/Settings.jsx'
 import TripPortal from './screens/TripPortal.jsx'
+import QualityConsole from './screens/QualityConsole.jsx'
 import VisaConsole from './screens/VisaConsole.jsx'
 import AdminConsole from './screens/AdminConsole.jsx'
 import SetupWizard from './screens/SetupWizard.jsx'
@@ -96,9 +97,16 @@ function AppInner() {
   // Boots on the MAIN MENU (the visa console's lane cards — Travel visas
   // and Schengen visa), per owner decision; '#schengen' still deep-links
   // straight into the Germany appointment lane.
+  // The Trip.com deliverable is the INFORMATION BASE: the Database is the
+  // landing surface. The visa-processing console is a separate product,
+  // reachable only by explicit hash — their review read any visible
+  // processing surface as scope drift.
   const [view, setView] = useState(() =>
     (window.location.hash || '').includes('schengen') ? 'schengen'
-      : (window.location.hash || '').includes('database') ? 'database' : 'visa')
+      : (window.location.hash || '').includes('ops') ? 'quality'
+        : (window.location.hash || '').includes('applicant') ? 'visa'
+          : (window.location.hash || '').includes('employer') ? 'visa'
+            : 'database')
   useEffect(() => { if (persona === 'employer') setView('employer') }, [persona])
   // The floating Ask Ellis assistant follows whichever H1B case a surface has
   // registered (H1bPipeline registers the parent case); hidden when no case.
@@ -141,11 +149,9 @@ function AppInner() {
           {/* Schengen: Germany's account-free RK-Termin calendar, read live. */}
           {/* The Database: traveldoc-style requirements lookup, answered by
               the Kimi-primary route decision. */}
-          {view === 'database' && (
-            <TravelDatabase onBack={() => {
-              window.location.hash = '#applicant'; window.location.reload()
-            }} />
-          )}
+          {view === 'database' && <TravelDatabase onBack={null} />}
+          {/* Trip.com's P0: the Information Quality Control Backend (#ops). */}
+          {view === 'quality' && <QualityConsole />}
           {view === 'schengen' && (
             <SchengenVisa onBack={() => {
               window.location.hash = '#applicant'; window.location.reload()

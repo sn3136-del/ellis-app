@@ -374,6 +374,7 @@ export default function TravelDatabase({ onBack }) {
   const [issueField, setIssueField] = useState('')
   // Dynamic-content translation overlay: original guidance string -> lang.
   const [tx, setTx] = useState({})
+  const [txPending, setTxPending] = useState(false)
 
   // Arriving on a linked answer opens it straight away — that link IS the
   // page. Runs once; a warm route resolves from cache immediately.
@@ -410,12 +411,21 @@ export default function TravelDatabase({ onBack }) {
   // cached Kimi catalog call whenever the UI language is not English.
   useEffect(() => {
     if (!g || lang === 'en') { setTx({}); return }
+    const products = (g.visa_products || []).filter((x) => x && typeof x === 'object')
     const texts = [...new Set([
       asText(g.visa_category), asText(g.permitted_stay),
       asText(g.processing_time), asText(g.passport_validity),
       asText(g.photo_requirements), asText(g.onward_travel_evidence),
       asText(g.accommodation_evidence), asText(g.financial_evidence),
       humanizeEnum(g.application_channel),
+      asText(g.application_channel_detail),
+      asText(g.arrival_card && g.arrival_card.note),
+      asText(g.transit_requirement && g.transit_requirement.note),
+      // The visa-type table is the reader's decision surface; it must switch
+      // languages with everything else (it previously stayed English).
+      ...products.flatMap((vp) => [asText(vp.type), asText(vp.validity),
+                                   asText(vp.notes), asText(vp.entry)]),
+      ...itemsOf(result?.apply_steps),
       ...itemsOf(g.required_documents), ...itemsOf(g.forms),
       ...itemsOf(g.account_registration_steps), ...itemsOf(g.payment_process),
       ...itemsOf(g.submission_process), ...itemsOf(g.health_requirements),
@@ -423,6 +433,7 @@ export default function TravelDatabase({ onBack }) {
       ...itemsOf(result?.advisories),
     ].filter(Boolean))]
     if (!texts.length) { setTx({}); return }
+    setTxPending(true)
     const entries = {}
     texts.forEach((s, i) => { entries['g' + i] = s })
     let live = true
@@ -434,7 +445,8 @@ export default function TravelDatabase({ onBack }) {
         if (v) m[s] = v
       })
       setTx(m)
-    }).catch(() => { /* honest English fallback */ })
+      setTxPending(false)
+    }).catch(() => { if (live) setTxPending(false) /* honest English fallback */ })
     return () => { live = false }
   }, [g, lang])
   const T = (s) => (s && tx[s]) || s
@@ -615,8 +627,10 @@ export default function TravelDatabase({ onBack }) {
     <div className="page" style={{ maxWidth: 900, margin: '0 auto',
                                    padding: '26px 20px 60px' }}
          data-testid="travel-database">
-      <button className="btn btn--sm btn--ghost" onClick={onBack}
-              data-testid="database-back">← {t('db.menu')}</button>
+      {onBack && (
+        <button className="btn btn--sm btn--ghost" onClick={onBack}
+                data-testid="database-back">← {t('db.menu')}</button>
+      )}
 
       {/* Heading only while searching; the answer page opens straight on
           the verdict (owner decision, theming). */}
@@ -898,6 +912,16 @@ export default function TravelDatabase({ onBack }) {
             </div>
           )}
 
+          {/* Content translation in flight: say so, instead of showing
+              English under a Chinese frame with no explanation. */}
+          {!switching && txPending && lang !== 'en' && (
+            <div style={{ textAlign: 'center', marginTop: 14, fontSize: 12.5,
+                          color: GRAY, fontWeight: 600 }}
+                 data-testid="database-translating">
+              {t('db.translatingContent')}
+            </div>
+          )}
+
           {/* At a glance */}
           {!switching && (
           <div style={{ display: 'grid', gap: 16, marginTop: 20,
@@ -1164,13 +1188,9 @@ export default function TravelDatabase({ onBack }) {
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center',
                         marginTop: 32, paddingTop: 24,
                         borderTop: '1px solid #eef1f6' }}>
-            {/* Present but inert, per owner instruction. */}
-            <button className="btn btn--primary" data-testid="database-process"
-                    onClick={() => {}}
-                    style={{ fontSize: 15, fontWeight: 800, padding: '13px 32px',
-                             borderRadius: 999 }}>
-              {t('db.process')}
-            </button>
+            {/* This deliverable is an information base: no application
+                buttons. Trip.com's review read the old "Process my visa"
+                button as scope drift into visa processing. */}
             <button className="btn btn--ghost" onClick={() => { setResult(null); clearHash() }}
                     data-testid="database-again"
                     style={{ fontSize: 14, borderRadius: 999 }}>

@@ -422,6 +422,25 @@ class KimiRouteGuidanceCache(Base, TimestampMixin):
     fresh_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
+class DatabaseChangeLog(Base, TimestampMixin):
+    """Every change to a served answer, visible and searchable.
+
+    Trip.com's quality-control requirement: after each update the backend
+    shows WHAT changed (add / modify / delete), field by field, with history.
+    One row per change event; `changes` holds {field: {from, to}} limited to
+    fields a reader can see, so operations can audit an update at a glance."""
+    __tablename__ = "database_change_log"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    cache_key: Mapped[str] = mapped_column(String(200), index=True, default="")
+    route: Mapped[dict] = mapped_column(JSON, default=dict)
+    action: Mapped[str] = mapped_column(String(16), default="modify", index=True)
+    # add | modify | delete
+    origin: Mapped[str] = mapped_column(String(32), default="engine")
+    # engine | grounded_recheck | verified_override | operator
+    changes: Mapped[dict] = mapped_column(JSON, default=dict)
+    note: Mapped[str] = mapped_column(Text, default="")
+
+
 class DatabaseIssueReport(Base, TimestampMixin):
     """A reader saying "this looks wrong".
 

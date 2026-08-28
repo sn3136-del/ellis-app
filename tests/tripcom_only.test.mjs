@@ -134,7 +134,10 @@ test('App.jsx imports no deleted screens and has no role selection', () => {
   // Germany's account-free RK-Termin calendar, live). The deleted
   // appointments SIMULATION must stay gone.
   assert.match(app, /includes\('schengen'\) \? 'schengen'/)
-  assert.match(app, /includes\('database'\) \? 'database' : 'visa'/)
+  // The Trip.com deliverable boots into the DATABASE; the processing
+  // console needs an explicit #applicant hash.
+  assert.match(app, /: 'database'\)/)
+  assert.match(app, /includes\('applicant'\) \? 'visa'/)
   assert.ok(!app.includes('AppointmentsDemo'), 'the appointments demo screen must stay deleted')
 })
 

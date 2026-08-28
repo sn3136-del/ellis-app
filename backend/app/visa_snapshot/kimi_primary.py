@@ -144,11 +144,13 @@ UNCERTAIN_TTL_DAYS = 2
 
 def hold_enabled() -> bool:
     """Whether a low-confidence answer is withheld from readers until a person
-    confirms it. Trip.com's requirements doc asked for this gate; the owner
-    decided Ellis must ALWAYS answer, so it is OFF unless switched on. The
-    confidence flag is still computed and still feeds the operator queue and
-    the grounded recheck — only the withholding is switched."""
-    return os.getenv("ELLIS_DATABASE_HOLD_LOW_CONFIDENCE", "0").strip() == "1"
+    confirms it. Trip.com's acceptance standard makes this mandatory ("block
+    low-confidence until confirmed"), so it is ON by default — the reader
+    still gets a response (an honest "being verified" card, never a blank
+    refusal), operations sees the full answer in the quality backend, and
+    approval releases it. Set ELLIS_DATABASE_HOLD_LOW_CONFIDENCE=0 to serve
+    low-confidence answers directly."""
+    return os.getenv("ELLIS_DATABASE_HOLD_LOW_CONFIDENCE", "1").strip() == "1"
 
 
 # Two-STAGE answering (the fast path for a route nobody has asked before):
@@ -1228,6 +1230,7 @@ def get_route_guidance(db, route: dict, *, force_refresh: bool = False,
             if status == STATUS_PRIMARY else UNCERTAIN_TTL_DAYS
         if row is None:
             row = _cached(db, key)
+        _prior_guidance = dict(row.guidance) if row is not None and row.guidance else None
         if row is None:
             row = KimiRouteGuidanceCache(cache_key=key)
             db.add(row)
@@ -1243,6 +1246,10 @@ def get_route_guidance(db, route: dict, *, force_refresh: bool = False,
                             **({"detail_pending": True} if staged else {})}
         row.generated_at = now
         row.fresh_until = now + timedelta(days=ttl)
+        from . import change_log
+        change_log.record(db, key, route, _prior_guidance, clean,
+                          origin="engine",
+                          note="route answered by the engine")
         db.commit()
     out = apply_portal_fallback(apply_verified_overrides(_result(
         status, clean, cached=False, stale=False,

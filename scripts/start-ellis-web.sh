@@ -242,6 +242,27 @@ PYEOF
 # ---- Vite web server (127.0.0.1) — NO Electron ----------------------------
 echo "Starting the Ellis web app (Vite, 127.0.0.1 only)…"
 "$VITE" --config "$ROOT/vite.web.config.mjs" >>"$LOGS/web.log" 2>&1 &
+WEB_PID=$!
+
+# ELLIS_PUBLIC=1: expose the app at a public URL through a Cloudflare quick
+# tunnel — Trip.com's acceptance standard requires an online, no-install test
+# link. The URL is printed once the tunnel is up.
+if [ "${ELLIS_PUBLIC:-0}" = "1" ] && command -v cloudflared >/dev/null 2>&1; then
+  ( cloudflared tunnel --url "http://127.0.0.1:$WEB_PORT" --no-autoupdate       >>"$LOGS/tunnel.log" 2>&1 & )
+  for _ in $(seq 1 30); do
+    TUNNEL_URL=$(grep -oE "https://[a-z0-9-]+\.trycloudflare\.com" "$LOGS/tunnel.log" 2>/dev/null | head -1)
+    [ -n "$TUNNEL_URL" ] && break
+    sleep 1
+  done
+  if [ -n "${TUNNEL_URL:-}" ]; then
+    echo ""
+    echo "  PUBLIC URL:      $TUNNEL_URL          (share this link)"
+    echo "  Quality console: $TUNNEL_URL/#ops"
+    echo "$TUNNEL_URL" > "$LOGS/tunnel_url.txt"
+  else
+    echo "  (public tunnel did not come up — see $LOGS/tunnel.log)"
+  fi
+fi
 WEB_PID=$!; echo "$WEB_PID" > "$RUN/web.pid"; log "web pid      : $WEB_PID"
 echo "$WEB_PID" > "$RUN/frontend.pid"   # so ellis:stop/status also cover it
 

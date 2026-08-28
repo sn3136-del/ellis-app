@@ -264,6 +264,11 @@ def recheck_row(db, row, *, today: str | None = None) -> dict:
             disputed.update(applied)
             applied = {}
         else:
+            from . import change_log
+            change_log.record(db, row.cache_key, route,
+                              dict(guidance), clean,
+                              origin="grounded_recheck",
+                              note=f"corrected against {page.final_url}")
             row.guidance = clean
 
     if disputed:

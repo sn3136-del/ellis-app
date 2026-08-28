@@ -140,15 +140,29 @@ def test_ask_refuses_to_guess_an_unnamed_route(client):
 
 
 
-def test_by_default_a_low_confidence_answer_is_still_answered(client):
-    """The owner's rule: Ellis always answers. Low confidence is flagged for
-    the operator queue and the grounded recheck, never withheld."""
+def test_by_default_a_low_confidence_answer_is_held_but_never_blank(client):
+    """Trip.com's acceptance standard: low-confidence content is blocked from
+    readers until operations confirms it. The reader still gets a RESPONSE —
+    a held card, never an error — and the operator queue sees the flag."""
     _provide(dict(ANSWER, confidence="low"))
     r = client.post("/database/lookup", headers=READER,
                     json={"nationality": "CHN", "destination": "MNG"})
+    assert r.status_code == 200                  # a response, always
     body = r.json()
-    assert body["review_required"] is True      # still flagged for operators
-    assert body["held"] is False                 # but not withheld
+    assert body["review_required"] is True      # flagged for operators
+    assert body["held"] is True                  # withheld from the reader
+    assert body.get("guidance") in (None, {})    # claims not shown
+
+
+def test_the_hold_can_be_switched_off(client, monkeypatch):
+    """The owner can revert to always-serve with the env switch."""
+    monkeypatch.setenv("ELLIS_DATABASE_HOLD_LOW_CONFIDENCE", "0")
+    _provide(dict(ANSWER, confidence="low"))
+    # A pair no verified override touches, so the engine's answer serves.
+    r = client.post("/database/lookup", headers=READER,
+                    json={"nationality": "ISL", "destination": "BTN"})
+    body = r.json()
+    assert body["held"] is False
     assert body["guidance"]["disposition"] == "VISA_REQUIRED"
 
 

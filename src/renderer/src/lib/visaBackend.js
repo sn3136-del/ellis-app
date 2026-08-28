@@ -93,6 +93,9 @@ export async function fetchRuntimeMode(baseUrl) {
 export function createVisaClient(session) {
   return {
     base: BASE,
+    baseUrl: BASE,
+    // Generic GET for the ops quality console (records, changes, freshness).
+    get: (path) => call('GET', path, session),
     capabilities: () => call('GET', '/capabilities', session),
     listAdapters: () => call('GET', '/adapters', session),
     // Dynamic UI language: the backend translates the English catalog via

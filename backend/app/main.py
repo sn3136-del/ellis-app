@@ -655,6 +655,145 @@ def travel_database_issues(db=Depends(get_session),
                         if r.created_at else None} for r in rows]}
 
 
+def _tstation_rows(db, *, nationality: str = "", destination: str = "",
+                   purpose: str = "", document: str = "",
+                   requirement: str = "", confidence: str = ""):
+    """Every served answer as Trip.com 25-field records, filters combined —
+    their "multi-dimensional spot check": slice by station (the nationality a
+    T-site serves), passport type, destination, visa requirement, field."""
+    from sqlalchemy import select as _select
+    from .visa_snapshot import kimi_primary, verified_overrides, tstation
+    from .visa_snapshot.models import KimiRouteGuidanceCache
+    verified_overrides.reload()
+    out = []
+    for r in db.execute(_select(KimiRouteGuidanceCache)).scalars():
+        if f"|{kimi_primary.CACHE_VERSION}" not in (r.cache_key or ""):
+            continue
+        route = dict(r.route or {})
+        if nationality and str(route.get("passport_nationality") or "").upper() != nationality.upper():
+            continue
+        if destination and str(route.get("destination_country") or "").upper() != destination.upper():
+            continue
+        if purpose and str(route.get("travel_purpose") or "tourism").lower() != purpose.lower():
+            continue
+        doc = str(route.get("travel_document_type") or "ordinary_passport")
+        if document and doc != document:
+            continue
+        g, prov = verified_overrides.apply(dict(r.guidance or {}), route)
+        g = kimi_primary.apply_portal_fallback({"guidance": g}, route)["guidance"]
+        collected = (r.generated_at.isoformat() if r.generated_at else "")
+        until = (r.fresh_until.isoformat() if r.fresh_until else "")
+        for rec in tstation.records_for_route(route, g, prov, collected, until):
+            if requirement and str(rec.get("visa_requirement") or "") != requirement:
+                continue
+            if confidence and str(rec.get("confidence_level") or "") != confidence:
+                continue
+            rec["_cache_key"] = r.cache_key
+            rec["_status"] = r.status
+            out.append(rec)
+    return out
+
+
+@app.get("/database/records")
+def travel_database_records(nationality: str = "", destination: str = "",
+                            purpose: str = "", document: str = "",
+                            requirement: str = "", confidence: str = "",
+                            db=Depends(get_session),
+                            p: Principal = Depends(get_principal)):
+    """The quality-control backend's record browser: T-Station 25-field
+    records with combined filtering, per-field fill status, completeness,
+    source and confidence — the operator's spot-check surface."""
+    from .visa_snapshot import tstation
+    require_admin(p)
+    rows = _tstation_rows(db, nationality=nationality, destination=destination,
+                          purpose=purpose, document=document,
+                          requirement=requirement, confidence=confidence)
+    complete = sum(1 for r in rows if tstation.completeness(r) == 1.0)
+    return {"fields": list(tstation.FIELD_ORDER),
+            "required_fields": sorted(tstation.REQUIRED_FIELDS),
+            "records": [{**{k: r.get(k) for k in tstation.FIELD_ORDER},
+                         "cache_key": r["_cache_key"],
+                         "field_status": tstation.field_status(r),
+                         "completeness": round(tstation.completeness(r), 4)}
+                        for r in rows],
+            "summary": {"total": len(rows), "complete": complete,
+                        "completeness_rate": round(complete / len(rows), 4) if rows else None,
+                        "high": sum(1 for r in rows if r.get("confidence_level") == "High"),
+                        "medium": sum(1 for r in rows if r.get("confidence_level") == "Medium"),
+                        "low": sum(1 for r in rows if r.get("confidence_level") == "Low"),
+                        "source_coverage": round(sum(1 for r in rows if r.get("source_url")) / len(rows), 4) if rows else None}}
+
+
+@app.get("/database/changes")
+def travel_database_changes(q: str = "", limit: int = 200,
+                            db=Depends(get_session),
+                            p: Principal = Depends(get_principal)):
+    """The change log: what changed in served answers, newest first —
+    add / modify / delete with a field-level diff, searchable."""
+    from sqlalchemy import select as _select
+    from .visa_snapshot.models import DatabaseChangeLog
+    require_admin(p)
+    rows = db.execute(_select(DatabaseChangeLog).order_by(
+        DatabaseChangeLog.created_at.desc()).limit(max(1, min(limit, 1000)))).scalars().all()
+    needle = q.strip().lower()
+    out = []
+    for r in rows:
+        blob = f"{r.cache_key} {r.action} {r.origin} {r.note} {list((r.changes or {}).keys())}".lower()
+        if needle and needle not in blob:
+            continue
+        out.append({"id": r.id, "cache_key": r.cache_key, "route": r.route,
+                    "action": r.action, "origin": r.origin,
+                    "changes": r.changes, "note": r.note,
+                    "at": r.created_at.isoformat() if r.created_at else None})
+    return {"changes": out}
+
+
+@app.get("/database/export.xlsx")
+def travel_database_export(nationality: str = "", destination: str = "",
+                           purpose: str = "", document: str = "",
+                           requirement: str = "", confidence: str = "",
+                           db=Depends(get_session),
+                           p: Principal = Depends(get_principal)):
+    """The dataset as Excel, to Trip.com's export spec: one workbook, a
+    field-description sheet and a data sheet, all 25 fields plus source and
+    confidence, filterable by the same dimensions as the record browser."""
+    import io
+    from datetime import datetime, timezone
+    from fastapi.responses import StreamingResponse
+    from openpyxl import Workbook
+    from openpyxl.styles import Font
+    from .visa_snapshot import tstation
+    require_admin(p)
+    rows = _tstation_rows(db, nationality=nationality, destination=destination,
+                          purpose=purpose, document=document,
+                          requirement=requirement, confidence=confidence)
+    wb = Workbook()
+    ws0 = wb.active
+    ws0.title = "Field descriptions"
+    ws0.append(["No.", "Field", "Required", "Description"])
+    for c in ws0[1]:
+        c.font = Font(bold=True)
+    for i, f in enumerate(tstation.FIELD_ORDER, 1):
+        ws0.append([i, f, "Yes" if f in tstation.REQUIRED_FIELDS else "If available",
+                    tstation.FIELD_DESCRIPTIONS[f]])
+    ws1 = wb.create_sheet("Data")
+    ws1.append(list(tstation.FIELD_ORDER))
+    for c in ws1[1]:
+        c.font = Font(bold=True)
+    for r in rows:
+        ws1.append([r.get(f) for f in tstation.FIELD_ORDER])
+    ws1.freeze_panes = "A2"
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d")
+    return StreamingResponse(
+        buf, media_type="application/vnd.openxmlformats-officedocument"
+                        ".spreadsheetml.sheet",
+        headers={"Content-Disposition":
+                 f'attachment; filename="tstation_visa_dataset_{stamp}.xlsx"'})
+
+
 class DatabaseAskIn(BaseModel):
     question: str
     # The route currently on screen, so a follow-up like "what about

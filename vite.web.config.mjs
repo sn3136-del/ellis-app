@@ -12,6 +12,12 @@ import react from '@vitejs/plugin-react'
 
 const HOST = '127.0.0.1'
 const PORT = 5199
+// ELLIS_PUBLIC=1: the server is being exposed through a tunnel at a public
+// URL (Trip.com's acceptance standard requires an online, no-install test
+// link). The browser then reaches the API same-origin under /api (see
+// visaBackend.resolveBase), which the dev server proxies to the local
+// backend — backend credentials still never reach the browser.
+const PUBLIC = process.env.ELLIS_PUBLIC === '1'
 
 const webCsp = [
   "default-src 'self'",
@@ -23,7 +29,8 @@ const webCsp = [
   "font-src 'self'",
   // Vite dev needs its module preamble; loopback backend + HMR websocket only.
   "script-src 'self' 'unsafe-inline'",
-  `connect-src 'self' ws://${HOST}:${PORT} http://${HOST}:8000 http://localhost:8000`,
+  `connect-src 'self' ws://${HOST}:${PORT} http://${HOST}:8000 http://localhost:8000` +
+    (PUBLIC ? ' https: wss:' : ''),
   // Browserbase Live View is a real secure feature: the short-lived URL comes
   // from the trusted local backend and is embedded in a sandboxed iframe.
   // blob: is the local PDF preview (Chrome's built-in viewer).
@@ -45,7 +52,19 @@ function webCspPlugin() {
 export default defineConfig({
   root: 'src/renderer',
   base: '/',
-  server: { host: HOST, port: PORT, strictPort: true },
+  server: {
+    host: HOST, port: PORT, strictPort: true,
+    // Public mode: accept the tunnel's Host header and serve the API
+    // same-origin so one URL carries the whole product.
+    ...(PUBLIC ? { allowedHosts: true } : {}),
+    proxy: {
+      '/api': {
+        target: `http://${HOST}:8000`,
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+  },
   plugins: [react(), webCspPlugin()],
   resolve: { alias: { '@': resolve(__dirname, 'src/renderer/src') } }
 })
