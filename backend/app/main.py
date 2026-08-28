@@ -155,6 +155,7 @@ def _uptime_data() -> dict:
 
 _UPTIME_I18N = {
     "zh-CN": {
+        "nav_db": "数据库", "nav_ops": "质量后台",
         "title": "Ellis 服务可用性", "heading": "Ellis 服务可用性",
         "tagline": "每分钟探测一次完整公网链路（DNS、TLS、网关、后端）",
         "sub": "本月 {probes} 次探测 · 中位延迟 {ms} ms",
@@ -164,6 +165,7 @@ _UPTIME_I18N = {
         "note": "探测失败会先重试一次再计入",
     },
     "zh-Hant": {
+        "nav_db": "資料庫", "nav_ops": "質量後台",
         "title": "Ellis 服務可用性", "heading": "Ellis 服務可用性",
         "tagline": "每分鐘探測一次完整公網鏈路（DNS、TLS、網關、後端）",
         "sub": "本月 {probes} 次探測 · 中位延遲 {ms} ms",
@@ -173,6 +175,7 @@ _UPTIME_I18N = {
         "note": "探測失敗會先重試一次再計入",
     },
     "en": {
+        "nav_db": "Database", "nav_ops": "Quality console",
         "title": "Ellis service availability", "heading": "Ellis service availability",
         "tagline": "The full public path (DNS, TLS, edge, backend) probed every minute",
         "sub": "{probes} probes this month · median latency {ms} ms",
@@ -248,7 +251,7 @@ def health_uptime(request: Request, format: str = "", lang: str = "zh-CN"):
   a {{ color: #287dfa; font-weight: 700; text-decoration: none; }}
 </style></head><body><div class="wrap">
 <div class="card">
-  <div class="langs">{picker}</div>
+  <div class="langs"><a href="/#database">{L['nav_db']}</a> <a href="/#ops">{L['nav_ops']}</a> <span style="color:#c3cddd">|</span> {picker}</div>
   <h1><span class="dot"></span>{L['heading']}</h1>
   <div class="muted" style="margin-top:4px">ellis-visa.com · {L['tagline']}</div>
   <div class="hero" style="margin-top:18px">{hero}</div>
