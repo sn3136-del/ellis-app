@@ -203,6 +203,23 @@ def _kimi_translator(masked_text: str, target: str, source: str) -> str:
     return provider.translate(masked_text, target, source)  # pragma: no cover - needs key
 
 
+_EM = "\u2014"
+
+
+def _no_em_dashes(text: str) -> str:
+    """House style, owner-mandated: no em dashes anywhere a reader looks.
+    Model translations love them; they are normalized to the language's
+    natural pause before anything is cached or served."""
+    import re as _re
+    if _EM not in text:
+        return text
+    cjk = bool(_re.search(r"[\u4e00-\u9fff]", text))
+    text = text.replace(_EM * 2, "\uff0c" if cjk else ", ")
+    text = text.replace(f" {_EM} ", "\uff0c" if cjk else ", ")
+    text = _re.sub(rf"(?<=\d){_EM}(?=\d)", "-", text)
+    return text.replace(_EM, "\uff0c" if cjk else ", ")
+
+
 def translate(text: str, target_lang: str, source_lang: str = "auto", *, translator=None) -> dict:
     """Translate dynamic content, preserving all protected tokens, with caching
     and honest unavailability. `translator(masked,target,source)->str` is
@@ -233,6 +250,7 @@ def translate(text: str, target_lang: str, source_lang: str = "auto", *, transla
         return {"original": text, "translated": text, "source_lang": source_lang,
                 "target_lang": target_lang, "status": "unavailable", "cached": False}
     translated = restore_tokens(masked_translation, mapping)
+    translated = _no_em_dashes(translated)
     _CACHE[key] = translated
     _persist_cache()
     return {"original": text, "translated": translated, "source_lang": source_lang,
@@ -334,7 +352,7 @@ def translate_catalog(entries: dict, target_lang: str, *,
                 out[k] = todo[k]
                 missed += 1
                 continue
-            restored = restore_tokens(got, mappings[k])
+            restored = _no_em_dashes(restore_tokens(got, mappings[k]))
             _CACHE[_cache_key(source_lang, target_lang, todo[k])] = restored
             _persist_cache()
             out[k] = restored

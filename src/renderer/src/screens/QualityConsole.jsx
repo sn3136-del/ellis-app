@@ -898,14 +898,18 @@ export default function QualityConsole() {
         {tab === 'changes' && (() => {
           const AC = { add: GREEN, modify: AMBER, delete: RED }
           const fmt = (v) => {
-            if (v == null) return '·'
+            if (v == null) return null
             if (typeof v === 'object') {
-              if (v.amount != null) return `${v.amount} ${v.currency || ''}`.trim()
               if (Array.isArray(v)) return `${v.length} ${t('ops.items')}`
-              return JSON.stringify(v).slice(0, 40)
+              if ('amount' in v) {
+                return v.amount == null ? null
+                  : `${v.amount} ${v.currency || ''}`.trim()
+              }
+              const j = JSON.stringify(v)
+              return j === '{}' ? null : j.slice(0, 40)
             }
-            const sv = String(v)
-            return sv.length > 60 ? sv.slice(0, 60) + '…' : sv
+            const sv = String(v).replace(/^"|"$/g, '')
+            return sv.length > 64 ? sv.slice(0, 64) + '…' : sv
           }
           const list = (changes?.changes || [])
             .filter((c) => !changeFilter || c.action === changeFilter)
@@ -978,24 +982,45 @@ export default function QualityConsole() {
                             {(c.at || '').slice(11, 16)}
                           </span>
                         </div>
-                        {Object.entries(c.changes || {}).slice(0, 5).map(([f, d]) => (
-                          <div key={f} style={{ fontSize: 12, marginTop: 5,
-                                display: 'grid',
-                                gridTemplateColumns: '150px 1fr', gap: 8,
-                                alignItems: 'baseline' }}>
-                            <span style={{ color: GRAY,
-                                           fontFamily: 'ui-monospace, monospace',
-                                           fontSize: 11, overflow: 'hidden',
-                                           textOverflow: 'ellipsis' }}>{f}</span>
-                            <span style={{ minWidth: 0, overflowWrap: 'anywhere' }}>
-                              <span style={{ color: '#b2456e',
-                                             textDecoration: 'line-through',
-                                             opacity: 0.8 }}>{fmt(d.from)}</span>
-                              <span style={{ color: '#94a3b8' }}> → </span>
-                              <span style={{ color: GREEN, fontWeight: 700 }}>{fmt(d.to)}</span>
-                            </span>
-                          </div>
-                        ))}
+                        {(() => {
+                          const entries = Object.entries(c.changes || {})
+                            .map(([f, d]) => [f, fmt(d.from), fmt(d.to)])
+                            .filter(([, a, b]) => a != null || b != null)
+                          const shownE = entries.slice(0, 5)
+                          return [
+                            ...shownE.map(([f, a, b]) => (
+                              <div key={f} style={{ fontSize: 12, marginTop: 5,
+                                    display: 'grid',
+                                    gridTemplateColumns: '180px 1fr', gap: 10,
+                                    alignItems: 'baseline' }}>
+                                <span title={f}
+                                      style={{ color: GRAY,
+                                               fontFamily: 'ui-monospace, monospace',
+                                               fontSize: 11, overflow: 'hidden',
+                                               textOverflow: 'ellipsis',
+                                               whiteSpace: 'nowrap' }}>{f}</span>
+                                <span style={{ minWidth: 0, overflowWrap: 'anywhere' }}>
+                                  {/* An "add" starts from nothing: show the
+                                      value alone, no struck-through null. */}
+                                  {a != null && c.action !== 'add' && [
+                                    <span key="a" style={{ color: '#b2456e',
+                                        textDecoration: 'line-through',
+                                        opacity: 0.8 }}>{a}</span>,
+                                    <span key="s" style={{ color: '#94a3b8' }}> → </span>,
+                                  ]}
+                                  <span style={{ color: c.action === 'delete' ? RED : GREEN,
+                                                 fontWeight: 700 }}>{b ?? '·'}</span>
+                                </span>
+                              </div>
+                            )),
+                            entries.length > 5 && (
+                              <div key="more" style={{ fontSize: 11.5, color: GRAY,
+                                                       marginTop: 5 }}>
+                                +{entries.length - 5} {t('ops.items')}
+                              </div>
+                            ),
+                          ]
+                        })()}
                       </div>
                     </div>
                   )),

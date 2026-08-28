@@ -493,7 +493,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://www.immd.gov.hk/eng/services/fee-tables/index.html",
-  "note": "Mainland residents do not get a Hong Kong visa; they use the Exit-Entry Permit for Travelling to and from Hong Kong and Macao (EEP) plus an endorsement, priced by China's National Immigration Administration. Ellis leaves the headline fee null; the real headline charge is CNY 15 for a single-entry in | quote: 1. Ordinary visa — (a) issued pursuant to an approved specified scheme applicati",
+  "note": "Mainland residents do not get a Hong Kong visa; they use the Exit-Entry Permit for Travelling to and from Hong Kong and Macao (EEP) plus an endorsement, priced by China's National Immigration Administration. Ellis leaves the headline fee null; the real headline charge is CNY 15 for a single-entry in | quote: 1. Ordinary visa, (a) issued pursuant to an approved specified scheme applicati",
   "fields": {
    "disposition": "CONDITIONAL",
    "visa_category": "Exit-Entry Permit endorsement (not a passport route)",
@@ -966,7 +966,7 @@
   "verified_at": "2026-08-22",
   "verified_by": "Ellis source audit",
   "source_url": "https://ircc.canada.ca/english/information/fees/fees.asp",
-  "note": "The visitor visa is CAD 100, and biometrics are mandatory for Chinese nationals at CAD 85 more — the real government cost for one tourist is CAD 185.",
+  "note": "The visitor visa is CAD 100, and biometrics are mandatory for Chinese nationals at CAD 85 more, the real government cost for one tourist is CAD 185.",
   "fields": {
    "government_fee": {
     "amount": 100,
@@ -8453,7 +8453,7 @@
   "verified_at": "2026-08-25",
   "verified_by": "Ellis source audit",
   "source_url": "https://www.exteriores.gob.es/Consulados/SAOPAULO/es/ServiciosConsulares/Documents/listapaisesvisado.pdf",
-  "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Korean passport holders fly to Spain with no visa and no travel authorisation — ETIAS is not in operation, so just carry proof of funds, onward ticket and a passport issued within the last 10 years and valid 3 months past departure. Official text: Lista de terceros países cuyos nacionales están exentos de la obligación de estar en posesión de un visado para cruzar las fronteras exteriores … COREA DEL SUR",
+  "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Korean passport holders fly to Spain with no visa and no travel authorisation, ETIAS is not in operation, so just carry proof of funds, onward ticket and a passport issued within the last 10 years and valid 3 months past departure. Official text: Lista de terceros países cuyos nacionales están exentos de la obligación de estar en posesión de un visado para cruzar las fronteras exteriores … COREA DEL SUR",
   "fields": {
    "official_portal_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
    "disposition": "VISA_EXEMPT",
@@ -8899,7 +8899,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://overseas.mofa.go.kr/us-en/brd/m_4502/view.do?seq=715889&page=1",
-  "note": "All fees were left null. India is not in MOFA's adjusted-fee or exempt-fee lists, so the standard schedule applies: USD 40 single entry for a stay of 90 days or less, USD 70 double, USD 90 multiple. Also, the tourism sub-code is C-3-9 (general tourist), not C-3-1 (short-term general visit). | quote: Visa Application Fee for Each Visa Type (in US $) — 90 days or less Single-entry visa USD",
+  "note": "All fees were left null. India is not in MOFA's adjusted-fee or exempt-fee lists, so the standard schedule applies: USD 40 single entry for a stay of 90 days or less, USD 70 double, USD 90 multiple. Also, the tourism sub-code is C-3-9 (general tourist), not C-3-1 (short-term general visit). | quote: Visa Application Fee for Each Visa Type (in US $), 90 days or less Single-entry visa USD",
   "fields": {
    "official_portal_url": "https://www.visa.go.kr/openPage.do?MENU_ID=10101&LANG_TYPE=EN",
    "government_fee": {
@@ -9138,7 +9138,7 @@
   "verified_at": "2026-08-25",
   "verified_by": "Ellis source audit",
   "source_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
-  "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Indonesian nationals do not require a visa for a tourist visit to Hong Kong and may stay for up to 30 days. Official text: \"Nationals of other foreign countries do not require visas for a visit\" — table entry: \"INDONESIA | 30 Days\" (visa free period for visit not exceeding 30 days; no footnote or exception attached to the Indonesia entry)",
+  "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Indonesian nationals do not require a visa for a tourist visit to Hong Kong and may stay for up to 30 days. Official text: \"Nationals of other foreign countries do not require visas for a visit\", table entry: \"INDONESIA | 30 Days\" (visa free period for visit not exceeding 30 days; no footnote or exception attached to the Indonesia entry)",
   "fields": {
    "official_portal_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
    "disposition": "VISA_EXEMPT",
@@ -9162,7 +9162,7 @@
   "verified_at": "2026-08-25",
   "verified_by": "Ellis source audit",
   "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
-  "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Indonesia is absent from ICA's visa-required list, so travel visa-free and just submit the SG Arrival Card within 3 days before arrival — the exact stay (typically 30 days) is set by the ICA officer on your e-Pass. Official text: If your travel document is issued by one of the countries/ places listed below, you will require a valid visa to enter Singapore.",
+  "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Indonesia is absent from ICA's visa-required list, so travel visa-free and just submit the SG Arrival Card within 3 days before arrival, the exact stay (typically 30 days) is set by the ICA officer on your e-Pass. Official text: If your travel document is issued by one of the countries/ places listed below, you will require a valid visa to enter Singapore.",
   "fields": {
    "official_portal_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
    "disposition": "VISA_EXEMPT",
@@ -9245,7 +9245,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://www.immd.gov.hk/eng/services/fee-tables/index.html",
-  "note": "Ellis leaves fee, stay and all product fees null. The official Immigration Regulations fee table gives a single price for a Hong Kong visit visa regardless of the number of entries: 'Ordinary visa — ... (b) others $330' (HK$330). There is no separate single/double/multiple visit-visa price; the HK$6 | quote: 1. Ordinary visa — (a) issued pursuant to an approved specified scheme applicati",
+  "note": "Ellis leaves fee, stay and all product fees null. The official Immigration Regulations fee table gives a single price for a Hong Kong visit visa regardless of the number of entries: 'Ordinary visa, ... (b) others $330' (HK$330). There is no separate single/double/multiple visit-visa price; the HK$6 | quote: 1. Ordinary visa, (a) issued pursuant to an approved specified scheme applicati",
   "fields": {
    "official_portal_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
    "government_fee": {
@@ -9363,7 +9363,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://overseas.mofa.go.kr/us-en/brd/m_4502/view.do?seq=715889&page=1",
-  "note": "Vietnam is on MOFA's adjusted-fee list: single entry for a stay of 90 days or less is USD 20, not USD 40. The multiple-entry figure of USD 80 is correct. Double entry (USD 60) is missing, and single entry for stays of 91 days or longer is USD 50. | quote: Visa Application Fee for Each Visa Type (in US $) — 90 days or less Single-entry visa USD 40 / 91 days or longer Single-entry visa USD",
+  "note": "Vietnam is on MOFA's adjusted-fee list: single entry for a stay of 90 days or less is USD 20, not USD 40. The multiple-entry figure of USD 80 is correct. Double entry (USD 60) is missing, and single entry for stays of 91 days or longer is USD 50. | quote: Visa Application Fee for Each Visa Type (in US $), 90 days or less Single-entry visa USD 40 / 91 days or longer Single-entry visa USD",
   "fields": {
    "official_portal_url": "https://www.visa.go.kr/openPage.do?MENU_ID=10101&LANG_TYPE=EN",
    "government_fee": {
@@ -10854,7 +10854,7 @@
   "verified_at": "2026-08-25",
   "verified_by": "Ellis source audit",
   "source_url": "http://www.gacetaoficialdebolivia.gob.bo/normas/verGratis_gob/168945",
-  "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. VISA_REQUIRED is right, but nearly everything around it is not. (1) The cited official_source is https://cs.mfa.gov.cn/... — the CHINESE foreign ministry, i.e. the origin country's advice, not the destination's law. Bolivia's own instrument (DS 1923 art. 8 and 10 as amended by DS 4828) was never con Official text: b) Países Grupo II: Las personas extranjeras pertenecientes al Grupo II de países requieren visa de turismo o visita, o autorización de ingreso por turismo o visita, para su ingreso a territorio boliviano ... ARTÍCULO 10",
+  "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. VISA_REQUIRED is right, but nearly everything around it is not. (1) The cited official_source is https://cs.mfa.gov.cn/..., the CHINESE foreign ministry, i.e. the origin country's advice, not the destination's law. Bolivia's own instrument (DS 1923 art. 8 and 10 as amended by DS 4828) was never con Official text: b) Países Grupo II: Las personas extranjeras pertenecientes al Grupo II de países requieren visa de turismo o visita, o autorización de ingreso por turismo o visita, para su ingreso a territorio boliviano ... ARTÍCULO 10",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "paper_visa_on_arrival",
@@ -11024,7 +11024,7 @@
   "verified_at": "2026-08-25",
   "verified_by": "Ellis source audit",
   "source_url": "https://turismo.gov.st/pt/guia-pratico/informacoes-uteis",
-  "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. Three separate problems. (1) Disposition: Ellis serves a flat VISA_REQUIRED. The official government position is conditional — 15 days visa-free for holders of a Schengen or US visa with a passport valid over 3 months, visa otherwise. (2) The stay fields contradict each other: permitted_stay says 'n Official text: A mesma isenção de visto de entrada e permanência, pelo mesmo período, é concedida a cidadãos de quaisquer outros países, desde que preencham cumulativamente as seguintes condições: Titulem passaporte com validade superi",
+  "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. Three separate problems. (1) Disposition: Ellis serves a flat VISA_REQUIRED. The official government position is conditional, 15 days visa-free for holders of a Schengen or US visa with a passport valid over 3 months, visa otherwise. (2) The stay fields contradict each other: permitted_stay says 'n Official text: A mesma isenção de visto de entrada e permanência, pelo mesmo período, é concedida a cidadãos de quaisquer outros países, desde que preencham cumulativamente as seguintes condições: Titulem passaporte com validade superi",
   "fields": {
    "disposition": "CONDITIONAL",
    "requirement_detail": "evisa",
@@ -11043,7 +11043,7 @@
   "verified_at": "2026-08-25",
   "verified_by": "Ellis source audit",
   "source_url": "https://www.zambiaimmigration.gov.zm/nationals-who-dont-require-visa/",
-  "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Chinese ordinary passport holders may enter Zambia without a visa; for official immigration services, use eservices.zambiaimmigration.gov.zm, not the non-resolving evisa hostname. Official text: \"Nationals of the countries listed below do not require visas to enter Zambia.\" — China appears on this list as entry \"34 China\" (Zambia Department of Immigration, 'Nationals Who Do Not Require Visa'). China is absent fr",
+  "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Chinese ordinary passport holders may enter Zambia without a visa; for official immigration services, use eservices.zambiaimmigration.gov.zm, not the non-resolving evisa hostname. Official text: \"Nationals of the countries listed below do not require visas to enter Zambia.\", China appears on this list as entry \"34 China\" (Zambia Department of Immigration, 'Nationals Who Do Not Require Visa'). China is absent fr",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "unconditional_visa_free",
@@ -11156,7 +11156,7 @@
   "verified_at": "2026-08-25",
   "verified_by": "Ellis source audit",
   "source_url": "https://mppre.gob.ve/detalle_turismo/2-quienes-deben-solicitar-la-visa-de-turista",
-  "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Chinese ordinary passport holders must apply for a tourist visa at a Venezuelan embassy or consulate; the bilateral visa exemption applies only to diplomatic, service, and public-affairs passports. Official text: MPPRE: \"LISTA DE PAÍSES CON EXENCIÓN DE VISA DE TURISMO PARA INGRESAR A LA REPÚBLICA BOLIVARIANA DE VENEZUELA POR VÍA AÉREA\" — 71 countries listed; China is not among them. China MFA (Venezuela page, 入境居留): \"中国公民赴委需持中国政府",
+  "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Chinese ordinary passport holders must apply for a tourist visa at a Venezuelan embassy or consulate; the bilateral visa exemption applies only to diplomatic, service, and public-affairs passports. Official text: MPPRE: \"LISTA DE PAÍSES CON EXENCIÓN DE VISA DE TURISMO PARA INGRESAR A LA REPÚBLICA BOLIVARIANA DE VENEZUELA POR VÍA AÉREA\"，71 countries listed; China is not among them. China MFA (Venezuela page, 入境居留): \"中国公民赴委需持中国政府",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "paper_visa",
@@ -11173,7 +11173,7 @@
   "verified_at": "2026-08-25",
   "verified_by": "Ellis source audit",
   "source_url": "https://www.imigrasi.go.id/wna/daftar-visa-indonesia/B1",
-  "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. Disposition, channel, visa category and fee are all correct — France is No. 63 on the official Visa on Arrival subject list ('63. Perancis;') and is not on the visa-free list, so VISA_REQUIRED / B1 VoA / IDR 500,000 is right. The defect is the stay number: Ellis sets permitted_stay_days = 60. The of Official text: Anda dapat tinggal di Indonesia maksimal 30 hari, dihitung sejak tanggal kedatangan. Anda dapat memperpanjang izin tinggal ini satu kali hingga (keseluruhan masa tinggal) maksimal 60 hari.",
+  "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. Disposition, channel, visa category and fee are all correct, France is No. 63 on the official Visa on Arrival subject list ('63. Perancis;') and is not on the visa-free list, so VISA_REQUIRED / B1 VoA / IDR 500,000 is right. The defect is the stay number: Ellis sets permitted_stay_days = 60. The of Official text: Anda dapat tinggal di Indonesia maksimal 30 hari, dihitung sejak tanggal kedatangan. Anda dapat memperpanjang izin tinggal ini satu kali hingga (keseluruhan masa tinggal) maksimal 60 hari.",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "evisa_on_arrival",
@@ -11234,7 +11234,7 @@
   "verified_at": "2026-08-25",
   "verified_by": "Ellis source audit",
   "source_url": "https://immigration.gov.bz/visa/visa-who-qualify/",
-  "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Hong Kong passport holders may enter Belize without a visa for visits up to 30 days and must apply for a Belize Visitor's Permit Extension to stay longer. Official text: Table \"Country Name / Visa Required\": \"Hong Kong — NO\". Page text: \"Exemption for Belize Entry Visa for visits not exceeding 30 days.\" and \"A visa allows you to enter Belize and remain legal in Belize for a maximum of 30",
+  "note": "Corrected 2026-08-25 after a route-by-route cross-check against traveldoc.aero, adjudicated against the official source. Hong Kong passport holders may enter Belize without a visa for visits up to 30 days and must apply for a Belize Visitor's Permit Extension to stay longer. Official text: Table \"Country Name / Visa Required\": \"Hong Kong, NO\". Page text: \"Exemption for Belize Entry Visa for visits not exceeding 30 days.\" and \"A visa allows you to enter Belize and remain legal in Belize for a maximum of 30",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "unconditional_visa_free",
@@ -11623,7 +11623,7 @@
   "verified_at": "2026-08-25",
   "verified_by": "Ellis source audit",
   "source_url": "https://www.kdmid.ru/cons/visas/conditions-of-entry-foreign-citizens-in-russian-federation/",
-  "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Indonesian ordinary-passport tourists need a Russian visa: apply for the unified e-visa at evisa.kdmid.ru before you fly (max 30 days per entry) — the visa-free entry Russia grants Indonesia covers diplomatic and service passports only, so Ellis's 'conditional visa-free' is wrong. Official text: Без виз по дипломатическим и служебным паспортам – до 14 дней. Могут въезжать по электронной визе на срок до 30 дней.",
+  "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Indonesian ordinary-passport tourists need a Russian visa: apply for the unified e-visa at evisa.kdmid.ru before you fly (max 30 days per entry), the visa-free entry Russia grants Indonesia covers diplomatic and service passports only, so Ellis's 'conditional visa-free' is wrong. Official text: Без виз по дипломатическим и служебным паспортам – до 14 дней. Могут въезжать по электронной визе на срок до 30 дней.",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "evisa",
@@ -11662,7 +11662,7 @@
   "verified_at": "2026-08-25",
   "verified_by": "Ellis source audit",
   "source_url": "https://www.imigrasi.go.id/wna/daftar-negara-voa-bvk-calling-visa/daftar-negara-subjek-visa-on-arrival",
-  "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Korean tourists must buy Indonesia's visa on arrival (B1) — do it in advance as an e-VOA at evisa.imigrasi.go.id or at the airport counter; Korea is not on Indonesia's Bebas Visa Kunjungan list, which now covers only ASEAN plus Timor-Leste, Suriname, Colombia, Hong Kong, Turkey, Brazil, Peru, Kazakhstan, Macau and Belarus. Official text: Daftar Subjek Visa on Arrival … Korea Selatan",
+  "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Korean tourists must buy Indonesia's visa on arrival (B1), do it in advance as an e-VOA at evisa.imigrasi.go.id or at the airport counter; Korea is not on Indonesia's Bebas Visa Kunjungan list, which now covers only ASEAN plus Timor-Leste, Suriname, Colombia, Hong Kong, Turkey, Brazil, Peru, Kazakhstan, Macau and Belarus. Official text: Daftar Subjek Visa on Arrival … Korea Selatan",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "evisa_on_arrival",
@@ -11758,7 +11758,7 @@
   "verified_at": "2026-08-25",
   "verified_by": "Ellis source audit (Opus re-verification)",
   "source_url": "http://www.tongaembassycn.gov.to/en/going-to-tonga-en/visas-en",
-  "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. The VISA_EXEMPT correction never reached what Ellis serves. Ellis still returns disposition VISA_REQUIRED with requirement_detail paper_visa_on_arrival, application_channel on_arrival, and a payment_process step reading \"Pay the visa fee in cash at the immigration counter on arrival\" — but the Tonga Official text: Visa Waiver Countries. Conditions for Visa Waiver Entries to Tonga. A valid return ticket out of the Kingdom to a country which s/he shall be able to enter. ... The following countries are NOT required to apply for a vis",
+  "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. The VISA_EXEMPT correction never reached what Ellis serves. Ellis still returns disposition VISA_REQUIRED with requirement_detail paper_visa_on_arrival, application_channel on_arrival, and a payment_process step reading \"Pay the visa fee in cash at the immigration counter on arrival\", but the Tonga Official text: Visa Waiver Countries. Conditions for Visa Waiver Entries to Tonga. A valid return ticket out of the Kingdom to a country which s/he shall be able to enter. ... The following countries are NOT required to apply for a vis",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "unconditional_visa_free",
@@ -11926,7 +11926,7 @@
   "verified_at": "2026-08-25",
   "verified_by": "Ellis source audit (Opus re-verification)",
   "source_url": "https://fipa.vijeceministara.gov.ba/en/visasinformation-for-visitors",
-  "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. The VISA_EXEMPT correction is NOT what Ellis serves. The live lookup returns a cached VISA_REQUIRED answer (requirement_detail paper_visa, embassy submission, 'up to 90 days per visit if visa granted', confidence low, review_required true, no source_verified block) — i.e. the correction never reache Official text: D) Holders of business passports of the following countries do not require a visa to enter, exit or transit the territory of Bosnia and Herzegovina: 1. Hong Kong, People's Republic of China 2. Macau, People's Republic of",
+  "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. The VISA_EXEMPT correction is NOT what Ellis serves. The live lookup returns a cached VISA_REQUIRED answer (requirement_detail paper_visa, embassy submission, 'up to 90 days per visit if visa granted', confidence low, review_required true, no source_verified block), i.e. the correction never reache Official text: D) Holders of business passports of the following countries do not require a visa to enter, exit or transit the territory of Bosnia and Herzegovina: 1. Hong Kong, People's Republic of China 2. Macau, People's Republic of",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "unconditional_visa_free",
@@ -13912,7 +13912,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://www.evisa.gov.et/information/tourist",
-  "note": "Same fee errors (52→62, 72→152). Hong Kong IS on the official visa-on-arrival country list, so that product exists, but the eVisa portal publishes no separate visa-on-arrival tariff — the USD 50 / USD 70 figures are unsourced. The published tourist tariff (62 / 152) is the only official one. | quote: Tourist Visa-VT … Duration and Validity — The Validity of the Visa starts counting from ",
+  "note": "Same fee errors (52→62, 72→152). Hong Kong IS on the official visa-on-arrival country list, so that product exists, but the eVisa portal publishes no separate visa-on-arrival tariff, the USD 50 / USD 70 figures are unsourced. The published tourist tariff (62 / 152) is the only official one. | quote: Tourist Visa-VT … Duration and Validity, The Validity of the Visa starts counting from ",
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 30,
@@ -14124,7 +14124,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://kuwaitvisa.moi.gov.kw/",
-  "note": "Validity, stay and route are all wrong. Kuwait's MOI portal states the tourism visa's 'Entry permit validity: 30 days from the date of issuance' (not 3 months) and 'Stay duration: No more than 90 days from the date of entry' (not 30). The route is also wrong: Hong Kong is on the MOI's visa-on-arriva | quote: Tourism Visa — Passport validity: No less than 6 months. Entry permit validity: ",
+  "note": "Validity, stay and route are all wrong. Kuwait's MOI portal states the tourism visa's 'Entry permit validity: 30 days from the date of issuance' (not 3 months) and 'Stay duration: No more than 90 days from the date of entry' (not 30). The route is also wrong: Hong Kong is on the MOI's visa-on-arriva | quote: Tourism Visa, Passport validity: No less than 6 months. Entry permit validity: ",
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 90,
@@ -14440,7 +14440,7 @@
   "note": "Both headline numbers are wrong. (1) The 60-day validity and 60-day stay are WRONG: the Kyrgyz MFA e-Visa portal states the Tourist Visa (type 'TS') is issued 'with a validity of up to 30 calendar days' and the application flow offers only a 1-month term. There is no 60-day tourist e-Visa. (2) The f | quote: Tourist Visa (type \"TS\") is issued for short-term stays for the purpose of touri",
   "fields": {
    "permitted_stay_days": 30,
-   "permitted_stay": "30 days — Kyrgyz tourist visa (type TS) validity; Chinese ordinary passport holders are not visa-free",
+   "permitted_stay": "30 days, Kyrgyz tourist visa (type TS) validity; Chinese ordinary passport holders are not visa-free",
    "government_fee": {
     "amount": 51.5,
     "currency": "USD"
@@ -14521,7 +14521,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 adjudication vs official sources",
   "source_url": "https://cs.mfa.gov.cn/zggmcg/ljmdd/fz_648564/mlqs_650737/rjjl_650747/",
-  "note": "The stay was raised from 30 to 60 days by the revised agreement in force 14 June 2017 — traveldoc's 30 is the pre-2017 number. Mauritius's own Passport and Immigration Office country-wise table (passport.govmu.org/passport/wp-content/uploads/2021/03/Visa-Requirement-Country-22062022.pdf) confirms the status — \"35 China — No visa required.\" — but states no day count for visa-fre",
+  "note": "The stay was raised from 30 to 60 days by the revised agreement in force 14 June 2017, traveldoc's 30 is the pre-2017 number. Mauritius's own Passport and Immigration Office country-wise table (passport.govmu.org/passport/wp-content/uploads/2021/03/Visa-Requirement-Country-22062022.pdf) confirms the status, \"35 China, No visa required.\", but states no day count for visa-fre",
   "fields": {
    "permitted_stay_days": 60,
    "permitted_stay": "60 days visa-free under the China-Mauritius mutual visa exemption agreement"
@@ -14587,7 +14587,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 adjudication vs official sources",
   "source_url": "https://www.mofa.gov.ae/en/missions/hong-kong/services/visas",
-  "note": "Confirmed twice over: the UAE Ministry of Foreign Affairs consulate page for Hong Kong, and the HK Immigration Department's list updated 26 August 2026 (\"169. United Arab Emirates 30 days\"). Traveldoc's 40 looks like 30 days plus a 10-day extension/grace period, which is not the granted stay — an extension must be applied for at the local GDRFA at least three days before expiry",
+  "note": "Confirmed twice over: the UAE Ministry of Foreign Affairs consulate page for Hong Kong, and the HK Immigration Department's list updated 26 August 2026 (\"169. United Arab Emirates 30 days\"). Traveldoc's 40 looks like 30 days plus a 10-day extension/grace period, which is not the granted stay, an extension must be applied for at the local GDRFA at least three days before expiry",
   "fields": {
    "permitted_stay_days": 30,
    "permitted_stay": "30 days, granted free of charge on arrival"
@@ -14617,7 +14617,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 adjudication vs official sources",
   "source_url": "https://www.immd.gov.hk/pdf/Visa-free%20Access%20or%20Visa-on-arrival%20for%20HKSAR%20passport%20list_Eng.pdf",
-  "note": "Two independent official confirmations of 30, not 90. Morocco's own Ministry of Foreign Affairs consular portal lists the exemption as \"Hong-Kong (séjour limité à 30 jours)\" at consulat.ma/fr/liste-des-pays-dont-les-ressortissants-sont-dispenses-du-visa-dentree-au-maroc — I cite the HK Immigration Department PDF instead only because consulat.ma is not a gov.* domain; the IMMD l",
+  "note": "Two independent official confirmations of 30, not 90. Morocco's own Ministry of Foreign Affairs consular portal lists the exemption as \"Hong-Kong (séjour limité à 30 jours)\" at consulat.ma/fr/liste-des-pays-dont-les-ressortissants-sont-dispenses-du-visa-dentree-au-maroc, I cite the HK Immigration Department PDF instead only because consulat.ma is not a gov.* domain; the IMMD l",
   "fields": {
    "permitted_stay_days": 30,
    "permitted_stay": "30 days visa-free"
@@ -14632,7 +14632,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 adjudication vs official sources",
   "source_url": "https://cdn.www.gob.pe/uploads/document/file/4797317/MIGRACIONES:%20Ley%20y%20Reglamento.pdf",
-  "note": "Peru's own migration law and regulation (Decreto Legislativo 1350 / DS 007-2017-IN, as published by MIGRACIONES on gob.pe) fix the Turista migratory status at 183 cumulative days per 365, and expressly apply it to nationalities entering under visa-exemption arrangements — which covers HKSAR passports. Ellis's 183 is the legal maximum. Flagging the tension honestly: the HK Immig",
+  "note": "Peru's own migration law and regulation (Decreto Legislativo 1350 / DS 007-2017-IN, as published by MIGRACIONES on gob.pe) fix the Turista migratory status at 183 cumulative days per 365, and expressly apply it to nationalities entering under visa-exemption arrangements, which covers HKSAR passports. Ellis's 183 is the legal maximum. Flagging the tension honestly: the HK Immig",
   "fields": {
    "permitted_stay_days": 183,
    "permitted_stay": "183 days, cumulative within any 365-day period, not extendable"
@@ -14733,7 +14733,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 adjudication vs official sources",
   "source_url": "https://security.gov.vc/security/index.php?option=com_content&view=article&id=56&Itemid=112",
-  "note": "Hong Kong falls in the residual \"Other International Countries\" band, so 3 months / 90 days, not Ellis's 30. HKSAR passport holders are not pre-visa nationals: the Ministry of Tourism's entry-requirements page lists the pre-entry visa countries as Afghanistan, Bangladesh, Cameroon, China, Dominican Republic, Haiti, Iran, Iraq, Lebanon, Nepal, Nigeria and Syria — mainland China ",
+  "note": "Hong Kong falls in the residual \"Other International Countries\" band, so 3 months / 90 days, not Ellis's 30. HKSAR passport holders are not pre-visa nationals: the Ministry of Tourism's entry-requirements page lists the pre-entry visa countries as Afghanistan, Bangladesh, Cameroon, China, Dominican Republic, Haiti, Iran, Iraq, Lebanon, Nepal, Nigeria and Syria, mainland China ",
   "fields": {
    "permitted_stay_days": 90,
    "permitted_stay": "three (3) months granted as a visitor permit on arrival"
@@ -14938,7 +14938,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://www.evisa.gov.et/information/tourist",
-  "note": "Both fees are stale. The Immigration and Citizenship Service now publishes USD 62 for the 30-day single-entry tourist e-Visa (Ellis says 52) and USD 152 for the 90-day single-entry tourist e-Visa (Ellis says 72). Durations (30 / 90 days, counted from the intended date of entry) are right. Headline f | quote: Tourist Visa-VT … Duration and Validity — The Validity of the Visa starts counti",
+  "note": "Both fees are stale. The Immigration and Citizenship Service now publishes USD 62 for the 30-day single-entry tourist e-Visa (Ellis says 52) and USD 152 for the 90-day single-entry tourist e-Visa (Ellis says 72). Durations (30 / 90 days, counted from the intended date of entry) are right. Headline f | quote: Tourist Visa-VT … Duration and Validity, The Validity of the Visa starts counti",
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 30,
@@ -15172,7 +15172,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 adjudication vs official sources",
   "source_url": "https://cs.mfa.gov.cn/zggmcg/ljmdd/fz_648564/kml_650055/rjjl_650065/",
-  "note": "Same official page: '科实行生物特征的落地签证，须采集申请人相貌特征和指纹，签证有效期不超过45天，普通护照持有人申请入境签证须缴纳30欧元签证费' — biometric visa on arrival, validity not exceeding 45 days, EUR 30 for ordinary passports; return ticket and passport copy required. The China–Comoros exemption agreement in force since 26 Feb 2016 covers only diplomatic, service and public-affairs passports. No Comorian government web presenc",
+  "note": "Same official page: '科实行生物特征的落地签证，须采集申请人相貌特征和指纹，签证有效期不超过45天，普通护照持有人申请入境签证须缴纳30欧元签证费'，biometric visa on arrival, validity not exceeding 45 days, EUR 30 for ordinary passports; return ticket and passport copy required. The China–Comoros exemption agreement in force since 26 Feb 2016 covers only diplomatic, service and public-affairs passports. No Comorian government web presenc",
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 45,
@@ -15237,7 +15237,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://repermad-geneve.diplomatie.gov.mg/index.php/passeport/visa-de-court-sejour-moins-de-90-jours",
-  "note": "All three visa-on-arrival amounts are wrong. Madagascar's published legal tariff (tarif légal MGA, 2026 chancellery rate) is 104,000 MGA for up to 1 month, 130,000 MGA for up to 2 months and 182,000 MGA for up to 3 months; Ellis has 115,000 / 135,000 / 175,000. Ellis also omits the ≤15-day band (65, | quote: Type de visa / Tarif légal MGA — Visa court séjour inférieur ou égal à 15 jours:",
+  "note": "All three visa-on-arrival amounts are wrong. Madagascar's published legal tariff (tarif légal MGA, 2026 chancellery rate) is 104,000 MGA for up to 1 month, 130,000 MGA for up to 2 months and 182,000 MGA for up to 3 months; Ellis has 115,000 / 135,000 / 175,000. Ellis also omits the ≤15-day band (65, | quote: Type de visa / Tarif légal MGA, Visa court séjour inférieur ou égal à 15 jours:",
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 30,
@@ -15416,7 +15416,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 adjudication vs official sources",
   "source_url": "https://cs.mfa.gov.cn/zggmcg/ljmdd/fz_648564/sd_651667/rjjl_651677/",
-  "note": "Traveldoc's 'Green/VoA' is wrong. Sudan's on-arrival option is not a walk-up visa: it exists only in emergencies and requires a Sudanese sponsor to obtain a pre-approved entry permit (入境许可) from the Immigration Department or Ministry of Investment BEFORE travel, which the traveller must carry to the airport — that is an advance authorisation, so VISA_REQUIRED. The same official",
+  "note": "Traveldoc's 'Green/VoA' is wrong. Sudan's on-arrival option is not a walk-up visa: it exists only in emergencies and requires a Sudanese sponsor to obtain a pre-approved entry permit (入境许可) from the Immigration Department or Ministry of Investment BEFORE travel, which the traveller must carry to the airport，that is an advance authorisation, so VISA_REQUIRED. The same official",
   "fields": {
    "disposition": "VISA_REQUIRED"
   }
@@ -15540,7 +15540,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://www.general-security.gov.lb/en/posts/38",
-  "note": "Entirely wrong. 'Hong kong(SAR)China' appears in Section One of the General Security list, so a Hong Kong passport holder gets the same cost-free one-month visa extendable to three months — not a paid embassy visa with 90-day stay and 3/6/12-month validity. Fee should be 0 and headline stay 30 days. | quote: Second Article: Entry of citizens from foreign countries for tourism. Section on",
+  "note": "Entirely wrong. 'Hong kong(SAR)China' appears in Section One of the General Security list, so a Hong Kong passport holder gets the same cost-free one-month visa extendable to three months, not a paid embassy visa with 90-day stay and 3/6/12-month validity. Fee should be 0 and headline stay 30 days. | quote: Second Article: Entry of citizens from foreign countries for tourism. Section on",
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 30,
@@ -15730,7 +15730,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://repermad-geneve.diplomatie.gov.mg/index.php/passeport/visa-de-court-sejour-moins-de-90-jours",
-  "note": "Both channels are mispriced. e-Visa: the official portal that the Madagascar Ministry of Tourism (mta.gov.mg) directs applicants to publishes EUR 30 / USD 35 for 1-15 days, EUR 35 / USD 41 for 16-30 days, EUR 40 / USD 47 for 31-60 days and EUR 50 / USD 59 for 61-90 days; Ellis has EUR 37 / 45 / 55 f | quote: Type de visa / Tarif légal MGA — Visa court séjour inférieur ou égal à 15 jours:",
+  "note": "Both channels are mispriced. e-Visa: the official portal that the Madagascar Ministry of Tourism (mta.gov.mg) directs applicants to publishes EUR 30 / USD 35 for 1-15 days, EUR 35 / USD 41 for 16-30 days, EUR 40 / USD 47 for 31-60 days and EUR 50 / USD 59 for 61-90 days; Ellis has EUR 37 / 45 / 55 f | quote: Type de visa / Tarif légal MGA, Visa court séjour inférieur ou égal à 15 jours:",
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 30,
@@ -15876,7 +15876,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://evisa.gov.mz/tourist-visa.html",
-  "note": "The validity figures are wrong and the entry type is wrong. The official portal states one validity for the tourist eVisa — 2 months from the date of issuance — not '30 days from issue' for single entry and '90 days from issue' for multiple entry. It also states the visa 'will be of multiple-entry t | quote: You can enter the country as per the duration of the visa 30, 60 or 90 days. The",
+  "note": "The validity figures are wrong and the entry type is wrong. The official portal states one validity for the tourist eVisa, 2 months from the date of issuance, not '30 days from issue' for single entry and '90 days from issue' for multiple entry. It also states the visa 'will be of multiple-entry t | quote: You can enter the country as per the duration of the visa 30, 60 or 90 days. The",
   "fields": {
    "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
    "permitted_stay_days": 30,
@@ -16052,7 +16052,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://turismo.gov.st/pt/guia-pratico/informacoes-uteis",
-  "note": "Currency and structure both wrong. The Serviço de Migração e Fronteiras (smf.st) states the Temporary Tourism Visa fee was cut to 490,000 STD, which in redenominated dobras is STN 490 — about EUR 20 at the rate the tourism ministry itself publishes (1 EUR = 24,500 old STD), not USD 20. There is one  | quote: Nos termos da deliberação do Governo de São Tomé e Príncipe sobre a supressão de",
+  "note": "Currency and structure both wrong. The Serviço de Migração e Fronteiras (smf.st) states the Temporary Tourism Visa fee was cut to 490,000 STD, which in redenominated dobras is STN 490, about EUR 20 at the rate the tourism ministry itself publishes (1 EUR = 24,500 old STD), not USD 20. There is one  | quote: Nos termos da deliberação do Governo de São Tomé e Príncipe sobre a supressão de",
   "fields": {
    "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
    "government_fee": {
@@ -16275,7 +16275,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://www.zimimmigration.gov.zw/?page_id=6958",
-  "note": "MAJOR ERROR — Hong Kong needs NO VISA for Zimbabwe. The Department of Immigration's Category A list (https://www.zimimmigration.gov.zw/?p=7176) reads: 'The countries listed below do not require a visa to enter the country' and includes 'Hong Kong'. Ellis's entire HKG row for Zimbabwe (visa on arriva | quote: Visa applicants — Ordinary single-entry visa (online) 30 USD; Ordinary single en",
+  "note": "MAJOR ERROR, Hong Kong needs NO VISA for Zimbabwe. The Department of Immigration's Category A list (https://www.zimimmigration.gov.zw/?p=7176) reads: 'The countries listed below do not require a visa to enter the country' and includes 'Hong Kong'. Ellis's entire HKG row for Zimbabwe (visa on arriva | quote: Visa applicants, Ordinary single-entry visa (online) 30 USD; Ordinary single en",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "government_fee": {
@@ -16292,7 +16292,7 @@
       "amount": 0,
       "currency": "USD"
      },
-     "notes": "Hong Kong is on the Department of Immigration Category A list — no visa to enter. Travellers are encouraged to complete the Zimbabwe Entry Declaration Form before travelling"
+     "notes": "Hong Kong is on the Department of Immigration Category A list, no visa to enter. Travellers are encouraged to complete the Zimbabwe Entry Declaration Form before travelling"
     }
    ]
   }
@@ -16401,7 +16401,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://cancilleria.gob.bo/mre/2025/12/01/23577/",
-  "note": "The whole record is out of date. On 1 December 2025 Bolivia's Foreign Ministry announced that the United States (and Israel) move from Grupo III to Grupo I — no visa required for tourism. So the correct headline is visa-free at zero cost, not a USD 160 visa on arrival. The 90-day figure is right but | quote: Los países que ingresan al Grupo I (sin requerimiento de visa) son: [list includ",
+  "note": "The whole record is out of date. On 1 December 2025 Bolivia's Foreign Ministry announced that the United States (and Israel) move from Grupo III to Grupo I, no visa required for tourism. So the correct headline is visa-free at zero cost, not a USD 160 visa on arrival. The 90-day figure is right but | quote: Los países que ingresan al Grupo I (sin requerimiento de visa) son: [list includ",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "government_fee": {
@@ -16413,7 +16413,7 @@
     {
      "type": "Visa-free entry for tourism (Grupo I)",
      "entry": "multiple",
-     "validity": "n/a — no visa required",
+     "validity": "n/a, no visa required",
      "max_stay_days": 90,
      "fee": {
       "amount": 0,
@@ -16485,7 +16485,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://www.evisa.gov.et/information/tourist",
-  "note": "Same fee errors (52→62, 72→152). The United States is on the official visa-on-arrival list, but the USD 50 on-arrival fee is not published by the Immigration and Citizenship Service; only the 62 / 152 tourist tariff is official. | quote: Tourist Visa-VT … Duration and Validity — The Validity of the Visa starts counting from the date intended to enter Ethiopia. Fee — Entry Type / Maximum ",
+  "note": "Same fee errors (52→62, 72→152). The United States is on the official visa-on-arrival list, but the USD 50 on-arrival fee is not published by the Immigration and Citizenship Service; only the 62 / 152 tourist tariff is official. | quote: Tourist Visa-VT … Duration and Validity, The Validity of the Visa starts counting from the date intended to enter Ethiopia. Fee, Entry Type / Maximum ",
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "government_fee": {
@@ -16504,7 +16504,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 adjudication vs official sources",
   "source_url": "https://gambia.gov.gm/immigration-and-visas/",
-  "note": "The exempt groups on the same page are \"Citizens of the United Kingdom, full members of the European Union, the Commonwealth, the Economic Community of West African States (ECOWAS) and other nations with a reciprocal visa exemption agreement with The Gambia\" for stays up to 90 days — the USA is in none of them, and The Gambia maintains an embassy in Washington DC, so the \"no Ga",
+  "note": "The exempt groups on the same page are \"Citizens of the United Kingdom, full members of the European Union, the Commonwealth, the Economic Community of West African States (ECOWAS) and other nations with a reciprocal visa exemption agreement with The Gambia\" for stays up to 90 days, the USA is in none of them, and The Gambia maintains an embassy in Washington DC, so the \"no Ga",
   "fields": {
    "disposition": "VISA_REQUIRED"
   }
@@ -16518,7 +16518,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://www.moi.gov.jo/AR/Pages/%D8%A7%D9%84%D8%AA%D8%A3%D8%B4%D9%8A%D8%B1%D8%A9_%D8%A7%D9%84%D8%A7%D9%84%D9%83%D8%AA%D8%B1%D9%88%D9%86%D9%8A%D8%A9?View=3329",
-  "note": "Headline JOD 40 CORRECT and single-entry is right except its validity is 3 months, not '30 days'. Ellis's 'Multiple-entry tourist visa, up to 6 months' has a NULL fee — it is JOD 120. Crucially, Jordan is the one destination in this batch where the fee genuinely varies by nationality: the MOI schedu | quote: رسوم التأشيرة - 3 اشهر / سفرة واحدة 40 دينار أردني - 3 اشهر/ سفرتين 60 دينار أرد",
+  "note": "Headline JOD 40 CORRECT and single-entry is right except its validity is 3 months, not '30 days'. Ellis's 'Multiple-entry tourist visa, up to 6 months' has a NULL fee, it is JOD 120. Crucially, Jordan is the one destination in this batch where the fee genuinely varies by nationality: the MOI schedu | quote: رسوم التأشيرة - 3 اشهر / سفرة واحدة 40 دينار أردني - 3 اشهر/ سفرتين 60 دينار أرد",
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 30,
@@ -16636,7 +16636,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://kuwaitvisa.moi.gov.kw/",
-  "note": "Validity and stay are INVERTED. Ellis has eVisa validity 90 days / stay 30; the MOI portal says validity 30 days from issuance and stay up to 90 days from entry. The 'visa on arrival — 30 days' product is likewise wrong on duration: the same 30-day validity / 90-day stay rule applies, and the United | quote: Tourism Visa — Passport validity: No less than 6 months. Entry permit validity: ",
+  "note": "Validity and stay are INVERTED. Ellis has eVisa validity 90 days / stay 30; the MOI portal says validity 30 days from issuance and stay up to 90 days from entry. The 'visa on arrival, 30 days' product is likewise wrong on duration: the same 30-day validity / 90-day stay rule applies, and the United | quote: Tourism Visa, Passport validity: No less than 6 months. Entry permit validity: ",
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 90,
@@ -16740,7 +16740,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://repermad-geneve.diplomatie.gov.mg/index.php/passeport/visa-de-court-sejour-moins-de-90-jours",
-  "note": "All three USD e-Visa prices are wrong. The official portal charges USD 41 for 16-30 days, USD 47 for 31-60 days and USD 59 for 61-90 days; Ellis has USD 37 / 45 / 55. Ellis also omits the 1-15 day tier at USD 35 (raised from USD 10 on 16 February 2026). Duration bands and single-entry structure are  | quote: Type de visa / Tarif légal MGA — Visa court séjour inférieur ou égal à 15 jours:",
+  "note": "All three USD e-Visa prices are wrong. The official portal charges USD 41 for 16-30 days, USD 47 for 31-60 days and USD 59 for 61-90 days; Ellis has USD 37 / 45 / 55. Ellis also omits the 1-15 day tier at USD 35 (raised from USD 10 on 16 February 2026). Duration bands and single-entry structure are  | quote: Type de visa / Tarif légal MGA, Visa court séjour inférieur ou égal à 15 jours:",
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 30,
@@ -17034,7 +17034,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://evisa.gov.sz/VisaApplicationGuidelines",
-  "note": "STAY of 30 days is CORRECT and now source-backed ('to enter and stay in Eswatini for a period not more than one month upon entry'). FEE remains UNVERIFIABLE — no fee schedule exists on evisa.gov.sz or gov.sz. Ellis's 'typically 30 days from entry' validity for the single entry conflates stay with va | quote: The Kingdom of Eswatini visas are required by certain tourists, business visitor",
+  "note": "STAY of 30 days is CORRECT and now source-backed ('to enter and stay in Eswatini for a period not more than one month upon entry'). FEE remains UNVERIFIABLE, no fee schedule exists on evisa.gov.sz or gov.sz. Ellis's 'typically 30 days from entry' validity for the single entry conflates stay with va | quote: The Kingdom of Eswatini visas are required by certain tourists, business visitor",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "permitted_stay_days": 30,
@@ -17247,7 +17247,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://www.zimimmigration.gov.zw/?page_id=6958",
-  "note": "USA is Category B (https://www.zimimmigration.gov.zw/?p=7186 — 'require a visa to enter Zimbabwe. However the visa from these country's nationals may also be obtained at the port of entry after payment of the corresponding visa fee'), so the visa-on-arrival disposition is right and the USD 30 single | quote: Visa applicants — Ordinary single-entry visa (online) 30 USD; Ordinary single en",
+  "note": "USA is Category B (https://www.zimimmigration.gov.zw/?p=7186, 'require a visa to enter Zimbabwe. However the visa from these country's nationals may also be obtained at the port of entry after payment of the corresponding visa fee'), so the visa-on-arrival disposition is right and the USD 30 single | quote: Visa applicants, Ordinary single-entry visa (online) 30 USD; Ordinary single en",
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "government_fee": {
@@ -17555,7 +17555,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 adjudication vs official sources",
   "source_url": "https://evisa.gov.ph/page/policy",
-  "note": "Philippine DFA eVisa policy page. The Bureau of Immigration's visa waiver page agrees ('HONG KONG / MACAU SAR PASSPORT — 14 days initial admission', extendable by 7 days then a 9A 14-day waiver). No Philippine instrument grants Hong Kong diplomatic/official passport holders more, and the HKSAR issues no service passport. If the traveller carries a PRC service passport, the RP-C",
+  "note": "Philippine DFA eVisa policy page. The Bureau of Immigration's visa waiver page agrees ('HONG KONG / MACAU SAR PASSPORT, 14 days initial admission', extendable by 7 days then a 9A 14-day waiver). No Philippine instrument grants Hong Kong diplomatic/official passport holders more, and the HKSAR issues no service passport. If the traveller carries a PRC service passport, the RP-C",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "permitted_stay_days": 14,
@@ -17667,7 +17667,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://evisacuba.cu/",
-  "note": "Stay is wrong and one product is obsolete. The Cuban foreign ministry's own eVisa portal states the tourist visa is good for a single entry and 'una estancia de 90 días, prorrogables por 90 días' — a 90-day stay extendable by another 90, not 30 days. The paper 'Tourist Card (pink for US-origin trave | quote: El visado de turismo es válido por una sola entrada a Cuba, para una estancia de",
+  "note": "Stay is wrong and one product is obsolete. The Cuban foreign ministry's own eVisa portal states the tourist visa is good for a single entry and 'una estancia de 90 días, prorrogables por 90 días', a 90-day stay extendable by another 90, not 30 days. The paper 'Tourist Card (pink for US-origin trave | quote: El visado de turismo es válido por una sola entrada a Cuba, para una estancia de",
   "fields": {
    "permitted_stay_days": 90,
    "permitted_stay": "90 days, extendable once for a further 90 days (180 days maximum)",
@@ -19138,7 +19138,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://migration.gov.bi/Services",
-  "note": "Fee left null. The Commissariat Général des Migrations publishes a duration-banded tariff: a single 'visa de séjour' for 1 month is USD 70; multiple-entry is USD 90 for 1 month. Fees are set by duration and visa class, not nationality (EAC and CEPGL citizens are free). The 30-day stay is right. Buru | quote: Visa de séjour — Tarif: 10 USD pour 5 jours ; 20 USD pour 10 jours ; 30 USD pour",
+  "note": "Fee left null. The Commissariat Général des Migrations publishes a duration-banded tariff: a single 'visa de séjour' for 1 month is USD 70; multiple-entry is USD 90 for 1 month. Fees are set by duration and visa class, not nationality (EAC and CEPGL citizens are free). The 30-day stay is right. Buru | quote: Visa de séjour, Tarif: 10 USD pour 5 jours ; 20 USD pour 10 jours ; 30 USD pour",
   "fields": {
    "government_fee": {
     "amount": 70,
@@ -19180,7 +19180,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://migration.gov.bi/Services",
-  "note": "Single-entry fee of USD 40 is wrong — the official tariff for a 1-month visa de séjour is USD 70 (USD 40 is the 20-day band). The multiple-entry USD 90 figure is right, but its validity is 1 month, not 90 days (90 days multiple-entry is USD 270). Stay of 30 days is right. | quote: Visa de séjour — Tarif: 10 USD pour 5 jours ; 20 USD pour 10 jours ; 30 USD pour 15 jours ; 40 USD pour 20 j",
+  "note": "Single-entry fee of USD 40 is wrong, the official tariff for a 1-month visa de séjour is USD 70 (USD 40 is the 20-day band). The multiple-entry USD 90 figure is right, but its validity is 1 month, not 90 days (90 days multiple-entry is USD 270). Stay of 30 days is right. | quote: Visa de séjour, Tarif: 10 USD pour 5 jours ; 20 USD pour 10 jours ; 30 USD pour 15 jours ; 40 USD pour 20 j",
   "fields": {
    "government_fee": {
     "amount": 70,
@@ -19233,7 +19233,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://migration.gov.bi/Services",
-  "note": "Fee left null; official 1-month single stay visa is USD 70. The 'Multiple-entry tourist visa — Up to 90 days' product should be USD 270 (the 1-month multiple-entry band is USD 90). No separate visa-on-arrival tariff is published on migration.gov.bi, so the VOA fee remains unsourced. | quote: Visa de séjour — Tarif: 10 USD pour 5 jours ; 20 USD pour 10 jours ; 30 USD pour 15 jours ; 40 US",
+  "note": "Fee left null; official 1-month single stay visa is USD 70. The 'Multiple-entry tourist visa, Up to 90 days' product should be USD 270 (the 1-month multiple-entry band is USD 90). No separate visa-on-arrival tariff is published on migration.gov.bi, so the VOA fee remains unsourced. | quote: Visa de séjour, Tarif: 10 USD pour 5 jours ; 20 USD pour 10 jours ; 30 USD pour 15 jours ; 40 US",
   "fields": {
    "government_fee": {
     "amount": 70,
@@ -19317,7 +19317,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://ica.gov.pg/visa-information/migration-service-fees",
-  "note": "Fee null should be 0 (visa fee 'Nil'), with USD 50 payable only for electronic lodgement. Validity claim 'usually valid for 60 days from issue' is wrong — ICA says the Visitor visa is 'valid for a single entry stay of sixty (60) days from the date of arrival', i.e. the 60 days runs from arrival, not | quote: Visitor | Tourist – Tour package | Fees: Nil | Extension Fee: 150 | Late Extensi",
+  "note": "Fee null should be 0 (visa fee 'Nil'), with USD 50 payable only for electronic lodgement. Validity claim 'usually valid for 60 days from issue' is wrong, ICA says the Visitor visa is 'valid for a single entry stay of sixty (60) days from the date of arrival', i.e. the 60 days runs from arrival, not | quote: Visitor | Tourist – Tour package | Fees: Nil | Extension Fee: 150 | Late Extensi",
   "fields": {
    "government_fee": {
     "amount": 0,
@@ -19348,7 +19348,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://ica.gov.pg/visa-information/migration-service-fees",
-  "note": "Two errors. (1) 'valid for 6 months from issue' is wrong — ICA: 'valid for a single entry stay of sixty (60) days from the date of arrival'. (2) The eVisa route is not open to US citizens: the ICA VOA page ends 'Note: Mainland New Zealand, French and United States of America are not eligible for VOA | quote: Visitor | Tourist – Tour package | Fees: Nil | Extension Fee: 150 | Late Extensi",
+  "note": "Two errors. (1) 'valid for 6 months from issue' is wrong, ICA: 'valid for a single entry stay of sixty (60) days from the date of arrival'. (2) The eVisa route is not open to US citizens: the ICA VOA page ends 'Note: Mainland New Zealand, French and United States of America are not eligible for VOA | quote: Visitor | Tourist – Tour package | Fees: Nil | Extension Fee: 150 | Late Extensi",
   "fields": {
    "government_fee": {
     "amount": 0,
@@ -19505,7 +19505,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://france-visas.gouv.fr/en/faq",
-  "note": "Fee EUR 90 and the 90-day stay are correct — this is the uniform EU Visa Code short-stay fee, confirmed on a government site at migrationsverket.se: 'People 12 years of age or older: 90 Euros. Children aged 6–11: 45 Euros. Children aged 0–5: no fee.' What is wrong is the framing: Monaco issues no sh | quote: When a short-stay visa is required and the main destination is Monaco. The consu",
+  "note": "Fee EUR 90 and the 90-day stay are correct, this is the uniform EU Visa Code short-stay fee, confirmed on a government site at migrationsverket.se: 'People 12 years of age or older: 90 Euros. Children aged 6–11: 45 Euros. Children aged 0–5: no fee.' What is wrong is the framing: Monaco issues no sh | quote: When a short-stay visa is required and the main destination is Monaco. The consu",
   "fields": {
    "government_fee": {
     "amount": 90,
@@ -19547,7 +19547,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://www.migrationsverket.se/en/you-want-to-apply/visiting-sweden/visiting-sweden-for-up-to-90-days-entry-visa.html",
-  "note": "Headline fee EUR 90 and the 90-day stay are correct for Chinese nationals. The child fee bands are mis-drawn: Ellis has 'Child 6–12 years' at EUR 45 and 'Child under 6' at EUR 0, but Migrationsverket bands it as 12 and over EUR 90, 6–11 EUR 45, 0–5 free — so a 12-year-old pays the full EUR 90 under  | quote: People 12 years of age or older: 90 Euros. Children aged 6–11: 45 Euros. Childre",
+  "note": "Headline fee EUR 90 and the 90-day stay are correct for Chinese nationals. The child fee bands are mis-drawn: Ellis has 'Child 6–12 years' at EUR 45 and 'Child under 6' at EUR 0, but Migrationsverket bands it as 12 and over EUR 90, 6–11 EUR 45, 0–5 free, so a 12-year-old pays the full EUR 90 under  | quote: People 12 years of age or older: 90 Euros. Children aged 6–11: 45 Euros. Childre",
   "fields": {
    "government_fee": {
     "amount": 90,
@@ -20696,7 +20696,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://www.cgrgba.gw/servicos/emolumentos",
-  "note": "Fee was null; the published consular tariff of the Consulate General of Guinea-Bissau (cgrgba.gw) is EUR 60 for a 30-45 day visa (EUR 70 urgent). The bigger error is the channel: Ellis records this as an e-Visa, but no Guinea-Bissau government e-visa portal exists or resolves (evisa.gov.gw, rai.gw a | quote: Visto — Duração: 30 à 45 dias; Preço: 60,00€ normal / 70,00€ urgente. Duração: 9",
+  "note": "Fee was null; the published consular tariff of the Consulate General of Guinea-Bissau (cgrgba.gw) is EUR 60 for a 30-45 day visa (EUR 70 urgent). The bigger error is the channel: Ellis records this as an e-Visa, but no Guinea-Bissau government e-visa portal exists or resolves (evisa.gov.gw, rai.gw a | quote: Visto, Duração: 30 à 45 dias; Preço: 60,00€ normal / 70,00€ urgente. Duração: 9",
   "fields": {
    "government_fee": {
     "amount": 60,
@@ -20749,7 +20749,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://www.cgrgba.gw/servicos/emolumentos",
-  "note": "Fee of EUR 85 is wrong: the published consular tariff for a 90-day visa is EUR 90 (EUR 110 urgent). The 90-day stay is right. Both products are wrong in kind: there is no Guinea-Bissau government e-visa, and no Guinea-Bissau government source publishes a visa-on-arrival fee, so the 'visa on arrival, | quote: Visto — Duração: 30 à 45 dias; Preço: 60,00€ normal / 70,00€ urgente. Duração: 9",
+  "note": "Fee of EUR 85 is wrong: the published consular tariff for a 90-day visa is EUR 90 (EUR 110 urgent). The 90-day stay is right. Both products are wrong in kind: there is no Guinea-Bissau government e-visa, and no Guinea-Bissau government source publishes a visa-on-arrival fee, so the 'visa on arrival, | quote: Visto, Duração: 30 à 45 dias; Preço: 60,00€ normal / 70,00€ urgente. Duração: 9",
   "fields": {
    "government_fee": {
     "amount": 90,
@@ -20802,7 +20802,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://www.cgrgba.gw/servicos/emolumentos",
-  "note": "Fee was null; the 90-day visa costs EUR 90 (EUR 110 urgent). The 90-day stay is right. Both listed products are wrong in kind: no government e-visa portal exists, and no Guinea-Bissau government source publishes a visa-on-arrival product or fee. | quote: Visto — Duração: 30 à 45 dias; Preço: 60,00€ normal / 70,00€ urgente. Duração: 90 dias; Preço: 90,00€ normal / 110,00€ urgente. Duração",
+  "note": "Fee was null; the 90-day visa costs EUR 90 (EUR 110 urgent). The 90-day stay is right. Both listed products are wrong in kind: no government e-visa portal exists, and no Guinea-Bissau government source publishes a visa-on-arrival product or fee. | quote: Visto, Duração: 30 à 45 dias; Preço: 60,00€ normal / 70,00€ urgente. Duração: 90 dias; Preço: 90,00€ normal / 110,00€ urgente. Duração",
   "fields": {
    "government_fee": {
     "amount": 90,
@@ -23971,7 +23971,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://ircc.canada.ca/english/information/fees/fees.asp",
-  "note": "Headline fee left null. Taiwan passport holders (with ID number) are visa-exempt but still need an eTA for air travel, so the real headline charge is CAD 7. The multiple-entry TRV validity phrase '1 month before passport expiry' is not what IRCC publishes: validity is capped at 10 years or the expir | quote: Electronic Travel Authorization (eTA) — Fees $CAN — Electronic Travel Authorizat",
+  "note": "Headline fee left null. Taiwan passport holders (with ID number) are visa-exempt but still need an eTA for air travel, so the real headline charge is CAD 7. The multiple-entry TRV validity phrase '1 month before passport expiry' is not what IRCC publishes: validity is capped at 10 years or the expir | quote: Electronic Travel Authorization (eTA), Fees $CAN, Electronic Travel Authorizat",
   "fields": {
    "government_fee": {
     "amount": 7,
@@ -24013,7 +24013,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://ircc.canada.ca/english/information/fees/fees.asp",
-  "note": "Nothing. CAD 7 eTA, valid up to 5 years or until passport expiry, stays normally up to 6 months, all match IRCC. | quote: Electronic Travel Authorization (eTA) — Fees $CAN — Electronic Travel Authorization 7.00 … Visitor visa (including super visa) or extend your stay in Canada — Visitor visa - per person / Single or multiple entry temporary resident visa 100.00 … Visitor visa – per fami",
+  "note": "Nothing. CAD 7 eTA, valid up to 5 years or until passport expiry, stays normally up to 6 months, all match IRCC. | quote: Electronic Travel Authorization (eTA), Fees $CAN, Electronic Travel Authorization 7.00 … Visitor visa (including super visa) or extend your stay in Canada, Visitor visa - per person / Single or multiple entry temporary resident visa 100.00 … Visitor visa – per fami",
   "fields": {
    "government_fee": {
     "amount": 7,
@@ -24031,7 +24031,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://ircc.canada.ca/english/information/fees/fees.asp",
-  "note": "Fees and stay match. Only refinement: TRV validity is capped by passport OR biometrics expiry, not passport alone. | quote: Electronic Travel Authorization (eTA) — Fees $CAN — Electronic Travel Authorization 7.00 … Visitor visa (including super visa) or extend your stay in Canada — Visitor visa - per person / Single or multiple entry temporary resident visa 100.00 … Visitor visa – per fa",
+  "note": "Fees and stay match. Only refinement: TRV validity is capped by passport OR biometrics expiry, not passport alone. | quote: Electronic Travel Authorization (eTA), Fees $CAN, Electronic Travel Authorization 7.00 … Visitor visa (including super visa) or extend your stay in Canada, Visitor visa - per person / Single or multiple entry temporary resident visa 100.00 … Visitor visa – per fa",
   "fields": {
    "government_fee": {
     "amount": 7,
@@ -24049,7 +24049,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://ircc.canada.ca/english/information/fees/fees.asp",
-  "note": "Nothing. | quote: Electronic Travel Authorization (eTA) — Fees $CAN — Electronic Travel Authorization 7.00 … Visitor visa (including super visa) or extend your stay in Canada — Visitor visa - per person / Single or multiple entry temporary resident visa 100.00 … Visitor visa – per family (1 fee pe",
+  "note": "Nothing. | quote: Electronic Travel Authorization (eTA), Fees $CAN, Electronic Travel Authorization 7.00 … Visitor visa (including super visa) or extend your stay in Canada, Visitor visa - per person / Single or multiple entry temporary resident visa 100.00 … Visitor visa – per family (1 fee pe",
   "fields": {
    "government_fee": {
     "amount": 7,
@@ -24067,7 +24067,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://ircc.canada.ca/english/information/fees/fees.asp",
-  "note": "CAD 100 is right, but the product set is incomplete and the validity wording is wrong. Thailand is on IRCC's 'eligible visa-required countries' list: a Thai national who has held a Canadian visitor visa in the past 10 years or holds a valid US non-immigrant visa may apply for a CAD 7 eTA instead of  | quote: Electronic Travel Authorization (eTA) — Fees $CAN — Electronic Travel Authorizat",
+  "note": "CAD 100 is right, but the product set is incomplete and the validity wording is wrong. Thailand is on IRCC's 'eligible visa-required countries' list: a Thai national who has held a Canadian visitor visa in the past 10 years or holds a valid US non-immigrant visa may apply for a CAD 7 eTA instead of  | quote: Electronic Travel Authorization (eTA), Fees $CAN, Electronic Travel Authorizat",
   "fields": {
    "government_fee": {
     "amount": 100,
@@ -24087,7 +24087,7 @@
      "notes": "Biometrics CAD 85 extra."
     },
     {
-     "type": "Electronic Travel Authorization (eTA) — conditional",
+     "type": "Electronic Travel Authorization (eTA), conditional",
      "entry": "multiple",
      "validity": "Up to 5 years or until the passport expires, whichever comes first",
      "max_stay_days": 180,
@@ -24109,7 +24109,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://ircc.canada.ca/english/information/fees/fees.asp",
-  "note": "Fees are right (eTA CAD 7, TRV CAD 100). The multiple-entry TRV validity '1 month before passport expires' is not IRCC's published rule; it is up to 10 years or the expiry of passport or biometrics, whichever comes first. | quote: Electronic Travel Authorization (eTA) — Fees $CAN — Electronic Travel Authorization 7.00 … Visitor visa (including super visa) or extend your stay in Canada — ",
+  "note": "Fees are right (eTA CAD 7, TRV CAD 100). The multiple-entry TRV validity '1 month before passport expires' is not IRCC's published rule; it is up to 10 years or the expiry of passport or biometrics, whichever comes first. | quote: Electronic Travel Authorization (eTA), Fees $CAN, Electronic Travel Authorization 7.00 … Visitor visa (including super visa) or extend your stay in Canada, ",
   "fields": {
    "government_fee": {
     "amount": 7,
@@ -24127,7 +24127,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://ircc.canada.ca/english/information/fees/fees.asp",
-  "note": "Nothing. eTA CAD 7 for air; no eTA and no fee for arrival by car, bus, train or boat, exactly as listed. | quote: Electronic Travel Authorization (eTA) — Fees $CAN — Electronic Travel Authorization 7.00 … Visitor visa (including super visa) or extend your stay in Canada — Visitor visa - per person / Single or multiple entry temporary resident visa 100.00 … Visitor visa – per family (1 fe",
+  "note": "Nothing. eTA CAD 7 for air; no eTA and no fee for arrival by car, bus, train or boat, exactly as listed. | quote: Electronic Travel Authorization (eTA), Fees $CAN, Electronic Travel Authorization 7.00 … Visitor visa (including super visa) or extend your stay in Canada, Visitor visa - per person / Single or multiple entry temporary resident visa 100.00 … Visitor visa – per family (1 fe",
   "fields": {
    "government_fee": {
     "amount": 7,
@@ -24145,7 +24145,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://ircc.canada.ca/english/information/fees/fees.asp",
-  "note": "Nothing. | quote: Electronic Travel Authorization (eTA) — Fees $CAN — Electronic Travel Authorization 7.00 … Visitor visa (including super visa) or extend your stay in Canada — Visitor visa - per person / Single or multiple entry temporary resident visa 100.00 … Visitor visa – per family (1 fee pe",
+  "note": "Nothing. | quote: Electronic Travel Authorization (eTA), Fees $CAN, Electronic Travel Authorization 7.00 … Visitor visa (including super visa) or extend your stay in Canada, Visitor visa - per person / Single or multiple entry temporary resident visa 100.00 … Visitor visa – per family (1 fee pe",
   "fields": {
    "government_fee": {
     "amount": 7,
@@ -24163,7 +24163,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://ircc.canada.ca/english/information/fees/fees.asp",
-  "note": "Fees right. Multiple-entry TRV validity '1 month before passport expiry' is wrong wording; IRCC caps at 10 years or passport/biometrics expiry, whichever comes first. | quote: Electronic Travel Authorization (eTA) — Fees $CAN — Electronic Travel Authorization 7.00 … Visitor visa (including super visa) or extend your stay in Canada — Visitor visa - per person / Single or multiple entry te",
+  "note": "Fees right. Multiple-entry TRV validity '1 month before passport expiry' is wrong wording; IRCC caps at 10 years or passport/biometrics expiry, whichever comes first. | quote: Electronic Travel Authorization (eTA), Fees $CAN, Electronic Travel Authorization 7.00 … Visitor visa (including super visa) or extend your stay in Canada, Visitor visa - per person / Single or multiple entry te",
   "fields": {
    "government_fee": {
     "amount": 7,
@@ -24181,7 +24181,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://ircc.canada.ca/english/information/fees/fees.asp",
-  "note": "CAD 100 and 180 days are right, and India is correctly shown as visa-required (India is NOT on the eTA-eligible visa-required list). Only refinement: validity is also capped by biometrics expiry. Biometrics CAD 85 is an additional government fee not shown. | quote: Electronic Travel Authorization (eTA) — Fees $CAN — Electronic Travel Authorization 7.00 … Visitor visa (including super vis",
+  "note": "CAD 100 and 180 days are right, and India is correctly shown as visa-required (India is NOT on the eTA-eligible visa-required list). Only refinement: validity is also capped by biometrics expiry. Biometrics CAD 85 is an additional government fee not shown. | quote: Electronic Travel Authorization (eTA), Fees $CAN, Electronic Travel Authorization 7.00 … Visitor visa (including super vis",
   "fields": {
    "government_fee": {
     "amount": 100,
@@ -24199,7 +24199,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://ircc.canada.ca/english/information/fees/fees.asp",
-  "note": "The eTA product is now correct (IRCC added Indonesia to the eligible visa-required countries as of 26 May 2026) but it must be flagged as conditional: only for holders of a Canadian visitor visa in the past 10 years or a valid US non-immigrant visa, and air travel only. TRV validity 'until 1 month b | quote: Electronic Travel Authorization (eTA) — Fees $CAN — Electronic Travel Authorizat",
+  "note": "The eTA product is now correct (IRCC added Indonesia to the eligible visa-required countries as of 26 May 2026) but it must be flagged as conditional: only for holders of a Canadian visitor visa in the past 10 years or a valid US non-immigrant visa, and air travel only. TRV validity 'until 1 month b | quote: Electronic Travel Authorization (eTA), Fees $CAN, Electronic Travel Authorizat",
   "fields": {
    "government_fee": {
     "amount": 100,
@@ -24217,7 +24217,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://ircc.canada.ca/english/information/fees/fees.asp",
-  "note": "CAD 100 is right but a product is missing: the Philippines is on IRCC's eligible visa-required countries list, so a conditional CAD 7 eTA (prior Canadian visa in 10 years or valid US non-immigrant visa, air travel only) is available. Multiple-entry validity '1 month before passport expiry' is wrong  | quote: Electronic Travel Authorization (eTA) — Fees $CAN — Electronic Travel Authorizat",
+  "note": "CAD 100 is right but a product is missing: the Philippines is on IRCC's eligible visa-required countries list, so a conditional CAD 7 eTA (prior Canadian visa in 10 years or valid US non-immigrant visa, air travel only) is available. Multiple-entry validity '1 month before passport expiry' is wrong  | quote: Electronic Travel Authorization (eTA), Fees $CAN, Electronic Travel Authorizat",
   "fields": {
    "government_fee": {
     "amount": 100,
@@ -24237,7 +24237,7 @@
      "notes": null
     },
     {
-     "type": "Electronic Travel Authorization (eTA) — conditional",
+     "type": "Electronic Travel Authorization (eTA), conditional",
      "entry": "multiple",
      "validity": "Up to 5 years or until the passport expires, whichever comes first",
      "max_stay_days": 180,
@@ -24259,7 +24259,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://ircc.canada.ca/english/information/fees/fees.asp",
-  "note": "Correct. Vietnam is not eTA-eligible, so visa-only is right. Add biometrics CAD 85 as a separate government charge. | quote: Electronic Travel Authorization (eTA) — Fees $CAN — Electronic Travel Authorization 7.00 … Visitor visa (including super visa) or extend your stay in Canada — Visitor visa - per person / Single or multiple entry temporary resident visa 100.00 … Visitor visa – per f",
+  "note": "Correct. Vietnam is not eTA-eligible, so visa-only is right. Add biometrics CAD 85 as a separate government charge. | quote: Electronic Travel Authorization (eTA), Fees $CAN, Electronic Travel Authorization 7.00 … Visitor visa (including super visa) or extend your stay in Canada, Visitor visa - per person / Single or multiple entry temporary resident visa 100.00 … Visitor visa – per f",
   "fields": {
    "government_fee": {
     "amount": 100,
@@ -24277,7 +24277,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://ircc.canada.ca/english/information/fees/fees.asp",
-  "note": "Nothing. | quote: Electronic Travel Authorization (eTA) — Fees $CAN — Electronic Travel Authorization 7.00 … Visitor visa (including super visa) or extend your stay in Canada — Visitor visa - per person / Single or multiple entry temporary resident visa 100.00 … Visitor visa – per family (1 fee pe",
+  "note": "Nothing. | quote: Electronic Travel Authorization (eTA), Fees $CAN, Electronic Travel Authorization 7.00 … Visitor visa (including super visa) or extend your stay in Canada, Visitor visa - per person / Single or multiple entry temporary resident visa 100.00 … Visitor visa – per family (1 fee pe",
   "fields": {
    "government_fee": {
     "amount": 7,
@@ -24295,7 +24295,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://ircc.canada.ca/english/information/fees/fees.asp",
-  "note": "CAD 100 right and visa-only is right (Russia is not eTA-eligible). Multiple-entry validity '1 month before passport expiry' is wrong; it is 10 years or passport/biometrics expiry, whichever comes first. | quote: Electronic Travel Authorization (eTA) — Fees $CAN — Electronic Travel Authorization 7.00 … Visitor visa (including super visa) or extend your stay in Canada — Visitor visa - per ",
+  "note": "CAD 100 right and visa-only is right (Russia is not eTA-eligible). Multiple-entry validity '1 month before passport expiry' is wrong; it is 10 years or passport/biometrics expiry, whichever comes first. | quote: Electronic Travel Authorization (eTA), Fees $CAN, Electronic Travel Authorization 7.00 … Visitor visa (including super visa) or extend your stay in Canada, Visitor visa - per ",
   "fields": {
    "government_fee": {
     "amount": 100,
@@ -24313,7 +24313,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://overseas.mofa.go.kr/us-en/brd/m_4502/view.do?seq=715889&page=1",
-  "note": "Every peso figure is wrong. MOFA exempts Philippine passport holders from the visa fee for all C-3 visas of 59 days or less, and the Manila embassy's own C-3-9 guide states 'Stay of 59 days or less: GRATIS / Stay of 60 to 90 days: PHP 2,000'. Ellis charges PHP 2,000 for the gratis band and PHP 2,500 | quote: Visa Application Fee for Each Visa Type (in US $) — 90 days or less Single-entry",
+  "note": "Every peso figure is wrong. MOFA exempts Philippine passport holders from the visa fee for all C-3 visas of 59 days or less, and the Manila embassy's own C-3-9 guide states 'Stay of 59 days or less: GRATIS / Stay of 60 to 90 days: PHP 2,000'. Ellis charges PHP 2,000 for the gratis band and PHP 2,500 | quote: Visa Application Fee for Each Visa Type (in US $), 90 days or less Single-entry",
   "fields": {
    "government_fee": {
     "amount": 0,
@@ -24330,7 +24330,7 @@
       "amount": 0,
       "currency": "PHP"
      },
-     "notes": "GRATIS — fee exempt for Philippine passport holders."
+     "notes": "GRATIS, fee exempt for Philippine passport holders."
     },
     {
      "type": "Single-entry short-term tourist (C-3-9), stay 60 to 90 days",
@@ -24355,7 +24355,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://www.general-security.gov.lb/en/posts/38",
-  "note": "Fee (free) and 30-day stay are right — China (PRC) is in Section One of the General Security list, which gets 'a cost-free visa of one month extendable to 3 months'. The product list is wrong: Lebanon operates no tourist e-Visa. Only the free on-arrival visa and an advance visa from a Lebanese missi | quote: Second Article: Entry of citizens from foreign countries for tourism. Section on",
+  "note": "Fee (free) and 30-day stay are right, China (PRC) is in Section One of the General Security list, which gets 'a cost-free visa of one month extendable to 3 months'. The product list is wrong: Lebanon operates no tourist e-Visa. Only the free on-arrival visa and an advance visa from a Lebanese missi | quote: Second Article: Entry of citizens from foreign countries for tourism. Section on",
   "fields": {
    "government_fee": {
     "amount": 0,
@@ -24386,7 +24386,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://justice.gov.nr/immigration-division/",
-  "note": "Fee left null. Nauru's Department of Justice and Border Control publishes a flat visitor-visa tariff, uniform across nationalities: $50 for up to 1 month, $150 for up to 2 months, $250 for up to 3 months (Nauru uses the Australian dollar). The '3 months from issue (typical)' validity is not publishe | quote: VISA FEES — Fees under the Immigration Act 2014 … Visitor Visa — Description / F",
+  "note": "Fee left null. Nauru's Department of Justice and Border Control publishes a flat visitor-visa tariff, uniform across nationalities: $50 for up to 1 month, $150 for up to 2 months, $250 for up to 3 months (Nauru uses the Australian dollar). The '3 months from issue (typical)' validity is not publishe | quote: VISA FEES, Fees under the Immigration Act 2014 … Visitor Visa, Description / F",
   "fields": {
    "government_fee": {
     "amount": 50,
@@ -24439,7 +24439,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://justice.gov.nr/immigration-division/",
-  "note": "Fee left null (should be AUD 50 for up to 1 month), and the 'visa on arrival' framing is wrong: the Immigration Division requires a visitor visa application lodged with the immigration office (in person through a representative or online) before travel. No on-arrival visitor visa is provided for in  | quote: VISA FEES — Fees under the Immigration Act 2014 … Visitor Visa — Description / F",
+  "note": "Fee left null (should be AUD 50 for up to 1 month), and the 'visa on arrival' framing is wrong: the Immigration Division requires a visitor visa application lodged with the immigration office (in person through a representative or online) before travel. No on-arrival visitor visa is provided for in  | quote: VISA FEES, Fees under the Immigration Act 2014 … Visitor Visa, Description / F",
   "fields": {
    "government_fee": {
     "amount": 50,
@@ -24457,7 +24457,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://justice.gov.nr/immigration-division/",
-  "note": "Fee left null (should be AUD 50 for up to 1 month) and, as for Hong Kong, Nauru does not offer a visa on arrival — the visitor visa must be applied for and granted before travel. The two- and three-month bands (AUD 150 / AUD 250) are missing entirely. | quote: VISA FEES — Fees under the Immigration Act 2014 … Visitor Visa — Description / Fee: For a period not exceeding 1 month $50; For a",
+  "note": "Fee left null (should be AUD 50 for up to 1 month) and, as for Hong Kong, Nauru does not offer a visa on arrival, the visitor visa must be applied for and granted before travel. The two- and three-month bands (AUD 150 / AUD 250) are missing entirely. | quote: VISA FEES, Fees under the Immigration Act 2014 … Visitor Visa, Description / Fee: For a period not exceeding 1 month $50; For a",
   "fields": {
    "government_fee": {
     "amount": 50,
@@ -24486,7 +24486,7 @@
     {
      "type": "Visa de turista o viajero, single entry (Category C nationality)",
      "entry": "single",
-     "validity": "Up to 180 days per the Reglamento de Visas (not directly verifiable — IGM site unreachable)",
+     "validity": "Up to 180 days per the Reglamento de Visas (not directly verifiable, IGM site unreachable)",
      "max_stay_days": 90,
      "fee": {
       "amount": 50,
@@ -24517,7 +24517,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://www.embaguateusa.gob.gt/general-9",
-  "note": "Fee left null; should be US$50 single / US$150 multiple. The multiple-entry validity claim of 'up to 1 year' is not what the Reglamento de Visas provides (five years for the multiple tourist visa; 180 days for the simple one) — though note this could not be read directly because igm.gob.gt is bot-wa | quote: Fee: US$ 50.00 for a single entry / US$150.00 multiple entries. We only accept M",
+  "note": "Fee left null; should be US$50 single / US$150 multiple. The multiple-entry validity claim of 'up to 1 year' is not what the Reglamento de Visas provides (five years for the multiple tourist visa; 180 days for the simple one), though note this could not be read directly because igm.gob.gt is bot-wa | quote: Fee: US$ 50.00 for a single entry / US$150.00 multiple entries. We only accept M",
   "fields": {
    "government_fee": {
     "amount": 50,
@@ -24553,7 +24553,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://mzv.gov.cz/jnp/en/information_for_aliens/visa_fee_schedule/index.html",
-  "note": "Nothing. EUR 90 is correct for Chinese nationals — China is not on the Czech MFA's reduced-fee (EUR 35) list. The 90-days-in-180 stay and the single/double/multiple structure at the same fee are correct; multiple-entry validity of up to 5 years matches the Visa Code cap. Flagging fee_uniform as fals | quote: Schengen short-stay visa — adults EUR 90; children from 6 to below 12 years EUR ",
+  "note": "Nothing. EUR 90 is correct for Chinese nationals, China is not on the Czech MFA's reduced-fee (EUR 35) list. The 90-days-in-180 stay and the single/double/multiple structure at the same fee are correct; multiple-entry validity of up to 5 years matches the Visa Code cap. Flagging fee_uniform as fals | quote: Schengen short-stay visa, adults EUR 90; children from 6 to below 12 years EUR ",
   "fields": {
    "government_fee": {
     "amount": 90,
@@ -24571,7 +24571,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02009R0810-20240611",
-  "note": "The values are right — EUR 90, 90 days in any 180-day period, single/multiple C visas with validity capped at five years. Sourcing caveat: Liechtenstein's own portal (llv.li, Ausländer- und Passamt) is behind bot protection and could not be read, and Schengen visas for Liechtenstein are issued by Sw | quote: Article 16 — Visa fee. 1. Applicants shall pay a visa fee of EUR 90. 2. Children",
+  "note": "The values are right, EUR 90, 90 days in any 180-day period, single/multiple C visas with validity capped at five years. Sourcing caveat: Liechtenstein's own portal (llv.li, Ausländer- und Passamt) is behind bot protection and could not be read, and Schengen visas for Liechtenstein are issued by Sw | quote: Article 16, Visa fee. 1. Applicants shall pay a visa fee of EUR 90. 2. Children",
   "fields": {
    "government_fee": {
     "amount": 90,
@@ -24589,7 +24589,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://www.gov.pl/web/ireland/c-type-schengen-visa",
-  "note": "Nothing material. EUR 90 for every entry pattern is right per the Polish MFA, and 90 days in any 180-day period is right. Two refinements: the multiple-entry ladder should extend beyond 2 years — the Visa Code allows validity up to 5 years (1 year → 2 years → 5 years on a track record of lawfully us | quote: How much does it cost? The visa fee is 90 Euro for all categories of Schengen vi",
+  "note": "Nothing material. EUR 90 for every entry pattern is right per the Polish MFA, and 90 days in any 180-day period is right. Two refinements: the multiple-entry ladder should extend beyond 2 years, the Visa Code allows validity up to 5 years (1 year → 2 years → 5 years on a track record of lawfully us | quote: How much does it cost? The visa fee is 90 Euro for all categories of Schengen vi",
   "fields": {
    "government_fee": {
     "amount": 90,
@@ -24607,7 +24607,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://www.dha.gov.za/index.php/fees",
-  "note": "The fee is more than triple the real one. The gazetted section 11 visitor's visa tariff is R425,00 (gazette 55209, 17 August 2026), not R1,525 — R1,520 is the business/work/corporate/permanent-residence tariff, which looks like where the number came from. The 90-day stay is right. The '10-year multi | quote: IMMIGRATION SERVICES — The following fees shall be payable in terms of section 7",
+  "note": "The fee is more than triple the real one. The gazetted section 11 visitor's visa tariff is R425,00 (gazette 55209, 17 August 2026), not R1,525, R1,520 is the business/work/corporate/permanent-residence tariff, which looks like where the number came from. The 90-day stay is right. The '10-year multi | quote: IMMIGRATION SERVICES, The following fees shall be payable in terms of section 7",
   "fields": {
    "government_fee": {
     "amount": 425,
@@ -24729,7 +24729,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://borders.etakenya.go.ke/media/AIC_14.25.pdf",
-  "note": "Fee is overstated: the official government charge for a standard eTA is USD 30, not USD 32.50. The Kenya Civil Aviation Authority circular promulgating the Immigration fee schedule (effective 1 Jan 2025) lists 'Standard eTA applications $30' and the official portal's own FAQ says fees start 'at $30' | quote: Electronic Travel Authorization (eTA) — eTA Fees paid by Travellers (excluding p",
+  "note": "Fee is overstated: the official government charge for a standard eTA is USD 30, not USD 32.50. The Kenya Civil Aviation Authority circular promulgating the Immigration fee schedule (effective 1 Jan 2025) lists 'Standard eTA applications $30' and the official portal's own FAQ says fees start 'at $30' | quote: Electronic Travel Authorization (eTA), eTA Fees paid by Travellers (excluding p",
   "fields": {
    "government_fee": {
     "amount": 30,
@@ -24746,7 +24746,7 @@
       "amount": 30,
       "currency": "USD"
      },
-     "notes": "Official portal Eligibility page: 'Standard eTA — Allows entry into Kenya once — $30'. Expedited processing costs an additional $100."
+     "notes": "Official portal Eligibility page: 'Standard eTA, Allows entry into Kenya once, $30'. Expedited processing costs an additional $100."
     },
     {
      "type": "Transit eTA",
@@ -24793,7 +24793,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://borders.etakenya.go.ke/media/AIC_14.25.pdf",
-  "note": "Fee is overstated: official standard eTA is USD 30, not USD 32.50. Hong Kong is not on any Kenyan exemption list, so an eTA is required. Products list is incomplete - Kenya also sells a Transit eTA ($20), a One Year Multi-Entry eTA ($300) and an expedited service (+$100). | quote: Electronic Travel Authorization (eTA) — eTA Fees paid by Travellers (excluding payment charges): a Standard ",
+  "note": "Fee is overstated: official standard eTA is USD 30, not USD 32.50. Hong Kong is not on any Kenyan exemption list, so an eTA is required. Products list is incomplete - Kenya also sells a Transit eTA ($20), a One Year Multi-Entry eTA ($300) and an expedited service (+$100). | quote: Electronic Travel Authorization (eTA), eTA Fees paid by Travellers (excluding payment charges): a Standard ",
   "fields": {
    "government_fee": {
     "amount": 30,
@@ -24846,7 +24846,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://borders.etakenya.go.ke/media/AIC_14.25.pdf",
-  "note": "Fee is overstated: official standard eTA is USD 30, not USD 32.50. Products are also incomplete for US nationals specifically - Kenya sells a USA-only Five Year Multi-Entry eTA at $185 ('For American nationals visiting the country for multiple times for five years'), which Ellis does not list. The E | quote: Electronic Travel Authorization (eTA) — eTA Fees paid by Travellers (excluding p",
+  "note": "Fee is overstated: official standard eTA is USD 30, not USD 32.50. Products are also incomplete for US nationals specifically - Kenya sells a USA-only Five Year Multi-Entry eTA at $185 ('For American nationals visiting the country for multiple times for five years'), which Ellis does not list. The E | quote: Electronic Travel Authorization (eTA), eTA Fees paid by Travellers (excluding p",
   "fields": {
    "government_fee": {
     "amount": 30,
@@ -24921,7 +24921,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://www.visaburkina.bf/en/entry-visas-to-burkina-faso-the-short-term-visa/",
-  "note": "Fee is missing entirely: the official tourist short-stay visa costs 33,000 F CFA single entry and 55,000 F CFA multiple entries (an express visa for emergency travel is 104,500 F CFA). The multiple-entry validity claim of 'up to 1 year' is wrong - Burkina Faso's short-stay visa validity 'cannot exce | quote: SHORT STAY VISA COST — Visa / Cost (F CFA) / Observations — Unique entry / Multi",
+  "note": "Fee is missing entirely: the official tourist short-stay visa costs 33,000 F CFA single entry and 55,000 F CFA multiple entries (an express visa for emergency travel is 104,500 F CFA). The multiple-entry validity claim of 'up to 1 year' is wrong - Burkina Faso's short-stay visa validity 'cannot exce | quote: SHORT STAY VISA COST, Visa / Cost (F CFA) / Observations, Unique entry / Multi",
   "fields": {
    "government_fee": {
     "amount": 33000,
@@ -24974,7 +24974,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://www.visaburkina.bf/en/entry-visas-to-burkina-faso-the-short-term-visa/",
-  "note": "Fee is missing: 33,000 F CFA single entry, 55,000 F CFA multiple entries for the tourist short-stay visa. The fee is set by visa type, not by nationality, so it is uniform. The '3 months' validity is right for both single and multiple entry (the statutory cap is 90 days), and the 90-day stay is righ | quote: SHORT STAY VISA COST — Visa / Cost (F CFA) / Observations — Unique entry / Multi",
+  "note": "Fee is missing: 33,000 F CFA single entry, 55,000 F CFA multiple entries for the tourist short-stay visa. The fee is set by visa type, not by nationality, so it is uniform. The '3 months' validity is right for both single and multiple entry (the statutory cap is 90 days), and the 90-day stay is righ | quote: SHORT STAY VISA COST, Visa / Cost (F CFA) / Observations, Unique entry / Multi",
   "fields": {
    "government_fee": {
     "amount": 33000,
@@ -25091,7 +25091,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://mvep.gov.hr/services-consular-portal/consular-information-22802/visas-22807/issuance-procedure/fees/22824",
-  "note": "Fee is stale by one revision: the Schengen short-stay (visa C) fee has been EUR 90 since the 11 June 2024 increase, not EUR 80. Croatia's MFA fee table lists 'Airport-transit (visa A) and short-term visa (visa C) fee — 90' EUR (USD 103.82 equivalent). All three products (single, double, multiple ent | quote: Fees are due on the visa application when applying. ... Airport-transit (visa A)",
+  "note": "Fee is stale by one revision: the Schengen short-stay (visa C) fee has been EUR 90 since the 11 June 2024 increase, not EUR 80. Croatia's MFA fee table lists 'Airport-transit (visa A) and short-term visa (visa C) fee, 90' EUR (USD 103.82 equivalent). All three products (single, double, multiple ent | quote: Fees are due on the visa application when applying. ... Airport-transit (visa A)",
   "fields": {
    "government_fee": {
     "amount": 90,
@@ -25172,7 +25172,7 @@
       "amount": 54,
       "currency": "USD"
      },
-     "notes": "gob.mx trámite SRE-01-036, 'Costo del trámite: Monto fijo 54 USD — Vigencia: 10 Años'; permits multiple entries, up to 180 days per stay."
+     "notes": "gob.mx trámite SRE-01-036, 'Costo del trámite: Monto fijo 54 USD, Vigencia: 10 Años'; permits multiple entries, up to 180 days per stay."
     }
    ]
   }
@@ -25186,7 +25186,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://mfa.gov.ua/en/consular-affairs/entry-and-stay-foreigners-ukraine/e-visa",
-  "note": "The headline e-Visa claim is right: USD 20 single entry, 30-day validity, 30-day stay - the MFA states e-Visas are issued to holders of passports of 45 specified countries 'as single or double entry 30-day visas', and China is on that list. Three product-level errors: (1) the double-entry e-Visa at  | quote: Step 4. Pay the fee — single entry e-Visa - 20 USA dollars — double entry e-Visa",
+  "note": "The headline e-Visa claim is right: USD 20 single entry, 30-day validity, 30-day stay - the MFA states e-Visas are issued to holders of passports of 45 specified countries 'as single or double entry 30-day visas', and China is on that list. Three product-level errors: (1) the double-entry e-Visa at  | quote: Step 4. Pay the fee, single entry e-Visa - 20 USA dollars, double entry e-Visa",
   "fields": {
    "government_fee": {
     "amount": 20,
@@ -25239,7 +25239,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://www.immd.gov.hk/eng/services/fee-tables/index.html",
-  "note": "All three claims are CORRECT and now source-backed. Official page https://www.immd.gov.hk/eng/services/visas/pre-arrival_registration_for_indian_nationals.html states: 'An Indian national can make use of the online service to apply for pre-arrival registration free of charge' and 'A pre-arrival regi | quote: 1. Ordinary visa — (a) issued pursuant to an approved specified scheme applicati",
+  "note": "All three claims are CORRECT and now source-backed. Official page https://www.immd.gov.hk/eng/services/visas/pre-arrival_registration_for_indian_nationals.html states: 'An Indian national can make use of the online service to apply for pre-arrival registration free of charge' and 'A pre-arrival regi | quote: 1. Ordinary visa, (a) issued pursuant to an approved specified scheme applicati",
   "fields": {
    "government_fee": {
     "amount": 0,
@@ -25270,7 +25270,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://evisacam.cm/",
-  "note": "Fee left null; the official Republic of Cameroon consular services portal (the sole legal application channel — 'You can only apply for a visa to enter Cameroon online at evisacam.cm') charges EUR 153 for a normal short-stay visa. Stay/validity of 90 days is wrong: the portal states 'The visa sticke | quote: Visa applicants must pay an administrative processing fee of: 153€ for a normal ",
+  "note": "Fee left null; the official Republic of Cameroon consular services portal (the sole legal application channel, 'You can only apply for a visa to enter Cameroon online at evisacam.cm') charges EUR 153 for a normal short-stay visa. Stay/validity of 90 days is wrong: the portal states 'The visa sticke | quote: Visa applicants must pay an administrative processing fee of: 153€ for a normal ",
   "fields": {
    "government_fee": {
     "amount": 153,
@@ -25323,7 +25323,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://evisacam.cm/",
-  "note": "Same corrections as for CHN — the fee is uniform across nationalities on the official portal. Fee null should be EUR 153. Stay 30 days (single) and validity 'typically 30 days from issue' / 'multiple up to 1 year' are wrong: short-stay visa validity and stay are up to 180 days as printed on the stic | quote: Visa applicants must pay an administrative processing fee of: 153€ for a normal ",
+  "note": "Same corrections as for CHN, the fee is uniform across nationalities on the official portal. Fee null should be EUR 153. Stay 30 days (single) and validity 'typically 30 days from issue' / 'multiple up to 1 year' are wrong: short-stay visa validity and stay are up to 180 days as printed on the stic | quote: Visa applicants must pay an administrative processing fee of: 153€ for a normal ",
   "fields": {
    "government_fee": {
     "amount": 153,
@@ -25396,7 +25396,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://servicios360.mirex.gob.do/tasas-consulares/",
-  "note": "Fee is USD 100, not USD 95 — the MIREX consular fee table lists 'Visa de Turismo Simple (TS) US$100.00'. The 60-day figure is CORRECT and is confirmed by the visa-types page https://servicios360.mirex.gob.do/visas/: 'REQUISITOS VISA DE TURISMO SIMPLE (TS) POR 60 DÍAS UNA ENTRADA O TURISMO MÚLTIPLE ( | quote: Tasas de visas — Visa de Turismo Simple (TS) US$100.00 ... Visa de Turismo Múlti",
+  "note": "Fee is USD 100, not USD 95, the MIREX consular fee table lists 'Visa de Turismo Simple (TS) US$100.00'. The 60-day figure is CORRECT and is confirmed by the visa-types page https://servicios360.mirex.gob.do/visas/: 'REQUISITOS VISA DE TURISMO SIMPLE (TS) POR 60 DÍAS UNA ENTRADA O TURISMO MÚLTIPLE ( | quote: Tasas de visas, Visa de Turismo Simple (TS) US$100.00 ... Visa de Turismo Múlti",
   "fields": {
    "government_fee": {
     "amount": 100,
@@ -25438,7 +25438,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://evisa.gov.sz/VisaApplicationGuidelines",
-  "note": "STAY: Ellis leaves stay null; the official Eswatini eVisa portal (Ministry of Home Affairs) states the visa permits a stay 'not more than one month upon entry', i.e. 30 days, and that anything beyond thirty days requires a Temporary Residence Permit instead. FEE: UNVERIFIABLE — Eswatini publishes no | quote: The Kingdom of Eswatini visas are required by certain tourists, business visitor",
+  "note": "STAY: Ellis leaves stay null; the official Eswatini eVisa portal (Ministry of Home Affairs) states the visa permits a stay 'not more than one month upon entry', i.e. 30 days, and that anything beyond thirty days requires a Temporary Residence Permit instead. FEE: UNVERIFIABLE, Eswatini publishes no | quote: The Kingdom of Eswatini visas are required by certain tourists, business visitor",
   "fields": {
    "permitted_stay_days": 30,
    "visa_products": [
@@ -25470,7 +25470,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://www.cancilleria.gov.co/atencion-y-servicio-al-ciudadano/tramites-y-servicios/visa/costos",
-  "note": "FEE: Ellis leaves it null. Colombia charges in two parts for the V Visitante - Turismo visa: a study (estudio) fee of USD 56 plus an issuance (visa) fee of USD 82, total USD 138, when applying from Colombia or the rest of the world; EUR 44 + EUR 63 = EUR 107 when applying in Europe or Cuba. The fee  | quote: Visitante - Turismo: COLOMBIA Y RESTO DEL MUNDO (USD) Estudio 56 Visa 82 — EUROP",
+  "note": "FEE: Ellis leaves it null. Colombia charges in two parts for the V Visitante - Turismo visa: a study (estudio) fee of USD 56 plus an issuance (visa) fee of USD 82, total USD 138, when applying from Colombia or the rest of the world; EUR 44 + EUR 63 = EUR 107 when applying in Europe or Cuba. The fee  | quote: Visitante - Turismo: COLOMBIA Y RESTO DEL MUNDO (USD) Estudio 56 Visa 82, EUROP",
   "fields": {
    "government_fee": {
     "amount": 138,
@@ -25509,7 +25509,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://www.government.is/topics/foreign-affairs/visa-to-iceland/",
-  "note": "ALL CORRECT and now source-backed against the Icelandic Ministry for Foreign Affairs. EUR 90 adult and EUR 45 for children matches ('The fee for a visa application is EUR 90 (EUR 45 for six to twelve year olds)'), the 90-day Schengen stay matches, and single/double/multiple entry all carry the same  | quote: Processing fee — The fee for a visa application is EUR 90 (EUR 45 for six to twe",
+  "note": "ALL CORRECT and now source-backed against the Icelandic Ministry for Foreign Affairs. EUR 90 adult and EUR 45 for children matches ('The fee for a visa application is EUR 90 (EUR 45 for six to twelve year olds)'), the 90-day Schengen stay matches, and single/double/multiple entry all carry the same  | quote: Processing fee, The fee for a visa application is EUR 90 (EUR 45 for six to twe",
   "fields": {
    "government_fee": {
     "amount": 90,
@@ -25637,7 +25637,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://www.gub.uy/tramites/inicio-solicitud-visas",
-  "note": "FEE: Ellis leaves it null; the official trámite page gives USD 42 (3 pesos consulares), charged only if the visa is granted, and free for official/diplomatic passports. The page also warns 'Los trámites consulares varían su precio el 1° de enero de cada año', so this needs an annual re-check. VALIDI | quote: Costos — 3 pesos consulares = 42 USD (únicamente si la visa es otorgada). Para e",
+  "note": "FEE: Ellis leaves it null; the official trámite page gives USD 42 (3 pesos consulares), charged only if the visa is granted, and free for official/diplomatic passports. The page also warns 'Los trámites consulares varían su precio el 1° de enero de cada año', so this needs an annual re-check. VALIDI | quote: Costos, 3 pesos consulares = 42 USD (únicamente si la visa es otorgada). Para e",
   "fields": {
    "government_fee": {
     "amount": 42,
