@@ -48,6 +48,17 @@ CHINA_ANSWERS = {
     "travel_purpose": "tourism",
     "arrival_date": "2026-11-02",
     "accommodation": "Hotel Example, New York",
+    # The DS-160 required set grew (d3d5350: every required form question is
+    # askable); the persona answers those questions too, or the "nothing
+    # required is missing" tests would fail on fixture drift, not on code.
+    "country_of_birth": "CHN",
+    "occupation": "Software engineer",
+    "employer": "Example Tech Co., 100 Century Avenue, Shanghai, +86 21 5555 0001",
+    "employer_address": "100 Century Avenue, Pudong, Shanghai",
+    "trip_payer": "Self",
+    "has_specific_plans": "Yes, a one-week tourist itinerary in New York",
+    "travelling_with": "No, travelling alone",
+    "been_to_us_before": "No",
 }
 
 
