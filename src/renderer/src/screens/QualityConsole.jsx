@@ -260,7 +260,13 @@ function CountryFilter({ value, placeholder, onCommit, countries }) {
       <input value={text} placeholder={placeholder}
              onChange={(e) => { setText(e.target.value); setOpen(true) }}
              onKeyDown={(e) => {
-               if (e.key === 'Enter') commit(matches[0]?.value ?? text)
+               // Enter picks the suggestion only when it is the ONLY one;
+               // otherwise the text goes through the resolver, which
+               // refuses ambiguous partials instead of grabbing the first
+               // alphabetical country.
+               if (e.key === 'Enter') {
+                 commit(matches.length === 1 ? matches[0].value : text)
+               }
                if (e.key === 'Escape') setOpen(false)
              }}
              onBlur={() => { if (!open) commit(text) }}
