@@ -207,26 +207,44 @@ const DB_CSS = `
 }`
 
 /** The SAME Trip.com plane the loading state flies (same SVG, same bob, same
- *  streaming dashed trail via the planeload classes), and underneath it a
- *  flat black-and-white island whose coastline spells ELLIS. */
+ *  streaming dashed trail via the planeload classes). Underneath it: a flat
+ *  black-and-white island drawn as a New York City skyline whose towers
+ *  spell ELLIS, an Empire State spire on the I, blinking windows, and the
+ *  Statue of Liberty on her own islet next door, the way Ellis Island
+ *  actually sits in New York Harbor. */
 function EllisIslandScene() {
-  // Each letter is one stroke path: a wide black stroke under a narrower
-  // white one reads as a white island with an inked coastline.
+  const reduced = typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  const INK = '#111'
+  const BASE = 168                       // the island's shoreline
+  // Every letter is a cluster of tower blocks [x, y-up, w, h] so the word
+  // reads as a city block AND as ELLIS.
   const LETTERS = [
-    ['M0,0 L0,64 M0,2 L34,2 M0,32 L26,32 M0,62 L34,62', 26, 60, -3],
-    ['M0,0 L0,60 L34,60', 96, 78, 2],
-    ['M0,0 L0,60 L34,60', 164, 58, -2],
-    ['M0,0 L0,64', 230, 80, 3],
-    ['M32,6 C8,-4 -4,18 12,28 C26,36 40,40 30,54 C22,64 6,64 0,56', 278, 62, -2],
+    // E
+    [28, [[0, 86, 14, 86], [0, 86, 42, 13], [0, 56, 34, 12], [0, 13, 42, 13]]],
+    // L
+    [96, [[0, 78, 14, 78], [0, 13, 40, 13]]],
+    // L
+    [152, [[0, 78, 14, 78], [0, 13, 40, 13]]],
+    // I with the stepped Empire State cap and needle
+    [210, [[0, 88, 16, 88], [2, 96, 12, 9]]],
+    // S as stacked slabs
+    [246, [[0, 71, 40, 13], [0, 58, 13, 16], [0, 42, 40, 13],
+           [27, 29, 13, 16], [0, 13, 40, 13]]],
   ]
-  const island = ([d, x, y, rot], i) => (
-    <g key={i} transform={`translate(${x},${y}) rotate(${rot})`}>
-      <path d={d} fill="none" stroke="#111" strokeWidth="32"
-            strokeLinecap="round" strokeLinejoin="round" />
-      <path d={d} fill="none" stroke="#fff" strokeWidth="24"
-            strokeLinecap="round" strokeLinejoin="round" />
-    </g>
-  )
+  // Window grid for the taller towers; a handful of them blink.
+  const windows = []
+  LETTERS.forEach(([lx, rects], li) => {
+    rects.forEach(([x, up, w, h]) => {
+      if (h < 30) return
+      for (let wy = up - 10; wy > 14; wy -= 13) {
+        for (let wx = x + 3; wx < x + w - 4; wx += 6) {
+          windows.push([lx + wx, BASE - wy])
+        }
+      }
+    })
+  })
+  const blinkers = windows.filter((_, i) => i % 5 === 2)
   return (
     <div className="db-scene" aria-hidden="true">
       {/* the loading animation itself: same markup, same classes */}
@@ -234,15 +252,77 @@ function EllisIslandScene() {
         <span className="planeload__trail" />
         <span className="planeload__plane"><TripPlane width={216} /></span>
       </div>
-      <svg viewBox="0 0 360 190"
-           style={{ display: 'block', width: 'min(340px, 92vw)' }}>
-        {LETTERS.map(island)}
-        {/* a few inked waves around the coastline */}
-        {[[16, 168], [120, 176], [230, 172], [316, 150], [66, 20],
-          [306, 26]].map(([x, y], i) => (
+      <svg viewBox="0 0 400 214"
+           style={{ display: 'block', width: 'min(360px, 92vw)' }}>
+        <g>
+          {/* the harbor island the city stands on */}
+          <path d="M16,168 Q10,190 44,193 L296,193 Q330,190 324,168 Z"
+                fill="#fff" stroke={INK} strokeWidth="3" />
+          {/* towers */}
+          {LETTERS.map(([lx, rects], i) => (
+            <g key={i}>
+              {rects.map(([x, up, w, h], j) => (
+                <rect key={j} x={lx + x} y={BASE - up} width={w} height={h}
+                      rx="2" fill="#fff" stroke={INK} strokeWidth="3" />
+              ))}
+            </g>
+          ))}
+          {/* Empire State needle on the I */}
+          <line x1="218" y1={BASE - 96} x2="218" y2={BASE - 114}
+                stroke={INK} strokeWidth="2.5" strokeLinecap="round" />
+          <circle cx="218" cy={BASE - 116} r="1.8" fill={INK} />
+          {/* windows, a few of them alive */}
+          {windows.map(([x, y], i) => (
+            <rect key={i} x={x} y={y} width="3" height="4" fill={INK}
+                  opacity="0.75" />
+          ))}
+          {!reduced && blinkers.map(([x, y], i) => (
+            <rect key={'b' + i} x={x} y={y} width="3" height="4" fill="#fff">
+              <animate attributeName="opacity" values="0;1;0"
+                       dur={`${2.6 + (i % 4) * 0.9}s`}
+                       begin={`${(i % 5) * 0.7}s`} repeatCount="indefinite" />
+            </rect>
+          ))}
+          {/* Liberty on her own islet next door */}
+          <g transform="translate(338,0)">
+            <path d="M2,168 Q-2,186 16,188 Q40,188 36,168 Z"
+                  fill="#fff" stroke={INK} strokeWidth="3" />
+            <rect x="8" y={BASE - 26} width="22" height="10" rx="1.5"
+                  fill="#fff" stroke={INK} strokeWidth="2.5" />
+            <rect x="12" y={BASE - 34} width="14" height="8" rx="1.5"
+                  fill="#fff" stroke={INK} strokeWidth="2.5" />
+            <path d={`M14,${BASE - 34} L12,${BASE - 58} Q19,${BASE - 62} 26,${BASE - 58} L24,${BASE - 34} Z`}
+                  fill="#fff" stroke={INK} strokeWidth="2.5" />
+            <circle cx="19" cy={BASE - 64} r="4.5" fill="#fff" stroke={INK}
+                    strokeWidth="2.5" />
+            {[[-6, -3], [-3, -5], [0, -6], [3, -5], [6, -3]].map(([dx, dy], i) => (
+              <line key={i} x1={19 + dx * 0.7} y1={BASE - 67}
+                    x2={19 + dx} y2={BASE - 71 + dy * 0.4}
+                    stroke={INK} strokeWidth="1.6" strokeLinecap="round" />
+            ))}
+            <line x1="26" y1={BASE - 56} x2="33" y2={BASE - 76}
+                  stroke={INK} strokeWidth="2.5" strokeLinecap="round" />
+            <path d={`M31,${BASE - 78} q2,-3 4,0 q-2,4 -4,0`} fill={INK} />
+          </g>
+          {/* the whole harbor breathes */}
+          {!reduced && (
+            <animateTransform attributeName="transform" type="translate"
+                              values="0 0; 0 -2.5; 0 0" dur="5.5s"
+                              repeatCount="indefinite" />
+          )}
+        </g>
+        {/* drifting waves */}
+        {[[20, 204], [120, 208], [230, 205], [318, 207], [368, 200]].map(([x, y], i) => (
           <path key={i} d={`M${x},${y} q8,-5 16,0 q8,5 16,0`} fill="none"
-                stroke="#111" strokeWidth="2" strokeLinecap="round"
-                opacity="0.55" />
+                stroke={INK} strokeWidth="2" strokeLinecap="round"
+                opacity="0.5">
+            {!reduced && (
+              <animateTransform attributeName="transform" type="translate"
+                                values="0 0; 9 0; 0 0"
+                                dur={`${4 + (i % 3)}s`}
+                                repeatCount="indefinite" />
+            )}
+          </path>
         ))}
       </svg>
     </div>
