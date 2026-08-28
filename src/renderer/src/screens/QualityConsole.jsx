@@ -380,9 +380,13 @@ function FieldGrid({ rec, t, typeNames = {} }) {
       {Object.entries(rec.field_status).map(([f, st]) => (
         <div key={f} style={{ display: 'flex', gap: 8, fontSize: 12,
                               alignItems: 'baseline', minWidth: 0 }}>
-          <span style={{ color: st === 'missing' ? RED : st === 'filled' ? GREEN : '#c3ccd9',
-                         fontWeight: 700, width: 12, flexShrink: 0 }}>
-            {st === 'missing' ? '✗' : st === 'filled' ? '✓' : '·'}
+          <span style={{ color: st === 'missing' ? RED
+                           : st === 'filled' ? GREEN
+                           : st === 'pending-review' ? AMBER : '#c3ccd9',
+                         fontWeight: 700, width: 12, flexShrink: 0 }}
+                title={st === 'pending-review' ? t('ops.pendingReview') : undefined}>
+            {st === 'missing' ? '✗' : st === 'filled' ? '✓'
+              : st === 'pending-review' ? '?' : '·'}
           </span>
           <span title={f}
                 style={{ color: GRAY, width: 148, flexShrink: 0,

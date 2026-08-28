@@ -915,6 +915,9 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
             #   reference          an official page is linked but has not yet
             #                      been machine-compared to this answer
             gc = ((r.verification or {}).get("grounded_check") or {})
+            # Fields the page disputed that no human has ruled on yet: the
+            # spec's third checklist state, 未过审 (not approved).
+            rec["_disputed"] = list(gc.get("disputed_fields") or [])
             if prov:
                 rec["_source_check"] = "human-quote"
             elif gc.get("outcome") == "checked" and gc.get("consistent"):
@@ -925,6 +928,16 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
                 rec["_source_check"] = "unchecked"
             out.append(rec)
     return out
+
+
+def _with_pending(status: dict, disputed) -> dict:
+    """The spec's checklist has THREE states: filled, missing, and 未过审
+    (not approved). A filled field the official page disputed, with no human
+    ruling yet, is the third one."""
+    for f in disputed or []:
+        if status.get(f) == "filled":
+            status[f] = "pending-review"
+    return status
 
 
 @app.get("/database/records")
@@ -959,7 +972,8 @@ def travel_database_records(nationality: str = "", destination: str = "",
                          "cache_key": r["_cache_key"],
                          "source_check": r.get("_source_check", "unchecked"),
                          "operator_released": r.get("_released", False),
-                         "field_status": tstation.field_status(r),
+                         "field_status": _with_pending(tstation.field_status(r),
+                                                       r.get("_disputed")),
                          "completeness": round(tstation.completeness(r), 4)}
                         for r in rows],
             "summary": {"total": len(rows), "complete": complete,
