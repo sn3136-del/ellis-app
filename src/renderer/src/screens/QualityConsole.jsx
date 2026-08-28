@@ -1030,6 +1030,28 @@ export default function QualityConsole() {
     }
   }
 
+  async function exportChangesCsv() {
+    // Deliverable 6: the change list itself is exportable, not only shown.
+    setBusy(true)
+    try {
+      const res = await fetch(`${client.baseUrl}/database/changes.csv`, {
+        headers: { authorization: 'Bearer admin-token',
+                   'x-org-id': 'ops', 'x-user-id': 'ops' },
+      })
+      if (!res.ok) throw new Error(`export failed (${res.status})`)
+      const blob = await res.blob()
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `tstation_change_log_${new Date().toISOString().slice(0, 10)}.csv`
+      a.click()
+      URL.revokeObjectURL(a.href)
+    } catch (e) {
+      setError(String(e?.message || e))
+    } finally {
+      setBusy(false)
+    }
+  }
+
   // Filtering is LOCAL and instant: the records are already here, and a
   // round-trip per keystroke made the console feel broken. The server-side
   // params remain only for the Excel export.
@@ -1588,7 +1610,9 @@ export default function QualityConsole() {
           )
           return (
             <div className="ops-fade" style={{ display: 'grid', gap: 14 }}>
-              {/* Segmented action filter with live counts */}
+              {/* Segmented action filter with live counts + list export */}
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center',
+                            flexWrap: 'wrap' }}>
               <div style={{ display: 'inline-flex', background: '#fff',
                             border: `1px solid ${BORDER}`, borderRadius: 999,
                             padding: 4, width: 'fit-content' }}>
@@ -1606,6 +1630,16 @@ export default function QualityConsole() {
                                    fontWeight: 600 }}>{counts[id] || 0}</span>
                   </button>
                 ))}
+              </div>
+              <button onClick={exportChangesCsv} disabled={busy}
+                      data-testid="ops-export-changes"
+                      style={{ borderRadius: 999, fontWeight: 700,
+                               fontSize: 12.5, cursor: 'pointer',
+                               border: `1px solid ${BORDER}`,
+                               background: '#fff', color: NAVY,
+                               padding: '9px 16px' }}>
+                ⬇ {t('ops.export')}
+              </button>
               </div>
               {list.length === 0 && !busy && (
                 <div style={{ ...card, padding: 22, color: GRAY,

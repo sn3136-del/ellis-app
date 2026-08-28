@@ -1033,6 +1033,41 @@ def travel_database_changes(q: str = "", limit: int = 200,
     return {"changes": out}
 
 
+@app.get("/database/changes.csv")
+def travel_database_changes_export(q: str = "", limit: int = 1000,
+                                   db=Depends(get_session),
+                                   p: Principal = Depends(get_principal)):
+    """The change log as a file (deliverable 6 requires the list to be
+    exportable, not just displayed): one row per changed field, UTF-8 CSV
+    Excel opens directly."""
+    import csv
+    import io
+    from fastapi.responses import Response
+    data = travel_database_changes(q=q, limit=limit, db=db, p=p)
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["time_utc", "action", "origin", "nationality", "destination",
+                "purpose", "field", "from", "to", "note"])
+    for c in data["changes"]:
+        rt = c.get("route") or {}
+        base = [c.get("at") or "", c.get("action") or "", c.get("origin") or "",
+                rt.get("passport_nationality") or "",
+                rt.get("destination_country") or "",
+                rt.get("travel_purpose") or ""]
+        changes = c.get("changes") or {}
+        if not changes:
+            w.writerow(base + ["", "", "", c.get("note") or ""])
+        for field, diff in changes.items():
+            frm, to = ("", "")
+            if isinstance(diff, dict):
+                frm, to = str(diff.get("from") or ""), str(diff.get("to") or "")
+            w.writerow(base + [field, frm, to, c.get("note") or ""])
+    # BOM so Excel decodes the Chinese route names correctly.
+    return Response("﻿" + buf.getvalue(), media_type="text/csv",
+                    headers={"Content-Disposition":
+                             'attachment; filename="tstation_change_log.csv"'})
+
+
 @app.get("/database/export.xlsx")
 def travel_database_export(nationality: str = "", destination: str = "",
                            purpose: str = "", document: str = "",
