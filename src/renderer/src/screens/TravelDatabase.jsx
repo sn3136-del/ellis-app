@@ -216,30 +216,43 @@ function EllisIslandScene() {
   const reduced = typeof window !== 'undefined' &&
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
   const INK = '#111'
-  const BASE = 168                       // the island's shoreline
-  // Every letter is a cluster of tower blocks [x, y-up, w, h] so the word
-  // reads as a city block AND as ELLIS.
+  const BASE = 150                       // the island's shoreline
+  // Every letter is a cluster of tower blocks [x, y-up, w, h]: the word
+  // reads as a modern skyline AND as ELLIS. Heights vary so the roofline
+  // has a skyline's rhythm.
   const LETTERS = [
     // E
-    [28, [[0, 86, 14, 86], [0, 86, 42, 13], [0, 56, 34, 12], [0, 13, 42, 13]]],
-    // L
-    [96, [[0, 78, 14, 78], [0, 13, 40, 13]]],
-    // L
-    [152, [[0, 78, 14, 78], [0, 13, 40, 13]]],
-    // I with the stepped Empire State cap and needle
-    [210, [[0, 88, 16, 88], [2, 96, 12, 9]]],
-    // S as stacked slabs
-    [246, [[0, 71, 40, 13], [0, 58, 13, 16], [0, 42, 40, 13],
-           [27, 29, 13, 16], [0, 13, 40, 13]]],
+    [22, [[0, 92, 13, 92], [0, 92, 40, 12], [0, 55, 32, 11], [0, 12, 40, 12]]],
+    // L, the shorter one
+    [84, [[0, 72, 13, 72], [0, 12, 36, 12]]],
+    // L, a notch taller
+    [138, [[0, 84, 13, 84], [0, 12, 36, 12]]],
+    // I as the Empire State Building: broad base, setback shaft, crown
+    // tiers, then the spire drawn separately
+    [192, [[-1, 30, 17, 30], [1, 78, 13, 48], [3, 100, 9, 22],
+           [4.5, 108, 6, 8]]],
+    // S as stacked setbacks
+    [228, [[0, 61, 38, 11], [0, 50, 12, 14], [0, 36, 38, 11],
+           [26, 25, 12, 14], [0, 11, 38, 11]]],
   ]
-  // Window grid for the taller towers; a handful of them blink.
+  // Windows laid out the way real facades are: aligned floor rows at a
+  // fixed pitch on the tower shafts, and one even strip along each slab.
   const windows = []
-  LETTERS.forEach(([lx, rects], li) => {
+  LETTERS.forEach(([lx, rects]) => {
     rects.forEach(([x, up, w, h]) => {
-      if (h < 30) return
-      for (let wy = up - 10; wy > 14; wy -= 13) {
-        for (let wx = x + 3; wx < x + w - 4; wx += 6) {
-          windows.push([lx + wx, BASE - wy])
+      if (w <= 20 && h >= 26) {
+        // tower block: aligned columns, one row per floor, kept inside
+        // this block's own walls
+        const cols = w >= 15 ? [2.8, 6.9, 11] : w >= 11 ? [3.2, 7.6]
+          : [(w - 2) / 2]
+        const floor = Math.max(20, up - h + 8)
+        for (let wy = up - 9; wy > floor; wy -= 11) {
+          cols.forEach((cx) => windows.push([lx + x + cx, BASE - wy, 2, 5.5]))
+        }
+      } else if (w >= 30) {
+        // slab: an even single strip of square windows
+        for (let cx = x + 4.5; cx <= x + w - 6; cx += 5.6) {
+          windows.push([lx + cx, BASE - up + (h - 4.5) / 2, 2.4, 4.5])
         }
       }
     })
@@ -252,58 +265,61 @@ function EllisIslandScene() {
         <span className="planeload__trail" />
         <span className="planeload__plane"><TripPlane width={216} /></span>
       </div>
-      <svg viewBox="0 0 400 214"
-           style={{ display: 'block', width: 'min(360px, 92vw)' }}>
+      <svg viewBox="0 0 300 208"
+           style={{ display: 'block', width: 'min(330px, 92vw)' }}>
+        <defs>
+          <clipPath id="ellis-mirror">
+            <rect x="0" y={BASE + 20} width="300" height="38" />
+          </clipPath>
+        </defs>
         <g>
-          {/* the harbor island the city stands on */}
-          <path d="M16,168 Q10,190 44,193 L296,193 Q330,190 324,168 Z"
-                fill="#fff" stroke={INK} strokeWidth="3" />
-          {/* towers */}
-          {LETTERS.map(([lx, rects], i) => (
-            <g key={i}>
-              {rects.map(([x, up, w, h], j) => (
-                <rect key={j} x={lx + x} y={BASE - up} width={w} height={h}
-                      rx="2" fill="#fff" stroke={INK} strokeWidth="3" />
-              ))}
-            </g>
-          ))}
-          {/* Empire State needle on the I */}
-          <line x1="218" y1={BASE - 96} x2="218" y2={BASE - 114}
-                stroke={INK} strokeWidth="2.5" strokeLinecap="round" />
-          <circle cx="218" cy={BASE - 116} r="1.8" fill={INK} />
-          {/* windows, a few of them alive */}
-          {windows.map(([x, y], i) => (
-            <rect key={i} x={x} y={y} width="3" height="4" fill={INK}
-                  opacity="0.75" />
-          ))}
-          {!reduced && blinkers.map(([x, y], i) => (
-            <rect key={'b' + i} x={x} y={y} width="3" height="4" fill="#fff">
-              <animate attributeName="opacity" values="0;1;0"
-                       dur={`${2.6 + (i % 4) * 0.9}s`}
-                       begin={`${(i % 5) * 0.7}s`} repeatCount="indefinite" />
-            </rect>
-          ))}
-          {/* Liberty on her own islet next door */}
-          <g transform="translate(338,0)">
-            <path d="M2,168 Q-2,186 16,188 Q40,188 36,168 Z"
-                  fill="#fff" stroke={INK} strokeWidth="3" />
-            <rect x="8" y={BASE - 26} width="22" height="10" rx="1.5"
-                  fill="#fff" stroke={INK} strokeWidth="2.5" />
-            <rect x="12" y={BASE - 34} width="14" height="8" rx="1.5"
-                  fill="#fff" stroke={INK} strokeWidth="2.5" />
-            <path d={`M14,${BASE - 34} L12,${BASE - 58} Q19,${BASE - 62} 26,${BASE - 58} L24,${BASE - 34} Z`}
-                  fill="#fff" stroke={INK} strokeWidth="2.5" />
-            <circle cx="19" cy={BASE - 64} r="4.5" fill="#fff" stroke={INK}
-                    strokeWidth="2.5" />
-            {[[-6, -3], [-3, -5], [0, -6], [3, -5], [6, -3]].map(([dx, dy], i) => (
-              <line key={i} x1={19 + dx * 0.7} y1={BASE - 67}
-                    x2={19 + dx} y2={BASE - 71 + dy * 0.4}
-                    stroke={INK} strokeWidth="1.6" strokeLinecap="round" />
+          <g id="ellis-city">
+            {/* towers */}
+            {LETTERS.map(([lx, rects], i) => (
+              <g key={i}>
+                {rects.map(([x, up, w, h], j) => (
+                  <rect key={j} x={lx + x} y={BASE - up} width={w} height={h}
+                        rx="3" fill="#fff" stroke={INK} strokeWidth="2.5" />
+                ))}
+              </g>
             ))}
-            <line x1="26" y1={BASE - 56} x2="33" y2={BASE - 76}
-                  stroke={INK} strokeWidth="2.5" strokeLinecap="round" />
-            <path d={`M31,${BASE - 78} q2,-3 4,0 q-2,4 -4,0`} fill={INK} />
+            {/* the Empire State spire */}
+            <line x1="199.5" y1={BASE - 108} x2="199.5" y2={BASE - 128}
+                  stroke={INK} strokeWidth="2.2" strokeLinecap="round" />
+            <circle cx="199.5" cy={BASE - 130} r="1.7" fill={INK} />
+            {/* rooftop details: an antenna on the E, a water tower on the
+                taller L, the small NYC signatures */}
+            <line x1="28.5" y1={BASE - 92} x2="28.5" y2={BASE - 102}
+                  stroke={INK} strokeWidth="2" strokeLinecap="round" />
+            <g transform={`translate(140,${BASE - 84})`}>
+              <rect x="2" y="-9" width="7" height="6" rx="1.5" fill="#fff"
+                    stroke={INK} strokeWidth="1.8" />
+              <path d="M2.5,-3 L2.5,0 M8.5,-3 L8.5,0" stroke={INK}
+                    strokeWidth="1.6" strokeLinecap="round" />
+            </g>
+            {/* the facade grids */}
+            {windows.map(([x, y, w, h], i) => (
+              <rect key={i} x={x} y={y} width={w} height={h} rx="0.8"
+                    fill={INK} opacity="0.55" />
+            ))}
+            {!reduced && blinkers.map(([x, y, w, h], i) => (
+              <rect key={'b' + i} x={x} y={y} width={w} height={h}
+                    rx="0.8" fill="#fff">
+                <animate attributeName="opacity" values="0;1;0"
+                         dur={`${2.8 + (i % 4) * 0.8}s`}
+                         begin={`${(i % 6) * 0.6}s`}
+                         repeatCount="indefinite" />
+              </rect>
+            ))}
           </g>
+          {/* the island: a low landmass with tapered shores, not a bar */}
+          <path d={`M2,${BASE + 14} C8,${BASE + 2} 24,${BASE - 1} 44,${BASE - 1}
+                    C90,${BASE - 3} 200,${BASE - 3} 246,${BASE - 1}
+                    C266,${BASE - 1} 282,${BASE + 2} 288,${BASE + 14}
+                    C289,${BASE + 17} 286,${BASE + 18} 282,${BASE + 18}
+                    L8,${BASE + 18} C4,${BASE + 18} 1,${BASE + 17} 2,${BASE + 14} Z`}
+                fill="#fff" stroke={INK} strokeWidth="2.5"
+                strokeLinejoin="round" />
           {/* the whole harbor breathes */}
           {!reduced && (
             <animateTransform attributeName="transform" type="translate"
@@ -311,14 +327,19 @@ function EllisIslandScene() {
                               repeatCount="indefinite" />
           )}
         </g>
+        {/* mirror-calm reflection in the water */}
+        <g clipPath="url(#ellis-mirror)" opacity="0.08">
+          <use href="#ellis-city"
+               transform={`translate(0 ${2 * BASE + 38}) scale(1 -1)`} />
+        </g>
         {/* drifting waves */}
-        {[[20, 204], [120, 208], [230, 205], [318, 207], [368, 200]].map(([x, y], i) => (
-          <path key={i} d={`M${x},${y} q8,-5 16,0 q8,5 16,0`} fill="none"
-                stroke={INK} strokeWidth="2" strokeLinecap="round"
-                opacity="0.5">
+        {[[26, 176], [126, 184], [216, 178], [258, 190]].map(([x, y], i) => (
+          <path key={i} d={`M${x},${y} q7,-4 14,0 q7,4 14,0`} fill="none"
+                stroke={INK} strokeWidth="1.8" strokeLinecap="round"
+                opacity="0.4">
             {!reduced && (
               <animateTransform attributeName="transform" type="translate"
-                                values="0 0; 9 0; 0 0"
+                                values="0 0; 8 0; 0 0"
                                 dur={`${4 + (i % 3)}s`}
                                 repeatCount="indefinite" />
             )}
