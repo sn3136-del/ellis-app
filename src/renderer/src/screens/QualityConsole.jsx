@@ -768,7 +768,13 @@ export default function QualityConsole() {
     try {
       if (tab === 'records') { setData(await client.get('/database/records')); setShown(PAGE) }
       else if (tab === 'changes') setChanges(await client.get('/database/changes?limit=300'))
-      else if (tab === 'issues') setIssues(await client.get('/database/issues'))
+      else if (tab === 'issues') {
+        // The dispute cards compare the page's claim against the current
+        // record, so the record set must be present on this tab too.
+        const [iss, recs] = await Promise.all([
+          client.get('/database/issues'), client.get('/database/records')])
+        setIssues(iss); setData(recs)
+      }
       else if (tab === 'freshness') setFreshness(await client.get('/database/freshness'))
     } catch (e) {
       setError(String(e?.message || e))
@@ -1095,39 +1101,155 @@ export default function QualityConsole() {
             if (/\w$/.test(says || '') && (note || '').endsWith(says || '')) v += '…'
             return v
           }
-          const AutoBody = ({ note }) => {
+          const fieldLabel = (f) => {
+            const M = {
+              disposition: t('ops.col.requirement'),
+              visa_category: t('ops.col.type'),
+              permitted_stay: t('ops.col.stay'),
+              permitted_stay_days: t('ops.col.stay'),
+              government_fee: t('ops.col.fee'),
+              confidence: t('ops.col.confidence'),
+              application_channel: t('ops.f.channel'),
+              application_channel_detail: t('ops.f.channelDetail'),
+              official_portal_url: t('ops.f.portal'),
+              requirement_detail: t('ops.f.reqDetail'),
+              processing_time: t('ops.f.processing'),
+              required_documents: t('ops.f.docs'),
+              exceptions: t('ops.f.exceptions'),
+              visa_products: t('ops.f.products'),
+              operator_spot_check: t('ops.f.spotCheck'),
+            }
+            const labels = String(f || '').split(',')
+              .map((x) => M[x.trim()] || x.trim().replace(/_/g, ' '))
+            return [...new Set(labels)].join(' · ')
+          }
+          // The record the page disagrees with, so both sides can be shown.
+          const recFor = (it) => {
+            const r = it.route || {}
+            const nat = r.passport_nationality || r.nationality
+            const dest = r.destination_country || r.destination
+            return (data?.records || []).find((x) =>
+              x.travel_document_country === nat &&
+              x.destination_country === dest &&
+              (!r.travel_purpose || x.travel_purpose === r.travel_purpose) &&
+              (!r.travel_document_type ||
+                x.travel_document_type === r.travel_document_type))
+          }
+          const currentOf = (rec, field) => {
+            if (!rec) return null
+            const j = (a, b) => (a == null || a === '' ? null
+              : `${a} ${b || ''}`.trim())
+            switch (String(field || '').split(',')[0].trim()) {
+              case 'disposition': return rec.visa_requirement
+              case 'visa_category': return rec.visa_type_name
+              case 'permitted_stay': case 'permitted_stay_days':
+                return j(rec.max_stay_duration, rec.max_stay_unit)
+              case 'government_fee':
+                return j(rec.visa_fee_amount, rec.visa_fee_currency)
+              case 'processing_time':
+                return j(rec.processing_min_days, rec.processing_unit)
+              case 'application_channel': return rec.application_method
+              case 'required_documents': return rec.required_documents
+              case 'official_portal_url': return rec.source_url
+              case 'confidence': return rec.confidence_level
+              default: return null
+            }
+          }
+          const diffChip = (v, kind) => (
+            <span style={{ display: 'inline-block', padding: '3px 9px',
+                           borderRadius: 7, fontSize: 12.5,
+                           overflowWrap: 'anywhere',
+                           ...(kind === 'old'
+                             ? { background: '#fdf1f4', color: '#a13d55',
+                                 textDecoration: 'line-through' }
+                             : kind === 'empty'
+                               ? { color: GRAY, fontStyle: 'italic',
+                                   padding: '3px 0' }
+                               : { background: '#eefaf3', color: '#0b7a44',
+                                   fontWeight: 700 }) }}>
+              {v}
+            </span>
+          )
+          const AutoBody = ({ note, issue }) => {
             const parsed = parseAuto(note)
-            const [openQ, setOpenQ] = [null, null]
             if (!parsed) return <div style={{ fontSize: 13, color: NAVY, marginTop: 8 }}>{note}</div>
+            const rec = recFor(issue)
+            let host = ''
+            try { host = new URL(parsed.url).hostname.replace(/^www\./, '') } catch { host = parsed.url }
             return (
-              <div style={{ marginTop: 8, display: 'grid', gap: 6 }}>
-                {parsed.segs.map((g, i) => (
-                  <div key={i} style={{ display: 'flex', gap: 8, fontSize: 12.5,
-                                        alignItems: 'baseline', flexWrap: 'wrap' }}>
-                    <span style={{ fontFamily: 'ui-monospace, monospace',
-                                   fontSize: 11, color: '#5b6a80',
-                                   background: '#f1f4f9', borderRadius: 6,
-                                   padding: '2px 8px', flexShrink: 0 }}>{g.field}</span>
-                    <span style={{ color: GRAY }}>{t('ops.pageSays')}</span>
-                    <span style={{ color: NAVY, fontWeight: 600,
-                                   overflowWrap: 'anywhere' }}>
-                      {(() => { const v = fmtSays(g.field, g.says, note)
-                        return v.length > 160 ? v.slice(0, 160) + '…' : v })()}
-                    </span>
-                    {g.quote && (
-                      <details style={{ fontSize: 12, width: '100%' }}>
-                        <summary style={{ color: BLUE, cursor: 'pointer',
-                                          fontWeight: 600 }}>{t('ops.showQuote')}</summary>
-                        <blockquote style={{ margin: '6px 0 0', padding: '8px 12px',
-                                     borderLeft: `3px solid ${BLUE}`,
-                                     background: '#f7faff', color: NAVY,
-                                     borderRadius: 6 }}>
-                          {g.quote.slice(0, 400)}
-                        </blockquote>
-                      </details>
-                    )}
+              <div style={{ marginTop: 10 }}>
+                {/* One plain sentence saying what this card is. */}
+                <div style={{ fontSize: 12.5, color: GRAY, marginBottom: 8,
+                              display: 'flex', gap: 8, alignItems: 'baseline',
+                              flexWrap: 'wrap' }}>
+                  <span>{t('ops.diff.summary').replace('{n}', parsed.segs.length)}</span>
+                  <a href={parsed.url} target="_blank" rel="noreferrer"
+                     style={{ color: BLUE, fontWeight: 700,
+                              textDecoration: 'none' }}>
+                    {host} ↗
+                  </a>
+                </div>
+                <div style={{ border: `1px solid ${BORDER}`, borderRadius: 10,
+                              overflow: 'hidden' }}>
+                  <div style={{ display: 'grid',
+                                gridTemplateColumns: 'minmax(86px, 130px) 1fr 1fr',
+                                background: '#f7f9fc', fontSize: 11.5,
+                                fontWeight: 800, color: GRAY,
+                                textTransform: 'uppercase',
+                                letterSpacing: 0.4 }}>
+                    <span style={{ padding: '7px 10px' }}>{t('ops.diff.field')}</span>
+                    <span style={{ padding: '7px 10px' }}>{t('ops.diff.db')}</span>
+                    <span style={{ padding: '7px 10px' }}>{t('ops.diff.page')}</span>
                   </div>
-                ))}
+                  {parsed.segs.map((g, i) => {
+                    const cur = currentOf(rec, g.field)
+                    const page = (() => {
+                      const v = fmtSays(g.field, g.says, note)
+                      return v.length > 160 ? v.slice(0, 160) + '…' : v
+                    })()
+                    const same = cur != null &&
+                      String(cur).trim().toLowerCase() ===
+                      String(page).trim().toLowerCase()
+                    return (
+                      <div key={i} style={{ borderTop: `1px solid ${BORDER}` }}>
+                        <div style={{ display: 'grid',
+                                      gridTemplateColumns:
+                                        'minmax(86px, 130px) 1fr 1fr',
+                                      fontSize: 12.5,
+                                      background: i % 2 ? '#fbfcfe' : '#fff' }}>
+                          <span style={{ padding: '8px 10px', fontWeight: 700,
+                                         color: NAVY }}>
+                            {fieldLabel(g.field)}
+                          </span>
+                          <span style={{ padding: '8px 10px' }}>
+                            {cur == null
+                              ? diffChip(t('ops.diff.empty'), 'empty')
+                              : diffChip(cur, same ? 'new' : 'old')}
+                          </span>
+                          <span style={{ padding: '8px 10px' }}>
+                            {diffChip(page, 'new')}
+                            {g.quote && (
+                              <details style={{ fontSize: 12, marginTop: 4 }}>
+                                <summary style={{ color: BLUE, cursor: 'pointer',
+                                                  fontWeight: 600 }}>
+                                  {t('ops.showQuote')}
+                                </summary>
+                                <blockquote style={{ margin: '6px 0 0',
+                                             padding: '8px 12px',
+                                             borderLeft: `3px solid ${BLUE}`,
+                                             background: '#f7faff', color: NAVY,
+                                             borderRadius: 6,
+                                             overflowWrap: 'anywhere' }}>
+                                  {g.quote.slice(0, 400)}
+                                </blockquote>
+                              </details>
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
             )
           }
@@ -1149,10 +1271,9 @@ export default function QualityConsole() {
                   ? <Chip color={BLUE} filled={false}>{t('ops.autoCheck')}</Chip>
                   : <Chip color={AMBER} filled={false}>{t('ops.readerReport')}</Chip>}
                 {it.reported_by !== 'freshness_monitor' && (
-                  <span style={{ color: GRAY, fontSize: 11,
-                                 fontFamily: 'ui-monospace, monospace',
+                  <span style={{ color: '#5b6a80', fontSize: 11.5,
                                  background: '#f1f4f9', borderRadius: 6,
-                                 padding: '2px 8px' }}>{it.field}</span>
+                                 padding: '2px 8px' }}>{fieldLabel(it.field)}</span>
                 )}
                 {!active && (
                   <Chip color={it.status === 'corrected' ? GREEN : GRAY} filled={false}>
@@ -1164,7 +1285,7 @@ export default function QualityConsole() {
                 </span>
               </div>
               {it.reported_by === 'freshness_monitor'
-                ? <AutoBody note={it.note} />
+                ? <AutoBody note={it.note} issue={it} />
                 : <div style={{ fontSize: 13, color: NAVY, marginTop: 8 }}>{it.note}</div>}
               {it.resolution && (
                 <div style={{ fontSize: 12.5, color: GREEN, marginTop: 6 }}>
