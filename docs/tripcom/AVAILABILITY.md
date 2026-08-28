@@ -66,3 +66,22 @@ fact can be replayed.
 99.99% monthly allows about 4.3 minutes of downtime; with a 3 second process
 restart and the minute-probe safety net, the measured budget is spent on
 deploys (which restart the backend in about 5 seconds each).
+
+## Periodic quality review (Acceptance Standard section 4.3)
+
+Two more cron jobs run alongside the probe:
+
+- `/usr/local/bin/ellis-rolling-recheck` (daily 03:30 UTC) re-reads the
+  official pages for the 25 answers whose last grounded check is oldest,
+  so the whole base is re-verified against its sources every month (the
+  "monthly full check"). Corrections and disputes flow through the normal
+  override/queue pipeline and land in the change log.
+- `/usr/local/bin/ellis-monthly-report` (1st of month, 04:00 UTC) snapshots
+  the section 6.1 metrics (field completeness, record completeness,
+  Medium-or-above share, source coverage) into
+  `/var/lib/ellis/quality-reports/YYYY-MM.json`, so the periodic-review
+  trail exists as dated evidence.
+
+The quarterly bidirectional sampling of section 4.3 is a joint exercise:
+Party A samples records against sources and sources against records; the
+Excel export (with its snapshot timestamp) is the sampling frame.
