@@ -202,6 +202,34 @@ function CountryFilter({ value, placeholder, onCommit, countries }) {
   )
 }
 
+function MissingLine({ missing, t }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div style={{ marginTop: 10 }}>
+      <div style={{ fontSize: 12, color: RED, display: 'flex',
+                    alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+        <span>{t('ops.missingRequired')}: {missing.join(', ')}</span>
+        <button onClick={(e) => { e.stopPropagation(); setOpen((o) => !o) }}
+                aria-label="why" data-testid="ops-missing-info"
+                style={{ width: 16, height: 16, borderRadius: '50%',
+                         border: `1px solid ${GRAY}`, background: '#fff',
+                         color: GRAY, fontSize: 10, fontWeight: 800,
+                         lineHeight: 1, cursor: 'pointer', padding: 0 }}>
+          i
+        </button>
+      </div>
+      {open && (
+        <div style={{ marginTop: 8, padding: '10px 14px', borderRadius: 10,
+                      background: '#f4f6fa', border: `1px solid ${BORDER}`,
+                      fontSize: 12, color: NAVY, lineHeight: 1.6,
+                      maxWidth: 620 }}>
+          {t('ops.missingWhy')}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function FieldGrid({ rec }) {
   return (
     <div style={{ display: 'grid', gap: '6px 18px', marginTop: 4,
@@ -407,9 +435,7 @@ function RecordsTable({ records, onFlag, onRelease, t }) {
                         padding: '14px 18px' }}>
                       <FieldGrid rec={rec} />
                       {missing.length > 0 && (
-                        <div style={{ marginTop: 10, fontSize: 12, color: RED }}>
-                          {t('ops.missingRequired')}: {missing.join(', ')}
-                        </div>
+                        <MissingLine missing={missing} t={t} />
                       )}
                       <FlagForm rec={rec} onFlag={onFlag} t={t} />
                     </td>
