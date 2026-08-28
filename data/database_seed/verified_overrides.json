@@ -1078,14 +1078,49 @@
   "verified_at": "2026-08-22",
   "verified_by": "Ellis source audit",
   "source_url": "https://www.exteriores.gob.es/",
-  "note": "The Schengen short-stay fee was missing: EUR 90 adults, EUR 45 children 6 to under 12, free under 6; payable at the visa centre in CNY cash, non-refundable on refusal.",
+  "note": "The Schengen short-stay fee was missing: EUR 90 adults, EUR 45 children 6 to under 12, free under 6; payable at the visa centre in CNY cash, non-refundable on refusal. Product fees aligned to the EUR 90 Schengen fee (were the pre-June-2024 EUR 80).",
   "fields": {
    "government_fee": {
     "amount": 90,
     "currency": "EUR"
    },
    "application_channel_detail": "Lodge at the visa application centre. The EUR 90 consular fee is paid on submission (in CNY cash at the centre) and is not refunded if the visa is refused; the centre's service fee is separate.",
-   "official_portal_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+   "official_portal_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+   "visa_products": [
+    {
+     "type": "Single-entry short-stay tourist visa",
+     "entry": "single",
+     "validity": "Up to 90 days within a 180-day window; validity decided by the consulate",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Adult fee; children 6-12 pay €40 and under-6 are free Schengen fee EUR 90 since 11 June 2024."
+    },
+    {
+     "type": "Double-entry short-stay tourist visa",
+     "entry": "multiple",
+     "validity": "Up to 90 days within a 180-day window; validity decided by the consulate",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Adult fee; validity and number of entries are consulate decisions Schengen fee EUR 90 since 11 June 2024."
+    },
+    {
+     "type": "Multiple-entry short-stay tourist visa",
+     "entry": "multiple",
+     "validity": "From a few months up to 5 years; each stay max 90 days in any 180-day period",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Reserved for frequent travellers with previous compliant Schengen travel; consulate decides validity Schengen fee EUR 90 since 11 June 2024."
+    }
+   ]
   }
  },
  {

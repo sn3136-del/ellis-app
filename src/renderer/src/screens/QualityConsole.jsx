@@ -449,7 +449,7 @@ export default function QualityConsole() {
                        letterSpacing: -0.4 }}>
             {t('ops.title')}
           </h1>
-          <span style={{ fontSize: 12.5, color: GRAY }}>{t('ops.subtitle')}</span>
+          {/* Subtitle hidden per owner instruction: the title stands alone. */}
         </div>
 
         {/* Tabs */}
