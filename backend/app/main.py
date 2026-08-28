@@ -230,6 +230,9 @@ def health_uptime(request: Request, format: str = "", lang: str = "zh-CN"):
           "Segoe UI", sans-serif; background: #f5f7fb; color: #0f294d;
           padding: 40px 20px; }}
   .wrap {{ max-width: 720px; margin: 0 auto; display: grid; gap: 16px; }}
+  /* Grid items refuse to shrink below their content's min width by
+     default; without this the month table drags the whole page wide. */
+  .wrap > * {{ min-width: 0; }}
   .card {{ background: #fff; border-radius: 16px; padding: 26px 30px;
            box-shadow: 0 1px 3px rgba(15,41,77,.06); }}
   h1 {{ font-size: 18px; font-weight: 800; }}
