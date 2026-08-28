@@ -191,6 +191,108 @@ function feeText(fee) {
 }
 
 // Type-ahead country picker: type to filter, click to choose.
+/** A localized calendar dropdown for the travel date. The native date input
+ *  renders its text in the BROWSER language, which read as a translation
+ *  failure; this one draws its month and weekday names from the app locale
+ *  via Intl, works identically on laptop and phone, and still lets the
+ *  reader type an ISO date by hand. */
+function DateField({ value, onChange, lang, placeholder }) {
+  const [open, setOpen] = useState(false)
+  const boxRef = useRef(null)
+  const parse = (s) => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s || '').trim())
+    return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null
+  }
+  const today = new Date(); today.setHours(0, 0, 0, 0)
+  const sel = parse(value)
+  const [view, setView] = useState(() => sel || today)
+  useEffect(() => { const d = parse(value); if (d) setView(d) }, [value])
+  useEffect(() => {
+    const close = (e) => {
+      if (boxRef.current && !boxRef.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [])
+  const loc = lang || 'en'
+  const monthName = new Intl.DateTimeFormat(loc, { year: 'numeric', month: 'long' }).format(view)
+  // 2023-01-01 was a Sunday: a fixed base week gives narrow weekday names
+  // in the app locale with Sunday first.
+  const weekdays = [...Array(7)].map((_, i) =>
+    new Intl.DateTimeFormat(loc, { weekday: 'narrow' }).format(new Date(2023, 0, 1 + i)))
+  const first = new Date(view.getFullYear(), view.getMonth(), 1)
+  const startPad = first.getDay()
+  const daysIn = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate()
+  const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  const nav = (delta) => setView((v) => new Date(v.getFullYear(), v.getMonth() + delta, 1))
+  const navBtn = { border: 'none', background: 'transparent', color: NAVY,
+                   fontSize: 16, fontWeight: 800, cursor: 'pointer',
+                   padding: '4px 10px', borderRadius: 8 }
+  return (
+    <div ref={boxRef} style={{ position: 'relative' }}>
+      <input className="input" value={value} inputMode="numeric"
+             data-testid="database-date"
+             placeholder={placeholder}
+             onFocus={() => setOpen(true)}
+             onChange={(e) => onChange(e.target.value.trim())}
+             style={{ fontSize: 14, padding: '10px 40px 10px 14px',
+                      borderRadius: 12, width: '100%', boxSizing: 'border-box' }} />
+      <button type="button" aria-label="calendar"
+              onClick={() => setOpen((o) => !o)}
+              style={{ position: 'absolute', right: 8, top: '50%',
+                       transform: 'translateY(-50%)', border: 'none',
+                       background: 'transparent', cursor: 'pointer',
+                       fontSize: 16, color: GRAY, padding: 4 }}>
+        📅
+      </button>
+      {open && (
+        <div className="card"
+             style={{ position: 'absolute', zIndex: 40, top: '100%', left: 0,
+                      marginTop: 4, padding: 12,
+                      width: 'min(300px, calc(100vw - 48px))',
+                      background: 'var(--bg, #fff)',
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+          <div style={{ display: 'flex', alignItems: 'center',
+                        justifyContent: 'space-between', marginBottom: 8 }}>
+            <button type="button" style={navBtn} aria-label="previous month"
+                    onClick={() => nav(-1)}>‹</button>
+            <strong style={{ color: NAVY, fontSize: 13.5 }}>{monthName}</strong>
+            <button type="button" style={navBtn} aria-label="next month"
+                    onClick={() => nav(1)}>›</button>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)',
+                        gap: 2, textAlign: 'center' }}>
+            {weekdays.map((w, i) => (
+              <span key={'w' + i} style={{ fontSize: 11, fontWeight: 700,
+                                           color: GRAY, padding: '2px 0' }}>{w}</span>
+            ))}
+            {[...Array(startPad)].map((_, i) => <span key={'p' + i} />)}
+            {[...Array(daysIn)].map((_, i) => {
+              const d = new Date(view.getFullYear(), view.getMonth(), i + 1)
+              const past = d < today
+              const isSel = sel && d.getTime() === sel.getTime()
+              const isToday = d.getTime() === today.getTime()
+              return (
+                <button key={'d' + i} type="button" disabled={past}
+                        onClick={() => { onChange(fmt(d)); setOpen(false) }}
+                        style={{ border: isToday && !isSel
+                                   ? `1px solid ${BLUE}` : 'none',
+                                 borderRadius: 8, fontSize: 13,
+                                 padding: '7px 0', cursor: past ? 'default' : 'pointer',
+                                 background: isSel ? NAVY : 'transparent',
+                                 color: isSel ? '#fff' : past ? '#c3ccd9' : NAVY,
+                                 fontWeight: isSel || isToday ? 700 : 500 }}>
+                  {i + 1}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function CountryCombo({ value, options, onChange, placeholder, noMatch, testid }) {
   const [q, setQ] = useState('')
   const [open, setOpen] = useState(false)
@@ -801,14 +903,8 @@ export default function TravelDatabase({ onBack }) {
                 {t('db.travelDate')}{' '}
                 <span style={{ color: GRAY, fontWeight: 400 }}>({t('db.optional')})</span>
               </span>
-              {/* A plain localized input, not the native date control:
-                  the browser's own picker writes mm/dd/yyyy in the BROWSER
-                  language regardless of the page language, which read as a
-                  translation failure. ISO dates are what the engine speaks. */}
-              <input className="input" value={arrival} inputMode="numeric"
-                     placeholder={t('db.datePlaceholder')}
-                     onChange={(e) => setArrival(e.target.value.trim())}
-                     style={{ fontSize: 14, padding: '10px 14px', borderRadius: 12 }} />
+              <DateField value={arrival} onChange={setArrival} lang={lang}
+                         placeholder={t('db.datePlaceholder')} />
             </label>
           </div>
           <div style={{ marginTop: 20, textAlign: 'center' }}>

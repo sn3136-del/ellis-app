@@ -29,6 +29,17 @@ const OPS_CSS = `
 .ops-lift:hover { box-shadow: 0 6px 18px rgba(15,41,77,.10);
                   transform: translateY(-1px); }
 .ops-row { transition: background .15s ease; }
+.ops-diff { display: grid; grid-template-columns: minmax(86px, 130px) 1fr 1fr; }
+.ops-diff-cell-label { display: none; }
+@media (max-width: 540px) {
+  /* The three-column comparison is unreadable at phone width: each row
+     stacks, and the two value cells announce which side they are. */
+  .ops-diff { grid-template-columns: 1fr; }
+  .ops-diff-head { display: none; }
+  .ops-diff-cell-label { display: inline; font-size: 10.5px; font-weight: 700;
+                         color: #5b6a80; margin-right: 6px;
+                         text-transform: uppercase; letter-spacing: .4px; }
+}
 @media (prefers-reduced-motion: reduce) {
   .ops-fade { animation: none; }
   .ops-bar, .ops-seg, .ops-lift { transition: none; }
@@ -1333,9 +1344,8 @@ export default function QualityConsole() {
                 </div>
                 <div style={{ border: `1px solid ${BORDER}`, borderRadius: 10,
                               overflow: 'hidden' }}>
-                  <div style={{ display: 'grid',
-                                gridTemplateColumns: 'minmax(86px, 130px) 1fr 1fr',
-                                background: '#f7f9fc', fontSize: 11.5,
+                  <div className="ops-diff ops-diff-head"
+                       style={{ background: '#f7f9fc', fontSize: 11.5,
                                 fontWeight: 800, color: GRAY,
                                 textTransform: 'uppercase',
                                 letterSpacing: 0.4 }}>
@@ -1354,21 +1364,21 @@ export default function QualityConsole() {
                       String(page).trim().toLowerCase()
                     return (
                       <div key={i} style={{ borderTop: `1px solid ${BORDER}` }}>
-                        <div style={{ display: 'grid',
-                                      gridTemplateColumns:
-                                        'minmax(86px, 130px) 1fr 1fr',
-                                      fontSize: 12.5,
+                        <div className="ops-diff"
+                             style={{ fontSize: 12.5,
                                       background: i % 2 ? '#fbfcfe' : '#fff' }}>
                           <span style={{ padding: '8px 10px', fontWeight: 700,
                                          color: NAVY }}>
                             {fieldLabel(g.field)}
                           </span>
                           <span style={{ padding: '8px 10px' }}>
+                            <span className="ops-diff-cell-label">{t('ops.diff.db')}</span>
                             {cur == null
                               ? diffChip(t('ops.diff.empty'), 'empty')
                               : diffChip(cur, same ? 'new' : 'old')}
                           </span>
                           <span style={{ padding: '8px 10px' }}>
+                            <span className="ops-diff-cell-label">{t('ops.diff.page')}</span>
                             {diffChip(page, 'new')}
                             {g.quote && (
                               <details style={{ fontSize: 12, marginTop: 4 }}>
