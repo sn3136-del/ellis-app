@@ -744,7 +744,6 @@ export default function QualityConsole() {
   const [shown, setShown] = useState(PAGE)
   const [changeFilter, setChangeFilter] = useState('')
   // Hoisted: hooks may not live inside the conditional band IIFE.
-  const totalCount = useCountUp(data?.summary?.total ?? 0)
   const typeNames = useTypeNames(client, data, lang)
 
   useEffect(() => {
@@ -871,6 +870,8 @@ export default function QualityConsole() {
              substantiated: sub, high, medium, low }
   }, [data, filtered])
   const records = filtered
+  // Counts the FILTERED view, so picking High shows the High-only numbers.
+  const totalCount = useCountUp(s?.total ?? 0)
   const set = (k) => (v) => setFilters((f) => ({ ...f, [k]: v }))
   return (
     <div style={{ background: BG, minHeight: '100vh' }}>

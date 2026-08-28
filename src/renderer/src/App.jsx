@@ -106,7 +106,7 @@ function AppInner() {
       if (!alive) return
       setRuntimeMode(m)
       tries += 1
-      if (m === 'production' && tries < 20) setTimeout(probe, 1000)
+      if (m === 'production' && tries < 3) setTimeout(probe, 1000)
     }
     probe()
     return () => { alive = false }
