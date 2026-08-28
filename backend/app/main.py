@@ -663,13 +663,26 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
                    purpose: str = "", document: str = "",
                    requirement: str = "", confidence: str = ""):
     from .visa_snapshot.registry import iso3
-    # The spot-check accepts "China" as readily as "CHN": names, aliases and
-    # both ISO forms all resolve through the registry; an unresolvable term
-    # keeps its literal form (and simply matches nothing).
+    from .visa_snapshot import kimi_primary as _kp
+
+    def _resolve(term: str) -> str:
+        # The spot-check accepts "China", "CHN", "CN" and Chinese names like
+        # 中国: the registry first, then the ask box's alias table (which
+        # carries the Chinese country names). An unresolvable term keeps its
+        # literal form and simply matches nothing.
+        term = term.strip()
+        got = iso3(term, default=None)
+        if got:
+            return got
+        low = term.lower()
+        for code, names in getattr(_kp, "_ALIASES", {}).items():
+            if low in names or term in names:
+                return code
+        return term.upper()
     if nationality:
-        nationality = iso3(nationality.strip(), default=nationality.strip().upper())
+        nationality = _resolve(nationality)
     if destination:
-        destination = iso3(destination.strip(), default=destination.strip().upper())
+        destination = _resolve(destination)
     """Every served answer as Trip.com 25-field records, filters combined —
     their "multi-dimensional spot check": slice by station (the nationality a
     T-site serves), passport type, destination, visa requirement, field."""
