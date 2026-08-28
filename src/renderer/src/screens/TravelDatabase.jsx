@@ -239,26 +239,25 @@ function EllisIslandScene() {
     if (w <= 22 && h >= 24) {
       // one centered column on narrow shafts, two on wide ones; every row
       // snaps to ONE global floor grid so windows align across all towers
-      const ww = 2.8, wh = 7, pitch = 16
-      const cols = w >= 15 ? [w / 2 - 4.6, w / 2 + 1.8] : [(w - ww) / 2]
+      const ww = 3.4, wh = 7.5, pitch = 16
+      const cols = w >= 15 ? [w / 2 - 5, w / 2 + 1.6] : [(w - ww) / 2]
       const first = Math.ceil((by + 6) / pitch) * pitch
       for (let wy = first; wy <= by + h - wh - 5; wy += pitch) {
-        cols.forEach((cx) => winRects.push([bx + cx, wy, ww, wh, false]))
+        cols.forEach((cx) => winRects.push([bx + cx, wy, ww, wh, 'v']))
       }
     } else if (w >= 30 && h >= 9) {
-      const ww = 6, wh = Math.min(5.5, h - 4.5), gap = 5, mx = 4.5
+      const ww = 6.5, wh = Math.min(5.5, h - 4.5), gap = 5, mx = 4.5
       const n = Math.floor((w - 2 * mx + gap) / (ww + gap))
       const gx = n > 1 ? (w - 2 * mx - n * ww) / (n - 1) : 0
       for (let i = 0; i < n; i++) {
         winRects.push([bx + mx + i * (ww + gx), by + (h - wh) / 2, ww, wh,
-                       false])
+                       'h'])
       }
     }
   }
   LETTERS.forEach(([lx, rects]) => {
     rects.forEach(([x, up, w, h]) => addGrid(lx + x, BASE - up, w, h))
   })
-  const blinkers = winRects.filter((_, i) => i % 9 === 4)
   // Long layered swells: one path each, spanning the whole harbor.
   const swell = (y, n) => 'M-12,' + y + ' q10,-3.5 20,0 ' +
     Array.from({ length: n }, () => 't20,0').join(' ')
@@ -304,17 +303,18 @@ function EllisIslandScene() {
                 stroke={INK} strokeWidth="2" strokeLinecap="round" />
           <circle cx="199.5" cy={BASE - 134} r="1.6" fill={INK} />
           {/* the facade grids */}
-          {winRects.map(([x, y, w, h, dim], i) => (
-            <rect key={i} x={x} y={y} width={w} height={h} rx="0.9"
-                  fill="#fff" opacity={dim ? 0.4 : 0.95} />
-          ))}
-          {!reduced && blinkers.map(([x, y, w, h], i) => (
-            <rect key={'b' + i} x={x} y={y} width={w} height={h} rx="0.7"
-                  fill="#fff">
-              <animate attributeName="opacity" values="0.95;0.15;0.95"
-                       dur={`${3 + (i % 4) * 0.9}s`}
-                       begin={`${(i % 6) * 0.7}s`} repeatCount="indefinite" />
-            </rect>
+          {winRects.map(([x, y, w, h, kind], i) => (
+            <g key={i}>
+              <rect x={x} y={y} width={w} height={h} rx="0.8" fill="#fff"
+                    opacity="0.95" />
+              {kind === 'v' ? (
+                <line x1={x} y1={y + h / 2} x2={x + w} y2={y + h / 2}
+                      stroke={INK} strokeWidth="0.9" />
+              ) : (
+                <line x1={x + w / 2} y1={y} x2={x + w / 2} y2={y + h}
+                      stroke={INK} strokeWidth="0.9" />
+              )}
+            </g>
           ))}
           {/* the whole harbor breathes */}
           {!reduced && (
