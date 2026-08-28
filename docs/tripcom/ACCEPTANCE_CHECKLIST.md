@@ -15,7 +15,7 @@ this checklist, the stage test report, and both parties' signatures.
 | Availability (monthly) | >= 99.99% | 100.0% since per-minute monitoring began 2026-08-28 (record younger than a month) | evidence young |
 | Recovery time (RTO) | <= 1h | auto-restart (systemd + probe), daily backups, runbook | yes |
 | Policy update timeliness | <= 48h (urgent 24h) | pipeline live, same-day corrections shipped; no external policy event yet in window | evidence young |
-| Error feedback closure | <= 48h | reader queue within window; residual machine-filed disputes are open source conflicts | partial |
+| Error feedback closure | <= 48h | 2026-08-28 full recheck: zero disputes older than 48h; 142 fresh engine-vs-official conflicts queued (must be worked within 2 days); historical backlog exceeded the window before it cleared | partial |
 | Quality backend availability | pass | exercised live 2026-08-28 incl. phone widths | yes |
 
 ## Functional checklist

@@ -15,8 +15,8 @@ dataset. The dataset was then rebuilt and corrected through the day
 (sourced-override waves, a full rewarm, enum fixes). Current live truth:
 
 - Records 1,092; destinations 187; all 18 Phase-1 stations present.
-- Field completeness 98.35% (21,440/21,800 required cells) — target 99%
-  still NOT met; record-level 85.2%.
+- Field completeness 98.34% (21,478/21,840 required cells) — target 99%
+  still NOT met; record-level 85.3%.
 - Source coverage 100.0% — the audit's "162 records lack any source URL"
   is closed (final 13 received adversarially verified official sources).
 - Confidence: High 796 / Medium 158 / Low 138 -> Medium+ 87.4% — target
