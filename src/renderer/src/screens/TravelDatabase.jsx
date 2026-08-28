@@ -220,16 +220,17 @@ function EllisIslandScene() {
   // Every letter is a cluster of blocks [x, y-up, w, h]; heights vary so
   // the roofline has a skyline's rhythm. The I is the Empire State Building.
   const LETTERS = [
-    [22, [[0, 92, 13, 92], [0, 92, 40, 12], [0, 55, 32, 11], [0, 12, 40, 12]]],
-    // The first L is Lady Liberty: her pedestal is the letter's foot
-    [84, [[0, 12, 36, 12], [5, 27, 18, 15]]],
+    [22, [[0, 92, 13, 92], [0, 92, 40, 12], [0, 55, 32, 11], [0, 12, 40, 12],
+          [26, 98, 9, 6]]],
+    [84, [[0, 76, 13, 76], [1.5, 84, 10, 8], [0, 12, 36, 12],
+          [26, 20, 7, 6]]],
     [138, [[0, 84, 13, 84], [0, 12, 36, 12]]],
     // the I is the Empire State Building: broad base, two setbacks,
     // crown tiers, then the mast and needle drawn separately
     [192, [[-2, 26, 19, 26], [0, 56, 15, 30], [2, 82, 11, 26],
            [4, 94, 7, 12], [5.5, 104, 4, 10]]],
     [228, [[0, 61, 38, 11], [0, 50, 12, 14], [0, 36, 38, 11],
-           [26, 25, 12, 14], [0, 11, 38, 11]]],
+           [26, 25, 12, 14], [0, 11, 38, 11], [3, 66, 6, 5], [29, 66, 6, 5]]],
   ]
   // A real facade: one uniform window module, laid out on a computed grid
   // with even margins inside every block. Nothing is placed by hand.
@@ -292,7 +293,7 @@ function EllisIslandScene() {
             </g>
           ))}
                     {/* street doors on the widest ground blocks */}
-          {[[42, 40], [98, 36], [156, 36], [199.5, 17], [247, 38]].map(([cx], i) => (
+          {[[42, 40], [102, 36], [156, 36], [199.5, 17], [247, 38]].map(([cx], i) => (
             <rect key={i} x={cx - 2.2} y={BASE - 7.5} width="4.4" height="7.5"
                   rx="1.2" fill="#fff" opacity="0.95" />
           ))}
@@ -300,22 +301,6 @@ function EllisIslandScene() {
           <line x1="199.5" y1={BASE - 111} x2="199.5" y2={BASE - 132}
                 stroke={INK} strokeWidth="2" strokeLinecap="round" />
           <circle cx="199.5" cy={BASE - 134} r="1.6" fill={INK} />
-          {/* Lady Liberty on the first L: robe, crown, torch, tablet */}
-          <g transform={`translate(84, ${BASE})`}>
-            <path d="M9,-27 L11,-56 L17,-56 L19,-27 Z" fill={INK} />
-            <circle cx="14" cy="-60" r="3.4" fill={INK} />
-            {[[-5, 2], [-2.5, 0.5], [0, 0], [2.5, 0.5], [5, 2]].map(([dx, dy], i) => (
-              <line key={i} x1={14 + dx * 0.55} y1={-62.5 + dy * 0.4}
-                    x2={14 + dx} y2={-67 + dy}
-                    stroke={INK} strokeWidth="1.4" strokeLinecap="round" />
-            ))}
-            <line x1="17.5" y1="-54" x2="23.5" y2="-70"
-                  stroke={INK} strokeWidth="2.6" strokeLinecap="round" />
-            <path d="M22.2,-72 q1.4,-2.8 2.8,0 q-1.4,3.2 -2.8,0" fill={INK} />
-            <line x1="10.5" y1="-53" x2="6.5" y2="-47"
-                  stroke={INK} strokeWidth="2.2" strokeLinecap="round" />
-            <rect x="4" y="-49" width="3.2" height="5" rx="0.6" fill={INK} />
-          </g>
           {/* the facade grids */}
           {winRects.map(([x, y, w, h], i) => (
             <rect key={i} x={x} y={y} width={w} height={h} rx="0.7"
