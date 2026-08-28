@@ -1641,8 +1641,9 @@ def _doc_from_text(q: str, low: str) -> str | None:
         return "service_passport"
     if "儿童护照" in q or "兒童護照" in q or "child passport" in low:
         return "child_passport"
-    if "emergency passport" in low or "temporary passport" in low \
-            or "紧急护照" in q or "緊急護照" in q or "临时护照" in q or "臨時護照" in q:
+    if "temporary passport" in low or "临时护照" in q or "臨時護照" in q:
+        return "temporary_passport"
+    if "emergency passport" in low or "紧急护照" in q or "緊急護照" in q:
         return "emergency_passport"
     if "签证身份书" in q or "簽證身份書" in q or "document of identity" in low:
         return "identity_certificate"

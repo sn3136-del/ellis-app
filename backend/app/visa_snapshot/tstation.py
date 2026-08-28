@@ -299,6 +299,18 @@ def records_for_route(route: dict, guidance: dict,
         row["visa_type_name"] = str(p.get("type"))
         n, unit = _num_unit(p.get("validity"),
                             stay_bound=p.get("max_stay_days"))
+        if n is None:
+            # Definitional: a product NAMED "3-year multiple" or "5年多次"
+            # states its own validity; reading it is not a guess.
+            m = re.search(r"(\d+)[\s-]*(?:year|年)", str(p.get("type") or ""),
+                          re.I)
+            if m:
+                n, unit = int(m.group(1)), "Year"
+            else:
+                m = re.search(r"(\d+)[\s-]*(?:month|个月|個月)",
+                              str(p.get("type") or ""), re.I)
+                if m:
+                    n, unit = int(m.group(1)), "Month"
         row["validity_duration"], row["validity_unit"] = _as_validity_unit(n, unit)
         stay = p.get("max_stay_days")
         if stay:
@@ -306,7 +318,9 @@ def records_for_route(route: dict, guidance: dict,
         else:
             n2, u2 = _num_unit(g.get("permitted_stay"))
             row["max_stay_duration"], row["max_stay_unit"] = _as_stay_unit(n2, u2)
-        row["entries"] = _entries(p.get("entry"))
+        # Definitional fallback: "single-entry" / "multiple-entry" in the
+        # product's own name states the entries field.
+        row["entries"] = _entries(p.get("entry")) or _entries(p.get("type"))
         amt, cur = _fee(p, g)
         row["visa_fee_amount"], row["visa_fee_currency"] = amt, cur
         note = p.get("notes")

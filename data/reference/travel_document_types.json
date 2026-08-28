@@ -71,9 +71,15 @@
    "icao_code_prefix": "CI",
    "name": "Identity certificate",
    "notes": "PRC 身份证明书 and equivalents: a national identity/travel certificate issued in lieu of a passport, distinct from an alien's passport."
+  },
+  {
+   "code": "temporary_passport",
+   "icao_code_prefix": "P",
+   "name": "Temporary passport",
+   "notes": "A short-validity passport issued pending a full one; some states treat it with the emergency passport, others restrict entry channels."
   }
  ],
- "entry_count": 12,
+ "entry_count": 13,
  "generated_at": "2026-07-23",
  "notes": "Curated travel-document taxonomy incl. refugee/stateless/alien/emergency documents.",
  "registry": "travel_document_types",

@@ -514,10 +514,8 @@ body { background: var(--bg-soft); }
 }
 .triptop > * { -webkit-app-region: no-drag; }
 .triptop__logo { height: 34px; display: block; }
-/* The Ellis skyline mark: static, dead-centered in the header. */
-.ellis-mark { position: absolute; left: 50%; top: 50%;
-  transform: translate(-50%, -50%); }
-@media (max-width: 700px) { .ellis-mark { display: none; } }
+/* The Ellis skyline mark: static, centered above the ask box. */
+.ellis-mark { display: flex; justify-content: center; }
 
 /* ---------- Language picker ---------- */
 .langpick { position: relative; }

@@ -8,6 +8,7 @@
 // an honest English fallback when a string cannot round-trip).
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Loading } from '../components/ui.jsx'
+import { EllisMark } from '../App.jsx'
 import { useLocale } from '../lib/locale.jsx'
 import { useLocalizedCountries } from '../lib/countryNames.js'
 import { createVisaClient } from '../lib/visaBackend.js'
@@ -779,6 +780,7 @@ export default function TravelDatabase({ onBack }) {
 
       {!result && (
       <div style={{ marginTop: 18 }}>
+        <div style={{ marginBottom: 16 }}><EllisMark /></div>
         <div className="card anim-rise" style={{ padding: '20px 24px',
                                                  borderRadius: 20,
                                                  maxWidth: 560, marginLeft: 'auto',
@@ -857,12 +859,11 @@ export default function TravelDatabase({ onBack }) {
               </select>
             </label>
             <label style={{ display: 'grid', gap: 6, textAlign: 'left' }}>
-              {/* Owner decision (2026-08-29): traveldoc-simple. The spec
-                  table marks 出发地 required, but a blocking city field read
-                  as friction; it stays optional like traveldoc's form. */}
+              {/* Owner decision (2026-08-30): 100% spec conformance wins;
+                  the input table marks 出发地 required, so the form does too.
+                  The API stays lenient for the spec's own deep links. */}
               <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>
-                {t('db.departure')}{' '}
-                <span style={{ color: GRAY, fontWeight: 400 }}>({t('db.optional')})</span>
+                {t('db.departure')} *
               </span>
               <input className="input" value={departureCity}
                      data-testid="database-departure"
@@ -910,7 +911,7 @@ export default function TravelDatabase({ onBack }) {
           </div>
           <div style={{ marginTop: 20, textAlign: 'center' }}>
             <button className="btn btn--primary" onClick={lookUp}
-                    disabled={busy || !nat || !dest}
+                    disabled={busy || !nat || !dest || !departureCity.trim()}
                     data-testid="database-check"
                     style={{ fontSize: 15, fontWeight: 800, padding: '13px 32px',
                              borderRadius: 999 }}>

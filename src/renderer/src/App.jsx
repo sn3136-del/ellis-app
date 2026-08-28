@@ -72,7 +72,7 @@ function DemoDisabled() {
 /** The Ellis skyline mark: the letters as solid towers, the Empire State
  *  Building as the I with its window ribbons. Static, centered in the
  *  header between the wordmark and the controls. */
-function EllisMark() {
+export function EllisMark() {
   const INK = '#0f294d'
   const B = 150
   const LETTERS = [
@@ -213,7 +213,6 @@ function AppInner() {
         {demoMode && <SimulatedBanner />}
         <header className="triptop" data-testid="triptop">
           <img className="triptop__logo" src={tripcomLogo} alt="Trip.com" />
-          <EllisMark />
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <SurfaceNav view={view} />
             <LanguagePicker />

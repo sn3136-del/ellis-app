@@ -47,7 +47,7 @@ def test_registry_counts_are_iso_complete():
     assert load_registry("currencies")["entry_count"] >= 170
     assert load_registry("languages")["entry_count"] >= 180
     # 9 since 2026-08-28: the PRC Travel Document (旅行证) joined the P0 set.
-    assert load_registry("travel_document_types")["entry_count"] == 12
+    assert load_registry("travel_document_types")["entry_count"] == 13
     # special nationality classes present
     codes = {e["code"] for e in load_registry("nationalities")["entries"]}
     assert {"XXA", "XXB", "GBN", "GBD"} <= codes
