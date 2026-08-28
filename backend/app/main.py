@@ -153,17 +153,51 @@ def _uptime_data() -> dict:
                     "a failed probe retries once before it counts."}
 
 
+_UPTIME_I18N = {
+    "zh-CN": {
+        "title": "Ellis 服务可用性", "heading": "Ellis 服务可用性",
+        "tagline": "每分钟探测一次完整公网链路（DNS、TLS、网关、后端）",
+        "sub": "本月 {probes} 次探测 · 中位延迟 {ms} ms",
+        "warming": "探测记录即将开始累积", "incidents": "事件 {n} 起",
+        "month": "月份", "probes": "探测次数", "ok": "成功",
+        "availability": "可用性", "latency": "中位延迟",
+        "note": "探测失败会先重试一次再计入",
+    },
+    "zh-Hant": {
+        "title": "Ellis 服務可用性", "heading": "Ellis 服務可用性",
+        "tagline": "每分鐘探測一次完整公網鏈路（DNS、TLS、網關、後端）",
+        "sub": "本月 {probes} 次探測 · 中位延遲 {ms} ms",
+        "warming": "探測記錄即將開始累積", "incidents": "事件 {n} 起",
+        "month": "月份", "probes": "探測次數", "ok": "成功",
+        "availability": "可用性", "latency": "中位延遲",
+        "note": "探測失敗會先重試一次再計入",
+    },
+    "en": {
+        "title": "Ellis service availability", "heading": "Ellis service availability",
+        "tagline": "The full public path (DNS, TLS, edge, backend) probed every minute",
+        "sub": "{probes} probes this month · median latency {ms} ms",
+        "warming": "The probe record is starting to accumulate",
+        "incidents": "{n} incidents",
+        "month": "Month", "probes": "Probes", "ok": "OK",
+        "availability": "Availability", "latency": "Median latency",
+        "note": "A failed probe retries once before it counts",
+    },
+}
+
+
 @app.get("/health/uptime")
-def health_uptime(request: Request, format: str = ""):
+def health_uptime(request: Request, format: str = "", lang: str = "zh-CN"):
     """The availability record behind the 99.99% acceptance metric: a cron
     probes the full public path every minute and logs to a monthly CSV; this
     reads it back so the evidence is visible where the acceptance runs.
-    Public like /health. A browser gets a styled status page; API callers
-    (or ?format=json) get the raw record."""
+    Public like /health. A browser gets a styled status page in the chosen
+    language; API callers (or ?format=json) get the raw record."""
     data = _uptime_data()
     wants_html = "text/html" in (request.headers.get("accept") or "")
     if format == "json" or not wants_html:
         return data
+    L = _UPTIME_I18N.get(lang) or _UPTIME_I18N["zh-CN"]
+    lang = lang if lang in _UPTIME_I18N else "zh-CN"
     cur = data["months"][-1] if data["months"] else None
     pct = cur["availability_pct"] if cur else None
     good = pct is not None and pct >= 99.99
@@ -176,12 +210,17 @@ def health_uptime(request: Request, format: str = ""):
         f"<td class='num'><strong>{m['availability_pct']}%</strong></td>"
         f"<td class='num'>{m['median_latency_ms'] if m['median_latency_ms'] is not None else '·'} ms</td></tr>"
         for m in reversed(data["months"]))
-    sub = (f"本月 {cur['probes']:,} 次探测 · 中位延迟 {cur['median_latency_ms']} ms"
-           if cur else "探测记录即将开始累积")
-    html = f"""<!doctype html><html lang="zh-CN"><head>
+    sub = (L["sub"].format(probes=f"{cur['probes']:,}", ms=cur["median_latency_ms"])
+           if cur else L["warming"])
+    picker = " ".join(
+        (f"<strong>{label}</strong>" if code == lang
+         else f'<a href="?lang={code}">{label}</a>')
+        for code, label in (("zh-CN", "简体中文"), ("zh-Hant", "繁體中文"),
+                            ("en", "English")))
+    html = f"""<!doctype html><html lang="{lang}"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="refresh" content="60">
-<title>Ellis 服务可用性</title>
+<title>{L['title']}</title>
 <style>
   * {{ box-sizing: border-box; margin: 0; }}
   body {{ font-family: -apple-system, "PingFang SC", "Microsoft YaHei",
@@ -196,6 +235,9 @@ def health_uptime(request: Request, format: str = ""):
            color: {color}; letter-spacing: -1px; }}
   .dot {{ display: inline-block; width: 10px; height: 10px; border-radius: 99px;
           background: {color}; margin-right: 8px; }}
+  .langs {{ float: right; font-size: 12.5px; color: #64748b; }}
+  .langs a {{ font-weight: 400; margin-left: 8px; }}
+  .langs strong {{ margin-left: 8px; }}
   table {{ width: 100%; border-collapse: collapse; font-size: 13.5px; }}
   th {{ text-align: left; font-size: 11px; letter-spacing: .06em;
         text-transform: uppercase; color: #64748b; padding: 8px 10px;
@@ -206,20 +248,23 @@ def health_uptime(request: Request, format: str = ""):
   a {{ color: #287dfa; font-weight: 700; text-decoration: none; }}
 </style></head><body><div class="wrap">
 <div class="card">
-  <h1><span class="dot"></span>Ellis 服务可用性 · Service availability</h1>
-  <div class="muted" style="margin-top:4px">ellis-visa.com · 每分钟探测一次完整公网链路（DNS、TLS、网关、后端）</div>
+  <div class="langs">{picker}</div>
+  <h1><span class="dot"></span>{L['heading']}</h1>
+  <div class="muted" style="margin-top:4px">ellis-visa.com · {L['tagline']}</div>
   <div class="hero" style="margin-top:18px">{hero}</div>
-  <div class="muted" style="margin-top:6px">{sub} · 事件 {data['incidents']} 起</div>
+  <div class="muted" style="margin-top:6px">{sub} · {L['incidents'].format(n=data['incidents'])}</div>
 </div>
 <div class="card">
   <table>
-    <tr><th>月份</th><th class="num">探测次数</th><th class="num">成功</th>
-        <th class="num">可用性</th><th class="num">中位延迟</th></tr>
+    <tr><th>{L['month']}</th><th class="num">{L['probes']}</th>
+        <th class="num">{L['ok']}</th>
+        <th class="num">{L['availability']}</th>
+        <th class="num">{L['latency']}</th></tr>
     {rows}
   </table>
 </div>
 <div class="muted" style="text-align:center">
-  探测失败会先重试一次再计入 · <a href="?format=json">JSON</a>
+  {L['note']} · <a href="?format=json">JSON</a>
 </div>
 </div></body></html>"""
     return HTMLResponse(html)

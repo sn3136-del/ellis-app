@@ -191,6 +191,99 @@ function feeText(fee) {
 }
 
 // Type-ahead country picker: type to filter, click to choose.
+// The landing hero: form column left, island scene right on wide screens.
+// The scene folds away on phones, where every pixel belongs to the form.
+const DB_CSS = `
+.db-hero { display: flex; gap: 40px; align-items: center;
+           justify-content: center; }
+.db-hero-left { width: 100%; max-width: 560px; flex-shrink: 0; }
+.db-scene { flex: 1; max-width: 470px; min-width: 300px; }
+@media (max-width: 1020px) {
+  .db-hero { display: block; }
+  .db-scene { display: none; }
+}`
+
+/** The Trip.com plane over an Ellis-shaped archipelago: five islands that
+ *  spell the name, a dotted flight path, and the brand-blue paper plane
+ *  flying it on a loop. Pure inline SVG, still under reduced motion. */
+function EllisIslandScene() {
+  const reduced = typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  const FLIGHT = 'M-20,360 C120,318 130,210 240,168 C330,134 388,86 500,30'
+  // Each letter is one stroke path: a wide sand stroke under a narrower
+  // green one turns the letterform into an island with a beach rim.
+  const LETTERS = [
+    ['M0,0 L0,64 M0,2 L34,2 M0,32 L26,32 M0,62 L34,62', 60, 160, -4],
+    ['M0,0 L0,60 L34,60', 128, 196, 3],
+    ['M0,0 L0,60 L34,60', 192, 168, -2],
+    ['M0,0 L0,64', 256, 200, 4],
+    ['M32,6 C8,-4 -4,18 12,28 C26,36 40,40 30,54 C22,64 6,64 0,56', 300, 162, -3],
+  ]
+  const island = ([d, x, y, rot], i) => (
+    <g key={i} transform={`translate(${x},${y}) rotate(${rot})`}>
+      <ellipse cx="17" cy="66" rx="34" ry="9" fill="#0f294d" opacity="0.06" />
+      <path d={d} fill="none" stroke="#f0debc" strokeWidth="30"
+            strokeLinecap="round" strokeLinejoin="round" />
+      <path d={d} fill="none" stroke="#8fd0a0" strokeWidth="15"
+            strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+  )
+  const cloud = (x, y, s, dur) => (
+    <g transform={`translate(${x},${y}) scale(${s})`} opacity="0.9">
+      <ellipse cx="0" cy="0" rx="26" ry="10" fill="#fff" />
+      <ellipse cx="18" cy="-6" rx="16" ry="9" fill="#fff" />
+      <ellipse cx="-16" cy="-4" rx="14" ry="8" fill="#fff" />
+      {!reduced && (
+        <animateTransform attributeName="transform" type="translate"
+                          additive="sum" values="0 0; 16 0; 0 0"
+                          dur={dur} repeatCount="indefinite" />
+      )}
+    </g>
+  )
+  return (
+    <div className="db-scene" aria-hidden="true">
+      <svg viewBox="0 0 470 430" width="100%" role="img"
+           style={{ display: 'block' }}>
+        <defs>
+          <linearGradient id="ellis-sea" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#eaf4ff" />
+            <stop offset="1" stopColor="#d6e8ff" />
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="470" height="430" rx="26"
+              fill="url(#ellis-sea)" />
+        {/* ripples */}
+        {[[70, 300], [330, 320], [150, 110], [395, 210], [60, 200]].map(([x, y], i) => (
+          <path key={i} d={`M${x},${y} q9,-5 18,0 q9,5 18,0`} fill="none"
+                stroke="#b9d4fa" strokeWidth="2.5" strokeLinecap="round" />
+        ))}
+        {LETTERS.map(island)}
+        {/* the dotted flight path the plane follows */}
+        <path d={FLIGHT} fill="none" stroke="#8fb8f5" strokeWidth="2.5"
+              strokeLinecap="round" strokeDasharray="1 11" />
+        {cloud(120, 78, 1, '9s')}
+        {cloud(360, 300, 0.8, '12s')}
+        <g>
+          {/* the paper plane, brand blue with the Trip.com orange dot */}
+          <g transform="translate(-21,-13)">
+            <path d="M42,2 L2,15 L18,19 Z" fill="#287dfa" />
+            <path d="M42,2 L18,19 L22,30 L28,21 Z" fill="#5b9dfc" />
+            <path d="M42,2 L18,19 L20,24 Z" fill="#1d4ed8" />
+            <circle cx="42" cy="2" r="3" fill="#f7a51b" />
+          </g>
+          {reduced ? (
+            <animateMotion dur="0.01s" fill="freeze" path={FLIGHT}
+                           keyPoints="0.55;0.55" keyTimes="0;1" rotate="auto" />
+          ) : (
+            <animateMotion dur="14s" repeatCount="indefinite" path={FLIGHT}
+                           rotate="auto" />
+          )}
+        </g>
+      </svg>
+    </div>
+  )
+}
+
 /** A localized calendar dropdown for the travel date. The native date input
  *  renders its text in the BROWSER language, which read as a translation
  *  failure; this one draws its month and weekday names from the app locale
@@ -755,9 +848,11 @@ export default function TravelDatabase({ onBack }) {
   )
 
   return (
-    <div className="page" style={{ maxWidth: 900, margin: '0 auto',
+    <div className="page" style={{ maxWidth: result ? 900 : 1160,
+                                   margin: '0 auto',
                                    padding: '26px 20px 60px' }}
          data-testid="travel-database">
+      <style>{DB_CSS}</style>
       {onBack && (
         <button className="btn btn--sm btn--ghost" onClick={onBack}
                 data-testid="database-back">← {t('db.menu')}</button>
@@ -776,8 +871,10 @@ export default function TravelDatabase({ onBack }) {
       )}
 
       {!result && (
+      <div className="db-hero" style={{ marginTop: 18 }}>
+      <div className="db-hero-left">
         <div className="card anim-rise" style={{ padding: '20px 24px',
-                                                 borderRadius: 20, marginTop: 18,
+                                                 borderRadius: 20,
                                                  maxWidth: 560, marginLeft: 'auto',
                                                  marginRight: 'auto' }}
              data-testid="database-ask">
@@ -813,9 +910,7 @@ export default function TravelDatabase({ onBack }) {
           <div style={{ fontSize: 11.5, color: GRAY, marginTop: 10,
                         textAlign: 'center' }}>{t('db.askOr')}</div>
         </div>
-      )}
 
-      {!result && (
         <div className="card anim-rise" style={{ padding: '26px 28px',
                                                  borderRadius: 20, marginTop: 14,
                                                  maxWidth: 560, marginLeft: 'auto',
@@ -928,6 +1023,9 @@ export default function TravelDatabase({ onBack }) {
             </div>
           )}
         </div>
+      </div>
+      <EllisIslandScene />
+      </div>
       )}
 
       {result && g && (
