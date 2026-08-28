@@ -215,3 +215,49 @@ def test_a_route_we_hold_nothing_for_still_fails_honestly(client):
     r = client.post("/database/lookup", headers=READER,
                     json={"nationality": "ISL", "destination": "TUV"})
     assert r.status_code == 504
+
+
+def test_a_verified_route_is_never_held(client, monkeypatch):
+    """China->UK served an EMPTY held card while its human-checked fee and
+    products sat in the override: the hold only released when the override
+    named the disposition. ANY human verification now releases the hold."""
+    monkeypatch.setenv("ELLIS_DATABASE_HOLD_LOW_CONFIDENCE", "1")
+    _provide(dict(ANSWER, confidence="low"))
+    r = client.post("/database/lookup", headers=READER,
+                    json={"nationality": "CHN", "destination": "GBR"})
+    body = r.json()
+    assert body["source_verified"] is not None
+    assert body["held"] is False
+    assert body["guidance"]["government_fee"]["amount"] == 135
+
+
+def test_overrides_do_not_claim_document_variants(client):
+    """The CHN->GBR override is verified for ordinary passports. A diplomatic
+    passport answer must not inherit it."""
+    _provide(dict(ANSWER))
+    r = client.post("/database/lookup", headers=READER,
+                    json={"nationality": "CHN", "destination": "GBR",
+                          "travel_document_type": "diplomatic_passport"})
+    assert r.json().get("source_verified") is None
+
+
+def test_junk_destination_is_a_clean_422_not_an_ai_guess(client):
+    _provide(ANSWER)
+    r = client.post("/database/lookup", headers=READER,
+                    json={"nationality": "CHN", "destination": "XXX"})
+    assert r.status_code == 422
+    r2 = client.post("/database/lookup", headers=READER,
+                     json={"nationality": "Chinaa", "destination": "Japan"})
+    # A misspelt but resolvable name still works via the registry aliases…
+    # and a real name pair answers normally.
+    r3 = client.post("/database/lookup", headers=READER,
+                     json={"nationality": "China", "destination": "Japan"})
+    assert r3.status_code == 200
+
+
+def test_lookup_echoes_the_transit_it_answered_for(client):
+    _provide(ANSWER)
+    r = client.post("/database/lookup", headers=READER,
+                    json={"nationality": "CHN", "destination": "USA",
+                          "transit_countries": ["JPN"]})
+    assert r.json()["transit_countries"] == ["JPN"]

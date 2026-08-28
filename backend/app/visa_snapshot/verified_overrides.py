@@ -116,6 +116,13 @@ def reload() -> None:
 
 
 def find(route: dict) -> dict | None:
+    # Overrides are verified for ORDINARY passports unless their route says
+    # otherwise. A diplomatic or service passport answer is a different
+    # policy; letting the ordinary-passport fact claim it produced "visa-free
+    # Japan, verified" records for diplomatic variants.
+    doc = str(route.get("travel_document_type") or "ordinary_passport")
+    if doc not in ("", "ordinary_passport"):
+        return None
     return _table().get(_key(route.get("passport_nationality", ""),
                              route.get("destination_country", ""),
                              route.get("travel_purpose", "tourism")))

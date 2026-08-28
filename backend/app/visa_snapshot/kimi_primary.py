@@ -802,12 +802,34 @@ def _is_stale(row) -> bool:
     return fu < _now()
 
 
+def _strip_visa_free_leftovers(guidance: dict) -> dict:
+    """A visa-free verdict must not carry application machinery.
+
+    The model sometimes leaves a fee, a portal or a product table in a
+    VISA_EXEMPT answer (seen live: a diplomatic-exemption answer showing
+    "Government fee 260 CNY" and an application portal). The same clearing
+    the override path applies is applied to EVERY served answer here, so the
+    page, the quality backend and the Excel export all get the clean truth.
+    arrival_card deliberately survives — a visa-free route can still require
+    a pre-arrival filing."""
+    if not isinstance(guidance, dict)             or str(guidance.get("disposition") or "").upper() != "VISA_EXEMPT":
+        return guidance
+    from .verified_overrides import _APPLICATION_ONLY
+    out = dict(guidance)
+    for k in _APPLICATION_ONLY:
+        out.pop(k, None)
+    out["appointment_required"] = False
+    out["interview_required"] = False
+    return out
+
+
 def _result(status: str, guidance: dict, *, cached: bool, stale: bool,
             missing=None, contradictions=None, model: str = "",
             advisories=None, elapsed_seconds: float | None = None,
             released: bool = False) -> dict:
     # Exactly one Kimi pass produced this — the verification field says so
     # honestly for a complete decision and is empty otherwise.
+    guidance = _strip_visa_free_leftovers(guidance)
     decided = status == STATUS_PRIMARY
     verification = {"passes": 1, "label": VERIFIED_LABEL} if decided else {}
     out = {
@@ -912,8 +934,13 @@ def apply_verified_overrides(out: dict, route: dict) -> dict:
     out = dict(out)
     out["guidance"] = merged
     out["source_verified"] = prov
-    if "disposition" in prov["fields"]:
-        out["review_required"] = False
+    # A human verified this route against a named official page. That IS the
+    # confirmation the hold waits for — holding a verified answer served an
+    # empty card for China→UK while its checked fee and products sat in the
+    # override. Any verification releases, not only one that names the
+    # disposition.
+    out["review_required"] = False
+    out["held"] = False
     return out
 
 
@@ -1236,7 +1263,11 @@ def get_route_guidance(db, route: dict, *, force_refresh: bool = False,
             db.add(row)
         row.route = {k: route.get(k) for k in (
             "passport_nationality", "lawful_country_of_residence", "destination_country",
-            "visa_category", "travel_purpose", "arrival_date", "consular_jurisdiction")}
+            "visa_category", "travel_purpose", "arrival_date", "consular_jurisdiction",
+            # Without these two, a diplomatic-passport row later reads as an
+            # ordinary-passport answer in the quality backend and the export,
+            # and ordinary-passport overrides wrongly apply to it.
+            "travel_document_type", "transit_countries")}
         row.status = status
         row.guidance = clean
         row.missing_fields = missing

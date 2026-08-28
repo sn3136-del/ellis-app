@@ -1098,3 +1098,30 @@ def test_apply_steps_order_and_filter_the_way_a_traveller_meets_them():
     fs = [s.lower() for s in canonical_steps(fra)]
     assert fs.index(next(s for s in fs if "book an appointment" in s)) < \
         fs.index(next(s for s in fs if s.startswith("pay")))
+
+
+def test_a_visa_free_answer_never_carries_application_machinery():
+    """Seen live: a diplomatic-exemption answer showing a 260 CNY fee and an
+    application portal. A VISA_EXEMPT answer is stripped of application-only
+    fields at serve time, whatever the model left in it; the arrival card
+    survives because visa-free routes can still require a pre-arrival
+    filing."""
+    from app.visa_snapshot.kimi_primary import _result
+    out = _result("KIMI_PRIMARY", {
+        "disposition": "VISA_EXEMPT", "permitted_stay_days": 90,
+        "government_fee": {"amount": 260, "currency": "CNY"},
+        "official_portal_url": "https://visa.example.gov",
+        "visa_products": [{"type": "leftover"}],
+        "application_channel": "VISA_APPLICATION_CENTRE",
+        "appointment_required": True, "interview_required": True,
+        "arrival_card": {"required": True, "note": "K-ETA style filing"},
+    }, cached=False, stale=False)
+    g = out["guidance"]
+    assert g.get("government_fee") is None
+    assert g.get("official_portal_url") is None
+    assert g.get("visa_products") is None
+    assert g.get("application_channel") is None
+    assert g["appointment_required"] is False
+    assert g["interview_required"] is False
+    assert g["arrival_card"]["required"] is True     # deliberately kept
+    assert g["permitted_stay_days"] == 90

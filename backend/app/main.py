@@ -161,7 +161,11 @@ def i18n_translate(body: TranslateBody, _: Principal = Depends(get_principal)):
     URLs, dates, amounts, filenames, and passport numbers / MRZ / identifiers are
     never translated; unavailable → the original text (never fabricated)."""
     from . import i18n
-    return i18n.translate(body.text, body.target_lang, body.source_lang)
+    try:
+        return i18n.translate(body.text, body.target_lang, body.source_lang)
+    except Exception:  # noqa: BLE001 — a provider hiccup must not become a 500
+        return {"status": "unavailable", "text": body.text,
+                "target_lang": body.target_lang}
 
 
 class CatalogBody(BaseModel):
@@ -676,7 +680,13 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
             continue
         if purpose and str(route.get("travel_purpose") or "tourism").lower() != purpose.lower():
             continue
-        doc = str(route.get("travel_document_type") or "ordinary_passport")
+        doc = str(route.get("travel_document_type") or "")
+        if not doc:
+            # Rows cached before the document type was stored carry it only
+            # in the cache key ("doc:diplomatic_passport").
+            doc = next((part[4:] for part in r.cache_key.split("|")
+                        if part.startswith("doc:")), "ordinary_passport")
+        route["travel_document_type"] = doc
         if document and doc != document:
             continue
         g, prov = verified_overrides.apply(dict(r.guidance or {}), route)
@@ -684,6 +694,16 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
         collected = (r.generated_at.isoformat() if r.generated_at else "")
         until = (r.fresh_until.isoformat() if r.fresh_until else "")
         for rec in tstation.records_for_route(route, g, prov, collected, until):
+            if not rec.get("source_url"):
+                # The destination's browser-verified official portal is the
+                # official reference page for a record whose answer carries
+                # no page of its own (visa-free routes especially).
+                portal = kimi_primary._official_portals().get(
+                    str(route.get("destination_country") or "").upper())
+                if portal:
+                    rec["source_url"] = portal
+                    rec["data_source"] = (rec.get("data_source")
+                                          or "Official government portal")
             if requirement and str(rec.get("visa_requirement") or "") != requirement:
                 continue
             if confidence and str(rec.get("confidence_level") or "") != confidence:
@@ -893,10 +913,12 @@ def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
         raise HTTPException(503, detail={
             "status": kimi_primary.STATUS_UNAVAILABLE,
             "reason": "the route engine is not configured on this install"})
-    nat = body.nationality.strip().upper()
-    dest = body.destination.strip().upper()
+    from .visa_snapshot.registry import iso3
+    nat = iso3(body.nationality.strip(), default=None)
+    dest = iso3(body.destination.strip(), default=None)
     if not nat or not dest:
-        raise HTTPException(422, "nationality and destination are required")
+        raise HTTPException(422, "nationality and destination must be real "
+                                 "countries (name or ISO code)")
     route = {
         "passport_nationality": nat,
         "passport_issuing_country": nat,
@@ -911,8 +933,9 @@ def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
         route["arrival_date"] = body.arrival_date
     if body.departure_city.strip():
         route["departure_city"] = body.departure_city.strip()[:80]
-    transit = [c.strip().upper() for c in (body.transit_countries or [])
-               if c and c.strip()][:5]
+    transit = [t for t in (iso3(c.strip(), default=None)
+               for c in (body.transit_countries or []) if c and c.strip())
+               if t][:5]
     if transit:
         route["transit_countries"] = transit
     try:
@@ -930,6 +953,7 @@ def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
     # leave the server, so no client (curious dev tools included) can read
     # what the reader is told is being checked. The envelope keeps the flag
     # and the identity so the page can say WHY there is nothing to show.
+    out["transit_countries"] = transit
     if out.get("held"):
         out = {k: v for k, v in out.items() if k != "guidance"}
         out["guidance"] = None
