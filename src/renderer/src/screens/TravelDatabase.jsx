@@ -277,34 +277,21 @@ function EllisIslandScene() {
                     L238,${BASE - 8} C260,${BASE - 7} 278,${BASE - 4} 286,${BASE + 8}
                     C288,${BASE + 13} 284,${BASE + 16} 276,${BASE + 16}
                     L24,${BASE + 16} C16,${BASE + 16} 12,${BASE + 13} 14,${BASE + 8} Z`}
-                fill="#fff" stroke={INK} strokeWidth="2.5"
+                fill={INK} stroke={INK} strokeWidth="2.5"
                 strokeLinejoin="round" />
-          {/* shoreline grass */}
-          {[[30, BASE - 3], [270, BASE - 2], [48, BASE - 6]].map(([x, y], i) => (
-            <path key={i} d={`M${x},${y} l1.6,-4 l1.6,4 M${x + 4},${y} l1.6,-3 l1.6,3`}
-                  fill="none" stroke={INK} strokeWidth="1.3"
-                  strokeLinecap="round" />
-          ))}
-          {/* towers */}
+                    {/* towers */}
           {LETTERS.map(([lx, rects], i) => (
             <g key={i}>
               {rects.map(([x, up, w, h], j) => (
                 <rect key={j} x={lx + x} y={BASE - up} width={w} height={h}
-                      rx="1.5" fill="#fff" stroke={INK} strokeWidth="2.5" />
+                      rx="1.5" fill={INK} stroke={INK} strokeWidth="2" />
               ))}
             </g>
           ))}
-          {/* parapet line under every roof edge */}
-          {LETTERS.flatMap(([lx, rects], i) =>
-            rects.filter(([, , , h]) => h >= 10).map(([x, up, w], j) => (
-              <line key={i + '-' + j} x1={lx + x + 2.2} y1={BASE - up + 3}
-                    x2={lx + x + w - 2.2} y2={BASE - up + 3}
-                    stroke={INK} strokeWidth="1.1" opacity="0.75" />
-            )))}
-          {/* street doors on the widest ground blocks */}
+                    {/* street doors on the widest ground blocks */}
           {[[42, 40], [102, 36], [156, 36], [199.5, 17], [247, 38]].map(([cx], i) => (
             <rect key={i} x={cx - 2.2} y={BASE - 7.5} width="4.4" height="7.5"
-                  rx="1.2" fill={INK} />
+                  rx="1.2" fill="#fff" opacity="0.95" />
           ))}
           {/* the Empire State spire */}
           <line x1="199.5" y1={BASE - 108} x2="199.5" y2={BASE - 128}
@@ -313,12 +300,12 @@ function EllisIslandScene() {
           {/* the facade grids */}
           {winRects.map(([x, y, w, h], i) => (
             <rect key={i} x={x} y={y} width={w} height={h} rx="0.7"
-                  fill={INK} opacity="0.8" />
+                  fill="#fff" opacity="0.95" />
           ))}
           {!reduced && blinkers.map(([x, y, w, h], i) => (
             <rect key={'b' + i} x={x} y={y} width={w} height={h} rx="0.7"
-                  fill={INK}>
-              <animate attributeName="opacity" values="0.8;0.2;0.8"
+                  fill="#fff">
+              <animate attributeName="opacity" values="0.95;0.15;0.95"
                        dur={`${3 + (i % 4) * 0.9}s`}
                        begin={`${(i % 6) * 0.7}s`} repeatCount="indefinite" />
             </rect>
