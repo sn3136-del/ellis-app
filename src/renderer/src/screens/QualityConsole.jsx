@@ -11,14 +11,14 @@
 // two-sheet Excel their spec defines. Reached via #ops; admin token only —
 // the backend enforces it, this screen just speaks it.
 //
-// Every record also carries source_check — how solidly its official source
-// BACKS what is displayed: human-quote (a person verified these fields
-// against the named page), grounded-consistent (the pipeline compared the
-// stored answer to the fetched page), reference (official page linked, not
-// yet machine-compared).
-import { useCallback, useEffect, useMemo, useState } from 'react'
+// The spot-check accepts "China" as readily as "CHN": the country inputs
+// autocomplete from the registry (name, alias or either ISO form) and the
+// server resolves whatever is typed. The chrome translates with the app's
+// language picker; record VALUES stay as stored — they are the dataset.
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createVisaClient } from '../lib/visaBackend.js'
 import { newSession } from '../lib/visaSession.js'
+import { useLocale } from '../lib/locale.jsx'
 
 const NAVY = '#0f294d'
 const BLUE = '#287dfa'
@@ -30,12 +30,12 @@ const BG = '#f6f8fb'
 const BORDER = '#e8edf4'
 
 const CONF_COLOR = { High: GREEN, Medium: AMBER, Low: RED }
-const CHECK_LABEL = {
-  'human-quote': ['Verified & quoted', GREEN],
-  'grounded-consistent': ['Source-checked', BLUE],
-  reference: ['Official reference', GRAY],
-  unchecked: ['No source yet', RED],
-}
+const PURPOSES = ['tourism', 'business', 'family_visit', 'study', 'work',
+                  'transit', 'other']
+const PURPOSE_KEY = { tourism: 'db.purpose.tourism', business: 'db.purpose.business',
+                      family_visit: 'db.purpose.family', study: 'db.purpose.study',
+                      work: 'db.purpose.work', transit: 'db.purpose.transit',
+                      other: 'db.purpose.other' }
 
 function useOpsClient() {
   return useMemo(() => {
@@ -77,38 +77,63 @@ function StatTile({ label, value, sub, accent = NAVY }) {
   )
 }
 
-function FilterBar({ filters, onChange, onExport, busy }) {
-  const F = (k, ph, w = 130) => (
-    <input key={k} value={filters[k]} placeholder={ph}
-           onChange={(e) => onChange({ ...filters, [k]: e.target.value })}
-           style={{ ...input, width: w }} />
-  )
-  const S = (k, opts, ph) => (
-    <select key={k} value={filters[k]}
-            onChange={(e) => onChange({ ...filters, [k]: e.target.value })}
-            style={{ ...input, color: filters[k] ? NAVY : GRAY }}>
-      <option value="">{ph}</option>
-      {opts.map((o) => <option key={o}>{o}</option>)}
-    </select>
-  )
+/** Country input with autocomplete: type a name ("China", "中国-adjacent
+ *  aliases resolve server-side too") or a code ("CN", "CHN"); pick from the
+ *  dropdown. The FILTER value sent to the API is whatever is committed —
+ *  the server resolves names and codes alike. */
+function CountryFilter({ value, placeholder, onCommit, countries }) {
+  const [text, setText] = useState(value)
+  const [open, setOpen] = useState(false)
+  const boxRef = useRef(null)
+  useEffect(() => { setText(value) }, [value])
+  const matches = useMemo(() => {
+    const q = text.trim().toLowerCase()
+    if (!q) return []
+    return countries.filter((c) => c.search.includes(q)).slice(0, 8)
+  }, [text, countries])
+  useEffect(() => {
+    const close = (e) => {
+      if (boxRef.current && !boxRef.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [])
+  const commit = (v) => { onCommit(v); setOpen(false) }
   return (
-    <div style={{ ...card, padding: '14px 18px', display: 'flex', gap: 10,
-                  flexWrap: 'wrap', alignItems: 'center' }}>
-      <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1,
-                     color: GRAY, textTransform: 'uppercase' }}>Spot check</span>
-      {F('nationality', 'Passport (CHN)', 118)}
-      {F('destination', 'Destination (JPN)', 128)}
-      {F('purpose', 'Purpose (tourism)', 128)}
-      {S('requirement', ['Visa-free', 'Visa on Arrival',
-                         'Visa Required in Advance', 'Conditional'], 'Any requirement')}
-      {S('confidence', ['High', 'Medium', 'Low'], 'Any confidence')}
-      <div style={{ flex: 1 }} />
-      <button className="btn btn--sm" onClick={onExport} disabled={busy}
-              data-testid="ops-export"
-              style={{ borderRadius: 999, fontWeight: 700, background: BLUE,
-                       color: '#fff', padding: '9px 18px' }}>
-        ⬇ Export Excel
-      </button>
+    <div ref={boxRef} style={{ position: 'relative' }}>
+      <input value={text} placeholder={placeholder}
+             onChange={(e) => { setText(e.target.value); setOpen(true) }}
+             onKeyDown={(e) => {
+               if (e.key === 'Enter') commit(matches[0]?.value ?? text)
+               if (e.key === 'Escape') setOpen(false)
+             }}
+             onBlur={() => { if (!open) onCommit(text) }}
+             style={{ ...input, width: 150 }} />
+      {text && (
+        <button onClick={() => { setText(''); commit('') }}
+                style={{ position: 'absolute', right: 6, top: 7, border: 'none',
+                         background: 'transparent', color: GRAY,
+                         cursor: 'pointer', fontSize: 13 }}>×</button>
+      )}
+      {open && matches.length > 0 && (
+        <div style={{ position: 'absolute', top: '110%', left: 0, zIndex: 30,
+                      minWidth: 210, ...card, padding: 6, maxHeight: 260,
+                      overflowY: 'auto' }}>
+          {matches.map((c) => (
+            <div key={c.value}
+                 onMouseDown={() => { setText(c.label); commit(c.value) }}
+                 style={{ padding: '7px 10px', borderRadius: 8, fontSize: 13,
+                          color: NAVY, cursor: 'pointer', display: 'flex',
+                          justifyContent: 'space-between', gap: 10 }}
+                 onMouseEnter={(e) => { e.currentTarget.style.background = BG }}
+                 onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}>
+              <span>{c.label}</span>
+              <span style={{ color: GRAY, fontFamily: 'ui-monospace, monospace',
+                             fontSize: 11 }}>{c.value}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -136,11 +161,24 @@ function FieldGrid({ rec }) {
   )
 }
 
-function RecordRow({ rec, onFlag }) {
+function RecordRow({ rec, onFlag, t }) {
   const [open, setOpen] = useState(false)
   const missing = Object.entries(rec.field_status)
     .filter(([, v]) => v === 'missing').map(([k]) => k)
-  const [checkLabel, checkColor] = CHECK_LABEL[rec.source_check] || CHECK_LABEL.reference
+  const CHECKS = {
+    'human-quote': [t('ops.check.quoted'), GREEN],
+    'grounded-consistent': [t('ops.check.grounded'), BLUE],
+    reference: [t('ops.check.reference'), GRAY],
+    unchecked: [t('ops.check.none'), RED],
+  }
+  const REQ = {
+    'Visa-free': [t('ops.req.free'), GREEN],
+    'Visa on Arrival': [t('ops.req.voa'), AMBER],
+    'Visa Required in Advance': [t('ops.req.advance'), NAVY],
+    Conditional: [t('ops.req.conditional'), AMBER],
+  }
+  const [checkLabel, checkColor] = CHECKS[rec.source_check] || CHECKS.reference
+  const [reqLabel, reqColor] = REQ[rec.visa_requirement] || ['—', GRAY]
   return (
     <div style={{ ...card, overflow: 'hidden' }}>
       <div style={{ display: 'grid', alignItems: 'center', cursor: 'pointer',
@@ -151,16 +189,14 @@ function RecordRow({ rec, onFlag }) {
           {rec.travel_document_country} → {rec.destination_country}
           <span style={{ color: GRAY, fontWeight: 500, fontSize: 11.5,
                          display: 'block' }}>
-            {rec.travel_purpose}{rec.travel_document_type !== 'ordinary_passport'
-              ? ` · ${rec.travel_document_type.replace(/_/g, ' ')}` : ''}
+            {t(PURPOSE_KEY[rec.travel_purpose] || '') || rec.travel_purpose}
+            {rec.travel_document_type !== 'ordinary_passport'
+              ? ` · ${(t('db.doc.' + rec.travel_document_type) !== 'db.doc.' + rec.travel_document_type
+                  ? t('db.doc.' + rec.travel_document_type)
+                  : rec.travel_document_type.replace(/_/g, ' '))}` : ''}
           </span>
         </strong>
-        <Chip color={rec.visa_requirement === 'Visa-free' ? GREEN
-          : rec.visa_requirement === 'Visa on Arrival' ? AMBER : NAVY} filled={false}>
-          {{ 'Visa-free': 'Visa-free', 'Visa on Arrival': 'On arrival',
-             'Visa Required in Advance': 'In advance',
-             Conditional: 'Conditional' }[rec.visa_requirement] || '—'}
-        </Chip>
+        <Chip color={reqColor} filled={false}>{reqLabel}</Chip>
         <span style={{ color: NAVY, fontSize: 12.5, fontWeight: 600,
                        overflow: 'hidden', textOverflow: 'ellipsis',
                        whiteSpace: 'nowrap' }}>
@@ -178,7 +214,7 @@ function RecordRow({ rec, onFlag }) {
              onClick={(e) => e.stopPropagation()}
              style={{ fontSize: 12, color: BLUE, fontWeight: 700,
                       whiteSpace: 'nowrap' }}>
-            source ↗
+            {t('ops.source')} ↗
           </a>
         ) : <span />}
         <span style={{ color: '#c3ccd9', fontSize: 11 }}>{open ? '▲' : '▼'}</span>
@@ -189,13 +225,13 @@ function RecordRow({ rec, onFlag }) {
           <FieldGrid rec={rec} />
           {missing.length > 0 && (
             <div style={{ marginTop: 10, fontSize: 12, color: RED }}>
-              Missing required: {missing.join(', ')}
+              {t('ops.missingRequired')}: {missing.join(', ')}
             </div>
           )}
           <button className="btn btn--sm btn--ghost" data-testid="ops-flag"
                   style={{ marginTop: 12, borderRadius: 999, fontSize: 12 }}
                   onClick={() => onFlag(rec)}>
-            ⚑ Flag an error on this record
+            ⚑ {t('ops.flag')}
           </button>
         </div>
       )}
@@ -207,10 +243,12 @@ const PAGE = 50
 
 export default function QualityConsole() {
   const client = useOpsClient()
+  const { t } = useLocale()
   const [tab, setTab] = useState('records')
   const [filters, setFilters] = useState({ nationality: '', destination: '',
                                            purpose: '', requirement: '',
                                            confidence: '' })
+  const [reg, setReg] = useState(null)
   const [data, setData] = useState(null)
   const [changes, setChanges] = useState(null)
   const [issues, setIssues] = useState(null)
@@ -218,6 +256,17 @@ export default function QualityConsole() {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [shown, setShown] = useState(PAGE)
+
+  useEffect(() => {
+    let live = true
+    client.snapshotRegistries().then((r) => { if (live) setReg(r) })
+      .catch(() => { if (live) setReg({ countries: [] }) })
+    return () => { live = false }
+  }, [client])
+  const countries = useMemo(() => (reg?.countries || []).map((c) => ({
+    value: c.alpha_3, label: `${c.flag ? c.flag + ' ' : ''}${c.name}`,
+    search: `${c.name} ${c.alpha_2 || ''} ${c.alpha_3}`.toLowerCase(),
+  })), [reg])
 
   const qs = useCallback(() => new URLSearchParams(
     Object.fromEntries(Object.entries(filters).filter(([, v]) => v))
@@ -240,15 +289,15 @@ export default function QualityConsole() {
 
   async function flag(rec) {
     const note = window.prompt(
-      `Describe what is wrong for ${rec.travel_document_country} → ` +
-      `${rec.destination_country} (${rec.visa_type_name || 'route'}):`)
+      `${t('ops.flagPrompt')} ${rec.travel_document_country} → ` +
+      `${rec.destination_country} (${rec.visa_type_name || ''}):`)
     if (!note) return
     await client.databaseReportIssue({
       nationality: rec.travel_document_country,
       destination: rec.destination_country,
       field: 'operator_spot_check', note, cache_key: rec.cache_key,
     })
-    window.alert('Flagged. It is now in the correction queue.')
+    window.alert(t('ops.flagged'))
     if (tab === 'issues') load()
   }
 
@@ -277,6 +326,7 @@ export default function QualityConsole() {
 
   const s = data?.summary
   const records = data?.records || []
+  const set = (k) => (v) => setFilters((f) => ({ ...f, [k]: v }))
   return (
     <div style={{ background: BG, minHeight: '100vh' }}>
       <div className="page" style={{ maxWidth: 1160, margin: '0 auto',
@@ -287,20 +337,18 @@ export default function QualityConsole() {
                       flexWrap: 'wrap' }}>
           <h1 style={{ fontSize: 26, fontWeight: 800, color: NAVY, margin: 0,
                        letterSpacing: -0.4 }}>
-            Information Quality Control
+            {t('ops.title')}
           </h1>
-          <span style={{ fontSize: 12.5, color: GRAY }}>
-            every record bound to its official source · spot checks · change
-            history · Excel export
-          </span>
+          <span style={{ fontSize: 12.5, color: GRAY }}>{t('ops.subtitle')}</span>
         </div>
 
         {/* Tabs */}
         <div style={{ display: 'flex', gap: 6, margin: '20px 0 18px',
                       background: '#fff', border: `1px solid ${BORDER}`,
                       borderRadius: 999, padding: 4, width: 'fit-content' }}>
-          {[['records', 'Records'], ['issues', 'Correction queue'],
-            ['changes', 'Change log'], ['freshness', 'Freshness']].map(([id, label]) => (
+          {[['records', t('ops.tab.records')], ['issues', t('ops.tab.issues')],
+            ['changes', t('ops.tab.changes')], ['freshness', t('ops.tab.freshness')]]
+            .map(([id, label]) => (
             <button key={id} onClick={() => setTab(id)}
                     data-testid={`ops-tab-${id}`}
                     style={{ border: 'none', cursor: 'pointer', fontSize: 13,
@@ -320,41 +368,87 @@ export default function QualityConsole() {
 
         {tab === 'records' && (
           <div style={{ display: 'grid', gap: 14 }}>
-            <FilterBar filters={filters} onChange={setFilters}
-                       onExport={exportXlsx} busy={busy} />
+            {/* Spot-check filter bar: country autocomplete + enum dropdowns */}
+            <div style={{ ...card, padding: '14px 18px', display: 'flex',
+                          gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+              <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1,
+                             color: GRAY, textTransform: 'uppercase' }}>
+                {t('ops.spotCheck')}
+              </span>
+              <CountryFilter value={filters.nationality} countries={countries}
+                             placeholder={t('ops.passport')}
+                             onCommit={set('nationality')} />
+              <CountryFilter value={filters.destination} countries={countries}
+                             placeholder={t('ops.destination')}
+                             onCommit={set('destination')} />
+              <select value={filters.purpose} onChange={(e) => set('purpose')(e.target.value)}
+                      style={{ ...input, color: filters.purpose ? NAVY : GRAY }}>
+                <option value="">{t('ops.anyPurpose')}</option>
+                {PURPOSES.map((p) => (
+                  <option key={p} value={p}>{t(PURPOSE_KEY[p])}</option>
+                ))}
+              </select>
+              <select value={filters.requirement}
+                      onChange={(e) => set('requirement')(e.target.value)}
+                      style={{ ...input, color: filters.requirement ? NAVY : GRAY }}>
+                <option value="">{t('ops.anyRequirement')}</option>
+                <option value="Visa-free">{t('ops.req.free')}</option>
+                <option value="Visa on Arrival">{t('ops.req.voa')}</option>
+                <option value="Visa Required in Advance">{t('ops.req.advance')}</option>
+                <option value="Conditional">{t('ops.req.conditional')}</option>
+              </select>
+              <select value={filters.confidence}
+                      onChange={(e) => set('confidence')(e.target.value)}
+                      style={{ ...input, color: filters.confidence ? NAVY : GRAY }}>
+                <option value="">{t('ops.anyConfidence')}</option>
+                <option value="High">{t('ops.conf.high')}</option>
+                <option value="Medium">{t('ops.conf.medium')}</option>
+                <option value="Low">{t('ops.conf.low')}</option>
+              </select>
+              <div style={{ flex: 1 }} />
+              <button className="btn btn--sm" onClick={exportXlsx} disabled={busy}
+                      data-testid="ops-export"
+                      style={{ borderRadius: 999, fontWeight: 700,
+                               background: BLUE, color: '#fff',
+                               padding: '9px 18px' }}>
+                ⬇ {t('ops.export')}
+              </button>
+            </div>
+
             {s && (
               <div style={{ display: 'grid', gap: 12,
                             gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
-                <StatTile label="Records" value={s.total} />
-                <StatTile label="Complete" accent={s.completeness_rate >= 0.99 ? GREEN : AMBER}
+                <StatTile label={t('ops.stat.records')} value={s.total} />
+                <StatTile label={t('ops.stat.complete')}
+                          accent={s.completeness_rate >= 0.99 ? GREEN : AMBER}
                           value={s.completeness_rate != null
                             ? `${Math.round(s.completeness_rate * 100)}%` : '—'}
-                          sub="all required fields filled" />
-                <StatTile label="Source coverage"
+                          sub={t('ops.stat.completeSub')} />
+                <StatTile label={t('ops.stat.sources')}
                           accent={s.source_coverage >= 0.999 ? GREEN : AMBER}
                           value={s.source_coverage != null
                             ? `${Math.round(s.source_coverage * 100)}%` : '—'}
-                          sub="records with an official URL" />
-                <StatTile label="Substantiated" accent={BLUE}
+                          sub={t('ops.stat.sourcesSub')} />
+                <StatTile label={t('ops.stat.substantiated')} accent={BLUE}
                           value={s.substantiated ?? '—'}
-                          sub="verified or source-checked" />
-                <StatTile label="High / Med / Low"
+                          sub={t('ops.stat.substantiatedSub')} />
+                <StatTile label={t('ops.stat.confidence')}
                           value={`${s.high} / ${s.medium} / ${s.low}`}
-                          sub="confidence levels" />
+                          sub={t('ops.stat.confidenceSub')} />
               </div>
             )}
-            {busy && <div style={{ color: GRAY, fontSize: 13 }}>Loading…</div>}
+            {busy && <div style={{ color: GRAY, fontSize: 13 }}>{t('ops.loading')}</div>}
             <div style={{ display: 'grid', gap: 8 }}>
               {records.slice(0, shown).map((rec, i) => (
                 <RecordRow key={rec.cache_key + rec.visa_type_name + i}
-                           rec={rec} onFlag={flag} />
+                           rec={rec} onFlag={flag} t={t} />
               ))}
             </div>
             {records.length > shown && (
               <button className="btn btn--ghost"
                       style={{ borderRadius: 999, justifySelf: 'center' }}
                       onClick={() => setShown((n) => n + PAGE)}>
-                Show more ({records.length - shown} left)
+                {t('ops.showMore')} ({records.length - shown})
               </button>
             )}
           </div>
@@ -364,9 +458,7 @@ export default function QualityConsole() {
           <div style={{ display: 'grid', gap: 10 }}>
             {(issues?.issues || []).length === 0 && !busy && (
               <div style={{ ...card, padding: 24, color: GRAY, fontSize: 13.5,
-                            textAlign: 'center' }}>
-                No reports in the queue.
-              </div>
+                            textAlign: 'center' }}>{t('ops.noReports')}</div>
             )}
             {(issues?.issues || []).map((it) => (
               <div key={it.id} style={{ ...card, padding: '14px 18px' }}>
@@ -400,9 +492,7 @@ export default function QualityConsole() {
           <div style={{ display: 'grid', gap: 10 }}>
             {(changes?.changes || []).length === 0 && !busy && (
               <div style={{ ...card, padding: 24, color: GRAY, fontSize: 13.5,
-                            textAlign: 'center' }}>
-                No recorded changes yet.
-              </div>
+                            textAlign: 'center' }}>{t('ops.noChanges')}</div>
             )}
             {(changes?.changes || []).map((c) => (
               <div key={c.id} style={{ ...card, padding: '14px 18px' }}>
@@ -444,23 +534,21 @@ export default function QualityConsole() {
           <div style={{ display: 'grid', gap: 14 }}>
             <div style={{ display: 'grid', gap: 12,
                           gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
-              <StatTile label="Answers" value={freshness.summary.total} />
-              <StatTile label="Source-checked" accent={BLUE}
+              <StatTile label={t('ops.fresh.answers')} value={freshness.summary.total} />
+              <StatTile label={t('ops.fresh.grounded')} accent={BLUE}
                         value={freshness.summary.grounded} />
-              <StatTile label="Human-verified" accent={GREEN}
+              <StatTile label={t('ops.fresh.human')} accent={GREEN}
                         value={freshness.summary.human_verified} />
-              <StatTile label="Stale" accent={freshness.summary.stale ? AMBER : GREEN}
+              <StatTile label={t('ops.fresh.stale')}
+                        accent={freshness.summary.stale ? AMBER : GREEN}
                         value={freshness.summary.stale} />
-              <StatTile label="Disputed" accent={freshness.summary.disputed ? RED : GREEN}
+              <StatTile label={t('ops.fresh.disputed')}
+                        accent={freshness.summary.disputed ? RED : GREEN}
                         value={freshness.summary.disputed} />
             </div>
             <div style={{ ...card, padding: '16px 20px', fontSize: 12.5,
                           color: GRAY, lineHeight: 1.6 }}>
-              Every answer is re-checked against its official page after it is
-              first generated and again on access when its window lapses. Fees,
-              validity and stay lengths are compared figure by figure; disputes
-              go to the correction queue for a person — the machine never
-              silently outvotes a human check.
+              {t('ops.fresh.note')}
             </div>
           </div>
         )}

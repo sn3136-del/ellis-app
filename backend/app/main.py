@@ -662,6 +662,14 @@ def travel_database_issues(db=Depends(get_session),
 def _tstation_rows(db, *, nationality: str = "", destination: str = "",
                    purpose: str = "", document: str = "",
                    requirement: str = "", confidence: str = ""):
+    from .visa_snapshot.registry import iso3
+    # The spot-check accepts "China" as readily as "CHN": names, aliases and
+    # both ISO forms all resolve through the registry; an unresolvable term
+    # keeps its literal form (and simply matches nothing).
+    if nationality:
+        nationality = iso3(nationality.strip(), default=nationality.strip().upper())
+    if destination:
+        destination = iso3(destination.strip(), default=destination.strip().upper())
     """Every served answer as Trip.com 25-field records, filters combined —
     their "multi-dimensional spot check": slice by station (the nationality a
     T-site serves), passport type, destination, visa requirement, field."""
