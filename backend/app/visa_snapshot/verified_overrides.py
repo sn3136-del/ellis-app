@@ -200,15 +200,24 @@ def _drop_exemption_leftovers(merged: dict, fields: dict,
     # When the verdict actually FLIPPED (model said exempt, source says a
     # visa is needed) the model's exemption narrative is falsified with it.
     flipped = str(original.get("disposition") or "").upper() == "VISA_EXEMPT"
-    if flipped and "exceptions" not in fields:
-        v = merged.get("exceptions")
-        pat = re.compile(r"免签|免簽|visa[- ]?free|visa[- ]?exempt", re.I)
-        if isinstance(v, list):
-            kept = [x for x in v if not pat.search(str(x))]
-            if len(kept) != len(v):
-                merged["exceptions"] = kept
-        elif isinstance(v, str) and pat.search(v):
-            merged.pop("exceptions", None)
+    if flipped:
+        pat = re.compile(r"免签|免簽|visa[- ]?free|visa[- ]?exempt|exemption",
+                         re.I)
+        if "exceptions" not in fields:
+            v = merged.get("exceptions")
+            if isinstance(v, list):
+                kept = [x for x in v if not pat.search(str(x))]
+                if len(kept) != len(v):
+                    merged["exceptions"] = kept
+            elif isinstance(v, str) and pat.search(v):
+                merged.pop("exceptions", None)
+        # The prose fields the model wrote for its exempt answer contradict
+        # the verified visa-required verdict just as loudly as the enum did.
+        for k in ("permitted_stay", "application_channel_detail",
+                  "visa_category"):
+            if k not in fields and isinstance(merged.get(k), str) \
+                    and pat.search(merged[k]):
+                merged.pop(k, None)
 
 
 def apply(guidance: dict, route: dict) -> tuple[dict, dict | None]:

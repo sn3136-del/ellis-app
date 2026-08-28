@@ -721,7 +721,8 @@ export default function TravelDatabase({ onBack }) {
         travel_document_type: shown.doc,
       } : null)
       if (out.understood === false) {
-        setAskMsg(t('db.askUnclear'))
+        // The server names the exact missing fact in the asker's language.
+        setAskMsg(out.clarify || t('db.askUnclear'))
       } else {
         if (out.route) {
           setNat(out.route.nationality); setDest(out.route.destination)

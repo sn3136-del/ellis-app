@@ -1057,9 +1057,28 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
         raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
                                          "reason": str(e)})
     if not parsed.get("understood"):
-        return {"understood": False,
-                "nationality": parsed.get("nationality") or "",
-                "destination": parsed.get("destination") or ""}
+        # A refusal keeps the documented shape (clients read route/held) and
+        # says exactly which fact is missing, in the asker's language.
+        nat = parsed.get("nationality") or ""
+        dest = parsed.get("destination") or ""
+        cjk = any("一" <= c <= "鿿" for c in body.question or "")
+        if not nat and dest:
+            clarify = "请告诉我您持哪国护照（国籍）？" if cjk else \
+                "Which country issued your passport?"
+        elif nat and not dest:
+            clarify = "请告诉我您要去哪个国家？" if cjk else \
+                "Which country are you travelling to?"
+        else:
+            clarify = "请说明您的国籍（护照签发国）和目的地。" if cjk else \
+                "Please name your passport country and your destination."
+        return {"understood": False, "clarify": clarify,
+                "route": {"nationality": nat, "destination": dest,
+                          "travel_purpose": parsed.get("travel_purpose") or "",
+                          "travel_document_type":
+                              parsed.get("travel_document_type") or "",
+                          "transit_countries": [], "arrival_date": None},
+                "guidance": None, "held": False,
+                "nationality": nat, "destination": dest}
     route = {
         "passport_nationality": parsed["nationality"],
         "passport_issuing_country": parsed["nationality"],

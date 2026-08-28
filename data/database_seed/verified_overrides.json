@@ -11422,7 +11422,7 @@
   "verified_at": "2026-08-25",
   "verified_by": "Ellis source audit",
   "source_url": "https://image.mfa.go.th/mfa/0/YLjhuT4Hho/Consular_Service/Tourist_Visa_Exempt_60_days.pdf",
-  "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Taiwan passport holders still receive 60 days visa-free on arrival in Thailand, so plan on 60 rather than 30, but re-check consular.mfa.go.th shortly before departure because a Cabinet-approved cut to 30 days is awaiting Royal Gazette publication and starts 15 days after it appears, and file the Thailand Digital Arrival Card within 72 hours of arrival. Official text: List of Countries and Territories whose Nationals are entitled to Visa Exemption Scheme for the Purpose of Tourism and Short-Term Business Engagements for a Period Not Exceeding 60 Days ... Ordinary P",
+  "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Taiwan passport holders still receive 60 days visa-free on arrival in Thailand, so plan on 60 rather than 30, but re-check consular.mfa.go.th shortly before departure because a Cabinet-approved cut to 30 days is awaiting Royal Gazette publication and starts 15 days after it appears, and file the Thailand Di",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "unconditional_visa_free",
@@ -11432,6 +11432,12 @@
    "government_fee": {
     "amount": 0,
     "currency": null
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "Thailand Digital Arrival Card (TDAC)",
+    "submission_window": "submit online within 3 days before arrival",
+    "note": "Mandatory for all foreign visitors since 1 May 2025; free at tdac.immigration.go.th"
    }
   }
  },
@@ -11568,7 +11574,7 @@
   "verified_at": "2026-08-25",
   "verified_by": "Ellis source audit",
   "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/0303/%E0%B8%9C.60.pdf",
-  "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Japanese passport holders still get 60 days visa-free per entry, but the Cabinet approved cutting this to 30 days on 19 May 2026, so re-check mfa.go.th before travel because the change takes effect 15 days after Royal Gazette publication. Official text: List of Countries and Territories whose Nationals are entitled to Visa Exemption Scheme for the Purpose of Tourism and Short-Term Business Engagements for a Period Not Exceeding 60 Days ... 40. Japan",
+  "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Japanese passport holders still get 60 days visa-free per entry, but the Cabinet approved cutting this to 30 days on 19 May 2026, so re-check mfa.go.th before travel because the change takes effect 15 days after Royal Gazette publication. Official text: List of Countries and Territories whose Nationals are ",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "unconditional_visa_free",
@@ -11578,6 +11584,12 @@
    "government_fee": {
     "amount": 0,
     "currency": null
+   },
+   "arrival_card": {
+    "required": true,
+    "name": "Thailand Digital Arrival Card (TDAC)",
+    "submission_window": "submit online within 3 days before arrival",
+    "note": "Mandatory for all foreign visitors since 1 May 2025; free at tdac.immigration.go.th"
    }
   }
  },
@@ -14445,10 +14457,16 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 adjudication vs official sources",
   "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/0303/Bilat_Ordinary.pdf",
-  "note": "Korea does not sit in the general 60-day (now 30-day) visa-exemption scheme; it has a standing bilateral agreement giving 90 days, alongside Argentina, Brazil, Chile and Peru. The Department of Consular Affairs list is dated 24 February 2025 and Korea's 90-day bilateral exemption was expressly preserved when the Cabinet cut the general visa-free stay in 2026. Ellis's 60 is the ",
+  "note": "Korea does not sit in the general 60-day (now 30-day) visa-exemption scheme; it has a standing bilateral agreement giving 90 days, alongside Argentina, Brazil, Chile and Peru. The Department of Consular Affairs list is dated 24 February 2025 and Korea's 90-day bilateral exemption was expressly preserved when the Cabinet cut the general visa-free stay in 2026. Ellis's 60 is the  TDAC: Thailand's Di",
   "fields": {
    "permitted_stay_days": 90,
-   "permitted_stay": "90 days per visit under the Thailand-Korea bilateral visa exemption agreement"
+   "permitted_stay": "90 days per visit under the Thailand-Korea bilateral visa exemption agreement",
+   "arrival_card": {
+    "required": true,
+    "name": "Thailand Digital Arrival Card (TDAC)",
+    "submission_window": "submit online within 3 days before arrival",
+    "note": "Mandatory for all foreign visitors since 1 May 2025; free at tdac.immigration.go.th"
+   }
   }
  },
  {
@@ -30507,6 +30525,63 @@
      "notes": "Fee payable in cash at port of entry; extension may be possible locally"
     }
    ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "GBR",
+   "destination": "THA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://tdac.immigration.go.th/",
+  "note": "Thailand Digital Arrival Card (TDAC) is mandatory for all foreign visitors since 1 May 2025; submitted free online within 3 days before arrival.",
+  "fields": {
+   "arrival_card": {
+    "required": true,
+    "name": "Thailand Digital Arrival Card (TDAC)",
+    "submission_window": "submit online within 3 days before arrival",
+    "note": "Mandatory for all foreign visitors since 1 May 2025; free at tdac.immigration.go.th"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "SGP",
+   "destination": "THA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://tdac.immigration.go.th/",
+  "note": "Thailand Digital Arrival Card (TDAC) is mandatory for all foreign visitors since 1 May 2025; submitted free online within 3 days before arrival.",
+  "fields": {
+   "arrival_card": {
+    "required": true,
+    "name": "Thailand Digital Arrival Card (TDAC)",
+    "submission_window": "submit online within 3 days before arrival",
+    "note": "Mandatory for all foreign visitors since 1 May 2025; free at tdac.immigration.go.th"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "MYS",
+   "destination": "THA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://tdac.immigration.go.th/",
+  "note": "Thailand Digital Arrival Card (TDAC) is mandatory for all foreign visitors since 1 May 2025; submitted free online within 3 days before arrival.",
+  "fields": {
+   "arrival_card": {
+    "required": true,
+    "name": "Thailand Digital Arrival Card (TDAC)",
+    "submission_window": "submit online within 3 days before arrival",
+    "note": "Mandatory for all foreign visitors since 1 May 2025; free at tdac.immigration.go.th"
+   }
   }
  }
 ]
