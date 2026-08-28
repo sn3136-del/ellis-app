@@ -396,22 +396,28 @@ function RecordsTable({ records, onFlag, onRelease, t, flagOf, typeNames = {} })
   }
   return (
     <div style={{ ...card, overflow: 'hidden' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 10,
+                    padding: '12px 16px', flexWrap: 'wrap',
+                    borderBottom: `1px solid ${BORDER}` }}>
+        <strong style={{ color: NAVY, fontSize: 13 }}>
+          {records.length.toLocaleString()} {t('ops.items')}
+        </strong>
+        <span style={{ color: GRAY, fontSize: 12 }}>{t('ops.rowsHint')}</span>
+      </div>
       <div style={{ overflowX: 'auto', maxHeight: '62vh', overflowY: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse',
                         fontSize: 13 }}>
           <thead>
             <tr>
-              <SortHeader label={t('ops.col.route')} k="route" sort={sort} onSort={onSort} width={120} />
+              <SortHeader label={t('ops.col.route')} k="route" sort={sort} onSort={onSort} width={140} />
               <SortHeader label={t('ops.col.requirement')} k="requirement" sort={sort} onSort={onSort} width={110} />
               <SortHeader label={t('ops.col.type')} k="type" sort={sort} onSort={onSort} />
-              <SortHeader label={t('ops.col.stay')} k="stay" sort={sort} onSort={onSort} align="right" width={70} />
+              <SortHeader label={t('ops.col.stay')} k="stay" sort={sort} onSort={onSort} align="right" width={80} />
               <SortHeader label={t('ops.col.fee')} k="fee" sort={sort} onSort={onSort} align="right" width={90} />
-              <SortHeader label={t('ops.col.confidence')} k="confidence" sort={sort} onSort={onSort} width={80} />
-              <SortHeader label={t('ops.col.complete')} k="complete" sort={sort} onSort={onSort} align="right" width={80} />
-              <SortHeader label={t('ops.col.check')} k="check" sort={sort} onSort={onSort} width={130} />
+              <SortHeader label={t('ops.col.quality')} k="check" sort={sort} onSort={onSort} width={150} />
               <th style={{ position: 'sticky', top: 0, background: '#fff',
                            zIndex: 5, borderBottom: `2px solid ${BORDER}`,
-                           width: 70 }} />
+                           width: 90 }} />
             </tr>
           </thead>
           <tbody>
@@ -422,18 +428,27 @@ function RecordsTable({ records, onFlag, onRelease, t, flagOf, typeNames = {} })
               const missing = Object.entries(rec.field_status)
                 .filter(([, v]) => v === 'missing').map(([k]) => k)
               const opened = open === id
+              const confKey = 'ops.conf.' + String(rec.confidence_level || '').toLowerCase()
+              const confLabel = t(confKey) !== confKey ? t(confKey) : rec.confidence_level
+              const pctDone = Math.round(rec.completeness * 100)
               return [
                 <tr key={id} onClick={() => setOpen(opened ? null : id)}
                     style={{ cursor: 'pointer',
                              background: opened ? '#f4f8ff'
                                : i % 2 ? '#fbfcfe' : '#fff' }}>
-                  <td style={{ padding: '9px 12px', whiteSpace: 'nowrap' }}>
+                  <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>
+                    <span style={{ display: 'inline-block', color: '#9aa8bd',
+                                   fontSize: 10, marginRight: 7,
+                                   transition: 'transform .15s ease',
+                                   transform: opened ? 'rotate(90deg)' : 'none' }}>
+                      ▶
+                    </span>
                     <strong style={{ color: NAVY }}>
                       {flagOf(rec.travel_document_country)} {rec.travel_document_country}
                       {' → '}
                       {flagOf(rec.destination_country)} {rec.destination_country}
                     </strong>
-                    <div style={{ color: GRAY, fontSize: 11 }}>
+                    <div style={{ color: GRAY, fontSize: 11, paddingLeft: 17 }}>
                       {t(PURPOSE_KEY[rec.travel_purpose] || '') || rec.travel_purpose}
                       {rec.travel_document_type !== 'ordinary_passport'
                         ? ' · ' + ((t('db.doc.' + rec.travel_document_type)
@@ -443,43 +458,45 @@ function RecordsTable({ records, onFlag, onRelease, t, flagOf, typeNames = {} })
                         : ''}
                     </div>
                   </td>
-                  <td style={{ padding: '9px 12px' }}>
+                  <td style={{ padding: '10px 12px' }}>
                     <Chip color={reqColor} filled={false}>{reqLabel}</Chip>
                   </td>
-                  <td style={{ padding: '9px 12px', color: NAVY, fontWeight: 600,
+                  <td style={{ padding: '10px 12px', color: NAVY, fontWeight: 600,
                                maxWidth: 300, overflow: 'hidden',
                                textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {typeNames[rec.visa_type_name] || rec.visa_type_name || '·'}
                   </td>
-                  <td style={{ padding: '9px 12px', textAlign: 'right',
-                               color: NAVY, whiteSpace: 'nowrap' }}>
+                  <td style={{ padding: '10px 12px', textAlign: 'right',
+                               color: NAVY, whiteSpace: 'nowrap',
+                               fontVariantNumeric: 'tabular-nums' }}>
                     {rec.max_stay_duration != null
-                      ? `${rec.max_stay_duration}${rec.max_stay_unit === 'Hour' ? 'h' : 'd'}`
+                      ? `${rec.max_stay_duration} ${rec.max_stay_unit === 'Hour'
+                          ? t('ops.u.hour') : t('ops.u.day')}`
                       : '·'}
                   </td>
-                  <td style={{ padding: '9px 12px', textAlign: 'right',
-                               color: NAVY, whiteSpace: 'nowrap' }}>
+                  <td style={{ padding: '10px 12px', textAlign: 'right',
+                               color: NAVY, whiteSpace: 'nowrap',
+                               fontVariantNumeric: 'tabular-nums' }}>
                     {rec.visa_fee_amount != null
                       ? `${rec.visa_fee_amount} ${rec.visa_fee_currency || ''}`
                       : '·'}
                   </td>
-                  <td style={{ padding: '9px 12px' }}>
-                    <Chip color={CONF_COLOR[rec.confidence_level] || GRAY}>
-                      {t('ops.conf.' + String(rec.confidence_level || '').toLowerCase())
-                        !== 'ops.conf.' + String(rec.confidence_level || '').toLowerCase()
-                        ? t('ops.conf.' + String(rec.confidence_level || '').toLowerCase())
-                        : rec.confidence_level}
-                    </Chip>
-                  </td>
-                  <td style={{ padding: '9px 12px', textAlign: 'right',
-                               fontWeight: 700,
-                               color: rec.completeness === 1 ? GREEN : AMBER }}>
-                    {Math.round(rec.completeness * 100)}%
-                  </td>
-                  <td style={{ padding: '9px 12px' }}>
+                  <td style={{ padding: '10px 12px' }}>
                     <Chip color={checkColor} filled={false}>{checkLabel}</Chip>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5,
+                                  marginTop: 4, fontSize: 10.5, color: GRAY }}>
+                      <span style={{ width: 7, height: 7, borderRadius: 99,
+                                     background: CONF_COLOR[rec.confidence_level] || GRAY,
+                                     display: 'inline-block' }} />
+                      {confLabel}
+                      <span style={{ color: '#c3cddd' }}>·</span>
+                      <span style={{ fontWeight: 700,
+                                     color: pctDone === 100 ? GREEN : AMBER }}>
+                        {pctDone}%
+                      </span>
+                    </div>
                   </td>
-                  <td style={{ padding: '9px 12px', whiteSpace: 'nowrap' }}>
+                  <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>
                     {rec.source_url && (
                       <a href={rec.source_url} target="_blank" rel="noreferrer"
                          onClick={(e) => e.stopPropagation()}
@@ -502,7 +519,7 @@ function RecordsTable({ records, onFlag, onRelease, t, flagOf, typeNames = {} })
                 </tr>,
                 opened && (
                   <tr key={id + ':detail'}>
-                    <td colSpan={9} style={{ background: '#fbfcfe',
+                    <td colSpan={7} style={{ background: '#fbfcfe',
                         borderBottom: `1px solid ${BORDER}`,
                         padding: '14px 18px' }}>
                       <FieldGrid rec={rec} />
@@ -682,17 +699,6 @@ function CoverageRing({ segs, total, centerLabel, centerSub }) {
           {centerSub}
         </text>
       </svg>
-      <div style={{ display: 'grid', gap: 10 }}>
-        {segs.map(([n, color, name], i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8,
-                                fontSize: 13 }}>
-            <span style={{ width: 10, height: 10, borderRadius: 3,
-                           background: color, border: '1px solid #c9d6ea' }} />
-            <strong style={{ color: NAVY, minWidth: 46 }}>{n.toLocaleString()}</strong>
-            <span style={{ color: GRAY }}>{name}</span>
-          </div>
-        ))}
-      </div>
     </div>
   )
 }
@@ -758,6 +764,64 @@ export default function QualityConsole() {
     for (const c of (reg?.countries || [])) m[c.alpha_3] = c.flag || ''
     return (code) => m[code] || ''
   }, [reg])
+
+  // Human, translated names for the snapshot engine's machine field keys.
+  // Used by the correction queue and the change log alike.
+  const fieldLabel = useCallback((f) => {
+    const M = {
+      disposition: t('ops.col.requirement'),
+      visa_category: t('ops.col.type'),
+      permitted_stay: t('ops.col.stay'),
+      permitted_stay_days: t('ops.col.stay'),
+      government_fee: t('ops.col.fee'),
+      confidence: t('ops.col.confidence'),
+      application_channel: t('ops.f.channel'),
+      application_channel_detail: t('ops.f.channelDetail'),
+      official_portal_url: t('ops.f.portal'),
+      requirement_detail: t('ops.f.reqDetail'),
+      processing_time: t('ops.f.processing'),
+      required_documents: t('ops.f.docs'),
+      exceptions: t('ops.f.exceptions'),
+      visa_products: t('ops.f.products'),
+      operator_spot_check: t('ops.f.spotCheck'),
+    }
+    const labels = String(f || '').split(',')
+      .map((x) => M[x.trim()] || x.trim().replace(/_/g, ' '))
+    return [...new Set(labels)].join(' · ')
+  }, [t])
+  // Translate the closed enum vocabularies the engine writes, so the change
+  // log and the queue read in the operator's language instead of snake_case.
+  const valueLabel = useCallback((field, v) => {
+    if (v == null || typeof v !== 'string') return v
+    const key = String(field || '').split(',')[0].trim()
+    const MAPS = {
+      disposition: {
+        VISA_EXEMPT: t('ops.req.free'), VISA_ON_ARRIVAL: t('ops.req.voa'),
+        ELECTRONIC_AUTHORIZATION_REQUIRED: t('ops.v.eta'),
+        VISA_REQUIRED: t('ops.req.advance'),
+        CONDITIONAL: t('ops.req.conditional'),
+      },
+      requirement_detail: {
+        unconditional_visa_free: t('db.detail.unconditionalVisaFree'),
+        conditional_visa_free: t('db.detail.conditionalVisaFree'),
+        eta_electronic_authorization: t('ops.v.eta'),
+        evisa: t('ops.v.evisa'), evisa_on_arrival: t('ops.v.evoa'),
+        paper_visa: t('ops.v.paper'),
+        paper_visa_on_arrival: t('ops.v.paperVoa'),
+      },
+      application_channel: {
+        authorised_agent: t('ops.ch.agent'), embassy: t('ops.ch.embassy'),
+        not_required: t('ops.ch.none'), on_arrival: t('ops.ch.arrival'),
+        online_portal: t('ops.ch.online'), visa_center: t('ops.ch.center'),
+      },
+      confidence: {
+        high: t('ops.conf.high'), medium: t('ops.conf.medium'),
+        low: t('ops.conf.low'),
+      },
+      visa_category: typeNames || {},
+    }
+    return (MAPS[key] || {})[v] ?? (MAPS[key] || {})[v.trim?.()] ?? v
+  }, [t, typeNames])
 
   const qs = useCallback(() => new URLSearchParams(
     Object.fromEntries(Object.entries(filters).filter(([, v]) => v))
@@ -1088,40 +1152,21 @@ export default function QualityConsole() {
             if (/^[\[{]/.test(v)) {
               // A product-table proposal: name the visa types instead of
               // printing JSON (the note is capped, so parse may not work).
-              const types = [...v.matchAll(/"type":\s*"([^"]+)"/g)].map((m) => m[1])
+              const types = [...v.matchAll(/"type":\s*"([^"]+)"/g)]
+                .map((m) => typeNames?.[m[1]] || m[1])
               if (types.length) {
                 return `${types.length} ${t('ops.productsProposed')}: ${types.join(' · ')}`
               }
               return t('ops.productsProposed')
             }
+            const mapped = valueLabel(field, v)
+            if (mapped !== v) return mapped
             if (/^[a-z0-9_]+$/i.test(v) && v.includes('_')) {
               v = v.replace(/_/g, ' ').toLowerCase()
               v = v.charAt(0).toUpperCase() + v.slice(1)
             }
             if (/\w$/.test(says || '') && (note || '').endsWith(says || '')) v += '…'
             return v
-          }
-          const fieldLabel = (f) => {
-            const M = {
-              disposition: t('ops.col.requirement'),
-              visa_category: t('ops.col.type'),
-              permitted_stay: t('ops.col.stay'),
-              permitted_stay_days: t('ops.col.stay'),
-              government_fee: t('ops.col.fee'),
-              confidence: t('ops.col.confidence'),
-              application_channel: t('ops.f.channel'),
-              application_channel_detail: t('ops.f.channelDetail'),
-              official_portal_url: t('ops.f.portal'),
-              requirement_detail: t('ops.f.reqDetail'),
-              processing_time: t('ops.f.processing'),
-              required_documents: t('ops.f.docs'),
-              exceptions: t('ops.f.exceptions'),
-              visa_products: t('ops.f.products'),
-              operator_spot_check: t('ops.f.spotCheck'),
-            }
-            const labels = String(f || '').split(',')
-              .map((x) => M[x.trim()] || x.trim().replace(/_/g, ' '))
-            return [...new Set(labels)].join(' · ')
           }
           // The record the page disagrees with, so both sides can be shown.
           const recFor = (it) => {
@@ -1135,23 +1180,39 @@ export default function QualityConsole() {
               (!r.travel_document_type ||
                 x.travel_document_type === r.travel_document_type))
           }
+          const reqName = (v) => ({
+            'Visa-free': t('ops.req.free'),
+            'Visa on Arrival': t('ops.req.voa'),
+            'Visa Required in Advance': t('ops.req.advance'),
+            Conditional: t('ops.req.conditional'),
+          }[v] || v)
+          const unitName = (u) => ({
+            Day: t('ops.u.day'), Month: t('ops.u.month'), Year: t('ops.u.year'),
+          }[u] || u || '')
+          const methodName = (v) => ({
+            Online: t('ops.ch.online'), 'Embassy/Consulate': t('ops.ch.embassy'),
+            'On arrival': t('ops.ch.arrival'), 'On Arrival': t('ops.ch.arrival'),
+            'Visa center': t('ops.ch.center'), Other: t('ops.m.other'),
+          }[v] || v)
           const currentOf = (rec, field) => {
             if (!rec) return null
             const j = (a, b) => (a == null || a === '' ? null
               : `${a} ${b || ''}`.trim())
             switch (String(field || '').split(',')[0].trim()) {
-              case 'disposition': return rec.visa_requirement
-              case 'visa_category': return rec.visa_type_name
+              case 'disposition': return reqName(rec.visa_requirement)
+              case 'visa_category':
+                return typeNames?.[rec.visa_type_name] || rec.visa_type_name
               case 'permitted_stay': case 'permitted_stay_days':
-                return j(rec.max_stay_duration, rec.max_stay_unit)
+                return j(rec.max_stay_duration, unitName(rec.max_stay_unit))
               case 'government_fee':
                 return j(rec.visa_fee_amount, rec.visa_fee_currency)
               case 'processing_time':
-                return j(rec.processing_min_days, rec.processing_unit)
-              case 'application_channel': return rec.application_method
+                return j(rec.processing_min_days, unitName(rec.processing_unit))
+              case 'application_channel': return methodName(rec.application_method)
               case 'required_documents': return rec.required_documents
               case 'official_portal_url': return rec.source_url
-              case 'confidence': return rec.confidence_level
+              case 'confidence': return valueLabel('confidence',
+                String(rec.confidence_level || '').toLowerCase()) || rec.confidence_level
               default: return null
             }
           }
@@ -1277,7 +1338,8 @@ export default function QualityConsole() {
                 )}
                 {!active && (
                   <Chip color={it.status === 'corrected' ? GREEN : GRAY} filled={false}>
-                    {it.status}
+                    {t(`ops.st.${it.status}`) === `ops.st.${it.status}`
+                      ? it.status : t(`ops.st.${it.status}`)}
                   </Chip>
                 )}
                 <span style={{ marginLeft: 'auto', color: GRAY, fontSize: 11.5 }}>
@@ -1351,7 +1413,8 @@ export default function QualityConsole() {
             else byDay.push({ day, items: [c] })
           }
           const ValueChip = ({ v, kind }) => (
-            <span style={{ display: 'inline-block', padding: '2px 8px',
+            <span title={typeof v === 'string' ? v : undefined}
+                  style={{ display: 'inline-block', padding: '2px 8px',
                            borderRadius: 7, fontSize: 12, maxWidth: 340,
                            overflow: 'hidden', textOverflow: 'ellipsis',
                            whiteSpace: 'nowrap', verticalAlign: 'bottom',
@@ -1371,8 +1434,9 @@ export default function QualityConsole() {
               <div style={{ display: 'inline-flex', background: '#fff',
                             border: `1px solid ${BORDER}`, borderRadius: 999,
                             padding: 4, width: 'fit-content' }}>
-                {[['', t('ops.all')], ['add', 'add'], ['modify', 'modify'],
-                  ['delete', 'delete']].map(([id, label]) => (
+                {[['', t('ops.all')], ['add', t('ops.act.add')],
+                  ['modify', t('ops.act.modify')],
+                  ['delete', t('ops.act.delete')]].map(([id, label]) => (
                   <button key={id} onClick={() => setChangeFilter(id)}
                           style={{ border: 'none', cursor: 'pointer',
                                    borderRadius: 999, fontSize: 12.5,
@@ -1394,10 +1458,19 @@ export default function QualityConsole() {
               {byDay.map((g) => (
                 <div key={g.day} style={{ display: 'grid', gap: 8 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontSize: 11, fontWeight: 800,
-                                   letterSpacing: 0.8, color: GRAY,
-                                   textTransform: 'uppercase',
-                                   whiteSpace: 'nowrap' }}>{g.day}</span>
+                    <span title={g.day}
+                          style={{ fontSize: 12, fontWeight: 800,
+                                   color: NAVY,
+                                   whiteSpace: 'nowrap' }}>
+                      {(() => {
+                        try {
+                          return new Intl.DateTimeFormat(
+                            lang === 'en' ? 'en' : lang,
+                            { month: 'short', day: 'numeric',
+                              weekday: 'short' }).format(new Date(g.day + 'T00:00:00'))
+                        } catch { return g.day }
+                      })()}
+                    </span>
                     <span style={{ flex: 1, height: 1, background: BORDER }} />
                     <span style={{ fontSize: 11, color: GRAY }}>
                       {g.items.length} {t('ops.items')}
@@ -1414,7 +1487,10 @@ export default function QualityConsole() {
                           {' → '}
                           {flagOf((c.route || {}).destination_country)} {(c.route || {}).destination_country}
                         </strong>
-                        <Chip color={AC[c.action] || GRAY}>{c.action}</Chip>
+                        <Chip color={AC[c.action] || GRAY}>
+                          {t(`ops.act.${c.action}`) === `ops.act.${c.action}`
+                            ? c.action : t(`ops.act.${c.action}`)}
+                        </Chip>
                         <span style={{ color: GRAY, fontSize: 11.5 }}>
                           {c.origin === 'grounded_recheck' ? t('ops.autoCheck')
                             : c.origin === 'engine' ? t('ops.origin.engine') : c.origin}
@@ -1427,22 +1503,34 @@ export default function QualityConsole() {
                       </div>
                       <div style={{ marginTop: 8, display: 'grid', gap: 5 }}>
                         {(() => {
-                          const entries = Object.entries(c.changes || {})
-                            .map(([f, d]) => [f, fmt(d.from), fmt(d.to)])
+                          const HEAD = ['disposition', 'visa_category',
+                                        'permitted_stay', 'government_fee']
+                          const fv = (f, v) =>
+                            fmt(typeof v === 'string' ? valueLabel(f, v) : v)
+                          let entries = Object.entries(c.changes || {})
+                            .map(([f, d]) => [f, fv(f, d.from), fv(f, d.to)])
                             .filter(([, a, b]) => a != null || b != null)
-                          const shownE = entries.slice(0, 5)
+                          if (c.action === 'add') {
+                            // A brand-new record: lead with the headline facts
+                            // instead of listing every stored field.
+                            entries = entries.sort((x, y) => {
+                              const ix = HEAD.indexOf(x[0]), iy = HEAD.indexOf(y[0])
+                              return (ix < 0 ? 9 : ix) - (iy < 0 ? 9 : iy)
+                            })
+                          }
+                          const cap = c.action === 'add' ? 4 : 5
+                          const shownE = entries.slice(0, cap)
                           return [
                             ...shownE.map(([f, a, b]) => (
                               <div key={f} style={{ display: 'grid',
                                     gridTemplateColumns: '175px 1fr', gap: 10,
                                     alignItems: 'center', fontSize: 12 }}>
                                 <span title={f}
-                                      style={{ color: '#7c8aa0',
-                                               fontFamily: 'ui-monospace, monospace',
-                                               fontSize: 11,
+                                      style={{ color: '#5b6a80',
+                                               fontSize: 11.5, fontWeight: 700,
                                                overflow: 'hidden',
                                                textOverflow: 'ellipsis',
-                                               whiteSpace: 'nowrap' }}>{f}</span>
+                                               whiteSpace: 'nowrap' }}>{fieldLabel(f)}</span>
                                 <span style={{ minWidth: 0, display: 'flex',
                                                gap: 6, alignItems: 'center',
                                                flexWrap: 'wrap' }}>
@@ -1455,10 +1543,10 @@ export default function QualityConsole() {
                                 </span>
                               </div>
                             )),
-                            entries.length > 5 && (
+                            entries.length > cap && (
                               <div key="more" style={{ fontSize: 11.5,
                                     color: GRAY }}>
-                                +{entries.length - 5} {t('ops.items')}
+                                +{entries.length - cap} {t('ops.items')}
                               </div>
                             ),
                           ]
@@ -1483,38 +1571,78 @@ export default function QualityConsole() {
           ]
           return (
             <div style={{ display: 'grid', gap: 14 }} className="ops-fade">
-              <div style={{ ...card, display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(185px, 1fr))' }}>
-                <StatCell label={t('ops.fresh.answers')} value={f.total}
-                          sub={t('ops.stat.recordsSub')} delay={0} />
-                <StatCell label={t('ops.fresh.human')} value={f.human_verified}
-                          accent={GREEN} delay={80}
-                          pct={f.total ? (f.human_verified / f.total) * 100 : null}
-                          sub={t('ops.check.quoted')} />
-                <StatCell label={t('ops.fresh.grounded')} value={f.grounded}
-                          accent={BLUE} delay={160}
-                          pct={f.total ? (f.grounded / f.total) * 100 : null}
-                          sub={t('ops.check.grounded')} />
-                <StatCell label={t('ops.fresh.stale')} value={f.stale}
-                          accent={f.stale ? AMBER : GREEN} delay={240}
-                          sub={t('ops.fresh.staleSub')} />
-                <StatCell label={t('ops.fresh.disputed')} value={f.disputed}
-                          accent={f.disputed ? RED : GREEN} delay={320}
-                          sub={t('ops.fresh.disputedSub')} />
+              <div style={{ display: 'grid', gap: 12,
+                            gridTemplateColumns:
+                              'repeat(auto-fit, minmax(175px, 1fr))' }}>
+                {[
+                  { label: t('ops.fresh.answers'), value: f.total,
+                    sub: t('ops.stat.recordsSub'), accent: NAVY },
+                  { label: t('ops.fresh.human'), value: f.human_verified,
+                    accent: GREEN,
+                    pct: f.total ? (f.human_verified / f.total) * 100 : null,
+                    sub: t('ops.check.quoted') },
+                  { label: t('ops.fresh.grounded'), value: f.grounded,
+                    accent: BLUE,
+                    pct: f.total ? (f.grounded / f.total) * 100 : null,
+                    sub: t('ops.fresh.groundedSub') },
+                  { label: t('ops.fresh.stale'), value: f.stale,
+                    accent: f.stale ? AMBER : GREEN,
+                    sub: t('ops.fresh.staleSub') },
+                  { label: t('ops.fresh.disputed'), value: f.disputed,
+                    accent: f.disputed ? RED : GREEN,
+                    sub: t('ops.fresh.disputedSub') },
+                ].map((p, i) => (
+                  <div key={i} className="ops-lift"
+                       style={{ ...card, padding: 0 }}>
+                    <StatCell {...p} delay={i * 70} />
+                  </div>
+                ))}
               </div>
-              <div style={{ ...card, padding: '22px 26px', display: 'grid',
-                            gap: 18 }}>
-                <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1,
-                              color: GRAY, textTransform: 'uppercase' }}>
-                  {t('ops.fresh.coverage')}
-                </div>
+              <div style={{ ...card, padding: '24px 28px', display: 'flex',
+                            flexWrap: 'wrap', gap: 26,
+                            alignItems: 'center' }}>
                 <CoverageRing segs={segs} total={f.total}
                               centerLabel={t('ops.fresh.coverage')}
                               centerSub={t('ops.fresh.coveredShort')} />
+                <div style={{ display: 'grid', gap: 16, minWidth: 0,
+                              flex: '1 1 260px' }}>
+                  <div style={{ fontSize: 10.5, fontWeight: 800,
+                                letterSpacing: 1, color: GRAY,
+                                textTransform: 'uppercase' }}>
+                    {t('ops.fresh.coverage')}
+                  </div>
+                  <MicroStack segs={segs} height={22} />
+                  <div style={{ display: 'grid', gap: 8 }}>
+                    {segs.map(([n, color, name], i) => (
+                      <div key={i} style={{ display: 'flex',
+                                    alignItems: 'center', gap: 10,
+                                    fontSize: 13 }}>
+                        <span style={{ width: 10, height: 10, borderRadius: 3,
+                                       background: color, flexShrink: 0 }} />
+                        <span style={{ color: GRAY, flex: 1 }}>{name}</span>
+                        <strong style={{ color: NAVY,
+                                         fontVariantNumeric: 'tabular-nums' }}>
+                          {n.toLocaleString()}
+                        </strong>
+                        <span style={{ color: GRAY, fontSize: 12, width: 44,
+                                       textAlign: 'right',
+                                       fontVariantNumeric: 'tabular-nums' }}>
+                          {f.total ? Math.round((n / f.total) * 100) : 0}%
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
               <div style={{ ...card, padding: '16px 20px', fontSize: 12.5,
-                            color: GRAY, lineHeight: 1.65 }}>
-                {t('ops.fresh.note')}
+                            color: GRAY, lineHeight: 1.65, display: 'flex',
+                            gap: 12, alignItems: 'flex-start' }}>
+                <span style={{ width: 22, height: 22, borderRadius: 99,
+                               background: `${BLUE}18`, color: BLUE,
+                               fontWeight: 800, fontSize: 12, flexShrink: 0,
+                               display: 'inline-flex', alignItems: 'center',
+                               justifyContent: 'center' }}>i</span>
+                <span>{t('ops.fresh.note')}</span>
               </div>
             </div>
           )
