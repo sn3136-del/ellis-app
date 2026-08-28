@@ -10,6 +10,35 @@ import { useEffect, useMemo, useState } from 'react'
 
 const LS = (lang) => `ellis.countrynames.v1.${lang}`
 
+// Everyday names the registry's FORMAL names don't contain as substrings:
+// 韩国 must find 大韩民国, "South Korea" must find "Korea, Republic of".
+// Substring search already covers prefixes (朝鲜→朝鲜民主主义人民共和国),
+// so only the genuinely unreachable names are listed.
+const COMMON_ALIASES = {
+  KOR: '韩国 南韩 韓國 南韓 south korea 首尔 首爾',
+  PRK: '北韩 北朝鲜 北韓 north korea',
+  ARE: '阿联酋 阿聯酋 迪拜 杜拜 阿布扎比 阿布達比 uae dubai abu dhabi',
+  USA: 'america united states of america 美利坚',
+  GBR: 'britain england great britain scotland wales 大不列颠',
+  RUS: '俄罗斯 russia',
+  VNM: 'vietnam',
+  CZE: 'czech republic',
+  NLD: 'holland',
+  MAC: 'macau 澳门 澳門',
+  HKG: '香港',
+  MMR: 'burma',
+  CIV: 'ivory coast cote divoire',
+  SWZ: 'swaziland 斯威士兰',
+  TLS: 'east timor 东帝汶 東帝汶',
+  COD: '刚果金 刚果（金） dr congo drc',
+  COG: '刚果布 刚果（布）',
+  AUS: '澳洲',
+  NZL: '纽西兰',
+  SAU: '沙地阿拉伯',
+  TUR: 'turkey',
+  LAO: '寮国 寮國 laos',
+}
+
 export function useLocalizedCountries(client, reg, lang) {
   const [zh, setZh] = useState(null)
 
@@ -48,7 +77,7 @@ export function useLocalizedCountries(client, reg, lang) {
       label: `${c.flag ? c.flag + ' ' : ''}${local || c.name}`,
       // Both scripts are searchable in EVERY locale: an ops user typing
       // 中国 with the UI in English still deserves the match.
-      search: `${c.name} ${local || ''} ${c.name_zh || ''} ${c.name_hant || ''} ${c.alpha_2 || ''} ${c.alpha_3}`.toLowerCase(),
+      search: `${c.name} ${local || ''} ${c.name_zh || ''} ${c.name_hant || ''} ${COMMON_ALIASES[c.alpha_3] || ''} ${c.alpha_2 || ''} ${c.alpha_3}`.toLowerCase(),
     }
   }), [reg, zh])
 }

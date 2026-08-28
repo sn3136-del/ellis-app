@@ -101,7 +101,7 @@ function useOpsClient() {
 
 const card = { background: '#fff', border: `1px solid ${BORDER}`,
                borderRadius: 16, boxShadow: '0 1px 3px rgba(15,41,77,0.05)' }
-const input = { padding: '9px 12px', borderRadius: 10, fontSize: 13,
+const input = { padding: '11px 12px', borderRadius: 10, fontSize: 13,
                 border: `1px solid #d9e1ec`, background: '#fff', color: NAVY,
                 outline: 'none' }
 
@@ -621,11 +621,16 @@ function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames 
                     <td colSpan={7} style={{ background: '#fbfcfe',
                         borderBottom: `1px solid ${BORDER}`,
                         padding: '14px 18px' }}>
-                      <FieldGrid rec={rec} t={t} typeNames={typeNames} />
-                      {missing.length > 0 && (
-                        <MissingLine missing={missing} t={t} />
-                      )}
-                      <FlagForm rec={rec} onFlag={onFlag} t={t} />
+                      {/* Pinned to the viewport: without this the 25-field
+                          card and the flag form span the table's full
+                          scroll width and a phone only ever sees a third. */}
+                      <div className="ops-rowdetail">
+                        <FieldGrid rec={rec} t={t} typeNames={typeNames} />
+                        {missing.length > 0 && (
+                          <MissingLine missing={missing} t={t} />
+                        )}
+                        <FlagForm rec={rec} onFlag={onFlag} t={t} />
+                      </div>
                     </td>
                   </tr>
                 ),
@@ -648,17 +653,17 @@ function IssueActions({ issue, onResolve, t }) {
              data-testid="ops-resolution" />
       <button disabled={!res.trim()} data-testid="ops-corrected"
               onClick={() => onResolve(issue.id, 'corrected', res.trim())}
-              style={{ borderRadius: 999, fontSize: 12, fontWeight: 700,
-                       border: 'none', cursor: 'pointer', padding: '7px 14px',
+              style={{ borderRadius: 999, fontSize: 12.5, fontWeight: 700,
+                       border: 'none', cursor: 'pointer', padding: '11px 18px',
                        background: GREEN, color: '#fff',
                        opacity: res.trim() ? 1 : 0.5 }}>
         ✓ {t('ops.markCorrected')}
       </button>
       <button disabled={!res.trim()} data-testid="ops-dismiss"
               onClick={() => onResolve(issue.id, 'dismissed', res.trim())}
-              style={{ borderRadius: 999, fontSize: 12, fontWeight: 700,
+              style={{ borderRadius: 999, fontSize: 12.5, fontWeight: 700,
                        border: `1px solid ${GRAY}`, cursor: 'pointer',
-                       padding: '7px 14px', background: '#fff', color: GRAY,
+                       padding: '11px 18px', background: '#fff', color: GRAY,
                        opacity: res.trim() ? 1 : 0.5 }}>
         {t('ops.dismiss')}
       </button>
@@ -1088,7 +1093,8 @@ export default function QualityConsole() {
         </div>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: 6, margin: '20px 0 18px',
+        <div className="ops-tabs"
+             style={{ display: 'flex', gap: 6, margin: '20px 0 18px',
                       background: '#fff', border: `1px solid ${BORDER}`,
                       borderRadius: 999, padding: 4, width: 'fit-content',
                       maxWidth: '100%', overflowX: 'auto' }}>

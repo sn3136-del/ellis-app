@@ -227,8 +227,16 @@ function DateField({ value, onChange, lang, placeholder }) {
   const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
   const nav = (delta) => setView((v) => new Date(v.getFullYear(), v.getMonth() + delta, 1))
   const navBtn = { border: 'none', background: 'transparent', color: NAVY,
-                   fontSize: 16, fontWeight: 800, cursor: 'pointer',
-                   padding: '4px 10px', borderRadius: 8 }
+                   fontSize: 18, fontWeight: 800, cursor: 'pointer',
+                   padding: '9px 14px', borderRadius: 8 }
+  // On a phone the field sits low in the form: bring the month grid into
+  // view when it opens, or the reader taps a calendar they cannot see.
+  const popRef = useRef(null)
+  useEffect(() => {
+    if (open && popRef.current?.scrollIntoView) {
+      popRef.current.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    }
+  }, [open])
   return (
     <div ref={boxRef} style={{ position: 'relative' }}>
       <input className="input" value={value} inputMode="numeric"
@@ -247,11 +255,11 @@ function DateField({ value, onChange, lang, placeholder }) {
         📅
       </button>
       {open && (
-        <div className="card"
+        <div className="card" ref={popRef}
              style={{ position: 'absolute', zIndex: 40, top: '100%', left: 0,
                       marginTop: 4, padding: 12,
                       width: 'min(300px, calc(100vw - 48px))',
-                      background: 'var(--bg, #fff)',
+                      background: '#fff',
                       boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
           <div style={{ display: 'flex', alignItems: 'center',
                         justifyContent: 'space-between', marginBottom: 8 }}>
@@ -278,8 +286,8 @@ function DateField({ value, onChange, lang, placeholder }) {
                         onClick={() => { onChange(fmt(d)); setOpen(false) }}
                         style={{ border: isToday && !isSel
                                    ? `1px solid ${BLUE}` : 'none',
-                                 borderRadius: 8, fontSize: 13,
-                                 padding: '7px 0', cursor: past ? 'default' : 'pointer',
+                                 borderRadius: 8, fontSize: 13.5,
+                                 padding: '11px 0', cursor: past ? 'default' : 'pointer',
                                  background: isSel ? NAVY : 'transparent',
                                  color: isSel ? '#fff' : past ? '#c3ccd9' : NAVY,
                                  fontWeight: isSel || isToday ? 700 : 500 }}>
@@ -364,18 +372,21 @@ function CountryCombo({ value, options, onChange, placeholder, noMatch, testid }
           } else if (e.key === 'Escape') { setOpen(false); setQ('') }
         }}
         onBlur={() => { blurTimer.current = setTimeout(resolveOnBlur, 150) }} />
-      {open && (
+      {/* The list appears only once the reader TYPES: an empty-query list
+          floated invisibly over the controls below and swallowed their taps
+          (a phone user tapping the calendar icon added a transit country). */}
+      {open && q.trim() !== '' && (
         <div className="card" style={{ position: 'absolute', zIndex: 40,
           top: '100%', left: 0, right: 0, maxHeight: 236, overflowY: 'auto',
-          marginTop: 4, background: 'var(--bg)',
+          marginTop: 4, background: '#fff', border: '1px solid #e4eaf3',
           boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
           {filtered.length === 0
-            ? <div style={{ padding: 10, fontSize: 13, color: GRAY }}>{noMatch}</div>
+            ? <div style={{ padding: 12, fontSize: 13, color: GRAY }}>{noMatch}</div>
             : filtered.map((o, i) => (
                 <div key={o.value}
                   onMouseDown={(e) => { e.preventDefault(); commit(o) }}
                   onMouseEnter={() => setHi(i)}
-                  style={{ padding: '8px 12px', cursor: 'pointer', fontSize: 13.5,
+                  style={{ padding: '11px 12px', cursor: 'pointer', fontSize: 13.5,
                            background: i === hi ? 'var(--bg-soft)'
                              : o.value === value ? 'var(--bg-soft)' : undefined }}>
                   {o.label}
@@ -824,13 +835,17 @@ export default function TravelDatabase({ onBack }) {
         </div>
       )}
 
-      {!result && (
       <div style={{ marginTop: 0 }}>
-        <div style={{ margin: '0 0 22px' }}><EllisMark /></div>
+        {!result && <div style={{ margin: '10px 0 22px' }}><EllisMark /></div>}
+        {/* The ask box stays on the ANSWER page too: a follow-up like
+            "那费用多少" carries the route on screen with it (the context
+            travels in askQuestion), so nobody has to start over to ask a
+            second question. */}
         <div className="card anim-rise" style={{ padding: '20px 24px',
                                                  borderRadius: 20,
                                                  maxWidth: 560, marginLeft: 'auto',
-                                                 marginRight: 'auto' }}
+                                                 marginRight: 'auto',
+                                                 marginBottom: result ? 18 : 0 }}
              data-testid="database-ask">
           <div style={{ fontSize: 13, fontWeight: 700, color: NAVY,
                         marginBottom: 8, textAlign: 'left' }}>{t('db.askTitle')}</div>
@@ -861,10 +876,13 @@ export default function TravelDatabase({ onBack }) {
               <Loading label="" />
             </div>
           )}
-          <div style={{ fontSize: 11.5, color: GRAY, marginTop: 10,
-                        textAlign: 'center' }}>{t('db.askOr')}</div>
+          {!result && (
+            <div style={{ fontSize: 11.5, color: GRAY, marginTop: 10,
+                          textAlign: 'center' }}>{t('db.askOr')}</div>
+          )}
         </div>
 
+        {!result && (
         <div className="card anim-rise" style={{ padding: '26px 28px',
                                                  borderRadius: 20, marginTop: 14,
                                                  maxWidth: 560, marginLeft: 'auto',
@@ -927,14 +945,19 @@ export default function TravelDatabase({ onBack }) {
                               marginBottom: 2 }}>
                   {transit.map((c) => (
                     <span key={c} style={{ fontSize: 12.5, fontWeight: 700,
-                          padding: '4px 10px', borderRadius: 999,
+                          padding: '4px 2px 4px 10px', borderRadius: 999,
                           background: '#eef4ff', color: NAVY,
-                          display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+                          display: 'inline-flex', gap: 2, alignItems: 'center' }}>
                       {countryName(c)}
-                      <span role="button" tabIndex={0}
+                      {/* A real button with a finger-sized hit area; the
+                          negative margins keep the chip visually compact. */}
+                      <button type="button" aria-label={`remove ${countryName(c)}`}
                             onClick={() => setTransit(transit.filter((x) => x !== c))}
                             style={{ cursor: 'pointer', color: GRAY,
-                                     fontWeight: 800 }}>×</span>
+                                     border: 'none', background: 'transparent',
+                                     fontWeight: 800, fontSize: 16, lineHeight: 1,
+                                     padding: '10px 12px', margin: '-8px 0',
+                                     borderRadius: 999 }}>×</button>
                     </span>
                   ))}
                 </div>
@@ -976,14 +999,18 @@ export default function TravelDatabase({ onBack }) {
             </div>
           )}
         </div>
+        )}
       </div>
-      )}
 
       {result && g && (
         <div className="anim-rise" data-testid="database-result">
-          {/* Verdict hero */}
+          {/* Verdict hero. While a switch or cold re-ask is in flight it
+              dims hard: the verdict on screen is for a DIFFERENT document
+              or purpose, and on a phone it fills the viewport. */}
           <div className="card" style={{ padding: '36px 36px', borderRadius: 22,
                                          marginTop: 20, textAlign: 'center',
+                                         opacity: (busy || switching) ? 0.3 : 1,
+                                         transition: 'opacity .2s ease',
                                          background: disp?.tint || '#eef4ff',
                                          border: 'none' }}>
             <div style={{ fontSize: 13, color: NAVY, fontWeight: 700,
@@ -1051,7 +1078,7 @@ export default function TravelDatabase({ onBack }) {
             <select className="select" value={doc} disabled={busy}
                     data-testid="database-switch-doc"
                     onChange={(e) => switchDoc(e.target.value)}
-                    style={{ fontSize: 13, padding: '7px 12px', borderRadius: 10 }}>
+                    style={{ fontSize: 13.5, padding: '10px 12px', borderRadius: 10 }}>
               {(docTypes.length ? docTypes
                 : [{ code: 'ordinary_passport', name: 'Ordinary passport' }])
                 .map((d) => (
@@ -1065,7 +1092,7 @@ export default function TravelDatabase({ onBack }) {
             <select className="select" value={purpose} disabled={busy}
                     data-testid="database-switch-purpose"
                     onChange={(e) => switchPurpose(e.target.value)}
-                    style={{ fontSize: 13, padding: '7px 12px', borderRadius: 10 }}>
+                    style={{ fontSize: 13.5, padding: '10px 12px', borderRadius: 10 }}>
               {PURPOSES.map(([v, k]) => <option key={v} value={v}>{t(k)}</option>)}
             </select>
             {busy && (
@@ -1317,8 +1344,10 @@ export default function TravelDatabase({ onBack }) {
               return (
                 <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start',
                               flexWrap: 'wrap' }}>
-                  <div style={{ flex: '1 1 340px', minWidth: 340 }}>{left}</div>
-                  <div style={{ flex: '1 1 340px', minWidth: 340 }}>{right}</div>
+                  <div style={{ flex: '1 1 340px',
+                                minWidth: 'min(340px, 100%)' }}>{left}</div>
+                  <div style={{ flex: '1 1 340px',
+                                minWidth: 'min(340px, 100%)' }}>{right}</div>
                 </div>
               )
             })()}
@@ -1348,7 +1377,10 @@ export default function TravelDatabase({ onBack }) {
                           <a href={g.official_portal_url} target="_blank"
                              rel="noreferrer"
                              style={{ marginLeft: 8, color: BLUE, fontWeight: 700,
-                                      whiteSpace: 'nowrap' }}>
+                                      whiteSpace: 'nowrap',
+                                      display: 'inline-block',
+                                      padding: '8px 6px',
+                                      margin: '-8px 0 -8px 8px' }}>
                             {t('db.portalInline')} ↗
                           </a>
                         )}
@@ -1358,8 +1390,9 @@ export default function TravelDatabase({ onBack }) {
                 </ol>
                 {g.official_portal_url && portalStepIndex === -1 && (
                   <a href={g.official_portal_url} target="_blank" rel="noreferrer"
-                     style={{ display: 'inline-block', marginTop: 10, color: BLUE,
-                              fontSize: 13.5, fontWeight: 700 }}>
+                     style={{ display: 'inline-block', marginTop: 6, color: BLUE,
+                              fontSize: 13.5, fontWeight: 700,
+                              padding: '10px 10px 10px 0' }}>
                     {t('db.portalStart')} ↗
                   </a>
                 )}
@@ -1391,7 +1424,9 @@ export default function TravelDatabase({ onBack }) {
               <span style={{ fontWeight: 800 }}>{t('db.verifiedTitle')}</span>{' '}
               {t('db.verifiedOn', { date: result.source_verified.verified_at })}{' '}
               <a href={result.source_verified.source_url} target="_blank"
-                 rel="noreferrer" style={{ color: '#0f8a3d' }}>
+                 rel="noreferrer" style={{ color: '#0f8a3d',
+                                           display: 'inline-block',
+                                           padding: '8px 6px', margin: '-8px 0' }}>
                 {t('db.verifiedSource')}
               </a>
               {/* The correction note (what the model had wrong) is hidden by
@@ -1418,6 +1453,8 @@ export default function TravelDatabase({ onBack }) {
                   {' '}
                   <a href={result.grounded_check.source_url} target="_blank"
                      rel="noreferrer" style={{ color: GRAY,
+                                               display: 'inline-block',
+                                               padding: '10px 8px', margin: '-10px 0',
                                                textDecoration: 'underline' }}>
                     {t('db.verifiedSource')}
                   </a>
@@ -1434,7 +1471,9 @@ export default function TravelDatabase({ onBack }) {
             <div style={{ fontSize: 12, color: GRAY, marginTop: 16,
                           textAlign: 'center' }}>
               <a href={g.source_url} target="_blank" rel="noreferrer"
-                 style={{ color: GRAY, textDecoration: 'underline' }}>
+                 style={{ color: GRAY, textDecoration: 'underline',
+                          display: 'inline-block',
+                          padding: '10px 8px', margin: '-10px 0' }}>
                 {t('db.source')}
               </a>
             </div>

@@ -513,9 +513,36 @@ body { background: var(--bg-soft); }
   -webkit-app-region: drag;
 }
 .triptop > * { -webkit-app-region: no-drag; }
-.triptop__logo { height: 34px; display: block; }
+.triptop__logo { height: 34px; display: block; flex: none; }
+.triptop__right { display: flex; align-items: center; gap: 12px; min-width: 0; }
 /* The Ellis skyline mark: static, centered above the ask box. */
 .ellis-mark { display: flex; justify-content: center; }
+
+/* Surface-switcher pills (database <-> quality console <-> status page). */
+.surfpill {
+  border: 1px solid #dbe3ee; background: #fff; cursor: pointer;
+  border-radius: 999px; font-size: 12.5px; font-weight: 700; padding: 7px 14px;
+  color: var(--trip-navy, #0f294d); white-space: nowrap; text-decoration: none;
+}
+.surfnav { display: flex; gap: 8px; align-items: center; }
+
+/* Phone header: everything must FIT the viewport. The pills and the language
+   picker compress first; below 400px the header wraps to two rows rather
+   than ever pushing the language picker off-screen. */
+@media (max-width: 700px) {
+  .triptop { padding: 0 12px; }
+  .triptop__right { gap: 6px; }
+  .surfnav { gap: 6px; }
+  .surfpill { font-size: 11.5px; padding: 8px 10px; }
+  .langpick__btn { padding: 8px 10px; font-size: 12px; gap: 5px; }
+}
+@media (max-width: 420px) {
+  .triptop { flex-wrap: wrap; height: auto; min-height: 0;
+             padding: 8px 10px; row-gap: 4px; justify-content: center; }
+  .triptop__logo { height: 24px; margin-right: auto; }
+  .surfpill { font-size: 11px; padding: 7px 9px; }
+  .langpick__btn { padding: 7px 9px; }
+}
 
 /* ---------- Language picker ---------- */
 .langpick { position: relative; }
@@ -523,15 +550,26 @@ body { background: var(--bg-soft); }
   display: inline-flex; align-items: center; gap: 8px;
   border: 1px solid #d9e4f2; background: #fff; color: var(--trip-navy);
   border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 600;
+  white-space: nowrap;
   transition: background .15s ease, box-shadow .15s ease;
 }
 .langpick__btn:hover { background: #f0f6ff; }
 .langpick__menu {
   position: absolute; right: 0; top: calc(100% + 8px); z-index: 60;
   background: #fff; border-radius: 14px; box-shadow: 0 10px 40px rgba(15,41,77,0.18);
-  padding: 8px; width: 230px; max-height: 380px; overflow-y: auto;
+  padding: 8px; width: 230px; max-width: calc(100vw - 24px);
+  max-height: 380px; overflow-y: auto;
   animation: rise .18s ease;
 }
+
+/* Ops tab pills scroll if they must, without a visible scrollbar track. */
+.ops-tabs { scrollbar-width: none; -ms-overflow-style: none; }
+.ops-tabs::-webkit-scrollbar { display: none; }
+/* An expanded record row lives inside the table's wide scroll area; on a
+   phone this pins the detail card to the viewport instead of letting it
+   ride 870px of sideways panning. */
+.ops-rowdetail { position: sticky; left: 0; max-width: calc(100vw - 72px); }
+@media (min-width: 900px) { .ops-rowdetail { max-width: none; } }
 .langpick__item {
   display: flex; align-items: center; justify-content: space-between; width: 100%;
   padding: 9px 12px; border: none; background: transparent; border-radius: 9px;

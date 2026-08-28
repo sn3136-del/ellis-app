@@ -125,27 +125,20 @@ export function EllisMark() {
  *  makes the in-app hops instant; the status page is its own URL. */
 function SurfaceNav({ view }) {
   const { t, lang } = useLocale()
-  const pill = {
-    border: '1px solid #dbe3ee', background: '#fff', cursor: 'pointer',
-    borderRadius: 999, fontSize: 12.5, fontWeight: 700, padding: '7px 14px',
-    color: 'var(--trip-navy, #0f294d)', whiteSpace: 'nowrap',
-    textDecoration: 'none',
-  }
   return (
-    <nav style={{ display: 'flex', gap: 8, alignItems: 'center' }}
-         data-testid="surface-nav">
+    <nav className="surfnav" data-testid="surface-nav">
       {view === 'quality' ? (
-        <button style={pill} data-testid="nav-database"
+        <button className="surfpill" data-testid="nav-database"
                 onClick={() => { window.location.hash = '#database' }}>
           {t('nav.db')}
         </button>
       ) : (
-        <button style={pill} data-testid="nav-ops"
+        <button className="surfpill" data-testid="nav-ops"
                 onClick={() => { window.location.hash = '#ops' }}>
           {t('nav.ops')}
         </button>
       )}
-      <a style={pill} data-testid="nav-status"
+      <a className="surfpill" data-testid="nav-status"
          href={`/api/health/uptime?lang=${encodeURIComponent(lang)}`}>
         {t('nav.status')}
       </a>
@@ -213,7 +206,7 @@ function AppInner() {
         {demoMode && <SimulatedBanner />}
         <header className="triptop" data-testid="triptop">
           <img className="triptop__logo" src={tripcomLogo} alt="Trip.com" />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div className="triptop__right">
             <SurfaceNav view={view} />
             <LanguagePicker />
           </div>

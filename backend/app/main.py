@@ -239,25 +239,40 @@ def health_uptime(request: Request, format: str = "", lang: str = "zh-CN"):
   .dot {{ display: inline-block; width: 10px; height: 10px; border-radius: 99px;
           background: {color}; margin-right: 8px; }}
   .langs {{ float: right; font-size: 12.5px; color: #64748b; }}
-  .langs a {{ font-weight: 400; margin-left: 8px; }}
-  .langs strong {{ margin-left: 8px; }}
+  /* Every control is a finger-sized target, not a 15px text sliver. */
+  .langs a, .langs strong {{ display: inline-block; padding: 10px 7px;
+                             margin: -10px 0 -10px 1px; border-radius: 8px; }}
+  .tablewrap {{ overflow-x: auto; margin: 0 -8px; padding: 0 8px; }}
   table {{ width: 100%; border-collapse: collapse; font-size: 13.5px; }}
   th {{ text-align: left; font-size: 11px; letter-spacing: .06em;
         text-transform: uppercase; color: #64748b; padding: 8px 10px;
-        border-bottom: 2px solid #e5eaf2; }}
-  td {{ padding: 9px 10px; border-bottom: 1px solid #eef2f8; }}
+        white-space: nowrap; border-bottom: 2px solid #e5eaf2; }}
+  td {{ padding: 9px 10px; border-bottom: 1px solid #eef2f8;
+        white-space: nowrap; }}
   .num {{ text-align: right; font-variant-numeric: tabular-nums; }}
   th.num {{ text-align: right; }}
   a {{ color: #287dfa; font-weight: 700; text-decoration: none; }}
+  .jsonlink {{ display: inline-block; padding: 10px 8px; }}
+  @media (max-width: 560px) {{
+    body {{ padding: 16px 10px; }}
+    .card {{ padding: 18px 16px; border-radius: 14px; }}
+    .hero {{ font-size: 42px; }}
+    .langs {{ float: none; display: block; margin: 0 0 12px;
+              text-align: left; }}
+    .langs a, .langs strong {{ margin: 0 6px 0 0; padding: 10px 7px 10px 0; }}
+    th, td {{ padding: 8px 6px; font-size: 12.5px; }}
+    th {{ letter-spacing: 0; }}
+  }}
 </style></head><body><div class="wrap">
 <div class="card">
-  <div class="langs"><a href="/#database">{L['nav_db']}</a> <a href="/#ops">{L['nav_ops']}</a> <span style="color:#c3cddd">|</span> {picker}</div>
+  <div class="langs"><a href="/">{L['nav_db']}</a> <a href="/#ops">{L['nav_ops']}</a> <span style="color:#c3cddd">|</span> {picker}</div>
   <h1><span class="dot"></span>{L['heading']}</h1>
   <div class="muted" style="margin-top:4px">ellis-visa.com · {L['tagline']}</div>
   <div class="hero" style="margin-top:18px">{hero}</div>
   <div class="muted" style="margin-top:6px">{sub} · {L['incidents'].format(n=data['incidents'])}</div>
 </div>
 <div class="card">
+  <div class="tablewrap">
   <table>
     <tr><th>{L['month']}</th><th class="num">{L['probes']}</th>
         <th class="num">{L['ok']}</th>
@@ -265,9 +280,10 @@ def health_uptime(request: Request, format: str = "", lang: str = "zh-CN"):
         <th class="num">{L['latency']}</th></tr>
     {rows}
   </table>
+  </div>
 </div>
 <div class="muted" style="text-align:center">
-  {L['note']} · <a href="?format=json">JSON</a>
+  {L['note']} · <a class="jsonlink" href="?format=json">JSON</a>
 </div>
 </div></body></html>"""
     return HTMLResponse(html)
@@ -802,7 +818,11 @@ def travel_database_freshness(db=Depends(get_session),
             "summary": {
                 "total": len(rows),
                 "stale": sum(1 for x in rows if x["stale"]),
-                "grounded": sum(1 for x in rows if x["grounded"]),
+                # Disjoint tiers: an answer that is BOTH human-verified and
+                # machine-grounded counts once, in the higher tier — summed
+                # coverage must never read as 108% of the answers.
+                "grounded": sum(1 for x in rows
+                                if x["grounded"] and not x["human_override"]),
                 "human_verified": sum(1 for x in rows if x["human_override"]),
                 "disputed": sum(1 for x in rows if x["disputed_fields"]),
             }}
