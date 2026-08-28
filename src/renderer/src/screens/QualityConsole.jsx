@@ -547,6 +547,30 @@ function IssueActions({ issue, onResolve, t }) {
   )
 }
 
+function BandCell({ children, delay = 0 }) {
+  return (
+    <div className="ops-fade" style={{ padding: '20px 24px', minWidth: 0,
+                                       animationDelay: `${delay}ms` }}>
+      {children}
+    </div>
+  )
+}
+
+function BandLabel({ children }) {
+  return (
+    <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1,
+                  color: GRAY, textTransform: 'uppercase',
+                  whiteSpace: 'nowrap' }}>{children}</div>
+  )
+}
+
+function BandBig({ children, color = NAVY }) {
+  return (
+    <div style={{ fontSize: 30, fontWeight: 700, marginTop: 8,
+                  lineHeight: 1, color }}>{children}</div>
+  )
+}
+
 function RingGauge({ pct, target, size = 74, hitColor = GREEN }) {
   const [go, setGo] = useState(false)
   useEffect(() => { const id = setTimeout(() => setGo(true), 140)
@@ -882,25 +906,12 @@ export default function QualityConsole() {
                 else if (r.source_check === 'reference') tiers.ref++
                 else tiers.un++
               }
-              const Cell = ({ children, delay = 0 }) => (
-                <div className="ops-fade" style={{ padding: '20px 24px',
-                      minWidth: 0, animationDelay: `${delay}ms` }}>{children}</div>
-              )
-              const Label = ({ children }) => (
-                <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1,
-                              color: GRAY, textTransform: 'uppercase',
-                              whiteSpace: 'nowrap' }}>{children}</div>
-              )
-              const Big = ({ children, color = NAVY }) => (
-                <div style={{ fontSize: 30, fontWeight: 700, marginTop: 8,
-                              lineHeight: 1, color }}>{children}</div>
-              )
               return (
                 <div style={{ ...card, display: 'grid',
                               gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
-                  <Cell delay={0}>
-                    <Label>{t('ops.stat.records')}</Label>
-                    <Big>{totalCount.toLocaleString()}</Big>
+                  <BandCell delay={0}>
+                    <BandLabel>{t('ops.stat.records')}</BandLabel>
+                    <BandBig>{totalCount.toLocaleString()}</BandBig>
                     <div style={{ marginTop: 12 }}>
                       <MicroStack segs={[
                         [req.free, '#1d4ed8', t('ops.req.free')],
@@ -909,9 +920,9 @@ export default function QualityConsole() {
                         [req.cond, '#d9e7fd', t('ops.req.conditional')],
                       ]} />
                     </div>
-                  </Cell>
-                  <Cell delay={80}>
-                    <Label>{t('ops.stat.complete')}</Label>
+                  </BandCell>
+                  <BandCell delay={80}>
+                    <BandLabel>{t('ops.stat.complete')}</BandLabel>
                     <div style={{ display: 'flex', alignItems: 'center',
                                   gap: 14, marginTop: 6 }}>
                       <RingGauge pct={(s.completeness_rate || 0) * 100} target={99} />
@@ -922,9 +933,9 @@ export default function QualityConsole() {
                         </div>
                       </div>
                     </div>
-                  </Cell>
-                  <Cell delay={160}>
-                    <Label>{t('ops.stat.sources')}</Label>
+                  </BandCell>
+                  <BandCell delay={160}>
+                    <BandLabel>{t('ops.stat.sources')}</BandLabel>
                     <div style={{ display: 'flex', alignItems: 'center',
                                   gap: 14, marginTop: 6 }}>
                       <RingGauge pct={(s.source_coverage || 0) * 100} target={100} />
@@ -935,10 +946,10 @@ export default function QualityConsole() {
                         </div>
                       </div>
                     </div>
-                  </Cell>
-                  <Cell delay={240}>
-                    <Label>{t('ops.stat.substantiated')}</Label>
-                    <Big color={BLUE}>{(s.substantiated ?? 0).toLocaleString()}</Big>
+                  </BandCell>
+                  <BandCell delay={240}>
+                    <BandLabel>{t('ops.stat.substantiated')}</BandLabel>
+                    <BandBig color={BLUE}>{(s.substantiated ?? 0).toLocaleString()}</BandBig>
                     <div style={{ marginTop: 12 }}>
                       <MicroStack segs={[
                         [tiers.hq, '#1d4ed8', t('ops.check.quoted')],
@@ -947,9 +958,9 @@ export default function QualityConsole() {
                         [tiers.un, '#e4edfc', t('ops.check.none')],
                       ]} />
                     </div>
-                  </Cell>
-                  <Cell delay={320}>
-                    <Label>{t('ops.stat.confidence')}</Label>
+                  </BandCell>
+                  <BandCell delay={320}>
+                    <BandLabel>{t('ops.stat.confidence')}</BandLabel>
                     <div style={{ marginTop: 12 }}>
                       <MicroStack height={10} segs={[
                         [s.high, SEQ.high, t('ops.conf.high')],
@@ -960,7 +971,7 @@ export default function QualityConsole() {
                     <div style={{ fontSize: 11, color: GRAY, marginTop: 9 }}>
                       {t('ops.stat.confidenceSub')}
                     </div>
-                  </Cell>
+                  </BandCell>
                 </div>
               )
             })()}
