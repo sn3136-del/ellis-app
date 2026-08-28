@@ -144,7 +144,7 @@ test('App.jsx imports no deleted screens and has no role selection', () => {
 
 test('the demo banner string exists in the i18n en locale exactly once', () => {
   const i18n = readFileSync(join(RENDERER_SRC, 'lib/i18n.js'), 'utf-8')
-  const BANNER = 'SIMULATED PORTAL — NO REAL APPLICATION, PAYMENT, APPOINTMENT OR SUBMISSION'
+  const BANNER = 'SIMULATED PORTAL: NO REAL APPLICATION, PAYMENT, APPOINTMENT OR SUBMISSION'
   const count = i18n.split(BANNER).length - 1
   assert.equal(count, 1, `banner string must appear exactly once in i18n.js (en locale); found ${count}`)
 })

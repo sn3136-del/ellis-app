@@ -46,13 +46,13 @@ def _provide(answer):
 def test_lookup_returns_the_answer_and_its_cache_identity(client):
     _provide(ANSWER)
     r = client.post("/database/lookup", headers=READER,
-                    json={"nationality": "CHN", "destination": "KHM"})
+                    json={"nationality": "ISL", "destination": "BLZ"})
     assert r.status_code == 200
     body = r.json()
     assert body["guidance"]["disposition"] == "VISA_REQUIRED"
     assert body["guidance"]["visa_products"][0]["max_stay_days"] == 30
     # The identity the report/release loop binds to.
-    assert body["cache_key"].startswith("CHN|CHN|KHM|tourism|")
+    assert body["cache_key"].startswith("ISL|ISL|BLZ|tourism|")
 
 
 def test_a_held_answer_ships_no_claims(client, monkeypatch):
@@ -62,7 +62,7 @@ def test_a_held_answer_ships_no_claims(client, monkeypatch):
     monkeypatch.setenv("ELLIS_DATABASE_HOLD_LOW_CONFIDENCE", "1")
     _provide(dict(ANSWER, confidence="low"))
     r = client.post("/database/lookup", headers=READER,
-                    json={"nationality": "CHN", "destination": "BTN"})
+                    json={"nationality": "ISL", "destination": "BTN"})
     assert r.status_code == 200
     body = r.json()
     assert body["review_required"] is True
@@ -72,10 +72,10 @@ def test_a_held_answer_ships_no_claims(client, monkeypatch):
 def test_the_quality_loop_report_queue_correct_refresh(client):
     _provide(ANSWER)
     look = client.post("/database/lookup", headers=READER,
-                       json={"nationality": "CHN", "destination": "LAO"}).json()
+                       json={"nationality": "ISL", "destination": "FSM"}).json()
     # 1. The reader flags the answer they actually saw.
     rep = client.post("/database/report-issue", headers=READER,
-                      json={"nationality": "CHN", "destination": "LAO",
+                      json={"nationality": "ISL", "destination": "FSM",
                             "field": "government_fee", "note": "fee looks wrong",
                             "cache_key": look["cache_key"]})
     assert rep.status_code == 200
@@ -98,7 +98,7 @@ def test_the_quality_loop_report_queue_correct_refresh(client):
     # ...so the next lookup is a fresh decision, not the declared-wrong row.
     _provide(dict(ANSWER, government_fee={"amount": 60, "currency": "USD"}))
     again = client.post("/database/lookup", headers=READER,
-                        json={"nationality": "CHN", "destination": "LAO"}).json()
+                        json={"nationality": "ISL", "destination": "FSM"}).json()
     assert again["cached"] is False
     assert again["guidance"]["government_fee"]["amount"] == 60
 
@@ -107,24 +107,24 @@ def test_release_binds_to_the_exact_answer_via_its_key(client, monkeypatch):
     monkeypatch.setenv("ELLIS_DATABASE_HOLD_LOW_CONFIDENCE", "1")
     _provide(dict(ANSWER, confidence="low"))
     held = client.post("/database/lookup", headers=READER,
-                       json={"nationality": "CHN", "destination": "NPL",
+                       json={"nationality": "ISL", "destination": "NRU",
                              "arrival_date": "2026-12-01"}).json()
     assert held["review_required"] is True and held["guidance"] is None
     # The dated lookup's key differs from the undated one — the echo is what
     # makes the release reach the answer the operator reviewed.
     rel = client.post("/database/approve", headers=OTHER_ORG_ADMIN,
-                      json={"nationality": "CHN", "destination": "NPL",
+                      json={"nationality": "ISL", "destination": "NRU",
                             "cache_key": held["cache_key"],
                             "note": "checked against the official source"})
     assert rel.status_code == 200
     after = client.post("/database/lookup", headers=READER,
-                        json={"nationality": "CHN", "destination": "NPL",
+                        json={"nationality": "ISL", "destination": "NRU",
                               "arrival_date": "2026-12-01"}).json()
     assert after["review_required"] is False
     assert after["guidance"]["disposition"] == "VISA_REQUIRED"
     # A reader cannot release.
     deny = client.post("/database/approve", headers=READER,
-                       json={"nationality": "CHN", "destination": "NPL",
+                       json={"nationality": "ISL", "destination": "NRU",
                              "cache_key": held["cache_key"]})
     assert deny.status_code == 403
 
@@ -146,7 +146,7 @@ def test_by_default_a_low_confidence_answer_is_held_but_never_blank(client):
     a held card, never an error — and the operator queue sees the flag."""
     _provide(dict(ANSWER, confidence="low"))
     r = client.post("/database/lookup", headers=READER,
-                    json={"nationality": "CHN", "destination": "MNG"})
+                    json={"nationality": "ISL", "destination": "PLW"})
     assert r.status_code == 200                  # a response, always
     body = r.json()
     assert body["review_required"] is True      # flagged for operators
@@ -188,14 +188,14 @@ def test_the_database_answers_even_when_the_engine_fails(client):
     for the SAME passport and destination is served, marked approximate."""
     _provide(ANSWER)
     first = client.post("/database/lookup", headers=READER,
-                        json={"nationality": "CHN", "destination": "KHM"})
+                        json={"nationality": "ISL", "destination": "BLZ"})
     assert first.status_code == 200
 
     def boom(system, user):
         raise kimi_primary.GuidanceTimeout()
     kimi_primary.set_provider(boom)
     r = client.post("/database/lookup", headers=READER,
-                    json={"nationality": "CHN", "destination": "KHM",
+                    json={"nationality": "ISL", "destination": "BLZ",
                           "travel_purpose": "business"})
     assert r.status_code == 200, r.text
     body = r.json()
@@ -235,9 +235,12 @@ def test_overrides_do_not_claim_document_variants(client):
     """The CHN->GBR override is verified for ordinary passports. A diplomatic
     passport answer must not inherit it."""
     _provide(dict(ANSWER))
+    # (diplomatic now has its OWN verified override for this route, which is
+    # the intended behaviour; an emergency passport has none and must not
+    # inherit the ordinary-passport fact.)
     r = client.post("/database/lookup", headers=READER,
                     json={"nationality": "CHN", "destination": "GBR",
-                          "travel_document_type": "diplomatic_passport"})
+                          "travel_document_type": "emergency_passport"})
     assert r.json().get("source_verified") is None
 
 

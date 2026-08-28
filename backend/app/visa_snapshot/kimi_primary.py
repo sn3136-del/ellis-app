@@ -817,6 +817,11 @@ def _strip_visa_free_leftovers(guidance: dict) -> dict:
     from .verified_overrides import _APPLICATION_ONLY
     out = dict(guidance)
     for k in _APPLICATION_ONLY:
+        # "forms" survives: a visa-free route can still carry an ARRIVAL form
+        # (the SG Arrival Card, Malaysia's MDAC) and the entry-preparation
+        # checklist is built from it.
+        if k == "forms":
+            continue
         out.pop(k, None)
     out["appointment_required"] = False
     out["interview_required"] = False

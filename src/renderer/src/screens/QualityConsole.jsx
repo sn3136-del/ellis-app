@@ -19,6 +19,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createVisaClient } from '../lib/visaBackend.js'
 import { newSession } from '../lib/visaSession.js'
 import { useLocale } from '../lib/locale.jsx'
+import { useLocalizedCountries } from '../lib/countryNames.js'
 
 const NAVY = '#0f294d'
 const BLUE = '#287dfa'
@@ -98,7 +99,15 @@ function CountryFilter({ value, placeholder, onCommit, countries }) {
     document.addEventListener('mousedown', close)
     return () => document.removeEventListener('mousedown', close)
   }, [])
-  const commit = (v) => { onCommit(v); setOpen(false) }
+  const commit = (v) => {
+    // Whatever is committed resolves to a clean value: a picked label goes
+    // back to its code, a flag emoji is stripped, free text passes through
+    // for the server-side resolver.
+    const clean = String(v || '').replace(/^[^\p{L}\p{N}]+/u, '').trim()
+    const byLabel = countries.find((c) => c.label === v || c.label.endsWith(clean))
+    onCommit(byLabel ? byLabel.value : clean)
+    setOpen(false)
+  }
   return (
     <div ref={boxRef} style={{ position: 'relative' }}>
       <input value={text} placeholder={placeholder}
@@ -107,7 +116,7 @@ function CountryFilter({ value, placeholder, onCommit, countries }) {
                if (e.key === 'Enter') commit(matches[0]?.value ?? text)
                if (e.key === 'Escape') setOpen(false)
              }}
-             onBlur={() => { if (!open) onCommit(text) }}
+             onBlur={() => { if (!open) commit(text) }}
              style={{ ...input, width: 150 }} />
       {text && (
         <button onClick={() => { setText(''); commit('') }}
@@ -153,7 +162,7 @@ function FieldGrid({ rec }) {
                          fontFamily: 'ui-monospace, monospace', fontSize: 11 }}>{f}</span>
           <span style={{ color: NAVY, fontWeight: 600, overflow: 'hidden',
                          textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {String(rec[f] ?? '—')}
+            {String(rec[f] ?? '·')}
           </span>
         </div>
       ))}
@@ -178,7 +187,7 @@ function RecordRow({ rec, onFlag, t }) {
     Conditional: [t('ops.req.conditional'), AMBER],
   }
   const [checkLabel, checkColor] = CHECKS[rec.source_check] || CHECKS.reference
-  const [reqLabel, reqColor] = REQ[rec.visa_requirement] || ['—', GRAY]
+  const [reqLabel, reqColor] = REQ[rec.visa_requirement] || ['·', GRAY]
   return (
     <div style={{ ...card, overflow: 'hidden' }}>
       <div style={{ display: 'grid', alignItems: 'center', cursor: 'pointer',
@@ -200,7 +209,7 @@ function RecordRow({ rec, onFlag, t }) {
         <span style={{ color: NAVY, fontSize: 12.5, fontWeight: 600,
                        overflow: 'hidden', textOverflow: 'ellipsis',
                        whiteSpace: 'nowrap' }}>
-          {rec.visa_type_name || '—'}
+          {rec.visa_type_name || '·'}
         </span>
         <Chip color={CONF_COLOR[rec.confidence_level] || GRAY}>
           {rec.confidence_level}
@@ -243,7 +252,7 @@ const PAGE = 50
 
 export default function QualityConsole() {
   const client = useOpsClient()
-  const { t } = useLocale()
+  const { t, lang } = useLocale()
   const [tab, setTab] = useState('records')
   const [filters, setFilters] = useState({ nationality: '', destination: '',
                                            purpose: '', requirement: '',
@@ -263,10 +272,7 @@ export default function QualityConsole() {
       .catch(() => { if (live) setReg({ countries: [] }) })
     return () => { live = false }
   }, [client])
-  const countries = useMemo(() => (reg?.countries || []).map((c) => ({
-    value: c.alpha_3, label: `${c.flag ? c.flag + ' ' : ''}${c.name}`,
-    search: `${c.name} ${c.alpha_2 || ''} ${c.alpha_3}`.toLowerCase(),
-  })), [reg])
+  const countries = useLocalizedCountries(client, reg, lang)
 
   const qs = useCallback(() => new URLSearchParams(
     Object.fromEntries(Object.entries(filters).filter(([, v]) => v))
@@ -422,15 +428,15 @@ export default function QualityConsole() {
                 <StatTile label={t('ops.stat.complete')}
                           accent={s.completeness_rate >= 0.99 ? GREEN : AMBER}
                           value={s.completeness_rate != null
-                            ? `${Math.round(s.completeness_rate * 100)}%` : '—'}
+                            ? `${Math.round(s.completeness_rate * 100)}%` : '·'}
                           sub={t('ops.stat.completeSub')} />
                 <StatTile label={t('ops.stat.sources')}
                           accent={s.source_coverage >= 0.999 ? GREEN : AMBER}
                           value={s.source_coverage != null
-                            ? `${Math.round(s.source_coverage * 100)}%` : '—'}
+                            ? `${Math.round(s.source_coverage * 100)}%` : '·'}
                           sub={t('ops.stat.sourcesSub')} />
                 <StatTile label={t('ops.stat.substantiated')} accent={BLUE}
-                          value={s.substantiated ?? '—'}
+                          value={s.substantiated ?? '·'}
                           sub={t('ops.stat.substantiatedSub')} />
                 <StatTile label={t('ops.stat.confidence')}
                           value={`${s.high} / ${s.medium} / ${s.low}`}

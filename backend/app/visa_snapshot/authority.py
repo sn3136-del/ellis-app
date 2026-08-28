@@ -16,6 +16,21 @@ from urllib.parse import urlparse
 # only (host == suffix or host endswith "." + suffix). This is a curated,
 # versioned allowlist — additions require evidence review.
 GOV_SUFFIXES = (
+    # 2026-08-28 adjudication batch: national government portals and foreign
+    # ministries on non-gov TLDs, each opened and read before being listed.
+    "chinhphu.vn", "ireland.ie", "mfa.tj", "bahrain.bh", "cubaminrex.cu",
+    "govmu.org",
+    # Fee-verification batch: each opened and identified before listing.
+    # irishimmigration.ie is Ireland's Immigration Service Delivery;
+    # nyidanmark.dk the Danish Immigration Service; govern.ad Andorra's
+    # government; guichet.public.lu Luxembourg's state portal; mae.ro
+    # Romania's MFA; esteri.sm San Marino's foreign ministry; evisa.bj and
+    # visaburkina.bf official e-visa portals; cgrgba.gw a Guinea-Bissau
+    # consulate-general on the state ccTLD.
+    "irishimmigration.ie", "govern.ad", "nyidanmark.dk", "evisa.bj",
+    "cgrgba.gw", "guichet.public.lu", "mae.ro", "visaburkina.bf",
+    "esteri.sm",
+
     # generic
     "gov", "mil",
     # gov.<cc> / gob.<cc> / gouv.<cc> / go.<cc> and country-specific forms

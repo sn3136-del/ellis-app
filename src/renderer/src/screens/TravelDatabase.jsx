@@ -9,6 +9,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Loading } from '../components/ui.jsx'
 import { useLocale } from '../lib/locale.jsx'
+import { useLocalizedCountries } from '../lib/countryNames.js'
 import { createVisaClient } from '../lib/visaBackend.js'
 import { newSession } from '../lib/visaSession.js'
 
@@ -395,10 +396,7 @@ export default function TravelDatabase({ onBack }) {
     return () => { live = false }
   }, [])
 
-  const countries = useMemo(() => (reg?.countries || []).map((c) => ({
-    value: c.alpha_3, label: `${c.flag ? c.flag + ' ' : ''}${c.name}`,
-    search: `${c.name} ${c.alpha_2 || ''} ${c.alpha_3}`.toLowerCase(),
-  })), [reg])
+  const countries = useLocalizedCountries(client, reg, lang)
   const docTypes = reg?.travel_document_types || []
   const docLabel = (d) => {
     const code = d.code || d
@@ -1031,11 +1029,11 @@ export default function TravelDatabase({ onBack }) {
                         {vp.entry ? <span style={{ color: GRAY, fontWeight: 400 }}>
                           {' · ' + T(asText(vp.entry))}</span> : null}
                       </div>
-                      <div style={{ color: NAVY }}>{T(asText(vp.validity)) || '—'}</div>
+                      <div style={{ color: NAVY }}>{T(asText(vp.validity)) || '·'}</div>
                       <div style={{ color: NAVY }}>
                         {vp.max_stay_days
                           ? t('db.upToDays', { n: vp.max_stay_days })
-                          : (T(asText(vp.notes)) ? '' : '—')}
+                          : (T(asText(vp.notes)) ? '' : '·')}
                         {T(asText(vp.notes)) && (
                           <div style={{ color: GRAY, fontSize: 12,
                                         marginTop: 3, lineHeight: 1.45 }}>
@@ -1044,7 +1042,7 @@ export default function TravelDatabase({ onBack }) {
                         )}
                       </div>
                       <div style={{ color: NAVY, fontWeight: 600 }}>
-                        {feeText(vp.fee) || '—'}</div>
+                        {feeText(vp.fee) || '·'}</div>
                     </div>
                   ))}
                 </div>

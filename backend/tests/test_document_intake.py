@@ -8,6 +8,20 @@ import base64
 import time
 
 import pytest
+
+@pytest.fixture(autouse=True)
+def _no_shipped_overrides(tmp_path, monkeypatch):
+    """These tests exercise the journey MECHANICS with injected mock answers.
+    The shipped verified overrides are real data that rewrites dispositions
+    at serve time (USA->EGY became visa-on-arrival in the 2026-08-28 batch),
+    which turns a mock's exempt continuation into a different flow. Data
+    correctness has its own suites; here the overrides are pointed away."""
+    from app.visa_snapshot import verified_overrides as vo
+    monkeypatch.setattr(vo, "OVERRIDES", tmp_path / "none.json")
+    vo.reload()
+    yield
+    vo.reload()
+
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 

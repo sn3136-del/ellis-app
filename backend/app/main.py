@@ -670,7 +670,7 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
         # 中国: the registry first, then the ask box's alias table (which
         # carries the Chinese country names). An unresolvable term keeps its
         # literal form and simply matches nothing.
-        term = term.strip()
+        term = re.sub(r"^[^\w\u4e00-\u9fff]+", "", term.strip())
         got = iso3(term, default=None)
         if got:
             return got

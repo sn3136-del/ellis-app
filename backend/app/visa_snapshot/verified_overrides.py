@@ -54,8 +54,15 @@ OVERRIDABLE = frozenset({
 })
 
 
-def _key(nat: str, dest: str, purpose: str = "tourism") -> str:
-    return f"{str(nat).upper()}|{str(dest).upper()}|{str(purpose).lower()}"
+def _key(nat: str, dest: str, purpose: str = "tourism",
+         doc: str = "") -> str:
+    """Ordinary-passport facts key on route alone; a fact verified for a
+    SPECIFIC document (a diplomatic or service passport follows bilateral
+    agreements, not tourist rules) carries the document in its key and only
+    ever matches that document."""
+    base = f"{str(nat).upper()}|{str(dest).upper()}|{str(purpose).lower()}"
+    doc = str(doc or "").strip().lower()
+    return f"{base}|{doc}" if doc and doc != "ordinary_passport" else base
 
 
 _CACHE: dict = {"mtime": None, "table": {}}
@@ -102,7 +109,8 @@ def _load_table() -> dict:
         if not clean:
             continue
         table[_key(route["nationality"], route["destination"],
-                   route.get("travel_purpose", "tourism"))] = {
+                   route.get("travel_purpose", "tourism"),
+                   route.get("travel_document_type", ""))] = {
             "fields": clean, "source_url": url, "verified_at": when,
             "verified_by": str(r.get("verified_by") or "").strip(),
             "note": str(r.get("note") or "").strip()[:400],
@@ -116,16 +124,14 @@ def reload() -> None:
 
 
 def find(route: dict) -> dict | None:
-    # Overrides are verified for ORDINARY passports unless their route says
-    # otherwise. A diplomatic or service passport answer is a different
-    # policy; letting the ordinary-passport fact claim it produced "visa-free
-    # Japan, verified" records for diplomatic variants.
+    # A diplomatic or service passport answer is a different policy: it
+    # matches ONLY an override verified for that document. Ordinary-passport
+    # routes match only document-less overrides.
     doc = str(route.get("travel_document_type") or "ordinary_passport")
-    if doc not in ("", "ordinary_passport"):
-        return None
     return _table().get(_key(route.get("passport_nationality", ""),
                              route.get("destination_country", ""),
-                             route.get("travel_purpose", "tourism")))
+                             route.get("travel_purpose", "tourism"),
+                             doc))
 
 
 # Fields that only describe APPLYING for a visa. When a verified override

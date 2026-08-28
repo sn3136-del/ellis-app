@@ -661,7 +661,7 @@ def test_a_route_with_no_override_is_untouched_and_unmarked():
     route deliberately outside the shipped override set."""
     from app.visa_snapshot import verified_overrides as vo
     vo.reload()
-    route = {"passport_nationality": "CHN", "destination_country": "ISL",
+    route = {"passport_nationality": "ISL", "destination_country": "BTN",
              "travel_purpose": "tourism"}
     assert vo.find(route) is None, "pick a route with no shipped override"
     guidance = {"disposition": "VISA_REQUIRED"}
