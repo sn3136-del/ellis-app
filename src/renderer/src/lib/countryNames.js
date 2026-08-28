@@ -15,6 +15,15 @@ export function useLocalizedCountries(client, reg, lang) {
 
   useEffect(() => {
     if (!reg || lang === 'en') { setZh(null); return }
+    // The registry ships standardized names for the Chinese locales — no
+    // network round-trip, no wait, no model in the loop.
+    const key = lang === 'zh-Hant' ? 'name_hant' : 'name_zh'
+    if ((reg.countries || []).some((c) => c[key])) {
+      const m = {}
+      reg.countries.forEach((c) => { if (c[key]) m[c.alpha_3] = c[key] })
+      setZh(m)
+      return
+    }
     try {
       const cached = localStorage.getItem(LS(lang))
       if (cached) { setZh(JSON.parse(cached)); return }

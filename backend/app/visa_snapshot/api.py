@@ -105,7 +105,11 @@ def snapshot_registries(_: Principal = Depends(get_principal)):
     from .registry import load_registry
     countries = [{"alpha_2": c["alpha_2"], "alpha_3": c["alpha_3"],
                   "name": c.get("common_name") or c["name"], "flag": c.get("flag"),
-                  "is_territory": c["is_territory"]}
+                  "is_territory": c["is_territory"],
+                  # Standardized Chinese names, stored in the registry file —
+                  # the pickers must read 中国, not "China", without waiting
+                  # on a live translation call.
+                  "name_zh": c.get("name_zh"), "name_hant": c.get("name_hant")}
                  for c in load_registry("countries")["entries"]]
     nationalities = [{"code": n["code"], "name": n["name"], "kind": n["kind"]}
                      for n in load_registry("nationalities")["entries"]]

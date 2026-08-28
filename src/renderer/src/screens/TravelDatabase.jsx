@@ -773,8 +773,13 @@ export default function TravelDatabase({ onBack }) {
                 {t('db.travelDate')}{' '}
                 <span style={{ color: GRAY, fontWeight: 400 }}>({t('db.optional')})</span>
               </span>
-              <input className="input" type="date" value={arrival}
-                     onChange={(e) => setArrival(e.target.value)}
+              {/* A plain localized input, not the native date control:
+                  the browser's own picker writes mm/dd/yyyy in the BROWSER
+                  language regardless of the page language, which read as a
+                  translation failure. ISO dates are what the engine speaks. */}
+              <input className="input" value={arrival} inputMode="numeric"
+                     placeholder={t('db.datePlaceholder')}
+                     onChange={(e) => setArrival(e.target.value.trim())}
                      style={{ fontSize: 14, padding: '10px 14px', borderRadius: 12 }} />
             </label>
           </div>
