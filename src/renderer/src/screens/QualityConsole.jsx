@@ -275,7 +275,7 @@ function MissingLine({ missing, t }) {
     <div style={{ marginTop: 10 }}>
       <div style={{ fontSize: 12, color: RED, display: 'flex',
                     alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-        <span>{t('ops.missingRequired')}: {missing.join(', ')}</span>
+        <span>{t('ops.missingRequired')}: {missing.map((f) => fx(t, f)).join(', ')}</span>
         <button onClick={(e) => { e.stopPropagation(); setOpen((o) => !o) }}
                 aria-label="why" data-testid="ops-missing-info"
                 style={{ width: 16, height: 16, borderRadius: '50%',
@@ -297,7 +297,52 @@ function MissingLine({ missing, t }) {
   )
 }
 
-function FieldGrid({ rec }) {
+// Translated label for one of the 25 T-Station field keys; falls back to the
+// humanized key so an unmapped field is still readable, never snake_case.
+function fx(t, f) {
+  const k = 'ops.fx.' + f
+  return t(k) !== k ? t(k) : f.replace(/_/g, ' ')
+}
+
+function FieldGrid({ rec, t, typeNames = {} }) {
+  const UNIT = { Day: t('ops.u.day'), Hour: t('ops.u.hour'),
+                 Month: t('ops.u.month'), Year: t('ops.u.year'),
+                 'Calendar Day': t('ops.u.calDay'),
+                 'Working Day': t('ops.u.workDay') }
+  const METHOD = { 'Online Application': t('ops.ch.online'),
+                   'Embassy Submission': t('ops.ch.embassy'),
+                   'On-arrival Processing': t('ops.ch.arrival'),
+                   'Agency Service': t('ops.m.agency'),
+                   Other: t('ops.m.other') }
+  const REQV = { 'Visa-free': t('ops.req.free'),
+                 'Visa on Arrival': t('ops.req.voa'),
+                 'Visa Required in Advance': t('ops.req.advance'),
+                 Conditional: t('ops.req.conditional') }
+  const ENTRIES = { Single: t('ops.e.single'), Multiple: t('ops.e.multiple'),
+                    Unlimited: t('ops.e.unlimited') }
+  const show = (f) => {
+    const v = rec[f]
+    if (v == null || v === '') return '·'
+    if (f === 'travel_document_type') {
+      const k = 'db.doc.' + v
+      return t(k) !== k ? t(k) : String(v).replace(/_/g, ' ')
+    }
+    if (f === 'travel_purpose') {
+      const k = PURPOSE_KEY[v]
+      return k && t(k) !== k ? t(k) : String(v)
+    }
+    if (f === 'visa_requirement') return REQV[v] || String(v)
+    if (f === 'visa_type_name') return typeNames[v] || String(v)
+    if (f === 'validity_unit' || f === 'max_stay_unit' ||
+        f === 'processing_unit') return UNIT[v] || String(v)
+    if (f === 'entries') return ENTRIES[v] || String(v)
+    if (f === 'application_method') return METHOD[v] || String(v)
+    if (f === 'confidence_level') {
+      const k = 'ops.conf.' + String(v).toLowerCase()
+      return t(k) !== k ? t(k) : String(v)
+    }
+    return String(v)
+  }
   return (
     <div style={{ display: 'grid', gap: '6px 18px', marginTop: 4,
                   gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))' }}>
@@ -308,11 +353,13 @@ function FieldGrid({ rec }) {
                          fontWeight: 700, width: 12, flexShrink: 0 }}>
             {st === 'missing' ? '✗' : st === 'filled' ? '✓' : '·'}
           </span>
-          <span style={{ color: GRAY, width: 148, flexShrink: 0,
-                         fontFamily: 'ui-monospace, monospace', fontSize: 11 }}>{f}</span>
-          <span style={{ color: NAVY, fontWeight: 600, overflow: 'hidden',
+          <span title={f}
+                style={{ color: GRAY, width: 148, flexShrink: 0,
+                         fontSize: 11.5 }}>{fx(t, f)}</span>
+          <span title={String(rec[f] ?? '')}
+                style={{ color: NAVY, fontWeight: 600, overflow: 'hidden',
                          textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {String(rec[f] ?? '·')}
+            {show(f)}
           </span>
         </div>
       ))}
@@ -483,18 +530,26 @@ function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames 
                   </td>
                   <td style={{ padding: '10px 12px' }}>
                     <Chip color={checkColor} filled={false}>{checkLabel}</Chip>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 5,
-                                  marginTop: 4, fontSize: 10.5, color: GRAY }}>
-                      <span style={{ width: 7, height: 7, borderRadius: 99,
-                                     background: CONF_COLOR[rec.confidence_level] || GRAY,
-                                     display: 'inline-block' }} />
-                      {confLabel}
-                      <span style={{ color: '#c3cddd' }}>·</span>
-                      <span style={{ fontWeight: 700,
-                                     color: pctDone === 100 ? GREEN : AMBER }}>
-                        {pctDone}%
-                      </span>
-                    </div>
+                    {/* The sub-line appears only when it says something: a
+                        confidence below High, or an incomplete record. A row
+                        that is High and 100% needs no extra annotation. */}
+                    {(rec.confidence_level !== 'High' || pctDone < 100) && (
+                      <div style={{ display: 'flex', alignItems: 'center',
+                                    gap: 5, marginTop: 4, fontSize: 10.5,
+                                    color: GRAY }}>
+                        {rec.confidence_level !== 'High' && (
+                          <span>{t('ops.col.confidence')} {confLabel}</span>
+                        )}
+                        {rec.confidence_level !== 'High' && pctDone < 100 && (
+                          <span style={{ color: '#c3cddd' }}>·</span>
+                        )}
+                        {pctDone < 100 && (
+                          <span style={{ fontWeight: 700, color: AMBER }}>
+                            {pctDone}%
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </td>
                   <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>
                     {rec.source_url && (
@@ -522,7 +577,7 @@ function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames 
                     <td colSpan={7} style={{ background: '#fbfcfe',
                         borderBottom: `1px solid ${BORDER}`,
                         padding: '14px 18px' }}>
-                      <FieldGrid rec={rec} />
+                      <FieldGrid rec={rec} t={t} typeNames={typeNames} />
                       {missing.length > 0 && (
                         <MissingLine missing={missing} t={t} />
                       )}
@@ -786,6 +841,8 @@ export default function QualityConsole() {
       exceptions: t('ops.f.exceptions'),
       visa_products: t('ops.f.products'),
       operator_spot_check: t('ops.f.spotCheck'),
+      arrival_card: t('ops.f.arrivalCard'),
+      forms: t('ops.f.forms'),
     }
     const labels = String(f || '').split(',')
       .map((x) => M[x.trim()] || x.trim().replace(/_/g, ' '))
@@ -820,7 +877,15 @@ export default function QualityConsole() {
         high: t('ops.conf.high'), medium: t('ops.conf.medium'),
         low: t('ops.conf.low'),
       },
-      visa_category: typeNames || {},
+      visa_category: {
+        ...{
+          tourist_visa: t('ops.vc.tourist'), business_visa: t('ops.vc.business'),
+          work_visa: t('ops.vc.work'), student_visa: t('ops.vc.student'),
+          study_visa: t('ops.vc.student'), transit_visa: t('ops.vc.transit'),
+          family_visit_visa: t('ops.vc.family'),
+        },
+        ...(typeNames || {}),
+      },
     }
     return (MAPS[key] || {})[v] ?? (MAPS[key] || {})[v.trim?.()] ?? v
   }, [t, typeNames])
@@ -1157,6 +1222,9 @@ export default function QualityConsole() {
           }
           const fmtSays = (field, says, note) => {
             let v = String(says || '').trim().replace(/^"|"$/g, '')
+            // The monitor writes literal "null"/"None" when the page proposes
+            // clearing a value; show a placeholder, not the token.
+            if (/^(null|none|undefined)$/i.test(v)) return '·'
             if (/^[\[{]/.test(v)) {
               // A product-table proposal: name the visa types instead of
               // printing JSON (the note is capped, so parse may not work).
@@ -1195,12 +1263,17 @@ export default function QualityConsole() {
             Conditional: t('ops.req.conditional'),
           }[v] || v)
           const unitName = (u) => ({
-            Day: t('ops.u.day'), Month: t('ops.u.month'), Year: t('ops.u.year'),
+            Day: t('ops.u.day'), Hour: t('ops.u.hour'),
+            Month: t('ops.u.month'), Year: t('ops.u.year'),
+            'Calendar Day': t('ops.u.calDay'),
+            'Working Day': t('ops.u.workDay'),
           }[u] || u || '')
           const methodName = (v) => ({
-            Online: t('ops.ch.online'), 'Embassy/Consulate': t('ops.ch.embassy'),
-            'On arrival': t('ops.ch.arrival'), 'On Arrival': t('ops.ch.arrival'),
-            'Visa center': t('ops.ch.center'), Other: t('ops.m.other'),
+            'Online Application': t('ops.ch.online'),
+            'Embassy Submission': t('ops.ch.embassy'),
+            'On-arrival Processing': t('ops.ch.arrival'),
+            'Agency Service': t('ops.m.agency'),
+            Other: t('ops.m.other'),
           }[v] || v)
           const currentOf = (rec, field) => {
             if (!rec) return null

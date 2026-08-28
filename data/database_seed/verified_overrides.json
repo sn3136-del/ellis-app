@@ -26388,5 +26388,1412 @@
     }
    ]
   }
+ },
+ {
+  "route": {
+   "nationality": "TWN",
+   "destination": "MYS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.imi.gov.my/index.php/en/main-services/visa/visa-requirement-by-country/",
+  "note": "Current claim (visa-free, 30 days) holds. Taiwan does not appear on the Immigration Department of Malaysia's list of nationalities that must obtain a visa, so ordinary ROC passport holders enter visa-free. The 30-day figure is the extended limit Malaysia granted ROC passport holders (welcomed in a Taiwan MOFA statement and reflected in BOCA's current Malaysia country guidance); an older, now-archi",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Up to 30 days, non-extendable",
+   "permitted_stay_days": 30,
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "JPN",
+   "destination": "TWN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+  "note": "Current claim confirmed. BOCA page updated 2026-07-17. Japan is starred: \"Japan nationals who possess a passport valid for the intended period of stay are eligible for visa-exempt entry\" (i.e. the usual 6-month rule is relaxed to validity covering the stay). Duration starts the day after arrival and is not extendable; a confirmed onward/return ticket is required, and the online arrival card at twa",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Up to 90 days, not extendable",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "SGP",
+   "destination": "ESP",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.interior.gob.es/opencms/es/servicios-al-ciudadano/tramites-y-gestiones/extranjeria/control-de-fronteras/entrada-en-espana/",
+  "note": "Current claim confirmed. Spain's Interior Ministry makes the visa requirement apply only to nationalities on the Annex I list of Regulation (EU) 2018/1806; Singapore is in Annex II. The same site's border-crossing page states the exempt allowance verbatim: \"Si no están sujetos a la obligación de visado podrán circular durante 90 días dentro de cualquier periodo de 180 días, a partir de la fecha de",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "90 days in any 180-day period (Schengen-wide)",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "MYS",
+   "destination": "FRA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://france-visas.gouv.fr/en/visa-de-court-sejour",
+  "note": "Current claim confirmed. France-Visas' own rules engine (api.france-visas.gouv.fr, the back end of the official \"Check your visa need\" wizard) returns \"response\": false for nationality MYS, destination France, short stay, citing \"Règlement CE 539/2001 ... Annexe 5\" — i.e. no short-stay visa required. Its only caveat message is that some member states may require a visa for remunerated activity. ET",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "90 days in any 180-day period (Schengen-wide)",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "MYS",
+   "destination": "ESP",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.interior.gob.es/opencms/es/servicios-al-ciudadano/tramites-y-gestiones/extranjeria/control-de-fronteras/entrada-en-espana/",
+  "note": "Current claim confirmed. Spain requires a visa only from Annex I nationalities of Regulation (EU) 2018/1806; Malaysia is Annex II. Spain's Interior Ministry border-crossing page gives the exempt allowance verbatim: \"Si no están sujetos a la obligación de visado podrán circular durante 90 días dentro de cualquier periodo de 180 días, a partir de la fecha de la primera entrada.\" Cross-checked agains",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "90 days in any 180-day period (Schengen-wide)",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "THA",
+   "destination": "TWN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+  "note": "Current claim confirmed (BOCA page updated 2026-07-17). Conditions specific to Thai nationals: \"Holders of Brunei, Philippines and Thailand passports must have proof of accommodation (hotel) booking, host/sponsor's contact information and sufficient travel funds\", plus passport valid 6+ months and a confirmed onward/return ticket. Crew or service personnel reporting for duty are excluded, and visa",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Up to 14 days, not extendable; trial programme effective until 31 July 2027",
+   "permitted_stay_days": 14,
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "THA",
+   "destination": "RUS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.kdmid.ru/cons/visas/conditions-of-entry-foreign-citizens-in-russian-federation/",
+  "note": "Current claim confirmed. Source is the Consular Department of the Russian MFA's table \"Условия въезда и пребывания граждан иностранных государств в Российскую Федерацию\", marked \"По состоянию на июль 2026 года\" (as at July 2026). Basis is the Russia–Thailand agreement of 13.12.2005. Separately note the doc split for this pair: Thai diplomatic and service passport holders get 90 days (agreement of ",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Up to 30 days visa-free on an ordinary passport",
+   "permitted_stay_days": 30,
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "GBR",
+   "destination": "FRA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://france-visas.gouv.fr/en/visa-de-court-sejour",
+  "note": "Current claim confirmed. France-Visas' official rules engine returns \"response\": false for nationality GBR, destination France, short stay, citing Regulation (EU) No 509/2014 (which moved the UK into the visa-free annex). Its one caveat message reads: \"Unless: You are a beneficiary of the withdrawal agreement. In this case, please apply for a short stay visa 'beneficiary of the withdrawal agreemen",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "90 days in any 180-day period (Schengen-wide)",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "JPN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.moj.go.jp/isa/immigration/procedures/ttp2_pre-check_pre-check_document03.html",
+  "note": "Current claim confirmed. Source is the Immigration Services Agency of Japan (Ministry of Justice), which lists フランス共和国 (France) among the countries Japan applies visa exemption to and is not suspending. Stay length: the ISA's Temporary Visitor status page (moj.go.jp/isa/applications/status/temporaryvisitor.html) gives the period of stay as \"９０日若しくは３０日又は１５日\"; MOFA sets 15 days for Indonesia and Tha",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Temporary Visitor status, up to 90 days",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "VNM",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://mofa.gov.vn/tin-chi-tiet/chi-tiet/danh-muc-mien-thi-thuc-cua-viet-nam-voi-cac-nuoc-57162-172.html",
+  "note": "Current claim confirmed. Legal basis is Government Resolution No. 44/NQ-CP of 7 March 2025; the Government's own portal states the terms verbatim: \"citizens of these countries will be exempted from visas for a temporary stay period of 45 days from the date of entry, regardless of passport type and purpose of entry, on the basis of fully meeting the entry conditions as prescribed by Viet Nam's laws",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "45 days from date of entry; policy runs 15 March 2025 to 14 March 2028",
+   "permitted_stay_days": 45,
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "AUS",
+   "destination": "ESP",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.exteriores.gob.es/es/ServiciosAlCiudadano/Paginas/Servicios-consulares.aspx?scco=Australia&scd=42&scca=Visados&scs=Visado+de+estancia+(visado+Schengen)",
+  "note": "Current claim confirmed. Spanish MFA (exteriores.gob.es) country page for Australia. The 90 days is Schengen-wide and cumulative across all 29 Schengen states, not per-country — worth surfacing to travellers combining Spain with other Schengen stops. ETIAS does NOT yet apply: the EU Commission states on home-affairs.ec.europa.eu that 'The European Travel Information and Authorisation System (ETIAS",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "90 days in any 180-day period (Schengen-wide, cumulative across all Schengen states)",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": "EUR"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "CAN",
+   "destination": "THA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/0303/%E0%B8%9C.60.pdf",
+  "note": "TIME-CRITICAL — verified as of 2026-08-28 but actively changing. The 60-day list (93 countries, Dept of Consular Affairs, 15 July 2024) is still the published operative list. However mfa.go.th and consular.mfa.go.th both state the Cabinet approved on 19 May 2026 'revoking the 60-day visa exemption scheme for all 93 countries/territories', effective 15 days after publication of three Ministry of In",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Not exceeding 60 days (scheme ผ.60); Canada is entry 12 on the official list",
+   "permitted_stay_days": 60,
+   "government_fee": {
+    "amount": 0,
+    "currency": "THB"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "IND",
+   "destination": "THA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/0303/%E0%B8%9C.60.pdf",
+  "note": "TIME-CRITICAL and the highest-risk route in this batch. Verified visa-exempt 60 days today. But under the Cabinet decision of 19 May 2026 (mfa.go.th) India does not simply lose days — it changes DISPOSITION, dropping out of visa exemption entirely into the reduced 4-country Visa on Arrival list (15 days, fee payable). That flips this route from VISA_EXEMPT to VISA_ON_ARRIVAL the moment the Ministr",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Not exceeding 60 days (scheme ผ.60); India is entry 34 on the official list",
+   "permitted_stay_days": 60,
+   "government_fee": {
+    "amount": 0,
+    "currency": "THB"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "IDN",
+   "destination": "THA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/0303/%E0%B8%9C.60.pdf",
+  "note": "TIME-CRITICAL — same pending Thai revocation as the other THA routes. Verified 60 days today; Indonesia is named in the reduced 54-country 30-day list under the approved-but-unpublished scheme, so the expected landing point is 30 days rather than loss of exemption. Publication in the Royal Gazette not evidenced on any go.th source, and the gazette site could not be read directly. TDAC required and",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Not exceeding 60 days (scheme ผ.60); Indonesia is entry 35 on the official list",
+   "permitted_stay_days": 60,
+   "government_fee": {
+    "amount": 0,
+    "currency": "THB"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "PHL",
+   "destination": "TWN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.boca.gov.tw/fp-149-4486-7785a-2.html",
+  "note": "Current claim confirmed, but this route was one month from being wrong. The trial scheme ran only to 31 July 2026; MOFA Taiwan announced the renewal on 17 July 2026 extending it 1 Aug 2026 - 31 Jul 2027 (https://www.boca.gov.tw/cp-220-8253-ff790-2.html). It is renewed one year at a time, so this route needs a recurring re-check each July. Conditions BOCA attaches: passport valid at least 6 months ",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Up to 14 days, non-extendable; counted from the day after arrival",
+   "permitted_stay_days": 14,
+   "government_fee": {
+    "amount": 0,
+    "currency": "TWD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "VNM",
+   "destination": "THA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/0303/%E0%B8%9C.60.pdf",
+  "note": "TIME-CRITICAL — same pending Thai revocation. Verified 60 days today. Vietnam is a special case: alongside the tourist exemption it holds a bilateral Thailand-Vietnam visa exemption agreement covering diplomatic, official AND ordinary passports at 30 days (per the MFA summary table). The 19 May 2026 decision imposes 'only one visa exemption scheme per country/territory', so when it takes effect th",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Not exceeding 60 days (scheme ผ.60); Vietnam is entry 93 on the official list",
+   "permitted_stay_days": 60,
+   "government_fee": {
+    "amount": 0,
+    "currency": "THB"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "RUS",
+   "destination": "THA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/0303/%E0%B8%9C.60.pdf",
+  "note": "TIME-CRITICAL — same pending Thai revocation. Verified 60 days today. Worth flagging that Russia's 60-day entitlement is now permanent list membership: an earlier temporary Russia-specific 60-day measure (1 May - 31 Oct 2024) has been superseded by inclusion in the standing ผ.60 list, so do not let any cached temporary-window logic expire this route early. Under the approved new scheme Russia appe",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Not exceeding 60 days (scheme ผ.60); Russia is entry 72 on the official list",
+   "permitted_stay_days": 60,
+   "government_fee": {
+    "amount": 0,
+    "currency": "THB"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "DEU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.auswaertiges-amt.de/en/visa-service/-/231148",
+  "note": "Current claim confirmed. Source is the German Federal Foreign Office (Auswärtiges Amt) official visa requirement/exemption table, page dated 03.06.2026 — Germany has no gov.de domain, this ministry site is the state source. The 90 days is Schengen-wide and cumulative, not Germany-only. Footnote 3 on the US row is a bonus: US nationals may apply for a residence permit after entering Germany without",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "90 days in any 180-day period; no gainful employment",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": "EUR"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "KAZ",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.gov.kz/memleket/entities/mfa/press/article/details/6764?lang=en",
+  "note": "Current claim confirmed against the Kazakh MFA's own visa-regime table, which the ministry last updated 2026-08-21 — one week ago, so this is unusually fresh. The table is broken out by passport type (D = diplomatic, S = service/official, N = ordinary) and China is 30 days on all three, so the diplomatic and service variants of this route can be settled from the same source if they are ever querie",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Visa-free up to 30 days",
+   "permitted_stay_days": 30,
+   "government_fee": {
+    "amount": 0,
+    "currency": "KZT"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "MDV",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.immigration.gov.mv/visa/tourist-visa",
+  "note": "CORRECTION to the current claim, which said 'Visa-free / No visa needed'. The Maldives is not visa-free: it issues an actual tourist visa at the border, free of charge, to all nationalities with no pre-approval. Disposition should be VISA_ON_ARRIVAL. Caveat on the stay figure: Maldives Immigration's current live page states the on-arrival grant but no longer restates the period, so the 30-day numb",
+  "fields": {
+   "disposition": "VISA_ON_ARRIVAL",
+   "permitted_stay": "Free tourist visa issued on arrival, standard grant up to 30 days",
+   "permitted_stay_days": 30,
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "BGR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.mfa.bg/upload/161580/02_07_2026_EN_VisaRegime_for_foreigners_ordinary_passports-1.pdf",
+  "note": "Current claim confirmed. Official Bulgarian MFA ordinary-passport table (linked from https://www.mfa.bg/en/services-travel/consular-services/travel-bulgaria/visa-bulgaria), last updated 02.07.2026, lists Hong Kong SAR as not requiring a visa. The same MFA page sets the duration: Annex II nationals of Regulation (EU) 2018/1806 'shall be subject to visa-free regime for a period of no more than 90 da",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "90 days in any 180-day period (Schengen short-stay clock)",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "CHE",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.sem.admin.ch/dam/sem/en/data/rechtsgrundlagen/weisungen/visa/bfm/bfm-anh01-liste1-e.pdf.download.pdf/bfm-anh01-liste1-e.pdf",
+  "note": "Current claim confirmed. State Secretariat for Migration (SEM) 'Overview of ID and visa provisions according to nationality (Annex CH-1, List 1)', Version of 3 April 2026. The Hong Kong row reads 'Hong Kong | see A) | No | V16' under the column 'Visa required for stays of up to 90 daysB)', with footnote V16 quoted above restricting the exemption to HKSAR passport holders (which is the document typ",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Up to 90 days (no visa required for stays of up to 90 days)",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "EST",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.vm.ee/en/consular-visa-and-travel-information/visa-information/who-does-not-need-visa-visit-estonia",
+  "note": "Current claim confirmed. Estonian Ministry of Foreign Affairs. The exemption is explicitly limited to HKSAR passport holders, which matches this route's document type. 90/180 is the shared Schengen clock. ETIAS is not yet in operation (EU official ETIAS site), so no pre-arrival authorisation applies today. Quote: \"following citizens do not need a visa to enter a Schengen area (incl. Estonia) for s",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "No more than 90 days in any 180-day period",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "ITA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.esteri.it/en/servizi-opportunita/ingressosoggiornoinitalia/visto_ingresso/paesi_esenti_visto/",
+  "note": "Current claim confirmed. Italian Ministry of Foreign Affairs and International Cooperation, 'Countries whose nationals are exempt from the requirement of short-stay visas'. Tourism is named explicitly among the covered purposes. Caution for the engine: Italy's own visa self-check tool at vistoperitalia.esteri.it has no Hong Kong option in its nationality list (only 'CHINA'), so that tool returns a",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Up to 90 days within a 180-day period",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "KAZ",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.gov.kz/memleket/entities/mfa/activities/34747?parentId=3053&lang=en",
+  "note": "Current claim confirmed, including the unusual 14-day figure. Kazakhstan MFA, 'Visa regime of the Republic of Kazakhstan for foreign citizens', a per-country table broken out by passport type (D diplomatic / S service/official / N ordinary). Hong Kong (PRC) is 14 days across all three columns, so diplomatic and service passports on this pair are also 14 days visa-free. This is markedly shorter tha",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Visa-free up to 14 days",
+   "permitted_stay_days": 14,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "LVA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.mfa.gov.lv/en/electronic-travel-declaration",
+  "note": "CORRECTION to the held claim. No visa is required (Latvia's MFA visa-free list at https://www.mfa.gov.lv/en/countries-and-territories-whose-citizens-may-enter-latvia-without-visa, updated 26.03.2026, includes Hong Kong for stays up to 90 days in any 180-day period), but 'Visa-free / nothing to do before you fly' is wrong for this route. Since 1 September 2025 Latvia requires a mandatory pre-arriva",
+  "fields": {
+   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+   "permitted_stay": "90 days in any 180-day period, but an Electronic Travel Declaration must be filed at least 48 hours before entry",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "NOR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.udi.no/en/want-to-apply/visit-and-holiday/?c=hkg",
+  "note": "Current claim confirmed. Norwegian Directorate of Immigration (UDI), page personalised for 'The applicant is a citizen of: Hong Kong Special Administrative Region of China' (the ?c=hkg query parameter selects that nationality in UDI's own guide). UDI adds that visa-free visitors 'can stay here for up to 90 days' subject to the general Schengen entry conditions. ETIAS not yet in operation. Quote: \"",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Up to 90 days",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "AND",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.govern.ad/ca/ministeris-i-secretaries-d-estat/ministeri-d-afers-exteriors/viatjar-a-andorra",
+  "note": "Confirmed visa-free, with an important routing caveat the current record misses. Government of Andorra, Ministry of Foreign Affairs, 'Viatjar a Andorra': Andorra requires no visa of any kind. But the same page continues: 'El Principado de Andorra no es miembro del Espacio Schengen. El acceso al Principado se puede hacer por Francia o España, motivo por el cuál toda persona extracomunitaria que via",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Andorra imposes no visa and publishes no visa-based stay limit; in practice the trip is bounded by the Schengen 90 days/180 days allowance consumed on the French or Spanish legs",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "AUT",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.bmi.gv.at/202/fremdenpolizei_und_grenzkontrolle/visumpflichtige_laender/start.html",
+  "note": "Current claim confirmed. Austrian Federal Ministry of the Interior (BMI), 'Visumpflichtige Länder' — the official per-nationality visa-requirement table. The United States row reads: EU visa requirement: No; EU visa exemption (normally 90 days within 180 days): Yes; national Austrian visa exemption: No; airport transit visa: No; entry on national ID card: No. The Austrian MFA's own visa page (http",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "90 days within a 180-day period",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "DNK",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.nyidanmark.dk/en-GB/You-want-to-apply/Short-stay-visa/Visa-free-visits",
+  "note": "Visa-free confirmed, and the 90-day figure is right but the clock is not the one the record implies. Danish Immigration Service (nyidanmark.dk). The page first names the US among 'Citizens of Australia, Canada, Chile, Israel, Japan, Malaysia, New Zealand, Singapore, South Korea and the US [who] can freely enter and stay in Denmark for the following periods, regardless of whether you have stayed in",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Up to 3 months counted from first entry into Denmark, under a bilateral agreement, independently of Schengen time spent elsewhere",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "EST",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://vm.ee/en/consular-visa-and-travel-information/visa-information/who-does-not-need-visa-visit-estonia",
+  "note": "Estonian MFA (vm.ee) official visa-exemption list; US ordinary passports appear under the general (non-diplomatic) list. Current claim confirmed. Two live caveats to surface to customers: (1) ETIAS is NOT yet in force - the European Commission's ETIAS page states today: 'The European Travel Information and Authorisation System (ETIAS) is currently not in operation and no applications for travel au",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Up to 90 days in any 180-day period (Schengen-wide count)",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": "EUR"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "ISL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://island.is/reglugerdir/nr/0795-2022",
+  "note": "Icelandic Regulation No. 795/2022 on visas, published on the official Icelandic government regulations portal (island.is/reglugerdir). Annex 9 ('Exemption from the visa requirement on entry to Iceland') lists 'Bandarikin' (the United States) among nationals exempt from the visa requirement. Article 1 of the same regulation fixes the short stay at 'i allt ad 90 daga a hverju 180 daga timabili' (up ",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Up to 90 days in any 180-day period (Schengen-wide count)",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": "ISK"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "KAZ",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.gov.kz/memleket/entities/mfa/press/article/details/6764?lang=en",
+  "note": "Kazakhstan MFA page 'Visa regime of the Republic of Kazakhstan for foreign citizens' on gov.kz, last updated 2026-08-21. The three columns are the passport types declared at the top of the same page: 'D - diplomatic passport, S - service/official passport, N - ordinary passport' - so US ordinary passports are visa-free up to 30 days (row 157). The page is a JS-rendered SPA; the same content was re",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Up to 30 calendar days per entry; cumulatively no more than 90 calendar days in any 180-day period",
+   "permitted_stay_days": 30,
+   "government_fee": {
+    "amount": 0,
+    "currency": "KZT"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "MCO",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://embassy-to-uk.gouv.mc/en/information-and-services/european-entry-exit-system-ees",
+  "note": "Monaco government domain (gouv.mc). Monaco is not itself a Schengen state but applies the Schengen entry regime through its convention with France, and its own public-service page states the rule: 'Nationals of countries outside the European Economic Area wishing to visit the Principality of Monaco must be in possession of a valid passport and a visa for the Schengen area', and 'Foreign nationals ",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Up to 90 days in any 180-day period (Schengen short-stay count; Monaco applies the Schengen entry rules via France)",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": "EUR"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "NLD",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.netherlandsworldwide.nl/visa-the-netherlands/schengen-visa/apply-united-states",
+  "note": "NetherlandsWorldwide is the Dutch Ministry of Foreign Affairs' official service site (page header: 'Government of the Netherlands'). Same page: 'If you will be visiting the Netherlands for a maximum of 90 days - for a holiday, to do business or to see family, for example - you can apply for a Schengen visa', i.e. 90 days is the short-stay ceiling. The 90-in-180 count is stated by the IND (Dutch Im",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Up to 90 days in any 180-day period (Schengen-wide count)",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": "EUR"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "PRT",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://vistos.mne.gov.pt/pt/vistos-schengen/informacao-geral/quem-precisa-de-visto",
+  "note": "Official visa portal of the Portuguese Ministry of Foreign Affairs (vistos.mne.gov.pt), 'Quem precisa de visto' (Who needs a visa). The United States appears in the 'nationalities exempt from the Schengen visa' list, unqualified (no biometric-passport footnote, unlike Albania, Georgia, Moldova, Serbia, Ukraine etc.). The English mirror of this page (/en/...) currently 404s; the Portuguese page is ",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Up to 90 days in any 180-day period (Schengen-wide count)",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": "EUR"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "TWN",
+   "travel_purpose": "business"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.immigration.gov.tw/5385/7244/7250/7257/%E5%B0%88%E6%A5%AD%E5%95%86%E5%8B%99/146423/",
+  "note": "Taiwan National Immigration Agency (NIA), 'Online application guidelines for Mainland residents coming to Taiwan for business activity exchange'. This is an advance permit, not a visa: a Mainland (PRC) resident cannot self-apply. The Taiwan-registered inviting entity applies online to the NIA on the applicant's behalf using its company certificate ('由邀請單位代向本署網站線上申辦'); an applicant already outside ",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "permitted_stay": "Set by the approved itinerary, maximum 1 month for short-term business activity (business visits, meetings, inspections, exhibitions); up to 3 months for contract-performance activity and for business",
+   "permitted_stay_days": 30,
+   "government_fee": {
+    "amount": 600,
+    "currency": "TWD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "TWN",
+   "travel_purpose": "study"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.immigration.gov.tw/5385/7244/7250/7257/%E5%81%9C%E7%95%99/77579/",
+  "note": "NIA 'Online application guidelines for Mainland residents entering Taiwan to study'. Advance permit, applied for by the admitting Taiwanese college/university on the student's behalf through the NIA student online system (https://coa.immigration.gov.tw/coa-frontend/); the student can only self-apply for the single-to-multiple exchange, extension and amendments. Fees on the same page: single-entry ",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "permitted_stay": "Single-entry permit used to travel: valid for one entry within 3 months of issue, stay not exceeding 2 months from the day after entry. After enrolling, it is exchanged in Taiwan for a multiple-entry ",
+   "permitted_stay_days": 60,
+   "government_fee": {
+    "amount": 600,
+    "currency": "TWD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "TWN",
+   "travel_purpose": "family_visit"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.immigration.gov.tw/5385/7244/7250/7257/%E5%81%9C%E7%95%99/75353/",
+  "note": "NIA 'Guidelines for Mainland residents applying to enter Taiwan for family visit or extended care'. Advance single-entry Exit & Entry Permit; an applicant inside the Mainland cannot file - the Taiwan-side relative or inviting unit files at an NIA service centre in person (postal filing not accepted), or the applicant files at a ROC overseas mission if abroad, or at the Taipei Economic and Cultural",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "permitted_stay": "3 months per visit for a blood relative within the 2nd degree of a Taiwan-area national (or their spouse), no extension, max 2 visits per year. Other classes differ: 1 month and up to 6 visits a year ",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 600,
+    "currency": "TWD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "TWN",
+   "travel_purpose": "work"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.immigration.gov.tw/5385/7244/7250/7257/%E5%B0%88%E6%A5%AD%E5%95%86%E5%8B%99/146423/",
+  "note": "There is no open-labour-market work permit for PRC nationals in Taiwan. The one documented advance-permit channel that supports multi-year employment is intra-corporate transfer (跨國企業內部調動服務), handled as a sub-type of business activity exchange by the NIA. Stay is fixed by NIA Appendix 1, section 参 item 4 (https://www.immigration.gov.tw/media/47653/): stay approved per itinerary, maximum 3 years ('",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "permitted_stay": "Set by the approved itinerary, maximum 3 years, extendable by up to 3 years each time where continued service is necessary",
+   "permitted_stay_days": 1095,
+   "government_fee": {
+    "amount": 600,
+    "currency": "TWD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "TWN",
+   "travel_purpose": "tourism",
+   "travel_document_type": "diplomatic_passport"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://servicestation.immigration.gov.tw/media/117043/2026-%E9%81%8B%E8%BC%B8%E6%A5%AD%E8%80%85%E8%BC%89%E9%81%8B%E6%97%85%E5%AE%A2%E5%85%A5%E5%A2%83%E4%B8%AD%E8%8F%AF%E6%B0%91%E5%9C%8B%E5%90%84%E9%A1%9E%E6%9C%89%E6%95%88%E6%97%85%E8%A1%8C%E6%96%87%E4%BB%B6%E5%8F%83%E8%80%83%E6%8C%87%E5%8D%97-immigration-reference-guide-for-civil-carriers.pdf",
+  "note": "CORRECTION to current claim (Conditional / group-tourist permit / 15 days). NIA's 2026 Immigration Reference Guide for Civil Carriers (Chapter Four) makes the requirement status-based, not passport-class-based: every mainland Chinese resident needs an NIA-issued Exit & Entry Permit before boarding, whatever PRC passport they hold. The guide accepts '大陸地區護照 (PRC Passport)' as the accompanying trave",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "permitted_stay": "Set by the activity category approved on the permit (Annex 1 to the Permit Regulations); the 15-day tourist stay is not available on this document.",
+   "government_fee": {
+    "amount": 600,
+    "currency": "TWD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "TWN",
+   "travel_purpose": "other"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?PCode=Q0060002",
+  "note": "CORRECTION to current claim ('Single-entry tourist permit', 15 days). A mainland resident travelling for a purpose other than tourism does not get a tourist permit; the Regulations Governing Approval of People of the Mainland Area to Enter the Taiwan Area (Art. 3) route every non-tourism purpose into social exchange, professional exchange, business activity exchange, medical service exchange or ca",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "permitted_stay": "Set by the approved itinerary; for 'other short-term professional exchange' (visits, inspections, prize ceremonies, seminars, conferences, exhibitions) not more than one month per Annex 1 to the Permi",
+   "permitted_stay_days": 30,
+   "government_fee": {
+    "amount": 600,
+    "currency": "TWD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "TWN",
+   "travel_purpose": "transit"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://servicestation.immigration.gov.tw/media/117043/2026-%E9%81%8B%E8%BC%B8%E6%A5%AD%E8%80%85%E8%BC%89%E9%81%8B%E6%97%85%E5%AE%A2%E5%85%A5%E5%A2%83%E4%B8%AD%E8%8F%AF%E6%B0%91%E5%9C%8B%E5%90%84%E9%A1%9E%E6%9C%89%E6%95%88%E6%97%85%E8%A1%8C%E6%96%87%E4%BB%B6%E5%8F%83%E8%80%83%E6%8C%87%E5%8D%97-immigration-reference-guide-for-civil-carriers.pdf",
+  "note": "CORRECTION to current claim (single-entry transit entry permit, 7 days, NT$600). Chapter Six of NIA's 2026 carrier reference guide states the transit rule generically for all passengers, with no nationality or document carve-out, and expressly waives entry eligibility for airside transfer — so the least burdensome available channel for a mainland Chinese ordinary-passport holder is a permit-free a",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Airside transfer only; no admission to Taiwan is granted, so no period of stay is issued."
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "USA",
+   "travel_purpose": "business"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.uscis.gov/working-in-the-united-states/temporary-visitors-for-business/b-1-temporary-business-visitor",
+  "note": "CONFIRMS current claim (B-1, 180 days, USD 185). China is not a Visa Waiver Program designated country, so there is no ESTA route. Fee verified independently at 22 CFR 22.1, Schedule of Fees for Consular Services, item 21(a) 'Non-petition-based nonimmigrant visa (except E category) — $185' (https://www.ecfr.gov/current/title-22/chapter-I/subchapter-A/part-22/section-22.1, eCFR current as of 25 Aug",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "permitted_stay": "Initial admission 1 to 6 months, 6 months is the maximum; extensions of up to 6 months, with total time in B-1 status on any one trip generally capped at 1 year.",
+   "permitted_stay_days": 180,
+   "government_fee": {
+    "amount": 185,
+    "currency": "USD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "USA",
+   "travel_purpose": "work"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.uscis.gov/working-in-the-united-states/h-1b-specialty-occupations",
+  "note": "CONFIRMS current claim (H-1B, 1095 days, USD 205). The 3-year figure is also fixed in regulation at 8 CFR 214.2(h)(9)(iii)(A)(1): 'An approved petition classified under section 101(a)(15)(H)(i)(b) of the Act for an alien in a specialty occupation shall be valid for a period of up to three years but may not exceed the validity period of the labor condition application.' The $205 consular fee is ite",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "permitted_stay": "Generally admitted for up to 3 years; extendable by up to a further 3 years for a 6-year total.",
+   "permitted_stay_days": 1095,
+   "government_fee": {
+    "amount": 205,
+    "currency": "USD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "MYS",
+   "travel_purpose": "study"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.imi.gov.my/wp-content/uploads/2022/01/21OKT_FAQs-MYS-CHINA_LULUS.pdf",
+  "note": "CONFIRMS the direction of the current claim (Student Pass, advance visa) and fills in the missing fee. The Malaysia-China Mutual Visa Exemption Agreement, in force since 17 July 2025, explicitly carves study out of the visa-free purposes, so the advance route stands. Sequence per the Immigration Department Student Pass page (https://www.imi.gov.my/index.php/en/main-services/pass/student-pass/): ap",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "permitted_stay": "Student Pass issued for the duration of the approved course; the 30-day visa-free allowance does not cover study.",
+   "government_fee": {
+    "amount": 60,
+    "currency": "MYR"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "MYS",
+   "travel_purpose": "transit"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.imi.gov.my/wp-content/uploads/2022/01/21OKT_FAQs-MYS-CHINA_LULUS.pdf",
+  "note": "CORRECTION to current claim (Conditional / 120-hour Transit Pass / 5 days). The 120-hour transit pass is superseded for Chinese nationals: international transit is named as an eligible purpose in the Malaysia-China Mutual Visa Exemption Agreement effective 17 July 2025, which grants a full 30-day visa-free entry rather than a 5-day transit facility, so the least burdensome channel is plain visa-fr",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Up to 30 days per entry, counted from the date of arrival and not extendable; cumulative visa-free stay must not exceed 90 days in any 180-day period.",
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "RUS",
+   "travel_purpose": "tourism",
+   "travel_document_type": "service_passport"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.kdmid.ru/cons/visas/conditions-of-entry-foreign-citizens-in-russian-federation/",
+  "note": "Corrects the stay from 90 to 30 days; the visa-free disposition itself was right. The Russian MFA Consular Department's official table 'Условия въезда и пребывания граждан иностранных государств в Российскую Федерацию по дипломатическим, служебным (официальным, специальным), общегражданским паспортам' states the service-passport exemption separately from the ordinary-passport one, so this is a doc",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Visa-free up to 30 days on a diplomatic or service passport",
+   "permitted_stay_days": 30,
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "IND",
+   "travel_purpose": "study"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://boi.gov.in/boi/contents/travelling-to-india/foreigners/study-in-india",
+  "note": "Advance Student Visa from an Indian Mission is the only channel for Chinese nationals. India's visa-free list is limited to Nepal, Bhutan and Maldives and visa-on-arrival to Japan, Republic of Korea and UAE (https://boi.gov.in/boi/contents/travelling-to-india/foreigners/visa-free-regime-visa-on-arrival), and China does not appear on the e-Visa eligible nationality list (https://indianvisaonline.go",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "permitted_stay": "Student Visa granted for the period of the course or 5 years, multiple entry, extendable in India",
+   "permitted_stay_days": 1825
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "IND",
+   "travel_purpose": "tourism",
+   "travel_document_type": "diplomatic_passport"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.mea.gov.in/bvwa-passport",
+  "note": "Settled on the document specifically: China appears on neither of the two MEA visa-waiver lists. The Diplomatic/Official/Service list (https://www.mea.gov.in/bvwa-passport) runs Chile (19) then Colombia (20) with no China entry, and the Diplomatic-passport-only list (https://www.mea.gov.in/bvwa-passport-only) has no China entry either. Both pages carry a 27 Aug 2026 last-updated stamp. A Chinese d",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "permitted_stay": "Validity and permitted stay are endorsed on the visa by the Indian Mission; the Bureau of Immigration provision for a Tourist visa is 5 years, multiple entry"
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "TWN",
+   "travel_purpose": "study"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.immigration.gov.tw/5385/7244/7250/7296/%E5%B1%85%E7%95%99/148063/",
+  "note": "Taiwan does not issue visas to Hong Kong residents; the instrument is an Entry & Exit Permit plus, for study, residence under identity code HF168 ('經中央目的事業主管機關核准來臺就學者'). The NIA guidance is explicit that Hong Kong and Macao students cannot lodge the residence application from Hong Kong — they must enter first and then apply. Fee shown is the pre-travel single-entry Entry & Exit Permit, NT$600 (htt",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "permitted_stay": "Enter on an Entry & Exit Permit (stay up to 3 months from the day after entry, extendable once by up to 3 months), then apply in Taiwan for the Taiwan Area Resident Certificate; residence extensions a",
+   "government_fee": {
+    "amount": 600,
+    "currency": "TWD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "TWN",
+   "travel_purpose": "business"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.immigration.gov.tw/5385/7244/7250/7296/%E5%81%9C%E7%95%99/30156/",
+  "note": "Least burdensome official channel is the free online Temporary Entry Permit (網簽) at https://egate.immigration.gov.tw — the same NIA rules page states the fee: '一、於臺灣本島機場、港口：證照費新臺幣３００元。二、於網際網路申請：免費(自行列印許可同意書)。' Eligibility is conditional: the applicant must be a Hong Kong permanent resident holding no travel document other than a Hong Kong passport or a BNO, and must either hold a valid Entry & Exi",
+  "fields": {
+   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+   "permitted_stay": "30 days from the day after entry, single entry",
+   "permitted_stay_days": 30,
+   "government_fee": {
+    "amount": 0,
+    "currency": "TWD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "JPN",
+   "travel_purpose": "transit"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.moj.go.jp/isa/immigration/procedures/ttp2_pre-check_pre-check_document03.html",
+  "note": "Confirms the existing visa-free claim. The Immigration Services Agency (Ministry of Justice) lists 香港 among the countries and regions to which Japan currently applies visa exemption measures, with no suspension or visa-encouragement measure in force. Transit is covered by the Temporary Visitor status, whose statutory activities include short visits of this kind (Immigration Control and Refugee Rec",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Temporary Visitor status, up to 90 days",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "JPN",
+   "travel_purpose": "other"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://laws.e-gov.go.jp/law/326CO0000000319",
+  "note": "Keeps the 'Conditional' disposition but pins down the condition. Hong Kong is on Japan's current visa-exemption list (Immigration Services Agency, https://www.moj.go.jp/isa/immigration/procedures/ttp2_pre-check_pre-check_document03.html), but the waiver only carries the traveller into the Temporary Visitor (短期滞在) status, whose permitted activities are exhaustively defined by the quoted provision o",
+  "fields": {
+   "disposition": "CONDITIONAL",
+   "permitted_stay": "Up to 90 days if the activity falls within Temporary Visitor; otherwise a status of residence and a visa are required",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "USA",
+   "travel_purpose": "family_visit"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.ecfr.gov/current/title-22/chapter-I/subchapter-E/part-22/section-22.1",
+  "note": "Current claim confirmed unchanged. Hong Kong is not a designated Visa Waiver Program country — the DHS list at https://www.dhs.gov/visa-waiver-program runs Greece then Hungary with no Hong Kong entry — so a B-1/B-2 visa must be obtained in advance, applied for at the U.S. Consulate General Hong Kong & Macau (https://hk.usconsulate.gov/visas/nonimmigrant-visas/). The 180-day figure is grounded in 8",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "permitted_stay": "B-2 visitors are admitted for a minimum of six months; the regulatory maximum single admission is one year, extendable in increments of up to six months",
+   "permitted_stay_days": 180,
+   "government_fee": {
+    "amount": 185,
+    "currency": "USD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "USA",
+   "travel_purpose": "work"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.ecfr.gov/current/title-22/chapter-I/subchapter-E/part-22/section-22.1",
+  "note": "Current claim confirmed unchanged. Stay verified at 8 CFR 214.2(h)(9)(iii)(A)(1) — 'An approved petition classified under section 101(a)(15)(H)(i)(b) of the Act for an alien in a specialty occupation shall be valid for a period of up to three years but may not exceed the validity period of the labor condition application' — with 214.2(h)(15)(ii)(B)(1) allowing extensions in up to three-year increm",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "permitted_stay": "H-1B petitions are approved for up to three years; total period of stay may not exceed six years",
+   "permitted_stay_days": 1095,
+   "government_fee": {
+    "amount": 205,
+    "currency": "USD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "THA",
+   "travel_purpose": "work"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.mfa.go.th/en/publicservice/non-immigrant-visa-b-for-business-and-work",
+  "note": "Current claim (Non-Immigrant B single entry, 90 days) is correct; the missing fee is now filled. Fee HKD 600 is the Royal Thai Consulate-General Hong Kong published rate (\"Non-Immigrant Visa / Single / 600\", Announcement of the Royal Thai Consulate-General Visa Application Fees, valid as of 15 July 2024, https://image.mfa.go.th/mfa/0/s2rU96ODpR/03062022/visa/2024_visa_fees.pdf). The MFA's baseline",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "permitted_stay": "Up to 90 days per entry (extendable in-country to 1 year from first entry)",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 600,
+    "currency": "HKD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "THA",
+   "travel_purpose": "family_visit"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/0303/Bilat_Ordinary.pdf",
+  "note": "CORRECTION: the held record said 60 days; the correct figure today is 30 days. In the cited MFA Department of Consular Affairs table (dated 24 February 2025) Hong Kong is the second entry in the \"30 days\" Period of Stay column for ordinary passports. This is confirmed by the current MFA summary \"Summary: The revision of Thailand's visa exemption and VoA schemes, 2026\" (https://image.mfa.go.th/mfa/",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Up to 30 days per entry under the Thailand-Hong Kong bilateral visa exemption agreement",
+   "permitted_stay_days": 30,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "THA",
+   "travel_purpose": "other"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/0303/Bilat_Ordinary.pdf",
+  "note": "CORRECTION: the held record said an advance Tourist Visa (TR) with 60-day stay was required. It is not: Hong Kong ordinary passport holders enter visa-free under the bilateral agreement (Hong Kong is listed in the \"30 days\" Period of Stay column of the cited MFA Consular Affairs table, 24 February 2025, and under \"Bilateral Agreements 30 days\" in the 2026 revision summary at https://image.mfa.go.t",
+  "fields": {
+   "disposition": "CONDITIONAL",
+   "permitted_stay": "Visa-free up to 30 days for a general visit; a visa is required for purposes needing a work permit or for stays beyond 30 days",
+   "permitted_stay_days": 30,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "MYS",
+   "travel_purpose": "work"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://esd.imi.gov.my/portal/latest-news/announcement/announcement-266-ep-salary-policy-2026/",
+  "note": "CORRECTION: the held record said 1825 days (5 years). Malaysia's revised expatriate salary policy, announced by the Immigration Department's Expatriate Services Division on 15 January 2026 and in force since 1 June 2026, sets Category I at \"RM20,000 and above\" (up from RM10,000) with Employment Pass Duration \"Up to 10 years\". The ESD Employment Pass page (https://esd.imi.gov.my/portal/expatriates/",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "permitted_stay": "Employment Pass Category I: up to 10 years total employment duration under the policy effective 1 June 2026; individual passes issued in line with the employment contract",
+   "permitted_stay_days": 3650,
+   "government_fee": {
+    "amount": 2160,
+    "currency": "MYR"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "GBR",
+   "travel_purpose": "other"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.gov.uk/eta",
+  "note": "CORRECTION: the held fee of GBP 10 is out of date. GOV.UK now states plainly \"An ETA costs £20.\" The Home Office fees table (Fees_Table_8_April_26.ods, https://www.gov.uk/government/publications/visa-regulations-revised-table) shows the ETA moving from GBP 16 to GBP 20 from 8 April 2026, which is in force today. Hong Kong Special Administrative Region is on the Immigration Rules Appendix ETA Natio",
+  "fields": {
+   "disposition": "CONDITIONAL",
+   "permitted_stay": "Up to 6 months per visit on an ETA",
+   "permitted_stay_days": 180,
+   "government_fee": {
+    "amount": 20,
+    "currency": "GBP"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "GBR",
+   "travel_purpose": "tourism",
+   "travel_document_type": "service_passport"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.gov.uk/guidance/immigration-rules/immigration-rules-appendix-visitor-visa-national-list",
+  "note": "Held disposition confirmed; the missing fee is now filled. The UK visa national list is document-specific and exhaustive. VN 1.1.(a) makes nationals of the People's Republic of China visa nationals; the only exceptions in VN 2.2 are the quoted HKSAR passport, a Macao SAR passport, a qualifying Taiwan passport, and \"people who hold a Service, Temporary Service or Diplomatic passport issued by the H",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "permitted_stay": "Up to 6 months on a Standard Visitor visa",
+   "permitted_stay_days": 180,
+   "government_fee": {
+    "amount": 135,
+    "currency": "GBP"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "ESP",
+   "travel_purpose": "other"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://www.exteriores.gob.es/Consulados/hongkong/en/ServiciosConsulares/Paginas/Consular/Condiciones-de-entrada-en-Espana.aspx",
+  "note": "Held record confirmed. Spain's own entry-conditions page (Consulate General of Spain in Hong Kong) says a visa is required only of the nationalities in Annex I of Regulation (EU) 2018/1806, and describes the short stay as \"90 days (during any period of 180 days) for tourism, business, family visits, medical treatment, study, non-work internships or volunteer activities with a duration not exceedin",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Up to 90 days in any 180-day period across the Schengen area",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "ARE",
+   "destination": "AIA",
+   "travel_purpose": "business"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://evisa.gov.ai/Countries",
+  "note": "Held disposition confirmed and the missing fee filled. The Government of Anguilla's official eVisa portal country table lists UAE as Visa Required. The eVisa is the least burdensome channel and expressly covers this purpose: \"You are a citizen or national of a country listed here, You plan to travel to Anguilla for business or pleasure, and You plan to stay for 90 days or less.\" Fees are published",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "permitted_stay": "Up to 90 days",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 140,
+    "currency": "USD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "RUS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://hongkong.mid.ru/en/consular-services/visa/hk_sar_and_macau_sar_visa_free_regime/",
+  "note": "Held record confirmed exactly (visa-free, 14 days). Conditions stated by the Consulate General of the Russian Federation in Hong Kong: the exemption rests on bilateral intergovernmental agreements and applies to \"holders of the HK SAR and Macau SAR passports (for permanent residents only) who do not intend to be employed, study or reside in the Russian Federation\"; cumulative stay cannot exceed 90",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "14 calendar days from the day of crossing the Russian border; cumulative stay capped at 90 days in any 180-day period",
+   "permitted_stay_days": 14,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "ALB",
+   "destination": "ATG",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://immigration.gov.ag/visa-services/countries-exempt-from-visa/",
+  "note": "CORRECTION: the held record said an advance Tourist/Visitor visa was required. It is not. Albania is the first entry in the quoted list of non-EU, non-Commonwealth countries exempt from visas for Antigua and Barbuda on the Immigration Department's official exempt-countries page, and that page closes with \"Citizens of countries which do not appear on any of the above list, require a visa.\" Permitte",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "As long as the visit requires, up to a maximum of six months",
+   "permitted_stay_days": 180,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "MNG",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "https://en.consul.mn/visa/c/83",
+  "note": "Source is the official visa-exemption list of the Consular Department of the Ministry of Foreign Affairs of Mongolia. It is the list that the Mongolian government's Immigration Agency (immigration.gov.mn, a gov.mn domain) links to as its own 'Visa exempt countries' reference from https://immigration.gov.mn/en/ - mfa.gov.mn itself was returning 503 today. Current claim of 90 days confirmed. Importa",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Up to 90 days, all passport types, bilateral agreement in force since 06.07.2001",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": "MNT"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "RUS",
+   "travel_purpose": "transit"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "http://en.kremlin.ru/acts/news/78616",
+  "note": "CORRECTION to current claim (single-entry transit visa, 10 days). Executive Order No. 872 of 1 December 2025 established the regime on a reciprocity basis; a further Executive Order signed 20 July 2026 extends it until 31 December 2027 inclusive (http://en.kremlin.ru/acts/news/80315, confirmed by the Russian Government at http://government.ru/en/news/59381/). The order covers transit by name, so n",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Up to 30 days; transit through Russian territory and exit are expressly covered.",
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "RUS",
+   "travel_purpose": "business"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "http://en.kremlin.ru/acts/news/78616",
+  "note": "CORRECTION to current claim (unified electronic business visa, 16 days, USD 40). Business visits are named in the visa-free order, so the e-visa is no longer the least burdensome channel for a Chinese ordinary-passport holder and should not be the default answer; it stays available as an alternative and is still the route for business trips that do not fit the order. Regime extended to 31 December",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Up to 30 days per entry for business visits.",
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "RUS",
+   "travel_purpose": "work"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "http://www.kremlin.ru/acts/bank/9895/page/6",
+  "note": "CORRECTION to current claim (single-entry initial work visa, 90 days). Employment is deliberately absent from the purposes listed in Presidential Executive Order No. 872, so the visa-free regime does not reach this route and a visa remains required. Federal Law No. 114-FZ of 15 August 1996, Art. 25.6 (official text on the President of Russia site) sets the ordinary work visa at the contract term c",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "permitted_stay": "Issued for the term of the employment or civil-law services contract, but no more than one year; highly qualified specialists receive a multiple-entry work visa for the contract term up to three years",
+   "permitted_stay_days": 365
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "RUS",
+   "travel_purpose": "family_visit"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "http://en.kremlin.ru/acts/news/78616",
+  "note": "CORRECTION to current claim (single-entry private/family visa, 90 days). 'Guest visits' (гостевые поездки) is the Russian statutory category for visiting family and friends and is named in the order, so no private visa and no fee are needed for visits of 30 days or less. Regime extended to 31 December 2027 inclusive by the Executive Order of 20 July 2026 (http://en.kremlin.ru/acts/news/80315; Russ",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Up to 30 days per entry for guest visits.",
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "RUS",
+   "travel_purpose": "other"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
+  "source_url": "http://www.kremlin.ru/acts/bank/52641",
+  "note": "Current claim (e-visa, 16 days, USD 40) is out of date on both counts. Presidential Decree No. 872 of 1 Dec 2025, as amended by Decree No. 499 of 20 Jul 2026, gives Chinese ordinary-passport holders 30 days visa-free until 31 Dec 2027. Because the route purpose is 'other', it is conditional: Art. 2 of the same decree excludes entry for employment (including journalism), education, residence, and i",
+  "fields": {
+   "disposition": "CONDITIONAL",
+   "permitted_stay": "Up to 30 days visa-free per entry, in force until 31 December 2027 inclusive",
+   "permitted_stay_days": 30,
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   }
+  }
  }
 ]

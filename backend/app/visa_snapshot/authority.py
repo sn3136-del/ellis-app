@@ -30,6 +30,9 @@ GOV_SUFFIXES = (
     "irishimmigration.ie", "govern.ad", "nyidanmark.dk", "evisa.bj",
     "cgrgba.gw", "guichet.public.lu", "mae.ro", "visaburkina.bf",
     "esteri.sm",
+    # kremlin.ru carries Russian presidential decrees (the CHN-RUS visa
+    # waiver); consul.mn is Mongolia's MFA consular department.
+    "kremlin.ru", "consul.mn",
 
     # generic
     "gov", "mil",
