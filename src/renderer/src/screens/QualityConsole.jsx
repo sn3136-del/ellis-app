@@ -66,6 +66,61 @@ function Chip({ children, color = GRAY, filled = true }) {
   )
 }
 
+function StatCell({ label, value, sub, pct, target, accent = NAVY }) {
+  const width = pct != null ? Math.max(2, Math.min(100, pct)) : null
+  const hit = pct != null && target != null && pct >= target
+  return (
+    <div style={{ padding: '18px 22px', minWidth: 0 }}>
+      <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1,
+                    color: GRAY, textTransform: 'uppercase',
+                    whiteSpace: 'nowrap' }}>{label}</div>
+      <div style={{ fontSize: 28, fontWeight: 800, marginTop: 8, lineHeight: 1,
+                    color: pct == null ? accent : (hit ? GREEN : NAVY) }}>
+        {value}
+      </div>
+      {width != null && (
+        <div style={{ marginTop: 10, height: 5, borderRadius: 999,
+                      background: '#edf1f7', position: 'relative' }}>
+          <div style={{ position: 'absolute', inset: 0, width: `${width}%`,
+                        borderRadius: 999,
+                        background: hit ? GREEN : `linear-gradient(90deg, ${BLUE}, #64a5ff)` }} />
+          {target != null && (
+            <div style={{ position: 'absolute', left: `${target}%`, top: -2,
+                          bottom: -2, width: 2, background: NAVY,
+                          borderRadius: 1, opacity: 0.5 }} />
+          )}
+        </div>
+      )}
+      <div style={{ fontSize: 11, color: GRAY, marginTop: 8,
+                    whiteSpace: 'nowrap', overflow: 'hidden',
+                    textOverflow: 'ellipsis' }}>{sub}</div>
+    </div>
+  )
+}
+
+function ConfidenceCell({ high, medium, low, label, sub }) {
+  const total = (high + medium + low) || 1
+  const seg = (n, color) => (
+    <div key={color} style={{ width: `${(n / total) * 100}%`, background: color }} />
+  )
+  return (
+    <div style={{ padding: '18px 22px', minWidth: 0 }}>
+      <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1,
+                    color: GRAY, textTransform: 'uppercase' }}>{label}</div>
+      <div style={{ fontSize: 28, fontWeight: 800, marginTop: 8, lineHeight: 1,
+                    color: NAVY }}>
+        {high}<span style={{ color: '#c3ccd9', fontSize: 20 }}> / </span>{medium}
+        <span style={{ color: '#c3ccd9', fontSize: 20 }}> / </span>{low}
+      </div>
+      <div style={{ marginTop: 10, height: 5, borderRadius: 999,
+                    overflow: 'hidden', display: 'flex', background: '#edf1f7' }}>
+        {seg(high, GREEN)}{seg(medium, AMBER)}{seg(low, RED)}
+      </div>
+      <div style={{ fontSize: 11, color: GRAY, marginTop: 8 }}>{sub}</div>
+    </div>
+  )
+}
+
 function StatTile({ label, value, sub, accent = NAVY }) {
   return (
     <div style={{ ...card, padding: '16px 20px' }}>
@@ -587,25 +642,29 @@ export default function QualityConsole() {
             </div>
 
             {s && (
-              <div style={{ display: 'grid', gap: 12,
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
-                <StatTile label={t('ops.stat.records')} value={s.total} />
-                <StatTile label={t('ops.stat.complete')}
-                          accent={s.completeness_rate >= 0.99 ? GREEN : AMBER}
+              <div style={{ ...card, display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(185px, 1fr))' }}>
+                <StatCell label={t('ops.stat.records')} value={s.total}
+                          sub={t('ops.stat.recordsSub')} accent={NAVY} />
+                <StatCell label={t('ops.stat.complete')}
                           value={s.completeness_rate != null
                             ? `${Math.round(s.completeness_rate * 100)}%` : '·'}
-                          sub={t('ops.stat.completeSub')} />
-                <StatTile label={t('ops.stat.sources')}
-                          accent={s.source_coverage >= 0.999 ? GREEN : AMBER}
+                          pct={s.completeness_rate != null ? s.completeness_rate * 100 : null}
+                          target={99}
+                          sub={t('ops.stat.completeSub') + ' · ' + t('ops.stat.target') + ' 99%'} />
+                <StatCell label={t('ops.stat.sources')}
                           value={s.source_coverage != null
                             ? `${Math.round(s.source_coverage * 100)}%` : '·'}
-                          sub={t('ops.stat.sourcesSub')} />
-                <StatTile label={t('ops.stat.substantiated')} accent={BLUE}
+                          pct={s.source_coverage != null ? s.source_coverage * 100 : null}
+                          target={100}
+                          sub={t('ops.stat.sourcesSub') + ' · ' + t('ops.stat.target') + ' 100%'} />
+                <StatCell label={t('ops.stat.substantiated')} accent={BLUE}
                           value={s.substantiated ?? '·'}
+                          pct={s.total ? (s.substantiated / s.total) * 100 : null}
                           sub={t('ops.stat.substantiatedSub')} />
-                <StatTile label={t('ops.stat.confidence')}
-                          value={`${s.high} / ${s.medium} / ${s.low}`}
-                          sub={t('ops.stat.confidenceSub')} />
+                <ConfidenceCell high={s.high} medium={s.medium} low={s.low}
+                                label={t('ops.stat.confidence')}
+                                sub={t('ops.stat.confidenceSub')} />
               </div>
             )}
             {busy && <div style={{ color: GRAY, fontSize: 13 }}>{t('ops.loading')}</div>}

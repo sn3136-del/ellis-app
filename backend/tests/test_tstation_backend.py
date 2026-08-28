@@ -142,3 +142,24 @@ def test_excel_export_has_two_sheets_and_the_data(client):
     fields = wb["Field descriptions"]
     assert fields.max_row == 1 + len(tstation.FIELD_ORDER)
     assert client.get("/database/export.xlsx", headers=READER).status_code == 403
+
+
+def test_discretionary_validity_maps_to_the_stay_bound():
+    """"Set by the consulate" is not a parser failure — it is the truth that
+    no fixed validity exists. Their own display standard writes these as
+    "Up to N days (determined at issuance)", so the record carries the stay
+    length as the upper bound; with no stay known it stays honestly empty."""
+    route = {"passport_nationality": "CHN", "destination_country": "FRA",
+             "travel_purpose": "tourism"}
+    g = {"disposition": "VISA_REQUIRED", "confidence": "high",
+         "visa_products": [
+             {"type": "Short-stay Schengen C", "entry": "single",
+              "validity": "Up to trip duration / consulate discretion",
+              "max_stay_days": 90,
+              "fee": {"amount": 90, "currency": "EUR"}},
+             {"type": "Mystery visa", "entry": "single",
+              "validity": "as granted", "max_stay_days": None, "fee": None},
+         ]}
+    rows = tstation.records_for_route(route, g)
+    assert (rows[0]["validity_duration"], rows[0]["validity_unit"]) == (90, "Day")
+    assert rows[1]["validity_duration"] is None      # no bound, no guess

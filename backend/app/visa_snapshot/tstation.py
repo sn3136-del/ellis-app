@@ -99,13 +99,28 @@ def _method_for_channel(channel: str) -> str | None:
     return "Other"
 
 
-def _num_unit(text) -> tuple[float | None, str | None]:
+_DISCRETIONARY = ("set by the consulate", "consulate discretion", "as granted",
+                  "determined by the consular", "determined at issuance",
+                  "not published", "trip duration", "trip dates",
+                  "aligned to the itinerary", "per the itinerary")
+
+
+def _num_unit(text, stay_bound=None) -> tuple[float | None, str | None]:
     """'90 days' -> (90, 'Day'); '5 years' -> (5, 'Year'); '6 months' ->
-    (6, 'Month'). Returns (None, None) when the text carries no single
-    number — a range or prose is not silently collapsed to a guess."""
+    (6, 'Month'). A DISCRETIONARY validity ("set by the consulate", "as
+    granted") maps to the product's stay length as the upper bound when one
+    is known — Trip.com's own display standard writes these as "Up to 90
+    days (determined at issuance)". Otherwise a range or prose is not
+    silently collapsed to a guess."""
     t = str(text or "").strip().lower()
     if not t:
         return None, None
+    if any(k in t for k in _DISCRETIONARY):
+        if stay_bound:
+            return int(stay_bound), "Day"
+        return None, None
+    if "long-term" in t or "long term" in t or "permanent" in t:
+        return 0, "Long-term Valid"
     m = re.search(r"(\d+(?:\.\d+)?)\s*(?:working\s+|business\s+|calendar\s+)?"
                   r"(hour|day|month|year|week)s?", t)
     if not m:
@@ -264,7 +279,8 @@ def records_for_route(route: dict, guidance: dict,
     for p in products:
         row = dict(base)
         row["visa_type_name"] = str(p.get("type"))
-        n, unit = _num_unit(p.get("validity"))
+        n, unit = _num_unit(p.get("validity"),
+                            stay_bound=p.get("max_stay_days"))
         row["validity_duration"], row["validity_unit"] = _as_validity_unit(n, unit)
         stay = p.get("max_stay_days")
         if stay:
