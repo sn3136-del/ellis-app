@@ -272,12 +272,12 @@ function EllisIslandScene() {
            style={{ display: 'block', width: 'min(330px, 92vw)',
                     marginTop: -20 }}>
         <g>
-          {/* the island: a tapered landmass the city stands on */}
-          <path d={`M14,${BASE + 8} C22,${BASE - 4} 40,${BASE - 7} 62,${BASE - 8}
-                    L238,${BASE - 8} C260,${BASE - 7} 278,${BASE - 4} 286,${BASE + 8}
-                    C288,${BASE + 13} 284,${BASE + 16} 276,${BASE + 16}
-                    L24,${BASE + 16} C16,${BASE + 16} 12,${BASE + 13} 14,${BASE + 8} Z`}
-                fill={INK} stroke={INK} strokeWidth="2.5"
+          {/* the island: a thin low shoreline, so the skyline stays the star */}
+          <path d={`M8,${BASE + 6} C20,${BASE} 50,${BASE - 1} 80,${BASE - 1}
+                    L220,${BASE - 1} C250,${BASE - 1} 280,${BASE} 292,${BASE + 6}
+                    C294,${BASE + 8} 291,${BASE + 9} 286,${BASE + 9}
+                    L14,${BASE + 9} C9,${BASE + 9} 6,${BASE + 8} 8,${BASE + 6} Z`}
+                fill={INK} stroke={INK} strokeWidth="1.5"
                 strokeLinejoin="round" />
                     {/* towers */}
           {LETTERS.map(([lx, rects], i) => (
