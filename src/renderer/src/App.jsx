@@ -11,7 +11,7 @@
 // them out-of-band via `#admin` in the URL or a persisted local flag.
 import { useState, useEffect } from 'react'
 import { LocaleProvider, useLocale, LanguagePicker } from './lib/locale.jsx'
-import { ToastProvider, TripPlane } from './components/ui.jsx'
+import { ToastProvider } from './components/ui.jsx'
 import Settings from './screens/Settings.jsx'
 import TripPortal from './screens/TripPortal.jsx'
 import QualityConsole from './screens/QualityConsole.jsx'
@@ -70,8 +70,8 @@ function DemoDisabled() {
 
 
 /** The Ellis skyline mark: the letters as solid towers, the Empire State
- *  Building as the I with its window ribbons, and the loading plane flying
- *  its dashed trail overhead. Compact enough to sit beside the wordmark. */
+ *  Building as the I with its window ribbons. Static, centered in the
+ *  header between the wordmark and the controls. */
 function EllisMark() {
   const INK = '#0f294d'
   const B = 150
@@ -86,9 +86,7 @@ function EllisMark() {
   ]
   return (
     <div className="ellis-mark" aria-label="Ellis" data-testid="ellis-mark">
-      <span className="ellis-mark__trail" />
-      <span className="ellis-mark__plane"><TripPlane width={54} /></span>
-      <svg viewBox="14 8 258 144" height="34" style={{ display: 'block' }}>
+      <svg viewBox="14 8 258 144" height="42" style={{ display: 'block' }}>
         {LETTERS.map(([lx, rects], i) => (
           <g key={i}>
             {rects.map(([x, up, w, h], j) => (
@@ -214,10 +212,8 @@ function AppInner() {
       <div className={'app' + (demoMode ? ' app--banner' : '')}>
         {demoMode && <SimulatedBanner />}
         <header className="triptop" data-testid="triptop">
-          <div className="triptop__brand">
-            <img className="triptop__logo" src={tripcomLogo} alt="Trip.com" />
-            <EllisMark />
-          </div>
+          <img className="triptop__logo" src={tripcomLogo} alt="Trip.com" />
+          <EllisMark />
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <SurfaceNav view={view} />
             <LanguagePicker />

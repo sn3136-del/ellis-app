@@ -514,18 +514,10 @@ body { background: var(--bg-soft); }
 }
 .triptop > * { -webkit-app-region: no-drag; }
 .triptop__logo { height: 34px; display: block; }
-.triptop__brand { display: flex; align-items: center; gap: 18px; }
-/* The Ellis skyline mark riding next to the wordmark, with the loading
-   plane bobbing over it on its dashed trail. */
-.ellis-mark { position: relative; height: 46px; display: flex;
-  align-items: flex-end; padding-top: 2px; }
-.ellis-mark__plane { position: absolute; top: -3px; left: 16px;
-  animation: planebob 2.2s ease-in-out infinite; }
-.ellis-mark__trail { position: absolute; top: 8px; left: -14px; width: 28px;
-  height: 2px; border-radius: 2px;
-  background: repeating-linear-gradient(90deg, rgba(40,125,250,0.45) 0 8px, transparent 8px 15px);
-  animation: trailmove 0.9s linear infinite; }
-@media (max-width: 600px) { .ellis-mark { display: none; } }
+/* The Ellis skyline mark: static, dead-centered in the header. */
+.ellis-mark { position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%); }
+@media (max-width: 700px) { .ellis-mark { display: none; } }
 
 /* ---------- Language picker ---------- */
 .langpick { position: relative; }
