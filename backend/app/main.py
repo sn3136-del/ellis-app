@@ -743,10 +743,15 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
                                           or "Official government portal")
             if requirement and str(rec.get("visa_requirement") or "") != requirement:
                 continue
-            if confidence and str(rec.get("confidence_level") or "") != confidence:
+            if confidence and str(rec.get("confidence_level") or "").lower() \
+                    != confidence.strip().lower():
                 continue
             rec["_cache_key"] = r.cache_key
             rec["_status"] = r.status
+            # Whether an operator has released this answer despite low
+            # confidence: without it the release half of the confidence gate
+            # cannot be audited from the records surface.
+            rec["_released"] = bool((r.verification or {}).get("operator_released"))
             # How solidly the source BACKS what this record shows:
             #   human-quote        a person verified these fields against the
             #                      named page and quoted it
@@ -787,6 +792,7 @@ def travel_database_records(nationality: str = "", destination: str = "",
             "records": [{**{k: r.get(k) for k in tstation.FIELD_ORDER},
                          "cache_key": r["_cache_key"],
                          "source_check": r.get("_source_check", "unchecked"),
+                         "operator_released": r.get("_released", False),
                          "field_status": tstation.field_status(r),
                          "completeness": round(tstation.completeness(r), 4)}
                         for r in rows],
@@ -842,22 +848,25 @@ def travel_database_export(nationality: str = "", destination: str = "",
     rows = _tstation_rows(db, nationality=nationality, destination=destination,
                           purpose=purpose, document=document,
                           requirement=requirement, confidence=confidence)
+    # Sheet 1 is the Data sheet whose header row is the exact 25 field names:
+    # the acceptance standard reads the dictionary off the first sheet. The
+    # field descriptions ride second as documentation.
     wb = Workbook()
-    ws0 = wb.active
-    ws0.title = "Field descriptions"
-    ws0.append(["No.", "Field", "Required", "Description"])
-    for c in ws0[1]:
-        c.font = Font(bold=True)
-    for i, f in enumerate(tstation.FIELD_ORDER, 1):
-        ws0.append([i, f, "Yes" if f in tstation.REQUIRED_FIELDS else "If available",
-                    tstation.FIELD_DESCRIPTIONS[f]])
-    ws1 = wb.create_sheet("Data")
+    ws1 = wb.active
+    ws1.title = "Data"
     ws1.append(list(tstation.FIELD_ORDER))
     for c in ws1[1]:
         c.font = Font(bold=True)
     for r in rows:
         ws1.append([r.get(f) for f in tstation.FIELD_ORDER])
     ws1.freeze_panes = "A2"
+    ws0 = wb.create_sheet("Field descriptions")
+    ws0.append(["No.", "Field", "Required", "Description"])
+    for c in ws0[1]:
+        c.font = Font(bold=True)
+    for i, f in enumerate(tstation.FIELD_ORDER, 1):
+        ws0.append([i, f, "Yes" if f in tstation.REQUIRED_FIELDS else "If available",
+                    tstation.FIELD_DESCRIPTIONS[f]])
     buf = io.BytesIO()
     wb.save(buf)
     buf.seek(0)

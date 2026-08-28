@@ -1486,7 +1486,8 @@ _ALIASES = {
     "ESP": ("spain", "西班牙", "spanish"),
     "NLD": ("netherlands", "holland", "荷兰", "荷蘭", "dutch"),
     "CHE": ("switzerland", "瑞士", "swiss"),
-    "ARE": ("uae", "united arab emirates", "dubai", "abu dhabi", "阿联酋", "阿聯酋", "emirati"),
+    "ARE": ("uae", "united arab emirates", "dubai", "abu dhabi", "阿联酋", "阿聯酋",
+            "迪拜", "杜拜", "阿布扎比", "emirati"),
     "TUR": ("turkey", "türkiye", "土耳其", "turkish"),
     "EGY": ("egypt", "埃及", "egyptian"),
     "BRA": ("brazil", "巴西", "brazilian"),
@@ -1507,7 +1508,7 @@ _ALIASES = {
     "HUN": ("hungary", "匈牙利", "hungarian"),
     "ISR": ("israel", "以色列", "israeli"),
     "SAU": ("saudi arabia", "saudi", "沙特", "沙烏地", "saudi"),
-    "QAT": ("qatar", "卡塔尔", "卡達", "qatari"),
+    "QAT": ("qatar", "卡塔尔", "卡達", "doha", "多哈", "qatari"),
     "ZAF": ("south africa", "南非", "south african"),
     "ARG": ("argentina", "阿根廷", "argentine", "argentinian"),
     "CHL": ("chile", "智利", "chilean"),
@@ -1729,6 +1730,13 @@ def _deterministic_route(question: str) -> dict | None:
         if any(w in low or w in q for w in words):
             purpose = name
             break
+    if purpose == "transit" and transit and dest not in transit:
+        # "经迪拜转机去法国" asks about the whole trip: the stopover rides in
+        # transit_countries and is answered by the transit rule; the
+        # destination leg keeps its own purpose. Without this the answer
+        # inverted to "airport transit visa for FRANCE" and said nothing
+        # about the stopover.
+        purpose = "tourism"
     doc = "diplomatic_passport" if ("diplomatic" in low or "外交护照" in q or "外交護照" in q) \
         else "service_passport" if ("official passport" in low or "公务护照" in q or "公務護照" in q) \
         else "ordinary_passport"

@@ -53,9 +53,27 @@
    "icao_code_prefix": "PT",
    "name": "Laissez-passer",
    "notes": "Issued by states or international organizations (e.g. UN)."
+  },
+  {
+   "code": "official_ordinary_passport",
+   "icao_code_prefix": "P",
+   "name": "Official ordinary passport",
+   "notes": "PRC 公务普通护照: an ordinary-format passport issued for official business; some bilateral waivers treat it with the service passport, others with the ordinary one."
+  },
+  {
+   "code": "child_passport",
+   "icao_code_prefix": "P",
+   "name": "Child passport",
+   "notes": "A minor's own passport; policies follow the ordinary passport unless a state publishes child-specific rules (fees, validity)."
+  },
+  {
+   "code": "identity_certificate",
+   "icao_code_prefix": "CI",
+   "name": "Identity certificate",
+   "notes": "PRC 身份证明书 and equivalents: a national identity/travel certificate issued in lieu of a passport, distinct from an alien's passport."
   }
  ],
- "entry_count": 9,
+ "entry_count": 12,
  "generated_at": "2026-07-23",
  "notes": "Curated travel-document taxonomy incl. refugee/stateless/alien/emergency documents.",
  "registry": "travel_document_types",

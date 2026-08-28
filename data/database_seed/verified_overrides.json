@@ -21055,8 +21055,8 @@
   },
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
-  "source_url": "https://www.evisa.gov.md/Info/TaxeViza?c=en-US",
-  "note": "Fee was null. Moldova's published consular tariff sets the Type C short-stay visa at EUR 60 for every nationality (Type A 20, Type B 40, Type D 80); applicants under 18 pay nothing. The 90-day stay is right, but the framing is off: the MFA defines the Type C visa as allowing 'an uninterrupted stay o | quote: The consular fee for a visa depends on the length of its issuance, the purpose o",
+  "source_url": "https://www.evisa.gov.md/Info/TaxeViza",
+  "note": "Fee was null. Moldova's published consular tariff sets the Type C short-stay visa at EUR 60 for every nationality (Type A 20, Type B 40, Type D 80); applicants under 18 pay nothing. The 90-day stay is right, but the framing is off: the MFA defines the Type C visa as allowing 'an uninterrupted stay o | quote: The consular fee for a visa depends on the length of its issuance, the purpose o Moldova's",
   "fields": {
    "government_fee": {
     "amount": 60,
@@ -21109,7 +21109,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
   "source_url": "https://www.gov.si/en/representations/embassy-london/visa-information-of-the-embassy-london/",
-  "note": "EUR 35 is flatly wrong for Chinese nationals. Slovenia's published chart reserves the EUR 35 rate for citizens of Armenia, Azerbaijan and Belarus (facilitation agreements); China has no EU visa facilitation agreement and pays the standard EUR 90. All three products carry the same wrong fee. The 90-d | quote: EUR 90 – persons over 12 years of age; EUR 45 – children aged between 6 and 12; ",
+  "note": "EUR 35 is flatly wrong for Chinese nationals. Slovenia's published chart reserves the EUR 35 rate for citizens of Armenia, Azerbaijan and Belarus (facilitation agreements); China has no EU visa facilitation agreement and pays the standard EUR 90. All three products carry the same wrong fee. The 90-d | quote: EUR 90 – persons over 12 years of age; EUR 45 – children aged between 6 and 12;  Slovenia ",
   "fields": {
    "government_fee": {
     "amount": 90,
@@ -22412,8 +22412,8 @@
   },
   "verified_at": "2026-08-28",
   "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
-  "source_url": "http://usa.mfa.gov.by/en/usa/payment/",
-  "note": "The conditional visa-free route and the 30-day cap are correct and the entry itself is free of charge, so the null headline fee is defensible for that product. The gap is the fallback: the Type C short-term visa is priced at USD 75 for regular processing (5 business days) and USD 145 for expedite (1 | quote: Embassy of the Republic of Belarus in the USA, 'CONSULAR FEES applicable since J",
+  "source_url": "https://usa.mfa.gov.by/en/usa/payment/",
+  "note": "The conditional visa-free route and the 30-day cap are correct and the entry itself is free of charge, so the null headline fee is defensible for that product. The gap is the fallback: the Type C short-term visa is priced at USD 75 for regular processing (5 business days) and USD 145 for expedite (1 | quote: Embassy of the Republic of Belarus in the USA, 'CONSULAR FEES applicable since J The Belar",
   "fields": {
    "government_fee": {
     "amount": 75,

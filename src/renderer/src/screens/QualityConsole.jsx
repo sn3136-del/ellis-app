@@ -751,8 +751,8 @@ function CoverageRing({ segs, total, centerLabel, centerSub }) {
           {shown}%
         </text>
         <text x="85" y="102" textAnchor="middle"
-              style={{ fontSize: 10, fontWeight: 700, fill: GRAY,
-                       letterSpacing: 0.6, textTransform: 'uppercase' }}>
+              style={{ fontSize: 9, fontWeight: 700, fill: GRAY,
+                       letterSpacing: 0.3, textTransform: 'uppercase' }}>
           {centerSub}
         </text>
       </svg>

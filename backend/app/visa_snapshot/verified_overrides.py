@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import json
 import pathlib
+import re
 from functools import lru_cache
 
 from .authority import hostname, is_government_host
@@ -171,6 +172,45 @@ def _drop_application_leftovers(merged: dict, fields: dict) -> None:
     merged["interview_required"] = False
 
 
+# Which requirement_detail subcategories can truthfully sit under each
+# verified disposition. A detail outside its verdict's family is a leftover
+# from the un-overridden model answer and reads as a contradiction
+# ("Visa required" badge next to "unconditional visa-free").
+_DETAIL_FAMILY = {
+    "VISA_EXEMPT": ("unconditional_visa_free", "conditional_visa_free",
+                    "transit_visa_free"),
+    "VISA_ON_ARRIVAL": ("evisa_on_arrival", "paper_visa_on_arrival"),
+    "ELECTRONIC_AUTHORIZATION_REQUIRED": ("eta_electronic_authorization",),
+    "VISA_REQUIRED": ("evisa", "paper_visa"),
+}
+
+
+def _drop_exemption_leftovers(merged: dict, fields: dict,
+                              original: dict) -> None:
+    """The mirror of _drop_application_leftovers: a verified visa-REQUIRED
+    verdict clears the model's exemption claims. Never invents a value."""
+    verdict = str(fields.get("disposition") or "").upper()
+    if not verdict or verdict == "VISA_EXEMPT":
+        return
+    if "requirement_detail" not in fields:
+        detail = str(merged.get("requirement_detail") or "")
+        family = _DETAIL_FAMILY.get(verdict)
+        if detail and family is not None and detail not in family:
+            merged.pop("requirement_detail", None)
+    # When the verdict actually FLIPPED (model said exempt, source says a
+    # visa is needed) the model's exemption narrative is falsified with it.
+    flipped = str(original.get("disposition") or "").upper() == "VISA_EXEMPT"
+    if flipped and "exceptions" not in fields:
+        v = merged.get("exceptions")
+        pat = re.compile(r"免签|免簽|visa[- ]?free|visa[- ]?exempt", re.I)
+        if isinstance(v, list):
+            kept = [x for x in v if not pat.search(str(x))]
+            if len(kept) != len(v):
+                merged["exceptions"] = kept
+        elif isinstance(v, str) and pat.search(v):
+            merged.pop("exceptions", None)
+
+
 def apply(guidance: dict, route: dict) -> tuple[dict, dict | None]:
     """Return (guidance, provenance). The guidance is a COPY with the verified
     fields replaced; provenance names the source, the date and the fields so
@@ -181,6 +221,7 @@ def apply(guidance: dict, route: dict) -> tuple[dict, dict | None]:
     merged = dict(guidance)
     merged.update(hit["fields"])
     _drop_application_leftovers(merged, hit["fields"])
+    _drop_exemption_leftovers(merged, hit["fields"], guidance)
     return merged, {
         "source_url": hit["source_url"], "verified_at": hit["verified_at"],
         "verified_by": hit["verified_by"], "note": hit["note"],

@@ -176,6 +176,21 @@ def _fee(product: dict, guidance: dict) -> tuple[float | None, str | None]:
         return None, str(currency) if currency else None
     if amount == int(amount):
         amount = int(amount)
+    if amount == 0:
+        # A zero consular fee on a visa that must be applied for is almost
+        # always a hallucinated "free": the acceptance audit found sources
+        # charging 60-90 EUR where 0 was stored. Zero survives only when the
+        # answer itself says the visa is free; otherwise the fee is honestly
+        # missing (and the completeness campaign researches it).
+        disposition = str(guidance.get("disposition") or "").upper()
+        if disposition not in ("VISA_EXEMPT", ""):
+            texts = " ".join(str(x or "") for x in (
+                product.get("notes"), fee.get("note"), fee.get("notes"),
+                guidance.get("requirement_detail"),
+                guidance.get("application_channel_detail"))).lower()
+            if not any(k in texts for k in ("free", "gratis", "no fee",
+                                            "waived", "免费", "免簽費", "免签费")):
+                return None, str(currency) if currency else None
     return amount, str(currency) if currency else None
 
 
@@ -263,7 +278,10 @@ def records_for_route(route: dict, guidance: dict,
             if n is None and g.get("permitted_stay_days"):
                 n, unit = g.get("permitted_stay_days"), "Day"
             row["max_stay_duration"], row["max_stay_unit"] = n, unit
-            row["validity_duration"], row["validity_unit"] = n, unit
+            # The stay may legitimately be in hours (a transit exemption),
+            # but their validity_unit enum has no Hour: route it through the
+            # same conversion the product rows use.
+            row["validity_duration"], row["validity_unit"] = _as_validity_unit(n, unit)
             row["entries"] = "Unlimited"
             row["visa_fee_amount"], row["visa_fee_currency"] = 0, "USD"
         else:

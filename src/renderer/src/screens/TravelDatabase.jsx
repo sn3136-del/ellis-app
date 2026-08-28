@@ -424,6 +424,11 @@ export default function TravelDatabase({ onBack }) {
       humanizeEnum(g.application_channel),
       asText(g.application_channel_detail),
       asText(g.arrival_card && g.arrival_card.note),
+      // The card's name and window render as a visible value; they must
+      // switch languages too (the audit caught "Visit Japan Web, Register
+      // before departure..." staying English under Chinese chrome).
+      asText(g.arrival_card && g.arrival_card.name),
+      asText(g.arrival_card && g.arrival_card.submission_window),
       asText(g.transit_requirement && g.transit_requirement.note),
       // The visa-type table is the reader's decision surface; it must switch
       // languages with everything else (it previously stayed English).
@@ -749,9 +754,12 @@ export default function TravelDatabase({ onBack }) {
               </select>
             </label>
             <label style={{ display: 'grid', gap: 6, textAlign: 'left' }}>
+              {/* Trip.com's input table marks 出发地 REQUIRED, so the form
+                  asks for it. The API stays lenient: the spec's own display
+                  pages deep-link per passport x destination with no
+                  departure, so it cannot be an API precondition. */}
               <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>
-                {t('db.departure')}{' '}
-                <span style={{ color: GRAY, fontWeight: 400 }}>({t('db.optional')})</span>
+                {t('db.departure')} *
               </span>
               <input className="input" value={departureCity}
                      data-testid="database-departure"
@@ -805,7 +813,7 @@ export default function TravelDatabase({ onBack }) {
           </div>
           <div style={{ marginTop: 20, textAlign: 'center' }}>
             <button className="btn btn--primary" onClick={lookUp}
-                    disabled={busy || !nat || !dest}
+                    disabled={busy || !nat || !dest || !departureCity.trim()}
                     data-testid="database-check"
                     style={{ fontSize: 15, fontWeight: 800, padding: '13px 32px',
                              borderRadius: 999 }}>
@@ -1114,7 +1122,7 @@ export default function TravelDatabase({ onBack }) {
                     {entryFacts.map(([l, [v, tone]]) => <Fact key={l} label={l} value={v} pill={tone} />)}
                     {g.arrival_card?.required ? (
                       <Fact label={t('db.arrivalCard')} value={
-                        `${g.arrival_card.name || t('db.arrivalCard')}${g.arrival_card.submission_window ? ', ' + g.arrival_card.submission_window : ''}`} />
+                        `${T(asText(g.arrival_card.name)) || t('db.arrivalCard')}${g.arrival_card.submission_window ? ', ' + T(asText(g.arrival_card.submission_window)) : ''}`} />
                     ) : null}
                     {health.length > 0 && (
                       <div style={{ marginTop: 8 }}>

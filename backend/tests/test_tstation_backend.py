@@ -134,7 +134,9 @@ def test_excel_export_has_two_sheets_and_the_data(client):
     assert r.status_code == 200
     assert "spreadsheetml" in r.headers["content-type"]
     wb = load_workbook(io.BytesIO(r.content))
-    assert wb.sheetnames == ["Field descriptions", "Data"]
+    # Data first: the acceptance standard reads the 25-field header row off
+    # sheet 1; the descriptions ride second.
+    assert wb.sheetnames == ["Data", "Field descriptions"]
     data = wb["Data"]
     header = [c.value for c in data[1]]
     assert header == list(tstation.FIELD_ORDER)

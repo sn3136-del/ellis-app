@@ -126,7 +126,7 @@ def test_matrix_expected_count_formula():
     n_nat = 207   # 194 states + HKG/MAC/TWN/PSE document classes + 5 GB* + 4 special
     n_dest = 249
     n_cat = 6
-    n_odoc = 8   # non-ordinary document types (PRC Travel Document added)
+    n_odoc = 11  # non-ordinary document types (P1 expansion: official-ordinary, child, identity certificate)
     assert matrix.expected_count() == n_nat * n_dest * n_cat + n_odoc * n_dest * n_cat
 
 
