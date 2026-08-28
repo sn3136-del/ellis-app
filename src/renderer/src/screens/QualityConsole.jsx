@@ -562,6 +562,7 @@ export default function QualityConsole() {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [shown, setShown] = useState(PAGE)
+  const [changeFilter, setChangeFilter] = useState('')
 
   useEffect(() => {
     let live = true
@@ -776,8 +777,57 @@ export default function QualityConsole() {
 
         {tab === 'issues' && (() => {
           const all = issues?.issues || []
-          const open = all.filter((i) => i.status === 'open' || i.status === 'acknowledged')
-          const closed = all.filter((i) => !open.includes(i)).reverse()
+          const isOpen = (i) => i.status === 'open' || i.status === 'acknowledged'
+          const human = all.filter((i) => isOpen(i) && i.reported_by !== 'freshness_monitor')
+          const auto = all.filter((i) => isOpen(i) && i.reported_by === 'freshness_monitor')
+          const open = [...human, ...auto]
+          const closed = all.filter((i) => !isOpen(i)).reverse()
+          const parseAuto = (note) => {
+            const m = /^Automatic source check against (\S+?): (.*)$/s.exec(note || '')
+            if (!m) return null
+            const segs = []
+            for (const part of m[2].split(/;\s+(?=[a-z_]+: page says)/)) {
+              const pm = /^([a-z_,\s]+): page says\s*([\s\S]*?)(?:\s*\(quote:\s*([\s\S]*?)\)?)?$/.exec(part.trim())
+              if (pm) segs.push({ field: pm[1].trim(), says: pm[2].trim(),
+                                  quote: (pm[3] || '').trim() })
+            }
+            return { url: m[1].replace(/[:;,]$/, ''), segs }
+          }
+          const AutoBody = ({ note }) => {
+            const parsed = parseAuto(note)
+            const [openQ, setOpenQ] = [null, null]
+            if (!parsed) return <div style={{ fontSize: 13, color: NAVY, marginTop: 8 }}>{note}</div>
+            return (
+              <div style={{ marginTop: 8, display: 'grid', gap: 6 }}>
+                {parsed.segs.map((g, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 8, fontSize: 12.5,
+                                        alignItems: 'baseline', flexWrap: 'wrap' }}>
+                    <span style={{ fontFamily: 'ui-monospace, monospace',
+                                   fontSize: 11, color: '#5b6a80',
+                                   background: '#f1f4f9', borderRadius: 6,
+                                   padding: '2px 8px', flexShrink: 0 }}>{g.field}</span>
+                    <span style={{ color: GRAY }}>{t('ops.pageSays')}</span>
+                    <span style={{ color: NAVY, fontWeight: 600,
+                                   overflowWrap: 'anywhere' }}>
+                      {g.says.length > 140 ? g.says.slice(0, 140) + '…' : g.says}
+                    </span>
+                    {g.quote && (
+                      <details style={{ fontSize: 12, width: '100%' }}>
+                        <summary style={{ color: BLUE, cursor: 'pointer',
+                                          fontWeight: 600 }}>{t('ops.showQuote')}</summary>
+                        <blockquote style={{ margin: '6px 0 0', padding: '8px 12px',
+                                     borderLeft: `3px solid ${BLUE}`,
+                                     background: '#f7faff', color: NAVY,
+                                     borderRadius: 6 }}>
+                          {g.quote.slice(0, 400)}
+                        </blockquote>
+                      </details>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )
+          }
           const Card = ({ it, active }) => (
             <div className="ops-lift" style={{ ...card, padding: '14px 18px',
                           borderLeft: `3px solid ${active ? RED : '#d6dee9'}` }}>
@@ -788,10 +838,15 @@ export default function QualityConsole() {
                   {' → '}
                   {(it.route || {}).destination || (it.route || {}).destination_country}
                 </strong>
-                <span style={{ color: GRAY, fontSize: 11,
-                               fontFamily: 'ui-monospace, monospace',
-                               background: '#f1f4f9', borderRadius: 6,
-                               padding: '2px 8px' }}>{it.field}</span>
+                {it.reported_by === 'freshness_monitor'
+                  ? <Chip color={BLUE} filled={false}>{t('ops.autoCheck')}</Chip>
+                  : <Chip color={AMBER} filled={false}>{t('ops.readerReport')}</Chip>}
+                {it.reported_by !== 'freshness_monitor' && (
+                  <span style={{ color: GRAY, fontSize: 11,
+                                 fontFamily: 'ui-monospace, monospace',
+                                 background: '#f1f4f9', borderRadius: 6,
+                                 padding: '2px 8px' }}>{it.field}</span>
+                )}
                 {!active && (
                   <Chip color={it.status === 'corrected' ? GREEN : GRAY} filled={false}>
                     {it.status}
@@ -801,7 +856,9 @@ export default function QualityConsole() {
                   {(it.created_at || '').slice(0, 16).replace('T', ' ')}
                 </span>
               </div>
-              <div style={{ fontSize: 13, color: NAVY, marginTop: 8 }}>{it.note}</div>
+              {it.reported_by === 'freshness_monitor'
+                ? <AutoBody note={it.note} />
+                : <div style={{ fontSize: 13, color: NAVY, marginTop: 8 }}>{it.note}</div>}
               {it.resolution && (
                 <div style={{ fontSize: 12.5, color: GREEN, marginTop: 6 }}>
                   ✓ {it.resolution}
@@ -839,70 +896,111 @@ export default function QualityConsole() {
         })()}
 
         {tab === 'changes' && (() => {
-          const list = changes?.changes || []
           const AC = { add: GREEN, modify: AMBER, delete: RED }
+          const fmt = (v) => {
+            if (v == null) return '·'
+            if (typeof v === 'object') {
+              if (v.amount != null) return `${v.amount} ${v.currency || ''}`.trim()
+              if (Array.isArray(v)) return `${v.length} ${t('ops.items')}`
+              return JSON.stringify(v).slice(0, 40)
+            }
+            const sv = String(v)
+            return sv.length > 60 ? sv.slice(0, 60) + '…' : sv
+          }
+          const list = (changes?.changes || [])
+            .filter((c) => !changeFilter || c.action === changeFilter)
+          const byDay = []
+          for (const c of list) {
+            const day = (c.at || '').slice(0, 10)
+            const g = byDay[byDay.length - 1]
+            if (g && g.day === day) g.items.push(c)
+            else byDay.push({ day, items: [c] })
+          }
           return (
-            <div className="ops-fade" style={{ ...card, padding: '6px 0' }}>
-              {list.length === 0 && !busy && (
-                <div style={{ padding: 22, color: GRAY, fontSize: 13.5,
-                              textAlign: 'center' }}>{t('ops.noChanges')}</div>
-              )}
-              {list.map((c, i) => (
-                <div key={c.id} className="ops-row"
-                     style={{ display: 'grid',
-                              gridTemplateColumns: '26px 1fr',
-                              gap: 12, padding: '12px 20px',
-                              background: i % 2 ? '#fbfcfe' : '#fff' }}>
-                  <div style={{ position: 'relative' }}>
-                    <div style={{ position: 'absolute', left: 11, top: -12,
-                                  bottom: -12, width: 2,
-                                  background: '#edf1f7' }} />
-                    <span style={{ position: 'relative', display: 'inline-block',
-                                   width: 10, height: 10, borderRadius: '50%',
-                                   marginTop: 4, marginLeft: 7,
-                                   background: AC[c.action] || GRAY,
-                                   border: '2px solid #fff',
-                                   boxShadow: '0 0 0 1px #dfe6f0' }} />
-                  </div>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ display: 'flex', gap: 10,
-                                  alignItems: 'center', flexWrap: 'wrap' }}>
-                      <strong style={{ color: NAVY, fontSize: 13 }}>
-                        {(c.route || {}).passport_nationality} → {(c.route || {}).destination_country}
-                      </strong>
-                      <Chip color={AC[c.action] || GRAY} filled={false}>{c.action}</Chip>
-                      <span style={{ color: GRAY, fontSize: 11.5 }}>{c.origin}</span>
-                      <span style={{ marginLeft: 'auto', color: GRAY,
-                                     fontSize: 11.5 }}>
-                        {(c.at || '').slice(0, 16).replace('T', ' ')}
-                      </span>
+            <div className="ops-fade" style={{ display: 'grid', gap: 12 }}>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {[['', t('ops.all')], ['add', 'add'], ['modify', 'modify'],
+                  ['delete', 'delete']].map(([id, label]) => (
+                  <button key={id} onClick={() => setChangeFilter(id)}
+                          style={{ border: `1px solid ${changeFilter === id ? NAVY : BORDER}`,
+                                   background: changeFilter === id ? NAVY : '#fff',
+                                   color: changeFilter === id ? '#fff' : GRAY,
+                                   borderRadius: 999, fontSize: 12, fontWeight: 700,
+                                   padding: '5px 14px', cursor: 'pointer' }}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <div style={{ ...card, padding: '4px 0', overflow: 'hidden' }}>
+                {list.length === 0 && !busy && (
+                  <div style={{ padding: 22, color: GRAY, fontSize: 13.5,
+                                textAlign: 'center' }}>{t('ops.noChanges')}</div>
+                )}
+                {byDay.map((g) => [
+                  <div key={g.day} style={{ padding: '10px 20px 6px',
+                        fontSize: 11, fontWeight: 800, letterSpacing: 0.8,
+                        color: GRAY, textTransform: 'uppercase',
+                        position: 'sticky', top: 0, background: '#fff',
+                        borderBottom: `1px solid ${BORDER}`, zIndex: 3 }}>
+                    {g.day}
+                  </div>,
+                  ...g.items.map((c, i) => (
+                    <div key={c.id} className="ops-row"
+                         style={{ display: 'grid',
+                                  gridTemplateColumns: '26px 1fr', gap: 12,
+                                  padding: '12px 20px',
+                                  background: i % 2 ? '#fbfcfe' : '#fff' }}>
+                      <div style={{ position: 'relative' }}>
+                        <div style={{ position: 'absolute', left: 11, top: -12,
+                                      bottom: -12, width: 2,
+                                      background: '#edf1f7' }} />
+                        <span style={{ position: 'relative',
+                                       display: 'inline-block', width: 10,
+                                       height: 10, borderRadius: '50%',
+                                       marginTop: 4, marginLeft: 7,
+                                       background: AC[c.action] || GRAY,
+                                       border: '2px solid #fff',
+                                       boxShadow: '0 0 0 1px #dfe6f0' }} />
+                      </div>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ display: 'flex', gap: 10,
+                                      alignItems: 'center', flexWrap: 'wrap' }}>
+                          <strong style={{ color: NAVY, fontSize: 13 }}>
+                            {(c.route || {}).passport_nationality} → {(c.route || {}).destination_country}
+                          </strong>
+                          <Chip color={AC[c.action] || GRAY} filled={false}>{c.action}</Chip>
+                          <span style={{ color: GRAY, fontSize: 11.5 }}>
+                            {c.origin === 'grounded_recheck' ? t('ops.autoCheck')
+                              : c.origin === 'engine' ? t('ops.origin.engine') : c.origin}
+                          </span>
+                          <span style={{ marginLeft: 'auto', color: GRAY,
+                                         fontSize: 11.5 }}>
+                            {(c.at || '').slice(11, 16)}
+                          </span>
+                        </div>
+                        {Object.entries(c.changes || {}).slice(0, 5).map(([f, d]) => (
+                          <div key={f} style={{ fontSize: 12, marginTop: 5,
+                                display: 'grid',
+                                gridTemplateColumns: '150px 1fr', gap: 8,
+                                alignItems: 'baseline' }}>
+                            <span style={{ color: GRAY,
+                                           fontFamily: 'ui-monospace, monospace',
+                                           fontSize: 11, overflow: 'hidden',
+                                           textOverflow: 'ellipsis' }}>{f}</span>
+                            <span style={{ minWidth: 0, overflowWrap: 'anywhere' }}>
+                              <span style={{ color: '#b2456e',
+                                             textDecoration: 'line-through',
+                                             opacity: 0.8 }}>{fmt(d.from)}</span>
+                              <span style={{ color: '#94a3b8' }}> → </span>
+                              <span style={{ color: GREEN, fontWeight: 700 }}>{fmt(d.to)}</span>
+                            </span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    {Object.entries(c.changes || {}).slice(0, 5).map(([f, d]) => (
-                      <div key={f} style={{ fontSize: 12, marginTop: 5,
-                                            display: 'flex', gap: 8,
-                                            alignItems: 'baseline',
-                                            flexWrap: 'wrap' }}>
-                        <span style={{ color: GRAY, width: 150, flexShrink: 0,
-                                       fontFamily: 'ui-monospace, monospace',
-                                       fontSize: 11 }}>{f}</span>
-                        <span style={{ color: RED, opacity: 0.75,
-                                       textDecoration: 'line-through' }}>
-                          {JSON.stringify(d.from)?.slice(0, 48)}
-                        </span>
-                        <span style={{ color: '#94a3b8' }}>→</span>
-                        <span style={{ color: GREEN, fontWeight: 600 }}>
-                          {JSON.stringify(d.to)?.slice(0, 70)}
-                        </span>
-                      </div>
-                    ))}
-                    {c.note && (
-                      <div style={{ fontSize: 11.5, color: GRAY, marginTop: 5 }}>
-                        {c.note}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
+                  )),
+                ])}
+              </div>
             </div>
           )
         })()}
@@ -910,6 +1008,12 @@ export default function QualityConsole() {
         {tab === 'freshness' && freshness && (() => {
           const f = freshness.summary
           const covered = f.human_verified + f.grounded
+          const rest = Math.max(0, f.total - covered)
+          const segs = [
+            [f.human_verified, SEQ.high, t('ops.fresh.human')],
+            [f.grounded, SEQ.medium, t('ops.fresh.grounded')],
+            [rest, SEQ.low, t('ops.fresh.notYet')],
+          ]
           return (
             <div style={{ display: 'grid', gap: 14 }} className="ops-fade">
               <div style={{ ...card, display: 'grid',
@@ -931,12 +1035,37 @@ export default function QualityConsole() {
                           accent={f.disputed ? RED : GREEN} delay={320}
                           sub={t('ops.fresh.disputedSub')} />
               </div>
+              <div style={{ ...card, padding: '18px 22px' }}>
+                <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1,
+                              color: GRAY, textTransform: 'uppercase' }}>
+                  {t('ops.fresh.coverage')}
+                </div>
+                <div style={{ display: 'flex', height: 14, borderRadius: 999,
+                              overflow: 'hidden', marginTop: 12,
+                              background: '#eef2f8' }}>
+                  {segs.map(([n, color], i) => (
+                    <div key={i} className="ops-seg"
+                         style={{ width: `${(n / (f.total || 1)) * 100}%`,
+                                  background: color,
+                                  borderRight: i < 2 ? '2px solid #fff' : 'none' }} />
+                  ))}
+                </div>
+                <div style={{ display: 'flex', gap: 16, marginTop: 10,
+                              fontSize: 12, flexWrap: 'wrap' }}>
+                  {segs.map(([n, color, name], i) => (
+                    <span key={i} style={{ display: 'inline-flex', gap: 5,
+                                           alignItems: 'center' }}>
+                      <span style={{ width: 9, height: 9, borderRadius: '50%',
+                                     background: color,
+                                     border: '1px solid #c9d6ea' }} />
+                      <strong style={{ color: NAVY }}>{n.toLocaleString()}</strong>
+                      <span style={{ color: GRAY }}>{name}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
               <div style={{ ...card, padding: '16px 20px', fontSize: 12.5,
                             color: GRAY, lineHeight: 1.65 }}>
-                <strong style={{ color: NAVY }}>{covered.toLocaleString()}</strong>
-                {' '}{t('ops.fresh.coveredOf')}{' '}
-                <strong style={{ color: NAVY }}>{f.total.toLocaleString()}</strong>
-                {' — '}
                 {t('ops.fresh.note')}
               </div>
             </div>
