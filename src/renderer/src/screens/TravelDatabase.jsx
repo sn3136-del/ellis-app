@@ -197,10 +197,13 @@ const DB_CSS = `
 .db-hero { display: flex; gap: 40px; align-items: center;
            justify-content: center; }
 .db-hero-left { width: 100%; max-width: 560px; flex-shrink: 0; }
-.db-scene { flex: 1; max-width: 470px; min-width: 300px; }
+.db-scene { flex: 1; max-width: 470px; min-width: 280px;
+            display: flex; flex-direction: column; align-items: center; }
+.db-scene .planeload__sky { max-width: 100%; }
 @media (max-width: 1020px) {
+  /* Phones stack: the form first, the island scene as a compact closer. */
   .db-hero { display: block; }
-  .db-scene { display: none; }
+  .db-scene { margin-top: 22px; max-width: 100%; }
 }`
 
 /** The SAME Trip.com plane the loading state flies (same SVG, same bob, same
@@ -225,15 +228,14 @@ function EllisIslandScene() {
     </g>
   )
   return (
-    <div className="db-scene" aria-hidden="true"
-         style={{ display: 'flex', flexDirection: 'column',
-                  alignItems: 'center' }}>
+    <div className="db-scene" aria-hidden="true">
       {/* the loading animation itself: same markup, same classes */}
       <div className="planeload__sky">
         <span className="planeload__trail" />
         <span className="planeload__plane"><TripPlane width={216} /></span>
       </div>
-      <svg viewBox="0 0 360 190" width="340" style={{ display: 'block' }}>
+      <svg viewBox="0 0 360 190"
+           style={{ display: 'block', width: 'min(340px, 92vw)' }}>
         {LETTERS.map(island)}
         {/* a few inked waves around the coastline */}
         {[[16, 168], [120, 176], [230, 172], [316, 150], [66, 20],
@@ -291,14 +293,14 @@ function DateField({ value, onChange, lang, placeholder }) {
              placeholder={placeholder}
              onFocus={() => setOpen(true)}
              onChange={(e) => onChange(e.target.value.trim())}
-             style={{ fontSize: 14, padding: '10px 40px 10px 14px',
+             style={{ fontSize: 14, padding: '12px 46px 12px 14px',
                       borderRadius: 12, width: '100%', boxSizing: 'border-box' }} />
       <button type="button" aria-label="calendar"
               onClick={() => setOpen((o) => !o)}
-              style={{ position: 'absolute', right: 8, top: '50%',
+              style={{ position: 'absolute', right: 2, top: '50%',
                        transform: 'translateY(-50%)', border: 'none',
                        background: 'transparent', cursor: 'pointer',
-                       fontSize: 16, color: GRAY, padding: 4 }}>
+                       fontSize: 18, color: GRAY, padding: '10px 12px' }}>
         📅
       </button>
       {open && (
