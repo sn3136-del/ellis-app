@@ -907,7 +907,8 @@
     "The consular fee is charged only if the visa is issued; the designated agency charges its own handling fee on top",
     "Individuals cannot apply at the embassy or consulate: every tourist application goes through a designated travel agency, which also books flights and hotels except for the 5-year visa"
    ],
-   "official_portal_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html"
+   "official_portal_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -962,7 +963,8 @@
      },
      "notes": "Up to 3 months per entry, 12 months total in any 24. Biometrics at an Australian Biometric Collection Centre are required."
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -1056,7 +1058,8 @@
      },
      "notes": "Up to 6 months per visit."
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -1290,7 +1293,8 @@
      },
      "notes": "630 CNY per both the Beijing embassy FAQ (多次签证（长、短期) 630元) and the Shanghai consulate table. Express +280 CNY. If a multiple-entry application is granted only a single-entry visa, the fee difference is not refunded. Validity of the multiple-entry visa is not stated in the official fee tables, so it "
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -9038,7 +9042,8 @@
      },
      "notes": "Same S$30 fee. ICA's only published MJV validity (up to 10 years, automatic for eligible travellers) applies to PRC nationals."
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -9052,7 +9057,8 @@
   "source_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
   "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Spain MFA Schengen visa information page (English); applications are lodged through consulates and their centres.",
   "fields": {
-   "official_portal_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+   "official_portal_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -9383,7 +9389,8 @@
      },
      "notes": "For reference; separate line item in the fee table"
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -9646,7 +9653,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -9688,7 +9696,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -13426,7 +13435,8 @@
      "notes": "Stay limited to 90 days in any 180-day period"
     }
    ],
-   "government_fee": null
+   "government_fee": null,
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -13633,7 +13643,8 @@
      },
      "notes": "No visa charge; the Australian ETA app charges a AUD 20 service fee"
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -14223,7 +14234,11 @@
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 45,
-   "permitted_stay": "up to 45 days"
+   "permitted_stay": "up to 45 days",
+   "government_fee": {
+    "amount": 30,
+    "currency": "EUR"
+   }
   }
  },
  {
@@ -14755,7 +14770,12 @@
   "note": "Two independent official confirmations of 30, not 90. Morocco's own Ministry of Foreign Affairs consular portal lists the exemption as \"Hong-Kong (séjour limité à 30 jours)\" at consulat.ma/fr/liste-des-pays-dont-les-ressortissants-sont-dispenses-du-visa-dentree-au-maroc, I cite the HK Immigration Department PDF instead only because consulat.ma is not a gov.* domain; the IMMD l",
   "fields": {
    "permitted_stay_days": 30,
-   "permitted_stay": "30 days visa-free"
+   "permitted_stay": "30 days visa-free",
+   "required_documents": [
+    "At lodging: visa application form for the Kingdom of Morocco; two recent colour ID photos on white background (4x3 cm); ID card or residence card or equivalent; passport valid beyond the intended stay; photocopy of the passport (identity and validity pages); bank statement",
+    "OR a duly legalised 'attestation de prise en charge' covering medical care and repatriation for a family visit",
+    "OR a request from an approved travel agency / recommendation of the Ministry of Tourism or of the ONMT delegation. At issuance: travel insurance; hotel booking or voucher; confirmed return ticket; chancellery fees."
+   ]
   }
  },
  {
@@ -15560,7 +15580,11 @@
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 30,
-   "permitted_stay": "30 days, extendable twice by 30 days at USD 50 each"
+   "permitted_stay": "30 days, extendable twice by 30 days at USD 50 each",
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   }
   }
  },
  {
@@ -15991,7 +16015,11 @@
      "fee": null,
      "notes": "Single entry only; re-entry requires a new visa. Fee unverifiable on the government site."
     }
-   ]
+   ],
+   "government_fee": {
+    "amount": 50,
+    "currency": "USD"
+   }
   }
  },
  {
@@ -19114,7 +19142,8 @@
      },
      "notes": "Andorra is outside the Schengen area and requires no visa of tourists; a valid passport or ID card suffices at the Andorran border. Because access is via France or Spain, a third-country national needs a double- or multiple-entry Schengen visa to re-enter Schengen after the Andorran visit. Max tourist stay in Andorra: 90 days."
     }
-   ]
+   ],
+   "disposition": "CONDITIONAL"
   }
  },
  {
@@ -19398,7 +19427,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -20747,7 +20777,8 @@
      },
      "notes": "No fee"
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -20811,7 +20842,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -20917,7 +20949,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -20959,7 +20992,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -21001,7 +21035,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -21414,7 +21449,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -21758,7 +21794,8 @@
      "fee": null,
      "notes": null
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -23097,7 +23134,8 @@
      "fee": null,
      "notes": "No fee published on any Pakistani government site for HKSAR passport holders."
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -23307,7 +23345,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -23437,7 +23476,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -23671,7 +23711,8 @@
      },
      "notes": "Same flat $140 for US citizens. Duration of each stay is set by the consular officer and is not published."
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -23777,7 +23818,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -23841,7 +23883,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -23894,7 +23937,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -23947,7 +23991,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -24000,7 +24045,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -24062,7 +24108,8 @@
      },
      "notes": "Plus SDF USD 100 per adult per night"
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -24092,7 +24139,8 @@
      },
      "notes": "Plus SDF USD 100 per adult per night"
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -25475,7 +25523,8 @@
      "fee": null,
      "notes": "Fee determined by the issuing mission; MPPRE publishes requirements only."
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -25761,7 +25810,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -25834,7 +25884,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -26002,7 +26053,8 @@
      "notes": "Exempt under EU Visa Code Art. 16(4); not stated on the Icelandic MFA page itself"
     }
    ],
-   "permitted_stay": "Up to 90 days in any 180-day period"
+   "permitted_stay": "Up to 90 days in any 180-day period",
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -30376,7 +30428,8 @@
   "note": "Completeness campaign fill vs official sources. Quote: \"Entry permit — A PERMIT IS NoT REQUIRED FoR A PERSON VISITING THE FSM FOR 30 DAYS oR LESS. A PERSON NEEDS A PERMTT FOR A VISIT IN EXCESS OF 30 DAYS.\"",
   "fields": {
    "permitted_stay": "No entry permit required for a visit of 30 days or less",
-   "permitted_stay_days": 30
+   "permitted_stay_days": 30,
+   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -30586,6 +30639,607 @@
     "submission_window": "submit online within 3 days before arrival",
     "note": "Mandatory for all foreign visitors since 1 May 2025; free at tdac.immigration.go.th"
    }
+  }
+ },
+ {
+  "route": {
+   "nationality": "JPN",
+   "destination": "MYS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://www.kln.gov.my/web/jpn_tokyo/requirement_foreigner",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"ENTRY REQUIREMENT | Country | Without Visa | VWTR | VWR | On Arrival | Extension | On Arrival | Extension | On Arrival | Extension | Japan |\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT"
+  }
+ },
+ {
+  "route": {
+   "nationality": "SGP",
+   "destination": "MYS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://www.imi.gov.my/index.php/en/main-services/visa/visa-requirement-by-country/",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"EXCEPT for the following countries which do not require a visa for any purpose of entry: ... 35. SINGAPORE\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "MYS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://www.kln.gov.my/web/fra_paris/requirement_foreigner",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"Country | Without Visa | VWTR | VWR | On Arrival | Extension | On Arrival | Extension | On Arrival | Extension | France | 3 mths | - | 3 mth\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT"
+  }
+ },
+ {
+  "route": {
+   "nationality": "DEU",
+   "destination": "MYS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://www.kln.gov.my/web/deu_berlin/requirement_foreigner",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"German citizens do not need a tourist visa when travelling to Malaysia. German passport holders can stay in Malaysia for 3 months (90 days).\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT"
+  }
+ },
+ {
+  "route": {
+   "nationality": "CAN",
+   "destination": "MYS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://www.imi.gov.my/index.php/en/main-services/visa/visa-requirement-by-country/",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"This visa facility application is open to all foreign nationals who require a visa to enter Malaysia for the purpose of studying, working, o\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT"
+  }
+ },
+ {
+  "route": {
+   "nationality": "IDN",
+   "destination": "MYS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://www.imi.gov.my/index.php/en/main-services/visa/visa-requirement-by-country/",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"Visa is not required for a stay of less than one (1) month for ASEAN nationals except Myanmar. Visas required for duration of stay exceeds (\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT"
+  }
+ },
+ {
+  "route": {
+   "nationality": "PHL",
+   "destination": "MYS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://www.imi.gov.my/index.php/en/main-services/visa/visa-requirement-by-country/",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"Visa is not required for a stay of less than one (1) month for ASEAN nationals except Myanmar. Visas required for duration of stay exceeds (\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "MYS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://www.exteriores.gob.es/es/ServiciosAlCiudadano/Paginas/Detalle-recomendaciones-de-viaje.aspx?trc=malasia",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"Los ciudadanos españoles pueden entrar en Malasia sin visado por un período máximo de hasta tres meses, a discreción de las autoridades mala\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT"
+  }
+ },
+ {
+  "route": {
+   "nationality": "RUS",
+   "destination": "MYS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://www.kln.gov.my/web/rus_moscow/requirement_foreigner",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"Visa Requirements for Citizens from the Russian Federation, Armenia, Belarus and Georgia | Country | Without Visa | VWTR | VWR | On Arrival \"",
+  "fields": {
+   "disposition": "VISA_EXEMPT"
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "MYS",
+   "travel_purpose": "tourism",
+   "travel_document_type": "diplomatic_passport"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://cs.mfa.gov.cn/wgrlh/lhqz/lhqzjjs/202510/t20251023_11739051.shtml",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"No. | Foreign Country | Passport Categories Covered by Agreement on Visa Exemption | Date of Entry into Force YYYY.MM.DD ... 85 | Malaysia |\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT"
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "MYS",
+   "travel_purpose": "transit"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://www.kln.gov.my/web/chn_hong-kong/requirement_foreigner",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"VISA REQUIREMENT INFORMATION | CITIZEN | TYPE OF DOCUMENT | VISA FREE PERIOD FOR VISIT NOT EXCEEDING | HONG KONG | PASSPORT | 90 days\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT"
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "MYS",
+   "travel_purpose": "tourism",
+   "travel_document_type": "diplomatic_passport"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://cs.mfa.gov.cn/wgrlh/lhqz/lhqzjjs/202510/t20251023_11739051.shtml",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"No. | Foreign Country | Passport Categories Covered by Agreement on Visa Exemption | Date of Entry into Force YYYY.MM.DD ... 85 | Malaysia |\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT"
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "GRD",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://www.immd.gov.hk/pdf/Visa-free%20Access%20or%20Visa-on-arrival%20for%20HKSAR%20passport%20list_Eng.pdf",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"HKSAR passport holders have been granted visa-free access or visa-on-arrival to visit the following countries/territories (updated on 26 Aug\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT"
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "GRD",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://laws.gov.gd/index.php/chapters/i-144-155/1236-cap145-immigration-act/viewdocument/1236",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"3. Visa requirements exemption — The following persons are exempt from visa requirements on entering the State— (a) Citizens of Denmark, Fra\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT"
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "VUT",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://immigration.gov.vu/visa-exempted-countries/",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"COUNTRIES NOT REQUIRING A VISITOR VISA TO ENTER VANUATU (EXEMPTED COUNTRIES) ... Asia, Oceania, and the Pacific ... China\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT"
+  }
+ },
+ {
+  "route": {
+   "nationality": "DEU",
+   "destination": "NLD",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32004L0038",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"Article 5 Right of entry 1. ... Member States shall grant Union citizens leave to enter their territory with a valid identity card or passpo\"",
+  "fields": {
+   "permitted_stay": "Up to three months without any conditions or formalities other than holding a valid identity card or passport (Directive 2004/38/EC, Article 6(1)); beyond three months the right continues under Articl",
+   "permitted_stay_days": 90
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "FRA",
+   "travel_purpose": "transit"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02009R0810-20240611",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"Without prejudice to Article 12(a), the period of validity of the visa shall include an additional 'period of grace' of 15 days. ... Without\"",
+  "fields": {
+   "disposition": "VISA_REQUIRED"
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "MWI",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://evisa.gov.mw/VisaAssistance",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"Hong Kong SAR, China nationals do not require Visa\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT"
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "DMA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://dominica.gov.dm/services/passports-and-travel-documents-non-nationals/do-i-need-a-visa-to-enter-into-dominica",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"Any in-transit passenger or bona fide tourist who is in possession of a return ticket and satisfies the Immigration Officer that he/she does\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT"
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "USA",
+   "travel_purpose": "tourism",
+   "travel_document_type": "emergency_passport"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://travel.state.gov/en/passports/renew-replace/limited-validity-passport.html",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"We may issue you a limited validity passport in certain circumstances when an emergency or urgent travel prevents us from issuing a fully va\"",
+  "fields": {
+   "permitted_stay": "No maximum stay - a returning U.S. citizen is admitted to the United States as a citizen and is not given a period of authorised stay."
+  }
+ },
+ {
+  "route": {
+   "nationality": "JPN",
+   "destination": "JPN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://laws.e-gov.go.jp/law/326CO0000000319",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"本邦外の地域から本邦に帰国する日本人（乗員を除く。）は、有効な旅券（有効な旅券を所持することができないときは、日本の国籍を有することを証する文書）を所持し、その者が上陸する出入国港において、法務省令で定める手続により、入国審査官から帰国の確認を受けなければならない。\"",
+  "fields": {
+   "permitted_stay": "Unlimited - no period of stay is imposed on Japanese nationals; the Immigration Control Act grants statuses of residence and periods of stay only to foreign nationals."
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "JPN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://www.mofa.go.jp/mofaj/toko/visa/tetsuzuki/pagew_000001_02672.html",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"査証手数料を規定している「領事官の徴収する手数料に関する政令」が改正され、令和8年7月1日から施行されます。同日以降に査証申請が在外公館で受理された場合の手数料額は、それぞれ邦貨換算で、一次有効査証は約15,000円、数次有効査証は約30,000円となります。原則として、査証の発\"",
+  "fields": {
+   "government_fee": {
+    "amount": 15000,
+    "currency": "JPY"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "ARM",
+   "destination": "CHN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://am.china-embassy.gov.cn/zytzx/202412/t20241227_11522075.htm",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"中国驻亚美尼亚使馆签证费调减措施将延续至2025年12月31日，具体费用如下：一、亚美尼亚公民赴华签证收费（德拉姆）\"",
+  "fields": {
+   "government_fee": {
+    "amount": 7500,
+    "currency": "AMD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "GRC",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX%3A02009R0810-20200202",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"An airport transit visa shall be valid for transiting through the international transit areas of the airports situated on the territory of M\"",
+  "fields": {
+   "government_fee": {
+    "amount": 80,
+    "currency": "EUR"
+   },
+   "permitted_stay": "No stay in the territory is authorised - an airport transit visa is valid only for transiting through the international transit areas of airports situated on the territory of the Member States."
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "SGP",
+   "travel_purpose": "study"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://ask.gov.sg/ica/questions/clos83fvm01gr5k0wd3ccw7aj",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"The validity period is shown on your Student's Pass (STP). | The validity period is shown on your Student's Pass (STP).\"",
+  "fields": {
+   "permitted_stay": "For the validity of the Student's Pass; the holder must leave on or before the STP expiry date unless another pass is granted."
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "PRY",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://www2.mre.gov.py/congralpar-buenos-aires/index.php/tramites-y-servicios/visas",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"Entrada Única: 65,00 USD o su equivalente a pesos argentinos (al tipo de cambio consular del día del trámite).\"",
+  "fields": {
+   "government_fee": {
+    "amount": 65,
+    "currency": "USD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "PRY",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://www2.mre.gov.py/congralpar-buenos-aires/index.php/tramites-y-servicios/visas",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"Entrada Única: 65,00 USD o su equivalente a pesos argentinos (al tipo de cambio consular del día del trámite).\"",
+  "fields": {
+   "government_fee": {
+    "amount": 65,
+    "currency": "USD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "COD",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://evisa.gouv.cd/helps/faqs",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"Il donne droit à un visa aéroportuaire de 7 jours avec une seule entrée. […] Le eVisa coûte 300 USD dont 50$ constituent les frais administr\"",
+  "fields": {
+   "government_fee": {
+    "amount": 300,
+    "currency": "USD"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "PRK",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://cs.mfa.gov.cn/zggmcg/ljmdd/yz_645708/cx_646206/",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"朝鲜签证有效期从签发之日起计算，停留期从入境朝鲜之日起计算，必须在签证有效期内入境并出境，即在朝停留期限包含在签证有效期内，不得超过签证有效期停留。\"",
+  "fields": {
+   "disposition": "VISA_REQUIRED"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "ITA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32004L0038",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any con\"",
+  "fields": {
+   "permitted_stay": "Up to three months of residence without any conditions or formalities other than holding a valid identity card or passport (EU free movement)",
+   "permitted_stay_days": 3
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "ATG",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://immigration.gov.ag/visa-services/countries-exempt-from-visa/",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"The following countries do not require a Visa to enter Antigua and Barbuda. … Other Countries (European Union, Non-European and Non-Commonwe\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT"
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "CIV",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://gcpnd.gouv.ci/uploads/publications/178239620711.pdf",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"Les participants, y compris ceux provenant des pays où il n'y a pas de représentations diplomatiques ou consulaires ivoiriennes, pourront ef\"",
+  "fields": {
+   "government_fee": {
+    "amount": 73,
+    "currency": "EUR"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "CIV",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://gcpnd.gouv.ci/uploads/publications/178239620711.pdf",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"pourront effectuer leur demande de visa en ligne https://snedai.com/e-visa/ contre paiement d'un montant d'environ 73 euros | pourront effectuer leur demande de visa en ligne https://snedai.com/e-visa/ contre paiement d'un montant d'environ 73 euros\"",
+  "fields": {
+   "disposition": "VISA_REQUIRED"
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "CIV",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://gcpnd.gouv.ci/uploads/publications/178239620711.pdf",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"pourront effectuer leur demande de visa en ligne https://snedai.com/e-visa/ contre paiement d'un montant d'environ 73 euros | Le visa électronique, délivré dans un délai de 3 à 5 jours ouvrables, devra être imprimé par le participant pour le présenter aussi bien à l\"",
+  "fields": {
+   "disposition": "VISA_REQUIRED"
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "MKD",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://travel.state.gov/content/travel/en/international-travel/International-Travel-Country-Information-Pages/Macedonia.html",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"Visas are not required for tourist or business trips of less than 90 days within a six-month period.\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT"
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "MAR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://www.consulat.ma/fr/liste-des-pays-dont-les-ressortissants-sont-dispenses-du-visa-dentree-au-maroc",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"Liste des pays dont les ressortissants sont dispensés du visa d'entrée au Maroc ... Chine\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT"
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "MAR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://www.consulat.ma/fr/liste-des-pays-dont-les-ressortissants-sont-dispenses-du-visa-dentree-au-maroc",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"Liste des pays dont les ressortissants sont dispensés du visa d'entrée au Maroc ... Etats-Unis d'Amérique\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT"
+  }
+ },
+ {
+  "route": {
+   "nationality": "NZL",
+   "destination": "MAR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://www.consulat.ma/fr/liste-des-pays-dont-les-ressortissants-sont-dispenses-du-visa-dentree-au-maroc",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"Liste des pays dont les ressortissants sont dispensés du visa d'entrée au Maroc ... Nouvelle Zélande\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT"
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "ERI",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://cs.mfa.gov.cn/zggmcg/ljmdd/fz_648564/eltly_649186/",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"持因私护照中国公民入境前须在厄驻华使馆办妥签证。具体签证要求与手续，请向厄驻华使馆查询。\"",
+  "fields": {
+   "disposition": "VISA_REQUIRED"
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "TUN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "http://tn.china-embassy.gov.cn/lsfw/lsbhyxz/202310/t20231007_11157169.htm",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"近日，突尼斯政府决定对中国游客实施免签入境政策，具体如下：免签政策适用于自中国境内或境外入境突尼斯的中国个人或团体游客。\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT"
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "TUN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Claude Opus 5 wave-2 research vs official sources",
+  "source_url": "https://www.immd.gov.hk/eng/service/travel_document/visa_free_access.html",
+  "note": "Wave-2 completeness research vs official sources. Quote: \"Tunisia (Republic of) ... Duration of Stay: 3 months\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT"
   }
  }
 ]

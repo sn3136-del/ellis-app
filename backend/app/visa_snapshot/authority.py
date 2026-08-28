@@ -40,6 +40,8 @@ GOV_SUFFIXES = (
     # fsmembassy.fm and maliembassy.us are those states' embassies.
     "boe.es", "consulat.ma", "ksavisa.sa", "gov.krd", "un.int",
     "fsmembassy.fm", "maliembassy.us",
+    # diplocam.cm is Cameroon's Ministry of Foreign Relations.
+    "diplocam.cm",
 
     # generic
     "gov", "mil",

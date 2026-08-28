@@ -46,7 +46,9 @@ export function useLocalizedCountries(client, reg, lang) {
     return {
       value: c.alpha_3,
       label: `${c.flag ? c.flag + ' ' : ''}${local || c.name}`,
-      search: `${c.name} ${local || ''} ${c.alpha_2 || ''} ${c.alpha_3}`.toLowerCase(),
+      // Both scripts are searchable in EVERY locale: an ops user typing
+      // 中国 with the UI in English still deserves the match.
+      search: `${c.name} ${local || ''} ${c.name_zh || ''} ${c.name_hant || ''} ${c.alpha_2 || ''} ${c.alpha_3}`.toLowerCase(),
     }
   }), [reg, zh])
 }

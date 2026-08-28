@@ -1013,6 +1013,7 @@ def travel_database_changes(q: str = "", limit: int = 200,
 def travel_database_export(nationality: str = "", destination: str = "",
                            purpose: str = "", document: str = "",
                            requirement: str = "", confidence: str = "",
+                           visa_type: str = "", field_missing: str = "",
                            db=Depends(get_session),
                            p: Principal = Depends(get_principal)):
     """The dataset as Excel, to Trip.com's export spec: one workbook, a
@@ -1028,6 +1029,14 @@ def travel_database_export(nationality: str = "", destination: str = "",
     rows = _tstation_rows(db, nationality=nationality, destination=destination,
                           purpose=purpose, document=document,
                           requirement=requirement, confidence=confidence)
+    # The standard's export filters by visa type too (按站点/目的地/签证类型
+    # 筛选), and by field gap for rectification work.
+    if visa_type:
+        vt = visa_type.strip().lower()
+        rows = [r for r in rows if vt in str(r.get("visa_type_name") or "").lower()]
+    if field_missing and field_missing.strip() in tstation.FIELD_ORDER:
+        fm = field_missing.strip()
+        rows = [r for r in rows if tstation.field_status(r).get(fm) == "missing"]
     # Sheet 1 is the Data sheet whose header row is the exact 25 field names:
     # the acceptance standard reads the dictionary off the first sheet. The
     # field descriptions ride second as documentation.

@@ -219,7 +219,11 @@ function CountryFilter({ value, placeholder, onCommit, countries }) {
   const [text, setText] = useState(value)
   const [open, setOpen] = useState(false)
   const boxRef = useRef(null)
-  useEffect(() => { setText(value) }, [value])
+  useEffect(() => {
+    // The committed VALUE is a code; the input shows the flagged label.
+    const hit = value && countries.find((c) => c.value === value)
+    setText(hit ? hit.label : value)
+  }, [value, countries])
   const matches = useMemo(() => {
     const q = text.trim().toLowerCase()
     if (!q) return []
@@ -241,8 +245,13 @@ function CountryFilter({ value, placeholder, onCommit, countries }) {
     const clean = String(v || '').replace(/^[^\p{L}\p{N}]+/u, '').trim()
     if (!clean) { onCommit(''); setOpen(false); return }
     const lc = clean.toLowerCase()
-    const exact = countries.find((c) => c.value.toLowerCase() === lc ||
+    // An alpha-3 CODE match counts only when typed as a code (uppercase):
+    // lowercase "and" is a word fragment, not Andorra.
+    const codeHit = clean === clean.toUpperCase() &&
+      countries.find((c) => c.value === clean.toUpperCase())
+    const nameHit = countries.find((c) =>
       c.label.replace(/^[^\p{L}\p{N}]+/u, '').trim().toLowerCase() === lc)
+    const exact = codeHit || nameHit
     const pool = countries.filter((c) => c.search.includes(lc))
     const pick = exact || (pool.length === 1 ? pool[0] : null)
     if (pick) {
