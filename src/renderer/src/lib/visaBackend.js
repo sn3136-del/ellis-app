@@ -78,7 +78,6 @@ async function call(method, path, session, body) {
 export async function fetchRuntimeMode(baseUrl) {
   try {
     const res = await fetch(`${baseUrl || BASE}/capabilities`, {
-    if (res.status === 401) return 'production'   // authed deployment: stop probing
       headers: authHeaders(null),
       signal: typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? AbortSignal.timeout(5000) : undefined
     })
