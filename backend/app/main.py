@@ -118,6 +118,45 @@ def healthz():
     return {"ok": True}
 
 
+@app.get("/health/uptime")
+def health_uptime():
+    """The availability record behind the 99.99% acceptance metric: a cron
+    probes the full public path every minute and logs to a monthly CSV; this
+    reads it back so the evidence is visible where the acceptance runs.
+    Public like /health: it holds no data beyond the service's own pulse."""
+    import csv as _csv
+    import glob as _glob
+    base = os.getenv("ELLIS_UPTIME_DIR", "/var/lib/ellis/uptime")
+    months = []
+    for f in sorted(_glob.glob(os.path.join(base, "*.csv"))):
+        try:
+            rows = list(_csv.DictReader(open(f, encoding="utf-8")))
+        except OSError:
+            continue
+        if not rows:
+            continue
+        ok = sum(1 for r in rows if r.get("code") == "200")
+        lat = sorted(int(r["ms"]) for r in rows
+                     if r.get("code") == "200" and str(r.get("ms", "")).isdigit())
+        months.append({
+            "month": os.path.basename(f)[:-4],
+            "probes": len(rows), "ok": ok,
+            "availability_pct": round(ok / len(rows) * 100, 4),
+            "median_latency_ms": lat[len(lat) // 2] if lat else None,
+        })
+    incidents = 0
+    inc = os.path.join(base, "incidents.log")
+    if os.path.isfile(inc):
+        try:
+            incidents = sum(1 for line in open(inc, encoding="utf-8") if line.strip())
+        except OSError:
+            pass
+    return {"probe_interval_seconds": 60, "months": months,
+            "incidents": incidents,
+            "note": "One probe per minute against the public HTTPS path; "
+                    "a failed probe retries once before it counts."}
+
+
 @app.get("/capabilities")
 def get_capabilities(_: Principal = Depends(get_principal)):
     caps = capabilities()
