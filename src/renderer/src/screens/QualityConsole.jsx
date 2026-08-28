@@ -625,7 +625,7 @@ function RingGauge({ pct, target, size = 74, hitColor = GREEN }) {
   )
 }
 
-function MicroStack({ segs, height = 8 }) {
+function MicroStack({ segs, height = 8, legend = true }) {
   const [go, setGo] = useState(false)
   useEffect(() => { const id = setTimeout(() => setGo(true), 140)
     return () => clearTimeout(id) }, [])
@@ -641,17 +641,19 @@ function MicroStack({ segs, height = 8 }) {
                         borderRight: i < segs.length - 1 ? '2px solid #fff' : 'none' }} />
         ))}
       </div>
-      <div style={{ display: 'flex', gap: 10, marginTop: 7, fontSize: 10.5,
-                    flexWrap: 'wrap' }}>
-        {segs.map(([n, color, name], i) => (
-          <span key={i} style={{ display: 'inline-flex', gap: 4,
-                                 alignItems: 'center', color: GRAY }}>
-            <span style={{ width: 7, height: 7, borderRadius: 2,
-                           background: color }} />
-            <strong style={{ color: NAVY }}>{n.toLocaleString()}</strong> {name}
-          </span>
-        ))}
-      </div>
+      {legend && (
+        <div style={{ display: 'flex', gap: 10, marginTop: 7, fontSize: 10.5,
+                      flexWrap: 'wrap' }}>
+          {segs.map(([n, color, name], i) => (
+            <span key={i} style={{ display: 'inline-flex', gap: 4,
+                                   alignItems: 'center', color: GRAY }}>
+              <span style={{ width: 7, height: 7, borderRadius: 2,
+                             background: color }} />
+              <strong style={{ color: NAVY }}>{n.toLocaleString()}</strong> {name}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -1617,7 +1619,7 @@ export default function QualityConsole() {
                                 textTransform: 'uppercase' }}>
                     {t('ops.fresh.coverage')}
                   </div>
-                  <MicroStack segs={segs} height={22} />
+                  <MicroStack segs={segs} height={22} legend={false} />
                   <div style={{ display: 'grid', gap: 8 }}>
                     {segs.map(([n, color, name], i) => (
                       <div key={i} style={{ display: 'flex',
