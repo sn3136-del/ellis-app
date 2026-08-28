@@ -901,6 +901,7 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
             # in the cache key ("doc:diplomatic_passport").
             doc = next((part[4:] for part in r.cache_key.split("|")
                         if part.startswith("doc:")), "ordinary_passport")
+        doc = kimi_primary.normalize_document_type(doc)
         route["travel_document_type"] = doc
         if document and doc != document:
             continue

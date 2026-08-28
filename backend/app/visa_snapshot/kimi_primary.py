@@ -778,10 +778,26 @@ def cache_key(route: dict) -> str:
     if transit:
         parts.append("via:" + ",".join(transit))
     # Document type likewise: a diplomatic passport is a different answer.
-    doc = str(route.get("travel_document_type") or "ordinary_passport").lower()
+    doc = normalize_document_type(route.get("travel_document_type"))
     if doc and doc != "ordinary_passport":
         parts.append("doc:" + doc)
     return "|".join(parts)
+
+
+# Shorthand document names collapse to the registry codes: "ordinary" must
+# hit the same cache row and records as "ordinary_passport", or the same
+# route splits into two entries whose 25-field records then drift apart.
+_DOC_SHORTHAND = {
+    "ordinary": "ordinary_passport", "passport": "ordinary_passport",
+    "diplomatic": "diplomatic_passport", "service": "service_passport",
+    "official": "service_passport", "emergency": "emergency_passport",
+    "temporary": "temporary_passport", "child": "child_passport",
+}
+
+
+def normalize_document_type(raw) -> str:
+    doc = str(raw or "ordinary_passport").strip().lower().replace(" ", "_")
+    return _DOC_SHORTHAND.get(doc, doc)
 
 
 def _now() -> datetime:
