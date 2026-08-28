@@ -363,7 +363,7 @@ function FlagForm({ rec, onFlag, t }) {
   )
 }
 
-function RecordsTable({ records, onFlag, onRelease, t }) {
+function RecordsTable({ records, onFlag, onRelease, t, flagOf }) {
   const [sort, setSort] = useState({ key: 'route', dir: 1 })
   const [open, setOpen] = useState(null)
   const onSort = (k) => setSort((s0) => ({ key: k, dir: s0.key === k ? -s0.dir : 1 }))
@@ -429,7 +429,9 @@ function RecordsTable({ records, onFlag, onRelease, t }) {
                                : i % 2 ? '#fbfcfe' : '#fff' }}>
                   <td style={{ padding: '9px 12px', whiteSpace: 'nowrap' }}>
                     <strong style={{ color: NAVY }}>
-                      {rec.travel_document_country} → {rec.destination_country}
+                      {flagOf(rec.travel_document_country)} {rec.travel_document_country}
+                      {' → '}
+                      {flagOf(rec.destination_country)} {rec.destination_country}
                     </strong>
                     <div style={{ color: GRAY, fontSize: 11 }}>
                       {t(PURPOSE_KEY[rec.travel_purpose] || '') || rec.travel_purpose}
@@ -571,6 +573,11 @@ export default function QualityConsole() {
     return () => { live = false }
   }, [client])
   const countries = useLocalizedCountries(client, reg, lang)
+  const flagOf = useMemo(() => {
+    const m = {}
+    for (const c of (reg?.countries || [])) m[c.alpha_3] = c.flag || ''
+    return (code) => m[code] || ''
+  }, [reg])
 
   const qs = useCallback(() => new URLSearchParams(
     Object.fromEntries(Object.entries(filters).filter(([, v]) => v))
@@ -764,7 +771,7 @@ export default function QualityConsole() {
               </div>
             )}
             {busy && <div style={{ color: GRAY, fontSize: 13 }}>{t('ops.loading')}</div>}
-            <RecordsTable records={records.slice(0, shown)} onFlag={flag} onRelease={release} t={t} />
+            <RecordsTable records={records.slice(0, shown)} onFlag={flag} onRelease={release} t={t} flagOf={flagOf} />
             {records.length > shown && (
               <button className="btn btn--ghost"
                       style={{ borderRadius: 999, justifySelf: 'center' }}
@@ -793,6 +800,24 @@ export default function QualityConsole() {
             }
             return { url: m[1].replace(/[:;,]$/, ''), segs }
           }
+          const fmtSays = (field, says) => {
+            let v = String(says || '').trim().replace(/^"|"$/g, '')
+            if (/^[\[{]/.test(v)) {
+              // A product-table proposal: name the visa types instead of
+              // printing JSON (the note is capped, so parse may not work).
+              const types = [...v.matchAll(/"type":\s*"([^"]+)"/g)].map((m) => m[1])
+              if (types.length) {
+                return `${types.length} ${t('ops.productsProposed')}: ${types.join(' · ')}`
+              }
+              return t('ops.productsProposed')
+            }
+            if (/^[a-z0-9_]+$/i.test(v) && v.includes('_')) {
+              v = v.replace(/_/g, ' ').toLowerCase()
+              v = v.charAt(0).toUpperCase() + v.slice(1)
+            }
+            if (/\w$/.test(says || '') && (note || '').endsWith(says || '')) v += '…'
+            return v
+          }
           const AutoBody = ({ note }) => {
             const parsed = parseAuto(note)
             const [openQ, setOpenQ] = [null, null]
@@ -809,7 +834,8 @@ export default function QualityConsole() {
                     <span style={{ color: GRAY }}>{t('ops.pageSays')}</span>
                     <span style={{ color: NAVY, fontWeight: 600,
                                    overflowWrap: 'anywhere' }}>
-                      {g.says.length > 140 ? g.says.slice(0, 140) + '…' : g.says}
+                      {(() => { const v = fmtSays(g.field, g.says)
+                        return v.length > 160 ? v.slice(0, 160) + '…' : v })()}
                     </span>
                     {g.quote && (
                       <details style={{ fontSize: 12, width: '100%' }}>
@@ -834,8 +860,12 @@ export default function QualityConsole() {
               <div style={{ display: 'flex', gap: 10, alignItems: 'center',
                             flexWrap: 'wrap' }}>
                 <strong style={{ color: NAVY, fontSize: 13.5 }}>
+                  {flagOf((it.route || {}).nationality || (it.route || {}).passport_nationality)}
+                  {' '}
                   {(it.route || {}).nationality || (it.route || {}).passport_nationality}
                   {' → '}
+                  {flagOf((it.route || {}).destination || (it.route || {}).destination_country)}
+                  {' '}
                   {(it.route || {}).destination || (it.route || {}).destination_country}
                 </strong>
                 {it.reported_by === 'freshness_monitor'
@@ -909,10 +939,12 @@ export default function QualityConsole() {
               return j === '{}' ? null : j.slice(0, 40)
             }
             const sv = String(v).replace(/^"|"$/g, '')
-            return sv.length > 64 ? sv.slice(0, 64) + '…' : sv
+            return sv.length > 56 ? sv.slice(0, 56) + '…' : sv
           }
-          const list = (changes?.changes || [])
-            .filter((c) => !changeFilter || c.action === changeFilter)
+          const all = changes?.changes || []
+          const counts = { '': all.length }
+          for (const c of all) counts[c.action] = (counts[c.action] || 0) + 1
+          const list = all.filter((c) => !changeFilter || c.action === changeFilter)
           const byDay = []
           for (const c of list) {
             const day = (c.at || '').slice(0, 10)
@@ -920,68 +952,82 @@ export default function QualityConsole() {
             if (g && g.day === day) g.items.push(c)
             else byDay.push({ day, items: [c] })
           }
+          const ValueChip = ({ v, kind }) => (
+            <span style={{ display: 'inline-block', padding: '2px 8px',
+                           borderRadius: 7, fontSize: 12, maxWidth: 340,
+                           overflow: 'hidden', textOverflow: 'ellipsis',
+                           whiteSpace: 'nowrap', verticalAlign: 'bottom',
+                           ...(kind === 'old'
+                             ? { background: '#fdf1f4', color: '#a13d55',
+                                 textDecoration: 'line-through' }
+                             : kind === 'del'
+                               ? { background: '#fdf1f4', color: RED, fontWeight: 700 }
+                               : { background: '#eefaf3', color: '#0b7a44',
+                                   fontWeight: 700 }) }}>
+              {v}
+            </span>
+          )
           return (
-            <div className="ops-fade" style={{ display: 'grid', gap: 12 }}>
-              <div style={{ display: 'flex', gap: 6 }}>
+            <div className="ops-fade" style={{ display: 'grid', gap: 14 }}>
+              {/* Segmented action filter with live counts */}
+              <div style={{ display: 'inline-flex', background: '#fff',
+                            border: `1px solid ${BORDER}`, borderRadius: 999,
+                            padding: 4, width: 'fit-content' }}>
                 {[['', t('ops.all')], ['add', 'add'], ['modify', 'modify'],
                   ['delete', 'delete']].map(([id, label]) => (
                   <button key={id} onClick={() => setChangeFilter(id)}
-                          style={{ border: `1px solid ${changeFilter === id ? NAVY : BORDER}`,
-                                   background: changeFilter === id ? NAVY : '#fff',
-                                   color: changeFilter === id ? '#fff' : GRAY,
-                                   borderRadius: 999, fontSize: 12, fontWeight: 700,
-                                   padding: '5px 14px', cursor: 'pointer' }}>
+                          style={{ border: 'none', cursor: 'pointer',
+                                   borderRadius: 999, fontSize: 12.5,
+                                   fontWeight: 700, padding: '7px 16px',
+                                   background: changeFilter === id ? NAVY : 'transparent',
+                                   color: changeFilter === id ? '#fff' : GRAY }}>
                     {label}
+                    <span style={{ marginLeft: 6, opacity: 0.65,
+                                   fontWeight: 600 }}>{counts[id] || 0}</span>
                   </button>
                 ))}
               </div>
-              <div style={{ ...card, padding: '4px 0', overflow: 'hidden' }}>
-                {list.length === 0 && !busy && (
-                  <div style={{ padding: 22, color: GRAY, fontSize: 13.5,
-                                textAlign: 'center' }}>{t('ops.noChanges')}</div>
-                )}
-                {byDay.map((g) => [
-                  <div key={g.day} style={{ padding: '10px 20px 6px',
-                        fontSize: 11, fontWeight: 800, letterSpacing: 0.8,
-                        color: GRAY, textTransform: 'uppercase',
-                        position: 'sticky', top: 0, background: '#fff',
-                        borderBottom: `1px solid ${BORDER}`, zIndex: 3 }}>
-                    {g.day}
-                  </div>,
-                  ...g.items.map((c, i) => (
-                    <div key={c.id} className="ops-row"
-                         style={{ display: 'grid',
-                                  gridTemplateColumns: '26px 1fr', gap: 12,
-                                  padding: '12px 20px',
-                                  background: i % 2 ? '#fbfcfe' : '#fff' }}>
-                      <div style={{ position: 'relative' }}>
-                        <div style={{ position: 'absolute', left: 11, top: -12,
-                                      bottom: -12, width: 2,
-                                      background: '#edf1f7' }} />
-                        <span style={{ position: 'relative',
-                                       display: 'inline-block', width: 10,
-                                       height: 10, borderRadius: '50%',
-                                       marginTop: 4, marginLeft: 7,
-                                       background: AC[c.action] || GRAY,
-                                       border: '2px solid #fff',
-                                       boxShadow: '0 0 0 1px #dfe6f0' }} />
+              {list.length === 0 && !busy && (
+                <div style={{ ...card, padding: 22, color: GRAY,
+                              fontSize: 13.5, textAlign: 'center' }}>
+                  {t('ops.noChanges')}
+                </div>
+              )}
+              {byDay.map((g) => (
+                <div key={g.day} style={{ display: 'grid', gap: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontSize: 11, fontWeight: 800,
+                                   letterSpacing: 0.8, color: GRAY,
+                                   textTransform: 'uppercase',
+                                   whiteSpace: 'nowrap' }}>{g.day}</span>
+                    <span style={{ flex: 1, height: 1, background: BORDER }} />
+                    <span style={{ fontSize: 11, color: GRAY }}>
+                      {g.items.length} {t('ops.items')}
+                    </span>
+                  </div>
+                  {g.items.map((c) => (
+                    <div key={c.id} className="ops-lift"
+                         style={{ ...card, padding: '12px 16px',
+                                  borderLeft: `3px solid ${AC[c.action] || GRAY}` }}>
+                      <div style={{ display: 'flex', gap: 10,
+                                    alignItems: 'center', flexWrap: 'wrap' }}>
+                        <strong style={{ color: NAVY, fontSize: 13 }}>
+                          {flagOf((c.route || {}).passport_nationality)} {(c.route || {}).passport_nationality}
+                          {' → '}
+                          {flagOf((c.route || {}).destination_country)} {(c.route || {}).destination_country}
+                        </strong>
+                        <Chip color={AC[c.action] || GRAY}>{c.action}</Chip>
+                        <span style={{ color: GRAY, fontSize: 11.5 }}>
+                          {c.origin === 'grounded_recheck' ? t('ops.autoCheck')
+                            : c.origin === 'engine' ? t('ops.origin.engine') : c.origin}
+                        </span>
+                        <span style={{ marginLeft: 'auto', color: '#9aa8bd',
+                                       fontSize: 11.5,
+                                       fontFamily: 'ui-monospace, monospace' }}>
+                          {(c.at || '').slice(11, 16)}
+                        </span>
                       </div>
-                      <div style={{ minWidth: 0 }}>
-                        <div style={{ display: 'flex', gap: 10,
-                                      alignItems: 'center', flexWrap: 'wrap' }}>
-                          <strong style={{ color: NAVY, fontSize: 13 }}>
-                            {(c.route || {}).passport_nationality} → {(c.route || {}).destination_country}
-                          </strong>
-                          <Chip color={AC[c.action] || GRAY} filled={false}>{c.action}</Chip>
-                          <span style={{ color: GRAY, fontSize: 11.5 }}>
-                            {c.origin === 'grounded_recheck' ? t('ops.autoCheck')
-                              : c.origin === 'engine' ? t('ops.origin.engine') : c.origin}
-                          </span>
-                          <span style={{ marginLeft: 'auto', color: GRAY,
-                                         fontSize: 11.5 }}>
-                            {(c.at || '').slice(11, 16)}
-                          </span>
-                        </div>
+                      <div style={{ marginTop: 8, display: 'grid', gap: 5 }}>
                         {(() => {
                           const entries = Object.entries(c.changes || {})
                             .map(([f, d]) => [f, fmt(d.from), fmt(d.to)])
@@ -989,33 +1035,31 @@ export default function QualityConsole() {
                           const shownE = entries.slice(0, 5)
                           return [
                             ...shownE.map(([f, a, b]) => (
-                              <div key={f} style={{ fontSize: 12, marginTop: 5,
-                                    display: 'grid',
-                                    gridTemplateColumns: '180px 1fr', gap: 10,
-                                    alignItems: 'baseline' }}>
+                              <div key={f} style={{ display: 'grid',
+                                    gridTemplateColumns: '175px 1fr', gap: 10,
+                                    alignItems: 'center', fontSize: 12 }}>
                                 <span title={f}
-                                      style={{ color: GRAY,
+                                      style={{ color: '#7c8aa0',
                                                fontFamily: 'ui-monospace, monospace',
-                                               fontSize: 11, overflow: 'hidden',
+                                               fontSize: 11,
+                                               overflow: 'hidden',
                                                textOverflow: 'ellipsis',
                                                whiteSpace: 'nowrap' }}>{f}</span>
-                                <span style={{ minWidth: 0, overflowWrap: 'anywhere' }}>
-                                  {/* An "add" starts from nothing: show the
-                                      value alone, no struck-through null. */}
+                                <span style={{ minWidth: 0, display: 'flex',
+                                               gap: 6, alignItems: 'center',
+                                               flexWrap: 'wrap' }}>
                                   {a != null && c.action !== 'add' && [
-                                    <span key="a" style={{ color: '#b2456e',
-                                        textDecoration: 'line-through',
-                                        opacity: 0.8 }}>{a}</span>,
-                                    <span key="s" style={{ color: '#94a3b8' }}> → </span>,
+                                    <ValueChip key="o" v={a} kind="old" />,
+                                    <span key="s" style={{ color: '#b6c2d4' }}>→</span>,
                                   ]}
-                                  <span style={{ color: c.action === 'delete' ? RED : GREEN,
-                                                 fontWeight: 700 }}>{b ?? '·'}</span>
+                                  <ValueChip v={b ?? '·'}
+                                             kind={c.action === 'delete' ? 'del' : 'new'} />
                                 </span>
                               </div>
                             )),
                             entries.length > 5 && (
-                              <div key="more" style={{ fontSize: 11.5, color: GRAY,
-                                                       marginTop: 5 }}>
+                              <div key="more" style={{ fontSize: 11.5,
+                                    color: GRAY }}>
                                 +{entries.length - 5} {t('ops.items')}
                               </div>
                             ),
@@ -1023,9 +1067,9 @@ export default function QualityConsole() {
                         })()}
                       </div>
                     </div>
-                  )),
-                ])}
-              </div>
+                  ))}
+                </div>
+              ))}
             </div>
           )
         })()}
