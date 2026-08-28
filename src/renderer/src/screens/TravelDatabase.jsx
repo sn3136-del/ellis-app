@@ -216,110 +216,113 @@ function EllisIslandScene() {
   const reduced = typeof window !== 'undefined' &&
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
   const INK = '#111'
-  const BASE = 150                       // the island's shoreline
-  // Every letter is a cluster of tower blocks [x, y-up, w, h]: the word
-  // reads as a modern skyline AND as ELLIS. Heights vary so the roofline
-  // has a skyline's rhythm.
+  const BASE = 150                       // street level
+  // Every letter is a cluster of blocks [x, y-up, w, h]; heights vary so
+  // the roofline has a skyline's rhythm. The I is the Empire State Building.
   const LETTERS = [
-    // E
     [22, [[0, 92, 13, 92], [0, 92, 40, 12], [0, 55, 32, 11], [0, 12, 40, 12]]],
-    // L, the shorter one
     [84, [[0, 72, 13, 72], [0, 12, 36, 12]]],
-    // L, a notch taller
     [138, [[0, 84, 13, 84], [0, 12, 36, 12]]],
-    // I as the Empire State Building: broad base, setback shaft, crown
-    // tiers, then the spire drawn separately
     [192, [[-1, 30, 17, 30], [1, 78, 13, 48], [3, 100, 9, 22],
            [4.5, 108, 6, 8]]],
-    // S as stacked setbacks
     [228, [[0, 61, 38, 11], [0, 50, 12, 14], [0, 36, 38, 11],
            [26, 25, 12, 14], [0, 11, 38, 11]]],
   ]
-  // Windows laid out the way real facades are: aligned floor rows at a
-  // fixed pitch on the tower shafts, and one even strip along each slab.
-  const windows = []
+  // A real facade: one uniform window module, laid out on a computed grid
+  // with even margins inside every block. Nothing is placed by hand.
+  const winRects = []
+  const addGrid = (bx, by, w, h) => {
+    const ww = 2.4, wh = 5, mx = 3.2, myT = 5, myB = 4, minGx = 2.2, minGy = 4.2
+    const nc = Math.max(1, Math.floor((w - 2 * mx + minGx) / (ww + minGx)))
+    const nr = Math.max(1, Math.floor((h - myT - myB + minGy) / (wh + minGy)))
+    if (h < myT + myB + wh) return
+    const gx = nc > 1 ? (w - 2 * mx - nc * ww) / (nc - 1) : 0
+    const gy = nr > 1 ? (h - myT - myB - nr * wh) / (nr - 1) : 0
+    for (let r = 0; r < nr; r++) {
+      for (let c = 0; c < nc; c++) {
+        winRects.push([bx + mx + c * (ww + gx), by + myT + r * (wh + gy), ww, wh])
+      }
+    }
+  }
   LETTERS.forEach(([lx, rects]) => {
     rects.forEach(([x, up, w, h]) => {
-      if (w <= 20 && h >= 26) {
-        // tower block: aligned columns, one row per floor, kept inside
-        // this block's own walls
-        const cols = w >= 15 ? [2.8, 6.9, 11] : w >= 11 ? [3.2, 7.6]
-          : [(w - 2) / 2]
-        const floor = Math.max(20, up - h + 8)
-        for (let wy = up - 9; wy > floor; wy -= 11) {
-          cols.forEach((cx) => windows.push([lx + x + cx, BASE - wy, 2, 5.5]))
-        }
-      } else if (w >= 30) {
-        // slab: an even single strip of square windows
-        for (let cx = x + 4.5; cx <= x + w - 6; cx += 5.6) {
-          windows.push([lx + cx, BASE - up + (h - 4.5) / 2, 2.4, 4.5])
-        }
-      }
+      // Tower shafts keep the street level clear (doors live there);
+      // low blocks and slabs take a single even strip.
+      const tall = h >= 26 && w <= 20
+      addGrid(lx + x, BASE - up, w, tall ? h - 12 : h)
     })
   })
-  const blinkers = windows.filter((_, i) => i % 5 === 2)
+  const blinkers = winRects.filter((_, i) => i % 6 === 3)
+  // Long layered swells: one path each, spanning the whole harbor.
+  const swell = (y, n) => 'M-12,' + y + ' q10,-3.5 20,0 ' +
+    Array.from({ length: n }, () => 't20,0').join(' ')
   return (
     <div className="db-scene" aria-hidden="true">
-      {/* the loading animation itself: same markup, same classes */}
-      <div className="planeload__sky">
+      {/* the loading animation itself: same markup, same classes. The sky
+          shares the island's exact width and overlaps it, so the plane and
+          the trail fly just over the spire as one composition. */}
+      <div className="planeload__sky"
+           style={{ width: 'min(330px, 92vw)', height: 84 }}>
         <span className="planeload__trail" />
-        <span className="planeload__plane"><TripPlane width={216} /></span>
+        <span className="planeload__plane" style={{ top: 4 }}>
+          <TripPlane width={176} />
+        </span>
       </div>
-      <svg viewBox="0 0 300 208"
-           style={{ display: 'block', width: 'min(330px, 92vw)' }}>
-        <defs>
-          <clipPath id="ellis-mirror">
-            <rect x="0" y={BASE + 20} width="300" height="38" />
-          </clipPath>
-        </defs>
+      <svg viewBox="0 0 300 200"
+           style={{ display: 'block', width: 'min(330px, 92vw)',
+                    marginTop: -20 }}>
         <g>
-          <g id="ellis-city">
-            {/* towers */}
-            {LETTERS.map(([lx, rects], i) => (
-              <g key={i}>
-                {rects.map(([x, up, w, h], j) => (
-                  <rect key={j} x={lx + x} y={BASE - up} width={w} height={h}
-                        rx="3" fill="#fff" stroke={INK} strokeWidth="2.5" />
-                ))}
-              </g>
-            ))}
-            {/* the Empire State spire */}
-            <line x1="199.5" y1={BASE - 108} x2="199.5" y2={BASE - 128}
-                  stroke={INK} strokeWidth="2.2" strokeLinecap="round" />
-            <circle cx="199.5" cy={BASE - 130} r="1.7" fill={INK} />
-            {/* rooftop details: an antenna on the E, a water tower on the
-                taller L, the small NYC signatures */}
-            <line x1="28.5" y1={BASE - 92} x2="28.5" y2={BASE - 102}
-                  stroke={INK} strokeWidth="2" strokeLinecap="round" />
-            <g transform={`translate(140,${BASE - 84})`}>
-              <rect x="2" y="-9" width="7" height="6" rx="1.5" fill="#fff"
-                    stroke={INK} strokeWidth="1.8" />
-              <path d="M2.5,-3 L2.5,0 M8.5,-3 L8.5,0" stroke={INK}
-                    strokeWidth="1.6" strokeLinecap="round" />
-            </g>
-            {/* the facade grids */}
-            {windows.map(([x, y, w, h], i) => (
-              <rect key={i} x={x} y={y} width={w} height={h} rx="0.8"
-                    fill={INK} opacity="0.55" />
-            ))}
-            {!reduced && blinkers.map(([x, y, w, h], i) => (
-              <rect key={'b' + i} x={x} y={y} width={w} height={h}
-                    rx="0.8" fill="#fff">
-                <animate attributeName="opacity" values="0;1;0"
-                         dur={`${2.8 + (i % 4) * 0.8}s`}
-                         begin={`${(i % 6) * 0.6}s`}
-                         repeatCount="indefinite" />
-              </rect>
-            ))}
-          </g>
-          {/* the island: a low landmass with tapered shores, not a bar */}
-          <path d={`M2,${BASE + 14} C8,${BASE + 2} 24,${BASE - 1} 44,${BASE - 1}
-                    C90,${BASE - 3} 200,${BASE - 3} 246,${BASE - 1}
-                    C266,${BASE - 1} 282,${BASE + 2} 288,${BASE + 14}
-                    C289,${BASE + 17} 286,${BASE + 18} 282,${BASE + 18}
-                    L8,${BASE + 18} C4,${BASE + 18} 1,${BASE + 17} 2,${BASE + 14} Z`}
+          {/* the island: a tapered landmass the city stands on */}
+          <path d={`M14,${BASE + 8} C22,${BASE - 4} 40,${BASE - 7} 62,${BASE - 8}
+                    L238,${BASE - 8} C260,${BASE - 7} 278,${BASE - 4} 286,${BASE + 8}
+                    C288,${BASE + 13} 284,${BASE + 16} 276,${BASE + 16}
+                    L24,${BASE + 16} C16,${BASE + 16} 12,${BASE + 13} 14,${BASE + 8} Z`}
                 fill="#fff" stroke={INK} strokeWidth="2.5"
                 strokeLinejoin="round" />
+          {/* shoreline grass */}
+          {[[30, BASE - 3], [270, BASE - 2], [48, BASE - 6]].map(([x, y], i) => (
+            <path key={i} d={`M${x},${y} l1.6,-4 l1.6,4 M${x + 4},${y} l1.6,-3 l1.6,3`}
+                  fill="none" stroke={INK} strokeWidth="1.3"
+                  strokeLinecap="round" />
+          ))}
+          {/* towers */}
+          {LETTERS.map(([lx, rects], i) => (
+            <g key={i}>
+              {rects.map(([x, up, w, h], j) => (
+                <rect key={j} x={lx + x} y={BASE - up} width={w} height={h}
+                      rx="1.5" fill="#fff" stroke={INK} strokeWidth="2.5" />
+              ))}
+            </g>
+          ))}
+          {/* parapet line under every roof edge */}
+          {LETTERS.flatMap(([lx, rects], i) =>
+            rects.filter(([, , , h]) => h >= 10).map(([x, up, w], j) => (
+              <line key={i + '-' + j} x1={lx + x + 2.2} y1={BASE - up + 3}
+                    x2={lx + x + w - 2.2} y2={BASE - up + 3}
+                    stroke={INK} strokeWidth="1.1" opacity="0.75" />
+            )))}
+          {/* street doors on the widest ground blocks */}
+          {[[42, 40], [102, 36], [156, 36], [199.5, 17], [247, 38]].map(([cx], i) => (
+            <rect key={i} x={cx - 2.2} y={BASE - 7.5} width="4.4" height="7.5"
+                  rx="1.2" fill={INK} />
+          ))}
+          {/* the Empire State spire */}
+          <line x1="199.5" y1={BASE - 108} x2="199.5" y2={BASE - 128}
+                stroke={INK} strokeWidth="2.2" strokeLinecap="round" />
+          <circle cx="199.5" cy={BASE - 130} r="1.7" fill={INK} />
+          {/* the facade grids */}
+          {winRects.map(([x, y, w, h], i) => (
+            <rect key={i} x={x} y={y} width={w} height={h} rx="0.7"
+                  fill={INK} opacity="0.8" />
+          ))}
+          {!reduced && blinkers.map(([x, y, w, h], i) => (
+            <rect key={'b' + i} x={x} y={y} width={w} height={h} rx="0.7"
+                  fill={INK}>
+              <animate attributeName="opacity" values="0.8;0.2;0.8"
+                       dur={`${3 + (i % 4) * 0.9}s`}
+                       begin={`${(i % 6) * 0.7}s`} repeatCount="indefinite" />
+            </rect>
+          ))}
           {/* the whole harbor breathes */}
           {!reduced && (
             <animateTransform attributeName="transform" type="translate"
@@ -327,21 +330,15 @@ function EllisIslandScene() {
                               repeatCount="indefinite" />
           )}
         </g>
-        {/* mirror-calm reflection in the water */}
-        <g clipPath="url(#ellis-mirror)" opacity="0.08">
-          <use href="#ellis-city"
-               transform={`translate(0 ${2 * BASE + 38}) scale(1 -1)`} />
-        </g>
-        {/* drifting waves */}
-        {[[26, 176], [126, 184], [216, 178], [258, 190]].map(([x, y], i) => (
-          <path key={i} d={`M${x},${y} q7,-4 14,0 q7,4 14,0`} fill="none"
-                stroke={INK} strokeWidth="1.8" strokeLinecap="round"
-                opacity="0.4">
+        {/* the water: long layered swells, nothing else */}
+        {[[BASE + 22, 16, 0.4, 7], [BASE + 30, 16, 0.3, 9],
+          [BASE + 38, 16, 0.22, 11]].map(([y, n, op, dur], i) => (
+          <path key={i} d={swell(y, n)} fill="none" stroke={INK}
+                strokeWidth="1.8" strokeLinecap="round" opacity={op}>
             {!reduced && (
               <animateTransform attributeName="transform" type="translate"
-                                values="0 0; 8 0; 0 0"
-                                dur={`${4 + (i % 3)}s`}
-                                repeatCount="indefinite" />
+                                values={i % 2 ? '0 0; -10 0; 0 0' : '0 0; 10 0; 0 0'}
+                                dur={`${dur}s`} repeatCount="indefinite" />
             )}
           </path>
         ))}
