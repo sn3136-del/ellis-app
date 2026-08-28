@@ -831,7 +831,13 @@ export default function QualityConsole() {
     setBusy(true); setError('')
     try {
       if (tab === 'records') { setData(await client.get('/database/records')); setShown(PAGE) }
-      else if (tab === 'changes') setChanges(await client.get('/database/changes?limit=300'))
+      else if (tab === 'changes') {
+        // Records ride along so visa type names can render translated.
+        const [chg, recs] = await Promise.all([
+          client.get('/database/changes?limit=300'),
+          client.get('/database/records')])
+        setChanges(chg); setData(recs)
+      }
       else if (tab === 'issues') {
         // The dispute cards compare the page's claim against the current
         // record, so the record set must be present on this tab too.
