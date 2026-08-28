@@ -526,22 +526,23 @@ body { background: var(--bg-soft); }
 }
 .surfnav { display: flex; gap: 8px; align-items: center; }
 
-/* Phone header: everything must FIT the viewport. The pills and the language
-   picker compress first; below 400px the header wraps to two rows rather
-   than ever pushing the language picker off-screen. */
+/* Phone header: everything must FIT the viewport, with air. On phone widths
+   the header breaks into two rows (logo, then the pills) instead of packing
+   one crowded line; the language picker never leaves the viewport. */
 @media (max-width: 700px) {
-  .triptop { padding: 0 12px; }
+  .triptop { flex-wrap: wrap; height: auto; min-height: 0;
+             padding: 10px 14px; row-gap: 8px; justify-content: center; }
+  .triptop__logo { height: 26px; margin-right: auto; }
+  .triptop__right { gap: 8px; }
+  .surfnav { gap: 8px; }
+  .surfpill { font-size: 12px; padding: 8px 13px; }
+  .langpick__btn { padding: 8px 13px; font-size: 12px; gap: 6px; }
+}
+@media (max-width: 360px) {
   .triptop__right { gap: 6px; }
   .surfnav { gap: 6px; }
-  .surfpill { font-size: 11.5px; padding: 8px 10px; }
-  .langpick__btn { padding: 8px 10px; font-size: 12px; gap: 5px; }
-}
-@media (max-width: 420px) {
-  .triptop { flex-wrap: wrap; height: auto; min-height: 0;
-             padding: 8px 10px; row-gap: 4px; justify-content: center; }
-  .triptop__logo { height: 24px; margin-right: auto; }
-  .surfpill { font-size: 11px; padding: 7px 9px; }
-  .langpick__btn { padding: 7px 9px; }
+  .surfpill { font-size: 11px; padding: 7px 10px; }
+  .langpick__btn { padding: 7px 10px; }
 }
 
 /* ---------- Language picker ---------- */
