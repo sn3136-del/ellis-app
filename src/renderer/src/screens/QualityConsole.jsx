@@ -233,12 +233,26 @@ function CountryFilter({ value, placeholder, onCommit, countries }) {
     return () => document.removeEventListener('mousedown', close)
   }, [])
   const commit = (v) => {
-    // Whatever is committed resolves to a clean value: a picked label goes
-    // back to its code, a flag emoji is stripped, free text passes through
-    // for the server-side resolver.
+    // A committed value must be UNAMBIGUOUS: a picked label returns its
+    // code; typed text applies only when it names exactly one country
+    // (exact code, exact name, or a single suggestion). A partial like
+    // "and" used to fall through to the server resolver, which read it as
+    // AND = Andorra and quietly filtered the table by the wrong country.
     const clean = String(v || '').replace(/^[^\p{L}\p{N}]+/u, '').trim()
-    const byLabel = countries.find((c) => c.label === v || c.label.endsWith(clean))
-    onCommit(byLabel ? byLabel.value : clean)
+    if (!clean) { onCommit(''); setOpen(false); return }
+    const lc = clean.toLowerCase()
+    const exact = countries.find((c) => c.value.toLowerCase() === lc ||
+      c.label.replace(/^[^\p{L}\p{N}]+/u, '').trim().toLowerCase() === lc)
+    const pool = countries.filter((c) => c.search.includes(lc))
+    const pick = exact || (pool.length === 1 ? pool[0] : null)
+    if (pick) {
+      setText(pick.label)
+      onCommit(pick.value)
+    } else if (pool.length === 0 && clean.length >= 4) {
+      onCommit(clean)          // full name or alias: the server resolves it
+    } else {
+      onCommit('')             // ambiguous partial: filter nothing, not a guess
+    }
     setOpen(false)
   }
   return (
