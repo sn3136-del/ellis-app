@@ -22,6 +22,7 @@ ANSWER = {
     "application_channel": "EMBASSY_OR_CONSULATE",
     "government_fee": {"amount": 100, "currency": "USD"},
     "processing_time": "5 working days", "confidence": "high",
+    "source_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
     "visa_products": [
         {"type": "Single-entry tourist", "entry": "single",
          "validity": "3 months", "max_stay_days": 30,
@@ -54,7 +55,13 @@ def test_the_25_field_record_speaks_their_dictionary_exactly():
     assert (r["visa_fee_amount"], r["visa_fee_currency"]) == (100, "USD")
     assert r["application_method"] == "Embassy Submission"
     assert (r["processing_min_days"], r["processing_unit"]) == (5, "Working Day")
-    assert r["confidence_level"] == "Medium"   # engine answer, no human check
+    # The spec ladder: an engine answer WITH an official source is Medium;
+    # strip the source and the same answer is Low ("non-official only").
+    assert r["confidence_level"] == "Medium"
+    bare = {k: v for k, v in ANSWER.items()
+            if k not in ("source_url", "official_portal_url")}
+    low = tstation.records_for_route(route, bare, None, "2026-08-27T00:00:00")
+    assert low[0]["confidence_level"] == "Low"
     r2 = rows[1]
     assert (r2["validity_duration"], r2["validity_unit"]) == (5, "Year")
     assert r2["entries"] == "Multiple"

@@ -86,7 +86,7 @@ export function EllisMark() {
   ]
   return (
     <div className="ellis-mark" aria-label="Ellis" data-testid="ellis-mark">
-      <svg viewBox="14 8 258 144" height="42" style={{ display: 'block' }}>
+      <svg viewBox="14 8 258 144" height="58" style={{ display: 'block' }}>
         {LETTERS.map(([lx, rects], i) => (
           <g key={i}>
             {rects.map(([x, up, w, h], j) => (

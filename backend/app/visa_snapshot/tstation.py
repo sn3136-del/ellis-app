@@ -195,10 +195,15 @@ def _fee(product: dict, guidance: dict) -> tuple[float | None, str | None]:
 
 
 def _confidence(guidance: dict, provenance: dict | None) -> str:
-    """High: a person verified it against a named official page. Medium: the
-    engine's own confident answer. Low: the engine said low confidence."""
+    """The spec's own ladder: High is a single official source, complete, no
+    conflict (here: a person verified it against a named page). Medium is
+    official-source-backed but with gaps. Low is conflicting or NON-OFFICIAL
+    ONLY, which by definition includes an answer carrying no source URL at
+    all: the model's memory alone is not an official source."""
     if provenance:
         return "High"
+    if not (guidance.get("source_url") or guidance.get("official_portal_url")):
+        return "Low"
     c = str(guidance.get("confidence") or "").lower()
     return "Low" if c == "low" else "Medium"
 

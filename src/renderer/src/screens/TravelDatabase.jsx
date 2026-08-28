@@ -779,8 +779,8 @@ export default function TravelDatabase({ onBack }) {
       )}
 
       {!result && (
-      <div style={{ marginTop: 18 }}>
-        <div style={{ marginBottom: 16 }}><EllisMark /></div>
+      <div style={{ marginTop: 4 }}>
+        <div style={{ margin: '2px 0 26px' }}><EllisMark /></div>
         <div className="card anim-rise" style={{ padding: '20px 24px',
                                                  borderRadius: 20,
                                                  maxWidth: 560, marginLeft: 'auto',
