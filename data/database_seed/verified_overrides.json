@@ -19041,6 +19041,17 @@
    "permitted_stay_days": 90,
    "visa_products": [
     {
+     "type": "Visa exemption (Temporary Visitor landing permission)",
+     "entry": "per visit",
+     "validity": "Not applicable, no visa issued",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 0,
+      "currency": "JPY"
+     },
+     "notes": "The normal path: Taiwan passports bearing a personal ID number are visa-exempt for up to 90 days per MOFA's exemption list. The paid visa products below apply only to passports without a personal ID number or purposes outside the exemption."
+    },
+    {
      "type": "Temporary Visitor, single entry",
      "entry": null,
      "validity": "3 months (single-entry visa must be used within 3 months of issue)",
