@@ -563,6 +563,26 @@ body { background: var(--bg-soft); }
   animation: rise .18s ease;
 }
 
+/* Ops filter controls: quiet soft-filled fields that light up on touch.
+   The base look is inline (the shared `input` style object); these
+   pseudo-state rules need !important to outrank the inline styles. */
+.ops-in:hover { background-color: #ecf2fa !important; }
+.ops-in:focus {
+  background-color: #fff !important;
+  border-color: var(--trip-blue) !important;
+  box-shadow: 0 0 0 3px rgba(40,125,250,0.13) !important;
+}
+select.ops-in {
+  appearance: none; -webkit-appearance: none;
+  /* !important: the inline `background` shorthand would otherwise reset
+     the chevron image to none. */
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%235a6b84' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 13px center !important;
+  padding-right: 34px !important;
+  cursor: pointer;
+}
+
 /* Ops tab pills scroll if they must, without a visible scrollbar track. */
 .ops-tabs { scrollbar-width: none; -ms-overflow-style: none; }
 .ops-tabs::-webkit-scrollbar { display: none; }

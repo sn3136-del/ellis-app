@@ -101,9 +101,11 @@ function useOpsClient() {
 
 const card = { background: '#fff', border: `1px solid ${BORDER}`,
                borderRadius: 16, boxShadow: '0 1px 3px rgba(15,41,77,0.05)' }
-const input = { padding: '11px 12px', borderRadius: 10, fontSize: 13,
-                border: `1px solid #d9e1ec`, background: '#fff', color: NAVY,
-                outline: 'none' }
+// Soft-filled controls: quiet until touched, a ring when focused (the
+// hover/focus states live in theme.css under .ops-in).
+const input = { padding: '11px 14px', borderRadius: 12, fontSize: 13,
+                border: '1px solid transparent', background: '#f2f6fb',
+                color: NAVY, outline: 'none' }
 
 function Chip({ children, color = GRAY, filled = true }) {
   return (
@@ -279,12 +281,15 @@ function CountryFilter({ value, placeholder, onCommit, countries }) {
                if (e.key === 'Escape') setOpen(false)
              }}
              onBlur={() => { if (!open) commit(text) }}
+             className="ops-in"
              style={{ ...input, width: 150 }} />
       {text && (
         <button onClick={() => { setText(''); commit('') }}
-                style={{ position: 'absolute', right: 6, top: 7, border: 'none',
+                style={{ position: 'absolute', right: 4, top: '50%',
+                         transform: 'translateY(-50%)', border: 'none',
                          background: 'transparent', color: GRAY,
-                         cursor: 'pointer', fontSize: 13 }}>×</button>
+                         cursor: 'pointer', fontSize: 14,
+                         padding: '8px 9px', lineHeight: 1 }}>×</button>
       )}
       {open && matches.length > 0 && (
         <div style={{ position: 'absolute', top: '110%', left: 0, zIndex: 30,
@@ -442,6 +447,7 @@ function FlagForm({ rec, onFlag, t }) {
     <div style={{ display: 'flex', gap: 8, marginTop: 12, maxWidth: 560 }}>
       <input value={note} placeholder={t('ops.flagPlaceholder')}
              onChange={(e) => setNote(e.target.value)}
+             className="ops-in"
              style={{ ...input, flex: 1 }} data-testid="ops-flag-note" />
       <button className="btn btn--sm" data-testid="ops-flag"
               disabled={!note.trim()}
@@ -649,6 +655,7 @@ function IssueActions({ issue, onResolve, t }) {
     <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
       <input value={res} placeholder={t('ops.resolutionPlaceholder')}
              onChange={(e) => setRes(e.target.value)}
+             className="ops-in"
              style={{ ...input, flex: 1, minWidth: 220 }}
              data-testid="ops-resolution" />
       <button disabled={!res.trim()} data-testid="ops-corrected"
@@ -1147,7 +1154,11 @@ export default function QualityConsole() {
             <div style={{ ...card, padding: '14px 18px', display: 'flex',
                           gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
               <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1,
-                             color: GRAY, textTransform: 'uppercase' }}>
+                             color: GRAY, textTransform: 'uppercase',
+                             display: 'inline-flex', alignItems: 'center',
+                             gap: 7 }}>
+                <span style={{ width: 7, height: 7, borderRadius: 3,
+                               background: BLUE, flexShrink: 0 }} />
                 {t('ops.spotCheck')}
               </span>
               <CountryFilter value={filters.nationality} countries={countries}
@@ -1157,6 +1168,7 @@ export default function QualityConsole() {
                              placeholder={t('ops.destination')}
                              onCommit={set('destination')} />
               <select value={filters.purpose} onChange={(e) => set('purpose')(e.target.value)}
+                      className="ops-in"
                       style={{ ...input, color: filters.purpose ? NAVY : GRAY }}>
                 <option value="">{t('ops.anyPurpose')}</option>
                 {PURPOSES.map((p) => (
@@ -1165,6 +1177,7 @@ export default function QualityConsole() {
               </select>
               <select value={filters.requirement}
                       onChange={(e) => set('requirement')(e.target.value)}
+                      className="ops-in"
                       style={{ ...input, color: filters.requirement ? NAVY : GRAY }}>
                 <option value="">{t('ops.anyRequirement')}</option>
                 <option value="Visa-free">{t('ops.req.free')}</option>
@@ -1174,6 +1187,7 @@ export default function QualityConsole() {
               </select>
               <select value={filters.confidence}
                       onChange={(e) => set('confidence')(e.target.value)}
+                      className="ops-in"
                       style={{ ...input, color: filters.confidence ? NAVY : GRAY }}>
                 <option value="">{t('ops.anyConfidence')}</option>
                 <option value="High">{t('ops.conf.high')}</option>
@@ -1182,12 +1196,12 @@ export default function QualityConsole() {
               </select>
               {/* The acceptance standard's extra slice dimensions (4.1.2):
                   by visa type, and by a specific field's gaps. */}
-              <input value={filters.visaType} style={{ ...input, width: 150 }}
+              <input value={filters.visaType} className="ops-in" style={{ ...input, width: 150 }}
                      placeholder={t('ops.typeFilter')}
                      data-testid="ops-filter-visatype"
                      onChange={(e) => setFilters((f) =>
                        ({ ...f, visaType: e.target.value }))} />
-              <select className="select" value={filters.fieldMissing}
+              <select className="ops-in" value={filters.fieldMissing}
                       data-testid="ops-filter-fieldmissing"
                       style={{ ...input, width: 170 }}
                       onChange={(e) => setFilters((f) =>
