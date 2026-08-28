@@ -170,80 +170,190 @@ function FieldGrid({ rec }) {
   )
 }
 
-function RecordRow({ rec, onFlag, t }) {
-  const [open, setOpen] = useState(false)
-  const missing = Object.entries(rec.field_status)
-    .filter(([, v]) => v === 'missing').map(([k]) => k)
-  const CHECKS = {
-    'human-quote': [t('ops.check.quoted'), GREEN],
-    'grounded-consistent': [t('ops.check.grounded'), BLUE],
-    reference: [t('ops.check.reference'), GRAY],
-    unchecked: [t('ops.check.none'), RED],
+const CONF_RANK = { High: 3, Medium: 2, Low: 1 }
+const CHECK_RANK = { 'human-quote': 3, 'grounded-consistent': 2,
+                     reference: 1, unchecked: 0 }
+
+function SortHeader({ label, k, sort, onSort, align = 'left', width }) {
+  const active = sort.key === k
+  return (
+    <th onClick={() => onSort(k)}
+        style={{ padding: '10px 12px', fontSize: 10.5, fontWeight: 800,
+                 letterSpacing: 0.8, textTransform: 'uppercase',
+                 color: active ? NAVY : GRAY, textAlign: align, width,
+                 cursor: 'pointer', userSelect: 'none',
+                 whiteSpace: 'nowrap', position: 'sticky', top: 0,
+                 background: '#fff', zIndex: 5,
+                 borderBottom: `2px solid ${active ? BLUE : BORDER}` }}>
+      {label}{active ? (sort.dir === 1 ? ' ↑' : ' ↓') : ''}
+    </th>
+  )
+}
+
+function FlagForm({ rec, onFlag, t }) {
+  const [note, setNote] = useState('')
+  const [sent, setSent] = useState(false)
+  if (sent) {
+    return <div style={{ fontSize: 12.5, color: GREEN, marginTop: 10 }}>
+      ✓ {t('ops.flagged')}</div>
   }
+  return (
+    <div style={{ display: 'flex', gap: 8, marginTop: 12, maxWidth: 560 }}>
+      <input value={note} placeholder={t('ops.flagPlaceholder')}
+             onChange={(e) => setNote(e.target.value)}
+             style={{ ...input, flex: 1 }} data-testid="ops-flag-note" />
+      <button className="btn btn--sm" data-testid="ops-flag"
+              disabled={!note.trim()}
+              style={{ borderRadius: 999, fontSize: 12, background: NAVY,
+                       color: '#fff', opacity: note.trim() ? 1 : 0.5 }}
+              onClick={async () => { await onFlag(rec, note.trim()); setSent(true) }}>
+        ⚑ {t('ops.flagSubmit')}
+      </button>
+    </div>
+  )
+}
+
+function RecordsTable({ records, onFlag, t }) {
+  const [sort, setSort] = useState({ key: 'route', dir: 1 })
+  const [open, setOpen] = useState(null)
+  const onSort = (k) => setSort((s0) => ({ key: k, dir: s0.key === k ? -s0.dir : 1 }))
+  const val = (r, k) => {
+    if (k === 'route') return `${r.travel_document_country}${r.destination_country}`
+    if (k === 'confidence') return CONF_RANK[r.confidence_level] || 0
+    if (k === 'check') return CHECK_RANK[r.source_check] ?? 0
+    if (k === 'stay') return r.max_stay_duration ?? -1
+    if (k === 'fee') return r.visa_fee_amount ?? -1
+    if (k === 'complete') return r.completeness
+    if (k === 'requirement') return r.visa_requirement || ''
+    if (k === 'type') return r.visa_type_name || ''
+    return ''
+  }
+  const sorted = useMemo(() => [...records].sort((a, b) => {
+    const x = val(a, sort.key), y = val(b, sort.key)
+    return (x < y ? -1 : x > y ? 1 : 0) * sort.dir
+  }), [records, sort])
   const REQ = {
     'Visa-free': [t('ops.req.free'), GREEN],
     'Visa on Arrival': [t('ops.req.voa'), AMBER],
     'Visa Required in Advance': [t('ops.req.advance'), NAVY],
     Conditional: [t('ops.req.conditional'), AMBER],
   }
-  const [checkLabel, checkColor] = CHECKS[rec.source_check] || CHECKS.reference
-  const [reqLabel, reqColor] = REQ[rec.visa_requirement] || ['·', GRAY]
+  const CHECKS = {
+    'human-quote': [t('ops.check.quoted'), GREEN],
+    'grounded-consistent': [t('ops.check.grounded'), BLUE],
+    reference: [t('ops.check.reference'), GRAY],
+    unchecked: [t('ops.check.none'), RED],
+  }
   return (
     <div style={{ ...card, overflow: 'hidden' }}>
-      <div style={{ display: 'grid', alignItems: 'center', cursor: 'pointer',
-                    gridTemplateColumns: '148px 96px 1fr auto auto auto auto 18px',
-                    gap: 12, padding: '12px 18px' }}
-           onClick={() => setOpen((o) => !o)}>
-        <strong style={{ color: NAVY, fontSize: 13.5, whiteSpace: 'nowrap' }}>
-          {rec.travel_document_country} → {rec.destination_country}
-          <span style={{ color: GRAY, fontWeight: 500, fontSize: 11.5,
-                         display: 'block' }}>
-            {t(PURPOSE_KEY[rec.travel_purpose] || '') || rec.travel_purpose}
-            {rec.travel_document_type !== 'ordinary_passport'
-              ? ` · ${(t('db.doc.' + rec.travel_document_type) !== 'db.doc.' + rec.travel_document_type
-                  ? t('db.doc.' + rec.travel_document_type)
-                  : rec.travel_document_type.replace(/_/g, ' '))}` : ''}
-          </span>
-        </strong>
-        <Chip color={reqColor} filled={false}>{reqLabel}</Chip>
-        <span style={{ color: NAVY, fontSize: 12.5, fontWeight: 600,
-                       overflow: 'hidden', textOverflow: 'ellipsis',
-                       whiteSpace: 'nowrap' }}>
-          {rec.visa_type_name || '·'}
-        </span>
-        <Chip color={CONF_COLOR[rec.confidence_level] || GRAY}>
-          {rec.confidence_level}
-        </Chip>
-        <Chip color={rec.completeness === 1 ? GREEN : AMBER} filled={false}>
-          {Math.round(rec.completeness * 100)}%
-        </Chip>
-        <Chip color={checkColor} filled={false}>{checkLabel}</Chip>
-        {rec.source_url ? (
-          <a href={rec.source_url} target="_blank" rel="noreferrer"
-             onClick={(e) => e.stopPropagation()}
-             style={{ fontSize: 12, color: BLUE, fontWeight: 700,
-                      whiteSpace: 'nowrap' }}>
-            {t('ops.source')} ↗
-          </a>
-        ) : <span />}
-        <span style={{ color: '#c3ccd9', fontSize: 11 }}>{open ? '▲' : '▼'}</span>
+      <div style={{ overflowX: 'auto', maxHeight: '62vh', overflowY: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse',
+                        fontSize: 13 }}>
+          <thead>
+            <tr>
+              <SortHeader label={t('ops.col.route')} k="route" sort={sort} onSort={onSort} width={120} />
+              <SortHeader label={t('ops.col.requirement')} k="requirement" sort={sort} onSort={onSort} width={110} />
+              <SortHeader label={t('ops.col.type')} k="type" sort={sort} onSort={onSort} />
+              <SortHeader label={t('ops.col.stay')} k="stay" sort={sort} onSort={onSort} align="right" width={70} />
+              <SortHeader label={t('ops.col.fee')} k="fee" sort={sort} onSort={onSort} align="right" width={90} />
+              <SortHeader label={t('ops.col.confidence')} k="confidence" sort={sort} onSort={onSort} width={80} />
+              <SortHeader label={t('ops.col.complete')} k="complete" sort={sort} onSort={onSort} align="right" width={80} />
+              <SortHeader label={t('ops.col.check')} k="check" sort={sort} onSort={onSort} width={130} />
+              <th style={{ position: 'sticky', top: 0, background: '#fff',
+                           zIndex: 5, borderBottom: `2px solid ${BORDER}`,
+                           width: 70 }} />
+            </tr>
+          </thead>
+          <tbody>
+            {sorted.map((rec, i) => {
+              const id = rec.cache_key + (rec.visa_type_name || '') + i
+              const [reqLabel, reqColor] = REQ[rec.visa_requirement] || ['·', GRAY]
+              const [checkLabel, checkColor] = CHECKS[rec.source_check] || CHECKS.reference
+              const missing = Object.entries(rec.field_status)
+                .filter(([, v]) => v === 'missing').map(([k]) => k)
+              const opened = open === id
+              return [
+                <tr key={id} onClick={() => setOpen(opened ? null : id)}
+                    style={{ cursor: 'pointer',
+                             background: opened ? '#f4f8ff'
+                               : i % 2 ? '#fbfcfe' : '#fff' }}>
+                  <td style={{ padding: '9px 12px', whiteSpace: 'nowrap' }}>
+                    <strong style={{ color: NAVY }}>
+                      {rec.travel_document_country} → {rec.destination_country}
+                    </strong>
+                    <div style={{ color: GRAY, fontSize: 11 }}>
+                      {t(PURPOSE_KEY[rec.travel_purpose] || '') || rec.travel_purpose}
+                      {rec.travel_document_type !== 'ordinary_passport'
+                        ? ' · ' + ((t('db.doc.' + rec.travel_document_type)
+                            !== 'db.doc.' + rec.travel_document_type)
+                            ? t('db.doc.' + rec.travel_document_type)
+                            : rec.travel_document_type.replace(/_/g, ' '))
+                        : ''}
+                    </div>
+                  </td>
+                  <td style={{ padding: '9px 12px' }}>
+                    <Chip color={reqColor} filled={false}>{reqLabel}</Chip>
+                  </td>
+                  <td style={{ padding: '9px 12px', color: NAVY, fontWeight: 600,
+                               maxWidth: 300, overflow: 'hidden',
+                               textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {rec.visa_type_name || '·'}
+                  </td>
+                  <td style={{ padding: '9px 12px', textAlign: 'right',
+                               color: NAVY, whiteSpace: 'nowrap' }}>
+                    {rec.max_stay_duration != null
+                      ? `${rec.max_stay_duration}${rec.max_stay_unit === 'Hour' ? 'h' : 'd'}`
+                      : '·'}
+                  </td>
+                  <td style={{ padding: '9px 12px', textAlign: 'right',
+                               color: NAVY, whiteSpace: 'nowrap' }}>
+                    {rec.visa_fee_amount != null
+                      ? `${rec.visa_fee_amount} ${rec.visa_fee_currency || ''}`
+                      : '·'}
+                  </td>
+                  <td style={{ padding: '9px 12px' }}>
+                    <Chip color={CONF_COLOR[rec.confidence_level] || GRAY}>
+                      {rec.confidence_level}
+                    </Chip>
+                  </td>
+                  <td style={{ padding: '9px 12px', textAlign: 'right',
+                               fontWeight: 700,
+                               color: rec.completeness === 1 ? GREEN : AMBER }}>
+                    {Math.round(rec.completeness * 100)}%
+                  </td>
+                  <td style={{ padding: '9px 12px' }}>
+                    <Chip color={checkColor} filled={false}>{checkLabel}</Chip>
+                  </td>
+                  <td style={{ padding: '9px 12px', whiteSpace: 'nowrap' }}>
+                    {rec.source_url && (
+                      <a href={rec.source_url} target="_blank" rel="noreferrer"
+                         onClick={(e) => e.stopPropagation()}
+                         style={{ fontSize: 12, color: BLUE, fontWeight: 700 }}>
+                        {t('ops.source')} ↗
+                      </a>
+                    )}
+                  </td>
+                </tr>,
+                opened && (
+                  <tr key={id + ':detail'}>
+                    <td colSpan={9} style={{ background: '#fbfcfe',
+                        borderBottom: `1px solid ${BORDER}`,
+                        padding: '14px 18px' }}>
+                      <FieldGrid rec={rec} />
+                      {missing.length > 0 && (
+                        <div style={{ marginTop: 10, fontSize: 12, color: RED }}>
+                          {t('ops.missingRequired')}: {missing.join(', ')}
+                        </div>
+                      )}
+                      <FlagForm rec={rec} onFlag={onFlag} t={t} />
+                    </td>
+                  </tr>
+                ),
+              ]
+            })}
+          </tbody>
+        </table>
       </div>
-      {open && (
-        <div style={{ borderTop: `1px solid ${BORDER}`, padding: '14px 18px',
-                      background: '#fbfcfe' }}>
-          <FieldGrid rec={rec} />
-          {missing.length > 0 && (
-            <div style={{ marginTop: 10, fontSize: 12, color: RED }}>
-              {t('ops.missingRequired')}: {missing.join(', ')}
-            </div>
-          )}
-          <button className="btn btn--sm btn--ghost" data-testid="ops-flag"
-                  style={{ marginTop: 12, borderRadius: 999, fontSize: 12 }}
-                  onClick={() => onFlag(rec)}>
-            ⚑ {t('ops.flag')}
-          </button>
-        </div>
-      )}
     </div>
   )
 }
@@ -293,18 +403,12 @@ export default function QualityConsole() {
   }, [client, tab, qs])
   useEffect(() => { load() }, [load])
 
-  async function flag(rec) {
-    const note = window.prompt(
-      `${t('ops.flagPrompt')} ${rec.travel_document_country} → ` +
-      `${rec.destination_country} (${rec.visa_type_name || ''}):`)
-    if (!note) return
+  async function flag(rec, note) {
     await client.databaseReportIssue({
       nationality: rec.travel_document_country,
       destination: rec.destination_country,
       field: 'operator_spot_check', note, cache_key: rec.cache_key,
     })
-    window.alert(t('ops.flagged'))
-    if (tab === 'issues') load()
   }
 
   async function exportXlsx() {
@@ -444,12 +548,7 @@ export default function QualityConsole() {
               </div>
             )}
             {busy && <div style={{ color: GRAY, fontSize: 13 }}>{t('ops.loading')}</div>}
-            <div style={{ display: 'grid', gap: 8 }}>
-              {records.slice(0, shown).map((rec, i) => (
-                <RecordRow key={rec.cache_key + rec.visa_type_name + i}
-                           rec={rec} onFlag={flag} t={t} />
-              ))}
-            </div>
+            <RecordsTable records={records.slice(0, shown)} onFlag={flag} t={t} />
             {records.length > shown && (
               <button className="btn btn--ghost"
                       style={{ borderRadius: 999, justifySelf: 'center' }}
