@@ -699,13 +699,20 @@ function CoverageRing({ segs, total, centerLabel, centerSub }) {
 
 const PAGE = 50
 
-function useTypeNames(client, records, lang) {
+function useTypeNames(client, data, lang) {
   const [map, setMap] = useState({})
   useEffect(() => {
-    if (lang === 'en' || !records.length) { setMap({}); return }
+    const records = data?.records || []
+    if (lang === 'en' || !records.length) {
+      setMap((m) => (Object.keys(m).length ? {} : m))
+      return
+    }
     const names = [...new Set(records.map((r) => r.visa_type_name)
       .filter((v) => v && /[A-Za-z]{3}/.test(v)))].slice(0, 120)
-    if (!names.length) { setMap({}); return }
+    if (!names.length) {
+      setMap((m) => (Object.keys(m).length ? {} : m))
+      return
+    }
     const entries = {}
     names.forEach((n, i) => { entries['n' + i] = n })
     let live = true
@@ -716,7 +723,7 @@ function useTypeNames(client, records, lang) {
       setMap(m)
     }).catch(() => { /* English stays */ })
     return () => { live = false }
-  }, [client, records, lang])
+  }, [client, data, lang])
   return map
 }
 
@@ -738,7 +745,7 @@ export default function QualityConsole() {
   const [changeFilter, setChangeFilter] = useState('')
   // Hoisted: hooks may not live inside the conditional band IIFE.
   const totalCount = useCountUp(data?.summary?.total ?? 0)
-  const typeNames = useTypeNames(client, data?.records || [], lang)
+  const typeNames = useTypeNames(client, data, lang)
 
   useEffect(() => {
     let live = true
@@ -760,7 +767,7 @@ export default function QualityConsole() {
   const load = useCallback(async () => {
     setBusy(true); setError('')
     try {
-      if (tab === 'records') { setData(await client.get(`/database/records?${qs()}`)); setShown(PAGE) }
+      if (tab === 'records') { setData(await client.get('/database/records')); setShown(PAGE) }
       else if (tab === 'changes') setChanges(await client.get('/database/changes?limit=300'))
       else if (tab === 'issues') setIssues(await client.get('/database/issues'))
       else if (tab === 'freshness') setFreshness(await client.get('/database/freshness'))
@@ -825,8 +832,45 @@ export default function QualityConsole() {
     }
   }
 
-  const s = data?.summary
-  const records = data?.records || []
+  // Filtering is LOCAL and instant: the records are already here, and a
+  // round-trip per keystroke made the console feel broken. The server-side
+  // params remain only for the Excel export.
+  const filtered = useMemo(() => {
+    const all = data?.records || []
+    const term = (raw) => {
+      const q = String(raw || '').trim().toLowerCase()
+      if (!q) return null
+      const hit = countries.find((c) => c.value.toLowerCase() === q
+        || c.search.includes(q))
+      return hit ? hit.value : String(raw).toUpperCase()
+    }
+    const natT = term(filters.nationality)
+    const destT = term(filters.destination)
+    return all.filter((r) => {
+      if (natT && r.travel_document_country !== natT) return false
+      if (destT && r.destination_country !== destT) return false
+      if (filters.purpose && r.travel_purpose !== filters.purpose) return false
+      if (filters.requirement && r.visa_requirement !== filters.requirement) return false
+      if (filters.confidence && r.confidence_level !== filters.confidence) return false
+      return true
+    })
+  }, [data, filters, countries])
+  const s = useMemo(() => {
+    if (!data?.summary) return null
+    const t0 = filtered
+    const high = t0.filter((r) => r.confidence_level === 'High').length
+    const medium = t0.filter((r) => r.confidence_level === 'Medium').length
+    const low = t0.filter((r) => r.confidence_level === 'Low').length
+    const complete = t0.filter((r) => r.completeness === 1).length
+    const src = t0.filter((r) => r.source_url).length
+    const sub = t0.filter((r) => r.source_check === 'human-quote'
+      || r.source_check === 'grounded-consistent').length
+    return { total: t0.length,
+             completeness_rate: t0.length ? complete / t0.length : null,
+             source_coverage: t0.length ? src / t0.length : null,
+             substantiated: sub, high, medium, low }
+  }, [data, filtered])
+  const records = filtered
   const set = (k) => (v) => setFilters((f) => ({ ...f, [k]: v }))
   return (
     <div style={{ background: BG, minHeight: '100vh' }}>
