@@ -213,7 +213,7 @@ function FlagForm({ rec, onFlag, t }) {
   )
 }
 
-function RecordsTable({ records, onFlag, t }) {
+function RecordsTable({ records, onFlag, onRelease, t }) {
   const [sort, setSort] = useState({ key: 'route', dir: 1 })
   const [open, setOpen] = useState(null)
   const onSort = (k) => setSort((s0) => ({ key: k, dir: s0.key === k ? -s0.dir : 1 }))
@@ -332,6 +332,17 @@ function RecordsTable({ records, onFlag, t }) {
                         {t('ops.source')} ↗
                       </a>
                     )}
+                    {rec.confidence_level === 'Low' && (
+                      <button onClick={(e) => { e.stopPropagation(); onRelease(rec) }}
+                              data-testid="ops-release"
+                              style={{ marginLeft: 8, border: `1px solid ${GREEN}`,
+                                       background: '#fff', color: GREEN,
+                                       borderRadius: 999, fontSize: 11,
+                                       fontWeight: 700, padding: '2px 10px',
+                                       cursor: 'pointer' }}>
+                        {t('ops.release')}
+                      </button>
+                    )}
                   </td>
                 </tr>,
                 opened && (
@@ -354,6 +365,34 @@ function RecordsTable({ records, onFlag, t }) {
           </tbody>
         </table>
       </div>
+    </div>
+  )
+}
+
+function IssueActions({ issue, onResolve, t }) {
+  const [res, setRes] = useState('')
+  return (
+    <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+      <input value={res} placeholder={t('ops.resolutionPlaceholder')}
+             onChange={(e) => setRes(e.target.value)}
+             style={{ ...input, flex: 1, minWidth: 220 }}
+             data-testid="ops-resolution" />
+      <button disabled={!res.trim()} data-testid="ops-corrected"
+              onClick={() => onResolve(issue.id, 'corrected', res.trim())}
+              style={{ borderRadius: 999, fontSize: 12, fontWeight: 700,
+                       border: 'none', cursor: 'pointer', padding: '7px 14px',
+                       background: GREEN, color: '#fff',
+                       opacity: res.trim() ? 1 : 0.5 }}>
+        ✓ {t('ops.markCorrected')}
+      </button>
+      <button disabled={!res.trim()} data-testid="ops-dismiss"
+              onClick={() => onResolve(issue.id, 'dismissed', res.trim())}
+              style={{ borderRadius: 999, fontSize: 12, fontWeight: 700,
+                       border: `1px solid ${GRAY}`, cursor: 'pointer',
+                       padding: '7px 14px', background: '#fff', color: GRAY,
+                       opacity: res.trim() ? 1 : 0.5 }}>
+        {t('ops.dismiss')}
+      </button>
     </div>
   )
 }
@@ -409,6 +448,28 @@ export default function QualityConsole() {
       destination: rec.destination_country,
       field: 'operator_spot_check', note, cache_key: rec.cache_key,
     })
+  }
+
+  async function release(rec) {
+    // Approving releases THIS cached answer to the main site: the customer
+    // hold lifts for the exact row the operator reviewed.
+    if (!window.confirm(t('ops.releaseConfirm'))) return
+    try {
+      await client.databaseApprove({
+        nationality: rec.travel_document_country,
+        destination: rec.destination_country,
+        cache_key: rec.cache_key,
+        note: 'released from the quality console',
+      })
+      load()
+    } catch (e) { setError(String(e?.message || e)) }
+  }
+
+  async function resolveIssue(id, status, resolution) {
+    try {
+      await client.databaseIssueUpdate(id, status, resolution)
+      load()
+    } catch (e) { setError(String(e?.message || e)) }
   }
 
   async function exportXlsx() {
@@ -548,7 +609,7 @@ export default function QualityConsole() {
               </div>
             )}
             {busy && <div style={{ color: GRAY, fontSize: 13 }}>{t('ops.loading')}</div>}
-            <RecordsTable records={records.slice(0, shown)} onFlag={flag} t={t} />
+            <RecordsTable records={records.slice(0, shown)} onFlag={flag} onRelease={release} t={t} />
             {records.length > shown && (
               <button className="btn btn--ghost"
                       style={{ borderRadius: 999, justifySelf: 'center' }}
@@ -587,6 +648,9 @@ export default function QualityConsole() {
                   <div style={{ fontSize: 12.5, color: GREEN, marginTop: 6 }}>
                     ✓ {it.resolution}
                   </div>
+                )}
+                {(it.status === 'open' || it.status === 'acknowledged') && (
+                  <IssueActions issue={it} onResolve={resolveIssue} t={t} />
                 )}
               </div>
             ))}
