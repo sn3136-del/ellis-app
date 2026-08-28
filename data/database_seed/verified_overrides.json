@@ -1375,12 +1375,13 @@
   "verified_at": "2026-08-22",
   "verified_by": "Ellis source audit",
   "source_url": "https://www.thaievisa.go.th/",
-  "note": "Source recorded for the visa exemption.",
+  "note": "Source recorded for the visa exemption. TDAC mandatory per tdac.immigration.go.th.",
   "fields": {
    "arrival_card": {
-    "required": false,
-    "name": null,
-    "submission_window": null
+    "required": true,
+    "name": "Thailand Digital Arrival Card (TDAC)",
+    "submission_window": "submit online within 3 days before arrival",
+    "note": "Mandatory for all foreign visitors since 1 May 2025; free at tdac.immigration.go.th"
    }
   }
  },
@@ -1431,12 +1432,13 @@
   "verified_at": "2026-08-22",
   "verified_by": "Ellis source audit",
   "source_url": "https://www.mfa.go.th/",
-  "note": "Visa-free is correct; the Thailand Digital Arrival Card must be filed before arrival.",
+  "note": "Visa-free is correct; the Thailand Digital Arrival Card must be filed before arrival. TDAC mandatory per tdac.immigration.go.th.",
   "fields": {
    "arrival_card": {
     "required": true,
     "name": "Thailand Digital Arrival Card (TDAC)",
-    "submission_window": "Within 3 days before arrival"
+    "submission_window": "submit online within 3 days before arrival",
+    "note": "Mandatory for all foreign visitors since 1 May 2025; free at tdac.immigration.go.th"
    }
   }
  },
@@ -1651,12 +1653,13 @@
   "verified_at": "2026-08-22",
   "verified_by": "Ellis source audit",
   "source_url": "https://tdac.immigration.go.th",
-  "note": "Visa-free is correct; the Thailand Digital Arrival Card is mandatory before arrival and was missing.",
+  "note": "Visa-free is correct; the Thailand Digital Arrival Card is mandatory before arrival and was missing. TDAC mandatory per tdac.immigration.go.th.",
   "fields": {
    "arrival_card": {
     "required": true,
     "name": "Thailand Digital Arrival Card (TDAC)",
-    "submission_window": "Within 3 days before arrival"
+    "submission_window": "submit online within 3 days before arrival",
+    "note": "Mandatory for all foreign visitors since 1 May 2025; free at tdac.immigration.go.th"
    },
    "official_portal_url": "https://tdac.immigration.go.th",
    "permitted_stay": "60 days, extendable once by up to 30 days at the officer's discretion",
@@ -14319,7 +14322,8 @@
   "source_url": "https://www.mofa.go.jp/ca/fna/page22e_000692.html",
   "note": "MOFA's diplomatic/official passport waiver list (updated 2 January 2026, 65 countries) does not include China, and neither does the second table on the same page (countries whose ordinary-passport waiver is extended to diplomatic/official holders). China is also absent from MOFA's 74-country ordinary-passport exemption list (https://www.mofa.go.jp/j_info/visit/visa/short/novisa",
   "fields": {
-   "disposition": "VISA_REQUIRED"
+   "disposition": "VISA_REQUIRED",
+   "permitted_stay": "Determined by the visa issued; the diplomatic waiver list does not include China"
   }
  },
  {
@@ -30536,7 +30540,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Ellis source audit",
   "source_url": "https://tdac.immigration.go.th/",
-  "note": "Thailand Digital Arrival Card (TDAC) is mandatory for all foreign visitors since 1 May 2025; submitted free online within 3 days before arrival.",
+  "note": "Thailand Digital Arrival Card (TDAC) is mandatory for all foreign visitors since 1 May 2025; submitted free online within 3 days before arrival. TDAC mandatory per tdac.immigration.go.th.",
   "fields": {
    "arrival_card": {
     "required": true,
@@ -30555,7 +30559,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Ellis source audit",
   "source_url": "https://tdac.immigration.go.th/",
-  "note": "Thailand Digital Arrival Card (TDAC) is mandatory for all foreign visitors since 1 May 2025; submitted free online within 3 days before arrival.",
+  "note": "Thailand Digital Arrival Card (TDAC) is mandatory for all foreign visitors since 1 May 2025; submitted free online within 3 days before arrival. TDAC mandatory per tdac.immigration.go.th.",
   "fields": {
    "arrival_card": {
     "required": true,
@@ -30574,7 +30578,7 @@
   "verified_at": "2026-08-28",
   "verified_by": "Ellis source audit",
   "source_url": "https://tdac.immigration.go.th/",
-  "note": "Thailand Digital Arrival Card (TDAC) is mandatory for all foreign visitors since 1 May 2025; submitted free online within 3 days before arrival.",
+  "note": "Thailand Digital Arrival Card (TDAC) is mandatory for all foreign visitors since 1 May 2025; submitted free online within 3 days before arrival. TDAC mandatory per tdac.immigration.go.th.",
   "fields": {
    "arrival_card": {
     "required": true,
