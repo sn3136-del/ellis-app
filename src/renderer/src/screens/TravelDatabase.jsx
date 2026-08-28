@@ -297,7 +297,7 @@ function EllisIslandScene() {
                   rx="1.2" fill="#fff" opacity="0.95" />
           ))}
           {/* the Empire State mast and needle */}
-          <line x1="199.5" y1={BASE - 114} x2="199.5" y2={BASE - 132}
+          <line x1="199.5" y1={BASE - 111} x2="199.5" y2={BASE - 132}
                 stroke={INK} strokeWidth="2" strokeLinecap="round" />
           <circle cx="199.5" cy={BASE - 134} r="1.6" fill={INK} />
           {/* Lady Liberty on the first L: robe, crown, torch, tablet */}
