@@ -363,7 +363,7 @@ function FlagForm({ rec, onFlag, t }) {
   )
 }
 
-function RecordsTable({ records, onFlag, onRelease, t, flagOf }) {
+function RecordsTable({ records, onFlag, onRelease, t, flagOf, typeNames = {} }) {
   const [sort, setSort] = useState({ key: 'route', dir: 1 })
   const [open, setOpen] = useState(null)
   const onSort = (k) => setSort((s0) => ({ key: k, dir: s0.key === k ? -s0.dir : 1 }))
@@ -449,7 +449,7 @@ function RecordsTable({ records, onFlag, onRelease, t, flagOf }) {
                   <td style={{ padding: '9px 12px', color: NAVY, fontWeight: 600,
                                maxWidth: 300, overflow: 'hidden',
                                textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {rec.visa_type_name || '·'}
+                    {typeNames[rec.visa_type_name] || rec.visa_type_name || '·'}
                   </td>
                   <td style={{ padding: '9px 12px', textAlign: 'right',
                                color: NAVY, whiteSpace: 'nowrap' }}>
@@ -465,7 +465,10 @@ function RecordsTable({ records, onFlag, onRelease, t, flagOf }) {
                   </td>
                   <td style={{ padding: '9px 12px' }}>
                     <Chip color={CONF_COLOR[rec.confidence_level] || GRAY}>
-                      {rec.confidence_level}
+                      {t('ops.conf.' + String(rec.confidence_level || '').toLowerCase())
+                        !== 'ops.conf.' + String(rec.confidence_level || '').toLowerCase()
+                        ? t('ops.conf.' + String(rec.confidence_level || '').toLowerCase())
+                        : rec.confidence_level}
                     </Chip>
                   </td>
                   <td style={{ padding: '9px 12px', textAlign: 'right',
@@ -696,6 +699,27 @@ function CoverageRing({ segs, total, centerLabel, centerSub }) {
 
 const PAGE = 50
 
+function useTypeNames(client, records, lang) {
+  const [map, setMap] = useState({})
+  useEffect(() => {
+    if (lang === 'en' || !records.length) { setMap({}); return }
+    const names = [...new Set(records.map((r) => r.visa_type_name)
+      .filter((v) => v && /[A-Za-z]{3}/.test(v)))].slice(0, 120)
+    if (!names.length) { setMap({}); return }
+    const entries = {}
+    names.forEach((n, i) => { entries['n' + i] = n })
+    let live = true
+    client.i18nCatalog(lang, entries).then((out) => {
+      if (!live || !out?.entries) return
+      const m = {}
+      names.forEach((n, i) => { const v = out.entries['n' + i]; if (v) m[n] = v })
+      setMap(m)
+    }).catch(() => { /* English stays */ })
+    return () => { live = false }
+  }, [client, records, lang])
+  return map
+}
+
 export default function QualityConsole() {
   const client = useOpsClient()
   const { t, lang } = useLocale()
@@ -714,6 +738,7 @@ export default function QualityConsole() {
   const [changeFilter, setChangeFilter] = useState('')
   // Hoisted: hooks may not live inside the conditional band IIFE.
   const totalCount = useCountUp(data?.summary?.total ?? 0)
+  const typeNames = useTypeNames(client, data?.records || [], lang)
 
   useEffect(() => {
     let live = true
@@ -976,7 +1001,7 @@ export default function QualityConsole() {
               )
             })()}
             {busy && <div style={{ color: GRAY, fontSize: 13 }}>{t('ops.loading')}</div>}
-            <RecordsTable records={records.slice(0, shown)} onFlag={flag} onRelease={release} t={t} flagOf={flagOf} />
+            <RecordsTable records={records.slice(0, shown)} onFlag={flag} onRelease={release} t={t} flagOf={flagOf} typeNames={typeNames} />
             {records.length > shown && (
               <button className="btn btn--ghost"
                       style={{ borderRadius: 999, justifySelf: 'center' }}
