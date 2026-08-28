@@ -547,6 +547,64 @@ function IssueActions({ issue, onResolve, t }) {
   )
 }
 
+function CoverageRing({ segs, total, centerLabel, centerSub }) {
+  // An SVG ring, animated by stroke-dasharray after mount. 2px surface gaps
+  // between segments; the ordered blue ramp carries the tiers.
+  const [go, setGo] = useState(false)
+  useEffect(() => { const id = setTimeout(() => setGo(true), 120)
+    return () => clearTimeout(id) }, [])
+  const R = 62, C = 2 * Math.PI * R
+  const gap = 3
+  let offset = 0
+  const arcs = segs.map(([n, color]) => {
+    const frac = total ? n / total : 0
+    const len = Math.max(0, frac * C - gap)
+    const a = { color, len, offset }
+    offset += frac * C
+    return a
+  })
+  const pctText = total ? Math.round(((segs[0][0] + segs[1][0]) / total) * 100) : 0
+  const shown = useCountUp(go ? pctText : 0, 900)
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 28,
+                  flexWrap: 'wrap' }}>
+      <svg width="170" height="170" viewBox="0 0 170 170"
+           role="img" aria-label={centerLabel}>
+        <circle cx="85" cy="85" r={R} fill="none" stroke="#eef2f8"
+                strokeWidth="20" />
+        {arcs.map((a, i) => (
+          <circle key={i} cx="85" cy="85" r={R} fill="none" stroke={a.color}
+                  strokeWidth="20" strokeLinecap="butt"
+                  strokeDasharray={`${go ? a.len : 0} ${C}`}
+                  strokeDashoffset={-a.offset}
+                  transform="rotate(-90 85 85)"
+                  style={{ transition: 'stroke-dasharray 1s cubic-bezier(.25,.8,.25,1)' }} />
+        ))}
+        <text x="85" y="82" textAnchor="middle"
+              style={{ fontSize: 30, fontWeight: 700, fill: NAVY }}>
+          {shown}%
+        </text>
+        <text x="85" y="102" textAnchor="middle"
+              style={{ fontSize: 10, fontWeight: 700, fill: GRAY,
+                       letterSpacing: 0.6, textTransform: 'uppercase' }}>
+          {centerSub}
+        </text>
+      </svg>
+      <div style={{ display: 'grid', gap: 10 }}>
+        {segs.map(([n, color, name], i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8,
+                                fontSize: 13 }}>
+            <span style={{ width: 10, height: 10, borderRadius: 3,
+                           background: color, border: '1px solid #c9d6ea' }} />
+            <strong style={{ color: NAVY, minWidth: 46 }}>{n.toLocaleString()}</strong>
+            <span style={{ color: GRAY }}>{name}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 const PAGE = 50
 
 export default function QualityConsole() {
@@ -1104,34 +1162,15 @@ export default function QualityConsole() {
                           accent={f.disputed ? RED : GREEN} delay={320}
                           sub={t('ops.fresh.disputedSub')} />
               </div>
-              <div style={{ ...card, padding: '18px 22px' }}>
+              <div style={{ ...card, padding: '22px 26px', display: 'grid',
+                            gap: 18 }}>
                 <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1,
                               color: GRAY, textTransform: 'uppercase' }}>
                   {t('ops.fresh.coverage')}
                 </div>
-                <div style={{ display: 'flex', height: 14, borderRadius: 999,
-                              overflow: 'hidden', marginTop: 12,
-                              background: '#eef2f8' }}>
-                  {segs.map(([n, color], i) => (
-                    <div key={i} className="ops-seg"
-                         style={{ width: `${(n / (f.total || 1)) * 100}%`,
-                                  background: color,
-                                  borderRight: i < 2 ? '2px solid #fff' : 'none' }} />
-                  ))}
-                </div>
-                <div style={{ display: 'flex', gap: 16, marginTop: 10,
-                              fontSize: 12, flexWrap: 'wrap' }}>
-                  {segs.map(([n, color, name], i) => (
-                    <span key={i} style={{ display: 'inline-flex', gap: 5,
-                                           alignItems: 'center' }}>
-                      <span style={{ width: 9, height: 9, borderRadius: '50%',
-                                     background: color,
-                                     border: '1px solid #c9d6ea' }} />
-                      <strong style={{ color: NAVY }}>{n.toLocaleString()}</strong>
-                      <span style={{ color: GRAY }}>{name}</span>
-                    </span>
-                  ))}
-                </div>
+                <CoverageRing segs={segs} total={f.total}
+                              centerLabel={t('ops.fresh.coverage')}
+                              centerSub={t('ops.fresh.coveredShort')} />
               </div>
               <div style={{ ...card, padding: '16px 20px', fontSize: 12.5,
                             color: GRAY, lineHeight: 1.65 }}>
