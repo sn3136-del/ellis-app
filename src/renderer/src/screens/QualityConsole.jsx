@@ -282,7 +282,8 @@ function CountryFilter({ value, placeholder, onCommit, countries }) {
              }}
              onBlur={() => { if (!open) commit(text) }}
              className="ops-in"
-             style={{ ...input, width: 150 }} />
+             style={{ ...input, width: '100%',
+                      boxSizing: 'border-box', paddingRight: 30 }} />
       {text && (
         <button onClick={() => { setText(''); commit('') }}
                 style={{ position: 'absolute', right: 4, top: '50%',
@@ -1150,17 +1151,31 @@ export default function QualityConsole() {
 
         {tab === 'records' && (
           <div style={{ display: 'grid', gap: 14 }}>
-            {/* Spot-check filter bar: country autocomplete + enum dropdowns */}
-            <div style={{ ...card, padding: '14px 18px', display: 'flex',
-                          gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-              <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1,
-                             color: GRAY, textTransform: 'uppercase',
-                             display: 'inline-flex', alignItems: 'center',
-                             gap: 7 }}>
-                <span style={{ width: 7, height: 7, borderRadius: 3,
-                               background: BLUE, flexShrink: 0 }} />
-                {t('ops.spotCheck')}
-              </span>
+            {/* Spot-check filter bar: a header row (label + export), then the
+                seven slice controls in equal grid columns, so nothing wraps
+                into a lonely orphan with the export floating in space. */}
+            <div style={{ ...card, padding: '16px 20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10,
+                            marginBottom: 12 }}>
+                <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1,
+                               color: GRAY, textTransform: 'uppercase',
+                               display: 'inline-flex', alignItems: 'center',
+                               gap: 7 }}>
+                  <span style={{ width: 7, height: 7, borderRadius: 3,
+                                 background: BLUE, flexShrink: 0 }} />
+                  {t('ops.spotCheck')}
+                </span>
+                <div style={{ flex: 1 }} />
+                <button className="btn btn--sm" onClick={exportXlsx} disabled={busy}
+                        data-testid="ops-export"
+                        style={{ borderRadius: 999, fontWeight: 700,
+                                 background: BLUE, color: '#fff',
+                                 padding: '9px 18px' }}>
+                  ⬇ {t('ops.export')}
+                </button>
+              </div>
+              <div style={{ display: 'grid', gap: 10, gridTemplateColumns:
+                              'repeat(auto-fill, minmax(170px, 1fr))' }}>
               <CountryFilter value={filters.nationality} countries={countries}
                              placeholder={t('ops.passport')}
                              onCommit={set('nationality')} />
@@ -1196,14 +1211,17 @@ export default function QualityConsole() {
               </select>
               {/* The acceptance standard's extra slice dimensions (4.1.2):
                   by visa type, and by a specific field's gaps. */}
-              <input value={filters.visaType} className="ops-in" style={{ ...input, width: 150 }}
+              <input value={filters.visaType} className="ops-in"
+                     style={{ ...input, width: '100%',
+                              boxSizing: 'border-box' }}
                      placeholder={t('ops.typeFilter')}
                      data-testid="ops-filter-visatype"
                      onChange={(e) => setFilters((f) =>
                        ({ ...f, visaType: e.target.value }))} />
               <select className="ops-in" value={filters.fieldMissing}
                       data-testid="ops-filter-fieldmissing"
-                      style={{ ...input, width: 170 }}
+                      style={{ ...input, width: '100%',
+                               boxSizing: 'border-box' }}
                       onChange={(e) => setFilters((f) =>
                         ({ ...f, fieldMissing: e.target.value }))}>
                 <option value="">{t('ops.anyGap')}</option>
@@ -1211,14 +1229,7 @@ export default function QualityConsole() {
                   <option key={f} value={f}>{fx(t, f)}</option>
                 ))}
               </select>
-              <div style={{ flex: 1 }} />
-              <button className="btn btn--sm" onClick={exportXlsx} disabled={busy}
-                      data-testid="ops-export"
-                      style={{ borderRadius: 999, fontWeight: 700,
-                               background: BLUE, color: '#fff',
-                               padding: '9px 18px' }}>
-                ⬇ {t('ops.export')}
-              </button>
+              </div>
             </div>
 
             {s && (() => {
