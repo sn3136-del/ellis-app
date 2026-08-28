@@ -514,6 +514,26 @@ export default function TravelDatabase({ onBack }) {
     setTimeout(tick, 2500)
   }
 
+  // Prewarm: the moment the form names a complete route, start the engine in
+  // the background. By the time the reader clicks the query button, a cold
+  // route is already seconds into its one generation (the server coalesces
+  // the prewarm and the real submit into a single Kimi call).
+  const prewarmedRef = useRef('')
+  useEffect(() => {
+    if (!nat || !dest) return
+    const sig = [nat, dest, purpose, doc, arrival, (transit || []).join(',')].join('|')
+    if (prewarmedRef.current === sig) return
+    const id = setTimeout(() => {
+      prewarmedRef.current = sig
+      client.databaseLookup({
+        nationality: nat, destination: dest, travel_document_type: doc,
+        travel_purpose: purpose, arrival_date: arrival || '',
+        transit_countries: transit,
+      }).catch(() => {})
+    }, 500)
+    return () => clearTimeout(id)
+  }, [nat, dest, purpose, doc, arrival, transit, client])
+
   // One query path. The form calls it bare; the switchers on the answer page
   // call it with an override, so changing document type or purpose re-asks
   // the engine for THAT combination instead of showing the old answer under

@@ -1033,7 +1033,17 @@ def reconcile_guidance_with_route(db, guidance: dict, *, nationality: str,
 
 
 def _stage_system(fields: tuple, label: str, verdict: dict | None = None) -> str:
-    head = _SYSTEM + f"\n\nTHIS CALL ({label}): fill ONLY these fields and set every other field to null: {', '.join(fields)}. Keep the JSON shape exactly as specified."
+    head = _SYSTEM + (
+        f"\n\nTHIS CALL ({label}): output ONLY these fields: {', '.join(fields)}. "
+        "OMIT every other field from the JSON entirely: do not write them as "
+        "null and do not name them in \"uncertainty\".")
+    if label == "CORE":
+        # The core answer is read while the reader waits; token count is
+        # latency. Facts stay complete, prose stays short.
+        head += (" Keep text fields tight: required_documents is a short "
+                 "comma-separated list (at most 8 items, no explanations); "
+                 "application_channel_detail at most 2 sentences; "
+                 "permitted_stay and processing_time one short sentence each.")
     if verdict:
         head += ("\nThe verdict is ALREADY DECIDED and must be respected exactly: "
                  + json.dumps(verdict, ensure_ascii=False)
@@ -1157,8 +1167,47 @@ def nearest_cached_answer(db, route: dict) -> dict | None:
     return apply_portal_fallback(apply_verified_overrides(out, route), route)
 
 
+import threading as _threading
+
+# One generation per route at a time: concurrent identical lookups (a reader
+# double-submitting, the form prewarm racing the submit, two readers on the
+# same cold route) share a single Kimi call instead of each paying for one.
+_INFLIGHT: dict = {}
+_INFLIGHT_GUARD = _threading.Lock()
+
+
 def get_route_guidance(db, route: dict, *, force_refresh: bool = False,
                        stage: str = "full", after=None) -> dict:
+    key = cache_key(route)
+    if not force_refresh and _cached(db, key) is not None:
+        return _get_route_guidance_locked(db, route, force_refresh=force_refresh,
+                                          stage=stage, after=after)
+    with _INFLIGHT_GUARD:
+        lk = _INFLIGHT.get(key)
+        if lk is None:
+            lk = _threading.Lock()
+            _INFLIGHT[key] = lk
+    acquired = lk.acquire(timeout=max(_deadline_seconds() * 2, 60))
+    try:
+        if acquired:
+            # Another request may have generated and committed while this one
+            # waited; drop stale session state so the fresh row is visible.
+            try:
+                db.expire_all()
+            except Exception:  # noqa: BLE001 - session hygiene must not fail a lookup
+                pass
+        return _get_route_guidance_locked(db, route, force_refresh=force_refresh,
+                                          stage=stage, after=after)
+    finally:
+        if acquired:
+            lk.release()
+            with _INFLIGHT_GUARD:
+                if _INFLIGHT.get(key) is lk and not lk.locked():
+                    _INFLIGHT.pop(key, None)
+
+
+def _get_route_guidance_locked(db, route: dict, *, force_refresh: bool = False,
+                               stage: str = "full", after=None) -> dict:
     """The authoritative single-pass route decision under one hard deadline.
 
     Cached identical routes return instantly. A fresh route runs exactly ONE
