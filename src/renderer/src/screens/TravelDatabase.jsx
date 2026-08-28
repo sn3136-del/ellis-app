@@ -307,12 +307,14 @@ function EllisIslandScene() {
                   height="40" fill="#fff" opacity="0.9" />
           ))}
           {[1.2, 4.7, 8.2, 11.7, 15.2].map((cx, i) => (
-            <rect key={'shoulder' + i} x={190.5 + cx} y={BASE - 41} width="1.7"
-                  height="16" fill="#fff" opacity="0.9" />
+            <rect key={'shoulder' + i} x={190.5 + cx} y={BASE - 40} width="1.7"
+                  height="13" fill="#fff" opacity="0.9" />
           ))}
-          {[1.4, 4.9, 8.4, 11.9, 15.4].map((cx, i) => (
-            <rect key={'esbbase' + i} x={189 + cx} y={BASE - 18} width="1.7"
-                  height="12" fill="#fff" opacity="0.9" />
+          {/* the limestone base: modest window pairs either side of the
+              grand entrance, which stands alone */}
+          {[2, 5.2, 12.6, 15.8].map((cx, i) => (
+            <rect key={'esbbase' + i} x={189 + cx} y={BASE - 17} width="1.7"
+                  height="6.5" fill="#fff" opacity="0.9" />
           ))}
           {[4.6, 7.9].map((cx, i) => (
             <rect key={'upper' + i} x={192 + cx} y={BASE - 100.5} width="1.6"
