@@ -16,6 +16,47 @@
 // server resolves whatever is typed. The chrome translates with the app's
 // language picker; record VALUES stay as stored — they are the dataset.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
+// Console-wide motion and polish. Bars grow, numbers count, cards lift —
+// all suppressed for readers who ask for reduced motion.
+const OPS_CSS = `
+@keyframes ops-fade-up { from { opacity: 0; transform: translateY(6px); }
+                         to { opacity: 1; transform: none; } }
+.ops-fade { animation: ops-fade-up .45s cubic-bezier(.2,.7,.3,1) both; }
+.ops-bar { transition: width .9s cubic-bezier(.25,.8,.25,1); }
+.ops-seg { transition: width .9s cubic-bezier(.25,.8,.25,1); }
+.ops-lift { transition: box-shadow .18s ease, transform .18s ease; }
+.ops-lift:hover { box-shadow: 0 6px 18px rgba(15,41,77,.10);
+                  transform: translateY(-1px); }
+.ops-row { transition: background .15s ease; }
+@media (prefers-reduced-motion: reduce) {
+  .ops-fade { animation: none; }
+  .ops-bar, .ops-seg, .ops-lift { transition: none; }
+}`
+
+function useCountUp(target, ms = 700) {
+  const [v, setV] = useState(0)
+  useEffect(() => {
+    if (target == null) return
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      setV(target); return
+    }
+    let raf; const t0 = performance.now()
+    const tick = (t) => {
+      const k = Math.min(1, (t - t0) / ms)
+      setV(Math.round(target * (1 - Math.pow(1 - k, 3))))
+      if (k < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [target, ms])
+  return v
+}
+
+// Confidence is ORDERED data, so it wears a sequential single-hue ramp
+// (validated: monotonic lightness, CVD-safe by construction), never
+// green/amber/red side by side.
+const SEQ = { high: '#1d4ed8', medium: '#7db2f7', low: '#dbe8fb' }
 import { createVisaClient } from '../lib/visaBackend.js'
 import { newSession } from '../lib/visaSession.js'
 import { useLocale } from '../lib/locale.jsx'
@@ -66,57 +107,83 @@ function Chip({ children, color = GRAY, filled = true }) {
   )
 }
 
-function StatCell({ label, value, sub, pct, target, accent = NAVY }) {
-  const width = pct != null ? Math.max(2, Math.min(100, pct)) : null
+function StatCell({ label, value, sub, pct, target, accent = NAVY, delay = 0 }) {
+  const [w, setW] = useState(0)
+  useEffect(() => {
+    const id = setTimeout(() => setW(pct != null ? Math.max(2, Math.min(100, pct)) : 0), 80 + delay)
+    return () => clearTimeout(id)
+  }, [pct, delay])
+  const n = useCountUp(typeof value === 'number' ? value : null)
   const hit = pct != null && target != null && pct >= target
   return (
-    <div style={{ padding: '18px 22px', minWidth: 0 }}>
+    <div className="ops-fade" style={{ padding: '20px 24px', minWidth: 0,
+                                       animationDelay: `${delay}ms` }}>
       <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1,
                     color: GRAY, textTransform: 'uppercase',
                     whiteSpace: 'nowrap' }}>{label}</div>
-      <div style={{ fontSize: 28, fontWeight: 800, marginTop: 8, lineHeight: 1,
+      <div style={{ fontSize: 30, fontWeight: 700, marginTop: 8, lineHeight: 1,
                     color: pct == null ? accent : (hit ? GREEN : NAVY) }}>
-        {value}
+        {typeof value === 'number' ? n.toLocaleString() : value}
       </div>
-      {width != null && (
-        <div style={{ marginTop: 10, height: 5, borderRadius: 999,
-                      background: '#edf1f7', position: 'relative' }}>
-          <div style={{ position: 'absolute', inset: 0, width: `${width}%`,
-                        borderRadius: 999,
-                        background: hit ? GREEN : `linear-gradient(90deg, ${BLUE}, #64a5ff)` }} />
+      {pct != null && (
+        <div style={{ marginTop: 12, height: 6, borderRadius: 999,
+                      background: '#dbe8fb', position: 'relative' }}>
+          <div className="ops-bar"
+               style={{ position: 'absolute', left: 0, top: 0, bottom: 0,
+                        width: `${w}%`, borderRadius: 999,
+                        background: hit ? GREEN
+                          : 'linear-gradient(90deg, #1d4ed8, #4f8ef8)' }} />
           {target != null && (
-            <div style={{ position: 'absolute', left: `${target}%`, top: -2,
-                          bottom: -2, width: 2, background: NAVY,
-                          borderRadius: 1, opacity: 0.5 }} />
+            <div style={{ position: 'absolute', left: `${target}%`, top: -3,
+                          bottom: -3, width: 2, background: NAVY,
+                          borderRadius: 1, opacity: 0.45 }} />
           )}
         </div>
       )}
-      <div style={{ fontSize: 11, color: GRAY, marginTop: 8,
+      <div style={{ fontSize: 11, color: GRAY, marginTop: 9,
                     whiteSpace: 'nowrap', overflow: 'hidden',
                     textOverflow: 'ellipsis' }}>{sub}</div>
     </div>
   )
 }
 
-function ConfidenceCell({ high, medium, low, label, sub }) {
+function ConfidenceCell({ high, medium, low, label, sub, t, delay = 0 }) {
   const total = (high + medium + low) || 1
-  const seg = (n, color) => (
-    <div key={color} style={{ width: `${(n / total) * 100}%`, background: color }} />
+  const [go, setGo] = useState(false)
+  useEffect(() => { const id = setTimeout(() => setGo(true), 80 + delay)
+    return () => clearTimeout(id) }, [delay])
+  const seg = (n, color, last) => (
+    <div key={color} className="ops-seg"
+         style={{ width: go ? `${(n / total) * 100}%` : '0%',
+                  background: color,
+                  borderRight: last ? 'none' : '2px solid #fff' }} />
+  )
+  const Key = ({ color, n, name }) => (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+      <span style={{ width: 8, height: 8, borderRadius: '50%',
+                     background: color, border: '1px solid #c9d6ea' }} />
+      <span style={{ color: NAVY, fontWeight: 700 }}>{n.toLocaleString()}</span>
+      <span style={{ color: GRAY }}>{name}</span>
+    </span>
   )
   return (
-    <div style={{ padding: '18px 22px', minWidth: 0 }}>
+    <div className="ops-fade" style={{ padding: '20px 24px', minWidth: 0,
+                                       animationDelay: `${delay}ms` }}>
       <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1,
                     color: GRAY, textTransform: 'uppercase' }}>{label}</div>
-      <div style={{ fontSize: 28, fontWeight: 800, marginTop: 8, lineHeight: 1,
-                    color: NAVY }}>
-        {high}<span style={{ color: '#c3ccd9', fontSize: 20 }}> / </span>{medium}
-        <span style={{ color: '#c3ccd9', fontSize: 20 }}> / </span>{low}
+      <div style={{ display: 'flex', gap: 12, marginTop: 12, fontSize: 12,
+                    flexWrap: 'wrap' }}>
+        <Key color={SEQ.high} n={high} name={t('ops.conf.high')} />
+        <Key color={SEQ.medium} n={medium} name={t('ops.conf.medium')} />
+        <Key color={SEQ.low} n={low} name={t('ops.conf.low')} />
       </div>
-      <div style={{ marginTop: 10, height: 5, borderRadius: 999,
-                    overflow: 'hidden', display: 'flex', background: '#edf1f7' }}>
-        {seg(high, GREEN)}{seg(medium, AMBER)}{seg(low, RED)}
+      <div style={{ marginTop: 12, height: 6, borderRadius: 999,
+                    overflow: 'hidden', display: 'flex',
+                    background: '#eef2f8' }}>
+        {seg(high, SEQ.high, false)}{seg(medium, SEQ.medium, false)}
+        {seg(low, SEQ.low, true)}
       </div>
-      <div style={{ fontSize: 11, color: GRAY, marginTop: 8 }}>{sub}</div>
+      <div style={{ fontSize: 11, color: GRAY, marginTop: 9 }}>{sub}</div>
     </div>
   )
 }
@@ -581,6 +648,7 @@ export default function QualityConsole() {
   const set = (k) => (v) => setFilters((f) => ({ ...f, [k]: v }))
   return (
     <div style={{ background: BG, minHeight: '100vh' }}>
+      <style>{OPS_CSS}</style>
       <div className="page" style={{ maxWidth: 1160, margin: '0 auto',
                                      padding: '30px 24px 80px' }}
            data-testid="quality-console">
@@ -671,25 +739,26 @@ export default function QualityConsole() {
               <div style={{ ...card, display: 'grid',
                             gridTemplateColumns: 'repeat(auto-fit, minmax(185px, 1fr))' }}>
                 <StatCell label={t('ops.stat.records')} value={s.total}
-                          sub={t('ops.stat.recordsSub')} accent={NAVY} />
+                          sub={t('ops.stat.recordsSub')} accent={NAVY} delay={0} />
                 <StatCell label={t('ops.stat.complete')}
                           value={s.completeness_rate != null
                             ? `${Math.round(s.completeness_rate * 100)}%` : '·'}
                           pct={s.completeness_rate != null ? s.completeness_rate * 100 : null}
-                          target={99}
+                          target={99} delay={80}
                           sub={t('ops.stat.completeSub') + ' · ' + t('ops.stat.target') + ' 99%'} />
                 <StatCell label={t('ops.stat.sources')}
                           value={s.source_coverage != null
                             ? `${Math.round(s.source_coverage * 100)}%` : '·'}
                           pct={s.source_coverage != null ? s.source_coverage * 100 : null}
-                          target={100}
+                          target={100} delay={160}
                           sub={t('ops.stat.sourcesSub') + ' · ' + t('ops.stat.target') + ' 100%'} />
                 <StatCell label={t('ops.stat.substantiated')} accent={BLUE}
                           value={s.substantiated ?? '·'}
                           pct={s.total ? (s.substantiated / s.total) * 100 : null}
+                          delay={240}
                           sub={t('ops.stat.substantiatedSub')} />
                 <ConfidenceCell high={s.high} medium={s.medium} low={s.low}
-                                label={t('ops.stat.confidence')}
+                                label={t('ops.stat.confidence')} t={t} delay={320}
                                 sub={t('ops.stat.confidenceSub')} />
               </div>
             )}
@@ -705,84 +774,568 @@ export default function QualityConsole() {
           </div>
         )}
 
-        {tab === 'issues' && (
-          <div style={{ display: 'grid', gap: 10 }}>
-            {(issues?.issues || []).length === 0 && !busy && (
-              <div style={{ ...card, padding: 24, color: GRAY, fontSize: 13.5,
-                            textAlign: 'center' }}>{t('ops.noReports')}</div>
-            )}
-            {(issues?.issues || []).map((it) => (
-              <div key={it.id} style={{ ...card, padding: '14px 18px' }}>
-                <div style={{ display: 'flex', gap: 10, alignItems: 'center',
-                              flexWrap: 'wrap' }}>
-                  <strong style={{ color: NAVY, fontSize: 13.5 }}>
-                    {(it.route || {}).nationality || (it.route || {}).passport_nationality}
-                    {' → '}
-                    {(it.route || {}).destination || (it.route || {}).destination_country}
-                  </strong>
-                  <Chip color={it.status === 'open' ? RED
-                    : it.status === 'corrected' ? GREEN : AMBER}>{it.status}</Chip>
-                  <span style={{ color: GRAY, fontSize: 12,
-                                 fontFamily: 'ui-monospace, monospace' }}>{it.field}</span>
-                  <span style={{ marginLeft: 'auto', color: GRAY, fontSize: 11.5 }}>
-                    {(it.created_at || '').slice(0, 16).replace('T', ' ')}
-                  </span>
-                </div>
-                <div style={{ fontSize: 13, color: NAVY, marginTop: 8 }}>{it.note}</div>
-                {it.resolution && (
-                  <div style={{ fontSize: 12.5, color: GREEN, marginTop: 6 }}>
-                    ✓ {it.resolution}
-                  </div>
+        {tab === 'issues' && (() => {
+          const all = issues?.issues || []
+          const open = all.filter((i) => i.status === 'open' || i.status === 'acknowledged')
+          const closed = all.filter((i) => !open.includes(i)).reverse()
+          const Card = ({ it, active }) => (
+            <div className="ops-lift" style={{ ...card, padding: '14px 18px',
+                          borderLeft: `3px solid ${active ? RED : '#d6dee9'}` }}>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center',
+                            flexWrap: 'wrap' }}>
+                <strong style={{ color: NAVY, fontSize: 13.5 }}>
+                  {(it.route || {}).nationality || (it.route || {}).passport_nationality}
+                  {' → '}
+                  {(it.route || {}).destination || (it.route || {}).destination_country}
+                </strong>
+                <span style={{ color: GRAY, fontSize: 11,
+                               fontFamily: 'ui-monospace, monospace',
+                               background: '#f1f4f9', borderRadius: 6,
+                               padding: '2px 8px' }}>{it.field}</span>
+                {!active && (
+                  <Chip color={it.status === 'corrected' ? GREEN : GRAY} filled={false}>
+                    {it.status}
+                  </Chip>
                 )}
-                {(it.status === 'open' || it.status === 'acknowledged') && (
-                  <IssueActions issue={it} onResolve={resolveIssue} t={t} />
-                )}
+                <span style={{ marginLeft: 'auto', color: GRAY, fontSize: 11.5 }}>
+                  {(it.created_at || '').slice(0, 16).replace('T', ' ')}
+                </span>
               </div>
-            ))}
+              <div style={{ fontSize: 13, color: NAVY, marginTop: 8 }}>{it.note}</div>
+              {it.resolution && (
+                <div style={{ fontSize: 12.5, color: GREEN, marginTop: 6 }}>
+                  ✓ {it.resolution}
+                </div>
+              )}
+              {active && <IssueActions issue={it} onResolve={resolveIssue} t={t} />}
+            </div>
+          )
+          return (
+            <div style={{ display: 'grid', gap: 10 }} className="ops-fade">
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                <span style={{ fontSize: 13, fontWeight: 800, color: NAVY }}>
+                  {t('ops.issues.open')}
+                </span>
+                <Chip color={open.length ? RED : GREEN}>{open.length}</Chip>
+              </div>
+              {open.length === 0 && !busy && (
+                <div style={{ ...card, padding: 22, color: GRAY, fontSize: 13.5,
+                              textAlign: 'center' }}>{t('ops.noReports')}</div>
+              )}
+              {open.map((it) => <Card key={it.id} it={it} active />)}
+              {closed.length > 0 && (
+                <details style={{ marginTop: 6 }}>
+                  <summary style={{ fontSize: 12.5, color: GRAY, cursor: 'pointer',
+                                    fontWeight: 700 }}>
+                    {t('ops.issues.resolved')} ({closed.length})
+                  </summary>
+                  <div style={{ display: 'grid', gap: 10, marginTop: 10 }}>
+                    {closed.map((it) => <Card key={it.id} it={it} active={false} />)}
+                  </div>
+                </details>
+              )}
+            </div>
+          )
+        })()}
+
+        {tab === 'changes' && (() => {
+          const list = changes?.changes || []
+          const AC = { add: GREEN, modify: AMBER, delete: RED }
+          return (
+            <div className="ops-fade" style={{ ...card, padding: '6px 0' }}>
+              {list.length === 0 && !busy && (
+                <div style={{ padding: 22, color: GRAY, fontSize: 13.5,
+                              textAlign: 'center' }}>{t('ops.noChanges')}</div>
+              )}
+              {list.map((c, i) => (
+                <div key={c.id} className="ops-row"
+                     style={{ display: 'grid',
+                              gridTemplateColumns: '26px 1fr',
+                              gap: 12, padding: '12px 20px',
+                              background: i % 2 ? '#fbfcfe' : '#fff' }}>
+                  <div style={{ position: 'relative' }}>
+                    <div style={{ position: 'absolute', left: 11, top: -12,
+                                  bottom: -12, width: 2,
+                                  background: '#edf1f7' }} />
+                    <span style={{ position: 'relative', display: 'inline-block',
+                                   width: 10, height: 10, borderRadius: '50%',
+                                   marginTop: 4, marginLeft: 7,
+                                   background: AC[c.action] || GRAY,
+                                   border: '2px solid #fff',
+                                   boxShadow: '0 0 0 1px #dfe6f0' }} />
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ display: 'flex', gap: 10,
+                                  alignItems: 'center', flexWrap: 'wrap' }}>
+                      <strong style={{ color: NAVY, fontSize: 13 }}>
+                        {(c.route || {}).passport_nationality} → {(c.route || {}).destination_country}
+                      </strong>
+                      <Chip color={AC[c.action] || GRAY} filled={false}>{c.action}</Chip>
+                      <span style={{ color: GRAY, fontSize: 11.5 }}>{c.origin}</span>
+                      <span style={{ marginLeft: 'auto', color: GRAY,
+                                     fontSize: 11.5 }}>
+                        {(c.at || '').slice(0, 16).replace('T', ' ')}
+                      </span>
+                    </div>
+                    {Object.entries(c.changes || {}).slice(0, 5).map(([f, d]) => (
+                      <div key={f} style={{ fontSize: 12, marginTop: 5,
+                                            display: 'flex', gap: 8,
+                                            alignItems: 'baseline',
+                                            flexWrap: 'wrap' }}>
+                        <span style={{ color: GRAY, width: 150, flexShrink: 0,
+                                       fontFamily: 'ui-monospace, monospace',
+                                       fontSize: 11 }}>{f}</span>
+                        <span style={{ color: RED, opacity: 0.75,
+                                       textDecoration: 'line-through' }}>
+                          {JSON.stringify(d.from)?.slice(0, 48)}
+                        </span>
+                        <span style={{ color: '#94a3b8' }}>→</span>
+                        <span style={{ color: GREEN, fontWeight: 600 }}>
+                          {JSON.stringify(d.to)?.slice(0, 70)}
+                        </span>
+                      </div>
+                    ))}
+                    {c.note && (
+                      <div style={{ fontSize: 11.5, color: GRAY, marginTop: 5 }}>
+                        {c.note}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        })()}
+
+        {tab === 'freshness' && freshness && (() => {
+          const f = freshness.summary
+          const covered = f.human_verified + f.grounded
+          return (
+            <div style={{ display: 'grid', gap: 14 }} className="ops-fade">
+              <div style={{ ...card, display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(185px, 1fr))' }}>
+                <StatCell label={t('ops.fresh.answers')} value={f.total}
+                          sub={t('ops.stat.recordsSub')} delay={0} />
+                <StatCell label={t('ops.fresh.human')} value={f.human_verified}
+                          accent={GREEN} delay={80}
+                          pct={f.total ? (f.human_verified / f.total) * 100 : null}
+                          sub={t('ops.check.quoted')} />
+                <StatCell label={t('ops.fresh.grounded')} value={f.grounded}
+                          accent={BLUE} delay={160}
+                          pct={f.total ? (f.grounded / f.total) * 100 : null}
+                          sub={t('ops.check.grounded')} />
+                <StatCell label={t('ops.fresh.stale')} value={f.stale}
+                          accent={f.stale ? AMBER : GREEN} delay={240}
+                          sub={t('ops.fresh.staleSub')} />
+                <StatCell label={t('ops.fresh.disputed')} value={f.disputed}
+                          accent={f.disputed ? RED : GREEN} delay={320}
+                          sub={t('ops.fresh.disputedSub')} />
+              </div>
+              <div style={{ ...card, padding: '16px 20px', fontSize: 12.5,
+                            color: GRAY, lineHeight: 1.65 }}>
+                <strong style={{ color: NAVY }}>{covered.toLocaleString()}</strong>
+                {' '}{t('ops.fresh.coveredOf')}{' '}
+                <strong style={{ color: NAVY }}>{f.total.toLocaleString()}</strong>
+                {' — '}
+                {t('ops.fresh.note')}
+              </div>
+            </div>
+          )
+        })()}
+      </div>
+    </div>
+  )
+}
+
+function IssueActions({ issue, onResolve, t }) {
+  const [res, setRes] = useState('')
+  return (
+    <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+      <input value={res} placeholder={t('ops.resolutionPlaceholder')}
+             onChange={(e) => setRes(e.target.value)}
+             style={{ ...input, flex: 1, minWidth: 220 }}
+             data-testid="ops-resolution" />
+      <button disabled={!res.trim()} data-testid="ops-corrected"
+              onClick={() => onResolve(issue.id, 'corrected', res.trim())}
+              style={{ borderRadius: 999, fontSize: 12, fontWeight: 700,
+                       border: 'none', cursor: 'pointer', padding: '7px 14px',
+                       background: GREEN, color: '#fff',
+                       opacity: res.trim() ? 1 : 0.5 }}>
+        ✓ {t('ops.markCorrected')}
+      </button>
+      <button disabled={!res.trim()} data-testid="ops-dismiss"
+              onClick={() => onResolve(issue.id, 'dismissed', res.trim())}
+              style={{ borderRadius: 999, fontSize: 12, fontWeight: 700,
+                       border: `1px solid ${GRAY}`, cursor: 'pointer',
+                       padding: '7px 14px', background: '#fff', color: GRAY,
+                       opacity: res.trim() ? 1 : 0.5 }}>
+        {t('ops.dismiss')}
+      </button>
+    </div>
+  )
+}
+
+const PAGE = 50
+
+export default function QualityConsole() {
+  const client = useOpsClient()
+  const { t, lang } = useLocale()
+  const [tab, setTab] = useState('records')
+  const [filters, setFilters] = useState({ nationality: '', destination: '',
+                                           purpose: '', requirement: '',
+                                           confidence: '' })
+  const [reg, setReg] = useState(null)
+  const [data, setData] = useState(null)
+  const [changes, setChanges] = useState(null)
+  const [issues, setIssues] = useState(null)
+  const [freshness, setFreshness] = useState(null)
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [shown, setShown] = useState(PAGE)
+
+  useEffect(() => {
+    let live = true
+    client.snapshotRegistries().then((r) => { if (live) setReg(r) })
+      .catch(() => { if (live) setReg({ countries: [] }) })
+    return () => { live = false }
+  }, [client])
+  const countries = useLocalizedCountries(client, reg, lang)
+
+  const qs = useCallback(() => new URLSearchParams(
+    Object.fromEntries(Object.entries(filters).filter(([, v]) => v))
+  ).toString(), [filters])
+
+  const load = useCallback(async () => {
+    setBusy(true); setError('')
+    try {
+      if (tab === 'records') { setData(await client.get(`/database/records?${qs()}`)); setShown(PAGE) }
+      else if (tab === 'changes') setChanges(await client.get('/database/changes?limit=300'))
+      else if (tab === 'issues') setIssues(await client.get('/database/issues'))
+      else if (tab === 'freshness') setFreshness(await client.get('/database/freshness'))
+    } catch (e) {
+      setError(String(e?.message || e))
+    } finally {
+      setBusy(false)
+    }
+  }, [client, tab, qs])
+  useEffect(() => { load() }, [load])
+
+  async function flag(rec, note) {
+    await client.databaseReportIssue({
+      nationality: rec.travel_document_country,
+      destination: rec.destination_country,
+      field: 'operator_spot_check', note, cache_key: rec.cache_key,
+    })
+  }
+
+  async function release(rec) {
+    // Approving releases THIS cached answer to the main site: the customer
+    // hold lifts for the exact row the operator reviewed.
+    if (!window.confirm(t('ops.releaseConfirm'))) return
+    try {
+      await client.databaseApprove({
+        nationality: rec.travel_document_country,
+        destination: rec.destination_country,
+        cache_key: rec.cache_key,
+        note: 'released from the quality console',
+      })
+      load()
+    } catch (e) { setError(String(e?.message || e)) }
+  }
+
+  async function resolveIssue(id, status, resolution) {
+    try {
+      await client.databaseIssueUpdate(id, status, resolution)
+      load()
+    } catch (e) { setError(String(e?.message || e)) }
+  }
+
+  async function exportXlsx() {
+    // An authenticated fetch, saved as a file: window.open cannot carry the
+    // operator token, so the workbook is fetched and handed to the browser.
+    setBusy(true)
+    try {
+      const res = await fetch(`${client.baseUrl}/database/export.xlsx?${qs()}`, {
+        headers: { authorization: 'Bearer admin-token',
+                   'x-org-id': 'ops', 'x-user-id': 'ops' },
+      })
+      if (!res.ok) throw new Error(`export failed (${res.status})`)
+      const blob = await res.blob()
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `tstation_visa_dataset_${new Date().toISOString().slice(0, 10)}.xlsx`
+      a.click()
+      URL.revokeObjectURL(a.href)
+    } catch (e) {
+      setError(String(e?.message || e))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const s = data?.summary
+  const records = data?.records || []
+  const set = (k) => (v) => setFilters((f) => ({ ...f, [k]: v }))
+  return (
+    <div style={{ background: BG, minHeight: '100vh' }}>
+      <style>{OPS_CSS}</style>
+      <div className="page" style={{ maxWidth: 1160, margin: '0 auto',
+                                     padding: '30px 24px 80px' }}
+           data-testid="quality-console">
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 14,
+                      flexWrap: 'wrap' }}>
+          <h1 style={{ fontSize: 26, fontWeight: 800, color: NAVY, margin: 0,
+                       letterSpacing: -0.4 }}>
+            {t('ops.title')}
+          </h1>
+          {/* Subtitle hidden per owner instruction: the title stands alone. */}
+        </div>
+
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: 6, margin: '20px 0 18px',
+                      background: '#fff', border: `1px solid ${BORDER}`,
+                      borderRadius: 999, padding: 4, width: 'fit-content' }}>
+          {[['records', t('ops.tab.records')], ['issues', t('ops.tab.issues')],
+            ['changes', t('ops.tab.changes')], ['freshness', t('ops.tab.freshness')]]
+            .map(([id, label]) => (
+            <button key={id} onClick={() => setTab(id)}
+                    data-testid={`ops-tab-${id}`}
+                    style={{ border: 'none', cursor: 'pointer', fontSize: 13,
+                             fontWeight: 700, padding: '8px 18px',
+                             borderRadius: 999,
+                             background: tab === id ? NAVY : 'transparent',
+                             color: tab === id ? '#fff' : GRAY }}>
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {error && (
+          <div style={{ ...card, padding: '12px 18px', color: RED,
+                        fontSize: 13, marginBottom: 14 }}>{error}</div>
+        )}
+
+        {tab === 'records' && (
+          <div style={{ display: 'grid', gap: 14 }}>
+            {/* Spot-check filter bar: country autocomplete + enum dropdowns */}
+            <div style={{ ...card, padding: '14px 18px', display: 'flex',
+                          gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+              <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1,
+                             color: GRAY, textTransform: 'uppercase' }}>
+                {t('ops.spotCheck')}
+              </span>
+              <CountryFilter value={filters.nationality} countries={countries}
+                             placeholder={t('ops.passport')}
+                             onCommit={set('nationality')} />
+              <CountryFilter value={filters.destination} countries={countries}
+                             placeholder={t('ops.destination')}
+                             onCommit={set('destination')} />
+              <select value={filters.purpose} onChange={(e) => set('purpose')(e.target.value)}
+                      style={{ ...input, color: filters.purpose ? NAVY : GRAY }}>
+                <option value="">{t('ops.anyPurpose')}</option>
+                {PURPOSES.map((p) => (
+                  <option key={p} value={p}>{t(PURPOSE_KEY[p])}</option>
+                ))}
+              </select>
+              <select value={filters.requirement}
+                      onChange={(e) => set('requirement')(e.target.value)}
+                      style={{ ...input, color: filters.requirement ? NAVY : GRAY }}>
+                <option value="">{t('ops.anyRequirement')}</option>
+                <option value="Visa-free">{t('ops.req.free')}</option>
+                <option value="Visa on Arrival">{t('ops.req.voa')}</option>
+                <option value="Visa Required in Advance">{t('ops.req.advance')}</option>
+                <option value="Conditional">{t('ops.req.conditional')}</option>
+              </select>
+              <select value={filters.confidence}
+                      onChange={(e) => set('confidence')(e.target.value)}
+                      style={{ ...input, color: filters.confidence ? NAVY : GRAY }}>
+                <option value="">{t('ops.anyConfidence')}</option>
+                <option value="High">{t('ops.conf.high')}</option>
+                <option value="Medium">{t('ops.conf.medium')}</option>
+                <option value="Low">{t('ops.conf.low')}</option>
+              </select>
+              <div style={{ flex: 1 }} />
+              <button className="btn btn--sm" onClick={exportXlsx} disabled={busy}
+                      data-testid="ops-export"
+                      style={{ borderRadius: 999, fontWeight: 700,
+                               background: BLUE, color: '#fff',
+                               padding: '9px 18px' }}>
+                ⬇ {t('ops.export')}
+              </button>
+            </div>
+
+            {s && (
+              <div style={{ ...card, display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(185px, 1fr))' }}>
+                <StatCell label={t('ops.stat.records')} value={s.total}
+                          sub={t('ops.stat.recordsSub')} accent={NAVY} delay={0} />
+                <StatCell label={t('ops.stat.complete')}
+                          value={s.completeness_rate != null
+                            ? `${Math.round(s.completeness_rate * 100)}%` : '·'}
+                          pct={s.completeness_rate != null ? s.completeness_rate * 100 : null}
+                          target={99} delay={80}
+                          sub={t('ops.stat.completeSub') + ' · ' + t('ops.stat.target') + ' 99%'} />
+                <StatCell label={t('ops.stat.sources')}
+                          value={s.source_coverage != null
+                            ? `${Math.round(s.source_coverage * 100)}%` : '·'}
+                          pct={s.source_coverage != null ? s.source_coverage * 100 : null}
+                          target={100} delay={160}
+                          sub={t('ops.stat.sourcesSub') + ' · ' + t('ops.stat.target') + ' 100%'} />
+                <StatCell label={t('ops.stat.substantiated')} accent={BLUE}
+                          value={s.substantiated ?? '·'}
+                          pct={s.total ? (s.substantiated / s.total) * 100 : null}
+                          delay={240}
+                          sub={t('ops.stat.substantiatedSub')} />
+                <ConfidenceCell high={s.high} medium={s.medium} low={s.low}
+                                label={t('ops.stat.confidence')} t={t} delay={320}
+                                sub={t('ops.stat.confidenceSub')} />
+              </div>
+            )}
+            {busy && <div style={{ color: GRAY, fontSize: 13 }}>{t('ops.loading')}</div>}
+            <RecordsTable records={records.slice(0, shown)} onFlag={flag} onRelease={release} t={t} />
+            {records.length > shown && (
+              <button className="btn btn--ghost"
+                      style={{ borderRadius: 999, justifySelf: 'center' }}
+                      onClick={() => setShown((n) => n + PAGE)}>
+                {t('ops.showMore')} ({records.length - shown})
+              </button>
+            )}
           </div>
         )}
 
-        {tab === 'changes' && (
-          <div style={{ display: 'grid', gap: 10 }}>
-            {(changes?.changes || []).length === 0 && !busy && (
-              <div style={{ ...card, padding: 24, color: GRAY, fontSize: 13.5,
-                            textAlign: 'center' }}>{t('ops.noChanges')}</div>
-            )}
-            {(changes?.changes || []).map((c) => (
-              <div key={c.id} style={{ ...card, padding: '14px 18px' }}>
-                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                  <Chip color={c.action === 'add' ? GREEN
-                    : c.action === 'delete' ? RED : AMBER}>{c.action}</Chip>
-                  <strong style={{ color: NAVY, fontSize: 13.5 }}>
-                    {(c.route || {}).passport_nationality} → {(c.route || {}).destination_country}
-                  </strong>
-                  <span style={{ color: GRAY, fontSize: 12 }}>{c.origin}</span>
-                  <span style={{ marginLeft: 'auto', color: GRAY, fontSize: 11.5 }}>
-                    {(c.at || '').slice(0, 16).replace('T', ' ')}
-                  </span>
-                </div>
-                {Object.entries(c.changes || {}).slice(0, 6).map(([f, d]) => (
-                  <div key={f} style={{ fontSize: 12.5, marginTop: 6,
-                                        display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    <span style={{ color: GRAY,
-                                   fontFamily: 'ui-monospace, monospace',
-                                   fontSize: 11 }}>{f}</span>
-                    <span style={{ color: RED, textDecoration: 'line-through' }}>
-                      {JSON.stringify(d.from)?.slice(0, 60)}
-                    </span>
-                    <span style={{ color: GRAY }}>→</span>
-                    <span style={{ color: GREEN, fontWeight: 600 }}>
-                      {JSON.stringify(d.to)?.slice(0, 80)}
-                    </span>
-                  </div>
-                ))}
-                {c.note && (
-                  <div style={{ fontSize: 12, color: GRAY, marginTop: 6 }}>{c.note}</div>
+        {tab === 'issues' && (() => {
+          const all = issues?.issues || []
+          const open = all.filter((i) => i.status === 'open' || i.status === 'acknowledged')
+          const closed = all.filter((i) => !open.includes(i)).reverse()
+          const Card = ({ it, active }) => (
+            <div className="ops-lift" style={{ ...card, padding: '14px 18px',
+                          borderLeft: `3px solid ${active ? RED : '#d6dee9'}` }}>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center',
+                            flexWrap: 'wrap' }}>
+                <strong style={{ color: NAVY, fontSize: 13.5 }}>
+                  {(it.route || {}).nationality || (it.route || {}).passport_nationality}
+                  {' → '}
+                  {(it.route || {}).destination || (it.route || {}).destination_country}
+                </strong>
+                <span style={{ color: GRAY, fontSize: 11,
+                               fontFamily: 'ui-monospace, monospace',
+                               background: '#f1f4f9', borderRadius: 6,
+                               padding: '2px 8px' }}>{it.field}</span>
+                {!active && (
+                  <Chip color={it.status === 'corrected' ? GREEN : GRAY} filled={false}>
+                    {it.status}
+                  </Chip>
                 )}
+                <span style={{ marginLeft: 'auto', color: GRAY, fontSize: 11.5 }}>
+                  {(it.created_at || '').slice(0, 16).replace('T', ' ')}
+                </span>
               </div>
-            ))}
-          </div>
-        )}
+              <div style={{ fontSize: 13, color: NAVY, marginTop: 8 }}>{it.note}</div>
+              {it.resolution && (
+                <div style={{ fontSize: 12.5, color: GREEN, marginTop: 6 }}>
+                  ✓ {it.resolution}
+                </div>
+              )}
+              {active && <IssueActions issue={it} onResolve={resolveIssue} t={t} />}
+            </div>
+          )
+          return (
+            <div style={{ display: 'grid', gap: 10 }} className="ops-fade">
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                <span style={{ fontSize: 13, fontWeight: 800, color: NAVY }}>
+                  {t('ops.issues.open')}
+                </span>
+                <Chip color={open.length ? RED : GREEN}>{open.length}</Chip>
+              </div>
+              {open.length === 0 && !busy && (
+                <div style={{ ...card, padding: 22, color: GRAY, fontSize: 13.5,
+                              textAlign: 'center' }}>{t('ops.noReports')}</div>
+              )}
+              {open.map((it) => <Card key={it.id} it={it} active />)}
+              {closed.length > 0 && (
+                <details style={{ marginTop: 6 }}>
+                  <summary style={{ fontSize: 12.5, color: GRAY, cursor: 'pointer',
+                                    fontWeight: 700 }}>
+                    {t('ops.issues.resolved')} ({closed.length})
+                  </summary>
+                  <div style={{ display: 'grid', gap: 10, marginTop: 10 }}>
+                    {closed.map((it) => <Card key={it.id} it={it} active={false} />)}
+                  </div>
+                </details>
+              )}
+            </div>
+          )
+        })()}
+
+        {tab === 'changes' && (() => {
+          const list = changes?.changes || []
+          const AC = { add: GREEN, modify: AMBER, delete: RED }
+          return (
+            <div className="ops-fade" style={{ ...card, padding: '6px 0' }}>
+              {list.length === 0 && !busy && (
+                <div style={{ padding: 22, color: GRAY, fontSize: 13.5,
+                              textAlign: 'center' }}>{t('ops.noChanges')}</div>
+              )}
+              {list.map((c, i) => (
+                <div key={c.id} className="ops-row"
+                     style={{ display: 'grid',
+                              gridTemplateColumns: '26px 1fr',
+                              gap: 12, padding: '12px 20px',
+                              background: i % 2 ? '#fbfcfe' : '#fff' }}>
+                  <div style={{ position: 'relative' }}>
+                    <div style={{ position: 'absolute', left: 11, top: -12,
+                                  bottom: -12, width: 2,
+                                  background: '#edf1f7' }} />
+                    <span style={{ position: 'relative', display: 'inline-block',
+                                   width: 10, height: 10, borderRadius: '50%',
+                                   marginTop: 4, marginLeft: 7,
+                                   background: AC[c.action] || GRAY,
+                                   border: '2px solid #fff',
+                                   boxShadow: '0 0 0 1px #dfe6f0' }} />
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ display: 'flex', gap: 10,
+                                  alignItems: 'center', flexWrap: 'wrap' }}>
+                      <strong style={{ color: NAVY, fontSize: 13 }}>
+                        {(c.route || {}).passport_nationality} → {(c.route || {}).destination_country}
+                      </strong>
+                      <Chip color={AC[c.action] || GRAY} filled={false}>{c.action}</Chip>
+                      <span style={{ color: GRAY, fontSize: 11.5 }}>{c.origin}</span>
+                      <span style={{ marginLeft: 'auto', color: GRAY,
+                                     fontSize: 11.5 }}>
+                        {(c.at || '').slice(0, 16).replace('T', ' ')}
+                      </span>
+                    </div>
+                    {Object.entries(c.changes || {}).slice(0, 5).map(([f, d]) => (
+                      <div key={f} style={{ fontSize: 12, marginTop: 5,
+                                            display: 'flex', gap: 8,
+                                            alignItems: 'baseline',
+                                            flexWrap: 'wrap' }}>
+                        <span style={{ color: GRAY, width: 150, flexShrink: 0,
+                                       fontFamily: 'ui-monospace, monospace',
+                                       fontSize: 11 }}>{f}</span>
+                        <span style={{ color: RED, opacity: 0.75,
+                                       textDecoration: 'line-through' }}>
+                          {JSON.stringify(d.from)?.slice(0, 48)}
+                        </span>
+                        <span style={{ color: '#94a3b8' }}>→</span>
+                        <span style={{ color: GREEN, fontWeight: 600 }}>
+                          {JSON.stringify(d.to)?.slice(0, 70)}
+                        </span>
+                      </div>
+                    ))}
+                    {c.note && (
+                      <div style={{ fontSize: 11.5, color: GRAY, marginTop: 5 }}>
+                        {c.note}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        })()}
 
         {tab === 'freshness' && freshness && (
           <div style={{ display: 'grid', gap: 14 }}>
