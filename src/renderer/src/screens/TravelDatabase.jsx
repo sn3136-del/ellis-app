@@ -297,6 +297,9 @@ function DateField({ value, onChange, lang, placeholder }) {
 function CountryCombo({ value, options, onChange, placeholder, noMatch, testid }) {
   const [q, setQ] = useState('')
   const [open, setOpen] = useState(false)
+  const [hi, setHi] = useState(0)
+  const typed = useRef(false)
+  const blurTimer = useRef(null)
   const current = options.find((o) => o.value === value)
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase()
@@ -306,21 +309,61 @@ function CountryCombo({ value, options, onChange, placeholder, noMatch, testid }
     const starts = [], contains = []
     for (const o of options) {
       if (!o.search.includes(s)) continue
-      const name = o.label.replace(/^[^A-Za-z]*/, '').toLowerCase()
+      const name = o.label.replace(/^[^A-Za-z\u4e00-\u9fff]*/, '').toLowerCase()
       ;(name.startsWith(s) ? starts : contains).push(o)
     }
     starts.sort((a, b) => a.label.length - b.label.length)
     return [...starts, ...contains].slice(0, 60)
   }, [q, options])
+  const commit = (opt) => {
+    onChange(opt.value)
+    setOpen(false)
+    setQ('')
+    typed.current = false
+  }
+  // Blur RESOLVES instead of discarding: an exact name or code in either
+  // script commits; emptied text clears the committed country; anything
+  // ambiguous reverts to what was already chosen. A refocus cancels the
+  // pending blur so the field never goes dead after a pick.
+  const resolveOnBlur = () => {
+    const clean = q.trim().toLowerCase()
+    if (!clean) {
+      // Only a DELIBERATE deletion clears the choice: focusing empties the
+      // box too, and a stray click-away must not wipe the selection.
+      if (typed.current && current) onChange('')
+      setOpen(false); setQ(''); typed.current = false
+      return
+    }
+    const exact = options.find((o) =>
+      o.value.toLowerCase() === clean ||
+      o.label.replace(/^[^\p{L}\p{N}]+/u, '').trim().toLowerCase() === clean)
+    const pick = exact || (filtered.length === 1 ? filtered[0] : null)
+    if (pick) commit(pick)
+    else { setOpen(false); setQ('') }
+  }
   return (
     <div style={{ position: 'relative' }}>
       <input className="input" data-testid={testid}
         style={{ fontSize: 14, padding: '11px 14px', borderRadius: 12, width: '100%' }}
         value={open ? q : (current ? current.label : '')}
         placeholder={current ? current.label : placeholder}
-        onFocus={() => { setOpen(true); setQ('') }}
-        onChange={(e) => setQ(e.target.value)}
-        onBlur={() => setTimeout(() => setOpen(false), 150)} />
+        onFocus={() => {
+          if (blurTimer.current) { clearTimeout(blurTimer.current); blurTimer.current = null }
+          setOpen(true); setQ(''); setHi(0)
+        }}
+        onChange={(e) => { setQ(e.target.value); setHi(0); typed.current = true
+                           if (!open) setOpen(true) }}
+        onKeyDown={(e) => {
+          if (!open) return
+          if (e.key === 'ArrowDown') { e.preventDefault(); setHi((h) => Math.min(h + 1, filtered.length - 1)) }
+          else if (e.key === 'ArrowUp') { e.preventDefault(); setHi((h) => Math.max(h - 1, 0)) }
+          else if (e.key === 'Enter') {
+            e.preventDefault()
+            if (filtered.length > 0 && q.trim()) commit(filtered[Math.min(hi, filtered.length - 1)])
+            else resolveOnBlur()
+          } else if (e.key === 'Escape') { setOpen(false); setQ('') }
+        }}
+        onBlur={() => { blurTimer.current = setTimeout(resolveOnBlur, 150) }} />
       {open && (
         <div className="card" style={{ position: 'absolute', zIndex: 40,
           top: '100%', left: 0, right: 0, maxHeight: 236, overflowY: 'auto',
@@ -328,11 +371,13 @@ function CountryCombo({ value, options, onChange, placeholder, noMatch, testid }
           boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
           {filtered.length === 0
             ? <div style={{ padding: 10, fontSize: 13, color: GRAY }}>{noMatch}</div>
-            : filtered.map((o) => (
+            : filtered.map((o, i) => (
                 <div key={o.value}
-                  onMouseDown={(e) => { e.preventDefault(); onChange(o.value); setOpen(false) }}
+                  onMouseDown={(e) => { e.preventDefault(); commit(o) }}
+                  onMouseEnter={() => setHi(i)}
                   style={{ padding: '8px 12px', cursor: 'pointer', fontSize: 13.5,
-                           background: o.value === value ? 'var(--bg-soft)' : undefined }}>
+                           background: i === hi ? 'var(--bg-soft)'
+                             : o.value === value ? 'var(--bg-soft)' : undefined }}>
                   {o.label}
                 </div>
               ))}
