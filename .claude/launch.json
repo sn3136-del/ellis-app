@@ -9,6 +9,18 @@
         "ellis:web"
       ],
       "port": 5199
+    },
+    {
+      "name": "ellis-web-public",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "ellis:web"
+      ],
+      "env": {
+        "ELLIS_PUBLIC": "1"
+      },
+      "port": 5199
     }
   ]
 }

@@ -400,6 +400,12 @@ export default function TravelDatabase({ onBack }) {
     search: `${c.name} ${c.alpha_2 || ''} ${c.alpha_3}`.toLowerCase(),
   })), [reg])
   const docTypes = reg?.travel_document_types || []
+  const docLabel = (d) => {
+    const code = d.code || d
+    const k = 'db.doc.' + code
+    const v = t(k)
+    return v === k ? (d.name || d) : v
+  }
 
   // An answer the engine itself rated low confidence is HELD until a person
   // confirms it. Holding means the reader does not see the claims at all —
@@ -705,7 +711,7 @@ export default function TravelDatabase({ onBack }) {
                       style={{ fontSize: 14, padding: '11px 14px', borderRadius: 12 }}>
                 {(docTypes.length ? docTypes : [{ code: 'ordinary_passport', name: 'Ordinary passport' }])
                   .map((d) => (
-                    <option key={d.code || d} value={d.code || d}>{d.name || d}</option>
+                    <option key={d.code || d} value={d.code || d}>{docLabel(d)}</option>
                   ))}
               </select>
             </label>
@@ -873,7 +879,7 @@ export default function TravelDatabase({ onBack }) {
               {(docTypes.length ? docTypes
                 : [{ code: 'ordinary_passport', name: 'Ordinary passport' }])
                 .map((d) => (
-                  <option key={d.code || d} value={d.code || d}>{d.name || d}</option>
+                  <option key={d.code || d} value={d.code || d}>{docLabel(d)}</option>
                 ))}
             </select>
             <span style={{ fontSize: 12, color: GRAY, fontWeight: 700,
@@ -1023,7 +1029,7 @@ export default function TravelDatabase({ onBack }) {
                       <div style={{ fontWeight: 700, color: NAVY }}>
                         {T(asText(vp.type))}
                         {vp.entry ? <span style={{ color: GRAY, fontWeight: 400 }}>
-                          {' · ' + asText(vp.entry)}</span> : null}
+                          {' · ' + T(asText(vp.entry))}</span> : null}
                       </div>
                       <div style={{ color: NAVY }}>{T(asText(vp.validity)) || '—'}</div>
                       <div style={{ color: NAVY }}>
