@@ -149,7 +149,9 @@ def test_excel_export_has_two_sheets_and_the_data(client):
     assert header == list(tstation.FIELD_ORDER)
     assert data.max_row >= 3                    # header + two products
     fields = wb["Field descriptions"]
-    assert fields.max_row == 1 + len(tstation.FIELD_ORDER)
+    # snapshot row (5.2) + header row + 25 field rows
+    assert fields.max_row == 2 + len(tstation.FIELD_ORDER)
+    assert fields["A1"].value == "Snapshot (UTC)"
     assert client.get("/database/export.xlsx", headers=READER).status_code == 403
 
 

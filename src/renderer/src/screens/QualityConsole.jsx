@@ -827,7 +827,8 @@ export default function QualityConsole() {
   const [tab, setTab] = useState('records')
   const [filters, setFilters] = useState({ nationality: '', destination: '',
                                            purpose: '', requirement: '',
-                                           confidence: '' })
+                                           confidence: '', visaType: '',
+                                           fieldMissing: '' })
   const [reg, setReg] = useState(null)
   const [data, setData] = useState(null)
   const [changes, setChanges] = useState(null)
@@ -1031,6 +1032,10 @@ export default function QualityConsole() {
       if (filters.purpose && r.travel_purpose !== filters.purpose) return false
       if (filters.requirement && r.visa_requirement !== filters.requirement) return false
       if (filters.confidence && r.confidence_level !== filters.confidence) return false
+      if (filters.visaType && !String(r.visa_type_name || '')
+            .toLowerCase().includes(filters.visaType.trim().toLowerCase())) return false
+      if (filters.fieldMissing &&
+          (r.field_status || {})[filters.fieldMissing] !== 'missing') return false
       return true
     })
   }, [data, filters, countries])
@@ -1133,6 +1138,23 @@ export default function QualityConsole() {
                 <option value="High">{t('ops.conf.high')}</option>
                 <option value="Medium">{t('ops.conf.medium')}</option>
                 <option value="Low">{t('ops.conf.low')}</option>
+              </select>
+              {/* The acceptance standard's extra slice dimensions (4.1.2):
+                  by visa type, and by a specific field's gaps. */}
+              <input value={filters.visaType} style={{ ...input, width: 150 }}
+                     placeholder={t('ops.typeFilter')}
+                     data-testid="ops-filter-visatype"
+                     onChange={(e) => setFilters((f) =>
+                       ({ ...f, visaType: e.target.value }))} />
+              <select className="select" value={filters.fieldMissing}
+                      data-testid="ops-filter-fieldmissing"
+                      style={{ ...input, width: 170 }}
+                      onChange={(e) => setFilters((f) =>
+                        ({ ...f, fieldMissing: e.target.value }))}>
+                <option value="">{t('ops.anyGap')}</option>
+                {(data?.required_fields || []).map((f) => (
+                  <option key={f} value={f}>{fx(t, f)}</option>
+                ))}
               </select>
               <div style={{ flex: 1 }} />
               <button className="btn btn--sm" onClick={exportXlsx} disabled={busy}

@@ -931,6 +931,7 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
 def travel_database_records(nationality: str = "", destination: str = "",
                             purpose: str = "", document: str = "",
                             requirement: str = "", confidence: str = "",
+                            visa_type: str = "", field_missing: str = "",
                             db=Depends(get_session),
                             p: Principal = Depends(get_principal)):
     """The quality-control backend's record browser: T-Station 25-field
@@ -941,6 +942,16 @@ def travel_database_records(nationality: str = "", destination: str = "",
     rows = _tstation_rows(db, nationality=nationality, destination=destination,
                           purpose=purpose, document=document,
                           requirement=requirement, confidence=confidence)
+    # The acceptance standard's multi-dimensional spot check (4.1.2) slices
+    # by visa TYPE and by FIELD as well as by route dimensions.
+    if visa_type:
+        vt = visa_type.strip().lower()
+        rows = [r for r in rows if vt in str(r.get("visa_type_name") or "").lower()]
+    if field_missing:
+        f = field_missing.strip()
+        if f in tstation.FIELD_ORDER:
+            rows = [r for r in rows
+                    if tstation.field_status(r).get(f) == "missing"]
     complete = sum(1 for r in rows if tstation.completeness(r) == 1.0)
     return {"fields": list(tstation.FIELD_ORDER),
             "required_fields": sorted(tstation.REQUIRED_FIELDS),
@@ -1016,6 +1027,10 @@ def travel_database_export(nationality: str = "", destination: str = "",
         ws1.append([r.get(f) for f in tstation.FIELD_ORDER])
     ws1.freeze_panes = "A2"
     ws0 = wb.create_sheet("Field descriptions")
+    # 5.2: offline data marks its snapshot moment explicitly.
+    ws0.append(["Snapshot (UTC)",
+                datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%SZ"),
+                "", "Exported live from the online database"])
     ws0.append(["No.", "Field", "Required", "Description"])
     for c in ws0[1]:
         c.font = Font(bold=True)
