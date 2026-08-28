@@ -1464,7 +1464,8 @@ Null anything not stated. NEVER invent a country. No prose, JSON only.""")
 _ALIASES = {
     "USA": ("usa", "us", "u.s.", "america", "united states", "the states", "美国", "美國", "american"),
     "GBR": ("uk", "u.k.", "britain", "great britain", "england", "united kingdom", "英国", "英國", "british", "english"),
-    "CHN": ("china", "mainland china", "prc", "中国", "中國", "中国大陆", "chinese"),
+    "CHN": ("china", "mainland china", "prc", "中国", "中國", "中国大陆",
+            "中华人民共和国", "中華人民共和國", "chinese"),
     "HKG": ("hong kong", "hongkong", "hk", "香港", "hong konger"),
     "TWN": ("taiwan", "台湾", "台灣", "taiwanese"),
     "JPN": ("japan", "日本", "japanese"),
@@ -1736,11 +1737,19 @@ def _deterministic_route(question: str) -> dict | None:
     if nat is None:
         for pos, iso, _d in mentions:
             before = low[max(0, pos - 12):pos]
-            after = q[pos:pos + 10]
+            # X护照 marks a nationality only when 护照 follows IMMEDIATELY:
+            # a comma between means the passport belongs to the NEXT phrase
+            # ("去希腊，中国护照" must not read 希腊 as the passport).
+            seg = q[pos:pos + 8]
+            k = seg.find("护照")
+            if k < 0:
+                k = seg.find("護照")
+            passport_after = k > 0 and not any(
+                ch in seg[:k] for ch in "，,。.、;； ")
             if "from " in before or before.rstrip().endswith("from") \
                     or "issued by" in before \
                     or "持" in q[max(0, pos - 3):pos] \
-                    or "护照" in after or "護照" in after:
+                    or passport_after:
                 nat = iso
                 break
     if nat is None and doc_named and doc_named != "ordinary_passport":
@@ -1941,7 +1950,10 @@ def parse_question(question: str, *, timeout: float = 20.0) -> dict:
         if direct is not None:
             return direct          # the matcher's guess beats a refusal
         return {"understood": False, "nationality": nat, "destination": dest}
-    doc = str(raw.get("travel_document_type") or "ordinary_passport").strip()
+    # The words outrank the model on the document: a named 旅行证 or refugee
+    # travel document must never collapse to ordinary_passport.
+    doc = _doc_from_text(q, q.lower()) \
+        or str(raw.get("travel_document_type") or "ordinary_passport").strip()
     transit = [str(c).strip().upper() for c in
                (raw.get("transit_countries") or [])
                if isinstance(c, str) and len(str(c).strip()) == 3][:5]
