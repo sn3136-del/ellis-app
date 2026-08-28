@@ -223,10 +223,11 @@ function EllisIslandScene() {
     [22, [[0, 92, 13, 92], [0, 92, 40, 12], [0, 55, 32, 11], [0, 12, 40, 12]]],
     [84, [[0, 76, 13, 76], [0, 12, 36, 12]]],
     [138, [[0, 84, 13, 84], [0, 12, 36, 12]]],
-    // the I is the Empire State Building: broad base, two setbacks,
-    // crown tiers, then the mast and needle drawn separately
-    [192, [[-2, 26, 19, 26], [0, 56, 15, 30], [2, 82, 11, 26],
-           [4, 94, 7, 12], [5.5, 104, 4, 10]]],
+    // the I is the Empire State Building, true to its elevation: a wide
+    // five-story base, a shoulder setback, the long ribbed shaft, the
+    // narrowing upper tower, the art-deco crown, the rounded mooring mast
+    [192, [[-3, 22, 21, 22], [-1.5, 44, 18, 22], [0, 92, 15, 48],
+           [2, 102, 11, 10], [3.5, 108, 8, 6], [5.5, 116, 4, 8]]],
     [228, [[0, 61, 38, 11], [0, 50, 12, 14], [0, 36, 38, 11],
            [26, 25, 12, 14], [0, 11, 38, 11]]],
   ]
@@ -255,7 +256,8 @@ function EllisIslandScene() {
       }
     }
   }
-  LETTERS.forEach(([lx, rects]) => {
+  LETTERS.forEach(([lx, rects], li) => {
+    if (li === 3) return   // the Empire State wears ribbon stripes instead
     rects.forEach(([x, up, w, h]) => addGrid(lx + x, BASE - up, w, h))
   })
   // Long layered swells: one path each, spanning the whole harbor.
@@ -298,10 +300,30 @@ function EllisIslandScene() {
             <rect key={i} x={cx - 2.2} y={BASE - 7.5} width="4.4" height="7.5"
                   rx="1.2" fill="#fff" opacity="0.95" />
           ))}
-          {/* the Empire State mast and needle */}
-          <line x1="199.5" y1={BASE - 111} x2="199.5" y2={BASE - 132}
-                stroke={INK} strokeWidth="2" strokeLinecap="round" />
-          <circle cx="199.5" cy={BASE - 134} r="1.6" fill={INK} />
+          {/* the Empire State facade: continuous vertical window ribbons
+              between limestone piers, the building's signature */}
+          {[3.4, 6.9, 10.4].map((cx, i) => (
+            <rect key={'shaft' + i} x={192 + cx} y={BASE - 88} width="1.7"
+                  height="40" fill="#fff" opacity="0.9" />
+          ))}
+          {[1.2, 4.7, 8.2, 11.7, 15.2].map((cx, i) => (
+            <rect key={'shoulder' + i} x={190.5 + cx} y={BASE - 41} width="1.7"
+                  height="16" fill="#fff" opacity="0.9" />
+          ))}
+          {[1.4, 4.9, 8.4, 11.9, 15.4].map((cx, i) => (
+            <rect key={'esbbase' + i} x={189 + cx} y={BASE - 18} width="1.7"
+                  height="12" fill="#fff" opacity="0.9" />
+          ))}
+          {[4.6, 7.9].map((cx, i) => (
+            <rect key={'upper' + i} x={192 + cx} y={BASE - 100.5} width="1.6"
+                  height="7" fill="#fff" opacity="0.9" />
+          ))}
+          {/* the rounded mast cap, then the needle */}
+          <rect x="197.5" y={BASE - 118} width="4" height="4" rx="2"
+                fill={INK} />
+          <line x1="199.5" y1={BASE - 118} x2="199.5" y2={BASE - 134}
+                stroke={INK} strokeWidth="1.8" strokeLinecap="round" />
+          <circle cx="199.5" cy={BASE - 136} r="1.5" fill={INK} />
           {/* the facade grids */}
           {winRects.map(([x, y, w, h, kind], i) => (
             <g key={i}>
