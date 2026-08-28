@@ -710,6 +710,22 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
                 continue
             rec["_cache_key"] = r.cache_key
             rec["_status"] = r.status
+            # How solidly the source BACKS what this record shows:
+            #   human-quote        a person verified these fields against the
+            #                      named page and quoted it
+            #   grounded-consistent the pipeline fetched the official page and
+            #                      found the stored answer consistent with it
+            #   reference          an official page is linked but has not yet
+            #                      been machine-compared to this answer
+            gc = ((r.verification or {}).get("grounded_check") or {})
+            if prov:
+                rec["_source_check"] = "human-quote"
+            elif gc.get("outcome") == "checked" and gc.get("consistent"):
+                rec["_source_check"] = "grounded-consistent"
+            elif rec.get("source_url"):
+                rec["_source_check"] = "reference"
+            else:
+                rec["_source_check"] = "unchecked"
             out.append(rec)
     return out
 
@@ -733,6 +749,7 @@ def travel_database_records(nationality: str = "", destination: str = "",
             "required_fields": sorted(tstation.REQUIRED_FIELDS),
             "records": [{**{k: r.get(k) for k in tstation.FIELD_ORDER},
                          "cache_key": r["_cache_key"],
+                         "source_check": r.get("_source_check", "unchecked"),
                          "field_status": tstation.field_status(r),
                          "completeness": round(tstation.completeness(r), 4)}
                         for r in rows],
@@ -741,7 +758,8 @@ def travel_database_records(nationality: str = "", destination: str = "",
                         "high": sum(1 for r in rows if r.get("confidence_level") == "High"),
                         "medium": sum(1 for r in rows if r.get("confidence_level") == "Medium"),
                         "low": sum(1 for r in rows if r.get("confidence_level") == "Low"),
-                        "source_coverage": round(sum(1 for r in rows if r.get("source_url")) / len(rows), 4) if rows else None}}
+                        "source_coverage": round(sum(1 for r in rows if r.get("source_url")) / len(rows), 4) if rows else None,
+                        "substantiated": sum(1 for r in rows if r.get("_source_check") in ("human-quote", "grounded-consistent"))}}
 
 
 @app.get("/database/changes")

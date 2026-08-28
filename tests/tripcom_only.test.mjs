@@ -133,11 +133,12 @@ test('App.jsx imports no deleted screens and has no role selection', () => {
   // Boots INTO the Schengen lane (the Trip.com evaluation's front door —
   // Germany's account-free RK-Termin calendar, live). The deleted
   // appointments SIMULATION must stay gone.
-  assert.match(app, /includes\('schengen'\) \? 'schengen'/)
-  // The Trip.com deliverable boots into the DATABASE; the processing
-  // console needs an explicit #applicant hash.
-  assert.match(app, /: 'database'\)/)
-  assert.match(app, /includes\('applicant'\) \? 'visa'/)
+  // Schengen lane hidden with the rest of the processing surfaces.
+  // The Trip.com deliverable is the DATABASE only: every hash boots into it
+  // except #ops (the quality-control backend). No processing surfaces.
+  assert.match(app, /includes\('ops'\) \? 'quality' : 'database'/)
+  assert.ok(!app.includes("includes('applicant')"),
+    'the hidden visa platform must not be hash-reachable')
   assert.ok(!app.includes('AppointmentsDemo'), 'the appointments demo screen must stay deleted')
 })
 

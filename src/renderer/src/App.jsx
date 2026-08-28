@@ -67,25 +67,6 @@ function DemoDisabled() {
 // flag still honored. Persona hides surfaces only — every per-party and
 // admin authorization is enforced by the backend.
 
-// Operator-only nav strip: never rendered for applicants.
-function AdminNav({ view, onNav, demoMode }) {
-  const items = [
-    ['visa', 'Visa Platform'], ['employer', 'Employer console'],
-    ['admin', 'Adapter Admin'],
-    ['setup', 'Setup'], ['settings', 'Settings'],
-  ]
-  if (demoMode) items.push(['demo', 'Demo portal'])
-  return (
-    <nav style={{ display: 'flex', gap: 6 }} aria-label="Operator">
-      {items.map(([id, label]) => (
-        <button key={id} type="button" onClick={() => onNav(id)}
-                className={'btn btn--sm' + (view === id ? '' : ' btn--ghost')}>
-          {label}
-        </button>
-      ))}
-    </nav>
-  )
-}
 
 function AppInner() {
   const [persona] = useState(detectPersona)
@@ -101,13 +82,13 @@ function AppInner() {
   // landing surface. The visa-processing console is a separate product,
   // reachable only by explicit hash — their review read any visible
   // processing surface as scope drift.
+  // OWNER DECISION (2026-08-28): only the Database is available. The visa
+  // platform, employer console and Schengen lane are hidden entirely — the
+  // Trip.com deliverable is the information base, and any visible processing
+  // surface reads as scope drift. #ops opens the quality-control backend.
   const [view, setView] = useState(() =>
-    (window.location.hash || '').includes('schengen') ? 'schengen'
-      : (window.location.hash || '').includes('ops') ? 'quality'
-        : (window.location.hash || '').includes('applicant') ? 'visa'
-          : (window.location.hash || '').includes('employer') ? 'visa'
-            : 'database')
-  useEffect(() => { if (persona === 'employer') setView('employer') }, [persona])
+    (window.location.hash || '').includes('ops') ? 'quality' : 'database')
+  // Employer persona routing removed with the hidden consoles.
   // The floating Ask Ellis assistant follows whichever H1B case a surface has
   // registered (H1bPipeline registers the parent case); hidden when no case.
   const [askCaseId, setAskCaseId] = useState(getActiveH1bCase)
@@ -140,7 +121,6 @@ function AppInner() {
         <header className="triptop" data-testid="triptop">
           <img className="triptop__logo" src={tripcomLogo} alt="Trip.com" />
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            {adminMode && <AdminNav view={view} onNav={setView} demoMode={demoMode} />}
             <LanguagePicker />
           </div>
         </header>

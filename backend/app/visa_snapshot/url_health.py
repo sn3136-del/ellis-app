@@ -37,7 +37,7 @@ def set_checker(fn) -> None:
     _CHECKER = fn
 
 
-def url_is_dead(url: str) -> bool:
+def url_is_dead(url: str, _retry: bool = True) -> bool:
     if _CHECKER is not None:
         return bool(_CHECKER(url))
     try:
@@ -57,9 +57,19 @@ def url_is_dead(url: str) -> bool:
         # boca.gov.tw) or reset automated clients (indianvisaonline.gov.in)
         # and still open fine in a real browser — those links are kept.
         msg = str(e).lower()
-        return any(t in msg for t in ("nodename nor servname",
-                                      "name or service not known",
-                                      "getaddrinfo", "no address associated"))
+        if any(t in msg for t in ("nodename nor servname",
+                                  "name or service not known",
+                                  "getaddrinfo", "no address associated")):
+            # A DNS failure can be the RESOLVER's moment, not the name's
+            # death: a parallel sweep once mis-flagged 18 living government
+            # sites this way. Death is only declared when a second, spaced
+            # lookup also fails.
+            if _retry:
+                import time
+                time.sleep(2)
+                return url_is_dead(url, _retry=False)
+            return True
+        return False
 
 
 def collect_urls(guidance: dict) -> list[str]:
