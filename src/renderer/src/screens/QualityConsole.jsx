@@ -547,6 +547,71 @@ function IssueActions({ issue, onResolve, t }) {
   )
 }
 
+function RingGauge({ pct, target, size = 74, hitColor = GREEN }) {
+  const [go, setGo] = useState(false)
+  useEffect(() => { const id = setTimeout(() => setGo(true), 140)
+    return () => clearTimeout(id) }, [])
+  const R = (size - 12) / 2, C = 2 * Math.PI * R
+  const hit = target != null && pct >= target
+  const val = Math.max(0, Math.min(100, pct || 0))
+  const tickAngle = target != null ? (target / 100) * 360 - 90 : null
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden>
+      <circle cx={size/2} cy={size/2} r={R} fill="none" stroke="#e7eefb"
+              strokeWidth="9" />
+      <circle cx={size/2} cy={size/2} r={R} fill="none"
+              stroke={hit ? hitColor : '#2f6ef2'} strokeWidth="9"
+              strokeLinecap="round"
+              strokeDasharray={`${go ? (val / 100) * C : 0} ${C}`}
+              transform={`rotate(-90 ${size/2} ${size/2})`}
+              style={{ transition: 'stroke-dasharray 1s cubic-bezier(.25,.8,.25,1)' }} />
+      {tickAngle != null && (
+        <line x1={size/2 + (R - 7) * Math.cos(tickAngle * Math.PI / 180)}
+              y1={size/2 + (R - 7) * Math.sin(tickAngle * Math.PI / 180)}
+              x2={size/2 + (R + 7) * Math.cos(tickAngle * Math.PI / 180)}
+              y2={size/2 + (R + 7) * Math.sin(tickAngle * Math.PI / 180)}
+              stroke={NAVY} strokeWidth="2" opacity="0.5" />
+      )}
+      <text x={size/2} y={size/2 + 5} textAnchor="middle"
+            style={{ fontSize: 16, fontWeight: 700,
+                     fill: hit ? hitColor : NAVY }}>
+        {Math.round(val)}%
+      </text>
+    </svg>
+  )
+}
+
+function MicroStack({ segs, height = 8 }) {
+  const [go, setGo] = useState(false)
+  useEffect(() => { const id = setTimeout(() => setGo(true), 140)
+    return () => clearTimeout(id) }, [])
+  const total = segs.reduce((a, [n]) => a + n, 0) || 1
+  return (
+    <div>
+      <div style={{ display: 'flex', height, borderRadius: 999,
+                    overflow: 'hidden', background: '#eef2f8' }}>
+        {segs.map(([n, color], i) => (
+          <div key={i} className="ops-seg"
+               style={{ width: go ? `${(n / total) * 100}%` : '0%',
+                        background: color,
+                        borderRight: i < segs.length - 1 ? '2px solid #fff' : 'none' }} />
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: 10, marginTop: 7, fontSize: 10.5,
+                    flexWrap: 'wrap' }}>
+        {segs.map(([n, color, name], i) => (
+          <span key={i} style={{ display: 'inline-flex', gap: 4,
+                                 alignItems: 'center', color: GRAY }}>
+            <span style={{ width: 7, height: 7, borderRadius: 2,
+                           background: color }} />
+            <strong style={{ color: NAVY }}>{n.toLocaleString()}</strong> {name}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function CoverageRing({ segs, total, centerLabel, centerSub }) {
   // An SVG ring, animated by stroke-dasharray after mount. 2px surface gaps
   // between segments; the ordered blue ramp carries the tiers.
@@ -623,6 +688,8 @@ export default function QualityConsole() {
   const [busy, setBusy] = useState(false)
   const [shown, setShown] = useState(PAGE)
   const [changeFilter, setChangeFilter] = useState('')
+  // Hoisted: hooks may not live inside the conditional band IIFE.
+  const totalCount = useCountUp(data?.summary?.total ?? 0)
 
   useEffect(() => {
     let live = true
@@ -801,33 +868,102 @@ export default function QualityConsole() {
               </button>
             </div>
 
-            {s && (
-              <div style={{ ...card, display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(185px, 1fr))' }}>
-                <StatCell label={t('ops.stat.records')} value={s.total}
-                          sub={t('ops.stat.recordsSub')} accent={NAVY} delay={0} />
-                <StatCell label={t('ops.stat.complete')}
-                          value={s.completeness_rate != null
-                            ? `${Math.round(s.completeness_rate * 100)}%` : '·'}
-                          pct={s.completeness_rate != null ? s.completeness_rate * 100 : null}
-                          target={99} delay={80}
-                          sub={t('ops.stat.completeSub') + ' · ' + t('ops.stat.target') + ' 99%'} />
-                <StatCell label={t('ops.stat.sources')}
-                          value={s.source_coverage != null
-                            ? `${Math.round(s.source_coverage * 100)}%` : '·'}
-                          pct={s.source_coverage != null ? s.source_coverage * 100 : null}
-                          target={100} delay={160}
-                          sub={t('ops.stat.sourcesSub') + ' · ' + t('ops.stat.target') + ' 100%'} />
-                <StatCell label={t('ops.stat.substantiated')} accent={BLUE}
-                          value={s.substantiated ?? '·'}
-                          pct={s.total ? (s.substantiated / s.total) * 100 : null}
-                          delay={240}
-                          sub={t('ops.stat.substantiatedSub')} />
-                <ConfidenceCell high={s.high} medium={s.medium} low={s.low}
-                                label={t('ops.stat.confidence')} t={t} delay={320}
-                                sub={t('ops.stat.confidenceSub')} />
-              </div>
-            )}
+            {s && (() => {
+              const recs = data?.records || []
+              const req = { free: 0, voa: 0, adv: 0, cond: 0 }
+              const tiers = { hq: 0, gc: 0, ref: 0, un: 0 }
+              for (const r of recs) {
+                if (r.visa_requirement === 'Visa-free') req.free++
+                else if (r.visa_requirement === 'Visa on Arrival') req.voa++
+                else if (r.visa_requirement === 'Conditional') req.cond++
+                else req.adv++
+                if (r.source_check === 'human-quote') tiers.hq++
+                else if (r.source_check === 'grounded-consistent') tiers.gc++
+                else if (r.source_check === 'reference') tiers.ref++
+                else tiers.un++
+              }
+              const Cell = ({ children, delay = 0 }) => (
+                <div className="ops-fade" style={{ padding: '20px 24px',
+                      minWidth: 0, animationDelay: `${delay}ms` }}>{children}</div>
+              )
+              const Label = ({ children }) => (
+                <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1,
+                              color: GRAY, textTransform: 'uppercase',
+                              whiteSpace: 'nowrap' }}>{children}</div>
+              )
+              const Big = ({ children, color = NAVY }) => (
+                <div style={{ fontSize: 30, fontWeight: 700, marginTop: 8,
+                              lineHeight: 1, color }}>{children}</div>
+              )
+              return (
+                <div style={{ ...card, display: 'grid',
+                              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+                  <Cell delay={0}>
+                    <Label>{t('ops.stat.records')}</Label>
+                    <Big>{totalCount.toLocaleString()}</Big>
+                    <div style={{ marginTop: 12 }}>
+                      <MicroStack segs={[
+                        [req.free, '#1d4ed8', t('ops.req.free')],
+                        [req.voa, '#4f8ef8', t('ops.req.voa')],
+                        [req.adv, '#9cc2fb', t('ops.req.advance')],
+                        [req.cond, '#d9e7fd', t('ops.req.conditional')],
+                      ]} />
+                    </div>
+                  </Cell>
+                  <Cell delay={80}>
+                    <Label>{t('ops.stat.complete')}</Label>
+                    <div style={{ display: 'flex', alignItems: 'center',
+                                  gap: 14, marginTop: 6 }}>
+                      <RingGauge pct={(s.completeness_rate || 0) * 100} target={99} />
+                      <div style={{ fontSize: 11, color: GRAY, lineHeight: 1.5 }}>
+                        {t('ops.stat.completeSub')}
+                        <div style={{ color: NAVY, fontWeight: 700 }}>
+                          {t('ops.stat.target')} 99%
+                        </div>
+                      </div>
+                    </div>
+                  </Cell>
+                  <Cell delay={160}>
+                    <Label>{t('ops.stat.sources')}</Label>
+                    <div style={{ display: 'flex', alignItems: 'center',
+                                  gap: 14, marginTop: 6 }}>
+                      <RingGauge pct={(s.source_coverage || 0) * 100} target={100} />
+                      <div style={{ fontSize: 11, color: GRAY, lineHeight: 1.5 }}>
+                        {t('ops.stat.sourcesSub')}
+                        <div style={{ color: NAVY, fontWeight: 700 }}>
+                          {t('ops.stat.target')} 100%
+                        </div>
+                      </div>
+                    </div>
+                  </Cell>
+                  <Cell delay={240}>
+                    <Label>{t('ops.stat.substantiated')}</Label>
+                    <Big color={BLUE}>{(s.substantiated ?? 0).toLocaleString()}</Big>
+                    <div style={{ marginTop: 12 }}>
+                      <MicroStack segs={[
+                        [tiers.hq, '#1d4ed8', t('ops.check.quoted')],
+                        [tiers.gc, '#4f8ef8', t('ops.check.grounded')],
+                        [tiers.ref, '#9cc2fb', t('ops.check.reference')],
+                        [tiers.un, '#e4edfc', t('ops.check.none')],
+                      ]} />
+                    </div>
+                  </Cell>
+                  <Cell delay={320}>
+                    <Label>{t('ops.stat.confidence')}</Label>
+                    <div style={{ marginTop: 12 }}>
+                      <MicroStack height={10} segs={[
+                        [s.high, SEQ.high, t('ops.conf.high')],
+                        [s.medium, SEQ.medium, t('ops.conf.medium')],
+                        [s.low, SEQ.low, t('ops.conf.low')],
+                      ]} />
+                    </div>
+                    <div style={{ fontSize: 11, color: GRAY, marginTop: 9 }}>
+                      {t('ops.stat.confidenceSub')}
+                    </div>
+                  </Cell>
+                </div>
+              )
+            })()}
             {busy && <div style={{ color: GRAY, fontSize: 13 }}>{t('ops.loading')}</div>}
             <RecordsTable records={records.slice(0, shown)} onFlag={flag} onRelease={release} t={t} flagOf={flagOf} />
             {records.length > shown && (
