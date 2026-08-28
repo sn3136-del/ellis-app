@@ -1222,6 +1222,10 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
 
 
 class DatabaseLookupIn(BaseModel):
+    # A mis-keyed body field (e.g. "travel_document") must be rejected, not
+    # silently dropped so the caller gets ordinary/tourism data for every
+    # switcher position.
+    model_config = {"extra": "forbid"}
     nationality: str
     destination: str
     travel_document_type: str = "ordinary_passport"

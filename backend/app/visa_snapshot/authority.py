@@ -42,6 +42,15 @@ GOV_SUFFIXES = (
     "fsmembassy.fm", "maliembassy.us",
     # diplocam.cm is Cameroon's Ministry of Foreign Relations.
     "diplocam.cm",
+    # Verified 2026-08-28 (unsourced-13 research, each opened and read):
+    # equatorialguinea-evisa.com is Equatorial Guinea's state e-visa platform
+    # (operated by VFS for the MFA, adjudicated by its Immigration Bureau);
+    # yemenevisa.org is Yemen's Ministry of Interior IPNA e-visa portal
+    # (launch announced by the MFA on mofa-ye.org); embassyeritrea.org hosts
+    # Eritrea's embassies (us. prefix is the Washington DC embassy);
+    # embassyofpanama.org is Panama's embassy in Washington DC.
+    "equatorialguinea-evisa.com", "yemenevisa.org", "embassyeritrea.org",
+    "embassyofpanama.org",
 
     # generic
     "gov", "mil",

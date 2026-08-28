@@ -31241,5 +31241,369 @@
   "fields": {
    "disposition": "VISA_EXEMPT"
   }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "GNQ",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://equatorialguinea-evisa.com/faq",
+  "note": "Official state e-visa portal (operated by VFS for the Ministry of Foreign Affairs, adjudicated by the Immigration Bureau): all nationalities apply for the eVisa; USD 50 government fee plus USD 25 platform service fee (excluded from the official fee per the field spec); usually single entry; e-visa arrivals via Malabo International Airport only. The portal does not publish the permitted stay or validity window, so those stay blank. ",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "evisa",
+   "visa_category": "Tourist eVisa",
+   "application_channel": "online_application",
+   "application_channel_detail": "Apply on the official Equatorial Guinea e-visa portal. E-visa holders must enter via Malabo International Airport; a consular visa (USD 200) at an embassy is the alternative for other entry points.",
+   "government_fee": {
+    "amount": 50,
+    "currency": "USD"
+   },
+   "visa_products": [
+    {
+     "type": "Single-entry tourist eVisa",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": null,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": "Processing 24-72 hours; passport valid 6+ months with one blank page; USD 25 platform service fee is charged in addition to the official fee."
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "GNQ",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://equatorialguinea-evisa.com/faq",
+  "note": "Official state e-visa portal (operated by VFS for the Ministry of Foreign Affairs, adjudicated by the Immigration Bureau): all nationalities apply for the eVisa; USD 50 government fee plus USD 25 platform service fee (excluded from the official fee per the field spec); usually single entry; e-visa arrivals via Malabo International Airport only. The portal does not publish the permitted stay or validity window, so those stay blank. ",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "evisa",
+   "visa_category": "Tourist eVisa",
+   "application_channel": "online_application",
+   "application_channel_detail": "Apply on the official Equatorial Guinea e-visa portal. E-visa holders must enter via Malabo International Airport; a consular visa (USD 200) at an embassy is the alternative for other entry points.",
+   "government_fee": {
+    "amount": 50,
+    "currency": "USD"
+   },
+   "visa_products": [
+    {
+     "type": "Single-entry tourist eVisa",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": null,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": "Processing 24-72 hours; passport valid 6+ months with one blank page; USD 25 platform service fee is charged in addition to the official fee."
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "GNQ",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://equatorialguinea-evisa.com/faq",
+  "note": "Official state e-visa portal (operated by VFS for the Ministry of Foreign Affairs, adjudicated by the Immigration Bureau): all nationalities apply for the eVisa; USD 50 government fee plus USD 25 platform service fee (excluded from the official fee per the field spec); usually single entry; e-visa arrivals via Malabo International Airport only. The portal does not publish the permitted stay or validity window, so those stay blank. The former US visa waiver no longer appears on any official page; the embassy in Washington states all foreign passport holders must present a valid visa.",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "evisa",
+   "visa_category": "Tourist eVisa",
+   "application_channel": "online_application",
+   "application_channel_detail": "Apply on the official Equatorial Guinea e-visa portal. E-visa holders must enter via Malabo International Airport; a consular visa (USD 200) at an embassy is the alternative for other entry points.",
+   "government_fee": {
+    "amount": 50,
+    "currency": "USD"
+   },
+   "visa_products": [
+    {
+     "type": "Single-entry tourist eVisa",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": null,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": "Processing 24-72 hours; passport valid 6+ months with one blank page; USD 25 platform service fee is charged in addition to the official fee."
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "YEM",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://yemenevisa.org/Types-of-Visas",
+  "note": "Official Yemen eVisa portal of the Ministry of Interior's Immigration, Passports and Nationality Authority (launch announced by the MFA, 2025-06-24): tourism is available only as GROUP tourism (minimum 10 travellers) arranged through a Yemeni tourism agency accredited by the General Authority for Tourism. Fee amounts, validity and stay are not published, so they stay blank. ",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "evisa",
+   "visa_category": "Group tourism eVisa",
+   "application_channel": "online_application",
+   "application_channel_detail": "Group tourism eVisa (minimum 10 travellers) through an accredited Yemeni tourism agency on the official portal; processing 3-5 working days; passport valid at least 180 days. Several Yemeni embassies state that individual tourist visa issuance is currently on hold.",
+   "visa_products": [
+    {
+     "type": "Group tourism eVisa (minimum 10 travellers)",
+     "entry": null,
+     "validity": null,
+     "max_stay_days": null,
+     "fee": null,
+     "notes": "Round-trip tickets and a health certificate are required; fee amounts are not published by the portal."
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "YEM",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://yemenevisa.org/Types-of-Visas",
+  "note": "Official Yemen eVisa portal of the Ministry of Interior's Immigration, Passports and Nationality Authority (launch announced by the MFA, 2025-06-24): tourism is available only as GROUP tourism (minimum 10 travellers) arranged through a Yemeni tourism agency accredited by the General Authority for Tourism. Fee amounts, validity and stay are not published, so they stay blank. ",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "evisa",
+   "visa_category": "Group tourism eVisa",
+   "application_channel": "online_application",
+   "application_channel_detail": "Group tourism eVisa (minimum 10 travellers) through an accredited Yemeni tourism agency on the official portal; processing 3-5 working days; passport valid at least 180 days. Several Yemeni embassies state that individual tourist visa issuance is currently on hold.",
+   "visa_products": [
+    {
+     "type": "Group tourism eVisa (minimum 10 travellers)",
+     "entry": null,
+     "validity": null,
+     "max_stay_days": null,
+     "fee": null,
+     "notes": "Round-trip tickets and a health certificate are required; fee amounts are not published by the portal."
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "YEM",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://yemenevisa.org/Types-of-Visas",
+  "note": "Official Yemen eVisa portal of the Ministry of Interior's Immigration, Passports and Nationality Authority (launch announced by the MFA, 2025-06-24): tourism is available only as GROUP tourism (minimum 10 travellers) arranged through a Yemeni tourism agency accredited by the General Authority for Tourism. Fee amounts, validity and stay are not published, so they stay blank. The Yemen Embassy in Washington DC states it is not issuing any tourist visas at this time; the group eVisa route is the only officially described channel.",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "evisa",
+   "visa_category": "Group tourism eVisa",
+   "application_channel": "online_application",
+   "application_channel_detail": "Group tourism eVisa (minimum 10 travellers) through an accredited Yemeni tourism agency on the official portal; processing 3-5 working days; passport valid at least 180 days. Several Yemeni embassies state that individual tourist visa issuance is currently on hold.",
+   "visa_products": [
+    {
+     "type": "Group tourism eVisa (minimum 10 travellers)",
+     "entry": null,
+     "validity": null,
+     "max_stay_days": null,
+     "fee": null,
+     "notes": "Round-trip tickets and a health certificate are required; fee amounts are not published by the portal."
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "ERI",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://us.embassyeritrea.org/visa/",
+  "note": "Embassy of the State of Eritrea in Washington DC: 'A Visa is required for Non-Eritreans and Eritreans without a National ID.' Tourist visa USD 50 (photo printing USD 13 and service fee USD 10 are additional), form B62.3, minimum 15 business days, passport valid 6+ months, proof of funds. Visa valid 3 months from issue; on arrival the stay is typically one month, extendable at Immigration in Asmara.",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "visa_category": "Tourist visa",
+   "permitted_stay": "Typically 1 month on arrival, extendable at Immigration in Asmara",
+   "permitted_stay_days": 30,
+   "application_channel": "embassy_or_consulate",
+   "application_channel_detail": "Apply at the Eritrean embassy for your consular jurisdiction (form B62.3); minimum 15 business days processing.",
+   "government_fee": {
+    "amount": 50,
+    "currency": "USD"
+   },
+   "visa_products": [
+    {
+     "type": "Tourist visa",
+     "entry": null,
+     "validity": "3 months from date of issue; arrival must be within this window",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": "Photo printing USD 13 and service fee USD 10 are charged in addition; proof of sufficient funds required."
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "ERI",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://us.embassyeritrea.org/visa/",
+  "note": "The Eritrean embassy states a visa is required for all non-Eritreans, with no nationality exemptions, so HKSAR passport holders need a visa. The embassy accredited for China's jurisdiction (which handles Hong Kong applicants) publishes no fee schedule online, so fee, validity and stay stay blank rather than borrowing Washington's numbers.",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "visa_category": "Tourist visa",
+   "application_channel": "embassy_or_consulate",
+   "application_channel_detail": "Apply through the Eritrean embassy accredited for your jurisdiction; details for Hong Kong SAR applicants are set by the embassy handling China's jurisdiction.",
+   "visa_products": [
+    {
+     "type": "Tourist visa",
+     "entry": null,
+     "validity": null,
+     "max_stay_days": null,
+     "fee": null,
+     "notes": "Fee and validity for the China/Hong Kong jurisdiction are not published online by the handling embassy."
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "MWI",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://evisa.gov.mw/PDFs/CategoryTwoCountries.pdf",
+  "note": "Malawi's official e-visa portal, public notice effective 24 February 2026: the United States is a Category Two country, eligible for a visa on arrival at all designated ports of entry (advance application on evisa.gov.mw is strongly encouraged). Portal eligibility wizard for USA/ordinary/tourism/single entry: USD 50 payable online, 5 days processing, approval valid 90 days from grant. The February 2024 visa exemption no longer appears on the portal. immigration.gov.mw lists USD 75 for a single-entry visa while the transactional portal charges USD 50; the portal price is used and the conflict is noted here. No official page states a permitted-stay day count, so stay stays blank.",
+  "fields": {
+   "disposition": "VISA_ON_ARRIVAL",
+   "requirement_detail": "paper_visa_on_arrival",
+   "visa_category": "Visa on arrival (Category Two)",
+   "application_channel": "on_arrival",
+   "application_channel_detail": "Visa on arrival at all designated ports of entry for Category Two nationals; applying in advance on the official e-visa portal is strongly encouraged.",
+   "government_fee": {
+    "amount": 50,
+    "currency": "USD"
+   },
+   "visa_products": [
+    {
+     "type": "Single-entry visa",
+     "entry": "single",
+     "validity": "Approval valid 90 days from the day it was granted",
+     "max_stay_days": null,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": "Processing 5 days when applied online; passport valid 180 days with 2 blank pages; multiple-entry 6-month (USD 150) and 12-month (USD 250) visas also offered."
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "PAN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://www.embassyofpanama.org/visas",
+  "note": "Embassy of Panama in Washington DC: the United States is listed under 'Sin requisito de visa' (no visa required), and Resolution 22706 allows US citizens to stay up to 180 days as tourists. Entry conditions: passport valid at least 3 months, proof of economic solvency of at least USD 500, and a return ticket.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Visa-free tourist entry",
+   "permitted_stay": "Up to 180 days as a tourist (Resolution 22706)",
+   "permitted_stay_days": 180,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa is applied for. Entry is granted on arrival to US citizens as tourists.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "entry_requirements": "Passport valid at least 3 months; proof of economic solvency of at least USD 500; return ticket.",
+   "visa_products": [
+    {
+     "type": "Visa-free tourist entry",
+     "entry": "single",
+     "validity": "on arrival",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 0,
+      "currency": null
+     },
+     "notes": "Resolution 22706 grants US and Canadian citizens up to 180 days as tourists."
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "DEU",
+   "destination": "MAC",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://www.gov.mo/en/services/ps-1474/ps-1474b/",
+  "note": "Macao SAR Government Portal (Public Security Police Force): Germany is listed among EU/Schengen member states whose ordinary passport holders are granted a limit of stay of a maximum of 90 days on arrival, with no visa or entry permit needed.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Visa-free entry",
+   "permitted_stay": "Up to 90 days granted on arrival",
+   "permitted_stay_days": 90,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa is applied for. The stay limit is granted on arrival.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": [
+    {
+     "type": "Visa-free entry",
+     "entry": "single",
+     "validity": "on arrival",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 0,
+      "currency": null
+     },
+     "notes": "Listed for EU/Schengen member states by the Public Security Police Force."
+    }
+   ]
+  }
  }
 ]
