@@ -13,6 +13,7 @@ import threading
 from typing import Any, Optional
 
 from fastapi import FastAPI, Depends, HTTPException, Header, Request, Response
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from sqlalchemy import select
 
@@ -118,12 +119,7 @@ def healthz():
     return {"ok": True}
 
 
-@app.get("/health/uptime")
-def health_uptime():
-    """The availability record behind the 99.99% acceptance metric: a cron
-    probes the full public path every minute and logs to a monthly CSV; this
-    reads it back so the evidence is visible where the acceptance runs.
-    Public like /health: it holds no data beyond the service's own pulse."""
+def _uptime_data() -> dict:
     import csv as _csv
     import glob as _glob
     base = os.getenv("ELLIS_UPTIME_DIR", "/var/lib/ellis/uptime")
@@ -155,6 +151,78 @@ def health_uptime():
             "incidents": incidents,
             "note": "One probe per minute against the public HTTPS path; "
                     "a failed probe retries once before it counts."}
+
+
+@app.get("/health/uptime")
+def health_uptime(request: Request, format: str = ""):
+    """The availability record behind the 99.99% acceptance metric: a cron
+    probes the full public path every minute and logs to a monthly CSV; this
+    reads it back so the evidence is visible where the acceptance runs.
+    Public like /health. A browser gets a styled status page; API callers
+    (or ?format=json) get the raw record."""
+    data = _uptime_data()
+    wants_html = "text/html" in (request.headers.get("accept") or "")
+    if format == "json" or not wants_html:
+        return data
+    cur = data["months"][-1] if data["months"] else None
+    pct = cur["availability_pct"] if cur else None
+    good = pct is not None and pct >= 99.99
+    hero = f"{pct}%" if pct is not None else "·"
+    color = "#0b7a44" if good else "#b45309"
+    rows = "".join(
+        f"<tr><td>{m['month']}</td>"
+        f"<td class='num'>{m['probes']:,}</td>"
+        f"<td class='num'>{m['ok']:,}</td>"
+        f"<td class='num'><strong>{m['availability_pct']}%</strong></td>"
+        f"<td class='num'>{m['median_latency_ms'] if m['median_latency_ms'] is not None else '·'} ms</td></tr>"
+        for m in reversed(data["months"]))
+    sub = (f"本月 {cur['probes']:,} 次探测 · 中位延迟 {cur['median_latency_ms']} ms"
+           if cur else "探测记录即将开始累积")
+    html = f"""<!doctype html><html lang="zh-CN"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="60">
+<title>Ellis 服务可用性</title>
+<style>
+  * {{ box-sizing: border-box; margin: 0; }}
+  body {{ font-family: -apple-system, "PingFang SC", "Microsoft YaHei",
+          "Segoe UI", sans-serif; background: #f5f7fb; color: #0f294d;
+          padding: 40px 20px; }}
+  .wrap {{ max-width: 720px; margin: 0 auto; display: grid; gap: 16px; }}
+  .card {{ background: #fff; border-radius: 16px; padding: 26px 30px;
+           box-shadow: 0 1px 3px rgba(15,41,77,.06); }}
+  h1 {{ font-size: 18px; font-weight: 800; }}
+  .muted {{ color: #64748b; font-size: 13px; }}
+  .hero {{ font-size: 56px; font-weight: 800; line-height: 1.1;
+           color: {color}; letter-spacing: -1px; }}
+  .dot {{ display: inline-block; width: 10px; height: 10px; border-radius: 99px;
+          background: {color}; margin-right: 8px; }}
+  table {{ width: 100%; border-collapse: collapse; font-size: 13.5px; }}
+  th {{ text-align: left; font-size: 11px; letter-spacing: .06em;
+        text-transform: uppercase; color: #64748b; padding: 8px 10px;
+        border-bottom: 2px solid #e5eaf2; }}
+  td {{ padding: 9px 10px; border-bottom: 1px solid #eef2f8; }}
+  .num {{ text-align: right; font-variant-numeric: tabular-nums; }}
+  th.num {{ text-align: right; }}
+  a {{ color: #287dfa; font-weight: 700; text-decoration: none; }}
+</style></head><body><div class="wrap">
+<div class="card">
+  <h1><span class="dot"></span>Ellis 服务可用性 · Service availability</h1>
+  <div class="muted" style="margin-top:4px">ellis-visa.com · 每分钟探测一次完整公网链路（DNS、TLS、网关、后端）</div>
+  <div class="hero" style="margin-top:18px">{hero}</div>
+  <div class="muted" style="margin-top:6px">{sub} · 事件 {data['incidents']} 起</div>
+</div>
+<div class="card">
+  <table>
+    <tr><th>月份</th><th class="num">探测次数</th><th class="num">成功</th>
+        <th class="num">可用性</th><th class="num">中位延迟</th></tr>
+    {rows}
+  </table>
+</div>
+<div class="muted" style="text-align:center">
+  探测失败会先重试一次再计入 · <a href="?format=json">JSON</a>
+</div>
+</div></body></html>"""
+    return HTMLResponse(html)
 
 
 @app.get("/capabilities")

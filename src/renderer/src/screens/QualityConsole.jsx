@@ -813,6 +813,7 @@ export default function QualityConsole() {
   const [changes, setChanges] = useState(null)
   const [issues, setIssues] = useState(null)
   const [freshness, setFreshness] = useState(null)
+  const [uptime, setUptime] = useState(null)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [shown, setShown] = useState(PAGE)
@@ -923,7 +924,12 @@ export default function QualityConsole() {
           client.get('/database/issues'), client.get('/database/records')])
         setIssues(iss); setData(recs)
       }
-      else if (tab === 'freshness') setFreshness(await client.get('/database/freshness'))
+      else if (tab === 'freshness') {
+        setFreshness(await client.get('/database/freshness'))
+        // The availability record rides along: the acceptance metric should
+        // be visible where the acceptance runs, not only as raw JSON.
+        try { setUptime(await client.get('/health/uptime')) } catch { /* tile hides */ }
+      }
     } catch (e) {
       setError(String(e?.message || e))
     } finally {
@@ -1682,6 +1688,14 @@ export default function QualityConsole() {
                   { label: t('ops.fresh.disputed'), value: f.disputed,
                     accent: f.disputed ? RED : GREEN,
                     sub: t('ops.fresh.disputedSub') },
+                  ...(() => {
+                    const m = uptime?.months?.[uptime.months.length - 1]
+                    if (!m) return []
+                    return [{ label: t('ops.fresh.avail'),
+                              value: `${m.availability_pct}%`,
+                              accent: m.availability_pct >= 99.99 ? GREEN : AMBER,
+                              sub: `${t('ops.fresh.availSub')} · ${m.median_latency_ms ?? '·'} ms` }]
+                  })(),
                 ].map((p, i) => (
                   <div key={i} className="ops-lift"
                        style={{ ...card, padding: 0 }}>
