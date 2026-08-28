@@ -1021,12 +1021,12 @@ export default function TravelDatabase({ onBack }) {
               </select>
             </label>
             <label style={{ display: 'grid', gap: 6, textAlign: 'left' }}>
-              {/* Trip.com's input table marks 出发地 REQUIRED, so the form
-                  asks for it. The API stays lenient: the spec's own display
-                  pages deep-link per passport x destination with no
-                  departure, so it cannot be an API precondition. */}
+              {/* Owner decision (2026-08-29): traveldoc-simple. The spec
+                  table marks 出发地 required, but a blocking city field read
+                  as friction; it stays optional like traveldoc's form. */}
               <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>
-                {t('db.departure')} *
+                {t('db.departure')}{' '}
+                <span style={{ color: GRAY, fontWeight: 400 }}>({t('db.optional')})</span>
               </span>
               <input className="input" value={departureCity}
                      data-testid="database-departure"
@@ -1074,7 +1074,7 @@ export default function TravelDatabase({ onBack }) {
           </div>
           <div style={{ marginTop: 20, textAlign: 'center' }}>
             <button className="btn btn--primary" onClick={lookUp}
-                    disabled={busy || !nat || !dest || !departureCity.trim()}
+                    disabled={busy || !nat || !dest}
                     data-testid="database-check"
                     style={{ fontSize: 15, fontWeight: 800, padding: '13px 32px',
                              borderRadius: 999 }}>
