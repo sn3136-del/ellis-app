@@ -220,41 +220,42 @@ function EllisIslandScene() {
   // Every letter is a cluster of blocks [x, y-up, w, h]; heights vary so
   // the roofline has a skyline's rhythm. The I is the Empire State Building.
   const LETTERS = [
-    [22, [[0, 92, 13, 92], [0, 92, 40, 12], [0, 55, 32, 11], [0, 12, 40, 12],
-          [26, 98, 9, 6]]],
-    [84, [[0, 76, 13, 76], [1.5, 84, 10, 8], [0, 12, 36, 12],
-          [26, 20, 7, 6]]],
+    [22, [[0, 92, 13, 92], [0, 92, 40, 12], [0, 55, 32, 11], [0, 12, 40, 12]]],
+    [84, [[0, 76, 13, 76], [0, 12, 36, 12]]],
     [138, [[0, 84, 13, 84], [0, 12, 36, 12]]],
     // the I is the Empire State Building: broad base, two setbacks,
     // crown tiers, then the mast and needle drawn separately
     [192, [[-2, 26, 19, 26], [0, 56, 15, 30], [2, 82, 11, 26],
            [4, 94, 7, 12], [5.5, 104, 4, 10]]],
     [228, [[0, 61, 38, 11], [0, 50, 12, 14], [0, 36, 38, 11],
-           [26, 25, 12, 14], [0, 11, 38, 11], [3, 66, 6, 5], [29, 66, 6, 5]]],
+           [26, 25, 12, 14], [0, 11, 38, 11]]],
   ]
-  // A real facade: one uniform window module, laid out on a computed grid
-  // with even margins inside every block. Nothing is placed by hand.
+  // Windows do the shaping: tower shafts wear aligned columns of tall slit
+  // windows; every horizontal slab wears one continuous glass ribbon
+  // tracing the letter's arm. A deterministic lit/dim mix gives the facade
+  // life without noise. [x, y, w, h, dim]
   const winRects = []
   const addGrid = (bx, by, w, h) => {
-    const ww = 2.4, wh = 5, mx = 3.2, myT = 5, myB = 4, minGx = 2.2, minGy = 4.2
-    const nc = Math.max(1, Math.floor((w - 2 * mx + minGx) / (ww + minGx)))
-    const nr = Math.max(1, Math.floor((h - myT - myB + minGy) / (wh + minGy)))
-    if (h < myT + myB + wh) return
-    const gx = nc > 1 ? (w - 2 * mx - nc * ww) / (nc - 1) : 0
-    const gy = nr > 1 ? (h - myT - myB - nr * wh) / (nr - 1) : 0
-    for (let r = 0; r < nr; r++) {
-      for (let c = 0; c < nc; c++) {
-        winRects.push([bx + mx + c * (ww + gx), by + myT + r * (wh + gy), ww, wh])
+    if (w <= 22 && h >= 24) {
+      const ww = 2.6, wh = 6.5, pitch = 11
+      const cols = w >= 15 ? [3, 7.4, 11.8].slice(0, Math.floor((w - 4) / 4.4))
+        : [w / 2 - 3.6, w / 2 + 1]
+      for (let wy = by + 5; wy <= by + h - wh - 4; wy += pitch) {
+        cols.forEach((cx, ci) => winRects.push(
+          [bx + cx, wy, ww, wh, (Math.round(wy) + ci) % 3 === 1]))
+      }
+    } else if (w >= 30 && h >= 9) {
+      const ww = 4.4, wh = Math.min(5.5, h - 4.5), gap = 2.6, mx = 3.5
+      const n = Math.floor((w - 2 * mx + gap) / (ww + gap))
+      const gx = n > 1 ? (w - 2 * mx - n * ww) / (n - 1) : 0
+      for (let i = 0; i < n; i++) {
+        winRects.push([bx + mx + i * (ww + gx), by + (h - wh) / 2, ww, wh,
+                       i % 4 === 2])
       }
     }
   }
   LETTERS.forEach(([lx, rects]) => {
-    rects.forEach(([x, up, w, h]) => {
-      // Tower shafts keep the street level clear (doors live there);
-      // low blocks and slabs take a single even strip.
-      const tall = h >= 26 && w <= 20
-      addGrid(lx + x, BASE - up, w, tall ? h - 12 : h)
-    })
+    rects.forEach(([x, up, w, h]) => addGrid(lx + x, BASE - up, w, h))
   })
   const blinkers = winRects.filter((_, i) => i % 6 === 3)
   // Long layered swells: one path each, spanning the whole harbor.
@@ -302,9 +303,9 @@ function EllisIslandScene() {
                 stroke={INK} strokeWidth="2" strokeLinecap="round" />
           <circle cx="199.5" cy={BASE - 134} r="1.6" fill={INK} />
           {/* the facade grids */}
-          {winRects.map(([x, y, w, h], i) => (
-            <rect key={i} x={x} y={y} width={w} height={h} rx="0.7"
-                  fill="#fff" opacity="0.95" />
+          {winRects.map(([x, y, w, h, dim], i) => (
+            <rect key={i} x={x} y={y} width={w} height={h} rx="0.9"
+                  fill="#fff" opacity={dim ? 0.4 : 0.95} />
           ))}
           {!reduced && blinkers.map(([x, y, w, h], i) => (
             <rect key={'b' + i} x={x} y={y} width={w} height={h} rx="0.7"
