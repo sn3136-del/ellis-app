@@ -8,6 +8,31 @@ Statuses: PASS (verified live), PARTIAL (works with a noted gap),
 DOCUMENT-NEEDED (a process document, produced alongside this one),
 NOT-APPLICABLE (outside the database deliverable).
 
+## Re-measurement, 2026-08-28 (end of day) — supersedes stale numbers below
+
+The audit tables below were captured against the 1,856-record morning
+dataset. The dataset was then rebuilt and corrected through the day
+(sourced-override waves, a full rewarm, enum fixes). Current live truth:
+
+- Records 1,092; destinations 187; all 18 Phase-1 stations present.
+- Field completeness 98.35% (21,440/21,800 required cells) — target 99%
+  still NOT met; record-level 85.2%.
+- Source coverage 100.0% — the audit's "162 records lack any source URL"
+  is closed (final 13 received adversarially verified official sources).
+- Confidence: High 796 / Medium 158 / Low 138 -> Medium+ 87.4% — target
+  90% still NOT met; every Low is blocked from customers.
+- Enum rows below marked FAIL are closed: validity_unit now only
+  Day/Month/Year, max_stay_unit only Hour/Day, application_method is
+  distributed across its five values (Online 384, Other 376, Agency 199,
+  Embassy 77, On-arrival 47).
+- The CHN->JPN business FAIL is closed (full guidance, 2 products, agency
+  channel). The held-card leak is closed (guidance null, no steps).
+  Mis-keyed lookup bodies now 422 instead of silently defaulting.
+- Uptime monitoring, status page, daily backups and the RTO runbook are
+  live; the availability record began 2026-08-28 and is younger than the
+  monthly window it must eventually prove.
+- Deliverable 6's export half now exists: /database/changes.csv.
+
 ## AI Q&A (P3) — /api/database/ask
 
 | Requirement | Source | Status | Evidence / gap |

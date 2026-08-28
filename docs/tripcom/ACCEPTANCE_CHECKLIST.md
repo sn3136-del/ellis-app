@@ -6,26 +6,26 @@ this checklist, the stage test report, and both parties' signatures.
 ## Metric checklist (section 6.1 of the standard)
 | Metric | Target | Measured (date/value) | Pass |
 |---|---|---|---|
-| Functional completeness | 100% of required functions | | |
-| Field completeness | >= 99% | | |
-| Accuracy (sampled vs official) | >= 99.5% (policy fields 100%) | | |
-| Confidence Medium-or-above | >= 90% | | |
-| Source coverage (official URL) | 100% | | |
-| Station coverage | >= 18 | | |
-| Availability (monthly) | >= 99.99% | | |
-| Recovery time (RTO) | <= 1h | | |
-| Policy update timeliness | <= 48h (urgent 24h) | | |
-| Error feedback closure | <= 48h | | |
-| Quality backend availability | pass | | |
+| Functional completeness | 100% of required functions | 2026-08-28: all enumerated items live-verified | yes |
+| Field completeness | >= 99% | 2026-08-28: 98.35% field-level (21,440/21,800 cells); 85.2% record-level | NO |
+| Accuracy (sampled vs official) | >= 99.5% (policy fields 100%) | internal: 52 sampled, 10 corrected, re-samples clean; formal sampling is Party A's (2.2) | pending Party A |
+| Confidence Medium-or-above | >= 90% | 2026-08-28: 87.4% (High 796, Medium 158, Low 138; Lows blocked) | NO |
+| Source coverage (official URL) | 100% | 2026-08-28: 100.0% (1,092/1,092) | yes |
+| Station coverage | >= 18 | 2026-08-28: 18/18 Phase-1 stations, 187 destinations | yes |
+| Availability (monthly) | >= 99.99% | 100.0% since per-minute monitoring began 2026-08-28 (record younger than a month) | evidence young |
+| Recovery time (RTO) | <= 1h | auto-restart (systemd + probe), daily backups, runbook | yes |
+| Policy update timeliness | <= 48h (urgent 24h) | pipeline live, same-day corrections shipped; no external policy event yet in window | evidence young |
+| Error feedback closure | <= 48h | reader queue within window; residual machine-filed disputes are open source conflicts | partial |
+| Quality backend availability | pass | exercised live 2026-08-28 incl. phone widths | yes |
 
 ## Functional checklist
-- [ ] Query tool: six inputs, full outputs, subcategories, transit answers
-- [ ] Display data: per-combination page, document switcher, purpose filter
-- [ ] AI Q&A: natural language (zh + en), knowledge-base answers, sources
-- [ ] Quality backend: spot check, per-field checklist, issue loop,
-      confidence gating, source traceability, change log, Excel export
-- [ ] Localization: full content switch in zh-CN and zh-Hant
-- [ ] Online access: browser only, no installation
+- [x] Query tool: six inputs, full outputs, subcategories, transit answers (2026-08-28)
+- [x] Display data: per-combination page, document switcher, purpose filter (2026-08-28)
+- [x] AI Q&A: natural language (zh + en), knowledge-base answers, sources (2026-08-28)
+- [x] Quality backend: spot check, per-field checklist, issue loop,
+      confidence gating, source traceability, change log, Excel + CSV export (2026-08-28)
+- [x] Localization: full content switch in zh-CN and zh-Hant (2026-08-28)
+- [x] Online access: browser only, no installation; phone-optimized to 320px (2026-08-28)
 
 ## Stage sign-off
 | Stage | Date | Party A (Trip.com) | Party B |
