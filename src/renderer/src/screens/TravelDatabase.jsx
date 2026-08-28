@@ -759,7 +759,8 @@ export default function TravelDatabase({ onBack }) {
   return (
     <div className="page" style={{ maxWidth: 900,
                                    margin: '0 auto',
-                                   padding: '26px 20px 60px' }}
+                                   padding: result ? '26px 20px 60px'
+                                                   : '8px 20px 60px' }}
          data-testid="travel-database">
       {onBack && (
         <button className="btn btn--sm btn--ghost" onClick={onBack}
@@ -779,8 +780,8 @@ export default function TravelDatabase({ onBack }) {
       )}
 
       {!result && (
-      <div style={{ marginTop: 4 }}>
-        <div style={{ margin: '2px 0 26px' }}><EllisMark /></div>
+      <div style={{ marginTop: 0 }}>
+        <div style={{ margin: '0 0 22px' }}><EllisMark /></div>
         <div className="card anim-rise" style={{ padding: '20px 24px',
                                                  borderRadius: 20,
                                                  maxWidth: 560, marginLeft: 'auto',
