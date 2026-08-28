@@ -892,7 +892,8 @@ export default function QualityConsole() {
         {/* Tabs */}
         <div style={{ display: 'flex', gap: 6, margin: '20px 0 18px',
                       background: '#fff', border: `1px solid ${BORDER}`,
-                      borderRadius: 999, padding: 4, width: 'fit-content' }}>
+                      borderRadius: 999, padding: 4, width: 'fit-content',
+                      maxWidth: '100%', overflowX: 'auto' }}>
           {[['records', t('ops.tab.records')], ['issues', t('ops.tab.issues')],
             ['changes', t('ops.tab.changes')], ['freshness', t('ops.tab.freshness')]]
             .map(([id, label]) => (
@@ -900,7 +901,8 @@ export default function QualityConsole() {
                     data-testid={`ops-tab-${id}`}
                     style={{ border: 'none', cursor: 'pointer', fontSize: 13,
                              fontWeight: 700, padding: '8px 18px',
-                             borderRadius: 999,
+                             borderRadius: 999, whiteSpace: 'nowrap',
+                             flexShrink: 0,
                              background: tab === id ? NAVY : 'transparent',
                              color: tab === id ? '#fff' : GRAY }}>
               {label}
@@ -1075,7 +1077,7 @@ export default function QualityConsole() {
             }
             return { url: m[1].replace(/[:;,]$/, ''), segs }
           }
-          const fmtSays = (field, says) => {
+          const fmtSays = (field, says, note) => {
             let v = String(says || '').trim().replace(/^"|"$/g, '')
             if (/^[\[{]/.test(v)) {
               // A product-table proposal: name the visa types instead of
@@ -1109,7 +1111,7 @@ export default function QualityConsole() {
                     <span style={{ color: GRAY }}>{t('ops.pageSays')}</span>
                     <span style={{ color: NAVY, fontWeight: 600,
                                    overflowWrap: 'anywhere' }}>
-                      {(() => { const v = fmtSays(g.field, g.says)
+                      {(() => { const v = fmtSays(g.field, g.says, note)
                         return v.length > 160 ? v.slice(0, 160) + '…' : v })()}
                     </span>
                     {g.quote && (
