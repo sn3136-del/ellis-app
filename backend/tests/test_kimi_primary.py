@@ -1125,3 +1125,14 @@ def test_a_visa_free_answer_never_carries_application_machinery():
     assert g["interview_required"] is False
     assert g["arrival_card"]["required"] is True     # deliberately kept
     assert g["permitted_stay_days"] == 90
+
+
+def test_chinese_dates_parse_to_the_day():
+    """"12月15日" answers for the 15th, not the 1st — policies carry end
+    dates and the day matters at a window boundary."""
+    from app.visa_snapshot.kimi_primary import _extract_arrival
+    got = _extract_arrival("中国护照12月15日去日本")
+    assert got is not None and got.endswith("-12-15")
+    assert _extract_arrival("明年3月去泰国").endswith("-03-01")
+    got31 = _extract_arrival("12月31日出发去日本")
+    assert got31.endswith("-12-31")

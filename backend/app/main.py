@@ -913,7 +913,10 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
                     "destination": parsed["destination"],
                     "travel_purpose": parsed["travel_purpose"],
                     "travel_document_type": parsed["travel_document_type"],
-                    "transit_countries": parsed.get("transit_countries") or []}
+                    "transit_countries": parsed.get("transit_countries") or [],
+                    # "12月15日去日本" was answered FOR that date; the echo
+                    # must say so or the screen shows a dateless route.
+                    "arrival_date": parsed.get("arrival_date")}
     if parsed.get("focus"):
         out["focus"] = parsed["focus"]
     audit.record(db, org_id=p.org_id, application_id="database",

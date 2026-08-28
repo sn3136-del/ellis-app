@@ -1593,7 +1593,8 @@ def _extract_arrival(question: str) -> str | None:
         month = _MONTHS[m.group(1)[:3]]
         year = today.year + (1 if month < today.month else 0)
         return f"{year:04d}-{month:02d}-01"
-    zh = _re.search(r"(明年|今年)?\s*([一二三四五六七八九十]{1,2}|\d{1,2})月", question)
+    zh = _re.search(r"(明年|今年)?\s*([一二三四五六七八九十]{1,2}|\d{1,2})月"
+                    r"\s*(\d{1,2})?\s*[日号號]?", question)
     if zh:
         raw = zh.group(2)
         nums = {"一":1,"二":2,"三":3,"四":4,"五":5,"六":6,"七":7,"八":8,"九":9,
@@ -1602,7 +1603,10 @@ def _extract_arrival(question: str) -> str | None:
         if month and 1 <= month <= 12:
             year = today.year + (1 if zh.group(1) == "明年"
                                  or month < today.month else 0)
-            return f"{year:04d}-{month:02d}-01"
+            # "12月15日" answers for THE DAY: policies carry end dates and a
+            # 12月31日 question is not a 1月1日 question.
+            day = int(zh.group(3)) if zh.group(3) and 1 <= int(zh.group(3)) <= 31 else 1
+            return f"{year:04d}-{month:02d}-{day:02d}"
     if "next month" in q or "下个月" in question or "下個月" in question:
         y, mo = (today.year, today.month + 1) if today.month < 12 else (today.year + 1, 1)
         return f"{y:04d}-{mo:02d}-01"
