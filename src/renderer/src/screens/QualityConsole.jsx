@@ -1174,14 +1174,33 @@ export default function QualityConsole() {
                   ⬇ {t('ops.export')}
                 </button>
               </div>
+              {/* Each control carries its own label: the reader sees WHAT
+                  each field filters before touching it (the last one slices
+                  by records MISSING a field, which a bare select hid). */}
               <div style={{ display: 'grid', gap: 10, gridTemplateColumns:
                               'repeat(auto-fill, minmax(170px, 1fr))' }}>
+              {(() => {
+                const F = ({ label, children }) => (
+                  <label style={{ display: 'grid', gap: 5, minWidth: 0 }}>
+                    <span style={{ fontSize: 10.5, fontWeight: 700,
+                                   letterSpacing: 0.4, color: GRAY,
+                                   textTransform: 'uppercase',
+                                   paddingLeft: 2 }}>{label}</span>
+                    {children}
+                  </label>
+                )
+                return (<>
+              <F label={t('ops.flt.passport')}>
               <CountryFilter value={filters.nationality} countries={countries}
                              placeholder={t('ops.passport')}
                              onCommit={set('nationality')} />
+              </F>
+              <F label={t('ops.flt.destination')}>
               <CountryFilter value={filters.destination} countries={countries}
                              placeholder={t('ops.destination')}
                              onCommit={set('destination')} />
+              </F>
+              <F label={t('ops.flt.purpose')}>
               <select value={filters.purpose} onChange={(e) => set('purpose')(e.target.value)}
                       className="ops-in"
                       style={{ ...input, color: filters.purpose ? NAVY : GRAY }}>
@@ -1190,6 +1209,8 @@ export default function QualityConsole() {
                   <option key={p} value={p}>{t(PURPOSE_KEY[p])}</option>
                 ))}
               </select>
+              </F>
+              <F label={t('ops.flt.requirement')}>
               <select value={filters.requirement}
                       onChange={(e) => set('requirement')(e.target.value)}
                       className="ops-in"
@@ -1200,6 +1221,8 @@ export default function QualityConsole() {
                 <option value="Visa Required in Advance">{t('ops.req.advance')}</option>
                 <option value="Conditional">{t('ops.req.conditional')}</option>
               </select>
+              </F>
+              <F label={t('ops.flt.confidence')}>
               <select value={filters.confidence}
                       onChange={(e) => set('confidence')(e.target.value)}
                       className="ops-in"
@@ -1209,8 +1232,10 @@ export default function QualityConsole() {
                 <option value="Medium">{t('ops.conf.medium')}</option>
                 <option value="Low">{t('ops.conf.low')}</option>
               </select>
+              </F>
               {/* The acceptance standard's extra slice dimensions (4.1.2):
                   by visa type, and by a specific field's gaps. */}
+              <F label={t('ops.flt.visaType')}>
               <input value={filters.visaType} className="ops-in"
                      style={{ ...input, width: '100%',
                               boxSizing: 'border-box' }}
@@ -1218,6 +1243,8 @@ export default function QualityConsole() {
                      data-testid="ops-filter-visatype"
                      onChange={(e) => setFilters((f) =>
                        ({ ...f, visaType: e.target.value }))} />
+              </F>
+              <F label={t('ops.flt.gap')}>
               <select className="ops-in" value={filters.fieldMissing}
                       data-testid="ops-filter-fieldmissing"
                       style={{ ...input, width: '100%',
@@ -1229,6 +1256,9 @@ export default function QualityConsole() {
                   <option key={f} value={f}>{fx(t, f)}</option>
                 ))}
               </select>
+              </F>
+                </>)
+              })()}
               </div>
             </div>
 

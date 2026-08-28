@@ -166,6 +166,11 @@ def recheck_row(db, row, *, today: str | None = None) -> dict:
     route = dict(row.route or {})
     override = verified_overrides.find(route)
     guidance = dict(row.guidance or {})
+    # Compare what customers SEE: the override-merged answer. Comparing the
+    # raw engine answer kept re-disputing facts a sourced override already
+    # corrects at serve time, so the queue filled with phantom conflicts.
+    if override:
+        guidance, _ = verified_overrides.apply(guidance, route)
     sources = candidate_sources(guidance, override)
     when = today or _now().isoformat()
 
