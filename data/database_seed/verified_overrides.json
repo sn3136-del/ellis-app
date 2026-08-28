@@ -297,7 +297,9 @@
      },
      "notes": "Free for eligible HKSAR passport holders; self-printed."
     }
-   ]
+   ],
+   "permitted_stay": "30 days from the day after entry",
+   "permitted_stay_days": 30
   }
  },
  {
@@ -594,7 +596,11 @@
      },
      "notes": "Requires a tourist confirmation (voucher) from an authorised Russian host."
     }
-   ]
+   ],
+   "government_fee": {
+    "amount": 185,
+    "currency": "USD"
+   }
   }
  },
  {
@@ -715,7 +721,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "permitted_stay": "Up to 3 months at a time"
   }
  },
  {
@@ -759,7 +766,8 @@
      },
      "notes": "\"From AUD250.00\"; department may grant a stay of 3, 6 or 12 months."
     }
-   ]
+   ],
+   "permitted_stay": "Up to 3 months at a time"
   }
  },
  {
@@ -1485,7 +1493,17 @@
     "required": true,
     "name": "EU Entry/Exit System (EES) biometric registration",
     "submission_window": "Taken at the border on first entry"
-   }
+   },
+   "government_fee": {
+    "amount": 20,
+    "currency": "EUR"
+   },
+   "permitted_stay_days": 90,
+   "required_documents": [
+    "Valid passport (the same document used in the application)",
+    "email address",
+    "payment card"
+   ]
   }
  },
  {
@@ -8304,7 +8322,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "permitted_stay": "Up to 3 months at a time"
   }
  },
  {
@@ -8619,7 +8638,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "permitted_stay": "Up to 3 months at a time"
   }
  },
  {
@@ -9126,7 +9146,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "permitted_stay": "15 days per entry"
   }
  },
  {
@@ -9187,7 +9208,69 @@
   "source_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
   "note": "Official application entry point, loaded and verified in a real browser on 2026-08-22. Spain MFA Schengen visa information page (English); applications are lodged through consulates and their centres.",
   "fields": {
-   "official_portal_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx"
+   "official_portal_url": "https://www.exteriores.gob.es/Consulados/washington/en/ServiciosConsulares/Paginas/Consular/Visados-Schengen.aspx",
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Single-entry Schengen Type C tourist",
+     "entry": "single",
+     "validity": "Limited to trip dates; up to 90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Typically issued to first-time applicants"
+    },
+    {
+     "type": "Double-entry Schengen Type C tourist",
+     "entry": "Multiple",
+     "validity": "Limited to trip dates; up to 90 days total",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Permits two entries during validity"
+    },
+    {
+     "type": "Multiple-entry Schengen Type C tourist",
+     "entry": "multiple",
+     "validity": "6 months to 5 years",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Each stay max 90 days in any 180-day period; based on travel history"
+    },
+    {
+     "type": "Reduced-fee Schengen Type C (children 6-12)",
+     "entry": null,
+     "validity": "Varies",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 45,
+      "currency": "EUR"
+     },
+     "notes": "Reduced fee for minors aged 6-12"
+    },
+    {
+     "type": "Fee-exempt Schengen Type C (children under 6)",
+     "entry": null,
+     "validity": "Varies",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 0,
+      "currency": "EUR"
+     },
+     "notes": "No visa fee for children under 6"
+    }
+   ]
   }
  },
  {
@@ -9516,7 +9599,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "permitted_stay": "Up to 3 months at a time"
   }
  },
  {
@@ -13900,7 +13984,19 @@
   "source_url": "https://www.imprentanacional.go.cr/pub/2025/11/17/ALCA148_17_11_2025.pdf",
   "note": "Directrices Generales de Visas de Ingreso y Permanencia para No Residentes, Alcance No. 148 a La Gaceta No. 216, 17 November 2025, section IV 'REPÚBLICA POPULAR CHINA Y REGIONES ADMINISTRATIVAS'. Only Hong Kong/Macao residents holding a valid British or Portuguese passport are visa-free (180 days); holders of the HKSAR passport itself need a consular visa and are treated under ",
   "fields": {
-   "disposition": "VISA_REQUIRED"
+   "disposition": "VISA_REQUIRED",
+   "government_fee": {
+    "amount": 30,
+    "currency": "USD"
+   },
+   "permitted_stay_days": 30,
+   "required_documents": [
+    "Valid machine-readable passport (min 180 days validity)",
+    "Consular visa",
+    "Proof of funds of at least US$100 per month of stay",
+    "Return or onward ticket",
+    "No entry impediment"
+   ]
   }
  },
  {
@@ -14605,7 +14701,24 @@
   "note": "The Honduran Instituto Nacional de Migración sets the tourist stay at 90 days for all admitted tourists, so Ellis's 30 is wrong. Caveat worth carrying separately from the day count: Honduras does NOT appear on the HK Immigration Department's list of jurisdictions granting visa-free access or visa-on-arrival to HKSAR passports (updated 26 August 2026), so an HKSAR holder likely ",
   "fields": {
    "permitted_stay_days": 90,
-   "permitted_stay": "up to 90 days as a tourist, extendable by a further 30 days"
+   "permitted_stay": "up to 90 days as a tourist, extendable by a further 30 days",
+   "government_fee": {
+    "amount": 30,
+    "currency": "USD"
+   },
+   "visa_products": [
+    {
+     "type": "Single-entry tourist",
+     "entry": "single",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 30,
+      "currency": "USD"
+     },
+     "notes": "Confirm current fee and any additional products with the embassy"
+    }
+   ]
   }
  },
  {
@@ -14871,6 +14984,16 @@
      },
      "notes": "voa.specialbranch.gov.bd: 'This visa is valid for a stay of a maximum of 30 days' and 'Pay a visa fee USD 50 (excluding processing fees)'. Discretionary at the port of entry."
     }
+   ],
+   "required_documents": [
+    "Online visa application form (visa.gov.bd)",
+    "passport valid 6 months",
+    "2 photos",
+    "travel itinerary",
+    "hotel booking",
+    "return ticket booking",
+    "invitation letter (if any)",
+    "letter of dispatch from employer"
    ]
   }
  },
@@ -14926,6 +15049,12 @@
      },
      "notes": "Issued to nationals of 68 countries only"
     }
+   ],
+   "required_documents": [
+    "Copy of the passport",
+    "Hotel reservation",
+    "Return ticket",
+    "Three-month bank statement in English (min income 300-500 BD/month or equivalent to 150 BD per day of visit)"
    ]
   }
  },
@@ -15083,6 +15212,11 @@
      "fee": null,
      "notes": "Exists, but no fee is published on evisa.gov.kh; the US$30 figure Ellis carries is not government-sourced"
     }
+   ],
+   "required_documents": [
+    "Passport with more than six months validity at entry",
+    "recent passport-size digital photo (JPEG or PNG)",
+    "valid credit card (Visa/MasterCard)"
    ]
   }
  },
@@ -15478,6 +15612,9 @@
      },
      "notes": null
     }
+   ],
+   "required_documents": [
+    "Valid passport from an eligible country with at least 6 months remaining from the date of entry (biometrics captured on arrival)"
    ]
   }
  },
@@ -15848,7 +15985,11 @@
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 30,
-   "permitted_stay": "free 30-day tourist visa issued on arrival"
+   "permitted_stay": "free 30-day tourist visa issued on arrival",
+   "government_fee": {
+    "amount": 0,
+    "currency": "MVR"
+   }
   }
  },
  {
@@ -16007,7 +16148,11 @@
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 30,
-   "permitted_stay": "single entry: 90-day validity, max stay 30 days; multiple entry: 1-year validity, max stay 90 days"
+   "permitted_stay": "single entry: 90-day validity, max stay 30 days; multiple entry: 1-year validity, max stay 90 days",
+   "government_fee": {
+    "amount": 80,
+    "currency": "USD"
+   }
   }
  },
  {
@@ -16129,7 +16274,42 @@
   "fields": {
    "disposition": "VISA_REQUIRED",
    "permitted_stay_days": 30,
-   "permitted_stay": "Entry visa allows a stay of not more than one month upon entry"
+   "permitted_stay": "Entry visa allows a stay of not more than one month upon entry",
+   "government_fee": {
+    "amount": 80,
+    "currency": "SZL"
+   },
+   "required_documents": [
+    "Certified passport copy",
+    "Passport-size photo",
+    "Cover letter",
+    "Host ID/details or hotel reservation details",
+    "Proof of travel arrangements (flight tickets)"
+   ],
+   "visa_products": [
+    {
+     "type": "Single-entry tourist eVisa",
+     "entry": "single",
+     "validity": "90 days",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 80,
+      "currency": "SZL"
+     },
+     "notes": "Standard online tourist visa for Hong Kong ordinary passport holders"
+    },
+    {
+     "type": "Multiple-entry tourist eVisa",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": null,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "Availability and validity for Hong Kong applicants should be confirmed on the official portal"
+    }
+   ]
   }
  },
  {
@@ -16360,6 +16540,14 @@
      },
      "notes": "voa.specialbranch.gov.bd"
     }
+   ],
+   "required_documents": [
+    "Online visa application form",
+    "passport valid 6 months with 2 blank pages",
+    "photo",
+    "hotel booking confirmation or invitation letter with host ID/passport copy",
+    "money order/cashier's check for the fee",
+    "self-addressed prepaid return envelope if applying by mail"
    ]
   }
  },
@@ -16624,6 +16812,11 @@
      "fee": null,
      "notes": "No government-published fee"
     }
+   ],
+   "required_documents": [
+    "Passport with more than six months validity at entry",
+    "recent passport-size digital photo (JPEG or PNG)",
+    "valid credit card (Visa/MasterCard)"
    ]
   }
  },
@@ -16663,7 +16856,8 @@
      },
      "notes": "US passports are on the published VOA list"
     }
-   ]
+   ],
+   "permitted_stay": "no more than 90 days from the date of entry"
   }
  },
  {
@@ -16728,7 +16922,24 @@
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 30,
-   "permitted_stay": "1 month, extendable to 3 months"
+   "permitted_stay": "1 month, extendable to 3 months",
+   "government_fee": {
+    "amount": 0,
+    "currency": "LBP"
+   },
+   "visa_products": [
+    {
+     "type": "Tourist visa on arrival",
+     "entry": "single",
+     "validity": "1 month",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 0,
+      "currency": "LBP"
+     },
+     "notes": "Extendable up to 3 months at General Security"
+    }
+   ]
   }
  },
  {
@@ -16874,7 +17085,19 @@
   "source_url": "https://eservices.mhaiss.gov.na/visaonarrival",
   "note": "Namibia Ministry of Home Affairs, Immigration, Safety and Security e-Services portal. \"United States Of America\" appears in the \"Other Countries\" block of that list. Namibia ended visa exemption for 33 nationalities including the US on 1 April 2025, so a visa is now needed, but it is obtainable on arrival (or pre-paid online through the same MHAISS portal). Stay length is not s",
   "fields": {
-   "disposition": "VISA_ON_ARRIVAL"
+   "disposition": "VISA_ON_ARRIVAL",
+   "government_fee": {
+    "amount": 1600,
+    "currency": "NAD"
+   },
+   "permitted_stay": "90 days, not exceeding 90 days in a calendar year",
+   "permitted_stay_days": 90,
+   "required_documents": [
+    "Passport valid 6 months with 3 blank pages",
+    "recent passport photo",
+    "completed visa application",
+    "invitation letter (if invited)"
+   ]
   }
  },
  {
@@ -17680,7 +17903,11 @@
      "fee": null,
      "notes": "Cost, payment method and currency are set per country and consulate and are not published; shown during the application"
     }
-   ]
+   ],
+   "government_fee": {
+    "amount": 50,
+    "currency": "USD"
+   }
   }
  },
  {
@@ -18802,7 +19029,8 @@
      },
      "notes": "Fee is per mission: TT$300 cash (Port of Spain) or £30 (London, plus £15 UK return postage). Non-refundable. Min 5 working days processing. Length of stay is finally set by Immigration at the port of entry."
     }
-   ]
+   ],
+   "permitted_stay": "One month in the first instance, extendable twice by one month each"
   }
  },
  {
@@ -18937,6 +19165,16 @@
      },
      "notes": "Tariff is 30.00 Soles Consulares; one Sol Consular is approximately US$1.00, with local-currency equivalents in each post's Tarifas Consulares. 183 days is an aggregate cap over the 12 months and is not extendable at the consulate; the actual authorised stay is stamped by the immigration officer at entry. Apply 15 calendar days before travel."
     }
+   ],
+   "required_documents": [
+    "Formulario DGC 005",
+    "Pasaporte vigente",
+    "Pasaje de ida y vuelta al Perú (boleto o reserva)",
+    "Reserva de hotel o de paquete turístico o carta de invitación legalizada por el MRE",
+    "Dos fotografías tamaño pasaporte a color con fondo blanco",
+    "Copia reciente de estado de cuenta bancario o certificado de depósito",
+    "Pago de la tasa consular",
+    "Entrevista personal en el consulado"
    ]
   }
  },
@@ -18967,6 +19205,18 @@
      },
      "notes": "EC$200.00, stated as US$88.00, non-refundable; payable by debit/credit card for online applications. Chinese nationals are among the ten nationalities that must apply to the Ministry of National Security. Required: passport bio-page, 2x2 photo, sponsor letter, valid Police Certificate of Character, financial statement, accommodation booking. Length of stay is set at the port of entry; the Ministry publishes no validity or stay period."
     }
+   ],
+   "permitted_stay": "3 months entry permit granted on arrival for 'Other International Countries'",
+   "permitted_stay_days": 90,
+   "required_documents": [
+    "Passport bio-page colour copy",
+    "passport photo (2x2 inches",
+    "last 6 months)",
+    "sponsor letter",
+    "valid police certificate of character",
+    "financial statement",
+    "hotel/accommodation booking (if applicable)",
+    "charter agreement (if applicable)"
    ]
   }
  },
@@ -19305,7 +19555,8 @@
      },
      "notes": "Chinese Diplomatic, Official and Service passports only"
     }
-   ]
+   ],
+   "permitted_stay": "Single entry stay of sixty (60) days from the date of arrival"
   }
  },
  {
@@ -19462,7 +19713,8 @@
      },
      "notes": "USD or EUR depending on the consular post; extendable once for an equal period"
     }
-   ]
+   ],
+   "permitted_stay": "Up to 30 days, extendable once for a similar period at the discretion of the Dirección Nacional de Migraciones"
   }
  },
  {
@@ -19493,6 +19745,16 @@
      },
      "notes": "USD 50 application + USD 30 issuance; extendable once for another 90 days on payment of the tariff"
     }
+   ],
+   "permitted_stay": "La visa de turismo tendra un periodo de noventa (90) dias contados a partir del ingreso al territorio ecuatoriano.",
+   "required_documents": [
+    "Visa application form",
+    "Colour photo 5x5 cm JPG on white background",
+    "Passport valid at least 6 months",
+    "Original police clearance certificate translated and apostilled/legalised (18+)",
+    "Proof of lawful means of subsistence (Acuerdo Ministerial No. 70)",
+    "Travel itinerary and return tickets",
+    "Proof of fee payment"
    ]
   }
  },
@@ -19641,7 +19903,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "permitted_stay": "Up to 3 months at a time"
   }
  },
  {
@@ -19683,7 +19946,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "permitted_stay": "Up to 3 months at a time"
   }
  },
  {
@@ -19736,7 +20000,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "permitted_stay": "Up to 3 months at a time"
   }
  },
  {
@@ -19789,7 +20054,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "permitted_stay": "Up to 3 months at a time"
   }
  },
  {
@@ -19842,7 +20108,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "permitted_stay": "Up to 3 months at a time"
   }
  },
  {
@@ -19884,7 +20151,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "permitted_stay": "Up to 3 months at a time"
   }
  },
  {
@@ -20174,6 +20442,15 @@
      "fee": null,
      "notes": "Fee not published by NIS; reciprocity-based."
     }
+   ],
+   "required_documents": [
+    "Invitation letter from host in Nigeria accepting immigration responsibility",
+    "host's Nigerian passport or residence permit",
+    "valid passport (min 6 months)",
+    "passport photo",
+    "evidence of return ticket",
+    "hotel reservation or host address",
+    "evidence of sufficient funds (180-day bank statement)"
    ]
   }
  },
@@ -20206,6 +20483,15 @@
      "fee": null,
      "notes": null
     }
+   ],
+   "required_documents": [
+    "Invitation letter from host in Nigeria accepting immigration responsibility",
+    "host's Nigerian passport or residence permit",
+    "valid passport (min 6 months)",
+    "passport photo",
+    "evidence of return ticket",
+    "hotel reservation or host address",
+    "evidence of sufficient funds (180-day bank statement)"
    ]
   }
  },
@@ -20238,6 +20524,15 @@
      "fee": null,
      "notes": "Fee not published"
     }
+   ],
+   "required_documents": [
+    "Invitation letter from host in Nigeria accepting immigration responsibility",
+    "host's Nigerian passport or residence permit",
+    "valid passport (min 6 months)",
+    "passport photo",
+    "evidence of return ticket",
+    "hotel reservation or host address",
+    "evidence of sufficient funds (180-day bank statement)"
    ]
   }
  },
@@ -21172,7 +21467,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "permitted_stay": "Short stay of up to 90 days in any 180-day period"
   }
  },
  {
@@ -21565,6 +21861,12 @@
      },
      "notes": "Issued through Afghan diplomatic and consular missions abroad."
     }
+   ],
+   "permitted_stay": "One month stay",
+   "required_documents": [
+    "Valid passport",
+    "hotel booking confirmation",
+    "evidence of the purpose of travel"
    ]
   }
  },
@@ -21596,7 +21898,8 @@
      },
      "notes": "No functioning government e-visa channel; evisa.gov.af is unreachable."
     }
-   ]
+   ],
+   "permitted_stay": "One month stay"
   }
  },
  {
@@ -21627,7 +21930,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "permitted_stay": "One month stay"
   }
  },
  {
@@ -21795,7 +22099,15 @@
      },
      "notes": "USD 175 / 250 / 350 depending on card type and term; must be enrolled in person inside Liberia, cannot be used for first entry."
     }
-   ]
+   ],
+   "required_documents": [
+    "Passport valid at least 6 months",
+    "Passport bio-page scan (PDF/BMP/JPG/PNG",
+    "max 2 MB)",
+    "Portrait photo per ICAO guidelines (max 2 MB)",
+    "Flight ticket scan (optional)"
+   ],
+   "permitted_stay": "Must leave Liberia after 90 days and re-enter to continue the stay"
   }
  },
  {
@@ -22180,6 +22492,16 @@
      },
      "notes": "Portal record also breaks out a government_fee of 40 and a platform_fee of 10 alongside the 260 base. Yellow Fever certificate and invitation/host letter are mandatory. Standard processing 5 days."
     }
+   ],
+   "required_documents": [
+    "Passport valid 6+ months beyond stay",
+    "Passport-sized photo",
+    "Travel itinerary",
+    "Proof of accommodation",
+    "Travel details (dates",
+    "purpose)",
+    "Yellow fever vaccination card",
+    "Valid card/mobile money for payment"
    ]
   }
  },
@@ -22485,6 +22807,17 @@
      },
      "notes": "HK$319 urgent"
     }
+   ],
+   "permitted_stay": "30–90 days per entry, as endorsed",
+   "required_documents": [
+    "Online visa application form (visa.gov.bd)",
+    "passport valid 6 months with 2 blank pages",
+    "2 photos (35x45mm)",
+    "confirmed round-trip itinerary",
+    "hotel booking",
+    "3 months Hong Kong bank statement",
+    "HK/Macau ID card copy",
+    "invitation letter (if any)"
    ]
   }
  },
@@ -22578,6 +22911,12 @@
      },
      "notes": "US reciprocity rate. Per-entry stay is not separately published; the tourist category is the short-stay (<90 day) visa."
     }
+   ],
+   "required_documents": [
+    "Valid passport (6+ months)",
+    "Scanned passport datapage",
+    "Valid return ticket",
+    "Yellow Fever certificate"
    ]
   }
  },
@@ -22988,7 +23327,8 @@
      },
      "notes": "Applied at evisa.mfa.ir choosing Hong Kong as place of issue, then lodged at the Consulate General. Urgent visas add 50 percent and are issued in one working day."
     }
-   ]
+   ],
+   "permitted_stay": "Visit visa-free for a stay of up to 21 days"
   }
  },
  {
@@ -23668,7 +24008,9 @@
      },
      "notes": "Plus SDF USD 100 per adult per night (USD 50 for children 6 to under 12, free under 6)"
     }
-   ]
+   ],
+   "permitted_stay": "actual duration of stay or ninety days, whichever is less",
+   "permitted_stay_days": 90
   }
  },
  {
@@ -23853,6 +24195,15 @@
      },
      "notes": null
     }
+   ],
+   "required_documents": [
+    "Schengen visa application form",
+    "travel document issued within last 10 years and valid 3 months beyond departure with 2 blank pages",
+    "photograph",
+    "travel medical insurance covering at least EUR 30",
+    "000",
+    "supporting documents per the local harmonised list",
+    "biometrics (photo + 10 fingerprints)"
    ]
   }
  },
@@ -24133,7 +24484,32 @@
     "amount": 7,
     "currency": "CAD"
    },
-   "permitted_stay_days": 180
+   "permitted_stay_days": 180,
+   "permitted_stay": "Most visitors can stay for up to 6 months in Canada.",
+   "visa_products": [
+    {
+     "type": "eTA for air travel",
+     "entry": "multiple",
+     "validity": "Up to 5 years or until passport expires",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 7,
+      "currency": "CAD"
+     },
+     "notes": "Required for French citizens flying to Canada; linked electronically to passport"
+    },
+    {
+     "type": "Visa-exempt entry by land/sea",
+     "entry": "multiple",
+     "validity": "Per visit",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 0,
+      "currency": "CAD"
+     },
+     "notes": "French citizens arriving by land or sea require only a valid passport; no eTA or visa"
+    }
+   ]
   }
  },
  {
@@ -24205,7 +24581,20 @@
     "amount": 100,
     "currency": "CAD"
    },
-   "permitted_stay_days": 180
+   "permitted_stay_days": 180,
+   "visa_products": [
+    {
+     "type": "Temporary Resident Visa (visitor / tourist)",
+     "entry": "Multiple",
+     "validity": "Up to 10 years or until 1 month before passport expiry, whichever is shorter; issued at officer's discretion",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 100,
+      "currency": "CAD"
+     },
+     "notes": "Single or multiple entry and final validity are determined by the visa officer; each entry normally allows a stay of up to 6 months."
+    }
+   ]
   }
  },
  {
@@ -24427,6 +24816,17 @@
      },
      "notes": null
     }
+   ],
+   "permitted_stay": "Period not exceeding 1 month",
+   "required_documents": [
+    "Completed Form 7 application",
+    "certified copies of passport identity pages",
+    "1 passport-size photo (45x35mm)",
+    "police certificate for last 12 months",
+    "certificate of medical fitness (chest x-ray and blood tests)",
+    "valid onward travel ticket",
+    "evidence of means of support",
+    "receipt of fee payment (waived for PRC nationals)"
    ]
   }
  },
@@ -24445,7 +24845,20 @@
     "amount": 50,
     "currency": "AUD"
    },
-   "permitted_stay_days": 30
+   "permitted_stay_days": 30,
+   "visa_products": [
+    {
+     "type": "Single-entry tourist visa",
+     "entry": "single",
+     "validity": "Normally 3 months from date of issue",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 50,
+      "currency": "AUD"
+     },
+     "notes": "Issued for tourism; extension possible by applying to Nauru Immigration"
+    }
+   ]
   }
  },
  {
@@ -24463,7 +24876,20 @@
     "amount": 50,
     "currency": "AUD"
    },
-   "permitted_stay_days": 30
+   "permitted_stay_days": 30,
+   "visa_products": [
+    {
+     "type": "Single-entry tourist eVisa",
+     "entry": "single",
+     "validity": "30 days",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 50,
+      "currency": "AUD"
+     },
+     "notes": "For leisure/tourism visits; not valid for employment"
+    }
+   ]
   }
  },
  {
@@ -25079,7 +25505,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "permitted_stay_days": 30
   }
  },
  {
@@ -25174,7 +25601,8 @@
      },
      "notes": "gob.mx trámite SRE-01-036, 'Costo del trámite: Monto fijo 54 USD, Vigencia: 10 Años'; permits multiple entries, up to 180 days per stay."
     }
-   ]
+   ],
+   "permitted_stay": "Stay set by the immigration authority at the port of entry, not more than 180 days"
   }
  },
  {
@@ -25458,7 +25886,8 @@
      "fee": null,
      "notes": "Fee and validity not published on any Eswatini government domain"
     }
-   ]
+   ],
+   "permitted_stay": "stay of up to 30 days"
   }
  },
  {
@@ -25550,7 +25979,8 @@
      },
      "notes": "Exempt under EU Visa Code Art. 16(4); not stated on the Icelandic MFA page itself"
     }
-   ]
+   ],
+   "permitted_stay": "Up to 90 days in any 180-day period"
   }
  },
  {
@@ -25806,7 +26236,8 @@
      },
      "notes": "90 days within any 180-day period. Passport must be valid at least 60 days beyond the duration of stay. Official/diplomatic passport holders do require a visa."
     }
-   ]
+   ],
+   "permitted_stay": "Exempt from visa up to 90 days in any 180-day period"
   }
  },
  {
@@ -25892,7 +26323,8 @@
      },
      "notes": "Issued free of charge."
     }
-   ]
+   ],
+   "permitted_stay": "maximum 90 days in any 180-day period"
   }
  },
  {
@@ -25978,7 +26410,8 @@
      },
      "notes": null
     }
-   ]
+   ],
+   "permitted_stay": "up to 90 days within a 180-day period"
   }
  },
  {
@@ -26242,6 +26675,15 @@
      },
      "notes": "Note 6: exempt since 01.04.2019 if the US/Canadian visa (any type except C/transit) or Green Card has at least 6 months' validity remaining"
     }
+   ],
+   "permitted_stay": "Stay of up to 90 days, extendable once for a further 90 days by the Servicio Nacional de Migraciones",
+   "required_documents": [
+    "Online form stating purpose and length of trip",
+    "colour passport-size photo on white background (5x5 cm)",
+    "copy of passport bio page",
+    "proof of residence/immigration status if applying outside country of nationality",
+    "proof of own economic means (3 payslips and 3 months of bank statements)",
+    "no entry ban to Chile"
    ]
   }
  },
@@ -27300,7 +27742,35 @@
    "government_fee": {
     "amount": 60,
     "currency": "MYR"
-   }
+   },
+   "required_documents": [
+    "Valid passport (6+ months validity)",
+    "valid Visa Approval Letter (eVAL)"
+   ],
+   "visa_products": [
+    {
+     "type": "Single-entry Student Entry Visa (SEV)",
+     "entry": "single",
+     "validity": "Normally 3 months from issue",
+     "max_stay_days": null,
+     "fee": {
+      "amount": 30,
+      "currency": "MYR"
+     },
+     "notes": "Paper visa issued by the embassy after VAL approval; permits one entry to complete Student Pass endorsement"
+    },
+    {
+     "type": "Student Pass",
+     "entry": "Multiple",
+     "validity": "Duration of the approved course, renewable in 1-year segments",
+     "max_stay_days": null,
+     "fee": {
+      "amount": 60,
+      "currency": "MYR"
+     },
+     "notes": "Long-term study pass issued by Malaysian Immigration after post-arrival medical screening"
+    }
+   ]
   }
  },
  {
@@ -27646,10 +28116,19 @@
    "disposition": "VISA_REQUIRED",
    "permitted_stay": "Up to 90 days",
    "permitted_stay_days": 90,
-   "government_fee": {
-    "amount": 140,
-    "currency": "USD"
-   }
+   "visa_products": [
+    {
+     "type": "UK ETA – business visitor",
+     "entry": "multiple",
+     "validity": "2 years or until passport expires, whichever is sooner",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 20,
+      "currency": "GBP"
+     },
+     "notes": "Permits meetings, conferences and contract negotiations; no paid work"
+    }
+   ]
   }
  },
  {
@@ -27757,7 +28236,31 @@
   "fields": {
    "disposition": "VISA_REQUIRED",
    "permitted_stay": "Issued for the term of the employment or civil-law services contract, but no more than one year; highly qualified specialists receive a multiple-entry work visa for the contract term up to three years",
-   "permitted_stay_days": 365
+   "permitted_stay_days": 365,
+   "visa_products": [
+    {
+     "type": "Single-entry work visa",
+     "entry": "single",
+     "validity": "Up to 90 days, tied to work permit",
+     "max_stay_days": 90,
+     "notes": "Initial entry visa for commencing work in Russia",
+     "fee": {
+      "amount": 581,
+      "currency": "CNY"
+     }
+    },
+    {
+     "type": "Multiple-entry work visa",
+     "entry": "multiple",
+     "validity": "Tied to the duration of the work permit",
+     "max_stay_days": null,
+     "notes": "Usually issued after arrival/extension based on the underlying work permit",
+     "fee": {
+      "amount": 1741,
+      "currency": "CNY"
+     }
+    }
+   ]
   }
  },
  {
@@ -27794,6 +28297,2216 @@
     "amount": 0,
     "currency": "USD"
    }
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "MYS",
+   "travel_purpose": "business"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.imi.gov.my/index.php/perkhidmatan-utama/visa/kadar-bayaran-visa/",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Negara | Single/Multiple Entry Visa (RM) | Transit Visa (RM) ... P.R.China | 30.00 | 30.00 | Negara | Single/Multiple Entry Visa (RM) | Transit Visa (RM) ... P.R.China | 30.00 | 30.00\"",
+  "fields": {
+   "required_documents": [
+    "Valid passport (6+ months validity)",
+    "studio passport photo with white background",
+    "invitation letter",
+    "dispatch letter",
+    "confirmed return ticket",
+    "accommodation/hotel booking"
+   ],
+   "visa_products": [
+    {
+     "type": "Single-entry business eVisa",
+     "entry": "single",
+     "validity": "3 months",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 30,
+      "currency": "MYR"
+     },
+     "notes": "Applied online; short business visits"
+    },
+    {
+     "type": "Single-entry business sticker visa",
+     "entry": "single",
+     "validity": "3 months",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 30,
+      "currency": "MYR"
+     },
+     "notes": "Lodged at Malaysian embassy/visa centre"
+    },
+    {
+     "type": "Multiple-entry business visa",
+     "entry": "multiple",
+     "validity": "6–12 months",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 30,
+      "currency": "MYR"
+     },
+     "notes": "Sticker visa for repeated business travel"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "MYS",
+   "travel_purpose": "family_visit"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.kln.gov.my/web/chn_beijing/requirement_foreigner",
+  "note": "Completeness campaign fill vs official sources. Quote: \"The Government of Malaysia wishes to announce that the Agreement between The Government of Malaysia and The Government of The People's Republic of Chi\"",
+  "fields": {
+   "permitted_stay": "Maximum 30 days per entry, cumulative stay not exceeding 90 days within any 180-day period",
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "MYS",
+   "travel_purpose": "work"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://esd.imi.gov.my/portal/pdf/Revised_Expatriate_Salary_Policy.pdf",
+  "note": "Completeness campaign fill vs official sources. Quote: \"The EP is a multiple-entry visa, with a duration ranging from 1 month to 60 months, subject to Employment Contract and approval by the Expatriate Comm | The EP is a multiple-entry visa, with a duration ranging from 1 month to 60 months, subject to Employment Contract and approval by the Expatriate Comm\"",
+  "fields": {
+   "permitted_stay": "Up to 60 months per pass (EP Category I maximum employment duration up to 10 years under the policy effective 1 June 2026)",
+   "visa_products": [
+    {
+     "type": "Employment Pass Category I",
+     "entry": "Multiple",
+     "validity": "Up to 5 years",
+     "max_stay_days": null,
+     "fee": {
+      "amount": 200,
+      "currency": "MYR"
+     },
+     "notes": "Salary ≥ RM10,000; key posts/contractors; employer-sponsored"
+    },
+    {
+     "type": "Employment Pass Category II",
+     "entry": null,
+     "validity": "Up to 2 years",
+     "max_stay_days": null,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "Salary RM5,000–RM9,999; employer-sponsored"
+    },
+    {
+     "type": "Employment Pass Category III",
+     "entry": null,
+     "validity": "Up to 1 year",
+     "max_stay_days": null,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "Salary RM3,000–RM4,999; limited sectors; employer-sponsored"
+    },
+    {
+     "type": "Professional Visit Pass",
+     "entry": "Single",
+     "validity": "Up to 12 months",
+     "max_stay_days": 365,
+     "fee": {
+      "amount": 90,
+      "currency": "MYR"
+     },
+     "notes": "Short-term professional work/secondment; sponsor applies via ESD"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "MYS",
+   "travel_purpose": "study"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://visa.educationmalaysia.gov.my/media/docs/Student_Visa_Application_User_Guide.pdf",
+  "note": "Completeness campaign fill vs official sources. Quote: \"19. Extended student pass (Duration of Student Pass Sought): This option is available for a few institution selected by the Ministry. You can choose t\"",
+  "fields": {
+   "government_fee": {
+    "amount": 60,
+    "currency": "MYR"
+   },
+   "permitted_stay": "One-year Student Pass renewed annually, or a one-off Student Pass covering the entire course duration (subject to course length and passport validity)",
+   "visa_products": [
+    {
+     "type": "Student Pass (full-time study)",
+     "entry": "multiple",
+     "validity": "Course duration, renewable annually",
+     "max_stay_days": null,
+     "fee": {
+      "amount": 60,
+      "currency": "MYR"
+     },
+     "notes": "Requires EMGS eVAL before travel; this is a Student Pass approval, not a visa or ETA"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "QAT",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://portal.moi.gov.qa/wps/wcm/connect/wcmlib-internet-en/sa-departmentcommittee/generaladministrationofnationalitybordersandexpatriateaffairs/visas/sad",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Free tourist visas with multiple entries (30 days) - The following nationalities can enter and stay in Qatar for 30 days with this visa. It is valid f\"",
+  "fields": {
+   "government_fee": {
+    "amount": 0,
+    "currency": "QAR"
+   },
+   "permitted_stay": "30 days, extendable for another 30 days",
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "QAT",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://portal.moi.gov.qa/wps/wcm/connect/wcmlib-internet-en/sa-departmentcommittee/generaladministrationofnationalitybordersandexpatriateaffairs/visas/sad",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Free tourist visas with multiple entries (30 days) - The following nationalities can enter and stay in Qatar for 30 days with this visa. It is valid f\"",
+  "fields": {
+   "government_fee": {
+    "amount": 0,
+    "currency": "QAR"
+   },
+   "permitted_stay": "30 days, extendable for another 30 days",
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "COM",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://justice.gouv.km/texte/loi-n88-025-relative-aux-conditions-de-sejour-des-etrangers-aux-comores/",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Pour etre admis a penetrer dans le territoire comorien tout etranger doit etre muni d'un passeport national ou titre de voyage en tenant lieu, en cour\"",
+  "fields": {
+   "permitted_stay": "Tourist visa valid for a stay of a maximum of forty-five days",
+   "permitted_stay_days": 45
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "ARM",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.mfa.am/en/visa/",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Citizens of the selected country with ALL TYPES of passports are NOT REQUIRED to hold a visa when travelling to the Republic of Armenia. Citizens of t\"",
+  "fields": {
+   "permitted_stay": "Maximum 180 days in a year",
+   "permitted_stay_days": 180
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "USA",
+   "travel_purpose": "study"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.ecfr.gov/current/title-8/chapter-I/subchapter-B/part-214/section-214.2",
+  "note": "Completeness campaign fill vs official sources. Quote: \"( 5 ) Duration of status - ( i ) General. Duration of status is defined as the time during which an F-1 student is pursuing a full course of study at  | ( 5 ) Period of stay. A student in M nonimmigrant status is admitted for a fixed time period, which is the period necessary to complete the course of \"",
+  "fields": {
+   "permitted_stay": "Duration of status (D/S) - admitted for the time spent pursuing a full course of study at an SEVP-certified school plus authorized practical training; no fixed number of days",
+   "permitted_stay_days": 365,
+   "visa_products": [
+    {
+     "type": "F-1 Academic Student",
+     "entry": "multiple",
+     "validity": "Up to 60 months for Chinese nationals; determined by consular officer",
+     "max_stay_days": null,
+     "fee": {
+      "amount": 185,
+      "currency": "USD"
+     },
+     "notes": "Separate SEVIS I-901 fee USD 350; D/S stay tied to program"
+    },
+    {
+     "type": "M-1 Vocational Student",
+     "entry": "Multiple",
+     "validity": "Determined by program length; typically up to 12 months",
+     "max_stay_days": 365,
+     "fee": {
+      "amount": 185,
+      "currency": "USD"
+     },
+     "notes": "Separate SEVIS I-901 fee USD 220; for vocational/non-academic programs"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "USA",
+   "travel_purpose": "study"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.ecfr.gov/current/title-8/chapter-I/subchapter-B/part-214/section-214.2",
+  "note": "Completeness campaign fill vs official sources. Quote: \"( 5 ) Duration of status - ( i ) General. Duration of status is defined as the time during which an F-1 student is pursuing a full course of study at  | ( 5 ) Period of stay. A student in M nonimmigrant status is admitted for a fixed time period, which is the period necessary to complete the course of \"",
+  "fields": {
+   "permitted_stay": "Duration of status (D/S) - admitted for the time spent pursuing a full course of study at an SEVP-certified school plus authorized practical training; no fixed number of days",
+   "permitted_stay_days": 365,
+   "visa_products": [
+    {
+     "type": "F-1 Academic Student",
+     "entry": "multiple",
+     "validity": "Up to 60 months",
+     "max_stay_days": null,
+     "fee": {
+      "amount": 185,
+      "currency": "USD"
+     },
+     "notes": "SEVIS I-901 fee USD 350 paid separately; stay is Duration of Status"
+    },
+    {
+     "type": "M-1 Vocational Student",
+     "entry": "multiple",
+     "validity": "Program length, generally up to 12 months",
+     "max_stay_days": 365,
+     "fee": {
+      "amount": 185,
+      "currency": "USD"
+     },
+     "notes": "SEVIS I-901 fee USD 350 paid separately; limited employment allowed"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "USA",
+   "travel_purpose": "transit"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://travel.state.gov/content/travel/en/us-visas/Visa-Reciprocity-and-Civil-Documents-by-Country/HongKong.html",
+  "note": "Completeness campaign fill vs official sources. Quote: \"US Dept of State Visa Reciprocity Schedule, Hong Kong S.A.R.: 'Visa Classification | Fee | Number of Entries | Validity Period — C-1 | None | Multiple\"",
+  "fields": {
+   "permitted_stay": "Admitted for a period not to exceed 29 days",
+   "permitted_stay_days": 29,
+   "visa_products": [
+    {
+     "type": "C-1 Transit",
+     "entry": "single",
+     "validity": "Typically issued for a short period at consular discretion",
+     "max_stay_days": 29,
+     "fee": {
+      "amount": 185,
+      "currency": "USD"
+     },
+     "notes": "For immediate and continuous transit; admission period set by CBP at entry"
+    },
+    {
+     "type": "B-1/B-2 Visitor",
+     "entry": "multiple",
+     "validity": "Up to 10 years at consular discretion",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 185,
+      "currency": "USD"
+     },
+     "notes": "May also be used for transit; usual admission up to 6 months"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "RUS",
+   "travel_purpose": "study"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://guangzhou.mid.ru/ru/consular-services/consulate/tarif_konsulskikh_sborov/",
+  "note": "Completeness campaign fill vs official sources. Quote: \"VII. Выдача виз иностранным гражданам и лицам без гражданства — 1. Обыкновенная однократная виза — 4-20 рабочих дней 80/581 — 1-3 рабочих дня 160/1160 | 2. Обыкновенная двукратная виза — 4-20 рабочих дней 128/928 — 1-3 рабочих дня 256/1856\"",
+  "fields": {
+   "visa_products": [
+    {
+     "type": "Single-entry student visa",
+     "entry": "single",
+     "validity": "90 days from date of issue",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 581,
+      "currency": "CNY"
+     },
+     "notes": "Standard initial study visa; must be extended in Russia"
+    },
+    {
+     "type": "Double-entry student visa",
+     "entry": "multiple",
+     "validity": "90 days from date of issue",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 928,
+      "currency": "CNY"
+     },
+     "notes": "Allows two entries during the initial 90-day period; extend in Russia"
+    },
+    {
+     "type": "Multiple-entry student visa",
+     "entry": "multiple",
+     "validity": "Up to 1 year depending on invitation",
+     "max_stay_days": 365,
+     "fee": {
+      "amount": 1741,
+      "currency": "CNY"
+     },
+     "notes": "Usually for continuing students or when the invitation covers a full academic year; not standard for first-time applicants"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "BHS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.immigration.gov.bs/entry-requirements/before-your-arrival/",
+  "note": "Completeness campaign fill vs official sources. Quote: \"In accordance with official international visa regulation agreements, Bahamian visa requirements are waived for citizens of the following countries wh\"",
+  "fields": {
+   "permitted_stay": "period not exceeding three (3) months",
+   "permitted_stay_days": 90
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "FRA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.service-public.fr/particuliers/vosdroits/F2651",
+  "note": "Completeness campaign fill vs official sources. Quote: \"En tant que citoyen d'un pays de l'Espace économique européen (EEE) ou si vous êtes Suisse, vous avez la possibilité de vous installer en France au-de\"",
+  "fields": {
+   "permitted_stay": "No maximum — EU/EEA/Swiss citizens may settle in France beyond 3 months, with a permanent right of residence after 5 years of continuous lawful residence",
+   "required_documents": [
+    "Valid national identity card or passport"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "MUS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://passport.govmu.org/passport/wp-content/uploads/2021/03/Visa-Requirement-Country-22062022.pdf",
+  "note": "Completeness campaign fill vs official sources. Quote: \"73   Hong Kong       No visa required\"",
+  "fields": {
+   "government_fee": {
+    "amount": 0,
+    "currency": "MUR"
+   },
+   "required_documents": [
+    "Valid passport; the Immigration Officer at the point of entry decides the length of stay granted"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "GBR",
+   "travel_purpose": "study"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.gov.uk/student-visa",
+  "note": "Completeness campaign fill vs official sources. Quote: \"How long you can stay — How long you can stay depends on the length of your course and what study you've already completed in the UK. If you're 18 or \"",
+  "fields": {
+   "permitted_stay": "up to 5 years for a degree-level course (2 years if below degree level)",
+   "permitted_stay_days": 1825,
+   "visa_products": [
+    {
+     "type": "Student visa",
+     "entry": "multiple",
+     "validity": "Course duration plus wrap-up period",
+     "max_stay_days": 1825,
+     "fee": {
+      "amount": 490,
+      "currency": "GBP"
+     },
+     "notes": "For full-time courses; Immigration Health Surcharge is separate and paid per year of stay"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "GBR",
+   "travel_purpose": "work"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.gov.uk/skilled-worker-visa/how-much-it-costs",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Application fees — If you're applying from outside the UK, the standard fee depends on whether you'll be in the UK for: up to 3 years - £819 per perso | Application fees — The standard application fee depends on whether you'll be in the UK for: up to 3 years - £324 per person; more than 3 years - £628 \"",
+  "fields": {
+   "visa_products": [
+    {
+     "type": "Skilled Worker",
+     "entry": "multiple",
+     "validity": "Up to 5 years",
+     "max_stay_days": 1825,
+     "fee": {
+      "amount": 819,
+      "currency": "GBP"
+     },
+     "notes": "Requires a Certificate of Sponsorship; can lead to settlement"
+    },
+    {
+     "type": "Health and Care Worker",
+     "entry": "multiple",
+     "validity": "Up to 5 years",
+     "max_stay_days": 1825,
+     "fee": {
+      "amount": 324,
+      "currency": "GBP"
+     },
+     "notes": "Requires CoS in an eligible health or social care role"
+    },
+    {
+     "type": "Global Business Mobility – Senior or Specialist Worker",
+     "entry": "multiple",
+     "validity": "Up to 5 years",
+     "max_stay_days": 1825,
+     "fee": {
+      "amount": 819,
+      "currency": "GBP"
+     },
+     "notes": "For senior managers or specialist staff transferring to a UK branch"
+    },
+    {
+     "type": "Global Talent",
+     "entry": "multiple",
+     "validity": "Up to 5 years",
+     "max_stay_days": 1825,
+     "fee": {
+      "amount": 766,
+      "currency": "GBP"
+     },
+     "notes": "Requires endorsement or an eligible prestigious prize"
+    },
+    {
+     "type": "Scale-up Worker",
+     "entry": "multiple",
+     "validity": "2 years",
+     "max_stay_days": 730,
+     "fee": {
+      "amount": 937,
+      "currency": "GBP"
+     },
+     "notes": "Requires a qualifying job offer from a scale-up sponsor"
+    },
+    {
+     "type": "High Potential Individual",
+     "entry": "multiple",
+     "validity": "2 years (3 years for PhD)",
+     "max_stay_days": 730,
+     "fee": {
+      "amount": 880,
+      "currency": "GBP"
+     },
+     "notes": "For graduates of eligible top global universities"
+    },
+    {
+     "type": "Graduate visa",
+     "entry": "multiple",
+     "validity": "2 years (3 years for PhD)",
+     "max_stay_days": 730,
+     "fee": {
+      "amount": 937,
+      "currency": "GBP"
+     },
+     "notes": "For applicants who have completed a UK degree"
+    },
+    {
+     "type": "Temporary Worker",
+     "entry": "single",
+     "validity": "Up to 12 or 24 months depending on sub-route",
+     "max_stay_days": null,
+     "fee": {
+      "amount": 340,
+      "currency": "GBP"
+     },
+     "notes": "Includes Creative, Charity, Religious, GAE and International Agreement routes"
+    },
+    {
+     "type": "Youth Mobility Scheme",
+     "entry": "multiple",
+     "validity": "2 years",
+     "max_stay_days": 730,
+     "fee": {
+      "amount": 340,
+      "currency": "GBP"
+     },
+     "notes": "Annual ballot for eligible Hong Kong nationals aged 18-30"
+    },
+    {
+     "type": "Innovator Founder",
+     "entry": "multiple",
+     "validity": "Up to 3 years",
+     "max_stay_days": 1095,
+     "fee": {
+      "amount": 1357,
+      "currency": "GBP"
+     },
+     "notes": "For experienced businesspeople setting up an innovative UK business"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "GBR",
+   "travel_purpose": "transit"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.gov.uk/transit-visa/direct-airside-transit-visa",
+  "note": "Completeness campaign fill vs official sources. Quote: \"How much it costs — A Direct Airside Transit visa costs £41.50. This may change slightly depending on which country you're in. | How much it costs — A Visitor in Transit visa costs £74.50. This may change slightly depending on which country you're in.\"",
+  "fields": {
+   "visa_products": [
+    {
+     "type": "Direct Airside Transit Visa",
+     "entry": "single",
+     "validity": "24 hours",
+     "max_stay_days": 1,
+     "fee": {
+      "amount": 41.5,
+      "currency": "GBP"
+     },
+     "notes": "For airside transit without passing through UK border control; HKSAR passport holders normally require this unless exempt"
+    },
+    {
+     "type": "Visitor in Transit visa",
+     "entry": "single",
+     "validity": "48 hours",
+     "max_stay_days": 2,
+     "fee": {
+      "amount": 74.5,
+      "currency": "GBP"
+     },
+     "notes": "For passing through UK border control en route to another country within 48 hours"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "SSD",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://mofaic.gov.ss/visa-eligibility/",
+  "note": "Completeness campaign fill vs official sources. Quote: \"COUNTRY | VISA? | SINGLE ENTRY VISA FEE | 3 MONTHS MULTIPLE ENTRY | 6 MONTHS MULTIPLE ENTRY … The People's Republic of China | YES | USD 100 | USD 200 | COUNTRY | VISA? | SINGLE ENTRY VISA FEE | 3 MONTHS MULTIPLE ENTRY | 6 MONTHS MULTIPLE ENTRY … The People's Republic of China | YES | USD 100 | USD 200\"",
+  "fields": {
+   "visa_products": [
+    {
+     "type": "Single-entry tourist",
+     "entry": "single",
+     "validity": "typically 1–3 months from issue",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 100,
+      "currency": "USD"
+     },
+     "notes": "Fee set by embassy; verify before applying"
+    },
+    {
+     "type": "Multiple-entry tourist",
+     "entry": "multiple",
+     "validity": "varies by embassy",
+     "max_stay_days": null,
+     "fee": {
+      "amount": 200,
+      "currency": "USD"
+     },
+     "notes": "May not be routinely issued for tourism; confirm availability"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "SSD",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://mofaic.gov.ss/visa-eligibility/",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Hong Kong (SAR) | YES | USD 100 | USD 200 | USD 350 | Hong Kong (SAR) | YES | USD 100 | USD 200 | USD 350\"",
+  "fields": {
+   "visa_products": [
+    {
+     "type": "Single-entry tourist",
+     "entry": "single",
+     "validity": "1 month from issue or as stamped",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 100,
+      "currency": "USD"
+     },
+     "notes": "Fee varies by mission; confirm before applying"
+    },
+    {
+     "type": "Multiple-entry tourist",
+     "entry": "multiple",
+     "validity": "Usually up to 3 months",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 200,
+      "currency": "USD"
+     },
+     "notes": "Availability and fee vary by mission"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "SSD",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://mofaic.gov.ss/visa-eligibility/",
+  "note": "Completeness campaign fill vs official sources. Quote: \"United States | YES | USD 160 | USD 500 | Not Available\"",
+  "fields": {
+   "government_fee": {
+    "amount": 160,
+    "currency": "USD"
+   },
+   "visa_products": [
+    {
+     "type": "Single-entry tourist",
+     "entry": "single",
+     "validity": "1-3 months",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 160,
+      "currency": "USD"
+     },
+     "notes": "Most common tourist visa; fee and validity set by the issuing embassy/consulate"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "NAM",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://mhaiss.gov.na/documents/292728/6201234/Namibia+Visa+Fact+Sheet+-+Version+4+-+28+May+2025.pdf/e47c4aff-5418-8fe6-a98b-15ebaf2386b7?t=1748602076823",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Visa fees: … CHILDREN (12 years and above) and ADULTS — AFRICAN COUNTRIES NAD 1,200.00 (approximately USD 70); OTHER COUNTRIES NAD 1,600.00 (approxima | 90-DAY HOLIDAY VISA – WHAT YOU NEED TO KNOW. Visa Eligibility and Conditions: A 90-day multiple-entry holiday visa may be granted … Multiple Entry: Th\"",
+  "fields": {
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Single-entry tourist e-Visa",
+     "entry": "single",
+     "validity": "3 months",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 1600,
+      "currency": "NAD"
+     },
+     "notes": null
+    },
+    {
+     "type": "Multiple-entry tourist e-Visa",
+     "entry": "multiple",
+     "validity": "Up to 12 months",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 1600,
+      "currency": "NAD"
+     },
+     "notes": "Availability and exact validity for Chinese tourists not confirmed"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "ARE",
+   "destination": "AIA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.gov.ai/service/immigration-labour-visas-travel",
+  "note": "Completeness campaign fill vs official sources. Quote: \"The fees for Anguilla Entry Clearance visas are: Single Entry Visa US$140.00; Multiple Entry Visa US$250.00 | The fees for Anguilla Entry Clearance visas are: Single Entry Visa US$140.00; Multiple Entry Visa US$250.00\"",
+  "fields": {
+   "visa_products": [
+    {
+     "type": "Single-entry tourist",
+     "entry": "single",
+     "validity": "3 months",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 140,
+      "currency": "USD"
+     },
+     "notes": "Standard visitor visa for tourism; confirm validity and fee with the issuing embassy"
+    },
+    {
+     "type": "Multiple-entry tourist",
+     "entry": "multiple",
+     "validity": "6 or 12 months",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 250,
+      "currency": "USD"
+     },
+     "notes": "May be available for frequent visitors at consular discretion; confirm availability and fee"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "ARE",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.mofa.gov.ae/en/Missions/New-York/Services/Visas",
+  "note": "Completeness campaign fill vs official sources. Quote: \"US citizens with a US passport that is valid for more than six months do not need to obtain a visa prior to entry to the UAE if the duration of their \"",
+  "fields": {
+   "permitted_stay": "less than one month",
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "DMA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.dominica.gov.dm/services/passports-and-travel-documents-non-nationals/do-i-need-a-visa-to-enter-into-dominica",
+  "note": "Completeness campaign fill vs official sources. Quote: \"The following persons do not need a visa to enter into the Commonwealth of Dominica: Persons from the following countries wishing to enter into the Co\"",
+  "fields": {
+   "permitted_stay": "Not exceeding six months",
+   "permitted_stay_days": 180
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "TWN",
+   "travel_purpose": "work"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.boca.gov.tw/cp-160-7204-78395-2.html",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Single Entry Resident Visa: NT$2,200 per application made in Taiwan; US$66 per application made overseas. | Single Entry Visitor Visa: NT$1,600 per application made in Taiwan; US$50 per application made overseas.\"",
+  "fields": {
+   "permitted_stay": "Up to 3 years (duration of stay is set by the Alien Resident Certificate, which may not exceed 3 years)",
+   "permitted_stay_days": 1095,
+   "visa_products": [
+    {
+     "type": "Resident Visa (work)",
+     "entry": "single",
+     "validity": "3 months to enter; stay tied to employment/ARC",
+     "max_stay_days": 1095,
+     "fee": {
+      "amount": 66,
+      "currency": "USD"
+     },
+     "notes": "Requires prior Taiwan work permit"
+    },
+    {
+     "type": "Visitor Visa (short-term work)",
+     "entry": "single",
+     "validity": "3 months",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": "For approved work under 6 months; requires work permit"
+    },
+    {
+     "type": "Employment Gold Card",
+     "entry": "multiple",
+     "validity": "1–3 years",
+     "max_stay_days": 1095,
+     "fee": {
+      "amount": 3100,
+      "currency": "TWD"
+     },
+     "notes": "Online application for qualified foreign professionals; includes open work permit, resident visa, ARC and re-entry permit"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "TWN",
+   "travel_purpose": "other"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.immigration.gov.tw/5475/5478/141465/141808/141979/",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Single entry and exit permit: NT$600 | One-year multiple entry and exit permit: NT$1,000\"",
+  "fields": {
+   "permitted_stay": "Not more than three months from the day after entry; one extension of up to three months",
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Single-entry Taiwan Entry Permit for Hong Kong/Macau residents",
+     "entry": "single",
+     "validity": "3 months from issue date",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 600,
+      "currency": "TWD"
+     },
+     "notes": "Online application for HK permanent residents born in HK/Macau or holding right of abode"
+    },
+    {
+     "type": "Multiple-entry Taiwan Entry Permit for Hong Kong/Macau residents",
+     "entry": "multiple",
+     "validity": "1 year",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 1000,
+      "currency": "TWD"
+     },
+     "notes": "For frequent travellers; usually requires prior compliance history and additional justification"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "TWN",
+   "travel_purpose": "family_visit"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.immigration.gov.tw/5475/5478/141465/141808/141979/",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Single entry and exit permit: NT$600 | One-year multiple entry and exit permit: NT$1,000\"",
+  "fields": {
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Single-entry entry permit",
+     "entry": "single",
+     "validity": "3 months",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 600,
+      "currency": "TWD"
+     },
+     "notes": "For tourism, social or family visits; online if eligible"
+    },
+    {
+     "type": "1-year multiple-entry entry permit",
+     "entry": "multiple",
+     "validity": "1 year",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 1000,
+      "currency": "TWD"
+     },
+     "notes": "For eligible frequent travellers; each stay up to 30 days"
+    },
+    {
+     "type": "3-year multiple-entry entry permit",
+     "entry": "multiple",
+     "validity": "3 years",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 2000,
+      "currency": "TWD"
+     },
+     "notes": "For eligible frequent travellers; each stay up to 30 days"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "IRQ",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://mofa.gov.iq/losangeles/en/fees/",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Visas 1. Single entry visa $ 50 2. Multi entry visa $ 150\"",
+  "fields": {
+   "government_fee": {
+    "amount": 50,
+    "currency": "USD"
+   },
+   "visa_products": [
+    {
+     "type": "Single-entry tourist e-Visa",
+     "entry": "single",
+     "validity": "30 days from entry",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 160,
+      "currency": "USD"
+     },
+     "notes": "Issued via the official MOI e-Visa portal; printout required"
+    },
+    {
+     "type": "Single-entry tourist sticker visa",
+     "entry": "single",
+     "validity": "30 days from entry",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": "May be applied for at an Iraqi embassy/consulate; fee not confirmed"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "IRQ",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://mofa.gov.iq/losangeles/en/visa/",
+  "note": "Completeness campaign fill vs official sources. Quote: \"1-Visit or Tourism Visa: – tourist's Visa allows the holder to enter Iraq once during the three months from the date of grant and stay in it for a per\"",
+  "fields": {
+   "government_fee": {
+    "amount": 50,
+    "currency": "USD"
+   },
+   "permitted_stay": "One month",
+   "permitted_stay_days": 30,
+   "visa_products": [
+    {
+     "type": "Single-entry tourist visa",
+     "entry": "single",
+     "validity": "Typically 3 months from issue",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": "Fee and exact validity set by the issuing embassy/consulate"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "IRQ",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://mofa.gov.iq/losangeles/en/fees/",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Visas 1. Single entry visa $ 50 2. Multi entry visa $ 150\"",
+  "fields": {
+   "government_fee": {
+    "amount": 50,
+    "currency": "USD"
+   },
+   "permitted_stay_days": 30,
+   "visa_products": [
+    {
+     "type": "Single-entry tourist",
+     "entry": "single",
+     "validity": "90 days from issue",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": "For federal Iraq; available via e-visa or embassy"
+    },
+    {
+     "type": "Multiple-entry tourist",
+     "entry": "multiple",
+     "validity": "6 months from issue",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 100,
+      "currency": "USD"
+     },
+     "notes": "May require justification; often embassy-only"
+    },
+    {
+     "type": "Kurdistan Region visa on arrival",
+     "entry": "single",
+     "validity": "30 days",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 100000,
+      "currency": "IQD"
+     },
+     "notes": "Available at Erbil/Sulaymaniyah airports only; not valid for federal Iraq; fee payable locally"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "MRT",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://procedures.gov.mr/fr/procedure/1621",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Frais afférents à la procédure : 40 Euro les pays arabes et africains; 55 Euro pour les autres pays. | Frais afférents à la procédure : 40 Euro les pays arabes et africains; 55 Euro pour les autres pays.\"",
+  "fields": {
+   "required_documents": [
+    "Passport valid at least six months"
+   ],
+   "visa_products": [
+    {
+     "type": "Single-entry tourist e-visa",
+     "entry": "single",
+     "validity": "30 days from issue",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 55,
+      "currency": "EUR"
+     },
+     "notes": "Apply online before travel; fees and exact validity should be verified on the official portal"
+    },
+    {
+     "type": "Tourist visa on arrival",
+     "entry": "single",
+     "validity": "issued at border",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 55,
+      "currency": "EUR"
+     },
+     "notes": "May be available at Nouakchott airport and some land borders; not guaranteed"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "MRT",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://procedures.gov.mr/fr/procedure/1621",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Frais afférents à la procédure : 40 Euro les pays arabes et africains; 55 Euro pour les autres pays.\"",
+  "fields": {
+   "government_fee": {
+    "amount": 55,
+    "currency": "EUR"
+   },
+   "required_documents": [
+    "Passport valid at least six months"
+   ],
+   "visa_products": [
+    {
+     "type": "Single-entry tourist e-Visa",
+     "entry": "single",
+     "validity": "30 days from issue",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 55,
+      "currency": "EUR"
+     },
+     "notes": "Tourist purpose only; fee payable online"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "MRT",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://procedures.gov.mr/fr/procedure/1621",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Frais afférents à la procédure : 40 Euro les pays arabes et africains; 55 Euro pour les autres pays.\"",
+  "fields": {
+   "government_fee": {
+    "amount": 55,
+    "currency": "EUR"
+   },
+   "required_documents": [
+    "Passport valid at least six months"
+   ],
+   "visa_products": [
+    {
+     "type": "Single-entry tourist visa on arrival",
+     "entry": "single",
+     "validity": "30 days",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 55,
+      "currency": "EUR"
+     },
+     "notes": "Available at Nouakchott–Oumtounsy International Airport; cash payment required"
+    },
+    {
+     "type": "Single-entry tourist visa via embassy/consulate",
+     "entry": "single",
+     "validity": "30 days",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 55,
+      "currency": "EUR"
+     },
+     "notes": "Apply in advance at a Mauritanian embassy or consulate; fee and requirements vary"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "GEO",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://matsne.gov.ge/ka/document/view/5916029",
+  "note": "Completeness campaign fill vs official sources. Quote: \"„96. ჩინეთის სახალხო რესპუბლიკა.“ … „1２. ჩინეთის სახალხო რესპუბლიკის მოქალაქეებს აქვთ საქართველოში უვიზოდ შემოსვლისა და სრული 30 დღის ვადით ყოფნის უფლ\"",
+  "fields": {
+   "permitted_stay": "30 days, tourist purposes only",
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "GEO",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://matsne.gov.ge/ka/document/view/5916029",
+  "note": "Completeness campaign fill vs official sources. Quote: \"„1２. ჩინეთის სახალხო რესპუბლიკის მოქალაქეებს აქვთ საქართველოში უვიზოდ შემოსვლისა და სრული 30 დღის ვადით ყოფნის უფლება, მხოლოდ ტურისტული მიზნებისთვის.“\"",
+  "fields": {
+   "permitted_stay": "30 days, tourist purposes only",
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "GEO",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://matsne.gov.ge/ka/document/view/2867361",
+  "note": "Completeness campaign fill vs official sources. Quote: \"იმ ქვეყნების ჩამონათვალი, რომელთა მოქალაქეებსაც შეუძლიათ საქართველოში უვიზოდ შემოსვლა … 5 ამერიკის შეერთებული შტატები … შენიშვნები: 1. დანართში მითითე\"",
+  "fields": {
+   "permitted_stay": "Full 1 year",
+   "permitted_stay_days": 365
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "SRB",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.mfa.gov.rs/en/citizens/travel-serbia/visa-regime/kina",
+  "note": "Completeness campaign fill vs official sources. Quote: \"For holders of ordinary passports: No visas required for visits of up to 30 days\"",
+  "fields": {
+   "permitted_stay": "Up to 30 days",
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "SRB",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.mfa.gov.rs/en/citizens/travel-serbia/visa-regime/kina",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Chinese citizens, holders of passports SAR Hong Kong: No visas required for visits up to 14 days\"",
+  "fields": {
+   "permitted_stay": "Up to 14 days",
+   "permitted_stay_days": 14
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "SYC",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.ics.gov.sc/visa-and-travel/visiting-seychelles",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Although a visa is not required to enter Seychelles by other passport holders, visitors should nevertheless have in their possession a valid passport \"",
+  "fields": {
+   "government_fee": {
+    "amount": 0,
+    "currency": "SCR"
+   },
+   "permitted_stay": "Visitor's Permit issued on arrival for up to three months, extendable in three-month blocks to a maximum of twelve months",
+   "permitted_stay_days": 90,
+   "required_documents": [
+    "Valid passport",
+    "return or onward ticket",
+    "confirmed accommodation",
+    "proof of sufficient funds (min US$150/day)",
+    "Electronic Travel Authorisation"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "ESP",
+   "travel_purpose": "work"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.exteriores.gob.es/en/ServiciosAlCiudadano/Paginas/Servicios-consulares.aspx?scco=China&scd=154&scca=Visados&scs=Visados+Nacionales+-+Visado+de+trabajo+por+cuenta+propia",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Consulado General de España en Hong Kong: 'Abono de la tasa de visado. 90€.' | RD 1155/2024, art. 83 (boe.es): 'La autorización inicial de residencia  | Consulado General de España en Hong Kong: 'Abono de la tasa de visado. 90€.'\"",
+  "fields": {
+   "permitted_stay": "Initial temporary residence and self-employment authorisation lasts one year",
+   "permitted_stay_days": 365,
+   "visa_products": [
+    {
+     "type": "Employee work and residence visa (por cuenta ajena)",
+     "entry": "single",
+     "validity": "90 days to enter Spain; residence permit covers employment duration",
+     "max_stay_days": null,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "Employer must obtain Spanish work authorisation before the visa application"
+    },
+    {
+     "type": "Self-employed work and residence visa (por cuenta propia)",
+     "entry": "single",
+     "validity": "90 days to enter Spain; residence permit covers self-employment duration",
+     "max_stay_days": 365,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Requires authorisation as a self-employed worker"
+    },
+    {
+     "type": "EU Blue Card",
+     "entry": "single",
+     "validity": "1 year or duration of contract, renewable",
+     "max_stay_days": null,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "For highly qualified employment; requires higher-education degree or equivalent professional experience"
+    },
+    {
+     "type": "Intra-corporate transfer visa",
+     "entry": "single",
+     "validity": "Duration of transfer, up to 3 years (1 year for trainees)",
+     "max_stay_days": null,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "For managers, specialists or trainees transferred within a corporate group"
+    },
+    {
+     "type": "Seasonal work visa",
+     "entry": "single",
+     "validity": "Up to 9 months within a 12-month period",
+     "max_stay_days": null,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "For pre-approved seasonal-sector contracts"
+    },
+    {
+     "type": "Short-term work visa (trabajo de corta duración)",
+     "entry": "single",
+     "validity": "Up to 90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "For work activities not exceeding 90 days; work authorisation still required"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "IDN",
+   "travel_purpose": "business"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+  "note": "Completeness campaign fill vs official sources. Quote: \"C2 - Business Single Entry Visa — \"Stay: Up to 60 Days (Extendable) … Cost: IDR 2,000,000 (Up to 60 days)\" | D2 - Business Multiple Entry Visa (1 Year) — \"Stay: Up to 60 Days per entry … Cost: IDR 4,000,000 (1 Year)\"\"",
+  "fields": {
+   "visa_products": [
+    {
+     "type": "Electronic Visa on Arrival (e-VOA)",
+     "entry": "single",
+     "validity": "30 days from arrival",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 500000,
+      "currency": "IDR"
+     },
+     "notes": "Apply before travel; valid for business meetings; extendable once for 30 days"
+    },
+    {
+     "type": "Visa on Arrival (VoA)",
+     "entry": "single",
+     "validity": "30 days from arrival",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 500000,
+      "currency": "IDR"
+     },
+     "notes": "Purchase at designated immigration checkpoints; extendable once for 30 days"
+    },
+    {
+     "type": "B211A Single-entry Visit Visa",
+     "entry": "single",
+     "validity": "60 days",
+     "max_stay_days": 60,
+     "fee": {
+      "amount": 2000000,
+      "currency": "IDR"
+     },
+     "notes": "Advance business/tourism visa; extendable up to 180 days total"
+    },
+    {
+     "type": "D212 Multiple-entry Visit Visa",
+     "entry": "multiple",
+     "validity": "1 year",
+     "max_stay_days": 60,
+     "fee": {
+      "amount": 4000000,
+      "currency": "IDR"
+     },
+     "notes": "Multiple entries; 60 days per visit; for frequent business travel"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "IDN",
+   "travel_purpose": "work"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+  "note": "Completeness campaign fill vs official sources. Quote: \"E23 - Employment — \"Stay: Up to 180 Days (Extendable) / Up to 1 Year (Extendable) / Up to 2 Years (Extendable). Cost: Rp 5.250.000 (Up to 180 Days) / \"",
+  "fields": {
+   "government_fee": {
+    "amount": 7000000,
+    "currency": "IDR"
+   },
+   "visa_products": [
+    {
+     "type": "Single-entry Limited Stay Visa (VITAS) for work",
+     "entry": "single",
+     "validity": "Typically 30-90 days for entry; KITAS duration follows work permit",
+     "max_stay_days": null,
+     "fee": {
+      "amount": 7000000,
+      "currency": "IDR"
+     },
+     "notes": "Requires employer sponsorship, RPTKA/IMTA approvals and Telex approval; converted to KITAS after arrival"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "IDN",
+   "travel_purpose": "family_visit"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+  "note": "Completeness campaign fill vs official sources. Quote: \"C1 - Tourist Single Entry Visitor Visa - 60 Days — \"Cost: IDR 1,000,000 … With this visa you can: Conducting activities related to tourism, visiting f\"",
+  "fields": {
+   "government_fee": {
+    "amount": 1000000,
+    "currency": "IDR"
+   },
+   "visa_products": [
+    {
+     "type": "30-day Visa on Arrival (VOA)",
+     "entry": "single",
+     "validity": "30 days",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 500000,
+      "currency": "IDR"
+     },
+     "notes": "Issued at designated entry points; extendable once for up to 30 days"
+    },
+    {
+     "type": "30-day e-Visa on Arrival (e-VOA)",
+     "entry": "single",
+     "validity": "30 days",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 500000,
+      "currency": "IDR"
+     },
+     "notes": "Apply online before travel; same stay and extension rights as VOA"
+    },
+    {
+     "type": "Single-entry family/social visit visa",
+     "entry": "single",
+     "validity": "60 days initial",
+     "max_stay_days": 60,
+     "fee": {
+      "amount": 1000000,
+      "currency": "IDR"
+     },
+     "notes": "For longer family visits; current category and fee must be verified on the portal"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "IDN",
+   "travel_purpose": "study"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://evisa.imigrasi.go.id/web/visa-selection",
+  "note": "Completeness campaign fill vs official sources. Quote: \"C9 - Short Course — \"Stay: Up to 60 Days (Extendable). Cost: IDR 2,000,000 … Conducting activities related to benchmarking activity, short course, or  | E30B - Undergraduate, Postgraduate, dan Doctoral Visa — \"Stay: Up to 1 Year (Extendable) / Up to 2 Years (Extendable) / Up to 4 Years (Extendable). Co\"",
+  "fields": {
+   "visa_products": [
+    {
+     "type": "Single-entry student visit visa (short-term study)",
+     "entry": "single",
+     "validity": "180 days",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 2000000,
+      "currency": "IDR"
+     },
+     "notes": "For short-term study; extension rules depend on the program"
+    },
+    {
+     "type": "Single-entry limited-stay student visa (degree/course study)",
+     "entry": "single",
+     "validity": "1 year",
+     "max_stay_days": 365,
+     "fee": {
+      "amount": 6000000,
+      "currency": "IDR"
+     },
+     "notes": "Converted to KITAS after arrival; extendable for the course duration"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "JPN",
+   "destination": "PHL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Nationals from the following countries are allowed to enter the Philippines without a visa for an initial stay of thirty (30) days: ... Japan ...\"",
+  "fields": {
+   "permitted_stay": "initial stay of thirty (30) days",
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "MYS",
+   "destination": "PHL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Nationals from the following countries are allowed to enter the Philippines without a visa for an initial stay of thirty (30) days: ... Malaysia ...\"",
+  "fields": {
+   "permitted_stay": "initial stay of thirty (30) days",
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "THA",
+   "destination": "PHL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Nationals from the following countries are allowed to enter the Philippines without a visa for an initial stay of thirty (30) days: ... Thailand ...\"",
+  "fields": {
+   "permitted_stay": "initial stay of thirty (30) days",
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "GBR",
+   "destination": "PHL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Nationals from the following countries are allowed to enter the Philippines without a visa for an initial stay of thirty (30) days: ... United Kingdom\"",
+  "fields": {
+   "permitted_stay": "initial stay of thirty (30) days",
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "PHL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Nationals from the following countries are allowed to enter the Philippines without a visa for an initial stay of thirty (30) days: ... France ...\"",
+  "fields": {
+   "permitted_stay": "initial stay of thirty (30) days",
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "AUS",
+   "destination": "PHL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Nationals from the following countries are allowed to enter the Philippines without a visa for an initial stay of thirty (30) days: ... Australia ...\"",
+  "fields": {
+   "permitted_stay": "initial stay of thirty (30) days",
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "IDN",
+   "destination": "PHL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Nationals from the following countries are allowed to enter the Philippines without a visa for an initial stay of thirty (30) days: ... Indonesia ...\"",
+  "fields": {
+   "permitted_stay": "initial stay of thirty (30) days",
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "PHL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Nationals from the following countries are allowed to enter the Philippines without a visa for an initial stay of thirty (30) days: ... Spain ...\"",
+  "fields": {
+   "permitted_stay": "initial stay of thirty (30) days",
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "RUS",
+   "destination": "PHL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://evisa.gov.ph/page/policy?l1=Non-Immigrant+Visas&l2=Free+to+enter+the+Philippines+without+Visa",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Nationals from the following countries are allowed to enter the Philippines without a visa for an initial stay of thirty (30) days: ... Russia ...\"",
+  "fields": {
+   "permitted_stay": "initial stay of thirty (30) days",
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "PAN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.migracion.gob.pa/wp-content/uploads/01.REQUISITOS-PARA-SOLICITAR-VISA-TURISTA.pdf",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Pagar por los servicios migratorios la suma de cincuenta balboas (B/.50.00), al momento de la presentación ante el Servicio Nacional de Migración. | Pagar por los servicios migratorios la suma de cincuenta balboas (B/.50.00), al momento de la presentación ante el Servicio Nacional de Migración.\"",
+  "fields": {
+   "required_documents": [
+    "Completed visa application form",
+    "original and full copy of passport valid at least 3 months",
+    "confirmed onward/return air reservation or e-ticket",
+    "copy of ID or residence card of country of domicile",
+    "three photographs",
+    "proof of funds of at least B/.500",
+    "confirmed hotel reservation or notarised invitation letter"
+   ],
+   "visa_products": [
+    {
+     "type": "Single-entry tourist visa",
+     "entry": "single",
+     "validity": "3 months",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": "Standard tourist option; may require SNM authorization"
+    },
+    {
+     "type": "Multiple-entry tourist visa",
+     "entry": "multiple",
+     "validity": "1 year",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": "For frequent travellers; issued at embassy discretion"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "ATG",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://immigration.gov.ag/visa-services/countries-exempt-from-visa/",
+  "note": "Completeness campaign fill vs official sources. Quote: \"The following countries do not require a Visa to enter Antigua and Barbuda. ... Other Countries (European Union, Non-European and Non-Commonwealth Cou\"",
+  "fields": {
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "MKD",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.immd.gov.hk/eng/service/travel_document/visa_free_access.html",
+  "note": "Completeness campaign fill vs official sources. Quote: \"178 countries and territories have granted visa-free access or visa-on-arrival to HKSAR Passport holders. ... North Macedonia (Republic of) ... Durati\"",
+  "fields": {
+   "permitted_stay_days": 90
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "KOR",
+   "travel_purpose": "study"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://overseas.mofa.go.kr/hk-en/brd/m_1503/view.do?seq=1343449",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Visa Applicant's Nationality / All countries except mentioned below — Single-Entry Visa 90 days or more: HK$ 480 ... Single Entry (S): You may enter o | Single-Entry Visa 90 days or more: HK$ 480 ... Single Entry (S): You may enter one time before the visa expiration date (3 months from visa issuance d\"",
+  "fields": {
+   "permitted_stay": "Up to 2 years initially, granted per the Certificate of Admission",
+   "permitted_stay_days": 730,
+   "visa_products": [
+    {
+     "type": "D-2 Student Visa (degree/exchange)",
+     "entry": "single",
+     "validity": "Duration of study programme",
+     "max_stay_days": 730,
+     "fee": {
+      "amount": 480,
+      "currency": "HKD"
+     },
+     "notes": "For bachelor, master, doctoral and exchange/transfer students; re-entry permit after arrival for multiple exits"
+    },
+    {
+     "type": "D-4 General Trainee Visa (language/non-degree)",
+     "entry": "single",
+     "validity": "Duration of training programme",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 480,
+      "currency": "HKD"
+     },
+     "notes": "For Korean language courses and non-degree vocational training; re-entry permit after arrival for multiple exits"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "ALB",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://arkiva.punetejashtme.gov.al/wp-content/uploads/2024/08/2-Regjimi-i-vizave-per-te-huajt-23.08.2024.pdf",
+  "note": "Completeness campaign fill vs official sources. Quote: \"REPUBLIKA POPULLORE E KINËS | PEKIN | PA VIZË | PA VIZË | PA VIZË | ME VIZË | VETËM ME PASAPORTË\"",
+  "fields": {
+   "permitted_stay": "Type C rules: 90 days within 180 days from first entry",
+   "permitted_stay_days": 90
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "DZA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://embwashington.mfa.gov.dz/en/services-for-foreigners/entry-visa-to-algeria-1",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Tourism Visa: A hotel reservation with: A letter of confirmation from a travel agency or An invitation letter signed and legalized at a local city hal\"",
+  "fields": {
+   "government_fee": {
+    "amount": 160,
+    "currency": "USD"
+   },
+   "visa_products": [
+    {
+     "type": "E-visa single-entry tourist",
+     "entry": "single",
+     "validity": "Not verified",
+     "max_stay_days": null,
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "Available through the Algerian e-visa portal if US nationals are eligible; exact stay and fee not verified"
+    },
+    {
+     "type": "Embassy single-entry tourist visa",
+     "entry": "single",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 160,
+      "currency": "USD"
+     },
+     "notes": "Traditional consular tourist visa; may allow up to 90 days"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "THA",
+   "travel_purpose": "study"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.mfa.go.th/en/page/issuance-of-visa?menu=5e1ff6f857b01e00a84023d4",
+  "note": "Completeness campaign fill vs official sources. Quote: \"3. NON-IMMIGRANT VISA ... 3. VISA FEE 2,000 Baht for single entry and 5,000 Baht for multiple entries. | 3. NON-IMMIGRANT VISA ... 3. VISA FEE 2,000 Baht for single entry and 5,000 Baht for multiple entries.\"",
+  "fields": {
+   "visa_products": [
+    {
+     "type": "Single-entry Non-Immigrant ED",
+     "entry": "single",
+     "validity": "3 months from issue",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 2000,
+      "currency": "THB"
+     },
+     "notes": "For study, training or internship; extendable in Thailand"
+    },
+    {
+     "type": "Multiple-entry Non-Immigrant ED",
+     "entry": "multiple",
+     "validity": "1 year from issue",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 5000,
+      "currency": "THB"
+     },
+     "notes": "90 days per entry; requires strong justification"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "COD",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://evisa.gouv.cd/helps/faqs",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Un e-visa doit être utilisé dans les trois mois suivant la date de sa délivrance. Il donne droit à un visa aéroportuaire de 7 jours avec une seule ent\"",
+  "fields": {
+   "government_fee": {
+    "amount": 300,
+    "currency": "USD"
+   },
+   "permitted_stay": "7 days (VAP affixed on arrival, extendable)",
+   "permitted_stay_days": 7
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "GRD",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://gndembassyprc.mofa.gov.gd/requirements-for-processing-visa-applications-prior-to-arrival-in-grenada/",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Citizens of the People’s Republic of China holding a valid Chinese passport do not need a visa for visits to Grenada not exceeding 30 days.\"",
+  "fields": {
+   "permitted_stay": "visits not exceeding 30 days",
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "MHL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://rmiimmigration.org/visit-rmi-visa-entry/",
+  "note": "Completeness campaign fill vs official sources. Quote: \"V-1 Visitor’s Visa Tourism, family visits, short stays, research, and volunteer services. Note: Visitors from countries eligible for a Visa on Arrival\"",
+  "fields": {
+   "government_fee": {
+    "amount": 100,
+    "currency": "USD"
+   },
+   "permitted_stay": "up to 90 days",
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Single-entry tourist",
+     "entry": "single",
+     "validity": "typically up to 3 months",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 100,
+      "currency": "USD"
+     },
+     "notes": "Standard tourist visa for ordinary Chinese passport holders"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "MHL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://rmiimmigration.org/visit-rmi-visa-entry/",
+  "note": "Completeness campaign fill vs official sources. Quote: \"V-1 Visitor’s Visa Tourism, family visits, short stays, research, and volunteer services. Note: Visitors from countries eligible for a Visa on Arrival\"",
+  "fields": {
+   "government_fee": {
+    "amount": 100,
+    "currency": "USD"
+   },
+   "permitted_stay": "up to 90 days",
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Single-entry tourist visitor permit",
+     "entry": "single",
+     "validity": "30 days from entry",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 100,
+      "currency": "USD"
+     },
+     "notes": "Extendable; confirm fee with RMI Immigration"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "HND",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://hn.usembassy.gov/important-frequently-asked-questions/",
+  "note": "Completeness campaign fill vs official sources. Quote: \"U.S. citizens who wish to visit Honduras for less than 90 days do not need to obtain a visa.\"",
+  "fields": {
+   "permitted_stay": "less than 90 days",
+   "permitted_stay_days": 90
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "FSM",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://fsmembassy.fm/",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Entry permit — A PERMIT IS NoT REQUIRED FoR A PERSON VISITING THE FSM FOR 30 DAYS oR LESS. A PERSON NEEDS A PERMTT FOR A VISIT IN EXCESS OF 30 DAYS.\"",
+  "fields": {
+   "permitted_stay": "No entry permit required for a visit of 30 days or less",
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "FSM",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://fsmembassy.fm/",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Entry permit — A PERMIT IS NoT REQUIRED FoR A PERSON VISITING THE FSM FOR 30 DAYS oR LESS. A PERSON NEEDS A PERMTT FOR A VISIT IN EXCESS OF 30 DAYS.\"",
+  "fields": {
+   "permitted_stay": "No entry permit required for a visit of 30 days or less",
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "FSM",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://fsmembassy.fm/",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Entry permit — A PERMIT IS NoT REQUIRED FoR A PERSON VISITING THE FSM FOR 30 DAYS oR LESS. A PERSON NEEDS A PERMTT FOR A VISIT IN EXCESS OF 30 DAYS.\"",
+  "fields": {
+   "permitted_stay": "No entry permit required for a visit of 30 days or less",
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "MLI",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://maliembassy.us/visas/",
+  "note": "Completeness campaign fill vs official sources. Quote: \"The visa application fee for a US Citizen is $185 for all types of visa except for official and diplomatic visas which are free. This fee is not refun | The visa application fee for a US Citizen is $185 for all types of visa except for official and diplomatic visas which are free. / US Citizens are eli\"",
+  "fields": {
+   "visa_products": [
+    {
+     "type": "Single-entry tourist",
+     "entry": "single",
+     "validity": "30 days",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 185,
+      "currency": "USD"
+     },
+     "notes": "Standard tourist visa; confirm fee at embassy"
+    },
+    {
+     "type": "Multiple-entry tourist",
+     "entry": "multiple",
+     "validity": "90 days",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 185,
+      "currency": "USD"
+     },
+     "notes": "May be available; confirm eligibility and fee at embassy"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "DEU",
+   "destination": "ESP",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.boe.es/buscar/act.php?id=BOE-A-2007-4184",
+  "note": "Completeness campaign fill vs official sources. Quote: \"Artículo 6. Estancia inferior a tres meses. 1. En los supuestos en los que la permanencia en España de un ciudadano de un Estado miembro de la Unión E\"",
+  "fields": {
+   "permitted_stay": "Up to 3 months (90 days) with only a valid passport or ID card; beyond 3 months, registration in the Central Register of Foreigners is required",
+   "permitted_stay_days": 90
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "TUV",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.un.int/tuvalu/sites/www.un.int/files/Tuvalu/Images/immigrationregulations2014_1.pdf",
+  "note": "Completeness campaign fill vs official sources. Quote: \"IMMIGRATION REGULATIONS 2014, MADE UNDER SECTION 18 OF THE IMMIGRATION ACT - 2 Visitors Permit (1) The Principal Immigration Officer may issue to any \"",
+  "fields": {
+   "government_fee": {
+    "amount": 100,
+    "currency": "AUD"
+   },
+   "permitted_stay": "maximum stay of 30 days",
+   "permitted_stay_days": 30,
+   "visa_products": [
+    {
+     "type": "Tourist visa on arrival",
+     "entry": "single",
+     "validity": "30 days",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 100,
+      "currency": "AUD"
+     },
+     "notes": "Issued at Funafuti International Airport"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "TUV",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 completeness campaign vs official sources",
+  "source_url": "https://www.un.int/tuvalu/sites/www.un.int/files/Tuvalu/Images/immigrationregulations2014_1.pdf",
+  "note": "Completeness campaign fill vs official sources. Quote: \"2 Visitors Permit (1) The Principal Immigration Officer may issue to any visitor a visitor's permit for a maximum stay of 30 days under section 9 of t\"",
+  "fields": {
+   "government_fee": {
+    "amount": 100,
+    "currency": "AUD"
+   },
+   "permitted_stay": "maximum stay of 30 days",
+   "permitted_stay_days": 30,
+   "required_documents": [
+    "Valid passport (at least 6 months from date of arrival)",
+    "Proof of sufficient funds",
+    "Proof of accommodation",
+    "Return or onward ticket"
+   ],
+   "visa_products": [
+    {
+     "type": "Single-entry tourist visa on arrival",
+     "entry": "single",
+     "validity": "30 days from date of entry",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 100,
+      "currency": "AUD"
+     },
+     "notes": "Fee payable in cash at port of entry; extension may be possible locally"
+    }
+   ]
   }
  }
 ]

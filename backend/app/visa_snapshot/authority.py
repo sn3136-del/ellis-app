@@ -33,6 +33,13 @@ GOV_SUFFIXES = (
     # kremlin.ru carries Russian presidential decrees (the CHN-RUS visa
     # waiver); consul.mn is Mongolia's MFA consular department.
     "kremlin.ru", "consul.mn",
+    # boe.es is Spain's official state gazette; consulat.ma the Moroccan
+    # consular portal; ksavisa.sa the Saudi state visa platform; gov.krd the
+    # Kurdistan Regional Government; un.int hosts states' permanent missions
+    # (for microstates it is often the only official web presence);
+    # fsmembassy.fm and maliembassy.us are those states' embassies.
+    "boe.es", "consulat.ma", "ksavisa.sa", "gov.krd", "un.int",
+    "fsmembassy.fm", "maliembassy.us",
 
     # generic
     "gov", "mil",
