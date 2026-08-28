@@ -7,7 +7,7 @@
 // demand through the same masked, cached Kimi K3 catalog pipe (fast, with
 // an honest English fallback when a string cannot round-trip).
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Loading, TripPlane } from '../components/ui.jsx'
+import { Loading } from '../components/ui.jsx'
 import { useLocale } from '../lib/locale.jsx'
 import { useLocalizedCountries } from '../lib/countryNames.js'
 import { createVisaClient } from '../lib/visaBackend.js'
@@ -191,179 +191,6 @@ function feeText(fee) {
 }
 
 // Type-ahead country picker: type to filter, click to choose.
-// The landing hero: form column left, island scene right on wide screens.
-// The scene folds away on phones, where every pixel belongs to the form.
-const DB_CSS = `
-.db-hero { display: flex; gap: 40px; align-items: center;
-           justify-content: center; }
-.db-hero-left { width: 100%; max-width: 560px; flex-shrink: 0; }
-.db-scene { flex: 1; max-width: 470px; min-width: 280px;
-            display: flex; flex-direction: column; align-items: center; }
-.db-scene .planeload__sky { max-width: 100%; }
-@media (max-width: 1020px) {
-  /* Phones stack: the form first, the island scene as a compact closer. */
-  .db-hero { display: block; }
-  .db-scene { margin-top: 22px; max-width: 100%; }
-}`
-
-/** The SAME Trip.com plane the loading state flies (same SVG, same bob, same
- *  streaming dashed trail via the planeload classes). Underneath it: a flat
- *  black-and-white island drawn as a New York City skyline whose towers
- *  spell ELLIS, an Empire State spire on the I, blinking windows, and the
- *  Statue of Liberty on her own islet next door, the way Ellis Island
- *  actually sits in New York Harbor. */
-function EllisIslandScene() {
-  const reduced = typeof window !== 'undefined' &&
-    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-  const INK = '#111'
-  const BASE = 150                       // street level
-  // Every letter is a cluster of blocks [x, y-up, w, h]; heights vary so
-  // the roofline has a skyline's rhythm. The I is the Empire State Building.
-  const LETTERS = [
-    [22, [[0, 92, 13, 92], [0, 92, 40, 12], [0, 55, 32, 11], [0, 12, 40, 12]]],
-    [84, [[0, 76, 13, 76], [0, 12, 36, 12]]],
-    [138, [[0, 84, 13, 84], [0, 12, 36, 12]]],
-    // the I is the Empire State Building, true to its elevation: a wide
-    // five-story base, a shoulder setback, the long ribbed shaft, the
-    // narrowing upper tower, the art-deco crown, the rounded mooring mast
-    [192, [[-3, 22, 21, 22], [-1.5, 44, 18, 22], [0, 92, 15, 48],
-           [2, 102, 11, 10], [3.5, 108, 8, 6], [5.5, 116, 4, 8]]],
-    [228, [[0, 61, 38, 11], [0, 50, 12, 14], [0, 36, 38, 11],
-           [26, 25, 12, 14], [0, 11, 38, 11]]],
-  ]
-  // Windows do the shaping: tower shafts wear aligned columns of tall slit
-  // windows; every horizontal slab wears one continuous glass ribbon
-  // tracing the letter's arm. A deterministic lit/dim mix gives the facade
-  // life without noise. [x, y, w, h, dim]
-  const winRects = []
-  const addGrid = (bx, by, w, h) => {
-    if (w <= 22 && h >= 24) {
-      // one centered column on narrow shafts, two on wide ones; every row
-      // snaps to ONE global floor grid so windows align across all towers
-      const ww = 3.4, wh = 7.5, pitch = 16
-      const cols = w >= 15 ? [w / 2 - 5, w / 2 + 1.6] : [(w - ww) / 2]
-      const first = Math.ceil((by + 6) / pitch) * pitch
-      for (let wy = first; wy <= by + h - wh - 5; wy += pitch) {
-        cols.forEach((cx) => winRects.push([bx + cx, wy, ww, wh, 'v']))
-      }
-    } else if (w >= 30 && h >= 9) {
-      const ww = 6.5, wh = Math.min(5.5, h - 4.5), gap = 5, mx = 4.5
-      const n = Math.floor((w - 2 * mx + gap) / (ww + gap))
-      const gx = n > 1 ? (w - 2 * mx - n * ww) / (n - 1) : 0
-      for (let i = 0; i < n; i++) {
-        winRects.push([bx + mx + i * (ww + gx), by + (h - wh) / 2, ww, wh,
-                       'h'])
-      }
-    }
-  }
-  LETTERS.forEach(([lx, rects], li) => {
-    if (li === 3) return   // the Empire State wears ribbon stripes instead
-    rects.forEach(([x, up, w, h]) => addGrid(lx + x, BASE - up, w, h))
-  })
-  // Long layered swells: one path each, spanning the whole harbor.
-  const swell = (y, n) => 'M-12,' + y + ' q10,-3.5 20,0 ' +
-    Array.from({ length: n }, () => 't20,0').join(' ')
-  return (
-    <div className="db-scene" aria-hidden="true">
-      {/* the loading animation itself: same markup, same classes. The sky
-          shares the island's exact width and overlaps it, so the plane and
-          the trail fly just over the spire as one composition. */}
-      <div className="planeload__sky"
-           style={{ width: 'min(330px, 92vw)', height: 84 }}>
-        <span className="planeload__trail" />
-        <span className="planeload__plane" style={{ top: 4 }}>
-          <TripPlane width={176} />
-        </span>
-      </div>
-      <svg viewBox="0 0 300 200"
-           style={{ display: 'block', width: 'min(330px, 92vw)',
-                    marginTop: -20 }}>
-        <g>
-          {/* the island: a thin low shoreline, so the skyline stays the star */}
-          <path d={`M8,${BASE + 6} C20,${BASE} 50,${BASE - 1} 80,${BASE - 1}
-                    L220,${BASE - 1} C250,${BASE - 1} 280,${BASE} 292,${BASE + 6}
-                    C294,${BASE + 8} 291,${BASE + 9} 286,${BASE + 9}
-                    L14,${BASE + 9} C9,${BASE + 9} 6,${BASE + 8} 8,${BASE + 6} Z`}
-                fill={INK} stroke={INK} strokeWidth="1.5"
-                strokeLinejoin="round" />
-                    {/* towers */}
-          {LETTERS.map(([lx, rects], i) => (
-            <g key={i}>
-              {rects.map(([x, up, w, h], j) => (
-                <rect key={j} x={lx + x} y={BASE - up} width={w} height={h}
-                      rx="1.5" fill={INK} stroke={INK} strokeWidth="2" />
-              ))}
-            </g>
-          ))}
-                    {/* street doors on the widest ground blocks */}
-          {[[42, 40], [102, 36], [156, 36], [199.5, 17], [247, 38]].map(([cx], i) => (
-            <rect key={i} x={cx - 2.2} y={BASE - 7.5} width="4.4" height="7.5"
-                  rx="1.2" fill="#fff" opacity="0.95" />
-          ))}
-          {/* the Empire State facade: continuous vertical window ribbons
-              between limestone piers, the building's signature */}
-          {[3.4, 6.9, 10.4].map((cx, i) => (
-            <rect key={'shaft' + i} x={192 + cx} y={BASE - 88} width="1.7"
-                  height="40" fill="#fff" opacity="0.9" />
-          ))}
-          {[1.2, 4.7, 8.2, 11.7, 15.2].map((cx, i) => (
-            <rect key={'shoulder' + i} x={190.5 + cx} y={BASE - 40} width="1.7"
-                  height="13" fill="#fff" opacity="0.9" />
-          ))}
-          {/* the limestone base: modest window pairs either side of the
-              grand entrance, which stands alone */}
-          {[2, 5.2, 12.6, 15.8].map((cx, i) => (
-            <rect key={'esbbase' + i} x={189 + cx} y={BASE - 17} width="1.7"
-                  height="6.5" fill="#fff" opacity="0.9" />
-          ))}
-          {[4.6, 7.9].map((cx, i) => (
-            <rect key={'upper' + i} x={192 + cx} y={BASE - 100.5} width="1.6"
-                  height="7" fill="#fff" opacity="0.9" />
-          ))}
-          {/* the rounded mast cap, then the needle */}
-          <rect x="197.5" y={BASE - 118} width="4" height="4" rx="2"
-                fill={INK} />
-          <line x1="199.5" y1={BASE - 118} x2="199.5" y2={BASE - 134}
-                stroke={INK} strokeWidth="1.8" strokeLinecap="round" />
-          <circle cx="199.5" cy={BASE - 136} r="1.5" fill={INK} />
-          {/* the facade grids */}
-          {winRects.map(([x, y, w, h, kind], i) => (
-            <g key={i}>
-              <rect x={x} y={y} width={w} height={h} rx="0.8" fill="#fff"
-                    opacity="0.95" />
-              {kind === 'v' ? (
-                <line x1={x} y1={y + h / 2} x2={x + w} y2={y + h / 2}
-                      stroke={INK} strokeWidth="0.9" />
-              ) : (
-                <line x1={x + w / 2} y1={y} x2={x + w / 2} y2={y + h}
-                      stroke={INK} strokeWidth="0.9" />
-              )}
-            </g>
-          ))}
-          {/* the whole harbor breathes */}
-          {!reduced && (
-            <animateTransform attributeName="transform" type="translate"
-                              values="0 0; 0 -2.5; 0 0" dur="5.5s"
-                              repeatCount="indefinite" />
-          )}
-        </g>
-        {/* the water: long layered swells, nothing else */}
-        {[[BASE + 22, 16, 0.4, 7], [BASE + 30, 16, 0.3, 9],
-          [BASE + 38, 16, 0.22, 11]].map(([y, n, op, dur], i) => (
-          <path key={i} d={swell(y, n)} fill="none" stroke={INK}
-                strokeWidth="1.8" strokeLinecap="round" opacity={op}>
-            {!reduced && (
-              <animateTransform attributeName="transform" type="translate"
-                                values={i % 2 ? '0 0; -10 0; 0 0' : '0 0; 10 0; 0 0'}
-                                dur={`${dur}s`} repeatCount="indefinite" />
-            )}
-          </path>
-        ))}
-      </svg>
-    </div>
-  )
-}
-
 /** A localized calendar dropdown for the travel date. The native date input
  *  renders its text in the BROWSER language, which read as a translation
  *  failure; this one draws its month and weekday names from the app locale
@@ -929,11 +756,10 @@ export default function TravelDatabase({ onBack }) {
   )
 
   return (
-    <div className="page" style={{ maxWidth: result ? 900 : 1160,
+    <div className="page" style={{ maxWidth: 900,
                                    margin: '0 auto',
                                    padding: '26px 20px 60px' }}
          data-testid="travel-database">
-      <style>{DB_CSS}</style>
       {onBack && (
         <button className="btn btn--sm btn--ghost" onClick={onBack}
                 data-testid="database-back">← {t('db.menu')}</button>
@@ -952,8 +778,7 @@ export default function TravelDatabase({ onBack }) {
       )}
 
       {!result && (
-      <div className="db-hero" style={{ marginTop: 18 }}>
-      <div className="db-hero-left">
+      <div style={{ marginTop: 18 }}>
         <div className="card anim-rise" style={{ padding: '20px 24px',
                                                  borderRadius: 20,
                                                  maxWidth: 560, marginLeft: 'auto',
@@ -1104,8 +929,6 @@ export default function TravelDatabase({ onBack }) {
             </div>
           )}
         </div>
-      </div>
-      <EllisIslandScene />
       </div>
       )}
 

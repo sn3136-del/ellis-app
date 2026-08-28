@@ -11,7 +11,7 @@
 // them out-of-band via `#admin` in the URL or a persisted local flag.
 import { useState, useEffect } from 'react'
 import { LocaleProvider, useLocale, LanguagePicker } from './lib/locale.jsx'
-import { ToastProvider } from './components/ui.jsx'
+import { ToastProvider, TripPlane } from './components/ui.jsx'
 import Settings from './screens/Settings.jsx'
 import TripPortal from './screens/TripPortal.jsx'
 import QualityConsole from './screens/QualityConsole.jsx'
@@ -67,6 +67,60 @@ function DemoDisabled() {
 // flag still honored. Persona hides surfaces only — every per-party and
 // admin authorization is enforced by the backend.
 
+
+
+/** The Ellis skyline mark: the letters as solid towers, the Empire State
+ *  Building as the I with its window ribbons, and the loading plane flying
+ *  its dashed trail overhead. Compact enough to sit beside the wordmark. */
+function EllisMark() {
+  const INK = '#0f294d'
+  const B = 150
+  const LETTERS = [
+    [22, [[0, 92, 13, 92], [0, 92, 40, 12], [0, 55, 32, 11], [0, 12, 40, 12]]],
+    [84, [[0, 76, 13, 76], [0, 12, 36, 12]]],
+    [138, [[0, 84, 13, 84], [0, 12, 36, 12]]],
+    [192, [[-3, 22, 21, 22], [-1.5, 44, 18, 22], [0, 92, 15, 48],
+           [2, 102, 11, 10], [3.5, 108, 8, 6], [5.5, 116, 4, 8]]],
+    [228, [[0, 61, 38, 11], [0, 50, 12, 14], [0, 36, 38, 11],
+           [26, 25, 12, 14], [0, 11, 38, 11]]],
+  ]
+  return (
+    <div className="ellis-mark" aria-label="Ellis" data-testid="ellis-mark">
+      <span className="ellis-mark__trail" />
+      <span className="ellis-mark__plane"><TripPlane width={54} /></span>
+      <svg viewBox="14 8 258 144" height="34" style={{ display: 'block' }}>
+        {LETTERS.map(([lx, rects], i) => (
+          <g key={i}>
+            {rects.map(([x, up, w, h], j) => (
+              <rect key={j} x={lx + x} y={B - up} width={w} height={h}
+                    rx="1.5" fill={INK} stroke={INK} strokeWidth="2" />
+            ))}
+          </g>
+        ))}
+        {[3.4, 6.9, 10.4].map((cx, i) => (
+          <rect key={'r' + i} x={192 + cx} y={B - 88} width="1.7" height="40"
+                fill="#fff" opacity="0.9" />
+        ))}
+        {[1.2, 4.7, 8.2, 11.7, 15.2].map((cx, i) => (
+          <rect key={'s' + i} x={190.5 + cx} y={B - 40} width="1.7"
+                height="13" fill="#fff" opacity="0.9" />
+        ))}
+        {[2, 5.2, 12.6, 15.8].map((cx, i) => (
+          <rect key={'b' + i} x={189 + cx} y={B - 17} width="1.7" height="6.5"
+                fill="#fff" opacity="0.9" />
+        ))}
+        {[4.6, 7.9].map((cx, i) => (
+          <rect key={'u' + i} x={192 + cx} y={B - 100.5} width="1.6" height="7"
+                fill="#fff" opacity="0.9" />
+        ))}
+        <rect x="197.5" y={B - 118} width="4" height="4" rx="2" fill={INK} />
+        <line x1="199.5" y1={B - 118} x2="199.5" y2={B - 134}
+              stroke={INK} strokeWidth="1.8" strokeLinecap="round" />
+        <circle cx="199.5" cy={B - 136} r="1.5" fill={INK} />
+      </svg>
+    </div>
+  )
+}
 
 /** Next to the language picker: one-click hops between the customer
  *  database, the quality console and the status page. The hash listener
@@ -160,7 +214,10 @@ function AppInner() {
       <div className={'app' + (demoMode ? ' app--banner' : '')}>
         {demoMode && <SimulatedBanner />}
         <header className="triptop" data-testid="triptop">
-          <img className="triptop__logo" src={tripcomLogo} alt="Trip.com" />
+          <div className="triptop__brand">
+            <img className="triptop__logo" src={tripcomLogo} alt="Trip.com" />
+            <EllisMark />
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <SurfaceNav view={view} />
             <LanguagePicker />
