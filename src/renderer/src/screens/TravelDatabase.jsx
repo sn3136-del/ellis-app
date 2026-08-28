@@ -7,7 +7,7 @@
 // demand through the same masked, cached Kimi K3 catalog pipe (fast, with
 // an honest English fallback when a string cannot round-trip).
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Loading } from '../components/ui.jsx'
+import { Loading, TripPlane } from '../components/ui.jsx'
 import { useLocale } from '../lib/locale.jsx'
 import { useLocalizedCountries } from '../lib/countryNames.js'
 import { createVisaClient } from '../lib/visaBackend.js'
@@ -203,82 +203,45 @@ const DB_CSS = `
   .db-scene { display: none; }
 }`
 
-/** The Trip.com plane over an Ellis-shaped archipelago: five islands that
- *  spell the name, a dotted flight path, and the brand-blue paper plane
- *  flying it on a loop. Pure inline SVG, still under reduced motion. */
+/** The SAME Trip.com plane the loading state flies (same SVG, same bob, same
+ *  streaming dashed trail via the planeload classes), and underneath it a
+ *  flat black-and-white island whose coastline spells ELLIS. */
 function EllisIslandScene() {
-  const reduced = typeof window !== 'undefined' &&
-    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-  const FLIGHT = 'M-20,360 C120,318 130,210 240,168 C330,134 388,86 500,30'
-  // Each letter is one stroke path: a wide sand stroke under a narrower
-  // green one turns the letterform into an island with a beach rim.
+  // Each letter is one stroke path: a wide black stroke under a narrower
+  // white one reads as a white island with an inked coastline.
   const LETTERS = [
-    ['M0,0 L0,64 M0,2 L34,2 M0,32 L26,32 M0,62 L34,62', 60, 160, -4],
-    ['M0,0 L0,60 L34,60', 128, 196, 3],
-    ['M0,0 L0,60 L34,60', 192, 168, -2],
-    ['M0,0 L0,64', 256, 200, 4],
-    ['M32,6 C8,-4 -4,18 12,28 C26,36 40,40 30,54 C22,64 6,64 0,56', 300, 162, -3],
+    ['M0,0 L0,64 M0,2 L34,2 M0,32 L26,32 M0,62 L34,62', 26, 60, -3],
+    ['M0,0 L0,60 L34,60', 96, 78, 2],
+    ['M0,0 L0,60 L34,60', 164, 58, -2],
+    ['M0,0 L0,64', 230, 80, 3],
+    ['M32,6 C8,-4 -4,18 12,28 C26,36 40,40 30,54 C22,64 6,64 0,56', 278, 62, -2],
   ]
   const island = ([d, x, y, rot], i) => (
     <g key={i} transform={`translate(${x},${y}) rotate(${rot})`}>
-      <ellipse cx="17" cy="66" rx="34" ry="9" fill="#0f294d" opacity="0.06" />
-      <path d={d} fill="none" stroke="#f0debc" strokeWidth="30"
+      <path d={d} fill="none" stroke="#111" strokeWidth="32"
             strokeLinecap="round" strokeLinejoin="round" />
-      <path d={d} fill="none" stroke="#8fd0a0" strokeWidth="15"
+      <path d={d} fill="none" stroke="#fff" strokeWidth="24"
             strokeLinecap="round" strokeLinejoin="round" />
-    </g>
-  )
-  const cloud = (x, y, s, dur) => (
-    <g transform={`translate(${x},${y}) scale(${s})`} opacity="0.9">
-      <ellipse cx="0" cy="0" rx="26" ry="10" fill="#fff" />
-      <ellipse cx="18" cy="-6" rx="16" ry="9" fill="#fff" />
-      <ellipse cx="-16" cy="-4" rx="14" ry="8" fill="#fff" />
-      {!reduced && (
-        <animateTransform attributeName="transform" type="translate"
-                          additive="sum" values="0 0; 16 0; 0 0"
-                          dur={dur} repeatCount="indefinite" />
-      )}
     </g>
   )
   return (
-    <div className="db-scene" aria-hidden="true">
-      <svg viewBox="0 0 470 430" width="100%" role="img"
-           style={{ display: 'block' }}>
-        <defs>
-          <linearGradient id="ellis-sea" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#eaf4ff" />
-            <stop offset="1" stopColor="#d6e8ff" />
-          </linearGradient>
-        </defs>
-        <rect x="0" y="0" width="470" height="430" rx="26"
-              fill="url(#ellis-sea)" />
-        {/* ripples */}
-        {[[70, 300], [330, 320], [150, 110], [395, 210], [60, 200]].map(([x, y], i) => (
-          <path key={i} d={`M${x},${y} q9,-5 18,0 q9,5 18,0`} fill="none"
-                stroke="#b9d4fa" strokeWidth="2.5" strokeLinecap="round" />
-        ))}
+    <div className="db-scene" aria-hidden="true"
+         style={{ display: 'flex', flexDirection: 'column',
+                  alignItems: 'center' }}>
+      {/* the loading animation itself: same markup, same classes */}
+      <div className="planeload__sky">
+        <span className="planeload__trail" />
+        <span className="planeload__plane"><TripPlane width={216} /></span>
+      </div>
+      <svg viewBox="0 0 360 190" width="340" style={{ display: 'block' }}>
         {LETTERS.map(island)}
-        {/* the dotted flight path the plane follows */}
-        <path d={FLIGHT} fill="none" stroke="#8fb8f5" strokeWidth="2.5"
-              strokeLinecap="round" strokeDasharray="1 11" />
-        {cloud(120, 78, 1, '9s')}
-        {cloud(360, 300, 0.8, '12s')}
-        <g>
-          {/* the paper plane, brand blue with the Trip.com orange dot */}
-          <g transform="translate(-28,-18) scale(1.35)">
-            <path d="M42,2 L2,15 L18,19 Z" fill="#287dfa" />
-            <path d="M42,2 L18,19 L22,30 L28,21 Z" fill="#5b9dfc" />
-            <path d="M42,2 L18,19 L20,24 Z" fill="#1d4ed8" />
-            <circle cx="42" cy="2" r="3" fill="#f7a51b" />
-          </g>
-          {reduced ? (
-            <animateMotion dur="0.01s" fill="freeze" path={FLIGHT}
-                           keyPoints="0.55;0.55" keyTimes="0;1" rotate="auto" />
-          ) : (
-            <animateMotion dur="14s" repeatCount="indefinite" path={FLIGHT}
-                           rotate="auto" />
-          )}
-        </g>
+        {/* a few inked waves around the coastline */}
+        {[[16, 168], [120, 176], [230, 172], [316, 150], [66, 20],
+          [306, 26]].map(([x, y], i) => (
+          <path key={i} d={`M${x},${y} q8,-5 16,0 q8,5 16,0`} fill="none"
+                stroke="#111" strokeWidth="2" strokeLinecap="round"
+                opacity="0.55" />
+        ))}
       </svg>
     </div>
   )
