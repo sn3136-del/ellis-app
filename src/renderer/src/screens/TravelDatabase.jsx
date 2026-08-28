@@ -237,15 +237,15 @@ function EllisIslandScene() {
   const winRects = []
   const addGrid = (bx, by, w, h) => {
     if (w <= 22 && h >= 24) {
-      const ww = 2.6, wh = 6.5, pitch = 11
-      const cols = w >= 15 ? [3, 7.4, 11.8].slice(0, Math.floor((w - 4) / 4.4))
-        : [w / 2 - 3.6, w / 2 + 1]
-      for (let wy = by + 5; wy <= by + h - wh - 4; wy += pitch) {
+      // sparse: one centered column on narrow shafts, two on wide ones
+      const ww = 2.8, wh = 7, pitch = 16
+      const cols = w >= 15 ? [w / 2 - 4.6, w / 2 + 1.8] : [(w - ww) / 2]
+      for (let wy = by + 6; wy <= by + h - wh - 5; wy += pitch) {
         cols.forEach((cx, ci) => winRects.push(
-          [bx + cx, wy, ww, wh, (Math.round(wy) + ci) % 3 === 1]))
+          [bx + cx, wy, ww, wh, (Math.round(wy) + ci) % 4 === 1]))
       }
     } else if (w >= 30 && h >= 9) {
-      const ww = 4.4, wh = Math.min(5.5, h - 4.5), gap = 2.6, mx = 3.5
+      const ww = 6, wh = Math.min(5.5, h - 4.5), gap = 5, mx = 4.5
       const n = Math.floor((w - 2 * mx + gap) / (ww + gap))
       const gx = n > 1 ? (w - 2 * mx - n * ww) / (n - 1) : 0
       for (let i = 0; i < n; i++) {
