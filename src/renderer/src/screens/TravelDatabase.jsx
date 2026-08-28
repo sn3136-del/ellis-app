@@ -265,7 +265,7 @@ function EllisIslandScene() {
         {cloud(360, 300, 0.8, '12s')}
         <g>
           {/* the paper plane, brand blue with the Trip.com orange dot */}
-          <g transform="translate(-21,-13)">
+          <g transform="translate(-28,-18) scale(1.35)">
             <path d="M42,2 L2,15 L18,19 Z" fill="#287dfa" />
             <path d="M42,2 L18,19 L22,30 L28,21 Z" fill="#5b9dfc" />
             <path d="M42,2 L18,19 L20,24 Z" fill="#1d4ed8" />
