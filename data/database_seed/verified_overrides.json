@@ -15037,7 +15037,7 @@
     {
      "type": "Visit eVisa, two weeks, single entry",
      "entry": "single",
-     "validity": null,
+     "validity": "14 days",
      "max_stay_days": 14,
      "fee": {
       "amount": 13,
@@ -25195,7 +25195,7 @@
     {
      "type": "Transit eTA",
      "entry": "single",
-     "validity": null,
+     "validity": "90 days",
      "max_stay_days": null,
      "fee": {
       "amount": 20,
@@ -25515,7 +25515,7 @@
     {
      "type": "Visa consular (ordinary consular visa, non-restricted nationalities)",
      "entry": "single",
-     "validity": null,
+     "validity": "60 days",
      "max_stay_days": null,
      "fee": {
       "amount": 30,
@@ -26031,8 +26031,8 @@
     },
     {
      "type": "Schengen C visitor visa (child aged 6 to 12)",
-     "entry": null,
-     "validity": null,
+     "entry": "Multiple",
+     "validity": "90 days",
      "max_stay_days": 90,
      "fee": {
       "amount": 45,
@@ -26042,8 +26042,8 @@
     },
     {
      "type": "Schengen C visitor visa (child under 6)",
-     "entry": null,
-     "validity": null,
+     "entry": "Multiple",
+     "validity": "90 days",
      "max_stay_days": 90,
      "fee": {
       "amount": 0,
@@ -26053,8 +26053,8 @@
     },
     {
      "type": "Schengen C visitor visa (citizens of Azerbaijan aged 6+)",
-     "entry": null,
-     "validity": null,
+     "entry": "Multiple",
+     "validity": "90 days",
      "max_stay_days": 90,
      "fee": {
       "amount": 35,
@@ -26064,8 +26064,8 @@
     },
     {
      "type": "Application to extend the visa after arrival in Norway",
-     "entry": null,
-     "validity": null,
+     "entry": "Single",
+     "validity": "90 days",
      "max_stay_days": null,
      "fee": {
       "amount": 30,
@@ -26685,7 +26685,7 @@
     {
      "type": "Visa exemption for PRC nationals holding a valid US or Canadian visa/Green Card",
      "entry": "n/a",
-     "validity": null,
+     "validity": "6 months",
      "max_stay_days": 90,
      "fee": {
       "amount": 0,
