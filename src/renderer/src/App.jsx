@@ -88,6 +88,14 @@ function AppInner() {
   // surface reads as scope drift. #ops opens the quality-control backend.
   const [view, setView] = useState(() =>
     (window.location.hash || '').includes('ops') ? 'quality' : 'database')
+  useEffect(() => {
+    // The hash is the only router: without this listener, editing the URL to
+    // #ops on an already-open page changes nothing until a manual reload.
+    const onHash = () => setView(
+      (window.location.hash || '').includes('ops') ? 'quality' : 'database')
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
   // Employer persona routing removed with the hidden consoles.
   // The floating Ask Ellis assistant follows whichever H1B case a surface has
   // registered (H1bPipeline registers the parent case); hidden when no case.
