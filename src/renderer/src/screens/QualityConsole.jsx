@@ -363,7 +363,7 @@ function FlagForm({ rec, onFlag, t }) {
   )
 }
 
-function RecordsTable({ records, onFlag, onRelease, t, flagOf, typeNames = {} }) {
+function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames = {} }) {
   const [sort, setSort] = useState({ key: 'route', dir: 1 })
   const [open, setOpen] = useState(null)
   const onSort = (k) => setSort((s0) => ({ key: k, dir: s0.key === k ? -s0.dir : 1 }))
@@ -400,7 +400,7 @@ function RecordsTable({ records, onFlag, onRelease, t, flagOf, typeNames = {} })
                     padding: '12px 16px', flexWrap: 'wrap',
                     borderBottom: `1px solid ${BORDER}` }}>
         <strong style={{ color: NAVY, fontSize: 13 }}>
-          {records.length.toLocaleString()} {t('ops.items')}
+          {(total ?? records.length).toLocaleString()} {t('ops.items')}
         </strong>
         <span style={{ color: GRAY, fontSize: 12 }}>{t('ops.rowsHint')}</span>
       </div>
@@ -1118,7 +1118,7 @@ export default function QualityConsole() {
               )
             })()}
             {busy && <div style={{ color: GRAY, fontSize: 13 }}>{t('ops.loading')}</div>}
-            <RecordsTable records={records.slice(0, shown)} onFlag={flag} onRelease={release} t={t} flagOf={flagOf} typeNames={typeNames} />
+            <RecordsTable records={records.slice(0, shown)} total={records.length} onFlag={flag} onRelease={release} t={t} flagOf={flagOf} typeNames={typeNames} />
             {records.length > shown && (
               <button className="btn btn--ghost"
                       style={{ borderRadius: 999, justifySelf: 'center' }}
