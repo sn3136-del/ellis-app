@@ -101,17 +101,17 @@ def _warm(client, nat, dest):
 
 
 def test_records_endpoint_filters_and_checklists(client):
-    _warm(client, "ISL", "BLZ")
     _warm(client, "NZL", "BLZ")
-    out = client.get("/database/records?nationality=ISL&destination=BLZ",
+    _warm(client, "NZL", "BLZ")
+    out = client.get("/database/records?nationality=NZL&destination=BLZ",
                      headers=ADMIN).json()
     assert out["summary"]["total"] == 2        # two products, one route
     rec = out["records"][0]
-    assert rec["travel_document_country"] == "ISL"
+    assert rec["travel_document_country"] == "NZL"
     assert rec["field_status"]["visa_requirement"] == "filled"
     assert out["summary"]["source_coverage"] is not None
     # Filters combine: a requirement filter that matches nothing.
-    none = client.get("/database/records?nationality=ISL&destination=BLZ"
+    none = client.get("/database/records?nationality=NZL&destination=BLZ"
                       "&requirement=Visa-free", headers=ADMIN).json()
     assert none["summary"]["total"] == 0
     # Readers cannot see the ops surface.
@@ -119,7 +119,7 @@ def test_records_endpoint_filters_and_checklists(client):
 
 
 def test_the_change_log_records_the_engine_answer(client):
-    _warm(client, "ISL", "VUT")
+    _warm(client, "NZL", "VUT")
     out = client.get("/database/changes?q=VUT", headers=ADMIN).json()
     assert any(c["action"] == "add" and c["origin"] == "engine"
                and (c["route"] or {}).get("destination_country") == "VUT"
@@ -128,8 +128,8 @@ def test_the_change_log_records_the_engine_answer(client):
 
 
 def test_excel_export_has_two_sheets_and_the_data(client):
-    _warm(client, "ISL", "FSM")
-    r = client.get("/database/export.xlsx?nationality=ISL&destination=FSM",
+    _warm(client, "NZL", "FSM")
+    r = client.get("/database/export.xlsx?nationality=NZL&destination=FSM",
                    headers=ADMIN)
     assert r.status_code == 200
     assert "spreadsheetml" in r.headers["content-type"]

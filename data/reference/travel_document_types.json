@@ -1,59 +1,65 @@
 {
-  "entries": [
-    {
-      "code": "ordinary_passport",
-      "icao_code_prefix": "P",
-      "name": "Ordinary passport",
-      "notes": "Standard national passport."
-    },
-    {
-      "code": "diplomatic_passport",
-      "icao_code_prefix": "PD",
-      "name": "Diplomatic passport",
-      "notes": "Issued to diplomats; different visa rules frequently apply."
-    },
-    {
-      "code": "service_passport",
-      "icao_code_prefix": "PS",
-      "name": "Service / official passport",
-      "notes": "Issued to government officials on duty travel."
-    },
-    {
-      "code": "emergency_passport",
-      "icao_code_prefix": "PE",
-      "name": "Emergency / temporary passport",
-      "notes": "Short-validity document issued in urgent cases; often restricted recognition."
-    },
-    {
-      "code": "refugee_travel_document",
-      "icao_code_prefix": "PT",
-      "name": "Refugee travel document (1951 Convention)",
-      "notes": "Issued to recognized refugees by the country of residence."
-    },
-    {
-      "code": "stateless_travel_document",
-      "icao_code_prefix": "PT",
-      "name": "Stateless-person travel document (1954 Convention)",
-      "notes": "Issued to recognized stateless persons by the country of residence."
-    },
-    {
-      "code": "alien_passport",
-      "icao_code_prefix": "PT",
-      "name": "Alien's passport / certificate of identity",
-      "notes": "Issued to non-citizen residents unable to obtain a national passport."
-    },
-    {
-      "code": "laissez_passer",
-      "icao_code_prefix": "PT",
-      "name": "Laissez-passer",
-      "notes": "Issued by states or international organizations (e.g. UN)."
-    }
-  ],
-  "entry_count": 8,
-  "generated_at": "2026-07-23",
-  "notes": "Curated travel-document taxonomy incl. refugee/stateless/alien/emergency documents.",
-  "registry": "travel_document_types",
-  "snapshot_date": "2026-07-23",
-  "source": "curated",
-  "version": 1
+ "entries": [
+  {
+   "code": "ordinary_passport",
+   "icao_code_prefix": "P",
+   "name": "Ordinary passport",
+   "notes": "Standard national passport."
+  },
+  {
+   "code": "diplomatic_passport",
+   "icao_code_prefix": "PD",
+   "name": "Diplomatic passport",
+   "notes": "Issued to diplomats; different visa rules frequently apply."
+  },
+  {
+   "code": "service_passport",
+   "icao_code_prefix": "PS",
+   "name": "Service / official passport",
+   "notes": "Issued to government officials on duty travel."
+  },
+  {
+   "code": "emergency_passport",
+   "icao_code_prefix": "PE",
+   "name": "Emergency / temporary passport",
+   "notes": "Short-validity document issued in urgent cases; often restricted recognition."
+  },
+  {
+   "code": "prc_travel_document",
+   "icao_code_prefix": "PT",
+   "name": "PRC Travel Document (旅行证)",
+   "notes": "Issued by PRC missions in lieu of a passport (children born abroad, replacements); follows its own bilateral treatment."
+  },
+  {
+   "code": "refugee_travel_document",
+   "icao_code_prefix": "PT",
+   "name": "Refugee travel document (1951 Convention)",
+   "notes": "Issued to recognized refugees by the country of residence."
+  },
+  {
+   "code": "stateless_travel_document",
+   "icao_code_prefix": "PT",
+   "name": "Stateless-person travel document (1954 Convention)",
+   "notes": "Issued to recognized stateless persons by the country of residence."
+  },
+  {
+   "code": "alien_passport",
+   "icao_code_prefix": "PT",
+   "name": "Alien's passport / certificate of identity",
+   "notes": "Issued to non-citizen residents unable to obtain a national passport."
+  },
+  {
+   "code": "laissez_passer",
+   "icao_code_prefix": "PT",
+   "name": "Laissez-passer",
+   "notes": "Issued by states or international organizations (e.g. UN)."
+  }
+ ],
+ "entry_count": 9,
+ "generated_at": "2026-07-23",
+ "notes": "Curated travel-document taxonomy incl. refugee/stateless/alien/emergency documents.",
+ "registry": "travel_document_types",
+ "snapshot_date": "2026-07-23",
+ "source": "curated",
+ "version": 1
 }

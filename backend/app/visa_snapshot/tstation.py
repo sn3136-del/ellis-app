@@ -78,16 +78,25 @@ _DISPOSITION_TO_REQUIREMENT = {
     "NOT_ADMITTED": "Not admitted",
 }
 
-_CHANNEL_TO_METHOD = {
-    "EMBASSY_OR_CONSULATE": "Embassy Submission",
-    "OFFICIAL_ONLINE_PORTAL": "Online Application",
-    "GOVERNMENT_ONLINE_PORTAL": "Online Application",
-    "VISA_APPLICATION_CENTRE": "Agency Service",
-    "ACCREDITED_AGENCY": "Agency Service",
-    "DESIGNATED_AGENCY": "Agency Service",
-    "ON_ARRIVAL": "On-arrival Processing",
-    "NOT_APPLICABLE": "Other",
-}
+def _method_for_channel(channel: str) -> str | None:
+    """The engine's channel vocabulary (lowercase, many variants) mapped to
+    their five application_method values. Substring rules, because a live
+    audit found 96% of records collapsing to "Other" when this was an exact
+    uppercase table."""
+    c = str(channel or "").lower()
+    if not c:
+        return None
+    if "arrival" in c:
+        return "On-arrival Processing"
+    if any(k in c for k in ("online", "portal", "evisa", "e-visa", "eta",
+                            "electronic")):
+        return "Online Application"
+    if any(k in c for k in ("agency", "agent", "centre", "center", "vfs",
+                            "bls", "tls")):
+        return "Agency Service"
+    if any(k in c for k in ("embassy", "consulate", "consular", "mission")):
+        return "Embassy Submission"
+    return "Other"
 
 
 def _num_unit(text) -> tuple[float | None, str | None]:
@@ -107,6 +116,23 @@ def _num_unit(text) -> tuple[float | None, str | None]:
     if m.group(2) == "week":
         n *= 7
     return (int(n) if n == int(n) else n), unit
+
+
+def _as_stay_unit(n, unit):
+    """Their max_stay_unit enum is Hour | Day only: month- and year-denominated
+    stays are converted to days rather than shipping an off-enum unit."""
+    if n is None or unit in (None, "Hour", "Day"):
+        return n, unit
+    factor = {"Month": 30, "Year": 365}.get(unit)
+    return (n * factor, "Day") if factor else (n, unit)
+
+
+def _as_validity_unit(n, unit):
+    """Their validity_unit enum has no Hour: sub-day validities round up to
+    one day."""
+    if unit == "Hour":
+        return 1, "Day"
+    return n, unit
 
 
 def _entries(text) -> str | None:
@@ -169,8 +195,7 @@ def records_for_route(route: dict, guidance: dict,
     docs = g.get("required_documents")
     docs = ", ".join(str(d) for d in docs if d) if isinstance(docs, list) else (
         str(docs) if docs else None)
-    channel = str(g.get("application_channel") or "").upper()
-    method = _CHANNEL_TO_METHOD.get(channel) or (None if not channel else "Other")
+    method = _method_for_channel(g.get("application_channel"))
     if disposition == "VISA_EXEMPT":
         method = "Other"
     entry_req = g.get("entry_requirements")
@@ -219,7 +244,7 @@ def records_for_route(route: dict, guidance: dict,
             row["visa_type_name"] = "No visa needed"
             if not row["required_documents"]:
                 row["required_documents"] = "Valid passport"
-            n, unit = _num_unit(g.get("permitted_stay"))
+            n, unit = _as_stay_unit(*_num_unit(g.get("permitted_stay")))
             if n is None and g.get("permitted_stay_days"):
                 n, unit = g.get("permitted_stay_days"), "Day"
             row["max_stay_duration"], row["max_stay_unit"] = n, unit
@@ -228,7 +253,7 @@ def records_for_route(route: dict, guidance: dict,
             row["visa_fee_amount"], row["visa_fee_currency"] = 0, "USD"
         else:
             row["visa_type_name"] = g.get("visa_category") or None
-            n, unit = _num_unit(g.get("permitted_stay"))
+            n, unit = _as_stay_unit(*_num_unit(g.get("permitted_stay")))
             if n is None and g.get("permitted_stay_days"):
                 n, unit = g.get("permitted_stay_days"), "Day"
             row["max_stay_duration"], row["max_stay_unit"] = n, unit
@@ -240,13 +265,13 @@ def records_for_route(route: dict, guidance: dict,
         row = dict(base)
         row["visa_type_name"] = str(p.get("type"))
         n, unit = _num_unit(p.get("validity"))
-        row["validity_duration"], row["validity_unit"] = n, unit
+        row["validity_duration"], row["validity_unit"] = _as_validity_unit(n, unit)
         stay = p.get("max_stay_days")
         if stay:
             row["max_stay_duration"], row["max_stay_unit"] = stay, "Day"
         else:
             n2, u2 = _num_unit(g.get("permitted_stay"))
-            row["max_stay_duration"], row["max_stay_unit"] = n2, u2
+            row["max_stay_duration"], row["max_stay_unit"] = _as_stay_unit(n2, u2)
         row["entries"] = _entries(p.get("entry"))
         amt, cur = _fee(p, g)
         row["visa_fee_amount"], row["visa_fee_currency"] = amt, cur

@@ -636,9 +636,9 @@ export default function TravelDatabase({ onBack }) {
                 data-testid="database-back">← {t('db.menu')}</button>
       )}
 
-      {/* Heading only while searching; the answer page opens straight on
-          the verdict (owner decision, theming). */}
-      {!result && (
+      {/* Heading hidden entirely (owner instruction 2026-08-28): the page
+          opens straight on the ask box and the route form. */}
+      {false && !result && (
         <div style={{ margin: '16px 0 6px', textAlign: 'center' }}>
           <h1 style={{ fontSize: 32, fontWeight: 800, color: NAVY, margin: 0,
                        letterSpacing: -0.6 }}>{t('db.title')}</h1>

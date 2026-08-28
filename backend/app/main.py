@@ -112,6 +112,7 @@ def _startup():
     portal_queue.start_executor()
 
 
+@app.get("/health")
 @app.get("/healthz")
 def healthz():
     return {"ok": True}
@@ -539,6 +540,21 @@ def _answer_anyway(db, route: dict, exc) -> dict:
     return near
 
 
+_HELD_LEAKS = ("guidance", "workflow_plan", "advisories",
+               "missing_fields", "contradictions", "apply_steps")
+
+
+def _held_envelope(out: dict) -> dict:
+    """A held answer's claims never leave the server — and a claim is not
+    only the guidance: the workflow plan, advisories and missing-field lists
+    all hint at the withheld verdict (a live audit read the verdict straight
+    out of workflow_plan on a held row). Only the identity and the flags
+    survive."""
+    out = {k: v for k, v in out.items() if k not in _HELD_LEAKS}
+    out["guidance"] = None
+    return out
+
+
 class DatabaseIssueIn(BaseModel):
     """A reader flagging a field that looks wrong."""
     nationality: str = ""
@@ -906,8 +922,7 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
     if out.get("cached"):
         _ground_on_access(route, out)
     if out.get("held"):
-        out = {k: v for k, v in out.items() if k != "guidance"}
-        out["guidance"] = None
+        out = _held_envelope(out)
     out["understood"] = True
     out["route"] = {"nationality": parsed["nationality"],
                     "destination": parsed["destination"],
@@ -961,13 +976,35 @@ def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
     if not nat or not dest:
         raise HTTPException(422, "nationality and destination must be real "
                                  "countries (name or ISO code)")
+    _DOCS = {"ordinary_passport", "diplomatic_passport", "service_passport",
+             "emergency_passport", "prc_travel_document",
+             "refugee_travel_document", "stateless_travel_document",
+             "alien_passport", "laissez_passer"}
+    _DOC_ALIAS = {"ordinary": "ordinary_passport", "passport": "ordinary_passport",
+                  "diplomatic": "diplomatic_passport", "official": "service_passport",
+                  "official_passport": "service_passport", "service": "service_passport",
+                  "emergency": "emergency_passport", "temporary": "emergency_passport",
+                  "temporary_passport": "emergency_passport",
+                  "travel_document": "prc_travel_document"}
+    doc_in = (body.travel_document_type or "ordinary_passport").strip().lower()
+    doc = _DOC_ALIAS.get(doc_in, doc_in)
+    if doc not in _DOCS:
+        raise HTTPException(422, f"unknown travel document type: {doc_in}")
+    _PURPOSES = {"tourism", "business", "family_visit", "study", "work",
+                 "transit", "other"}
+    _PURPOSE_ALIAS = {"family": "family_visit", "visiting_relatives": "family_visit",
+                      "tourist": "tourism", "study_abroad": "study"}
+    purpose_in = (body.travel_purpose or "tourism").strip().lower()
+    purpose = _PURPOSE_ALIAS.get(purpose_in, purpose_in)
+    if purpose not in _PURPOSES:
+        raise HTTPException(422, f"unknown travel purpose: {purpose_in}")
     route = {
         "passport_nationality": nat,
         "passport_issuing_country": nat,
         "lawful_country_of_residence": (body.residence or nat).strip().upper(),
-        "travel_document_type": body.travel_document_type or "ordinary_passport",
+        "travel_document_type": doc,
         "destination_country": dest,
-        "travel_purpose": body.travel_purpose or "tourism",
+        "travel_purpose": purpose,
     }
     route["visa_category"] = kimi_primary.category_for_purpose(
         route["travel_purpose"])
@@ -997,8 +1034,7 @@ def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
     # and the identity so the page can say WHY there is nothing to show.
     out["transit_countries"] = transit
     if out.get("held"):
-        out = {k: v for k, v in out.items() if k != "guidance"}
-        out["guidance"] = None
+        out = _held_envelope(out)
     # The answer carries the identity of the cached row it came from. A reader
     # flagging it, or an operator releasing it, then names THAT answer instead
     # of re-deriving a key from a subset of the inputs (which silently missed
