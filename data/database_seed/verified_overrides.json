@@ -1227,10 +1227,10 @@
    "destination": "KOR",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-22",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://overseas.mofa.go.kr/cn-zh/index.do",
-  "note": "Mainland South Korea requires a visa, but Jeju is visa-free for Chinese tourists (individual and group) — a facilitation the answer must mention. Consular fee and the official portal added.",
+  "verified_at": "2026-08-28",
+  "verified_by": "Claude Opus 5 product-fee verification vs official sources",
+  "source_url": "https://overseas.mofa.go.kr/cn-zh/wpge/m_1199/contents.do",
+  "note": "办理韩国签证需要多少费用？ （单位：人民币） … 签 证 种 类 手续费 加急费 单次签证 短期签证 （停留期90天以内） 280元 140元 长期签证 （停留期91天以上） 420元 140元 两次签证 个人 490元 140元 多次签证（长、短期) 630元 280元 延长再入国许可期间 140元 - 以上是中国公民签证收费标准，其他国家公民的签证费按照其所属国与韩国政府之间的协定或互惠政策收取。...",
   "fields": {
    "exceptions": [
     "Jeju Island is visa-free for Chinese tourists arriving directly, for both individual and group tourism, under the Jeju Special Act",
@@ -1238,7 +1238,7 @@
     "Transit passengers on qualifying itineraries may enter visa-free for a limited period under the transit-tourism programmes"
    ],
    "government_fee": {
-    "amount": 260,
+    "amount": 280,
     "currency": "CNY"
    },
    "official_portal_url": "https://www.visa.go.kr",
@@ -1247,7 +1247,42 @@
     "name": null,
     "submission_window": null
    },
-   "application_channel_detail": "Lodge through the Korean visa application centre serving your region. The consular fee is separate from the centre's service fee."
+   "application_channel_detail": "Lodge through the Korean visa application centre serving your region. The consular fee is separate from the centre's service fee.",
+   "visa_products": [
+    {
+     "type": "Single-entry tourist (C-3-9)",
+     "entry": null,
+     "validity": "3 months from issuance",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 280,
+      "currency": "CNY"
+     },
+     "notes": "Charged in CNY (RMB) for applications lodged in mainland China, not USD. Embassy of the ROK in Beijing FAQ (current live page, last updated 2023-06-21) and the Consulate-General in Shanghai both publish 280 CNY for a single-entry short-term visa (stay within 90 days). Ellis's 260 CNY headline and US"
+    },
+    {
+     "type": "Double-entry",
+     "entry": null,
+     "validity": "6 months (2 entries within 6 months)",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 490,
+      "currency": "CNY"
+     },
+     "notes": "490 CNY per both the Beijing embassy FAQ (两次签证 个人 490元) and the Shanghai consulate table (双次签证(6个月内2次的多次签证) 490元). Express +140 CNY. Validity wording comes from the Shanghai table: 2 entries within 6 months."
+    },
+    {
+     "type": "Multiple-entry (short/long-term)",
+     "entry": null,
+     "validity": "varies by eligibility (not stated on the fee pages; commonly 5 years, 10 years for certain groups)",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 630,
+      "currency": "CNY"
+     },
+     "notes": "630 CNY per both the Beijing embassy FAQ (多次签证（长、短期) 630元) and the Shanghai consulate table. Express +280 CNY. If a multiple-entry application is granted only a single-entry visa, the fee difference is not refunded. Validity of the multiple-entry visa is not stated in the official fee tables, so it "
+    }
+   ]
   }
  },
  {
@@ -18995,9 +19030,9 @@
    "travel_purpose": "tourism"
   },
   "verified_at": "2026-08-28",
-  "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
+  "verified_by": "Claude Opus 5 product-fee verification vs official sources",
   "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
-  "note": "Substantively fine. MOFA's exemption list (https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html) confirms Taiwan is visa-exempt with a 90-day landing permission, subject to '(Note 4) Visa exemption arrangement for Taiwan is limited to passport holders with a personal ID number.' So no fee appl | quote: The \"Cabinet Order on Fees Collected by Consular Officers,\" which sets forth vis",
+  "note": "The “Cabinet Order on Fees Collected by Consular Officers,” which sets forth visa fees, has been amended and comes into effect on July 1, 2026. For visa applications accepted at overseas diplomatic missions on or after that date, the fee, converted i...",
   "fields": {
    "government_fee": {
     "amount": 0,
@@ -19006,26 +19041,26 @@
    "permitted_stay_days": 90,
    "visa_products": [
     {
-     "type": "Visa exemption (Temporary Visitor landing permission)",
-     "entry": "per entry",
-     "validity": "n/a",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 0,
-      "currency": "JPY"
-     },
-     "notes": "Only for Taiwan passports carrying a personal ID number"
-    },
-    {
-     "type": "Single-entry Temporary Visitor visa (incl. JAPAN eVISA)",
-     "entry": "single",
-     "validity": "3 months",
+     "type": "Temporary Visitor, single entry",
+     "entry": null,
+     "validity": "3 months (single-entry visa must be used within 3 months of issue)",
      "max_stay_days": 90,
      "fee": {
       "amount": 15000,
       "currency": "JPY"
      },
-     "notes": "Fee ~15,000 yen, paid in local currency, from 1 July 2026"
+     "notes": "Ellis's 15,000 JPY is CORRECT for applications accepted on or after 2026-07-01: the Cabinet Order on consular fees was amended effective July 1, 2026, raising the single-entry visa fee from about 3,000 JPY to about 15,000 JPY (multiple: 6,000 -> 30,000 JPY). The 3,000 JPY figure is the pre-July-2026"
+    },
+    {
+     "type": "Temporary Visitor, multiple entry",
+     "entry": null,
+     "validity": "varies by visa granted",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 30000,
+      "currency": "JPY"
+     },
+     "notes": "About 30,000 JPY for applications accepted on or after 2026-07-01 per the same amended Cabinet Order; in Taiwan the Japan-Taiwan Exchange Association table (koryu.or.jp, non-government) shows NT$6,240 from 2026-07-01. Transit visas were discontinued as of 2026-06-30 per the same table."
     }
    ]
   }
