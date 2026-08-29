@@ -352,6 +352,41 @@ function CountryFilter({ value, placeholder, onCommit, countries }) {
   )
 }
 
+function MissingLine({ missing, t }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div style={{ marginTop: 10 }}>
+      <div style={{ fontSize: 12, color: RED, display: 'flex',
+                    alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+        <span>{t('ops.missingRequired')}: {missing.map((f) => fx(t, f)).join(', ')}</span>
+        <button onClick={(e) => { e.stopPropagation(); setOpen((o) => !o) }}
+                aria-label="why" data-testid="ops-missing-info"
+                style={{ width: 16, height: 16, borderRadius: '50%',
+                         border: `1px solid ${GRAY}`, background: '#fff',
+                         color: GRAY, fontSize: 10, fontWeight: 800,
+                         lineHeight: 1, cursor: 'pointer', padding: 0 }}>
+          i
+        </button>
+      </div>
+      {open && (
+        <div style={{ marginTop: 8, padding: '10px 14px', borderRadius: 10,
+                      background: '#f4f6fa', border: `1px solid ${BORDER}`,
+                      fontSize: 12, color: NAVY, lineHeight: 1.6,
+                      maxWidth: 620 }}>
+          {t('ops.missingWhy')}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Translated label for one of the 25 T-Station field keys; falls back to the
+// humanized key so an unmapped field is still readable, never snake_case.
+function fx(t, f) {
+  const k = 'ops.fx.' + f
+  return t(k) !== k ? t(k) : f.replace(/_/g, ' ')
+}
+
 function FieldGrid({ rec, t, typeNames = {} }) {
   const UNIT = { Day: t('ops.u.day'), Hour: t('ops.u.hour'),
                  Month: t('ops.u.month'), Year: t('ops.u.year'),
