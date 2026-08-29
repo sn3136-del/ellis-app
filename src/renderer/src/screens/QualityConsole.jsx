@@ -40,6 +40,25 @@ const OPS_CSS = `
                          color: #5b6a80; margin-right: 6px;
                          text-transform: uppercase; letter-spacing: .4px; }
 }
+/* Seven slice controls plus the export action = eight cells, laid out
+   four-up so the block closes as two even rows. auto-fill left a lone
+   control stranded on row two with the blue button floating beside it. */
+.ops-filters { display: grid; gap: 10px 12px;
+               grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.ops-filters-act { display: flex; align-items: flex-end; }
+@media (max-width: 1080px) {
+  .ops-filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  /* Eight cells over three columns leaves the action cell alone on the
+     last row; span it so it ends flush with the controls above. */
+  .ops-filters-act { grid-column: 2 / -1; justify-content: flex-end; }
+}
+@media (max-width: 760px) {
+  .ops-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ops-filters-act { grid-column: 1 / -1; }
+}
+@media (max-width: 460px) {
+  .ops-filters { grid-template-columns: minmax(0, 1fr); }
+}
 @media (prefers-reduced-motion: reduce) {
   .ops-fade { animation: none; }
   .ops-bar, .ops-seg, .ops-lift { transition: none; }
@@ -145,19 +164,29 @@ function StatCell({ label, value, sub, pct, target, accent = NAVY, delay = 0 }) 
                     color: pct == null ? accent : (hit ? GREEN : NAVY) }}>
         {typeof value === 'number' ? n.toLocaleString() : value}
       </div>
+      {/* The meter carries the tile's own colour. A fixed blue bar under an
+          amber STALE number said two different things about one figure, and
+          the share it represents was left for the reader to divide out. */}
       {pct != null && (
-        <div style={{ marginTop: 12, height: 6, borderRadius: 999,
-                      background: '#dbe8fb', position: 'relative' }}>
-          <div className="ops-bar"
-               style={{ position: 'absolute', left: 0, top: 0, bottom: 0,
-                        width: `${w}%`, borderRadius: 999,
-                        background: hit ? GREEN
-                          : 'linear-gradient(90deg, #1d4ed8, #4f8ef8)' }} />
-          {target != null && (
-            <div style={{ position: 'absolute', left: `${target}%`, top: -3,
-                          bottom: -3, width: 2, background: NAVY,
-                          borderRadius: 1, opacity: 0.45 }} />
-          )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9,
+                      marginTop: 12 }}>
+          <div style={{ flex: 1, height: 5, borderRadius: 999, minWidth: 0,
+                        background: '#e8edf5', position: 'relative' }}>
+            <div className="ops-bar"
+                 style={{ position: 'absolute', left: 0, top: 0, bottom: 0,
+                          width: `${w}%`, borderRadius: 999,
+                          background: hit ? GREEN : accent }} />
+            {target != null && (
+              <div style={{ position: 'absolute', left: `${target}%`, top: -3,
+                            bottom: -3, width: 2, background: NAVY,
+                            borderRadius: 1, opacity: 0.45 }} />
+            )}
+          </div>
+          <span style={{ fontSize: 11, fontWeight: 700, color: GRAY,
+                         fontVariantNumeric: 'tabular-nums',
+                         flexShrink: 0 }}>
+            {pct < 1 && pct > 0 ? '<1' : Math.round(pct)}%
+          </span>
         </div>
       )}
       {/* The caption wraps: a clipped "past their recheck win..." explains
@@ -567,7 +596,7 @@ function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames 
             <tr>
               <SortHeader label={t('ops.col.route')} k="route" sort={sort} onSort={onSort} width="15%" />
               <SortHeader label={t('ops.col.requirement')} k="requirement" sort={sort} onSort={onSort} width="11%" />
-              <SortHeader label={t('ops.col.type')} k="type" sort={sort} onSort={onSort} width="28%" />
+              <SortHeader label={t('ops.col.type')} k="type" sort={sort} onSort={onSort} width="24%" />
               <SortHeader label={t('ops.col.stay')} k="stay" sort={sort} onSort={onSort} align="right" width="9%" />
               <SortHeader label={t('ops.col.fee')} k="fee" sort={sort} onSort={onSort} align="right" width="11%" />
               <SortHeader label={t('ops.col.quality')} k="check" sort={sort} onSort={onSort} width="14%" />
@@ -576,7 +605,7 @@ function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames 
                            padding: '10px 12px', fontSize: 10.5,
                            fontWeight: 800, letterSpacing: 0.8,
                            textTransform: 'uppercase', color: GRAY,
-                           whiteSpace: 'nowrap', width: '12%',
+                           whiteSpace: 'nowrap', width: '16%',
                            textAlign: 'left' }}>
                 {t('ops.col.site')}
               </th>
@@ -593,6 +622,7 @@ function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames 
               const confKey = 'ops.conf.' + String(rec.confidence_level || '').toLowerCase()
               const confLabel = t(confKey) !== confKey ? t(confKey) : rec.confidence_level
               const pctDone = Math.round(rec.completeness * 100)
+              const held = rec.confidence_level === 'Low' && !rec.operator_released
               return [
                 <tr key={id} onClick={() => setOpen(opened ? null : id)}
                     style={{ cursor: 'pointer',
@@ -667,40 +697,61 @@ function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames 
                       </div>
                     )}
                   </td>
-                  <td style={{ padding: '10px 12px' }}>
-                    {rec.source_url && (
-                      <a href={rec.source_url} target="_blank" rel="noreferrer"
-                         onClick={(e) => e.stopPropagation()}
-                         style={{ fontSize: 12, color: BLUE, fontWeight: 700 }}>
-                        {t('ops.source')} ↗
-                      </a>
-                    )}
-                    {rec.confidence_level === 'Low' && (
-                      rec.operator_released
-                        ? <Chip color={GREEN} filled={false}>{t('ops.release')}</Chip>
-                        : <span style={{ display: 'inline-flex', gap: 6,
-                                         alignItems: 'center', marginLeft: 8 }}>
-                            <span title={t('ops.heldTip')}
-                                  style={{ fontSize: 11, fontWeight: 700,
-                                           color: '#9a5b00',
-                                           background: '#fdf3e2',
-                                           borderRadius: 999,
-                                           padding: '3px 9px',
-                                           cursor: 'help' }}>
-                              {t('ops.heldChip')}
-                            </span>
-                            <button onClick={(e) => { e.stopPropagation(); onRelease(rec) }}
-                                    data-testid="ops-release"
-                                    title={t('ops.heldTip')}
-                                    style={{ border: `1px solid ${GREEN}`,
-                                             background: '#fff', color: GREEN,
-                                             borderRadius: 999, fontSize: 11,
-                                             fontWeight: 700, padding: '3px 10px',
-                                             cursor: 'pointer' }}>
-                              {t('ops.releaseAction')}
-                            </button>
+                  {/* One column, one question: is this record in front of
+                      customers? A held record answers no and offers the one
+                      control that changes it. The source link sits under the
+                      answer rather than beside it, which is what jammed the
+                      link, the chip and the button onto the same short line. */}
+                  <td style={{ padding: '10px 12px', verticalAlign: 'top' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column',
+                                  alignItems: 'flex-start', gap: 6 }}>
+                      {held ? (
+                        <>
+                          <span title={t('ops.heldTip')}
+                                style={{ display: 'inline-flex', gap: 5,
+                                         alignItems: 'center',
+                                         fontSize: 11, fontWeight: 700,
+                                         color: '#9a5b00',
+                                         background: '#fdf3e2',
+                                         borderRadius: 999,
+                                         padding: '3px 10px',
+                                         whiteSpace: 'nowrap',
+                                         cursor: 'help' }}>
+                            <span style={{ width: 6, height: 6, borderRadius: 3,
+                                           background: AMBER, flexShrink: 0 }} />
+                            {t('ops.heldChip')}
                           </span>
-                    )}
+                          <button onClick={(e) => { e.stopPropagation(); onRelease(rec) }}
+                                  data-testid="ops-release"
+                                  title={t('ops.heldTip')}
+                                  style={{ border: `1px solid ${GREEN}`,
+                                           background: '#fff', color: GREEN,
+                                           borderRadius: 8, fontSize: 11,
+                                           fontWeight: 700, padding: '4px 12px',
+                                           whiteSpace: 'nowrap',
+                                           cursor: 'pointer' }}>
+                            {t('ops.releaseAction')}
+                          </button>
+                        </>
+                      ) : (
+                        <span style={{ display: 'inline-flex', gap: 5,
+                                       alignItems: 'center', fontSize: 11,
+                                       fontWeight: 700, color: '#1c6b45',
+                                       whiteSpace: 'nowrap' }}>
+                          <span style={{ width: 6, height: 6, borderRadius: 3,
+                                         background: GREEN, flexShrink: 0 }} />
+                          {t('ops.liveChip')}
+                        </span>
+                      )}
+                      {rec.source_url && (
+                        <a href={rec.source_url} target="_blank" rel="noreferrer"
+                           onClick={(e) => e.stopPropagation()}
+                           style={{ fontSize: 11.5, color: BLUE,
+                                    fontWeight: 700, whiteSpace: 'nowrap' }}>
+                          {t('ops.source')} ↗
+                        </a>
+                      )}
+                    </div>
                   </td>
                 </tr>,
                 opened && (
@@ -1088,15 +1139,17 @@ function useValueTranslations(client, lang) {
   }, [lang, map, want])
 }
 
+const EMPTY_FILTERS = { nationality: '', destination: '', purpose: '',
+                        requirement: '', confidence: '', visaType: '',
+                        fieldMissing: '' }
+
 export default function QualityConsole() {
   const client = useOpsClient()
   const { t, lang } = useLocale()
   const tv = useValueTranslations(client, lang)
   const [tab, setTab] = useState('records')
-  const [filters, setFilters] = useState({ nationality: '', destination: '',
-                                           purpose: '', requirement: '',
-                                           confidence: '', visaType: '',
-                                           fieldMissing: '' })
+  const [filters, setFilters] = useState(EMPTY_FILTERS)
+  const activeFilters = Object.values(filters).filter(Boolean).length
   const [reg, setReg] = useState(null)
   const [data, setData] = useState(null)
   const [changes, setChanges] = useState(null)
@@ -1440,7 +1493,7 @@ export default function QualityConsole() {
                 into a lonely orphan with the export floating in space. */}
             <div style={{ ...card, padding: '16px 20px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10,
-                            marginBottom: 12 }}>
+                            marginBottom: 12, flexWrap: 'wrap' }}>
                 <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1,
                                color: GRAY, textTransform: 'uppercase',
                                display: 'inline-flex', alignItems: 'center',
@@ -1449,20 +1502,32 @@ export default function QualityConsole() {
                                  background: BLUE, flexShrink: 0 }} />
                   {t('ops.spotCheck')}
                 </span>
-                <div style={{ flex: 1 }} />
-                <button className="btn btn--sm" onClick={exportXlsx} disabled={busy}
-                        data-testid="ops-export"
-                        style={{ borderRadius: 999, fontWeight: 700,
-                                 background: BLUE, color: '#fff',
-                                 padding: '9px 18px' }}>
-                  ⬇ {t('ops.export')}
-                </button>
+                {/* How many slices are active, and one way to undo them.
+                    Without this the only clue a filter is on is a shrunken
+                    row count further down the page. */}
+                {activeFilters > 0 && (
+                  <>
+                    <span style={{ fontSize: 11, fontWeight: 700,
+                                   color: BLUE, background: '#eef4ff',
+                                   borderRadius: 999, padding: '2px 9px' }}>
+                      {t('ops.flt.on').replace('{n}', activeFilters)}
+                    </span>
+                    <button onClick={() => setFilters(EMPTY_FILTERS)}
+                            data-testid="ops-filters-clear"
+                            style={{ border: 'none', background: 'none',
+                                     color: GRAY, fontSize: 11.5,
+                                     fontWeight: 700, cursor: 'pointer',
+                                     padding: 0, textDecoration: 'underline',
+                                     textUnderlineOffset: 3 }}>
+                      {t('ops.flt.clear')}
+                    </button>
+                  </>
+                )}
               </div>
               {/* Each control carries its own label: the reader sees WHAT
                   each field filters before touching it (the last one slices
                   by records MISSING a field, which a bare select hid). */}
-              <div style={{ display: 'grid', gap: 10, gridTemplateColumns:
-                              'repeat(auto-fill, minmax(170px, 1fr))' }}>
+              <div className="ops-filters">
               {(() => {
                 const F = ({ label, children }) => (
                   <label style={{ display: 'grid', gap: 5, minWidth: 0 }}>
@@ -1541,6 +1606,23 @@ export default function QualityConsole() {
                 ))}
               </select>
               </F>
+                <div className="ops-filters-act">
+                  <button className="btn btn--sm" onClick={exportXlsx}
+                          disabled={busy} data-testid="ops-export"
+                          style={{ borderRadius: 10, fontWeight: 700,
+                                   background: BLUE, color: '#fff',
+                                   border: 'none', width: '100%',
+                                   maxWidth: 220, padding: '11px 18px',
+                                   display: 'inline-flex', gap: 8,
+                                   alignItems: 'center',
+                                   justifyContent: 'center',
+                                   boxShadow: '0 1px 2px rgba(29,78,216,.28)',
+                                   opacity: busy ? 0.6 : 1,
+                                   cursor: busy ? 'default' : 'pointer' }}>
+                    <span aria-hidden="true" style={{ fontSize: 13 }}>⬇</span>
+                    {t('ops.export')}
+                  </button>
+                </div>
                 </>)
               })()}
               </div>
@@ -2259,6 +2341,10 @@ export default function QualityConsole() {
                             gridTemplateColumns:
                               'repeat(auto-fit, minmax(175px, 1fr))' }}>
                 {[
+                  // Every tile states its own unit. An answer is one cached
+                  // route decision; a record is one visa product within it,
+                  // which is why this page counts fewer things than Records
+                  // does - a difference that reads as a bug when unstated.
                   { label: t('ops.fresh.answers'), value: f.total,
                     sub: t('ops.fresh.answersSub'), accent: NAVY },
                   { label: t('ops.fresh.human'), value: f.human_verified,
@@ -2271,22 +2357,24 @@ export default function QualityConsole() {
                     sub: t('ops.fresh.groundedSub2') },
                   { label: t('ops.fresh.stale'), value: f.stale,
                     accent: f.stale ? AMBER : GREEN,
+                    pct: f.total ? (f.stale / f.total) * 100 : null,
                     sub: t('ops.fresh.staleSub') },
+                  // The caption used to carry the queue's open-report count,
+                  // so the tile showed two different numbers at once and read
+                  // as broken. It now describes only what it counts.
                   { label: t('ops.fresh.disputed'), value: f.disputed,
                     accent: f.disputed ? RED : GREEN,
-                    // One click from the number to the queue that holds it.
+                    pct: f.total ? (f.disputed / f.total) * 100 : null,
                     onClick: () => setTab('issues'),
-                    sub: (issues?.issues || []).length
-                      ? t('ops.fresh.disputedSub2').replace('{r}',
-                          (issues.issues.filter((i) => i.status === 'open').length))
-                      : t('ops.fresh.disputedSub') },
+                    sub: t('ops.fresh.disputedSub') },
                   ...(() => {
                     const m = uptime?.months?.[uptime.months.length - 1]
                     if (!m) return []
                     return [{ label: t('ops.fresh.avail'),
                               value: `${m.availability_pct}%`,
                               accent: m.availability_pct >= 99.99 ? GREEN : AMBER,
-                              sub: `${t('ops.fresh.availSub')} ${m.median_latency_ms ?? '·'} ms` }]
+                              sub: t('ops.fresh.availSub')
+                                     .replace('{ms}', m.median_latency_ms ?? '·') }]
                   })(),
                 ].map((p, i) => (
                   <div key={i} className="ops-lift"
