@@ -220,101 +220,110 @@ function StatTile({ label, value, sub, accent = NAVY }) {
  *  dropdown. The FILTER value sent to the API is whatever is committed —
  *  the server resolves names and codes alike. */
 function CountryFilter({ value, placeholder, onCommit, countries }) {
+  // ONE owner of the text: the operator while focused, the committed value
+  // otherwise. Earlier this had three writers (a value-sync effect, a
+  // debounce, and a blur commit) and the document mousedown listener closed
+  // the menu before blur fired, so clicking away re-committed and rewrote
+  // whatever had been typed.
   const [text, setText] = useState(value)
   const [open, setOpen] = useState(false)
+  const [hi, setHi] = useState(0)
   const boxRef = useRef(null)
   const inputRef = useRef(null)
-  const focused = () => typeof document !== 'undefined' &&
-    document.activeElement === inputRef.current
-  useEffect(() => {
-    // The committed VALUE is a code; the input shows the flagged label —
-    // but NEVER while the operator is typing: rewriting mid-keystroke made
-    // typed filters silently vanish.
-    if (focused()) return
-    const hit = value && countries.find((c) => c.value === value)
-    setText(hit ? hit.label : value)
-  }, [value, countries])
-  // Live filtering: the table follows the keystrokes (debounced), the same
-  // way the dropdown filters do. Ambiguous partials filter nothing rather
-  // than guessing a country.
-  useEffect(() => {
-    if (!focused()) return undefined
-    const id = setTimeout(() => {
-      const clean = String(text || '').replace(/^[^\p{L}\p{N}]+/u, '').trim()
-      if (!clean) { onCommit(''); return }
-      const lc = clean.toLowerCase()
-      const codeHit = clean === clean.toUpperCase() &&
-        countries.find((c) => c.value === clean.toUpperCase())
-      const nameHit = countries.find((c) =>
-        c.label.replace(/^[^\p{L}\p{N}]+/u, '').trim().toLowerCase() === lc)
-      const pool = countries.filter((c) => c.search.includes(lc))
-      const pick = codeHit || nameHit || (pool.length === 1 ? pool[0] : null)
-      if (pick) onCommit(pick.value)
-      else if (pool.length === 0 && clean.length >= 4) onCommit(clean)
-      else onCommit('')
-    }, 250)
-    return () => clearTimeout(id)
-  }, [text])  // eslint-disable-line react-hooks/exhaustive-deps
-  const matches = useMemo(() => {
-    const q = text.trim().toLowerCase()
-    if (!q) return []
-    return countries.filter((c) => c.search.includes(q)).slice(0, 8)
-  }, [text, countries])
-  useEffect(() => {
-    const close = (e) => {
-      if (boxRef.current && !boxRef.current.contains(e.target)) setOpen(false)
-    }
-    document.addEventListener('mousedown', close)
-    return () => document.removeEventListener('mousedown', close)
-  }, [])
-  const commit = (v) => {
-    // A committed value must be UNAMBIGUOUS: a picked label returns its
-    // code; typed text applies only when it names exactly one country
-    // (exact code, exact name, or a single suggestion). A partial like
-    // "and" used to fall through to the server resolver, which read it as
-    // AND = Andorra and quietly filtered the table by the wrong country.
-    const clean = String(v || '').replace(/^[^\p{L}\p{N}]+/u, '').trim()
-    if (!clean) { onCommit(''); setOpen(false); return }
+  const typing = useRef(false)
+  const timer = useRef(null)
+
+  const labelFor = (v) => {
+    const hit = v && countries.find((c) => c.value === v)
+    return hit ? hit.label : (v || '')
+  }
+  // Resolve typed text to a country code. Unambiguous only: an exact code
+  // (typed as a code), an exact name, or a single remaining suggestion.
+  // "and" stays ambiguous rather than silently becoming Andorra.
+  const resolve = (raw) => {
+    const clean = String(raw || '').replace(/^[^\p{L}\p{N}]+/u, '').trim()
+    if (!clean) return ''
     const lc = clean.toLowerCase()
-    // An alpha-3 CODE match counts only when typed as a code (uppercase):
-    // lowercase "and" is a word fragment, not Andorra.
     const codeHit = clean === clean.toUpperCase() &&
       countries.find((c) => c.value === clean.toUpperCase())
     const nameHit = countries.find((c) =>
       c.label.replace(/^[^\p{L}\p{N}]+/u, '').trim().toLowerCase() === lc)
-    const exact = codeHit || nameHit
     const pool = countries.filter((c) => c.search.includes(lc))
-    const pick = exact || (pool.length === 1 ? pool[0] : null)
-    if (pick) {
-      setText(pick.label)
-      onCommit(pick.value)
-    } else if (pool.length === 0 && clean.length >= 4) {
-      onCommit(clean)          // full name or alias: the server resolves it
-    } else {
-      onCommit('')             // ambiguous partial: filter nothing, not a guess
+    const pick = codeHit || nameHit || (pool.length === 1 ? pool[0] : null)
+    if (pick) return pick.value
+    if (pool.length === 0 && clean.length >= 4) return clean  // server resolves
+    return ''
+  }
+
+  // The committed value writes the box ONLY when the operator is not editing.
+  useEffect(() => {
+    if (typing.current) return
+    setText(labelFor(value))
+  }, [value, countries])  // eslint-disable-line react-hooks/exhaustive-deps
+
+  const matches = useMemo(() => {
+    const q = String(text || '').trim().toLowerCase()
+    if (!q) return []
+    const starts = [], rest = []
+    for (const c of countries) {
+      if (!c.search.includes(q)) continue
+      const name = c.label.replace(/^[^\p{L}\p{N}]+/u, '').toLowerCase()
+      ;(name.startsWith(q) || c.value.toLowerCase().startsWith(q)
+        ? starts : rest).push(c)
     }
+    starts.sort((a, b) => a.label.length - b.label.length)
+    return [...starts, ...rest].slice(0, 8)
+  }, [text, countries])
+
+  // Live filtering while typing: the table follows the keystrokes, the same
+  // way the enum dropdowns do.
+  const type = (v) => {
+    typing.current = true
+    setText(v); setHi(0); setOpen(true)
+    if (timer.current) clearTimeout(timer.current)
+    timer.current = setTimeout(() => onCommit(resolve(v)), 250)
+  }
+  const choose = (c) => {
+    if (timer.current) clearTimeout(timer.current)
+    typing.current = false
+    setText(c.label); setOpen(false)
+    onCommit(c.value)
+  }
+  // Leaving the field settles it: the pending keystroke is flushed once, the
+  // box shows the committed country's label, and nothing is re-committed.
+  const settle = () => {
+    if (!typing.current) { setOpen(false); return }
+    if (timer.current) clearTimeout(timer.current)
+    typing.current = false
+    const code = resolve(text)
+    onCommit(code)
+    setText(code ? labelFor(code) : '')
     setOpen(false)
   }
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current) }, [])
+
   return (
     <div ref={boxRef} style={{ position: 'relative' }}>
       <input value={text} placeholder={placeholder} ref={inputRef}
-             onChange={(e) => { setText(e.target.value); setOpen(true) }}
-             onKeyDown={(e) => {
-               // Enter picks the suggestion only when it is the ONLY one;
-               // otherwise the text goes through the resolver, which
-               // refuses ambiguous partials instead of grabbing the first
-               // alphabetical country.
-               if (e.key === 'Enter') {
-                 commit(matches.length === 1 ? matches[0].value : text)
-               }
-               if (e.key === 'Escape') setOpen(false)
-             }}
-             onBlur={() => { if (!open) commit(text) }}
              className="ops-in"
-             style={{ ...input, width: '100%',
-                      boxSizing: 'border-box', paddingRight: 30 }} />
+             onChange={(e) => type(e.target.value)}
+             onFocus={() => setOpen(true)}
+             onKeyDown={(e) => {
+               if (e.key === 'Escape') { setOpen(false); return }
+               if (!open || matches.length === 0) return
+               if (e.key === 'ArrowDown') { e.preventDefault(); setHi((h) => Math.min(h + 1, matches.length - 1)) }
+               else if (e.key === 'ArrowUp') { e.preventDefault(); setHi((h) => Math.max(h - 1, 0)) }
+               else if (e.key === 'Enter') { e.preventDefault()
+                 choose(matches[Math.min(hi, matches.length - 1)]) }
+             }}
+             onBlur={settle}
+             style={{ ...input, width: '100%', boxSizing: 'border-box',
+                      paddingRight: 30 }} />
       {text && (
-        <button onClick={() => { setText(''); commit('') }}
+        <button onMouseDown={(e) => e.preventDefault()}
+                onClick={() => { if (timer.current) clearTimeout(timer.current)
+                                 typing.current = false
+                                 setText(''); setOpen(false); onCommit('') }}
                 style={{ position: 'absolute', right: 4, top: '50%',
                          transform: 'translateY(-50%)', border: 'none',
                          background: 'transparent', color: GRAY,
@@ -325,58 +334,22 @@ function CountryFilter({ value, placeholder, onCommit, countries }) {
         <div style={{ position: 'absolute', top: '110%', left: 0, zIndex: 30,
                       minWidth: 210, ...card, padding: 6, maxHeight: 260,
                       overflowY: 'auto' }}>
-          {matches.map((c) => (
+          {matches.map((c, i) => (
             <div key={c.value}
-                 onMouseDown={() => { setText(c.label); commit(c.value) }}
-                 style={{ padding: '7px 10px', borderRadius: 8, fontSize: 13,
+                 onMouseDown={(e) => { e.preventDefault(); choose(c) }}
+                 onMouseEnter={() => setHi(i)}
+                 style={{ padding: '8px 10px', borderRadius: 8, fontSize: 13,
                           color: NAVY, cursor: 'pointer', display: 'flex',
-                          justifyContent: 'space-between', gap: 10 }}
-                 onMouseEnter={(e) => { e.currentTarget.style.background = BG }}
-                 onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}>
+                          justifyContent: 'space-between', gap: 10,
+                          background: i === hi ? BG : 'transparent' }}>
               <span>{c.label}</span>
-              <span style={{ color: GRAY, fontFamily: 'ui-monospace, monospace',
-                             fontSize: 11 }}>{c.value}</span>
+              <span style={{ color: GRAY, fontSize: 12 }}>{c.value}</span>
             </div>
           ))}
         </div>
       )}
     </div>
   )
-}
-
-function MissingLine({ missing, t }) {
-  const [open, setOpen] = useState(false)
-  return (
-    <div style={{ marginTop: 10 }}>
-      <div style={{ fontSize: 12, color: RED, display: 'flex',
-                    alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-        <span>{t('ops.missingRequired')}: {missing.map((f) => fx(t, f)).join(', ')}</span>
-        <button onClick={(e) => { e.stopPropagation(); setOpen((o) => !o) }}
-                aria-label="why" data-testid="ops-missing-info"
-                style={{ width: 16, height: 16, borderRadius: '50%',
-                         border: `1px solid ${GRAY}`, background: '#fff',
-                         color: GRAY, fontSize: 10, fontWeight: 800,
-                         lineHeight: 1, cursor: 'pointer', padding: 0 }}>
-          i
-        </button>
-      </div>
-      {open && (
-        <div style={{ marginTop: 8, padding: '10px 14px', borderRadius: 10,
-                      background: '#f4f6fa', border: `1px solid ${BORDER}`,
-                      fontSize: 12, color: NAVY, lineHeight: 1.6,
-                      maxWidth: 620 }}>
-          {t('ops.missingWhy')}
-        </div>
-      )}
-    </div>
-  )
-}
-
-// Translated label for one of the 25 T-Station field keys; falls back to the
-// humanized key so an unmapped field is still readable, never snake_case.
-function fx(t, f) {
-  const k = 'ops.fx.' + f
-  return t(k) !== k ? t(k) : f.replace(/_/g, ' ')
 }
 
 function FieldGrid({ rec, t, typeNames = {} }) {
@@ -473,7 +446,17 @@ function FieldGrid({ rec, t, typeNames = {} }) {
             {(rec[f] == null || rec[f] === '')
               ? (st === 'missing' ? t('ops.missingCounts')
                  : st === 'optional-empty' ? t('ops.notRequired') : show(f))
-              : show(f)}
+              : /^https?:\/\//.test(String(rec[f]))
+                /* A source is only traceable if it can be OPENED: the
+                   acceptance standard asks for a clickable source. */
+                ? <a href={String(rec[f])} target="_blank" rel="noreferrer"
+                     onClick={(e) => e.stopPropagation()}
+                     style={{ color: BLUE, fontWeight: 600,
+                              textDecoration: 'underline',
+                              overflowWrap: 'anywhere' }}>
+                    {show(f)} ↗
+                  </a>
+                : show(f)}
           </div>
         </div>
       ))}
