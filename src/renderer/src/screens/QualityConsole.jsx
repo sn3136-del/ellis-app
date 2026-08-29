@@ -46,6 +46,7 @@ const OPS_CSS = `
 .ops-filters { display: grid; gap: 10px 12px;
                grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .ops-filters-act { display: flex; align-items: flex-end; }
+.ops-export-btn { max-width: 220px; }
 @media (max-width: 1080px) {
   .ops-filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   /* Eight cells over three columns leaves the action cell alone on the
@@ -58,6 +59,21 @@ const OPS_CSS = `
 }
 @media (max-width: 460px) {
   .ops-filters { grid-template-columns: minmax(0, 1fr); }
+  /* A 220px button pinned right leaves a dead gap on a phone. */
+  .ops-export-btn { max-width: none; }
+}
+/* Six freshness tiles. auto-fit landed on four, leaving two adrift on a
+   second row; fixed breakpoints keep every row full. */
+.ops-tiles { display: grid; gap: 12px;
+             grid-template-columns: repeat(6, minmax(0, 1fr)); }
+@media (max-width: 1560px) {
+  .ops-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 820px) {
+  .ops-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 420px) {
+  .ops-tiles { grid-template-columns: minmax(0, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) {
   .ops-fade { animation: none; }
@@ -628,19 +644,23 @@ function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames 
                     style={{ cursor: 'pointer',
                              background: opened ? '#f4f8ff'
                                : i % 2 ? '#fbfcfe' : '#fff' }}>
-                  <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>
+                  {/* The pair itself never wraps; the purpose line under it
+                      does. Held together, a long document type ("Tourism ·
+                      Refugee travel document") burst the column. */}
+                  <td style={{ padding: '10px 12px' }}>
                     <span style={{ display: 'inline-block', color: '#9aa8bd',
                                    fontSize: 10, marginRight: 7,
                                    transition: 'transform .15s ease',
                                    transform: opened ? 'rotate(90deg)' : 'none' }}>
                       ▶
                     </span>
-                    <strong style={{ color: NAVY }}>
+                    <strong style={{ color: NAVY, whiteSpace: 'nowrap' }}>
                       {flagOf(rec.travel_document_country)} {rec.travel_document_country}
                       {' → '}
                       {flagOf(rec.destination_country)} {rec.destination_country}
                     </strong>
-                    <div style={{ color: GRAY, fontSize: 11, paddingLeft: 17 }}>
+                    <div style={{ color: GRAY, fontSize: 11, paddingLeft: 17,
+                                  lineHeight: 1.45, overflowWrap: 'anywhere' }}>
                       {t(PURPOSE_KEY[rec.travel_purpose] || '') || rec.travel_purpose}
                       {rec.travel_document_type !== 'ordinary_passport'
                         ? ' · ' + ((t('db.doc.' + rec.travel_document_type)
@@ -956,53 +976,6 @@ function MicroStack({ segs, height = 10, legend = true }) {
           ))}
         </div>
       )}
-    </div>
-  )
-}
-
-function CoverageRing({ segs, total, centerLabel, centerSub }) {
-  // An SVG ring, animated by stroke-dasharray after mount. 2px surface gaps
-  // between segments; the ordered blue ramp carries the tiers.
-  const [go, setGo] = useState(false)
-  useEffect(() => { const id = setTimeout(() => setGo(true), 120)
-    return () => clearTimeout(id) }, [])
-  const R = 62, C = 2 * Math.PI * R
-  const gap = 3
-  let offset = 0
-  const arcs = segs.map(([n, color]) => {
-    const frac = total ? n / total : 0
-    const len = Math.max(0, frac * C - gap)
-    const a = { color, len, offset }
-    offset += frac * C
-    return a
-  })
-  const pctText = total ? Math.round(((segs[0][0] + segs[1][0]) / total) * 100) : 0
-  const shown = useCountUp(go ? pctText : 0, 900)
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 28,
-                  flexWrap: 'wrap' }}>
-      <svg width="170" height="170" viewBox="0 0 170 170"
-           role="img" aria-label={centerLabel}>
-        <circle cx="85" cy="85" r={R} fill="none" stroke="#eef2f8"
-                strokeWidth="20" />
-        {arcs.map((a, i) => (
-          <circle key={i} cx="85" cy="85" r={R} fill="none" stroke={a.color}
-                  strokeWidth="20" strokeLinecap="butt"
-                  strokeDasharray={`${go ? a.len : 0} ${C}`}
-                  strokeDashoffset={-a.offset}
-                  transform="rotate(-90 85 85)"
-                  style={{ transition: 'stroke-dasharray 1s cubic-bezier(.25,.8,.25,1)' }} />
-        ))}
-        <text x="85" y="82" textAnchor="middle"
-              style={{ fontSize: 30, fontWeight: 700, fill: NAVY }}>
-          {shown}%
-        </text>
-        <text x="85" y="102" textAnchor="middle"
-              style={{ fontSize: 9, fontWeight: 700, fill: GRAY,
-                       letterSpacing: 0.3, textTransform: 'uppercase' }}>
-          {centerSub}
-        </text>
-      </svg>
     </div>
   )
 }
@@ -1607,12 +1580,13 @@ export default function QualityConsole() {
               </select>
               </F>
                 <div className="ops-filters-act">
-                  <button className="btn btn--sm" onClick={exportXlsx}
+                  <button className="btn btn--sm ops-export-btn"
+                          onClick={exportXlsx}
                           disabled={busy} data-testid="ops-export"
                           style={{ borderRadius: 10, fontWeight: 700,
                                    background: BLUE, color: '#fff',
                                    border: 'none', width: '100%',
-                                   maxWidth: 220, padding: '11px 18px',
+                                   padding: '11px 18px',
                                    display: 'inline-flex', gap: 8,
                                    alignItems: 'center',
                                    justifyContent: 'center',
@@ -2337,9 +2311,7 @@ export default function QualityConsole() {
           ]
           return (
             <div style={{ display: 'grid', gap: 14 }} className="ops-fade">
-              <div style={{ display: 'grid', gap: 12,
-                            gridTemplateColumns:
-                              'repeat(auto-fit, minmax(175px, 1fr))' }}>
+              <div className="ops-tiles">
                 {[
                   // Every tile states its own unit. An answer is one cached
                   // route decision; a record is one visa product within it,
@@ -2395,18 +2367,25 @@ export default function QualityConsole() {
                                justifyContent: 'center' }}>i</span>
                 <span>{t('ops.fresh.note')}</span>
               </div>
-              <div style={{ ...card, padding: '24px 28px', display: 'flex',
-                            flexWrap: 'wrap', gap: 26,
-                            alignItems: 'center' }}>
-                <CoverageRing segs={segs} total={f.total}
-                              centerLabel={t('ops.fresh.coverage')}
-                              centerSub={t('ops.fresh.coveredShort')} />
-                <div style={{ display: 'grid', gap: 16, minWidth: 0,
-                              flex: '1 1 260px' }}>
-                  <div style={{ fontSize: 10.5, fontWeight: 800,
-                                letterSpacing: 1, color: GRAY,
-                                textTransform: 'uppercase' }}>
-                    {t('ops.fresh.coverage')}
+              <div style={{ ...card, padding: '24px 28px' }}>
+                <div style={{ display: 'grid', gap: 16, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline',
+                                gap: 12, flexWrap: 'wrap' }}>
+                    <div style={{ fontSize: 10.5, fontWeight: 800,
+                                  letterSpacing: 1, color: GRAY,
+                                  textTransform: 'uppercase', flex: 1 }}>
+                      {t('ops.fresh.coverage')}
+                    </div>
+                    <div style={{ fontSize: 26, fontWeight: 700, color: NAVY,
+                                  lineHeight: 1,
+                                  fontVariantNumeric: 'tabular-nums' }}>
+                      {f.total ? Math.round((covered / f.total) * 100) : 0}%
+                    </div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: GRAY,
+                                  textTransform: 'uppercase',
+                                  letterSpacing: 0.6 }}>
+                      {t('ops.fresh.coveredShort')}
+                    </div>
                   </div>
                   <MicroStack segs={segs} height={22} legend={false} />
                   <div style={{ display: 'grid', gap: 8 }}>
