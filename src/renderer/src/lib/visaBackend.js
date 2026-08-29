@@ -77,8 +77,11 @@ async function call(method, path, session, body) {
 // ever appear by accident.
 export async function fetchRuntimeMode(baseUrl) {
   try {
+    // The probe carries an identity like every other call: without org and
+    // user the endpoint answers 401, which fails safe to 'production' but
+    // left three red errors in the console on every page load.
     const res = await fetch(`${baseUrl || BASE}/capabilities`, {
-      headers: authHeaders(null),
+      headers: authHeaders({ orgId: 'public', userId: 'runtime-probe' }),
       signal: typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? AbortSignal.timeout(5000) : undefined
     })
     if (!res.ok) return 'production'
