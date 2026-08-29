@@ -855,7 +855,7 @@
   "verified_at": "2026-08-29",
   "verified_by": "Ellis source audit",
   "source_url": "https://www.cn.emb-japan.go.jp/itpr_zh/visa_kanko.html",
-  "note": "The embassy tourist-visa page lists FIVE ordinary-passport tourist products (group tour, individual single-entry, Okinawa/Tohoku multiple, sufficient-financial-ability multiple, high-income 5-year). They were mis-keyed onto the diplomatic-passport route, so ordinary travellers saw only the single-entry eVisa - exactly the appendix defect Trip.com raised. Consular fees from 1 July 2026: CNY 715 single / CNY 1,430 multiple, excluding agency service fees. | Verified 2026-08-22 against MOFA and the Embassy of Japan in China. Single-entry tourist visas for mainland residents are issued electronically (Visa issuance notice shown online at the airport); stay 15 or 30 days, set by the mission. Fees CNY 715 single / 1,430 multiple from 1 July 2026, charged only on issuance; the designated agency's fee is separate. Group tour visa (5 to 40 people) up to 15  | Adjudicated 2026-08-29 against the official page after a freshness dispute: The embassy page contradicts the stored 15-day cap: the individual single-entry tourist visa's stay is 15 OR 30 days decided by the embassy. The stored requirement_detail 'evisa' STANDS and needs no change: the embassy's eVisa notice (https://www.cn.emb-japan.go",
+  "note": "Group-tour validity is unpublished by the mission and stays blank per the no-inference rule. | The embassy tourist-visa page lists FIVE ordinary-passport tourist products (group tour, individual single-entry, Okinawa/Tohoku multiple, sufficient-financial-ability multiple, high-income 5-year). They were mis-keyed onto the diplomatic-passport route, so ordinary travellers saw only the single-entry eVisa - exactly the appendix defect Trip.com raised. Consular fees from 1 July 2026: CNY 715 single / CNY 1,430 multiple, excluding agency service fees. | Verified 2026-08-22 against MOFA and the Embassy of Japan in China. Single-entry tourist visas for mainland residents are issued electronically (Visa issuance notice shown online at the airport); stay 15 or 30 days, set by the mission. Fees CNY 715 single / 1,430 multiple from 1 July 2026, charged only on issuance; the designated agency's fee is separate. Group tour visa (5 to 40 people) up to 15  | Adjudicated 2026-08-29 against the official page after a freshness dispute: The embassy page contradicts the stored 15-day cap: the individual single-entry tourist visa's stay is 15 OR 30 days decided by the embassy. The stored requirement_det",
   "fields": {
    "permitted_stay": "15 or 30 days on a single-entry tourist visa (decided by the mission); 30 days per visit on the 3-year multiple-entry visas; 90 days per visit on the 5-year multiple-entry visa",
    "government_fee": {
@@ -872,7 +872,7 @@
       "amount": 715,
       "currency": "CNY"
      },
-     "notes": "Tour groups of about 5 to 40 people organised by designated agencies; itinerary within 15 days; no independent activity without the tour escort. Fee = single-entry visa rate effective 2026-07-01."
+     "notes": "Single-entry visa for organised groups of roughly 5 to 40 travellers, itinerary within 15 days, lodged through a designated travel agency. The embassy publishes no validity period for this product (the 3-month validity it states belongs to the individual single-entry visa), so validity is left blank rather than assumed."
     },
     {
      "type": "Individual single-entry tourist visa (个人单次旅游签证)",
