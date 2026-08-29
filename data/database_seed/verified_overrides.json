@@ -193,28 +193,39 @@
    "destination": "KOR",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-25",
+  "verified_at": "2026-08-29",
   "verified_by": "Ellis source audit",
-  "source_url": "https://www.k-eta.go.kr/portal/apply/index.do",
-  "note": "Verified 2026-08-25 against the K-ETA portal's own notice \"대한민국 전자여행허가제(K-ETA) 한시 면제 기간 연장 알림\" (2026-03-20) and Korea's MOFA: the temporary K-ETA exemption for 22 countries is extended to 31 December 2026. K-ETA is OPTIONAL for these nationalities during the exemption (a voluntary application only buys the arrival-card exemption). Review on 2026-12-31: the requirement returns if the exemption is not extended again.",
+  "source_url": "https://www.k-eta.go.kr/portal/board/viewboarddetail.do?bbsSn=299707",
+  "note": "Policy red-line verification 2026-08-29: the stored answer demanded a visa. HKSAR passport holders enter Korea visa-free, and the Ministry of Justice has extended the temporary K-ETA exemption to 31 December 2026 (KST). | Verified 2026-08-25 against the K-ETA portal's own notice \"대한민국 전자여행허가제(K-ETA) 한시 면제 기간 연장 알림\" (2026-03-20) and Korea's MOFA: the temporary K-ETA exemption for 22 countries is extended to 31 December 2026. K-ETA is OPTIONAL for these nationalities during the exemption (a voluntary application only buys the arrival-card exemption). Review on 2026-12-31: the requirement returns if the exemption is not extended again.",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "unconditional_visa_free",
-   "visa_category": "Visa-free short-term visit",
-   "permitted_stay": "Up to 90 days per entry",
+   "visa_category": "Visa-free entry",
+   "permitted_stay": "Up to 90 days",
    "permitted_stay_days": 90,
    "application_channel": "not_required",
-   "application_channel_detail": "No visa and no K-ETA are required during Korea's temporary K-ETA exemption, which runs to 31 December 2026. Applying for K-ETA voluntarily only exempts you from the paper arrival card.",
+   "application_channel_detail": "No visa is required. K-ETA is temporarily waived for Hong Kong through 31 December 2026 (KST); travellers may still apply for one voluntarily.",
    "government_fee": {
     "amount": 0,
     "currency": null
    },
    "confidence": "medium",
    "official_portal_url": "https://www.k-eta.go.kr/portal/apply/index.do",
-   "visa_products": [],
+   "visa_products": [
+    {
+     "type": "Visa-free entry",
+     "entry": "multiple",
+     "validity": "on arrival",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 0,
+      "currency": null
+     },
+     "notes": "No visa is required. K-ETA is temporarily waived for Hong Kong through 31 December 2026 (KST); travellers may still apply for one voluntarily."
+    }
+   ],
    "exceptions": [
-    "Korea's temporary K-ETA exemption runs to 31 December 2026; check again for travel after that date",
-    "A voluntary K-ETA application exempts you from filling the arrival card on the plane"
+    "K-ETA exemption runs to 31 December 2026 (KST); the requirement returns if it is not extended"
    ]
   }
  },
@@ -1394,17 +1405,41 @@
    "destination": "THA",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-22",
+  "verified_at": "2026-08-29",
   "verified_by": "Ellis source audit",
   "source_url": "https://www.thaievisa.go.th/",
-  "note": "Source recorded for the visa exemption. TDAC mandatory per tdac.immigration.go.th.",
+  "note": "Policy red-line verification 2026-08-29: the stored answer demanded a visa in advance. Thailand's official e-Visa portal checker returns visa-free entry for Chinese nationals for stays up to 60 days. | Source recorded for the visa exemption. TDAC mandatory per tdac.immigration.go.th.",
   "fields": {
    "arrival_card": {
     "required": true,
     "name": "Thailand Digital Arrival Card (TDAC)",
     "submission_window": "submit online within 3 days before arrival",
     "note": "Mandatory for all foreign visitors since 1 May 2025; free at tdac.immigration.go.th"
-   }
+   },
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Visa-free entry",
+   "permitted_stay": "Up to 60 days",
+   "permitted_stay_days": 60,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa is required for stays of up to 60 days. A Thailand Digital Arrival Card is submitted before arrival.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": [
+    {
+     "type": "Visa-free entry",
+     "entry": "multiple",
+     "validity": "on arrival",
+     "max_stay_days": 60,
+     "fee": {
+      "amount": 0,
+      "currency": null
+     },
+     "notes": "No visa is required for stays of up to 60 days. A Thailand Digital Arrival Card is submitted before arrival."
+    }
+   ]
   }
  },
  {
@@ -37092,6 +37127,189 @@
       "currency": "EUR"
      },
      "notes": "Validity is set by the issuing consulate under the EU cascade; Iceland publishes no fixed figure."
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "DEU",
+   "travel_purpose": "work"
+  },
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://www.auswaertiges-amt.de/en/visa-service/-/231148",
+  "note": "Policy red-line verification 2026-08-29: the stored answer demanded a visa in advance. The Federal Foreign Office's own country list marks the United States 'no' for visa requirement; US ordinary-passport holders enter visa-free and may apply for a work residence permit after arrival.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "conditional_visa_free",
+   "visa_category": "Visa-free entry",
+   "permitted_stay": "Up to 90 days",
+   "permitted_stay_days": 90,
+   "application_channel": "not_required",
+   "application_channel_detail": "No entry visa is required. US ordinary-passport holders may apply for a residence permit for work purposes after entering Germany; a national D visa is needed in advance only where employment begins directly on arrival.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": [
+    {
+     "type": "Visa-free entry",
+     "entry": "multiple",
+     "validity": "on arrival",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 0,
+      "currency": null
+     },
+     "notes": "No entry visa is required. US ordinary-passport holders may apply for a residence permit for work purposes after entering Germany; a national D visa is needed in advance only where employment begins directly on arrival."
+    }
+   ],
+   "exceptions": [
+    "A national D visa is required in advance only if employment is to begin directly after arrival",
+    "Stays beyond 90 days require a residence permit, applied for locally after entry"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "SYC",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://www.ics.gov.sc/permits/visitors-permit",
+  "note": "Policy red-line verification 2026-08-29: Seychelles requires every traveller to hold an Electronic Travel Authorisation before departure, so this is an ETA route rather than plain visa-free. The Visitor's Permit granted on arrival runs up to three months.",
+  "fields": {
+   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+   "requirement_detail": "eta_electronic_authorization",
+   "visa_category": "Seychelles Travel Authorisation",
+   "permitted_stay": "Up to 90 days",
+   "permitted_stay_days": 90,
+   "application_channel": "online_application",
+   "application_channel_detail": "Apply online for the Seychelles Travel Authorisation before departure; a Visitor's Permit is then granted on arrival for up to three months.",
+   "government_fee": "",
+   "official_portal_url": "https://seychelles.govtas.com/",
+   "visa_products": [
+    {
+     "type": "Seychelles Travel Authorisation",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": "",
+     "notes": "Apply online for the Seychelles Travel Authorisation before departure; a Visitor's Permit is then granted on arrival for up to three months."
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "ISR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://embassies.gov.il/usa/en/announcements/important-information-travelers-israel-eta-il-requirement",
+  "note": "Policy red-line verification 2026-08-29: the stored answer said plain visa-free. Israel's Population and Immigration Authority made ETA-IL mandatory on 1 January 2025 for every visa-exempt nationality, so an authorisation must be held before departure.",
+  "fields": {
+   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+   "requirement_detail": "eta_electronic_authorization",
+   "visa_category": "ETA-IL (Electronic Travel Authorization)",
+   "permitted_stay": "Up to 90 days",
+   "permitted_stay_days": 90,
+   "application_channel": "online_application",
+   "application_channel_detail": "Nationals of visa-exempt countries must hold an approved ETA-IL before departing for Israel; no visa is required.",
+   "government_fee": "",
+   "official_portal_url": "https://israel-entry.piba.gov.il/",
+   "visa_products": [
+    {
+     "type": "ETA-IL (Electronic Travel Authorization)",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": "",
+     "notes": "Nationals of visa-exempt countries must hold an approved ETA-IL before departing for Israel; no visa is required."
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "KOR",
+   "travel_purpose": "transit"
+  },
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://www.k-eta.go.kr/portal/board/viewboarddetail.do?bbsSn=299707",
+  "note": "Policy red-line verification 2026-08-29: the stored answer demanded a visa. HKSAR passport holders enter Korea visa-free, and the Ministry of Justice has extended the temporary K-ETA exemption to 31 December 2026 (KST).",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Visa-free entry",
+   "permitted_stay": "Up to 90 days",
+   "permitted_stay_days": 90,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa is required. K-ETA is temporarily waived for Hong Kong through 31 December 2026 (KST); travellers may still apply for one voluntarily.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": [
+    {
+     "type": "Visa-free entry",
+     "entry": "multiple",
+     "validity": "on arrival",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 0,
+      "currency": null
+     },
+     "notes": "No visa is required. K-ETA is temporarily waived for Hong Kong through 31 December 2026 (KST); travellers may still apply for one voluntarily."
+    }
+   ],
+   "exceptions": [
+    "K-ETA exemption runs to 31 December 2026 (KST); the requirement returns if it is not extended"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "TWN",
+   "destination": "USA",
+   "travel_purpose": "business"
+  },
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://www.dhs.gov/visa-waiver-program",
+  "note": "Policy red-line verification 2026-08-29: the stored answer demanded a visa. Taiwan has been a designated Visa Waiver Program country since 1 November 2012; eligible travellers hold an ESTA authorisation, which is not a visa.",
+  "fields": {
+   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+   "requirement_detail": "eta_electronic_authorization",
+   "visa_category": "ESTA (Visa Waiver Program travel authorisation)",
+   "permitted_stay": "Up to 90 days",
+   "permitted_stay_days": 90,
+   "application_channel": "online_application",
+   "application_channel_detail": "Apply for ESTA online before travel. Open to Taiwan passport holders with an unrestricted right of permanent abode who hold a passport bearing a national identification number.",
+   "government_fee": {
+    "amount": 40,
+    "currency": "USD"
+   },
+   "official_portal_url": "https://esta.cbp.dhs.gov/",
+   "visa_products": [
+    {
+     "type": "ESTA (Visa Waiver Program travel authorisation)",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 40,
+      "currency": "USD"
+     },
+     "notes": "Apply for ESTA online before travel. Open to Taiwan passport holders with an unrestricted right of permanent abode who hold a passport bearing a national identification number."
     }
    ]
   }
