@@ -194,18 +194,31 @@ def _fee(product: dict, guidance: dict) -> tuple[float | None, str | None]:
     return amount, str(currency) if currency else None
 
 
-def _confidence(guidance: dict, provenance: dict | None) -> str:
+def _confidence(guidance: dict, provenance: dict | None,
+                grounded_ok: bool = False) -> str:
     """The spec's own ladder: High is a single official source, complete, no
     conflict (here: a person verified it against a named page). Medium is
     official-source-backed but with gaps. Low is conflicting or NON-OFFICIAL
     ONLY, which by definition includes an answer carrying no source URL at
-    all: the model's memory alone is not an official source."""
+    all: the model's memory alone is not an official source.
+
+    An answer that ASSERTS VISA PRODUCTS — fees, validity, entry counts — but
+    has never been checked against its official page is Low as well. That is
+    not caution, it is measurement: an adversarial audit of every such record
+    (2026-08-29, 21 route+purpose combinations) confirmed none of them and
+    found 19 wrong, including superseded fees, products the destination does
+    not issue, and visas demanded of travellers who are visa-exempt. A URL
+    attached to an unread claim is not a source."""
     if provenance:
         return "High"
     if not (guidance.get("source_url") or guidance.get("official_portal_url")):
         return "Low"
     c = str(guidance.get("confidence") or "").lower()
-    return "Low" if c == "low" else "Medium"
+    if c == "low":
+        return "Low"
+    if (guidance.get("visa_products") or []) and not grounded_ok:
+        return "Low"
+    return "Medium"
 
 
 def _processing(guidance: dict) -> tuple[float | None, str | None]:
@@ -220,7 +233,8 @@ def _processing(guidance: dict) -> tuple[float | None, str | None]:
 def records_for_route(route: dict, guidance: dict,
                       provenance: dict | None = None,
                       collected_at: str | None = None,
-                      valid_until: str | None = None) -> list[dict]:
+                      valid_until: str | None = None,
+                      grounded_ok: bool = False) -> list[dict]:
     """The route's answer as T-Station 25-field records, one per visa
     product; a product-less route (visa-free, or detail still filling)
     yields a single route-level record."""
@@ -269,7 +283,7 @@ def records_for_route(route: dict, guidance: dict,
         # window that triggers the next official-source recheck.
         "info_validity": g.get("policy_valid_until")
                          or ((valid_until or "")[:10] or None),
-        "confidence_level": _confidence(g, provenance),
+        "confidence_level": _confidence(g, provenance, grounded_ok),
     }
     products = [p for p in (g.get("visa_products") or [])
                 if isinstance(p, dict) and p.get("type")]

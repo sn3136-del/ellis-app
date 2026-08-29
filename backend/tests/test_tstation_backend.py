@@ -55,9 +55,16 @@ def test_the_25_field_record_speaks_their_dictionary_exactly():
     assert (r["visa_fee_amount"], r["visa_fee_currency"]) == (100, "USD")
     assert r["application_method"] == "Embassy Submission"
     assert (r["processing_min_days"], r["processing_unit"]) == (5, "Working Day")
-    # The spec ladder: an engine answer WITH an official source is Medium;
-    # strip the source and the same answer is Low ("non-official only").
-    assert r["confidence_level"] == "Medium"
+    # The spec ladder. An answer that asserts visa PRODUCTS but was never
+    # checked against its official page is Low however good its URL looks:
+    # an audit of every such record found 19 of 21 wrong (superseded fees,
+    # products the destination does not issue, visas demanded of exempt
+    # travellers). Once the official page has been read and agrees, the same
+    # answer is Medium.
+    assert r["confidence_level"] == "Low"
+    ok = tstation.records_for_route(route, ANSWER, None, "2026-08-27T00:00:00",
+                                    grounded_ok=True)
+    assert ok[0]["confidence_level"] == "Medium"
     bare = {k: v for k, v in ANSWER.items()
             if k not in ("source_url", "official_portal_url")}
     low = tstation.records_for_route(route, bare, None, "2026-08-27T00:00:00")

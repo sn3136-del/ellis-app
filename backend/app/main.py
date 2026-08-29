@@ -909,7 +909,12 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
         g = kimi_primary.apply_portal_fallback({"guidance": g}, route)["guidance"]
         collected = (r.generated_at.isoformat() if r.generated_at else "")
         until = (r.fresh_until.isoformat() if r.fresh_until else "")
-        for rec in tstation.records_for_route(route, g, prov, collected, until):
+        # Whether the official page has actually been read and agreed with:
+        # the difference between a source and a link nobody opened.
+        _gc = ((r.verification or {}).get("grounded_check") or {})
+        _grounded = _gc.get("outcome") == "checked" and bool(_gc.get("consistent"))
+        for rec in tstation.records_for_route(route, g, prov, collected, until,
+                                              grounded_ok=_grounded):
             if not rec.get("source_url"):
                 # The destination's browser-verified official portal is the
                 # official reference page for a record whose answer carries
@@ -1325,8 +1330,12 @@ def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
     # Low still reach customers unheld.
     if out.get("guidance") and not out.get("operator_released"):
         from .visa_snapshot import tstation as _ts
-        _rows = _ts.records_for_route(route, out.get("guidance") or {},
-                                      (out.get("source_verified") or None))
+        _gc2 = out.get("grounded_check") or {}
+        _rows = _ts.records_for_route(
+            route, out.get("guidance") or {},
+            (out.get("source_verified") or None),
+            grounded_ok=(_gc2.get("outcome") == "checked"
+                         and bool(_gc2.get("consistent"))))
         if _rows and _rows[0].get("confidence_level") == "Low":
             out["review_required"] = True
             out["held"] = kimi_primary.hold_enabled()
