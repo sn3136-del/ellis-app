@@ -1081,3 +1081,9 @@ select.ops-in {
   .illo-stamp, .illo-node, .illo-pulse { opacity: 1; transform: none; }
   .trip-home__accent::after { transform: scaleX(1); }
 }
+
+/* Phone: all four ops tabs stay visible by wrapping to a second row. */
+@media (max-width: 540px) {
+  .ops-tabs { flex-wrap: wrap; overflow-x: visible; border-radius: 18px;
+              width: 100%; }
+}

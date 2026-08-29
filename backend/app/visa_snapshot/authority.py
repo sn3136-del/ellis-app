@@ -56,6 +56,19 @@ GOV_SUFFIXES = (
     # mozambiquehighcommission.org.uk and ghanaembassydc.org are those
     # states' official missions in London and Washington DC.
     "ind.nl", "mozambiquehighcommission.org.uk", "ghanaembassydc.org",
+    # Verified 2026-08-29 (gap-close research, each page opened and quoted):
+    # state ministries and official missions on their own domains.
+    # minv.sk is Slovakia's Ministry of the Interior; baochinhphu.vn is the
+    # Vietnamese government's official electronic gazette (state organ of
+    # chinhphu.vn); bhutan.travel is Bhutan's Department of Tourism, the
+    # state channel that administers entry and the SDF.
+    "minv.sk", "baochinhphu.vn", "bhutan.travel",
+    # Official embassies/consulates of their states:
+    "bolivianembassy.co.uk", "botswanaembassy.org", "namibia-botschaft.de",
+    "panamaconsulatehk.com", "sudanembassybj.com", "sudanembassy.org",
+    "embassyofguyana.be", "embassyoflibyadc.org", "embassyofniger-usa.org",
+    "embassyofuruguay.us", "ambacongo-us.org", "liberianembassyus.org",
+    "ambacamcaire.com", "haiti.org", "pakistan.hk",
 
     # generic
     "gov", "mil",

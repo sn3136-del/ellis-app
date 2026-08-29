@@ -11,6 +11,7 @@ import { Loading } from '../components/ui.jsx'
 import { EllisMark } from '../App.jsx'
 import { useLocale } from '../lib/locale.jsx'
 import { useLocalizedCountries } from '../lib/countryNames.js'
+import { DEPARTURE_CITIES } from '../lib/departureCities.js'
 import { createVisaClient } from '../lib/visaBackend.js'
 import { newSession } from '../lib/visaSession.js'
 
@@ -392,6 +393,87 @@ function CountryCombo({ value, options, onChange, placeholder, noMatch, testid }
                   {o.label}
                 </div>
               ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** The "departing from" autocomplete: suggests from the global departure
+ *  city vocabulary in the reader's language, but the VALUE is the text
+ *  itself, so any real place can be typed even when the list lacks it. */
+function CityCombo({ value, onChange, placeholder, lang, countries, testid }) {
+  const [open, setOpen] = useState(false)
+  const [hi, setHi] = useState(0)
+  const blurTimer = useRef(null)
+  const opts = useMemo(() => DEPARTURE_CITIES.map((c) => {
+    const local = lang === 'zh-Hant' ? (c.hant || c.zh)
+      : lang === 'zh-CN' ? c.zh : c.en
+    const other = lang === 'en' ? c.zh : c.en
+    const cc = countries.find((x) => x.value === c.country)
+    return {
+      label: local, other,
+      country: cc ? cc.label : c.country,
+      search: `${c.en} ${c.zh} ${c.hant || ''} ${c.country}`.toLowerCase(),
+      names: [c.en, c.zh, c.hant || ''].map((n) => n.toLowerCase()),
+    }
+  }), [lang, countries])
+  const matches = useMemo(() => {
+    const q = String(value || '').trim().toLowerCase()
+    if (!q) return []
+    const starts = [], contains = []
+    for (const o of opts) {
+      if (!o.search.includes(q)) continue
+      ;(o.names.some((n) => n.startsWith(q)) ? starts : contains).push(o)
+    }
+    starts.sort((a, b) => a.label.length - b.label.length)
+    return [...starts, ...contains].slice(0, 8)
+  }, [value, opts])
+  return (
+    <div style={{ position: 'relative' }}>
+      <input className="input" data-testid={testid} value={value}
+             placeholder={placeholder}
+             style={{ fontSize: 14, padding: '11px 14px', borderRadius: 12,
+                      width: '100%', boxSizing: 'border-box' }}
+             onFocus={() => {
+               if (blurTimer.current) { clearTimeout(blurTimer.current); blurTimer.current = null }
+               setOpen(true); setHi(0)
+             }}
+             onChange={(e) => { onChange(e.target.value); setHi(0)
+                                if (!open) setOpen(true) }}
+             onKeyDown={(e) => {
+               if (!open || matches.length === 0) return
+               if (e.key === 'ArrowDown') { e.preventDefault(); setHi((h) => Math.min(h + 1, matches.length - 1)) }
+               else if (e.key === 'ArrowUp') { e.preventDefault(); setHi((h) => Math.max(h - 1, 0)) }
+               else if (e.key === 'Enter') { e.preventDefault()
+                 onChange(matches[Math.min(hi, matches.length - 1)].label)
+                 setOpen(false) }
+               else if (e.key === 'Escape') setOpen(false)
+             }}
+             onBlur={() => { blurTimer.current = setTimeout(() => setOpen(false), 150) }} />
+      {open && matches.length > 0 && (
+        <div className="card" style={{ position: 'absolute', zIndex: 40,
+          top: '100%', left: 0, right: 0, maxHeight: 300, overflowY: 'auto',
+          marginTop: 4, background: '#fff', border: '1px solid #e4eaf3',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+          {matches.map((o, i) => (
+            <div key={o.label + o.country}
+              onMouseDown={(e) => { e.preventDefault(); onChange(o.label); setOpen(false) }}
+              onMouseEnter={() => setHi(i)}
+              style={{ padding: '11px 12px', cursor: 'pointer',
+                       display: 'flex', gap: 8, alignItems: 'baseline',
+                       background: i === hi ? 'var(--bg-soft)' : undefined }}>
+              <span style={{ fontSize: 13.5, fontWeight: 600, color: NAVY }}>
+                {o.label}
+              </span>
+              {o.other && o.other !== o.label && (
+                <span style={{ fontSize: 12, color: GRAY }}>{o.other}</span>
+              )}
+              <span style={{ marginLeft: 'auto', fontSize: 12, color: GRAY }}>
+                {o.country}
+              </span>
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -929,11 +1011,10 @@ export default function TravelDatabase({ onBack }) {
               <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>
                 {t('db.departure')} *
               </span>
-              <input className="input" value={departureCity}
-                     data-testid="database-departure"
-                     placeholder={t('db.departurePlaceholder')}
-                     onChange={(e) => setDepartureCity(e.target.value)}
-                     style={{ fontSize: 14, padding: '11px 14px', borderRadius: 12 }} />
+              <CityCombo value={departureCity} onChange={setDepartureCity}
+                         placeholder={t('db.departurePlaceholder')}
+                         lang={lang} countries={countries}
+                         testid="database-departure" />
             </label>
             <label style={{ display: 'grid', gap: 6, textAlign: 'left' }}>
               <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>

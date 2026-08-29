@@ -223,11 +223,38 @@ function CountryFilter({ value, placeholder, onCommit, countries }) {
   const [text, setText] = useState(value)
   const [open, setOpen] = useState(false)
   const boxRef = useRef(null)
+  const inputRef = useRef(null)
+  const focused = () => typeof document !== 'undefined' &&
+    document.activeElement === inputRef.current
   useEffect(() => {
-    // The committed VALUE is a code; the input shows the flagged label.
+    // The committed VALUE is a code; the input shows the flagged label —
+    // but NEVER while the operator is typing: rewriting mid-keystroke made
+    // typed filters silently vanish.
+    if (focused()) return
     const hit = value && countries.find((c) => c.value === value)
     setText(hit ? hit.label : value)
   }, [value, countries])
+  // Live filtering: the table follows the keystrokes (debounced), the same
+  // way the dropdown filters do. Ambiguous partials filter nothing rather
+  // than guessing a country.
+  useEffect(() => {
+    if (!focused()) return undefined
+    const id = setTimeout(() => {
+      const clean = String(text || '').replace(/^[^\p{L}\p{N}]+/u, '').trim()
+      if (!clean) { onCommit(''); return }
+      const lc = clean.toLowerCase()
+      const codeHit = clean === clean.toUpperCase() &&
+        countries.find((c) => c.value === clean.toUpperCase())
+      const nameHit = countries.find((c) =>
+        c.label.replace(/^[^\p{L}\p{N}]+/u, '').trim().toLowerCase() === lc)
+      const pool = countries.filter((c) => c.search.includes(lc))
+      const pick = codeHit || nameHit || (pool.length === 1 ? pool[0] : null)
+      if (pick) onCommit(pick.value)
+      else if (pool.length === 0 && clean.length >= 4) onCommit(clean)
+      else onCommit('')
+    }, 250)
+    return () => clearTimeout(id)
+  }, [text])  // eslint-disable-line react-hooks/exhaustive-deps
   const matches = useMemo(() => {
     const q = text.trim().toLowerCase()
     if (!q) return []
@@ -270,7 +297,7 @@ function CountryFilter({ value, placeholder, onCommit, countries }) {
   }
   return (
     <div ref={boxRef} style={{ position: 'relative' }}>
-      <input value={text} placeholder={placeholder}
+      <input value={text} placeholder={placeholder} ref={inputRef}
              onChange={(e) => { setText(e.target.value); setOpen(true) }}
              onKeyDown={(e) => {
                // Enter picks the suggestion only when it is the ONLY one;
@@ -368,9 +395,27 @@ function FieldGrid({ rec, t, typeNames = {} }) {
                  Conditional: t('ops.req.conditional') }
   const ENTRIES = { Single: t('ops.e.single'), Multiple: t('ops.e.multiple'),
                     Unlimited: t('ops.e.unlimited') }
+  // Unit and currency ride WITH their value: a reader meets "90 days",
+  // never a naked "90" whose unit lives two tiles away.
+  const PAIR = { validity_duration: 'validity_unit',
+                 max_stay_duration: 'max_stay_unit',
+                 processing_min_days: 'processing_unit',
+                 visa_fee_amount: 'visa_fee_currency' }
+  const PAIRED = new Set(Object.values(PAIR))
   const show = (f) => {
     const v = rec[f]
     if (v == null || v === '') return '·'
+    if (f === 'data_source') {
+      if (v === 'Ellis source audit') return t('ops.src.audit')
+      if (v === 'Ellis verified route engine') return t('ops.src.engine')
+      return String(v)
+    }
+    if (PAIR[f]) {
+      const u = rec[PAIR[f]]
+      const uv = u == null || u === '' ? ''
+        : (f === 'visa_fee_amount' ? String(u) : (UNIT[u] || String(u)))
+      return `${v} ${uv}`.trim()
+    }
     if (f === 'travel_document_type') {
       const k = 'db.doc.' + v
       return t(k) !== k ? t(k) : String(v).replace(/_/g, ' ')
@@ -397,7 +442,9 @@ function FieldGrid({ rec, t, typeNames = {} }) {
       {/* Label-over-value tiles: every value wraps in full. An operator
           checking a record must never meet "Ordinary p..." where the fact
           should be. */}
-      {Object.entries(rec.field_status).map(([f, st]) => (
+      {Object.entries(rec.field_status)
+        .filter(([f]) => !PAIRED.has(f))
+        .map(([f, st]) => (
         <div key={f} style={{ background: '#fff', border: '1px solid #eef2f8',
                               borderRadius: 10, padding: '8px 12px',
                               minWidth: 0 }}>
@@ -415,10 +462,18 @@ function FieldGrid({ rec, t, typeNames = {} }) {
                            letterSpacing: 0.3,
                            textTransform: 'uppercase' }}>{fx(t, f)}</span>
           </div>
-          <div style={{ color: NAVY, fontWeight: 600, fontSize: 12.5,
+          <div style={{ color: st === 'missing' ? AMBER
+                          : st === 'optional-empty' ? GRAY : NAVY,
+                        fontWeight: 600, fontSize: 12.5,
                         marginTop: 4, lineHeight: 1.45,
+                        fontStyle: (st === 'missing' || st === 'optional-empty')
+                          && (rec[f] == null || rec[f] === '')
+                          ? 'italic' : 'normal',
                         overflowWrap: 'anywhere' }}>
-            {show(f)}
+            {(rec[f] == null || rec[f] === '')
+              ? (st === 'missing' ? t('ops.missingCounts')
+                 : st === 'optional-empty' ? t('ops.notRequired') : show(f))
+              : show(f)}
           </div>
         </div>
       ))}
@@ -496,10 +551,10 @@ function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames 
     Conditional: [t('ops.req.conditional'), AMBER],
   }
   const CHECKS = {
-    'human-quote': [t('ops.check.quoted'), GREEN],
-    'grounded-consistent': [t('ops.check.grounded'), BLUE],
-    reference: [t('ops.check.reference'), GRAY],
-    unchecked: [t('ops.check.none'), RED],
+    'human-quote': [t('ops.check.quoted'), GREEN, t('ops.tip.quoted')],
+    'grounded-consistent': [t('ops.check.grounded'), BLUE, t('ops.tip.grounded')],
+    reference: [t('ops.check.reference'), GRAY, t('ops.tip.reference')],
+    unchecked: [t('ops.check.none'), RED, t('ops.tip.none')],
   }
   return (
     <div style={{ ...card, overflow: 'hidden' }}>
@@ -511,7 +566,7 @@ function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames 
         </strong>
         <span style={{ color: GRAY, fontSize: 12 }}>{t('ops.rowsHint')}</span>
       </div>
-      <div style={{ overflowX: 'auto', maxHeight: '62vh', overflowY: 'auto' }}>
+      <div style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse',
                         fontSize: 13 }}>
           <thead>
@@ -524,14 +579,19 @@ function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames 
               <SortHeader label={t('ops.col.quality')} k="check" sort={sort} onSort={onSort} width={150} />
               <th style={{ position: 'sticky', top: 0, background: '#fff',
                            zIndex: 5, borderBottom: `2px solid ${BORDER}`,
-                           width: 90 }} />
+                           padding: '10px 12px', fontSize: 10.5,
+                           fontWeight: 800, letterSpacing: 0.8,
+                           textTransform: 'uppercase', color: GRAY,
+                           whiteSpace: 'nowrap', width: 120 }}>
+                {t('ops.col.site')}
+              </th>
             </tr>
           </thead>
           <tbody>
             {sorted.map((rec, i) => {
               const id = rec.cache_key + (rec.visa_type_name || '') + i
               const [reqLabel, reqColor] = REQ[rec.visa_requirement] || ['·', GRAY]
-              const [checkLabel, checkColor] = CHECKS[rec.source_check] || CHECKS.reference
+              const [checkLabel, checkColor, checkTip] = CHECKS[rec.source_check] || CHECKS.reference
               const missing = Object.entries(rec.field_status)
                 .filter(([, v]) => v === 'missing').map(([k]) => k)
               const opened = open === id
@@ -589,7 +649,9 @@ function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames 
                       : '·'}
                   </td>
                   <td style={{ padding: '10px 12px' }}>
-                    <Chip color={checkColor} filled={false}>{checkLabel}</Chip>
+                    <span title={checkTip} style={{ cursor: 'help' }}>
+                      <Chip color={checkColor} filled={false}>{checkLabel}</Chip>
+                    </span>
                     {/* The sub-line appears only when it says something: a
                         confidence below High, or an incomplete record. A row
                         that is High and 100% needs no extra annotation. */}
@@ -620,15 +682,30 @@ function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames 
                       </a>
                     )}
                     {rec.confidence_level === 'Low' && (
-                      <button onClick={(e) => { e.stopPropagation(); onRelease(rec) }}
-                              data-testid="ops-release"
-                              style={{ marginLeft: 8, border: `1px solid ${GREEN}`,
-                                       background: '#fff', color: GREEN,
-                                       borderRadius: 999, fontSize: 11,
-                                       fontWeight: 700, padding: '2px 10px',
-                                       cursor: 'pointer' }}>
-                        {t('ops.release')}
-                      </button>
+                      rec.operator_released
+                        ? <Chip color={GREEN} filled={false}>{t('ops.release')}</Chip>
+                        : <span style={{ display: 'inline-flex', gap: 6,
+                                         alignItems: 'center', marginLeft: 8 }}>
+                            <span title={t('ops.heldTip')}
+                                  style={{ fontSize: 11, fontWeight: 700,
+                                           color: '#9a5b00',
+                                           background: '#fdf3e2',
+                                           borderRadius: 999,
+                                           padding: '3px 9px',
+                                           cursor: 'help' }}>
+                              {t('ops.heldChip')}
+                            </span>
+                            <button onClick={(e) => { e.stopPropagation(); onRelease(rec) }}
+                                    data-testid="ops-release"
+                                    title={t('ops.heldTip')}
+                                    style={{ border: `1px solid ${GREEN}`,
+                                             background: '#fff', color: GREEN,
+                                             borderRadius: 999, fontSize: 11,
+                                             fontWeight: 700, padding: '3px 10px',
+                                             cursor: 'pointer' }}>
+                              {t('ops.releaseAction')}
+                            </button>
+                          </span>
                     )}
                   </td>
                 </tr>,
@@ -669,14 +746,16 @@ function IssueActions({ issue, onResolve, t }) {
              style={{ ...input, flex: 1, minWidth: 220 }}
              data-testid="ops-resolution" />
       <button disabled={!res.trim()} data-testid="ops-corrected"
+              title={t('ops.correctedHint')}
               onClick={() => onResolve(issue.id, 'corrected', res.trim())}
               style={{ borderRadius: 999, fontSize: 12.5, fontWeight: 700,
                        border: 'none', cursor: 'pointer', padding: '11px 18px',
                        background: GREEN, color: '#fff',
                        opacity: res.trim() ? 1 : 0.5 }}>
-        ✓ {t('ops.markCorrected')}
+        {t('ops.markCorrected')}
       </button>
       <button disabled={!res.trim()} data-testid="ops-dismiss"
+              title={t('ops.dismissHint')}
               onClick={() => onResolve(issue.id, 'dismissed', res.trim())}
               style={{ borderRadius: 999, fontSize: 12.5, fontWeight: 700,
                        border: `1px solid ${GRAY}`, cursor: 'pointer',
@@ -684,6 +763,10 @@ function IssueActions({ issue, onResolve, t }) {
                        opacity: res.trim() ? 1 : 0.5 }}>
         {t('ops.dismiss')}
       </button>
+      <div style={{ flexBasis: '100%', fontSize: 11, color: GRAY,
+                    lineHeight: 1.5 }}>
+        {t('ops.correctedHint')} · {t('ops.dismissHint')}
+      </div>
     </div>
   )
 }
@@ -765,12 +848,14 @@ function MicroStack({ segs, height = 8, legend = true }) {
       {legend && (
         <div style={{ display: 'flex', gap: 10, marginTop: 7, fontSize: 10.5,
                       flexWrap: 'wrap' }}>
-          {segs.map(([n, color, name], i) => (
+          {segs.map(([n, color, name, tip], i) => (
             <span key={i} style={{ display: 'inline-flex', gap: 4,
                                    alignItems: 'center', color: GRAY }}>
               <span style={{ width: 7, height: 7, borderRadius: 2,
                              background: color }} />
-              <strong style={{ color: NAVY }}>{n.toLocaleString()}</strong> {name}
+              <strong style={{ color: NAVY }}>{n.toLocaleString()}</strong>{' '}
+              <span title={tip || undefined}
+                    style={tip ? { cursor: 'help' } : undefined}>{name}</span>
             </span>
           ))}
         </div>
@@ -982,6 +1067,7 @@ export default function QualityConsole() {
       }
       else if (tab === 'freshness') {
         setFreshness(await client.get('/database/freshness'))
+        try { setIssues(await client.get('/database/issues')) } catch { /* tile falls back */ }
         // The availability record rides along: the acceptance metric should
         // be visible where the acceptance runs, not only as raw JSON.
         try { setUptime(await client.get('/health/uptime')) } catch { /* tile hides */ }
@@ -1022,6 +1108,24 @@ export default function QualityConsole() {
       await client.databaseIssueUpdate(id, status, resolution)
       load()
     } catch (e) { setError(String(e?.message || e)) }
+  }
+
+  // Server timestamps are UTC; the operator's clock is not. Everything
+  // user-visible renders in the viewer's local timezone.
+  const localDate = (ts) => {
+    if (!ts) return null
+    const iso = /[zZ]|[+-]\d\d:?\d\d$/.test(ts) ? ts : ts + 'Z'
+    const d = new Date(iso)
+    return isNaN(d) ? null : d
+  }
+  const localTs = (ts) => {
+    const d = localDate(ts)
+    if (!d) return String(ts || '')
+    try {
+      return new Intl.DateTimeFormat(lang === 'en' ? 'en' : lang,
+        { month: 'short', day: 'numeric',
+          hour: '2-digit', minute: '2-digit' }).format(d)
+    } catch { return d.toLocaleString() }
   }
 
   async function resolveGroup(ids, status, resolution) {
@@ -1281,7 +1385,11 @@ export default function QualityConsole() {
             </div>
 
             {s && (() => {
-              const recs = data?.records || []
+              // The bands describe exactly what the table shows: with a
+              // filter on, every headline AND sub-split is filtered scope.
+              const recs = records
+              const allN = (data?.records || []).length
+              const anyFilter = Object.values(filters).some(Boolean)
               const req = { free: 0, voa: 0, adv: 0, cond: 0 }
               const tiers = { hq: 0, gc: 0, ref: 0, un: 0 }
               for (const r of recs) {
@@ -1295,6 +1403,13 @@ export default function QualityConsole() {
                 else tiers.un++
               }
               return (
+                <div style={{ display: 'grid', gap: 8 }}>
+                <div style={{ fontSize: 11.5, fontWeight: 700, color: GRAY,
+                              paddingLeft: 4 }}>
+                  {anyFilter
+                    ? t('ops.scope.filtered').replace('{n}', recs.length.toLocaleString()).replace('{m}', allN.toLocaleString())
+                    : t('ops.scope.all').replace('{n}', allN.toLocaleString())}
+                </div>
                 <div style={{ ...card, display: 'grid',
                               gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
                   <BandCell delay={0}>
@@ -1337,29 +1452,42 @@ export default function QualityConsole() {
                   </BandCell>
                   <BandCell delay={240}>
                     <BandLabel>{t('ops.stat.substantiated')}</BandLabel>
-                    <BandBig color={BLUE}>{(s.substantiated ?? 0).toLocaleString()}</BandBig>
+                    <BandBig color={BLUE}>
+                      {t('ops.substHead')
+                        .replace('{n}', (s.substantiated ?? 0).toLocaleString())
+                        .replace('{m}', recs.length.toLocaleString())}
+                    </BandBig>
                     <div style={{ marginTop: 12 }}>
                       <MicroStack segs={[
-                        [tiers.hq, '#1d4ed8', t('ops.check.quoted')],
-                        [tiers.gc, '#4f8ef8', t('ops.check.grounded')],
-                        [tiers.ref, '#9cc2fb', t('ops.check.reference')],
-                        [tiers.un, '#e4edfc', t('ops.check.none')],
+                        [tiers.hq, '#1d4ed8', t('ops.check.quoted'), t('ops.tip.quoted')],
+                        [tiers.gc, '#4f8ef8', t('ops.check.grounded'), t('ops.tip.grounded')],
                       ]} />
+                    </div>
+                    <div style={{ fontSize: 11, color: GRAY, marginTop: 8,
+                                  borderTop: `1px dashed ${BORDER}`,
+                                  paddingTop: 7 }}
+                         title={t('ops.tip.reference')}>
+                      {tiers.ref.toLocaleString()} {t('ops.check.reference')}
+                      {' · '}{tiers.un.toLocaleString()} {t('ops.check.none')}
+                      {' — '.replace(' — ', ' · ')}{t('ops.notCounted')}
                     </div>
                   </BandCell>
                   <BandCell delay={320}>
                     <BandLabel>{t('ops.stat.confidence')}</BandLabel>
                     <div style={{ marginTop: 12 }}>
+                      {/* Traffic-light semantics: Low must not look as calm
+                          as High. */}
                       <MicroStack height={10} segs={[
-                        [s.high, SEQ.high, t('ops.conf.high')],
-                        [s.medium, SEQ.medium, t('ops.conf.medium')],
-                        [s.low, SEQ.low, t('ops.conf.low')],
+                        [s.high, '#0b7a44', t('ops.conf.high'), t('ops.tip.quoted')],
+                        [s.medium, '#d97706', t('ops.conf.medium'), t('ops.tip.grounded')],
+                        [s.low, '#b3261e', t('ops.conf.low'), t('ops.heldTip')],
                       ]} />
                     </div>
                     <div style={{ fontSize: 11, color: GRAY, marginTop: 9 }}>
                       {t('ops.stat.confidenceSub')}
                     </div>
                   </BandCell>
+                </div>
                 </div>
               )
             })()}
@@ -1397,34 +1525,48 @@ export default function QualityConsole() {
           })()
           const openCount = human.length + groups.length
           const closed = all.filter((i) => !isOpen(i)).reverse()
-          const today = new Date().toISOString().slice(0, 10)
-          const resolvedToday = closed.filter((i) =>
-            String(i.resolved_at || i.updated_at || '').slice(0, 10) === today).length
+          const dayAgo = Date.now() - 24 * 3600 * 1000
+          const resolvedToday = closed.filter((i) => {
+            const d = localDate(i.resolved_at || i.updated_at)
+            return d && d.getTime() >= dayAgo
+          }).length
           const nameOf = (iso) =>
             (countries.find((c) => c.value === iso) || {}).label || iso || '·'
           const parseAuto = (note) => {
             const m = /^Automatic source check against (\S+?): (.*)$/s.exec(note || '')
             if (!m) return null
-            const segs = []
+            const segMap = new Map()
             for (const part of m[2].split(/;\s+(?=[a-z_]+: page says)/)) {
               const pm = /^([a-z_,\s]+): page says\s*([\s\S]*?)(?:\s*\(quote:\s*([\s\S]*?)\)?)?$/.exec(part.trim())
-              if (pm) segs.push({ field: pm[1].trim(), says: pm[2].trim(),
-                                  quote: (pm[3] || '').trim() })
+              // Same field twice (merged repeat checks): the LAST reading
+              // wins, so one field never shows two competing rows.
+              if (pm) segMap.set(pm[1].trim(), { field: pm[1].trim(),
+                                                 says: pm[2].trim(),
+                                                 quote: (pm[3] || '').trim() })
             }
-            return { url: m[1].replace(/[:;,]$/, ''), segs }
+            return { url: m[1].replace(/[:;,]$/, ''), segs: [...segMap.values()] }
           }
           const fmtSays = (field, says, note) => {
             let v = String(says || '').trim().replace(/^"|"$/g, '')
             // The monitor writes literal "null"/"None" when the page proposes
-            // clearing a value; show a placeholder, not the token.
-            if (/^(null|none|undefined)$/i.test(v)) return '·'
+            // clearing a value; show a plain sentence, not the token.
+            if (/^(null|none|undefined)\b/i.test(v) || v === '' || v === '·') {
+              return t('ops.pageNoValue')
+            }
             if (/^[\[{]/.test(v)) {
               // A product-table proposal: name the visa types instead of
               // printing JSON (the note is capped, so parse may not work).
+              // Outside the visa-products row it is extractor spillover, not
+              // a value for THIS field.
+              if (!String(field || '').includes('visa_products')) {
+                return t('ops.pageNoValue')
+              }
               const types = [...v.matchAll(/"type":\s*"([^"]+)"/g)]
                 .map((m) => typeNames?.[m[1]] || m[1])
               if (types.length) {
-                return `${types.length} ${t('ops.productsProposed')}: ${types.join(' · ')}`
+                const noun = types.length === 1
+                  ? t('ops.productProposed') : t('ops.productsProposed')
+                return `${types.length} ${noun}: ${types.join(' · ')}`
               }
               return t('ops.productsProposed')
             }
@@ -1610,7 +1752,8 @@ export default function QualityConsole() {
                   ? <Chip color={BLUE} filled={false}>{t('ops.autoCheck')}</Chip>
                   : <Chip color={AMBER} filled={false}>{t('ops.readerReport')}</Chip>}
                 {group && group.count > 1 && (
-                  <span style={{ color: GRAY, fontSize: 11.5 }}>
+                  <span title={t('ops.checksHint')}
+                        style={{ color: GRAY, fontSize: 11.5, cursor: 'help' }}>
                     {group.count} {t('ops.q.checks')}
                   </span>
                 )}
@@ -1626,7 +1769,7 @@ export default function QualityConsole() {
                   </Chip>
                 )}
                 <span style={{ marginLeft: 'auto', color: GRAY, fontSize: 11.5 }}>
-                  {(it.created_at || '').slice(0, 16).replace('T', ' ')}
+                  {localTs(it.created_at)}
                 </span>
               </div>
               {it.reported_by === 'freshness_monitor'
@@ -1676,7 +1819,7 @@ export default function QualityConsole() {
                 )}
                 <span style={{ marginLeft: 'auto', fontSize: 11.5,
                                color: GREEN, fontWeight: 700 }}>
-                  ✓ {resolvedToday} {t('ops.q.resolvedToday')}
+                  ✓ {resolvedToday} {t('ops.recent24h')}
                 </span>
               </div>
               {openCount === 0 && !busy && (
@@ -1726,7 +1869,8 @@ export default function QualityConsole() {
           const list = all.filter((c) => !changeFilter || c.action === changeFilter)
           const byDay = []
           for (const c of list) {
-            const day = (c.at || '').slice(0, 10)
+            const d = localDate(c.at)
+            const day = d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : (c.at || '').slice(0, 10)
             const g = byDay[byDay.length - 1]
             if (g && g.day === day) g.items.push(c)
             else byDay.push({ day, items: [c] })
@@ -1737,6 +1881,10 @@ export default function QualityConsole() {
                            borderRadius: 7, fontSize: 12,
                            overflowWrap: 'anywhere', lineHeight: 1.45,
                            verticalAlign: 'bottom',
+                           ...(kind === 'empty'
+                             ? { color: GRAY, fontStyle: 'italic',
+                                 padding: '2px 0' }
+                             : {}),
                            ...(kind === 'old'
                              ? { background: '#fdf1f4', color: '#a13d55',
                                  textDecoration: 'line-through' }
@@ -1752,8 +1900,9 @@ export default function QualityConsole() {
               {/* Segmented action filter with live counts + list export */}
               <div style={{ display: 'flex', gap: 10, alignItems: 'center',
                             flexWrap: 'wrap' }}>
-              <div style={{ display: 'inline-flex', background: '#fff',
-                            border: `1px solid ${BORDER}`, borderRadius: 999,
+              <div style={{ display: 'inline-flex', flexWrap: 'wrap',
+                            background: '#fff',
+                            border: `1px solid ${BORDER}`, borderRadius: 18,
                             padding: 4, width: 'fit-content' }}>
                 {[['', t('ops.all')], ['add', t('ops.act.add')],
                   ['modify', t('ops.act.modify')],
@@ -1835,11 +1984,26 @@ export default function QualityConsole() {
                             {t(PURPOSE_KEY[(c.route || {}).travel_purpose])}
                           </span>
                         )}
+                        {(() => { const dd = (c.route || {}).travel_document_type
+                          return dd && dd !== 'ordinary_passport' && (
+                            <span style={{ color: '#5b6a80', fontSize: 11.5,
+                                           background: '#f1f4f9',
+                                           borderRadius: 6,
+                                           padding: '2px 8px' }}>
+                              {t('db.doc.' + dd) !== 'db.doc.' + dd
+                                ? t('db.doc.' + dd) : dd.replace(/_/g, ' ')}
+                            </span>
+                          ) })()}
                         <Chip color={AC[c.action] || GRAY}>
                           {t(`ops.act.${c.action}`) === `ops.act.${c.action}`
                             ? c.action : t(`ops.act.${c.action}`)}
                         </Chip>
                         {/* WHO changed it, in plain words, not a token. */}
+                        <span title={c.origin === 'grounded_recheck'
+                                ? t('ops.originRecheckTip')
+                                : c.origin === 'engine' ? t('ops.originEngineTip')
+                                  : t('ops.originHumanTip')}
+                              style={{ cursor: 'help' }}>
                         <Chip filled={false}
                               color={c.origin === 'grounded_recheck' ? BLUE
                                 : c.origin === 'engine' ? GRAY : GREEN}>
@@ -1847,10 +2011,12 @@ export default function QualityConsole() {
                             : c.origin === 'engine' ? t('ops.origin.engine')
                               : t('ops.origin.human')}
                         </Chip>
+                        </span>
                         <span style={{ marginLeft: 'auto', color: '#9aa8bd',
                                        fontSize: 11.5,
                                        fontFamily: 'ui-monospace, monospace' }}>
-                          {(c.at || '').slice(11, 16)}
+                          {(() => { const d = localDate(c.at)
+                            return d ? `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}` : (c.at || '').slice(11, 16) })()}
                         </span>
                       </div>
                       <div style={{ marginTop: 8, display: 'grid', gap: 5 }}>
@@ -1870,10 +2036,13 @@ export default function QualityConsole() {
                               return (ix < 0 ? 9 : ix) - (iy < 0 ? 9 : iy)
                             })
                           }
+                          // A row whose two sides render identically claims a
+                          // change while showing none: drop it.
+                          if (c.action === 'modify') {
+                            entries = entries.filter(([, a, b]) => a !== b)
+                          }
                           const cap = c.action === 'add' ? 4 : 5
-                          const shownE = entries.slice(0, cap)
-                          return [
-                            ...shownE.map(([f, a, b]) => (
+                          const Row = ([f, a, b]) => (
                               <div key={f} style={{ display: 'grid',
                                     gridTemplateColumns: '175px 1fr', gap: 10,
                                     alignItems: 'center', fontSize: 12 }}>
@@ -1884,20 +2053,30 @@ export default function QualityConsole() {
                                 <span style={{ minWidth: 0, display: 'flex',
                                                gap: 6, alignItems: 'center',
                                                flexWrap: 'wrap' }}>
-                                  {a != null && c.action !== 'add' && [
-                                    <ValueChip key="o" v={a} kind="old" />,
+                                  {c.action === 'modify' && [
+                                    <ValueChip key="o" v={a ?? t('ops.emptyVal')}
+                                               kind={a == null ? 'empty' : 'old'} />,
                                     <span key="s" style={{ color: '#b6c2d4' }}>→</span>,
                                   ]}
-                                  <ValueChip v={b ?? '·'}
-                                             kind={c.action === 'delete' ? 'del' : 'new'} />
+                                  <ValueChip v={b ?? t('ops.emptyVal')}
+                                             kind={c.action === 'delete' ? 'del'
+                                               : b == null ? 'empty' : 'new'} />
                                 </span>
                               </div>
-                            )),
+                          )
+                          return [
+                            ...entries.slice(0, cap).map(Row),
                             entries.length > cap && (
-                              <div key="more" style={{ fontSize: 11.5,
-                                    color: GRAY }}>
-                                +{entries.length - cap} {t('ops.items')}
-                              </div>
+                              <details key="more" style={{ marginTop: 2 }}>
+                                <summary style={{ fontSize: 11.5, color: BLUE,
+                                      fontWeight: 700, cursor: 'pointer' }}>
+                                  {t('ops.showMore').replace('{n}', entries.length - cap)}
+                                </summary>
+                                <div style={{ display: 'grid', gap: 5,
+                                      marginTop: 6 }}>
+                                  {entries.slice(cap).map(Row)}
+                                </div>
+                              </details>
                             ),
                           ]
                         })()}
@@ -1926,35 +2105,52 @@ export default function QualityConsole() {
                               'repeat(auto-fit, minmax(175px, 1fr))' }}>
                 {[
                   { label: t('ops.fresh.answers'), value: f.total,
-                    sub: t('ops.stat.recordsSub'), accent: NAVY },
+                    sub: t('ops.fresh.answersSub'), accent: NAVY },
                   { label: t('ops.fresh.human'), value: f.human_verified,
                     accent: GREEN,
                     pct: f.total ? (f.human_verified / f.total) * 100 : null,
-                    sub: t('ops.check.quoted') },
+                    sub: t('ops.fresh.humanSub') },
                   { label: t('ops.fresh.grounded'), value: f.grounded,
                     accent: BLUE,
                     pct: f.total ? (f.grounded / f.total) * 100 : null,
-                    sub: t('ops.fresh.groundedSub') },
+                    sub: t('ops.fresh.groundedSub2') },
                   { label: t('ops.fresh.stale'), value: f.stale,
                     accent: f.stale ? AMBER : GREEN,
                     sub: t('ops.fresh.staleSub') },
                   { label: t('ops.fresh.disputed'), value: f.disputed,
                     accent: f.disputed ? RED : GREEN,
-                    sub: t('ops.fresh.disputedSub') },
+                    // One click from the number to the queue that holds it.
+                    onClick: () => setTab('issues'),
+                    sub: (issues?.issues || []).length
+                      ? t('ops.fresh.disputedSub2').replace('{r}',
+                          (issues.issues.filter((i) => i.status === 'open').length))
+                      : t('ops.fresh.disputedSub') },
                   ...(() => {
                     const m = uptime?.months?.[uptime.months.length - 1]
                     if (!m) return []
                     return [{ label: t('ops.fresh.avail'),
                               value: `${m.availability_pct}%`,
                               accent: m.availability_pct >= 99.99 ? GREEN : AMBER,
-                              sub: `${t('ops.fresh.availSub')} · ${m.median_latency_ms ?? '·'} ms` }]
+                              sub: `${t('ops.fresh.availSub')} ${m.median_latency_ms ?? '·'} ms` }]
                   })(),
                 ].map((p, i) => (
                   <div key={i} className="ops-lift"
-                       style={{ ...card, padding: 0 }}>
+                       onClick={p.onClick}
+                       style={{ ...card, padding: 0,
+                                cursor: p.onClick ? 'pointer' : 'default' }}>
                     <StatCell {...p} delay={i * 70} />
                   </div>
                 ))}
+              </div>
+              <div style={{ ...card, padding: '16px 20px', fontSize: 12.5,
+                            color: GRAY, lineHeight: 1.65, display: 'flex',
+                            gap: 12, alignItems: 'flex-start' }}>
+                <span style={{ width: 22, height: 22, borderRadius: 99,
+                               background: `${BLUE}18`, color: BLUE,
+                               fontWeight: 800, fontSize: 12, flexShrink: 0,
+                               display: 'inline-flex', alignItems: 'center',
+                               justifyContent: 'center' }}>i</span>
+                <span>{t('ops.fresh.note')}</span>
               </div>
               <div style={{ ...card, padding: '24px 28px', display: 'flex',
                             flexWrap: 'wrap', gap: 26,
@@ -1991,16 +2187,6 @@ export default function QualityConsole() {
                     ))}
                   </div>
                 </div>
-              </div>
-              <div style={{ ...card, padding: '16px 20px', fontSize: 12.5,
-                            color: GRAY, lineHeight: 1.65, display: 'flex',
-                            gap: 12, alignItems: 'flex-start' }}>
-                <span style={{ width: 22, height: 22, borderRadius: 99,
-                               background: `${BLUE}18`, color: BLUE,
-                               fontWeight: 800, fontSize: 12, flexShrink: 0,
-                               display: 'inline-flex', alignItems: 'center',
-                               justifyContent: 'center' }}>i</span>
-                <span>{t('ops.fresh.note')}</span>
               </div>
             </div>
           )
