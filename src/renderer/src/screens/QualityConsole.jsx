@@ -1548,16 +1548,11 @@ export default function QualityConsole() {
               const allN = (data?.records || []).length
               const anyFilter = Object.values(filters).some(Boolean)
               const req = { free: 0, voa: 0, adv: 0, cond: 0 }
-              const tiers = { hq: 0, gc: 0, ref: 0, un: 0 }
               for (const r of recs) {
                 if (r.visa_requirement === 'Visa-free') req.free++
                 else if (r.visa_requirement === 'Visa on Arrival') req.voa++
                 else if (r.visa_requirement === 'Conditional') req.cond++
                 else req.adv++
-                if (r.source_check === 'human-quote') tiers.hq++
-                else if (r.source_check === 'grounded-consistent') tiers.gc++
-                else if (r.source_check === 'reference') tiers.ref++
-                else tiers.un++
               }
               return (
                 <div style={{ display: 'grid', gap: 8 }}>
@@ -1614,27 +1609,6 @@ export default function QualityConsole() {
                     </div>
                   </BandCell>
                   <BandCell delay={240}>
-                    <BandLabel>{t('ops.stat.substantiated')}</BandLabel>
-                    <BandBig color={BLUE}
-                             of={`/ ${recs.length.toLocaleString()}`}>
-                      {(s.substantiated ?? 0).toLocaleString()}
-                    </BandBig>
-                    <div style={{ marginTop: 12 }}>
-                      <MicroStack segs={[
-                        [tiers.hq, '#1d4ed8', t('ops.check.quoted'), t('ops.tip.quoted')],
-                        [tiers.gc, '#4f8ef8', t('ops.check.grounded'), t('ops.tip.grounded')],
-                      ]} />
-                    </div>
-                    <div style={{ fontSize: 10.5, color: GRAY, marginTop: 10,
-                                  borderTop: `1px dashed ${BORDER}`,
-                                  paddingTop: 8, lineHeight: 1.5 }}
-                         title={t('ops.tip.reference')}>
-                      <span style={{ fontWeight: 700 }}>
-                        {(tiers.ref + tiers.un).toLocaleString()}
-                      </span>{' '}{t('ops.notCounted')}
-                    </div>
-                  </BandCell>
-                  <BandCell delay={320}>
                     <BandLabel>{t('ops.stat.confidence')}</BandLabel>
                     <div style={{ marginTop: 12 }}>
                       {/* Traffic-light semantics: Low must not look as calm
