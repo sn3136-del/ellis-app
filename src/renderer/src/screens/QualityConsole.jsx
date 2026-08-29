@@ -800,47 +800,56 @@ function BandBig({ children, color = NAVY, of = null }) {
   )
 }
 
-function RingGauge({ pct, target, size = 76, hitColor = GREEN, label }) {
+// Rounding each share on its own makes them sum to 101. Largest remainder
+// keeps every figure within a point of its true value AND the column adding
+// to exactly 100, which is what a reader checks first.
+function shares(values, total) {
+  if (!total) return values.map(() => 0)
+  const exact = values.map((v) => (v / total) * 100)
+  const floor = exact.map(Math.floor)
+  let left = 100 - floor.reduce((a, b) => a + b, 0)
+  const order = exact.map((v, i) => [v - Math.floor(v), i])
+                     .sort((a, b) => b[0] - a[0])
+  const out = floor.slice()
+  for (const [, i] of order) { if (left <= 0) break; out[i] += 1; left -= 1 }
+  return out
+}
+
+// Value against a target, drawn as a meter rather than a dial: the bar
+// language matches the splits beside it, the shortfall is a visible gap,
+// and the target is a mark on the same scale instead of a second ring.
+function Meter({ pct, target, hitColor = GREEN }) {
   const [go, setGo] = useState(false)
   useEffect(() => { const id = setTimeout(() => setGo(true), 140)
     return () => clearTimeout(id) }, [])
-  // A thinner arc reads as a measurement rather than a pie: the track stays
-  // visible the whole way round, so the shortfall is as legible as the fill.
-  const SW = 7
-  const R = (size - SW - 8) / 2, C = 2 * Math.PI * R
-  const hit = target != null && pct >= target
   const val = Math.max(0, Math.min(100, pct || 0))
-  const ang = target != null ? (target / 100) * 360 - 90 : null
-  const cx = size / 2, cy = size / 2
+  const hit = target != null && val >= target
+  const color = hit ? hitColor : '#2563eb'
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}
-         role="img" aria-label={label || `${Math.round(val)} percent`}>
-      <circle cx={cx} cy={cy} r={R} fill="none" stroke="#e9eef7" strokeWidth={SW} />
-      <circle cx={cx} cy={cy} r={R} fill="none"
-              stroke={hit ? hitColor : '#2563eb'} strokeWidth={SW}
-              strokeLinecap="round"
-              strokeDasharray={`${go ? (val / 100) * C : 0} ${C}`}
-              transform={`rotate(-90 ${cx} ${cy})`}
-              style={{ transition: 'stroke-dasharray .9s cubic-bezier(.22,.8,.28,1)' }} />
-      {ang != null && (
-        // The target is a notch cut through the track, not a line laid over
-        // it: it reads as a mark ON the scale rather than another series.
-        <line x1={cx + (R - SW / 2 - 1) * Math.cos(ang * Math.PI / 180)}
-              y1={cy + (R - SW / 2 - 1) * Math.sin(ang * Math.PI / 180)}
-              x2={cx + (R + SW / 2 + 1) * Math.cos(ang * Math.PI / 180)}
-              y2={cy + (R + SW / 2 + 1) * Math.sin(ang * Math.PI / 180)}
-              stroke="#fff" strokeWidth="2.5" />
-      )}
-      <text x={cx} y={cy + 5.5} textAnchor="middle"
-            style={{ fontSize: 17, fontWeight: 700,
-                     fontVariantNumeric: 'tabular-nums',
-                     letterSpacing: '-0.4px',
-                     fill: hit ? hitColor : NAVY }}>
-        {Math.round(val)}%
-      </text>
-    </svg>
+    <div>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+        <span style={{ fontSize: 30, fontWeight: 700, color,
+                       fontVariantNumeric: 'tabular-nums',
+                       letterSpacing: '-0.6px', lineHeight: 1 }}>
+          {val.toFixed(val < 100 ? 1 : 0)}%
+        </span>
+      </div>
+      <div style={{ position: 'relative', height: 10, marginTop: 11,
+                    borderRadius: 999, background: '#eef2f8' }}>
+        <div style={{ position: 'absolute', inset: 0, width: go ? `${val}%` : '0%',
+                      background: color, borderRadius: 999,
+                      transition: 'width .9s cubic-bezier(.22,.8,.28,1)' }} />
+        {target != null && (
+          <div title={`${t0(target)}`}
+               style={{ position: 'absolute', left: `${target}%`, top: -3,
+                        bottom: -3, width: 2, borderRadius: 1,
+                        background: NAVY, opacity: 0.55 }} />
+        )}
+      </div>
+    </div>
   )
 }
+const t0 = (n) => `${n}%`
 
 function MicroStack({ segs, height = 10, legend = true }) {
   const [go, setGo] = useState(false)
@@ -849,6 +858,7 @@ function MicroStack({ segs, height = 10, legend = true }) {
     return () => clearTimeout(id) }, [])
   const total = segs.reduce((a, [n]) => a + n, 0) || 1
   const shown = segs.filter(([n]) => n > 0)
+  const pcts = shares(shown.map(([n]) => n), total)
   return (
     <div>
       {/* One bar, parts separated by the surface itself rather than by a
@@ -887,7 +897,7 @@ function MicroStack({ segs, height = 10, legend = true }) {
               </strong>
               <span style={{ width: 30, textAlign: 'right', color: '#9aa8bd',
                              fontVariantNumeric: 'tabular-nums' }}>
-                {Math.round((n / total) * 100)}%
+                {pcts[i]}%
               </span>
             </div>
           ))}
@@ -1579,32 +1589,25 @@ export default function QualityConsole() {
                   </BandCell>
                   <BandCell delay={80}>
                     <BandLabel>{t('ops.stat.complete')}</BandLabel>
-                    <div style={{ display: 'flex', alignItems: 'center',
-                                  gap: 14, marginTop: 6 }}>
-                      <RingGauge pct={(s.completeness_rate || 0) * 100} target={99} />
-                      <div style={{ fontSize: 11, color: GRAY, lineHeight: 1.5 }}>
-                        {t('ops.stat.completeSub')}
-                        <div style={{ color: NAVY, fontWeight: 700 }}>
-                          {t('ops.stat.target')} 99%
-                        </div>
-                        <div style={{ marginTop: 6 }}
-                             title={t('ops.stat.recordCompleteTip')}>
+                    <div style={{ marginTop: 8 }}>
+                      <Meter pct={(s.completeness_rate || 0) * 100} target={99} />
+                      <div style={{ display: 'flex', gap: 12, marginTop: 9,
+                                    fontSize: 11, color: GRAY }}>
+                        <span>{t('ops.stat.target')} 99%</span>
+                        <span title={t('ops.stat.recordCompleteTip')}
+                              style={{ cursor: 'help' }}>
                           {t('ops.stat.recordComplete')
                             .replace('{p}', Math.round((s.record_completeness || 0) * 100))}
-                        </div>
+                        </span>
                       </div>
                     </div>
                   </BandCell>
                   <BandCell delay={160}>
                     <BandLabel>{t('ops.stat.sources')}</BandLabel>
-                    <div style={{ display: 'flex', alignItems: 'center',
-                                  gap: 14, marginTop: 6 }}>
-                      <RingGauge pct={(s.source_coverage || 0) * 100} target={100} />
-                      <div style={{ fontSize: 11, color: GRAY, lineHeight: 1.5 }}>
-                        {t('ops.stat.sourcesSub')}
-                        <div style={{ color: NAVY, fontWeight: 700 }}>
-                          {t('ops.stat.target')} 100%
-                        </div>
+                    <div style={{ marginTop: 8 }}>
+                      <Meter pct={(s.source_coverage || 0) * 100} target={100} />
+                      <div style={{ marginTop: 9, fontSize: 11, color: GRAY }}>
+                        {t('ops.stat.target')} 100%
                       </div>
                     </div>
                   </BandCell>
@@ -1622,9 +1625,7 @@ export default function QualityConsole() {
                         [s.low, '#b3261e', t('ops.conf.low'), t('ops.heldTip')],
                       ]} />
                     </div>
-                    <div style={{ fontSize: 11, color: GRAY, marginTop: 9 }}>
-                      {t('ops.stat.confidenceSub')}
-                    </div>
+
                   </BandCell>
                 </div>
                 </div>
