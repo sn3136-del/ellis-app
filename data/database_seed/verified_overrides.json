@@ -36826,5 +36826,274 @@
    "official_portal_url": "https://diplomatiemdc.gouv.ml/vitrine/",
    "application_channel_detail": "The official Mali MFA portal's checker ('Ai-je besoin d'un visa pour voyager au Mali ?'), submitted for Chinese nationality with an Ordinaire passport residing in China, returns that a visa is required and routes the applicant into the ministry's online visa application; lodgement posts for residents of China are the Embassy in Beijing (Ambassade Pekin) or the Consulate General in Guangzhou. Consistent with China MFA's Mali page (持因私普通护照入境马里需提前申请签证). No official source states the visa fee for Chinese nationals (maliembassy.us publishes fees for U.S. citizens only), so the missing fee amount/currency for both the e-Visa and sticker visa products remain unstated."
   }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "GBR",
+   "travel_purpose": "family_visit"
+  },
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://www.gov.uk/standard-visitor/apply-standard-visitor-visa",
+  "note": "Fabrication audit 2026-08-29: the stored answer demanded a Standard Visitor VISA. HKSAR passport holders are non-visa nationals for visits and need an Electronic Travel Authorisation instead. gov.uk: \"An ETA costs £20\" and lets you visit for up to 6 months. The stored Standard Visitor fees were also all wrong (£115/432/771/963 against the live £135/506/903/1128).",
+  "fields": {
+   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+   "requirement_detail": "eta_electronic_authorization",
+   "visa_category": "Electronic Travel Authorisation (ETA)",
+   "permitted_stay": "Up to 6 months per visit",
+   "permitted_stay_days": 180,
+   "application_channel": "online_application",
+   "application_channel_detail": "Apply online for a UK Electronic Travel Authorisation before travelling; no visa application is required for a visit.",
+   "government_fee": {
+    "amount": 20,
+    "currency": "GBP"
+   },
+   "official_portal_url": "https://www.gov.uk/apply-electronic-travel-authorisation-eta",
+   "visa_products": [
+    {
+     "type": "UK Electronic Travel Authorisation (ETA)",
+     "entry": "multiple",
+     "validity": "2 years or until the passport expires, whichever is sooner",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 20,
+      "currency": "GBP"
+     },
+     "notes": "Permits visits of up to 6 months. A Standard Visitor visa is not required for HKSAR passport holders."
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "GBR",
+   "travel_purpose": "business"
+  },
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://www.gov.uk/standard-visitor/apply-standard-visitor-visa",
+  "note": "Fabrication audit 2026-08-29: the stored answer demanded a Standard Visitor VISA. HKSAR passport holders are non-visa nationals for visits and need an Electronic Travel Authorisation instead. gov.uk: \"An ETA costs £20\" and lets you visit for up to 6 months. The stored Standard Visitor fees were also all wrong (£115/432/771/963 against the live £135/506/903/1128).",
+  "fields": {
+   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+   "requirement_detail": "eta_electronic_authorization",
+   "visa_category": "Electronic Travel Authorisation (ETA)",
+   "permitted_stay": "Up to 6 months per visit",
+   "permitted_stay_days": 180,
+   "application_channel": "online_application",
+   "application_channel_detail": "Apply online for a UK Electronic Travel Authorisation before travelling; no visa application is required for a visit.",
+   "government_fee": {
+    "amount": 20,
+    "currency": "GBP"
+   },
+   "official_portal_url": "https://www.gov.uk/apply-electronic-travel-authorisation-eta",
+   "visa_products": [
+    {
+     "type": "UK Electronic Travel Authorisation (ETA)",
+     "entry": "multiple",
+     "validity": "2 years or until the passport expires, whichever is sooner",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 20,
+      "currency": "GBP"
+     },
+     "notes": "Permits visits of up to 6 months. A Standard Visitor visa is not required for HKSAR passport holders."
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "SGP",
+   "travel_purpose": "other"
+  },
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+  "note": "Fabrication audit 2026-08-29: the stored answer demanded a Singapore visit visa with an S$30 fee. Chinese ordinary-passport holders are visa-exempt for up to 30 days under the mutual arrangement in force since 9 February 2024; China does not appear on ICA's visa-required list. The S$30 fee belongs to travellers who do need a visa, such as PRC Travel Document holders.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Visa-free entry (Short-Term Visit Pass on arrival)",
+   "permitted_stay": "Up to 30 days, granted as a Short-Term Visit Pass on arrival",
+   "permitted_stay_days": 30,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa is applied for. A Short-Term Visit Pass is granted at the checkpoint; an SG Arrival Card is submitted before arrival.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": [
+    {
+     "type": "Visa-free entry",
+     "entry": "multiple",
+     "validity": "on arrival",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 0,
+      "currency": null
+     },
+     "notes": "Mutual 30-day visa exemption in force since 9 February 2024."
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "SGP",
+   "travel_purpose": "family_visit"
+  },
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+  "note": "Fabrication audit 2026-08-29: the stored answer demanded a Singapore visit visa with an S$30 fee. Chinese ordinary-passport holders are visa-exempt for up to 30 days under the mutual arrangement in force since 9 February 2024; China does not appear on ICA's visa-required list. The S$30 fee belongs to travellers who do need a visa, such as PRC Travel Document holders.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Visa-free entry (Short-Term Visit Pass on arrival)",
+   "permitted_stay": "Up to 30 days, granted as a Short-Term Visit Pass on arrival",
+   "permitted_stay_days": 30,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa is applied for. A Short-Term Visit Pass is granted at the checkpoint; an SG Arrival Card is submitted before arrival.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": [
+    {
+     "type": "Visa-free entry",
+     "entry": "multiple",
+     "validity": "on arrival",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 0,
+      "currency": null
+     },
+     "notes": "Mutual 30-day visa exemption in force since 9 February 2024."
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "KOR",
+   "travel_purpose": "business"
+  },
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://overseas.mofa.go.kr/gb-en/brd/m_23721/view.do?seq=33",
+  "note": "Fabrication audit 2026-08-29: the stored answer treated K-ETA as a required visa product. HKSAR passport holders enter Korea visa-free, and Hong Kong is among the jurisdictions temporarily exempted from K-ETA through 31 December 2026 (KST). K-ETA remains optional; its validity is 3 years or until passport expiry, multiple use, 10,000 KRW plus a card fee.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Visa-free entry",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa is required. K-ETA is temporarily waived for Hong Kong through 31 December 2026 (KST); travellers may still apply for one voluntarily.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "exceptions": [
+    "K-ETA exemption runs to 31 December 2026 (KST); the requirement returns if it is not extended",
+    "A voluntary K-ETA costs 10,000 KRW plus a separately charged card fee and is valid 3 years or until the passport expires"
+   ],
+   "visa_products": [
+    {
+     "type": "Visa-free entry",
+     "entry": "multiple",
+     "validity": "on arrival",
+     "max_stay_days": null,
+     "fee": {
+      "amount": 0,
+      "currency": null
+     },
+     "notes": "Permitted stay is set on arrival; the mission does not publish a fixed figure for this route."
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "KOR",
+   "travel_purpose": "other"
+  },
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://overseas.mofa.go.kr/gb-en/brd/m_23721/view.do?seq=33",
+  "note": "Fabrication audit 2026-08-29: the stored answer treated K-ETA as a required visa product. HKSAR passport holders enter Korea visa-free, and Hong Kong is among the jurisdictions temporarily exempted from K-ETA through 31 December 2026 (KST). K-ETA remains optional; its validity is 3 years or until passport expiry, multiple use, 10,000 KRW plus a card fee.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Visa-free entry",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa is required. K-ETA is temporarily waived for Hong Kong through 31 December 2026 (KST); travellers may still apply for one voluntarily.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "exceptions": [
+    "K-ETA exemption runs to 31 December 2026 (KST); the requirement returns if it is not extended",
+    "A voluntary K-ETA costs 10,000 KRW plus a separately charged card fee and is valid 3 years or until the passport expires"
+   ],
+   "visa_products": [
+    {
+     "type": "Visa-free entry",
+     "entry": "multiple",
+     "validity": "on arrival",
+     "max_stay_days": null,
+     "fee": {
+      "amount": 0,
+      "currency": null
+     },
+     "notes": "Permitted stay is set on arrival; the mission does not publish a fixed figure for this route."
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "IND",
+   "destination": "ISL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://island.is/en/get-a-visa",
+  "note": "Fabrication audit 2026-08-29: the Schengen fee was stored as 80 EUR. Iceland states 90 EUR (45 EUR for children aged six to twelve). The 3-month and 6-month validities were unsourced and are dropped.",
+  "fields": {
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "visa_products": [
+    {
+     "type": "Schengen short-stay visa (single entry)",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "90 days in any 180-day period. 45 EUR for children aged six to twelve. Lodged with the Icelandic Embassy in New Delhi or a Schengen partner acting for Iceland."
+    },
+    {
+     "type": "Schengen short-stay visa (multiple entry)",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Validity is set by the issuing consulate under the EU cascade; Iceland publishes no fixed figure."
+    }
+   ]
+  }
  }
 ]

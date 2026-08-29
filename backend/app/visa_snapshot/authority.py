@@ -72,6 +72,9 @@ GOV_SUFFIXES = (
     # diplobrazza.net is the Republic of the Congo's MFA: the ministry's own
     # diplomatie.gouv.cg 301-redirects to it (verified live 2026-08-29).
     "diplobrazza.net",
+    # germany.info is the German Missions in the United States, run by the
+    # Federal Foreign Office (verified 2026-08-29 during the fabrication audit).
+    "germany.info",
 
     # generic
     "gov", "mil",
