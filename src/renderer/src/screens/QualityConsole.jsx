@@ -562,21 +562,22 @@ function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames 
       </div>
       <div style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse',
-                        fontSize: 13 }}>
+                        tableLayout: 'fixed', fontSize: 13 }}>
           <thead>
             <tr>
-              <SortHeader label={t('ops.col.route')} k="route" sort={sort} onSort={onSort} width={140} />
-              <SortHeader label={t('ops.col.requirement')} k="requirement" sort={sort} onSort={onSort} width={110} />
-              <SortHeader label={t('ops.col.type')} k="type" sort={sort} onSort={onSort} />
-              <SortHeader label={t('ops.col.stay')} k="stay" sort={sort} onSort={onSort} align="right" width={80} />
-              <SortHeader label={t('ops.col.fee')} k="fee" sort={sort} onSort={onSort} align="right" width={90} />
-              <SortHeader label={t('ops.col.quality')} k="check" sort={sort} onSort={onSort} width={150} />
+              <SortHeader label={t('ops.col.route')} k="route" sort={sort} onSort={onSort} width="15%" />
+              <SortHeader label={t('ops.col.requirement')} k="requirement" sort={sort} onSort={onSort} width="11%" />
+              <SortHeader label={t('ops.col.type')} k="type" sort={sort} onSort={onSort} width="28%" />
+              <SortHeader label={t('ops.col.stay')} k="stay" sort={sort} onSort={onSort} align="right" width="9%" />
+              <SortHeader label={t('ops.col.fee')} k="fee" sort={sort} onSort={onSort} align="right" width="11%" />
+              <SortHeader label={t('ops.col.quality')} k="check" sort={sort} onSort={onSort} width="14%" />
               <th style={{ position: 'sticky', top: 0, background: '#fff',
                            zIndex: 5, borderBottom: `2px solid ${BORDER}`,
                            padding: '10px 12px', fontSize: 10.5,
                            fontWeight: 800, letterSpacing: 0.8,
                            textTransform: 'uppercase', color: GRAY,
-                           whiteSpace: 'nowrap', width: 120 }}>
+                           whiteSpace: 'nowrap', width: '12%',
+                           textAlign: 'left' }}>
                 {t('ops.col.site')}
               </th>
             </tr>
@@ -623,8 +624,7 @@ function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames 
                     <Chip color={reqColor} filled={false}>{reqLabel}</Chip>
                   </td>
                   <td style={{ padding: '10px 12px', color: NAVY, fontWeight: 600,
-                               maxWidth: 320, lineHeight: 1.4,
-                               overflowWrap: 'anywhere' }}>
+                               lineHeight: 1.45, overflowWrap: 'anywhere' }}>
                     {typeNames[rec.visa_type_name] || rec.visa_type_name || '·'}
                   </td>
                   <td style={{ padding: '10px 12px', textAlign: 'right',
@@ -667,7 +667,7 @@ function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames 
                       </div>
                     )}
                   </td>
-                  <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>
+                  <td style={{ padding: '10px 12px' }}>
                     {rec.source_url && (
                       <a href={rec.source_url} target="_blank" rel="noreferrer"
                          onClick={(e) => e.stopPropagation()}
