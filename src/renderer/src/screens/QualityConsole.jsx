@@ -1832,6 +1832,17 @@ export default function QualityConsole() {
           const AC = { add: GREEN, modify: AMBER, delete: RED }
           const nameOfC = (iso) =>
             (countries.find((x) => x.value === iso) || {}).label || iso || '·'
+          // Every correction names the official page it was made against;
+          // the log shows it as a link so any change can be re-checked at
+          // its source in one click.
+          const sourceOf = (c) => {
+            const m = /(https?:\/\/[^\s)]+)/.exec(c.note || '')
+            return m ? m[1].replace(/[).,;:]+$/, '') : null
+          }
+          const hostOf = (u) => {
+            try { return new URL(u).hostname.replace(/^www\./, '') }
+            catch { return u }
+          }
           const fmt = (v) => {
             if (v == null) return null
             if (typeof v === 'object') {
@@ -1995,6 +2006,15 @@ export default function QualityConsole() {
                               : t('ops.origin.human')}
                         </Chip>
                         </span>
+                        {sourceOf(c) && (
+                          <a href={sourceOf(c)} target="_blank" rel="noreferrer"
+                             title={sourceOf(c)}
+                             style={{ fontSize: 11.5, fontWeight: 700,
+                                      color: BLUE, textDecoration: 'none',
+                                      overflowWrap: 'anywhere' }}>
+                            {hostOf(sourceOf(c))} ↗
+                          </a>
+                        )}
                         <span style={{ marginLeft: 'auto', color: '#9aa8bd',
                                        fontSize: 11.5,
                                        fontFamily: 'ui-monospace, monospace' }}>
