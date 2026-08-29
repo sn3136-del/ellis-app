@@ -1359,11 +1359,25 @@ export default function QualityConsole() {
     const medium = t0.filter((r) => r.confidence_level === 'Medium').length
     const low = t0.filter((r) => r.confidence_level === 'Low').length
     const complete = t0.filter((r) => r.completeness === 1).length
+    // The standard defines completeness twice: section 6.1 counts filled
+    // CELLS over required cells (the acceptance metric with the 99% bar),
+    // section 4.2.2 counts records with every required field filled. Showing
+    // the record figure against the cell target mispaired the two.
+    const reqNames = data?.required_fields || []
+    let cells = 0, filledCells = 0
+    for (const r of t0) {
+      const fs = r.field_status || {}
+      for (const f of reqNames) {
+        cells += 1
+        if (fs[f] === 'filled' || fs[f] === 'pending-review') filledCells += 1
+      }
+    }
     const src = t0.filter((r) => r.source_url).length
     const sub = t0.filter((r) => r.source_check === 'human-quote'
       || r.source_check === 'grounded-consistent').length
     return { total: t0.length,
-             completeness_rate: t0.length ? complete / t0.length : null,
+             completeness_rate: cells ? filledCells / cells : null,
+             record_completeness: t0.length ? complete / t0.length : null,
              source_coverage: t0.length ? src / t0.length : null,
              substantiated: sub, high, medium, low }
   }, [data, filtered])
@@ -1577,6 +1591,11 @@ export default function QualityConsole() {
                         {t('ops.stat.completeSub')}
                         <div style={{ color: NAVY, fontWeight: 700 }}>
                           {t('ops.stat.target')} 99%
+                        </div>
+                        <div style={{ marginTop: 6 }}
+                             title={t('ops.stat.recordCompleteTip')}>
+                          {t('ops.stat.recordComplete')
+                            .replace('{p}', Math.round((s.record_completeness || 0) * 100))}
                         </div>
                       </div>
                     </div>
