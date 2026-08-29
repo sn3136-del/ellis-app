@@ -135,6 +135,7 @@ function StatCell({ label, value, sub, pct, target, accent = NAVY, delay = 0 }) 
                     color: GRAY, textTransform: 'uppercase',
                     whiteSpace: 'nowrap' }}>{label}</div>
       <div style={{ fontSize: 30, fontWeight: 700, marginTop: 8, lineHeight: 1,
+                    fontVariantNumeric: 'tabular-nums',
                     color: pct == null ? accent : (hit ? GREEN : NAVY) }}>
         {typeof value === 'number' ? n.toLocaleString() : value}
       </div>
@@ -153,9 +154,10 @@ function StatCell({ label, value, sub, pct, target, accent = NAVY, delay = 0 }) 
           )}
         </div>
       )}
+      {/* The caption wraps: a clipped "past their recheck win..." explains
+          nothing. Two short lines beat one amputated one. */}
       <div style={{ fontSize: 11, color: GRAY, marginTop: 9,
-                    whiteSpace: 'nowrap', overflow: 'hidden',
-                    textOverflow: 'ellipsis' }}>{sub}</div>
+                    lineHeight: 1.5 }}>{sub}</div>
     </div>
   )
 }
@@ -1015,6 +1017,15 @@ export default function QualityConsole() {
     } catch (e) { setError(String(e?.message || e)) }
   }
 
+  async function resolveGroup(ids, status, resolution) {
+    // One route, many automatic checks: resolving the route resolves every
+    // report filed against it, so the queue never demands N identical clicks.
+    try {
+      for (const id of ids) await client.databaseIssueUpdate(id, status, resolution)
+      load()
+    } catch (e) { setError(String(e?.message || e)) }
+  }
+
   async function exportXlsx() {
     // An authenticated fetch, saved as a file: window.open cannot carry the
     // operator token, so the workbook is fetched and handed to the browser.
@@ -1361,9 +1372,29 @@ export default function QualityConsole() {
           const all = issues?.issues || []
           const isOpen = (i) => i.status === 'open' || i.status === 'acknowledged'
           const human = all.filter((i) => isOpen(i) && i.reported_by !== 'freshness_monitor')
-          const auto = all.filter((i) => isOpen(i) && i.reported_by === 'freshness_monitor')
-          const open = [...human, ...auto]
+          const autoAll = all.filter((i) => isOpen(i) && i.reported_by === 'freshness_monitor')
+          // One card per ROUTE: the monitor may have checked the same route
+          // several times; the newest report carries the current page reading.
+          const groups = (() => {
+            const byKey = new Map()
+            for (const i of autoAll) {
+              const k = i.cache_key || JSON.stringify(i.route || {})
+              const g = byKey.get(k)
+              if (!g) byKey.set(k, { rep: i, ids: [i.id], count: 1 })
+              else {
+                g.ids.push(i.id); g.count += 1
+                if ((i.created_at || '') > (g.rep.created_at || '')) g.rep = i
+              }
+            }
+            return [...byKey.values()]
+          })()
+          const openCount = human.length + groups.length
           const closed = all.filter((i) => !isOpen(i)).reverse()
+          const today = new Date().toISOString().slice(0, 10)
+          const resolvedToday = closed.filter((i) =>
+            String(i.resolved_at || i.updated_at || '').slice(0, 10) === today).length
+          const nameOf = (iso) =>
+            (countries.find((c) => c.value === iso) || {}).label || iso || '·'
           const parseAuto = (note) => {
             const m = /^Automatic source check against (\S+?): (.*)$/s.exec(note || '')
             if (!m) return null
@@ -1549,23 +1580,33 @@ export default function QualityConsole() {
               </div>
             )
           }
-          const Card = ({ it, active }) => (
+          const Card = ({ it, active, group }) => (
             <div className="ops-lift" style={{ ...card, padding: '14px 18px',
-                          borderLeft: `3px solid ${active ? RED : '#d6dee9'}` }}>
+                          borderLeft: `3px solid ${active
+                            ? (it.reported_by === 'freshness_monitor' ? BLUE : AMBER)
+                            : '#d6dee9'}` }}>
               <div style={{ display: 'flex', gap: 10, alignItems: 'center',
                             flexWrap: 'wrap' }}>
                 <strong style={{ color: NAVY, fontSize: 13.5 }}>
-                  {flagOf((it.route || {}).nationality || (it.route || {}).passport_nationality)}
-                  {' '}
-                  {(it.route || {}).nationality || (it.route || {}).passport_nationality}
+                  {nameOf((it.route || {}).nationality || (it.route || {}).passport_nationality)}
                   {' → '}
-                  {flagOf((it.route || {}).destination || (it.route || {}).destination_country)}
-                  {' '}
-                  {(it.route || {}).destination || (it.route || {}).destination_country}
+                  {nameOf((it.route || {}).destination || (it.route || {}).destination_country)}
                 </strong>
+                {(it.route || {}).travel_purpose && PURPOSE_KEY[(it.route || {}).travel_purpose] && (
+                  <span style={{ color: '#5b6a80', fontSize: 11.5,
+                                 background: '#f1f4f9', borderRadius: 6,
+                                 padding: '2px 8px' }}>
+                    {t(PURPOSE_KEY[(it.route || {}).travel_purpose])}
+                  </span>
+                )}
                 {it.reported_by === 'freshness_monitor'
                   ? <Chip color={BLUE} filled={false}>{t('ops.autoCheck')}</Chip>
                   : <Chip color={AMBER} filled={false}>{t('ops.readerReport')}</Chip>}
+                {group && group.count > 1 && (
+                  <span style={{ color: GRAY, fontSize: 11.5 }}>
+                    {group.count} {t('ops.q.checks')}
+                  </span>
+                )}
                 {it.reported_by !== 'freshness_monitor' && (
                   <span style={{ color: '#5b6a80', fontSize: 11.5,
                                  background: '#f1f4f9', borderRadius: 6,
@@ -1589,22 +1630,56 @@ export default function QualityConsole() {
                   ✓ {it.resolution}
                 </div>
               )}
-              {active && <IssueActions issue={it} onResolve={resolveIssue} t={t} />}
+              {active && (
+                <IssueActions issue={it} t={t}
+                  onResolve={group
+                    ? (_, st, res) => resolveGroup(group.ids, st, res)
+                    : resolveIssue} />
+              )}
             </div>
           )
           return (
             <div style={{ display: 'grid', gap: 10 }} className="ops-fade">
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+              {/* What this queue IS, in one sentence. */}
+              <div style={{ ...card, padding: '12px 18px', fontSize: 12.5,
+                            color: GRAY, lineHeight: 1.6, display: 'flex',
+                            gap: 12, alignItems: 'flex-start' }}>
+                <span style={{ width: 22, height: 22, borderRadius: 99,
+                               background: `${BLUE}18`, color: BLUE,
+                               fontWeight: 800, fontSize: 12, flexShrink: 0,
+                               display: 'inline-flex', alignItems: 'center',
+                               justifyContent: 'center' }}>i</span>
+                <span>{t('ops.queueIntro')}</span>
+              </div>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center',
+                            flexWrap: 'wrap' }}>
                 <span style={{ fontSize: 13, fontWeight: 800, color: NAVY }}>
                   {t('ops.issues.open')}
                 </span>
-                <Chip color={open.length ? RED : GREEN}>{open.length}</Chip>
+                <Chip color={openCount ? BLUE : GREEN}>{openCount}</Chip>
+                {groups.length > 0 && (
+                  <span style={{ fontSize: 11.5, color: GRAY }}>
+                    {groups.length} {t('ops.q.machineOpen')}
+                  </span>
+                )}
+                {human.length > 0 && (
+                  <span style={{ fontSize: 11.5, color: '#9a5b00' }}>
+                    {human.length} {t('ops.q.humanOpen')}
+                  </span>
+                )}
+                <span style={{ marginLeft: 'auto', fontSize: 11.5,
+                               color: GREEN, fontWeight: 700 }}>
+                  ✓ {resolvedToday} {t('ops.q.resolvedToday')}
+                </span>
               </div>
-              {open.length === 0 && !busy && (
+              {openCount === 0 && !busy && (
                 <div style={{ ...card, padding: 22, color: GRAY, fontSize: 13.5,
                               textAlign: 'center' }}>{t('ops.noReports')}</div>
               )}
-              {open.map((it) => <Card key={it.id} it={it} active />)}
+              {human.map((it) => <Card key={it.id} it={it} active />)}
+              {groups.map((g) => (
+                <Card key={g.rep.id} it={g.rep} active group={g} />
+              ))}
               {closed.length > 0 && (
                 <details style={{ marginTop: 6 }}>
                   <summary style={{ fontSize: 12.5, color: GRAY, cursor: 'pointer',
@@ -1622,6 +1697,8 @@ export default function QualityConsole() {
 
         {tab === 'changes' && (() => {
           const AC = { add: GREEN, modify: AMBER, delete: RED }
+          const nameOfC = (iso) =>
+            (countries.find((x) => x.value === iso) || {}).label || iso || '·'
           const fmt = (v) => {
             if (v == null) return null
             if (typeof v === 'object') {
@@ -1696,6 +1773,16 @@ export default function QualityConsole() {
                 ⬇ {t('ops.export')}
               </button>
               </div>
+              <div style={{ ...card, padding: '12px 18px', fontSize: 12.5,
+                            color: GRAY, lineHeight: 1.6, display: 'flex',
+                            gap: 12, alignItems: 'flex-start' }}>
+                <span style={{ width: 22, height: 22, borderRadius: 99,
+                               background: `${BLUE}18`, color: BLUE,
+                               fontWeight: 800, fontSize: 12, flexShrink: 0,
+                               display: 'inline-flex', alignItems: 'center',
+                               justifyContent: 'center' }}>i</span>
+                <span>{t('ops.logIntro')}</span>
+              </div>
               {list.length === 0 && !busy && (
                 <div style={{ ...card, padding: 22, color: GRAY,
                               fontSize: 13.5, textAlign: 'center' }}>
@@ -1730,18 +1817,29 @@ export default function QualityConsole() {
                       <div style={{ display: 'flex', gap: 10,
                                     alignItems: 'center', flexWrap: 'wrap' }}>
                         <strong style={{ color: NAVY, fontSize: 13 }}>
-                          {flagOf((c.route || {}).passport_nationality)} {(c.route || {}).passport_nationality}
+                          {nameOfC((c.route || {}).passport_nationality)}
                           {' → '}
-                          {flagOf((c.route || {}).destination_country)} {(c.route || {}).destination_country}
+                          {nameOfC((c.route || {}).destination_country)}
                         </strong>
+                        {(c.route || {}).travel_purpose && PURPOSE_KEY[(c.route || {}).travel_purpose] && (
+                          <span style={{ color: '#5b6a80', fontSize: 11.5,
+                                         background: '#f1f4f9', borderRadius: 6,
+                                         padding: '2px 8px' }}>
+                            {t(PURPOSE_KEY[(c.route || {}).travel_purpose])}
+                          </span>
+                        )}
                         <Chip color={AC[c.action] || GRAY}>
                           {t(`ops.act.${c.action}`) === `ops.act.${c.action}`
                             ? c.action : t(`ops.act.${c.action}`)}
                         </Chip>
-                        <span style={{ color: GRAY, fontSize: 11.5 }}>
-                          {c.origin === 'grounded_recheck' ? t('ops.autoCheck')
-                            : c.origin === 'engine' ? t('ops.origin.engine') : c.origin}
-                        </span>
+                        {/* WHO changed it, in plain words, not a token. */}
+                        <Chip filled={false}
+                              color={c.origin === 'grounded_recheck' ? BLUE
+                                : c.origin === 'engine' ? GRAY : GREEN}>
+                          {c.origin === 'grounded_recheck' ? t('ops.origin.recheck')
+                            : c.origin === 'engine' ? t('ops.origin.engine')
+                              : t('ops.origin.human')}
+                        </Chip>
                         <span style={{ marginLeft: 'auto', color: '#9aa8bd',
                                        fontSize: 11.5,
                                        fontFamily: 'ui-monospace, monospace' }}>
