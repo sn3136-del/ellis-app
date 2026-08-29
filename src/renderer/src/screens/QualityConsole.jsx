@@ -554,7 +554,7 @@ function FlagForm({ rec, onFlag, t }) {
   )
 }
 
-function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames = {} }) {
+function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames = {}, tvv = (x) => x }) {
   const [sort, setSort] = useState({ key: 'route', dir: 1 })
   const [open, setOpen] = useState(null)
   const onSort = (k) => setSort((s0) => ({ key: k, dir: s0.key === k ? -s0.dir : 1 }))
@@ -748,7 +748,7 @@ function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames 
                           scroll width and a phone only ever sees a third. */}
                       <div className="ops-rowdetail">
                         <FieldGrid rec={rec} t={t} typeNames={typeNames}
-                                   tvv={tvRef.current} />
+                                   tvv={tvv} />
                         {missing.length > 0 && (
                           <MissingLine missing={missing} t={t} />
                         )}
@@ -1036,7 +1036,6 @@ function useValueTranslations(client, lang) {
 export default function QualityConsole() {
   const client = useOpsClient()
   const { t, lang } = useLocale()
-  const tvRef = useRef((x) => x)
   const [tab, setTab] = useState('records')
   const [filters, setFilters] = useState({ nationality: '', destination: '',
                                            purpose: '', requirement: '',
@@ -1585,7 +1584,7 @@ export default function QualityConsole() {
               )
             })()}
             {busy && <div style={{ color: GRAY, fontSize: 13 }}>{t('ops.loading')}</div>}
-            <RecordsTable records={records.slice(0, shown)} total={records.length} onFlag={flag} onRelease={release} t={t} flagOf={flagOf} typeNames={typeNames} />
+            <RecordsTable records={records.slice(0, shown)} total={records.length} onFlag={flag} onRelease={release} t={t} flagOf={flagOf} typeNames={typeNames} tvv={tv} />
             {records.length > shown && (
               <button className="btn btn--ghost"
                       style={{ borderRadius: 999, justifySelf: 'center' }}
