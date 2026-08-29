@@ -1260,15 +1260,16 @@ def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
     if not nat or not dest:
         raise HTTPException(422, "nationality and destination must be real "
                                  "countries (name or ISO code)")
-    _DOCS = {"ordinary_passport", "diplomatic_passport", "service_passport",
-             "emergency_passport", "prc_travel_document",
-             "refugee_travel_document", "stateless_travel_document",
-             "alien_passport", "laissez_passer"}
+    # The registry is the ONE vocabulary: a hardcoded copy here silently
+    # rejected three document types the picker offers (公务普通护照, 儿童护照,
+    # 身份证明书) and collapsed 临时护照 into the emergency passport.
+    from .visa_snapshot.registry import load_registry as _lr
+    _DOCS = {e["code"] for e in _lr("travel_document_types")["entries"]}
     _DOC_ALIAS = {"ordinary": "ordinary_passport", "passport": "ordinary_passport",
                   "diplomatic": "diplomatic_passport", "official": "service_passport",
                   "official_passport": "service_passport", "service": "service_passport",
-                  "emergency": "emergency_passport", "temporary": "emergency_passport",
-                  "temporary_passport": "emergency_passport",
+                  "emergency": "emergency_passport", "temporary": "temporary_passport",
+                  "child": "child_passport", "identity_certificate": "identity_certificate",
                   "travel_document": "prc_travel_document"}
     doc_in = (body.travel_document_type or "ordinary_passport").strip().lower()
     doc = _DOC_ALIAS.get(doc_in, doc_in)

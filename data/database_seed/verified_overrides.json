@@ -855,16 +855,27 @@
   "verified_at": "2026-08-29",
   "verified_by": "Ellis source audit",
   "source_url": "https://www.cn.emb-japan.go.jp/itpr_zh/visa_kanko.html",
-  "note": "Verified 2026-08-22 against MOFA and the Embassy of Japan in China. Single-entry tourist visas for mainland residents are issued electronically (Visa issuance notice shown online at the airport); stay 15 or 30 days, set by the mission. Fees CNY 715 single / 1,430 multiple from 1 July 2026, charged only on issuance; the designated agency's fee is separate. Group tour visa (5 to 40 people) up to 15  | Adjudicated 2026-08-29 against the official page after a freshness dispute: The embassy page contradicts the stored 15-day cap: the individual single-entry tourist visa's stay is 15 OR 30 days decided by the embassy. The stored requirement_detail 'evisa' STANDS and needs no change: the embassy's eVisa notice (https://www.cn.emb-japan.go.jp/itpr_zh/00_000485_00224.html) says that from 2023-06-19 it issues electronic visas for '30天内旅游目的短期滞在单次签证（仅限在中国(除香港、澳门)居住持有中国护照的申请人）',  Quote: \"停留期限分为「15天」或「30天」，由本馆根据情况决定。\"",
+  "note": "The embassy tourist-visa page lists FIVE ordinary-passport tourist products (group tour, individual single-entry, Okinawa/Tohoku multiple, sufficient-financial-ability multiple, high-income 5-year). They were mis-keyed onto the diplomatic-passport route, so ordinary travellers saw only the single-entry eVisa - exactly the appendix defect Trip.com raised. Consular fees from 1 July 2026: CNY 715 single / CNY 1,430 multiple, excluding agency service fees. | Verified 2026-08-22 against MOFA and the Embassy of Japan in China. Single-entry tourist visas for mainland residents are issued electronically (Visa issuance notice shown online at the airport); stay 15 or 30 days, set by the mission. Fees CNY 715 single / 1,430 multiple from 1 July 2026, charged only on issuance; the designated agency's fee is separate. Group tour visa (5 to 40 people) up to 15  | Adjudicated 2026-08-29 against the official page after a freshness dispute: The embassy page contradicts the stored 15-day cap: the individual single-entry tourist visa's stay is 15 OR 30 days decided by the embassy. The stored requirement_detail 'evisa' STANDS and needs no change: the embassy's eVisa notice (https://www.cn.emb-japan.go",
   "fields": {
-   "permitted_stay": "Single-entry tourist visa: 15 or 30 days per visit, decided by the embassy",
+   "permitted_stay": "15 or 30 days on a single-entry tourist visa (decided by the mission); 30 days per visit on the 3-year multiple-entry visas; 90 days per visit on the 5-year multiple-entry visa",
    "government_fee": {
     "amount": 715,
     "currency": "CNY"
    },
    "visa_products": [
     {
-     "type": "Single-entry tourist eVisa",
+     "type": "Group tourist visa (团队旅游签证)",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 15,
+     "fee": {
+      "amount": 715,
+      "currency": "CNY"
+     },
+     "notes": "Tour groups of about 5 to 40 people organised by designated agencies; itinerary within 15 days; no independent activity without the tour escort. Fee = single-entry visa rate effective 2026-07-01."
+    },
+    {
+     "type": "Individual single-entry tourist visa (个人单次旅游签证)",
      "entry": "single",
      "validity": "3 months",
      "max_stay_days": 30,
@@ -872,7 +883,40 @@
       "amount": 715,
       "currency": "CNY"
      },
-     "notes": "Permitted stay is 15 or 30 days, decided by the embassy. eVisa issued for tourism stays within 30 days to Chinese passport holders resident in mainland China (excluding Hong Kong/Macao); lodged by a designated travel agency; consular fee 715 CNY effective 2026-07-01, agency service fee additional."
+     "notes": "Validity 3 months; permitted stay 15 or 30 days as decided by the mission. Fee = single-entry rate effective 2026-07-01."
+    },
+    {
+     "type": "Okinawa / six Tohoku prefectures multiple-entry tourist visa",
+     "entry": "multiple",
+     "validity": "3 years",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 1430,
+      "currency": "CNY"
+     },
+     "notes": "First trip must include an overnight stay in Okinawa or one of the six Tohoku prefectures; from the second visit it may also be used for other short-term visit purposes. Fee = multiple-visa rate effective 2026-07-01."
+    },
+    {
+     "type": "Multiple-entry tourist visa for persons of sufficient financial ability",
+     "entry": "multiple",
+     "validity": "3 years",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 1430,
+      "currency": "CNY"
+     },
+     "notes": "No destination restriction within Japan; from the second visit usable for other short-term visit purposes. Fee = multiple-visa rate effective 2026-07-01."
+    },
+    {
+     "type": "Multiple-entry visa for persons of considerably high income (5-year)",
+     "entry": "multiple",
+     "validity": "5 years",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 1430,
+      "currency": "CNY"
+     },
+     "notes": "Usable from the first entry for tourism and other short-term visit purposes; travel bookings and itinerary may be self-managed. Fee = multiple-visa rate effective 2026-07-01."
     }
    ],
    "arrival_card": {
@@ -14376,77 +14420,20 @@
   "verified_at": "2026-08-29",
   "verified_by": "Ellis source audit",
   "source_url": "https://www.cn.emb-japan.go.jp/itpr_zh/visa_kanko.html",
-  "note": "MOFA's diplomatic/official passport waiver list (updated 2 January 2026, 65 countries) does not include China, and neither does the second table on the same page (countries whose ordinary-passport waiver is extended to diplomatic/official holders). China is also absent from MOFA's 74-country ordinary-passport exemption list (https://www.mofa.go.jp/ | Gap-close research 2026-08-29 against the official page. Quote: \"需通过取得了日本国驻华使领馆…送签资格的指定旅行社进行申请…（个人单次旅游签证）有效期为「3个月」，停留期限分为「15天」或「30天」，由本馆根据情况决定。\"",
+  "note": "Products removed 2026-08-29: the five tourist products on this entry are the ORDINARY-passport lineup from the embassy tourist page and were mis-keyed here; they now serve the ordinary route. | MOFA's diplomatic/official passport waiver list (updated 2 January 2026, 65 countries) does not include China, and neither does the second table on the same page (countries whose ordinary-passport waiver is extended to diplomatic/official holders). China is also absent from MOFA's 74-country ordinary-passport exemption list (https://www.mofa.go.jp/ | Gap-close research 2026-08-29 against the official page. Quote: \"需通过取得了日本国驻华使领馆…送签资格的指定旅行社进行申请…（个人单次旅游签证）有效期为「3个月」，停留期限分为「15天」或「30天」，由本馆根据情况决定。\"",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "permitted_stay": "15 or 30 days (single-entry tourist visa, as decided by the embassy); 30 days (3-year multiple-entry); 90 days (5-year multiple-entry)",
    "visa_category": "Temporary Visitor (short-term stay, tourism)",
    "requirement_detail": "paper_visa",
    "application_channel": "designated_travel_agency",
-   "application_channel_detail": "Tourist visas for Chinese nationals must be lodged through travel agencies designated by the Embassy/Consulates-General of Japan in China; applicants cannot apply for or collect this visa directly at the mission.",
+   "application_channel_detail": "China is not among the states whose diplomatic or official passport holders Japan exempts, so a visa is required. Diplomatic and official passport holders apply through official channels rather than the designated travel agencies used for ordinary tourist visas; the mission does not publish a separate product or fee list for them.",
    "processing_time": "Result issued on the 5th working day counting from the day after acceptance (从本馆受理翌日起第5个工作日发给结果), excluding the agency's own review time",
    "official_portal_url": "https://www.cn.emb-japan.go.jp/itpr_zh/visa_kanko.html",
    "exceptions": [
     "China is NOT among Japan's visa exemption arrangements for diplomatic and official passport holders (MOFA 65-country list, https://www.mofa.go.jp/ca/fna/page22e_000692.html), so Chinese diplomatic passport holders also require a visa for tourism.",
     "Visa fees were revised effective 1 July 2026 (Embassy notice 2026-06-24, https://www.cn.emb-japan.go.jp/itpr_zh/00_000485_00222.html): 单次签证 715元, 两次签证 1,430元, 数次签证 1,430元; MOFA states approx. 15,000 JPY single / 30,000 JPY multiple, payable in local currency (https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html). The older 200/400元 tourist-fee page (2019) is superseded.",
     "No fee is charged if the visa is not issued; designated agencies charge separate service fees."
-   ],
-   "visa_products": [
-    {
-     "type": "Group tourist visa (团队旅游签证)",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 15,
-     "fee": {
-      "amount": 715,
-      "currency": "CNY"
-     },
-     "notes": "Tour groups of about 5 to 40 people organised by designated agencies; itinerary within 15 days; no independent activity without the tour escort. Fee = single-entry visa rate effective 2026-07-01."
-    },
-    {
-     "type": "Individual single-entry tourist visa (个人单次旅游签证)",
-     "entry": "single",
-     "validity": "3 months",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 715,
-      "currency": "CNY"
-     },
-     "notes": "Validity 3 months; permitted stay 15 or 30 days as decided by the mission. Fee = single-entry rate effective 2026-07-01."
-    },
-    {
-     "type": "Okinawa / six Tohoku prefectures multiple-entry tourist visa",
-     "entry": "multiple",
-     "validity": "3 years",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 1430,
-      "currency": "CNY"
-     },
-     "notes": "First trip must include an overnight stay in Okinawa or one of the six Tohoku prefectures; from the second visit it may also be used for other short-term visit purposes. Fee = multiple-visa rate effective 2026-07-01."
-    },
-    {
-     "type": "Multiple-entry tourist visa for persons of sufficient financial ability",
-     "entry": "multiple",
-     "validity": "3 years",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 1430,
-      "currency": "CNY"
-     },
-     "notes": "No destination restriction within Japan; from the second visit usable for other short-term visit purposes. Fee = multiple-visa rate effective 2026-07-01."
-    },
-    {
-     "type": "Multiple-entry visa for persons of considerably high income (5-year)",
-     "entry": "multiple",
-     "validity": "5 years",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 1430,
-      "currency": "CNY"
-     },
-     "notes": "Usable from the first entry for tourism and other short-term visit purposes; travel bookings and itinerary may be self-managed. Fee = multiple-visa rate effective 2026-07-01."
-    }
    ]
   }
  },
