@@ -565,22 +565,31 @@ def test_new_answer_fields_survive_validation():
 
 def test_low_confidence_answers_are_held_until_a_person_releases_them():
     """Their requirement: low-confidence content is blocked until an operator
-    confirms it. The engine's OWN doubt is the trigger, and holding means the
-    reader sees nothing — showing the claims under a warning is still
-    showing them."""
+    confirms it, and holding means the reader sees nothing — showing the
+    claims under a warning is still showing them. The trigger is the
+    standard's own ladder (4.2.3), the SAME one the 25-field records
+    publish: the engine's own doubt, and equally an answer that names no
+    official source, since non-official-only evidence is Low by definition.
+    Keying the gate on the engine's self-rating alone once let answers the
+    console displayed as Low reach customers unheld."""
     from app.visa_snapshot.kimi_primary import _result
-    held = _result("KIMI_PRIMARY", {"confidence": "low"},
+    SRC = "https://www.mofa.go.jp/j_info/visit/visa/index.html"
+    held = _result("KIMI_PRIMARY", {"confidence": "low", "source_url": SRC},
                    cached=False, stale=False)
     assert held["review_required"] is True
     assert held["operator_released"] is False
+    # No official source is Low however sure the engine sounds.
+    assert _result("KIMI_PRIMARY", {"confidence": "high"},
+                   cached=False, stale=False)["review_required"] is True
     for ok in ("high", "medium"):
-        assert _result("KIMI_PRIMARY", {"confidence": ok},
+        assert _result("KIMI_PRIMARY", {"confidence": ok, "source_url": SRC},
                        cached=False, stale=False)["review_required"] is False
 
 
 def test_an_operator_release_lifts_the_hold_for_that_answer_only():
     from app.visa_snapshot.kimi_primary import _result
-    released = _result("KIMI_PRIMARY", {"confidence": "low"},
+    released = _result("KIMI_PRIMARY", {"confidence": "low",
+                                        "source_url": "https://x.gov.uk/a"},
                        cached=True, stale=False, released=True)
     assert released["review_required"] is False
     assert released["operator_released"] is True

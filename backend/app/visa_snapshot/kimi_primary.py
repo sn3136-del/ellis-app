@@ -875,8 +875,13 @@ def _result(status: str, guidance: dict, *, cached: bool, stale: bool,
         # until a person confirms it, rather than shown as if it were solid.
         # The engine's own doubt is the trigger — this is not a second
         # opinion about whether it is right.
+        # The gate reads the SAME grading the 25-field records publish
+        # (section 4.2.3): the engine's own doubt, and equally a record the
+        # standard grades Low because no official source backs it. Keying
+        # only on the engine's self-rating let records shown as Low in the
+        # console still reach customers unheld.
         "review_required": bool(guidance) and not released
-                           and str((guidance or {}).get("confidence", "")).lower() == "low",
+                           and _spec_confidence_is_low(guidance),
         "operator_released": released,
     }
     # `held` is what actually withholds: the flag above AND the switch. With
@@ -886,6 +891,17 @@ def _result(status: str, guidance: dict, *, cached: bool, stale: bool,
     if elapsed_seconds is not None:
         out["elapsed_seconds"] = round(elapsed_seconds, 2)
     return out
+
+
+def _spec_confidence_is_low(guidance: dict) -> bool:
+    """True when the acceptance standard's own confidence ladder grades this
+    answer Low: conflicting or non-official-only evidence. An answer naming
+    no official page at all is Low however sure the engine sounds; a
+    human-verified answer always carries its source, so it never trips this."""
+    g = guidance or {}
+    if not (g.get("source_url") or g.get("official_portal_url")):
+        return True
+    return str(g.get("confidence") or "").lower() == "low"
 
 
 _PORTAL_TABLE: dict = {"mtime": None, "portals": {}}

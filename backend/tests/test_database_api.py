@@ -22,6 +22,10 @@ ANSWER = {
     "required_documents": ["passport"], "application_channel": "embassy",
     "government_fee": {"amount": 100, "currency": "USD"},
     "processing_time": "5 days", "confidence": "high",
+    # Every real answer names the official page it came from; without one the
+    # standard grades the answer Low and it is withheld (4.2.3), which is
+    # exercised by its own test below.
+    "source_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
     "visa_products": [{"type": "Single-entry tourist", "entry": "single",
                        "validity": "3 months", "max_stay_days": 30,
                        "fee": {"amount": 100, "currency": "USD"},

@@ -1318,6 +1318,18 @@ def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
     # what the reader is told is being checked. The envelope keeps the flag
     # and the identity so the page can say WHY there is nothing to show.
     out["transit_countries"] = transit
+    # One grading, one gate. The 25-field record publishes a confidence_level
+    # by the standard's ladder (4.2.3); anything that ladder calls Low must be
+    # withheld from readers until an operator confirms it. Deciding the hold
+    # from the engine's self-rating alone let records the console showed as
+    # Low still reach customers unheld.
+    if out.get("guidance") and not out.get("operator_released"):
+        from .visa_snapshot import tstation as _ts
+        _rows = _ts.records_for_route(route, out.get("guidance") or {},
+                                      (out.get("source_verified") or None))
+        if _rows and _rows[0].get("confidence_level") == "Low":
+            out["review_required"] = True
+            out["held"] = kimi_primary.hold_enabled()
     if out.get("held"):
         out = _held_envelope(out)
     # The answer carries the identity of the cached row it came from. A reader
