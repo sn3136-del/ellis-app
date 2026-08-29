@@ -1087,3 +1087,10 @@ select.ops-in {
   .ops-tabs { flex-wrap: wrap; overflow-x: visible; border-radius: 18px;
               width: 100%; }
 }
+
+/* Stat bands: dividers belong between columns, never before a wrapped row. */
+@media (max-width: 620px) {
+  .band-cell { border-left: none !important;
+               border-top: 1px solid var(--line, #e8edf3); }
+  .band-cell:first-child { border-top: none; }
+}

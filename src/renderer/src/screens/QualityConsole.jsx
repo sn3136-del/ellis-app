@@ -801,10 +801,12 @@ function IssueActions({ issue, onResolve, t }) {
   )
 }
 
-function BandCell({ children, delay = 0 }) {
+function BandCell({ children, delay = 0, first = false }) {
   return (
-    <div className="ops-fade" style={{ padding: '20px 24px', minWidth: 0,
-                                       animationDelay: `${delay}ms` }}>
+    <div className="ops-fade band-cell"
+         style={{ padding: '22px 26px', minWidth: 0,
+                  borderLeft: first ? 'none' : `1px solid ${BORDER}`,
+                  animationDelay: `${delay}ms` }}>
       {children}
     </div>
   )
@@ -818,10 +820,18 @@ function BandLabel({ children }) {
   )
 }
 
-function BandBig({ children, color = NAVY }) {
+function BandBig({ children, color = NAVY, of = null }) {
   return (
-    <div style={{ fontSize: 30, fontWeight: 700, marginTop: 8,
-                  lineHeight: 1, color }}>{children}</div>
+    <div style={{ marginTop: 10, lineHeight: 1.05, display: 'flex',
+                  alignItems: 'baseline', gap: 7, flexWrap: 'wrap' }}>
+      <span style={{ fontSize: 30, fontWeight: 700, color,
+                     fontVariantNumeric: 'tabular-nums',
+                     letterSpacing: '-0.5px' }}>{children}</span>
+      {of && (
+        <span style={{ fontSize: 13, fontWeight: 600, color: GRAY,
+                       fontVariantNumeric: 'tabular-nums' }}>{of}</span>
+      )}
+    </div>
   )
 }
 
@@ -1543,9 +1553,10 @@ export default function QualityConsole() {
                     ? t('ops.scope.filtered').replace('{n}', recs.length.toLocaleString()).replace('{m}', allN.toLocaleString())
                     : t('ops.scope.all').replace('{n}', allN.toLocaleString())}
                 </div>
-                <div style={{ ...card, display: 'grid',
-                              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
-                  <BandCell delay={0}>
+                <div style={{ ...card, display: 'grid', overflow: 'hidden',
+                              gridTemplateColumns:
+                                'repeat(auto-fit, minmax(246px, 1fr))' }}>
+                  <BandCell delay={0} first>
                     <BandLabel>{t('ops.stat.records')}</BandLabel>
                     <BandBig>{totalCount.toLocaleString()}</BandBig>
                     <div style={{ marginTop: 12 }}>
@@ -1585,10 +1596,9 @@ export default function QualityConsole() {
                   </BandCell>
                   <BandCell delay={240}>
                     <BandLabel>{t('ops.stat.substantiated')}</BandLabel>
-                    <BandBig color={BLUE}>
-                      {t('ops.substHead')
-                        .replace('{n}', (s.substantiated ?? 0).toLocaleString())
-                        .replace('{m}', recs.length.toLocaleString())}
+                    <BandBig color={BLUE}
+                             of={`/ ${recs.length.toLocaleString()}`}>
+                      {(s.substantiated ?? 0).toLocaleString()}
                     </BandBig>
                     <div style={{ marginTop: 12 }}>
                       <MicroStack segs={[
@@ -1596,13 +1606,13 @@ export default function QualityConsole() {
                         [tiers.gc, '#4f8ef8', t('ops.check.grounded'), t('ops.tip.grounded')],
                       ]} />
                     </div>
-                    <div style={{ fontSize: 11, color: GRAY, marginTop: 8,
+                    <div style={{ fontSize: 10.5, color: GRAY, marginTop: 10,
                                   borderTop: `1px dashed ${BORDER}`,
-                                  paddingTop: 7 }}
+                                  paddingTop: 8, lineHeight: 1.5 }}
                          title={t('ops.tip.reference')}>
-                      {tiers.ref.toLocaleString()} {t('ops.check.reference')}
-                      {' · '}{tiers.un.toLocaleString()} {t('ops.check.none')}
-                      {' — '.replace(' — ', ' · ')}{t('ops.notCounted')}
+                      <span style={{ fontWeight: 700 }}>
+                        {(tiers.ref + tiers.un).toLocaleString()}
+                      </span>{' '}{t('ops.notCounted')}
                     </div>
                   </BandCell>
                   <BandCell delay={320}>
