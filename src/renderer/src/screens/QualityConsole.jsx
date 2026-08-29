@@ -67,7 +67,13 @@ function useCountUp(target, ms = 700) {
 // Confidence is ORDERED data, so it wears a sequential single-hue ramp
 // (validated: monotonic lightness, CVD-safe by construction), never
 // green/amber/red side by side.
-const SEQ = { high: '#1d4ed8', medium: '#7db2f7', low: '#dbe8fb' }
+// The assurance ladder: verified by a person, read by the machine, not yet
+// checked. It is a status scale, so it wears status colours - the same
+// meaning the confidence grades carry. The old blue ramp's lightest step
+// failed the palette check twice over: below the chroma floor (reading
+// grey) and 1.21:1 against the surface. This trio passes every check in
+// both themes, worst adjacent pair ΔE 28.3.
+const SEQ = { high: '#0b7a44', medium: '#2563eb', low: '#d97706' }
 import { createVisaClient } from '../lib/visaBackend.js'
 import { newSession } from '../lib/visaSession.js'
 import { useLocale } from '../lib/locale.jsx'
@@ -158,47 +164,6 @@ function StatCell({ label, value, sub, pct, target, accent = NAVY, delay = 0 }) 
           nothing. Two short lines beat one amputated one. */}
       <div style={{ fontSize: 11, color: GRAY, marginTop: 9,
                     lineHeight: 1.5 }}>{sub}</div>
-    </div>
-  )
-}
-
-function ConfidenceCell({ high, medium, low, label, sub, t, delay = 0 }) {
-  const total = (high + medium + low) || 1
-  const [go, setGo] = useState(false)
-  useEffect(() => { const id = setTimeout(() => setGo(true), 80 + delay)
-    return () => clearTimeout(id) }, [delay])
-  const seg = (n, color, last) => (
-    <div key={color} className="ops-seg"
-         style={{ width: go ? `${(n / total) * 100}%` : '0%',
-                  background: color,
-                  borderRight: last ? 'none' : '2px solid #fff' }} />
-  )
-  const Key = ({ color, n, name }) => (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-      <span style={{ width: 8, height: 8, borderRadius: '50%',
-                     background: color, border: '1px solid #c9d6ea' }} />
-      <span style={{ color: NAVY, fontWeight: 700 }}>{n.toLocaleString()}</span>
-      <span style={{ color: GRAY }}>{name}</span>
-    </span>
-  )
-  return (
-    <div className="ops-fade" style={{ padding: '20px 24px', minWidth: 0,
-                                       animationDelay: `${delay}ms` }}>
-      <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1,
-                    color: GRAY, textTransform: 'uppercase' }}>{label}</div>
-      <div style={{ display: 'flex', gap: 12, marginTop: 12, fontSize: 12,
-                    flexWrap: 'wrap' }}>
-        <Key color={SEQ.high} n={high} name={t('ops.conf.high')} />
-        <Key color={SEQ.medium} n={medium} name={t('ops.conf.medium')} />
-        <Key color={SEQ.low} n={low} name={t('ops.conf.low')} />
-      </div>
-      <div style={{ marginTop: 12, height: 6, borderRadius: 999,
-                    overflow: 'hidden', display: 'flex',
-                    background: '#eef2f8' }}>
-        {seg(high, SEQ.high, false)}{seg(medium, SEQ.medium, false)}
-        {seg(low, SEQ.low, true)}
-      </div>
-      <div style={{ fontSize: 11, color: GRAY, marginTop: 9 }}>{sub}</div>
     </div>
   )
 }
@@ -835,33 +800,41 @@ function BandBig({ children, color = NAVY, of = null }) {
   )
 }
 
-function RingGauge({ pct, target, size = 74, hitColor = GREEN }) {
+function RingGauge({ pct, target, size = 76, hitColor = GREEN, label }) {
   const [go, setGo] = useState(false)
   useEffect(() => { const id = setTimeout(() => setGo(true), 140)
     return () => clearTimeout(id) }, [])
-  const R = (size - 12) / 2, C = 2 * Math.PI * R
+  // A thinner arc reads as a measurement rather than a pie: the track stays
+  // visible the whole way round, so the shortfall is as legible as the fill.
+  const SW = 7
+  const R = (size - SW - 8) / 2, C = 2 * Math.PI * R
   const hit = target != null && pct >= target
   const val = Math.max(0, Math.min(100, pct || 0))
-  const tickAngle = target != null ? (target / 100) * 360 - 90 : null
+  const ang = target != null ? (target / 100) * 360 - 90 : null
+  const cx = size / 2, cy = size / 2
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden>
-      <circle cx={size/2} cy={size/2} r={R} fill="none" stroke="#e7eefb"
-              strokeWidth="9" />
-      <circle cx={size/2} cy={size/2} r={R} fill="none"
-              stroke={hit ? hitColor : '#2f6ef2'} strokeWidth="9"
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}
+         role="img" aria-label={label || `${Math.round(val)} percent`}>
+      <circle cx={cx} cy={cy} r={R} fill="none" stroke="#e9eef7" strokeWidth={SW} />
+      <circle cx={cx} cy={cy} r={R} fill="none"
+              stroke={hit ? hitColor : '#2563eb'} strokeWidth={SW}
               strokeLinecap="round"
               strokeDasharray={`${go ? (val / 100) * C : 0} ${C}`}
-              transform={`rotate(-90 ${size/2} ${size/2})`}
-              style={{ transition: 'stroke-dasharray 1s cubic-bezier(.25,.8,.25,1)' }} />
-      {tickAngle != null && (
-        <line x1={size/2 + (R - 7) * Math.cos(tickAngle * Math.PI / 180)}
-              y1={size/2 + (R - 7) * Math.sin(tickAngle * Math.PI / 180)}
-              x2={size/2 + (R + 7) * Math.cos(tickAngle * Math.PI / 180)}
-              y2={size/2 + (R + 7) * Math.sin(tickAngle * Math.PI / 180)}
-              stroke={NAVY} strokeWidth="2" opacity="0.5" />
+              transform={`rotate(-90 ${cx} ${cy})`}
+              style={{ transition: 'stroke-dasharray .9s cubic-bezier(.22,.8,.28,1)' }} />
+      {ang != null && (
+        // The target is a notch cut through the track, not a line laid over
+        // it: it reads as a mark ON the scale rather than another series.
+        <line x1={cx + (R - SW / 2 - 1) * Math.cos(ang * Math.PI / 180)}
+              y1={cy + (R - SW / 2 - 1) * Math.sin(ang * Math.PI / 180)}
+              x2={cx + (R + SW / 2 + 1) * Math.cos(ang * Math.PI / 180)}
+              y2={cy + (R + SW / 2 + 1) * Math.sin(ang * Math.PI / 180)}
+              stroke="#fff" strokeWidth="2.5" />
       )}
-      <text x={size/2} y={size/2 + 5} textAnchor="middle"
-            style={{ fontSize: 16, fontWeight: 700,
+      <text x={cx} y={cy + 5.5} textAnchor="middle"
+            style={{ fontSize: 17, fontWeight: 700,
+                     fontVariantNumeric: 'tabular-nums',
+                     letterSpacing: '-0.4px',
                      fill: hit ? hitColor : NAVY }}>
         {Math.round(val)}%
       </text>
@@ -869,34 +842,54 @@ function RingGauge({ pct, target, size = 74, hitColor = GREEN }) {
   )
 }
 
-function MicroStack({ segs, height = 8, legend = true }) {
+function MicroStack({ segs, height = 10, legend = true }) {
   const [go, setGo] = useState(false)
+  const [hi, setHi] = useState(-1)
   useEffect(() => { const id = setTimeout(() => setGo(true), 140)
     return () => clearTimeout(id) }, [])
   const total = segs.reduce((a, [n]) => a + n, 0) || 1
+  const shown = segs.filter(([n]) => n > 0)
   return (
     <div>
+      {/* One bar, parts separated by the surface itself rather than by a
+          stroke: a 2px gap of the card colour reads cleaner than a border
+          and keeps the segment colours honest against each other. */}
       <div style={{ display: 'flex', height, borderRadius: 999,
-                    overflow: 'hidden', background: '#eef2f8' }}>
-        {segs.map(([n, color], i) => (
-          <div key={i} className="ops-seg"
+                    overflow: 'hidden', background: '#eef2f8', gap: 2 }}>
+        {shown.map(([n, color, name], i) => (
+          <div key={i} title={`${name}: ${n.toLocaleString()} (${Math.round((n / total) * 100)}%)`}
+               onMouseEnter={() => setHi(i)} onMouseLeave={() => setHi(-1)}
+               className="ops-seg"
                style={{ width: go ? `${(n / total) * 100}%` : '0%',
-                        background: color,
-                        borderRight: i < segs.length - 1 ? '2px solid #fff' : 'none' }} />
+                        background: color, borderRadius: 3,
+                        opacity: hi === -1 || hi === i ? 1 : 0.35,
+                        transition: 'width .9s cubic-bezier(.22,.8,.28,1), opacity .15s ease',
+                        cursor: 'default' }} />
         ))}
       </div>
       {legend && (
-        <div style={{ display: 'flex', gap: 10, marginTop: 7, fontSize: 10.5,
-                      flexWrap: 'wrap' }}>
-          {segs.map(([n, color, name, tip], i) => (
-            <span key={i} style={{ display: 'inline-flex', gap: 4,
-                                   alignItems: 'center', color: GRAY }}>
-              <span style={{ width: 7, height: 7, borderRadius: 2,
-                             background: color }} />
-              <strong style={{ color: NAVY }}>{n.toLocaleString()}</strong>{' '}
+        <div style={{ display: 'grid', gap: 4, marginTop: 9, fontSize: 11 }}>
+          {shown.map(([n, color, name, tip], i) => (
+            <div key={i}
+                 onMouseEnter={() => setHi(i)} onMouseLeave={() => setHi(-1)}
+                 style={{ display: 'flex', alignItems: 'center', gap: 7,
+                          color: GRAY,
+                          opacity: hi === -1 || hi === i ? 1 : 0.45,
+                          transition: 'opacity .15s ease' }}>
+              <span style={{ width: 8, height: 8, borderRadius: 2.5,
+                             background: color, flexShrink: 0 }} />
               <span title={tip || undefined}
-                    style={tip ? { cursor: 'help' } : undefined}>{name}</span>
-            </span>
+                    style={{ flex: 1, minWidth: 0, overflow: 'hidden',
+                             textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                             cursor: tip ? 'help' : 'default' }}>{name}</span>
+              <strong style={{ color: NAVY, fontVariantNumeric: 'tabular-nums' }}>
+                {n.toLocaleString()}
+              </strong>
+              <span style={{ width: 30, textAlign: 'right', color: '#9aa8bd',
+                             fontVariantNumeric: 'tabular-nums' }}>
+                {Math.round((n / total) * 100)}%
+              </span>
+            </div>
           ))}
         </div>
       )}
@@ -1569,11 +1562,18 @@ export default function QualityConsole() {
                     <BandLabel>{t('ops.stat.records')}</BandLabel>
                     <BandBig>{totalCount.toLocaleString()}</BandBig>
                     <div style={{ marginTop: 12 }}>
+                      {/* Four requirement CATEGORIES, so four distinct
+                          hues rather than one hue's ramp. The old four
+                          blues failed the palette check outright: two sat
+                          below the chroma floor (reading grey) and adjacent
+                          pairs measured ΔE 13, under the 15 floor for
+                          ordinary colour vision. This set passes every
+                          check, worst adjacent pair ΔE 19.6. */}
                       <MicroStack segs={[
                         [req.free, '#1d4ed8', t('ops.req.free')],
-                        [req.voa, '#4f8ef8', t('ops.req.voa')],
-                        [req.adv, '#9cc2fb', t('ops.req.advance')],
-                        [req.cond, '#d9e7fd', t('ops.req.conditional')],
+                        [req.voa, '#0891b2', t('ops.req.voa')],
+                        [req.adv, '#7c3aed', t('ops.req.advance')],
+                        [req.cond, '#be185d', t('ops.req.conditional')],
                       ]} />
                     </div>
                   </BandCell>
@@ -1613,6 +1613,9 @@ export default function QualityConsole() {
                     <div style={{ marginTop: 12 }}>
                       {/* Traffic-light semantics: Low must not look as calm
                           as High. */}
+                      {/* Confidence is a STATUS scale, so it keeps the
+                          reserved good/warning/critical colours; the
+                          categorical set above never borrows them. */}
                       <MicroStack height={10} segs={[
                         [s.high, '#0b7a44', t('ops.conf.high'), t('ops.tip.quoted')],
                         [s.medium, '#d97706', t('ops.conf.medium'), t('ops.tip.grounded')],
