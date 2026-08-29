@@ -193,7 +193,7 @@ export const STRINGS = {
     'ops.col.type': 'Visa type', 'ops.col.stay': 'Stay',
     'ops.col.fee': 'Official fee', 'ops.col.confidence': 'Confidence',
     'ops.col.complete': 'Complete', 'ops.col.check': 'Verification',
-    'ops.diff.summary': 'The official page differs from the Ellis record in {n} places',
+    'ops.diff.summary': 'Fields where the official page disagrees with the Ellis record: {n}',
     'ops.diff.field': 'Field', 'ops.diff.db': 'Ellis record',
     'ops.diff.page': 'Official page', 'ops.diff.empty': 'not recorded',
     'ops.f.channel': 'Application method', 'ops.f.channelDetail': 'Method detail',
