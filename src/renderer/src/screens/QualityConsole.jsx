@@ -818,7 +818,7 @@ function shares(values, total) {
 // Value against a target, drawn as a meter rather than a dial: the bar
 // language matches the splits beside it, the shortfall is a visible gap,
 // and the target is a mark on the same scale instead of a second ring.
-function Meter({ pct, target, hitColor = GREEN }) {
+function Meter({ pct, target, hitColor = GREEN, targetLabel, valueTitle }) {
   const [go, setGo] = useState(false)
   useEffect(() => { const id = setTimeout(() => setGo(true), 140)
     return () => clearTimeout(id) }, [])
@@ -828,9 +828,11 @@ function Meter({ pct, target, hitColor = GREEN }) {
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-        <span style={{ fontSize: 30, fontWeight: 700, color,
+        <span title={valueTitle || undefined}
+              style={{ fontSize: 30, fontWeight: 700, color,
                        fontVariantNumeric: 'tabular-nums',
-                       letterSpacing: '-0.6px', lineHeight: 1 }}>
+                       letterSpacing: '-0.6px', lineHeight: 1,
+                       cursor: valueTitle ? 'help' : 'default' }}>
           {val.toFixed(val < 100 ? 1 : 0)}%
         </span>
       </div>
@@ -840,7 +842,7 @@ function Meter({ pct, target, hitColor = GREEN }) {
                       background: color, borderRadius: 999,
                       transition: 'width .9s cubic-bezier(.22,.8,.28,1)' }} />
         {target != null && (
-          <div title={`${t0(target)}`}
+          <div title={targetLabel || t0(target)}
                style={{ position: 'absolute', left: `${target}%`, top: -3,
                         bottom: -3, width: 2, borderRadius: 1,
                         background: NAVY, opacity: 0.55 }} />
@@ -1590,25 +1592,17 @@ export default function QualityConsole() {
                   <BandCell delay={80}>
                     <BandLabel>{t('ops.stat.complete')}</BandLabel>
                     <div style={{ marginTop: 8 }}>
-                      <Meter pct={(s.completeness_rate || 0) * 100} target={99} />
-                      <div style={{ display: 'flex', gap: 12, marginTop: 9,
-                                    fontSize: 11, color: GRAY }}>
-                        <span>{t('ops.stat.target')} 99%</span>
-                        <span title={t('ops.stat.recordCompleteTip')}
-                              style={{ cursor: 'help' }}>
-                          {t('ops.stat.recordComplete')
-                            .replace('{p}', Math.round((s.record_completeness || 0) * 100))}
-                        </span>
-                      </div>
+                      <Meter pct={(s.completeness_rate || 0) * 100} target={99}
+                             targetLabel={`${t('ops.stat.target')} 99%`}
+                             valueTitle={`${t('ops.stat.recordComplete')
+                               .replace('{p}', Math.round((s.record_completeness || 0) * 100))} · ${t('ops.stat.recordCompleteTip')}`} />
                     </div>
                   </BandCell>
                   <BandCell delay={160}>
                     <BandLabel>{t('ops.stat.sources')}</BandLabel>
                     <div style={{ marginTop: 8 }}>
-                      <Meter pct={(s.source_coverage || 0) * 100} target={100} />
-                      <div style={{ marginTop: 9, fontSize: 11, color: GRAY }}>
-                        {t('ops.stat.target')} 100%
-                      </div>
+                      <Meter pct={(s.source_coverage || 0) * 100} target={100}
+                             targetLabel={`${t('ops.stat.target')} 100%`} />
                     </div>
                   </BandCell>
                   <BandCell delay={240}>
