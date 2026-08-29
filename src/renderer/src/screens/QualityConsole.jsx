@@ -398,7 +398,7 @@ function fx(t, f) {
   return t(k) !== k ? t(k) : f.replace(/_/g, ' ')
 }
 
-function FieldGrid({ rec, t, typeNames = {} }) {
+function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
   const UNIT = { Day: t('ops.u.day'), Hour: t('ops.u.hour'),
                  Month: t('ops.u.month'), Year: t('ops.u.year'),
                  'Calendar Day': t('ops.u.calDay'),
@@ -491,7 +491,7 @@ function FieldGrid({ rec, t, typeNames = {} }) {
                         overflowWrap: 'anywhere' }}>
             {(rec[f] == null || rec[f] === '')
               ? (st === 'missing' ? t('ops.missingCounts')
-                 : st === 'optional-empty' ? t('ops.notRequired') : show(f))
+                 : st === 'optional-empty' ? t('ops.notRequired') : tvv(show(f)))
               : /^https?:\/\//.test(String(rec[f]))
                 /* A source is only traceable if it can be OPENED: the
                    acceptance standard asks for a clickable source. */
@@ -502,7 +502,7 @@ function FieldGrid({ rec, t, typeNames = {} }) {
                               overflowWrap: 'anywhere' }}>
                     {show(f)} ↗
                   </a>
-                : show(f)}
+                : tvv(show(f))}
           </div>
         </div>
       ))}
@@ -747,7 +747,8 @@ function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames 
                           card and the flag form span the table's full
                           scroll width and a phone only ever sees a third. */}
                       <div className="ops-rowdetail">
-                        <FieldGrid rec={rec} t={t} typeNames={typeNames} />
+                        <FieldGrid rec={rec} t={t} typeNames={typeNames}
+                                   tvv={tvRef.current} />
                         {missing.length > 0 && (
                           <MissingLine missing={missing} t={t} />
                         )}
@@ -970,9 +971,72 @@ function useTypeNames(client, data, lang) {
   return map
 }
 
+/** Dynamic DATA values (record content, the monitor's page readings, reader
+ *  notes) arrive from the engine in English. This translates them into the
+ *  UI language through the server's masked, cached catalog: batched, cached
+ *  in localStorage per language, English shown only until the translation
+ *  lands, and NEVER fabricated (the server returns strings it cannot
+ *  round-trip unchanged). Verbatim source quotes are exempt: they are
+ *  evidence and stay in the page's own words. */
+function useValueTranslations(client, lang) {
+  const LSK = `ellis.opsvals.v2.${lang}`
+  const [map, setMap] = useState(() => {
+    if (lang === 'en') return {}
+    try { return JSON.parse(localStorage.getItem(LSK) || '{}') } catch { return {} }
+  })
+  const queue = useRef(new Set())
+  const inflight = useRef(new Set())
+  const timer = useRef(null)
+  useEffect(() => {
+    if (lang === 'en') { setMap({}); return }
+    try { setMap(JSON.parse(localStorage.getItem(LSK) || '{}')) } catch { setMap({}) }
+  }, [lang])  // eslint-disable-line react-hooks/exhaustive-deps
+  const flush = useCallback(() => {
+    const batch = [...queue.current].slice(0, 120)
+    if (!batch.length) return
+    batch.forEach((v) => { queue.current.delete(v); inflight.current.add(v) })
+    const entries = {}
+    batch.forEach((v, i) => { entries['v' + i] = v })
+    client.i18nCatalog(lang, entries).then((out) => {
+      if (!out?.entries) return
+      setMap((m) => {
+        const next = { ...m }
+        batch.forEach((v, i) => {
+          const tr = out.entries['v' + i]
+          if (tr && tr !== v) next[v.slice(0, 400)] = tr
+        })
+        try {
+          const keys = Object.keys(next)
+          localStorage.setItem(LSK, JSON.stringify(
+            keys.length > 1500 ? {} : next))
+        } catch { /* quota: cache resets next load */ }
+        return next
+      })
+    }).catch(() => { /* English stays visible */ })
+      .finally(() => batch.forEach((v) => inflight.current.delete(v)))
+  }, [client, lang])  // eslint-disable-line react-hooks/exhaustive-deps
+  return useCallback((sIn) => {
+    if (lang === 'en') return sIn
+    const v = String(sIn ?? '')
+    if (!v || v.length < 3 || v.length > 400) return sIn
+    if (/^https?:\/\//.test(v)) return sIn
+    if (/^[\d\s.,:;%/()+·-]*$/.test(v)) return sIn
+    if (!/[A-Za-z]{2}/.test(v)) return sIn
+    const hit = map[v]
+    if (hit) return hit
+    if (!queue.current.has(v) && !inflight.current.has(v)) {
+      queue.current.add(v)
+      if (timer.current) clearTimeout(timer.current)
+      timer.current = setTimeout(flush, 350)
+    }
+    return sIn
+  }, [lang, map, flush])
+}
+
 export default function QualityConsole() {
   const client = useOpsClient()
   const { t, lang } = useLocale()
+  const tvRef = useRef((x) => x)
   const [tab, setTab] = useState('records')
   const [filters, setFilters] = useState({ nationality: '', destination: '',
                                            purpose: '', requirement: '',
@@ -1932,7 +1996,7 @@ export default function QualityConsole() {
                                ? { background: '#fdf1f4', color: RED, fontWeight: 700 }
                                : { background: '#eefaf3', color: '#0b7a44',
                                    fontWeight: 700 }) }}>
-              {v}
+              {typeof v === 'string' ? tv(v) : v}
             </span>
           )
           return (
