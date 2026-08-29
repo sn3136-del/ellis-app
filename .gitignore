@@ -89,3 +89,4 @@ backend/google_adc.json
 # stray embedded clone of this very repo (user-created); never track it
 ellis-app/
 deploy/.env*
+._*
