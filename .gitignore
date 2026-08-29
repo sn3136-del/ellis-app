@@ -90,3 +90,4 @@ backend/google_adc.json
 ellis-app/
 deploy/.env*
 ._*
+tripcom-pdfs/
