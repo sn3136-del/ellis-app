@@ -220,29 +220,26 @@ function StatTile({ label, value, sub, accent = NAVY }) {
  *  dropdown. The FILTER value sent to the API is whatever is committed —
  *  the server resolves names and codes alike. */
 function CountryFilter({ value, placeholder, onCommit, countries }) {
-  // ONE owner of the text: the operator while focused, the committed value
-  // otherwise. Earlier this had three writers (a value-sync effect, a
-  // debounce, and a blur commit) and the document mousedown listener closed
-  // the menu before blur fired, so clicking away re-committed and rewrote
-  // whatever had been typed.
-  const [text, setText] = useState(value)
+  // The interaction model is the customer combo\'s, which is proven: the box
+  // EMPTIES on focus so typing always starts fresh (the committed country
+  // stays visible as the placeholder), suggestions appear once something is
+  // typed, and blur resolves exactly once. While typing, the table follows
+  // only RESOLVED text (an exact code, an exact name, or a single match);
+  // half-typed words never commit, so the table cannot flash empty mid-word.
+  const [q, setQ] = useState('')
   const [open, setOpen] = useState(false)
   const [hi, setHi] = useState(0)
-  const boxRef = useRef(null)
-  const inputRef = useRef(null)
-  const typing = useRef(false)
-  const timer = useRef(null)
+  const typed = useRef(false)
+  const blurTimer = useRef(null)
+  const liveTimer = useRef(null)
+  const committedLabel = (() => {
+    const hit = value && countries.find((c) => c.value === value)
+    return hit ? hit.label : (value || '')
+  })()
 
-  const labelFor = (v) => {
-    const hit = v && countries.find((c) => c.value === v)
-    return hit ? hit.label : (v || '')
-  }
-  // Resolve typed text to a country code. Unambiguous only: an exact code
-  // (typed as a code), an exact name, or a single remaining suggestion.
-  // "and" stays ambiguous rather than silently becoming Andorra.
-  const resolve = (raw) => {
+  const resolve = (raw, { final }) => {
     const clean = String(raw || '').replace(/^[^\p{L}\p{N}]+/u, '').trim()
-    if (!clean) return ''
+    if (!clean) return { kind: 'empty' }
     const lc = clean.toLowerCase()
     const codeHit = clean === clean.toUpperCase() &&
       countries.find((c) => c.value === clean.toUpperCase())
@@ -250,80 +247,94 @@ function CountryFilter({ value, placeholder, onCommit, countries }) {
       c.label.replace(/^[^\p{L}\p{N}]+/u, '').trim().toLowerCase() === lc)
     const pool = countries.filter((c) => c.search.includes(lc))
     const pick = codeHit || nameHit || (pool.length === 1 ? pool[0] : null)
-    if (pick) return pick.value
-    if (pool.length === 0 && clean.length >= 4) return clean  // server resolves
-    return ''
+    if (pick) return { kind: 'pick', pick }
+    // Unknown text long enough to be a real name goes to the server\'s
+    // resolver, but only as a FINAL act (blur/Enter) — never mid-word.
+    if (final && pool.length === 0 && clean.length >= 4) {
+      return { kind: 'raw', raw: clean }
+    }
+    return { kind: 'ambiguous' }
   }
 
-  // The committed value writes the box ONLY when the operator is not editing.
-  useEffect(() => {
-    if (typing.current) return
-    setText(labelFor(value))
-  }, [value, countries])  // eslint-disable-line react-hooks/exhaustive-deps
-
   const matches = useMemo(() => {
-    const q = String(text || '').trim().toLowerCase()
-    if (!q) return []
+    const s2 = q.trim().toLowerCase()
+    if (!s2) return []
     const starts = [], rest = []
     for (const c of countries) {
-      if (!c.search.includes(q)) continue
+      if (!c.search.includes(s2)) continue
       const name = c.label.replace(/^[^\p{L}\p{N}]+/u, '').toLowerCase()
-      ;(name.startsWith(q) || c.value.toLowerCase().startsWith(q)
+      ;(name.startsWith(s2) || c.value.toLowerCase().startsWith(s2)
         ? starts : rest).push(c)
     }
     starts.sort((a, b) => a.label.length - b.label.length)
     return [...starts, ...rest].slice(0, 8)
-  }, [text, countries])
+  }, [q, countries])
 
-  // Live filtering while typing: the table follows the keystrokes, the same
-  // way the enum dropdowns do.
-  const type = (v) => {
-    typing.current = true
-    setText(v); setHi(0); setOpen(true)
-    if (timer.current) clearTimeout(timer.current)
-    timer.current = setTimeout(() => onCommit(resolve(v)), 250)
-  }
   const choose = (c) => {
-    if (timer.current) clearTimeout(timer.current)
-    typing.current = false
-    setText(c.label); setOpen(false)
+    if (liveTimer.current) clearTimeout(liveTimer.current)
+    typed.current = false
+    setQ(''); setOpen(false)
     onCommit(c.value)
   }
-  // Leaving the field settles it: the pending keystroke is flushed once, the
-  // box shows the committed country's label, and nothing is re-committed.
   const settle = () => {
-    if (!typing.current) { setOpen(false); return }
-    if (timer.current) clearTimeout(timer.current)
-    typing.current = false
-    const code = resolve(text)
-    onCommit(code)
-    setText(code ? labelFor(code) : '')
-    setOpen(false)
+    if (liveTimer.current) clearTimeout(liveTimer.current)
+    const wasTyped = typed.current
+    typed.current = false
+    const r = resolve(q, { final: true })
+    setQ(''); setOpen(false)
+    if (r.kind === 'pick') onCommit(r.pick.value)
+    else if (r.kind === 'raw') onCommit(r.raw)
+    else if (r.kind === 'empty') {
+      // Focusing empties the box too: only a DELIBERATE deletion clears
+      // the committed filter.
+      if (wasTyped && value) onCommit('')
+    }
+    // ambiguous: the committed filter stands; the label returns via q=''.
   }
-  useEffect(() => () => { if (timer.current) clearTimeout(timer.current) }, [])
+
+  useEffect(() => () => {
+    if (blurTimer.current) clearTimeout(blurTimer.current)
+    if (liveTimer.current) clearTimeout(liveTimer.current)
+  }, [])
 
   return (
-    <div ref={boxRef} style={{ position: 'relative' }}>
-      <input value={text} placeholder={placeholder} ref={inputRef}
-             className="ops-in"
-             onChange={(e) => type(e.target.value)}
-             onFocus={() => setOpen(true)}
-             onKeyDown={(e) => {
-               if (e.key === 'Escape') { setOpen(false); return }
-               if (!open || matches.length === 0) return
-               if (e.key === 'ArrowDown') { e.preventDefault(); setHi((h) => Math.min(h + 1, matches.length - 1)) }
-               else if (e.key === 'ArrowUp') { e.preventDefault(); setHi((h) => Math.max(h - 1, 0)) }
-               else if (e.key === 'Enter') { e.preventDefault()
-                 choose(matches[Math.min(hi, matches.length - 1)]) }
+    <div style={{ position: 'relative' }}>
+      <input className="ops-in"
+             value={open ? q : committedLabel}
+             placeholder={committedLabel || placeholder}
+             onFocus={() => {
+               if (blurTimer.current) { clearTimeout(blurTimer.current); blurTimer.current = null }
+               setOpen(true); setQ(''); setHi(0); typed.current = false
              }}
-             onBlur={settle}
+             onChange={(e) => {
+               const v = e.target.value
+               setQ(v); setHi(0); typed.current = true
+               if (!open) setOpen(true)
+               if (liveTimer.current) clearTimeout(liveTimer.current)
+               liveTimer.current = setTimeout(() => {
+                 const r = resolve(v, { final: false })
+                 if (r.kind === 'pick') onCommit(r.pick.value)
+                 else if (r.kind === 'empty' && value) onCommit('')
+               }, 250)
+             }}
+             onKeyDown={(e) => {
+               if (e.key === 'Escape') { setQ(''); setOpen(false); return }
+               if (!open) return
+               if (e.key === 'ArrowDown') { e.preventDefault(); setHi((h) => Math.min(h + 1, Math.max(0, matches.length - 1))) }
+               else if (e.key === 'ArrowUp') { e.preventDefault(); setHi((h) => Math.max(h - 1, 0)) }
+               else if (e.key === 'Enter') {
+                 e.preventDefault()
+                 if (matches.length > 0 && q.trim()) choose(matches[Math.min(hi, matches.length - 1)])
+                 else settle()
+               }
+             }}
+             onBlur={() => { blurTimer.current = setTimeout(settle, 150) }}
              style={{ ...input, width: '100%', boxSizing: 'border-box',
                       paddingRight: 30 }} />
-      {text && (
+      {(value || '') !== '' && !open && (
         <button onMouseDown={(e) => e.preventDefault()}
-                onClick={() => { if (timer.current) clearTimeout(timer.current)
-                                 typing.current = false
-                                 setText(''); setOpen(false); onCommit('') }}
+                onClick={() => { typed.current = false; setQ(''); onCommit('') }}
+                title={placeholder}
                 style={{ position: 'absolute', right: 4, top: '50%',
                          transform: 'translateY(-50%)', border: 'none',
                          background: 'transparent', color: GRAY,
