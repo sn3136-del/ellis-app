@@ -985,6 +985,7 @@ function useValueTranslations(client, lang) {
     try { return JSON.parse(localStorage.getItem(LSK) || '{}') } catch { return {} }
   })
   const queue = useRef(new Set())
+  const flushRef = useRef(() => {})
   const inflight = useRef(new Set())
   const timer = useRef(null)
   useEffect(() => {
@@ -1013,29 +1014,69 @@ function useValueTranslations(client, lang) {
         return next
       })
     }).catch(() => { /* English stays visible */ })
-      .finally(() => batch.forEach((v) => inflight.current.delete(v)))
+      .finally(() => {
+        batch.forEach((v) => inflight.current.delete(v))
+        // A page can queue more than one batch; without this the tail after
+        // the first 120 strings stayed English until something re-rendered.
+        if (queue.current.size) {
+          if (timer.current) clearTimeout(timer.current)
+          timer.current = setTimeout(flushRef.current, 200)
+        }
+      })
   }, [client, lang])  // eslint-disable-line react-hooks/exhaustive-deps
-  return useCallback((sIn) => {
-    if (lang === 'en') return sIn
-    const v = String(sIn ?? '')
-    if (!v || v.length < 3 || v.length > 400) return sIn
-    if (/^https?:\/\//.test(v)) return sIn
-    if (/^[\d\s.,:;%/()+·-]*$/.test(v)) return sIn
-    if (!/[A-Za-z]{2}/.test(v)) return sIn
-    const hit = map[v]
-    if (hit) return hit
-    if (!queue.current.has(v) && !inflight.current.has(v)) {
-      queue.current.add(v)
+  flushRef.current = flush
+  // A document checklist or a conditions paragraph can run past the
+  // catalog's per-string cap; those are exactly the fields an operator must
+  // read. Long values translate SEGMENT BY SEGMENT (sentence and list
+  // boundaries) and are rejoined, so length never means untranslated.
+  const CAP = 360
+  const segment = (v) => {
+    const out = []
+    let rest = v
+    while (rest.length > CAP) {
+      const win = rest.slice(0, CAP)
+      let cut = Math.max(win.lastIndexOf('. '), win.lastIndexOf('; '),
+                         win.lastIndexOf(', '))
+      if (cut < 60) cut = win.lastIndexOf(' ')
+      if (cut < 60) cut = CAP
+      out.push(rest.slice(0, cut + 1).trim())
+      rest = rest.slice(cut + 1)
+    }
+    if (rest.trim()) out.push(rest.trim())
+    return out
+  }
+  const want = useCallback((piece) => {
+    if (!queue.current.has(piece) && !inflight.current.has(piece)) {
+      queue.current.add(piece)
       if (timer.current) clearTimeout(timer.current)
       timer.current = setTimeout(flush, 350)
     }
+  }, [flush])
+  return useCallback((sIn) => {
+    if (lang === 'en') return sIn
+    const v = String(sIn ?? '')
+    if (!v || v.length < 3) return sIn
+    if (/^https?:\/\//.test(v)) return sIn
+    if (/^[\d\s.,:;%/()+·-]*$/.test(v)) return sIn
+    if (!/[A-Za-z]{2}/.test(v)) return sIn
+    if (v.length <= CAP) {
+      const hit = map[v]
+      if (hit) return hit
+      want(v)
+      return sIn
+    }
+    const pieces = segment(v)
+    const done = pieces.map((x) => map[x])
+    pieces.forEach((x, i) => { if (!done[i]) want(x) })
+    if (done.every(Boolean)) return done.join(' ')
     return sIn
-  }, [lang, map, flush])
+  }, [lang, map, want])
 }
 
 export default function QualityConsole() {
   const client = useOpsClient()
   const { t, lang } = useLocale()
+  const tv = useValueTranslations(client, lang)
   const [tab, setTab] = useState('records')
   const [filters, setFilters] = useState({ nationality: '', destination: '',
                                            purpose: '', requirement: '',
@@ -1791,11 +1832,12 @@ export default function QualityConsole() {
                             <span className="ops-diff-cell-label">{t('ops.diff.db')}</span>
                             {cur == null
                               ? diffChip(t('ops.diff.empty'), 'empty')
-                              : diffChip(cur, same ? 'new' : 'old')}
+                              : diffChip(typeof cur === 'string' ? tv(cur) : cur,
+                                         same ? 'new' : 'old')}
                           </span>
                           <span style={{ padding: '8px 10px' }}>
                             <span className="ops-diff-cell-label">{t('ops.diff.page')}</span>
-                            {diffChip(page, 'new')}
+                            {diffChip(tv(page), 'new')}
                             {g.quote && (
                               <details style={{ fontSize: 12, marginTop: 4 }}>
                                 <summary style={{ color: BLUE, cursor: 'pointer',
@@ -1866,10 +1908,10 @@ export default function QualityConsole() {
               </div>
               {it.reported_by === 'freshness_monitor'
                 ? <AutoBody note={it.note} issue={it} />
-                : <div style={{ fontSize: 13, color: NAVY, marginTop: 8 }}>{it.note}</div>}
+                : <div style={{ fontSize: 13, color: NAVY, marginTop: 8 }}>{tv(it.note)}</div>}
               {it.resolution && (
                 <div style={{ fontSize: 12.5, color: GREEN, marginTop: 6 }}>
-                  ✓ {it.resolution}
+                  ✓ {tv(it.resolution)}
                 </div>
               )}
               {active && (
