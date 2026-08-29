@@ -325,7 +325,11 @@ def pretranslate() -> int:
     def walk(v):
         if isinstance(v, str):
             t = v.strip()
-            if 2 < len(t) <= 240 and not t.startswith("http"):
+            # 400 is the catalog's own per-string limit. The old 240 cap
+            # silently skipped document checklists and conditions
+            # paragraphs, so those stayed English on the first Chinese view
+            # while everything around them switched.
+            if 2 < len(t) <= 400 and not t.startswith("http"):
                 strings.setdefault(f"g{len(strings)}", t)
         elif isinstance(v, dict):
             for x in v.values():
