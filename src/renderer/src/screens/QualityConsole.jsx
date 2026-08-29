@@ -392,27 +392,34 @@ function FieldGrid({ rec, t, typeNames = {} }) {
     return String(v)
   }
   return (
-    <div style={{ display: 'grid', gap: '6px 18px', marginTop: 4,
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))' }}>
+    <div style={{ display: 'grid', gap: 8, marginTop: 4,
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(215px, 1fr))' }}>
+      {/* Label-over-value tiles: every value wraps in full. An operator
+          checking a record must never meet "Ordinary p..." where the fact
+          should be. */}
       {Object.entries(rec.field_status).map(([f, st]) => (
-        <div key={f} style={{ display: 'flex', gap: 8, fontSize: 12,
-                              alignItems: 'baseline', minWidth: 0 }}>
-          <span style={{ color: st === 'missing' ? RED
-                           : st === 'filled' ? GREEN
-                           : st === 'pending-review' ? AMBER : '#c3ccd9',
-                         fontWeight: 700, width: 12, flexShrink: 0 }}
-                title={st === 'pending-review' ? t('ops.pendingReview') : undefined}>
-            {st === 'missing' ? '✗' : st === 'filled' ? '✓'
-              : st === 'pending-review' ? '?' : '·'}
-          </span>
-          <span title={f}
-                style={{ color: GRAY, width: 148, flexShrink: 0,
-                         fontSize: 11.5 }}>{fx(t, f)}</span>
-          <span title={String(rec[f] ?? '')}
-                style={{ color: NAVY, fontWeight: 600, overflow: 'hidden',
-                         textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div key={f} style={{ background: '#fff', border: '1px solid #eef2f8',
+                              borderRadius: 10, padding: '8px 12px',
+                              minWidth: 0 }}>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <span style={{ color: st === 'missing' ? RED
+                             : st === 'filled' ? GREEN
+                             : st === 'pending-review' ? AMBER : '#c3ccd9',
+                           fontWeight: 700, fontSize: 11, flexShrink: 0 }}
+                  title={st === 'pending-review' ? t('ops.pendingReview') : undefined}>
+              {st === 'missing' ? '✗' : st === 'filled' ? '✓'
+                : st === 'pending-review' ? '?' : '·'}
+            </span>
+            <span title={f}
+                  style={{ color: GRAY, fontSize: 10.5, fontWeight: 700,
+                           letterSpacing: 0.3,
+                           textTransform: 'uppercase' }}>{fx(t, f)}</span>
+          </div>
+          <div style={{ color: NAVY, fontWeight: 600, fontSize: 12.5,
+                        marginTop: 4, lineHeight: 1.45,
+                        overflowWrap: 'anywhere' }}>
             {show(f)}
-          </span>
+          </div>
         </div>
       ))}
     </div>
@@ -562,8 +569,8 @@ function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames 
                     <Chip color={reqColor} filled={false}>{reqLabel}</Chip>
                   </td>
                   <td style={{ padding: '10px 12px', color: NAVY, fontWeight: 600,
-                               maxWidth: 300, overflow: 'hidden',
-                               textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                               maxWidth: 320, lineHeight: 1.4,
+                               overflowWrap: 'anywhere' }}>
                     {typeNames[rec.visa_type_name] || rec.visa_type_name || '·'}
                   </td>
                   <td style={{ padding: '10px 12px', textAlign: 'right',
@@ -1532,7 +1539,7 @@ export default function QualityConsole() {
                     const cur = currentOf(rec, g.field)
                     const page = (() => {
                       const v = fmtSays(g.field, g.says, note)
-                      return v.length > 160 ? v.slice(0, 160) + '…' : v
+                      return v.length > 320 ? v.slice(0, 320) + '…' : v
                     })()
                     const same = cur != null &&
                       String(cur).trim().toLowerCase() ===
@@ -1711,7 +1718,7 @@ export default function QualityConsole() {
               return j === '{}' ? null : j.slice(0, 40)
             }
             const sv = String(v).replace(/^"|"$/g, '')
-            return sv.length > 56 ? sv.slice(0, 56) + '…' : sv
+            return sv.length > 220 ? sv.slice(0, 220) + '…' : sv
           }
           const all = changes?.changes || []
           const counts = { '': all.length }
@@ -1727,9 +1734,9 @@ export default function QualityConsole() {
           const ValueChip = ({ v, kind }) => (
             <span title={typeof v === 'string' ? v : undefined}
                   style={{ display: 'inline-block', padding: '2px 8px',
-                           borderRadius: 7, fontSize: 12, maxWidth: 340,
-                           overflow: 'hidden', textOverflow: 'ellipsis',
-                           whiteSpace: 'nowrap', verticalAlign: 'bottom',
+                           borderRadius: 7, fontSize: 12,
+                           overflowWrap: 'anywhere', lineHeight: 1.45,
+                           verticalAlign: 'bottom',
                            ...(kind === 'old'
                              ? { background: '#fdf1f4', color: '#a13d55',
                                  textDecoration: 'line-through' }
@@ -1873,9 +1880,7 @@ export default function QualityConsole() {
                                 <span title={f}
                                       style={{ color: '#5b6a80',
                                                fontSize: 11.5, fontWeight: 700,
-                                               overflow: 'hidden',
-                                               textOverflow: 'ellipsis',
-                                               whiteSpace: 'nowrap' }}>{fieldLabel(f)}</span>
+                                               lineHeight: 1.4 }}>{fieldLabel(f)}</span>
                                 <span style={{ minWidth: 0, display: 'flex',
                                                gap: 6, alignItems: 'center',
                                                flexWrap: 'wrap' }}>
