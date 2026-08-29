@@ -16261,12 +16261,12 @@
    "destination": "MOZ",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
-  "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
   "source_url": "https://evisa.gov.mz/tourist-visa.html",
-  "note": "The validity figures are wrong and the entry type is wrong. The official portal states one validity for the tourist eVisa, 2 months from the date of issuance, not '30 days from issue' for single entry and '90 days from issue' for multiple entry. It also states the visa 'will be of multiple-entry t | quote: You can enter the country as per the duration of the visa 30, 60 or 90 days. The",
+  "note": "The validity figures are wrong and the entry type is wrong. The official portal states one validity for the tourist eVisa, 2 months from the date of issuance, not '30 days from issue' for single entry and '90 days from issue' for multiple entry. It also states the visa 'will be of multiple-entry t | quote: You can enter the country as per the duration of the visa 30, 60 or 90 days. The | Loaded the official portal (evisa.gov.mz, 'The official portal of The Mozambique National Immigration Service', operated by VFS Global) in the browser (it 403s plain fetchers). It confirms the stored product structure: tourist eVisa for 30/60/90-day durations, multiple entry, validity 2 months beginning on the date of issuance. Hong Kong/China is not in the portal's visa-exempt eligibility table, so a full eVisa applies. The missing facts (fee amount/currency) are NOT published anywhere on the portal's public pages (checked tourist-visa page, homepage, FAQs; fees are only shown inside the logged-in application flow), and no other official Mozambican page states current eVisa fees (the London | Gap-close research 2026-08-29 against the official page. Quote: \"You can enter the country as per the dura",
   "fields": {
-   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+   "disposition": "VISA_REQUIRED",
    "permitted_stay_days": 30,
    "permitted_stay": "eVisa issued for 30, 60 or 90 days",
    "visa_products": [
@@ -16276,7 +16276,7 @@
      "validity": "2 months from date of issuance",
      "max_stay_days": 30,
      "fee": null,
-     "notes": "Fee not published on any gov.mz page"
+     "notes": "Fee not published on the official portal's public pages; shown only inside the application flow. Printed pre-approval letter must be presented on arrival."
     },
     {
      "type": "Tourist eVisa, 60-day duration",
@@ -16284,7 +16284,7 @@
      "validity": "2 months from date of issuance",
      "max_stay_days": 60,
      "fee": null,
-     "notes": "Fee not published on any gov.mz page"
+     "notes": "Fee not published on the official portal's public pages; shown only inside the application flow."
     },
     {
      "type": "Tourist eVisa, 90-day duration",
@@ -16292,8 +16292,20 @@
      "validity": "2 months from date of issuance",
      "max_stay_days": 90,
      "fee": null,
-     "notes": "Fee not published on any gov.mz page"
+     "notes": "Fee not published on the official portal's public pages; shown only inside the application flow."
     }
+   ],
+   "requirement_detail": "evisa",
+   "visa_category": "Tourist eVisa",
+   "application_channel": "online_application",
+   "official_portal_url": "https://evisa.gov.mz",
+   "processing_time": "Apply 3 to 5 days before the trip (official portal guidance)",
+   "required_documents": [
+    "Color copy of the passport bio page (valid more than 6 months)",
+    "Recent passport-style frontal photo",
+    "Proof of financial means (e.g. bank statements)",
+    "Proof of hotel/accommodation",
+    "Return confirmed tickets"
    ]
   }
  },
@@ -18759,7 +18771,7 @@
   "verified_at": "2026-08-29",
   "verified_by": "Ellis source audit",
   "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
-  "note": "All fees null and the 1-year/5-year stays are null. Official: United Kingdom (UK) 30-day e-TV = US$10 (Apr-Jun) / US$25 (Jul-Mar); 1-year = US$40; 5-year = US$484 (the highest band in the chart, alongside Gibraltar, Guernsey, Isle of Man and Jersey). Stay for the 1-year and 5-year products is a maxi | quote: Stay: Maximum stay in India during one Calender Year should not exceed 180 days  | Adjudicated 2026-08-29 against the official page after a freshness dispute: The official India e-Visa page (United Kingdom confirmed eligible) contradicts the stored values on all three disputed fields: the one-month e-Tourist visa is multiple entry (not double entry); the 1-year and 5-year products are capped at 180 days of stay per calendar year, with no UK-specific 180-days-per-visit rule stated; a 6-month multiple-entry e-Tourist product also exists; and the arrival f Quote: \"Foreigners and OCI Card holders can complete and submit the e-Arrival card online within 72 hours before their arrival ... Maximum stay in India during one Calender Year should not exceed 180 days\"",
+  "note": "All fees null and the 1-year/5-year stays are null. Official: United Kingdom (UK) 30-day e-TV = US$10 (Apr-Jun) / US$25 (Jul-Mar); 1-year = US$40; 5-year = US$484 (the highest band in the chart, alongside Gibraltar, Guernsey, Isle of Man and Jersey). Stay for the 1-year and 5-year products is a maxi | quote: Stay: Maximum stay in India during one Calender Year should not exceed 180 days  | Adjudicated 2026-08-29 against the official page after a freshness dispute: The official India e-Visa page (United Kingdom confirmed eligible) contradicts the stored values on all three disputed fields: the one-month e-Tourist visa is multiple entry (not double entry); the 1-year and 5-year products are capped at 180 days of stay per calendar year, with no UK-specific 180-days-per-visit rule stated; a 6-month multiple-entry e-Tourist product also exists; and the arrival f Quote: \"Foreigners and OCI Card holders can complete and submit the e-Arrival card online within 72 hours before their arrival ... Maximum stay in India during one Calender Year should not exceed 180 days\" | Verified on the official Indian e-Visa portal (tvoa.html, loaded raw) plus its linked fee schedule images/Etourist_fee_fin",
   "fields": {
    "government_fee": {
     "amount": 25,
@@ -18770,10 +18782,13 @@
     {
      "type": "e-Tourist Visa - One Month (30 days)",
      "entry": "multiple",
-     "validity": "One Month (30 days)",
+     "validity": "30 days",
      "max_stay_days": 30,
-     "fee": null,
-     "notes": "Multiple entry, non-extendable and non-convertible"
+     "fee": {
+      "amount": 25,
+      "currency": "USD"
+     },
+     "notes": "Official fee schedule (09-July-2026): USD 10 for applications April-June, USD 25 July-March. Multiple entry, non-extendable and non-convertible. Bank transaction charge of 3% additional."
     },
     {
      "type": "e-Tourist Visa - Six Months",
@@ -18781,23 +18796,29 @@
      "validity": "6 months from the date of grant of ETA",
      "max_stay_days": null,
      "fee": null,
-     "notes": "Multiple entry"
+     "notes": "e-T2 V category on the official portal; its fee is not published in the official country-wise fee PDFs."
     },
     {
      "type": "e-Tourist Visa - One Year",
      "entry": "multiple",
-     "validity": "One year (365 days) from the date of grant of ETA",
+     "validity": "365 days from the date of grant of ETA",
      "max_stay_days": null,
-     "fee": null,
-     "notes": "Multiple entry; maximum stay in India during one calendar year must not exceed 180 days"
+     "fee": {
+      "amount": 40,
+      "currency": "USD"
+     },
+     "notes": "Maximum stay in India during one calendar year must not exceed 180 days. Bank transaction charge of 3% additional."
     },
     {
      "type": "e-Tourist Visa - Five Years",
      "entry": "multiple",
-     "validity": "Five years from the date of grant of ETA",
+     "validity": "5 years from the date of grant of ETA",
      "max_stay_days": null,
-     "fee": null,
-     "notes": "Multiple entry; maximum stay in India during one calendar year must not exceed 180 days"
+     "fee": {
+      "amount": 484,
+      "currency": "USD"
+     },
+     "notes": "UK-specific fee USD 484 per the official fee schedule dated 09-July-2026. Maximum stay in India during one calendar year must not exceed 180 days. Bank transaction charge of 3% additional."
     }
    ],
    "arrival_card": {
@@ -18805,7 +18826,12 @@
     "name": "e-Arrival Card",
     "submission_window": "Online within 72 hours before arrival in India"
    },
-   "permitted_stay": "30 days for the one-month e-Tourist visa; for the 1-year and 5-year e-Tourist visas, maximum stay in India during one calendar year must not exceed 180 days"
+   "permitted_stay": "30 days for the one-month e-Tourist visa; for the 1-year and 5-year e-Tourist visas, maximum stay in India during one calendar year must not exceed 180 days",
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "evisa",
+   "visa_category": "e-Tourist Visa",
+   "application_channel": "online_application",
+   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html"
   }
  },
  {
@@ -18921,8 +18947,8 @@
   },
   "verified_at": "2026-08-29",
   "verified_by": "Ellis source audit",
-  "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
-  "note": "All fees null, when in fact Indonesia is one of the few nationalities charged NOTHING: the official chart shows Indonesia 00 / 00 / 00 / 00 across all four columns - the 30-day, 1-year and 5-year e-Tourist Visas are all free for Indonesian nationals. Stay of 90 days for 1-year/5-year is WRONG - 180  | quote: Stay: Maximum stay in India during one Calender Year should not exceed 180 days  | Adjudicated 2026-08-29 against the official page after a freshness dispute: The recheck is right. The official e-visa instructions page describes the 30-day e-Tourist Visa as 'Multiple Entry, non-extendable and non-convertible', so the stored 'double-entry' description is outdated. For the 1-year and 5-year e-Tourist Visas the page states only a calendar-year cap ('Maximum stay in India during one Calender Year should not exceed 180 days for 1 year and 5 year Tourist Visa Quote: \"Multiple Entry, non-extendable and non-convertible ... Maximum stay in India during one Calender Year should not exceed 180 days for 1 year and 5 year Tourist Visa.\"",
+  "source_url": "https://indianvisaonline.gov.in/evisa/images/Etourist_fee_final.pdf",
+  "note": "All fees null, when in fact Indonesia is one of the few nationalities charged NOTHING: the official chart shows Indonesia 00 / 00 / 00 / 00 across all four columns - the 30-day, 1-year and 5-year e-Tourist Visas are all free for Indonesian nationals. Stay of 90 days for 1-year/5-year is WRONG - 180  | quote: Stay: Maximum stay in India during one Calender Year should not exceed 180 days  | Adjudicated 2026-08-29 against the official page after a freshness dispute: The recheck is right. The official e-visa instructions page describes the 30-day e-Tourist Visa as 'Multiple Entry, non-extendable and non-convertible', so the stored 'double-entry' description is outdated. For the 1-year and 5-year e-Tourist Visas the page states only a calendar-year cap ('Maximum stay in India during one Calender Year should not exceed 180 days for 1 year and 5 year Tourist Visa Quote: \"Multiple Entry, non-extendable and non-convertible ... Maximum stay in India during one Calender Year should not exceed 180 days for 1 year and 5 year Tourist Visa.\" | Missing fees filled from the official country-wise e-Tourist Visa fee schedule PDF linked from indianvisaonline.gov.in/evisa/tvoa.html (dated 09-July-2026",
   "fields": {
    "government_fee": {
     "amount": 0,
@@ -18933,38 +18959,51 @@
     {
      "type": "30-day e-Tourist Visa",
      "entry": "multiple",
-     "validity": "30 days from the date of first arrival in India",
+     "validity": "30 days",
      "max_stay_days": 30,
      "fee": {
-      "amount": null,
-      "currency": null
+      "amount": 0,
+      "currency": "USD"
      },
-     "notes": "Multiple entry, non-extendable and non-convertible; e-Visa fee is country/territory specific"
+     "notes": "Gratis for Indonesian nationals per the official fee schedule dated 09-July-2026 (00 in both April-June and July-March columns). Multiple entry, non-extendable and non-convertible."
+    },
+    {
+     "type": "6-month e-Tourist Visa",
+     "entry": "multiple",
+     "validity": "6 months from the date of grant of ETA",
+     "max_stay_days": null,
+     "fee": null,
+     "notes": "e-T2 V category on the official portal; its fee is not published in the official country-wise fee PDFs."
     },
     {
      "type": "1-year e-Tourist Visa",
      "entry": "multiple",
-     "validity": "One year (365 days) from the date of grant of ETA",
+     "validity": "365 days from the date of grant of ETA",
      "max_stay_days": null,
      "fee": {
-      "amount": null,
-      "currency": null
+      "amount": 0,
+      "currency": "USD"
      },
-     "notes": "Maximum stay in India during one calendar year must not exceed 180 days"
+     "notes": "Gratis for Indonesian nationals per the official fee schedule dated 09-July-2026. Maximum stay in India during one calendar year must not exceed 180 days."
     },
     {
      "type": "5-year e-Tourist Visa",
      "entry": "multiple",
-     "validity": "Five years from the date of grant of ETA",
+     "validity": "5 years from the date of grant of ETA",
      "max_stay_days": null,
      "fee": {
-      "amount": null,
-      "currency": null
+      "amount": 0,
+      "currency": "USD"
      },
-     "notes": "Maximum stay in India during one calendar year must not exceed 180 days"
+     "notes": "Gratis for Indonesian nationals per the official fee schedule dated 09-July-2026. Maximum stay in India during one calendar year must not exceed 180 days."
     }
    ],
-   "permitted_stay": "30 days from first arrival on the 30-day multiple-entry e-Tourist Visa; 1-year and 5-year multiple-entry e-Tourist Visas capped at 180 days total in a calendar year"
+   "permitted_stay": "30 days from first arrival on the 30-day multiple-entry e-Tourist Visa; 1-year and 5-year multiple-entry e-Tourist Visas capped at 180 days total in a calendar year",
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "evisa",
+   "visa_category": "e-Tourist Visa",
+   "application_channel": "online_application",
+   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html"
   }
  },
  {
@@ -19074,7 +19113,7 @@
   "verified_at": "2026-08-29",
   "verified_by": "Ellis source audit",
   "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
-  "note": "5-year fee of US$80 is WRONG - Spain pays US$200 for the 5-year e-Tourist Visa. 30-day US$25 holds only July-March (US$10 April-June); 1-year US$40 is correct. Stay of 90 days for 1-year/5-year is WRONG - 180 days aggregate per calendar year. | quote: Stay: Maximum stay in India during one Calender Year should not exceed 180 days for 1 year and 5 year Tourist Visa. ... 1. One Month e-Tou | Adjudicated 2026-08-29 against the official page after a freshness dispute: The official India e-Visa page (Spain confirmed in the eligible list) shows the one-month e-Tourist visa is 'Multiple Entry, non-extendable and non-convertible' (not double entry), lists an additional 6-month multiple-entry e-Tourist product (e-T2), and caps the 1-year and 5-year multiple-entry products at 180 days of stay per calendar year; the page states no 90-days-per-visit rule, so the stored Quote: \"Multiple Entry, non-extendable and non-convertible ... Maximum stay in India during one Calender Year should not exceed 180 days\"",
+  "note": "5-year fee of US$80 is WRONG - Spain pays US$200 for the 5-year e-Tourist Visa. 30-day US$25 holds only July-March (US$10 April-June); 1-year US$40 is correct. Stay of 90 days for 1-year/5-year is WRONG - 180 days aggregate per calendar year. | quote: Stay: Maximum stay in India during one Calender Year should not exceed 180 days for 1 year and 5 year Tourist Visa. ... 1. One Month e-Tou | Adjudicated 2026-08-29 against the official page after a freshness dispute: The official India e-Visa page (Spain confirmed in the eligible list) shows the one-month e-Tourist visa is 'Multiple Entry, non-extendable and non-convertible' (not double entry), lists an additional 6-month multiple-entry e-Tourist product (e-T2), and caps the 1-year and 5-year multiple-entry products at 180 days of stay per calendar year; the page states no 90-days-per-visit rule, so the stored Quote: \"Multiple Entry, non-extendable and non-convertible ... Maximum stay in India during one Calender Year should not exceed 180 days\" | Verified on the official Indian e-Visa portal (tvoa.html, loaded raw) plus its linked fee schedule images/Etourist_fee_final.pdf (dated 09-July-2026). Spain is eligible (listed in the eligib",
   "fields": {
    "government_fee": {
     "amount": 25,
@@ -19085,10 +19124,13 @@
     {
      "type": "e-Tourist Visa - One Month (30 days)",
      "entry": "multiple",
-     "validity": "One Month (30 days)",
+     "validity": "30 days",
      "max_stay_days": 30,
-     "fee": null,
-     "notes": "Multiple entry, non-extendable and non-convertible"
+     "fee": {
+      "amount": 25,
+      "currency": "USD"
+     },
+     "notes": "Official fee schedule (09-July-2026): USD 10 for applications April-June, USD 25 July-March. Multiple entry, non-extendable and non-convertible. Bank transaction charge of 3% additional."
     },
     {
      "type": "e-Tourist Visa - Six Months",
@@ -19096,25 +19138,36 @@
      "validity": "6 months from the date of grant of ETA",
      "max_stay_days": null,
      "fee": null,
-     "notes": "Multiple entry"
+     "notes": "e-T2 V category on the official portal; its fee is not published in the official country-wise fee PDFs."
     },
     {
      "type": "e-Tourist Visa - One Year",
      "entry": "multiple",
-     "validity": "One year (365 days) from the date of grant of ETA",
+     "validity": "365 days from the date of grant of ETA",
      "max_stay_days": null,
-     "fee": null,
-     "notes": "Multiple entry; maximum stay in India during one calendar year must not exceed 180 days"
+     "fee": {
+      "amount": 40,
+      "currency": "USD"
+     },
+     "notes": "Maximum stay in India during one calendar year must not exceed 180 days. Bank transaction charge of 3% additional."
     },
     {
      "type": "e-Tourist Visa - Five Years",
      "entry": "multiple",
-     "validity": "Five years from the date of grant of ETA",
+     "validity": "5 years from the date of grant of ETA",
      "max_stay_days": null,
-     "fee": null,
-     "notes": "Multiple entry; maximum stay in India during one calendar year must not exceed 180 days"
+     "fee": {
+      "amount": 200,
+      "currency": "USD"
+     },
+     "notes": "Maximum stay in India during one calendar year must not exceed 180 days. Bank transaction charge of 3% additional."
     }
-   ]
+   ],
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "evisa",
+   "visa_category": "e-Tourist Visa",
+   "application_channel": "online_application",
+   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html"
   }
  },
  {
@@ -22823,7 +22876,7 @@
   "verified_at": "2026-08-29",
   "verified_by": "Ellis source audit",
   "source_url": "https://voyage.gouv.tg/about",
-  "note": "Two errors. First, Ellis sells a 'Visa on arrival, 7 days' - the government portal states visa on arrival and express visas are suspended until further notice and applications must be lodged at least 5 days before arrival, so routing anyone to a VoA is actively harmful. Second, the '30-day single /  | quote: Visa touristique - Duree et prix: '1 a 15 jours | Simple | 25 000 Fr CFA'; '1 a  | Adjudicated 2026-08-29 against the official page after a freshness dispute: The official Togo e-visa portal publishes a tourist-visa fee schedule the stored answer lacked: 1-15 days single entry 25,000 Fr CFA; 1-15 days multiple 35,000; 16-30 days multiple 45,000; 31-90 days multiple 65,000 (so the 90-day option is multiple-entry, not single as stored). Mandatory documents are the application form, a passport valid 3+ more months, a recent identity photo and flight confir Quote: \"31 à 90 jours / Multiples / 65 000 Fr CFA\"",
+  "note": "Two errors. First, Ellis sells a 'Visa on arrival, 7 days' - the government portal states visa on arrival and express visas are suspended until further notice and applications must be lodged at least 5 days before arrival, so routing anyone to a VoA is actively harmful. Second, the '30-day single /  | quote: Visa touristique - Duree et prix: '1 a 15 jours | Simple | 25 000 Fr CFA'; '1 a  | Adjudicated 2026-08-29 against the official page after a freshness dispute: The official Togo e-visa portal publishes a tourist-visa fee schedule the stored answer lacked: 1-15 days single entry 25,000 Fr CFA; 1-15 days multiple 35,000; 16-30 days multiple 45,000; 31-90 days multiple 65,000 (so the 90-day option is multiple-entry, not single as stored). Mandatory documents are the application form, a passport valid 3+ more months, a recent identity photo and flight confir Quote: \"31 à 90 jours / Multiples / 65 000 Fr CFA\" | Verified on the official Togo e-visa portal voyage.gouv.tg. The /about fee table matches the stored four products exactly (25000/35000/45000/65000 XOF). Hong Kong is explicitly eligible: 'CHINE, REGION ADMINISTRATIVE SPECIALE DE HONG KONG' appears in the eligible-country list.",
   "fields": {
    "government_fee": {
     "amount": 25000,
@@ -22840,7 +22893,7 @@
       "amount": 25000,
       "currency": "XOF"
      },
-     "notes": null
+     "notes": "Portal FAQ: validity begins on the date of entry into Togo and its length is granted based on the requested stay; no fixed enter-by window after issuance is published."
     },
     {
      "type": "Tourist e-visa, 1-15 days",
@@ -22851,7 +22904,7 @@
       "amount": 35000,
       "currency": "XOF"
      },
-     "notes": null
+     "notes": "Portal FAQ: validity begins on the date of entry into Togo and its length is granted based on the requested stay; no fixed enter-by window after issuance is published."
     },
     {
      "type": "Tourist e-visa, 16-30 days",
@@ -22862,7 +22915,7 @@
       "amount": 45000,
       "currency": "XOF"
      },
-     "notes": null
+     "notes": "Portal FAQ: validity begins on the date of entry into Togo and its length is granted based on the requested stay; no fixed enter-by window after issuance is published."
     },
     {
      "type": "Tourist e-visa, 31-90 days",
@@ -22873,16 +22926,21 @@
       "amount": 65000,
       "currency": "XOF"
      },
-     "notes": null
+     "notes": "Portal FAQ: validity begins on the date of entry into Togo and its length is granted based on the requested stay; no fixed enter-by window after issuance is published."
     }
    ],
-   "processing_time": "up to 5 working days",
+   "processing_time": "Maximum 5 working days",
    "required_documents": [
     "completed e-visa application form",
     "passport valid for at least 3 more months",
     "recent identity photo",
     "flight confirmation (return or onward ticket)"
-   ]
+   ],
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "evisa",
+   "visa_category": "Tourist e-visa",
+   "application_channel": "online_application",
+   "official_portal_url": "https://voyage.gouv.tg"
   }
  },
  {
@@ -22955,27 +23013,34 @@
    "destination": "HTI",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
-  "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
-  "source_url": "https://cgmiami.gouv.ht/frais-de-services",
-  "note": "Same position as CHN. Fee should be USD 150 per the only government-published figure. The '90 days, varies by mission' validity and the 90-day stay are unverifiable - no gouv.ht page states a tourist-visa validity or permitted stay, so this claim is currently unsourceable rather than confirmed wrong | quote: Consular fee schedule of the Consulate General of Haiti in Miami (page is a Java",
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://www.haiti.org/tourist-visa/",
+  "note": "Same position as CHN. Fee should be USD 150 per the only government-published figure. The '90 days, varies by mission' validity and the 90-day stay are unverifiable - no gouv.ht page states a tourist-visa validity or permitted stay, so this claim is currently unsourceable rather than confirmed wrong | quote: Consular fee schedule of the Consulate General of Haiti in Miami (page is a Java | CORRECTION. The Embassy of Haiti in Washington (official embassy site, loaded in browser) states tourists generally do not need a visa; only nationals of 9 listed countries (Dominican Republic, Panama, Colombia, Cuba, Syria, Libya, Iran, Vietnam, Yemen) require one. Hong Kong SAR is not on that list, so HKG ordinary passport holders are visa-exempt for tourism - the stored 'Consular visa USD 150' picture is wrong for this nationality (the cgmiami.gouv.ht fee table's bare 'Visa $150' line is the consular fee for the nationalities that do need visas, with no validity/entries/stay/document details published). Conditions stated for visa-free tourists: passport valid at least 6 months and 'a fee  | Gap-close research 2026-08-29 against the official page. Quote: \"Generally speaking, tourists traveling ",
   "fields": {
    "government_fee": {
-    "amount": 150,
+    "amount": 0,
     "currency": "USD"
    },
    "visa_products": [
     {
-     "type": "Consular visa",
+     "type": "Visa exemption (tourist)",
      "entry": null,
      "validity": null,
      "max_stay_days": null,
      "fee": {
-      "amount": 150,
+      "amount": 0,
       "currency": "USD"
      },
-     "notes": "Only government-domain figure available; validity and stay not published by Haitian authorities."
+     "notes": "No visa required for Hong Kong SAR passport holders. US$10.00 fee payable on arrival at the airport; passport must be valid at least 6 months. The embassy page does not state a maximum stay length."
     }
+   ],
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "exceptions": [
+    "Nationals of Dominican Republic, Panama, Colombia, Cuba, Syria, Libya, Iran, Vietnam and Yemen require a visa to enter Haiti",
+    "Tourists must pay a fee of US$10.00 on arrival at the airport",
+    "Passport must be valid for at least 6 months"
    ]
   }
  },
@@ -25718,6 +25783,16 @@
      "fee": null,
      "notes": "No official fee tariff is published on a Congolese government domain; fees are set consulate by consulate."
     }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "application_channel_detail": "Apply at the nearest Congolese embassy or consulate",
+   "required_documents": [
+    "Valid passport",
+    "Identity photo",
+    "Invitation letter",
+    "Proof of hotel or accommodation reservation"
    ]
   }
  },
@@ -25727,10 +25802,10 @@
    "destination": "COG",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
-  "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
   "source_url": "https://www.diplomatie.gouv.cg/etrangers-voyageant-en-republique-du-congo",
-  "note": "UNVERIFIABLE. No Congolese government domain publishes a visa fee tariff, a validity period, or a permitted stay for tourist visas; the MFA only says visas are obtained at an embassy or consulate. The claimed 'up to 90 days' stay has no government backing. | quote: Visa La plupart des voyageurs ont besoin d'un visa pour entrer en République du Congo. Vous pouvez demander un visa touristi",
+  "note": "UNVERIFIABLE. No Congolese government domain publishes a visa fee tariff, a validity period, or a permitted stay for tourist visas; the MFA only says visas are obtained at an embassy or consulate. The claimed 'up to 90 days' stay has no government backing. | quote: Visa La plupart des voyageurs ont besoin d'un visa pour entrer en République du Congo. Vous pouvez demander un visa touristi | Loaded the Congolese MFA page (note: the gouv.cg URL 301-redirects to the ministry's serving host diplobrazza.net; the content is the ministry's own). It confirms the requirement picture: tourist visa obtained from the nearest Congolese embassy or consulate (paper consular visa), and it lists the usual application documents verbatim: 'un passeport valide, une photo d'identité, une lettre d'invitation et une preuve de réservation d'hôtel ou de logement'. The missing facts (visa validity duration/unit and consular fee amount/currency) are NOT stated anywhere on this page, and no official Congolese e-visa portal exists; they must stay absent. No visa_products supplied so the stored product (90- | Gap-close research 2026-08-29 against the official page. Quote: \"La plupart des voyageurs ont besoin d'u",
   "fields": {
    "visa_products": [
     {
@@ -25741,6 +25816,17 @@
      "fee": null,
      "notes": null
     }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "visa_category": "Tourist visa",
+   "application_channel": "consular",
+   "application_channel_detail": "Apply at the nearest Congolese embassy or consulate",
+   "required_documents": [
+    "Valid passport",
+    "Identity photo",
+    "Invitation letter",
+    "Proof of hotel or accommodation reservation"
    ]
   }
  },
@@ -32134,16 +32220,16 @@
    "destination": "GNQ",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
+  "verified_at": "2026-08-29",
   "verified_by": "Ellis source audit",
   "source_url": "https://equatorialguinea-evisa.com/faq",
-  "note": "Official state e-visa portal (operated by VFS for the Ministry of Foreign Affairs, adjudicated by the Immigration Bureau): all nationalities apply for the eVisa; USD 50 government fee plus USD 25 platform service fee (excluded from the official fee per the field spec); usually single entry; e-visa arrivals via Malabo International Airport only. The portal does not publish the permitted stay or validity window, so those stay blank. ",
+  "note": "Official state e-visa portal (operated by VFS for the Ministry of Foreign Affairs, adjudicated by the Immigration Bureau): all nationalities apply for the eVisa; USD 50 government fee plus USD 25 platform service fee (excluded from the official fee per the field spec); usually single entry; e-visa arrivals via Malabo International Airport only. The | Gap-close research 2026-08-29 against the official page. Quote: \"Visa Fees – USD 50 Service Fees – USD 25 (Excluding Tax)\"",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "evisa",
    "visa_category": "Tourist eVisa",
    "application_channel": "online_application",
-   "application_channel_detail": "Apply on the official Equatorial Guinea e-visa portal. E-visa holders must enter via Malabo International Airport; a consular visa (USD 200) at an embassy is the alternative for other entry points.",
+   "application_channel_detail": "Apply online at https://egonline.vfsevisa.com/gnq/en/login; VFS Global operates the official Equatorial Guinea eVisa. Portal FAQ: 'All Nationalities can apply for an E- Visa', so Chinese citizens are covered (payment options include UnionPay, WeChat and Alipay).",
    "government_fee": {
     "amount": 50,
     "currency": "USD"
@@ -32153,13 +32239,28 @@
      "type": "Single-entry tourist eVisa",
      "entry": "single",
      "validity": null,
-     "max_stay_days": null,
+     "max_stay_days": 30,
      "fee": {
       "amount": 50,
       "currency": "USD"
      },
-     "notes": "Processing 24-72 hours; passport valid 6+ months with one blank page; USD 25 platform service fee is charged in addition to the official fee."
+     "notes": "The official portal does not publish the eVisa's validity window (the missing validity_duration/validity_unit remain unstated). FAQ states 'Usually, an E-Visa is valid for Single Entry only'; the application form only accepts applicants travelling within 30 days."
     }
+   ],
+   "permitted_stay": "30 days on arrival, extendable by another 30 days up to 60 days",
+   "permitted_stay_days": 30,
+   "official_portal_url": "https://equatorialguinea-evisa.com/",
+   "processing_time": "24-72 hours from application payment",
+   "required_documents": [
+    "Passport valid at least 6 months from date of arrival with at least 1 blank page",
+    "Return flight ticket copies",
+    "Confirmed hotel booking or invitation letter",
+    "Yellow Fever Certificate",
+    "Vaccine certificates or PCR test results if applicable"
+   ],
+   "exceptions": [
+    "VFS service fee USD 25 (excluding tax) applies in addition to the USD 50 government visa fee",
+    "Portal disclaimer: 'The applicant will get 30 days to stay in Equatorial Guinea on arrival, but can extend their stay for another 30 days at the Alien Police Department up to 60 days.'"
    ]
   }
  },
@@ -32319,26 +32420,58 @@
    "destination": "YEM",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
+  "verified_at": "2026-08-29",
   "verified_by": "Ellis source audit",
   "source_url": "https://yemenevisa.org/Types-of-Visas",
-  "note": "Official Yemen eVisa portal of the Ministry of Interior's Immigration, Passports and Nationality Authority (launch announced by the MFA, 2025-06-24): tourism is available only as GROUP tourism (minimum 10 travellers) arranged through a Yemeni tourism agency accredited by the General Authority for Tourism. Fee amounts, validity and stay are not published, so they stay blank. ",
+  "note": "Official Yemen eVisa portal of the Ministry of Interior's Immigration, Passports and Nationality Authority (launch announced by the MFA, 2025-06-24): tourism is available only as GROUP tourism (minimum 10 travellers) arranged through a Yemeni tourism agency accredited by the General Authority for Tourism. Fee amounts, validity and stay are not publ | Gap-close research 2026-08-29 against the official page. Quote: \"The tourist groups must be brought through a Yemeni tourism agency accredited by the General Authority for Tourism ... The number of the tourist group must not be less than ten people. Eligibility page lists: HONG KONG — Vist Groups Tourism, ... Urgent tourist visa ...\" | Verified on the official Yemen eVisa portal (yemenevisa.org, footer: Republic of Yemen, Ministry of Interior, Immigration, Passports and Nationality Authority, info@ipnaye.org). The Eligibility page lists HONG KONG with an APPLY NOW link, so HKG passport holders are eligible. The Types of Visas content (served on the portal's pages, embedded in its published visa-type data) prices 'Vist Groups Tourism' at 75.00 USD, so the missing fee facts are resolved: 75 USD. The portal does NOT state the number of en",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "evisa",
-   "visa_category": "Group tourism eVisa",
-   "application_channel": "online_application",
-   "application_channel_detail": "Group tourism eVisa (minimum 10 travellers) through an accredited Yemeni tourism agency on the official portal; processing 3-5 working days; passport valid at least 180 days. Several Yemeni embassies state that individual tourist visa issuance is currently on hold.",
+   "visa_category": "Tourist visa (tourist groups)",
+   "application_channel": "evisa_portal",
+   "application_channel_detail": "Apply on the Yemen eVisa portal (Ministry of Interior, Immigration, Passports and Nationality Authority); the visa sticker for group tourism is issued by Yemeni embassies/consulates abroad, while the urgent tourist visa is granted at border crossings after approval of the Authority",
    "visa_products": [
     {
      "type": "Group tourism eVisa (minimum 10 travellers)",
      "entry": null,
      "validity": null,
      "max_stay_days": null,
-     "fee": null,
-     "notes": "Round-trip tickets and a health certificate are required; fee amounts are not published by the portal."
+     "fee": {
+      "amount": 75,
+      "currency": "USD"
+     },
+     "notes": "Portal product 'Vist Groups Tourism', fee 75.00 USD. Minimum ten travellers, arranged through a Yemeni tourism agency accredited by the General Authority for Tourism; visa sticker issued by Yemeni embassies/consulates abroad. The portal does not state entries, validity, or permitted stay."
+    },
+    {
+     "type": "Urgent tourist visa",
+     "entry": null,
+     "validity": null,
+     "max_stay_days": null,
+     "fee": {
+      "amount": 75,
+      "currency": "USD"
+     },
+     "notes": "Fee 75.00 USD; granted at border crossings after approval of the Authority, on request of an accredited tourism agency; fee reduced by 50% for tourist groups exceeding ten people. The portal does not state entries, validity, or permitted stay."
     }
-   ]
+   ],
+   "official_portal_url": "https://yemenevisa.org",
+   "processing_time": "3-5 working days after the Immigration, Passports and Nationality Authority receives the completed application",
+   "required_documents": [
+    "Scanned copy of the letter of the General Authority for Tourism",
+    "Scanned copy of the application of a travel agency accredited by the General Authority for Tourism, specifying the tourism program",
+    "Round-trip tickets",
+    "Scanned copy of the passport data page, passport valid for at least six months",
+    "Health certificate certified by an official competent authority showing the applicant is free from infectious diseases",
+    "Pledge not to engage in any activity during the tourism period and to leave after it ends"
+   ],
+   "exceptions": [
+    "Group must number at least ten people and be brought through a Yemeni tourism agency accredited by the General Authority for Tourism",
+    "Urgent tourist visa fees are reduced by 50% for tourist groups exceeding ten people"
+   ],
+   "government_fee": {
+    "amount": 75,
+    "currency": "USD"
+   }
   }
  },
  {
@@ -34998,75 +35131,13 @@
  {
   "route": {
    "nationality": "HKG",
-   "destination": "YEM",
-   "travel_purpose": "tourism",
-   "travel_document_type": "Verified on the official Yemen eVisa portal (yemenevisa.org, footer: Republic of Yemen, Ministry of Interior, Immigration, Passports and Nationality Authority, info@ipnaye.org). The Eligibility page lists HONG KONG with an APPLY NOW link, so HKG passport holders are eligible. The Types of Visas content (served on the portal's pages, embedded in its published visa-type data) prices 'Vist Groups Tourism' at 75.00 USD, so the missing fee facts are resolved: 75 USD. The portal does NOT state the number of entries, the validity duration/unit, or the permitted stay for this product anywhere (Types of Visas descriptions and FAQ both silent), so those stay null; the stored 30-day stay is neither confirmed nor contradicted by the portal. The portal also lists a second tourism-category product, 'Urgent tourist visa' (75.00 USD), granted at border crossings after Authority approval on request of an accredited tourism agency, with fees reduced by 50% for tourist groups exceeding ten people. FAQ: e-Visa processed within 3-5 working days; approval notification arrives by email and must be printed and presented on arrival; FAQ also states the e-Visa validity period begins on the date specified in the application, without giving its length."
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://yemenevisa.org/Types-of-Visas",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"Tourist visa for tourist groups of foreigners. The issuance of the visa sticker is granted by the embassies and consulates of the Republic of Yemen abroad according to the following conditions: ... The number of the tourist group must not be less than ten people ... \"VisaTypeName\":\"Vist Groups Touri\"",
-  "fields": {
-   "disposition": "VISA_REQUIRED",
-   "requirement_detail": "evisa",
-   "visa_category": "Tourist visa (tourist groups)",
-   "application_channel": "evisa_portal",
-   "application_channel_detail": "Apply on the Yemen eVisa portal (Ministry of Interior, Immigration, Passports and Nationality Authority); the visa sticker for group tourism is issued by Yemeni embassies/consulates abroad, while the urgent tourist visa is granted at border crossings after approval of the Authority",
-   "government_fee": {
-    "amount": 75,
-    "currency": "USD"
-   },
-   "official_portal_url": "https://yemenevisa.org",
-   "processing_time": "3-5 working days after the Immigration, Passports and Nationality Authority receives the completed application",
-   "required_documents": [
-    "Scanned copy of the letter of the General Authority for Tourism",
-    "Scanned copy of the application of a travel agency accredited by the General Authority for Tourism, specifying the tourism program",
-    "Round-trip tickets",
-    "Scanned copy of the passport data page, passport valid for at least six months",
-    "Health certificate certified by an official competent authority showing the applicant is free from infectious diseases",
-    "Pledge not to engage in any activity during the tourism period and to leave after it ends"
-   ],
-   "exceptions": [
-    "Group must number at least ten people and be brought through a Yemeni tourism agency accredited by the General Authority for Tourism",
-    "Urgent tourist visa fees are reduced by 50% for tourist groups exceeding ten people"
-   ],
-   "visa_products": [
-    {
-     "type": "Group tourism eVisa (minimum 10 travellers)",
-     "entry": null,
-     "validity": null,
-     "max_stay_days": null,
-     "fee": {
-      "amount": 75,
-      "currency": "USD"
-     },
-     "notes": "Portal product 'Vist Groups Tourism', fee 75.00 USD. Minimum ten travellers, arranged through a Yemeni tourism agency accredited by the General Authority for Tourism; visa sticker issued by Yemeni embassies/consulates abroad. The portal does not state entries, validity, or permitted stay."
-    },
-    {
-     "type": "Urgent tourist visa",
-     "entry": null,
-     "validity": null,
-     "max_stay_days": null,
-     "fee": {
-      "amount": 75,
-      "currency": "USD"
-     },
-     "notes": "Fee 75.00 USD; granted at border crossings after approval of the Authority, on request of an accredited tourism agency; fee reduced by 50% for tourist groups exceeding ten people. The portal does not state entries, validity, or permitted stay."
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "HKG",
    "destination": "ZMB",
-   "travel_purpose": "tourism",
-   "travel_document_type": "Zambia Department of Immigration's official 'Nationals who don't require a visa' list includes Hong Kong at entry 67, confirming visa exemption for HKG passport holders. The page states no permitted-stay duration for exempt nationals, so the stored 90-day figures are neither confirmed nor contradicted here; visa_products intentionally not supplied so the stored product stands. The page's only stated conditions: visa-exempt visitors arriving by air must hold valid return air tickets, and arrivals by land or water must have enough funds for their stay in and departure from Zambia."
+   "travel_purpose": "tourism"
   },
   "verified_at": "2026-08-29",
   "verified_by": "Ellis source audit",
   "source_url": "https://www.zambiaimmigration.gov.zm/nationals-who-dont-require-visa/",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"67 Hong Kong\"",
+  "note": "Zambia Department of Immigration's official 'Nationals who don't require a visa' list includes Hong Kong at entry 67, confirming visa exemption for HKG passport holders. The page states no permitted-stay duration for exempt nationals, so the stored 90-day figures are neither confirmed nor contradicted here; visa_products intentionally not supplied so the stored product stands. The page's only stated conditions: visa-exempt visitors arriving by air must hold valid return air tickets, and arrivals by land or water must have enough funds for their stay in and departure from Zambia. | Gap-close research 2026-08-29 against the official page. Quote: \"67 Hong Kong\" | Gap-close research 2026-08-29 against the official page. Quote: \"Nationals Who Do Not Require Visa: Nationals of the countries listed below do not require visas to enter Zambia. ... 67 Hong Kong\"",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "unconditional_visa_free",
@@ -35075,7 +35146,7 @@
     "currency": "USD"
    },
    "exceptions": [
-    "Visa-exempt visitors arriving by air must be in possession of valid return air tickets; those arriving by land or water must have enough funds for their stay in and departure from Zambia"
+    "The official exemption list does not state a maximum stay duration for visa-exempt nationals"
    ]
   }
  },
@@ -35083,13 +35154,12 @@
   "route": {
    "nationality": "HKG",
    "destination": "ZAF",
-   "travel_purpose": "tourism",
-   "travel_document_type": "South Africa Department of Home Affairs official visa-exempt countries page lists Hong Kong (SAR of China) as exempt for 30 days, matching the stored 30-day product. The asterisk footnote ties visa fees only to visits intended to exceed thirty days (i.e. a visa is needed beyond 30 days). Stored picture confirmed; no product change needed."
+   "travel_purpose": "tourism"
   },
   "verified_at": "2026-08-29",
   "verified_by": "Ellis source audit",
   "source_url": "https://www.dha.gov.za/index.php/immigration-services/exempt-countries",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"Hong Kong (Special Administrative Region of China)* | 30 Days\"",
+  "note": "South Africa Department of Home Affairs official visa-exempt countries page lists Hong Kong (SAR of China) as exempt for 30 days, matching the stored 30-day product. The asterisk footnote ties visa fees only to visits intended to exceed thirty days (i.e. a visa is needed beyond 30 days). Stored picture confirmed; no product change needed. | Gap-close research 2026-08-29 against the official page. Quote: \"Hong Kong (Special Administrative Region of China)* | 30 Days\" | Gap-close research 2026-08-29 against the official page. Quote: \"Hong Kong (Special Administrative Region of China)* 30 Days ... countries marked with an asterisk are only subject to visa fees if the intended visit exceeds thirty (30) days\"",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "unconditional_visa_free",
@@ -35100,7 +35170,7 @@
     "currency": "USD"
    },
    "exceptions": [
-    "Visits intended to exceed 30 days require a visa (DHA exemption applies to stays of up to 30 days)"
+    "Asterisked entry: only subject to visa fees if the intended visit exceeds thirty (30) days, i.e. a visa (with fee) is needed for stays beyond 30 days"
    ]
   }
  },
@@ -35108,13 +35178,12 @@
   "route": {
    "nationality": "USA",
    "destination": "BRB",
-   "travel_purpose": "tourism",
-   "travel_document_type": "Barbados Ministry of Foreign Affairs consular visa requirements table (Consular Section, revised August 05, 2022; linked from immigration.gov.bb's visa requirements page) shows, in the 'Visa requirements for foreign nationals entering Barbados' column for United States of America: 'No visa required', with the remark that US nationals can stay for a maximum of six (6) months. Confirms the stored visa-exempt, 6-month (180-day) picture."
+   "travel_purpose": "tourism"
   },
   "verified_at": "2026-08-29",
   "verified_by": "Ellis source audit",
   "source_url": "https://www.foreign.gov.bb/wp-content/uploads/2022/08/Updated-visa-list-August-2022.pdf",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"UNITED STATES OF AMERICA ... No visa required ... Nationals of the USA can stay for a maximum of six (6) months\"",
+  "note": "Barbados Ministry of Foreign Affairs consular visa requirements table (Consular Section, revised August 05, 2022; linked from immigration.gov.bb's visa requirements page) shows, in the 'Visa requirements for foreign nationals entering Barbados' column for United States of America: 'No visa required', with the remark that US nationals can stay for a maximum of six (6) months. Confirms the stored visa-exempt, 6-month (180-day) picture. | Gap-close research 2026-08-29 against the official page. Quote: \"UNITED STATES OF AMERICA ... No visa required ... Nationals of the USA can stay for a maximum of six (6) months\" | Gap-close research 2026-08-29 against the official page. Quote: \"UNITED STATES OF AMERICA ... Visa requirements for foreign nationals entering Barbados: No visa required ... Nationals of the USA can stay for a maximum of six (6) months (Consular Section, August 05, 2022, Revised)\"",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "unconditional_visa_free",
@@ -35123,86 +35192,22 @@
    "government_fee": {
     "amount": 0,
     "currency": "USD"
-   }
+   },
+   "exceptions": [
+    "Valid passports required with effect from March 2004 (same table entry)"
+   ]
   }
  },
  {
   "route": {
    "nationality": "USA",
    "destination": "BEL",
-   "travel_purpose": "tourism",
-   "travel_document_type": "Official Belgian FPS Foreign Affairs site for the United States (unitedstates.diplomatie.belgium.be) explicitly states US citizens do not require a Schengen C-visa for short stays, with the Schengen 90-days-in-any-180-day-period cap. Confirms the stored visa-exempt 90-day picture."
+   "travel_purpose": "tourism"
   },
   "verified_at": "2026-08-29",
   "verified_by": "Ellis source audit",
   "source_url": "https://unitedstates.diplomatie.belgium.be/en/visa-belgium/schengen-visa-c-visa-90-days",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"The following categories do not require a C-visa: US citizens ... You are allowed to stay in the Schengen area for a maximum of 90 days within any 180-day period.\"",
-  "fields": {
-   "disposition": "VISA_EXEMPT",
-   "requirement_detail": "unconditional_visa_free",
-   "permitted_stay": "90 days within any 180-day period",
-   "permitted_stay_days": 90,
-   "government_fee": {
-    "amount": 0,
-    "currency": "USD"
-   }
-  }
- },
- {
-  "route": {
-   "nationality": "USA",
-   "destination": "BGR",
-   "travel_purpose": "tourism",
-   "travel_document_type": "Bulgarian MFA 'Table of countries/territories whose citizens, holders of ordinary passports, require/do not require visas to enter Bulgaria' (last update 02.07.2026) lists USA at entry 190 with visa required: No. The MFA's visa-bulgaria page adds that Annex II nationals 'shall be subject to visa-free regime for a period of no more than 90 days in any 180-day period' (https://www.mfa.bg/en/services-travel/consular-services/travel-bulgaria/visa-bulgaria), and notes Bulgaria is in the Schengen area. Confirms the stored visa-exempt 90-day picture."
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://www.mfa.bg/upload/161580/02_07_2026_EN_VisaRegime_for_foreigners_ordinary_passports-1.pdf",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"USA ... [Visa is required Yes/No] No\"",
-  "fields": {
-   "disposition": "VISA_EXEMPT",
-   "requirement_detail": "unconditional_visa_free",
-   "permitted_stay": "no more than 90 days in any 180-day period",
-   "permitted_stay_days": 90,
-   "government_fee": {
-    "amount": 0,
-    "currency": "USD"
-   }
-  }
- },
- {
-  "route": {
-   "nationality": "USA",
-   "destination": "BRN",
-   "travel_purpose": "tourism",
-   "travel_document_type": "Brunei MFA Visa Information page (https://www.mfa.gov.bn/Pages/Visa-Information.aspx) lists 'United States of America' linked to category D1---D90, alongside Austria, Belgium, Canada, France, Germany and the UK; the D1---D90 category page states nationals in this category need no visa and may stay up to 90 days. Confirms the stored visa-exempt 90-day picture."
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://www.mfa.gov.bn/Pages/D1---D90.aspx",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"Foreign nationals of countries under this category do not require any visas to enter Brunei Darussalam and are allowed to stay in the country for up to 90 days.\"",
-  "fields": {
-   "disposition": "VISA_EXEMPT",
-   "requirement_detail": "unconditional_visa_free",
-   "permitted_stay": "up to 90 days",
-   "permitted_stay_days": 90,
-   "government_fee": {
-    "amount": 0,
-    "currency": "USD"
-   }
-  }
- },
- {
-  "route": {
-   "nationality": "USA",
-   "destination": "CHE",
-   "travel_purpose": "tourism",
-   "travel_document_type": "Swiss State Secretariat for Migration 'Overview of ID and visa provisions according to nationality' (Annex CH-1, List 1, version of 3 April 2026): the United States of America row shows 'No' in the 'Visa required for stays of up to 90 days' column (code V1), with note B defining the short-stay cap as 90 days in any 180-day period. Confirms the stored visa-exempt 90-day picture."
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://www.sem.admin.ch/dam/sem/en/data/rechtsgrundlagen/weisungen/visa/bfm/bfm-anh01-liste1-e.pdf.download.pdf/bfm-anh01-liste1-e.pdf",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"United States of America ... Visa required for stays of up to 90 days: No ... The maximum duration of short stays within the Schengen Area is 90 days in any 180-day period.\"",
+  "note": "Official Belgian FPS Foreign Affairs site for the United States (unitedstates.diplomatie.belgium.be) explicitly states US citizens do not require a Schengen C-visa for short stays, with the Schengen 90-days-in-any-180-day-period cap. Confirms the stored visa-exempt 90-day picture. | Gap-close research 2026-08-29 against the official page. Quote: \"The following categories do not require a C-visa: US citizens ... You are allowed to stay in the Schengen area for a maximum of 90 days within any 180-day period.\" | Gap-close research 2026-08-29 against the official page. Quote: \"US citizens ... do not require a C-visa. You are allowed to stay in the Schengen area for a maximum of 90 days within any 180-day period.\"",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "unconditional_visa_free",
@@ -35211,7 +35216,82 @@
    "government_fee": {
     "amount": 0,
     "currency": "USD"
-   }
+   },
+   "exceptions": [
+    "Exemption from a C visa does not exempt the traveller from the Schengen entry conditions; the 90/180-day count covers the whole Schengen area"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "BGR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://www.mfa.bg/upload/161580/02_07_2026_EN_VisaRegime_for_foreigners_ordinary_passports-1.pdf",
+  "note": "Bulgarian MFA 'Table of countries/territories whose citizens, holders of ordinary passports, require/do not require visas to enter Bulgaria' (last update 02.07.2026) lists USA at entry 190 with visa required: No. The MFA's visa-bulgaria page adds that Annex II nationals 'shall be subject to visa-free regime for a period of no more than 90 days in any 180-day period' (https://www.mfa.bg/en/services-travel/consular-services/travel-bulgaria/visa-bulgaria), and notes Bulgaria is in the Schengen area. Confirms the stored visa-exempt 90-day picture. | Gap-close research 2026-08-29 against the official page. Quote: \"USA ... [Visa is required Yes/No] No\" | Gap-close research 2026-08-29 against the official page. Quote: \"TABLE OF COUNTRIES/TERRITORIES WHOSE CITIZENS, HOLDERS OF ORDINARY PASSPORTS, REQUIRE/DO NOT REQUIRE VISAS TO ENTER BULGARIA (Last update: 02.07.2026): 190 USA — Visa is required: No\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "permitted_stay": "90 days in any 180-day period",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   },
+   "exceptions": [
+    "Per https://www.mfa.bg/en/services-travel/consular-services/travel-bulgaria/visa-bulgaria (also loaded): visa-exempt nationals 'shall be subject to visa-free regime for a period of no more than 90 days in any 180-day period', and the short-term stay is counted from entry into the Schengen area, Bulgaria included"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "BRN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://www.mfa.gov.bn/Pages/D1---D90.aspx",
+  "note": "Brunei MFA Visa Information page (https://www.mfa.gov.bn/Pages/Visa-Information.aspx) lists 'United States of America' linked to category D1---D90, alongside Austria, Belgium, Canada, France, Germany and the UK; the D1---D90 category page states nationals in this category need no visa and may stay up to 90 days. Confirms the stored visa-exempt 90-day picture. | Gap-close research 2026-08-29 against the official page. Quote: \"Foreign nationals of countries under this category do not require any visas to enter Brunei Darussalam and are allowed to stay in the country for up to 90 days.\" | Gap-close research 2026-08-29 against the official page. Quote: \"Foreign nationals of countries which have Visa Waiver Arrangement with Brunei Darussalam ... do not require any visas to enter Brunei Darussalam and are allowed to stay in the country for up to 90 days\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "permitted_stay": "up to 90 days",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   },
+   "exceptions": [
+    "The MFA Visa Information directory (https://www.mfa.gov.bn/Pages/Visa-Information.aspx, also loaded) lists 'United States of America' linking to this 90-day visa-waiver category page"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "CHE",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://www.sem.admin.ch/dam/sem/en/data/rechtsgrundlagen/weisungen/visa/bfm/bfm-anh01-liste1-e.pdf.download.pdf/bfm-anh01-liste1-e.pdf",
+  "note": "Swiss State Secretariat for Migration 'Overview of ID and visa provisions according to nationality' (Annex CH-1, List 1, version of 3 April 2026): the United States of America row shows 'No' in the 'Visa required for stays of up to 90 days' column (code V1), with note B defining the short-stay cap as 90 days in any 180-day period. Confirms the stored visa-exempt 90-day picture. | Gap-close research 2026-08-29 against the official page. Quote: \"United States of America ... Visa required for stays of up to 90 days: No ... The maximum duration of short stays within the Schengen Area is 90 days in any 180-day period.\" | Gap-close research 2026-08-29 against the official page. Quote: \"United States of America ... Visa required for stays of up to 90 days: No. (B) The maximum duration of short stays within the Schengen Area is 90 days in any 180-day period. (Overview of ID and visa provisions according to nationality, Annex CH-1 List 1, version of 3 April 2026)\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "permitted_stay": "90 days in any 180-day period",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   },
+   "exceptions": [
+    "Visa required for stays of more than 90 days; for stays in Switzerland of more than 90 days a residence permit is required, filed before entry at the cantonal migration office"
+   ]
   }
  },
  {
@@ -36130,255 +36210,14 @@
  },
  {
   "route": {
-   "nationality": "ESP",
-   "destination": "IND",
-   "travel_purpose": "tourism",
-   "travel_document_type": "Verified on the official Indian e-Visa portal (tvoa.html, loaded raw) plus its linked fee schedule images/Etourist_fee_final.pdf (dated 09-July-2026). Spain is eligible (listed in the eligibility popup). The portal lists four tourist products: e-T1 One Month (Duration: One Month (30 Days), Multiple Entry, non-extendable and non-convertible), One Year (365 days from grant of ETA), Five Years (Five years from the date of grant of ETA), and e-T2 (Duration: 6 month from the date of grant of ETA, Multiple). Missing fact filled: 5-year validity = 5 years from grant of ETA. Fee corrections from the official PDF for Spain: 30-day USD 10 (April-June) / USD 25 (July-March), 1-year USD 40, 5-year USD 200 (stored USD 25 across the board was wrong for 1y/5y). The 6-month e-T2 fee is not published in either official fee PDF, so it stays null. The page states a 180-days-per-calendar-year aggregate stay cap for the 1-year and 5-year visas; it does not state a 30-day per-visit stay for them, so those stored stay figures are dropped to notes. A 3% bank charge applies on top of e-Visa fees."
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"Five years e-Tourist Visa ... Duration: Five years from the date of grant of ETA. Entries: Multiple\"",
-  "fields": {
-   "disposition": "VISA_REQUIRED",
-   "requirement_detail": "evisa",
-   "visa_category": "e-Tourist Visa",
-   "application_channel": "online_application",
-   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
-   "visa_products": [
-    {
-     "type": "e-Tourist Visa - One Month (30 days)",
-     "entry": "multiple",
-     "validity": "30 days",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 25,
-      "currency": "USD"
-     },
-     "notes": "Official fee schedule (09-July-2026): USD 10 for applications April-June, USD 25 July-March. Multiple entry, non-extendable and non-convertible. Bank transaction charge of 3% additional."
-    },
-    {
-     "type": "e-Tourist Visa - Six Months",
-     "entry": "multiple",
-     "validity": "6 months from the date of grant of ETA",
-     "max_stay_days": null,
-     "fee": null,
-     "notes": "e-T2 V category on the official portal; its fee is not published in the official country-wise fee PDFs."
-    },
-    {
-     "type": "e-Tourist Visa - One Year",
-     "entry": "multiple",
-     "validity": "365 days from the date of grant of ETA",
-     "max_stay_days": null,
-     "fee": {
-      "amount": 40,
-      "currency": "USD"
-     },
-     "notes": "Maximum stay in India during one calendar year must not exceed 180 days. Bank transaction charge of 3% additional."
-    },
-    {
-     "type": "e-Tourist Visa - Five Years",
-     "entry": "multiple",
-     "validity": "5 years from the date of grant of ETA",
-     "max_stay_days": null,
-     "fee": {
-      "amount": 200,
-      "currency": "USD"
-     },
-     "notes": "Maximum stay in India during one calendar year must not exceed 180 days. Bank transaction charge of 3% additional."
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "GBR",
-   "destination": "IND",
-   "travel_purpose": "tourism",
-   "travel_document_type": "Verified on the official Indian e-Visa portal (tvoa.html, loaded raw) plus its linked fee schedule images/Etourist_fee_final.pdf (dated 09-July-2026). United Kingdom is eligible. Missing fact filled: 5-year validity = 5 years from grant of ETA. Fee corrections for UK (row 166 of the official PDF): 30-day USD 10 (April-June) / USD 25 (July-March), 1-year USD 40, 5-year USD 484 (stored USD 25 was wrong for the 1-year and badly wrong for the 5-year; the UK has an elevated reciprocal 5-year fee). The 6-month e-T2 fee is not published in either official fee PDF. The page states a 180-days-per-calendar-year aggregate stay cap for 1-year and 5-year visas and no 30-day per-visit stay for them."
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"Five years e-Tourist Visa ... Duration: Five years from the date of grant of ETA. Entries: Multiple\"",
-  "fields": {
-   "disposition": "VISA_REQUIRED",
-   "requirement_detail": "evisa",
-   "visa_category": "e-Tourist Visa",
-   "application_channel": "online_application",
-   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
-   "visa_products": [
-    {
-     "type": "e-Tourist Visa - One Month (30 days)",
-     "entry": "multiple",
-     "validity": "30 days",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 25,
-      "currency": "USD"
-     },
-     "notes": "Official fee schedule (09-July-2026): USD 10 for applications April-June, USD 25 July-March. Multiple entry, non-extendable and non-convertible. Bank transaction charge of 3% additional."
-    },
-    {
-     "type": "e-Tourist Visa - Six Months",
-     "entry": "multiple",
-     "validity": "6 months from the date of grant of ETA",
-     "max_stay_days": null,
-     "fee": null,
-     "notes": "e-T2 V category on the official portal; its fee is not published in the official country-wise fee PDFs."
-    },
-    {
-     "type": "e-Tourist Visa - One Year",
-     "entry": "multiple",
-     "validity": "365 days from the date of grant of ETA",
-     "max_stay_days": null,
-     "fee": {
-      "amount": 40,
-      "currency": "USD"
-     },
-     "notes": "Maximum stay in India during one calendar year must not exceed 180 days. Bank transaction charge of 3% additional."
-    },
-    {
-     "type": "e-Tourist Visa - Five Years",
-     "entry": "multiple",
-     "validity": "5 years from the date of grant of ETA",
-     "max_stay_days": null,
-     "fee": {
-      "amount": 484,
-      "currency": "USD"
-     },
-     "notes": "UK-specific fee USD 484 per the official fee schedule dated 09-July-2026. Maximum stay in India during one calendar year must not exceed 180 days. Bank transaction charge of 3% additional."
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "HKG",
-   "destination": "COG",
-   "travel_purpose": "tourism",
-   "travel_document_type": "Loaded the Congolese MFA page (note: the gouv.cg URL 301-redirects to the ministry's serving host diplobrazza.net; the content is the ministry's own). It confirms the requirement picture: tourist visa obtained from the nearest Congolese embassy or consulate (paper consular visa), and it lists the usual application documents verbatim: 'un passeport valide, une photo d'identité, une lettre d'invitation et une preuve de réservation d'hôtel ou de logement'. The missing facts (visa validity duration/unit and consular fee amount/currency) are NOT stated anywhere on this page, and no official Congolese e-visa portal exists; they must stay absent. No visa_products supplied so the stored product (90-day stay, single entry) is not clobbered with nulls."
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://www.diplomatie.gouv.cg/etrangers-voyageant-en-republique-du-congo",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"La plupart des voyageurs ont besoin d'un visa pour entrer en République du Congo. Vous pouvez demander un visa touristique ou un visa d'affaires auprès de l'ambassade ou du consulat congolais le plus proche.\"",
-  "fields": {
-   "disposition": "VISA_REQUIRED",
-   "requirement_detail": "paper_visa",
-   "visa_category": "Tourist visa",
-   "application_channel": "consular",
-   "application_channel_detail": "Apply at the nearest Congolese embassy or consulate",
-   "required_documents": [
-    "Valid passport",
-    "Identity photo",
-    "Invitation letter",
-    "Proof of hotel or accommodation reservation"
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "HKG",
-   "destination": "HTI",
-   "travel_purpose": "tourism",
-   "travel_document_type": "CORRECTION. The Embassy of Haiti in Washington (official embassy site, loaded in browser) states tourists generally do not need a visa; only nationals of 9 listed countries (Dominican Republic, Panama, Colombia, Cuba, Syria, Libya, Iran, Vietnam, Yemen) require one. Hong Kong SAR is not on that list, so HKG ordinary passport holders are visa-exempt for tourism - the stored 'Consular visa USD 150' picture is wrong for this nationality (the cgmiami.gouv.ht fee table's bare 'Visa $150' line is the consular fee for the nationalities that do need visas, with no validity/entries/stay/document details published). Conditions stated for visa-free tourists: passport valid at least 6 months and 'a fee of US$ 10.00 on arrival at the airport' (an arrival fee, not a visa fee). Permitted stay length is not stated on the official page, so it stays absent. The originally missing facts about the consular visa product are moot for this route."
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://www.haiti.org/tourist-visa/",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"Generally speaking, tourists traveling to Haiti do not need a visa to enter the country. ... However, nationals of the following countries require a visa to enter Haiti: Dominican Republic, Panama, Colombia, Cuba, Syria, Libya, Iran, Vietnam and Yemen.\"",
-  "fields": {
-   "disposition": "VISA_EXEMPT",
-   "requirement_detail": "unconditional_visa_free",
-   "government_fee": {
-    "amount": 0,
-    "currency": "USD"
-   },
-   "exceptions": [
-    "Nationals of Dominican Republic, Panama, Colombia, Cuba, Syria, Libya, Iran, Vietnam and Yemen require a visa to enter Haiti",
-    "Tourists must pay a fee of US$10.00 on arrival at the airport",
-    "Passport must be valid for at least 6 months"
-   ],
-   "visa_products": [
-    {
-     "type": "Visa exemption (tourist)",
-     "entry": null,
-     "validity": null,
-     "max_stay_days": null,
-     "fee": {
-      "amount": 0,
-      "currency": "USD"
-     },
-     "notes": "No visa required for Hong Kong SAR passport holders. US$10.00 fee payable on arrival at the airport; passport must be valid at least 6 months. The embassy page does not state a maximum stay length."
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "HKG",
-   "destination": "MOZ",
-   "travel_purpose": "tourism",
-   "travel_document_type": "Loaded the official portal (evisa.gov.mz, 'The official portal of The Mozambique National Immigration Service', operated by VFS Global) in the browser (it 403s plain fetchers). It confirms the stored product structure: tourist eVisa for 30/60/90-day durations, multiple entry, validity 2 months beginning on the date of issuance. Hong Kong/China is not in the portal's visa-exempt eligibility table, so a full eVisa applies. The missing facts (fee amount/currency) are NOT published anywhere on the portal's public pages (checked tourist-visa page, homepage, FAQs; fees are only shown inside the logged-in application flow), and no other official Mozambican page states current eVisa fees (the London High Commission publishes only its own GBP consular fees for paper visas, and MINEC's USD 60 border-visa figure is from a 2017 event page). Fees therefore stay absent. Requirements and processing guidance below are stated verbatim on the tourist visa page."
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://evisa.gov.mz/tourist-visa.html",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"You can enter the country as per the duration of the visa 30, 60 or 90 days. The visa issued will be of multiple-entry type ... The validity period of your eVisa is 2 months\"",
-  "fields": {
-   "disposition": "VISA_REQUIRED",
-   "requirement_detail": "evisa",
-   "visa_category": "Tourist eVisa",
-   "application_channel": "online_application",
-   "official_portal_url": "https://evisa.gov.mz",
-   "processing_time": "Apply 3 to 5 days before the trip (official portal guidance)",
-   "required_documents": [
-    "Color copy of the passport bio page (valid more than 6 months)",
-    "Recent passport-style frontal photo",
-    "Proof of financial means (e.g. bank statements)",
-    "Proof of hotel/accommodation",
-    "Return confirmed tickets"
-   ],
-   "visa_products": [
-    {
-     "type": "Tourist eVisa, 30-day duration",
-     "entry": "multiple",
-     "validity": "2 months from date of issuance",
-     "max_stay_days": 30,
-     "fee": null,
-     "notes": "Fee not published on the official portal's public pages; shown only inside the application flow. Printed pre-approval letter must be presented on arrival."
-    },
-    {
-     "type": "Tourist eVisa, 60-day duration",
-     "entry": "multiple",
-     "validity": "2 months from date of issuance",
-     "max_stay_days": 60,
-     "fee": null,
-     "notes": "Fee not published on the official portal's public pages; shown only inside the application flow."
-    },
-    {
-     "type": "Tourist eVisa, 90-day duration",
-     "entry": "multiple",
-     "validity": "2 months from date of issuance",
-     "max_stay_days": 90,
-     "fee": null,
-     "notes": "Fee not published on the official portal's public pages; shown only inside the application flow."
-    }
-   ]
-  }
- },
- {
-  "route": {
    "nationality": "HKG",
    "destination": "SGP",
-   "travel_purpose": "tourism",
-   "travel_document_type": "Verified on ICA's official visa requirements page (loaded twice: via fetch for the full list, via browser for the notes; page last updated 25 June 2026). The visa-required list of ~40 countries/documents does NOT include Hong Kong SAR passports - the only Hong Kong entry is 'A Document of Identity issued by Hong Kong Special Administrative Region', which does require a visa. So HKSAR ordinary passport holders are visa-exempt: LOW confidence resolved, disposition confirmed VISA_EXEMPT. Correction to the stored product's fixed 30-day validity/stay: ICA states 'The period of stay in Singapore is not tied to the validity of your visa. The period of stay is determined by the duration of the Visit Pass issued to you in the form of electronic visit pass (e-Pass) at the checkpoint upon entry.' - no fixed 30-day entitlement is published, so those figures move to null with a note. ICA also notes the SG Arrival Card must be submitted and is not a visa."
+   "travel_purpose": "tourism"
   },
   "verified_at": "2026-08-29",
   "verified_by": "Ellis source audit",
   "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"If you hold a travel document issued by one of the countries or places listed below, you will require a valid Singapore entry visa to travel to, and seek entry, into Singapore.\"",
+  "note": "Verified on ICA's official visa requirements page (loaded twice: via fetch for the full list, via browser for the notes; page last updated 25 June 2026). The visa-required list of ~40 countries/documents does NOT include Hong Kong SAR passports - the only Hong Kong entry is 'A Document of Identity issued by Hong Kong Special Administrative Region', which does require a visa. So HKSAR ordinary passport holders are visa-exempt: LOW confidence resolved, disposition confirmed VISA_EXEMPT. Correction to the stored product's fixed 30-day validity/stay: ICA states 'The period of stay in Singapore is not tied to the validity of your visa. The period of stay is determined by the duration of the Visit | Gap-close research 2026-08-29 against the official page. Quote: \"If you hold a travel document issued by one of the countries or places listed below, you will require a valid Singapore entry visa to travel to, and seek entry, into Singapore.\"",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "unconditional_visa_free",
@@ -36402,134 +36241,6 @@
       "currency": "USD"
      },
      "notes": "Hong Kong SAR passport holders do not need an entry visa. ICA does not publish a fixed stay entitlement: the period of stay is determined by the Visit Pass (e-Pass) issued at the checkpoint upon entry. SG Arrival Card required; Hong Kong Document of Identity holders need a visa."
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "HKG",
-   "destination": "TGO",
-   "travel_purpose": "tourism",
-   "travel_document_type": "Verified on the official Togo e-visa portal voyage.gouv.tg. The /about fee table matches the stored four products exactly (25000/35000/45000/65000 XOF). Hong Kong is explicitly eligible: 'CHINE, REGION ADMINISTRATIVE SPECIALE DE HONG KONG' appears in the eligible-country list. The missing validity_duration/unit facts are NOT published as a fixed pre-entry window: the portal FAQ states 'La date de début de validité du visa est la date d'entrée à laquelle vous êtes rentré sur le territoire togolais' and 'La durée de validité de visa est accordée sur la base de la durée de votre séjour' - i.e. validity starts on the entry date and its length is granted per the requested stay. No enter-by deadline after issuance is stated, so the validity fields stay null with the official semantics captured in notes. Processing: maximum 5 working days; apply at least 5-6 days before arrival."
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://voyage.gouv.tg/about",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"1 à 15 jours / Simple / 25 000 Fr CFA ... 1 à 15 jours / Multiples / 35 000 Fr CFA ... 16 à 30 jours / Multiples / 45 000 Fr CFA ... 31 à 90 jours / Multiples / 65 000 Fr CFA\"",
-  "fields": {
-   "disposition": "VISA_REQUIRED",
-   "requirement_detail": "evisa",
-   "visa_category": "Tourist e-visa",
-   "application_channel": "online_application",
-   "official_portal_url": "https://voyage.gouv.tg",
-   "processing_time": "Maximum 5 working days",
-   "visa_products": [
-    {
-     "type": "Tourist e-visa, 1-15 days",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 15,
-     "fee": {
-      "amount": 25000,
-      "currency": "XOF"
-     },
-     "notes": "Portal FAQ: validity begins on the date of entry into Togo and its length is granted based on the requested stay; no fixed enter-by window after issuance is published."
-    },
-    {
-     "type": "Tourist e-visa, 1-15 days",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 15,
-     "fee": {
-      "amount": 35000,
-      "currency": "XOF"
-     },
-     "notes": "Portal FAQ: validity begins on the date of entry into Togo and its length is granted based on the requested stay; no fixed enter-by window after issuance is published."
-    },
-    {
-     "type": "Tourist e-visa, 16-30 days",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 45000,
-      "currency": "XOF"
-     },
-     "notes": "Portal FAQ: validity begins on the date of entry into Togo and its length is granted based on the requested stay; no fixed enter-by window after issuance is published."
-    },
-    {
-     "type": "Tourist e-visa, 31-90 days",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 65000,
-      "currency": "XOF"
-     },
-     "notes": "Portal FAQ: validity begins on the date of entry into Togo and its length is granted based on the requested stay; no fixed enter-by window after issuance is published."
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "IDN",
-   "destination": "IND",
-   "travel_purpose": "tourism",
-   "travel_document_type": "Missing fees filled from the official country-wise e-Tourist Visa fee schedule PDF linked from indianvisaonline.gov.in/evisa/tvoa.html (dated 09-July-2026). Indonesia (row 70) shows 00 in all four columns (30-day April-June, 30-day July-March, 1-year, 5-year): the e-Tourist Visa is GRATIS (USD 0) for Indonesian nationals. The 3% bank transaction charge note applies to 'applicable' fees only. Indonesia is in the portal's eligibility list. Product picture confirmed on tvoa.html: One Month (30 days, multiple, non-extendable), One Year (365 days from grant of ETA), Five Years (5 years from grant of ETA) - all multiple entry, with a 180-days-per-calendar-year aggregate stay cap on the 1-year and 5-year visas - plus the e-T2 six-month e-Tourist Visa (6 months from grant of ETA) whose fee is not published in the official fee PDFs, added for completeness."
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://indianvisaonline.gov.in/evisa/images/Etourist_fee_final.pdf",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"Indonesia | 00 | 00 | 00 | 00 (Country/Territory Wise e-Tourist Visa Fee, in US $)\"",
-  "fields": {
-   "disposition": "VISA_REQUIRED",
-   "requirement_detail": "evisa",
-   "visa_category": "e-Tourist Visa",
-   "application_channel": "online_application",
-   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
-   "visa_products": [
-    {
-     "type": "30-day e-Tourist Visa",
-     "entry": "multiple",
-     "validity": "30 days",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 0,
-      "currency": "USD"
-     },
-     "notes": "Gratis for Indonesian nationals per the official fee schedule dated 09-July-2026 (00 in both April-June and July-March columns). Multiple entry, non-extendable and non-convertible."
-    },
-    {
-     "type": "6-month e-Tourist Visa",
-     "entry": "multiple",
-     "validity": "6 months from the date of grant of ETA",
-     "max_stay_days": null,
-     "fee": null,
-     "notes": "e-T2 V category on the official portal; its fee is not published in the official country-wise fee PDFs."
-    },
-    {
-     "type": "1-year e-Tourist Visa",
-     "entry": "multiple",
-     "validity": "365 days from the date of grant of ETA",
-     "max_stay_days": null,
-     "fee": {
-      "amount": 0,
-      "currency": "USD"
-     },
-     "notes": "Gratis for Indonesian nationals per the official fee schedule dated 09-July-2026. Maximum stay in India during one calendar year must not exceed 180 days."
-    },
-    {
-     "type": "5-year e-Tourist Visa",
-     "entry": "multiple",
-     "validity": "5 years from the date of grant of ETA",
-     "max_stay_days": null,
-     "fee": {
-      "amount": 0,
-      "currency": "USD"
-     },
-     "notes": "Gratis for Indonesian nationals per the official fee schedule dated 09-July-2026. Maximum stay in India during one calendar year must not exceed 180 days."
     }
    ]
   }
@@ -36930,6 +36641,203 @@
    "exceptions": [
     "Correction: the consular fee for applications lodged in China is charged in CNY, not JPY — MOFA states payment 'shall be made in the local currency of the country (region) where the Embassy or Consulate-General of Japan issuing the visa is located' and gives approx. 15,000 JPY single / 30,000 JPY multiple from 1 July 2026 (https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html)."
    ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "AGO",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://sme.gov.ao/ao/perguntas-frequentes/evisa-english-version/",
+  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"exempt from tourist visa requirements for stays in the Republic of Angola of up to 30 days per entry and 90 days per year\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "permitted_stay": "30 days per entry, up to 90 days per year",
+   "permitted_stay_days": 30,
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   },
+   "exceptions": [
+    "Cumulative visa-free stay capped at 90 days per year (Presidential Decree no. 189/23 of September 29)",
+    "Exemption applies to tourism purposes only"
+   ],
+   "visa_products": [
+    {
+     "type": "No visa needed",
+     "entry": "multiple",
+     "validity": "30 days per entry; max 90 days per year",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 0,
+      "currency": "USD"
+     },
+     "notes": "Unilateral tourist visa exemption under Presidential Decree no. 189/23; China is explicitly listed among the exempt nationalities on the official SME (Servico de Migracao e Estrangeiros) FAQ"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "BIH",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://fipa.vijeceministara.gov.ba/en/visasinformation-for-visitors",
+  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"Citizens of the following countries do not require a visa to enter Bosnia and Herzegovina: ... 91) China (People's Republic of China).\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "permitted_stay": "90 days in any 180-day period",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   },
+   "visa_products": [
+    {
+     "type": "No visa needed",
+     "entry": "multiple",
+     "validity": "90 days in any 180-day period",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 0,
+      "currency": "USD"
+     },
+     "notes": "Bilateral ordinary-passport visa waiver agreement effective 29 May 2018. Stay terms verified on China MFA consular page for BiH (https://cs.mfa.gov.cn/zggmcg/ljmdd/oz_652287/bh_652847/): 持普通护照公民在对方国家入境、出境、停留或者过境，每180日停留不超过90日免办签证"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "BRN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://www.mfa.gov.bn/Pages/D3---D14.aspx",
+  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"Foreign nationals of countries under this category do not require any visas to enter Brunei Darussalam and are allowed to stay in the country for up to 14 days.\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "permitted_stay": "up to 14 days",
+   "permitted_stay_days": 14,
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   },
+   "exceptions": [
+    "Visa application is required for stay/visit of more than the given visa waiver's period"
+   ],
+   "visa_products": [
+    {
+     "type": "No visa needed",
+     "entry": "multiple",
+     "validity": "14 days per visit",
+     "max_stay_days": 14,
+     "fee": {
+      "amount": 0,
+      "currency": "USD"
+     },
+     "notes": "Brunei MFA Visa Information page (https://www.mfa.gov.bn/Pages/Visa-Information.aspx) lists China - Ordinary Passport under Category D3 (Countries which have Visa Waiver Arrangement with Brunei Darussalam)"
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "BLR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://mfa.gov.by/en/visa/freemove/general/",
+  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"People's Republic of China (30 days but no longer than 90 days within one calendar year)\"",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "permitted_stay": "30 days per visit, max 90 days per calendar year",
+   "permitted_stay_days": 30,
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   },
+   "exceptions": [
+    "Total visa-free stay must not exceed 90 days within one calendar year"
+   ],
+   "visa_products": [
+    {
+     "type": "No visa needed",
+     "entry": "multiple",
+     "validity": "30 days per visit; max 90 days per calendar year",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 0,
+      "currency": "USD"
+     },
+     "notes": "Bilateral mutual visa waiver for holders of ordinary passports, listed on the Belarus MFA visa-free travel (general information) page. The previously stored source (usa.mfa.gov.by payment page) does not cover Chinese nationals; replaced with the MFA visa-free page."
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "PRK",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://cs.mfa.gov.cn/zggmcg/ljmdd/yz_645708/cx_646206/",
+  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"朝鲜签证有效期从签发之日起计算，停留期从入境朝鲜之日起计算，必须在签证有效期内入境并出境\"",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel_detail": "Chinese ordinary (private) passport holders must obtain a visa or tourist certificate before travel; tourism must be arranged through travel agencies via a DPRK receiving organization, and tourists are accompanied throughout the stay. The official page states validity runs from date of issue and stay from date of entry, but publishes no numeric durations and no visa fee amounts, so the missing fee amount/currency remain unstated."
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "LBY",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://back.evisa.gov.ly/api/v1/countries",
+  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"\"key\":\"china\",\"name\":{\"en\":\"China\",...},\"is_available\":true,\"code\":\"CN\",...\"exemption_type\":\"NONE\",...\"can_apply_online\":1\"",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "evisa",
+   "visa_category": "Electronic Visa (tourist_visa)",
+   "application_channel": "online_application",
+   "official_portal_url": "https://evisa.gov.ly/",
+   "application_channel_detail": "Official Libya eVisa portal evisa.gov.ly (backend back.evisa.gov.ly, same gov.ly domain). Its API confirms China is available with exemption_type NONE and can_apply_online 1; the eligibility check for a Chinese adult with a Regular passport returns is_banned:false, is_exempted:false; the only available visa type is 'Electronic Visa' (key tourist_visa). The portal publishes no fee amount before account creation/payment, so the missing fee amount/currency remain unstated."
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "MLI",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-29",
+  "verified_by": "Ellis source audit",
+  "source_url": "https://diplomatiemdc.gouv.ml/vitrine/",
+  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"Un visa vous est requis pour voyager sur le territoire Malien.\"",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "official_portal_url": "https://diplomatiemdc.gouv.ml/vitrine/",
+   "application_channel_detail": "The official Mali MFA portal's checker ('Ai-je besoin d'un visa pour voyager au Mali ?'), submitted for Chinese nationality with an Ordinaire passport residing in China, returns that a visa is required and routes the applicant into the ministry's online visa application; lodgement posts for residents of China are the Embassy in Beijing (Ambassade Pekin) or the Consulate General in Guangzhou. Consistent with China MFA's Mali page (持因私普通护照入境马里需提前申请签证). No official source states the visa fee for Chinese nationals (maliembassy.us publishes fees for U.S. citizens only), so the missing fee amount/currency for both the e-Visa and sticker visa products remain unstated."
   }
  }
 ]

@@ -69,6 +69,9 @@ GOV_SUFFIXES = (
     "embassyofguyana.be", "embassyoflibyadc.org", "embassyofniger-usa.org",
     "embassyofuruguay.us", "ambacongo-us.org", "liberianembassyus.org",
     "ambacamcaire.com", "haiti.org", "pakistan.hk",
+    # diplobrazza.net is the Republic of the Congo's MFA: the ministry's own
+    # diplomatie.gouv.cg 301-redirects to it (verified live 2026-08-29).
+    "diplobrazza.net",
 
     # generic
     "gov", "mil",

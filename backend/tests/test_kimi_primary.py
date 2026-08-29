@@ -737,6 +737,23 @@ def test_shipped_overrides_are_internally_consistent():
     from app.visa_snapshot.authority import hostname, is_government_host
     rows = json.loads(pathlib.Path(vo.OVERRIDES).read_text())
     assert rows, "the shipped overrides must not be empty"
+    # One entry per canonical route: a duplicate silently shadows its twin at
+    # load, and a research pipeline once stuffed prose into the document-type
+    # field, keying real data on a nonsense document that matched nothing.
+    from app.visa_snapshot.registry import load_registry
+    doc_codes = {e["code"] for e in
+                 load_registry("travel_document_types")["entries"]}
+    seen_routes = set()
+    for r in rows:
+        rt = r["route"]
+        doc = rt.get("travel_document_type")
+        assert doc is None or doc in doc_codes, \
+            f"{rt['nationality']}->{rt['destination']}: bad document {doc!r}"
+        k = (rt["nationality"], rt["destination"],
+             rt.get("travel_purpose") or "tourism",
+             "" if (doc or "ordinary_passport") == "ordinary_passport" else doc)
+        assert k not in seen_routes, f"duplicate override entry for {k}"
+        seen_routes.add(k)
     for r in rows:
         route = f"{r['route']['nationality']}->{r['route']['destination']}"
         assert is_government_host(hostname(r["source_url"])), route
