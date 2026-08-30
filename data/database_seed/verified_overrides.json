@@ -44911,8 +44911,8 @@
   },
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (validity)",
-  "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
-  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay.",
+  "source_url": "https://indianvisaonline.gov.in/evisa/images/Etourist_fee_final.pdf",
+  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay. | Verified 2026-08-30 against India's per-country e-Tourist fee schedule, dated 9 July 2026 and linked from the official e-visa portal. The fee varies by nationality, so the row for this country was read rather than a general figure. The six month e-T2 V has no column in that table and none in the other official e-visa fee table, so no government publishes a price for it. Indonesia is row 70 and reads 00 in all four columns, so the e-Tourist visa is granted free of charge to Indonesian nationals.",
   "fields": {
    "government_fee": {
     "amount": 0,
@@ -44921,45 +44921,37 @@
    "permitted_stay_days": 180,
    "visa_products": [
     {
-     "type": "30-day e-Tourist Visa",
+     "type": "30-day e-Tourist Visa (e-T1 V)",
      "entry": "multiple",
-     "validity": "6 months",
+     "validity": "30 days from first arrival",
      "max_stay_days": 30,
      "fee": {
       "amount": 0,
       "currency": "USD"
      },
-     "notes": null
+     "notes": "Free of charge for Indonesian nationals: India publishes a nil fee for Indonesia in every e-Tourist tier. A 3% bank charge applies to fee-paying nationalities only."
     },
     {
-     "type": "6-month e-Tourist Visa",
+     "type": "1-year e-Tourist Visa (e-T1 V)",
      "entry": "multiple",
-     "validity": "6 months",
-     "max_stay_days": 30,
-     "fee": null,
-     "notes": null
-    },
-    {
-     "type": "1-year e-Tourist Visa",
-     "entry": "multiple",
-     "validity": "6 months",
-     "max_stay_days": 30,
+     "validity": "1 year from grant",
+     "max_stay_days": 90,
      "fee": {
       "amount": 0,
       "currency": "USD"
      },
-     "notes": null
+     "notes": "Free of charge for Indonesian nationals."
     },
     {
-     "type": "5-year e-Tourist Visa",
+     "type": "5-year e-Tourist Visa (e-T1 V)",
      "entry": "multiple",
-     "validity": "6 months",
-     "max_stay_days": 30,
+     "validity": "5 years from grant",
+     "max_stay_days": 90,
      "fee": {
       "amount": 0,
       "currency": "USD"
      },
-     "notes": null
+     "notes": "Free of charge for Indonesian nationals."
     }
    ],
    "permitted_stay": "30 days from first arrival on the 30-day multiple-entry e-Tourist Visa; 1-year and 5-year multiple-entry e-Tourist Visas capped at 180 days total in a calendar year",
@@ -45084,8 +45076,8 @@
   },
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (validity)",
-  "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
-  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay.",
+  "source_url": "https://indianvisaonline.gov.in/evisa/images/Etourist_fee_final.pdf",
+  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay. | Verified 2026-08-30 against India's per-country e-Tourist fee schedule, dated 9 July 2026 and linked from the official e-visa portal. The fee varies by nationality, so the row for this country was read rather than a general figure. The six month e-T2 V has no column in that table and none in the other official e-visa fee table, so no government publishes a price for it. Malaysia pays nothing for the 30 day tier and 40 US dollars for the one year tier.",
   "fields": {
    "government_fee": {
     "amount": 0,
@@ -45096,50 +45088,46 @@
     {
      "type": "30-day e-Tourist Visa (e-T1 V)",
      "entry": "multiple",
-     "validity": "6 months",
+     "validity": "30 days from first arrival",
      "max_stay_days": 30,
      "fee": {
       "amount": 0,
       "currency": "USD"
      },
-     "notes": null
+     "notes": "Free of charge for Malaysian nationals under India's published per-country schedule."
     },
     {
      "type": "1-year e-Tourist Visa (e-T1 V)",
      "entry": "multiple",
-     "validity": "6 months",
+     "validity": "1 year from grant",
      "max_stay_days": 180,
      "fee": {
       "amount": 40,
       "currency": "USD"
      },
-     "notes": null
-    },
-    {
-     "type": "5-year e-Tourist Visa (e-T1 V)",
-     "entry": "multiple",
-     "validity": "6 months",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 200,
-      "currency": "USD"
-     },
-     "notes": null
+     "notes": "A 3% bank charge is added to the consular fee."
     },
     {
      "type": "6-month e-Tourist Visa (e-T2 V)",
      "entry": "multiple",
-     "validity": "6 months",
+     "validity": "6 months from grant",
      "max_stay_days": 30,
-     "fee": null,
-     "notes": null
+     "fee": {
+      "amount": null,
+      "currency": null
+     },
+     "notes": "India publishes no fee for the six month e-T2 V in either official fee table, for any nationality."
     }
    ],
    "permitted_stay": "30-day e-Tourist Visa: up to 30 days; 1-year/5-year e-Tourist Visas: multiple entry, maximum stay in India 180 days per calendar year",
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "evisa",
    "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
-   "consular_jurisdiction": "Applicants are allocated between missions by place of residence. Each Indian mission publishes its own area, the central portal does not carry one table."
+   "consular_jurisdiction": "Applicants are allocated between missions by place of residence. Each Indian mission publishes its own area, the central portal does not carry one table.",
+   "unpublished_fields": [
+    "visa_fee_amount",
+    "visa_fee_currency"
+   ]
   }
  },
  {
@@ -46916,8 +46904,8 @@
   },
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (validity)",
-  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
-  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "source_url": "https://www.cn.emb-japan.go.jp/itpr_zh/visa_tankishoyo.html",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish. | Verified 2026-08-30 against the Embassy of Japan in China short-term business page, stamped 1 July 2026: validity three months, with a stay of 15, 30 or 90 days set on examination, and a consular fee of 715 yuan with the agency handling fee charged separately. The record had a single product whose own name said diplomatic passport, shown on the ordinary passport page, which is one axis leaking into another.",
   "fields": {
    "application_channel_detail": "Applications by Chinese nationals must be lodged through designated agencies (指定代办机构), which charge their own handling fees on top of the government fee",
    "government_fee": {
@@ -46926,12 +46914,26 @@
    },
    "visa_products": [
     {
-     "type": "Short-term stay visa (business) - diplomatic passport, applied via PRC MFA-designated agency",
-     "entry": null,
-     "validity": "1 years",
+     "type": "Single-entry short-term business visa (短期商务签证)",
+     "entry": "single",
+     "validity": "3 months",
      "max_stay_days": 90,
-     "fee": null,
-     "notes": null
+     "fee": {
+      "amount": 715,
+      "currency": "CNY"
+     },
+     "notes": "The embassy grants a stay of 15, 30 or 90 days on examination. Lodged through a designated agency, which charges its own service fee."
+    },
+    {
+     "type": "Multiple-entry short-term business visa (短期商务多次签证)",
+     "entry": "multiple",
+     "validity": "1, 3 or 5 years",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 1430,
+      "currency": "CNY"
+     },
+     "notes": "Validity is set by the embassy according to the applicant's circumstances."
     }
    ],
    "processing_time": "5 working days",
@@ -47355,8 +47357,8 @@
   },
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (validity)",
-  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
-  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "source_url": "https://www.cn.emb-japan.go.jp/itpr_zh/visa_kanko.html",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish. | Verified 2026-08-30 against the Embassy of Japan in China, pages stamped 1 July 2026. The tourism page gives the individual single-entry visa a three month validity with a stay of 15 or 30 days set by the embassy, and sets out the group and multi-year tiers. The fee page states 715 yuan for a single entry and 1,430 for a multiple entry, for Chinese nationals specifically, and says the designated agency charges its own handling fee on top. Only the consular fee is recorded here. The three and five year multiple-entry visas were missing from the tourism answer while appearing on the family visit answer for the same route, which is one of the demo defects Trip.com listed.",
   "fields": {
    "permitted_stay": "15 or 30 days on a single-entry tourist visa (decided by the mission); 30 days per visit on the 3-year multiple-entry visas; 90 days per visit on the 5-year multiple-entry visa",
    "government_fee": {
@@ -47367,21 +47369,46 @@
     {
      "type": "Group tourist visa (团队旅游签证)",
      "entry": "single",
-     "validity": null,
+     "validity": "3 months",
      "max_stay_days": 15,
      "fee": {
       "amount": 715,
       "currency": "CNY"
      },
-     "notes": null
+     "notes": "Lodged by a designated travel agency. The agency charges its own service fee on top of the consular fee."
     },
     {
-     "type": "Temporary Visitor (short-term stay, tourism)",
-     "entry": null,
-     "validity": null,
+     "type": "Individual single-entry tourist visa (个人单次旅游签证)",
+     "entry": "single",
+     "validity": "3 months",
      "max_stay_days": 30,
-     "fee": null,
-     "notes": null
+     "fee": {
+      "amount": 715,
+      "currency": "CNY"
+     },
+     "notes": "The embassy decides whether the stay granted is 15 or 30 days. No tour leader or guide is required."
+    },
+    {
+     "type": "3-year multiple-entry tourist visa (三年多次旅游签证)",
+     "entry": "multiple",
+     "validity": "3 years",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 1430,
+      "currency": "CNY"
+     },
+     "notes": "For applicants meeting the embassy's financial and travel history conditions. 30 days per visit."
+    },
+    {
+     "type": "5-year multiple-entry tourist visa (五年多次旅游签证)",
+     "entry": "multiple",
+     "validity": "5 years",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 1430,
+      "currency": "CNY"
+     },
+     "notes": "For applicants meeting the embassy's stricter financial conditions. 90 days per visit."
     }
    ],
    "arrival_card": {
