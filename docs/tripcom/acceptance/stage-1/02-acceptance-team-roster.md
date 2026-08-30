@@ -1,5 +1,5 @@
 # Stage 1 acceptance team roster 验收小组名单
-**承建单位自测 Contractor Self-Test** · generated 2026-08-30 11:13 UTC
+**承建单位自测 Contractor Self-Test** · generated 2026-08-30 11:46 UTC
 
 Party A appoints the team leader per the Acceptance and Delivery Standard.
 This roster is filled in by both parties before the stage begins.

@@ -16,6 +16,9 @@ from urllib.parse import urlparse
 # only (host == suffix or host endswith "." + suffix). This is a curated,
 # versioned allowlist — additions require evidence review.
 GOV_SUFFIXES = (
+    # The .va top level domain is reserved to the Holy See, so its own sites
+    # are government sites. Vatican pages were being refused as unofficial.
+    "vaticanstate.va", "vatican.va",
     # 2026-08-28 adjudication batch: national government portals and foreign
     # ministries on non-gov TLDs, each opened and read before being listed.
     "chinhphu.vn", "ireland.ie", "mfa.tj", "bahrain.bh", "cubaminrex.cu",

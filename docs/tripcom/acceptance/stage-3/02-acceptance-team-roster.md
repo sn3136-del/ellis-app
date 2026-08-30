@@ -1,5 +1,5 @@
 # Stage 3 acceptance team roster 验收小组名单
-**灰度验收 Canary Acceptance** · generated 2026-08-30 11:13 UTC
+**灰度验收 Canary Acceptance** · generated 2026-08-30 11:46 UTC
 
 Party A appoints the team leader per the Acceptance and Delivery Standard.
 This roster is filled in by both parties before the stage begins.

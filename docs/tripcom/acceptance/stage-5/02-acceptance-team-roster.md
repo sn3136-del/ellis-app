@@ -1,5 +1,5 @@
 # Stage 5 acceptance team roster 验收小组名单
-**持续监控验收 Ongoing Monitoring** · generated 2026-08-30 11:13 UTC
+**持续监控验收 Ongoing Monitoring** · generated 2026-08-30 11:46 UTC
 
 Party A appoints the team leader per the Acceptance and Delivery Standard.
 This roster is filled in by both parties before the stage begins.

@@ -32,7 +32,17 @@ srcs=sum(1 for r in recs if r.get("source_url"))
 STA=["HKG","TWN","JPN","KOR","USA","THA","SGP","MYS","GBR","RUS","AUS","IDN",
      "PHL","FRA","VNM","ESP","IND","CAN"]
 nat=collections.Counter(r["travel_document_country"] for r in recs)
+# Depth, not presence. Counting a station as covered because it has one record
+# let sixteen thin stations read the same as the two test stations that are at
+# full depth, which is the opposite of what the metric is for. A station is
+# reported as at depth when it answers for at least 100 destinations, the
+# level the two designated test stations are held to.
+DEPTH=100
+dests=collections.defaultdict(set)
+for r in recs: dests[r["travel_document_country"]].add(r["destination_country"])
 stations=sum(1 for s in STA if nat.get(s))
+at_depth=sum(1 for s in STA if len(dests.get(s) or ()) >= DEPTH)
+depth_detail=", ".join(f"{s} {len(dests.get(s) or ())}" for s in STA)
 openish=[i for i in issues if i["status"] not in ("published","dismissed")]
 def _age(iso):
     try:
@@ -49,6 +59,8 @@ M = {
                             "≥90%", 100*(conf['High']+conf['Medium'])/len(recs)>=90),
  "source_coverage": (f"{100*srcs/len(recs):.2f}%", "100%", srcs==len(recs)),
  "station_coverage": (f"{stations}/18", "≥18", stations>=18),
+ "station_depth": (f"{at_depth}/18 at {DEPTH}+ destinations", f"18/18 by full acceptance",
+                   at_depth>=18),
  "error_feedback_48h": (f"{len(old48)} past 48h", "0 past 48h", not old48),
  "records": (str(len(recs)), "n/a", True),
  "held_from_customers": (str(conf["Low"]), "n/a", True),
@@ -80,6 +92,7 @@ def metrics_table():
            "source_coverage":"Source coverage 信源覆盖率",
            "station_coverage":"Station coverage 站点覆盖率",
            "error_feedback_48h":"Error feedback closure 错误反馈时效",
+           "station_depth":"Station depth 站点深度",
            "records":"Records delivered 记录数",
            "held_from_customers":"Held from customers 暂不对客"}
     for k,(val,target,ok) in M.items():

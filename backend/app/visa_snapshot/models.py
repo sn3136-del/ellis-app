@@ -482,6 +482,14 @@ class DatabaseIssueReport(Base, TimestampMixin):
         DateTime(timezone=True), nullable=True)
     published_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True)
+    # What the page actually said, in full, next to what the record holds.
+    # The note is a one-line summary clipped at 120 characters per field, so
+    # an operator reading the queue could see that a value was contested but
+    # not what it was contested with, and could not rule on it without going
+    # back to the page by hand. This carries the whole proposal, the value it
+    # would replace, the verbatim quote and the page it came from, so the
+    # decision can be made where the issue is read.
+    proposal: Mapped[dict] = mapped_column(JSON, default=dict)
 
 
 class DatabaseAskLog(Base, TimestampMixin):

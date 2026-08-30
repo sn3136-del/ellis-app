@@ -1,5 +1,5 @@
 # Stage 3 functional checklist 功能清单
-**灰度验收 Canary Acceptance** · measured 2026-08-30 11:13 UTC
+**灰度验收 Canary Acceptance** · measured 2026-08-30 11:46 UTC
 
 Verdicts are left blank for Party A to complete. The evidence column is
 measured from the live system.
@@ -14,7 +14,7 @@ measured from the live system.
 | 6 | Per-field checklist over the 25 fields | field_status on every record | |
 | 7 | Change management, add / modify / delete highlighted | /api/database/changes | |
 | 8 | Issue loop: flag, notify, correct, review, publish | /api/database/issues | |
-| 9 | Confidence labelling, low withheld from customers | 50 records held | |
+| 9 | Confidence labelling, low withheld from customers | 35 records held | |
 | 10 | Source traceability, clickable official URL | 100.00% coverage | |
 | 11 | Batch Excel export by filter | /api/database/export.xlsx | |
 | 12 | AI Q&A answers logged for sampling | /api/database/asks | |

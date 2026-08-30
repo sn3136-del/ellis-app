@@ -1225,6 +1225,8 @@ export default function QualityConsole() {
   const [tab, setTab] = useState('records')
   const [filters, setFilters] = useState(EMPTY_FILTERS)
   const activeFilters = Object.values(filters).filter(Boolean).length
+  const [reg, setReg] = useState(null)
+  const [data, setData] = useState(null)
   // Suggestions come from the visa type names that actually exist, so the box
   // can never propose a filter that returns nothing.
   const documentOptions = useMemo(() => {
@@ -1242,8 +1244,6 @@ export default function QualityConsole() {
     }
     return [...seen.entries()].sort((a, b) => b[1] - a[1]).map(([v]) => v)
   }, [data])
-  const [reg, setReg] = useState(null)
-  const [data, setData] = useState(null)
   const [changes, setChanges] = useState(null)
   const [issues, setIssues] = useState(null)
   const [freshness, setFreshness] = useState(null)

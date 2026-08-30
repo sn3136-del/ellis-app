@@ -891,6 +891,7 @@ def travel_database_issues(db=Depends(get_session),
                         "reviewed_by": r.reviewed_by,
                         "reviewed_at": _iso(r.reviewed_at),
                         "published_at": _iso(r.published_at),
+                        "proposal": r.proposal or {},
                         "created_at": _iso(r.created_at)} for r in rows]}
 
 
