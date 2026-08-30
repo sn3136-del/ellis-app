@@ -610,8 +610,38 @@ function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
           </div>
         </div>
       ))}
+      {/* §4.2.1's cross-validation, one URL per source. Field 22 holds a
+          single source_url by their dictionary, so a route checked against
+          three ministries could show one of them and the rest were
+          unauditable. These sit beside the 25 fields, each clickable. */}
+      {(rec.corroborating_sources || []).length > 0 && (
+        <div style={{ gridColumn: '1 / -1', background: '#fff',
+                      border: '1px solid #eef2f8', borderRadius: 10,
+                      padding: '10px 12px', minWidth: 0 }}>
+          <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 0.7,
+                        textTransform: 'uppercase', color: GRAY }}>
+            {t('ops.crossChecked')}
+          </div>
+          <ul style={{ margin: '7px 0 0', paddingLeft: 16, fontSize: 12,
+                       color: NAVY, lineHeight: 1.5 }}>
+            {(rec.corroborating_sources || []).map((c, i) => (
+              <li key={i} style={{ marginBottom: 5, overflowWrap: 'anywhere' }}>
+                <a href={c.url} target="_blank" rel="noreferrer"
+                   style={{ color: BLUE, fontWeight: 600 }}>
+                  {c.authority || siteOf(c.url)} ↗
+                </a>
+                {c.quote ? <span style={{ color: GRAY }}> — “{c.quote}”</span> : null}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   )
+}
+
+function siteOf(url) {
+  try { return new URL(url).hostname.replace(/^www\./, '') } catch { return url }
 }
 
 const CONF_RANK = { High: 3, Medium: 2, Low: 1 }

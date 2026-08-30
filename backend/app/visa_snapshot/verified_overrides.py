@@ -66,6 +66,12 @@ OVERRIDABLE = frozenset({
     # written here passes the same government-host gate as the override's own
     # provenance, so this cannot be used to smuggle in an unofficial page.
     "source_url",
+    # §4.2.1: where no single official source settles a route, several
+    # high-credibility sources are cross-checked and "每条来源须逐条绑定URL",
+    # each source bound to its own URL. A record carried exactly one URL, so
+    # a route checked against three ministries could show only one of them and
+    # the other two were unauditable. Each entry is gated individually.
+    "corroborating_sources",
 })
 
 # Fields whose value is a link. Whatever an override puts in one of these has
@@ -90,6 +96,33 @@ _REVIEWER_VOICE = (
 _CUSTOMER_TEXT = ("exceptions", "application_channel_detail", "requirement_detail",
                   "permitted_stay", "processing_time", "required_documents",
                   "entry_requirements", "consular_jurisdiction")
+
+
+def _clean_corroborating(value):
+    """Keep only entries that name an official page and say what it said.
+
+    An entry is {url, quote} at minimum. A URL that fails the government-host
+    gate is dropped rather than the whole list, so one bad citation cannot
+    take the good ones with it, and an entry with no quote is dropped because
+    a bare link is not evidence of agreement."""
+    if not isinstance(value, (list, tuple)):
+        return None
+    kept = []
+    for item in value:
+        if not isinstance(item, dict):
+            continue
+        url = str(item.get("url") or "").strip()
+        quote = str(item.get("quote") or "").strip()
+        if not url or not quote:
+            continue
+        if not is_government_host(hostname(url)):
+            continue
+        entry = {"url": url, "quote": quote[:600]}
+        for k in ("checked_at", "authority", "agrees"):
+            if item.get(k) not in (None, ""):
+                entry[k] = item[k]
+        kept.append(entry)
+    return kept or None
 
 
 def _reads_like_review(value) -> bool:
@@ -159,6 +192,12 @@ def _load_table() -> dict:
         for k in _CUSTOMER_TEXT:
             if k in clean and _reads_like_review(clean[k]):
                 clean.pop(k, None)
+        if "corroborating_sources" in clean:
+            cleaned = _clean_corroborating(clean["corroborating_sources"])
+            if cleaned:
+                clean["corroborating_sources"] = cleaned
+            else:
+                clean.pop("corroborating_sources", None)
         if not clean:
             continue
         table[_key(route["nationality"], route["destination"],

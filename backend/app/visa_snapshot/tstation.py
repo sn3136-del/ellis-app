@@ -749,6 +749,12 @@ def records_for_route(route: dict, guidance: dict,
         "info_validity": g.get("policy_valid_until")
                          or ((valid_until or "")[:10] or None),
         "confidence_level": _confidence(g, provenance, grounded_ok),
+        # §4.2.1's cross-validation, bound one URL at a time. This sits
+        # ALONGSIDE the 25 fields rather than inside them: field 22 is a
+        # single source_url by their dictionary and stays that way, so the
+        # export shape is unchanged. What was missing was any slot at all for
+        # the second and third page a route was checked against.
+        "corroborating_sources": _corroborating(g),
         "_prov": bool(provenance), "_grounded": grounded_ok,
         "_unpublished": sorted(_unpub),
     }
@@ -817,6 +823,28 @@ def records_for_route(route: dict, guidance: dict,
                                          else f"{row['special_conditions']}. {note}")
         rows.append(_regrade({k: _clean_text(v) for k, v in row.items()}, g, disputed_fields, _unpub))
     return rows
+
+
+def _corroborating(g: dict) -> list:
+    """The other official pages this answer was checked against.
+
+    Their clause asks for each source to be bound to its own URL where no
+    single official source settles the route. One URL per record could not
+    express that, so a route checked against three ministries showed one and
+    the rest were unauditable."""
+    out = []
+    for item in (g or {}).get("corroborating_sources") or []:
+        if not isinstance(item, dict):
+            continue
+        url = str(item.get("url") or "").strip()
+        if not url:
+            continue
+        row = {"url": url, "quote": _clean_text(item.get("quote"))}
+        for k in ("authority", "checked_at", "agrees"):
+            if item.get(k) not in (None, ""):
+                row[k] = item[k]
+        out.append(row)
+    return out
 
 
 def field_status(row: dict, unpublished: set | None = None) -> dict:

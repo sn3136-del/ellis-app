@@ -9496,7 +9496,15 @@
    "permitted_stay": "30 calendar days on entry, extendable by a transitory-stay permit of up to 60 further calendar days (90 days in total)",
    "permitted_stay_days": 30,
    "visa_category": "tourist visa",
-   "application_channel": "on_arrival"
+   "application_channel": "on_arrival",
+   "corroborating_sources": [
+    {
+     "url": "https://cs.mfa.gov.cn/",
+     "quote": "(1) The cited official_source is https://cs.mfa.gov.cn/..., the CHINESE foreign ministry, i.e.",
+     "authority": "cs.mfa.gov.cn",
+     "checked_at": "2026-08-25"
+    }
+   ]
   }
  },
  {
@@ -9751,7 +9759,15 @@
    "account_registration_steps": [],
    "payment_process": [],
    "submission_process": [],
-   "appointment_required": false
+   "appointment_required": false,
+   "corroborating_sources": [
+    {
+     "url": "https://e-visa.gov.uz",
+     "quote": "Ellis still serves route_workflow_type 'evisa_portal' with source_url https://e-visa.gov.uz and a workflow_plan containing generate_route_adapter, account_registration, display_exa Official text: citizens of both countries can travel to each other's territory without a visa for up to 30 days per visit, and for a total of no more than 90 days within any 180-day period",
+     "authority": "e-visa.gov.uz",
+     "checked_at": "2026-08-25"
+    }
+   ]
   }
  },
  {
@@ -9881,7 +9897,15 @@
    "account_registration_steps": [],
    "payment_process": [],
    "submission_process": [],
-   "appointment_required": false
+   "appointment_required": false,
+   "corroborating_sources": [
+    {
+     "url": "https://evisa.gov.az/en/",
+     "quote": "It carries route_workflow_type \"evisa_portal\", source_url https://evisa.gov.az/en/, application_channel_detail \"Apply person Official text: IV Group | A visa-free regime is being applied by the Republic of Azerbaijan for the ordinary passport holders of the following countries on a unilateral basis within the relevant period: 1.",
+     "authority": "evisa.gov.az",
+     "checked_at": "2026-08-25"
+    }
+   ]
   }
  },
  {
@@ -10348,7 +10372,15 @@
   "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. Ellis serves ELECTRONIC_AUTHORIZATION_REQUIRED, requirement_detail \"evisa\", application_channel \"online_portal\" with a DGME eVisa portal at https://www.migracion.gob.sv, account registration, online card payment and \"Up to 90 days\" / 90 permitted_stay_days. None of that is on the official source: th Official text: Categoría A: Exento de visa. Categoría B: Visa Consular o Sin Consulta. Categoría C: Visa Consultada. [...] (República Popular China + Ordinario + no US/Canada/Schengen visa + no foreign residence) \"Usted califica para V",
   "fields": {
    "disposition": "CONDITIONAL",
-   "permitted_stay": "Not stated on the official source; length of stay is set by the consular visa granted (the rree.gob.sv tool publishes no day figure)"
+   "permitted_stay": "Not stated on the official source; length of stay is set by the consular visa granted (the rree.gob.sv tool publishes no day figure)",
+   "corroborating_sources": [
+    {
+     "url": "https://www.migracion.gob.sv",
+     "quote": "Ellis serves ELECTRONIC_AUTHORIZATION_REQUIRED, requirement_detail \"evisa\", application_channel \"online_portal\" with a DGME eVisa portal at https://www.migracion.gob.sv, account registration, online card payment and \"Up to 90 days\" / 90 permitted_stay_days.",
+     "authority": "migracion.gob.sv",
+     "checked_at": "2026-08-25"
+    }
+   ]
   }
  },
  {
@@ -11717,7 +11749,15 @@
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 30,
-   "permitted_stay": "30 days, extendable once for a further 30 days"
+   "permitted_stay": "30 days, extendable once for a further 30 days",
+   "corroborating_sources": [
+    {
+     "url": "https://migracao.gov.tl/wp/visa-exemptions/",
+     "quote": "China is not on any visa-exemption list (https://migracao.gov.tl/wp/visa-exemptions/ covers Schengen, Indonesia/Malaysia/Singapore/Thailand, and diplomatic/service passports only), so the on-arrival tourist visa is the app",
+     "authority": "migracao.gov.tl",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -12174,6 +12214,14 @@
     "China is NOT among Japan's visa exemption arrangements for diplomatic and official passport holders (MOFA 65-country list, https://www.mofa.go.jp/ca/fna/page22e_000692.html), so Chinese diplomatic passport holders also require a visa for tourism.",
     "Visa fees were revised effective 1 July 2026 (Embassy notice 2026-06-24, https://www.cn.emb-japan.go.jp/itpr_zh/00_000485_00222.html): 单次签证 715元, 两次签证 1,430元, 数次签证 1,430元; MOFA states approx. 15,000 JPY single / 30,000 JPY multiple, payable in local currency (https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html). The older 200/400元 tourist-fee page (2019) is superseded.",
     "No fee is charged if the visa is not issued; designated agencies charge separate service fees."
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://www.mofa.go.jp/",
+     "quote": "China is also absent from MOFA's 74-country ordinary-passport exemption list (https://www.mofa.go.jp/ | Gap-close research 2026-08-29 against the official page.",
+     "authority": "mofa.go.jp",
+     "checked_at": "2026-08-29"
+    }
    ]
   }
  },
@@ -12842,6 +12890,14 @@
     "return ticket booking",
     "invitation letter (if any)",
     "letter of dispatch from employer"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://beijing.mofa.gov.bd/pages/static-pages/6952669c35ce18",
+     "quote": "Bangladesh Embassy Beijing publishes a country-specific chart: 'Visa Fee for Chinese Citizen: Single Entry RMB 200 (ordinary) / RMB 300 (urgent); Double Entry RMB 250 / RMB 350; Multiple Entry RMB 585 / RMB 585' (https://beijing.mofa.gov.bd/pages/static-pages/6952669c35ce18 | quote: Rate of Visa Fees (in Hong Kong Dollars) | Sl.",
+     "authority": "beijing.mofa.gov.bd",
+     "checked_at": "2026-08-28"
+    }
    ]
   }
  },
@@ -13147,6 +13203,14 @@
      },
      "notes": null
     }
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://www.moi.gov.jo/Ar/Pages/الدول_الجنسيات_المقيدة_وغير_المقيدة",
+     "quote": "China is NOT on the Ministry of Interior's prior-approval list (https://www.moi.gov.jo/Ar/Pages/الدول_الجنسيات_المقيدة_وغير_المقيدة lists only Afghanistan, Iran, PNG, Pakistan, Sri Lanka, Philippines, Cambodia, Laos, Mongolia, Myanmar, Nepal, Iraq, Yemen, Bangladesh in As | quote: رسوم التأشيرة - 3 اشهر / سفرة واحدة 40 دينار أردني - 3 اشهر/ سفرتين 60 دينار أرد",
+     "authority": "moi.gov.jo",
+     "checked_at": "2026-08-28"
+    }
    ]
   }
  },
@@ -13328,7 +13392,15 @@
   "fields": {
    "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
    "permitted_stay_days": 30,
-   "permitted_stay": "up to 30 days on a K2 tourist e-visa"
+   "permitted_stay": "up to 30 days on a K2 tourist e-visa",
+   "corroborating_sources": [
+    {
+     "url": "https://immigration.gov.mn/en/articles/537/",
+     "quote": "Mongolia's tourist visa exemption programme covers only 34 countries and China is not among them (https://immigration.gov.mn/en/articles/537/), and the Mongolian Consulate General in Shanghai states 'Chinese nationals wh",
+     "authority": "immigration.gov.mn",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -14098,7 +14170,15 @@
   "fields": {
    "disposition": "VISA_ON_ARRIVAL",
    "permitted_stay_days": 30,
-   "permitted_stay": "30 days, single entry, extendable once for the same period"
+   "permitted_stay": "30 days, single entry, extendable once for the same period",
+   "corroborating_sources": [
+    {
+     "url": "https://migracao.gov.tl/wp/visa-exemptions/",
+     "quote": "Timor-Leste's tourist visa is granted on arrival to any nationality meeting the criteria; the page states it is \"valid for a single entry, thirty days stay and may be extended once for the same period.\" The separate visa-exemptions page (https://migracao.gov.tl/wp/visa-exemptions/) covers only Schengen citizens, Indonesia/Malaysia/Singapore/Thailand, and diplomatic/official pas",
+     "authority": "migracao.gov.tl",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -14148,6 +14228,14 @@
       "currency": null
      },
      "notes": "Availability and validity for Hong Kong applicants should be confirmed on the official portal"
+    }
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://evisa.gov.sz/VisaApplicationGuidelines",
+     "quote": "Alternative channel: Eswatini runs an official eVisa portal (https://evisa.gov.sz/VisaApplicationGuidelines) which states \"If the names of country of origin is not listed amongst member countries requiring visa to enter the Kingdom o",
+     "authority": "evisa.gov.sz",
+     "checked_at": "2026-08-28"
     }
    ]
   }
@@ -14326,6 +14414,14 @@
      },
      "notes": "Hong Kong is on the Department of Immigration Category A list, no visa to enter. Travellers are encouraged to complete the Zimbabwe Entry Declaration Form before travelling"
     }
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://www.zimimmigration.gov.zw/?p=7176",
+     "quote": "The Department of Immigration's Category A list (https://www.zimimmigration.gov.zw/?p=7176) reads: 'The countries listed below do not require a visa to enter the country' and includes 'Hong Kong'.",
+     "authority": "zimimmigration.gov.zw",
+     "checked_at": "2026-08-28"
+    }
    ]
   }
  },
@@ -14400,6 +14496,14 @@
     "hotel booking confirmation or invitation letter with host ID/passport copy",
     "money order/cashier's check for the fee",
     "self-addressed prepaid return envelope if applying by mail"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://losangeles.mofa.gov.bd/pages/static-pages/6952667435ce18e1c05a93a3",
+     "quote": "ordinary/private passport holder is US$160.00' (https://losangeles.mofa.gov.bd/pages/static-pages/6952667435ce18e1c05a93a3).",
+     "authority": "losangeles.mofa.gov.bd",
+     "checked_at": "2026-08-28"
+    }
    ]
   }
  },
@@ -15348,6 +15452,14 @@
    "official_portal_url": "https://www.evisa.gov.zw/",
    "exceptions": [
     "The official fee schedule lists the Emergency visa (online) at USD 100 but publishes no validity period or number of entries for it; the eVisa portal FAQ (https://www.evisa.gov.zw/faq.html) describes only single entry ('one (1) month'), double entry ('three (3) months'), multiple entry ('six (6) months') and KAZA UniVisa ('one (1) month') and does not mention the emergency visa. The requested entries/validity facts for the Emergency visa are therefore not officially published and remain absent."
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://www.zimimmigration.gov.zw/?p=7186",
+     "quote": "USA is Category B (https://www.zimimmigration.gov.zw/?p=7186, 'require a visa to enter Zimbabwe.",
+     "authority": "zimimmigration.gov.zw",
+     "checked_at": "2026-08-29"
+    }
    ]
   }
  },
@@ -15382,7 +15494,15 @@
   "fields": {
    "disposition": "VISA_EXEMPT",
    "permitted_stay_days": 30,
-   "permitted_stay": "30 days"
+   "permitted_stay": "30 days",
+   "corroborating_sources": [
+    {
+     "url": "https://en.nia.gov.cn/n147418/n147463/c181470/content.html",
+     "quote": "Corroborated by China's National Immigration Administration table (https://en.nia.gov.cn/n147418/n147463/c181470/content.html), 'Republic of Korea | Diplomatic passports, service (official) passports | 2014.12.25 | 30 days'.",
+     "authority": "en.nia.gov.cn",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -15467,7 +15587,15 @@
   "fields": {
    "disposition": "VISA_EXEMPT",
    "permitted_stay_days": 30,
-   "permitted_stay": "30 days"
+   "permitted_stay": "30 days",
+   "corroborating_sources": [
+    {
+     "url": "https://ph.china-embassy.gov.cn/eng/sgdt/200503/t20050303_1180863.htm",
+     "quote": "Confirmed by the Chinese Embassy in Manila's notice on entry into force (https://ph.china-embassy.gov.cn/eng/sgdt/200503/t20050303_1180863.htm) and by China's NIA table ('The Philippines | Diplomatic passports, service (official) passports (only for temporary visitors) | 2005.02.28 | 30 days').",
+     "authority": "ph.china-embassy.gov.cn",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -15535,7 +15663,15 @@
   "fields": {
    "disposition": "VISA_EXEMPT",
    "permitted_stay_days": 30,
-   "permitted_stay": "30 days"
+   "permitted_stay": "30 days",
+   "corroborating_sources": [
+    {
+     "url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/0303/%E0%B8%9C.60.pdf",
+     "quote": "Traveldoc's 60 days is the ORDINARY-passport figure: Hong Kong is item 31 on Thailand's separate 60-day visa exemption scheme list for ordinary passports (https://image.mfa.go.th/mfa/0/zE6021nSnu/0303/%E0%B8%9C.60.pdf, 15 July 2024).",
+     "authority": "image.mfa.go.th",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -15620,7 +15756,15 @@
   "fields": {
    "disposition": "VISA_EXEMPT",
    "permitted_stay_days": 14,
-   "permitted_stay": "14 days initial admission"
+   "permitted_stay": "14 days initial admission",
+   "corroborating_sources": [
+    {
+     "url": "https://immigration.gov.ph/visa-waiver/",
+     "quote": "Same Philippine DFA source; corroborated by the Bureau of Immigration visa waiver page (https://immigration.gov.ph/visa-waiver/) listing 'HONG KONG / MACAU SAR PASSPORT 14 days initial admission'.",
+     "authority": "immigration.gov.ph",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -15636,7 +15780,15 @@
   "fields": {
    "disposition": "VISA_EXEMPT",
    "permitted_stay_days": 90,
-   "permitted_stay": "Free 90-day Visitor's Permit issued on arrival to all foreign nationals; extendable at the Immigration Office in Apia"
+   "permitted_stay": "Free 90-day Visitor's Permit issued on arrival to all foreign nationals; extendable at the Immigration Office in Apia",
+   "corroborating_sources": [
+    {
+     "url": "https://www.mfat.gov.ws/wp-content/uploads/2013/10/Entry-requirements-into-Samoa.pdf",
+     "quote": "Ellis's 60 matches a stale MFAT handout (https://www.mfat.gov.ws/wp-content/uploads/2013/10/Entry-requirements-into-Samoa.pdf, uploaded 2013) that still says 'stays less than 60 days'.",
+     "authority": "mfat.gov.ws",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -15784,7 +15936,15 @@
   "note": "Neither figure is right as published. The Embassy of St. Kitts and Nevis to the USA (embassydc.gov.kn) says the initial stay is one month. Traveldoc's 180 matches the statutory maximum in the Immigration Act CAP. 6.02 s.14(1)(b), 'for such period, not exceeding six months as that officer considers appropriate' (https://lawcommission.gov.kn/wp-content/documents/Act17TOC/Ch-06_02",
   "fields": {
    "permitted_stay_days": 30,
-   "permitted_stay": "Initial stay of up to 1 month granted at the officer's discretion on arrival; extendable, with a statutory ceiling of 6 months"
+   "permitted_stay": "Initial stay of up to 1 month granted at the officer's discretion on arrival; extendable, with a statutory ceiling of 6 months",
+   "corroborating_sources": [
+    {
+     "url": "https://lawcommission.gov.kn/wp-content/documents/Act17TOC/Ch-06_02",
+     "quote": "6.02 s.14(1)(b), 'for such period, not exceeding six months as that officer considers appropriate' (https://lawcommission.gov.kn/wp-content/documents/Act17TOC/Ch-06_02",
+     "authority": "lawcommission.gov.kn",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -15800,7 +15960,15 @@
   "fields": {
    "disposition": "VISA_EXEMPT",
    "permitted_stay_days": 180,
-   "permitted_stay": "No visa required; up to six months may be granted in a calendar year"
+   "permitted_stay": "No visa required; up to six months may be granted in a calendar year",
+   "corroborating_sources": [
+    {
+     "url": "https://passport.govmu.org/passport/wp-content/uploads/2021/03/Visa-Requirement-Country-2025.pdf",
+     "quote": "The country table linked from that page (https://passport.govmu.org/passport/wp-content/uploads/2021/03/Visa-Requirement-Country-2025.pdf, row 187) reads 'United States of America No visa required.' - it assigns no duration, so the governing number is the Tourist Visa ceiling of six months per calendar year, which supports Ellis's 18",
+     "authority": "passport.govmu.org",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -15815,7 +15983,15 @@
   "note": "183 is Peru's statutory tourist ceiling and applies to the tourist migratory status generally, whether or not a visa was needed - Migraciones' own tourist campaign page warns about the daily UIT fine for exceeding it (https://www.gob.pe/institucion/migraciones/campanas/64003-informacion-fundamental-para-turistas-en-peru). Traveldoc's 90 is the common stamp, not the legal limit.",
   "fields": {
    "permitted_stay_days": 183,
-   "permitted_stay": "Up to 183 calendar days, counted across continuous or consecutive visits within a 12-month period"
+   "permitted_stay": "Up to 183 calendar days, counted across continuous or consecutive visits within a 12-month period",
+   "corroborating_sources": [
+    {
+     "url": "https://www.gob.pe/institucion/migraciones/campanas/64003-informacion-fundamental-para-turistas-en-peru",
+     "quote": "183 is Peru's statutory tourist ceiling and applies to the tourist migratory status generally, whether or not a visa was needed - Migraciones' own tourist campaign page warns about the daily UIT fine for exceeding it (https://www.gob.pe/institucion/migraciones/campanas/64003-informacion-fundamental-para-turistas-en-peru).",
+     "authority": "gob.pe",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -15846,7 +16022,15 @@
   "fields": {
    "disposition": "VISA_EXEMPT",
    "permitted_stay_days": 90,
-   "permitted_stay": "90 days visa-free"
+   "permitted_stay": "90 days visa-free",
+   "corroborating_sources": [
+    {
+     "url": "https://portal.moi.gov.qa/wps/portal/MOIInternet/departmentcommittees/visasentryperme",
+     "quote": "Ellis's 30 matches the older Ministry of Interior on-arrival page (https://portal.moi.gov.qa/wps/portal/MOIInternet/departmentcommittees/visasentryperme",
+     "authority": "portal.moi.gov.qa",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -16157,6 +16341,14 @@
     "Copy of hotel reservation in Guyana",
     "Recent bank statement; letter from employer where applicable",
     "Yellow fever vaccination card if travelling from a country with risk of yellow fever transmission"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://eservices.iss.gov.gy/",
+     "quote": "(1) 'evisa' is WRONG for tourists: Guyana's eServices portal (https://eservices.iss.gov.gy/) exists, but the Guyana missions state that only \"Student, Business and Employment visas MUST be submitted online\" - a tourist must lodge a prior-entry tourist visa application in person or by c | quote: A Tourist visa is valid for (1) month fo | Gap-close research 2026-08-29 against the official page.",
+     "authority": "eservices.iss.gov.gy",
+     "checked_at": "2026-08-29"
+    }
    ]
   }
  },
@@ -16680,6 +16872,14 @@
       "currency": "USD"
      },
      "notes": "Max 90 consecutive days per visit and no more than 180 days per year"
+    }
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://www.gov.il/en/Departments/DynamicCollectors/tarifimconsularim",
+     "quote": "Two official prices exist: the MFA consular fee table (https://www.gov.il/en/Departments/DynamicCollectors/tarifimconsularim, filtered to Service 'B/2-Visitor Visa', Country 'CHINA') gives 'Dollar rate 32, Euro rate 28, Currency CHINESE YUAN, local rate 231, Updated for 2026' for a co | quote: eVisa-B2 Tourist Visa ...",
+     "authority": "gov.il",
+     "checked_at": "2026-08-28"
     }
    ]
   }
@@ -18231,6 +18431,14 @@
     "Valid passport",
     "hotel booking confirmation",
     "evidence of the purpose of travel"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://mfa.gov.af/en/page/39100",
+     "quote": "|| Entry Visa (https://mfa.gov.af/en/page/39100):",
+     "authority": "mfa.gov.af",
+     "checked_at": "2026-08-28"
+    }
    ]
   }
  },
@@ -18295,7 +18503,15 @@
      "notes": null
     }
    ],
-   "permitted_stay": "One month stay"
+   "permitted_stay": "One month stay",
+   "corroborating_sources": [
+    {
+     "url": "https://mfa.gov.af/en/page/39100",
+     "quote": "|| Entry Visa (https://mfa.gov.af/en/page/39100): Fee '100$', Validity 'Three months (one month stay)'.",
+     "authority": "mfa.gov.af",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -19344,6 +19560,14 @@
      },
      "notes": "Processing 7-10 working days. Multiple-entry tourist status is obtainable only as an extension applied for from inside Pakistan."
     }
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://visa.nadra.gov.pk/fee-structure/",
+     "quote": "Pakistan's own fee calculator on the Ministry of Interior portal (https://visa.nadra.gov.pk/fee-structure/, backed by /evisaFee/fetch-record.php) returns for Tourist/Visit, sub-category 'Individual Less Than 3 Months', country of application China: 'Total Fees: 8.18 USD' - identic | quote: Duration and Validity - Entry Visa: Single Entry for duration up to 3 months.",
+     "authority": "visa.nadra.gov.pk",
+     "checked_at": "2026-08-28"
+    }
    ]
   }
  },
@@ -19550,6 +19774,14 @@
       "currency": "USD"
      },
      "notes": "Processing on the e-visa portal: Regular 7 days, Urgent 3 days, Super Urgent 24 hours. Urgent doubles the consular fee per the MFA tariff."
+    }
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://evisa.migration.gov.tm",
+     "quote": "On the 'evisa' label: Turkmenistan does now run an official e-visa portal at https://evisa.migration.gov.tm (State Migration Service) offering e-TU Tourist, e-BS Business and e-HM Humanitarian, bu | quote: For registration and issuance of visas, the legislation of Turkmenistan provides",
+     "authority": "evisa.migration.gov.tm",
+     "checked_at": "2026-08-28"
     }
    ]
   }
@@ -21145,6 +21377,14 @@
      },
      "notes": "Free of charge; multiple visits allowed during the 6-month validity, 14 days per visit; must re-apply if the linked Indian passport is renewed or replaced"
     }
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://www.immd.gov.hk/eng/services/visas/pre-arrival_registration_for_indian_nationals.html",
+     "quote": "Official page https://www.immd.gov.hk/eng/services/visas/pre-arrival_registration_for_indian_nationals.html states: 'An Indian national can make use of the online service to apply for pre-arrival registration free of charge' and 'A pre-arrival regi | quote: 1.",
+     "authority": "immd.gov.hk",
+     "checked_at": "2026-08-28"
+    }
    ]
   }
  },
@@ -21333,6 +21573,14 @@
       "currency": "USD"
      },
      "notes": "Official wording: 'POR 60 DÍAS CON DOS ENTRADAS'"
+    }
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://servicios360.mirex.gob.do/visas/",
+     "quote": "The 60-day figure is CORRECT and is confirmed by the visa-types page https://servicios360.mirex.gob.do/visas/: 'REQUISITOS VISA DE TURISMO SIMPLE (TS) POR 60 DÍAS UNA ENTRADA O TURISMO MÚLTIPLE ( | quote: Tasas de visas, Visa de Turismo Simple (TS) US$100.00 ...",
+     "authority": "servicios360.mirex.gob.do",
+     "checked_at": "2026-08-28"
     }
    ]
   }
@@ -22411,7 +22659,15 @@
    "government_fee": {
     "amount": 0,
     "currency": "TWD"
-   }
+   },
+   "corroborating_sources": [
+    {
+     "url": "https://www.boca.gov.tw/cp-220-8253-ff790-2.html",
+     "quote": "The trial scheme ran only to 31 July 2026; MOFA Taiwan announced the renewal on 17 July 2026 extending it 1 Aug 2026 - 31 Jul 2027 (https://www.boca.gov.tw/cp-220-8253-ff790-2.html).",
+     "authority": "boca.gov.tw",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -22643,7 +22899,15 @@
    "government_fee": {
     "amount": 0,
     "currency": null
-   }
+   },
+   "corroborating_sources": [
+    {
+     "url": "https://www.mfa.gov.lv/en/countries-and-territories-whose-citizens-may-enter-latvia-without-visa",
+     "quote": "No visa is required (Latvia's MFA visa-free list at https://www.mfa.gov.lv/en/countries-and-territories-whose-citizens-may-enter-latvia-without-visa, updated 26.03.2026, includes Hong Kong for stays up to 90 days in any 180-day period), but 'Visa-free / nothing to do before you fly' is wrong for this route.",
+     "authority": "mfa.gov.lv",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -22887,7 +23151,15 @@
    "government_fee": {
     "amount": 600,
     "currency": "TWD"
-   }
+   },
+   "corroborating_sources": [
+    {
+     "url": "https://coa.immigration.gov.tw/coa-frontend/",
+     "quote": "Advance permit, applied for by the admitting Taiwanese college/university on the student's behalf through the NIA student online system (https://coa.immigration.gov.tw/coa-frontend/); the student can only self-apply for the single-to-multiple exchange, extension and amendments.",
+     "authority": "coa.immigration.gov.tw",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -22927,7 +23199,15 @@
    "government_fee": {
     "amount": 600,
     "currency": "TWD"
-   }
+   },
+   "corroborating_sources": [
+    {
+     "url": "https://www.immigration.gov.tw/media/47653/",
+     "quote": "Stay is fixed by NIA Appendix 1, section 参 item 4 (https://www.immigration.gov.tw/media/47653/): stay approved per itinerary, maximum 3 years ('",
+     "authority": "immigration.gov.tw",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -23049,6 +23329,14 @@
      },
      "notes": "Long-term study pass issued by Malaysian Immigration after post-arrival medical screening"
     }
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://www.imi.gov.my/index.php/en/main-services/pass/student-pass/",
+     "quote": "Sequence per the Immigration Department Student Pass page (https://www.imi.gov.my/index.php/en/main-services/pass/student-pass/): ap",
+     "authority": "imi.gov.my",
+     "checked_at": "2026-08-28"
+    }
    ]
   }
  },
@@ -23102,7 +23390,15 @@
   "note": "Settled on the document specifically: China appears on neither of the two MEA visa-waiver lists. The Diplomatic/Official/Service list (https://www.mea.gov.in/bvwa-passport) runs Chile (19) then Colombia (20) with no China entry, and the Diplomatic-passport-only list (https://www.mea.gov.in/bvwa-passport-only) has no China entry either. Both pages carry a 27 Aug 2026 last-updated stamp. A Chinese d",
   "fields": {
    "disposition": "VISA_REQUIRED",
-   "permitted_stay": "Validity and permitted stay are endorsed on the visa by the Indian Mission; the Bureau of Immigration provision for a Tourist visa is 5 years, multiple entry"
+   "permitted_stay": "Validity and permitted stay are endorsed on the visa by the Indian Mission; the Bureau of Immigration provision for a Tourist visa is 5 years, multiple entry",
+   "corroborating_sources": [
+    {
+     "url": "https://www.mea.gov.in/bvwa-passport-only",
+     "quote": "The Diplomatic/Official/Service list (https://www.mea.gov.in/bvwa-passport) runs Chile (19) then Colombia (20) with no China entry, and the Diplomatic-passport-only list (https://www.mea.gov.in/bvwa-passport-only) has no China entry either.",
+     "authority": "mea.gov.in",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -23141,7 +23437,15 @@
    "government_fee": {
     "amount": 0,
     "currency": "TWD"
-   }
+   },
+   "corroborating_sources": [
+    {
+     "url": "https://egate.immigration.gov.tw",
+     "quote": "Least burdensome official channel is the free online Temporary Entry Permit (網簽) at https://egate.immigration.gov.tw — the same NIA rules page states the fee: '一、於臺灣本島機場、港口：證照費新臺幣３００元。二、於網際網路申請：免費(自行列印許可同意書)。' Eligibility is conditional: the applicant must be a Hong Kong permanent resident holding no travel document other than a Hong Kong passport or a BNO, and must either hold a valid Entry & Exi",
+     "authority": "egate.immigration.gov.tw",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -23181,7 +23485,15 @@
    "government_fee": {
     "amount": 0,
     "currency": "USD"
-   }
+   },
+   "corroborating_sources": [
+    {
+     "url": "https://www.moj.go.jp/isa/immigration/procedures/ttp2_pre-check_pre-check_document03.html",
+     "quote": "Hong Kong is on Japan's current visa-exemption list (Immigration Services Agency, https://www.moj.go.jp/isa/immigration/procedures/ttp2_pre-check_pre-check_document03.html), but the waiver only carries the traveller into the Temporary Visitor (短期滞在) status, whose permitted activities are exhaustively defined by the quoted provision o",
+     "authority": "moj.go.jp",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -23201,7 +23513,21 @@
    "government_fee": {
     "amount": 185,
     "currency": "USD"
-   }
+   },
+   "corroborating_sources": [
+    {
+     "url": "https://www.dhs.gov/visa-waiver-program",
+     "quote": "Hong Kong is not a designated Visa Waiver Program country — the DHS list at https://www.dhs.gov/visa-waiver-program runs Greece then Hungary with no Hong Kong entry — so a B-1/B-2 visa must be obtained in advance, applied for at the U.S.",
+     "authority": "dhs.gov",
+     "checked_at": "2026-08-28"
+    },
+    {
+     "url": "https://hk.usconsulate.gov/visas/nonimmigrant-visas/",
+     "quote": "Consulate General Hong Kong & Macau (https://hk.usconsulate.gov/visas/nonimmigrant-visas/).",
+     "authority": "hk.usconsulate.gov",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -23241,7 +23567,15 @@
    "government_fee": {
     "amount": 600,
     "currency": "HKD"
-   }
+   },
+   "corroborating_sources": [
+    {
+     "url": "https://image.mfa.go.th/mfa/0/s2rU96ODpR/03062022/visa/2024_visa_fees.pdf",
+     "quote": "Fee HKD 600 is the Royal Thai Consulate-General Hong Kong published rate (\"Non-Immigrant Visa / Single / 600\", Announcement of the Royal Thai Consulate-General Visa Application Fees, valid as of 15 July 2024, https://image.mfa.go.th/mfa/0/s2rU96ODpR/03062022/visa/2024_visa_fees.pdf).",
+     "authority": "image.mfa.go.th",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -23261,7 +23595,15 @@
    "government_fee": {
     "amount": 0,
     "currency": null
-   }
+   },
+   "corroborating_sources": [
+    {
+     "url": "https://image.mfa.go.th/mfa/",
+     "quote": "This is confirmed by the current MFA summary \"Summary: The revision of Thailand's visa exemption and VoA schemes, 2026\" (https://image.mfa.go.th/mfa/",
+     "authority": "image.mfa.go.th",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -23301,7 +23643,15 @@
    "government_fee": {
     "amount": 2160,
     "currency": "MYR"
-   }
+   },
+   "corroborating_sources": [
+    {
+     "url": "https://esd.imi.gov.my/portal/expatriates/",
+     "quote": "The ESD Employment Pass page (https://esd.imi.gov.my/portal/expatriates/",
+     "authority": "esd.imi.gov.my",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -23321,7 +23671,15 @@
    "government_fee": {
     "amount": 20,
     "currency": "GBP"
-   }
+   },
+   "corroborating_sources": [
+    {
+     "url": "https://www.gov.uk/government/publications/visa-regulations-revised-table",
+     "quote": "GOV.UK now states plainly \"An ETA costs £20.\" The Home Office fees table (Fees_Table_8_April_26.ods, https://www.gov.uk/government/publications/visa-regulations-revised-table) shows the ETA moving from GBP 16 to GBP 20 from 8 April 2026, which is in force today.",
+     "authority": "gov.uk",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -23459,7 +23817,15 @@
    "government_fee": {
     "amount": 0,
     "currency": "MNT"
-   }
+   },
+   "corroborating_sources": [
+    {
+     "url": "https://immigration.gov.mn/en/",
+     "quote": "It is the list that the Mongolian government's Immigration Agency (immigration.gov.mn, a gov.mn domain) links to as its own 'Visa exempt countries' reference from https://immigration.gov.mn/en/ - mfa.gov.mn itself was returning 503 today.",
+     "authority": "immigration.gov.mn",
+     "checked_at": "2026-08-28"
+    }
+   ]
   }
  },
  {
@@ -29406,6 +29772,14 @@
    },
    "exceptions": [
     "The MFA Visa Information directory (https://www.mfa.gov.bn/Pages/Visa-Information.aspx, also loaded) lists 'United States of America' linking to this 90-day visa-waiver category page"
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://www.mfa.gov.bn/Pages/Visa-Information.aspx",
+     "quote": "Brunei MFA Visa Information page (https://www.mfa.gov.bn/Pages/Visa-Information.aspx) lists 'United States of America' linked to category D1---D90, alongside Austria, Belgium, Canada, France, Germany and the UK; the D1---D90 category page states nationals in this category need no visa and may stay up to 90 days.",
+     "authority": "mfa.gov.bn",
+     "checked_at": "2026-08-29"
+    }
    ]
   }
  },
@@ -39554,6 +39928,14 @@
    "application_channel": "online_portal",
    "exceptions": [
     "An e-Visa is required. Turkiye lists Taiwan on its e-Visa eligibility page. Confirm the entry and validity terms on the official portal when you apply, because they vary by nationality."
+   ],
+   "corroborating_sources": [
+    {
+     "url": "https://www.evisa.gov.tr/en/）申辦半年內多次入境，總停留時間最多30天的電子簽證",
+     "quote": "凡我國人因觀光或商務目的欲前往土耳其，得持憑6個月以上效期之中華民國普通護照先行上網（https://www.evisa.gov.tr/en/）申辦半年內多次入境，總停留時間最多30天的電子簽證。",
+     "authority": "evisa.gov.tr",
+     "checked_at": "2026-08-30"
+    }
    ]
   }
  },

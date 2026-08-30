@@ -1468,3 +1468,45 @@ def test_a_verified_verdict_also_governs_what_was_derived_from_the_guidance():
     assert kinds <= {"visa_exempt_preparation"}, kinds
     text = " ".join(str(s.get("step") or "") for s in fixed["workflow_plan"]).lower()
     assert "pay" not in text and "submit_application" not in text, text
+
+
+def test_cross_validation_binds_each_source_to_its_own_url():
+    """§4.2.1: where no single official source settles a route, several are
+    cross-checked and 每条来源须逐条绑定URL — each bound to its own URL.
+
+    A record carried exactly one source_url, so a route checked against three
+    ministries could show one of them and the other two were unauditable.
+    The 25-field dictionary keeps its single source_url; the corroborating
+    list sits alongside it so the export shape is unchanged."""
+    from app.visa_snapshot import tstation
+    from app.visa_snapshot.verified_overrides import _clean_corroborating
+
+    # Each entry is gated on its own: a non-government host or a bare link
+    # with no quote is dropped without taking the good entries with it.
+    cleaned = _clean_corroborating([
+        {"url": "https://www.gov.uk/eta", "quote": "Hong Kong SAR is on the ETA list"},
+        {"url": "https://www.mofa.go.jp/x", "quote": "confirms the same"},
+        {"url": "https://a-blog.example.com/x", "quote": "says the same"},
+        {"url": "https://www.gov.uk/y"},
+    ])
+    assert [c["url"] for c in cleaned] == [
+        "https://www.gov.uk/eta", "https://www.mofa.go.jp/x"]
+    assert _clean_corroborating([{"url": "https://blog.example.com", "quote": "x"}]) is None
+
+    g = {"disposition": "VISA_REQUIRED", "visa_category": "Tourist visa",
+         "permitted_stay": "30 days",
+         "corroborating_sources": [
+             {"url": "https://www.gov.uk/eta", "quote": "On the ETA list",
+              "authority": "UK Home Office"},
+             {"url": "https://www.mofa.go.jp/x", "quote": "Confirms the same"}]}
+    row = tstation.records_for_route(
+        {"passport_nationality": "HKG", "destination_country": "GBR",
+         "travel_purpose": "tourism", "travel_document_type": "ordinary_passport"},
+        g)[0]
+    assert len(row["corroborating_sources"]) == 2
+    assert all(c["url"] and c["quote"] for c in row["corroborating_sources"])
+
+    # The dictionary's 25 fields are untouched, so the export shape holds.
+    assert "corroborating_sources" not in tstation.FIELD_ORDER
+    assert "corroborating_sources" not in tstation.REQUIRED_FIELDS
+    assert set(tstation.field_status(row)) == set(tstation.FIELD_ORDER)
