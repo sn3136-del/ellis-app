@@ -913,8 +913,11 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
         # the difference between a source and a link nobody opened.
         _gc = ((r.verification or {}).get("grounded_check") or {})
         _grounded = _gc.get("outcome") == "checked" and bool(_gc.get("consistent"))
+        _disputed_now = list(((r.verification or {}).get("grounded_check")
+                              or {}).get("disputed_fields") or [])
         for rec in tstation.records_for_route(route, g, prov, collected, until,
-                                              grounded_ok=_grounded):
+                                              grounded_ok=_grounded,
+                                              disputed_fields=_disputed_now):
             if not rec.get("source_url"):
                 # The destination's browser-verified official portal is the
                 # official reference page for a record whose answer carries

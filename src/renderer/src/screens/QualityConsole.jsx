@@ -75,6 +75,22 @@ const OPS_CSS = `
 @media (max-width: 420px) {
   .ops-tiles { grid-template-columns: minmax(0, 1fr); }
 }
+/* The seven-column record table cannot survive a phone. Under 760px each row
+   becomes a stacked card: the header row is hidden, every cell announces its
+   own label, and the route line stops being a column of single letters. */
+@media (max-width: 760px) {
+  .ops-rt thead { display: none; }
+  .ops-rt, .ops-rt tbody, .ops-rt tr, .ops-rt td { display: block; width: 100%; }
+  .ops-rt tr { border-bottom: 8px solid #f4f7fb; padding: 4px 0 10px; }
+  .ops-rt td { border: none; padding: 5px 14px; text-align: left !important; }
+  .ops-rt td[data-label]::before {
+    content: attr(data-label); display: block; font-size: 9px; font-weight: 700;
+    letter-spacing: .7px; text-transform: uppercase; color: #7A8798;
+    margin-bottom: 2px;
+  }
+  .ops-rt td.ops-route { padding-top: 10px; }
+  .ops-rt td.ops-route strong { font-size: 14px; white-space: normal; }
+}
 @media (prefers-reduced-motion: reduce) {
   .ops-fade { animation: none; }
   .ops-bar, .ops-seg, .ops-lift { transition: none; }
@@ -480,11 +496,13 @@ function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
             <span style={{ color: st === 'missing' ? RED
                              : st === 'filled' ? GREEN
-                             : st === 'pending-review' ? AMBER : '#c3ccd9',
+                             : st === 'pending-review' ? AMBER
+                             : st === 'not-published' ? '#7A8798' : '#c3ccd9',
                            fontWeight: 700, fontSize: 11, flexShrink: 0 }}
                   title={st === 'pending-review' ? t('ops.pendingReview') : undefined}>
               {st === 'missing' ? '✗' : st === 'filled' ? '✓'
-                : st === 'pending-review' ? '?' : '·'}
+                : st === 'pending-review' ? '?'
+                : st === 'not-published' ? '—' : '·'}
             </span>
             <span title={f}
                   style={{ color: GRAY, fontSize: 10.5, fontWeight: 700,
@@ -501,7 +519,9 @@ function FieldGrid({ rec, t, typeNames = {}, tvv = (x) => x }) {
                         overflowWrap: 'anywhere' }}>
             {(rec[f] == null || rec[f] === '')
               ? (st === 'missing' ? t('ops.missingCounts')
-                 : st === 'optional-empty' ? t('ops.notRequired') : tvv(show(f)))
+                 : st === 'not-published' ? t('ops.notPublished')
+                 : st === 'not-applicable' ? t('ops.notApplicable')
+                 : st === 'optional-empty' ? t('ops.notPublished') : tvv(show(f)))
               : /^https?:\/\//.test(String(rec[f]))
                 /* A source is only traceable if it can be OPENED: the
                    acceptance standard asks for a clickable source. */
@@ -606,7 +626,8 @@ function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames 
         <span style={{ color: GRAY, fontSize: 12 }}>{t('ops.rowsHint')}</span>
       </div>
       <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse',
+        <table className="ops-rt"
+               style={{ width: '100%', borderCollapse: 'collapse',
                         tableLayout: 'fixed', fontSize: 13 }}>
           <thead>
             <tr>
@@ -647,7 +668,8 @@ function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames 
                   {/* The pair itself never wraps; the purpose line under it
                       does. Held together, a long document type ("Tourism ·
                       Refugee travel document") burst the column. */}
-                  <td style={{ padding: '10px 12px' }}>
+                  <td className="ops-cell ops-route"
+                      style={{ padding: '10px 12px' }}>
                     <span style={{ display: 'inline-block', color: '#9aa8bd',
                                    fontSize: 10, marginRight: 7,
                                    transition: 'transform .15s ease',
@@ -670,14 +692,17 @@ function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames 
                         : ''}
                     </div>
                   </td>
-                  <td style={{ padding: '10px 12px' }}>
+                  <td className="ops-cell" data-label={t('ops.col.requirement')}
+                      style={{ padding: '10px 12px' }}>
                     <Chip color={reqColor} filled={false}>{reqLabel}</Chip>
                   </td>
-                  <td style={{ padding: '10px 12px', color: NAVY, fontWeight: 600,
+                  <td className="ops-cell" data-label={t('ops.col.type')}
+                      style={{ padding: '10px 12px', color: NAVY, fontWeight: 600,
                                lineHeight: 1.45, overflowWrap: 'anywhere' }}>
                     {typeNames[rec.visa_type_name] || rec.visa_type_name || '·'}
                   </td>
-                  <td style={{ padding: '10px 12px', textAlign: 'right',
+                  <td className="ops-cell" data-label={t('ops.col.stay')}
+                      style={{ padding: '10px 12px', textAlign: 'right',
                                color: NAVY, whiteSpace: 'nowrap',
                                fontVariantNumeric: 'tabular-nums' }}>
                     {rec.max_stay_duration != null
@@ -685,14 +710,16 @@ function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames 
                           ? t('ops.u.hour') : t('ops.u.day')}`
                       : '·'}
                   </td>
-                  <td style={{ padding: '10px 12px', textAlign: 'right',
+                  <td className="ops-cell" data-label={t('ops.col.fee')}
+                      style={{ padding: '10px 12px', textAlign: 'right',
                                color: NAVY, whiteSpace: 'nowrap',
                                fontVariantNumeric: 'tabular-nums' }}>
                     {rec.visa_fee_amount != null
                       ? `${rec.visa_fee_amount} ${rec.visa_fee_currency || ''}`
                       : '·'}
                   </td>
-                  <td style={{ padding: '10px 12px' }}>
+                  <td className="ops-cell" data-label={t('ops.col.quality')}
+                      style={{ padding: '10px 12px' }}>
                     <span title={checkTip} style={{ cursor: 'help' }}>
                       <Chip color={checkColor} filled={false}>{checkLabel}</Chip>
                     </span>
@@ -722,7 +749,8 @@ function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames 
                       control that changes it. The source link sits under the
                       answer rather than beside it, which is what jammed the
                       link, the chip and the button onto the same short line. */}
-                  <td style={{ padding: '10px 12px', verticalAlign: 'top' }}>
+                  <td className="ops-cell" data-label={t('ops.col.site')}
+                      style={{ padding: '10px 12px', verticalAlign: 'top' }}>
                     <div style={{ display: 'flex', flexDirection: 'column',
                                   alignItems: 'flex-start', gap: 6 }}>
                       {held ? (

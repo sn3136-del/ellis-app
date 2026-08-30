@@ -56,6 +56,9 @@ OVERRIDABLE = frozenset({
     # being written and then silently dropped here, which is why that column
     # stayed empty on every record while the facts sat in the seed.
     "consular_jurisdiction",
+    # Names the fields a destination was checked for and does not publish, so
+    # a correct blank reads as "not publicly available" instead of a gap.
+    "unpublished_fields",
 })
 
 

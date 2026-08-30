@@ -17,7 +17,8 @@ import re
 # Their field order, exactly as numbered 1-25 in the requirements document.
 FIELD_ORDER = (
     "travel_document_type", "travel_document_country", "destination_country",
-    "travel_purpose", "visa_requirement", "visa_type_name",
+    "travel_purpose", "visa_requirement", "visa_requirement_detail",
+    "visa_type_name",
     "validity_duration", "validity_unit", "max_stay_duration", "max_stay_unit",
     "entries", "processing_min_days", "processing_unit",
     "visa_fee_amount", "visa_fee_currency", "application_method",
@@ -46,6 +47,9 @@ FIELD_DESCRIPTIONS = {
     "destination_country": "Visa destination",
     "travel_purpose": "User's travel purpose",
     "visa_requirement": "Visa-free / Visa on Arrival / Visa Required in Advance",
+    "visa_requirement_detail": "Field 5's subcategory: Unconditional / Conditional / "
+                               "Transit Visa-free, eVisa or Paper Visa on Arrival, "
+                               "eVisa / Paper Visa / ETA Electronic Authorization",
     "visa_type_name": "Visa type name for this purpose and destination",
     "validity_duration": "How long the visa is valid after approval (number)",
     "validity_unit": "Day / Month / Year / Long-term Valid",
@@ -240,7 +244,8 @@ def _fee(product: dict, guidance: dict) -> tuple[float | None, str | None]:
 
 
 def _confidence(guidance: dict, provenance: dict | None,
-                grounded_ok: bool = False) -> str:
+                grounded_ok: bool = False, *, complete: bool = True,
+                disputed: bool = False) -> str:
     """The spec's own ladder: High is a single official source, complete, no
     conflict (here: a person verified it against a named page). Medium is
     official-source-backed but with gaps. Low is conflicting or NON-OFFICIAL
@@ -255,7 +260,14 @@ def _confidence(guidance: dict, provenance: dict | None,
     not issue, and visas demanded of travellers who are visa-exempt. A URL
     attached to an unread claim is not a source."""
     if provenance:
-        return "High"
+        # Their §4.2.3 ladder: High is a single official source, complete, and
+        # free of conflict. A verified override satisfies the first of those
+        # three, never all three on its own, so a record that is still missing
+        # a required field or carries a field its own official page disputes
+        # is Medium however carefully a person checked the rest.
+        if disputed:
+            return "Medium"
+        return "High" if complete else "Medium"
     if not (guidance.get("source_url") or guidance.get("official_portal_url")):
         return "Low"
     c = str(guidance.get("confidence") or "").lower()
@@ -318,6 +330,21 @@ def _headline_source(guidance: dict, provenance: dict | None) -> str | None:
     if fields and not (fields & _RECORD_DEFINING):
         return own or provenance.get("source_url")
     return provenance.get("source_url") or own
+
+
+# Field 5's second half: 细化子类, the precise subcategory under each of the
+# four headline values. The engine already decides this, it simply never
+# reached the record, so the enumeration shipped half implemented.
+SUBCATEGORY = {
+    "unconditional_visa_free": "Unconditional Visa-free",
+    "conditional_visa_free": "Conditional Visa-free",
+    "transit_visa_free": "Transit Visa-free",
+    "evisa_on_arrival": "eVisa on Arrival",
+    "paper_visa_on_arrival": "Paper Visa on Arrival",
+    "evisa": "eVisa",
+    "paper_visa": "Paper Visa",
+    "eta_electronic_authorization": "ETA Electronic Authorization",
+}
 
 
 def _entry_requirements(g: dict) -> str | None:
@@ -400,15 +427,72 @@ def _processing(guidance: dict) -> tuple[float | None, str | None]:
                else "Calendar Day")
 
 
+def _subcategory_for(product: dict, route_default: str | None,
+                     requirement: str | None) -> str | None:
+    """Field 5's subcategory for THIS product, not for the route.
+
+    A route can offer several different kinds of permission at once. A
+    Japanese traveller to the United Kingdom needs an ETA, and may separately
+    hold a Standard Visitor visa; labelling the visa rows "ETA Electronic
+    Authorization" because the route's headline is an ETA is simply wrong on
+    four rows out of five. The product's own name settles it.
+    """
+    name = f"{product.get('type') or ''}".lower()
+    if any(k in name for k in ("eta", "electronic travel", "esta", "authoris",
+                               "authoriz")):
+        return SUBCATEGORY["eta_electronic_authorization"]
+    if "on arrival" in name or "on-arrival" in name:
+        return SUBCATEGORY["evisa_on_arrival" if "e-visa" in name or "evisa" in name
+                           else "paper_visa_on_arrival"]
+    if "e-visa" in name or "evisa" in name or "electronic visa" in name:
+        return SUBCATEGORY["evisa"]
+    # A product whose own name says "visa" is a visa, whatever the route's
+    # headline says. On a Conditional route the headline is often the ETA, and
+    # inheriting it labelled four Standard Visitor visas as an authorisation.
+    if "visa" in name or "visitor" in name or "permit" in name:
+        return SUBCATEGORY["paper_visa"]
+    if "visa-free" in name or "no visa" in name:
+        return SUBCATEGORY["unconditional_visa_free"]
+    return route_default
+
+
+def _regrade(row: dict, g: dict, disputed: list | None,
+             unpublished: set | None = None) -> dict:
+    """Apply their §4.2.3 ladder to the finished row.
+
+    High means a single official source, complete, and free of conflict. Only
+    the first of those is knowable before the row exists, which is why a
+    record missing a required field, or carrying one its own official page
+    disputes, was still being shown as High.
+    """
+    row = dict(row)
+    prov, grounded = row.pop("_prov", False), row.pop("_grounded", False)
+    st = field_status(row, unpublished)
+    complete = not any(v == "missing" for v in st.values())
+    conflicted = bool(disputed) and any(
+        f in FIELD_ORDER or f in OVERRIDABLE_HINT for f in (disputed or []))
+    row["confidence_level"] = _confidence(g, {"x": 1} if prov else None,
+                                          grounded, complete=complete,
+                                          disputed=conflicted)
+    return row
+
+
+OVERRIDABLE_HINT = frozenset({"disposition", "government_fee", "permitted_stay",
+                              "visa_products", "requirement_detail"})
+
+
 def records_for_route(route: dict, guidance: dict,
                       provenance: dict | None = None,
                       collected_at: str | None = None,
                       valid_until: str | None = None,
-                      grounded_ok: bool = False) -> list[dict]:
+                      grounded_ok: bool = False,
+                      disputed_fields: list | None = None) -> list[dict]:
     """The route's answer as T-Station 25-field records, one per visa
     product; a product-less route (visa-free, or detail still filling)
     yields a single route-level record."""
     g = guidance or {}
+    # Fields a destination has been checked for and does not publish.
+    _unpub = {str(x) for x in (g.get("unpublished_fields") or [])}
     disposition = str(g.get("disposition") or "").upper()
     requirement = _DISPOSITION_TO_REQUIREMENT.get(disposition)
     docs = g.get("required_documents")
@@ -442,6 +526,8 @@ def records_for_route(route: dict, guidance: dict,
         "destination_country": route.get("destination_country"),
         "travel_purpose": route.get("travel_purpose") or "tourism",
         "visa_requirement": requirement,
+        "visa_requirement_detail": SUBCATEGORY.get(
+            str(g.get("requirement_detail") or "").strip().lower()),
         "visa_type_name": None,
         "validity_duration": None, "validity_unit": None,
         "max_stay_duration": None, "max_stay_unit": None,
@@ -465,6 +551,8 @@ def records_for_route(route: dict, guidance: dict,
         "info_validity": g.get("policy_valid_until")
                          or ((valid_until or "")[:10] or None),
         "confidence_level": _confidence(g, provenance, grounded_ok),
+        "_prov": bool(provenance), "_grounded": grounded_ok,
+        "_unpublished": sorted(_unpub),
     }
     products = [p for p in (g.get("visa_products") or [])
                 if isinstance(p, dict) and p.get("type")]
@@ -492,11 +580,13 @@ def records_for_route(route: dict, guidance: dict,
             row["max_stay_duration"], row["max_stay_unit"] = n, unit
             amt, cur = _fee({}, g)
             row["visa_fee_amount"], row["visa_fee_currency"] = amt, cur
-        return [{k: _clean_text(v) for k, v in row.items()}]
+        return [_regrade({k: _clean_text(v) for k, v in row.items()}, g, disputed_fields, _unpub)]
     rows = []
     for p in products:
         row = dict(base)
         row["visa_type_name"] = str(p.get("type"))
+        row["visa_requirement_detail"] = _subcategory_for(
+            p, base.get("visa_requirement_detail"), requirement)
         n, unit = _num_unit(p.get("validity"),
                             stay_bound=p.get("max_stay_days"))
         if n is None:
@@ -527,24 +617,57 @@ def records_for_route(route: dict, guidance: dict,
         if note:
             row["special_conditions"] = (str(note) if not row["special_conditions"]
                                          else f"{row['special_conditions']}. {note}")
-        rows.append({k: _clean_text(v) for k, v in row.items()})
+        rows.append(_regrade({k: _clean_text(v) for k, v in row.items()}, g, disputed_fields, _unpub))
     return rows
 
 
-def field_status(row: dict) -> dict:
-    """Their per-field checklist verdict: filled / missing / optional-empty."""
+def field_status(row: dict, unpublished: set | None = None) -> dict:
+    """Their per-field checklist verdict, with the three kinds of blank kept apart.
+
+    A blank cell is not one thing. "Validity" on a visa-free route is not
+    missing, there is no visa to have a validity. "Validity" on a French
+    Schengen visa is not missing either, the consulate sets it per applicant
+    and France publishes no figure. Only the third kind, a value that exists
+    somewhere official and nobody has fetched yet, should count against
+    completeness, and only that one should read as a gap to an operator.
+    """
+    unpublished = set(unpublished or ()) | set(row.get("_unpublished") or ())
     out = {}
+    exempt = str(row.get("visa_requirement") or "") == "Visa-free"
     for f in FIELD_ORDER:
         v = row.get(f)
-        filled = v is not None and str(v).strip() != ""
-        out[f] = "filled" if filled else (
-            "missing" if f in REQUIRED_FIELDS else "optional-empty")
+        if v not in (None, "", []):
+            out[f] = "filled"
+        elif f in unpublished:
+            out[f] = "not-published"
+        elif exempt and f in _NOT_APPLICABLE_WHEN_EXEMPT:
+            out[f] = "not-applicable"
+        elif f in REQUIRED_FIELDS:
+            out[f] = "missing"
+        else:
+            out[f] = "optional-empty"
     return out
 
 
-def completeness(row: dict) -> float:
-    """Share of REQUIRED fields filled — the acceptance metric's numerator
-    rule (records with all required fields filled count as complete)."""
-    st = field_status(row)
-    need = [f for f in FIELD_ORDER if f in REQUIRED_FIELDS]
+# A route with no visa cannot have a visa's validity, entry count or
+# processing time. Counting those as gaps made a correct record look wrong.
+_NOT_APPLICABLE_WHEN_EXEMPT = frozenset({
+    "validity_duration", "validity_unit", "entries",
+    "processing_min_days", "processing_unit",
+})
+
+
+def completeness(row: dict, unpublished: set | None = None) -> float:
+    """Share of required fields filled, out of those that could be filled.
+
+    A field the destination does not publish, or that cannot apply to a
+    visa-free route, is excluded from the denominator rather than counted as
+    a gap. Counting them punished the database for being accurate: blanking a
+    validity that France genuinely does not publish made the metric fall.
+    """
+    st = field_status(row, unpublished)
+    need = [f for f in FIELD_ORDER if f in REQUIRED_FIELDS
+            and st[f] not in ("not-applicable", "not-published")]
+    if not need:
+        return 1.0
     return sum(1 for f in need if st[f] == "filled") / len(need)

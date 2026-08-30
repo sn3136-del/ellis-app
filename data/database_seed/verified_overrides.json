@@ -44015,7 +44015,11 @@
     }
    ],
    "validity_duration": null,
-   "validity_unit": null
+   "validity_unit": null,
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
   }
  },
  {
@@ -44059,7 +44063,11 @@
     }
    ],
    "validity_duration": null,
-   "validity_unit": null
+   "validity_unit": null,
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
   }
  },
  {
@@ -44114,7 +44122,11 @@
     }
    ],
    "validity_duration": null,
-   "validity_unit": null
+   "validity_unit": null,
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
   }
  },
  {
@@ -44169,7 +44181,11 @@
     }
    ],
    "validity_duration": null,
-   "validity_unit": null
+   "validity_unit": null,
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
   }
  },
  {
@@ -44224,7 +44240,11 @@
     }
    ],
    "validity_duration": null,
-   "validity_unit": null
+   "validity_unit": null,
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
   }
  },
  {
@@ -44279,7 +44299,11 @@
     }
    ],
    "validity_duration": null,
-   "validity_unit": null
+   "validity_unit": null,
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
   }
  },
  {
@@ -44348,7 +44372,11 @@
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "paper_visa",
    "validity_duration": null,
-   "validity_unit": null
+   "validity_unit": null,
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
   }
  },
  {
@@ -44405,7 +44433,11 @@
    ],
    "validity_duration": null,
    "validity_unit": null,
-   "permitted_stay_days": 90
+   "permitted_stay_days": 90,
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
   }
  },
  {
@@ -44477,7 +44509,11 @@
     "Schengen short-stay (C) visa required before travel for mainland PRC passport holders; 'China' is in Annex I. Hong Kong SAR and Macao SAR passport holders are NOT caught by this row — they are separately exempt under Annex II section 2, subject to holding the relevant SAR passpor"
    ],
    "validity_duration": null,
-   "validity_unit": null
+   "validity_unit": null,
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
   }
  },
  {
@@ -44557,7 +44593,11 @@
    ],
    "validity_duration": null,
    "validity_unit": null,
-   "permitted_stay_days": 90
+   "permitted_stay_days": 90,
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
   }
  },
  {
@@ -44615,7 +44655,11 @@
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "paper_visa",
    "validity_duration": null,
-   "validity_unit": null
+   "validity_unit": null,
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
   }
  },
  {
@@ -44683,7 +44727,11 @@
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "paper_visa",
    "validity_duration": null,
-   "validity_unit": null
+   "validity_unit": null,
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
   }
  },
  {
@@ -44750,6 +44798,10 @@
      },
      "notes": null
     }
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
    ]
   }
  },
@@ -44791,6 +44843,10 @@
      },
      "notes": null
     }
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
    ]
   }
  },
@@ -44854,6 +44910,10 @@
      },
      "notes": null
     }
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
    ]
   }
  },
@@ -44906,6 +44966,10 @@
      },
      "notes": null
     }
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
    ]
   }
  },
@@ -44947,6 +45011,10 @@
      },
      "notes": null
     }
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
    ]
   }
  },
@@ -45002,6 +45070,10 @@
      },
      "notes": null
     }
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
    ]
   }
  },
@@ -45057,6 +45129,10 @@
      },
      "notes": null
     }
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
    ]
   }
  },
@@ -45101,6 +45177,10 @@
      },
      "notes": null
     }
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
    ]
   }
  },
@@ -45200,6 +45280,10 @@
      },
      "notes": null
     }
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
    ]
   }
  },
@@ -45240,6 +45324,10 @@
      },
      "notes": null
     }
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
    ]
   }
  },
@@ -45291,6 +45379,10 @@
      },
      "notes": null
     }
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
    ]
   }
  },
@@ -45344,6 +45436,10 @@
      },
      "notes": null
     }
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
    ]
   }
  },
@@ -45395,6 +45491,10 @@
      },
      "notes": null
     }
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
    ]
   }
  },
