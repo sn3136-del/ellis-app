@@ -428,6 +428,16 @@ def test_non_retryable_provider_status_fails_fast(db):
     assert calls["n"] == 1
 
 
+def test_travel_authorisation_is_not_visa_required_in_the_25_field_view(db):
+    """ESTA-class routes must not render as "Visa Required in Advance". The
+    traveller is visa-exempt and files an authorisation; the honest cell is
+    Conditional, with the filing named in the detail."""
+    from app.visa_snapshot import tstation
+    assert tstation._DISPOSITION_TO_REQUIREMENT["ELECTRONIC_AUTHORIZATION_REQUIRED"] == "Conditional"
+    assert tstation._DISPOSITION_TO_REQUIREMENT["VISA_EXEMPT"] == "Visa-free"
+    assert tstation._DISPOSITION_TO_REQUIREMENT["VISA_REQUIRED"] == "Visa Required in Advance"
+
+
 def test_malformed_disposition_rejected(db):
     _clear_cache(db)
     kimi_primary.set_provider(single_pass(dict(GOOD_ANSWER, disposition="MAYBE")))

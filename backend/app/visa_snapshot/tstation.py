@@ -72,7 +72,13 @@ FIELD_DESCRIPTIONS = {
 _DISPOSITION_TO_REQUIREMENT = {
     "VISA_EXEMPT": "Visa-free",
     "VISA_ON_ARRIVAL": "Visa on Arrival",
-    "ELECTRONIC_AUTHORIZATION_REQUIRED": "Visa Required in Advance",
+    # An ESTA, an eTA or a K-ETA is not a visa: the traveller is visa-exempt
+    # and files an authorisation instead. Calling that "Visa Required in
+    # Advance" tells a Japanese tourist the United States needs a visa, which
+    # is false; calling it "Visa-free" invites them to skip the filing and be
+    # denied boarding. Conditional is the only honest cell, and the detail
+    # fields carry what the condition is.
+    "ELECTRONIC_AUTHORIZATION_REQUIRED": "Conditional",
     "VISA_REQUIRED": "Visa Required in Advance",
     "CONDITIONAL": "Conditional",
     "NOT_ADMITTED": "Not admitted",
@@ -221,6 +227,59 @@ def _confidence(guidance: dict, provenance: dict | None,
     return "Medium"
 
 
+def _entry_requirements(g: dict) -> str | None:
+    """Their field 附加信息 "other entry requirements besides the visa",
+    marked provide-if-available.
+
+    It was reading a key the engine never writes, so the column was empty on
+    every record while the facts sat one level down, already verified: the
+    passport-validity rule, a mandatory arrival card, onward travel, funds,
+    accommodation, insurance, biometrics, health. Nothing here is invented or
+    inferred; each clause appears only when that field is actually set, so a
+    route with none of them still returns None rather than filler.
+    """
+    parts: list[str] = []
+    pv = g.get("passport_validity")
+    if isinstance(pv, str) and pv.strip():
+        parts.append(f"Passport: {pv.strip().rstrip('.')}")
+    ac = g.get("arrival_card")
+    if isinstance(ac, dict) and ac.get("required"):
+        name = str(ac.get("name") or "arrival card").strip()
+        when = str(ac.get("submission_window") or "").strip()
+        parts.append(f"{name} required" + (f" ({when})" if when else ""))
+    for key, label in (("onward_travel_evidence", "Onward travel"),
+                       ("accommodation_evidence", "Accommodation"),
+                       ("financial_evidence", "Funds")):
+        v = g.get(key)
+        if isinstance(v, str) and v.strip():
+            parts.append(f"{label}: {v.strip().rstrip('.')}")
+    if g.get("insurance_required") is True:
+        parts.append("Travel insurance required")
+    if g.get("biometrics_required") is True:
+        parts.append("Biometrics collected")
+    for h in (g.get("health_requirements") or []):
+        if isinstance(h, dict) and h.get("applicability") == "always_required":
+            nm = str(h.get("name") or "").strip()
+            if nm:
+                parts.append(f"Health: {nm}")
+    return "; ".join(parts) or None
+
+
+def _consulate_district(g: dict, route: dict) -> str | None:
+    """Which mission handles this applicant, when the route says so. Left
+    null rather than guessed: naming the wrong consulate sends someone to the
+    wrong city."""
+    for src in (g, route):
+        v = (src or {}).get("consular_jurisdiction")
+        if isinstance(v, str) and v.strip():
+            return v.strip()
+        if isinstance(v, dict):
+            name = str(v.get("mission") or v.get("name") or "").strip()
+            if name:
+                return name
+    return None
+
+
 def _processing(guidance: dict) -> tuple[float | None, str | None]:
     n, unit = _num_unit(guidance.get("processing_time"))
     if n is None:
@@ -269,8 +328,9 @@ def records_for_route(route: dict, guidance: dict,
         "visa_fee_amount": None, "visa_fee_currency": None,
         "application_method": method,
         "required_documents": docs,
-        "consulate_district": None,
-        "entry_requirements": entry_req if isinstance(entry_req, str) else None,
+        "consulate_district": _consulate_district(g, route),
+        "entry_requirements": (entry_req if isinstance(entry_req, str)
+                               else _entry_requirements(g)),
         "special_conditions": exceptions if isinstance(exceptions, str) else None,
         "data_source": (provenance or {}).get("verified_by")
                        or ("Ellis verified route engine" if g else None),

@@ -1328,41 +1328,6 @@
  },
  {
   "route": {
-   "nationality": "CHN",
-   "destination": "USA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-22",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://www.evus.gov/",
-  "note": "The MRV application fee (USD 185) was missing, and so was EVUS: Chinese nationals with a 10-year B1/B2 visa must also hold a valid EVUS enrolment (USD 30.75) to travel.",
-  "fields": {
-   "government_fee": {
-    "amount": 185,
-    "currency": "USD"
-   },
-   "application_channel_detail": "Complete the DS-160, pay the USD 185 MRV fee, and attend the interview at the embassy or consulate. After issuance, Chinese passport holders with a 10-year B1/B2 visa must also keep a valid EVUS enrolment (USD 30.75 at evus.gov) to board.",
-   "exceptions": [
-    "EVUS enrolment at evus.gov is mandatory for Chinese passport holders with a 10-year B1/B2 visa; without a valid enrolment boarding is denied",
-    "The 10-year multiple-entry B1/B2 is the standard issuance for Chinese nationals; no separate reciprocity fee applies"
-   ],
-   "visa_products": [
-    {
-     "type": "B1/B2 visitor visa (10-year multiple-entry)",
-     "entry": "multiple",
-     "validity": "10 years",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 185,
-      "currency": "USD"
-     },
-     "notes": "Stay per admission is set by CBP, usually up to 6 months. EVUS enrolment (USD 30.75) is required alongside the visa."
-    }
-   ]
-  }
- },
- {
-  "route": {
    "nationality": "USA",
    "destination": "GBR",
    "travel_purpose": "tourism"
@@ -1395,49 +1360,6 @@
       "currency": "GBP"
      },
      "notes": "Permits visits of up to 6 months."
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "CHN",
-   "destination": "THA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://www.thaievisa.go.th/",
-  "note": "Policy red-line verification 2026-08-29: the stored answer demanded a visa in advance. Thailand's official e-Visa portal checker returns visa-free entry for Chinese nationals for stays up to 60 days. | Source recorded for the visa exemption. TDAC mandatory per tdac.immigration.go.th.",
-  "fields": {
-   "arrival_card": {
-    "required": true,
-    "name": "Thailand Digital Arrival Card (TDAC)",
-    "submission_window": "submit online within 3 days before arrival",
-    "note": "Mandatory for all foreign visitors since 1 May 2025; free at tdac.immigration.go.th"
-   },
-   "disposition": "VISA_EXEMPT",
-   "requirement_detail": "unconditional_visa_free",
-   "visa_category": "Visa-free entry",
-   "permitted_stay": "Up to 60 days",
-   "permitted_stay_days": 60,
-   "application_channel": "not_required",
-   "application_channel_detail": "No visa is required for stays of up to 60 days. A Thailand Digital Arrival Card is submitted before arrival.",
-   "government_fee": {
-    "amount": 0,
-    "currency": null
-   },
-   "visa_products": [
-    {
-     "type": "Visa-free entry",
-     "entry": "multiple",
-     "validity": "on arrival",
-     "max_stay_days": 60,
-     "fee": {
-      "amount": 0,
-      "currency": null
-     },
-     "notes": "No visa is required for stays of up to 60 days. A Thailand Digital Arrival Card is submitted before arrival."
     }
    ]
   }
@@ -1562,45 +1484,6 @@
     "Valid passport (the same document used in the application)",
     "email address",
     "payment card"
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "HKG",
-   "destination": "USA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-22",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html",
-  "note": "Category, fee and portal were missing. Hong Kong is not a Visa Waiver country, so there is no ESTA route: a B-1/B-2 visa is required, MRV fee USD 185. Appointments and fee payment for Hong Kong run through ustraveldocs.com/hk.",
-  "fields": {
-   "visa_category": "B-1/B-2 visitor visa",
-   "government_fee": {
-    "amount": 185,
-    "currency": "USD"
-   },
-   "official_portal_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html",
-   "requirement_detail": "paper_visa",
-   "arrival_card": {
-    "required": false,
-    "name": null,
-    "submission_window": null
-   },
-   "application_channel_detail": "Hong Kong is not in the Visa Waiver Program, so ESTA is not available. Complete the DS-160, pay the USD 185 MRV fee and attend an interview at the US Consulate General.",
-   "visa_products": [
-    {
-     "type": "B-1/B-2 visitor visa",
-     "entry": "multiple",
-     "validity": "as granted",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 185,
-      "currency": "USD"
-     },
-     "notes": "Stay per admission is set by CBP, usually up to 6 months."
-    }
    ]
   }
  },
@@ -8585,70 +8468,6 @@
  },
  {
   "route": {
-   "nationality": "MYS",
-   "destination": "USA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-28",
-  "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
-  "source_url": "https://www.ecfr.gov/current/title-22/chapter-I/subchapter-A/part-22/section-22.1",
-  "note": "Fee and stay are correct and source-backed. Fee: 22 CFR 22.1 Item 21(a) sets the MRV application fee at $185 per person for non-petition-based NIVs (B-1/B-2); corroborated by ec.usembassy.gov ('The application fee for visitor visas for business or tourism (B1/B2s and BCCs) ... has increased from $16 | quote: 21. Nonimmigrant Visa Application and Border Crossing Card Processing Fees (per ",
-  "fields": {
-   "official_portal_url": "https://ceac.state.gov/genniv/",
-   "government_fee": {
-    "amount": 185,
-    "currency": "USD"
-   },
-   "permitted_stay_days": 180,
-   "visa_products": [
-    {
-     "type": "B-1/B-2 visitor visa",
-     "entry": "per country reciprocity schedule",
-     "validity": "set by the country-specific reciprocity schedule (unverified this pass - travel.state.gov bot-blocked)",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 185,
-      "currency": "USD"
-     },
-     "notes": "$185 is the MRV application fee (22 CFR 22.1 item 21(a)); a reciprocity issuance fee may be added for some nationalities (item 23). Admission period is set by CBP, minimum 6 months for B-2 under 8 CFR 214.2(b)(2), maximum 1 year under 214.2(b)(1)."
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "THA",
-   "destination": "USA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-28",
-  "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
-  "source_url": "https://www.ecfr.gov/current/title-22/chapter-I/subchapter-A/part-22/section-22.1",
-  "note": "Fee ($185, 22 CFR 22.1 item 21(a)) and stay (180 days, 8 CFR 214.2(b)(2) minimum six-month admission) confirmed. 'Usually 10 years' validity for Thai nationals is UNVERIFIED - the per-nationality validity lives only in the travel.state.gov reciprocity schedule, which is behind a Cloudflare human-ver | quote: 21. Nonimmigrant Visa Application and Border Crossing Card Processing Fees (per ",
-  "fields": {
-   "official_portal_url": "https://ceac.state.gov/genniv/",
-   "government_fee": {
-    "amount": 185,
-    "currency": "USD"
-   },
-   "permitted_stay_days": 180,
-   "visa_products": [
-    {
-     "type": "B-1/B-2 visitor visa",
-     "entry": "per country reciprocity schedule",
-     "validity": "per reciprocity schedule (unverified)",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 185,
-      "currency": "USD"
-     },
-     "notes": null
-    }
-   ]
-  }
- },
- {
-  "route": {
    "nationality": "THA",
    "destination": "ESP",
    "travel_purpose": "tourism"
@@ -9052,38 +8871,6 @@
  {
   "route": {
    "nationality": "IND",
-   "destination": "USA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-28",
-  "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
-  "source_url": "https://www.ecfr.gov/current/title-22/chapter-I/subchapter-A/part-22/section-22.1",
-  "note": "Fee $185 and stay 180 days confirmed from eCFR (22 CFR 22.1 item 21(a); 8 CFR 214.2(b)(2)). The '10 years' validity is UNVERIFIED against an official source: travel.state.gov's India reciprocity page returned 403 to WebFetch and a Cloudflare bot challenge in the browser; in.usembassy.gov does not pu | quote: 21. Nonimmigrant Visa Application and Border Crossing Card Processing Fees (per ",
-  "fields": {
-   "official_portal_url": "https://ceac.state.gov/genniv/",
-   "government_fee": {
-    "amount": 185,
-    "currency": "USD"
-   },
-   "permitted_stay_days": 180,
-   "visa_products": [
-    {
-     "type": "B-1/B-2 visitor visa",
-     "entry": "per country reciprocity schedule",
-     "validity": "per reciprocity schedule (unverified)",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 185,
-      "currency": "USD"
-     },
-     "notes": null
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "IND",
    "destination": "SGP",
    "travel_purpose": "tourism"
   },
@@ -9346,38 +9133,6 @@
       "currency": "EUR"
      },
      "notes": "No visa fee for children under 6"
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "PHL",
-   "destination": "USA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-28",
-  "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
-  "source_url": "https://www.ecfr.gov/current/title-22/chapter-I/subchapter-A/part-22/section-22.1",
-  "note": "Fee $185 and 180-day stay confirmed from eCFR. 'Typically 10 years (consular discretion)' UNVERIFIED - reciprocity schedule inaccessible. | quote: 21. Nonimmigrant Visa Application and Border Crossing Card Processing Fees (per person): (a) Non-petition-based nonimmigrant visa (except E category) $185 ... 23. Nonimmigrant Visa Issuance Fee, including Border-Crossing Cards (Reciprocity Fee",
-  "fields": {
-   "official_portal_url": "https://ceac.state.gov/genniv/",
-   "government_fee": {
-    "amount": 185,
-    "currency": "USD"
-   },
-   "permitted_stay_days": 180,
-   "visa_products": [
-    {
-     "type": "B-1/B-2 visitor visa",
-     "entry": "per country reciprocity schedule",
-     "validity": "per reciprocity schedule (unverified)",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 185,
-      "currency": "USD"
-     },
-     "notes": null
     }
    ]
   }
@@ -11173,34 +10928,6 @@
     "amount": 0,
     "currency": null
    }
-  }
- },
- {
-  "route": {
-   "nationality": "CHN",
-   "destination": "TUR",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-25",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://www.mfa.gov.tr/visa-information-for-foreigners.en.mfa",
-  "note": "Re-verified 2026-08-25 by an independent Opus check against the official source. The headline values are right: disposition VISA_EXEMPT, permitted_stay \"90 days in any 180-day period\", permitted_stay_days 90 and requirement_detail \"unconditional_visa_free\" all match the official MFA text verbatim. Marked not-correct only because the rest of the served payload still contradicts t Official text: Ordinary passport holder People's Republic of China nationals are exempt from visa up to 90 days in any 180 day period as of 2 January 2026.",
-  "fields": {
-   "disposition": "VISA_EXEMPT",
-   "requirement_detail": "unconditional_visa_free",
-   "permitted_stay": "90 days in any 180-day period",
-   "permitted_stay_days": 90,
-   "application_channel": "not_required",
-   "visa_products": [],
-   "government_fee": {
-    "amount": 0,
-    "currency": null
-   },
-   "forms": [],
-   "account_registration_steps": [],
-   "payment_process": [],
-   "submission_process": [],
-   "appointment_required": false
   }
  },
  {
@@ -13121,335 +12848,7 @@
  },
  {
   "route": {
-   "nationality": "AUS",
-   "destination": "USA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-25",
-  "verified_by": "Claude Opus 5 verification vs official sources",
-  "source_url": "https://www.federalregister.gov/documents/2025/11/19/2025-20304/certain-dhs-immigration-fees-required-by-hr-1-fiscal-year-2026-adjustments-for-inflation",
-  "note": "ESTA fee is USD 40.27 for FY2026 under HR-1 (Public Law 119-21); the old USD 21 price was repealed. 8 CFR 217.5(c) still shows the superseded text.",
-  "fields": {
-   "government_fee": {
-    "amount": 40.27,
-    "currency": "USD"
-   },
-   "visa_products": [
-    {
-     "type": "ESTA (Visa Waiver Program)",
-     "entry": "multiple",
-     "validity": "2 years from issue, or until the passport expires if sooner",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 40.27,
-      "currency": "USD"
-     },
-     "notes": "FY2026 fee under Public Law 119-21 (HR-1); was USD 21 before FY2025"
-    },
-    {
-     "type": "B1/B2 visitor visa",
-     "entry": "multiple",
-     "validity": "Set by the US reciprocity schedule for each nationality",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 185,
-      "currency": "USD"
-     },
-     "notes": "USD 185 MRV application fee; admission normally 6 months"
-    }
-   ]
-  }
- },
- {
-  "route": {
    "nationality": "DEU",
-   "destination": "USA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-25",
-  "verified_by": "Claude Opus 5 verification vs official sources",
-  "source_url": "https://www.federalregister.gov/documents/2025/11/19/2025-20304/certain-dhs-immigration-fees-required-by-hr-1-fiscal-year-2026-adjustments-for-inflation",
-  "note": "ESTA fee is USD 40.27 for FY2026 under HR-1 (Public Law 119-21); the old USD 21 price was repealed. 8 CFR 217.5(c) still shows the superseded text.",
-  "fields": {
-   "government_fee": {
-    "amount": 40.27,
-    "currency": "USD"
-   },
-   "visa_products": [
-    {
-     "type": "ESTA (Visa Waiver Program)",
-     "entry": "multiple",
-     "validity": "2 years from issue, or until the passport expires if sooner",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 40.27,
-      "currency": "USD"
-     },
-     "notes": "FY2026 fee under Public Law 119-21 (HR-1); was USD 21 before FY2025"
-    },
-    {
-     "type": "B1/B2 visitor visa",
-     "entry": "multiple",
-     "validity": "Set by the US reciprocity schedule for each nationality",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 185,
-      "currency": "USD"
-     },
-     "notes": "USD 185 MRV application fee; admission normally 6 months"
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "ESP",
-   "destination": "USA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-25",
-  "verified_by": "Claude Opus 5 verification vs official sources",
-  "source_url": "https://www.federalregister.gov/documents/2025/11/19/2025-20304/certain-dhs-immigration-fees-required-by-hr-1-fiscal-year-2026-adjustments-for-inflation",
-  "note": "ESTA fee is USD 40.27 for FY2026 under HR-1 (Public Law 119-21); the old USD 21 price was repealed. 8 CFR 217.5(c) still shows the superseded text.",
-  "fields": {
-   "government_fee": {
-    "amount": 40.27,
-    "currency": "USD"
-   },
-   "visa_products": [
-    {
-     "type": "ESTA (Visa Waiver Program)",
-     "entry": "multiple",
-     "validity": "2 years from issue, or until the passport expires if sooner",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 40.27,
-      "currency": "USD"
-     },
-     "notes": "FY2026 fee under Public Law 119-21 (HR-1); was USD 21 before FY2025"
-    },
-    {
-     "type": "B1/B2 visitor visa",
-     "entry": "multiple",
-     "validity": "Set by the US reciprocity schedule for each nationality",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 185,
-      "currency": "USD"
-     },
-     "notes": "USD 185 MRV application fee; admission normally 6 months"
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "FRA",
-   "destination": "USA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-25",
-  "verified_by": "Claude Opus 5 verification vs official sources",
-  "source_url": "https://www.federalregister.gov/documents/2025/11/19/2025-20304/certain-dhs-immigration-fees-required-by-hr-1-fiscal-year-2026-adjustments-for-inflation",
-  "note": "ESTA fee is USD 40.27 for FY2026 under HR-1 (Public Law 119-21); the old USD 21 price was repealed. 8 CFR 217.5(c) still shows the superseded text.",
-  "fields": {
-   "government_fee": {
-    "amount": 40.27,
-    "currency": "USD"
-   },
-   "visa_products": [
-    {
-     "type": "ESTA (Visa Waiver Program)",
-     "entry": "multiple",
-     "validity": "2 years from issue, or until the passport expires if sooner",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 40.27,
-      "currency": "USD"
-     },
-     "notes": "FY2026 fee under Public Law 119-21 (HR-1); was USD 21 before FY2025"
-    },
-    {
-     "type": "B1/B2 visitor visa",
-     "entry": "multiple",
-     "validity": "Set by the US reciprocity schedule for each nationality",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 185,
-      "currency": "USD"
-     },
-     "notes": "USD 185 MRV application fee; admission normally 6 months"
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "GBR",
-   "destination": "USA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-25",
-  "verified_by": "Claude Opus 5 verification vs official sources",
-  "source_url": "https://www.federalregister.gov/documents/2025/11/19/2025-20304/certain-dhs-immigration-fees-required-by-hr-1-fiscal-year-2026-adjustments-for-inflation",
-  "note": "ESTA fee is USD 40.27 for FY2026 under HR-1 (Public Law 119-21); the old USD 21 price was repealed. 8 CFR 217.5(c) still shows the superseded text.",
-  "fields": {
-   "government_fee": {
-    "amount": 40.27,
-    "currency": "USD"
-   },
-   "visa_products": [
-    {
-     "type": "ESTA (Visa Waiver Program)",
-     "entry": "multiple",
-     "validity": "2 years from issue, or until the passport expires if sooner",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 40.27,
-      "currency": "USD"
-     },
-     "notes": "FY2026 fee under Public Law 119-21 (HR-1); was USD 21 before FY2025"
-    },
-    {
-     "type": "B1/B2 visitor visa",
-     "entry": "multiple",
-     "validity": "Set by the US reciprocity schedule for each nationality",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 185,
-      "currency": "USD"
-     },
-     "notes": "USD 185 MRV application fee; admission normally 6 months"
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "JPN",
-   "destination": "USA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-25",
-  "verified_by": "Claude Opus 5 verification vs official sources",
-  "source_url": "https://www.federalregister.gov/documents/2025/11/19/2025-20304/certain-dhs-immigration-fees-required-by-hr-1-fiscal-year-2026-adjustments-for-inflation",
-  "note": "ESTA fee is USD 40.27 for FY2026 under HR-1 (Public Law 119-21); the old USD 21 price was repealed. 8 CFR 217.5(c) still shows the superseded text.",
-  "fields": {
-   "government_fee": {
-    "amount": 40.27,
-    "currency": "USD"
-   },
-   "visa_products": [
-    {
-     "type": "ESTA (Visa Waiver Program)",
-     "entry": "multiple",
-     "validity": "2 years from issue, or until the passport expires if sooner",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 40.27,
-      "currency": "USD"
-     },
-     "notes": "FY2026 fee under Public Law 119-21 (HR-1); was USD 21 before FY2025"
-    },
-    {
-     "type": "B1/B2 visitor visa",
-     "entry": "multiple",
-     "validity": "Set by the US reciprocity schedule for each nationality",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 185,
-      "currency": "USD"
-     },
-     "notes": "USD 185 MRV application fee; admission normally 6 months"
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "KOR",
-   "destination": "USA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-25",
-  "verified_by": "Claude Opus 5 verification vs official sources",
-  "source_url": "https://www.federalregister.gov/documents/2025/11/19/2025-20304/certain-dhs-immigration-fees-required-by-hr-1-fiscal-year-2026-adjustments-for-inflation",
-  "note": "ESTA fee is USD 40.27 for FY2026 under HR-1 (Public Law 119-21); the old USD 21 price was repealed. 8 CFR 217.5(c) still shows the superseded text.",
-  "fields": {
-   "government_fee": {
-    "amount": 40.27,
-    "currency": "USD"
-   },
-   "visa_products": [
-    {
-     "type": "ESTA (Visa Waiver Program)",
-     "entry": "multiple",
-     "validity": "2 years from issue, or until the passport expires if sooner",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 40.27,
-      "currency": "USD"
-     },
-     "notes": "FY2026 fee under Public Law 119-21 (HR-1); was USD 21 before FY2025"
-    },
-    {
-     "type": "B1/B2 visitor visa",
-     "entry": "multiple",
-     "validity": "Set by the US reciprocity schedule for each nationality",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 185,
-      "currency": "USD"
-     },
-     "notes": "USD 185 MRV application fee; admission normally 6 months"
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "SGP",
-   "destination": "USA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-25",
-  "verified_by": "Claude Opus 5 verification vs official sources",
-  "source_url": "https://www.federalregister.gov/documents/2025/11/19/2025-20304/certain-dhs-immigration-fees-required-by-hr-1-fiscal-year-2026-adjustments-for-inflation",
-  "note": "ESTA fee is USD 40.27 for FY2026 under HR-1 (Public Law 119-21); the old USD 21 price was repealed. 8 CFR 217.5(c) still shows the superseded text.",
-  "fields": {
-   "government_fee": {
-    "amount": 40.27,
-    "currency": "USD"
-   },
-   "visa_products": [
-    {
-     "type": "ESTA (Visa Waiver Program)",
-     "entry": "multiple",
-     "validity": "2 years from issue, or until the passport expires if sooner",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 40.27,
-      "currency": "USD"
-     },
-     "notes": "FY2026 fee under Public Law 119-21 (HR-1); was USD 21 before FY2025"
-    },
-    {
-     "type": "B1/B2 visitor visa",
-     "entry": "multiple",
-     "validity": "Set by the US reciprocity schedule for each nationality",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 185,
-      "currency": "USD"
-     },
-     "notes": "USD 185 MRV application fee; admission normally 6 months"
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "TWN",
    "destination": "USA",
    "travel_purpose": "tourism"
   },
@@ -13891,102 +13290,6 @@
       "currency": "TWD"
      },
      "notes": "NT$1,646 total incl. NT$46 card-processing fee"
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "IDN",
-   "destination": "USA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-28",
-  "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
-  "source_url": "https://www.ecfr.gov/current/title-22/chapter-I/subchapter-A/part-22/section-22.1",
-  "note": "Fee $185 and 180-day stay confirmed from eCFR. 'Up to 120 months, reciprocity-based' is UNVERIFIED - reciprocity schedule inaccessible (travel.state.gov bot-verification wall). | quote: 21. Nonimmigrant Visa Application and Border Crossing Card Processing Fees (per person): (a) Non-petition-based nonimmigrant visa (except E category) $185 ... 23. Nonimmigrant Visa Issuance Fee, including",
-  "fields": {
-   "permitted_stay_days": 180,
-   "permitted_stay": "Up to 6 months; B-2 admissions are for a minimum of six months",
-   "government_fee": {
-    "amount": 185,
-    "currency": "USD"
-   },
-   "visa_products": [
-    {
-     "type": "B-1/B-2 visitor visa",
-     "entry": "per country reciprocity schedule",
-     "validity": "per reciprocity schedule (unverified)",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 185,
-      "currency": "USD"
-     },
-     "notes": null
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "VNM",
-   "destination": "USA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-28",
-  "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
-  "source_url": "https://www.ecfr.gov/current/title-22/chapter-I/subchapter-A/part-22/section-22.1",
-  "note": "Fee $185 and 180-day stay confirmed from eCFR. 'Up to 12 months by reciprocity' UNVERIFIED - reciprocity schedule inaccessible. | quote: 21. Nonimmigrant Visa Application and Border Crossing Card Processing Fees (per person): (a) Non-petition-based nonimmigrant visa (except E category) $185 ... 23. Nonimmigrant Visa Issuance Fee, including Border-Crossing Cards (Reciprocity Fee) RECIPROC",
-  "fields": {
-   "permitted_stay_days": 180,
-   "permitted_stay": "Up to 6 months; B-2 admissions are for a minimum of six months",
-   "government_fee": {
-    "amount": 185,
-    "currency": "USD"
-   },
-   "visa_products": [
-    {
-     "type": "B-1/B-2 visitor visa",
-     "entry": "per country reciprocity schedule",
-     "validity": "per reciprocity schedule (unverified)",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 185,
-      "currency": "USD"
-     },
-     "notes": null
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "RUS",
-   "destination": "USA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-28",
-  "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
-  "source_url": "https://www.ecfr.gov/current/title-22/chapter-I/subchapter-A/part-22/section-22.1",
-  "note": "Fee $185 and 180-day stay confirmed from eCFR. 'up to 3 years (reciprocity)' UNVERIFIED - reciprocity schedule inaccessible. Russia is also one of the nationalities most likely to carry a reciprocity ISSUANCE fee on top of the $185 MRV (22 CFR 22.1 item 23, 'RECIPROCAL'); Ellis's headline fee ignore | quote: 21. Nonimmigrant Visa Application and Border Crossing Card Processing Fees (per ",
-  "fields": {
-   "permitted_stay_days": 180,
-   "permitted_stay": "Up to 6 months; B-2 admissions are for a minimum of six months",
-   "government_fee": {
-    "amount": 185,
-    "currency": "USD"
-   },
-   "visa_products": [
-    {
-     "type": "B-1/B-2 visitor visa",
-     "entry": "per country reciprocity schedule",
-     "validity": "per reciprocity schedule (unverified)",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 185,
-      "currency": "USD"
-     },
-     "notes": null
     }
    ]
   }
@@ -14943,49 +14246,6 @@
   "fields": {
    "permitted_stay_days": 183,
    "permitted_stay": "183 days, cumulative within any 365-day period, not extendable"
-  }
- },
- {
-  "route": {
-   "nationality": "HKG",
-   "destination": "TUR",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-28",
-  "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
-  "source_url": "https://www.mfa.gov.tr/visa-information-for-foreigners.en.mfa",
-  "note": "Completely wrong route. Holders of a Hong Kong SAR passport (ordinary or official) are VISA-EXEMPT for Türkiye for up to 90 days - there is no e-Visa and no fee. Ellis charges USD 60 for a 30-day single-entry e-Visa with 180-day validity; the correct fee is 0 and the correct stay is 90 days. Only Ho | quote: Hong Kong Special Administrative Region of the PRC: Ordinary and official \"Hong ",
-  "fields": {
-   "permitted_stay_days": 90,
-   "permitted_stay": "90 days visa-free",
-   "government_fee": {
-    "amount": 0,
-    "currency": "USD"
-   },
-   "visa_products": [
-    {
-     "type": "Visa exemption (Hong Kong SAR ordinary/official passport)",
-     "entry": "n/a",
-     "validity": "n/a - no visa issued",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 0,
-      "currency": "USD"
-     },
-     "notes": "Passport must be valid at least 60 days beyond the intended duration of stay."
-    },
-    {
-     "type": "Multiple-entry e-Visa (Hong Kong British National (Overseas) passport holders only)",
-     "entry": "multiple",
-     "validity": "3 months",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 20,
-      "currency": "USD"
-     },
-     "notes": "Applies only to BN(O) passports. Holders of a 'Document of Identity for Visa Purposes - Hong Kong (D.I.)' must obtain a visa from a Turkish mission instead."
-    }
-   ]
   }
  },
  {
@@ -24028,71 +23288,6 @@
  {
   "route": {
    "nationality": "CHN",
-   "destination": "BGR",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://www.mfa.bg/en/services-travel/consular-services/fees",
-  "note": "Headline fee (EUR 90) and stay (90 days in any 180-day period) are correct and source-backed - since 31 March 2024 Bulgaria issues uniform Schengen visas and 'A Schengen visa issued by the Republic of Bulgaria after 31 March 2024 will allow its holder to travel throughout the Schengen area in accord | quote: When submitting an application for issua | Gap-close research 2026-08-29 against the official page. Quote: \"When submitting an application for issuance of a visa for airport transit or for short-term stay, a fee of EUR 90 shall be collected … Children who are between 6 and under 12 years of age are exempt from the requirement to pay a visa fee.\"",
-  "fields": {
-   "government_fee": {
-    "amount": 90,
-    "currency": "EUR"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Short-stay Schengen visa (Type C) - adult, single entry",
-     "entry": "single",
-     "validity": "90 days",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": "Fee is non-refundable if the visa is refused."
-    },
-    {
-     "type": "Short-stay Schengen visa (Type C) - child aged 6 to under 12",
-     "entry": "single",
-     "validity": "90 days",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 0,
-      "currency": "EUR"
-     },
-     "notes": "MFA fees page: 'Children who are between 6 and under 12 years of age are exempt from the requirement to pay a visa fee.' (Bulgaria waives the fee for this age band rather than charging the EU-standard reduced fee.)"
-    },
-    {
-     "type": "Short-stay Schengen visa (Type C) - child under 6",
-     "entry": "single",
-     "validity": "90 days",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 0,
-      "currency": "EUR"
-     },
-     "notes": "MFA 'Visa for Bulgaria' page (https://www.mfa.bg/en/services-travel/consular-services/travel-bulgaria/visa-bulgaria): 'The following persons are exempt from fees for visa application processing: Foreign citizens who as of the date of the visa application are under 6 years'."
-    },
-    {
-     "type": "Short-stay Schengen visa (Type C) - adult, multiple entry",
-     "entry": "multiple",
-     "validity": "5 years",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": null
-    }
-   ],
-   "disposition": "VISA_REQUIRED"
-  }
- },
- {
-  "route": {
-   "nationality": "CHN",
    "destination": "DEU",
    "travel_purpose": "tourism"
   },
@@ -24192,81 +23387,6 @@
       "currency": "EUR"
      },
      "notes": null
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "CHN",
-   "destination": "ROU",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://www.mae.ro/en/node/2061?page=2",
-  "note": "Nothing wrong. Romania's MFA fee schedule confirms EUR 90 for the uniform (type C) visa and EUR 45 for children aged 6 to 12; children under 6 are exempt under EU Visa Code Art. 16(4)(a). Romania has issued uniform Schengen visas since 31 March 2024, so the 90-days-in-180 stay is right, and single,  | quote: Here are the fees charged for the proces | Gap-close research 2026-08-29 against the official page. Quote: \"There is no fee for short-stay visas for the following categories of applicants: ... children under six years of age;\"",
-  "fields": {
-   "government_fee": {
-    "amount": 90,
-    "currency": "EUR"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Short-stay Schengen visa (C) - adult, single entry",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": "MAE fee table: 'Uniform visa (type C) 90 EUR'. Stay per mae.ro node 30325: Schengen visas issued 'for stays ... not exceeding 90 days in any period of 180 days'. Validity is set per issuance under the EU Visa Code and not published as a fixed figure."
-    },
-    {
-     "type": "Short-stay Schengen visa (C) - adult, double entry",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": "Two entries. Same 90 EUR uniform C-visa fee regardless of number of entries; 90/180-day stay rule; validity per issuance."
-    },
-    {
-     "type": "Short-stay Schengen visa (C) - adult, multiple entry",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": "Same 90 EUR uniform C-visa fee; 90/180-day stay rule; validity per issuance."
-    },
-    {
-     "type": "Short-stay Schengen visa (C) - child aged 6 to 12",
-     "entry": null,
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 45,
-      "currency": "EUR"
-     },
-     "notes": "MAE fee table: 'Type A, C visas for children aged 6 to 12: 45 EUR'. Fee tier is set by age, not by number of entries."
-    },
-    {
-     "type": "Short-stay Schengen visa (C) - child under 6",
-     "entry": null,
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 0,
-      "currency": "EUR"
-     },
-     "notes": "MAE: 'There is no fee for short-stay visas for ... children under six years of age' (node 2061, page 2). Fee exemption applies regardless of number of entries."
     }
    ]
   }
@@ -27012,38 +26132,6 @@
  },
  {
   "route": {
-   "nationality": "USA",
-   "destination": "TUR",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-28",
-  "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
-  "source_url": "https://www.mfa.gov.tr/visa-information-for-foreigners.en.mfa",
-  "note": "US ordinary passport holders are VISA-EXEMPT for Türkiye for up to 90 days in any 180-day period. Ellis's USD 50 multiple-entry tourist/business e-Visa with 180-day validity is obsolete - there is no e-Visa requirement and no fee for ordinary US passports. The 90-day stay figure is right, but it is  | quote: Hong Kong Special Administrative Region of the PRC: Ordinary and official \"Hong ",
-  "fields": {
-   "government_fee": {
-    "amount": 0,
-    "currency": "USD"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Visa exemption (US ordinary passport)",
-     "entry": "multiple",
-     "validity": "n/a - no visa issued",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 0,
-      "currency": "USD"
-     },
-     "notes": "90 days within any 180-day period. Passport must be valid at least 60 days beyond the duration of stay. Official/diplomatic passport holders do require a visa."
-    }
-   ],
-   "permitted_stay": "Exempt from visa up to 90 days in any 180-day period"
-  }
- },
- {
-  "route": {
    "nationality": "CHN",
    "destination": "CHE",
    "travel_purpose": "tourism"
@@ -27879,26 +26967,6 @@
  },
  {
   "route": {
-   "nationality": "IND",
-   "destination": "THA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-28",
-  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
-  "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/0303/%E0%B8%9C.60.pdf",
-  "note": "TIME-CRITICAL and the highest-risk route in this batch. Verified visa-exempt 60 days today. But under the Cabinet decision of 19 May 2026 (mfa.go.th) India does not simply lose days — it changes DISPOSITION, dropping out of visa exemption entirely into the reduced 4-country Visa on Arrival list (15 days, fee payable). That flips this route from VISA_EXEMPT to VISA_ON_ARRIVAL the moment the Ministr",
-  "fields": {
-   "disposition": "VISA_EXEMPT",
-   "permitted_stay": "Not exceeding 60 days (scheme ผ.60); India is entry 34 on the official list",
-   "permitted_stay_days": 60,
-   "government_fee": {
-    "amount": 0,
-    "currency": "THB"
-   }
-  }
- },
- {
-  "route": {
    "nationality": "IDN",
    "destination": "THA",
    "travel_purpose": "tourism"
@@ -28055,26 +27123,6 @@
      "notes": "The current official Maldives Immigration and MFA pages (immigration.gov.mv/visa/tourist-visa, backup.foreign.gov.mv maldives-visa) confirm the visa is granted on arrival with no pre-approval but do not publish a fee amount for the on-arrival tourist visa; the fee fact therefore remains unset. foreign.gov.mv and mdvmission.gov.mv pages that reportedly state the visa is free are behind an interactive human-verification challenge and could not be read."
     }
    ]
-  }
- },
- {
-  "route": {
-   "nationality": "HKG",
-   "destination": "BGR",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-28",
-  "verified_by": "Claude Opus 5 low-confidence sweep vs official sources",
-  "source_url": "https://www.mfa.bg/upload/161580/02_07_2026_EN_VisaRegime_for_foreigners_ordinary_passports-1.pdf",
-  "note": "Current claim confirmed. Official Bulgarian MFA ordinary-passport table (linked from https://www.mfa.bg/en/services-travel/consular-services/travel-bulgaria/visa-bulgaria), last updated 02.07.2026, lists Hong Kong SAR as not requiring a visa. The same MFA page sets the duration: Annex II nationals of Regulation (EU) 2018/1806 'shall be subject to visa-free regime for a period of no more than 90 da",
-  "fields": {
-   "disposition": "VISA_EXEMPT",
-   "permitted_stay": "90 days in any 180-day period (Schengen short-stay clock)",
-   "permitted_stay_days": 90,
-   "government_fee": {
-    "amount": 0,
-    "currency": null
-   }
   }
  },
  {
@@ -33859,48 +32907,6 @@
  },
  {
   "route": {
-   "nationality": "CAN",
-   "destination": "USA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/citizens-of-canada-and-bermuda.html",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"Citizens of Canada traveling to the United States do not require a nonimmigrant visa, except for the travel purposes described below.\"",
-  "fields": {
-   "disposition": "VISA_EXEMPT",
-   "requirement_detail": "unconditional_visa_free",
-   "permitted_stay": "Generally up to six months",
-   "permitted_stay_days": 180,
-   "government_fee": {
-    "amount": 0,
-    "currency": "USD"
-   },
-   "required_documents": [
-    "Valid Canadian passport (air entry; NEXUS card accepted when departing from Canada)",
-    "By land or sea: Canadian passport, Enhanced Driver's License/Enhanced ID Card, or NEXUS/FAST/SENTRI card"
-   ],
-   "exceptions": [
-    "Visa still required for: foreign government officials (A), international organization officials/employees (G) and NATO; treaty traders (E-1) and treaty investors (E-2); fiance(e)s and their children (K-1/K-2); spouses of U.S. citizens completing immigration (K-3/K-4); informants (S-5/S-6) and their family (S-7)",
-    "Permanent residents (landed immigrants) of Canada are not covered by the exemption and generally need a passport and visa unless VWP-eligible"
-   ],
-   "visa_products": [
-    {
-     "type": "No visa needed",
-     "entry": "multiple",
-     "validity": "Up to six months per visit",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 0,
-      "currency": "USD"
-     },
-     "notes": "Stay duration confirmed on CBP's official help article (help.cbp.gov Article-1418, loaded 2026-08-28): Canadian citizens 'may generally visit the United States for up to six months'. Canadian passports need only be valid until the intended date of departure; no ESTA needed for Canadian citizens on a Canadian passport."
-    }
-   ]
-  }
- },
- {
-  "route": {
    "nationality": "PHL",
    "destination": "THA",
    "travel_purpose": "tourism"
@@ -35290,30 +34296,6 @@
  {
   "route": {
    "nationality": "USA",
-   "destination": "BGR",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://www.mfa.bg/upload/161580/02_07_2026_EN_VisaRegime_for_foreigners_ordinary_passports-1.pdf",
-  "note": "Bulgarian MFA 'Table of countries/territories whose citizens, holders of ordinary passports, require/do not require visas to enter Bulgaria' (last update 02.07.2026) lists USA at entry 190 with visa required: No. The MFA's visa-bulgaria page adds that Annex II nationals 'shall be subject to visa-free regime for a period of no more than 90 days in any 180-day period' (https://www.mfa.bg/en/services-travel/consular-services/travel-bulgaria/visa-bulgaria), and notes Bulgaria is in the Schengen area. Confirms the stored visa-exempt 90-day picture. | Gap-close research 2026-08-29 against the official page. Quote: \"USA ... [Visa is required Yes/No] No\" | Gap-close research 2026-08-29 against the official page. Quote: \"TABLE OF COUNTRIES/TERRITORIES WHOSE CITIZENS, HOLDERS OF ORDINARY PASSPORTS, REQUIRE/DO NOT REQUIRE VISAS TO ENTER BULGARIA (Last update: 02.07.2026): 190 USA — Visa is required: No\"",
-  "fields": {
-   "disposition": "VISA_EXEMPT",
-   "requirement_detail": "unconditional_visa_free",
-   "permitted_stay": "90 days in any 180-day period",
-   "permitted_stay_days": 90,
-   "government_fee": {
-    "amount": 0,
-    "currency": "USD"
-   },
-   "exceptions": [
-    "Per https://www.mfa.bg/en/services-travel/consular-services/travel-bulgaria/visa-bulgaria (also loaded): visa-exempt nationals 'shall be subject to visa-free regime for a period of no more than 90 days in any 180-day period', and the short-term stay is counted from entry into the Schengen area, Bulgaria included"
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "USA",
    "destination": "BRN",
    "travel_purpose": "tourism"
   },
@@ -35888,31 +34870,6 @@
     "A $100 Pristine Paradise Environmental Fee (PPEF) is collected via the international airline ticket price for every visitor (not a visa fee).",
     "All visitors sign the Palau Pledge stamped into their passports upon arrival.",
     "The Bureau of Customs & Border Protection page does not state a maximum stay duration for US citizens."
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "USA",
-   "destination": "ROU",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://washington.mae.ro/en/node/426",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"US citizens may enter and stay in Romania without requirement for a visa on a short term basis for a maximum total period of 90 days within 6 months.\"",
-  "fields": {
-   "disposition": "VISA_EXEMPT",
-   "requirement_detail": "unconditional_visa_free",
-   "permitted_stay": "90 days within any 180-day period",
-   "permitted_stay_days": 90,
-   "government_fee": {
-    "amount": 0,
-    "currency": "USD"
-   },
-   "exceptions": [
-    "The 90-day allowance is counted with a 180-day look-back at the border; days already used reduce the remaining permitted entry.",
-    "Stays over 90 days: US citizens are exempt from a D-type visa but must apply to the Romanian Immigration Office for a temporary residence permit at least 30 days before the legal stay expires."
    ]
   }
  },
@@ -45520,6 +44477,2153 @@
     "ETIAS and the Entry/Exit System do not apply to Union citizens"
    ],
    "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "THA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://thailand.prd.go.th/en/content/category/detail/id/2078/iid/522327",
+  "note": "Verified 2026-08-30 against thailand.prd.go.th. Under the new measures, citizens of 59 countries and territories will be granted visa-free entry for tourism purposes for stays up to 30 days. This entitlement includes six countries – India, Croatia, Bulgaria, Cyprus, Malta, and the Maldives – resulting in 27 European Union member states that will ",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "Ordinary passports. STRONGEST OUTCOME IN THIS BATCH — visa-free holds under both the current and the pending regime. France is an EU member state and the Government PR Department (15 July 2026) confirms all 27 EU member states receive the new 30-day exemption; France is also on t"
+   ],
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "THA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://thailand.prd.go.th/en/content/category/detail/id/2078/iid/522327",
+  "note": "Verified 2026-08-30 against thailand.prd.go.th. Under the new measures, citizens of 59 countries and territories will be granted visa-free entry for tourism purposes for stays up to 30 days. This entitlement includes six countries – India, Croatia, Bulgaria, Cyprus, Malta, and the Maldives – resulting in 27 European Union member states that will ",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "Ordinary passports. Outcome robust under both regimes, as with France: Spain is an EU member state covered by the PRD's explicit statement that all 27 EU member states receive the new 30-day exemption, and Spain is on the Tourist Visa Exemption Scheme 30-day list in MFA's 9 May 2"
+   ],
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "IND",
+   "destination": "THA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://thailand.prd.go.th/en/content/category/detail/id/2078/iid/522327",
+  "note": "Verified 2026-08-30 against thailand.prd.go.th. Under the new measures, citizens of 59 countries and territories will be granted visa-free entry for tourism purposes for stays up to 30 days. This entitlement includes six countries – India, Croatia, Bulgaria, Cyprus, Malta, and the Maldives ... India's VoA will be removed to eliminate the overlapp",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "Not exceeding 60 days (scheme ผ.60); India is entry 34 on the official list",
+   "permitted_stay_days": 60,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "Ordinary passports. Outcome is government-confirmed under BOTH regimes, which is rare here: India is on the current 60-day list (I extracted entry '34. India' from https://image.mfa.go.th/mfa/0/zE6021nSnu/0303/%E0%B8%9C.60.pdf myself) AND is one of only six countries the Governme"
+   ],
+   "visa_products": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "THA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.mfa.go.th/en/content/thcn280124?cate=5d5bcb4e15e39c306000683e",
+  "note": "Verified 2026-08-30 against www.mfa.go.th. Holders of valid Thai ordinary passports and valid Chinese passports for public affairs and ordinary passports [are exempted from visa requirements] for a period of stay not exceeding 30 days and a cumulative period of stays not exceeding 90 days in any 180-day period ... The Agreement will enter in",
+  "fields": {
+   "arrival_card": {
+    "required": true,
+    "name": "Thailand Digital Arrival Card (TDAC)",
+    "submission_window": "submit online within 3 days before arrival",
+    "note": "Mandatory for all foreign visitors since 1 May 2025; free at tdac.immigration.go.th"
+   },
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "Visa-free entry",
+   "permitted_stay": "Up to 60 days",
+   "permitted_stay_days": 60,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa is required for stays of up to 60 days. A Thailand Digital Arrival Card is submitted before arrival.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": [],
+   "exceptions": [
+    "Ordinary passports. THE CLAIM'S RISK LABEL IS BACKWARDS — I am correcting it. The claim marks China 'HIGH RISK under the pending one country, one entitlement revision given the 30-day bilateral overlap.' The bilateral is what makes China SAFE on outcome, not unsafe: it is a treat"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "TUR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.immd.gov.hk/pdf/Visa-free%20Access%20or%20Visa-on-arrival%20for%20HKSAR%20passport%20list_Eng.pdf",
+  "note": "Verified 2026-08-30 against www.immd.gov.hk. HKSAR passport holders have been granted visa-free access or visa-on-arrival to visit the following countries/territories (updated on 26 August 2026): ... 164. Turkiye  90 days",
+  "fields": {
+   "permitted_stay_days": 90,
+   "permitted_stay": "90 days visa-free",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": [],
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "conditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "Exemption applies only to holders of a Hong Kong SAR passport; BN(O) holders need an e-Visa.",
+    "HKSAR passport holders only. Confirmed on Hong Kong's own government list of countries granting visa-free access, updated 26 August 2026. British National (Overseas) holders are NOT covered: Turkiye's official e-Visa eligibility list at evisa.gov.tr carries an entry for 'Hong Kon"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "TWN",
+   "destination": "TUR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.boca.gov.tw/cp-37-220-9f130-1.html",
+  "note": "Verified 2026-08-30 against www.boca.gov.tw. 凡我國人因觀光或商務目的欲前往土耳其，得持憑6個月以上效期之中華民國普通護照先行上網（https://www.evisa.gov.tr/en/）申辦半年內多次入境，總停留時間最多30天的電子簽證。",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "evisa",
+   "application_channel": "online_portal",
+   "exceptions": [
+    "e-Visa required; independently corroborated by Turkiye's own eligibility list at https://www.evisa.gov.tr/en/info/who-is-eligible-for-e-visa/, which lists Taiwan and omits all fifteen visa-free nationalities in this set. CORRECTION TO THE SUBMITTED CLAIM: do not publish 'single e"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "JPN",
+   "destination": "TUR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.anzen.mofa.go.jp/info/pcsafetymeasure_052.html",
+  "note": "Verified 2026-08-30 against www.anzen.mofa.go.jp. 日本とトルコの間には査証免除取極があり、観光や会議出席等を目的とする90日以内の短期滞在については、査証を取得する必要はありません。この短期滞在の期間は、「180日間内で合計90日間を超えないものとする」と規定されています。",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "CORRECTION TO THE SUBMITTED CLAIM: the claim stated the 90 days carries no 180-day reference window. That is wrong and dangerous. Japan's MOFA (page updated 11 June 2025) states the short stay is expressly capped at 90 days total within any 180 days, and warns that leaving and re"
+   ],
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "KOR",
+   "destination": "TUR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://0404.go.kr/bbs/contsPst/MST0000000000113/13/detail",
+  "note": "Verified 2026-08-30 against 0404.go.kr. 튀르키예 외교목적: 임무기간, 그외 180일 중 90일 관용목적: 임무기간, 그외 180일 중 90일 180일 중 90일 외교관여권 소지자 : 협정 관용여권 소지자 : 협정 일반여권 소지자 : 협정",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "CORRECTION TO THE SUBMITTED CLAIM: the claim stated there is no 180-day reference window. Korea's MOFA visa-exemption table records the Turkiye entry for ordinary passport holders as 90 days within 180 days, held under a bilateral agreement. Diplomatic and official holders get th"
+   ],
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "TUR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://tr.usembassy.gov/obtaining-a-visa-for-turkiye/",
+  "note": "Verified 2026-08-30 against tr.usembassy.gov. Ordinary U.S. passport holders are exempted from visa up to 90 days in any 180-day period.",
+  "fields": {
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "permitted_stay": "Exempt from visa up to 90 days in any 180-day period",
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "Ordinary passports only; US official and diplomatic passport holders on official business must obtain a visa in advance. 90 days in any 180-day period. Staying beyond 90 days requires a residence permit from the Presidency of Migration Management, obtained after arrival. Work, st"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "THA",
+   "destination": "TUR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://bangkok-emb.mfa.gov.tr/Mission/ShowInfoNote/122066",
+  "note": "Verified 2026-08-30 against bangkok-emb.mfa.gov.tr. granted visa exemption on their touristic visits to Turkey for a period of not exceeding 30 days on each of their visits for a cumulative of 90 days within 180 days",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "conditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "30 days per visit for tourism only, capped at 90 days in any 180.",
+    "MATERIAL DETAIL THE CLAIM OMITTED: the 30 days is per visit AND is subject to a cumulative cap of 90 days within 180 days, and the exemption is scoped to touristic visits. The submitted row recorded a flat 30 days with no cap and no purpose limit. Thai official, diplomatic and se"
+   ],
+   "permitted_stay_days": 30,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "SGP",
+   "destination": "TUR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.mfa.gov.sg/travelling-overseas/travel-advisories-notices-and-visa-information/turkiye/",
+  "note": "Verified 2026-08-30 against www.mfa.gov.sg. All Singapore passport holders do not require a visa for visits less than 90 days within 180 days from date of initial entry to Türkiye for social visit purposes.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "CORRECTION TO THE SUBMITTED CLAIM: Singapore's own MFA states the 90 days runs within a 180-day window measured from the date of initial entry, contradicting the claim's 'no 180-day reference window'. Scope is social visit purposes. Turkiye's Embassy in Singapore separately confi"
+   ],
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "MYS",
+   "destination": "TUR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.kln.gov.my/web/tur_istanbul/requirement_malaysians",
+  "note": "Verified 2026-08-30 against www.kln.gov.my. Ordinary and official passport holders are exempted from visas for their travels for up to 90 days. Please provide the return/ round flight ticket before departure from the origin country.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "Confirmed on a Malaysian government page written for Malaysian travellers. Two caveats. First, that page cites the Turkish MFA A-Z as its source, so it is corroboration rather than a fully independent authority. Second, the claim's 'no 180-day reference window' should not be publ"
+   ],
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "GBR",
+   "destination": "TUR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.gov.uk/foreign-travel-advice/turkey/entry-requirements",
+  "note": "Verified 2026-08-30 against www.gov.uk. You can visit Turkey without a visa for up to 90 days in any 180-day period, for business or tourism.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "90 days in any 180-day period. PURPOSE-SCOPE DISCREPANCY worth carrying: the Turkish MFA text limits the exemption to touristic purposes, while the UK FCDO states business or tourism. The Turkish wording is the binding one, so a business traveller should not rely on the UK phrasi"
+   ],
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "RUS",
+   "destination": "TUR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.kdmid.ru/info-for-traveling-abroad/reference-information-for-traveling-abroad/list-of-countries-with-simplified-entry/",
+  "note": "Verified 2026-08-30 against www.kdmid.ru. Турция | без визы до 90 дней | без визы до 30 дней, но не более 90 дней в течение 180 дней | без визы до 30 дней, но не более 90 дней в течение 180 дней*, ** ... *По решению Совета Министров Турецкой Республики от 22.04.2013 г. № 2013/4665 для россиян с 16.05.2013 г. – до 60 дней.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "CORRECTION TO THE SUBMITTED CLAIM: the claim asserted that no 180-day cap attaches to the 60 days. Russia's MFA Consular Department table shows the opposite. The 2010 bilateral agreement sets 30 days not exceeding 90 days within 180 days, and a footnote records that by Turkish Co"
+   ],
+   "permitted_stay_days": 60,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "AUS",
+   "destination": "TUR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.smartraveller.gov.au/destinations/europe/turkiye",
+  "note": "Verified 2026-08-30 against www.smartraveller.gov.au. Australians holding ordinary passports don't need a visa for tourism or transit purposes if staying 90 days or less in a 180-day period.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "90 days in any 180-day period, scoped to tourism or transit. Australian official passport holders still require a visa. Source page marked 'Still current at: 30 August 2026', updated 14 August 2026, so this is the freshest confirmation in the batch. Medical travellers whose treat"
+   ],
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "IDN",
+   "destination": "TUR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://jakarta-emb.mfa.gov.tr/Mission/ShowAnnouncement/389613",
+  "note": "Verified 2026-08-30 against jakarta-emb.mfa.gov.tr. Indonesian ordinary passport holders are exempted from the visa requirement for their travels to Turkey for touristic and transit purposes for up to 30 days stay in Turkey. The new visa-free travel regulation came into effect as of 24 December 2021.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "PURPOSE SCOPE THE CLAIM OMITTED: Turkiye's own embassy in Jakarta limits the exemption to touristic and transit purposes, in force since 24 December 2021. The structure the claim describes, 30 days per entry with an overall cap of 90 days in any 180, appears on the Turkish MFA A-"
+   ],
+   "permitted_stay_days": 30,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "PHL",
+   "destination": "TUR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://manila-be.mfa.gov.tr/Mission/ShowAnnouncement/352056",
+  "note": "Verified 2026-08-30 against manila-be.mfa.gov.tr. Philippine nationals who are holders of ordinary passports and have a valid visa or residence permit of any of the Schengen countries, USA, UK and Ireland are eligible to apply for an e-visa.",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "evisa",
+   "application_channel": "online_portal",
+   "exceptions": [
+    "CONDITIONAL e-Visa. A Philippine ordinary passport alone is not sufficient; the applicant must already hold a valid visa or residence permit from a Schengen state, the USA, the UK or Ireland, and must carry that document in original for Turkish immigration. Without one, the trave"
+   ],
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "TUR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.diplomatie.gouv.fr/fr/information-par-pays/turquie/conseils-aux-voyageurs-entree-sejour",
+  "note": "Verified 2026-08-30 against www.diplomatie.gouv.fr. Les ressortissants français sont dispensés de visa pour un séjour touristique en Turquie ne dépassant pas 90 jours sur une période de 180 jours, que le séjour soit continu ou fractionné.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "CORRECTION TO THE SUBMITTED CLAIM: France's own foreign ministry, page updated 19 August 2026, states 90 days over a 180-day period and adds that the cap applies whether the stay is continuous or split into several trips. The claim's 'no 180-day reference window' is wrong. Scoped"
+   ],
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "VNM",
+   "destination": "TUR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://hanoi-emb.mfa.gov.tr/Mission/ShowAnnouncement/413510",
+  "note": "Verified 2026-08-30 against hanoi-emb.mfa.gov.tr. As of 1 September 2025, citizens of Vietnam are eligible to apply for an e-Visa ... The e-Visa is valid for 180 days, with a maximum stay of 30 days within that period.",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "evisa",
+   "application_channel": "online_portal",
+   "exceptions": [
+    "Newest scheme in this set: Vietnamese ordinary passport holders became e-Visa eligible as of 1 September 2025. The 180 days is the e-Visa's VALIDITY and the 30 days is the maximum stay within it; do not conflate them. Corroborated by Turkiye's e-Visa eligibility list, which inclu"
+   ],
+   "permitted_stay_days": 30
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "TUR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.exteriores.gob.es/es/ServiciosAlCiudadano/Paginas/Detalle-recomendaciones-de-viaje.aspx?trc=Turqu%C3%ADa",
+  "note": "Verified 2026-08-30 against www.exteriores.gob.es. A partir del 2 de marzo de 2020 los ciudadanos españoles están exentos de visado para viajar a Turquía y para una estancia máxima de 90 días en un período de 180.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "90 days in any 180-day period, in force since 2 March 2020. Spanish nationals may enter on a DNI rather than a passport in most cases, but a passport is required if the stay exceeds three months, if entering in their own vehicle, or if declaring valuables at customs; entering on "
+   ],
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "IND",
+   "destination": "TUR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://newdelhi-emb.mfa.gov.tr/Mission/ShowAnnouncement/361514",
+  "note": "Verified 2026-08-30 against newdelhi-emb.mfa.gov.tr. Valid visa\" or \"Valid residence permit\" from one of the Schengen Countries, USA, UK or Ireland ... E-visa is only valid when the purpose of travel is tourism or commerce.",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "evisa",
+   "application_channel": "online_portal",
+   "exceptions": [
+    "CONDITIONAL e-Visa, confirmed by Turkiye's embassy in New Delhi (announcement dated 1 March 2024) and by Turkiye's e-Visa eligibility list, which includes India. Eligibility requires a valid visa or valid residence permit from a Schengen country, the USA, the UK or Ireland; previ"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CAN",
+   "destination": "TUR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://travel.gc.ca/destinations/turkiye",
+  "note": "Verified 2026-08-30 against travel.gc.ca. Tourist visa: Not required for stays up to 90 days in a 180-day period ... To qualify for a subsequent visa-exempted entry for a 90-day period in Turkiye, you must leave the country for at least 90 days before being allowed to re-enter for another 90 days.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "90 days in a 180-day period. Canadian official passport holders still require a visa. Canada adds a practical warning the claim missed: to qualify for a subsequent visa-exempt 90-day entry you must leave Turkiye for at least 90 days before re-entering. Stays beyond 90 consecutive"
+   ],
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "TUR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://istanbul.china-consulate.gov.cn/lsfw/lsbh/202601/t20260112_11810960.htm",
+  "note": "Verified 2026-08-30 against istanbul.china-consulate.gov.cn. 2026年1月2日起，土耳其对以旅游、过境为目的的持普通护照中国公民实施免签政策。中国游客可在任意180天内，在土耳其累计停留不超过90天。",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "permitted_stay": "90 days in any 180-day period",
+   "permitted_stay_days": 90,
+   "application_channel": "not_required",
+   "visa_products": [],
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "forms": [],
+   "account_registration_steps": [],
+   "payment_process": [],
+   "submission_process": [],
+   "appointment_required": false,
+   "exceptions": [
+    "The most recent change in this set and the one most likely to be wrong in stale databases. Independently confirmed by China's own Consulate-General in Istanbul in a notice published 12 January 2026: effective 2 January 2026, cumulative stay not exceeding 90 days within any 180 da"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "BGR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. ANNEX II ... 'FOR STAYS OF NO MORE THAN 90 DAYS IN ANY 180-DAY PERIOD'; section '2. SPECIAL ADMINISTRATIVE REGIONS OF THE PEOPLE'S REPUBLIC OF CHINA' lists 'Hong Kong SAR (14)'; footnote: '(14) The exemption from the visa requirement shall only apply to holders of a \"Hong Kong Special Administrative",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "permitted_stay": "90 days in any 180-day period (Schengen short-stay clock)",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "CORRECTED FROM SUBMISSION — the exemption is CONDITIONAL, not unconditional. It applies ONLY to holders of a 'Hong Kong Special Administrative Region' passport. Holders of other Hong Kong travel documents (e.g. a Document of Identity for Visa Purposes) and Hong Kong residents tra"
+   ],
+   "visa_products": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "TWN",
+   "destination": "BGR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. ANNEX II, section '4. ENTITIES AND TERRITORIAL AUTHORITIES THAT ARE NOT RECOGNISED AS STATES BY AT LEAST ONE MEMBER STATE' lists 'Taiwan (17)'; footnote: '(17) The exemption from the visa requirement shall only apply to holders of passports issued by Taiwan which include an identity card number.'",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "CORRECTED FROM SUBMISSION — the exemption is CONDITIONAL. It applies ONLY to holders of passports issued by Taiwan that include an identity card number. Taiwan passports issued WITHOUT a national identity card number (typically issued to persons without household registration in "
+   ],
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "JPN",
+   "destination": "BGR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. ANNEX II 'LIST OF THIRD COUNTRIES WHOSE NATIONALS ARE EXEMPT FROM THE REQUIREMENT TO BE IN POSSESSION OF A VISA ... FOR STAYS OF NO MORE THAN 90 DAYS IN ANY 180-DAY PERIOD'; section '1. STATES' lists 'Japan' with no footnote.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "Unconditional exemption — 'Japan' appears in Annex II section 1 with no footnote attached, which I checked specifically because neighbouring entries do carry conditions. Valid passport only. 90 days in any 180-day period, counted Schengen-wide from first entry into the Schengen a"
+   ],
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "KOR",
+   "destination": "BGR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. ANNEX II section '1. STATES' lists 'South Korea' with no footnote; ANNEX I 'LIST OF THIRD COUNTRIES WHOSE NATIONALS ARE REQUIRED TO BE IN POSSESSION OF A VISA' separately lists 'North Korea'.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "Unconditional exemption for Republic of Korea (South Korea) nationals; listed in Annex II as 'South Korea' with no footnote. MUST NOT be conflated with North Korea, which I confirmed sits in Annex I (visa required) — the Bulgarian MFA table makes the same split at row 48, 'Democr"
+   ],
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "BGR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. ANNEX II 'LIST OF THIRD COUNTRIES WHOSE NATIONALS ARE EXEMPT FROM THE REQUIREMENT TO BE IN POSSESSION OF A VISA ... FOR STAYS OF NO MORE THAN 90 DAYS IN ANY 180-DAY PERIOD'; section '1. STATES' lists 'United States' with no footnote.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "permitted_stay": "90 days in any 180-day period",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "exceptions": [
+    "Unconditional exemption — 'United States' appears in Annex II section 1 with no footnote. Valid passport only. 90 days in any 180, counted Schengen-wide from first entry into the Schengen area. NO ESTA CONDITION APPLIES AND NONE HAS BEEN ADDED: ESTA is the United States' own auth"
+   ],
+   "application_channel": "not_required",
+   "visa_products": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "THA",
+   "destination": "BGR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. ANNEX I 'LIST OF THIRD COUNTRIES WHOSE NATIONALS ARE REQUIRED TO BE IN POSSESSION OF A VISA WHEN CROSSING THE EXTERNAL BORDERS OF THE MEMBER STATES', section '1. STATES' lists 'Thailand'. Visa Code Art 16(1): 'Applicants shall pay a visa fee of EUR 90.'",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "exceptions": [
+    "Schengen short-stay (C) visa required before travel; 'Thailand' is in Annex I. The 90 figure is a CEILING, not an entitlement: the Visa Code defines a visa as authorising 'an intended stay ... not exceeding 90 days in any 180-day period', and the actual permitted stay is whatever"
+   ],
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "SGP",
+   "destination": "BGR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. ANNEX II section '1. STATES' lists 'Singapore' with no footnote, under the heading exempting nationals 'FOR STAYS OF NO MORE THAN 90 DAYS IN ANY 180-DAY PERIOD'.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "Unconditional exemption — 'Singapore' appears in Annex II section 1 with no footnote. Valid passport only. 90 days in any 180, counted Schengen-wide from first entry into the Schengen area, not from arrival in Bulgaria. No ETIAS in operation today; expected Q4 2026, so re-audit b"
+   ],
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "MYS",
+   "destination": "BGR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. ANNEX II section '1. STATES' lists 'Malaysia' with no footnote, under the heading exempting nationals 'FOR STAYS OF NO MORE THAN 90 DAYS IN ANY 180-DAY PERIOD'.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "Unconditional exemption — 'Malaysia' appears in Annex II section 1 with no footnote. Valid passport only. 90 days in any 180, counted Schengen-wide from first entry. No ETIAS in operation today; expected Q4 2026, so re-audit before then. NOTE: the submission's aside about Malaysi"
+   ],
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "GBR",
+   "destination": "BGR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. ANNEX II section '1. STATES' (consolidated, amendment M1): 'United Kingdom (excluding British nationals as referred to in Part 3)'; section 3 'BRITISH NATIONALS WHO ARE NOT BRITISH CITIZENS' lists 'British nationals (Overseas)', 'British overseas territories citizens (BOTC)', 'British overseas citiz",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "Exempt. IMPORTANT SOURCING TRAP: the United Kingdom does NOT appear in Annex II of the original 2018 regulation (the UK was still an EU Member State then), and appears only in the CONSOLIDATED text via amendment marker M1. Anyone verifying this row against the unconsolidated regu"
+   ],
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "RUS",
+   "destination": "BGR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. ANNEX I section '1. STATES' lists 'Russia'. Council Decision (EU) 2022/1500 of 9 September 2022 'on the suspension in whole of the application of the Agreement between the European Community and the Russian Federation on the facilitation of the issuance of visas'. Visa Code Art 16(1): 'Applicants sh",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "exceptions": [
+    "Schengen short-stay (C) visa required before travel; 'Russia' is in Annex I. The 90 figure is a CEILING, not an entitlement — the actual stay is whatever the visa grants. Fee is the FULL EUR 90, and this is the point on which the submission's caveat was right and I verified it: t"
+   ],
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "AUS",
+   "destination": "BGR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. ANNEX II section '1. STATES' lists 'Australia' with no footnote, under the heading exempting nationals 'FOR STAYS OF NO MORE THAN 90 DAYS IN ANY 180-DAY PERIOD'.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "Unconditional exemption — 'Australia' appears in Annex II section 1 with no footnote. Valid passport only. 90 days in any 180, counted Schengen-wide from first entry into the Schengen area, not from arrival in Bulgaria. No ETIAS in operation today; expected Q4 2026, so re-audit b"
+   ],
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "IDN",
+   "destination": "BGR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. ANNEX I section '1. STATES' lists 'Indonesia'. Visa Code Art 9(1): applications 'shall be lodged no more than six months ... before the start of the intended visit, and, as a rule, no later than 15 calendar days before'; Art 15(3): 'The minimum coverage shall be EUR 30 000.'",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "exceptions": [
+    "Schengen short-stay (C) visa required before travel; 'Indonesia' is in Annex I. The 90 figure is a CEILING per Visa Code Art 2(2)(a) ('an intended stay ... not exceeding 90 days in any 180-day period'), not an entitlement — the actual stay is whatever the visa states. Fee EUR 90 "
+   ],
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "PHL",
+   "destination": "BGR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. ANNEX I 'LIST OF THIRD COUNTRIES WHOSE NATIONALS ARE REQUIRED TO BE IN POSSESSION OF A VISA WHEN CROSSING THE EXTERNAL BORDERS OF THE MEMBER STATES', section '1. STATES' lists 'Philippines'.",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "exceptions": [
+    "Schengen short-stay (C) visa required before travel; 'Philippines' is in Annex I. The 90 figure is a CEILING, not an entitlement — the actual stay is whatever the visa grants. Fee EUR 90 for adults per Visa Code Art 16(1); EUR 45 for children aged 6 to under 12; waived for childr"
+   ],
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "BGR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.mfa.bg/upload/120500/13_12_2023_EN_VisaRegime_for_foreigners_ordinary_passports.pdf",
+  "note": "Verified 2026-08-30 against www.mfa.bg. Row: '62 France (1) — No'; footnote: '(1) Citizens of the EU, EEC (Norway, Iceland and Lichtenstein) and Switzerland are exempted from the requirement to have a long-term visa and from the requirement to have \"work permit\" when staying in Bulgaria for the period of more than 90 days.'",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "EU citizen exercising free movement — a different legal basis entirely from the Annex II tourist exemption, and France correctly does NOT appear in Annex II because it is a Member State, not a third country. permitted_stay_days is deliberately EMPTY, not 90: the 90-days-in-any-18"
+   ],
+   "visa_products": [],
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "VNM",
+   "destination": "BGR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. ANNEX I section '1. STATES' lists 'Vietnam'. Visa Code Art 2(2)(a) defines a visa as authorising 'an intended stay on the territory of the Member States not exceeding 90 days in any 180-day period'.",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "exceptions": [
+    "Schengen short-stay (C) visa required before travel; 'Vietnam' is in Annex I. The 90 figure is a CEILING per Visa Code Art 2(2)(a), not an entitlement — the actual stay is whatever the visa states. Fee EUR 90 for adults per Visa Code Art 16(1); EUR 45 for children aged 6 to under"
+   ],
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "BGR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.mfa.bg/upload/120500/13_12_2023_EN_VisaRegime_for_foreigners_ordinary_passports.pdf",
+  "note": "Verified 2026-08-30 against www.mfa.bg. Row: '165 Spain (1) — No'; footnote: '(1) Citizens of the EU, EEC (Norway, Iceland and Lichtenstein) and Switzerland are exempted from the requirement to have a long-term visa and from the requirement to have \"work permit\" when staying in Bulgaria for the period of more than 90 days.'",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "EU citizen exercising free movement — a different legal basis from the Annex II tourist exemption, and Spain correctly does NOT appear in Annex II because it is a Member State, not a third country. permitted_stay_days is deliberately EMPTY, not 90: the 90-days-in-any-180 cap does"
+   ],
+   "visa_products": [],
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "IND",
+   "destination": "BGR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. ANNEX I 'LIST OF THIRD COUNTRIES WHOSE NATIONALS ARE REQUIRED TO BE IN POSSESSION OF A VISA WHEN CROSSING THE EXTERNAL BORDERS OF THE MEMBER STATES', section '1. STATES' lists 'India'.",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "exceptions": [
+    "Schengen short-stay (C) visa required before travel; 'India' is in Annex I. The 90 figure is a CEILING, not an entitlement — the actual stay is whatever the visa grants. Fee EUR 90 for adults per Visa Code Art 16(1); EUR 45 for children aged 6 to under 12; waived for children und"
+   ],
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "CAN",
+   "destination": "BGR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. ANNEX II section '1. STATES' lists 'Canada' with no footnote, under the heading exempting nationals 'FOR STAYS OF NO MORE THAN 90 DAYS IN ANY 180-DAY PERIOD'.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "Unconditional exemption — 'Canada' appears in Annex II section 1 with no footnote. Valid passport only. 90 days in any 180, counted Schengen-wide from first entry into the Schengen area, not from arrival in Bulgaria. No ETIAS in operation today; expected Q4 2026, so re-audit befo"
+   ],
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "BGR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. ANNEX I section '1. STATES' lists 'China'; ANNEX II section '2. SPECIAL ADMINISTRATIVE REGIONS OF THE PEOPLE'S REPUBLIC OF CHINA' separately lists 'Hong Kong SAR (14)' and 'Macao SAR (15)'.",
+  "fields": {
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Short-stay Schengen visa (Type C) - adult, single entry",
+     "entry": "single",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Fee is non-refundable if the visa is refused."
+    },
+    {
+     "type": "Short-stay Schengen visa (Type C) - child aged 6 to under 12",
+     "entry": "single",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 0,
+      "currency": "EUR"
+     },
+     "notes": "MFA fees page: 'Children who are between 6 and under 12 years of age are exempt from the requirement to pay a visa fee.' (Bulgaria waives the fee for this age band rather than charging the EU-standard reduced fee.)"
+    },
+    {
+     "type": "Short-stay Schengen visa (Type C) - child under 6",
+     "entry": "single",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 0,
+      "currency": "EUR"
+     },
+     "notes": "MFA 'Visa for Bulgaria' page (https://www.mfa.bg/en/services-travel/consular-services/travel-bulgaria/visa-bulgaria): 'The following persons are exempt from fees for visa application processing: Foreign citizens who as of the date of the visa application are under 6 years'."
+    },
+    {
+     "type": "Short-stay Schengen visa (Type C) - adult, multiple entry",
+     "entry": "multiple",
+     "validity": "5 years",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": null
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "exceptions": [
+    "Schengen short-stay (C) visa required before travel for mainland PRC passport holders; 'China' is in Annex I. Hong Kong SAR and Macao SAR passport holders are NOT caught by this row — they are separately exempt under Annex II section 2, subject to holding the relevant SAR passpor"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "ROU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.mae.ro/sites/default/files/file/anul_2024/pdf_2024/2024.10_anexa_2_en.pdf",
+  "note": "Verified 2026-08-30 against www.mae.ro. 2. SPECIAL ADMINISTRATIVE REGIONS OF THE PEOPLE'S REPUBLIC OF CHINA: A. Hong Kong SAR B. Macao SAR ... A. The visa requirement exemption applies only to holders of a \"Hong Kong Special Administrative Region\" passport.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "Exempt ONLY on a \"Hong Kong Special Administrative Region\" passport. A Hong Kong permanent resident travelling on a mainland PRC passport falls under Annex 1 (China, entry 22) and is visa-required. 90 days in any 180-day period across the whole Schengen area. Entry conditions ver"
+   ],
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "TWN",
+   "destination": "ROU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. Nationals of the following countries, entities and territorial authorities are exempt from the visa requirement for stays of up to 90 days within a 180-day period ... Singapore, United States, St. Vincent and the Grenadines, Taiwan, East Timor ... In the case of Taiwan, the visa waiver applies only ",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "Exempt ONLY on a Taiwan (ROC) passport bearing a personal identity number. I verified this against an independent Schengen member state rather than the destination: the Italian MFA states the same condition in its own words. Romania's Annex 2 lists Taiwan under section 4, \"ENTITI"
+   ],
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "JPN",
+   "destination": "ROU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. Nationals of the following countries, entities and territorial authorities are exempt from the visa requirement for stays of up to 90 days within a 180-day period, for tourism, missions, business, invitations, religious reasons, transit, transport, sport competitions and study: Albania, Andorra, Ant",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "Ordinary passport holders. Verified against an independent Schengen member state (Italian MFA) as well as Romania's Annex 2, where Japan is entry 23 and carries NO footnote marker (no biometric-passport condition, and not one of the entries whose exemption is still pending an EU "
+   ],
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "KOR",
+   "destination": "ROU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. Nationals of the following countries, entities and territorial authorities are exempt from the visa requirement for stays of up to 90 days within a 180-day period ... Canada, Chile, Colombia, South Korea, Costa Rica, Dominica, El Salvador",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "Ordinary passport holders. Listed by Romania as \"South Korea\", Annex 2 entry 49, with NO footnote marker. Independently confirmed on the Italian MFA exemption list (\"South Korea\"). 90 days in any 180-day period across the Schengen area. Standard entry conditions and EES enrolment"
+   ],
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "ROU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. Nationals of the following countries, entities and territorial authorities are exempt from the visa requirement for stays of up to 90 days within a 180-day period ... Saint Christopher (Saint Kitts) and Nevis, United Kingdom, Samoa, Saint Lucia, Serbia, Seychelles, Singapore, United States, St. Vinc",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "permitted_stay": "90 days within any 180-day period",
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "exceptions": [
+    "No visa and NO pre-travel authorisation. ESTA and the Visa Waiver Program are US-INBOUND schemes governing travel TO the United States and are irrelevant to entering Romania; a US citizen needs neither to fly to Romania. I was instructed to attach an ESTA condition to this row an"
+   ],
+   "application_channel": "not_required",
+   "visa_products": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "THA",
+   "destination": "ROU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.mae.ro/sites/default/files/file/2025_files/pdf/2025.08.27_anexa_1_eng.pdf",
+  "note": "Verified 2026-08-30 against www.mae.ro. I. The list of countries whose nationals must be in possession of visas when traveling to Romania (the list herein is established in accordance with the provisions of Regulation EU 2018/1806) ... 92. Thailand",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "exceptions": [
+    "Schengen uniform visa (type C). I confirmed in the Annex 1 text itself that Thailand (entry 92) carries NEITHER the asterisk (no IGI invitation requirement) NOR the (1) marker (no airport transit visa). Cross-checked against the European Commission's national airport-transit tabl"
+   ],
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "SGP",
+   "destination": "ROU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. Nationals of the following countries, entities and territorial authorities are exempt from the visa requirement for stays of up to 90 days within a 180-day period ... Serbia, Seychelles, Singapore, United States",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "Ordinary passport holders. Romania's Annex 2 entry 47, NO footnote marker. Independently confirmed on the Italian MFA exemption list. 90 days in any 180-day period across the Schengen area. Standard entry conditions and EES enrolment apply."
+   ],
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "MYS",
+   "destination": "ROU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. Nationals of the following countries, entities and territorial authorities are exempt from the visa requirement for stays of up to 90 days within a 180-day period ... Kiribati, Kosovo, Malaysia, Macao SAR, North Macedonia",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "Ordinary passport holders. Romania's Annex 2 entry 25, NO footnote marker. Independently confirmed on the Italian MFA exemption list. I also checked the EU visa-suspension mechanism for any recent withdrawal of this exemption and found none (the only 2026 suspension is Georgia, d"
+   ],
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "GBR",
+   "destination": "ROU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.mae.ro/sites/default/files/file/anul_2024/pdf_2024/2024.10_anexa_2_en.pdf",
+  "note": "Verified 2026-08-30 against www.mae.ro. 56. United Kingdom ... 3. BRITISH NATIONALS WHO ARE NOT BRITISH CITIZENS: British Nationals (Overseas) British overseas territories citizens (BOTC): Anguilla, Bermuda, British Antarctic Territory, British Indian Ocean Territory, British Virgin Islands, Cayman Islands, Falkland Islands, Gibraltar, Mo",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "British citizens are third-country nationals post-Brexit and are subject to the 90/180 cap. Romania's Annex 2 entry 56 is \"United Kingdom\" with NO footnote marker. Confirmed in the annex text that a SEPARATE section 3 extends exemption to British nationals who are not British cit"
+   ],
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "RUS",
+   "destination": "ROU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.mae.ro/sites/default/files/file/2025_files/pdf/2025.08.27_anexa_1_eng.pdf",
+  "note": "Verified 2026-08-30 against www.mae.ro. 77. Russia* ... NOTE: * The states whose nationals must be in possession of an invitation endorsed by the Inspectorate General for Immigration from the Ministry of Internal Affairs, that they must submit when applying for a short-stay visa; (1) States whose nationals are subject to the airport trans",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "exceptions": [
+    "Annex 1 entry 77 is \"Russia*\". I confirmed the asterisk in the annex text: an invitation endorsed by the Inspectorate General for Immigration must be submitted with the short-stay visa application. Russia carries NO (1) marker, so no Romanian airport transit visa; the Commission'"
+   ],
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "AUS",
+   "destination": "ROU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. Nationals of the following countries, entities and territorial authorities are exempt from the visa requirement for stays of up to 90 days within a 180-day period, for tourism, missions, business, invitations, religious reasons, transit, transport, sport competitions and study: Albania, Andorra, Ant",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "Ordinary passport holders. Romania's Annex 2 entry 5, NO footnote marker. Independently confirmed on the Italian MFA exemption list. 90 days in any 180-day period across the Schengen area. Standard entry conditions and EES enrolment apply."
+   ],
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "IDN",
+   "destination": "ROU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.mae.ro/sites/default/files/file/2025_files/pdf/2025.08.27_anexa_1_eng.pdf",
+  "note": "Verified 2026-08-30 against www.mae.ro. 44. Indonesia* ... NOTE: * The states whose nationals must be in possession of an invitation endorsed by the Inspectorate General for Immigration from the Ministry of Internal Affairs, that they must submit when applying for a short-stay visa",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "exceptions": [
+    "Annex 1 entry 44 is \"Indonesia*\". Asterisk confirmed in the annex text: an invitation endorsed by the Inspectorate General for Immigration must be submitted with the short-stay visa application. NO (1) marker, so no Romanian airport transit visa; the Commission's national ATV tab"
+   ],
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "PHL",
+   "destination": "ROU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.mae.ro/sites/default/files/file/2025_files/pdf/2025.08.27_anexa_1_eng.pdf",
+  "note": "Verified 2026-08-30 against www.mae.ro. I. The list of countries whose nationals must be in possession of visas when traveling to Romania (the list herein is established in accordance with the provisions of Regulation EU 2018/1806) ... 75. Philippines",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "exceptions": [
+    "Annex 1 entry 75 is \"Philippines\", with NO asterisk and NO (1) marker, so no IGI invitation requirement and no Romanian airport transit visa. Worth noting for routing: the European Commission's national ATV table does flag the Philippines, but only for FRANCE, not Romania, so a M"
+   ],
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "VNM",
+   "destination": "ROU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.mae.ro/sites/default/files/file/2025_files/pdf/2025.08.27_anexa_1_eng.pdf",
+  "note": "Verified 2026-08-30 against www.mae.ro. I. The list of countries whose nationals must be in possession of visas when traveling to Romania (the list herein is established in accordance with the provisions of Regulation EU 2018/1806) ... 101. Vietnam",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "exceptions": [
+    "Annex 1 entry 101 is \"Vietnam\", with NO asterisk and NO (1) marker, so no IGI invitation requirement and no airport transit visa. Confirmed against the Commission's national ATV table, where Vietnam appears for no member state. Schengen uniform visa (type C), 90 EUR per the MFA f"
+   ],
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "IND",
+   "destination": "ROU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.mae.ro/sites/default/files/file/2025_files/pdf/2025.08.27_anexa_1_eng.pdf",
+  "note": "Verified 2026-08-30 against www.mae.ro. 43. India*(1) ... NOTE: * The states whose nationals must be in possession of an invitation endorsed by the Inspectorate General for Immigration from the Ministry of Internal Affairs, that they must submit when applying for a short-stay visa; (1) States whose nationals are subject to the airport tra",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "exceptions": [
+    "Annex 1 entry 43 is \"India*(1)\", carrying BOTH markers, and this is the row I attacked hardest because India is NOT on the EU common airport-transit list (Afghanistan, Bangladesh, DR Congo, Eritrea, Ethiopia, Ghana, Iran, Iraq, Nigeria, Pakistan, Somalia, Sri Lanka). It survives:"
+   ],
+   "permitted_stay_days": 90,
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "CAN",
+   "destination": "ROU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://publications.europa.eu/resource/celex/02018R1806-20251230",
+  "note": "Verified 2026-08-30 against publications.europa.eu. Nationals of the following countries, entities and territorial authorities are exempt from the visa requirement for stays of up to 90 days within a 180-day period ... Brazil, Brunei, Canada, Chile, Colombia, South Korea",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "Ordinary passport holders. Romania's Annex 2 entry 11, NO footnote marker. Independently confirmed on the Italian MFA exemption list. 90 days in any 180-day period across the Schengen area. Standard entry conditions and EES biometric enrolment apply; exemption is not admission."
+   ],
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   }
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "ROU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.mae.ro/sites/default/files/file/2025_files/pdf/2025.08.27_anexa_1_eng.pdf",
+  "note": "Verified 2026-08-30 against www.mae.ro. I. The list of countries whose nationals must be in possession of visas when traveling to Romania (the list herein is established in accordance with the provisions of Regulation EU 2018/1806) ... 22. China",
+  "fields": {
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Short-stay Schengen visa (C) - adult, single entry",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "MAE fee table: 'Uniform visa (type C) 90 EUR'. Stay per mae.ro node 30325: Schengen visas issued 'for stays ... not exceeding 90 days in any period of 180 days'. Validity is set per issuance under the EU Visa Code and not published as a fixed figure."
+    },
+    {
+     "type": "Short-stay Schengen visa (C) - adult, double entry",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Two entries. Same 90 EUR uniform C-visa fee regardless of number of entries; 90/180-day stay rule; validity per issuance."
+    },
+    {
+     "type": "Short-stay Schengen visa (C) - adult, multiple entry",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Same 90 EUR uniform C-visa fee; 90/180-day stay rule; validity per issuance."
+    },
+    {
+     "type": "Short-stay Schengen visa (C) - child aged 6 to 12",
+     "entry": null,
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 45,
+      "currency": "EUR"
+     },
+     "notes": "MAE fee table: 'Type A, C visas for children aged 6 to 12: 45 EUR'. Fee tier is set by age, not by number of entries."
+    },
+    {
+     "type": "Short-stay Schengen visa (C) - child under 6",
+     "entry": null,
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 0,
+      "currency": "EUR"
+     },
+     "notes": "MAE: 'There is no fee for short-stay visas for ... children under six years of age' (node 2061, page 2). Fee exemption applies regardless of number of entries."
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "exceptions": [
+    "Mainland PRC passport holders. Annex 1 entry 22 is \"China\", with NO asterisk (so no IGI invitation requirement) and NO (1) marker (no airport transit visa); the Commission's national ATV table also lists China for no member state. Hong Kong SAR and Macao SAR passport holders are "
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "JPN",
+   "destination": "USA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.dhs.gov/visa-waiver-program",
+  "note": "Verified 2026-08-30 against www.dhs.gov. The Visa Waiver Program (VWP), administered by the Department of Homeland Security (DHS) in consultation with the Department of State, permits citizens of designated countries to travel to the United States for business or tourism for stays of up to 90 days without a visa. ... The following countrie",
+  "fields": {
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": [],
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "conditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "An approved ESTA is mandatory before boarding (8 CFR 217.5). ESTA is a travel authorisation, not a visa, and costs USD 40.27. An electronic passport is required.",
+    "ESTA approval is MANDATORY before boarding; without it the traveller is denied boarding. 8 CFR 217.5(b)(1): 'must receive a travel authorization via ESTA prior to boarding a carrier destined for travel to the United States' (https://www.govinfo.gov/content/pkg/CFR-2024-title8-vol"
+   ],
+   "permitted_stay_days": 90
+  }
+ },
+ {
+  "route": {
+   "nationality": "KOR",
+   "destination": "USA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.dhs.gov/visa-waiver-program",
+  "note": "Verified 2026-08-30 against www.dhs.gov. permits citizens of designated countries to travel to the United States for business or tourism for stays of up to 90 days without a visa. ... The following countries are currently designated for participation in the VWP. ... Korea, Republic of  Nov. 17, 2008",
+  "fields": {
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": [],
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "conditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "An approved ESTA is mandatory before boarding (8 CFR 217.5). ESTA is a travel authorisation, not a visa, and costs USD 40.27. An electronic passport is required.",
+    "ESTA approval is MANDATORY before boarding: 8 CFR 217.5(b)(1), 'must receive a travel authorization via ESTA prior to boarding a carrier destined for travel to the United States' (https://www.govinfo.gov/content/pkg/CFR-2024-title8-vol1/xml/CFR-2024-title8-vol1-sec217-5.xml). EST"
+   ],
+   "permitted_stay_days": 90
+  }
+ },
+ {
+  "route": {
+   "nationality": "TWN",
+   "destination": "USA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.dhs.gov/visa-waiver-program",
+  "note": "Verified 2026-08-30 against www.dhs.gov. The following countries are currently designated for participation in the VWP. ... Taiwan(double dagger)  Nov. 1, 2012 ... (double dagger) Taiwan refers only to individuals who have unrestricted right of permanent abode on Taiwan and are in possession of an electronic passport bearing a personal ide",
+  "fields": {
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": [],
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "conditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "An approved ESTA is mandatory before boarding (8 CFR 217.5). ESTA is a travel authorisation, not a visa, and costs USD 40.27. An electronic passport is required.",
+    "PASSPORT-CLASS RESTRICTION, model as a condition and not a footnote: eligibility covers ONLY holders of a Taiwan e-passport bearing a personal identification (household registration) number, with unrestricted right of permanent abode on Taiwan. A Taiwan passport WITHOUT the house"
+   ],
+   "permitted_stay_days": 90
+  }
+ },
+ {
+  "route": {
+   "nationality": "SGP",
+   "destination": "USA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.dhs.gov/visa-waiver-program",
+  "note": "Verified 2026-08-30 against www.dhs.gov. permits citizens of designated countries to travel to the United States for business or tourism for stays of up to 90 days without a visa. ... The following countries are currently designated for participation in the VWP. ... Singapore  Aug. 9, 1999",
+  "fields": {
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": [],
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "conditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "An approved ESTA is mandatory before boarding (8 CFR 217.5). ESTA is a travel authorisation, not a visa, and costs USD 40.27. An electronic passport is required.",
+    "ESTA approval is MANDATORY before boarding: 8 CFR 217.5(b)(1), 'must receive a travel authorization via ESTA prior to boarding a carrier destined for travel to the United States' (https://www.govinfo.gov/content/pkg/CFR-2024-title8-vol1/xml/CFR-2024-title8-vol1-sec217-5.xml). EST"
+   ],
+   "permitted_stay_days": 90
+  }
+ },
+ {
+  "route": {
+   "nationality": "GBR",
+   "destination": "USA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.dhs.gov/visa-waiver-program",
+  "note": "Verified 2026-08-30 against www.dhs.gov. The following countries are currently designated for participation in the VWP. ... United Kingdom(section)  July 1, 1988 ... (section) The United Kingdom refers only to British citizens who have the unrestricted right of permanent abode in the United Kingdom (England, Scotland, Wales, Northern Irela",
+  "fields": {
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": [],
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "conditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "An approved ESTA is mandatory before boarding (8 CFR 217.5). ESTA is a travel authorisation, not a visa, and costs USD 40.27. An electronic passport is required.",
+    "PASSPORT-CLASS RESTRICTION, decisive and must be modelled as a condition: only BRITISH CITIZENS with unrestricted right of permanent abode qualify. British overseas citizens, British dependent territories' citizens, British National (Overseas) holders and Commonwealth citizens ar"
+   ],
+   "permitted_stay_days": 90
+  }
+ },
+ {
+  "route": {
+   "nationality": "AUS",
+   "destination": "USA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.dhs.gov/visa-waiver-program",
+  "note": "Verified 2026-08-30 against www.dhs.gov. permits citizens of designated countries to travel to the United States for business or tourism for stays of up to 90 days without a visa. ... The following countries are currently designated for participation in the VWP. Andorra  Oct. 1, 1991  Australia  July 29, 1996",
+  "fields": {
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": [],
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "conditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "An approved ESTA is mandatory before boarding (8 CFR 217.5). ESTA is a travel authorisation, not a visa, and costs USD 40.27. An electronic passport is required.",
+    "ESTA approval is MANDATORY before boarding: 8 CFR 217.5(b)(1) (https://www.govinfo.gov/content/pkg/CFR-2024-title8-vol1/xml/CFR-2024-title8-vol1-sec217-5.xml). ESTA is not a visa. Fee USD 40.27 verified at https://www.govinfo.gov/content/pkg/FR-2025-11-19/html/2025-20304.htm. Ele"
+   ],
+   "permitted_stay_days": 90
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "USA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.dhs.gov/visa-waiver-program",
+  "note": "Verified 2026-08-30 against www.dhs.gov. permits citizens of designated countries to travel to the United States for business or tourism for stays of up to 90 days without a visa. ... The following countries are currently designated for participation in the VWP. ... France  July 1, 1989",
+  "fields": {
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": [],
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "conditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "An approved ESTA is mandatory before boarding (8 CFR 217.5). ESTA is a travel authorisation, not a visa, and costs USD 40.27. An electronic passport is required.",
+    "ESTA approval is MANDATORY before boarding: 8 CFR 217.5(b)(1) (https://www.govinfo.gov/content/pkg/CFR-2024-title8-vol1/xml/CFR-2024-title8-vol1-sec217-5.xml). ESTA is not a visa. Fee USD 40.27 verified at https://www.govinfo.gov/content/pkg/FR-2025-11-19/html/2025-20304.htm. Ele"
+   ],
+   "permitted_stay_days": 90
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "USA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.dhs.gov/visa-waiver-program",
+  "note": "Verified 2026-08-30 against www.dhs.gov. permits citizens of designated countries to travel to the United States for business or tourism for stays of up to 90 days without a visa. ... The following countries are currently designated for participation in the VWP. ... Spain  Oct. 1, 1991",
+  "fields": {
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "visa_products": [],
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "conditional_visa_free",
+   "application_channel": "not_required",
+   "exceptions": [
+    "An approved ESTA is mandatory before boarding (8 CFR 217.5). ESTA is a travel authorisation, not a visa, and costs USD 40.27. An electronic passport is required.",
+    "ESTA approval is MANDATORY before boarding: 8 CFR 217.5(b)(1) (https://www.govinfo.gov/content/pkg/CFR-2024-title8-vol1/xml/CFR-2024-title8-vol1-sec217-5.xml). ESTA is not a visa. Fee USD 40.27 verified at https://www.govinfo.gov/content/pkg/FR-2025-11-19/html/2025-20304.htm. Ele"
+   ],
+   "permitted_stay_days": 90
+  }
+ },
+ {
+  "route": {
+   "nationality": "CAN",
+   "destination": "USA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.govinfo.gov/content/pkg/CFR-2024-title8-vol1/xml/CFR-2024-title8-vol1-sec212-1.xml",
+  "note": "Verified 2026-08-30 against www.govinfo.gov. A visa is generally not required for Canadian citizens, except those Canadians that fall under nonimmigrant visa categories E, K, S, or V.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "permitted_stay": "Generally up to six months",
+   "permitted_stay_days": 180,
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "required_documents": [
+    "Valid Canadian passport (air entry; NEXUS card accepted when departing from Canada)",
+    "By land or sea: Canadian passport, Enhanced Driver's License/Enhanced ID Card, or NEXUS/FAST/SENTRI card"
+   ],
+   "exceptions": [
+    "THIRD CATEGORY, distinct from the VWP: no visa AND no ESTA. The no-ESTA point is now positively verified rather than asserted: ESTA under 8 CFR 217.5 applies only to travellers entering under the VWP, and Canada does not appear anywhere on the DHS designated-country list, which r"
+   ],
+   "visa_products": [],
+   "application_channel": "not_required"
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "USA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.dhs.gov/visa-waiver-program",
+  "note": "Verified 2026-08-30 against www.dhs.gov. The following countries are currently designated for participation in the VWP. ... Chile  Mar. 31, 2014  Croatia  Dec. 1, 2021",
+  "fields": {
+   "government_fee": {
+    "amount": 185,
+    "currency": "USD"
+   },
+   "application_channel_detail": "Complete the DS-160, pay the USD 185 MRV fee, and attend the interview at the embassy or consulate. After issuance, Chinese passport holders with a 10-year B1/B2 visa must also keep a valid EVUS enrolment (USD 30.75 at evus.gov) to board.",
+   "exceptions": [
+    "Holders of a 10-year B-1/B-2 visa must enrol in EVUS before boarding; failing to do so provisionally revokes the visa (8 CFR 215.24). EVUS costs USD 30.75.",
+    "China is absent from the DHS designated-country list; the alphabetical run passes straight from Chile to Croatia, so ESTA is unavailable. Positive requirement at 8 CFR 212.1: 'A valid unexpired visa...and an unexpired passport, shall be presented by each arriving nonimmigrant ali"
+   ],
+   "visa_products": [
+    {
+     "type": "B1/B2 visitor visa (10-year multiple-entry)",
+     "entry": "multiple",
+     "validity": "10 years",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 185,
+      "currency": "USD"
+     },
+     "notes": "Stay per admission is set by CBP, usually up to 6 months. EVUS enrolment (USD 30.75) is required alongside the visa."
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy"
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "USA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.dhs.gov/visa-waiver-program",
+  "note": "Verified 2026-08-30 against www.dhs.gov. The following countries are currently designated for participation in the VWP. ... Greece  Apr. 5, 2010  Hungary  Nov. 17, 2008",
+  "fields": {
+   "visa_category": "B-1/B-2 visitor visa",
+   "government_fee": {
+    "amount": 185,
+    "currency": "USD"
+   },
+   "official_portal_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html",
+   "requirement_detail": "paper_visa",
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "application_channel_detail": "Hong Kong is not in the Visa Waiver Program, so ESTA is not available. Complete the DS-160, pay the USD 185 MRV fee and attend an interview at the US Consulate General.",
+   "visa_products": [
+    {
+     "type": "B-1/B-2 visitor visa",
+     "entry": "multiple",
+     "validity": "as granted",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 185,
+      "currency": "USD"
+     },
+     "notes": "Stay per admission is set by CBP, usually up to 6 months."
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "application_channel": "embassy",
+   "exceptions": [
+    "Hong Kong is absent from the DHS designated-country list; the alphabetical run passes straight from Greece to Hungary, so HKSAR passport holders cannot use ESTA. Positive requirement at 8 CFR 212.1: 'A valid unexpired visa...and an unexpired passport, shall be presented by each a"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "IND",
+   "destination": "USA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.dhs.gov/visa-waiver-program",
+  "note": "Verified 2026-08-30 against www.dhs.gov. The following countries are currently designated for participation in the VWP. ... Iceland  Oct. 1, 1991  Ireland  Apr. 1, 1995",
+  "fields": {
+   "official_portal_url": "https://ceac.state.gov/genniv/",
+   "government_fee": {
+    "amount": 185,
+    "currency": "USD"
+   },
+   "permitted_stay_days": 180,
+   "visa_products": [
+    {
+     "type": "B-1/B-2 visitor visa",
+     "entry": "per country reciprocity schedule",
+     "validity": "per reciprocity schedule (unverified)",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 185,
+      "currency": "USD"
+     },
+     "notes": null
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "exceptions": [
+    "India is absent from the DHS designated-country list; the alphabetical run passes straight from Iceland to Ireland, so ESTA is unavailable. Positive requirement at 8 CFR 212.1: 'A valid unexpired visa...and an unexpired passport, shall be presented by each arriving nonimmigrant a"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "IDN",
+   "destination": "USA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.dhs.gov/visa-waiver-program",
+  "note": "Verified 2026-08-30 against www.dhs.gov. The following countries are currently designated for participation in the VWP. ... Iceland  Oct. 1, 1991  Ireland  Apr. 1, 1995",
+  "fields": {
+   "permitted_stay_days": 180,
+   "permitted_stay": "Up to 6 months; B-2 admissions are for a minimum of six months",
+   "government_fee": {
+    "amount": 185,
+    "currency": "USD"
+   },
+   "visa_products": [
+    {
+     "type": "B-1/B-2 visitor visa",
+     "entry": "per country reciprocity schedule",
+     "validity": "per reciprocity schedule (unverified)",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 185,
+      "currency": "USD"
+     },
+     "notes": null
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "exceptions": [
+    "Indonesia is absent from the DHS designated-country list; the alphabetical run passes straight from Iceland to Ireland, so ESTA is unavailable. Positive requirement at 8 CFR 212.1: 'A valid unexpired visa...and an unexpired passport, shall be presented by each arriving nonimmigra"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "MYS",
+   "destination": "USA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.dhs.gov/visa-waiver-program",
+  "note": "Verified 2026-08-30 against www.dhs.gov. The following countries are currently designated for participation in the VWP. ... Luxembourg  Oct. 1, 1991  Malta  Dec. 30, 2008",
+  "fields": {
+   "official_portal_url": "https://ceac.state.gov/genniv/",
+   "government_fee": {
+    "amount": 185,
+    "currency": "USD"
+   },
+   "permitted_stay_days": 180,
+   "visa_products": [
+    {
+     "type": "B-1/B-2 visitor visa",
+     "entry": "per country reciprocity schedule",
+     "validity": "set by the country-specific reciprocity schedule (unverified this pass - travel.state.gov bot-blocked)",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 185,
+      "currency": "USD"
+     },
+     "notes": "$185 is the MRV application fee (22 CFR 22.1 item 21(a)); a reciprocity issuance fee may be added for some nationalities (item 23). Admission period is set by CBP, minimum 6 months for B-2 under 8 CFR 214.2(b)(2), maximum 1 year under 214.2(b)(1)."
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "exceptions": [
+    "Malaysia is absent from the DHS designated-country list; the alphabetical run passes straight from Luxembourg to Malta, so ESTA is unavailable. Positive requirement at 8 CFR 212.1: 'A valid unexpired visa...and an unexpired passport, shall be presented by each arriving nonimmigra"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "PHL",
+   "destination": "USA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.dhs.gov/visa-waiver-program",
+  "note": "Verified 2026-08-30 against www.dhs.gov. The following countries are currently designated for participation in the VWP. ... Norway  Oct. 1, 1991  Poland  Nov. 11, 2019",
+  "fields": {
+   "official_portal_url": "https://ceac.state.gov/genniv/",
+   "government_fee": {
+    "amount": 185,
+    "currency": "USD"
+   },
+   "permitted_stay_days": 180,
+   "visa_products": [
+    {
+     "type": "B-1/B-2 visitor visa",
+     "entry": "per country reciprocity schedule",
+     "validity": "per reciprocity schedule (unverified)",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 185,
+      "currency": "USD"
+     },
+     "notes": null
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "exceptions": [
+    "The Philippines is absent from the DHS designated-country list; the alphabetical run passes straight from Norway to Poland, so ESTA is unavailable. Positive requirement at 8 CFR 212.1: 'A valid unexpired visa...and an unexpired passport, shall be presented by each arriving nonimm"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "THA",
+   "destination": "USA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.dhs.gov/visa-waiver-program",
+  "note": "Verified 2026-08-30 against www.dhs.gov. The following countries are currently designated for participation in the VWP. ... Taiwan(double dagger)  Nov. 1, 2012  United Kingdom(section)  July 1, 1988",
+  "fields": {
+   "official_portal_url": "https://ceac.state.gov/genniv/",
+   "government_fee": {
+    "amount": 185,
+    "currency": "USD"
+   },
+   "permitted_stay_days": 180,
+   "visa_products": [
+    {
+     "type": "B-1/B-2 visitor visa",
+     "entry": "per country reciprocity schedule",
+     "validity": "per reciprocity schedule (unverified)",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 185,
+      "currency": "USD"
+     },
+     "notes": null
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "exceptions": [
+    "Thailand is absent from the DHS designated-country list; the alphabetical run passes straight from Taiwan to United Kingdom, so no ESTA route exists. Positive requirement at 8 CFR 212.1: 'A valid unexpired visa...and an unexpired passport, shall be presented by each arriving noni"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "VNM",
+   "destination": "USA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.dhs.gov/visa-waiver-program",
+  "note": "Verified 2026-08-30 against www.dhs.gov. The following countries are currently designated for participation in the VWP. ... Switzerland  July 1, 1989  Taiwan(double dagger)  Nov. 1, 2012  United Kingdom(section)  July 1, 1988",
+  "fields": {
+   "permitted_stay_days": 180,
+   "permitted_stay": "Up to 6 months; B-2 admissions are for a minimum of six months",
+   "government_fee": {
+    "amount": 185,
+    "currency": "USD"
+   },
+   "visa_products": [
+    {
+     "type": "B-1/B-2 visitor visa",
+     "entry": "per country reciprocity schedule",
+     "validity": "per reciprocity schedule (unverified)",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 185,
+      "currency": "USD"
+     },
+     "notes": null
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "exceptions": [
+    "Vietnam is absent from the DHS designated-country list, which ends at United Kingdom, so ESTA is unavailable. Positive requirement at 8 CFR 212.1: 'A valid unexpired visa...and an unexpired passport, shall be presented by each arriving nonimmigrant alien' (https://www.govinfo.gov"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "RUS",
+   "destination": "USA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (adversarially verified sweep)",
+  "source_url": "https://www.dhs.gov/visa-waiver-program",
+  "note": "Verified 2026-08-30 against www.dhs.gov. The following countries are currently designated for participation in the VWP. ... Qatar  Nov. 21, 2024  San Marino  Oct. 1, 1991",
+  "fields": {
+   "permitted_stay_days": 180,
+   "permitted_stay": "Up to 6 months; B-2 admissions are for a minimum of six months",
+   "government_fee": {
+    "amount": 185,
+    "currency": "USD"
+   },
+   "visa_products": [
+    {
+     "type": "B-1/B-2 visitor visa",
+     "entry": "per country reciprocity schedule",
+     "validity": "per reciprocity schedule (unverified)",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 185,
+      "currency": "USD"
+     },
+     "notes": null
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "exceptions": [
+    "Russia is absent from the DHS designated-country list; the alphabetical run passes straight from Qatar to San Marino, so no ESTA route exists. Positive requirement at 8 CFR 212.1: 'A valid unexpired visa...and an unexpired passport, shall be presented by each arriving nonimmigran"
+   ]
   }
  }
 ]

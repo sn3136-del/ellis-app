@@ -2043,10 +2043,13 @@ export default function QualityConsole() {
           // Every correction names the official page it was made against;
           // the log shows it as a link so any change can be re-checked at
           // its source in one click.
-          const sourceOf = (c) => {
-            const m = /(https?:\/\/[^\s)]+)/.exec(c.note || '')
-            return m ? m[1].replace(/[).,;:]+$/, '') : null
-          }
+          // The server now resolves a source for every entry: the URL the
+          // change itself set, else the human-verified override, else the
+          // note, else the source on the answer as it stands. Reading it out
+          // of the note was only ever finding the minority that mentioned one.
+          const sourceOf = (c) => c.source_url
+            || (/(https?:\/\/[^\s)]+)/.exec(c.note || '') || [])[1]?.replace(/[).,;:]+$/, '')
+            || null
           const hostOf = (u) => {
             try { return new URL(u).hostname.replace(/^www\./, '') }
             catch { return u }
@@ -2214,14 +2217,32 @@ export default function QualityConsole() {
                               : t('ops.origin.human')}
                         </Chip>
                         </span>
-                        {sourceOf(c) && (
+                        {sourceOf(c) ? (
                           <a href={sourceOf(c)} target="_blank" rel="noreferrer"
-                             title={sourceOf(c)}
-                             style={{ fontSize: 11.5, fontWeight: 700,
+                             title={`${c.source_kind || t('ops.chg.srcTitle')}\n${sourceOf(c)}`}
+                             style={{ display: 'inline-flex', alignItems: 'center',
+                                      gap: 5, fontSize: 11.5, fontWeight: 700,
                                       color: BLUE, textDecoration: 'none',
                                       overflowWrap: 'anywhere' }}>
+                            {/* A reviewer must be able to see at a glance that
+                                the proof is a government page, not any page. */}
+                            <span style={{ fontSize: 9, fontWeight: 800,
+                                           letterSpacing: 0.4,
+                                           borderRadius: 3, padding: '1px 5px',
+                                           color: c.source_official === false ? '#9a5b00' : '#0b7a44',
+                                           background: c.source_official === false ? '#fdf3e2' : '#e8f5ee' }}>
+                              {c.source_official === false ? t('ops.chg.srcOther') : t('ops.chg.srcGov')}
+                            </span>
                             {hostOf(sourceOf(c))} ↗
                           </a>
+                        ) : (
+                          <span title={t('ops.chg.noSrcTip')}
+                                style={{ fontSize: 11, fontWeight: 700,
+                                         color: '#9a5b00', background: '#fdf3e2',
+                                         borderRadius: 3, padding: '2px 7px',
+                                         cursor: 'help' }}>
+                            {t('ops.chg.noSrc')}
+                          </span>
                         )}
                         <span style={{ marginLeft: 'auto', color: '#9aa8bd',
                                        fontSize: 11.5,

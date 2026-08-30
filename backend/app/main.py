@@ -1014,6 +1014,59 @@ def travel_database_records(nationality: str = "", destination: str = "",
                         "substantiated": sum(1 for r in rows if r.get("_source_check") in ("human-quote", "grounded-consistent"))}}
 
 
+def _change_source(db, row) -> dict:
+    """The official page a reviewer can open to check this entry.
+
+    Their standard requires every record to be traceable to an official
+    source; a change log that says what moved without saying where the new
+    value came from is not checkable, and unverifiable rows are exactly what
+    the acceptance sampling is meant to catch. Resolution order: a source the
+    change itself set, then the human-verified override for that route, then
+    the source on the answer as it stands now. Nothing is invented: when no
+    official page is known the entry says so, and says why.
+    """
+    from .visa_snapshot import authority, kimi_primary, verified_overrides
+    from .visa_snapshot.models import KimiRouteGuidanceCache as _C
+    from sqlalchemy import select as _sel
+
+    def _first_url(text: str) -> str:
+        import re as _re
+        m = _re.search(r"https?://[^\s)\]\"',]+", str(text or ""))
+        return m.group(0).rstrip(".,;") if m else ""
+
+    url, kind = "", ""
+    ch = row.changes or {}
+    for key in ("source_url", "official_portal_url"):
+        val = (ch.get(key) or {}).get("to") if isinstance(ch.get(key), dict) else None
+        if val:
+            url, kind = str(val), "changed in this update"
+            break
+    route = row.route or {}
+    if not url:
+        ov = verified_overrides.find(route) or {}
+        if ov.get("source_url"):
+            url = ov["source_url"]
+            kind = f"human-verified {ov.get('verified_at') or ''}".strip()
+    if not url:
+        url, kind = _first_url(row.note), "cited in the note"
+    if not url:
+        try:
+            cached = db.execute(_sel(_C).where(
+                _C.cache_key == row.cache_key)).scalars().first()
+            g = (cached.guidance or {}) if cached else {}
+            url = str(g.get("source_url") or g.get("official_portal_url") or "")
+            kind = "source on the current answer"
+        except Exception:  # noqa: BLE001 - a missing row must not break the log
+            url = ""
+    if not url:
+        return {"source_url": "", "source_host": "",
+                "source_kind": "no official page recorded",
+                "source_official": False}
+    host = authority.hostname(url)
+    return {"source_url": url, "source_host": host, "source_kind": kind,
+            "source_official": bool(authority.is_government_host(host))}
+
+
 @app.get("/database/changes")
 def travel_database_changes(q: str = "", limit: int = 200,
                             db=Depends(get_session),
@@ -1034,7 +1087,8 @@ def travel_database_changes(q: str = "", limit: int = 200,
         out.append({"id": r.id, "cache_key": r.cache_key, "route": r.route,
                     "action": r.action, "origin": r.origin,
                     "changes": r.changes, "note": r.note,
-                    "at": r.created_at.isoformat() if r.created_at else None})
+                    "at": r.created_at.isoformat() if r.created_at else None,
+                    **_change_source(db, r)})
     return {"changes": out}
 
 
@@ -1052,7 +1106,8 @@ def travel_database_changes_export(q: str = "", limit: int = 1000,
     buf = io.StringIO()
     w = csv.writer(buf)
     w.writerow(["time_utc", "action", "origin", "nationality", "destination",
-                "purpose", "field", "from", "to", "note"])
+                "purpose", "field", "from", "to", "note",
+                "source_url", "source_host", "official_domain"])
     for c in data["changes"]:
         rt = c.get("route") or {}
         base = [c.get("at") or "", c.get("action") or "", c.get("origin") or "",
@@ -1060,13 +1115,17 @@ def travel_database_changes_export(q: str = "", limit: int = 1000,
                 rt.get("destination_country") or "",
                 rt.get("travel_purpose") or ""]
         changes = c.get("changes") or {}
+        # Every exported row carries the same proof the screen shows, so a
+        # reviewer working in Excel can open the official page too.
+        proof = [c.get("source_url") or "", c.get("source_host") or "",
+                 "yes" if c.get("source_official") else "no"]
         if not changes:
-            w.writerow(base + ["", "", "", c.get("note") or ""])
+            w.writerow(base + ["", "", "", c.get("note") or ""] + proof)
         for field, diff in changes.items():
             frm, to = ("", "")
             if isinstance(diff, dict):
                 frm, to = str(diff.get("from") or ""), str(diff.get("to") or "")
-            w.writerow(base + [field, frm, to, c.get("note") or ""])
+            w.writerow(base + [field, frm, to, c.get("note") or ""] + proof)
     # BOM so Excel decodes the Chinese route names correctly.
     return Response("﻿" + buf.getvalue(), media_type="text/csv",
                     headers={"Content-Disposition":
