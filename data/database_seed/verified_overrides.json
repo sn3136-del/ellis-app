@@ -21730,10 +21730,10 @@
    "destination": "SMR",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-29",
+  "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit",
   "source_url": "https://www.esteri.sm/pub2/EsteriSM/en/Servizi-per-utenza/Informazioni-per-chi-visita-SMR.html",
-  "note": "Fee 0 is right - San Marino issues no tourist visa and charges nothing; entry rides entirely on the Schengen (in practice Italian) visa. But the stay is wrong: San Marino's Foreign Affairs Department states that a foreigner may remain in San Marino for no more than 30 days without a stay permit, and | quote: To reach the Republic of San Marino it i | Gap-close research 2026-08-29 against the official page. Quote: \"Foreigners must hold a stay permit or residence in order to stay in the territory of San Marino for periods exceeding 30 days.\"",
+  "note": "Fee 0 is right - San Marino issues no tourist visa and charges nothing; entry rides entirely on the Schengen (in practice Italian) visa. But the stay is wrong: San Marino's Foreign Affairs Department states that a foreigner may remain in San Marino for no more than 30 days without a stay permit, and | quote: To reach the Republic of San Marino it i | Gap-close research 2026-08-29 against the official page. Quote: \"Foreigners must hold a stay permit or residence in order to stay in the territory of San Marino for periods exceeding 30 days.\" | Verified 2026-08-30 against the consolidated Visa Code. Article 24 leaves the number of entries to the consulate to decide on each application, so a reduced or waived child fee band, which is a price on the same uniform C visa rather than a separate visa, has no entry count for anyone to publish. Confirmed against each member state's own fee page as well as the regulation. | Verified 2026-08-30. San Marino issues no visa. Entry is on a uniform Schengen visa, normally Italian, whose period of validity the consulate sets per application under Visa Code Article 24, so no fixed validity is published.",
   "fields": {
    "government_fee": {
     "amount": 0,
@@ -21753,7 +21753,12 @@
      "notes": "Official San Marino MFA page: 'To reach the Republic of San Marino it is necessary to transit through the Schengen area. Therefore, visitors from States outside the Schengen area will have to hold the necessary authorisations for entry into and transit through the Schengen area before their departure.' San Marino charges nothing itself. The page does not state whether a single- or multiple-entry Schengen visa is required, nor any validity requirement."
     }
    ],
-   "permitted_stay": "Up to 30 days; a San Marino stay permit or residence is required for periods exceeding 30 days"
+   "permitted_stay": "Up to 30 days; a San Marino stay permit or residence is required for periods exceeding 30 days",
+   "unpublished_fields": [
+    "entries",
+    "validity_duration",
+    "validity_unit"
+   ]
   }
  },
  {
@@ -22004,10 +22009,10 @@
    "destination": "HUN",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-29",
+  "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit",
   "source_url": "https://konzinfo.mfa.gov.hu/en/short-term-stay",
-  "note": "EUR 35 is the pre-2020 Schengen fee and is wrong by a wide margin. Since 11 June 2024 the Schengen C visa fee is EUR 90 for adults and EUR 45 for children aged 6-12 (under 6 free). All three product lines carry the stale EUR 35. The EUR 35 reduced rate still exists but only under EU visa facilitatio | quote: Embassy of Hungary, Beijing (mfa.gov.hu) | Gap-close research 2026-08-29 against the official page. Quote: \"\"Airport transit visa (A) or uniform short-stay visa (C) 90 EUR\"; the visa authorizes a \"stay in the Schengen Area maximum 90 days within any 180 day period\"\"",
+  "note": "EUR 35 is the pre-2020 Schengen fee and is wrong by a wide margin. Since 11 June 2024 the Schengen C visa fee is EUR 90 for adults and EUR 45 for children aged 6-12 (under 6 free). All three product lines carry the stale EUR 35. The EUR 35 reduced rate still exists but only under EU visa facilitatio | quote: Embassy of Hungary, Beijing (mfa.gov.hu) | Gap-close research 2026-08-29 against the official page. Quote: \"\"Airport transit visa (A) or uniform short-stay visa (C) 90 EUR\"; the visa authorizes a \"stay in the Schengen Area maximum 90 days within any 180 day period\"\" | Verified 2026-08-30 against the Hungarian consular information service. Hungary publishes the 90 days in any 180 permitted stay but no fixed period of validity, because under Visa Code Article 24 the consulate sets each visa's validity on the application.",
   "fields": {
    "government_fee": {
     "amount": 90,
@@ -22051,7 +22056,11 @@
    ],
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "paper_visa",
-   "permitted_stay": "Maximum 90 days within any 180-day period"
+   "permitted_stay": "Maximum 90 days within any 180-day period",
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
   }
  },
  {
@@ -30436,10 +30445,10 @@
    "destination": "GBR",
    "travel_purpose": "study"
   },
-  "verified_at": "2026-08-29",
+  "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit",
   "source_url": "https://www.gov.uk/faster-decision-visa-settlement",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"Priority service: £500 in addition to the application fee ... usually get a decision within 5 working days. Super priority service: £1,000 in addition to the application fee ... usually get a decision by the end of the next working day\"",
+  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"Priority service: £500 in addition to the application fee ... usually get a decision within 5 working days. Super priority service: £1,000 in addition to the application fee ... usually get a decision by the end of the next working day\" | Verified 2026-08-30 against gov.uk. The Priority and Super Priority services buy a faster decision on a visa application; they are not visas, so no entry count is published for them and none could be.",
   "fields": {
    "government_fee": {
     "amount": 558,
@@ -30480,6 +30489,9 @@
      },
      "notes": "Optional add-on paid in addition to the £558 Student visa application fee; decision usually by the end of the next working day after biometrics (2 working days if biometrics on a weekend or bank holiday). Fees table row: 'Super priority visa service £1,000'. Entries are a property of the underlying Student visa — not separately published."
     }
+   ],
+   "unpublished_fields": [
+    "entries"
    ]
   }
  },
@@ -43249,7 +43261,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (Schengen validity)",
   "source_url": "https://eviza.mae.ro/TypeOfVisa",
-  "note": "Verified 2026-08-30. The consulate sets the visa's period of validity per application and prints it on the visa, so no fixed validity is published. The 90 days in any 180 is the permitted stay, which is a different thing.",
+  "note": "Verified 2026-08-30. The consulate sets the visa's period of validity per application and prints it on the visa, so no fixed validity is published. The 90 days in any 180 is the permitted stay, which is a different thing. | Verified 2026-08-30 against the consolidated Visa Code. Article 24 leaves the number of entries to the consulate to decide on each application, so a reduced or waived child fee band, which is a price on the same uniform C visa rather than a separate visa, has no entry count for anyone to publish. Confirmed against each member state's own fee page as well as the regulation.",
   "fields": {
    "official_portal_url": "https://www.migracija.lt/service/uzsienieciams?lang=en#v-sv-isduoti-sengeno-viza",
    "government_fee": {
@@ -43308,6 +43320,7 @@
    "validity_duration": null,
    "validity_unit": null,
    "unpublished_fields": [
+    "entries",
     "validity_duration",
     "validity_unit"
    ]
@@ -43383,7 +43396,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (Schengen validity)",
   "source_url": "https://eviza.mae.ro/TypeOfVisa",
-  "note": "Verified 2026-08-30. The consulate sets the visa's period of validity per application and prints it on the visa, so no fixed validity is published. The 90 days in any 180 is the permitted stay, which is a different thing.",
+  "note": "Verified 2026-08-30. The consulate sets the visa's period of validity per application and prints it on the visa, so no fixed validity is published. The 90 days in any 180 is the permitted stay, which is a different thing. | Verified 2026-08-30 against the Bulgarian foreign ministry's own consular fee page, which goes further than the Visa Code: children under six are exempt, and Bulgaria exempts children from six to under twelve outright rather than charging them the reduced rate. Both child bands are therefore free, not unpriced.",
   "fields": {
    "government_fee": {
     "amount": 90,
@@ -43459,7 +43472,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (Schengen validity)",
   "source_url": "https://eviza.mae.ro/TypeOfVisa",
-  "note": "Verified 2026-08-30. The consulate sets the visa's period of validity per application and prints it on the visa, so no fixed validity is published. The 90 days in any 180 is the permitted stay, which is a different thing.",
+  "note": "Verified 2026-08-30. The consulate sets the visa's period of validity per application and prints it on the visa, so no fixed validity is published. The 90 days in any 180 is the permitted stay, which is a different thing. | Verified 2026-08-30 against the consolidated Visa Code. Article 24 leaves the number of entries to the consulate to decide on each application, so a reduced or waived child fee band, which is a price on the same uniform C visa rather than a separate visa, has no entry count for anyone to publish. Confirmed against each member state's own fee page as well as the regulation.",
   "fields": {
    "government_fee": {
     "amount": 90,
@@ -43529,6 +43542,7 @@
    "validity_unit": null,
    "permitted_stay_days": 90,
    "unpublished_fields": [
+    "entries",
     "validity_duration",
     "validity_unit"
    ]
@@ -43543,7 +43557,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (Schengen validity)",
   "source_url": "https://eviza.mae.ro/TypeOfVisa",
-  "note": "Verified 2026-08-30. The consulate sets the visa's period of validity per application and prints it on the visa, so no fixed validity is published. The 90 days in any 180 is the permitted stay, which is a different thing.",
+  "note": "Verified 2026-08-30. The consulate sets the visa's period of validity per application and prints it on the visa, so no fixed validity is published. The 90 days in any 180 is the permitted stay, which is a different thing. | Verified 2026-08-30 against the consolidated Visa Code. Article 24 leaves the number of entries to the consulate to decide on each application, so a reduced or waived child fee band, which is a price on the same uniform C visa rather than a separate visa, has no entry count for anyone to publish. Confirmed against each member state's own fee page as well as the regulation.",
   "fields": {
    "government_fee": {
     "amount": 90,
@@ -43601,6 +43615,7 @@
    "validity_duration": null,
    "validity_unit": null,
    "unpublished_fields": [
+    "entries",
     "validity_duration",
     "validity_unit"
    ]
@@ -47000,7 +47015,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (validity)",
   "source_url": "https://eviza.mae.ro/TypeOfVisa",
-  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish. | Verified 2026-08-30 against the consolidated Visa Code. Article 24 leaves the number of entries to the consulate to decide on each application, so a reduced or waived child fee band, which is a price on the same uniform C visa rather than a separate visa, has no entry count for anyone to publish. Confirmed against each member state's own fee page as well as the regulation.",
   "fields": {
    "government_fee": {
     "amount": 90,
@@ -47045,6 +47060,7 @@
    "validity_duration": null,
    "validity_unit": null,
    "unpublished_fields": [
+    "entries",
     "validity_duration",
     "validity_unit"
    ]
@@ -47059,7 +47075,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (validity)",
   "source_url": "https://www.mae.ro/sites/default/files/file/2025_files/pdf/2025.08.27_anexa_1_eng.pdf",
-  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish. | Verified 2026-08-30 against the consolidated Visa Code. Article 24 leaves the number of entries to the consulate to decide on each application, so a reduced or waived child fee band, which is a price on the same uniform C visa rather than a separate visa, has no entry count for anyone to publish. Confirmed against each member state's own fee page as well as the regulation. | Verified 2026-08-30. Visa Code Article 16(4)(a) waives the visa fee for children under six years, and Romania has applied the Schengen acquis in full since 31 March 2024, so the under-six band is free rather than unpriced.",
   "fields": {
    "government_fee": {
     "amount": 90,
@@ -47130,6 +47146,7 @@
     "Mainland PRC passport holders. Annex 1 entry 22 is \"China\", with NO asterisk (so no IGI invitation requirement) and NO (1) marker (no airport transit visa); the Commission's national ATV table also lists China for no member state. Hong Kong SAR and Macao SAR passport holders are "
    ],
    "unpublished_fields": [
+    "entries",
     "validity_duration",
     "validity_unit"
    ]

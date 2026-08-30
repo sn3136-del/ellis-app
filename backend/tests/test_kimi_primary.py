@@ -1325,3 +1325,52 @@ def test_every_subcategory_nests_under_its_primary():
                         f" -> {got!r}")
     assert not offenders, (
         "these pairings do not exist in their tree: " + "; ".join(offenders))
+
+
+def test_no_record_contradicts_its_own_verdict():
+    """The class of defect a hand-maintained clean-up list cannot catch.
+
+    A customer answer is a verified verdict layered over an un-verified model
+    answer, and the verdict only clears the fields somebody remembered to
+    list. Everything else survives a verdict that has made it false. Singapore
+    to Spain said "No visa and no travel authorisation" in one field and
+    "require only an approved ETIAS to enter Spain" in the next; Japan to
+    Italy asked a visa-free traveller for a payment card. This checks the
+    OUTPUT for self-contradiction rather than trusting the list."""
+    import re
+    from app.visa_snapshot import tstation
+
+    app_doc = re.compile(r"\b(email address|payment card|credit card|"
+                         r"debit card|application form|application fee)\b", re.I)
+    asserts_auth = re.compile(r"(requires?\s+(only\s+)?an?\s+(approved\s+)?"
+                              r"(ETIAS|ESTA|K-ETA|ETA)|(ETIAS|ESTA)\s+is\s+required)", re.I)
+    guidance = {
+        "disposition": "VISA_EXEMPT",
+        "requirement_detail": "unconditional_visa_free",
+        "application_channel": "not_required",
+        "permitted_stay": "90 days in any 180-day period",
+        "permitted_stay_days": 90,
+        "required_documents": ["Passport", "Email address", "Payment card",
+                               "Return ticket"],
+        "exceptions": ["Nationals require only an approved ETIAS to enter.",
+                       "ETIAS is an entry authorisation, not a visa."],
+        "government_fee": {"amount": 0, "currency": None},
+    }
+    route = {"passport_nationality": "SGP", "destination_country": "ESP",
+             "travel_purpose": "tourism",
+             "travel_document_type": "ordinary_passport"}
+    rows = tstation.records_for_route(route, guidance)
+    assert rows
+    for row in rows:
+        assert row["visa_requirement"] == "Visa-free", row["visa_requirement"]
+        docs = str(row.get("required_documents") or "")
+        assert not app_doc.search(docs), (
+            f"a visa-free record asks for {app_doc.search(docs).group(0)!r}, "
+            "which only exists to feed an application")
+        for field in ("special_conditions", "entry_requirements"):
+            text = str(row.get(field) or "")
+            assert not asserts_auth.search(text), (
+                f"{field} asserts an authorisation is required on a route "
+                "whose verdict is that none is")
+        assert row.get("validity_duration") is None
+        assert row.get("entries") is None

@@ -1823,19 +1823,6 @@ export default function QualityConsole() {
                     <div style={{ marginTop: 8 }}>
                       <Meter pct={(s.source_coverage || 0) * 100} target={100}
                              targetLabel={`${t('ops.stat.target')} 100%`} />
-                      {/* What the headline actually means, and the one thing
-                          it does not: a citation is a page someone can open,
-                          which is not the same as a page someone has read. */}
-                      <div style={{ marginTop: 7, fontSize: 11, lineHeight: 1.5,
-                                    color: GRAY, fontVariantNumeric: 'tabular-nums' }}>
-                        {s.sourced.toLocaleString()} / {s.total.toLocaleString()}
-                        {' '}{t('ops.stat.srcCited')}
-                        <br />
-                        {t('ops.stat.srcGate')}
-                        <br />
-                        {t('ops.stat.srcRead')
-                          .replace('{n}', s.substantiated.toLocaleString())}
-                      </div>
                     </div>
                   </BandCell>
                   <BandCell delay={240}>

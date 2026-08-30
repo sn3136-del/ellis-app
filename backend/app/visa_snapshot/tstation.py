@@ -561,7 +561,93 @@ def _strip_visa_only_fields(row: dict) -> dict:
     # checklist says why. "Other" implied a channel that does not exist.
     if row.get("application_method") == "Other":
         row["application_method"] = None
+    # A method only belongs on a visa-free route when the record actually
+    # names something the traveller files: an arrival card, a travel
+    # authorisation, a passenger declaration. Forty records offered "Online
+    # Application" with nothing anywhere in them to apply for, which sends a
+    # traveller looking for a form that does not exist.
+    if row.get("application_method") and not _names_something_to_file(row):
+        row["application_method"] = None
+    # These two ran only when a verified override declared the route
+    # visa-free, so a route the engine alone called visa-free kept every
+    # contradiction. They belong here, on the one path every record takes.
+    docs = row.get("required_documents")
+    if docs:
+        row["required_documents"] = _documents_without_an_application(docs)
+    for f in ("special_conditions", "entry_requirements"):
+        text = row.get(f)
+        if text:
+            row[f] = _text_without_a_required_authorisation(text)
     return row
+
+
+def _documents_without_an_application(docs):
+    """Drop items that exist only to feed a form, on a route with no form.
+
+    What survives is what a border officer can ask to see: the passport, the
+    onward ticket, the accommodation booking, the funds. Japan to Italy asked
+    a visa-free traveller for an email address and a payment card, left over
+    from an ETIAS the Commission has not yet brought into operation."""
+    def keep(item: str) -> bool:
+        low = str(item).strip().lower()
+        return bool(low) and not any(m in low for m in _APPLICATION_ONLY_DOCUMENTS)
+
+    if isinstance(docs, (list, tuple)):
+        kept = [d for d in docs if keep(d)]
+        return kept if kept else docs
+    text = str(docs or "")
+    if not text:
+        return docs
+    kept = [part.strip() for part in text.split(",") if keep(part)]
+    return ", ".join(kept) if kept else docs
+
+
+_APPLICATION_ONLY_DOCUMENTS = (
+    "email address", "e-mail address", "payment card", "credit card",
+    "debit card", "bank card", "application form", "application fee",
+    "payment method",
+)
+
+# A sentence asserting the traveller must hold an authorisation, on a route
+# whose verdict is that none is required. The explanations stay: "ETIAS is an
+# entry authorisation, not a visa" and "ETIAS is not in operation" are both
+# true and both worth saying. Only the assertion goes.
+_ASSERTS_AN_AUTHORISATION = re.compile(
+    r"[^.]*?(requires?\s+(only\s+)?an?\s+(approved\s+)?"
+    r"(ETIAS|ESTA|K-ETA|ETA|electronic travel authoris\w*)"
+    r"|must\s+(hold|obtain|apply\s+for|have)\s+an?\s+(approved\s+)?"
+    r"(ETIAS|ESTA|K-ETA|ETA|electronic travel authoris\w*)"
+    r"|needs?\s+an?\s+(approved\s+)?(ETIAS|ESTA|K-ETA|ETA)\b"
+    r"|(ETIAS|ESTA|K-ETA)\s+is\s+required)[^.]*\.?", re.I)
+
+
+def _text_without_a_required_authorisation(value):
+    """Remove only the sentences that contradict a no-authorisation verdict."""
+    if isinstance(value, (list, tuple)):
+        kept = [v for v in value
+                if not _ASSERTS_AN_AUTHORISATION.search(str(v or ""))]
+        return kept if kept else None
+    text = str(value or "")
+    if not text:
+        return value
+    cleaned = _ASSERTS_AN_AUTHORISATION.sub("", text)
+    cleaned = re.sub(r"\s{2,}", " ", cleaned).strip(" .,;")
+    return cleaned or None
+
+
+# The things a visa-free traveller can still be required to file before
+# travelling. If a record names none of them, there is nothing to apply for.
+_FILINGS = re.compile(
+    r"arrival card|travel authoris\w*|travel authoriz\w*|ETIAS|ESTA|K-ETA"
+    r"|\bETA\b|eTA\b|declaration|registration|register\b|pre-?arrival"
+    r"|MDAC|TDAC|SG Arrival|eTravel|e-Ticket|entry permit|entry form", re.I)
+
+
+def _names_something_to_file(row: dict) -> bool:
+    text = " ".join(str(row.get(f) or "") for f in (
+        "entry_requirements", "required_documents", "special_conditions",
+        "visa_type_name"))
+    return bool(_FILINGS.search(text))
 
 
 def _regrade(row: dict, g: dict, disputed: list | None,

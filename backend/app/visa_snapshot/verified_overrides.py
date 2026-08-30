@@ -222,6 +222,74 @@ def _drop_application_leftovers(merged: dict, fields: dict) -> None:
     # "Appointment: Required".)
     merged["appointment_required"] = False
     merged["interview_required"] = False
+    docs = merged.get("required_documents")
+    if docs is not None and "required_documents" not in fields:
+        merged["required_documents"] = _documents_without_an_application(docs)
+    # A verdict of "no authorisation is required" cannot sit beside a sentence
+    # saying one is. Singapore to Spain read "No visa and no travel
+    # authorisation" in one field and "require only an approved ETIAS to enter
+    # Spain" in the next. exceptions was on no clean-up list, so the model's
+    # stale claim outlived the verdict that falsified it.
+    if str(merged.get("application_channel") or "").lower() in (
+            "not_required", "none", "no_application_required",
+            "none_or_port_of_entry") and "exceptions" not in fields:
+        merged["exceptions"] = _exceptions_without_a_required_authorisation(
+            merged.get("exceptions"))
+
+
+# Items that exist only to feed an application form. On a route where nothing
+# is applied for they are not documents a traveller needs, they are the
+# residue of an application that does not happen. Japan to Italy listed "email
+# address, payment card" on a verified visa-free verdict, left over from an
+# ETIAS the European Commission has not yet brought into operation.
+_APPLICATION_ONLY_DOCUMENTS = (
+    "email address", "e-mail address", "email", "payment card", "credit card",
+    "debit card", "bank card", "application form", "visa application form",
+    "online application form", "application fee", "payment method",
+)
+
+
+def _documents_without_an_application(docs):
+    """Drop the items that only make sense when there is a form to submit.
+
+    What survives is what a border officer can actually ask to see: the
+    passport, the onward ticket, the accommodation booking, the funds."""
+    def keep(item: str) -> bool:
+        low = str(item).strip().lower()
+        return bool(low) and not any(m in low for m in _APPLICATION_ONLY_DOCUMENTS)
+
+    if isinstance(docs, (list, tuple)):
+        kept = [d for d in docs if keep(d)]
+        return kept if kept else docs
+    text = str(docs or "")
+    if not text:
+        return docs
+    kept = [part.strip() for part in text.split(",") if keep(part)]
+    return ", ".join(kept) if kept else docs
+
+
+# A sentence that says the traveller must hold an authorisation, on a route
+# whose verified verdict is that none is required. The explanatory sentences
+# stay: "ETIAS is an entry authorisation, not a visa" and "ETIAS is not in
+# operation" are both true and both useful. Only the assertion goes.
+_ASSERTS_AN_AUTHORISATION = re.compile(
+    r"(requires?\s+(only\s+)?an?\s+(approved\s+)?(ETIAS|ESTA|K-ETA|ETA|"
+    r"electronic travel authoris\w*)"
+    r"|must\s+(hold|obtain|apply\s+for|have)\s+an?\s+(approved\s+)?"
+    r"(ETIAS|ESTA|K-ETA|ETA|electronic travel authoris\w*)"
+    r"|need\s+an?\s+(approved\s+)?(ETIAS|ESTA|K-ETA|ETA)"
+    r"|(ETIAS|ESTA|K-ETA)\s+is\s+required)", re.I)
+
+
+def _exceptions_without_a_required_authorisation(items):
+    """Drop only the sentences that contradict a no-authorisation verdict."""
+    if not isinstance(items, (list, tuple)):
+        if items and _ASSERTS_AN_AUTHORISATION.search(str(items)):
+            return None
+        return items
+    kept = [x for x in items
+            if not _ASSERTS_AN_AUTHORISATION.search(str(x or ""))]
+    return kept if kept != list(items) else items
 
 
 # Which requirement_detail subcategories can truthfully sit under each
