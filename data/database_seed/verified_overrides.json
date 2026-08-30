@@ -8153,7 +8153,8 @@
    "government_fee": {
     "amount": 0,
     "currency": null
-   }
+   },
+   "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements"
   }
  },
  {
@@ -14253,7 +14254,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit",
   "source_url": "https://mppre.gob.ve/descripcion/30",
-  "note": "Fee UNVERIFIABLE by design: Venezuela's Ministry of Foreign Affairs publishes the tourist visa (Visa de Turista 'T') requirements but explicitly refuses to publish the amount, stating the consular fee must be checked with the individual diplomatic or consular mission. The same wording appears on Ven | quote: Comprobante de pago del arancel consular | Gap-close research 2026-08-29 against the official page. Quote: \"Se otorgará a los extranjeros que ingresen al país con fines de recreo o esparcimiento, salud o actividades que no involucren remuneración o lucro. ... El costo del arancel consular debe ser consultado en la Representación Diplomática o Consular.\" | Verified 2026-08-30. The foreign ministry's tourist visa page lists the required documents and states no fee and no validity period. The fee is set by reciprocity at the mission, and no Venezuelan government page publishes a figure or a validity.",
+  "note": "Fee UNVERIFIABLE by design: Venezuela's Ministry of Foreign Affairs publishes the tourist visa (Visa de Turista 'T') requirements but explicitly refuses to publish the amount, stating the consular fee must be checked with the individual diplomatic or consular mission. The same wording appears on Ven | quote: Comprobante de pago del arancel consular | Gap-close research 2026-08-29 against the official page. Quote: \"Se otorgará a los extranjeros que ingresen al país con fines de recreo o esparcimiento, salud o actividades que no involucren remuneración o lucro. ... El costo del arancel consular debe ser consultado en la Representación Diplomática o Consular.\" | Verified 2026-08-30. The foreign ministry's tourist visa page lists the required documents and states no fee and no validity period. The fee is set by reciprocity at the mission, and no Venezuelan government page publishes a figure or a validity. | Verified 2026-08-30. The foreign ministry's tourist visa page lists the required documents and states no fee and no validity period. The fee is set by reciprocity at the mission, and no Venezuelan government page publishes a figure or a validity.",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "visa_products": [
@@ -17381,7 +17382,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit",
   "source_url": "https://ambwashingtondc.esteri.it/en/news/dall_ambasciata/2024/05/modifiche-alle-tariffe-dei-visti-schengen-a-partire-dall11-giugno-2024/",
-  "note": "The EUR90 / EUR45 amounts and the 90-day stay are correct, but the products are attributed to the wrong issuer. Vatican City State issues no tourist visa and has no immigration service - the Governorate's official site vaticanstate.va has no visa page at all. A Chinese traveller reaches Vatican City | quote: As stipulated by Commission Delegated Re | Gap-close research 2026-08-29 against the official page. Quote: \"for children aged 0 to 6 years, no changes are provided for, so there will continue to be no fees as currently provided\" | Verified 2026-08-30. Vatican City issues no visa of its own. Entry is on a uniform Schengen short-stay visa issued by Italy, and under the Visa Code the consulate sets each visa's period of validity per application and prints it on the visa, so no fixed validity is published. The reduced child fees are fee tiers rather than separate products, so they carry no entry count.",
+  "note": "The EUR90 / EUR45 amounts and the 90-day stay are correct, but the products are attributed to the wrong issuer. Vatican City State issues no tourist visa and has no immigration service - the Governorate's official site vaticanstate.va has no visa page at all. A Chinese traveller reaches Vatican City | quote: As stipulated by Commission Delegated Re | Gap-close research 2026-08-29 against the official page. Quote: \"for children aged 0 to 6 years, no changes are provided for, so there will continue to be no fees as currently provided\" | Verified 2026-08-30. Vatican City issues no visa of its own. Entry is on a uniform Schengen short-stay visa issued by Italy, and under the Visa Code the consulate sets each visa's period of validity per application and prints it on the visa, so no fixed validity is published. The reduced child fees are fee tiers rather than separate products, so they carry no entry count. | Verified 2026-08-30. Vatican City issues no visa of its own. Entry is on a uniform Schengen short-stay visa issued by Italy, and under the Visa Code the consulate sets each visa's period of validity per application and prints it on the visa, so no fixed validity is published. The reduced child fees are fee tiers rather than separate products, so they carry no entry count.",
   "fields": {
    "government_fee": {
     "amount": 90,
@@ -17515,7 +17516,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit",
   "source_url": "https://paris.diplomatie.gouv.cf/sites/paris/files/2025-02/01-AMB-CFFR--%20Demande%20de%20visa%20court%20s%C3%A9jour.pdf",
-  "note": "Fee was null. The CAR short-stay tourist visa costs EUR 80 for 1-30 days and EUR 160 for 30-45 days per the official application form published by the Embassy of the Central African Republic in France (gouv.cf). Express handling adds EUR 20 (a service surcharge, not the consular fee). The 30-day sta | quote: Type de visa sollicité: Court séjour (1  | Gap-close research 2026-08-29 against the official page. Quote: \"Court séjour (1 à 30 jours). TARIF 80€ / Court séjour (30 à 45 jours). TARIF 160€ ... Frais de dossier: Court séjour: 80€ ou 160 € (Traitement de visa express +20€)\" | Verified 2026-08-30. The embassy's short-stay application form prices the visa in two brackets, 80 EUR for 1 to 30 days and 160 EUR for 30 to 45 days. It states the permitted stay and the fee and no validity period, and no other CAR government page states one.",
+  "note": "Fee was null. The CAR short-stay tourist visa costs EUR 80 for 1-30 days and EUR 160 for 30-45 days per the official application form published by the Embassy of the Central African Republic in France (gouv.cf). Express handling adds EUR 20 (a service surcharge, not the consular fee). The 30-day sta | quote: Type de visa sollicité: Court séjour (1  | Gap-close research 2026-08-29 against the official page. Quote: \"Court séjour (1 à 30 jours). TARIF 80€ / Court séjour (30 à 45 jours). TARIF 160€ ... Frais de dossier: Court séjour: 80€ ou 160 € (Traitement de visa express +20€)\" | Verified 2026-08-30. The embassy's short-stay application form prices the visa in two brackets, 80 EUR for 1 to 30 days and 160 EUR for 30 to 45 days. It states the permitted stay and the fee and no validity period, and no other CAR government page states one. | Verified 2026-08-30. The embassy's short-stay application form prices the visa in two brackets, 80 EUR for 1 to 30 days and 160 EUR for 30 to 45 days. It states the permitted stay and the fee and no validity period, and no other CAR government page states one.",
   "fields": {
    "government_fee": {
     "amount": 80,
@@ -17571,7 +17572,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit",
   "source_url": "https://paris.diplomatie.gouv.cf/sites/paris/files/2025-02/01-AMB-CFFR--%20Demande%20de%20visa%20court%20s%C3%A9jour.pdf",
-  "note": "Three separate errors. (1) Ellis calls this an e-visa: the CAR has no government e-visa portal; evisa-centrafrique.com is a non-government .com site and the CAR embassy's own page directs applicants to a downloadable form mailed with the passport. (2) The fee was null; it is EUR 80 (1-30 days) or EU | quote: Type de visa sollicité: Court séjour (1  | Gap-close research 2026-08-29 against the official page. Quote: \"Court séjour (1 à 30 jours). TARIF 80€ ... Court séjour (30 à 45 jours). TARIF 160€\" | Verified 2026-08-30. The embassy's short-stay application form prices the visa in two brackets, 80 EUR for 1 to 30 days and 160 EUR for 30 to 45 days. It states the permitted stay and the fee and no validity period, and no other CAR government page states one.",
+  "note": "Three separate errors. (1) Ellis calls this an e-visa: the CAR has no government e-visa portal; evisa-centrafrique.com is a non-government .com site and the CAR embassy's own page directs applicants to a downloadable form mailed with the passport. (2) The fee was null; it is EUR 80 (1-30 days) or EU | quote: Type de visa sollicité: Court séjour (1  | Gap-close research 2026-08-29 against the official page. Quote: \"Court séjour (1 à 30 jours). TARIF 80€ ... Court séjour (30 à 45 jours). TARIF 160€\" | Verified 2026-08-30. The embassy's short-stay application form prices the visa in two brackets, 80 EUR for 1 to 30 days and 160 EUR for 30 to 45 days. It states the permitted stay and the fee and no validity period, and no other CAR government page states one. | Verified 2026-08-30. The embassy's short-stay application form prices the visa in two brackets, 80 EUR for 1 to 30 days and 160 EUR for 30 to 45 days. It states the permitted stay and the fee and no validity period, and no other CAR government page states one.",
   "fields": {
    "government_fee": {
     "amount": 80,
@@ -17628,7 +17629,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit",
   "source_url": "https://paris.diplomatie.gouv.cf/sites/paris/files/2025-02/01-AMB-CFFR--%20Demande%20de%20visa%20court%20s%C3%A9jour.pdf",
-  "note": "Every field was null. The correct short-stay tariff is EUR 80 for 1-30 days and EUR 160 for 30-45 days. Ellis also lists a 'multiple-entry tourist visa' product; the official short-stay form offers only the two duration bands, with no multiple-entry tourist tier and no published multiple-entry fee. | quote: Type de visa sollicité: Court séjour (1 à | Gap-close research 2026-08-29 against the official page. Quote: \"Court séjour (1 à 30 jours). TARIF 80€ / Court séjour (30 à 45 jours). TARIF 160€ ... Frais de dossier: Court séjour: 80€ ou 160 € (Traitement de visa express +20€)\" | Verified 2026-08-30. The embassy's short-stay application form prices the visa in two brackets, 80 EUR for 1 to 30 days and 160 EUR for 30 to 45 days. It states the permitted stay and the fee and no validity period, and no other CAR government page states one.",
+  "note": "Every field was null. The correct short-stay tariff is EUR 80 for 1-30 days and EUR 160 for 30-45 days. Ellis also lists a 'multiple-entry tourist visa' product; the official short-stay form offers only the two duration bands, with no multiple-entry tourist tier and no published multiple-entry fee. | quote: Type de visa sollicité: Court séjour (1 à | Gap-close research 2026-08-29 against the official page. Quote: \"Court séjour (1 à 30 jours). TARIF 80€ / Court séjour (30 à 45 jours). TARIF 160€ ... Frais de dossier: Court séjour: 80€ ou 160 € (Traitement de visa express +20€)\" | Verified 2026-08-30. The embassy's short-stay application form prices the visa in two brackets, 80 EUR for 1 to 30 days and 160 EUR for 30 to 45 days. It states the permitted stay and the fee and no validity period, and no other CAR government page states one. | Verified 2026-08-30. The embassy's short-stay application form prices the visa in two brackets, 80 EUR for 1 to 30 days and 160 EUR for 30 to 45 days. It states the permitted stay and the fee and no validity period, and no other CAR government page states one.",
   "fields": {
    "government_fee": {
     "amount": 80,
@@ -20940,7 +20941,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit",
   "source_url": "https://mppre.gob.ve/descripcion/30",
-  "note": "Fee, validity and stay are all UNVERIFIABLE from Venezuelan government sources - MPPRE states the consular fee 'debe ser consultado en la Representación Diplomática o Consular' and publishes no validity or stay figures. The multiple-entry 'up to 1 year' product is not described anywhere on gob.ve. A | quote: Comprobante de pago del arancel consular | Gap-close research 2026-08-29 against the official page. Quote: \"El costo del arancel consular debe ser consultado en la Representación Diplomática o Consular.\" | Verified 2026-08-30. The foreign ministry's tourist visa page lists the required documents and states no fee and no validity period. The fee is set by reciprocity at the mission, and no Venezuelan government page publishes a figure or a validity.",
+  "note": "Fee, validity and stay are all UNVERIFIABLE from Venezuelan government sources - MPPRE states the consular fee 'debe ser consultado en la Representación Diplomática o Consular' and publishes no validity or stay figures. The multiple-entry 'up to 1 year' product is not described anywhere on gob.ve. A | quote: Comprobante de pago del arancel consular | Gap-close research 2026-08-29 against the official page. Quote: \"El costo del arancel consular debe ser consultado en la Representación Diplomática o Consular.\" | Verified 2026-08-30. The foreign ministry's tourist visa page lists the required documents and states no fee and no validity period. The fee is set by reciprocity at the mission, and no Venezuelan government page publishes a figure or a validity. | Verified 2026-08-30. The foreign ministry's tourist visa page lists the required documents and states no fee and no validity period. The fee is set by reciprocity at the mission, and no Venezuelan government page publishes a figure or a validity.",
   "fields": {
    "visa_products": [
     {
@@ -26638,7 +26639,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit",
   "source_url": "https://yemenevisa.org/Types-of-Visas",
-  "note": "Official Yemen eVisa portal of the Ministry of Interior's Immigration, Passports and Nationality Authority (launch announced by the MFA, 2025-06-24): tourism is available only as GROUP tourism (minimum 10 travellers) arranged through a Yemeni tourism agency accredited by the General Authority for Tourism. Fee amounts, validity and stay are not publ | Gap-close research 2026-08-29 against the official page. Quote: \"\"VisaTypeName\":\"Vist Groups Tourism\" ... \"FeeAmount\":75.00 ... \"CurrencyCode\":\"USD\" (portal visa-type catalog); \"The number of the tourist group must not be less than ten people\"; Eligibility page: CHINA — Vist Groups Tourism, ... Urgent tourist visa; FAQ: \"An e-Visa is processed within 3-5 working \" | Verified 2026-08-30. The official Yemeni e-visa portal lists the group tourism visa and the urgent tourist visa at USD 75 each. It publishes no validity period and no entry count for either, and no other Yemeni government page does.",
+  "note": "Official Yemen eVisa portal of the Ministry of Interior's Immigration, Passports and Nationality Authority (launch announced by the MFA, 2025-06-24): tourism is available only as GROUP tourism (minimum 10 travellers) arranged through a Yemeni tourism agency accredited by the General Authority for Tourism. Fee amounts, validity and stay are not publ | Gap-close research 2026-08-29 against the official page. Quote: \"\"VisaTypeName\":\"Vist Groups Tourism\" ... \"FeeAmount\":75.00 ... \"CurrencyCode\":\"USD\" (portal visa-type catalog); \"The number of the tourist group must not be less than ten people\"; Eligibility page: CHINA — Vist Groups Tourism, ... Urgent tourist visa; FAQ: \"An e-Visa is processed within 3-5 working \" | Verified 2026-08-30. The official Yemeni e-visa portal lists the group tourism visa and the urgent tourist visa at USD 75 each. It publishes no validity period and no entry count for either, and no other Yemeni government page does. | Verified 2026-08-30. The official Yemeni e-visa portal lists the group tourism visa and the urgent tourist visa at USD 75 each. It publishes no validity period and no entry count for either, and no other Yemeni government page does.",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "evisa",
@@ -26704,7 +26705,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit",
   "source_url": "https://yemenevisa.org/Types-of-Visas",
-  "note": "Official Yemen eVisa portal of the Ministry of Interior's Immigration, Passports and Nationality Authority (launch announced by the MFA, 2025-06-24): tourism is available only as GROUP tourism (minimum 10 travellers) arranged through a Yemeni tourism agency accredited by the General Authority for Tourism. Fee amounts, validity and stay are not publ | Gap-close research 2026-08-29 against the official page. Quote: \"The tourist groups must be brought through a Yemeni tourism agency accredited by the General Authority for Tourism ... The number of the tourist group must not be less than ten people. Eligibility page lists: HONG KONG — Vist Groups Tourism, ... Urgent tourist visa ...\" | Verified on the official Yemen eVisa portal (yemenevisa.org, footer: Republic of Yemen, Ministry of Interior, Immigration, Passports and Nationality Authority, info@ipnaye.org). The Eligibility page lists HONG KONG with an APPLY NOW link, so HKG passport holders are eligible. The Types of Visas content (served on the portal's pages, embedded in its published visa-type data) prices 'Vist Groups Tourism' at 75.00 USD, so the missing fee facts are resolved: 75 USD. The portal does NOT state the number of en | Verified 2026-08-30. The official Yemeni e-visa portal lists the group tourism visa and the urgent tourist visa at USD 75 each. It publishes no validity period and no entry count for either, and no other Yemeni government page does.",
+  "note": "Official Yemen eVisa portal of the Ministry of Interior's Immigration, Passports and Nationality Authority (launch announced by the MFA, 2025-06-24): tourism is available only as GROUP tourism (minimum 10 travellers) arranged through a Yemeni tourism agency accredited by the General Authority for Tourism. Fee amounts, validity and stay are not publ | Gap-close research 2026-08-29 against the official page. Quote: \"The tourist groups must be brought through a Yemeni tourism agency accredited by the General Authority for Tourism ... The number of the tourist group must not be less than ten people. Eligibility page lists: HONG KONG — Vist Groups Tourism, ... Urgent tourist visa ...\" | Verified on the official Yemen eVisa portal (yemenevisa.org, footer: Republic of Yemen, Ministry of Interior, Immigration, Passports and Nationality Authority, info@ipnaye.org). The Eligibility page lists HONG KONG with an APPLY NOW link, so HKG passport holders are eligible. The Types of Visas content (served on the portal's pages, embedded in its published visa-type data) prices 'Vist Groups Tourism' at 75.00 USD, so the missing fee facts are resolved: 75 USD. The portal does NOT state the number of en | Verified 2026-08-30. The official Yemeni e-visa portal lists the group tourism visa and the urgent tourist visa at USD 75 each. It publishes no validity period and no entry count for either, and no other Yemeni government page does. | Verified 2026-08-30. The official Yemeni e-visa portal lists the group tourism visa and the urgent tourist visa at USD 75 each. It publishes no validity period and no entry count for either, and no other Yemeni government page does.",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "evisa",
@@ -26769,7 +26770,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit",
   "source_url": "https://yemenevisa.org/Types-of-Visas",
-  "note": "Official Yemen eVisa portal of the Ministry of Interior's Immigration, Passports and Nationality Authority (launch announced by the MFA, 2025-06-24): tourism is available only as GROUP tourism (minimum 10 travellers) arranged through a Yemeni tourism agency accredited by the General Authority for Tourism. Fee amounts, validity and stay are not publ | Gap-close research 2026-08-29 against the official page. Quote: \"The number of the tourist group must not be less than ten people\" | Verified 2026-08-30. The official Yemeni e-visa portal lists the group tourism visa and the urgent tourist visa at USD 75 each. It publishes no validity period and no entry count for either, and no other Yemeni government page does.",
+  "note": "Official Yemen eVisa portal of the Ministry of Interior's Immigration, Passports and Nationality Authority (launch announced by the MFA, 2025-06-24): tourism is available only as GROUP tourism (minimum 10 travellers) arranged through a Yemeni tourism agency accredited by the General Authority for Tourism. Fee amounts, validity and stay are not publ | Gap-close research 2026-08-29 against the official page. Quote: \"The number of the tourist group must not be less than ten people\" | Verified 2026-08-30. The official Yemeni e-visa portal lists the group tourism visa and the urgent tourist visa at USD 75 each. It publishes no validity period and no entry count for either, and no other Yemeni government page does. | Verified 2026-08-30. The official Yemeni e-visa portal lists the group tourism visa and the urgent tourist visa at USD 75 each. It publishes no validity period and no entry count for either, and no other Yemeni government page does.",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "evisa",
@@ -27146,7 +27147,8 @@
    ],
    "exceptions": [
     "ICA does not publish a fixed per-nationality stay duration: 'If you are eligible for entry, you will receive a Visit Pass or e-Pass which will indicate the period of stay granted. The granting of visit passes to visitors is determined by the Immigration & Checkpoints Authority (ICA) officers at the point of entry.' (ask.gov.sg/ica, loaded). The stored 30-day figure is not stated on the official pages; period of stay is set on the e-Pass at entry."
-   ]
+   ],
+   "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements"
   }
  },
  {
@@ -28438,7 +28440,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit",
   "source_url": "https://bolivianembassy.co.uk/visa-grupos-1-2-3/",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"TOURIST VISA GROUP – II ... CHINA ( INCLUYENDO HONG KONG, TAIWAN, MACAO); DS 4828 (gacetaoficialdebolivia.gob.bo/normas/verGratis_gob/168945): \"b) Países Grupo II: Las personas extranjeras pertenecientes al Grupo II de países requieren visa de turismo o visita, o autorización de ingreso por turismo \" | Verified 2026-08-30. The consular tariff prices the tourism or visit visa at USD 30, and the migration authority's legal framework gives the visa a 30 day validity with a 90 day stay per year. Neither page states an entry count for the tourist visa, and no other Bolivian page publishes one.",
+  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"TOURIST VISA GROUP – II ... CHINA ( INCLUYENDO HONG KONG, TAIWAN, MACAO); DS 4828 (gacetaoficialdebolivia.gob.bo/normas/verGratis_gob/168945): \"b) Países Grupo II: Las personas extranjeras pertenecientes al Grupo II de países requieren visa de turismo o visita, o autorización de ingreso por turismo \" | Verified 2026-08-30. The consular tariff prices the tourism or visit visa at USD 30, and the migration authority's legal framework gives the visa a 30 day validity with a 90 day stay per year. Neither page states an entry count for the tourist visa, and no other Bolivian page publishes one. | Verified 2026-08-30. The consular tariff prices the tourism or visit visa at USD 30, and the migration authority's legal framework gives the visa a 30 day validity with a 90 day stay per year. Neither page states an entry count for the tourist visa, and no other Bolivian page publishes one.",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "paper_visa",
@@ -28782,7 +28784,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit",
   "source_url": "https://evisa.gov.ly/",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"Welcome to the official Libya eVisa application portal. [Portal countries dataset for Hong Kong: \"key\":\"hong_kong\",\"code\":\"HK\",\"is_available\":true,\"exemption_type\":\"NONE\",\"can_apply_online\":1; eligibility check for a Hong Kong adult with a regular passport returns {\"is_banned\":false,\"is_exempted\":fa\" | Verified 2026-08-30. Libya's official e-visa portal publishes no fee, validity, stay or entry count. The statutory schedule in Law No. 6 of 1987 sets a 45 day validity and a three month stay for the entry visa but names no fee, and the fees that exist are posted mission by mission rather than nationally.",
+  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"Welcome to the official Libya eVisa application portal. [Portal countries dataset for Hong Kong: \"key\":\"hong_kong\",\"code\":\"HK\",\"is_available\":true,\"exemption_type\":\"NONE\",\"can_apply_online\":1; eligibility check for a Hong Kong adult with a regular passport returns {\"is_banned\":false,\"is_exempted\":fa\" | Verified 2026-08-30. Libya's official e-visa portal publishes no fee, validity, stay or entry count. The statutory schedule in Law No. 6 of 1987 sets a 45 day validity and a three month stay for the entry visa but names no fee, and the fees that exist are posted mission by mission rather than nationally. | Verified 2026-08-30. Libya's official e-visa portal publishes no fee, validity, stay or entry count. The statutory schedule in Law No. 6 of 1987 sets a 45 day validity and a three month stay for the entry visa but names no fee, and the fees that exist are posted mission by mission rather than nationally.",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "evisa",
@@ -29719,7 +29721,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit",
   "source_url": "https://www.embassyoflibyadc.org/visa",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"We currently do not issue tourist visas.\" | Verified 2026-08-30. Libya's official e-visa portal publishes no fee, validity, stay or entry count. The statutory schedule in Law No. 6 of 1987 sets a 45 day validity and a three month stay for the entry visa but names no fee, and the fees that exist are posted mission by mission rather than nationally.",
+  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"We currently do not issue tourist visas.\" | Verified 2026-08-30. Libya's official e-visa portal publishes no fee, validity, stay or entry count. The statutory schedule in Law No. 6 of 1987 sets a 45 day validity and a three month stay for the entry visa but names no fee, and the fees that exist are posted mission by mission rather than nationally. | Verified 2026-08-30. Libya's official e-visa portal publishes no fee, validity, stay or entry count. The statutory schedule in Law No. 6 of 1987 sets a 45 day validity and a three month stay for the entry visa but names no fee, and the fees that exist are posted mission by mission rather than nationally.",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "evisa",
@@ -30819,7 +30821,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit",
   "source_url": "https://back.evisa.gov.ly/api/v1/countries",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"\"key\":\"china\",\"name\":{\"en\":\"China\",...},\"is_available\":true,\"code\":\"CN\",...\"exemption_type\":\"NONE\",...\"can_apply_online\":1\" | Verified 2026-08-30. Libya's official e-visa portal publishes no fee, validity, stay or entry count. The statutory schedule in Law No. 6 of 1987 sets a 45 day validity and a three month stay for the entry visa but names no fee, and the fees that exist are posted mission by mission rather than nationally.",
+  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"\"key\":\"china\",\"name\":{\"en\":\"China\",...},\"is_available\":true,\"code\":\"CN\",...\"exemption_type\":\"NONE\",...\"can_apply_online\":1\" | Verified 2026-08-30. Libya's official e-visa portal publishes no fee, validity, stay or entry count. The statutory schedule in Law No. 6 of 1987 sets a 45 day validity and a three month stay for the entry visa but names no fee, and the fees that exist are posted mission by mission rather than nationally. | Verified 2026-08-30. Libya's official e-visa portal publishes no fee, validity, stay or entry count. The statutory schedule in Law No. 6 of 1987 sets a 45 day validity and a three month stay for the entry visa but names no fee, and the fees that exist are posted mission by mission rather than nationally.",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "evisa",
@@ -41139,8 +41141,8 @@
   },
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (validity and jurisdiction)",
-  "source_url": "https://www.dhs.gov/visa-waiver-program",
-  "note": "Verified 2026-08-30. Consular jurisdiction for USA.",
+  "source_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html",
+  "note": "Verified 2026-08-30. Consular jurisdiction for USA. | Verified 2026-08-30. The record cited the DHS Visa Waiver Program page, and this nationality is not in that programme, so the page does not speak to it at all. The source is now the State Department's visitor visa page, which is what a B-1/B-2 applicant actually needs.",
   "fields": {
    "visa_category": "B-1/B-2 visitor visa",
    "government_fee": {
@@ -41173,7 +41175,8 @@
    "exceptions": [
     "Hong Kong is absent from the DHS designated-country list; the alphabetical run passes straight from Greece to Hungary, so HKSAR passport holders cannot use ESTA. Positive requirement at 8 CFR 212.1: 'A valid unexpired visa...and an unexpired passport, shall be presented by each a"
    ],
-   "consular_jurisdiction": "Schedule the interview at the US Embassy or Consulate in your country of nationality or residence."
+   "consular_jurisdiction": "Schedule the interview at the US Embassy or Consulate in your country of nationality or residence.",
+   "source_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html"
   }
  },
  {
@@ -41279,8 +41282,8 @@
   },
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (validity and jurisdiction)",
-  "source_url": "https://www.dhs.gov/visa-waiver-program",
-  "note": "Verified 2026-08-30. Consular jurisdiction for USA.",
+  "source_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html",
+  "note": "Verified 2026-08-30. Consular jurisdiction for USA. | Verified 2026-08-30. The record cited the DHS Visa Waiver Program page, and this nationality is not in that programme, so the page does not speak to it at all. The source is now the State Department's visitor visa page, which is what a B-1/B-2 applicant actually needs.",
   "fields": {
    "government_fee": {
     "amount": 185,
@@ -41307,7 +41310,9 @@
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "paper_visa",
    "application_channel": "embassy",
-   "consular_jurisdiction": "Schedule the interview at the US Embassy or Consulate in your country of nationality or residence."
+   "consular_jurisdiction": "Schedule the interview at the US Embassy or Consulate in your country of nationality or residence.",
+   "official_portal_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html",
+   "source_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html"
   }
  },
  {
@@ -41669,10 +41674,12 @@
   },
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (validity and jurisdiction)",
-  "source_url": "https://travel.state.gov/content/travel/en/News/visas-news/adjudicating-niv-applicants-in-their-country-of-residence.html",
-  "note": "Verified 2026-08-30. Consular jurisdiction for USA.",
+  "source_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html",
+  "note": "Verified 2026-08-30. Consular jurisdiction for USA. | Verified 2026-08-30. The stored link used the visitor-visa.html spelling, which returns the State Department's own not found page. Corrected to the live visitor.html page.",
   "fields": {
-   "consular_jurisdiction": "Schedule the interview at the US Embassy or Consulate in your country of nationality or residence."
+   "consular_jurisdiction": "Schedule the interview at the US Embassy or Consulate in your country of nationality or residence.",
+   "official_portal_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html",
+   "source_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html"
   }
  },
  {
@@ -42654,7 +42661,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (validity and jurisdiction)",
   "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
-  "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for a multiple.",
+  "note": "Verified 2026-08-30. Consular jurisdiction for JPN. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for a multiple. | Verified 2026-08-30 against the MOFA fee page revised 24 June 2026, which gives approximately 15,000 yen for a single-entry visa and approximately 30,000 yen for a multiple-entry visa. The record held a zero fee, which the page does not support. Validity is from the separate validity page: three months for a single entry, one to five years for a multiple.",
   "fields": {
    "official_portal_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
    "government_fee": {
@@ -46239,10 +46246,10 @@
   },
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (verified absent)",
-  "source_url": "https://www.dhs.gov/visa-waiver-program",
-  "note": "Verified 2026-08-30. US visa validity and entry count are set per nationality by the State Department reciprocity schedule, so no single figure exists.",
+  "source_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html",
+  "note": "Verified 2026-08-30. US visa validity and entry count are set per nationality by the State Department reciprocity schedule, so no single figure exists. | Verified 2026-08-30. The record cited the DHS Visa Waiver Program page, and this nationality is not in that programme, so the page does not speak to it at all. The source is now the State Department's visitor visa page, which is what a B-1/B-2 applicant actually needs.",
   "fields": {
-   "official_portal_url": "https://ceac.state.gov/genniv/",
+   "official_portal_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html",
    "government_fee": {
     "amount": 185,
     "currency": "USD"
@@ -46272,7 +46279,8 @@
     "entries",
     "validity_duration",
     "validity_unit"
-   ]
+   ],
+   "source_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html"
   }
  },
  {
@@ -47243,7 +47251,8 @@
    "unpublished_fields": [
     "validity_duration",
     "validity_unit"
-   ]
+   ],
+   "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements"
   }
  },
  {
@@ -47294,7 +47303,8 @@
    "unpublished_fields": [
     "validity_duration",
     "validity_unit"
-   ]
+   ],
+   "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements"
   }
  },
  {
@@ -47694,7 +47704,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (field gap research)",
   "source_url": "https://www.mfa.go.th/en/page/issuance-of-visa?menu=5e1ff6e057b01e001a03f7d3",
-  "note": "Verified 2026-08-30. The Thai MFA publishes one tourist visa fee schedule, 1,000 THB for a single entry and 5,000 THB for the multiple-entry METV. It does not vary with the traveller's document type. Rows for non-ordinary documents had been priced separately at 1,900 and 9,500 THB and in converted yuan, none of which Thailand publishes. All are set to the published national schedule.",
+  "note": "Verified 2026-08-30. The Thai MFA publishes one tourist visa fee schedule, 1,000 THB for a single entry and 5,000 THB for the multiple-entry METV. It does not vary with the traveller's document type. Rows for non-ordinary documents had been priced separately at 1,900 and 9,500 THB and in converted yuan, none of which Thailand publishes. All are set to the published national schedule. | Verified 2026-08-30. The Thai MFA publishes one tourist visa fee schedule, 1,000 THB for a single entry and 5,000 THB for the multiple-entry METV. It does not vary with the traveller's document type. Rows for non-ordinary documents had been priced separately at 1,900 and 9,500 THB and in converted yuan, none of which Thailand publishes. All are set to the published national schedule.",
   "fields": {
    "visa_products": [
     {
@@ -47732,7 +47742,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (field gap research)",
   "source_url": "https://www.mfa.go.th/en/page/issuance-of-visa?menu=5e1ff6e057b01e001a03f7d3",
-  "note": "Verified 2026-08-30. The Thai MFA publishes one tourist visa fee schedule, 1,000 THB for a single entry and 5,000 THB for the multiple-entry METV. It does not vary with the traveller's document type. Rows for non-ordinary documents had been priced separately at 1,900 and 9,500 THB and in converted yuan, none of which Thailand publishes. All are set to the published national schedule.",
+  "note": "Verified 2026-08-30. The Thai MFA publishes one tourist visa fee schedule, 1,000 THB for a single entry and 5,000 THB for the multiple-entry METV. It does not vary with the traveller's document type. Rows for non-ordinary documents had been priced separately at 1,900 and 9,500 THB and in converted yuan, none of which Thailand publishes. All are set to the published national schedule. | Verified 2026-08-30. The Thai MFA publishes one tourist visa fee schedule, 1,000 THB for a single entry and 5,000 THB for the multiple-entry METV. It does not vary with the traveller's document type. Rows for non-ordinary documents had been priced separately at 1,900 and 9,500 THB and in converted yuan, none of which Thailand publishes. All are set to the published national schedule.",
   "fields": {
    "visa_products": [
     {
@@ -47770,7 +47780,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (field gap research)",
   "source_url": "https://www.mfa.go.th/en/page/issuance-of-visa?menu=5e1ff6e057b01e001a03f7d3",
-  "note": "Verified 2026-08-30. The Thai MFA publishes one tourist visa fee schedule, 1,000 THB for a single entry and 5,000 THB for the multiple-entry METV. It does not vary with the traveller's document type. Rows for non-ordinary documents had been priced separately at 1,900 and 9,500 THB and in converted yuan, none of which Thailand publishes. All are set to the published national schedule.",
+  "note": "Verified 2026-08-30. The Thai MFA publishes one tourist visa fee schedule, 1,000 THB for a single entry and 5,000 THB for the multiple-entry METV. It does not vary with the traveller's document type. Rows for non-ordinary documents had been priced separately at 1,900 and 9,500 THB and in converted yuan, none of which Thailand publishes. All are set to the published national schedule. | Verified 2026-08-30. The Thai MFA publishes one tourist visa fee schedule, 1,000 THB for a single entry and 5,000 THB for the multiple-entry METV. It does not vary with the traveller's document type. Rows for non-ordinary documents had been priced separately at 1,900 and 9,500 THB and in converted yuan, none of which Thailand publishes. All are set to the published national schedule.",
   "fields": {
    "visa_products": [
     {
@@ -47808,7 +47818,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (field gap research)",
   "source_url": "https://www.mfa.go.th/en/page/issuance-of-visa?menu=5e1ff6e057b01e001a03f7d3",
-  "note": "Verified 2026-08-30. The Thai MFA publishes one tourist visa fee schedule, 1,000 THB for a single entry and 5,000 THB for the multiple-entry METV. It does not vary with the traveller's document type. Rows for non-ordinary documents had been priced separately at 1,900 and 9,500 THB and in converted yuan, none of which Thailand publishes. All are set to the published national schedule.",
+  "note": "Verified 2026-08-30. The Thai MFA publishes one tourist visa fee schedule, 1,000 THB for a single entry and 5,000 THB for the multiple-entry METV. It does not vary with the traveller's document type. Rows for non-ordinary documents had been priced separately at 1,900 and 9,500 THB and in converted yuan, none of which Thailand publishes. All are set to the published national schedule. | Verified 2026-08-30. The Thai MFA publishes one tourist visa fee schedule, 1,000 THB for a single entry and 5,000 THB for the multiple-entry METV. It does not vary with the traveller's document type. Rows for non-ordinary documents had been priced separately at 1,900 and 9,500 THB and in converted yuan, none of which Thailand publishes. All are set to the published national schedule.",
   "fields": {
    "visa_products": [
     {
@@ -47846,7 +47856,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (field gap research)",
   "source_url": "https://www.mfa.go.th/en/page/issuance-of-visa?menu=5e1ff6e057b01e001a03f7d3",
-  "note": "Verified 2026-08-30. The Thai MFA publishes one tourist visa fee schedule, 1,000 THB for a single entry and 5,000 THB for the multiple-entry METV. It does not vary with the traveller's document type. Rows for non-ordinary documents had been priced separately at 1,900 and 9,500 THB and in converted yuan, none of which Thailand publishes. All are set to the published national schedule.",
+  "note": "Verified 2026-08-30. The Thai MFA publishes one tourist visa fee schedule, 1,000 THB for a single entry and 5,000 THB for the multiple-entry METV. It does not vary with the traveller's document type. Rows for non-ordinary documents had been priced separately at 1,900 and 9,500 THB and in converted yuan, none of which Thailand publishes. All are set to the published national schedule. | Verified 2026-08-30. The Thai MFA publishes one tourist visa fee schedule, 1,000 THB for a single entry and 5,000 THB for the multiple-entry METV. It does not vary with the traveller's document type. Rows for non-ordinary documents had been priced separately at 1,900 and 9,500 THB and in converted yuan, none of which Thailand publishes. All are set to the published national schedule.",
   "fields": {
    "visa_products": [
     {
@@ -47884,7 +47894,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (field gap research)",
   "source_url": "https://www.mfa.go.th/en/page/issuance-of-visa?menu=5e1ff6e057b01e001a03f7d3",
-  "note": "Verified 2026-08-30. The Thai MFA publishes one tourist visa fee schedule, 1,000 THB for a single entry and 5,000 THB for the multiple-entry METV. It does not vary with the traveller's document type. Rows for non-ordinary documents had been priced separately at 1,900 and 9,500 THB and in converted yuan, none of which Thailand publishes. All are set to the published national schedule.",
+  "note": "Verified 2026-08-30. The Thai MFA publishes one tourist visa fee schedule, 1,000 THB for a single entry and 5,000 THB for the multiple-entry METV. It does not vary with the traveller's document type. Rows for non-ordinary documents had been priced separately at 1,900 and 9,500 THB and in converted yuan, none of which Thailand publishes. All are set to the published national schedule. | Verified 2026-08-30. The Thai MFA publishes one tourist visa fee schedule, 1,000 THB for a single entry and 5,000 THB for the multiple-entry METV. It does not vary with the traveller's document type. Rows for non-ordinary documents had been priced separately at 1,900 and 9,500 THB and in converted yuan, none of which Thailand publishes. All are set to the published national schedule.",
   "fields": {
    "visa_products": [
     {
@@ -47922,7 +47932,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (field gap research)",
   "source_url": "https://www.mfa.go.th/en/page/issuance-of-visa?menu=5e1ff6e057b01e001a03f7d3",
-  "note": "Verified 2026-08-30. The Thai MFA publishes one tourist visa fee schedule, 1,000 THB for a single entry and 5,000 THB for the multiple-entry METV. It does not vary with the traveller's document type. Rows for non-ordinary documents had been priced separately at 1,900 and 9,500 THB and in converted yuan, none of which Thailand publishes. All are set to the published national schedule.",
+  "note": "Verified 2026-08-30. The Thai MFA publishes one tourist visa fee schedule, 1,000 THB for a single entry and 5,000 THB for the multiple-entry METV. It does not vary with the traveller's document type. Rows for non-ordinary documents had been priced separately at 1,900 and 9,500 THB and in converted yuan, none of which Thailand publishes. All are set to the published national schedule. | Verified 2026-08-30. The Thai MFA publishes one tourist visa fee schedule, 1,000 THB for a single entry and 5,000 THB for the multiple-entry METV. It does not vary with the traveller's document type. Rows for non-ordinary documents had been priced separately at 1,900 and 9,500 THB and in converted yuan, none of which Thailand publishes. All are set to the published national schedule.",
   "fields": {
    "visa_products": [
     {
@@ -47960,7 +47970,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (field gap research)",
   "source_url": "https://www.mfa.go.th/en/page/issuance-of-visa?menu=5e1ff6e057b01e001a03f7d3",
-  "note": "Verified 2026-08-30. The Thai MFA publishes one tourist visa fee schedule, 1,000 THB for a single entry and 5,000 THB for the multiple-entry METV. It does not vary with the traveller's document type. Rows for non-ordinary documents had been priced separately at 1,900 and 9,500 THB and in converted yuan, none of which Thailand publishes. All are set to the published national schedule.",
+  "note": "Verified 2026-08-30. The Thai MFA publishes one tourist visa fee schedule, 1,000 THB for a single entry and 5,000 THB for the multiple-entry METV. It does not vary with the traveller's document type. Rows for non-ordinary documents had been priced separately at 1,900 and 9,500 THB and in converted yuan, none of which Thailand publishes. All are set to the published national schedule. | Verified 2026-08-30. The Thai MFA publishes one tourist visa fee schedule, 1,000 THB for a single entry and 5,000 THB for the multiple-entry METV. It does not vary with the traveller's document type. Rows for non-ordinary documents had been priced separately at 1,900 and 9,500 THB and in converted yuan, none of which Thailand publishes. All are set to the published national schedule.",
   "fields": {
    "visa_products": [
     {
@@ -47986,6 +47996,52 @@
      "notes": "60 days per entry, for frequent travellers meeting the funds and history conditions."
     }
    ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "USA",
+   "travel_purpose": "other"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (link health)",
+  "source_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html",
+  "note": "Verified 2026-08-30. The stored link used the visitor-visa.html spelling, which returns the State Department's own not found page. Corrected to the live visitor.html page.",
+  "fields": {
+   "official_portal_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html",
+   "source_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html"
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "SGP",
+   "travel_purpose": "transit"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (link health)",
+  "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+  "note": "Verified 2026-08-30. Both stored spellings of the ICA visa requirements path return 404. The live page uses entering-singapore with a hyphen.",
+  "fields": {
+   "official_portal_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+   "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements"
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "SGP",
+   "travel_purpose": "tourism",
+   "travel_document_type": "diplomatic_passport"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (link health)",
+  "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+  "note": "Verified 2026-08-30. Both stored spellings of the ICA visa requirements path return 404. The live page uses entering-singapore with a hyphen.",
+  "fields": {
+   "official_portal_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+   "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements"
   }
  }
 ]

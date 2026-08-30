@@ -59,7 +59,19 @@ OVERRIDABLE = frozenset({
     # Names the fields a destination was checked for and does not publish, so
     # a correct blank reads as "not publicly available" instead of a gap.
     "unpublished_fields",
+    # The page the answer cites. A link that has gone dead, or that was never
+    # about this nationality in the first place, could be corrected on the
+    # record and not on the page the customer reads, because the customer page
+    # shows the answer's own source_url and nothing could reach it. Any URL
+    # written here passes the same government-host gate as the override's own
+    # provenance, so this cannot be used to smuggle in an unofficial page.
+    "source_url",
 })
+
+# Fields whose value is a link. Whatever an override puts in one of these has
+# to satisfy the same rule as the override's provenance: an official page or
+# nothing at all.
+_URL_FIELDS = ("source_url", "official_portal_url")
 
 
 def _key(nat: str, dest: str, purpose: str = "tourism",
@@ -114,6 +126,10 @@ def _load_table() -> dict:
         if not is_government_host(hostname(url)):
             continue          # an override must cite an official source
         clean = {k: v for k, v in fields.items() if k in OVERRIDABLE}
+        for k in _URL_FIELDS:
+            v = str(clean.get(k) or "").strip()
+            if v and not is_government_host(hostname(v)):
+                clean.pop(k, None)
         if not clean:
             continue
         table[_key(route["nationality"], route["destination"],
