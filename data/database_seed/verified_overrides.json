@@ -48560,5 +48560,183 @@
    },
    "visa_products": []
   }
+ },
+ {
+  "route": {
+   "nationality": "THA",
+   "destination": "DEU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (held-route release)",
+  "source_url": "https://bangkok.diplo.de/th-de/service/05-visa-und-einreise/visa-fragen-und-antworten-1352786",
+  "note": "Verified 2026-08-30 against the German Embassy Bangkok's own visa FAQ, which names Thai nationals rather than describing rules for everyone: \"Thailändische Staatsangehörige benötigen ein Visum, um nach Deutschland einreisen zu können\". Corroborated by the Federal Foreign Office country list, which records Thailand as Ja with no footnote. The fee sentence reads \"Die Gebühren für ein Schengen-Visum betragen 90 Euro\".",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "confidence": "high",
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "permitted_stay": "Up to 90 days in any 180 across the Schengen area",
+   "permitted_stay_days": 90,
+   "exceptions": [
+    "The 90 euro fee is the consular fee only. VFS Global charges its own service fee on top, 19.13 euros in Bangkok and 40 euros in Phuket and Chiang Mai, and the fee is payable in Thai baht at application.",
+    "Children aged 6 to 11 pay 45 euros and under 6 are free. A spouse or minor child of a German citizen, and family of an EU or EEA national exercising free movement, pay nothing.",
+    "The 90 days is the Schengen maximum. The stay you actually get is the number of days printed on your visa.",
+    "No visa is needed for an airport transit that stays airside.",
+    "Apply at the German mission covering where you live. Bangkok is for applicants whose ordinary residence is in Thailand.",
+    "The fee is not refunded if the application is refused or withdrawn."
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "DEU",
+   "destination": "TWN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (held-route release)",
+  "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+  "note": "Verified 2026-08-30 against Taiwan's Bureau of Consular Affairs list of nationals eligible for visa-exempt entry. boca.gov.tw refuses automated fetchers and renders normally in a browser.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "confidence": "high",
+   "permitted_stay": "90 days from the day after arrival",
+   "permitted_stay_days": 90,
+   "application_channel": "not_required",
+   "government_fee": {
+    "amount": 0,
+    "currency": "TWD"
+   },
+   "visa_products": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "TWN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (held-route release)",
+  "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+  "note": "Verified 2026-08-30 against Taiwan's Bureau of Consular Affairs list of nationals eligible for visa-exempt entry. boca.gov.tw refuses automated fetchers and renders normally in a browser.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "confidence": "high",
+   "permitted_stay": "90 days from the day after arrival",
+   "permitted_stay_days": 90,
+   "application_channel": "not_required",
+   "government_fee": {
+    "amount": 0,
+    "currency": "TWD"
+   },
+   "visa_products": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "KOR",
+   "destination": "TWN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (held-route release)",
+  "source_url": "https://www.boca.gov.tw/cp-149-4486-7785a-2.html",
+  "note": "Verified 2026-08-30 against Taiwan's Bureau of Consular Affairs list of nationals eligible for visa-exempt entry. boca.gov.tw refuses automated fetchers and renders normally in a browser.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "confidence": "high",
+   "permitted_stay": "90 days from the day after arrival",
+   "permitted_stay_days": 90,
+   "application_channel": "not_required",
+   "government_fee": {
+    "amount": 0,
+    "currency": "TWD"
+   },
+   "visa_products": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "AND",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (held-route release)",
+  "source_url": "https://www.govern.ad/en/ministries-and-secretaries-of-state/ministry-of-foreign-affairs/travelling-to-andorra",
+  "note": "Verified 2026-08-30 against the Government of Andorra. Andorra has no airport and no sea border, so every visitor arrives through France or Spain and must satisfy Schengen entry rules to reach it.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "confidence": "high",
+   "application_channel": "not_required",
+   "government_fee": {
+    "amount": 0,
+    "currency": "EUR"
+   },
+   "visa_products": [],
+   "exceptions": [
+    "Andorra is reached only through France or Spain, so you must be able to enter the Schengen area first. A Schengen visa, where one is needed, must allow the re-entry your return will require."
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "USA",
+   "travel_purpose": "family_visit"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (held-route release)",
+  "source_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html",
+  "note": "Verified 2026-08-30. The visa class and the 185 USD fee hold, and the permitted stay does not: the United States publishes none. Admission is decided by Customs and Border Protection at the port of entry and recorded on the I-94, so a number in that cell would be ours and not theirs.",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "confidence": "high",
+   "unpublished_fields": [
+    "max_stay_duration",
+    "max_stay_unit"
+   ],
+   "government_fee": {
+    "amount": 185,
+    "currency": "USD"
+   },
+   "exceptions": [
+    "The United States publishes no permitted stay for a visitor visa. The officer at the border decides how long you may stay and records it on your I-94.",
+    "A B-1/B-2 issued in a Chinese passport is normally multiple entry and valid for 120 months."
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "SYR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (held-route release)",
+  "source_url": "https://travel.state.gov/en/international-travel/travel-advisories/syria.html",
+  "note": "Corrected 2026-08-30. The record said a visa had to be obtained in advance. The State Department's own Syria page now describes a visa issued on arrival, 200 USD for 30 days. The policy changed under the transitional government and any record written before 2025 says the opposite.",
+  "fields": {
+   "disposition": "VISA_ON_ARRIVAL",
+   "requirement_detail": "paper_visa_on_arrival",
+   "confidence": "high",
+   "permitted_stay": "30 days",
+   "permitted_stay_days": 30,
+   "government_fee": {
+    "amount": 200,
+    "currency": "USD"
+   },
+   "exceptions": [
+    "The United States advises its citizens not to travel to Syria for any reason, and says it cannot provide routine or emergency consular services there."
+   ]
+  }
  }
 ]
