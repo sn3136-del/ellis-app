@@ -619,15 +619,43 @@ export default function TravelDatabase({ onBack }) {
   const [txPending, setTxPending] = useState(false)
 
   // Arriving on a linked answer opens it straight away — that link IS the
-  // page. Runs once; a warm route resolves from cache immediately.
+  // page. It also has to KEEP being the page. This ran once on mount, so
+  // moving between two routes' links left the first answer on screen under
+  // the second address until a full reload, and the browser's own back
+  // button did the same. Every address change is followed now.
   const booted = useRef(false)
-  useEffect(() => {
-    if (booted.current) return
-    booted.current = true
+  const openedRoute = useRef('')
+  // Two lookups can be in flight at once, and before this the slower one won
+  // whichever order they were asked in: switching routes quickly left the
+  // heading of one route above the answer of another. Only the most recent
+  // request is allowed to write the page.
+  const askSeq = useRef(0)
+  // The handler is registered once but must call the CURRENT lookUp, not the
+  // one that existed at mount, which closes over the first render's arrival
+  // date, departure city and stopovers.
+  const openHash = useRef(() => {})
+  openHash.current = () => {
     const r = routeFromHash()
-    if (!r) return
+    if (!r) {
+      if (booted.current && openedRoute.current) {
+        openedRoute.current = ''
+        setResult(null); setError('')
+      }
+      booted.current = true
+      return
+    }
+    const key = [r.nat, r.dest, r.purpose, r.doc].join('|')
+    if (booted.current && key === openedRoute.current) return
+    booted.current = true
+    openedRoute.current = key
     setNat(r.nat); setDest(r.dest); setPurpose(r.purpose); setDoc(r.doc)
     lookUp({ nat: r.nat, dest: r.dest, purpose: r.purpose, doc: r.doc })
+  }
+  useEffect(() => {
+    openHash.current()
+    const on = () => openHash.current()
+    window.addEventListener('hashchange', on)
+    return () => window.removeEventListener('hashchange', on)
   }, [])
 
   useEffect(() => {
@@ -649,6 +677,45 @@ export default function TravelDatabase({ onBack }) {
   // An answer the engine itself rated low confidence is HELD until a person
   // confirms it. Holding means the reader does not see the claims at all —
   // showing them under a warning would still be showing them.
+  // The document and purpose switchers, defined once. A held page needs them
+  // more than an answered one does: the hold is per purpose, so the way out
+  // of a held combination is usually a switch and not a fresh search. They
+  // used to live inside the answer block, so a held page offered no way
+  // through to a purpose that IS published.
+  const switchers = (
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10,
+                    marginTop: 14, alignItems: 'center',
+                    justifyContent: 'center' }}
+           data-testid="database-switchers">
+        <span style={{ fontSize: 12, color: GRAY, fontWeight: 700 }}>
+          {t('db.travelDoc')}
+        </span>
+        <select className="select" value={doc} disabled={busy}
+                data-testid="database-switch-doc"
+                onChange={(e) => switchDoc(e.target.value)}
+                style={{ fontSize: 13.5, padding: '10px 12px', borderRadius: 10 }}>
+          {(docTypes.length ? docTypes
+            : [{ code: 'ordinary_passport', name: 'Ordinary passport' }])
+            .map((d) => (
+              <option key={d.code || d} value={d.code || d}>{docLabel(d)}</option>
+            ))}
+        </select>
+        <span style={{ fontSize: 12, color: GRAY, fontWeight: 700,
+                       marginLeft: 6 }}>
+          {t('db.purpose')}
+        </span>
+        <select className="select" value={purpose} disabled={busy}
+                data-testid="database-switch-purpose"
+                onChange={(e) => switchPurpose(e.target.value)}
+                style={{ fontSize: 13.5, padding: '10px 12px', borderRadius: 10 }}>
+          {PURPOSES.map(([v, k]) => <option key={v} value={v}>{t(k)}</option>)}
+        </select>
+        {busy && (
+          <span style={{ fontSize: 12, color: GRAY }}>{t('db.checking')}</span>
+        )}
+      </div>
+  )
+
   const held = result?.held === true   // server decides; off by default
   const g = (result && !held) ? (result.guidance || null) : null
 
@@ -793,6 +860,8 @@ export default function TravelDatabase({ onBack }) {
     const useNat = override.nat ?? nat
     const useDest = override.dest ?? dest
     if (!useNat || !useDest) return
+    const seq = ++askSeq.current
+    const current = () => seq === askSeq.current
     setBusy(true); setError(''); setIssueOpen(false); setIssueDone(false)
     if (!override.keepResult) setResult(null)
     try {
@@ -802,6 +871,7 @@ export default function TravelDatabase({ onBack }) {
         departure_city: departureCity || '',
         transit_countries: transit,
       })
+      if (!current()) return true   // a newer question is already on screen
       setResult(out)
       setShown({ purpose: usePurpose, doc: useDoc })
       if (!override.keepFocus) setFocus(null)
@@ -814,6 +884,7 @@ export default function TravelDatabase({ onBack }) {
       })
       return true
     } catch (e) {
+      if (!current()) return false  // a newer question is already on screen
       setError(e?.detail?.reason || e?.detail?.detail || e?.message || t('db.error'))
       // A failed switch leaves the answer the reader was already looking at
       // on screen. Clearing it would throw away a good answer because a
@@ -1149,37 +1220,7 @@ export default function TravelDatabase({ onBack }) {
           {/* Switchers, on the page itself: change the travel document or the
               purpose and the answer is re-asked for THAT combination — never
               the old answer relabelled. */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10,
-                        marginTop: 14, alignItems: 'center',
-                        justifyContent: 'center' }}
-               data-testid="database-switchers">
-            <span style={{ fontSize: 12, color: GRAY, fontWeight: 700 }}>
-              {t('db.travelDoc')}
-            </span>
-            <select className="select" value={doc} disabled={busy}
-                    data-testid="database-switch-doc"
-                    onChange={(e) => switchDoc(e.target.value)}
-                    style={{ fontSize: 13.5, padding: '10px 12px', borderRadius: 10 }}>
-              {(docTypes.length ? docTypes
-                : [{ code: 'ordinary_passport', name: 'Ordinary passport' }])
-                .map((d) => (
-                  <option key={d.code || d} value={d.code || d}>{docLabel(d)}</option>
-                ))}
-            </select>
-            <span style={{ fontSize: 12, color: GRAY, fontWeight: 700,
-                           marginLeft: 6 }}>
-              {t('db.purpose')}
-            </span>
-            <select className="select" value={purpose} disabled={busy}
-                    data-testid="database-switch-purpose"
-                    onChange={(e) => switchPurpose(e.target.value)}
-                    style={{ fontSize: 13.5, padding: '10px 12px', borderRadius: 10 }}>
-              {PURPOSES.map(([v, k]) => <option key={v} value={v}>{t(k)}</option>)}
-            </select>
-            {busy && (
-              <span style={{ fontSize: 12, color: GRAY }}>{t('db.checking')}</span>
-            )}
-          </div>
+          {switchers}
           {/* A switch that could not be answered says so here, and the
               controls above have already snapped back to the combination
               actually on screen. */}
@@ -1646,9 +1687,17 @@ export default function TravelDatabase({ onBack }) {
           </div>
           <div style={{ fontSize: 13.5, color: GRAY, marginTop: 10,
                         lineHeight: 1.55 }}>
-            {t('db.heldBody', { route: `${countryName(nat)} → ${countryName(dest)}` })}
+            {/* The hold is per PURPOSE and per document, not per country pair.
+                Naming only the pair told a customer Ellis could not answer
+                China to Japan while the tourism page answered it fine. */}
+            {t('db.heldBody', {
+              route: `${countryName(nat)} → ${countryName(dest)}`
+                + ` · ${t((PURPOSES.find(([v]) => v === purpose) || [, 'db.purpose'])[1])}`,
+            })}
           </div>
-          <div style={{ marginTop: 18 }}>
+          {/* A held combination is a reason to switch, not to start again. */}
+          <div style={{ marginTop: 16 }}>{switchers}</div>
+          <div style={{ marginTop: 14 }}>
             <button className="btn btn--ghost" onClick={() => { setResult(null); clearHash() }}
                     data-testid="database-held-again"
                     style={{ fontSize: 14, borderRadius: 999 }}>

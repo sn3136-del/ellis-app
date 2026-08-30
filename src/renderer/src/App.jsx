@@ -130,12 +130,16 @@ function SurfaceNav({ view }) {
       {view === 'quality' ? (
         <button className="surfpill" data-testid="nav-database"
                 onClick={() => { window.location.hash = '#database' }}>
-          {t('nav.db')}
+          {/* "Quality console" does not fit a 320px phone; the short label
+              takes over there rather than being clipped mid-word. */}
+          <span className="pill-long">{t('nav.db')}</span>
+          <span className="pill-short">{t('nav.dbShort')}</span>
         </button>
       ) : (
         <button className="surfpill" data-testid="nav-ops"
                 onClick={() => { window.location.hash = '#ops' }}>
-          {t('nav.ops')}
+          <span className="pill-long">{t('nav.ops')}</span>
+          <span className="pill-short">{t('nav.opsShort')}</span>
         </button>
       )}
       <a className="surfpill" data-testid="nav-status"

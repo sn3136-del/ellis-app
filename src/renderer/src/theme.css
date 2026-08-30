@@ -530,19 +530,40 @@ body { background: var(--bg-soft); }
    the header breaks into two rows (logo, then the pills) instead of packing
    one crowded line; the language picker never leaves the viewport. */
 @media (max-width: 700px) {
+  /* The pills wrapped to their own row at three different widths, which read
+     as three unrelated buttons dropped under the logo. On the second row they
+     now share it equally, so it is one control rather than three strays. */
   .triptop { flex-wrap: wrap; height: auto; min-height: 0;
-             padding: 10px 14px; row-gap: 8px; justify-content: center; }
-  .triptop__logo { height: 26px; margin-right: auto; }
-  .triptop__right { gap: 8px; }
-  .surfnav { gap: 8px; }
-  .surfpill { font-size: 12px; padding: 8px 13px; }
-  .langpick__btn { padding: 8px 13px; font-size: 12px; gap: 6px; }
+             padding: 10px 14px 11px; row-gap: 9px; justify-content: flex-start; }
+  .triptop__logo { height: 24px; margin-right: auto; }
+  .triptop__right { width: 100%; gap: 7px; align-items: stretch; }
+  /* surfnav holds TWO pills and langpick holds one, so it takes twice the
+     share; with equal flex the language pill came out 82px against 125px. */
+  .surfnav { flex: 2 1 0; gap: 7px; min-width: 0; }
+  .surfpill {
+    flex: 1 1 0; min-width: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12.5px; font-weight: 600; padding: 9px 8px; line-height: 1.2;
+    border-color: #e3eaf4;
+    overflow: hidden; text-overflow: ellipsis;
+  }
+  .langpick { flex: 1 1 0; min-width: 0; display: flex; }
+  .langpick__btn {
+    width: 100%; justify-content: center;
+    padding: 9px 8px; font-size: 12.5px; font-weight: 600; gap: 6px;
+    line-height: 1.2; border-color: #e3eaf4;
+  }
+  /* The globe collapsed to nothing inside a min-width:0 flex row. */
+  .langpick__btn svg { flex: none; }
 }
+.pill-short { display: none; }
 @media (max-width: 360px) {
-  .triptop__right { gap: 6px; }
-  .surfnav { gap: 6px; }
-  .surfpill { font-size: 11px; padding: 7px 10px; }
-  .langpick__btn { padding: 7px 10px; }
+  .triptop__right { gap: 5px; }
+  .surfnav { gap: 5px; }
+  .surfpill { font-size: 11.5px; padding: 8px 5px; }
+  .langpick__btn { padding: 8px 5px; font-size: 11.5px; gap: 4px; }
+  .pill-long { display: none; }
+  .pill-short { display: inline; }
 }
 
 /* ---------- Language picker ---------- */
