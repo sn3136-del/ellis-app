@@ -54,6 +54,14 @@ STATUS_UNCERTAIN = "KIMI_UNCERTAIN"
 STATUS_UNAVAILABLE = "KIMI_UNAVAILABLE"
 STATUS_TIMEOUT = "KIMI_TIMEOUT"
 
+# Pages that describe a pre-travel authorisation or a border formality, none
+# of which is a visa. Matched against the URL and the category the answer
+# cites, so a route graded VISA_REQUIRED on one of them is caught.
+_AUTHORIZATION_NOT_VISA = ("etias", "esta", "/eta", "eta_", "k-eta", "keta",
+                           "entry/exit system", "entry-exit-system", "ees_",
+                           "electronic travel authoris", "electronic travel authoriz",
+                           "electronic system for travel author")
+
 DISPOSITIONS = ("VISA_REQUIRED", "VISA_EXEMPT",
                 "ELECTRONIC_AUTHORIZATION_REQUIRED", "CONDITIONAL")
 
@@ -221,9 +229,23 @@ countries, age, prior refusals, passport issue/expiration dates), answer from
 your knowledge of official visa policy.
 The facts include today's date. Visa policy CHANGES: exemptions are introduced
 and withdrawn, fees are revised, channels move. If your knowledge of this
-route could predate a change — the rule is volatile, recently announced, or
-politically driven — say so in uncertainty and rate confidence low rather
+route could predate a change - the rule is volatile, recently announced, or
+politically driven - say so in uncertainty and rate confidence low rather
 than presenting a possibly outdated rule as current.
+
+A TRAVEL AUTHORISATION IS NOT A VISA, and a border formality is not a visa
+either. ETIAS (Europe), ESTA (United States), eTA (Canada), K-ETA (Korea),
+ETA (United Kingdom, Australia, New Zealand) and the EU Entry/Exit System
+(EES) are none of them visas. A traveller who is visa-exempt for a
+destination stays VISA_EXEMPT when one of these applies; use
+ELECTRONIC_AUTHORIZATION_REQUIRED only when the authorisation is actually
+in force and actually required of this nationality today, and never
+VISA_REQUIRED. EES is a biometric registration performed at the border and
+changes no disposition at all. Specifically for the Schengen area: a
+national of a country listed in Annex II of Regulation (EU) 2018/1806 is
+visa-exempt for up to 90 days in any 180 for tourism, business, family
+visit and transit. Citing an ETIAS or EES page is not a reason to answer
+VISA_REQUIRED for such a national.
 """ + _SCHEMA_SPEC)
 
 class GuidanceUnavailable(Exception):
@@ -469,6 +491,20 @@ def validate_answer(raw: dict, *, detail_known: bool = True) -> tuple[dict, list
     if ps_days is not None and (not isinstance(ps_days, (int, float)) or ps_days < 0
                                 or ps_days > 3660):
         clean.pop("permitted_stay_days", None)
+
+    # A travel authorisation is not a visa. Answering VISA_REQUIRED while
+    # citing an ETIAS/ESTA/eTA page is the exact error that told a Japanese
+    # tourist they needed a visa for Italy: the engine read the ETIAS page,
+    # which is a pre-travel authorisation for the visa-EXEMPT, and graded the
+    # route as visa-required. EES is a border biometric and decides nothing.
+    if clean.get("disposition") == "VISA_REQUIRED":
+        cited = " ".join(str(clean.get(k) or "") for k in
+                         ("source_url", "official_portal_url", "visa_category")).lower()
+        if any(t in cited for t in _AUTHORIZATION_NOT_VISA):
+            contradictions.append(
+                "disposition VISA_REQUIRED but the cited page is a travel "
+                "authorisation or border-formality page (ETIAS/ESTA/eTA/EES), "
+                "which applies to visa-exempt travellers and is not a visa")
 
     # --- the Trip.com appendix defects, caught deterministically -------------
     # (iii) The headline channel must not contradict the honest sentence. If

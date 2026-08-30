@@ -338,6 +338,39 @@ def test_contradictory_answer_flagged_precisely(db):
     assert any("visa application" in c for c in g["contradictions"])
 
 
+def test_travel_authorization_page_cannot_prove_a_visa_requirement(db):
+    """A Japanese tourist was told Italy required a visa because the engine
+    read the ETIAS page. ETIAS applies to the visa-EXEMPT, so citing it while
+    answering VISA_REQUIRED is a contradiction, not a source."""
+    _clear_cache(db)
+    bad = dict(GOOD_ANSWER, disposition="VISA_REQUIRED",
+               source_url="https://travel-europe.europa.eu/etias_en",
+               visa_products=[{"type": "Schengen C", "entry": "single",
+                               "validity": "90 days", "max_stay_days": 90,
+                               "fee": {"amount": 90, "currency": "EUR"},
+                               "notes": None}])
+    kimi_primary.set_provider(single_pass(bad))
+    g = kimi_primary.get_route_guidance(db, ROUTE)
+    assert g["status"] == "KIMI_UNCERTAIN"
+    assert any("travel authorisation" in c for c in g["contradictions"])
+
+
+def test_visa_required_on_an_ordinary_official_page_is_not_flagged(db):
+    """The guard must not fire on a genuine visa page: a real visa-required
+    route citing a consulate page stays clean."""
+    _clear_cache(db)
+    ok = dict(GOOD_ANSWER, disposition="VISA_REQUIRED",
+              source_url="https://vistoperitalia.esteri.it/",
+              visa_products=[{"type": "Schengen C", "entry": "single",
+                              "validity": "90 days", "max_stay_days": 90,
+                              "fee": {"amount": 90, "currency": "EUR"},
+                              "notes": None}])
+    kimi_primary.set_provider(single_pass(ok))
+    g = kimi_primary.get_route_guidance(db, ROUTE)
+    assert not any("travel authorisation" in c
+                   for c in (g.get("contradictions") or []))
+
+
 def test_malformed_disposition_rejected(db):
     _clear_cache(db)
     kimi_primary.set_provider(single_pass(dict(GOOD_ANSWER, disposition="MAYBE")))
