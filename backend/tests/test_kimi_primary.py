@@ -1374,3 +1374,97 @@ def test_no_record_contradicts_its_own_verdict():
                 "whose verdict is that none is")
         assert row.get("validity_duration") is None
         assert row.get("entries") is None
+
+
+def test_departure_city_resolves_a_district_without_disturbing_warm_routes():
+    """The departure city is a required input that provably changed nothing.
+
+    It reached the model on a cache miss but was absent from the cache key, so
+    on any already-cached route four different cities returned byte-identical
+    answers. The fix puts the DISTRICT the city resolves to into the slot the
+    key already carries, never the raw city: keying on free text would mint an
+    entry per spelling and invalidate the warm cache in one move."""
+    from app.visa_snapshot import consular_districts, kimi_primary
+
+    base = {"passport_nationality": "CHN", "passport_issuing_country": "CHN",
+            "lawful_country_of_residence": "CHN", "destination_country": "JPN",
+            "travel_purpose": "tourism", "travel_document_type": "ordinary_passport"}
+
+    # A destination with no published table resolves to "default", which is
+    # exactly what every shipped key holds, so nothing warm is disturbed.
+    assert consular_districts.resolve("XKX", "Beijing", "CHN") == "default"
+    assert kimi_primary.cache_key(base) == kimi_primary.cache_key(
+        {**base, "consular_jurisdiction": "default"})
+
+    # A resolved district DOES change the key, which is the whole point.
+    assert kimi_primary.cache_key({**base, "consular_jurisdiction": "shanghai"}) \
+        != kimi_primary.cache_key(base)
+
+    # The city is normalised the way a traveller actually types it.
+    n = consular_districts._norm
+    assert n("Beijing") == n("  BEIJING ") == n("beijing")
+    assert n("北京市") == n("北京")
+    assert n("Guangdong Province") == n("guangdong")
+
+    # An unknown city never invents a district.
+    assert consular_districts.resolve("JPN", "Nowhereville", "CHN") == "default"
+    assert consular_districts.resolve("JPN", "", "CHN") == "default"
+
+
+def test_a_verified_verdict_also_governs_what_was_derived_from_the_guidance():
+    """apply_steps and workflow_plan are built in _result from the RAW model
+    answer, before the override runs, so a verified verdict corrected the
+    guidance and left the steps built from the answer it replaced.
+
+    Japan to Italy showed "No visa needed" and "Government fee: None" above a
+    five-step How to apply beginning "Pay the EUR 7 fee online", for an ETIAS
+    the European Commission has not brought into operation. The guidance was
+    clean; the derived list was not, because nothing re-derived it."""
+    from app.visa_snapshot import kimi_primary, verified_overrides
+
+    raw = {
+        "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+        "application_channel": "online_portal",
+        "account_registration_steps": ["Complete the ETIAS online application"],
+        "payment_process": ["Pay the EUR 7 fee online by card during application"],
+        "submission_process": ["Submit through the official ETIAS portal"],
+        "government_fee": {"amount": 7, "currency": "EUR"},
+        "permitted_stay": "90 days in any 180-day period",
+    }
+    out = kimi_primary._result("KIMI_PRIMARY", dict(raw), cached=True, stale=False)
+    assert out["apply_steps"], "the raw answer should carry steps to begin with"
+
+    verdict = {
+        "disposition": "VISA_EXEMPT",
+        "application_channel": "not_required",
+        "requirement_detail": "unconditional_visa_free",
+        "government_fee": {"amount": 0, "currency": None},
+    }
+    real_apply = verified_overrides.apply
+
+    def fake_apply(guidance, route):
+        merged = dict(guidance)
+        merged.update(verdict)
+        verified_overrides._drop_application_leftovers(merged, verdict)
+        return merged, {"source_url": "https://example.gov", "verified_at": "2026-08-30"}
+
+    verified_overrides.apply = fake_apply
+    try:
+        fixed = kimi_primary.apply_verified_overrides(
+            out, {"passport_nationality": "JPN", "destination_country": "ITA"})
+    finally:
+        verified_overrides.apply = real_apply
+
+    assert fixed["guidance"].get("payment_process") in (None, [], ""), \
+        "the verdict should have cleared the payment steps from the guidance"
+    assert fixed["apply_steps"] == [], (
+        "a route where nothing is applied for still lists steps to apply: "
+        + repr(fixed["apply_steps"]))
+    # workflow_plan is re-derived too, and for an exempt route it becomes a
+    # PREPARATION plan rather than an application one. That is right: a
+    # visa-free traveller still has a passport to check. What must not survive
+    # is any step about applying or paying.
+    kinds = {str(s.get("workflow_type") or "") for s in fixed["workflow_plan"]}
+    assert kinds <= {"visa_exempt_preparation"}, kinds
+    text = " ".join(str(s.get("step") or "") for s in fixed["workflow_plan"]).lower()
+    assert "pay" not in text and "submit_application" not in text, text

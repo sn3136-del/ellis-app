@@ -1513,6 +1513,18 @@ def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
         route["arrival_date"] = body.arrival_date
     if body.departure_city.strip():
         route["departure_city"] = body.departure_city.strip()[:80]
+        # The city itself stays out of the cache key: keying on free text
+        # would mint an entry per spelling anyone types. What the key carries
+        # is the consular district the city resolves to, in the slot the key
+        # already has. A destination with no published district table
+        # resolves to "default", which is what every existing key holds, so
+        # the warm cache is untouched.
+        from .visa_snapshot import consular_districts
+        district = consular_districts.resolve(
+            route["destination_country"], route["departure_city"],
+            route["passport_nationality"])
+        if district and district != "default":
+            route["consular_jurisdiction"] = district
     transit = [t for t in (iso3(c.strip(), default=None)
                for c in (body.transit_countries or []) if c and c.strip())
                if t][:5]

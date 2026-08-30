@@ -1036,6 +1036,15 @@ def apply_verified_overrides(out: dict, route: dict) -> dict:
     out = dict(out)
     out["guidance"] = merged
     out["source_verified"] = prov
+    # Anything DERIVED from the guidance has to be derived again. These two
+    # are computed in _result from the raw model answer, before this function
+    # runs, so a verified verdict fixed the guidance and left the steps built
+    # from the answer it replaced. Japan to Italy said "No visa needed" and
+    # "Government fee: None" above a five step How to apply that opened with
+    # "Pay the EUR 7 fee online", for an ETIAS the European Commission has not
+    # brought into operation.
+    out["apply_steps"] = canonical_steps(merged) if merged else []
+    out["workflow_plan"] = derive_workflow_plan(merged) if merged else []
     # A human verified this route against a named official page. That IS the
     # confirmation the hold waits for — holding a verified answer served an
     # empty card for China→UK while its checked fee and products sat in the

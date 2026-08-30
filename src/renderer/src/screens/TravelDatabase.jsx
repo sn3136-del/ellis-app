@@ -151,6 +151,12 @@ const sentence = (s) => humanize(s)
 // Each "passport x destination" answer has its OWN address, so it can be
 // linked, bookmarked and shared:  #database/CHN/JPN/tourism/ordinary_passport
 // Purpose and document are part of the address because they change the answer.
+// Channels that mean the traveller applies for nothing. On these the portal
+// link is a reference, not a place to go and lodge an application.
+const NO_APPLICATION_CHANNELS = new Set([
+  'not_required', 'none', 'no_application_required', 'none_or_port_of_entry',
+])
+
 function routeFromHash() {
   const raw = (typeof window !== 'undefined' && window.location.hash) || ''
   const m = raw.replace(/^#\/?/, '').split('/')
@@ -935,7 +941,16 @@ export default function TravelDatabase({ onBack }) {
   // The 3-5 key steps, already deduplicated and ordered by the server (the
   // engine's three arrays overlap and repeat — one answer carried 135 steps).
   // The concatenation is only the fallback for an older cached answer.
-  const applySteps = !g ? []
+  // Steps to apply, but only where there is something to apply for. The
+  // fallback exists for older cached answers that predate apply_steps; it
+  // must not fire on a route whose channel says nothing is applied for,
+  // because there the backend's empty list is a DECISION and rebuilding from
+  // the raw guidance overrides it. Japan to Italy showed a five-step "How to
+  // apply" opening with "Pay the €7 fee online" under a headline of "No visa
+  // needed", rebuilt on the client after the server had already cleared it.
+  const nothingToApplyFor = !g ? false
+    : NO_APPLICATION_CHANNELS.has(String(g.application_channel || '').toLowerCase())
+  const applySteps = (!g || nothingToApplyFor) ? []
     : (Array.isArray(result?.apply_steps) && result.apply_steps.length
         ? result.apply_steps.map((x) => sentence(asText(x))).filter(Boolean)
         : [...itemsOf(g.account_registration_steps),
@@ -1263,14 +1278,23 @@ export default function TravelDatabase({ onBack }) {
                          || ((g.visa_products || []).some((vp) => feeText(vp.fee))
                              ? t('db.feeSeeProducts') : null)} />
             <Tile label={t('db.processing')} value={T(asText(g.processing_time))} />
-            <Tile label={t('db.channel')}
-                  value={g.official_portal_url
-                    ? (siteLabel(g.official_portal_url)
-                       || T(humanizeEnum(g.application_channel)))
-                    : T(humanizeEnum(g.application_channel))}
-                  sub={g.official_portal_url
-                    ? T(humanizeEnum(g.application_channel)) : null}
-                  href={g.official_portal_url || undefined} />
+            {/* Nothing is applied for on a visa-free route, so "Where to
+                apply" is the wrong heading over the link: it read "Where to
+                apply / Vistoperitalia.esteri.it / Not required", which asks
+                and answers itself. The page still shows the official page,
+                as the reference it actually is. */}
+            {(() => {
+              const channelText = T(humanizeEnum(g.application_channel))
+              return (
+                <Tile label={nothingToApplyFor ? t('db.sourceTile') : t('db.channel')}
+                      value={g.official_portal_url
+                        ? (siteLabel(g.official_portal_url) || channelText)
+                        : channelText}
+                      sub={g.official_portal_url && !nothingToApplyFor
+                        ? channelText : null}
+                      href={g.official_portal_url || undefined} />
+              )
+            })()}
           </div>
           )}
           {/* The channel sentence under the tiles is hidden by owner decision
