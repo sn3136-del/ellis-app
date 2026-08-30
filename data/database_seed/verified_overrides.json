@@ -42390,52 +42390,6 @@
  {
   "route": {
    "nationality": "CHN",
-   "destination": "JPN",
-   "travel_purpose": "business"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity and jurisdiction)",
-  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
-  "note": "Verified 2026-08-30. Consular jurisdiction for JPN.",
-  "fields": {
-   "application_channel_detail": "Applications by Chinese nationals must be lodged through designated agencies (指定代办机构), which charge their own handling fees on top of the government fee",
-   "government_fee": {
-    "amount": 715,
-    "currency": "CNY"
-   },
-   "visa_products": [
-    {
-     "type": "Single-entry short-term business",
-     "entry": "single",
-     "validity": "3 months",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 715,
-      "currency": "CNY"
-     },
-     "notes": "Fee per Embassy of Japan in China notice effective 2026-07-01 (单次签证 715元); excludes designated-agency handling fees."
-    },
-    {
-     "type": "Multiple-entry short-term business",
-     "entry": "multiple",
-     "validity": "5 years",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 1430,
-      "currency": "CNY"
-     },
-     "notes": "Fee per Embassy of Japan in China notice effective 2026-07-01 (数次签证 1,430元; 两次签证 also 1,430元); excludes designated-agency handling fees."
-    }
-   ],
-   "processing_time": "5 working days",
-   "validity_duration": 3,
-   "validity_unit": "Month",
-   "consular_jurisdiction": "Apply at the Japanese Embassy or Consulate General with jurisdiction over your place of residence. Applying outside your country or region of residence is a stated ground for refusing to accept the application."
-  }
- },
- {
-  "route": {
-   "nationality": "CHN",
    "destination": "USA",
    "travel_purpose": "business"
   },
@@ -42672,101 +42626,6 @@
   "route": {
    "nationality": "CHN",
    "destination": "JPN",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity and jurisdiction)",
-  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
-  "note": "Verified 2026-08-30. Consular jurisdiction for JPN.",
-  "fields": {
-   "permitted_stay": "15 or 30 days on a single-entry tourist visa (decided by the mission); 30 days per visit on the 3-year multiple-entry visas; 90 days per visit on the 5-year multiple-entry visa",
-   "government_fee": {
-    "amount": 715,
-    "currency": "CNY"
-   },
-   "visa_products": [
-    {
-     "type": "Group tourist visa (团队旅游签证)",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 15,
-     "fee": {
-      "amount": 715,
-      "currency": "CNY"
-     },
-     "notes": "Single-entry visa for organised groups of roughly 5 to 40 travellers, itinerary within 15 days, lodged through a designated travel agency. The embassy publishes no validity period for this product (the 3-month validity it states belongs to the individual single-entry visa), so validity is left blank rather than assumed."
-    },
-    {
-     "type": "Individual single-entry tourist visa (个人单次旅游签证)",
-     "entry": "single",
-     "validity": "3 months",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 715,
-      "currency": "CNY"
-     },
-     "notes": "Validity 3 months; permitted stay 15 or 30 days as decided by the mission. Fee = single-entry rate effective 2026-07-01."
-    },
-    {
-     "type": "Okinawa / six Tohoku prefectures multiple-entry tourist visa",
-     "entry": "multiple",
-     "validity": "3 years",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 1430,
-      "currency": "CNY"
-     },
-     "notes": "First trip must include an overnight stay in Okinawa or one of the six Tohoku prefectures; from the second visit it may also be used for other short-term visit purposes. Fee = multiple-visa rate effective 2026-07-01."
-    },
-    {
-     "type": "Multiple-entry tourist visa for persons of sufficient financial ability",
-     "entry": "multiple",
-     "validity": "3 years",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 1430,
-      "currency": "CNY"
-     },
-     "notes": "No destination restriction within Japan; from the second visit usable for other short-term visit purposes. Fee = multiple-visa rate effective 2026-07-01."
-    },
-    {
-     "type": "Multiple-entry visa for persons of considerably high income (5-year)",
-     "entry": "multiple",
-     "validity": "5 years",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 1430,
-      "currency": "CNY"
-     },
-     "notes": "Usable from the first entry for tourism and other short-term visit purposes; travel bookings and itinerary may be self-managed. Fee = multiple-visa rate effective 2026-07-01."
-    }
-   ],
-   "arrival_card": {
-    "required": true,
-    "name": "Visit Japan Web",
-    "submission_window": "Register before departure for immigration and customs"
-   },
-   "application_channel": "authorised_agent",
-   "application_channel_detail": "Chinese ordinary passport holders cannot apply directly to the embassy; tourist visa applications must be lodged through a designated travel agency. Since 19 June 2023 the embassy issues single-entry tourist visas for stays within 30 days as electronic visas; the applicant must show the 'Visa issuance notice' on a mobile device with internet access at the airport (PDF files, screenshots and printouts are not accepted).",
-   "permitted_stay_days": 30,
-   "requirement_detail": "evisa",
-   "processing_time": "5 working days",
-   "exceptions": [
-    "Single-entry tourist visas for mainland residents are electronic since 19 June 2023: the Visa issuance notice must be shown online at the airport",
-    "The consular fee is charged only if the visa is issued; the designated agency charges its own handling fee on top",
-    "Individuals cannot apply at the embassy or consulate: every tourist application goes through a designated travel agency, which also books flights and hotels except for the 5-year visa"
-   ],
-   "official_portal_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
-   "disposition": "VISA_REQUIRED",
-   "validity_duration": 3,
-   "validity_unit": "Month",
-   "consular_jurisdiction": "Apply at the Japanese Embassy or Consulate General with jurisdiction over your place of residence. Applying outside your country or region of residence is a stated ground for refusing to accept the application."
-  }
- },
- {
-  "route": {
-   "nationality": "CHN",
-   "destination": "JPN",
    "travel_purpose": "family_visit"
   },
   "verified_at": "2026-08-30",
@@ -42830,55 +42689,6 @@
  },
  {
   "route": {
-   "nationality": "HKG",
-   "destination": "AUS",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity and jurisdiction)",
-  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651",
-  "note": "Verified 2026-08-30. Consular jurisdiction for AUS.",
-  "fields": {
-   "application_channel_detail": "Apply for the ETA in the Australian ETA mobile app. There is no web form for this authorisation.",
-   "official_portal_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/electronic-travel-authority-601",
-   "government_fee": {
-    "amount": 20,
-    "currency": "AUD"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Electronic Travel Authority (subclass 601) - tourism/business visitor",
-     "entry": "multiple",
-     "validity": "12-month period from grant",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 20,
-      "currency": "AUD"
-     },
-     "notes": "Visa application charge AUD0.00; AUD20 is the service charge to use the Australian ETA app. Must be applied for in the app."
-    },
-    {
-     "type": "Visitor visa (subclass 600) - Tourist stream (apply outside Australia)",
-     "entry": "single or multiple as granted",
-     "validity": "Up to 12 months",
-     "max_stay_days": 365,
-     "fee": {
-      "amount": 250,
-      "currency": "AUD"
-     },
-     "notes": "\"From AUD250.00\"; department may grant a stay of 3, 6 or 12 months."
-    }
-   ],
-   "permitted_stay": "Up to 3 months at a time",
-   "processing_time": "7 calendar days",
-   "validity_duration": 12,
-   "validity_unit": "Month",
-   "consular_jurisdiction": "Not applicable. Australian visitor visas are lodged online through ImmiAccount rather than at a post."
-  }
- },
- {
-  "route": {
    "nationality": "TWN",
    "destination": "USA",
    "travel_purpose": "tourism"
@@ -42933,100 +42743,6 @@
  },
  {
   "route": {
-   "nationality": "TWN",
-   "destination": "AUS",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity and jurisdiction)",
-  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651",
-  "note": "Verified 2026-08-30. Consular jurisdiction for AUS.",
-  "fields": {
-   "official_portal_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600",
-   "government_fee": {
-    "amount": 20,
-    "currency": "AUD"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Electronic Travel Authority (subclass 601)",
-     "entry": "multiple",
-     "validity": "12-month period from grant",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 20,
-      "currency": "AUD"
-     },
-     "notes": "Taiwan passports eligible except official/diplomatic"
-    },
-    {
-     "type": "Visitor visa (subclass 600) - Tourist stream (apply outside Australia)",
-     "entry": "single or multiple as granted",
-     "validity": "Up to 12 months",
-     "max_stay_days": 365,
-     "fee": {
-      "amount": 250,
-      "currency": "AUD"
-     },
-     "notes": null
-    }
-   ],
-   "permitted_stay": "Up to 3 months at a time",
-   "validity_duration": 12,
-   "validity_unit": "Month",
-   "consular_jurisdiction": "Not applicable. Australian visitor visas are lodged online through ImmiAccount rather than at a post."
-  }
- },
- {
-  "route": {
-   "nationality": "JPN",
-   "destination": "AUS",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity and jurisdiction)",
-  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651",
-  "note": "Verified 2026-08-30. Consular jurisdiction for AUS.",
-  "fields": {
-   "government_fee": {
-    "amount": 20,
-    "currency": "AUD"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Electronic Travel Authority (subclass 601)",
-     "entry": "multiple",
-     "validity": "12-month period from grant",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 20,
-      "currency": "AUD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Visitor visa (subclass 600) - Tourist stream (apply outside Australia)",
-     "entry": "single or multiple as granted",
-     "validity": "Up to 12 months",
-     "max_stay_days": 365,
-     "fee": {
-      "amount": 250,
-      "currency": "AUD"
-     },
-     "notes": null
-    }
-   ],
-   "permitted_stay": "Up to 3 months at a time",
-   "processing_time": "7 calendar days",
-   "validity_duration": 12,
-   "validity_unit": "Month",
-   "consular_jurisdiction": "Not applicable. Australian visitor visas are lodged online through ImmiAccount rather than at a post."
-  }
- },
- {
-  "route": {
    "nationality": "KOR",
    "destination": "USA",
    "travel_purpose": "tourism"
@@ -43050,101 +42766,6 @@
    ],
    "permitted_stay_days": 90,
    "consular_jurisdiction": "Schedule the interview at the US Embassy or Consulate in your country of nationality or residence."
-  }
- },
- {
-  "route": {
-   "nationality": "KOR",
-   "destination": "AUS",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity and jurisdiction)",
-  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651",
-  "note": "Verified 2026-08-30. Consular jurisdiction for AUS.",
-  "fields": {
-   "government_fee": {
-    "amount": 20,
-    "currency": "AUD"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Electronic Travel Authority (subclass 601)",
-     "entry": "multiple",
-     "validity": "12-month period from grant",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 20,
-      "currency": "AUD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Visitor visa (subclass 600) - Tourist stream (apply outside Australia)",
-     "entry": "single or multiple as granted",
-     "validity": "Up to 12 months",
-     "max_stay_days": 365,
-     "fee": {
-      "amount": 250,
-      "currency": "AUD"
-     },
-     "notes": null
-    }
-   ],
-   "permitted_stay": "Up to 3 months at a time",
-   "validity_duration": 12,
-   "validity_unit": "Month",
-   "consular_jurisdiction": "Not applicable. Australian visitor visas are lodged online through ImmiAccount rather than at a post."
-  }
- },
- {
-  "route": {
-   "nationality": "USA",
-   "destination": "AUS",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity and jurisdiction)",
-  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651",
-  "note": "Verified 2026-08-30. Consular jurisdiction for AUS.",
-  "fields": {
-   "application_channel_detail": "Apply for the ETA in the Australian ETA mobile app. There is no web form for this authorisation.",
-   "official_portal_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/electronic-travel-authority-601",
-   "government_fee": {
-    "amount": 20,
-    "currency": "AUD"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Electronic Travel Authority (subclass 601)",
-     "entry": "multiple",
-     "validity": "12-month period from grant",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 20,
-      "currency": "AUD"
-     },
-     "notes": "VAC AUD0.00 + AUD20 ETA app service charge"
-    },
-    {
-     "type": "Visitor visa (subclass 600) - Tourist stream (apply outside Australia)",
-     "entry": "single or multiple as granted",
-     "validity": "Up to 12 months",
-     "max_stay_days": 365,
-     "fee": {
-      "amount": 250,
-      "currency": "AUD"
-     },
-     "notes": null
-    }
-   ],
-   "permitted_stay": "Up to 3 months at a time",
-   "processing_time": "7 calendar days",
-   "validity_duration": 12,
-   "validity_unit": "Month",
-   "consular_jurisdiction": "Not applicable. Australian visitor visas are lodged online through ImmiAccount rather than at a post."
   }
  },
  {
@@ -43192,111 +42813,6 @@
    ],
    "permitted_stay_days": 90,
    "consular_jurisdiction": "Schedule the interview at the US Embassy or Consulate in your country of nationality or residence."
-  }
- },
- {
-  "route": {
-   "nationality": "SGP",
-   "destination": "AUS",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity and jurisdiction)",
-  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651",
-  "note": "Verified 2026-08-30. Consular jurisdiction for AUS.",
-  "fields": {
-   "government_fee": {
-    "amount": 20,
-    "currency": "AUD"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Electronic Travel Authority (subclass 601)",
-     "entry": "multiple",
-     "validity": "12-month period from grant",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 20,
-      "currency": "AUD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Visitor visa (subclass 600) - Tourist stream (apply outside Australia)",
-     "entry": "single or multiple as granted",
-     "validity": "Up to 12 months",
-     "max_stay_days": 365,
-     "fee": {
-      "amount": 250,
-      "currency": "AUD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Visitor visa (subclass 600) - Frequent traveller stream",
-     "entry": "multiple",
-     "validity": "Up to 10 years",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 1845,
-      "currency": "AUD"
-     },
-     "notes": null
-    }
-   ],
-   "permitted_stay": "Up to 3 months at a time",
-   "processing_time": "7 calendar days",
-   "validity_duration": 12,
-   "validity_unit": "Month",
-   "consular_jurisdiction": "Not applicable. Australian visitor visas are lodged online through ImmiAccount rather than at a post."
-  }
- },
- {
-  "route": {
-   "nationality": "CAN",
-   "destination": "AUS",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity and jurisdiction)",
-  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651",
-  "note": "Verified 2026-08-30. Consular jurisdiction for AUS.",
-  "fields": {
-   "government_fee": {
-    "amount": 20,
-    "currency": "AUD"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Electronic Travel Authority (subclass 601)",
-     "entry": "multiple",
-     "validity": "12-month period from grant",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 20,
-      "currency": "AUD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Visitor visa (subclass 600) - Tourist stream (apply outside Australia)",
-     "entry": "single or multiple as granted",
-     "validity": "Up to 12 months",
-     "max_stay_days": 365,
-     "fee": {
-      "amount": 250,
-      "currency": "AUD"
-     },
-     "notes": null
-    }
-   ],
-   "permitted_stay": "Up to 3 months at a time",
-   "processing_time": "7 calendar days",
-   "validity_duration": 12,
-   "validity_unit": "Month",
-   "consular_jurisdiction": "Not applicable. Australian visitor visas are lodged online through ImmiAccount rather than at a post."
   }
  },
  {
@@ -43930,68 +43446,6 @@
    "validity_duration": null,
    "validity_unit": null,
    "permitted_stay_days": 90,
-   "unpublished_fields": [
-    "validity_duration",
-    "validity_unit"
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "CHN",
-   "destination": "ISL",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (Schengen validity)",
-  "source_url": "https://eviza.mae.ro/TypeOfVisa",
-  "note": "Verified 2026-08-30. The consulate sets the visa's period of validity per application and prints it on the visa, so no fixed validity is published. The 90 days in any 180 is the permitted stay, which is a different thing.",
-  "fields": {
-   "government_fee": {
-    "amount": 90,
-    "currency": "EUR"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Schengen C visa (adult) - single, double or multiple entry",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": "Official fee statement on https://www.government.is/topics/foreign-affairs/visa-to-iceland/ (redirects to island.is): 'The fee for a visa application is EUR 90 (EUR 45 for six to twelve year olds).'"
-    },
-    {
-     "type": "Schengen C visa (child aged 6 to under 12)",
-     "entry": null,
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 45,
-      "currency": "EUR"
-     },
-     "notes": "Reduced fee per government.is/island.is; Regulation 795/2022 Art. 16: 'Born a aldrinum sex til tolf ara skulu greida laegra gjald en their sem eldri eru.' Entry type (single/multiple) is not specified by the official sources for child applicants."
-    },
-    {
-     "type": "Schengen C visa (child under 6)",
-     "entry": null,
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 0,
-      "currency": "EUR"
-     },
-     "notes": "Fee-exempt per Regulation 795/2022 Art. 16 (children under six years of age exempt from the visa fee). Entry type not specified by the official sources."
-    }
-   ],
-   "permitted_stay": "Up to 90 days in any 180-day period",
-   "disposition": "VISA_REQUIRED",
-   "requirement_detail": "paper_visa",
-   "validity_duration": null,
-   "validity_unit": null,
    "unpublished_fields": [
     "validity_duration",
     "validity_unit"
@@ -44836,55 +44290,6 @@
  },
  {
   "route": {
-   "nationality": "USA",
-   "destination": "VNM",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity)",
-  "source_url": "https://evisa.gov.vn/",
-  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay.",
-  "fields": {
-   "official_portal_url": "https://evisa.gov.vn/",
-   "requirement_detail": "evisa",
-   "visa_category": "Tourist e-visa",
-   "government_fee": {
-    "amount": 25,
-    "currency": "USD"
-   },
-   "arrival_card": {
-    "required": false,
-    "name": null,
-    "submission_window": null
-   },
-   "visa_products": [
-    {
-     "type": "Single-entry tourist e-visa",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 25,
-      "currency": "USD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Multiple-entry tourist e-visa",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 50,
-      "currency": "USD"
-     },
-     "notes": null
-    }
-   ]
-  }
- },
- {
-  "route": {
    "nationality": "FRA",
    "destination": "IND",
    "travel_purpose": "tourism"
@@ -45017,45 +44422,6 @@
  },
  {
   "route": {
-   "nationality": "IND",
-   "destination": "VNM",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity)",
-  "source_url": "https://evisa.xuatnhapcanh.gov.vn/trang-chu-ttdt",
-  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay.",
-  "fields": {
-   "permitted_stay_days": 90,
-   "permitted_stay": "Up to 90 days on an e-visa (single or multiple entry)",
-   "visa_products": [
-    {
-     "type": "Single-entry tourist e-Visa",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 25,
-      "currency": "USD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Multiple-entry tourist e-Visa",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 50,
-      "currency": "USD"
-     },
-     "notes": null
-    }
-   ]
-  }
- },
- {
-  "route": {
    "nationality": "AUS",
    "destination": "IND",
    "travel_purpose": "tourism"
@@ -45150,48 +44516,6 @@
  },
  {
   "route": {
-   "nationality": "AUS",
-   "destination": "VNM",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity)",
-  "source_url": "https://evisa.gov.vn/",
-  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay.",
-  "fields": {
-   "government_fee": {
-    "amount": 25,
-    "currency": "USD"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Single-entry tourist e-Visa",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 25,
-      "currency": "USD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Multiple-entry tourist e-Visa",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 50,
-      "currency": "USD"
-     },
-     "notes": null
-    }
-   ]
-  }
- },
- {
-  "route": {
    "nationality": "CAN",
    "destination": "IND",
    "travel_purpose": "tourism"
@@ -45253,139 +44577,6 @@
     }
    ],
    "consular_jurisdiction": "Applicants are allocated between missions by place of residence. Each Indian mission publishes its own area, the central portal does not carry one table."
-  }
- },
- {
-  "route": {
-   "nationality": "CAN",
-   "destination": "VNM",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity)",
-  "source_url": "https://evisa.gov.vn/",
-  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay.",
-  "fields": {
-   "permitted_stay_days": 90,
-   "permitted_stay": "Up to 90 days on an e-visa (single or multiple entry)",
-   "government_fee": {
-    "amount": 25,
-    "currency": "USD"
-   },
-   "visa_products": [
-    {
-     "type": "Single-entry tourist e-Visa",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 25,
-      "currency": "USD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Multiple-entry tourist e-Visa",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 50,
-      "currency": "USD"
-     },
-     "notes": null
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "CHN",
-   "destination": "LKA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity)",
-  "source_url": "https://www.eta.gov.lk/slvisa/",
-  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay.",
-  "fields": {
-   "government_fee": {
-    "amount": 0,
-    "currency": "USD"
-   },
-   "permitted_stay_days": 30,
-   "visa_products": [
-    {
-     "type": "Tourist ETA (30 days, free of charge)",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 0,
-      "currency": "USD"
-     },
-     "notes": null
-    }
-   ],
-   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
-   "requirement_detail": "eta_electronic_authorization",
-   "official_portal_url": "https://eta.gov.lk/slvisa/",
-   "permitted_stay": "30 days from first arrival"
-  }
- },
- {
-  "route": {
-   "nationality": "CHN",
-   "destination": "NPL",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity)",
-  "source_url": "https://immigration.gov.np/visa-fees-and-documents",
-  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay.",
-  "fields": {
-   "disposition": "VISA_ON_ARRIVAL",
-   "permitted_stay_days": 90,
-   "permitted_stay": "15, 30 or 90 days; gratis for Chinese nationals; max 150 days total per calendar year",
-   "government_fee": {
-    "amount": 0,
-    "currency": "USD"
-   },
-   "visa_products": [
-    {
-     "type": "15-day tourist visa (on arrival or from a mission)",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 15,
-     "fee": {
-      "amount": 0,
-      "currency": "USD"
-     },
-     "notes": null
-    },
-    {
-     "type": "30-day tourist visa",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 0,
-      "currency": "USD"
-     },
-     "notes": null
-    },
-    {
-     "type": "90-day tourist visa",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 0,
-      "currency": "USD"
-     },
-     "notes": null
-    }
-   ]
   }
  },
  {
@@ -45632,140 +44823,6 @@
  },
  {
   "route": {
-   "nationality": "HKG",
-   "destination": "LKA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity)",
-  "source_url": "https://www.eta.gov.lk/slvisa/visainfo/fees.jsp?locale=en_US",
-  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay.",
-  "fields": {
-   "government_fee": {
-    "amount": 50,
-    "currency": "USD"
-   },
-   "permitted_stay_days": 30,
-   "visa_products": [
-    {
-     "type": "Tourist ETA (double entry)",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 50,
-      "currency": "USD"
-     },
-     "notes": null
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "HKG",
-   "destination": "NPL",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity)",
-  "source_url": "https://immigration.gov.np/visa-fees-and-documents",
-  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay.",
-  "fields": {
-   "disposition": "VISA_ON_ARRIVAL",
-   "permitted_stay_days": 90,
-   "permitted_stay": "15, 30 or 90 days, chosen and paid for at arrival (USD 30 / 50 / 125)",
-   "government_fee": {
-    "amount": 50,
-    "currency": "USD"
-   },
-   "visa_products": [
-    {
-     "type": "15-day tourist visa",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 15,
-     "fee": {
-      "amount": 30,
-      "currency": "USD"
-     },
-     "notes": null
-    },
-    {
-     "type": "30-day tourist visa",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 50,
-      "currency": "USD"
-     },
-     "notes": null
-    },
-    {
-     "type": "90-day tourist visa",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 125,
-      "currency": "USD"
-     },
-     "notes": null
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "HKG",
-   "destination": "VNM",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity)",
-  "source_url": "https://evisa.gov.vn/",
-  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay.",
-  "fields": {
-   "official_portal_url": "https://evisa.gov.vn/",
-   "requirement_detail": "evisa",
-   "government_fee": {
-    "amount": 25,
-    "currency": "USD"
-   },
-   "arrival_card": {
-    "required": false,
-    "name": null,
-    "submission_window": null
-   },
-   "visa_products": [
-    {
-     "type": "Single-entry tourist e-visa",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 25,
-      "currency": "USD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Multiple-entry tourist e-visa",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 50,
-      "currency": "USD"
-     },
-     "notes": null
-    }
-   ]
-  }
- },
- {
-  "route": {
    "nationality": "IDN",
    "destination": "IND",
    "travel_purpose": "tourism"
@@ -45939,74 +44996,6 @@
  },
  {
   "route": {
-   "nationality": "JPN",
-   "destination": "IND",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity)",
-  "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
-  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay.",
-  "fields": {
-   "government_fee": {
-    "amount": 25,
-    "currency": "USD"
-   },
-   "permitted_stay_days": 180,
-   "visa_products": [
-    {
-     "type": "30-day multiple-entry e-Tourist Visa",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 25,
-      "currency": "USD"
-     },
-     "notes": null
-    },
-    {
-     "type": "1-year multiple-entry e-Tourist Visa",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 25,
-      "currency": "USD"
-     },
-     "notes": null
-    },
-    {
-     "type": "5-year multiple-entry e-Tourist Visa",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 25,
-      "currency": "USD"
-     },
-     "notes": null
-    },
-    {
-     "type": "6-month e-Tourist Visa (e-T2 V)",
-     "entry": "multiple",
-     "validity": "6 months",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 25,
-      "currency": "USD"
-     },
-     "notes": null
-    }
-   ],
-   "disposition": "VISA_REQUIRED",
-   "requirement_detail": "evisa",
-   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
-   "consular_jurisdiction": "Applicants are allocated between missions by place of residence. Each Indian mission publishes its own area, the central portal does not carry one table."
-  }
- },
- {
-  "route": {
    "nationality": "MYS",
    "destination": "IND",
    "travel_purpose": "tourism"
@@ -46137,48 +45126,6 @@
    "requirement_detail": "evisa",
    "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
    "consular_jurisdiction": "Applicants are allocated between missions by place of residence. Each Indian mission publishes its own area, the central portal does not carry one table."
-  }
- },
- {
-  "route": {
-   "nationality": "CHN",
-   "destination": "VNM",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity)",
-  "source_url": "https://evisa.gov.vn/",
-  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay.",
-  "fields": {
-   "requirement_detail": "evisa",
-   "government_fee": {
-    "amount": 25,
-    "currency": "USD"
-   },
-   "visa_products": [
-    {
-     "type": "Single-entry tourist e-visa",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 25,
-      "currency": "USD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Multiple-entry tourist e-visa",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 50,
-      "currency": "USD"
-     },
-     "notes": null
-    }
-   ]
   }
  },
  {
@@ -46534,48 +45481,6 @@
  },
  {
   "route": {
-   "nationality": "TWN",
-   "destination": "VNM",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity)",
-  "source_url": "https://evisa.gov.vn/",
-  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay.",
-  "fields": {
-   "government_fee": {
-    "amount": 25,
-    "currency": "USD"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Single-entry tourist e-Visa",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 25,
-      "currency": "USD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Multiple-entry tourist e-Visa",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 50,
-      "currency": "USD"
-     },
-     "notes": null
-    }
-   ]
-  }
- },
- {
-  "route": {
    "nationality": "THA",
    "destination": "IND",
    "travel_purpose": "tourism"
@@ -46626,72 +45531,6 @@
     }
    ],
    "consular_jurisdiction": "Applicants are allocated between missions by place of residence. Each Indian mission publishes its own area, the central portal does not carry one table."
-  }
- },
- {
-  "route": {
-   "nationality": "USA",
-   "destination": "NPL",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity)",
-  "source_url": "https://immigration.gov.np/visa-fees-and-documents",
-  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay.",
-  "fields": {
-   "disposition": "VISA_ON_ARRIVAL",
-   "permitted_stay_days": 90,
-   "permitted_stay": "15, 30 or 90 days (USD 30 / 50 / 125), extendable",
-   "government_fee": {
-    "amount": 50,
-    "currency": "USD"
-   },
-   "visa_products": [
-    {
-     "type": "15-day tourist visa (on arrival)",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 15,
-     "fee": {
-      "amount": 30,
-      "currency": "USD"
-     },
-     "notes": null
-    },
-    {
-     "type": "30-day tourist visa (on arrival)",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 50,
-      "currency": "USD"
-     },
-     "notes": null
-    },
-    {
-     "type": "90-day tourist visa (on arrival)",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 125,
-      "currency": "USD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Reciprocity Tourist Visa (US citizens & dependents)",
-     "entry": "multiple",
-     "validity": "5 years",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 160,
-      "currency": "USD"
-     },
-     "notes": null
-    }
-   ]
   }
  },
  {
@@ -46859,161 +45698,6 @@
  },
  {
   "route": {
-   "nationality": "CHN",
-   "destination": "AUS",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity)",
-  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/frequent-traveller-stream",
-  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay.",
-  "fields": {
-   "government_fee": {
-    "amount": 250,
-    "currency": "AUD"
-   },
-   "official_portal_url": "https://online.immi.gov.au/lusc/login",
-   "application_channel_detail": "Apply online in ImmiAccount. There is no paper channel, and the applicant cannot choose a stay length: the Department sets it in the grant letter.",
-   "permitted_stay": "Set case by case: generally 3 months, up to 12 months in certain circumstances",
-   "visa_products": [
-    {
-     "type": "Visitor (subclass 600) Tourist stream",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 365,
-     "fee": {
-      "amount": 250,
-      "currency": "AUD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Visitor (subclass 600) Approved Destination Status stream",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 250,
-      "currency": "AUD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Visitor (subclass 600) Frequent Traveller stream",
-     "entry": "multiple",
-     "validity": "10 years",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 1845,
-      "currency": "AUD"
-     },
-     "notes": null
-    }
-   ],
-   "disposition": "VISA_REQUIRED",
-   "processing_time": "7 calendar days",
-   "consular_jurisdiction": "Not applicable. Australian visitor visas are lodged online through ImmiAccount rather than at a post."
-  }
- },
- {
-  "route": {
-   "nationality": "DEU",
-   "destination": "RUS",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity)",
-  "source_url": "https://www.kdmid.ru/cons/visas/",
-  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay.",
-  "fields": {
-   "permitted_stay": "Up to 30 days from the date of entry (unified e-visa)",
-   "permitted_stay_days": 30,
-   "visa_products": [
-    {
-     "type": "Unified e-visa (tourism, business, humanitarian)",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 52,
-      "currency": "USD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Single-entry tourist visa (paper)",
-     "entry": "single",
-     "validity": "6 months",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 70,
-      "currency": "EUR"
-     },
-     "notes": null
-    },
-    {
-     "type": "Double-entry tourist visa (paper)",
-     "entry": "multiple",
-     "validity": "6 months",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 112,
-      "currency": "EUR"
-     },
-     "notes": null
-    }
-   ],
-   "government_fee": null,
-   "disposition": "VISA_REQUIRED",
-   "official_portal_url": "https://electronic-visa.kdmid.ru",
-   "exceptions": [
-    "CORRECTION: multiple-entry tourist visas (6 months) are issued on a reciprocity basis only to citizens of Greece, India, Japan, Austria, Spain and Hungary - not to German citizens. Per the Russian Embassy in Germany (germany.mid.ru Touristenvisum page): 'Es gibt folgende Arten von Touristenvisa: für eine Einreise (max. Aufenthaltsdauer 1 Monat); für zwei Einreisen (max. Aufenthaltsdauer insgesamt 1 Monat).' The stored 1-year multiple-entry tourist visa product does not exist for this route and is replaced by the double-entry product.",
-    "Paper tourist visas require a tourist confirmation (Reisebestätigung) from a Russian tour operator listed in the Unified Federal Tourist Register, with entry/exit dates of max 30 days."
-   ],
-   "validity_duration": 120,
-   "validity_unit": "Day",
-   "consular_jurisdiction": "Apply at the Russian consular office covering your place of permanent residence."
-  }
- },
- {
-  "route": {
-   "nationality": "USA",
-   "destination": "LKA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity)",
-  "source_url": "https://www.eta.gov.lk/slvisa/visainfo/fees.jsp?locale=en_US",
-  "note": "Verified 2026-08-30. Validity taken from the destination's published figure for this product, separately from the permitted stay.",
-  "fields": {
-   "government_fee": {
-    "amount": 0,
-    "currency": "USD"
-   },
-   "permitted_stay_days": 30,
-   "visa_products": [
-    {
-     "type": "Tourist ETA (free of charge for 40 eligible nationalities including USA)",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 0,
-      "currency": "USD"
-     },
-     "notes": null
-    }
-   ],
-   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
-   "requirement_detail": "eta_electronic_authorization",
-   "application_channel": "online_application",
-   "application_channel_detail": "All foreign nationals, including US citizens, must obtain an Electronic Travel Authorization (ETA) before arrival in Sri Lanka. US nationals are among the 40 nationalities eligible for a free-of-charge 30-day tourist ETA with a double-entry facility; remaining beyond 30 days requires a visa extension on payment of the applicable fee.",
-   "official_portal_url": "https://eta.gov.lk/slvisa/",
-   "permitted_stay": "30 days from first arrival"
-  }
- },
- {
-  "route": {
    "nationality": "USA",
    "destination": "RUS",
    "travel_purpose": "tourism"
@@ -47043,51 +45727,6 @@
     "amount": 185,
     "currency": "USD"
    }
-  }
- },
- {
-  "route": {
-   "nationality": "IND",
-   "destination": "ISL",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (verified absent)",
-  "source_url": "https://island.is/en/get-a-visa",
-  "note": "Verified 2026-08-30. Iceland publishes no fixed Schengen visa validity.",
-  "fields": {
-   "government_fee": {
-    "amount": 90,
-    "currency": "EUR"
-   },
-   "visa_products": [
-    {
-     "type": "Schengen short-stay visa (single entry)",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": "90 days in any 180-day period. 45 EUR for children aged six to twelve. Lodged with the Icelandic Embassy in New Delhi or a Schengen partner acting for Iceland."
-    },
-    {
-     "type": "Schengen short-stay visa (multiple entry)",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": "Validity is set by the issuing consulate under the EU cascade; Iceland publishes no fixed figure."
-    }
-   ],
-   "unpublished_fields": [
-    "validity_duration",
-    "validity_unit"
-   ]
   }
  },
  {
@@ -47128,111 +45767,6 @@
    ],
    "consular_jurisdiction": "Schedule the interview at the US Embassy or Consulate in your country of nationality or residence.",
    "unpublished_fields": [
-    "validity_duration",
-    "validity_unit"
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "CHN",
-   "destination": "ROU",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (verified absent)",
-  "source_url": "https://www.mae.ro/sites/default/files/file/2025_files/pdf/2025.08.27_anexa_1_eng.pdf",
-  "note": "Verified 2026-08-30. Romania publishes no fixed Schengen visa validity.",
-  "fields": {
-   "government_fee": {
-    "amount": 90,
-    "currency": "EUR"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Short-stay Schengen visa (C) - adult, single entry",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": "MAE fee table: 'Uniform visa (type C) 90 EUR'. Stay per mae.ro node 30325: Schengen visas issued 'for stays ... not exceeding 90 days in any period of 180 days'. Validity is set per issuance under the EU Visa Code and not published as a fixed figure."
-    },
-    {
-     "type": "Short-stay Schengen visa (C) - adult, double entry",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": "Two entries. Same 90 EUR uniform C-visa fee regardless of number of entries; 90/180-day stay rule; validity per issuance."
-    },
-    {
-     "type": "Short-stay Schengen visa (C) - adult, multiple entry",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": "Same 90 EUR uniform C-visa fee; 90/180-day stay rule; validity per issuance."
-    },
-    {
-     "type": "Short-stay Schengen visa (C) - child aged 6 to 12",
-     "entry": null,
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 45,
-      "currency": "EUR"
-     },
-     "notes": "MAE fee table: 'Type A, C visas for children aged 6 to 12: 45 EUR'. Fee tier is set by age, not by number of entries."
-    },
-    {
-     "type": "Short-stay Schengen visa (C) - child under 6",
-     "entry": null,
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 0,
-      "currency": "EUR"
-     },
-     "notes": "MAE: 'There is no fee for short-stay visas for ... children under six years of age' (node 2061, page 2). Fee exemption applies regardless of number of entries."
-    }
-   ],
-   "disposition": "VISA_REQUIRED",
-   "requirement_detail": "paper_visa",
-   "application_channel": "embassy",
-   "exceptions": [
-    "Mainland PRC passport holders. Annex 1 entry 22 is \"China\", with NO asterisk (so no IGI invitation requirement) and NO (1) marker (no airport transit visa); the Commission's national ATV table also lists China for no member state. Hong Kong SAR and Macao SAR passport holders are "
-   ],
-   "unpublished_fields": [
-    "validity_duration",
-    "validity_unit"
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "CHN",
-   "destination": "SGP",
-   "travel_purpose": "study"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (verified absent)",
-  "source_url": "https://ask.gov.sg/ica/questions/clos83fvm01gr5k0wd3ccw7aj",
-  "note": "Verified 2026-08-30. Singapore publishes no fixed entry visa validity, and a Singapore visa carries no period of stay at all: the stay is set at the checkpoint.",
-  "fields": {
-   "permitted_stay": "For the validity of the Student's Pass; the holder must leave on or before the STP expiry date unless another pass is granted.",
-   "unpublished_fields": [
-    "max_stay_duration",
-    "max_stay_unit",
     "validity_duration",
     "validity_unit"
    ]
@@ -47367,54 +45901,6 @@
  },
  {
   "route": {
-   "nationality": "IND",
-   "destination": "SGP",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (verified absent)",
-  "source_url": "https://chennai.mfa.gov.sg/consular-services/visa-information/frequently-asked-questions-on-visa/",
-  "note": "Verified 2026-08-30. Singapore publishes no fixed entry visa validity, and a Singapore visa carries no period of stay at all: the stay is set at the checkpoint.",
-  "fields": {
-   "official_portal_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
-   "government_fee": {
-    "amount": 30,
-    "currency": "SGD"
-   },
-   "visa_products": [
-    {
-     "type": "Singapore entry visa - single journey (social/business visit)",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 30,
-      "currency": "SGD"
-     },
-     "notes": "ICA/MFA do not publish a fixed validity: 'the duration of the visa granted, will be considered on its own merits' (MFA Chennai FAQ). ICA India page: 'A S$30 non-refundable processing fee is payable online'. Period of stay is granted via the e-Pass at entry and 'is not tied to the validity of your visa' (ICA)."
-    },
-    {
-     "type": "Singapore entry visa - multiple journey",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 30,
-      "currency": "SGD"
-     },
-     "notes": "No fixed published validity; duration granted is decided per application by ICA. A multiple journey visa may be used any number of times within its validity period (MFA Chennai FAQ)."
-    }
-   ],
-   "disposition": "VISA_REQUIRED",
-   "processing_time": "3 working days (excluding day of submission)",
-   "unpublished_fields": [
-    "validity_duration",
-    "validity_unit"
-   ]
-  }
- },
- {
-  "route": {
    "nationality": "PHL",
    "destination": "FRA",
    "travel_purpose": "tourism"
@@ -47528,57 +46014,6 @@
    "official_portal_url": "https://france-visas.gouv.fr/",
    "exceptions": [
     "Validity of single-entry and two-entry short-stay (C) visas is not a fixed published duration: France-Visas states the validity is indicated on the visa sticker per application, and EU Visa Code Art. 24 (consolidated 02009R0810-20240611) bases the period of validity on the examination of each application (single-entry visas carry a 15-day period of grace). EUR-Lex confirms the standard fee of EUR 90 (Art. 16), which applies to Russian applicants since the EU-Russia visa facilitation agreement was suspended."
-   ],
-   "unpublished_fields": [
-    "validity_duration",
-    "validity_unit"
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "RUS",
-   "destination": "SGP",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (verified absent)",
-  "source_url": "https://ask.gov.sg/ica/questions/clos83fw201ol5k0w6sf3u5ap",
-  "note": "Verified 2026-08-30. Singapore publishes no fixed entry visa validity, and a Singapore visa carries no period of stay at all: the stay is set at the checkpoint.",
-  "fields": {
-   "official_portal_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
-   "government_fee": {
-    "amount": 30,
-    "currency": "SGD"
-   },
-   "visa_products": [
-    {
-     "type": "Singapore entry visa - single journey (social/business visit)",
-     "entry": "single",
-     "validity": "Not published by ICA",
-     "max_stay_days": null,
-     "fee": {
-      "amount": 30,
-      "currency": "SGD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Singapore entry visa - multiple journey",
-     "entry": "multiple",
-     "validity": "Not published by ICA",
-     "max_stay_days": null,
-     "fee": {
-      "amount": 30,
-      "currency": "SGD"
-     },
-     "notes": null
-    }
-   ],
-   "disposition": "VISA_REQUIRED",
-   "requirement_detail": "evisa",
-   "exceptions": [
-    "ICA (ask.gov.sg official FAQ, 'What is the validity period of a Singapore Visa?') states visa validity is decided per application; the validity granted is shown on the e-Visa. ICA's Russia visa-detail page (loaded) confirms: 'A S$30 non-refundable processing fee is payable online using a Visa or MasterCard credit/debit card.' ICA also states the period of stay granted at entry (e-Pass) is not tied to the validity of the visa."
    ],
    "unpublished_fields": [
     "validity_duration",
@@ -47759,6 +46194,1415 @@
    "consular_jurisdiction": "Schedule the interview at the US Embassy or Consulate in your country of nationality or residence.",
    "unpublished_fields": [
     "entries",
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "VNM",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://evisa.gov.vn/",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "official_portal_url": "https://evisa.gov.vn/",
+   "requirement_detail": "evisa",
+   "visa_category": "Tourist e-visa",
+   "government_fee": {
+    "amount": 25,
+    "currency": "USD"
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "visa_products": [
+    {
+     "type": "Single-entry tourist e-visa",
+     "entry": "single",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 25,
+      "currency": "USD"
+     },
+     "notes": null
+    },
+    {
+     "type": "Multiple-entry tourist e-visa",
+     "entry": "multiple",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": null
+    }
+   ],
+   "unpublished_fields": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "IND",
+   "destination": "VNM",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://evisa.xuatnhapcanh.gov.vn/trang-chu-ttdt",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "permitted_stay_days": 90,
+   "permitted_stay": "Up to 90 days on an e-visa (single or multiple entry)",
+   "visa_products": [
+    {
+     "type": "Single-entry tourist e-Visa",
+     "entry": "single",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 25,
+      "currency": "USD"
+     },
+     "notes": null
+    },
+    {
+     "type": "Multiple-entry tourist e-Visa",
+     "entry": "multiple",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": null
+    }
+   ],
+   "unpublished_fields": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "AUS",
+   "destination": "VNM",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://evisa.gov.vn/",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "government_fee": {
+    "amount": 25,
+    "currency": "USD"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Single-entry tourist e-Visa",
+     "entry": "single",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 25,
+      "currency": "USD"
+     },
+     "notes": null
+    },
+    {
+     "type": "Multiple-entry tourist e-Visa",
+     "entry": "multiple",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": null
+    }
+   ],
+   "unpublished_fields": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "CAN",
+   "destination": "VNM",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://evisa.gov.vn/",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "permitted_stay_days": 90,
+   "permitted_stay": "Up to 90 days on an e-visa (single or multiple entry)",
+   "government_fee": {
+    "amount": 25,
+    "currency": "USD"
+   },
+   "visa_products": [
+    {
+     "type": "Single-entry tourist e-Visa",
+     "entry": "single",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 25,
+      "currency": "USD"
+     },
+     "notes": null
+    },
+    {
+     "type": "Multiple-entry tourist e-Visa",
+     "entry": "multiple",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": null
+    }
+   ],
+   "unpublished_fields": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "LKA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://www.eta.gov.lk/slvisa/",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   },
+   "permitted_stay_days": 30,
+   "visa_products": [
+    {
+     "type": "Tourist ETA (30 days, free of charge)",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 30,
+     "fee": null,
+     "notes": null
+    }
+   ],
+   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+   "requirement_detail": "eta_electronic_authorization",
+   "official_portal_url": "https://eta.gov.lk/slvisa/",
+   "permitted_stay": "30 days from first arrival",
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "NPL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://immigration.gov.np/visa-fees-and-documents",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "disposition": "VISA_ON_ARRIVAL",
+   "permitted_stay_days": 90,
+   "permitted_stay": "15, 30 or 90 days; gratis for Chinese nationals; max 150 days total per calendar year",
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   },
+   "visa_products": [
+    {
+     "type": "15-day tourist visa (on arrival or from a mission)",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 15,
+     "fee": null,
+     "notes": null
+    },
+    {
+     "type": "30-day tourist visa",
+     "entry": "multiple",
+     "validity": "5 years",
+     "max_stay_days": 30,
+     "fee": null,
+     "notes": null
+    },
+    {
+     "type": "90-day tourist visa",
+     "entry": "multiple",
+     "validity": "5 years",
+     "max_stay_days": 90,
+     "fee": null,
+     "notes": null
+    }
+   ],
+   "unpublished_fields": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "LKA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://www.eta.gov.lk/slvisa/visainfo/fees.jsp?locale=en_US",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "government_fee": {
+    "amount": 50,
+    "currency": "USD"
+   },
+   "permitted_stay_days": 30,
+   "visa_products": [
+    {
+     "type": "Tourist ETA (double entry)",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": null
+    }
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "NPL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://immigration.gov.np/visa-fees-and-documents",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "disposition": "VISA_ON_ARRIVAL",
+   "permitted_stay_days": 90,
+   "permitted_stay": "15, 30 or 90 days, chosen and paid for at arrival (USD 30 / 50 / 125)",
+   "government_fee": {
+    "amount": 50,
+    "currency": "USD"
+   },
+   "visa_products": [
+    {
+     "type": "15-day tourist visa",
+     "entry": "multiple",
+     "validity": "5 years",
+     "max_stay_days": 15,
+     "fee": {
+      "amount": 30,
+      "currency": "USD"
+     },
+     "notes": null
+    },
+    {
+     "type": "30-day tourist visa",
+     "entry": "multiple",
+     "validity": "5 years",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": null
+    },
+    {
+     "type": "90-day tourist visa",
+     "entry": "multiple",
+     "validity": "5 years",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 125,
+      "currency": "USD"
+     },
+     "notes": null
+    }
+   ],
+   "unpublished_fields": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "VNM",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://evisa.gov.vn/",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "official_portal_url": "https://evisa.gov.vn/",
+   "requirement_detail": "evisa",
+   "government_fee": {
+    "amount": 25,
+    "currency": "USD"
+   },
+   "arrival_card": {
+    "required": false,
+    "name": null,
+    "submission_window": null
+   },
+   "visa_products": [
+    {
+     "type": "Single-entry tourist e-visa",
+     "entry": "single",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 25,
+      "currency": "USD"
+     },
+     "notes": null
+    },
+    {
+     "type": "Multiple-entry tourist e-visa",
+     "entry": "multiple",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": null
+    }
+   ],
+   "unpublished_fields": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "JPN",
+   "destination": "IND",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "government_fee": {
+    "amount": 25,
+    "currency": "USD"
+   },
+   "permitted_stay_days": 180,
+   "visa_products": [
+    {
+     "type": "30-day multiple-entry e-Tourist Visa",
+     "entry": "multiple",
+     "validity": "30 days",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 25,
+      "currency": "USD"
+     },
+     "notes": null
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "evisa",
+   "official_portal_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+   "consular_jurisdiction": "Applicants are allocated between missions by place of residence. Each Indian mission publishes its own area, the central portal does not carry one table.",
+   "unpublished_fields": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "VNM",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://evisa.gov.vn/",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "requirement_detail": "evisa",
+   "government_fee": {
+    "amount": 25,
+    "currency": "USD"
+   },
+   "visa_products": [
+    {
+     "type": "Single-entry tourist e-visa",
+     "entry": "single",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 25,
+      "currency": "USD"
+     },
+     "notes": null
+    },
+    {
+     "type": "Multiple-entry tourist e-visa",
+     "entry": "multiple",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": null
+    }
+   ],
+   "unpublished_fields": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "TWN",
+   "destination": "VNM",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://evisa.gov.vn/",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "government_fee": {
+    "amount": 25,
+    "currency": "USD"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Single-entry tourist e-Visa",
+     "entry": "single",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 25,
+      "currency": "USD"
+     },
+     "notes": null
+    },
+    {
+     "type": "Multiple-entry tourist e-Visa",
+     "entry": "multiple",
+     "validity": "90 days",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": null
+    }
+   ],
+   "unpublished_fields": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "NPL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://immigration.gov.np/visa-fees-and-documents",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "disposition": "VISA_ON_ARRIVAL",
+   "permitted_stay_days": 90,
+   "permitted_stay": "15, 30 or 90 days (USD 30 / 50 / 125), extendable",
+   "government_fee": {
+    "amount": 50,
+    "currency": "USD"
+   },
+   "visa_products": [
+    {
+     "type": "15-day tourist visa (on arrival)",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 15,
+     "fee": {
+      "amount": 30,
+      "currency": "USD"
+     },
+     "notes": null
+    },
+    {
+     "type": "30-day tourist visa (on arrival)",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 50,
+      "currency": "USD"
+     },
+     "notes": null
+    },
+    {
+     "type": "90-day tourist visa (on arrival)",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 125,
+      "currency": "USD"
+     },
+     "notes": null
+    }
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "IND",
+   "destination": "ISL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://island.is/en/get-a-visa",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "visa_products": [
+    {
+     "type": "Schengen short-stay visa (single entry)",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": null
+    },
+    {
+     "type": "Schengen short-stay visa (multiple entry)",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": null
+    }
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "JPN",
+   "travel_purpose": "business"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "application_channel_detail": "Applications by Chinese nationals must be lodged through designated agencies (指定代办机构), which charge their own handling fees on top of the government fee",
+   "government_fee": {
+    "amount": 715,
+    "currency": "CNY"
+   },
+   "visa_products": [
+    {
+     "type": "Short-term stay visa (business) - diplomatic passport, applied via PRC MFA-designated agency",
+     "entry": null,
+     "validity": "1 years",
+     "max_stay_days": 90,
+     "fee": null,
+     "notes": null
+    }
+   ],
+   "processing_time": "5 working days",
+   "validity_duration": 3,
+   "validity_unit": "Month",
+   "consular_jurisdiction": "Apply at the Japanese Embassy or Consulate General with jurisdiction over your place of residence. Applying outside your country or region of residence is a stated ground for refusing to accept the application.",
+   "unpublished_fields": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "AUS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600/frequent-traveller-stream",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "government_fee": {
+    "amount": 250,
+    "currency": "AUD"
+   },
+   "official_portal_url": "https://online.immi.gov.au/lusc/login",
+   "application_channel_detail": "Apply online in ImmiAccount. There is no paper channel, and the applicant cannot choose a stay length: the Department sets it in the grant letter.",
+   "permitted_stay": "Set case by case: generally 3 months, up to 12 months in certain circumstances",
+   "visa_products": [
+    {
+     "type": "Visitor (subclass 600) Tourist stream",
+     "entry": "single",
+     "validity": "12 months",
+     "max_stay_days": 365,
+     "fee": {
+      "amount": 250,
+      "currency": "AUD"
+     },
+     "notes": null
+    },
+    {
+     "type": "Visitor (subclass 600) Approved Destination Status stream",
+     "entry": "single",
+     "validity": "12 months",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 250,
+      "currency": "AUD"
+     },
+     "notes": null
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "processing_time": "7 calendar days",
+   "consular_jurisdiction": "Not applicable. Australian visitor visas are lodged online through ImmiAccount rather than at a post.",
+   "unpublished_fields": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "ISL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://eviza.mae.ro/TypeOfVisa",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Schengen C visa (adult) - single, double or multiple entry",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": null
+    },
+    {
+     "type": "Schengen C visa (child aged 6 to under 12)",
+     "entry": null,
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 45,
+      "currency": "EUR"
+     },
+     "notes": null
+    },
+    {
+     "type": "Schengen C visa (child under 6)",
+     "entry": null,
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": null,
+     "notes": null
+    }
+   ],
+   "permitted_stay": "Up to 90 days in any 180-day period",
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "validity_duration": null,
+   "validity_unit": null,
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "ROU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://www.mae.ro/sites/default/files/file/2025_files/pdf/2025.08.27_anexa_1_eng.pdf",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Short-stay Schengen visa (C) - adult, single entry",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": null
+    },
+    {
+     "type": "Short-stay Schengen visa (C) - adult, double entry",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": null
+    },
+    {
+     "type": "Short-stay Schengen visa (C) - adult, multiple entry",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": null
+    },
+    {
+     "type": "Short-stay Schengen visa (C) - child aged 6 to 12",
+     "entry": null,
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 45,
+      "currency": "EUR"
+     },
+     "notes": null
+    },
+    {
+     "type": "Short-stay Schengen visa (C) - child under 6",
+     "entry": null,
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 0,
+      "currency": "EUR"
+     },
+     "notes": null
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "exceptions": [
+    "Mainland PRC passport holders. Annex 1 entry 22 is \"China\", with NO asterisk (so no IGI invitation requirement) and NO (1) marker (no airport transit visa); the Commission's national ATV table also lists China for no member state. Hong Kong SAR and Macao SAR passport holders are "
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "SGP",
+   "travel_purpose": "study"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://ask.gov.sg/ica/questions/clos83fvm01gr5k0wd3ccw7aj",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "permitted_stay": "For the validity of the Student's Pass; the holder must leave on or before the STP expiry date unless another pass is granted.",
+   "unpublished_fields": [
+    "max_stay_duration",
+    "max_stay_unit",
+    "validity_duration",
+    "validity_unit"
+   ],
+   "visa_products": [
+    {
+     "type": "Student's Pass (STP)",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": null,
+     "fee": {
+      "amount": 90,
+      "currency": "SGD"
+     },
+     "notes": null
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "DEU",
+   "destination": "RUS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://www.kdmid.ru/cons/visas/",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "permitted_stay": "Up to 30 days from the date of entry (unified e-visa)",
+   "permitted_stay_days": 30,
+   "visa_products": [
+    {
+     "type": "Unified e-visa (tourism, business, humanitarian)",
+     "entry": "single",
+     "validity": "3 years",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 52,
+      "currency": "USD"
+     },
+     "notes": null
+    }
+   ],
+   "government_fee": null,
+   "disposition": "VISA_REQUIRED",
+   "official_portal_url": "https://electronic-visa.kdmid.ru",
+   "exceptions": [
+    "CORRECTION: multiple-entry tourist visas (6 months) are issued on a reciprocity basis only to citizens of Greece, India, Japan, Austria, Spain and Hungary - not to German citizens. Per the Russian Embassy in Germany (germany.mid.ru Touristenvisum page): 'Es gibt folgende Arten von Touristenvisa: für eine Einreise (max. Aufenthaltsdauer 1 Monat); für zwei Einreisen (max. Aufenthaltsdauer insgesamt 1 Monat).' The stored 1-year multiple-entry tourist visa product does not exist for this route and is replaced by the double-entry product.",
+    "Paper tourist visas require a tourist confirmation (Reisebestätigung) from a Russian tour operator listed in the Unified Federal Tourist Register, with entry/exit dates of max 30 days."
+   ],
+   "validity_duration": 120,
+   "validity_unit": "Day",
+   "consular_jurisdiction": "Apply at the Russian consular office covering your place of permanent residence.",
+   "unpublished_fields": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "IND",
+   "destination": "SGP",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://chennai.mfa.gov.sg/consular-services/visa-information/frequently-asked-questions-on-visa/",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "official_portal_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+   "government_fee": {
+    "amount": 30,
+    "currency": "SGD"
+   },
+   "visa_products": [
+    {
+     "type": "Singapore entry visa - single journey (social/business visit)",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 30,
+      "currency": "SGD"
+     },
+     "notes": null
+    },
+    {
+     "type": "Singapore entry visa - multiple journey",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 30,
+      "currency": "SGD"
+     },
+     "notes": null
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "processing_time": "3 working days (excluding day of submission)",
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "RUS",
+   "destination": "SGP",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://ask.gov.sg/ica/questions/clos83fw201ol5k0w6sf3u5ap",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "official_portal_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+   "government_fee": {
+    "amount": 30,
+    "currency": "SGD"
+   },
+   "visa_products": [
+    {
+     "type": "Singapore entry visa - single journey (social/business visit)",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 30,
+      "currency": "SGD"
+     },
+     "notes": null
+    },
+    {
+     "type": "Singapore entry visa - multiple journey",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 30,
+      "currency": "SGD"
+     },
+     "notes": null
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "evisa",
+   "exceptions": [
+    "ICA (ask.gov.sg official FAQ, 'What is the validity period of a Singapore Visa?') states visa validity is decided per application; the validity granted is shown on the e-Visa. ICA's Russia visa-detail page (loaded) confirms: 'A S$30 non-refundable processing fee is payable online using a Visa or MasterCard credit/debit card.' ICA also states the period of stay granted at entry (e-Pass) is not tied to the validity of the visa."
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "LKA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://www.eta.gov.lk/slvisa/visainfo/fees.jsp?locale=en_US",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "government_fee": {
+    "amount": 0,
+    "currency": "USD"
+   },
+   "permitted_stay_days": 30,
+   "visa_products": [
+    {
+     "type": "Tourist ETA (free of charge for 40 eligible nationalities including USA)",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 0,
+      "currency": "USD"
+     },
+     "notes": null
+    }
+   ],
+   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+   "requirement_detail": "eta_electronic_authorization",
+   "application_channel": "online_application",
+   "application_channel_detail": "All foreign nationals, including US citizens, must obtain an Electronic Travel Authorization (ETA) before arrival in Sri Lanka. US nationals are among the 40 nationalities eligible for a free-of-charge 30-day tourist ETA with a double-entry facility; remaining beyond 30 days requires a visa extension on payment of the applicable fee.",
+   "official_portal_url": "https://eta.gov.lk/slvisa/",
+   "permitted_stay": "30 days from first arrival",
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "JPN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "permitted_stay": "15 or 30 days on a single-entry tourist visa (decided by the mission); 30 days per visit on the 3-year multiple-entry visas; 90 days per visit on the 5-year multiple-entry visa",
+   "government_fee": {
+    "amount": 715,
+    "currency": "CNY"
+   },
+   "visa_products": [
+    {
+     "type": "Group tourist visa (团队旅游签证)",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 15,
+     "fee": {
+      "amount": 715,
+      "currency": "CNY"
+     },
+     "notes": null
+    },
+    {
+     "type": "Temporary Visitor (short-term stay, tourism)",
+     "entry": null,
+     "validity": null,
+     "max_stay_days": 30,
+     "fee": null,
+     "notes": null
+    }
+   ],
+   "arrival_card": {
+    "required": true,
+    "name": "Visit Japan Web",
+    "submission_window": "Register before departure for immigration and customs"
+   },
+   "application_channel": "authorised_agent",
+   "application_channel_detail": "Chinese ordinary passport holders cannot apply directly to the embassy; tourist visa applications must be lodged through a designated travel agency. Since 19 June 2023 the embassy issues single-entry tourist visas for stays within 30 days as electronic visas; the applicant must show the 'Visa issuance notice' on a mobile device with internet access at the airport (PDF files, screenshots and printouts are not accepted).",
+   "permitted_stay_days": 30,
+   "requirement_detail": "evisa",
+   "processing_time": "5 working days",
+   "exceptions": [
+    "Single-entry tourist visas for mainland residents are electronic since 19 June 2023: the Visa issuance notice must be shown online at the airport",
+    "The consular fee is charged only if the visa is issued; the designated agency charges its own handling fee on top",
+    "Individuals cannot apply at the embassy or consulate: every tourist application goes through a designated travel agency, which also books flights and hotels except for the 5-year visa"
+   ],
+   "official_portal_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+   "disposition": "VISA_REQUIRED",
+   "validity_duration": 3,
+   "validity_unit": "Month",
+   "consular_jurisdiction": "Apply at the Japanese Embassy or Consulate General with jurisdiction over your place of residence. Applying outside your country or region of residence is a stated ground for refusing to accept the application.",
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "AUS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "application_channel_detail": "Apply for the ETA in the Australian ETA mobile app. There is no web form for this authorisation.",
+   "official_portal_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/electronic-travel-authority-601",
+   "government_fee": {
+    "amount": 20,
+    "currency": "AUD"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Electronic Travel Authority (subclass 601) - tourism/business visitor",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 20,
+      "currency": "AUD"
+     },
+     "notes": null
+    }
+   ],
+   "permitted_stay": "Up to 3 months at a time",
+   "processing_time": "7 calendar days",
+   "validity_duration": 12,
+   "validity_unit": "Month",
+   "consular_jurisdiction": "Not applicable. Australian visitor visas are lodged online through ImmiAccount rather than at a post.",
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "TWN",
+   "destination": "AUS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "official_portal_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600",
+   "government_fee": {
+    "amount": 20,
+    "currency": "AUD"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Electronic Travel Authority (subclass 601)",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 20,
+      "currency": "AUD"
+     },
+     "notes": null
+    }
+   ],
+   "permitted_stay": "Up to 3 months at a time",
+   "validity_duration": 12,
+   "validity_unit": "Month",
+   "consular_jurisdiction": "Not applicable. Australian visitor visas are lodged online through ImmiAccount rather than at a post.",
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "JPN",
+   "destination": "AUS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "government_fee": {
+    "amount": 20,
+    "currency": "AUD"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Electronic Travel Authority (subclass 601)",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 20,
+      "currency": "AUD"
+     },
+     "notes": null
+    }
+   ],
+   "permitted_stay": "Up to 3 months at a time",
+   "processing_time": "7 calendar days",
+   "validity_duration": 12,
+   "validity_unit": "Month",
+   "consular_jurisdiction": "Not applicable. Australian visitor visas are lodged online through ImmiAccount rather than at a post.",
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "KOR",
+   "destination": "AUS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "government_fee": {
+    "amount": 20,
+    "currency": "AUD"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Electronic Travel Authority (subclass 601)",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 20,
+      "currency": "AUD"
+     },
+     "notes": null
+    }
+   ],
+   "permitted_stay": "Up to 3 months at a time",
+   "validity_duration": 12,
+   "validity_unit": "Month",
+   "consular_jurisdiction": "Not applicable. Australian visitor visas are lodged online through ImmiAccount rather than at a post.",
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "AUS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "application_channel_detail": "Apply for the ETA in the Australian ETA mobile app. There is no web form for this authorisation.",
+   "official_portal_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/electronic-travel-authority-601",
+   "government_fee": {
+    "amount": 20,
+    "currency": "AUD"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Electronic Travel Authority (subclass 601)",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 20,
+      "currency": "AUD"
+     },
+     "notes": null
+    }
+   ],
+   "permitted_stay": "Up to 3 months at a time",
+   "processing_time": "7 calendar days",
+   "validity_duration": 12,
+   "validity_unit": "Month",
+   "consular_jurisdiction": "Not applicable. Australian visitor visas are lodged online through ImmiAccount rather than at a post.",
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "SGP",
+   "destination": "AUS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "government_fee": {
+    "amount": 20,
+    "currency": "AUD"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Electronic Travel Authority (subclass 601)",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 20,
+      "currency": "AUD"
+     },
+     "notes": null
+    }
+   ],
+   "permitted_stay": "Up to 3 months at a time",
+   "processing_time": "7 calendar days",
+   "validity_duration": 12,
+   "validity_unit": "Month",
+   "consular_jurisdiction": "Not applicable. Australian visitor visas are lodged online through ImmiAccount rather than at a post.",
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CAN",
+   "destination": "AUS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (validity)",
+  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
+  "fields": {
+   "government_fee": {
+    "amount": 20,
+    "currency": "AUD"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Electronic Travel Authority (subclass 601)",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 20,
+      "currency": "AUD"
+     },
+     "notes": null
+    }
+   ],
+   "permitted_stay": "Up to 3 months at a time",
+   "processing_time": "7 calendar days",
+   "validity_duration": 12,
+   "validity_unit": "Month",
+   "consular_jurisdiction": "Not applicable. Australian visitor visas are lodged online through ImmiAccount rather than at a post.",
+   "unpublished_fields": [
     "validity_duration",
     "validity_unit"
    ]

@@ -450,8 +450,14 @@ class DatabaseIssueReport(Base, TimestampMixin):
     and field are recorded verbatim; the answer itself is NOT copied here (the
     cache row it points at holds it, and stays the single source of truth).
 
-    Status walks: open -> acknowledged -> corrected | dismissed. Only an
-    operator moves it; a reader can only open one."""
+    Status walks the five stages their standard names: open -> acknowledged
+    (the information provider has been told) -> corrected (the fix is written)
+    -> reviewed (an operator checked the fix) -> published (the corrected
+    answer is live), or dismissed. Collapsing review and go-live into
+    "corrected" meant two of the five required stages had no representation at
+    all, and an issue could be closed by whoever wrote the fix.
+
+    Only an operator moves it; a reader can only open one."""
     __tablename__ = "database_issue_reports"
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
     org_id: Mapped[str] = mapped_column(String(64), index=True, default="")
@@ -465,6 +471,43 @@ class DatabaseIssueReport(Base, TimestampMixin):
     resolved_by: Mapped[str] = mapped_column(String(64), default="")
     resolved_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True)
+    # Who was told, when, and who signed the fix off. Without these the loop
+    # could not show that the provider was notified or that anyone other than
+    # the author reviewed the correction.
+    notified_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True)
+    notified_to: Mapped[str] = mapped_column(String(200), default="")
+    reviewed_by: Mapped[str] = mapped_column(String(64), default="")
+    reviewed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True)
+    published_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True)
+
+
+class DatabaseAskLog(Base, TimestampMixin):
+    """One AI Q&A exchange, kept so it can be spot-checked.
+
+    Their §4 requires operations to sample the assistant's answers the same
+    way it samples records. Nothing about an answer was stored, so the one
+    surface that speaks to a customer in its own words was the one surface
+    nobody could audit. The question, the route it was read as, the answer
+    shown and the source cited are recorded; nothing about the person asking
+    is, because none of it is needed to check an answer."""
+    __tablename__ = "database_ask_log"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    org_id: Mapped[str] = mapped_column(String(64), index=True, default="")
+    question: Mapped[str] = mapped_column(String(1000), default="")
+    language: Mapped[str] = mapped_column(String(16), default="")
+    understood: Mapped[bool] = mapped_column(Boolean, default=False)
+    route: Mapped[dict] = mapped_column(JSON, default=dict)
+    answer: Mapped[dict] = mapped_column(JSON, default=dict)
+    source_url: Mapped[str] = mapped_column(String(500), default="")
+    held: Mapped[bool] = mapped_column(Boolean, default=False)
+    confidence: Mapped[str] = mapped_column(String(16), default="")
+    reviewed_by: Mapped[str] = mapped_column(String(64), default="")
+    reviewed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True)
+    verdict: Mapped[str] = mapped_column(String(16), default="")
 
 
 class RouteIntakeDocument(Base, TimestampMixin):

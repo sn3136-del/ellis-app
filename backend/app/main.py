@@ -443,7 +443,16 @@ class DatabaseIssueUpdateIn(BaseModel):
 # open -> acknowledged -> corrected | dismissed. An issue never silently
 # disappears: dismissing one requires saying why, in the same field a
 # correction is recorded in.
-DATABASE_ISSUE_STATUSES = ("open", "acknowledged", "corrected", "dismissed")
+# Their §4.1.2 loop has five stages: flag, notify the information provider,
+# correct, operations review, go live. Three statuses could not express it, so
+# review and go-live were invisible and an issue could be closed by the same
+# person who wrote the fix.
+DATABASE_ISSUE_STATUSES = ("open", "acknowledged", "corrected", "reviewed",
+                           "published", "dismissed")
+# The order a report has to walk. Skipping a stage or going backwards is
+# rejected, so the queue records a progression rather than a free-text label.
+_ISSUE_ORDER = {"open": 0, "acknowledged": 1, "corrected": 2, "reviewed": 3,
+                "published": 4, "dismissed": 4}
 
 
 @app.post("/database/issues/{issue_id}")
@@ -465,18 +474,38 @@ def travel_database_issue_update(issue_id: str, body: DatabaseIssueUpdateIn,
     if status in ("corrected", "dismissed") and not (body.resolution or "").strip():
         raise HTTPException(422, "say what was corrected, or why this is "
                                  "being dismissed")
+    here, there = _ISSUE_ORDER.get(row.status, 0), _ISSUE_ORDER[status]
+    if status != "dismissed" and there < here:
+        raise HTTPException(422, f"an issue cannot go back from {row.status} "
+                                 f"to {status}")
+    if status != "dismissed" and there > here + 1:
+        raise HTTPException(422, f"{row.status} must be followed by the next "
+                                 f"stage, not {status}")
+    if status == "reviewed" and row.resolved_by == p.user_id:
+        raise HTTPException(422, "the correction has to be reviewed by someone "
+                                 "other than the person who wrote it")
     row.status = status
     if body.resolution:
         row.resolution = body.resolution[:1000]
+    now = datetime.now(timezone.utc)
+    if status == "acknowledged":
+        # The provider has been told. Recording who and when is what makes the
+        # notify stage auditable rather than assumed.
+        row.notified_at = now
+        row.notified_to = (body.resolution or "information provider")[:200]
     if status in ("corrected", "dismissed"):
         row.resolved_by = p.user_id
-        row.resolved_at = datetime.now(timezone.utc)
+        row.resolved_at = now
+    if status == "reviewed":
+        row.reviewed_by, row.reviewed_at = p.user_id, now
+    if status == "published":
+        row.published_at = now
     # "Corrected" has to change what readers actually see. Without this the
     # cached wrong answer kept serving for the rest of its TTL and the queue
     # said the problem was fixed. Expiring the row makes the next lookup
     # re-ask the engine; the reader is never shown a stale answer that an
     # operator has just declared wrong.
-    if status == "corrected" and row.cache_key:
+    if status in ("corrected", "published") and row.cache_key:
         from sqlalchemy import select as _sel
         from .visa_snapshot.models import KimiRouteGuidanceCache
         cached = db.execute(_sel(KimiRouteGuidanceCache).where(
@@ -845,12 +874,24 @@ def travel_database_issues(db=Depends(get_session),
     # own org meant no reader report was ever visible to anyone.
     rows = db.execute(_select(DatabaseIssueReport).order_by(
         DatabaseIssueReport.created_at)).scalars().all()
+    def _iso(v):
+        return v.isoformat() if v else None
+    # Every stage of the loop is reported, not just the current label. A
+    # closure nobody can attribute is not traceable, which is the whole point
+    # of the requirement.
     return {"issues": [{"id": r.id, "route": r.route, "field": r.field,
                         "note": r.note, "status": r.status,
                         "resolution": r.resolution,
                         "reported_by": r.reported_by,
-                        "created_at": r.created_at.isoformat()
-                        if r.created_at else None} for r in rows]}
+                        "cache_key": r.cache_key,
+                        "notified_to": r.notified_to,
+                        "notified_at": _iso(r.notified_at),
+                        "resolved_by": r.resolved_by,
+                        "resolved_at": _iso(r.resolved_at),
+                        "reviewed_by": r.reviewed_by,
+                        "reviewed_at": _iso(r.reviewed_at),
+                        "published_at": _iso(r.published_at),
+                        "created_at": _iso(r.created_at)} for r in rows]}
 
 
 def _tstation_rows(db, *, nationality: str = "", destination: str = "",
@@ -1109,12 +1150,30 @@ def travel_database_changes(q: str = "", limit: int = 200,
                             p: Principal = Depends(get_principal)):
     """The change log: what changed in served answers, newest first —
     add / modify / delete with a field-level diff, searchable."""
+    from sqlalchemy import String as _String
+    from sqlalchemy import func as _func
+    from sqlalchemy import or_ as _or_
     from sqlalchemy import select as _select
     from .visa_snapshot.models import DatabaseChangeLog
     require_admin(p)
-    rows = db.execute(_select(DatabaseChangeLog).order_by(
-        DatabaseChangeLog.created_at.desc()).limit(max(1, min(limit, 1000)))).scalars().all()
+    # Search must run in the database, not over a pre-truncated page. Filtering
+    # after a 1,000-row cap meant a term that existed only in older history
+    # returned nothing, and the same query found it once the caller happened to
+    # ask for a bigger page. The cap is the caller's page size now, not a
+    # ceiling on what is searchable.
     needle = q.strip().lower()
+    stmt = _select(DatabaseChangeLog)
+    if needle:
+        like = f"%{needle}%"
+        stmt = stmt.where(_or_(
+            _func.lower(DatabaseChangeLog.cache_key).like(like),
+            _func.lower(DatabaseChangeLog.action).like(like),
+            _func.lower(DatabaseChangeLog.origin).like(like),
+            _func.lower(_func.coalesce(DatabaseChangeLog.note, "")).like(like),
+            _func.lower(_func.cast(DatabaseChangeLog.changes, _String)).like(like),
+        ))
+    rows = db.execute(stmt.order_by(DatabaseChangeLog.created_at.desc())
+                      .limit(max(1, min(limit, 20000)))).scalars().all()
     out = []
     for r in rows:
         blob = f"{r.cache_key} {r.action} {r.origin} {r.note} {list((r.changes or {}).keys())}".lower()
@@ -1237,6 +1296,61 @@ class DatabaseAskIn(BaseModel):
     context: dict | None = None
 
 
+@app.get("/database/asks")
+def travel_database_asks(limit: int = 200, unreviewed: bool = False,
+                         db=Depends(get_session),
+                         p: Principal = Depends(get_principal)):
+    """The AI Q&A log, newest first, so operations can sample what the
+    assistant actually told customers."""
+    from sqlalchemy import select as _sel
+    from .visa_snapshot.models import DatabaseAskLog
+    require_admin(p)
+    stmt = _sel(DatabaseAskLog)
+    if unreviewed:
+        stmt = stmt.where(DatabaseAskLog.verdict == "")
+    rows = db.execute(stmt.order_by(DatabaseAskLog.created_at.desc())
+                      .limit(max(1, min(limit, 2000)))).scalars().all()
+    return {"asks": [{"id": r.id, "question": r.question, "language": r.language,
+                      "understood": r.understood, "route": r.route,
+                      "answer": r.answer, "source_url": r.source_url,
+                      "held": r.held, "confidence": r.confidence,
+                      "verdict": r.verdict, "reviewed_by": r.reviewed_by,
+                      "at": r.created_at.isoformat() if r.created_at else None}
+                     for r in rows],
+            "unreviewed": sum(1 for r in rows if not r.verdict)}
+
+
+def _log_ask(db, p, question: str, parsed: dict, out: dict) -> None:
+    """Keep the exchange so operations can sample it.
+
+    Their standard requires the assistant's answers to be spot-checked, and
+    nothing about them was stored, so the surface that talks to a customer in
+    its own words was the only one nobody could audit. Failure here must never
+    break the answer: a log that can sink a reply is worse than no log.
+    """
+    try:
+        from .visa_snapshot.models import DatabaseAskLog
+        g = (out or {}).get("guidance") or {}
+        db.add(DatabaseAskLog(
+            org_id=p.org_id,
+            question=str(question or "")[:1000],
+            language="zh" if re.search(r"[\u4e00-\u9fff]", str(question or "")) else "en",
+            understood=bool((out or {}).get("understood", True)),
+            route={k: parsed.get(k) for k in
+                   ("nationality", "destination", "travel_purpose",
+                    "travel_document_type")},
+            answer={k: g.get(k) for k in
+                    ("disposition", "visa_category", "permitted_stay",
+                     "requirement_detail")},
+            source_url=str(g.get("source_url") or g.get("official_portal_url") or "")[:500],
+            held=bool((out or {}).get("held")),
+            confidence=str((out or {}).get("confidence")
+                           or g.get("confidence") or "")[:16]))
+        db.commit()
+    except Exception:  # noqa: BLE001 - never let auditing break an answer
+        db.rollback()
+
+
 @app.post("/database/ask")
 def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
                         p: Principal = Depends(get_principal)):
@@ -1318,6 +1432,7 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
                  action="database_ask",
                  detail={"nationality": parsed["nationality"],
                          "destination": parsed["destination"]}, actor=p.user_id)
+    _log_ask(db, p, body.question, parsed, out)
     return out
 
 

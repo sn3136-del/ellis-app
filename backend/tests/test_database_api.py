@@ -103,6 +103,17 @@ def test_the_quality_loop_report_queue_correct_refresh(client):
                       json={"status": "corrected"})
     assert bad.status_code == 422
     # 4. Corrected (with a reason) expires the cached answer...
+    # The loop walks its five stages now: the provider is told, the fix is
+    # written, someone else reviews it, and only then does it go live. Skipping
+    # a stage is refused, which is what makes the queue a progression rather
+    # than a free-text label.
+    ack = client.post(f"/database/issues/{issue_id}", headers=OTHER_ORG_ADMIN,
+                      json={"status": "acknowledged",
+                            "resolution": "flagged to the information provider"})
+    assert ack.status_code == 200
+    skip = client.post(f"/database/issues/{issue_id}", headers=OTHER_ORG_ADMIN,
+                       json={"status": "published", "resolution": "x"})
+    assert skip.status_code == 422, "a stage may not be skipped"
     ok = client.post(f"/database/issues/{issue_id}", headers=OTHER_ORG_ADMIN,
                      json={"status": "corrected",
                            "resolution": "re-decided with the fixed prompt"})

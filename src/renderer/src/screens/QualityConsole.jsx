@@ -245,6 +245,80 @@ function StatTile({ label, value, sub, accent = NAVY }) {
  *  aliases resolve server-side too") or a code ("CN", "CHN"); pick from the
  *  dropdown. The FILTER value sent to the API is whatever is committed —
  *  the server resolves names and codes alike. */
+function SuggestInput({ value, placeholder, options, onCommit, testid }) {
+  // A plain input re-filtered 1,100 records on every keystroke, so the table
+  // re-rendered mid-word and typing felt like it was fighting back. The box
+  // now owns its own text, suggests from values that actually exist in the
+  // data, and only commits when the typing stops or the reader picks one.
+  const [q, setQ] = useState(value || '')
+  const [open, setOpen] = useState(false)
+  const [hi, setHi] = useState(0)
+  const timer = useRef(null)
+  const blur = useRef(null)
+  useEffect(() => { setQ(value || '') }, [value])
+  useEffect(() => () => { clearTimeout(timer.current); clearTimeout(blur.current) }, [])
+
+  const matches = useMemo(() => {
+    const s2 = q.trim().toLowerCase()
+    if (!s2) return options.slice(0, 10)
+    const starts = [], rest = []
+    for (const o of options) {
+      const l = o.toLowerCase()
+      if (!l.includes(s2)) continue
+      ;(l.startsWith(s2) ? starts : rest).push(o)
+    }
+    return [...starts, ...rest].slice(0, 10)
+  }, [q, options])
+
+  const commit = (v) => { clearTimeout(timer.current); onCommit(v) }
+  const type = (v) => {
+    setQ(v); setOpen(true); setHi(0)
+    // Commit after a pause, so a half-typed word never filters the table.
+    clearTimeout(timer.current)
+    timer.current = setTimeout(() => onCommit(v), 320)
+  }
+  const pick = (o) => { setQ(o); setOpen(false); commit(o) }
+
+  return (
+    <div style={{ position: 'relative' }}
+         onBlur={() => { blur.current = setTimeout(() => setOpen(false), 120) }}
+         onFocus={() => clearTimeout(blur.current)}>
+      <input value={q} className="ops-in" data-testid={testid}
+             placeholder={placeholder} autoComplete="off"
+             style={{ ...input, width: '100%', boxSizing: 'border-box' }}
+             onFocus={() => setOpen(true)}
+             onChange={(e) => type(e.target.value)}
+             onKeyDown={(e) => {
+               if (e.key === 'ArrowDown') { e.preventDefault(); setOpen(true); setHi((i) => Math.min(i + 1, matches.length - 1)) }
+               else if (e.key === 'ArrowUp') { e.preventDefault(); setHi((i) => Math.max(i - 1, 0)) }
+               else if (e.key === 'Enter') { e.preventDefault(); if (open && matches[hi]) pick(matches[hi]); else commit(q); setOpen(false) }
+               else if (e.key === 'Escape') { setOpen(false) }
+             }} />
+      {q && (
+        <button onMouseDown={(e) => { e.preventDefault(); setQ(''); commit('') }}
+                aria-label="clear"
+                style={{ position: 'absolute', right: 8, top: 8, border: 'none',
+                         background: 'none', color: GRAY, cursor: 'pointer',
+                         fontSize: 14, lineHeight: 1, padding: 2 }}>×</button>
+      )}
+      {open && matches.length > 0 && (
+        <div style={{ position: 'absolute', zIndex: 40, left: 0, right: 0, top: '100%',
+                      marginTop: 4, background: '#fff', border: `1px solid ${BORDER}`,
+                      borderRadius: 10, boxShadow: '0 10px 26px rgba(15,41,77,.12)',
+                      maxHeight: 260, overflowY: 'auto' }}>
+          {matches.map((o, i) => (
+            <div key={o} onMouseDown={(e) => { e.preventDefault(); pick(o) }}
+                 onMouseEnter={() => setHi(i)}
+                 style={{ padding: '8px 11px', fontSize: 12.5, cursor: 'pointer',
+                          color: NAVY, background: i === hi ? '#eef4ff' : '#fff',
+                          overflowWrap: 'anywhere' }}>{o}</div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function CountryFilter({ value, placeholder, onCommit, countries }) {
   // The interaction model is the customer combo\'s, which is proven: the box
   // EMPTIES on focus so typing always starts fresh (the committed country
@@ -1142,7 +1216,7 @@ function useValueTranslations(client, lang) {
 
 const EMPTY_FILTERS = { nationality: '', destination: '', purpose: '',
                         requirement: '', confidence: '', visaType: '',
-                        fieldMissing: '' }
+                        fieldMissing: '', document: '' }
 
 export default function QualityConsole() {
   const client = useOpsClient()
@@ -1151,6 +1225,23 @@ export default function QualityConsole() {
   const [tab, setTab] = useState('records')
   const [filters, setFilters] = useState(EMPTY_FILTERS)
   const activeFilters = Object.values(filters).filter(Boolean).length
+  // Suggestions come from the visa type names that actually exist, so the box
+  // can never propose a filter that returns nothing.
+  const documentOptions = useMemo(() => {
+    const seen = new Set()
+    for (const r of (data?.records || [])) {
+      if (r.travel_document_type) seen.add(r.travel_document_type)
+    }
+    return [...seen].sort()
+  }, [data])
+  const visaTypeOptions = useMemo(() => {
+    const seen = new Map()
+    for (const r of (data?.records || [])) {
+      const v = String(r.visa_type_name || '').trim()
+      if (v) seen.set(v, (seen.get(v) || 0) + 1)
+    }
+    return [...seen.entries()].sort((a, b) => b[1] - a[1]).map(([v]) => v)
+  }, [data])
   const [reg, setReg] = useState(null)
   const [data, setData] = useState(null)
   const [changes, setChanges] = useState(null)
@@ -1406,6 +1497,7 @@ export default function QualityConsole() {
       if (filters.confidence && r.confidence_level !== filters.confidence) return false
       if (filters.visaType && !String(r.visa_type_name || '')
             .toLowerCase().includes(filters.visaType.trim().toLowerCase())) return false
+      if (filters.document && r.travel_document_type !== filters.document) return false
       if (filters.fieldMissing &&
           (r.field_status || {})[filters.fieldMissing] !== 'missing') return false
       return true
@@ -1586,13 +1678,27 @@ export default function QualityConsole() {
               {/* The acceptance standard's extra slice dimensions (4.1.2):
                   by visa type, and by a specific field's gaps. */}
               <F label={t('ops.flt.visaType')}>
-              <input value={filters.visaType} className="ops-in"
-                     style={{ ...input, width: '100%',
-                              boxSizing: 'border-box' }}
-                     placeholder={t('ops.typeFilter')}
-                     data-testid="ops-filter-visatype"
-                     onChange={(e) => setFilters((f) =>
-                       ({ ...f, visaType: e.target.value }))} />
+              <SuggestInput value={filters.visaType}
+                            placeholder={t('ops.typeFilter')}
+                            testid="ops-filter-visatype"
+                            options={visaTypeOptions}
+                            onCommit={(v) => setFilters((f) => ({ ...f, visaType: v }))} />
+              </F>
+              <F label={t('ops.flt.document')}>
+              <select className="ops-in" value={filters.document}
+                      data-testid="ops-filter-document"
+                      style={{ ...input, width: '100%', boxSizing: 'border-box',
+                               color: filters.document ? NAVY : GRAY }}
+                      onChange={(e) => setFilters((f) =>
+                        ({ ...f, document: e.target.value }))}>
+                <option value="">{t('ops.anyDocument')}</option>
+                {documentOptions.map((d) => (
+                  <option key={d} value={d}>
+                    {t('db.doc.' + d) !== 'db.doc.' + d
+                      ? t('db.doc.' + d) : d.replace(/_/g, ' ')}
+                  </option>
+                ))}
+              </select>
               </F>
               <F label={t('ops.flt.gap')}>
               <select className="ops-in" value={filters.fieldMissing}

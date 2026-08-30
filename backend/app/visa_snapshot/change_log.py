@@ -16,11 +16,22 @@ from .models import DatabaseChangeLog
 
 # The reader-visible surface, in Trip.com's own field terms. Internal
 # machinery (verification stamps, model names) is not a "change" to them.
+# Every guidance key that can move any of the 25 delivered fields. The diff
+# used to watch fourteen, so a change to validity, entries, fee currency, the
+# consular district or the entry requirements produced no log entry at all:
+# nine of the twenty-five fields could change silently, which is the opposite
+# of what a change log is for.
 _WATCHED = (
     "disposition", "requirement_detail", "visa_category", "permitted_stay",
     "permitted_stay_days", "application_channel", "application_channel_detail",
     "government_fee", "official_portal_url", "visa_products",
     "processing_time", "required_documents", "exceptions", "confidence",
+    # added so the remaining delivered fields are traceable too
+    "source_url", "validity", "entries", "arrival_card", "passport_validity",
+    "consular_jurisdiction", "entry_requirements", "unpublished_fields",
+    "onward_travel_evidence", "accommodation_evidence", "financial_evidence",
+    "insurance_required", "biometrics_required", "health_requirements",
+    "policy_valid_until",
 )
 
 
