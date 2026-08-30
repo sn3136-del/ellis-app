@@ -46328,7 +46328,7 @@
   },
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (validity)",
-  "source_url": "https://evisa.xuatnhapcanh.gov.vn/trang-chu-ttdt",
+  "source_url": "https://evisa.gov.vn/",
   "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish.",
   "fields": {
    "permitted_stay_days": 90,
