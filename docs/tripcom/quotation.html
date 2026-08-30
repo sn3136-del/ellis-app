@@ -60,15 +60,15 @@ ul{margin:0;padding-left:14px} li{margin-bottom:1px}
 <tr><td>AI engineer maintaining the database, half time</td><td class="num">3,000</td></tr>
 <tr><td>Acceptance programme: five stages, three documents each</td><td class="num">540</td></tr>
 <tr><td>On-call cover for the 24-hour urgent policy path</td><td class="num">400</td></tr>
-<tr><td>Model and research API, 40 deep-research runs a month at $10</td><td class="num">400</td></tr>
+<tr><td>Model and research API, measured per operation (section 6)</td><td class="num">482</td></tr>
 <tr><td>Hosting with redundancy, daily backup with 1h RTO, external monitoring</td><td class="num">120</td></tr>
-<tr><td>Tooling, support and contingency</td><td class="num">140</td></tr>
-<tr class="tot"><td>Monthly total</td><td class="num">4,600</td></tr>
+<tr><td>Tooling, support and contingency</td><td class="num">158</td></tr>
+<tr class="tot"><td>Monthly total</td><td class="num">4,700</td></tr>
 </tbody></table>
 
-<div class="hero"><div>Year one: build plus 12 months of operations</div><div class="v">USD 104,800</div></div>
-<div class="chart"><svg viewBox="0 0 474 86" width="100%" style="max-width:474px;display:block"><rect x="4" y="41.9" width="52" height="22.1" fill="#1D4ED8"/><text x="64" y="57.2" font-size="8.8" fill="#7A8798">Build <tspan font-weight="700" fill="#0F294D">$49,600</tspan></text><rect x="4" y="15.1" width="52" height="24.8" fill="#0891B2"/><text x="64" y="31.8" font-size="8.8" fill="#7A8798">Operations <tspan font-weight="700" fill="#0F294D">$55,200</tspan></text><text x="4" y="9.1" font-size="13" font-weight="800" fill="#0F294D">$104,800</text><text x="4" y="79" font-size="8.8" fill="#7A8798">Year 1</text><rect x="250" y="39.2" width="52" height="24.8" fill="#0891B2"/><text x="310" y="55.9" font-size="8.8" fill="#7A8798">Operations <tspan font-weight="700" fill="#0F294D">$55,200</tspan></text><text x="250" y="33.2" font-size="13" font-weight="800" fill="#0F294D">$55,200</text><text x="250" y="79" font-size="8.8" fill="#7A8798">Year 2 onward</text><line x1="0" y1="66" x2="474" y2="66" stroke="#0F294D" stroke-width="1"/></svg></div>
-<div class="note">The build is charged once. Every year after the first is operations only, <b>USD 55,200</b>, and the system belongs to you.</div>
+<div class="hero"><div>Year one: build plus 12 months of operations</div><div class="v">USD 106,000</div></div>
+<div class="chart"><svg viewBox="0 0 474 86" width="100%" style="max-width:474px;display:block"><rect x="4" y="42.2" width="52" height="21.8" fill="#1D4ED8"/><text x="64" y="57.4" font-size="8.8" fill="#7A8798">Build <tspan font-weight="700" fill="#0F294D">$49,600</tspan></text><rect x="4" y="15.1" width="52" height="25.1" fill="#0891B2"/><text x="64" y="31.9" font-size="8.8" fill="#7A8798">Operations <tspan font-weight="700" fill="#0F294D">$56,400</tspan></text><text x="4" y="9.1" font-size="13" font-weight="800" fill="#0F294D">$106,000</text><text x="4" y="79" font-size="8.8" fill="#7A8798">Year 1</text><rect x="250" y="38.9" width="52" height="25.1" fill="#0891B2"/><text x="310" y="55.7" font-size="8.8" fill="#7A8798">Operations <tspan font-weight="700" fill="#0F294D">$56,400</tspan></text><text x="250" y="32.9" font-size="13" font-weight="800" fill="#0F294D">$56,400</text><text x="250" y="79" font-size="8.8" fill="#7A8798">Year 2 onward</text><line x1="0" y1="66" x2="474" y2="66" stroke="#0F294D" stroke-width="1"/></svg></div>
+<div class="note">The build is charged once. Every year after the first is operations only, <b>USD 56,400</b>, and the system belongs to you.</div>
 
 <h2>4 · Payment</h2>
 <table><tbody>
@@ -89,12 +89,21 @@ ul{margin:0;padding-left:14px} li{margin-bottom:1px}
 </tbody></table>
 <div class="note">This is an AI engineer, not a data clerk. The job is adjudicating what the machine flags against official sources, keeping the verification pipeline running, and holding the 48-hour correction and 24-hour urgent windows. Without that person the database drifts and the accuracy targets in section 6.1 stop being met. The deep-research runs in the table above are the same work on the machine side: each one reads up to twelve government pages for a route nobody has answered before.</div>
 
-<h2>6 · For reference, against your own visa products <em>live prices on vacations.ctrip.com/visa, 30 August 2026</em></h2>
+<h2>6 · What the model actually costs <em>unit costs measured on the live system</em></h2>
+<table><thead><tr><th style="width:46%">Operation</th><th class="num" style="width:18%">Unit USD</th>
+<th class="num" style="width:18%">Per month</th><th class="num" style="width:18%">USD</th></tr></thead><tbody>
+<tr><td>Route decision, not yet in cache</td><td class="num">$0.0106</td><td class="num">25,000</td><td class="num">$265</td></tr><tr><td>Re-check one answer against its official page</td><td class="num">$0.0157</td><td class="num">2,500</td><td class="num">$39</td></tr><tr><td>Deep research, up to twelve government pages</td><td class="num">$0.1184</td><td class="num">500</td><td class="num">$59</td></tr><tr><td>AI Q&amp;A question parsing</td><td class="num">$0.0018</td><td class="num">50,000</td><td class="num">$89</td></tr>
+<tr><td>Translation deltas</td><td class="num"></td><td class="num"></td><td class="num">$30</td></tr>
+<tr class="tot"><td>Model and research API</td><td class="num"></td><td class="num"></td><td class="num">$482</td></tr>
+</tbody></table>
+<div class="note">Unit costs are computed from sizes measured on the running system and Kimi's published rates of $1.90 per million input tokens and $8.00 per million output. Page text is capped at 40,000 characters, and the official pages this database cites average 8,354 characters of extracted text, sampled live across 17 government sources. Volumes assume 500,000 requirement queries a month across the 18 sites with 95% served from cache; the unit costs hold at any volume, so this line scales with your traffic rather than being a flat fee.</div>
+
+<h2>7 · For reference, against your own visa products <em>live prices on vacations.ctrip.com/visa, 30 August 2026</em></h2>
 <table><thead><tr><th style="width:64%">Ctrip product</th><th class="num" style="width:18%">Price CNY</th>
 <th class="num" style="width:18%">USD</th></tr></thead><tbody><tr><td>美国个人旅游签证 加急<span style="color:#7A8798"> · US tourist, expedited</span></td><td class="num">¥3,699</td><td class="num">$521</td></tr><tr><td>加拿大个人旅游签证<span style="color:#7A8798"> · Canada tourist</span></td><td class="num">¥4,188</td><td class="num">$590</td></tr><tr><td>日本个人旅游签证 5年多次<span style="color:#7A8798"> · Japan, 5-year multiple</span></td><td class="num">¥1,758</td><td class="num">$248</td></tr><tr><td>意大利个人旅游签证 特加急<span style="color:#7A8798"> · Italy tourist, expedited</span></td><td class="num">¥1,288</td><td class="num">$181</td></tr><tr><td>韩国个人旅游签证 5年多次<span style="color:#7A8798"> · Korea, 5-year multiple</span></td><td class="num">¥858</td><td class="num">$121</td></tr><tr><td>土耳其 180日多次<span style="color:#7A8798"> · Turkiye, 180-day multiple</span></td><td class="num">¥535</td><td class="num">$75</td></tr></tbody></table>
-<div class="why"><b>Year one is $104,800. At the $521 service fee Ctrip already charges for one expedited US tourist visa, that is 201 applications.</b> Every year after the first is $55,200, or 106 applications, roughly nine a month. This database sits underneath every one of the products in that table.</div>
+<div class="why"><b>Year one is $106,000. At the $521 service fee Ctrip already charges for one expedited US tourist visa, that is 203 applications.</b> Every year after the first is $56,400, or 108 applications, roughly nine a month. This database sits underneath every one of the products in that table.</div>
 
-<h2>7 · Sources</h2>
+<h2>8 · Sources</h2>
 <ol class="src"><li>Trip.com Group cost breakdown, section 2.1, supplied by email: base setup and storage USD 9,000; rollout base USD 10,000; PLUS version approximately USD 1,700 per site across approximately 18 sites.</li>
 <li>Ctrip visa product prices read live from Trip.com Group's own consumer page on 30 August 2026. Converted at 7.1 CNY to the dollar.<br><a href="https://vacations.ctrip.com/visa">vacations.ctrip.com/visa</a></li>
 <li>T-Site Visa Information Base Acceptance and Delivery Standard, section 4.3 (timeliness and periodic review), section 5.3 (acceptance documents) and section 6.1 (quantified metrics).</li>
@@ -121,15 +130,15 @@ ul{margin:0;padding-left:14px} li{margin-bottom:1px}
 <tr><td>维护数据库的 AI 工程师（半职）</td><td class="num">3,000</td></tr>
 <tr><td>验收工作：五个阶段，每阶段三份文档</td><td class="num">540</td></tr>
 <tr><td>24 小时紧急政策通道的值班保障</td><td class="num">400</td></tr>
-<tr><td>模型与深度检索 API：每月 40 次深度检索，每次 10 美元</td><td class="num">400</td></tr>
+<tr><td>模型与检索 API，按操作实测计价（见第 6 节）</td><td class="num">482</td></tr>
 <tr><td>冗余托管、每日备份及 1 小时 RTO、外部监控</td><td class="num">120</td></tr>
-<tr><td>工具、支持与备用</td><td class="num">140</td></tr>
-<tr class="tot"><td>月度合计</td><td class="num">4,600</td></tr>
+<tr><td>工具、支持与备用</td><td class="num">158</td></tr>
+<tr class="tot"><td>月度合计</td><td class="num">4,700</td></tr>
 </tbody></table>
 
-<div class="hero"><div>第一年合计：建设 + 12 个月运维</div><div class="v">USD 104,800</div></div>
-<div class="chart"><svg viewBox="0 0 474 86" width="100%" style="max-width:474px;display:block"><rect x="4" y="41.9" width="52" height="22.1" fill="#1D4ED8"/><text x="64" y="57.2" font-size="8.8" fill="#7A8798">建设 <tspan font-weight="700" fill="#0F294D">$49,600</tspan></text><rect x="4" y="15.1" width="52" height="24.8" fill="#0891B2"/><text x="64" y="31.8" font-size="8.8" fill="#7A8798">运维 <tspan font-weight="700" fill="#0F294D">$55,200</tspan></text><text x="4" y="9.1" font-size="13" font-weight="800" fill="#0F294D">$104,800</text><text x="4" y="79" font-size="8.8" fill="#7A8798">第一年</text><rect x="250" y="39.2" width="52" height="24.8" fill="#0891B2"/><text x="310" y="55.9" font-size="8.8" fill="#7A8798">运维 <tspan font-weight="700" fill="#0F294D">$55,200</tspan></text><text x="250" y="33.2" font-size="13" font-weight="800" fill="#0F294D">$55,200</text><text x="250" y="79" font-size="8.8" fill="#7A8798">第二年起</text><line x1="0" y1="66" x2="474" y2="66" stroke="#0F294D" stroke-width="1"/></svg></div>
-<div class="note">建设费仅收取一次。第一年之后每年仅收运维费 <b>55,200 美元</b>，系统归贵司所有。</div>
+<div class="hero"><div>第一年合计：建设 + 12 个月运维</div><div class="v">USD 106,000</div></div>
+<div class="chart"><svg viewBox="0 0 474 86" width="100%" style="max-width:474px;display:block"><rect x="4" y="42.2" width="52" height="21.8" fill="#1D4ED8"/><text x="64" y="57.4" font-size="8.8" fill="#7A8798">建设 <tspan font-weight="700" fill="#0F294D">$49,600</tspan></text><rect x="4" y="15.1" width="52" height="25.1" fill="#0891B2"/><text x="64" y="31.9" font-size="8.8" fill="#7A8798">运维 <tspan font-weight="700" fill="#0F294D">$56,400</tspan></text><text x="4" y="9.1" font-size="13" font-weight="800" fill="#0F294D">$106,000</text><text x="4" y="79" font-size="8.8" fill="#7A8798">第一年</text><rect x="250" y="38.9" width="52" height="25.1" fill="#0891B2"/><text x="310" y="55.7" font-size="8.8" fill="#7A8798">运维 <tspan font-weight="700" fill="#0F294D">$56,400</tspan></text><text x="250" y="32.9" font-size="13" font-weight="800" fill="#0F294D">$56,400</text><text x="250" y="79" font-size="8.8" fill="#7A8798">第二年起</text><line x1="0" y1="66" x2="474" y2="66" stroke="#0F294D" stroke-width="1"/></svg></div>
+<div class="note">建设费仅收取一次。第一年之后每年仅收运维费 <b>56,400 美元</b>，系统归贵司所有。</div>
 
 <h2>4 · 付款</h2>
 <table><tbody>
@@ -150,12 +159,21 @@ ul{margin:0;padding-left:14px} li{margin-bottom:1px}
 </tbody></table>
 <div class="note">该岗位需要的是 AI 工程师，而非数据录入人员。工作内容是对机器标记的差异对照官方来源作出裁定、维护核验流水线，并保障 48 小时修正与 24 小时紧急更新的时限。没有这个岗位，数据会逐渐失准，§6.1 的准确性指标将无法持续达标。上表中的深度检索即机器侧的同一项工作：每次针对一条尚无答案的线路，读取多达十二个政府页面。</div>
 
-<h2>6 · 参考对照：贵司自有签证产品 <em>vacations.ctrip.com/visa 实时价格，2026 年 8 月 30 日</em></h2>
+<h2>6 · 模型的实际成本 <em>线上系统实测单位成本</em></h2>
+<table><thead><tr><th style="width:46%">操作</th><th class="num" style="width:18%">单位成本（美元）</th>
+<th class="num" style="width:18%">每月次数</th><th class="num" style="width:18%">美元</th></tr></thead><tbody>
+<tr><td>线路判定（尚未命中缓存）</td><td class="num">$0.0106</td><td class="num">25,000</td><td class="num">$265</td></tr><tr><td>将一条答案与其官方页面比对复核</td><td class="num">$0.0157</td><td class="num">2,500</td><td class="num">$39</td></tr><tr><td>深度检索：最多读取十二个政府页面</td><td class="num">$0.1184</td><td class="num">500</td><td class="num">$59</td></tr><tr><td>AI 问答的问题解析</td><td class="num">$0.0018</td><td class="num">50,000</td><td class="num">$89</td></tr>
+<tr><td>翻译增量</td><td class="num"></td><td class="num"></td><td class="num">$30</td></tr>
+<tr class="tot"><td>模型与检索 API 合计</td><td class="num"></td><td class="num"></td><td class="num">$482</td></tr>
+</tbody></table>
+<div class="note">单位成本依据线上运行系统实测的数据规模，以及 Kimi 公布的费率（输入每百万 token 1.90 美元、输出 8.00 美元）计算。页面文本上限 40,000 字符；本库引用的官方页面提取文本平均 8,354 字符（实时抽样 17 个政府来源）。次数按 18 个站点每月 50 万次需求查询、95% 命中缓存测算；单位成本在任何量级下均成立，故该项随贵司流量变化，而非固定收费。</div>
+
+<h2>7 · 参考对照：贵司自有签证产品 <em>vacations.ctrip.com/visa 实时价格，2026 年 8 月 30 日</em></h2>
 <table><thead><tr><th style="width:64%">携程产品</th><th class="num" style="width:18%">价格（人民币）</th>
 <th class="num" style="width:18%">美元</th></tr></thead><tbody><tr><td>美国个人旅游签证 加急<span style="color:#7A8798"> · US tourist, expedited</span></td><td class="num">¥3,699</td><td class="num">$521</td></tr><tr><td>加拿大个人旅游签证<span style="color:#7A8798"> · Canada tourist</span></td><td class="num">¥4,188</td><td class="num">$590</td></tr><tr><td>日本个人旅游签证 5年多次<span style="color:#7A8798"> · Japan, 5-year multiple</span></td><td class="num">¥1,758</td><td class="num">$248</td></tr><tr><td>意大利个人旅游签证 特加急<span style="color:#7A8798"> · Italy tourist, expedited</span></td><td class="num">¥1,288</td><td class="num">$181</td></tr><tr><td>韩国个人旅游签证 5年多次<span style="color:#7A8798"> · Korea, 5-year multiple</span></td><td class="num">¥858</td><td class="num">$121</td></tr><tr><td>土耳其 180日多次<span style="color:#7A8798"> · Turkiye, 180-day multiple</span></td><td class="num">¥535</td><td class="num">$75</td></tr></tbody></table>
-<div class="why"><b>第一年合计 104,800 美元。按携程现售一单美国旅游签证加急服务费 521 美元计，相当于 201 单。</b>第一年之后每年 55,200 美元，相当于 106 单，约每月九单。上表中的每一款产品，底层依赖的正是这个信息库。</div>
+<div class="why"><b>第一年合计 106,000 美元。按携程现售一单美国旅游签证加急服务费 521 美元计，相当于 203 单。</b>第一年之后每年 56,400 美元，相当于 108 单，约每月九单。上表中的每一款产品，底层依赖的正是这个信息库。</div>
 
-<h2>7 · 资料来源</h2>
+<h2>8 · 资料来源</h2>
 <ol class="src"><li>携程集团邮件提供的 2.1 节成本测算：基础搭建与存储 9,000 美元；上线基础费用 10,000 美元；PLUS 版本约 1,700 美元/站点，共约 18 个站点。</li>
 <li>携程签证产品价格于 2026 年 8 月 30 日取自携程集团自有消费者页面实时数据，按 7.1 人民币兑 1 美元折算。<br><a href="https://vacations.ctrip.com/visa">vacations.ctrip.com/visa</a></li>
 <li>《T站签证信息库建设项目验收交付标准》§4.3（时效与周期性校对）、§5.3（验收文档）、§6.1（量化指标）。</li>
