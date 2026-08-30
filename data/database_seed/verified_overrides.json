@@ -728,10 +728,10 @@
    "destination": "GBR",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-22",
+  "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit",
   "source_url": "https://www.gov.uk/guidance/apply-for-an-electronic-travel-authorisation-eta",
-  "note": "The UK ETA fee (GBP 20) and its official application page were missing.",
+  "note": "The UK ETA fee (GBP 20) and its official application page were missing. | Verified 2026-08-30 against gov.uk. Recorded because the absence of a lead applicant is itself the fact a family needs: everyone pays, including a baby.",
   "fields": {
    "government_fee": {
     "amount": 20,
@@ -757,6 +757,11 @@
      },
      "notes": "Permits visits of up to 6 months."
     }
+   ],
+   "exceptions": [
+    "There is no lead applicant for the United Kingdom. Every traveller needs their own ETA tied to their own passport, infants included.",
+    "One adult can do the whole family. Use the UK ETA app for anyone physically present with you, and the online form for anyone who is not, which needs a photo of their passport and their face.",
+    "There is no document pack. The ETA asks for the passport you will travel on, an email address, a card to pay with and a photo of your face. No bank statements, no payslips, no itinerary and no hotel booking."
    ]
   }
  },
@@ -41676,7 +41681,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (validity and jurisdiction)",
   "source_url": "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html",
-  "note": "Verified 2026-08-30. Consular jurisdiction for USA. | Verified 2026-08-30. The record cited the DHS Visa Waiver Program page, and this nationality is not in that programme, so the page does not speak to it at all. The source is now the State Department's visitor visa page, which is what a B-1/B-2 applicant actually needs.",
+  "note": "Verified 2026-08-30. Consular jurisdiction for USA. | Verified 2026-08-30. The record cited the DHS Visa Waiver Program page, and this nationality is not in that programme, so the page does not speak to it at all. The source is now the State Department's visitor visa page, which is what a B-1/B-2 applicant actually needs. | Verified 2026-08-30 against travel.state.gov. The invitation letter line is recorded because it is money travellers are commonly asked for and the State Department says outright it is not used.",
   "fields": {
    "government_fee": {
     "amount": 185,
@@ -41685,7 +41690,11 @@
    "application_channel_detail": "Complete the DS-160, pay the USD 185 MRV fee, and attend the interview at the embassy or consulate. After issuance, Chinese passport holders with a 10-year B1/B2 visa must also keep a valid EVUS enrolment (USD 30.75 at evus.gov) to board.",
    "exceptions": [
     "Holders of a 10-year B-1/B-2 visa must enrol in EVUS before boarding; failing to do so provisionally revokes the visa (8 CFR 215.24). EVUS costs USD 30.75.",
-    "China is absent from the DHS designated-country list; the alphabetical run passes straight from Chile to Croatia, so ESTA is unavailable. Positive requirement at 8 CFR 212.1: 'A valid unexpired visa...and an unexpired passport, shall be presented by each arriving nonimmigrant ali"
+    "China is absent from the DHS designated-country list; the alphabetical run passes straight from Chile to Croatia, so ESTA is unavailable. Positive requirement at 8 CFR 212.1: 'A valid unexpired visa...and an unexpired passport, shall be presented by each arriving nonimmigrant ali",
+    "A family or group DS-160 is a copying shortcut, not one form for the family. One person completes theirs first, then chooses the family or group option on the confirmation page and the shared answers carry across to the next form. Everyone still files and signs their own.",
+    "A parent or legal guardian completes and signs the DS-160 for a child under 16. From 16 the applicant must click sign themselves even if someone else typed the answers, and anyone completing a form for another adult must name themselves as the third party on it.",
+    "Do not pay for an invitation letter or an affidavit of support. The State Department states it is not needed and is not used in deciding the case.",
+    "There is no asset-free route and no published minimum bank balance. No bank statement appears on the required list, but the consular officer may ask you to show you can pay for the trip, or that someone else will."
    ],
    "visa_products": [
     {
@@ -47302,7 +47311,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (validity)",
   "source_url": "https://www.cn.emb-japan.go.jp/itpr_zh/visa_tankishoyo.html",
-  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish. | Verified 2026-08-30 against the Embassy of Japan in China short-term business page, stamped 1 July 2026: validity three months, with a stay of 15, 30 or 90 days set on examination, and a consular fee of 715 yuan with the agency handling fee charged separately. The record had a single product whose own name said diplomatic passport, shown on the ordinary passport page, which is one axis leaking into another.",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish. | Verified 2026-08-30 against the Embassy of Japan in China short-term business page, stamped 1 July 2026: validity three months, with a stay of 15, 30 or 90 days set on examination, and a consular fee of 715 yuan with the agency handling fee charged separately. The record had a single product whose own name said diplomatic passport, shown on the ordinary passport page, which is one axis leaking into another. | Verified 2026-08-30 against the Embassy of Japan in China's own document list, linked from the tourist visa page stamped 1 July 2026, and the Shanghai consulate's definition of family. Trip.com listed 特殊政策缺失, that we never explain the primary and secondary applicant rules or the asset-free routes. These are those policies.",
   "fields": {
    "application_channel_detail": "Applications by Chinese nationals must be lodged through designated agencies (指定代办机构), which charge their own handling fees on top of the government fee",
    "government_fee": {
@@ -47337,7 +47346,10 @@
    "validity_duration": 3,
    "validity_unit": "Month",
    "consular_jurisdiction": "Apply at the Japanese Embassy or Consulate General with jurisdiction over your place of residence. Applying outside your country or region of residence is a stated ground for refusing to accept the application.",
-   "unpublished_fields": []
+   "unpublished_fields": [],
+   "exceptions": [
+    "The same lead applicant structure runs the business and cultural-figure multiple-entry visa. A spouse and children apply on the lead applicant's qualification and submit only the passport, the application form, a household register copy and proof of the marriage or the parent and child relationship."
+   ]
   }
  },
  {
@@ -47757,7 +47769,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (validity)",
   "source_url": "https://www.cn.emb-japan.go.jp/itpr_zh/visa_kanko.html",
-  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish. | Verified 2026-08-30 against the Embassy of Japan in China, pages stamped 1 July 2026. The tourism page gives the individual single-entry visa a three month validity with a stay of 15 or 30 days set by the embassy, and sets out the group and multi-year tiers. The fee page states 715 yuan for a single entry and 1,430 for a multiple entry, for Chinese nationals specifically, and says the designated agency charges its own handling fee on top. Only the consular fee is recorded here. The three and five year multiple-entry visas were missing from the tourism answer while appearing on the family visit answer for the same route, which is one of the demo defects Trip.com listed.",
+  "note": "Verified 2026-08-30. Validity from the destination's published figure for this product, or marked as one it does not publish. | Verified 2026-08-30 against the Embassy of Japan in China, pages stamped 1 July 2026. The tourism page gives the individual single-entry visa a three month validity with a stay of 15 or 30 days set by the embassy, and sets out the group and multi-year tiers. The fee page states 715 yuan for a single entry and 1,430 for a multiple entry, for Chinese nationals specifically, and says the designated agency charges its own handling fee on top. Only the consular fee is recorded here. The three and five year multiple-entry visas were missing from the tourism answer while appearing on the family visit answer for the same route, which is one of the demo defects Trip.com listed. | Verified 2026-08-30 against the Embassy of Japan in China's own document list, linked from the tourist visa page stamped 1 July 2026, and the Shanghai consulate's definition of family. Trip.com listed 特殊政策缺失, that we never explain the primary and secondary applicant rules or the asset-free routes. These are those policies.",
   "fields": {
    "permitted_stay": "15 or 30 days on a single-entry tourist visa (decided by the mission); 30 days per visit on the 3-year multiple-entry visas; 90 days per visit on the 5-year multiple-entry visa",
    "government_fee": {
@@ -47823,7 +47835,13 @@
    "exceptions": [
     "Single-entry tourist visas for mainland residents are electronic since 19 June 2023: the Visa issuance notice must be shown online at the airport",
     "The consular fee is charged only if the visa is issued; the designated agency charges its own handling fee on top",
-    "Individuals cannot apply at the embassy or consulate: every tourist application goes through a designated travel agency, which also books flights and hotels except for the 5-year visa"
+    "Individuals cannot apply at the embassy or consulate: every tourist application goes through a designated travel agency, which also books flights and hotels except for the 5-year visa",
+    "One earner can carry the family. On the multiple-entry tourist visas the economic test is applied to a lead applicant and family members apply on that standing. Family means a spouse, lineal relatives within two degrees, and siblings living in the same household.",
+    "A family member may only apply for the same visa the lead applicant holds or is applying for, not a longer one. Each files a full application of their own and adds a copy of the household register or a notarised kinship certificate, plus a copy of the lead applicant's multiple-entry visa if it has already been issued.",
+    "No financial proof at all on a group tour. Booked through a designated travel agency, 5 to about 40 people for up to 15 days, the published list is the passport, the application form with photo and the personal information consent form, because the agency stands as guarantor.",
+    "No financial proof for students. An undergraduate or postgraduate at a Chinese university on the Ministry of Education's list, or someone who graduated from one within the last three years, can get a single-entry individual tourist visa without any proof of financial capacity.",
+    "No financial proof after two previous visits. Two or more trips to Japan in the past three years on a designated individual tourist visa remove the financial documents for the three-year multiple-entry visa; submit the visa notices from those trips and the passports instead.",
+    "A Gold or higher international credit card, UnionPay included, can replace the employment certificate and six months of bank statements on the ordinary single-entry visa. Submit the card and a document showing it is valid."
    ],
    "official_portal_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
    "disposition": "VISA_REQUIRED",
