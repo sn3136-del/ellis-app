@@ -371,6 +371,63 @@ def test_visa_required_on_an_ordinary_official_page_is_not_flagged(db):
                    for c in (g.get("contradictions") or []))
 
 
+def test_provider_rate_limit_is_retried_not_surfaced(db):
+    """Eight readers arriving together rate-limited the provider and each got
+    a 503 on a route that was merely busy. A 429 is now retried inside the
+    caller's own budget."""
+    from app.visa_snapshot import kimi_primary as kp
+    from app.providers.kimi import KimiHttpError
+    calls = {"n": 0}
+
+    def flaky(system, user, json_mode=None, timeout=None, max_tokens=None, model=None):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise KimiHttpError(429)
+        return dict(GOOD_ANSWER)
+
+    class _P:
+        _chat = staticmethod(flaky)
+    kp.set_provider(None)
+    _clear_cache(db)
+    import app.providers.kimi as kmod
+    real_provider, real_settings = kmod.LiveKimiProvider, kp.settings
+    kmod.LiveKimiProvider = lambda: _P()
+    kp.settings = lambda: type("S", (), {
+        "moonshot_api_key": "k", "kimi_enabled": True,
+        "runtime_mode": "local_real_services"})()
+    try:
+        out = kp._live_call("s", "u", timeout=40, max_tokens=100)
+    finally:
+        kmod.LiveKimiProvider, kp.settings = real_provider, real_settings
+    assert calls["n"] == 2 and out["disposition"] == GOOD_ANSWER["disposition"]
+
+
+def test_non_retryable_provider_status_fails_fast(db):
+    """A 401 is a real answer. Retrying it only burns the reader's budget."""
+    from app.visa_snapshot import kimi_primary as kp
+    from app.providers.kimi import KimiHttpError
+    calls = {"n": 0}
+
+    def dead(system, user, json_mode=None, timeout=None, max_tokens=None, model=None):
+        calls["n"] += 1
+        raise KimiHttpError(401)
+
+    class _P:
+        _chat = staticmethod(dead)
+    import app.providers.kimi as kmod
+    real_provider, real_settings = kmod.LiveKimiProvider, kp.settings
+    kmod.LiveKimiProvider = lambda: _P()
+    kp.settings = lambda: type("S", (), {
+        "moonshot_api_key": "k", "kimi_enabled": True,
+        "runtime_mode": "local_real_services"})()
+    try:
+        with pytest.raises(kp.GuidanceProviderError):
+            kp._live_call("s", "u", timeout=40, max_tokens=100)
+    finally:
+        kmod.LiveKimiProvider, kp.settings = real_provider, real_settings
+    assert calls["n"] == 1
+
+
 def test_malformed_disposition_rejected(db):
     _clear_cache(db)
     kimi_primary.set_provider(single_pass(dict(GOOD_ANSWER, disposition="MAYBE")))

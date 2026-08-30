@@ -41,6 +41,7 @@ from __future__ import annotations
 import json
 import os
 import re as _re
+import threading
 import time
 from datetime import date, datetime, timedelta, timezone
 
@@ -283,6 +284,20 @@ def _deadline_seconds() -> float:
                            DEFAULT_DEADLINE_SECONDS) or DEFAULT_DEADLINE_SECONDS)
 
 
+# Outbound model calls are BOUNDED and retried. A cold-miss route decision
+# holds its connection for about nine seconds, so eight readers arriving
+# together fired eight simultaneous requests, the provider rate-limited us,
+# and the reader saw 503 on a route that was merely busy. Measured: 34 of 139
+# concurrent lookups failed that way. Queueing behind a few slots turns a
+# refusal into a wait, which is what the caller's own timeout is already for.
+_LIVE_SLOTS = threading.Semaphore(
+    max(1, int(os.getenv("ELLIS_KIMI_CONCURRENCY", "3") or 3)))
+
+# Statuses worth trying again: a rate limit or a transient upstream fault.
+# A 401/402/404 is a real answer and retrying it only wastes the budget.
+_RETRY_STATUS = frozenset({429, 500, 502, 503, 504})
+
+
 def _live_call(system: str, user: str, *, timeout: float, max_tokens: int) -> dict:
     s = settings()
     if not (s.moonshot_api_key and s.kimi_enabled):
@@ -293,15 +308,29 @@ def _live_call(system: str, user: str, *, timeout: float, max_tokens: int) -> di
     # KIMI_MODEL). Lets a deployment pick a faster Kimi tier for the bounded
     # route decision without touching the rest of the system.
     model = os.getenv("KIMI_GUIDANCE_MODEL", "").strip() or None
-    try:
-        return provider._chat(system, user, json_mode=True, timeout=timeout,
-                              max_tokens=max_tokens, model=model)
-    except KimiTimeout as e:
-        raise GuidanceTimeout() from e
-    except KimiHttpError as e:
-        from .. import provider_errors
-        raise GuidanceProviderError(
-            provider_errors.user_error(f"kimi moonshot HTTP {e.status}")) from e
+    deadline = time.monotonic() + max(0.0, timeout)
+    with _LIVE_SLOTS:
+        for attempt in range(3):
+            left = deadline - time.monotonic()
+            if left <= 0:
+                raise GuidanceTimeout()
+            try:
+                return provider._chat(system, user, json_mode=True, timeout=left,
+                                      max_tokens=max_tokens, model=model)
+            except KimiTimeout as e:
+                raise GuidanceTimeout() from e
+            except KimiHttpError as e:
+                # Back off only while the caller's own budget can still pay
+                # for it. Past that the honest answer is the failure, not a
+                # longer spinner.
+                pause = 0.75 * (2 ** attempt)
+                if (e.status not in _RETRY_STATUS or attempt == 2
+                        or deadline - time.monotonic() <= pause + 2.0):
+                    from .. import provider_errors
+                    raise GuidanceProviderError(provider_errors.user_error(
+                        f"kimi moonshot HTTP {e.status}")) from e
+                time.sleep(pause)
+    raise GuidanceTimeout()
 
 
 def _call(system: str, user: str, *, timeout: float, max_tokens: int) -> dict:
