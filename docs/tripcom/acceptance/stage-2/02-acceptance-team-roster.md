@@ -1,5 +1,5 @@
 # Stage 2 acceptance team roster 验收小组名单
-**联调验收 Joint Debug Acceptance** · generated 2026-08-30 11:46 UTC
+**联调验收 Joint Debug Acceptance** · generated 2026-08-30 13:57 UTC
 
 Party A appoints the team leader per the Acceptance and Delivery Standard.
 This roster is filled in by both parties before the stage begins.

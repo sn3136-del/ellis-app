@@ -1,5 +1,5 @@
 # Acceptance archive 验收过程档案
-Generated from the live system at 2026-08-30 11:46 UTC.
+Generated from the live system at 2026-08-30 13:57 UTC.
 
 Section 5.3 of the Acceptance and Delivery Standard requires each of the five
 stages to archive seven artefacts plus the signed acceptance report. This
@@ -22,13 +22,13 @@ and cannot be produced by the party being audited.
 ## Current measured position
 | Metric 指标 | Target 目标 | Measured 实测 | Meets 达标 |
 |---|---|---|---|
-| Field completeness 字段完整度 | ≥99% | **99.28%** | yes |
-| Confidence, Medium or above 置信度中等及以上 | ≥90% | **96.47%** | yes |
+| Field completeness 字段完整度 | ≥99% | **99.22%** | yes |
+| Confidence, Medium or above 置信度中等及以上 | ≥90% | **96.87%** | yes |
 | Source coverage 信源覆盖率 | 100% | **100.00%** | yes |
 | Station coverage 站点覆盖率 | ≥18 | **18/18** | yes |
 | Station depth 站点深度 | 18/18 by full acceptance | **2/18 at 100+ destinations** | NO |
 | Error feedback closure 错误反馈时效 | 0 past 48h | **0 past 48h** | yes |
-| Records delivered 记录数 | n/a | **991** | yes |
+| Records delivered 记录数 | n/a | **1119** | yes |
 | Held from customers 暂不对客 | n/a | **35** | yes |
 
 Regenerate with `python3 scripts/generate_acceptance_archive.py`.

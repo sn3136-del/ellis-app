@@ -1,5 +1,5 @@
 # Stage 1 functional checklist 功能清单
-**承建单位自测 Contractor Self-Test** · measured 2026-08-30 11:46 UTC
+**承建单位自测 Contractor Self-Test** · measured 2026-08-30 13:57 UTC
 
 Verdicts are left blank for Party A to complete. The evidence column is
 measured from the live system.

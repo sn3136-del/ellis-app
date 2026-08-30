@@ -1,5 +1,5 @@
 # Stage 4 acceptance team roster 验收小组名单
-**全量验收 Full Acceptance** · generated 2026-08-30 11:46 UTC
+**全量验收 Full Acceptance** · generated 2026-08-30 13:57 UTC
 
 Party A appoints the team leader per the Acceptance and Delivery Standard.
 This roster is filled in by both parties before the stage begins.

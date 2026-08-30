@@ -8,16 +8,16 @@ Party B 乙方: Ellis Intelligence, Inc.
 ## Exit criteria 出口标准
 Sustained compliance; final report signed.
 
-## Measured position at generation, 2026-08-30 11:46 UTC
+## Measured position at generation, 2026-08-30 13:57 UTC
 | Metric 指标 | Target 目标 | Measured 实测 | Meets 达标 |
 |---|---|---|---|
-| Field completeness 字段完整度 | ≥99% | **99.28%** | yes |
-| Confidence, Medium or above 置信度中等及以上 | ≥90% | **96.47%** | yes |
+| Field completeness 字段完整度 | ≥99% | **99.22%** | yes |
+| Confidence, Medium or above 置信度中等及以上 | ≥90% | **96.87%** | yes |
 | Source coverage 信源覆盖率 | 100% | **100.00%** | yes |
 | Station coverage 站点覆盖率 | ≥18 | **18/18** | yes |
 | Station depth 站点深度 | 18/18 by full acceptance | **2/18 at 100+ destinations** | NO |
 | Error feedback closure 错误反馈时效 | 0 past 48h | **0 past 48h** | yes |
-| Records delivered 记录数 | n/a | **991** | yes |
+| Records delivered 记录数 | n/a | **1119** | yes |
 | Held from customers 暂不对客 | n/a | **35** | yes |
 
 ## Conclusion 结论

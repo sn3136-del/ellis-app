@@ -1,5 +1,5 @@
 # Stage 2 functional checklist 功能清单
-**联调验收 Joint Debug Acceptance** · measured 2026-08-30 11:46 UTC
+**联调验收 Joint Debug Acceptance** · measured 2026-08-30 13:57 UTC
 
 Verdicts are left blank for Party A to complete. The evidence column is
 measured from the live system.
