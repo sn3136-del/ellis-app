@@ -1514,20 +1514,34 @@ export default function QualityConsole() {
     // CELLS over required cells (the acceptance metric with the 99% bar),
     // section 4.2.2 counts records with every required field filled. Showing
     // the record figure against the cell target mispaired the two.
+    // Two readings of the same clause, and the console used to show one while
+    // the acceptance archive reported the other, so the product contradicted
+    // itself by seven points. Both are computed here and both are shown.
+    // "Fillable" is the headline because 6.1 asks for filled over fields that
+    // SHOULD be filled: a visa-free route has no visa validity to state, and
+    // 4.2.1 forbids inventing what no government publishes. The raw count is
+    // shown beside it so the exclusions are auditable rather than asserted.
     const reqNames = data?.required_fields || []
-    let cells = 0, filledCells = 0
+    let cells = 0, filledCells = 0, na = 0, unpub = 0, gaps = 0
     for (const r of t0) {
       const fs = r.field_status || {}
       for (const f of reqNames) {
         cells += 1
-        if (fs[f] === 'filled' || fs[f] === 'pending-review') filledCells += 1
+        const v = fs[f]
+        if (v === 'filled' || v === 'pending-review') filledCells += 1
+        else if (v === 'not-applicable') na += 1
+        else if (v === 'not-published') unpub += 1
+        else if (v === 'missing') gaps += 1
       }
     }
+    const fillable = filledCells + gaps
     const src = t0.filter((r) => r.source_url).length
     const sub = t0.filter((r) => r.source_check === 'human-quote'
       || r.source_check === 'grounded-consistent').length
     return { total: t0.length,
-             completeness_rate: cells ? filledCells / cells : null,
+             completeness_rate: fillable ? filledCells / fillable : null,
+             completeness_literal: cells ? filledCells / cells : null,
+             cells, filledCells, na, unpub, gaps,
              record_completeness: t0.length ? complete / t0.length : null,
              source_coverage: t0.length ? src / t0.length : null,
              substantiated: sub, high, medium, low }
@@ -1786,6 +1800,21 @@ export default function QualityConsole() {
                              targetLabel={`${t('ops.stat.target')} 99%`}
                              valueTitle={`${t('ops.stat.recordComplete')
                                .replace('{p}', Math.round((s.record_completeness || 0) * 100))} · ${t('ops.stat.recordCompleteTip')}`} />
+                      {/* The arithmetic in full, so the headline can be checked
+                          rather than taken on trust. */}
+                      <div style={{ marginTop: 7, fontSize: 11, lineHeight: 1.5,
+                                    color: GRAY, fontVariantNumeric: 'tabular-nums' }}>
+                        {s.filledCells.toLocaleString()} / {(s.filledCells + s.gaps).toLocaleString()}
+                        {' '}{t('ops.stat.fillable')}
+                        <br />
+                        {t('ops.stat.excluded')
+                          .replace('{na}', s.na.toLocaleString())
+                          .replace('{unpub}', s.unpub.toLocaleString())}
+                        <br />
+                        {t('ops.stat.ofAllCells')
+                          .replace('{p}', ((s.completeness_literal || 0) * 100).toFixed(2))
+                          .replace('{n}', s.cells.toLocaleString())}
+                      </div>
                     </div>
                   </BandCell>
                   <BandCell delay={160}>

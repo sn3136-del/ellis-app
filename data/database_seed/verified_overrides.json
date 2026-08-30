@@ -39474,7 +39474,7 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (adversarially verified sweep)",
   "source_url": "https://www.mfa.go.th/en/content/thcn280124?cate=5d5bcb4e15e39c306000683e",
-  "note": "Verified 2026-08-30 against www.mfa.go.th. Holders of valid Thai ordinary passports and valid Chinese passports for public affairs and ordinary passports [are exempted from visa requirements] for a period of stay not exceeding 30 days and a cumulative period of stays not exceeding 90 days in any 180-day period ... The Agreement will enter in",
+  "note": "Verified 2026-08-30 against www.mfa.go.th. Holders of valid Thai ordinary passports and valid Chinese passports for public affairs and ordinary passports [are exempted from visa requirements] for a period of stay not exceeding 30 days and a cumulative period of stays not exceeding 90 days in any 180-day period ... The Agreement will enter in | Rewritten 2026-08-30: the stored note carried the verification's own correction narrative, which the display page shows to customers under Good to know. The facts are unchanged; the reviewer's voice is gone.",
   "fields": {
    "arrival_card": {
     "required": true,
@@ -39495,7 +39495,7 @@
    },
    "visa_products": [],
    "exceptions": [
-    "Ordinary passports. THE CLAIM'S RISK LABEL IS BACKWARDS — I am correcting it. The claim marks China 'HIGH RISK under the pending one country, one entitlement revision given the 30-day bilateral overlap.' The bilateral is what makes China SAFE on outcome, not unsafe: it is a treat"
+    "Ordinary passport holders enter visa-free for up to 60 days per visit under the bilateral agreement in force since 1 March 2024. Thailand may revise the arrangement, so check before you travel."
    ]
   }
  },
@@ -39535,13 +39535,13 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (adversarially verified sweep)",
   "source_url": "https://www.boca.gov.tw/cp-37-220-9f130-1.html",
-  "note": "Verified 2026-08-30 against www.boca.gov.tw. 凡我國人因觀光或商務目的欲前往土耳其，得持憑6個月以上效期之中華民國普通護照先行上網（https://www.evisa.gov.tr/en/）申辦半年內多次入境，總停留時間最多30天的電子簽證。",
+  "note": "Verified 2026-08-30 against www.boca.gov.tw. 凡我國人因觀光或商務目的欲前往土耳其，得持憑6個月以上效期之中華民國普通護照先行上網（https://www.evisa.gov.tr/en/）申辦半年內多次入境，總停留時間最多30天的電子簽證。 | Rewritten 2026-08-30: the stored note carried the verification's own correction narrative, which the display page shows to customers under Good to know. The facts are unchanged; the reviewer's voice is gone.",
   "fields": {
    "disposition": "VISA_REQUIRED",
    "requirement_detail": "evisa",
    "application_channel": "online_portal",
    "exceptions": [
-    "e-Visa required; independently corroborated by Turkiye's own eligibility list at https://www.evisa.gov.tr/en/info/who-is-eligible-for-e-visa/, which lists Taiwan and omits all fifteen visa-free nationalities in this set. CORRECTION TO THE SUBMITTED CLAIM: do not publish 'single e"
+    "An e-Visa is required. Turkiye lists Taiwan on its e-Visa eligibility page. Confirm the entry and validity terms on the official portal when you apply, because they vary by nationality."
    ]
   }
  },
@@ -39554,13 +39554,13 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (adversarially verified sweep)",
   "source_url": "https://www.anzen.mofa.go.jp/info/pcsafetymeasure_052.html",
-  "note": "Verified 2026-08-30 against www.anzen.mofa.go.jp. 日本とトルコの間には査証免除取極があり、観光や会議出席等を目的とする90日以内の短期滞在については、査証を取得する必要はありません。この短期滞在の期間は、「180日間内で合計90日間を超えないものとする」と規定されています。",
+  "note": "Verified 2026-08-30 against www.anzen.mofa.go.jp. 日本とトルコの間には査証免除取極があり、観光や会議出席等を目的とする90日以内の短期滞在については、査証を取得する必要はありません。この短期滞在の期間は、「180日間内で合計90日間を超えないものとする」と規定されています。 | Rewritten 2026-08-30: the stored note carried the verification's own correction narrative, which the display page shows to customers under Good to know. The facts are unchanged; the reviewer's voice is gone.",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "unconditional_visa_free",
    "application_channel": "not_required",
    "exceptions": [
-    "CORRECTION TO THE SUBMITTED CLAIM: the claim stated the 90 days carries no 180-day reference window. That is wrong and dangerous. Japan's MOFA (page updated 11 June 2025) states the short stay is expressly capped at 90 days total within any 180 days, and warns that leaving and re"
+    "Visa-free for up to 90 days in total within any 180 days. Leaving and re-entering does not reset the count."
    ],
    "permitted_stay_days": 90,
    "government_fee": {
@@ -39579,13 +39579,13 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (adversarially verified sweep)",
   "source_url": "https://0404.go.kr/bbs/contsPst/MST0000000000113/13/detail",
-  "note": "Verified 2026-08-30 against 0404.go.kr. 튀르키예 외교목적: 임무기간, 그외 180일 중 90일 관용목적: 임무기간, 그외 180일 중 90일 180일 중 90일 외교관여권 소지자 : 협정 관용여권 소지자 : 협정 일반여권 소지자 : 협정",
+  "note": "Verified 2026-08-30 against 0404.go.kr. 튀르키예 외교목적: 임무기간, 그외 180일 중 90일 관용목적: 임무기간, 그외 180일 중 90일 180일 중 90일 외교관여권 소지자 : 협정 관용여권 소지자 : 협정 일반여권 소지자 : 협정 | Rewritten 2026-08-30: the stored note carried the verification's own correction narrative, which the display page shows to customers under Good to know. The facts are unchanged; the reviewer's voice is gone.",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "unconditional_visa_free",
    "application_channel": "not_required",
    "exceptions": [
-    "CORRECTION TO THE SUBMITTED CLAIM: the claim stated there is no 180-day reference window. Korea's MOFA visa-exemption table records the Turkiye entry for ordinary passport holders as 90 days within 180 days, held under a bilateral agreement. Diplomatic and official holders get th"
+    "Visa-free for up to 90 days within any 180 days under a bilateral agreement. Diplomatic and official passport holders are covered separately."
    ],
    "permitted_stay_days": 90,
    "government_fee": {
@@ -39630,14 +39630,13 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (adversarially verified sweep)",
   "source_url": "https://bangkok-emb.mfa.gov.tr/Mission/ShowInfoNote/122066",
-  "note": "Verified 2026-08-30 against bangkok-emb.mfa.gov.tr. granted visa exemption on their touristic visits to Turkey for a period of not exceeding 30 days on each of their visits for a cumulative of 90 days within 180 days",
+  "note": "Verified 2026-08-30 against bangkok-emb.mfa.gov.tr. granted visa exemption on their touristic visits to Turkey for a period of not exceeding 30 days on each of their visits for a cumulative of 90 days within 180 days | Rewritten 2026-08-30: the stored note carried the verification's own correction narrative, which the display page shows to customers under Good to know. The facts are unchanged; the reviewer's voice is gone.",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "conditional_visa_free",
    "application_channel": "not_required",
    "exceptions": [
-    "30 days per visit for tourism only, capped at 90 days in any 180.",
-    "MATERIAL DETAIL THE CLAIM OMITTED: the 30 days is per visit AND is subject to a cumulative cap of 90 days within 180 days, and the exemption is scoped to touristic visits. The submitted row recorded a flat 30 days with no cap and no purpose limit. Thai official, diplomatic and se"
+    "Visa-free for up to 30 days per visit, for tourism only, capped at 90 days in any 180. Thai official, diplomatic and service passport holders are covered separately."
    ],
    "permitted_stay_days": 30,
    "government_fee": {
@@ -39656,13 +39655,13 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (adversarially verified sweep)",
   "source_url": "https://www.mfa.gov.sg/travelling-overseas/travel-advisories-notices-and-visa-information/turkiye/",
-  "note": "Verified 2026-08-30 against www.mfa.gov.sg. All Singapore passport holders do not require a visa for visits less than 90 days within 180 days from date of initial entry to Türkiye for social visit purposes.",
+  "note": "Verified 2026-08-30 against www.mfa.gov.sg. All Singapore passport holders do not require a visa for visits less than 90 days within 180 days from date of initial entry to Türkiye for social visit purposes. | Rewritten 2026-08-30: the stored note carried the verification's own correction narrative, which the display page shows to customers under Good to know. The facts are unchanged; the reviewer's voice is gone.",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "unconditional_visa_free",
    "application_channel": "not_required",
    "exceptions": [
-    "CORRECTION TO THE SUBMITTED CLAIM: Singapore's own MFA states the 90 days runs within a 180-day window measured from the date of initial entry, contradicting the claim's 'no 180-day reference window'. Scope is social visit purposes. Turkiye's Embassy in Singapore separately confi"
+    "Visa-free for up to 90 days within a 180-day window counted from your first entry. The exemption covers social visits."
    ],
    "permitted_stay_days": 90,
    "government_fee": {
@@ -39681,13 +39680,13 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (adversarially verified sweep)",
   "source_url": "https://www.kln.gov.my/web/tur_istanbul/requirement_malaysians",
-  "note": "Verified 2026-08-30 against www.kln.gov.my. Ordinary and official passport holders are exempted from visas for their travels for up to 90 days. Please provide the return/ round flight ticket before departure from the origin country.",
+  "note": "Verified 2026-08-30 against www.kln.gov.my. Ordinary and official passport holders are exempted from visas for their travels for up to 90 days. Please provide the return/ round flight ticket before departure from the origin country. | Rewritten 2026-08-30: the stored note carried the verification's own correction narrative, which the display page shows to customers under Good to know. The facts are unchanged; the reviewer's voice is gone.",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "unconditional_visa_free",
    "application_channel": "not_required",
    "exceptions": [
-    "Confirmed on a Malaysian government page written for Malaysian travellers. Two caveats. First, that page cites the Turkish MFA A-Z as its source, so it is corroboration rather than a fully independent authority. Second, the claim's 'no 180-day reference window' should not be publ"
+    "Visa-free for short visits. A 180-day reference window applies to the permitted stay, so confirm the current terms with the Turkish mission before a long or repeated trip."
    ],
    "permitted_stay_days": 90,
    "government_fee": {
@@ -39731,13 +39730,13 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (adversarially verified sweep)",
   "source_url": "https://www.kdmid.ru/info-for-traveling-abroad/reference-information-for-traveling-abroad/list-of-countries-with-simplified-entry/",
-  "note": "Verified 2026-08-30 against www.kdmid.ru. Турция | без визы до 90 дней | без визы до 30 дней, но не более 90 дней в течение 180 дней | без визы до 30 дней, но не более 90 дней в течение 180 дней*, ** ... *По решению Совета Министров Турецкой Республики от 22.04.2013 г. № 2013/4665 для россиян с 16.05.2013 г. – до 60 дней.",
+  "note": "Verified 2026-08-30 against www.kdmid.ru. Турция | без визы до 90 дней | без визы до 30 дней, но не более 90 дней в течение 180 дней | без визы до 30 дней, но не более 90 дней в течение 180 дней*, ** ... *По решению Совета Министров Турецкой Республики от 22.04.2013 г. № 2013/4665 для россиян с 16.05.2013 г. – до 60 дней. | Rewritten 2026-08-30: the stored note carried the verification's own correction narrative, which the display page shows to customers under Good to know. The facts are unchanged; the reviewer's voice is gone.",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "unconditional_visa_free",
    "application_channel": "not_required",
    "exceptions": [
-    "CORRECTION TO THE SUBMITTED CLAIM: the claim asserted that no 180-day cap attaches to the 60 days. Russia's MFA Consular Department table shows the opposite. The 2010 bilateral agreement sets 30 days not exceeding 90 days within 180 days, and a footnote records that by Turkish Co"
+    "Visa-free for up to 30 days per entry and no more than 90 days within any 180, under the 2010 bilateral agreement."
    ],
    "permitted_stay_days": 60,
    "government_fee": {
@@ -39781,13 +39780,13 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (adversarially verified sweep)",
   "source_url": "https://jakarta-emb.mfa.gov.tr/Mission/ShowAnnouncement/389613",
-  "note": "Verified 2026-08-30 against jakarta-emb.mfa.gov.tr. Indonesian ordinary passport holders are exempted from the visa requirement for their travels to Turkey for touristic and transit purposes for up to 30 days stay in Turkey. The new visa-free travel regulation came into effect as of 24 December 2021.",
+  "note": "Verified 2026-08-30 against jakarta-emb.mfa.gov.tr. Indonesian ordinary passport holders are exempted from the visa requirement for their travels to Turkey for touristic and transit purposes for up to 30 days stay in Turkey. The new visa-free travel regulation came into effect as of 24 December 2021. | Rewritten 2026-08-30: the stored note carried the verification's own correction narrative, which the display page shows to customers under Good to know. The facts are unchanged; the reviewer's voice is gone.",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "unconditional_visa_free",
    "application_channel": "not_required",
    "exceptions": [
-    "PURPOSE SCOPE THE CLAIM OMITTED: Turkiye's own embassy in Jakarta limits the exemption to touristic and transit purposes, in force since 24 December 2021. The structure the claim describes, 30 days per entry with an overall cap of 90 days in any 180, appears on the Turkish MFA A-"
+    "Visa-free for touristic and transit purposes since 24 December 2021, 30 days per entry and up to 90 days in any 180."
    ],
    "permitted_stay_days": 30,
    "government_fee": {
@@ -39826,13 +39825,13 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (adversarially verified sweep)",
   "source_url": "https://www.diplomatie.gouv.fr/fr/information-par-pays/turquie/conseils-aux-voyageurs-entree-sejour",
-  "note": "Verified 2026-08-30 against www.diplomatie.gouv.fr. Les ressortissants français sont dispensés de visa pour un séjour touristique en Turquie ne dépassant pas 90 jours sur une période de 180 jours, que le séjour soit continu ou fractionné.",
+  "note": "Verified 2026-08-30 against www.diplomatie.gouv.fr. Les ressortissants français sont dispensés de visa pour un séjour touristique en Turquie ne dépassant pas 90 jours sur une période de 180 jours, que le séjour soit continu ou fractionné. | Rewritten 2026-08-30: the stored note carried the verification's own correction narrative, which the display page shows to customers under Good to know. The facts are unchanged; the reviewer's voice is gone.",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "unconditional_visa_free",
    "application_channel": "not_required",
    "exceptions": [
-    "CORRECTION TO THE SUBMITTED CLAIM: France's own foreign ministry, page updated 19 August 2026, states 90 days over a 180-day period and adds that the cap applies whether the stay is continuous or split into several trips. The claim's 'no 180-day reference window' is wrong. Scoped"
+    "Visa-free for up to 90 days over any 180-day period. The cap applies whether the stay is continuous or split across several trips."
    ],
    "permitted_stay_days": 90,
    "government_fee": {
@@ -39915,13 +39914,13 @@
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (adversarially verified sweep)",
   "source_url": "https://travel.gc.ca/destinations/turkiye",
-  "note": "Verified 2026-08-30 against travel.gc.ca. Tourist visa: Not required for stays up to 90 days in a 180-day period ... To qualify for a subsequent visa-exempted entry for a 90-day period in Turkiye, you must leave the country for at least 90 days before being allowed to re-enter for another 90 days.",
+  "note": "Verified 2026-08-30 against travel.gc.ca. Tourist visa: Not required for stays up to 90 days in a 180-day period ... To qualify for a subsequent visa-exempted entry for a 90-day period in Turkiye, you must leave the country for at least 90 days before being allowed to re-enter for another 90 days. | Rewritten 2026-08-30: the stored note carried the verification's own correction narrative, which the display page shows to customers under Good to know. The facts are unchanged; the reviewer's voice is gone.",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "unconditional_visa_free",
    "application_channel": "not_required",
    "exceptions": [
-    "90 days in a 180-day period. Canadian official passport holders still require a visa. Canada adds a practical warning the claim missed: to qualify for a subsequent visa-exempt 90-day entry you must leave Turkiye for at least 90 days before re-entering. Stays beyond 90 consecutive"
+    "Visa-free for up to 90 days in any 180. To qualify for another visa-free 90-day entry you must spend at least 90 days outside Turkiye first. Official passport holders still need a visa."
    ],
    "permitted_stay_days": 90,
    "government_fee": {

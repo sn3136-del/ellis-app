@@ -1262,3 +1262,30 @@ def test_chinese_dates_parse_to_the_day():
     assert _extract_arrival("明年3月去泰国").endswith("-03-01")
     got31 = _extract_arrival("12月31日出发去日本")
     assert got31.endswith("-12-31")
+
+
+def test_no_shipped_override_speaks_in_the_reviewers_voice():
+    """A customer reads `exceptions` under "Good to know"; the verification's
+    own argument with the claim in front of it is not an answer.
+
+    Eleven overrides shipped sentences like "CORRECTION TO THE SUBMITTED CLAIM"
+    and "the claim's risk label is backwards, I am correcting it" straight onto
+    the display page of routes including China to Thailand."""
+    import json
+    from pathlib import Path
+    from app.visa_snapshot import verified_overrides as vo
+    rows = json.loads(
+        (Path(__file__).resolve().parents[2] / "data" / "database_seed"
+         / "verified_overrides.json").read_text())
+    offenders = []
+    for r in rows:
+        fields = r.get("fields") or {}
+        for key in vo._CUSTOMER_TEXT:
+            if key in fields and vo._reads_like_review(fields[key]):
+                route = r.get("route") or {}
+                offenders.append(
+                    f"{route.get('nationality')}->{route.get('destination')}"
+                    f" {route.get('travel_purpose')} .{key}")
+    assert not offenders, (
+        "these overrides put the reviewer's workings in front of a customer: "
+        + ", ".join(sorted(offenders)))

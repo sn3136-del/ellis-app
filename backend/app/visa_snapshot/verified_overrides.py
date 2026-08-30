@@ -74,6 +74,32 @@ OVERRIDABLE = frozenset({
 _URL_FIELDS = ("source_url", "official_portal_url")
 
 
+# A verification writes prose, and some of that prose is the reviewer arguing
+# with the claim in front of them rather than telling a traveller anything.
+# Eleven overrides reached the display page carrying sentences like "CORRECTION
+# TO THE SUBMITTED CLAIM" and "the claim's risk label is backwards, I am
+# correcting it", and the customer page renders exceptions under "Good to know".
+# A field a customer reads may not contain the workings.
+_REVIEWER_VOICE = (
+    "the claim", "correction to the submitted", "i am correcting",
+    "the submitted row", "material detail", "should not be published",
+    "do not publish", "the agent ", "as an ai", "my earlier",
+    "purpose scope the claim", "is wrong and dangerous",
+)
+# The fields whose text a customer actually reads.
+_CUSTOMER_TEXT = ("exceptions", "application_channel_detail", "requirement_detail",
+                  "permitted_stay", "processing_time", "required_documents",
+                  "entry_requirements", "consular_jurisdiction")
+
+
+def _reads_like_review(value) -> bool:
+    """True when this text is the reviewer talking, not the answer."""
+    if isinstance(value, (list, tuple)):
+        return any(_reads_like_review(v) for v in value)
+    low = str(value or "").lower()
+    return any(marker in low for marker in _REVIEWER_VOICE)
+
+
 def _key(nat: str, dest: str, purpose: str = "tourism",
          doc: str = "") -> str:
     """Ordinary-passport facts key on route alone; a fact verified for a
@@ -129,6 +155,9 @@ def _load_table() -> dict:
         for k in _URL_FIELDS:
             v = str(clean.get(k) or "").strip()
             if v and not is_government_host(hostname(v)):
+                clean.pop(k, None)
+        for k in _CUSTOMER_TEXT:
+            if k in clean and _reads_like_review(clean[k]):
                 clean.pop(k, None)
         if not clean:
             continue
