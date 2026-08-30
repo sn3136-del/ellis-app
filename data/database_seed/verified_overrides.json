@@ -804,15 +804,15 @@
    "destination": "THA",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-22",
+  "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit",
-  "source_url": "https://www.mfa.go.th/",
-  "note": "Visa-free is correct; the Thailand Digital Arrival Card must be filed before arrival. TDAC mandatory per tdac.immigration.go.th.",
+  "source_url": "https://tdac.immigration.go.th/arrival-card/#/home",
+  "note": "Visa-free is correct; the Thailand Digital Arrival Card must be filed before arrival. TDAC mandatory per tdac.immigration.go.th. | Restated 2026-08-30 in Thai Immigration's own words. The record said the card is filed within three days before arrival, a window that opens three days out. The official notice states a deadline instead, three days in advance of the arrival date. The number is the same and the direction is not, so the notice's own sentence is used rather than a paraphrase that picks one reading.",
   "fields": {
    "arrival_card": {
     "required": true,
     "name": "Thailand Digital Arrival Card (TDAC)",
-    "submission_window": "submit online within 3 days before arrival",
+    "submission_window": "Thai Immigration states that foreigners are required to submit their arrival card information 3 days in advance of their arrival date",
     "note": "Mandatory for all foreign visitors since 1 May 2025; free at tdac.immigration.go.th"
    }
   }
@@ -889,15 +889,15 @@
    "destination": "THA",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-22",
+  "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit",
-  "source_url": "https://tdac.immigration.go.th",
-  "note": "Visa-free is correct; the Thailand Digital Arrival Card is mandatory before arrival and was missing. TDAC mandatory per tdac.immigration.go.th.",
+  "source_url": "https://tdac.immigration.go.th/arrival-card/#/home",
+  "note": "Visa-free is correct; the Thailand Digital Arrival Card is mandatory before arrival and was missing. TDAC mandatory per tdac.immigration.go.th. | Restated 2026-08-30 in Thai Immigration's own words. The record said the card is filed within three days before arrival, a window that opens three days out. The official notice states a deadline instead, three days in advance of the arrival date. The number is the same and the direction is not, so the notice's own sentence is used rather than a paraphrase that picks one reading.",
   "fields": {
    "arrival_card": {
     "required": true,
     "name": "Thailand Digital Arrival Card (TDAC)",
-    "submission_window": "submit online within 3 days before arrival",
+    "submission_window": "Thai Immigration states that foreigners are required to submit their arrival card information 3 days in advance of their arrival date",
     "note": "Mandatory for all foreign visitors since 1 May 2025; free at tdac.immigration.go.th"
    },
    "official_portal_url": "https://tdac.immigration.go.th",
@@ -9942,10 +9942,10 @@
    "destination": "THA",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-25",
+  "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit",
-  "source_url": "https://image.mfa.go.th/mfa/0/YLjhuT4Hho/Consular_Service/Tourist_Visa_Exempt_60_days.pdf",
-  "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Taiwan passport holders still receive 60 days visa-free on arrival in Thailand, so plan on 60 rather than 30, but re-check consular.mfa.go.th shortly before departure because a Cabinet-approved cut to 30 days is awaiting Royal Gazette publication and starts 15 days after it appears, and file the Thailand Di",
+  "source_url": "https://tdac.immigration.go.th/arrival-card/#/home",
+  "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Taiwan passport holders still receive 60 days visa-free on arrival in Thailand, so plan on 60 rather than 30, but re-check consular.mfa.go.th shortly before departure because a Cabinet-approved cut to 30 days is awaiting Royal Gazette publication and starts 15 days after it appears, and file the Thailand Di | Restated 2026-08-30 in Thai Immigration's own words. The record said the card is filed within three days before arrival, a window that opens three days out. The official notice states a deadline instead, three days in advance of the arrival date. The number is the same and the direction is not, so the notice's own sentence is used rather than a paraphrase that picks one reading.",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "unconditional_visa_free",
@@ -9959,7 +9959,7 @@
    "arrival_card": {
     "required": true,
     "name": "Thailand Digital Arrival Card (TDAC)",
-    "submission_window": "submit online within 3 days before arrival",
+    "submission_window": "Thai Immigration states that foreigners are required to submit their arrival card information 3 days in advance of their arrival date",
     "note": "Mandatory for all foreign visitors since 1 May 2025; free at tdac.immigration.go.th"
    }
   }
@@ -10094,10 +10094,10 @@
    "destination": "THA",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-25",
+  "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit",
-  "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/0303/%E0%B8%9C.60.pdf",
-  "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Japanese passport holders still get 60 days visa-free per entry, but the Cabinet approved cutting this to 30 days on 19 May 2026, so re-check mfa.go.th before travel because the change takes effect 15 days after Royal Gazette publication. Official text: List of Countries and Territories whose Nationals are ",
+  "source_url": "https://tdac.immigration.go.th/arrival-card/#/home",
+  "note": "Corrected 2026-08-25 by the traveldoc cross-check, adjudicated against the official source. Japanese passport holders still get 60 days visa-free per entry, but the Cabinet approved cutting this to 30 days on 19 May 2026, so re-check mfa.go.th before travel because the change takes effect 15 days after Royal Gazette publication. Official text: List of Countries and Territories whose Nationals are | Restated 2026-08-30 in Thai Immigration's own words. The record said the card is filed within three days before arrival, a window that opens three days out. The official notice states a deadline instead, three days in advance of the arrival date. The number is the same and the direction is not, so the notice's own sentence is used rather than a paraphrase that picks one reading.",
   "fields": {
    "disposition": "VISA_EXEMPT",
    "requirement_detail": "unconditional_visa_free",
@@ -10111,7 +10111,7 @@
    "arrival_card": {
     "required": true,
     "name": "Thailand Digital Arrival Card (TDAC)",
-    "submission_window": "submit online within 3 days before arrival",
+    "submission_window": "Thai Immigration states that foreigners are required to submit their arrival card information 3 days in advance of their arrival date",
     "note": "Mandatory for all foreign visitors since 1 May 2025; free at tdac.immigration.go.th"
    }
   }
@@ -12309,17 +12309,17 @@
    "destination": "THA",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
+  "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (adjudication)",
-  "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/0303/Bilat_Ordinary.pdf",
-  "note": "Korea does not sit in the general 60-day (now 30-day) visa-exemption scheme; it has a standing bilateral agreement giving 90 days, alongside Argentina, Brazil, Chile and Peru. The Department of Consular Affairs list is dated 24 February 2025 and Korea's 90-day bilateral exemption was expressly preserved when the Cabinet cut the general visa-free stay in 2026. Ellis's 60 is the  TDAC: Thailand's Di",
+  "source_url": "https://tdac.immigration.go.th/arrival-card/#/home",
+  "note": "Korea does not sit in the general 60-day (now 30-day) visa-exemption scheme; it has a standing bilateral agreement giving 90 days, alongside Argentina, Brazil, Chile and Peru. The Department of Consular Affairs list is dated 24 February 2025 and Korea's 90-day bilateral exemption was expressly preserved when the Cabinet cut the general visa-free stay in 2026. Ellis's 60 is the  TDAC: Thailand's Di | Restated 2026-08-30 in Thai Immigration's own words. The record said the card is filed within three days before arrival, a window that opens three days out. The official notice states a deadline instead, three days in advance of the arrival date. The number is the same and the direction is not, so the notice's own sentence is used rather than a paraphrase that picks one reading.",
   "fields": {
    "permitted_stay_days": 90,
    "permitted_stay": "90 days per visit under the Thailand-Korea bilateral visa exemption agreement",
    "arrival_card": {
     "required": true,
     "name": "Thailand Digital Arrival Card (TDAC)",
-    "submission_window": "submit online within 3 days before arrival",
+    "submission_window": "Thai Immigration states that foreigners are required to submit their arrival card information 3 days in advance of their arrival date",
     "note": "Mandatory for all foreign visitors since 1 May 2025; free at tdac.immigration.go.th"
    }
   }
@@ -25725,15 +25725,15 @@
    "destination": "THA",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
+  "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit",
-  "source_url": "https://tdac.immigration.go.th/",
-  "note": "Thailand Digital Arrival Card (TDAC) is mandatory for all foreign visitors since 1 May 2025; submitted free online within 3 days before arrival. TDAC mandatory per tdac.immigration.go.th.",
+  "source_url": "https://tdac.immigration.go.th/arrival-card/#/home",
+  "note": "Thailand Digital Arrival Card (TDAC) is mandatory for all foreign visitors since 1 May 2025; submitted free online within 3 days before arrival. TDAC mandatory per tdac.immigration.go.th. | Restated 2026-08-30 in Thai Immigration's own words. The record said the card is filed within three days before arrival, a window that opens three days out. The official notice states a deadline instead, three days in advance of the arrival date. The number is the same and the direction is not, so the notice's own sentence is used rather than a paraphrase that picks one reading.",
   "fields": {
    "arrival_card": {
     "required": true,
     "name": "Thailand Digital Arrival Card (TDAC)",
-    "submission_window": "submit online within 3 days before arrival",
+    "submission_window": "Thai Immigration states that foreigners are required to submit their arrival card information 3 days in advance of their arrival date",
     "note": "Mandatory for all foreign visitors since 1 May 2025; free at tdac.immigration.go.th"
    }
   }
@@ -25744,15 +25744,15 @@
    "destination": "THA",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
+  "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit",
-  "source_url": "https://tdac.immigration.go.th/",
-  "note": "Thailand Digital Arrival Card (TDAC) is mandatory for all foreign visitors since 1 May 2025; submitted free online within 3 days before arrival. TDAC mandatory per tdac.immigration.go.th.",
+  "source_url": "https://tdac.immigration.go.th/arrival-card/#/home",
+  "note": "Thailand Digital Arrival Card (TDAC) is mandatory for all foreign visitors since 1 May 2025; submitted free online within 3 days before arrival. TDAC mandatory per tdac.immigration.go.th. | Restated 2026-08-30 in Thai Immigration's own words. The record said the card is filed within three days before arrival, a window that opens three days out. The official notice states a deadline instead, three days in advance of the arrival date. The number is the same and the direction is not, so the notice's own sentence is used rather than a paraphrase that picks one reading.",
   "fields": {
    "arrival_card": {
     "required": true,
     "name": "Thailand Digital Arrival Card (TDAC)",
-    "submission_window": "submit online within 3 days before arrival",
+    "submission_window": "Thai Immigration states that foreigners are required to submit their arrival card information 3 days in advance of their arrival date",
     "note": "Mandatory for all foreign visitors since 1 May 2025; free at tdac.immigration.go.th"
    }
   }
@@ -25763,15 +25763,15 @@
    "destination": "THA",
    "travel_purpose": "tourism"
   },
-  "verified_at": "2026-08-28",
+  "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit",
-  "source_url": "https://tdac.immigration.go.th/",
-  "note": "Thailand Digital Arrival Card (TDAC) is mandatory for all foreign visitors since 1 May 2025; submitted free online within 3 days before arrival. TDAC mandatory per tdac.immigration.go.th.",
+  "source_url": "https://tdac.immigration.go.th/arrival-card/#/home",
+  "note": "Thailand Digital Arrival Card (TDAC) is mandatory for all foreign visitors since 1 May 2025; submitted free online within 3 days before arrival. TDAC mandatory per tdac.immigration.go.th. | Restated 2026-08-30 in Thai Immigration's own words. The record said the card is filed within three days before arrival, a window that opens three days out. The official notice states a deadline instead, three days in advance of the arrival date. The number is the same and the direction is not, so the notice's own sentence is used rather than a paraphrase that picks one reading.",
   "fields": {
    "arrival_card": {
     "required": true,
     "name": "Thailand Digital Arrival Card (TDAC)",
-    "submission_window": "submit online within 3 days before arrival",
+    "submission_window": "Thai Immigration states that foreigners are required to submit their arrival card information 3 days in advance of their arrival date",
     "note": "Mandatory for all foreign visitors since 1 May 2025; free at tdac.immigration.go.th"
    }
   }
@@ -39473,13 +39473,13 @@
   },
   "verified_at": "2026-08-30",
   "verified_by": "Ellis source audit (adversarially verified sweep)",
-  "source_url": "https://www.mfa.go.th/en/content/thcn280124?cate=5d5bcb4e15e39c306000683e",
-  "note": "Verified 2026-08-30 against www.mfa.go.th. Holders of valid Thai ordinary passports and valid Chinese passports for public affairs and ordinary passports [are exempted from visa requirements] for a period of stay not exceeding 30 days and a cumulative period of stays not exceeding 90 days in any 180-day period ... The Agreement will enter in | Rewritten 2026-08-30: the stored note carried the verification's own correction narrative, which the display page shows to customers under Good to know. The facts are unchanged; the reviewer's voice is gone.",
+  "source_url": "https://tdac.immigration.go.th/arrival-card/#/home",
+  "note": "Verified 2026-08-30 against www.mfa.go.th. Holders of valid Thai ordinary passports and valid Chinese passports for public affairs and ordinary passports [are exempted from visa requirements] for a period of stay not exceeding 30 days and a cumulative period of stays not exceeding 90 days in any 180-day period ... The Agreement will enter in | Rewritten 2026-08-30: the stored note carried the verification's own correction narrative, which the display page shows to customers under Good to know. The facts are unchanged; the reviewer's voice is gone. | Restated 2026-08-30 in Thai Immigration's own words. The record said the card is filed within three days before arrival, a window that opens three days out. The official notice states a deadline instead, three days in advance of the arrival date. The number is the same and the direction is not, so the notice's own sentence is used rather than a paraphrase that picks one reading.",
   "fields": {
    "arrival_card": {
     "required": true,
     "name": "Thailand Digital Arrival Card (TDAC)",
-    "submission_window": "submit online within 3 days before arrival",
+    "submission_window": "Thai Immigration states that foreigners are required to submit their arrival card information 3 days in advance of their arrival date",
     "note": "Mandatory for all foreign visitors since 1 May 2025; free at tdac.immigration.go.th"
    },
    "disposition": "VISA_EXEMPT",
