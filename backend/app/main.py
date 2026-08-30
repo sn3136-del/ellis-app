@@ -956,7 +956,40 @@ def _tstation_rows(db, *, nationality: str = "", destination: str = "",
             else:
                 rec["_source_check"] = "unchecked"
             out.append(rec)
-    return out
+    return _dedupe_dataset_rows(out)
+
+
+def _dedupe_dataset_rows(rows: list[dict]) -> list[dict]:
+    """One dataset row per visa product, however many cached answers produced it.
+
+    A route is cached separately per transit itinerary and per consular
+    jurisdiction, because those change the ADVICE. They do not change the
+    25-field product row: the same Japanese group tourist visa came back six
+    times for CHN->JPN, once per transit variant, and an operator opening that
+    route met thirty-one rows where five exist. The 25 fields identify the
+    row, so they decide identity here too; among duplicates the best-evidenced
+    survives, so deduplicating can never downgrade what a reader sees.
+    """
+    from .visa_snapshot import tstation as _ts
+    rank = {"human-quote": 3, "grounded-consistent": 2, "reference": 1,
+            "unchecked": 0}
+    best: dict[tuple, dict] = {}
+    order: list[tuple] = []
+    for r in rows:
+        key = (r.get("travel_document_country"), r.get("destination_country"),
+               r.get("travel_purpose"), r.get("travel_document_type"),
+               r.get("visa_type_name"), r.get("visa_requirement"))
+        prev = best.get(key)
+        if prev is None:
+            best[key] = r
+            order.append(key)
+            continue
+        score = (rank.get(r.get("_source_check"), 0), _ts.completeness(r))
+        prior = (rank.get(prev.get("_source_check"), 0),
+                 _ts.completeness(prev))
+        if score > prior:
+            best[key] = r
+    return [best[k] for k in order]
 
 
 def _with_pending(status: dict, disputed) -> dict:

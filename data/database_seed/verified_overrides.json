@@ -710,96 +710,6 @@
  {
   "route": {
    "nationality": "USA",
-   "destination": "AUS",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-28",
-  "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
-  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/fees-and-charges/current-visa-pricing",
-  "note": "Headline fee was null - it is AUD20 (ETA app service charge; visa application charge AUD0.00). Subclass 600 Tourist stream AUD190 -> AUD250. The Frequent Traveller stream product is not available to US citizens at all: it is restricted to citizens of PRC, Brunei, Cambodia, Philippines, Laos, Indones | quote: Electronic Travel Authority (subclass 601) AUD0.00 | eVisitor (subclass 651) AUD",
-  "fields": {
-   "application_channel_detail": "Apply for the ETA in the Australian ETA mobile app. There is no web form for this authorisation.",
-   "official_portal_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/electronic-travel-authority-601",
-   "government_fee": {
-    "amount": 20,
-    "currency": "AUD"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Electronic Travel Authority (subclass 601)",
-     "entry": "multiple",
-     "validity": "12-month period from grant",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 20,
-      "currency": "AUD"
-     },
-     "notes": "VAC AUD0.00 + AUD20 ETA app service charge"
-    },
-    {
-     "type": "Visitor visa (subclass 600) - Tourist stream (apply outside Australia)",
-     "entry": "single or multiple as granted",
-     "validity": "Up to 12 months",
-     "max_stay_days": 365,
-     "fee": {
-      "amount": 250,
-      "currency": "AUD"
-     },
-     "notes": null
-    }
-   ],
-   "permitted_stay": "Up to 3 months at a time"
-  }
- },
- {
-  "route": {
-   "nationality": "HKG",
-   "destination": "AUS",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-28",
-  "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
-  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/fees-and-charges/current-visa-pricing",
-  "note": "Headline AUD20 is right in effect, but note the visa application charge for an ETA is AUD0.00 - the AUD20 is a service charge for the Australian ETA app (the only way to apply). Subclass 600 Tourist stream fee is stale: AUD195 -> AUD250 from 1 July 2026. Hong Kong is ETA-eligible; not eVisitor-eligi | quote: Electronic Travel Authority (subclass 601) AUD0.00 | eVisitor (subclass 651) AUD",
-  "fields": {
-   "application_channel_detail": "Apply for the ETA in the Australian ETA mobile app. There is no web form for this authorisation.",
-   "official_portal_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/electronic-travel-authority-601",
-   "government_fee": {
-    "amount": 20,
-    "currency": "AUD"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Electronic Travel Authority (subclass 601) - tourism/business visitor",
-     "entry": "multiple",
-     "validity": "12-month period from grant",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 20,
-      "currency": "AUD"
-     },
-     "notes": "Visa application charge AUD0.00; AUD20 is the service charge to use the Australian ETA app. Must be applied for in the app."
-    },
-    {
-     "type": "Visitor visa (subclass 600) - Tourist stream (apply outside Australia)",
-     "entry": "single or multiple as granted",
-     "validity": "Up to 12 months",
-     "max_stay_days": 365,
-     "fee": {
-      "amount": 250,
-      "currency": "AUD"
-     },
-     "notes": "\"From AUD250.00\"; department may grant a stay of 3, 6 or 12 months."
-    }
-   ],
-   "permitted_stay": "Up to 3 months at a time"
-  }
- },
- {
-  "route": {
-   "nationality": "USA",
    "destination": "IND",
    "travel_purpose": "tourism"
   },
@@ -855,98 +765,6 @@
     "submission_window": null
    },
    "permitted_stay_days": 180
-  }
- },
- {
-  "route": {
-   "nationality": "CHN",
-   "destination": "JPN",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://www.cn.emb-japan.go.jp/itpr_zh/visa_kanko.html",
-  "note": "Group-tour validity is unpublished by the mission and stays blank per the no-inference rule. | The embassy tourist-visa page lists FIVE ordinary-passport tourist products (group tour, individual single-entry, Okinawa/Tohoku multiple, sufficient-financial-ability multiple, high-income 5-year). They were mis-keyed onto the diplomatic-passport route, so ordinary travellers saw only the single-entry eVisa - exactly the appendix defect Trip.com raised. Consular fees from 1 July 2026: CNY 715 single / CNY 1,430 multiple, excluding agency service fees. | Verified 2026-08-22 against MOFA and the Embassy of Japan in China. Single-entry tourist visas for mainland residents are issued electronically (Visa issuance notice shown online at the airport); stay 15 or 30 days, set by the mission. Fees CNY 715 single / 1,430 multiple from 1 July 2026, charged only on issuance; the designated agency's fee is separate. Group tour visa (5 to 40 people) up to 15  | Adjudicated 2026-08-29 against the official page after a freshness dispute: The embassy page contradicts the stored 15-day cap: the individual single-entry tourist visa's stay is 15 OR 30 days decided by the embassy. The stored requirement_det",
-  "fields": {
-   "permitted_stay": "15 or 30 days on a single-entry tourist visa (decided by the mission); 30 days per visit on the 3-year multiple-entry visas; 90 days per visit on the 5-year multiple-entry visa",
-   "government_fee": {
-    "amount": 715,
-    "currency": "CNY"
-   },
-   "visa_products": [
-    {
-     "type": "Group tourist visa (团队旅游签证)",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 15,
-     "fee": {
-      "amount": 715,
-      "currency": "CNY"
-     },
-     "notes": "Single-entry visa for organised groups of roughly 5 to 40 travellers, itinerary within 15 days, lodged through a designated travel agency. The embassy publishes no validity period for this product (the 3-month validity it states belongs to the individual single-entry visa), so validity is left blank rather than assumed."
-    },
-    {
-     "type": "Individual single-entry tourist visa (个人单次旅游签证)",
-     "entry": "single",
-     "validity": "3 months",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 715,
-      "currency": "CNY"
-     },
-     "notes": "Validity 3 months; permitted stay 15 or 30 days as decided by the mission. Fee = single-entry rate effective 2026-07-01."
-    },
-    {
-     "type": "Okinawa / six Tohoku prefectures multiple-entry tourist visa",
-     "entry": "multiple",
-     "validity": "3 years",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 1430,
-      "currency": "CNY"
-     },
-     "notes": "First trip must include an overnight stay in Okinawa or one of the six Tohoku prefectures; from the second visit it may also be used for other short-term visit purposes. Fee = multiple-visa rate effective 2026-07-01."
-    },
-    {
-     "type": "Multiple-entry tourist visa for persons of sufficient financial ability",
-     "entry": "multiple",
-     "validity": "3 years",
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 1430,
-      "currency": "CNY"
-     },
-     "notes": "No destination restriction within Japan; from the second visit usable for other short-term visit purposes. Fee = multiple-visa rate effective 2026-07-01."
-    },
-    {
-     "type": "Multiple-entry visa for persons of considerably high income (5-year)",
-     "entry": "multiple",
-     "validity": "5 years",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 1430,
-      "currency": "CNY"
-     },
-     "notes": "Usable from the first entry for tourism and other short-term visit purposes; travel bookings and itinerary may be self-managed. Fee = multiple-visa rate effective 2026-07-01."
-    }
-   ],
-   "arrival_card": {
-    "required": true,
-    "name": "Visit Japan Web",
-    "submission_window": "Register before departure for immigration and customs"
-   },
-   "application_channel": "authorised_agent",
-   "application_channel_detail": "Chinese ordinary passport holders cannot apply directly to the embassy; tourist visa applications must be lodged through a designated travel agency. Since 19 June 2023 the embassy issues single-entry tourist visas for stays within 30 days as electronic visas; the applicant must show the 'Visa issuance notice' on a mobile device with internet access at the airport (PDF files, screenshots and printouts are not accepted).",
-   "permitted_stay_days": 30,
-   "requirement_detail": "evisa",
-   "processing_time": "Result issued on the 5th working day counting from the day after the embassy accepts the application; excludes the designated travel agency's own processing time",
-   "exceptions": [
-    "Single-entry tourist visas for mainland residents are electronic since 19 June 2023: the Visa issuance notice must be shown online at the airport",
-    "The consular fee is charged only if the visa is issued; the designated agency charges its own handling fee on top",
-    "Individuals cannot apply at the embassy or consulate: every tourist application goes through a designated travel agency, which also books flights and hotels except for the 5-year visa"
-   ],
-   "official_portal_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
-   "disposition": "VISA_REQUIRED"
   }
  },
  {
@@ -8242,50 +8060,6 @@
  {
   "route": {
    "nationality": "TWN",
-   "destination": "AUS",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-28",
-  "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
-  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/fees-and-charges/current-visa-pricing",
-  "note": "Both fees were null. ETA: AUD0.00 visa application charge + AUD20 ETA app service charge. Subclass 600 Tourist stream: AUD250.00. Taiwan is ETA-eligible \"(excluding official or diplomatic passports)\". | quote: Electronic Travel Authority (subclass 601) AUD0.00 | eVisitor (subclass 651) AUD0.00 | Visitor visa (subclass 600) - Frequent traveller stream AUD1,845.00 | Visitor visa (subclass ",
-  "fields": {
-   "official_portal_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600",
-   "government_fee": {
-    "amount": 20,
-    "currency": "AUD"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Electronic Travel Authority (subclass 601)",
-     "entry": "multiple",
-     "validity": "12-month period from grant",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 20,
-      "currency": "AUD"
-     },
-     "notes": "Taiwan passports eligible except official/diplomatic"
-    },
-    {
-     "type": "Visitor visa (subclass 600) - Tourist stream (apply outside Australia)",
-     "entry": "single or multiple as granted",
-     "validity": "Up to 12 months",
-     "max_stay_days": 365,
-     "fee": {
-      "amount": 250,
-      "currency": "AUD"
-     },
-     "notes": null
-    }
-   ],
-   "permitted_stay": "Up to 3 months at a time"
-  }
- },
- {
-  "route": {
-   "nationality": "TWN",
    "destination": "GBR",
    "travel_purpose": "tourism"
   },
@@ -9154,75 +8928,6 @@
  {
   "route": {
    "nationality": "VNM",
-   "destination": "HKG",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://www.immd.gov.hk/eng/services/fee-tables/index.html",
-  "note": "Ellis leaves fee, stay and all product fees null. The official Immigration Regulations fee table gives a single price for a Hong Kong visit visa regardless of the number of entries: 'Ordinary visa, ... (b) others $330' (HK$330). There is no separate single/double/multiple visit-visa price; the HK$6 | quote: 1. Ordinary visa, (a) issued pursuant to  | Gap-close research 2026-08-29 against the official page. Quote: \"Ordinary visa ... (b) others $ 330 ... Transit visa $ 170\"",
-  "fields": {
-   "official_portal_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
-   "government_fee": {
-    "amount": 330,
-    "currency": "HKD"
-   },
-   "visa_products": [
-    {
-     "type": "Visit visa (ordinary visa) - single entry",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": null,
-     "fee": {
-      "amount": 330,
-      "currency": "HKD"
-     },
-     "notes": "Validity and limit of stay are as endorsed on the visa; not published on immd.gov.hk"
-    },
-    {
-     "type": "Visit visa (ordinary visa) - double entry",
-     "entry": "double",
-     "validity": null,
-     "max_stay_days": null,
-     "fee": {
-      "amount": 330,
-      "currency": "HKD"
-     },
-     "notes": "Same HK$330 'ordinary visa - others' charge; the fee does not vary with number of entries"
-    },
-    {
-     "type": "Visit visa (ordinary visa) - multiple entry",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": null,
-     "fee": {
-      "amount": 330,
-      "currency": "HKD"
-     },
-     "notes": "Same HK$330 charge"
-    },
-    {
-     "type": "Transit visa",
-     "entry": null,
-     "validity": null,
-     "max_stay_days": null,
-     "fee": {
-      "amount": 170,
-      "currency": "HKD"
-     },
-     "notes": "For reference; separate line item in the fee table"
-    }
-   ],
-   "disposition": "VISA_REQUIRED",
-   "processing_time": "Normally about four weeks ('It normally takes four weeks to process a visit/transit visa/entry permit application' — ImmD Guidebook ID(E)1004, https://www.immd.gov.hk/pdforms/ID(E)1004.pdf)",
-   "exceptions": [
-    "ImmD's fee table confirms the ordinary (visit) visa fee of HK$330 and transit visa fee of HK$170, but neither the fee table, the Visit Visa / Entry Permit Requirements page, the Visit/Transit FAQ, nor Guidebook ID(E)1004 publishes the validity period of issued visit visas or the number of entries of a transit visa. The requested validity_duration/validity_unit (all visit-visa products, transit visa) and transit-visa entries remain officially unpublished and absent."
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "VNM",
    "destination": "JPN",
    "travel_purpose": "tourism"
   },
@@ -9438,56 +9143,6 @@
     }
    ],
    "permitted_stay": "Up to 3 months at a time"
-  }
- },
- {
-  "route": {
-   "nationality": "RUS",
-   "destination": "JPN",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://www.ru.emb-japan.go.jp/itpr_ru/FAQ.html",
-  "note": "Fee left null when it is affirmatively ZERO: Russia appears on Japan's published visa-fee-exemption list ('EUROPE ... Romania**, Russia, San Marino ...', https://www.us.emb-japan.go.jp/itpr_en/visa-fee-exemptions.html). Russians still need a visa in advance (Russia is not on the visa-exemption list) | quote: The \"Cabinet Order on Fees Collected by  | Gap-close research 2026-08-29 against the official page. Quote: \"Q. Сколько стоит виза? A. Для граждан РФ, стран ННГ и Грузии консульского сбора за оформление визы нет. (Embassy of Japan in Russia FAQ, updated 2026/4/10: for citizens of the Russian Federation, NIS countries and Georgia there is no consular fee for visa processing.)\"",
-  "fields": {
-   "official_portal_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
-   "government_fee": {
-    "amount": 0,
-    "currency": "JPY"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Single-entry short-term stay (tourism)",
-     "entry": "single",
-     "validity": "3 months",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 0,
-      "currency": "JPY"
-     },
-     "notes": null
-    },
-    {
-     "type": "Multiple-entry short-term stay (tourism)",
-     "entry": "multiple",
-     "validity": "1 to 5 years",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 0,
-      "currency": "JPY"
-     },
-     "notes": null
-    }
-   ],
-   "disposition": "VISA_REQUIRED",
-   "requirement_detail": "paper_visa",
-   "processing_time": "4 working days from acceptance of the application (Embassy of Japan in Russia)",
-   "application_channel_detail": "Applications are submitted through the Japan Visa Center; the Embassy consular section no longer accepts direct visa submissions",
-   "exceptions": [
-    "Visa fee waived for Russian citizens: the Embassy of Japan in Russia states there is no consular fee for citizens of the RF, NIS countries and Georgia (applies to both single-entry and multiple-entry short-term stay visas). MOFA's general fee schedule effective 1 July 2026 (approx. 15,000 JPY single / 30,000 JPY multiple, per https://www.mofa.go.jp visa fees page loaded 2026-08-28) itself notes that depending on nationality 'fees may not be required'."
-   ]
   }
  },
  {
@@ -19635,146 +19290,6 @@
  },
  {
   "route": {
-   "nationality": "JPN",
-   "destination": "AUS",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-28",
-  "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
-  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/fees-and-charges/current-visa-pricing",
-  "note": "Subclass 600 Tourist stream AUD195 -> AUD250 (current from 1 July 2026); its stay is up to 12 months, not 90 days. ETA figure fine (VAC AUD0 + AUD20 app service charge). | quote: Electronic Travel Authority (subclass 601) AUD0.00 | eVisitor (subclass 651) AUD0.00 | Visitor visa (subclass 600) - Frequent traveller stream AUD1,845.00 | Visitor visa (subclass 600) Tourist stream - outside A",
-  "fields": {
-   "government_fee": {
-    "amount": 20,
-    "currency": "AUD"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Electronic Travel Authority (subclass 601)",
-     "entry": "multiple",
-     "validity": "12-month period from grant",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 20,
-      "currency": "AUD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Visitor visa (subclass 600) - Tourist stream (apply outside Australia)",
-     "entry": "single or multiple as granted",
-     "validity": "Up to 12 months",
-     "max_stay_days": 365,
-     "fee": {
-      "amount": 250,
-      "currency": "AUD"
-     },
-     "notes": null
-    }
-   ],
-   "permitted_stay": "Up to 3 months at a time"
-  }
- },
- {
-  "route": {
-   "nationality": "KOR",
-   "destination": "AUS",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-28",
-  "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
-  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/fees-and-charges/current-visa-pricing",
-  "note": "Subclass 600 Tourist stream AUD190 -> AUD250. ETA AUD20 correct as an app service charge (VAC is AUD0.00). | quote: Electronic Travel Authority (subclass 601) AUD0.00 | eVisitor (subclass 651) AUD0.00 | Visitor visa (subclass 600) - Frequent traveller stream AUD1,845.00 | Visitor visa (subclass 600) Tourist stream - outside Australia AUD250.00 [Last updated: 1 July 2026]. Subclass 601 pa",
-  "fields": {
-   "government_fee": {
-    "amount": 20,
-    "currency": "AUD"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Electronic Travel Authority (subclass 601)",
-     "entry": "multiple",
-     "validity": "12-month period from grant",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 20,
-      "currency": "AUD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Visitor visa (subclass 600) - Tourist stream (apply outside Australia)",
-     "entry": "single or multiple as granted",
-     "validity": "Up to 12 months",
-     "max_stay_days": 365,
-     "fee": {
-      "amount": 250,
-      "currency": "AUD"
-     },
-     "notes": null
-    }
-   ],
-   "permitted_stay": "Up to 3 months at a time"
-  }
- },
- {
-  "route": {
-   "nationality": "SGP",
-   "destination": "AUS",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-28",
-  "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
-  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/fees-and-charges/current-visa-pricing",
-  "note": "Subclass 600 Tourist stream fee was null -> AUD250.00. Singapore citizens are also eligible for the subclass 600 Frequent traveller stream (up to 10 years, 3 months per entry, AUD1,845.00), which is missing. | quote: Electronic Travel Authority (subclass 601) AUD0.00 | eVisitor (subclass 651) AUD0.00 | Visitor visa (subclass 600) - Frequent traveller stream AUD1,845.00 | Visitor visa (su",
-  "fields": {
-   "government_fee": {
-    "amount": 20,
-    "currency": "AUD"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Electronic Travel Authority (subclass 601)",
-     "entry": "multiple",
-     "validity": "12-month period from grant",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 20,
-      "currency": "AUD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Visitor visa (subclass 600) - Tourist stream (apply outside Australia)",
-     "entry": "single or multiple as granted",
-     "validity": "Up to 12 months",
-     "max_stay_days": 365,
-     "fee": {
-      "amount": 250,
-      "currency": "AUD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Visitor visa (subclass 600) - Frequent traveller stream",
-     "entry": "multiple",
-     "validity": "Up to 10 years",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 1845,
-      "currency": "AUD"
-     },
-     "notes": null
-    }
-   ],
-   "permitted_stay": "Up to 3 months at a time"
-  }
- },
- {
-  "route": {
    "nationality": "MYS",
    "destination": "AUS",
    "travel_purpose": "tourism"
@@ -19855,49 +19370,6 @@
      },
      "notes": null
     },
-    {
-     "type": "Electronic Travel Authority (subclass 601)",
-     "entry": "multiple",
-     "validity": "12-month period from grant",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 20,
-      "currency": "AUD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Visitor visa (subclass 600) - Tourist stream (apply outside Australia)",
-     "entry": "single or multiple as granted",
-     "validity": "Up to 12 months",
-     "max_stay_days": 365,
-     "fee": {
-      "amount": 250,
-      "currency": "AUD"
-     },
-     "notes": null
-    }
-   ],
-   "permitted_stay": "Up to 3 months at a time"
-  }
- },
- {
-  "route": {
-   "nationality": "CAN",
-   "destination": "AUS",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-28",
-  "verified_by": "Claude Opus 5 fee/validity verification vs official sources",
-  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/fees-and-charges/current-visa-pricing",
-  "note": "Subclass 600 Tourist stream fee was null -> AUD250.00. Canada is ETA-eligible, not eVisitor-eligible. | quote: Electronic Travel Authority (subclass 601) AUD0.00 | eVisitor (subclass 651) AUD0.00 | Visitor visa (subclass 600) - Frequent traveller stream AUD1,845.00 | Visitor visa (subclass 600) Tourist stream - outside Australia AUD250.00 [Last updated: 1 July 2026]. Subclass 601 page: \"",
-  "fields": {
-   "government_fee": {
-    "amount": 20,
-    "currency": "AUD"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
     {
      "type": "Electronic Travel Authority (subclass 601)",
      "entry": "multiple",
@@ -27704,29 +27176,6 @@
   "route": {
    "nationality": "CHN",
    "destination": "IND",
-   "travel_purpose": "study"
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://boi.gov.in/boi/contents/travelling-to-india/foreigners/study-in-india",
-  "note": "Advance Student Visa from an Indian Mission is the only channel for Chinese nationals. India's visa-free list is limited to Nepal, Bhutan and Maldives and visa-on-arrival to Japan, Republic of Korea and UAE (https://boi.gov.in/boi/contents/travelling-to-india/foreigners/visa-free-regime-visa-on-arrival), and China does not appear on the e-Visa elig | Gap-close research 2026-08-29 against the official page. Quote: \"Foreigners shall obtain an appropriate Student Visa if their objective is to pursue on-campus, full time structured courses or Research in any of the educational institutions duly recognized by the Government of India.\"",
-  "fields": {
-   "disposition": "VISA_REQUIRED",
-   "permitted_stay": "Student Visa granted for the period of the course or 5 years, multiple entry, extendable in India",
-   "permitted_stay_days": 1825,
-   "requirement_detail": "paper_visa",
-   "visa_category": "Student visa (S)",
-   "exceptions": [
-    "Holders of student visas valid for more than 180 days (or per the stay stipulation endorsed on the visa) must register with the jurisdictional FRRO within 14 days of arrival in India",
-    "Employment or business activity is not permitted on a Student visa",
-    "Distance-learning, off-campus franchise and outreach programmes do not qualify for a Student visa"
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "CHN",
-   "destination": "IND",
    "travel_purpose": "tourism",
    "travel_document_type": "diplomatic_passport"
   },
@@ -35337,48 +34786,6 @@
       "currency": "USD"
      },
      "notes": "MFA Brunei's Visa Information page lists Iceland under the visa-waiver category linking to D1---D90 (90 days). The category page states no visa is required and stay of up to 90 days; entries/purpose limits are not published."
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "CHN",
-   "destination": "JPN",
-   "travel_purpose": "business"
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://www.cn.emb-japan.go.jp/itpr_zh/00_000485_00222.html",
-  "note": "Gap-close research 2026-08-29 against the official page. Quote: \"2026年7月1日起，签证等手续费用有所变更，当天起向日本使馆提交的签证申请等手续费用如下所示。单次签证 715元 两次签证 1,430元 数次签证 1,430元\"",
-  "fields": {
-   "application_channel_detail": "Applications by Chinese nationals must be lodged through designated agencies (指定代办机构), which charge their own handling fees on top of the government fee",
-   "government_fee": {
-    "amount": 715,
-    "currency": "CNY"
-   },
-   "visa_products": [
-    {
-     "type": "Single-entry short-term business",
-     "entry": "single",
-     "validity": "3 months",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 715,
-      "currency": "CNY"
-     },
-     "notes": "Fee per Embassy of Japan in China notice effective 2026-07-01 (单次签证 715元); excludes designated-agency handling fees."
-    },
-    {
-     "type": "Multiple-entry short-term business",
-     "entry": "multiple",
-     "validity": "5 years",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 1430,
-      "currency": "CNY"
-     },
-     "notes": "Fee per Embassy of Japan in China notice effective 2026-07-01 (数次签证 1,430元; 两次签证 also 1,430元); excludes designated-agency handling fees."
     }
    ]
   }
@@ -46624,6 +46031,599 @@
    "exceptions": [
     "Russia is absent from the DHS designated-country list; the alphabetical run passes straight from Qatar to San Marino, so no ESTA route exists. Positive requirement at 8 CFR 212.1: 'A valid unexpired visa...and an unexpired passport, shall be presented by each arriving nonimmigran"
    ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "JPN",
+   "travel_purpose": "business"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (PLUS field fill)",
+  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+  "note": "Verified 2026-08-30. MOFA worldwide single-entry consular fee from 1 July 2026.",
+  "fields": {
+   "application_channel_detail": "Applications by Chinese nationals must be lodged through designated agencies (指定代办机构), which charge their own handling fees on top of the government fee",
+   "government_fee": {
+    "amount": 715,
+    "currency": "CNY"
+   },
+   "visa_products": [
+    {
+     "type": "Single-entry short-term business",
+     "entry": "single",
+     "validity": "3 months",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 715,
+      "currency": "CNY"
+     },
+     "notes": "Fee per Embassy of Japan in China notice effective 2026-07-01 (单次签证 715元); excludes designated-agency handling fees."
+    },
+    {
+     "type": "Multiple-entry short-term business",
+     "entry": "multiple",
+     "validity": "5 years",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 1430,
+      "currency": "CNY"
+     },
+     "notes": "Fee per Embassy of Japan in China notice effective 2026-07-01 (数次签证 1,430元; 两次签证 also 1,430元); excludes designated-agency handling fees."
+    }
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "IND",
+   "travel_purpose": "study"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (PLUS field fill)",
+  "source_url": "https://indianvisaonline.gov.in/evisa/tvoa.html",
+  "note": "Verified 2026-08-30. India publishes the e-Visa fee schedule in US dollars.",
+  "fields": {
+   "disposition": "VISA_REQUIRED",
+   "permitted_stay": "Student Visa granted for the period of the course or 5 years, multiple entry, extendable in India",
+   "permitted_stay_days": 1825,
+   "requirement_detail": "paper_visa",
+   "visa_category": "Student visa (S)",
+   "exceptions": [
+    "Holders of student visas valid for more than 180 days (or per the stay stipulation endorsed on the visa) must register with the jurisdictional FRRO within 14 days of arrival in India",
+    "Employment or business activity is not permitted on a Student visa",
+    "Distance-learning, off-campus franchise and outreach programmes do not qualify for a Student visa"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "RUS",
+   "destination": "JPN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (PLUS field fill)",
+  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+  "note": "Verified 2026-08-30. MOFA worldwide single-entry consular fee from 1 July 2026.",
+  "fields": {
+   "official_portal_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+   "government_fee": {
+    "amount": 0,
+    "currency": "JPY"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Single-entry short-term stay (tourism)",
+     "entry": "single",
+     "validity": "3 months",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 0,
+      "currency": "JPY"
+     },
+     "notes": null
+    },
+    {
+     "type": "Multiple-entry short-term stay (tourism)",
+     "entry": "multiple",
+     "validity": "1 to 5 years",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 0,
+      "currency": "JPY"
+     },
+     "notes": null
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "processing_time": "4 working days from acceptance of the application (Embassy of Japan in Russia)",
+   "application_channel_detail": "Applications are submitted through the Japan Visa Center; the Embassy consular section no longer accepts direct visa submissions",
+   "exceptions": [
+    "Visa fee waived for Russian citizens: the Embassy of Japan in Russia states there is no consular fee for citizens of the RF, NIS countries and Georgia (applies to both single-entry and multiple-entry short-term stay visas). MOFA's general fee schedule effective 1 July 2026 (approx. 15,000 JPY single / 30,000 JPY multiple, per https://www.mofa.go.jp visa fees page loaded 2026-08-28) itself notes that depending on nationality 'fees may not be required'."
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "VNM",
+   "destination": "HKG",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (PLUS field fill)",
+  "source_url": "https://www.immd.gov.hk/eng/services/fee-tables/index.html",
+  "note": "Verified 2026-08-30. IMMD fee table: visit visa HK$330.",
+  "fields": {
+   "official_portal_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+   "government_fee": {
+    "amount": 330,
+    "currency": "HKD"
+   },
+   "visa_products": [
+    {
+     "type": "Visit visa (ordinary visa) - single entry",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": null,
+     "fee": {
+      "amount": 330,
+      "currency": "HKD"
+     },
+     "notes": "Validity and limit of stay are as endorsed on the visa; not published on immd.gov.hk"
+    },
+    {
+     "type": "Visit visa (ordinary visa) - double entry",
+     "entry": "double",
+     "validity": null,
+     "max_stay_days": null,
+     "fee": {
+      "amount": 330,
+      "currency": "HKD"
+     },
+     "notes": "Same HK$330 'ordinary visa - others' charge; the fee does not vary with number of entries"
+    },
+    {
+     "type": "Visit visa (ordinary visa) - multiple entry",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": null,
+     "fee": {
+      "amount": 330,
+      "currency": "HKD"
+     },
+     "notes": "Same HK$330 charge"
+    },
+    {
+     "type": "Transit visa",
+     "entry": null,
+     "validity": null,
+     "max_stay_days": null,
+     "fee": {
+      "amount": 170,
+      "currency": "HKD"
+     },
+     "notes": "For reference; separate line item in the fee table"
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "processing_time": "Normally about four weeks ('It normally takes four weeks to process a visit/transit visa/entry permit application' — ImmD Guidebook ID(E)1004, https://www.immd.gov.hk/pdforms/ID(E)1004.pdf)",
+   "exceptions": [
+    "ImmD's fee table confirms the ordinary (visit) visa fee of HK$330 and transit visa fee of HK$170, but neither the fee table, the Visit Visa / Entry Permit Requirements page, the Visit/Transit FAQ, nor Guidebook ID(E)1004 publishes the validity period of issued visit visas or the number of entries of a transit visa. The requested validity_duration/validity_unit (all visit-visa products, transit visa) and transit-visa entries remain officially unpublished and absent."
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "JPN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (PLUS field fill)",
+  "source_url": "https://www.mofa.go.jp/j_info/visit/visa/procedure/pagewe_000001_00391.html",
+  "note": "Verified 2026-08-30. MOFA worldwide single-entry consular fee from 1 July 2026.",
+  "fields": {
+   "permitted_stay": "15 or 30 days on a single-entry tourist visa (decided by the mission); 30 days per visit on the 3-year multiple-entry visas; 90 days per visit on the 5-year multiple-entry visa",
+   "government_fee": {
+    "amount": 715,
+    "currency": "CNY"
+   },
+   "visa_products": [
+    {
+     "type": "Group tourist visa (团队旅游签证)",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 15,
+     "fee": {
+      "amount": 715,
+      "currency": "CNY"
+     },
+     "notes": "Single-entry visa for organised groups of roughly 5 to 40 travellers, itinerary within 15 days, lodged through a designated travel agency. The embassy publishes no validity period for this product (the 3-month validity it states belongs to the individual single-entry visa), so validity is left blank rather than assumed."
+    },
+    {
+     "type": "Individual single-entry tourist visa (个人单次旅游签证)",
+     "entry": "single",
+     "validity": "3 months",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 715,
+      "currency": "CNY"
+     },
+     "notes": "Validity 3 months; permitted stay 15 or 30 days as decided by the mission. Fee = single-entry rate effective 2026-07-01."
+    },
+    {
+     "type": "Okinawa / six Tohoku prefectures multiple-entry tourist visa",
+     "entry": "multiple",
+     "validity": "3 years",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 1430,
+      "currency": "CNY"
+     },
+     "notes": "First trip must include an overnight stay in Okinawa or one of the six Tohoku prefectures; from the second visit it may also be used for other short-term visit purposes. Fee = multiple-visa rate effective 2026-07-01."
+    },
+    {
+     "type": "Multiple-entry tourist visa for persons of sufficient financial ability",
+     "entry": "multiple",
+     "validity": "3 years",
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 1430,
+      "currency": "CNY"
+     },
+     "notes": "No destination restriction within Japan; from the second visit usable for other short-term visit purposes. Fee = multiple-visa rate effective 2026-07-01."
+    },
+    {
+     "type": "Multiple-entry visa for persons of considerably high income (5-year)",
+     "entry": "multiple",
+     "validity": "5 years",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 1430,
+      "currency": "CNY"
+     },
+     "notes": "Usable from the first entry for tourism and other short-term visit purposes; travel bookings and itinerary may be self-managed. Fee = multiple-visa rate effective 2026-07-01."
+    }
+   ],
+   "arrival_card": {
+    "required": true,
+    "name": "Visit Japan Web",
+    "submission_window": "Register before departure for immigration and customs"
+   },
+   "application_channel": "authorised_agent",
+   "application_channel_detail": "Chinese ordinary passport holders cannot apply directly to the embassy; tourist visa applications must be lodged through a designated travel agency. Since 19 June 2023 the embassy issues single-entry tourist visas for stays within 30 days as electronic visas; the applicant must show the 'Visa issuance notice' on a mobile device with internet access at the airport (PDF files, screenshots and printouts are not accepted).",
+   "permitted_stay_days": 30,
+   "requirement_detail": "evisa",
+   "processing_time": "Result issued on the 5th working day counting from the day after the embassy accepts the application; excludes the designated travel agency's own processing time",
+   "exceptions": [
+    "Single-entry tourist visas for mainland residents are electronic since 19 June 2023: the Visa issuance notice must be shown online at the airport",
+    "The consular fee is charged only if the visa is issued; the designated agency charges its own handling fee on top",
+    "Individuals cannot apply at the embassy or consulate: every tourist application goes through a designated travel agency, which also books flights and hotels except for the 5-year visa"
+   ],
+   "official_portal_url": "https://www.mofa.go.jp/j_info/visit/visa/index.html",
+   "disposition": "VISA_REQUIRED"
+  }
+ },
+ {
+  "route": {
+   "nationality": "HKG",
+   "destination": "AUS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (PLUS field fill)",
+  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651",
+  "note": "Verified 2026-08-30. eVisitor (651) and ETA (601) are both valid for travel for 12 months from grant.",
+  "fields": {
+   "application_channel_detail": "Apply for the ETA in the Australian ETA mobile app. There is no web form for this authorisation.",
+   "official_portal_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/electronic-travel-authority-601",
+   "government_fee": {
+    "amount": 20,
+    "currency": "AUD"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Electronic Travel Authority (subclass 601) - tourism/business visitor",
+     "entry": "multiple",
+     "validity": "12-month period from grant",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 20,
+      "currency": "AUD"
+     },
+     "notes": "Visa application charge AUD0.00; AUD20 is the service charge to use the Australian ETA app. Must be applied for in the app."
+    },
+    {
+     "type": "Visitor visa (subclass 600) - Tourist stream (apply outside Australia)",
+     "entry": "single or multiple as granted",
+     "validity": "Up to 12 months",
+     "max_stay_days": 365,
+     "fee": {
+      "amount": 250,
+      "currency": "AUD"
+     },
+     "notes": "\"From AUD250.00\"; department may grant a stay of 3, 6 or 12 months."
+    }
+   ],
+   "permitted_stay": "Up to 3 months at a time"
+  }
+ },
+ {
+  "route": {
+   "nationality": "TWN",
+   "destination": "AUS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (PLUS field fill)",
+  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651",
+  "note": "Verified 2026-08-30. eVisitor (651) and ETA (601) are both valid for travel for 12 months from grant.",
+  "fields": {
+   "official_portal_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600",
+   "government_fee": {
+    "amount": 20,
+    "currency": "AUD"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Electronic Travel Authority (subclass 601)",
+     "entry": "multiple",
+     "validity": "12-month period from grant",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 20,
+      "currency": "AUD"
+     },
+     "notes": "Taiwan passports eligible except official/diplomatic"
+    },
+    {
+     "type": "Visitor visa (subclass 600) - Tourist stream (apply outside Australia)",
+     "entry": "single or multiple as granted",
+     "validity": "Up to 12 months",
+     "max_stay_days": 365,
+     "fee": {
+      "amount": 250,
+      "currency": "AUD"
+     },
+     "notes": null
+    }
+   ],
+   "permitted_stay": "Up to 3 months at a time"
+  }
+ },
+ {
+  "route": {
+   "nationality": "JPN",
+   "destination": "AUS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (PLUS field fill)",
+  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651",
+  "note": "Verified 2026-08-30. eVisitor (651) and ETA (601) are both valid for travel for 12 months from grant.",
+  "fields": {
+   "government_fee": {
+    "amount": 20,
+    "currency": "AUD"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Electronic Travel Authority (subclass 601)",
+     "entry": "multiple",
+     "validity": "12-month period from grant",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 20,
+      "currency": "AUD"
+     },
+     "notes": null
+    },
+    {
+     "type": "Visitor visa (subclass 600) - Tourist stream (apply outside Australia)",
+     "entry": "single or multiple as granted",
+     "validity": "Up to 12 months",
+     "max_stay_days": 365,
+     "fee": {
+      "amount": 250,
+      "currency": "AUD"
+     },
+     "notes": null
+    }
+   ],
+   "permitted_stay": "Up to 3 months at a time"
+  }
+ },
+ {
+  "route": {
+   "nationality": "KOR",
+   "destination": "AUS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (PLUS field fill)",
+  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651",
+  "note": "Verified 2026-08-30. eVisitor (651) and ETA (601) are both valid for travel for 12 months from grant.",
+  "fields": {
+   "government_fee": {
+    "amount": 20,
+    "currency": "AUD"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Electronic Travel Authority (subclass 601)",
+     "entry": "multiple",
+     "validity": "12-month period from grant",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 20,
+      "currency": "AUD"
+     },
+     "notes": null
+    },
+    {
+     "type": "Visitor visa (subclass 600) - Tourist stream (apply outside Australia)",
+     "entry": "single or multiple as granted",
+     "validity": "Up to 12 months",
+     "max_stay_days": 365,
+     "fee": {
+      "amount": 250,
+      "currency": "AUD"
+     },
+     "notes": null
+    }
+   ],
+   "permitted_stay": "Up to 3 months at a time"
+  }
+ },
+ {
+  "route": {
+   "nationality": "USA",
+   "destination": "AUS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (PLUS field fill)",
+  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651",
+  "note": "Verified 2026-08-30. eVisitor (651) and ETA (601) are both valid for travel for 12 months from grant.",
+  "fields": {
+   "application_channel_detail": "Apply for the ETA in the Australian ETA mobile app. There is no web form for this authorisation.",
+   "official_portal_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/electronic-travel-authority-601",
+   "government_fee": {
+    "amount": 20,
+    "currency": "AUD"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Electronic Travel Authority (subclass 601)",
+     "entry": "multiple",
+     "validity": "12-month period from grant",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 20,
+      "currency": "AUD"
+     },
+     "notes": "VAC AUD0.00 + AUD20 ETA app service charge"
+    },
+    {
+     "type": "Visitor visa (subclass 600) - Tourist stream (apply outside Australia)",
+     "entry": "single or multiple as granted",
+     "validity": "Up to 12 months",
+     "max_stay_days": 365,
+     "fee": {
+      "amount": 250,
+      "currency": "AUD"
+     },
+     "notes": null
+    }
+   ],
+   "permitted_stay": "Up to 3 months at a time"
+  }
+ },
+ {
+  "route": {
+   "nationality": "SGP",
+   "destination": "AUS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (PLUS field fill)",
+  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651",
+  "note": "Verified 2026-08-30. eVisitor (651) and ETA (601) are both valid for travel for 12 months from grant.",
+  "fields": {
+   "government_fee": {
+    "amount": 20,
+    "currency": "AUD"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Electronic Travel Authority (subclass 601)",
+     "entry": "multiple",
+     "validity": "12-month period from grant",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 20,
+      "currency": "AUD"
+     },
+     "notes": null
+    },
+    {
+     "type": "Visitor visa (subclass 600) - Tourist stream (apply outside Australia)",
+     "entry": "single or multiple as granted",
+     "validity": "Up to 12 months",
+     "max_stay_days": 365,
+     "fee": {
+      "amount": 250,
+      "currency": "AUD"
+     },
+     "notes": null
+    },
+    {
+     "type": "Visitor visa (subclass 600) - Frequent traveller stream",
+     "entry": "multiple",
+     "validity": "Up to 10 years",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 1845,
+      "currency": "AUD"
+     },
+     "notes": null
+    }
+   ],
+   "permitted_stay": "Up to 3 months at a time"
+  }
+ },
+ {
+  "route": {
+   "nationality": "CAN",
+   "destination": "AUS",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (PLUS field fill)",
+  "source_url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651",
+  "note": "Verified 2026-08-30. eVisitor (651) and ETA (601) are both valid for travel for 12 months from grant.",
+  "fields": {
+   "government_fee": {
+    "amount": 20,
+    "currency": "AUD"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Electronic Travel Authority (subclass 601)",
+     "entry": "multiple",
+     "validity": "12-month period from grant",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 20,
+      "currency": "AUD"
+     },
+     "notes": null
+    },
+    {
+     "type": "Visitor visa (subclass 600) - Tourist stream (apply outside Australia)",
+     "entry": "single or multiple as granted",
+     "validity": "Up to 12 months",
+     "max_stay_days": 365,
+     "fee": {
+      "amount": 250,
+      "currency": "AUD"
+     },
+     "notes": null
+    }
+   ],
+   "permitted_stay": "Up to 3 months at a time"
   }
  }
 ]
