@@ -427,33 +427,120 @@ def _processing(guidance: dict) -> tuple[float | None, str | None]:
                else "Calendar Day")
 
 
+# Which subcategories each primary classification owns. Their tree nests the
+# eight 细化子类 under the three primaries, so a pairing outside this map is not
+# a fine distinction, it is a contradiction: "Visa-free / Paper Visa" printed
+# beside a visa type of "No visa needed" on 74 records, because the
+# subcategory was read off the product's name with no reference to the verdict
+# above it.
+_NESTED_UNDER = {
+    "Visa-free": ("unconditional_visa_free", "conditional_visa_free",
+                  "transit_visa_free"),
+    "Visa on Arrival": ("evisa_on_arrival", "paper_visa_on_arrival"),
+    "Visa Required in Advance": ("evisa", "paper_visa",
+                                 "eta_electronic_authorization"),
+    # Ellis's own fourth primary, used where the answer turns on a condition
+    # the traveller has to meet. It can carry either an advance permission or
+    # a conditional exemption, and nothing that is issued at the border.
+    "Conditional": ("evisa", "paper_visa", "eta_electronic_authorization",
+                    "conditional_visa_free"),
+}
+
+
 def _subcategory_for(product: dict, route_default: str | None,
                      requirement: str | None) -> str | None:
-    """Field 5's subcategory for THIS product, not for the route.
+    """Field 5's subcategory for THIS product, inside the primary it sits under.
 
-    A route can offer several different kinds of permission at once. A
-    Japanese traveller to the United Kingdom needs an ETA, and may separately
-    hold a Standard Visitor visa; labelling the visa rows "ETA Electronic
-    Authorization" because the route's headline is an ETA is simply wrong on
-    four rows out of five. The product's own name settles it.
+    A route can offer several kinds of permission at once. A Japanese traveller
+    to the United Kingdom needs an ETA and may separately hold a Standard
+    Visitor visa; labelling the visa rows "ETA Electronic Authorization"
+    because the route's headline is an ETA is wrong on four rows out of five.
+    So the product's own name still chooses.
+
+    But it chooses from the set its primary owns. Reading the name alone put a
+    paper visa under a visa-free verdict and an ordinary eVisa under a
+    visa-on-arrival one. The name says what KIND of permission this is; the
+    verdict says WHEN it is obtained, and only the two together name a
+    subcategory that exists in their tree.
     """
+    allowed = _NESTED_UNDER.get(str(requirement or ""))
     name = f"{product.get('type') or ''}".lower()
-    if any(k in name for k in ("eta", "electronic travel", "esta", "authoris",
-                               "authoriz")):
-        return SUBCATEGORY["eta_electronic_authorization"]
-    if "on arrival" in name or "on-arrival" in name:
-        return SUBCATEGORY["evisa_on_arrival" if "e-visa" in name or "evisa" in name
+    electronic = any(k in name for k in ("e-visa", "evisa", "electronic visa",
+                                         "online", "e-tourist", "etourist"))
+    authorisation = any(k in name for k in (
+        "eta", "esta", "electronic travel", "travel authoris",
+        "travel authoriz", "authorisation", "authorization"))
+    at_border = "on arrival" in name or "on-arrival" in name
+
+    if allowed is None:
+        # An unknown or absent primary: fall back to the old name-only reading
+        # rather than inventing a nesting for a verdict we do not recognise.
+        if authorisation:
+            return SUBCATEGORY["eta_electronic_authorization"]
+        if at_border:
+            return SUBCATEGORY["evisa_on_arrival" if electronic
+                               else "paper_visa_on_arrival"]
+        if electronic:
+            return SUBCATEGORY["evisa"]
+        if "visa" in name or "visitor" in name or "permit" in name:
+            return SUBCATEGORY["paper_visa"]
+        return route_default
+
+    if "Visa-free" == requirement:
+        # There is no visa, so no product can name its kind. The route's own
+        # detail decides whether the exemption is unconditional, conditional
+        # or transit-only; nothing about the product may override that.
+        key = _key_of(route_default)
+        return SUBCATEGORY[key if key in allowed else "unconditional_visa_free"]
+
+    if requirement == "Visa on Arrival":
+        return SUBCATEGORY["evisa_on_arrival" if electronic
                            else "paper_visa_on_arrival"]
-    if "e-visa" in name or "evisa" in name or "electronic visa" in name:
+
+    # Advance permissions, and the conditional case that can hold either an
+    # advance permission or a conditional exemption.
+    if authorisation and "eta_electronic_authorization" in allowed:
+        return SUBCATEGORY["eta_electronic_authorization"]
+    if (electronic or at_border) and "evisa" in allowed:
+        # "Visa on arrival, pre-applied online" on a route that requires
+        # advance action is an eVisa: the applying happens before travel and
+        # only the sticker is handed over at the border.
         return SUBCATEGORY["evisa"]
-    # A product whose own name says "visa" is a visa, whatever the route's
-    # headline says. On a Conditional route the headline is often the ETA, and
-    # inheriting it labelled four Standard Visitor visas as an authorisation.
     if "visa" in name or "visitor" in name or "permit" in name:
-        return SUBCATEGORY["paper_visa"]
-    if "visa-free" in name or "no visa" in name:
+        return SUBCATEGORY["paper_visa"] if "paper_visa" in allowed \
+            else SUBCATEGORY[allowed[0]]
+    key = _key_of(route_default)
+    if key in allowed:
+        return SUBCATEGORY[key]
+    return SUBCATEGORY[allowed[0]]
+
+
+_LABEL_TO_KEY = {v: k for k, v in SUBCATEGORY.items()}
+
+
+def _nested_detail(raw, requirement: str | None) -> str | None:
+    """The route's own subcategory, forced inside the primary it sits under.
+
+    Used on the product-less path, where there is no product name to read and
+    the engine's requirement_detail is taken as given. When the two disagree
+    the verdict wins, because the verdict is what the customer reads first."""
+    key = _key_of(raw)
+    allowed = _NESTED_UNDER.get(str(requirement or ""))
+    if allowed is None:
+        return SUBCATEGORY.get(key)
+    if key in allowed:
+        return SUBCATEGORY[key]
+    if requirement == "Visa-free":
         return SUBCATEGORY["unconditional_visa_free"]
-    return route_default
+    return SUBCATEGORY[allowed[0]] if key else None
+
+
+def _key_of(value) -> str:
+    """A subcategory arrives either as its key or as its printed label."""
+    raw = str(value or "").strip()
+    if raw in SUBCATEGORY:
+        return raw
+    return _LABEL_TO_KEY.get(raw, "")
 
 
 def _strip_visa_only_fields(row: dict) -> dict:
@@ -547,8 +634,12 @@ def records_for_route(route: dict, guidance: dict,
         "destination_country": route.get("destination_country"),
         "travel_purpose": route.get("travel_purpose") or "tourism",
         "visa_requirement": requirement,
-        "visa_requirement_detail": SUBCATEGORY.get(
-            str(g.get("requirement_detail") or "").strip().lower()),
+        # Constrained to the primary above it. A route whose verdict is
+        # visa-free cannot carry "Paper Visa" as its subcategory, and nine
+        # product-less routes did exactly that, printing "Visa-free / Paper
+        # Visa" beside a visa type of "No visa needed".
+        "visa_requirement_detail": _nested_detail(
+            g.get("requirement_detail"), requirement),
         "visa_type_name": None,
         "validity_duration": None, "validity_unit": None,
         "max_stay_duration": None, "max_stay_unit": None,

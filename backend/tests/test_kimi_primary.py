@@ -1289,3 +1289,39 @@ def test_no_shipped_override_speaks_in_the_reviewers_voice():
     assert not offenders, (
         "these overrides put the reviewer's workings in front of a customer: "
         + ", ".join(sorted(offenders)))
+
+
+def test_every_subcategory_nests_under_its_primary():
+    """Their 细化子类 hang off the three primaries; a pairing outside that tree
+    is a contradiction, not a nuance.
+
+    74 records shipped pairings like "Visa-free / Paper Visa" beside a visa
+    type of "No visa needed", because the subcategory was read off the
+    product's name with no reference to the verdict printed above it."""
+    from app.visa_snapshot.tstation import (
+        _subcategory_for, _NESTED_UNDER, SUBCATEGORY)
+    products = [
+        {"type": "Single-entry visit visa, tourism (index B1)"},
+        {"type": "Single-entry tourist e-Visa, 30 days"},
+        {"type": "No visa needed"},
+        {"type": "Visa on Arrival (pre-applied online)"},
+        {"type": "Electronic Travel Authorisation (ETA)"},
+        {"type": "Standard Visitor visa"},
+        {"type": "Tourist visa on arrival (T)"},
+        {"type": "Short-stay Schengen visa (Type C)"},
+        {"type": ""},
+    ]
+    defaults = [None, "unconditional_visa_free", "conditional_visa_free",
+                "transit_visa_free", "eta_electronic_authorization", "evisa"]
+    offenders = []
+    for primary, allowed in _NESTED_UNDER.items():
+        labels = {SUBCATEGORY[k] for k in allowed}
+        for product in products:
+            for default in defaults:
+                got = _subcategory_for(product, default, primary)
+                if got is not None and got not in labels:
+                    offenders.append(
+                        f"{primary} + {product['type']!r} (default {default!r})"
+                        f" -> {got!r}")
+    assert not offenders, (
+        "these pairings do not exist in their tree: " + "; ".join(offenders))
