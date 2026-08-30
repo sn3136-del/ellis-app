@@ -48468,5 +48468,79 @@
    "official_portal_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
    "source_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements"
   }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "THA",
+   "travel_purpose": "tourism",
+   "travel_document_type": "diplomatic_passport"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (Thai bilateral agreement)",
+  "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/0303/Bilat_Diplomatic.pdf",
+  "note": "Verified 2026-08-30 against the Thai foreign ministry's own list, \"List of Countries and Territories Which Have Bilateral Agreement on Visa Exemption for Diplomatic/ Official passports with Thailand\". The table has two period-of-stay columns, 30 days and 90 days, and China is number 5 in the 30 day column. The record said 90 days, which is the other column. The service passport record on the same route already read 30 days from this same document, so the two disagreed with each other while quoting one page.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "permitted_stay": "30 days per entry under the bilateral agreement on visa exemption for diplomatic and official passports",
+   "permitted_stay_days": 30,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa is required. Thailand and China have a bilateral agreement exempting diplomatic and official passport holders for 30 days per entry.",
+   "government_fee": {
+    "amount": 0,
+    "currency": "THB"
+   },
+   "visa_products": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "THA",
+   "travel_purpose": "tourism",
+   "travel_document_type": "official_ordinary_passport"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (Thai bilateral agreement)",
+  "source_url": "https://image.mfa.go.th/mfa/0/zE6021nSnu/0303/Bilat_Diplomatic.pdf",
+  "note": "Verified 2026-08-30 against the Thai foreign ministry's own list, \"List of Countries and Territories Which Have Bilateral Agreement on Visa Exemption for Diplomatic/ Official passports with Thailand\". The table has two period-of-stay columns, 30 days and 90 days, and China is number 5 in the 30 day column. The record said 90 days, which is the other column. The service passport record on the same route already read 30 days from this same document, so the two disagreed with each other while quoting one page.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "permitted_stay": "30 days per entry under the bilateral agreement on visa exemption for diplomatic and official passports",
+   "permitted_stay_days": 30,
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa is required. Thailand and China have a bilateral agreement exempting diplomatic and official passport holders for 30 days per entry.",
+   "government_fee": {
+    "amount": 0,
+    "currency": "THB"
+   },
+   "visa_products": []
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "THA",
+   "travel_purpose": "tourism",
+   "travel_document_type": "child_passport"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (Thai bilateral agreement)",
+  "source_url": "https://www.mfa.go.th/en/content/thcn280124?cate=5d5bcb4e15e39c306000683e",
+  "note": "Verified 2026-08-30. The record gave a child 30 days where an adult on the same passport gets 60. China issues ordinary passports to children rather than a separate child passport, and the Thailand-China mutual exemption in force since 1 March 2024 sets no shorter period for a minor, so the same 60 days applies.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "permitted_stay": "60 days per visit under the mutual visa exemption in force since 1 March 2024",
+   "permitted_stay_days": 60,
+   "application_channel": "not_required",
+   "government_fee": {
+    "amount": 0,
+    "currency": "THB"
+   },
+   "visa_products": []
+  }
  }
 ]
