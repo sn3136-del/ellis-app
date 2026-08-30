@@ -456,6 +456,27 @@ def _subcategory_for(product: dict, route_default: str | None,
     return route_default
 
 
+def _strip_visa_only_fields(row: dict) -> dict:
+    """Remove properties of a visa from a route that issues none.
+
+    A visa-free record was showing "Validity 90 days" beside "Max stay 90
+    days" and an application method of "Other". There is no visa, so it has no
+    validity and no entry count, and nothing is applied for. The stay and the
+    entry rules live in max_stay and entry_requirements, where they belong.
+    """
+    if str(row.get("visa_requirement") or "") != "Visa-free":
+        return row
+    row = dict(row)
+    for f in ("validity_duration", "validity_unit", "entries",
+              "processing_min_days", "processing_unit"):
+        row[f] = None
+    # Their enum has no "not applicable", so an empty cell carries it and the
+    # checklist says why. "Other" implied a channel that does not exist.
+    if row.get("application_method") == "Other":
+        row["application_method"] = None
+    return row
+
+
 def _regrade(row: dict, g: dict, disputed: list | None,
              unpublished: set | None = None) -> dict:
     """Apply their §4.2.3 ladder to the finished row.
@@ -465,7 +486,7 @@ def _regrade(row: dict, g: dict, disputed: list | None,
     record missing a required field, or carrying one its own official page
     disputes, was still being shown as High.
     """
-    row = dict(row)
+    row = _strip_visa_only_fields(dict(row))
     prov, grounded = row.pop("_prov", False), row.pop("_grounded", False)
     st = field_status(row, unpublished)
     complete = not any(v == "missing" for v in st.values())
@@ -653,7 +674,7 @@ def field_status(row: dict, unpublished: set | None = None) -> dict:
 # processing time. Counting those as gaps made a correct record look wrong.
 _NOT_APPLICABLE_WHEN_EXEMPT = frozenset({
     "validity_duration", "validity_unit", "entries",
-    "processing_min_days", "processing_unit",
+    "processing_min_days", "processing_unit", "application_method",
 })
 
 

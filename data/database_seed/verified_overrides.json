@@ -8025,50 +8025,6 @@
  {
   "route": {
    "nationality": "IND",
-   "destination": "SGP",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://chennai.mfa.gov.sg/consular-services/visa-information/frequently-asked-questions-on-visa/",
-  "note": "SGD30 confirmed verbatim on ICA's India page. The 30-day stay is not a visa attribute - ICA: period of stay is determined by the Visit Pass granted at the checkpoint. The product validities are unsourced: ICA publishes no single-journey/multiple-journey validity table for Indian nationals, and the o | quote: Fees: A S$30 non-refundable processing f | Gap-close research 2026-08-29 against the official page. Quote: \"Every application for a visa, including the duration of the visa granted, will be considered on its own merits and subject to approval.\"",
-  "fields": {
-   "official_portal_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
-   "government_fee": {
-    "amount": 30,
-    "currency": "SGD"
-   },
-   "visa_products": [
-    {
-     "type": "Singapore entry visa - single journey (social/business visit)",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 30,
-      "currency": "SGD"
-     },
-     "notes": "ICA/MFA do not publish a fixed validity: 'the duration of the visa granted, will be considered on its own merits' (MFA Chennai FAQ). ICA India page: 'A S$30 non-refundable processing fee is payable online'. Period of stay is granted via the e-Pass at entry and 'is not tied to the validity of your visa' (ICA)."
-    },
-    {
-     "type": "Singapore entry visa - multiple journey",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 30,
-     "fee": {
-      "amount": 30,
-      "currency": "SGD"
-     },
-     "notes": "No fixed published validity; duration granted is decided per application by ICA. A multiple journey visa may be used any number of times within its validity period (MFA Chennai FAQ)."
-    }
-   ],
-   "disposition": "VISA_REQUIRED",
-   "processing_time": "3 working days (excluding day of submission)"
-  }
- },
- {
-  "route": {
-   "nationality": "IND",
    "destination": "IDN",
    "travel_purpose": "tourism"
   },
@@ -8383,53 +8339,6 @@
     }
    ],
    "permitted_stay": "Up to 3 months at a time"
-  }
- },
- {
-  "route": {
-   "nationality": "RUS",
-   "destination": "SGP",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://ask.gov.sg/ica/questions/clos83fw201ol5k0w6sf3u5ap",
-  "note": "SGD30 confirmed verbatim on ICA's Russia page (fee is uniform - identical text on both country pages). The 30-day stay is set by the Visit Pass at the checkpoint, not by the visa. The \"5 weeks\" SJV and \"up to 1 year\" MJV validities are not published by ICA and could not be sourced. | quote: Fees: A S$30 non-refundable processing fee is payable onli | Gap-close research 2026-08-29 against the official page. Quote: \"Each visa application, including the duration of the visa granted, is considered on its own merits and subject to approval.\"",
-  "fields": {
-   "official_portal_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
-   "government_fee": {
-    "amount": 30,
-    "currency": "SGD"
-   },
-   "visa_products": [
-    {
-     "type": "Singapore entry visa - single journey (social/business visit)",
-     "entry": "single",
-     "validity": "Not published by ICA",
-     "max_stay_days": null,
-     "fee": {
-      "amount": 30,
-      "currency": "SGD"
-     },
-     "notes": null
-    },
-    {
-     "type": "Singapore entry visa - multiple journey",
-     "entry": "multiple",
-     "validity": "Not published by ICA",
-     "max_stay_days": null,
-     "fee": {
-      "amount": 30,
-      "currency": "SGD"
-     },
-     "notes": null
-    }
-   ],
-   "disposition": "VISA_REQUIRED",
-   "requirement_detail": "evisa",
-   "exceptions": [
-    "ICA (ask.gov.sg official FAQ, 'What is the validity period of a Singapore Visa?') states visa validity is decided per application; the validity granted is shown on the e-Visa. ICA's Russia visa-detail page (loaded) confirms: 'A S$30 non-refundable processing fee is payable online using a Visa or MasterCard credit/debit card.' ICA also states the period of stay granted at entry (e-Pass) is not tied to the validity of the visa."
-   ]
   }
  },
  {
@@ -19787,296 +19696,6 @@
  },
  {
   "route": {
-   "nationality": "IND",
-   "destination": "FRA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://france-visas.gouv.fr/en/faq",
-  "note": "Validity field conflates validity with stay. '90 days in a 180-day window' is the STAY rule, not the visa's validity. A multiple-entry C visa is issued with a validity of 6 months to 5 years; single/double entry validity is set per trip. Fee EUR 90 and stay 90/180 are correct. | quote: Visa applicants must pay an application fee (fees related to th | Gap-close research 2026-08-29 against the official page. Quote: \"The visa stamp indicates the validity of the visa and the authorised length of stay. A visa may be issued for a single entry or multiple entries.\"",
-  "fields": {
-   "government_fee": {
-    "amount": 90,
-    "currency": "EUR"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Single-entry tourist Schengen C",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": "No fixed validity is published: validity is set per application, as duration of stay plus a 15-calendar-day period of grace (Visa Code Art. 24(1), EUR-Lex CELEX:02009R0810-20240611)."
-    },
-    {
-     "type": "Double-entry tourist Schengen C",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": "Two entries. No fixed validity is published: validity is set per application, as duration of stay plus a 15-calendar-day period of grace (Visa Code Art. 24(1))."
-    },
-    {
-     "type": "Multiple-entry tourist Schengen C",
-     "entry": "multiple",
-     "validity": "6 months",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": "Longer multiple-entry validity follows the Visa Code Art. 24(2) cascade: 1 year, then 2 years, then up to 5 years."
-    }
-   ],
-   "disposition": "VISA_REQUIRED"
-  }
- },
- {
-  "route": {
-   "nationality": "IDN",
-   "destination": "FRA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02009R0810-20240611",
-  "note": "Correct. Child tiers confirmed: France-Visas fee schedule gives a reduced rate for children aged 6 to 12 (EUR 45) and free of charge under 6; Estonia's and Slovakia's MFA fee tables state the same Visa Code amounts (EUR 45 for 6-11 / 6-12, no fee under 6). | quote: Visa applicants must pay an application fee (fees related to the administrative proc | Gap-close research 2026-08-29 against the official page. Quote: \"Article 16: standard fee \"EUR 90\"; children six to below twelve \"EUR 45\"; fee waived for \"children under six years\". Article 24: single-entry visa validity \"shall include a 'period of grace' of 15 calendar days\".\"",
-  "fields": {
-   "government_fee": {
-    "amount": 90,
-    "currency": "EUR"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Single-entry short-stay Schengen C (adult 12+)",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": "No fixed validity is published: validity is set per application (duration of stay plus a 15-calendar-day period of grace, Visa Code Art. 24(1)). France-Visas FAQ: 'The visa stamp indicates the validity of the visa and the authorised length of stay.'"
-    },
-    {
-     "type": "Multiple-entry short-stay Schengen C (adult 12+)",
-     "entry": "multiple",
-     "validity": "6 months",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": "Multiple-entry visas can be issued with longer validity under the Visa Code Art. 24(2) cascade: 1 year after three visas lawfully used within two years, then 2 years, then up to 5 years."
-    },
-    {
-     "type": "Short-stay Schengen C (child 6-11)",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 45,
-      "currency": "EUR"
-     },
-     "notes": "Visa Code Art. 16(2): EUR 45 for children from six to below twelve years. No fixed validity published; set per application (stay plus 15-day grace period)."
-    },
-    {
-     "type": "Short-stay Schengen C (child under 6)",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 0,
-      "currency": "EUR"
-     },
-     "notes": "Visa fee waived for children under six years (Visa Code Art. 16(4)(a)); France-Visas FAQ likewise lists 'children under 6 years old' among fee exemptions. No fixed validity published; set per application (stay plus 15-day grace period)."
-    }
-   ],
-   "disposition": "VISA_REQUIRED"
-  }
- },
- {
-  "route": {
-   "nationality": "PHL",
-   "destination": "FRA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://france-visas.gouv.fr/en/faq",
-  "note": "Correct. EUR 90, stay max 90 days in any 180-day period, multiple-entry validity 6 months to 5 years. | quote: Visa applicants must pay an application fee (fees related to the administrative processing of the application) of €90 for short-stay visas and €99 for long-stay visas. In certain cases and for certain categories of applicants, free or part | Gap-close research 2026-08-29 against the official page. Quote: \"The visa stamp indicates the validity of the visa and the authorised length of stay. A visa may be issued for a single entry or multiple entries.\"",
-  "fields": {
-   "government_fee": {
-    "amount": 90,
-    "currency": "EUR"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Single-entry short-stay Schengen C (tourism)",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": "No fixed validity is published: validity is set per application, as duration of stay plus a 15-calendar-day period of grace (Visa Code Art. 24(1), EUR-Lex CELEX:02009R0810-20240611)."
-    },
-    {
-     "type": "Double-entry short-stay Schengen C",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": "Two entries. No fixed validity is published: validity is set per application, as duration of stay plus a 15-calendar-day period of grace (Visa Code Art. 24(1))."
-    },
-    {
-     "type": "Multiple-entry short-stay Schengen C",
-     "entry": "multiple",
-     "validity": "6 months",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": "Longer multiple-entry validity follows the Visa Code Art. 24(2) cascade: 1 year, then 2 years, then up to 5 years."
-    }
-   ],
-   "disposition": "VISA_REQUIRED"
-  }
- },
- {
-  "route": {
-   "nationality": "VNM",
-   "destination": "FRA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://france-visas.gouv.fr/en/faq",
-  "note": "Correct. | quote: Visa applicants must pay an application fee (fees related to the administrative processing of the application) of €90 for short-stay visas and €99 for long-stay visas. In certain cases and for certain categories of applicants, free or partial exemption from these rights may be ap | Gap-close research 2026-08-29 against the official page. Quote: \"The visa stamp indicates the validity of the visa and the authorised length of stay. A visa may be issued for a single entry or multiple entries.\"",
-  "fields": {
-   "government_fee": {
-    "amount": 90,
-    "currency": "EUR"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Single-entry short-stay tourist C",
-     "entry": "single",
-     "validity": "Set per trip",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": null
-    },
-    {
-     "type": "Double-entry short-stay tourist C",
-     "entry": "double",
-     "validity": "Set per trip",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": null
-    },
-    {
-     "type": "Multiple-entry short-stay tourist C",
-     "entry": "multiple",
-     "validity": "6 months to 5 years",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": null
-    }
-   ],
-   "disposition": "VISA_REQUIRED",
-   "exceptions": [
-    "Validity of single-entry and double-entry short-stay (type C) visas is not a fixed published duration: France-Visas states the validity and authorised length of stay are indicated on the visa sticker and 'will vary depending on the purpose of your stay'. The requested validity_duration/validity_unit for the single- and double-entry products are therefore intentionally left absent."
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "RUS",
-   "destination": "FRA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://france-visas.gouv.fr/en/faq",
-  "note": "Correct - Russian nationals pay the full EUR 90. The EUR 35 facilitated fee does NOT apply: Estonia's MFA fee table lists the EU visa-facilitation reduced fee only for Albania, Armenia, Azerbaijan, Belarus, Bosnia and Herzegovina, Georgia, Moldova, Montenegro, North Macedonia, Serbia and Ukraine - R | quote: Visa applicants must pay an application  | Gap-close research 2026-08-29 against the official page. Quote: \"The visa stamp indicates the validity of the visa and the authorised length of stay. A visa may be issued for a single entry or multiple entries. The maximum length of a stay is that which is indicated on the visa and will vary depending on the purpose of your stay.\"",
-  "fields": {
-   "government_fee": {
-    "amount": 90,
-    "currency": "EUR"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Single-entry short-stay tourist visa (C)",
-     "entry": "single",
-     "validity": "Set per trip",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": null
-    },
-    {
-     "type": "Double-entry short-stay tourist visa (C)",
-     "entry": "double",
-     "validity": "Set per trip",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": null
-    },
-    {
-     "type": "Multiple-entry short-stay tourist visa (C)",
-     "entry": "multiple",
-     "validity": "6 months to 5 years",
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": null
-    }
-   ],
-   "disposition": "VISA_REQUIRED",
-   "requirement_detail": "paper_visa",
-   "permitted_stay": "90 days in any 180-day period",
-   "official_portal_url": "https://france-visas.gouv.fr/",
-   "exceptions": [
-    "Validity of single-entry and two-entry short-stay (C) visas is not a fixed published duration: France-Visas states the validity is indicated on the visa sticker per application, and EU Visa Code Art. 24 (consolidated 02009R0810-20240611) bases the period of validity on the examination of each application (single-entry visas carry a 15-day period of grace). EUR-Lex confirms the standard fee of EUR 90 (Art. 16), which applies to Russian applicants since the EU-Russia visa facilitation agreement was suspended."
-   ]
-  }
- },
- {
-  "route": {
    "nationality": "CHN",
    "destination": "BTN",
    "travel_purpose": "tourism"
@@ -26498,20 +26117,6 @@
  {
   "route": {
    "nationality": "CHN",
-   "destination": "SGP",
-   "travel_purpose": "study"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (wave-2 research)",
-  "source_url": "https://ask.gov.sg/ica/questions/clos83fvm01gr5k0wd3ccw7aj",
-  "note": "Wave-2 completeness research vs official sources. Quote: \"The validity period is shown on your Student's Pass (STP). | The validity period is shown on your Student's Pass (STP).\"",
-  "fields": {
-   "permitted_stay": "For the validity of the Student's Pass; the holder must leave on or before the STP expiry date unless another pass is granted."
-  }
- },
- {
-  "route": {
-   "nationality": "CHN",
    "destination": "PRY",
    "travel_purpose": "tourism"
   },
@@ -31394,47 +30999,6 @@
       "currency": null
      },
      "notes": "Permitted stay is set on arrival; the mission does not publish a fixed figure for this route."
-    }
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "IND",
-   "destination": "ISL",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-29",
-  "verified_by": "Ellis source audit",
-  "source_url": "https://island.is/en/get-a-visa",
-  "note": "Fabrication audit 2026-08-29: the Schengen fee was stored as 80 EUR. Iceland states 90 EUR (45 EUR for children aged six to twelve). The 3-month and 6-month validities were unsourced and are dropped.",
-  "fields": {
-   "government_fee": {
-    "amount": 90,
-    "currency": "EUR"
-   },
-   "visa_products": [
-    {
-     "type": "Schengen short-stay visa (single entry)",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": "90 days in any 180-day period. 45 EUR for children aged six to twelve. Lodged with the Icelandic Embassy in New Delhi or a Schengen partner acting for Iceland."
-    },
-    {
-     "type": "Schengen short-stay visa (multiple entry)",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": "Validity is set by the issuing consulate under the EU cascade; Iceland publishes no fixed figure."
     }
    ]
   }
@@ -41161,87 +40725,6 @@
  },
  {
   "route": {
-   "nationality": "CHN",
-   "destination": "ROU",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (adversarially verified sweep)",
-  "source_url": "https://www.mae.ro/sites/default/files/file/2025_files/pdf/2025.08.27_anexa_1_eng.pdf",
-  "note": "Verified 2026-08-30 against www.mae.ro. I. The list of countries whose nationals must be in possession of visas when traveling to Romania (the list herein is established in accordance with the provisions of Regulation EU 2018/1806) ... 22. China",
-  "fields": {
-   "government_fee": {
-    "amount": 90,
-    "currency": "EUR"
-   },
-   "permitted_stay_days": 90,
-   "visa_products": [
-    {
-     "type": "Short-stay Schengen visa (C) - adult, single entry",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": "MAE fee table: 'Uniform visa (type C) 90 EUR'. Stay per mae.ro node 30325: Schengen visas issued 'for stays ... not exceeding 90 days in any period of 180 days'. Validity is set per issuance under the EU Visa Code and not published as a fixed figure."
-    },
-    {
-     "type": "Short-stay Schengen visa (C) - adult, double entry",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": "Two entries. Same 90 EUR uniform C-visa fee regardless of number of entries; 90/180-day stay rule; validity per issuance."
-    },
-    {
-     "type": "Short-stay Schengen visa (C) - adult, multiple entry",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 90,
-      "currency": "EUR"
-     },
-     "notes": "Same 90 EUR uniform C-visa fee; 90/180-day stay rule; validity per issuance."
-    },
-    {
-     "type": "Short-stay Schengen visa (C) - child aged 6 to 12",
-     "entry": null,
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 45,
-      "currency": "EUR"
-     },
-     "notes": "MAE fee table: 'Type A, C visas for children aged 6 to 12: 45 EUR'. Fee tier is set by age, not by number of entries."
-    },
-    {
-     "type": "Short-stay Schengen visa (C) - child under 6",
-     "entry": null,
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 0,
-      "currency": "EUR"
-     },
-     "notes": "MAE: 'There is no fee for short-stay visas for ... children under six years of age' (node 2061, page 2). Fee exemption applies regardless of number of entries."
-    }
-   ],
-   "disposition": "VISA_REQUIRED",
-   "requirement_detail": "paper_visa",
-   "application_channel": "embassy",
-   "exceptions": [
-    "Mainland PRC passport holders. Annex 1 entry 22 is \"China\", with NO asterisk (so no IGI invitation requirement) and NO (1) marker (no airport transit visa); the Commission's national ATV table also lists China for no member state. Hong Kong SAR and Macao SAR passport holders are "
-   ]
-  }
- },
- {
-  "route": {
    "nationality": "GBR",
    "destination": "USA",
    "travel_purpose": "tourism"
@@ -41569,75 +41052,6 @@
    "application_channel": "embassy",
    "exceptions": [
     "Russia is absent from the DHS designated-country list; the alphabetical run passes straight from Qatar to San Marino, so no ESTA route exists. Positive requirement at 8 CFR 212.1: 'A valid unexpired visa...and an unexpired passport, shall be presented by each arriving nonimmigran"
-   ]
-  }
- },
- {
-  "route": {
-   "nationality": "VNM",
-   "destination": "HKG",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (PLUS field fill)",
-  "source_url": "https://www.immd.gov.hk/eng/services/fee-tables/index.html",
-  "note": "Verified 2026-08-30. IMMD fee table: visit visa HK$330.",
-  "fields": {
-   "official_portal_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
-   "government_fee": {
-    "amount": 330,
-    "currency": "HKD"
-   },
-   "visa_products": [
-    {
-     "type": "Visit visa (ordinary visa) - single entry",
-     "entry": "single",
-     "validity": null,
-     "max_stay_days": null,
-     "fee": {
-      "amount": 330,
-      "currency": "HKD"
-     },
-     "notes": "Validity and limit of stay are as endorsed on the visa; not published on immd.gov.hk"
-    },
-    {
-     "type": "Visit visa (ordinary visa) - double entry",
-     "entry": "double",
-     "validity": null,
-     "max_stay_days": null,
-     "fee": {
-      "amount": 330,
-      "currency": "HKD"
-     },
-     "notes": "Same HK$330 'ordinary visa - others' charge; the fee does not vary with number of entries"
-    },
-    {
-     "type": "Visit visa (ordinary visa) - multiple entry",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": null,
-     "fee": {
-      "amount": 330,
-      "currency": "HKD"
-     },
-     "notes": "Same HK$330 charge"
-    },
-    {
-     "type": "Transit visa",
-     "entry": null,
-     "validity": null,
-     "max_stay_days": null,
-     "fee": {
-      "amount": 170,
-      "currency": "HKD"
-     },
-     "notes": "For reference; separate line item in the fee table"
-    }
-   ],
-   "disposition": "VISA_REQUIRED",
-   "processing_time": "Normally about four weeks ('It normally takes four weeks to process a visit/transit visa/entry permit application' — ImmD Guidebook ID(E)1004, https://www.immd.gov.hk/pdforms/ID(E)1004.pdf)",
-   "exceptions": [
-    "ImmD's fee table confirms the ordinary (visit) visa fee of HK$330 and transit visa fee of HK$170, but neither the fee table, the Visit Visa / Entry Permit Requirements page, the Visit/Transit FAQ, nor Guidebook ID(E)1004 publishes the validity period of issued visit visas or the number of entries of a transit visa. The requested validity_duration/validity_unit (all visit-visa products, transit visa) and transit-visa entries remain officially unpublished and absent."
    ]
   }
  },
@@ -43042,45 +42456,6 @@
  },
  {
   "route": {
-   "nationality": "TWN",
-   "destination": "USA",
-   "travel_purpose": "business"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity and jurisdiction)",
-  "source_url": "https://www.dhs.gov/visa-waiver-program",
-  "note": "Verified 2026-08-30. Consular jurisdiction for USA.",
-  "fields": {
-   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
-   "requirement_detail": "eta_electronic_authorization",
-   "visa_category": "ESTA (Visa Waiver Program travel authorisation)",
-   "permitted_stay": "Up to 90 days",
-   "permitted_stay_days": 90,
-   "application_channel": "online_application",
-   "application_channel_detail": "Apply for ESTA online before travel. Open to Taiwan passport holders with an unrestricted right of permanent abode who hold a passport bearing a national identification number.",
-   "government_fee": {
-    "amount": 40,
-    "currency": "USD"
-   },
-   "official_portal_url": "https://esta.cbp.dhs.gov/",
-   "visa_products": [
-    {
-     "type": "ESTA (Visa Waiver Program travel authorisation)",
-     "entry": "multiple",
-     "validity": null,
-     "max_stay_days": 90,
-     "fee": {
-      "amount": 40,
-      "currency": "USD"
-     },
-     "notes": "Apply for ESTA online before travel. Open to Taiwan passport holders with an unrestricted right of permanent abode who hold a passport bearing a national identification number."
-    }
-   ],
-   "consular_jurisdiction": "Schedule the interview at the US Embassy or Consulate in your country of nationality or residence."
-  }
- },
- {
-  "route": {
    "nationality": "ISL",
    "destination": "JPN",
    "travel_purpose": "tourism"
@@ -43770,45 +43145,6 @@
    "validity_duration": 12,
    "validity_unit": "Month",
    "consular_jurisdiction": "Not applicable. Australian visitor visas are lodged online through ImmiAccount rather than at a post."
-  }
- },
- {
-  "route": {
-   "nationality": "THA",
-   "destination": "USA",
-   "travel_purpose": "tourism"
-  },
-  "verified_at": "2026-08-30",
-  "verified_by": "Ellis source audit (validity and jurisdiction)",
-  "source_url": "https://www.dhs.gov/visa-waiver-program",
-  "note": "Verified 2026-08-30. Consular jurisdiction for USA.",
-  "fields": {
-   "official_portal_url": "https://ceac.state.gov/genniv/",
-   "government_fee": {
-    "amount": 185,
-    "currency": "USD"
-   },
-   "permitted_stay_days": 180,
-   "visa_products": [
-    {
-     "type": "B-1/B-2 visitor visa",
-     "entry": "per country reciprocity schedule",
-     "validity": "per reciprocity schedule (unverified)",
-     "max_stay_days": 180,
-     "fee": {
-      "amount": 185,
-      "currency": "USD"
-     },
-     "notes": null
-    }
-   ],
-   "disposition": "VISA_REQUIRED",
-   "requirement_detail": "paper_visa",
-   "application_channel": "embassy",
-   "exceptions": [
-    "Thailand is absent from the DHS designated-country list; the alphabetical run passes straight from Taiwan to United Kingdom, so no ESTA route exists. Positive requirement at 8 CFR 212.1: 'A valid unexpired visa...and an unexpired passport, shall be presented by each arriving noni"
-   ],
-   "consular_jurisdiction": "Schedule the interview at the US Embassy or Consulate in your country of nationality or residence."
   }
  },
  {
@@ -47707,6 +47043,725 @@
     "amount": 185,
     "currency": "USD"
    }
+  }
+ },
+ {
+  "route": {
+   "nationality": "IND",
+   "destination": "ISL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (verified absent)",
+  "source_url": "https://island.is/en/get-a-visa",
+  "note": "Verified 2026-08-30. Iceland publishes no fixed Schengen visa validity.",
+  "fields": {
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "visa_products": [
+    {
+     "type": "Schengen short-stay visa (single entry)",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "90 days in any 180-day period. 45 EUR for children aged six to twelve. Lodged with the Icelandic Embassy in New Delhi or a Schengen partner acting for Iceland."
+    },
+    {
+     "type": "Schengen short-stay visa (multiple entry)",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Validity is set by the issuing consulate under the EU cascade; Iceland publishes no fixed figure."
+    }
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "TWN",
+   "destination": "USA",
+   "travel_purpose": "business"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (verified absent)",
+  "source_url": "https://www.dhs.gov/visa-waiver-program",
+  "note": "Verified 2026-08-30. US visa validity and entry count are set per nationality by the State Department reciprocity schedule, so no single figure exists.",
+  "fields": {
+   "disposition": "ELECTRONIC_AUTHORIZATION_REQUIRED",
+   "requirement_detail": "eta_electronic_authorization",
+   "visa_category": "ESTA (Visa Waiver Program travel authorisation)",
+   "permitted_stay": "Up to 90 days",
+   "permitted_stay_days": 90,
+   "application_channel": "online_application",
+   "application_channel_detail": "Apply for ESTA online before travel. Open to Taiwan passport holders with an unrestricted right of permanent abode who hold a passport bearing a national identification number.",
+   "government_fee": {
+    "amount": 40,
+    "currency": "USD"
+   },
+   "official_portal_url": "https://esta.cbp.dhs.gov/",
+   "visa_products": [
+    {
+     "type": "ESTA (Visa Waiver Program travel authorisation)",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 40,
+      "currency": "USD"
+     },
+     "notes": "Apply for ESTA online before travel. Open to Taiwan passport holders with an unrestricted right of permanent abode who hold a passport bearing a national identification number."
+    }
+   ],
+   "consular_jurisdiction": "Schedule the interview at the US Embassy or Consulate in your country of nationality or residence.",
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "ROU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (verified absent)",
+  "source_url": "https://www.mae.ro/sites/default/files/file/2025_files/pdf/2025.08.27_anexa_1_eng.pdf",
+  "note": "Verified 2026-08-30. Romania publishes no fixed Schengen visa validity.",
+  "fields": {
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Short-stay Schengen visa (C) - adult, single entry",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "MAE fee table: 'Uniform visa (type C) 90 EUR'. Stay per mae.ro node 30325: Schengen visas issued 'for stays ... not exceeding 90 days in any period of 180 days'. Validity is set per issuance under the EU Visa Code and not published as a fixed figure."
+    },
+    {
+     "type": "Short-stay Schengen visa (C) - adult, double entry",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Two entries. Same 90 EUR uniform C-visa fee regardless of number of entries; 90/180-day stay rule; validity per issuance."
+    },
+    {
+     "type": "Short-stay Schengen visa (C) - adult, multiple entry",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Same 90 EUR uniform C-visa fee; 90/180-day stay rule; validity per issuance."
+    },
+    {
+     "type": "Short-stay Schengen visa (C) - child aged 6 to 12",
+     "entry": null,
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 45,
+      "currency": "EUR"
+     },
+     "notes": "MAE fee table: 'Type A, C visas for children aged 6 to 12: 45 EUR'. Fee tier is set by age, not by number of entries."
+    },
+    {
+     "type": "Short-stay Schengen visa (C) - child under 6",
+     "entry": null,
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 0,
+      "currency": "EUR"
+     },
+     "notes": "MAE: 'There is no fee for short-stay visas for ... children under six years of age' (node 2061, page 2). Fee exemption applies regardless of number of entries."
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "exceptions": [
+    "Mainland PRC passport holders. Annex 1 entry 22 is \"China\", with NO asterisk (so no IGI invitation requirement) and NO (1) marker (no airport transit visa); the Commission's national ATV table also lists China for no member state. Hong Kong SAR and Macao SAR passport holders are "
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "CHN",
+   "destination": "SGP",
+   "travel_purpose": "study"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (verified absent)",
+  "source_url": "https://ask.gov.sg/ica/questions/clos83fvm01gr5k0wd3ccw7aj",
+  "note": "Verified 2026-08-30. Singapore publishes no fixed entry visa validity, and a Singapore visa carries no period of stay at all: the stay is set at the checkpoint.",
+  "fields": {
+   "permitted_stay": "For the validity of the Student's Pass; the holder must leave on or before the STP expiry date unless another pass is granted.",
+   "unpublished_fields": [
+    "max_stay_duration",
+    "max_stay_unit",
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "IDN",
+   "destination": "FRA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (verified absent)",
+  "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02009R0810-20240611",
+  "note": "Verified 2026-08-30. France publishes no fixed validity: the consulate sets it per application and prints it on the visa.",
+  "fields": {
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Single-entry short-stay Schengen C (adult 12+)",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "No fixed validity is published: validity is set per application (duration of stay plus a 15-calendar-day period of grace, Visa Code Art. 24(1)). France-Visas FAQ: 'The visa stamp indicates the validity of the visa and the authorised length of stay.'"
+    },
+    {
+     "type": "Multiple-entry short-stay Schengen C (adult 12+)",
+     "entry": "multiple",
+     "validity": "6 months",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Multiple-entry visas can be issued with longer validity under the Visa Code Art. 24(2) cascade: 1 year after three visas lawfully used within two years, then 2 years, then up to 5 years."
+    },
+    {
+     "type": "Short-stay Schengen C (child 6-11)",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 45,
+      "currency": "EUR"
+     },
+     "notes": "Visa Code Art. 16(2): EUR 45 for children from six to below twelve years. No fixed validity published; set per application (stay plus 15-day grace period)."
+    },
+    {
+     "type": "Short-stay Schengen C (child under 6)",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 0,
+      "currency": "EUR"
+     },
+     "notes": "Visa fee waived for children under six years (Visa Code Art. 16(4)(a)); France-Visas FAQ likewise lists 'children under 6 years old' among fee exemptions. No fixed validity published; set per application (stay plus 15-day grace period)."
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "IND",
+   "destination": "FRA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (verified absent)",
+  "source_url": "https://france-visas.gouv.fr/en/faq",
+  "note": "Verified 2026-08-30. France publishes no fixed validity: the consulate sets it per application and prints it on the visa.",
+  "fields": {
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Single-entry tourist Schengen C",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "No fixed validity is published: validity is set per application, as duration of stay plus a 15-calendar-day period of grace (Visa Code Art. 24(1), EUR-Lex CELEX:02009R0810-20240611)."
+    },
+    {
+     "type": "Double-entry tourist Schengen C",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Two entries. No fixed validity is published: validity is set per application, as duration of stay plus a 15-calendar-day period of grace (Visa Code Art. 24(1))."
+    },
+    {
+     "type": "Multiple-entry tourist Schengen C",
+     "entry": "multiple",
+     "validity": "6 months",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Longer multiple-entry validity follows the Visa Code Art. 24(2) cascade: 1 year, then 2 years, then up to 5 years."
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "IND",
+   "destination": "SGP",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (verified absent)",
+  "source_url": "https://chennai.mfa.gov.sg/consular-services/visa-information/frequently-asked-questions-on-visa/",
+  "note": "Verified 2026-08-30. Singapore publishes no fixed entry visa validity, and a Singapore visa carries no period of stay at all: the stay is set at the checkpoint.",
+  "fields": {
+   "official_portal_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+   "government_fee": {
+    "amount": 30,
+    "currency": "SGD"
+   },
+   "visa_products": [
+    {
+     "type": "Singapore entry visa - single journey (social/business visit)",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 30,
+      "currency": "SGD"
+     },
+     "notes": "ICA/MFA do not publish a fixed validity: 'the duration of the visa granted, will be considered on its own merits' (MFA Chennai FAQ). ICA India page: 'A S$30 non-refundable processing fee is payable online'. Period of stay is granted via the e-Pass at entry and 'is not tied to the validity of your visa' (ICA)."
+    },
+    {
+     "type": "Singapore entry visa - multiple journey",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 30,
+     "fee": {
+      "amount": 30,
+      "currency": "SGD"
+     },
+     "notes": "No fixed published validity; duration granted is decided per application by ICA. A multiple journey visa may be used any number of times within its validity period (MFA Chennai FAQ)."
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "processing_time": "3 working days (excluding day of submission)",
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "PHL",
+   "destination": "FRA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (verified absent)",
+  "source_url": "https://france-visas.gouv.fr/en/faq",
+  "note": "Verified 2026-08-30. France publishes no fixed validity: the consulate sets it per application and prints it on the visa.",
+  "fields": {
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Single-entry short-stay Schengen C (tourism)",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "No fixed validity is published: validity is set per application, as duration of stay plus a 15-calendar-day period of grace (Visa Code Art. 24(1), EUR-Lex CELEX:02009R0810-20240611)."
+    },
+    {
+     "type": "Double-entry short-stay Schengen C",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Two entries. No fixed validity is published: validity is set per application, as duration of stay plus a 15-calendar-day period of grace (Visa Code Art. 24(1))."
+    },
+    {
+     "type": "Multiple-entry short-stay Schengen C",
+     "entry": "multiple",
+     "validity": "6 months",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": "Longer multiple-entry validity follows the Visa Code Art. 24(2) cascade: 1 year, then 2 years, then up to 5 years."
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "RUS",
+   "destination": "FRA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (verified absent)",
+  "source_url": "https://france-visas.gouv.fr/en/faq",
+  "note": "Verified 2026-08-30. France publishes no fixed validity: the consulate sets it per application and prints it on the visa.",
+  "fields": {
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Single-entry short-stay tourist visa (C)",
+     "entry": "single",
+     "validity": "Set per trip",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": null
+    },
+    {
+     "type": "Double-entry short-stay tourist visa (C)",
+     "entry": "double",
+     "validity": "Set per trip",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": null
+    },
+    {
+     "type": "Multiple-entry short-stay tourist visa (C)",
+     "entry": "multiple",
+     "validity": "6 months to 5 years",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": null
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "permitted_stay": "90 days in any 180-day period",
+   "official_portal_url": "https://france-visas.gouv.fr/",
+   "exceptions": [
+    "Validity of single-entry and two-entry short-stay (C) visas is not a fixed published duration: France-Visas states the validity is indicated on the visa sticker per application, and EU Visa Code Art. 24 (consolidated 02009R0810-20240611) bases the period of validity on the examination of each application (single-entry visas carry a 15-day period of grace). EUR-Lex confirms the standard fee of EUR 90 (Art. 16), which applies to Russian applicants since the EU-Russia visa facilitation agreement was suspended."
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "RUS",
+   "destination": "SGP",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (verified absent)",
+  "source_url": "https://ask.gov.sg/ica/questions/clos83fw201ol5k0w6sf3u5ap",
+  "note": "Verified 2026-08-30. Singapore publishes no fixed entry visa validity, and a Singapore visa carries no period of stay at all: the stay is set at the checkpoint.",
+  "fields": {
+   "official_portal_url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore/visa_requirements",
+   "government_fee": {
+    "amount": 30,
+    "currency": "SGD"
+   },
+   "visa_products": [
+    {
+     "type": "Singapore entry visa - single journey (social/business visit)",
+     "entry": "single",
+     "validity": "Not published by ICA",
+     "max_stay_days": null,
+     "fee": {
+      "amount": 30,
+      "currency": "SGD"
+     },
+     "notes": null
+    },
+    {
+     "type": "Singapore entry visa - multiple journey",
+     "entry": "multiple",
+     "validity": "Not published by ICA",
+     "max_stay_days": null,
+     "fee": {
+      "amount": 30,
+      "currency": "SGD"
+     },
+     "notes": null
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "evisa",
+   "exceptions": [
+    "ICA (ask.gov.sg official FAQ, 'What is the validity period of a Singapore Visa?') states visa validity is decided per application; the validity granted is shown on the e-Visa. ICA's Russia visa-detail page (loaded) confirms: 'A S$30 non-refundable processing fee is payable online using a Visa or MasterCard credit/debit card.' ICA also states the period of stay granted at entry (e-Pass) is not tied to the validity of the visa."
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "VNM",
+   "destination": "FRA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (verified absent)",
+  "source_url": "https://france-visas.gouv.fr/en/faq",
+  "note": "Verified 2026-08-30. France publishes no fixed validity: the consulate sets it per application and prints it on the visa.",
+  "fields": {
+   "government_fee": {
+    "amount": 90,
+    "currency": "EUR"
+   },
+   "permitted_stay_days": 90,
+   "visa_products": [
+    {
+     "type": "Single-entry short-stay tourist C",
+     "entry": "single",
+     "validity": "Set per trip",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": null
+    },
+    {
+     "type": "Double-entry short-stay tourist C",
+     "entry": "double",
+     "validity": "Set per trip",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": null
+    },
+    {
+     "type": "Multiple-entry short-stay tourist C",
+     "entry": "multiple",
+     "validity": "6 months to 5 years",
+     "max_stay_days": 90,
+     "fee": {
+      "amount": 90,
+      "currency": "EUR"
+     },
+     "notes": null
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "exceptions": [
+    "Validity of single-entry and double-entry short-stay (type C) visas is not a fixed published duration: France-Visas states the validity and authorised length of stay are indicated on the visa sticker and 'will vary depending on the purpose of your stay'. The requested validity_duration/validity_unit for the single- and double-entry products are therefore intentionally left absent."
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "VNM",
+   "destination": "HKG",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (verified absent)",
+  "source_url": "https://www.immd.gov.hk/eng/services/fee-tables/index.html",
+  "note": "Verified 2026-08-30. Hong Kong publishes no standard visit visa validity: it is set per case and printed on the visa.",
+  "fields": {
+   "official_portal_url": "https://www.immd.gov.hk/eng/services/visas/visit-transit/visit-visa-entry-permit.html",
+   "government_fee": {
+    "amount": 330,
+    "currency": "HKD"
+   },
+   "visa_products": [
+    {
+     "type": "Visit visa (ordinary visa) - single entry",
+     "entry": "single",
+     "validity": null,
+     "max_stay_days": null,
+     "fee": {
+      "amount": 330,
+      "currency": "HKD"
+     },
+     "notes": "Validity and limit of stay are as endorsed on the visa; not published on immd.gov.hk"
+    },
+    {
+     "type": "Visit visa (ordinary visa) - double entry",
+     "entry": "double",
+     "validity": null,
+     "max_stay_days": null,
+     "fee": {
+      "amount": 330,
+      "currency": "HKD"
+     },
+     "notes": "Same HK$330 'ordinary visa - others' charge; the fee does not vary with number of entries"
+    },
+    {
+     "type": "Visit visa (ordinary visa) - multiple entry",
+     "entry": "multiple",
+     "validity": null,
+     "max_stay_days": null,
+     "fee": {
+      "amount": 330,
+      "currency": "HKD"
+     },
+     "notes": "Same HK$330 charge"
+    },
+    {
+     "type": "Transit visa",
+     "entry": null,
+     "validity": null,
+     "max_stay_days": null,
+     "fee": {
+      "amount": 170,
+      "currency": "HKD"
+     },
+     "notes": "For reference; separate line item in the fee table"
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "processing_time": "Normally about four weeks ('It normally takes four weeks to process a visit/transit visa/entry permit application' — ImmD Guidebook ID(E)1004, https://www.immd.gov.hk/pdforms/ID(E)1004.pdf)",
+   "exceptions": [
+    "ImmD's fee table confirms the ordinary (visit) visa fee of HK$330 and transit visa fee of HK$170, but neither the fee table, the Visit Visa / Entry Permit Requirements page, the Visit/Transit FAQ, nor Guidebook ID(E)1004 publishes the validity period of issued visit visas or the number of entries of a transit visa. The requested validity_duration/validity_unit (all visit-visa products, transit visa) and transit-visa entries remain officially unpublished and absent."
+   ],
+   "unpublished_fields": [
+    "validity_duration",
+    "validity_unit"
+   ]
+  }
+ },
+ {
+  "route": {
+   "nationality": "THA",
+   "destination": "USA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (verified absent)",
+  "source_url": "https://www.dhs.gov/visa-waiver-program",
+  "note": "Verified 2026-08-30. US visa validity and entry count are set per nationality by the State Department reciprocity schedule, so no single figure exists.",
+  "fields": {
+   "official_portal_url": "https://ceac.state.gov/genniv/",
+   "government_fee": {
+    "amount": 185,
+    "currency": "USD"
+   },
+   "permitted_stay_days": 180,
+   "visa_products": [
+    {
+     "type": "B-1/B-2 visitor visa",
+     "entry": "per country reciprocity schedule",
+     "validity": "per reciprocity schedule (unverified)",
+     "max_stay_days": 180,
+     "fee": {
+      "amount": 185,
+      "currency": "USD"
+     },
+     "notes": null
+    }
+   ],
+   "disposition": "VISA_REQUIRED",
+   "requirement_detail": "paper_visa",
+   "application_channel": "embassy",
+   "exceptions": [
+    "Thailand is absent from the DHS designated-country list; the alphabetical run passes straight from Taiwan to United Kingdom, so no ESTA route exists. Positive requirement at 8 CFR 212.1: 'A valid unexpired visa...and an unexpired passport, shall be presented by each arriving noni"
+   ],
+   "consular_jurisdiction": "Schedule the interview at the US Embassy or Consulate in your country of nationality or residence.",
+   "unpublished_fields": [
+    "entries",
+    "validity_duration",
+    "validity_unit"
+   ]
   }
  }
 ]

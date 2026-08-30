@@ -1315,7 +1315,17 @@ export default function TravelDatabase({ onBack }) {
                         {vp.entry ? <span style={{ color: GRAY, fontWeight: 400 }}>
                           {' · ' + T(asText(vp.entry))}</span> : null}
                       </div>
-                      <div style={{ color: NAVY }}>{T(asText(vp.validity)) || '·'}</div>
+                      {/* Validity always says something true. A bare dot left
+                          a reader guessing whether we had failed to find it,
+                          when for an exemption there is no visa to have one
+                          and for a Schengen visa the consulate decides it. */}
+                      <div style={{ color: T(asText(vp.validity)) ? NAVY : '#7A8798',
+                                    fontStyle: T(asText(vp.validity)) ? 'normal' : 'italic' }}>
+                        {T(asText(vp.validity))
+                          || (/exempt|visa-free|no visa/i.test(String(vp.type || ''))
+                                ? t('db.val.na')
+                                : t('db.val.consulate'))}
+                      </div>
                       <div style={{ color: NAVY }}>
                         {vp.max_stay_days
                           ? t('db.upToDays', { n: vp.max_stay_days })
