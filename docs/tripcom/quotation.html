@@ -16,7 +16,7 @@
   h1{ font-size:19px; color:var(--ink); margin:0 0 2px; letter-spacing:-.2px; }
   h1 .cn{ display:block; font-size:12px; margin-top:3px; letter-spacing:0; }
   h2{ font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1.1px;
-      margin:16px 0 7px; font-weight:700; }
+      margin:15px 0 7px; font-weight:700; }
   h2 span{ text-transform:none; letter-spacing:0; color:#9AA6B6; font-weight:600; }
 
   .top{ display:flex; justify-content:space-between; align-items:flex-start;
@@ -31,41 +31,35 @@
   table{ width:100%; border-collapse:collapse; }
   th{ font-size:8.5px; text-transform:uppercase; letter-spacing:.7px; color:var(--muted);
       text-align:left; font-weight:700; padding:0 8px 5px; border-bottom:1px solid var(--rule); }
-  td{ padding:8px; border-bottom:1px solid var(--rule); vertical-align:top;
+  td{ padding:7px 8px; border-bottom:1px solid var(--rule); vertical-align:top;
       font-size:10.5px; line-height:1.45; }
-  /* Chinese sits on its own line inside a cell. Inline, it wrapped mid-phrase
-     and orphaned single characters ("...规模因" / "素"). */
   td .cn{ display:block; margin-top:2px; line-height:1.4; }
-  td.num .cn{ display:block; }
   .num{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
-  .tot td{ background:var(--band); font-weight:700; color:var(--ink); border-bottom:none; }
+  .sub td{ background:var(--band); font-weight:700; color:var(--ink); }
   .big{ font-size:13px; }
   .lead{ color:var(--ink); font-weight:600; }
+  .yours td{ color:var(--muted); }
 
   ul{ margin:0; padding-left:15px; }
   li{ margin-bottom:3px; }
 
-  .yr{ margin-top:10px; background:var(--ink); color:#fff; border-radius:5px;
+  .yr{ margin-top:11px; background:var(--ink); color:#fff; border-radius:5px;
        padding:11px 14px; display:flex; justify-content:space-between; align-items:baseline; }
   .yr .lbl{ font-size:10px; letter-spacing:.4px; }
-  .yr .lbl .cn{ color:#A9BBD4; }
+  .yr .lbl .cn{ color:#A9BBD4; display:block; margin-top:2px; }
   .yr .v{ font-size:20px; font-weight:800; font-variant-numeric:tabular-nums; }
-
-  .split{ display:flex; gap:16px; }
-  .split > div{ flex:1; min-width:0; }
-  .split table{ table-layout:fixed; }
 
   .src{ font-size:8.5px; line-height:1.65; color:var(--muted); }
   .src a{ color:var(--accent); text-decoration:none; word-break:break-all; }
   .src li{ margin-bottom:5px; }
 
-  .note{ font-size:9px; color:var(--muted); margin-top:7px; }
-  .foot{ margin-top:16px; padding-top:8px; border-top:1px solid var(--rule);
+  .note{ font-size:9px; color:var(--muted); margin-top:7px; line-height:1.6; }
+  .foot{ margin-top:15px; padding-top:8px; border-top:1px solid var(--rule);
          font-size:8.5px; color:var(--muted); display:flex; justify-content:space-between; }
   .pb{ page-break-before:always; }
   .kv td{ padding:5.5px 8px; }
   .kv .hl td{ background:var(--band); font-weight:700; color:var(--ink); }
-  .pct{ color:var(--good); font-weight:700; }
+  .ok{ color:var(--good); font-weight:700; }
 </style>
 
 <div class="top">
@@ -87,8 +81,8 @@
 <div class="to">
   <b>To 致：</b> Trip.com Group, Visa &amp; Insurance Business Unit 携程签证与保险业务部
   &nbsp;·&nbsp; Attn: Hazel Huang<br>
-  <span class="cn">Supersedes ELLIS-2026-001, which was priced against the 21 August requirements draft. This quotation is priced against the 26 August Requirements Specification and Acceptance &amp; Delivery Standard.<br>
-  本报价单取代 ELLIS-2026-001。前者按 8 月 21 日需求初稿计价，本报价单按 8 月 26 日需求规格说明书与验收交付标准计价。</span>
+  <span class="cn">Priced on your own cost breakdown, at your PLUS rate, for the qualified PLUS version across all 18 sites.<br>
+  本报价采用贵司提供的成本测算口径，按 PLUS 单价计价，18 个站点全部交付合格 PLUS 版本。</span>
 </div>
 
 <h2>1 · Scope <span>交付范围（仅信息库产品 database product only）</span></h2>
@@ -101,59 +95,47 @@
   <li>Acceptance document set for all five stages <span class="cn">五阶段验收文档集</span></li>
 </ul>
 
-<h2>2 · Price <span>价格</span></h2>
+<h2>2 · Price <span>价格（沿用贵司成本测算口径）</span></h2>
 <table>
   <thead><tr>
-    <th style="width:56%">Item 项目</th>
-    <th class="num" style="width:12%">Qty 数量</th>
-    <th class="num" style="width:16%">Unit USD 单价</th>
-    <th class="num" style="width:16%">Amount USD 金额</th>
+    <th style="width:58%">Item 项目</th>
+    <th class="num" style="width:14%">Unit USD 单价</th>
+    <th class="num" style="width:14%">Qty 数量</th>
+    <th class="num" style="width:14%">Amount USD 金额</th>
   </tr></thead>
   <tbody>
-    <tr>
-      <td>Platform: all four deliverables, dataset pipeline, export engine, acceptance documents
-          <span class="cn">平台：四项交付物、数据集流水线、导出引擎、验收文档</span></td>
-      <td class="num">1</td><td class="num">34,000</td><td class="num">34,000</td>
-    </tr>
-    <tr>
-      <td>Station activation to acceptance depth
-          <span class="cn">站点启用至验收深度</span></td>
-      <td class="num">18</td><td class="num">3,000</td><td class="num">54,000</td>
-    </tr>
-    <tr class="tot">
-      <td>One-time, Phase 1 <span class="cn">一期一次性合计</span></td>
-      <td></td><td></td><td class="num big">88,000</td>
-    </tr>
+    <tr><td>Base setup and storage <span class="cn">基础搭建与存储</span></td>
+        <td class="num">9,000</td><td class="num">1</td><td class="num">9,000</td></tr>
+    <tr><td>Version rollout, base <span class="cn">版本上线，基础费用</span></td>
+        <td class="num">10,000</td><td class="num">1</td><td class="num">10,000</td></tr>
+    <tr><td>PLUS version, per site <span class="cn">PLUS 版本，按站点</span></td>
+        <td class="num">1,700</td><td class="num">18</td><td class="num">30,600</td></tr>
+    <tr class="sub"><td>Build subtotal, identical to your estimate
+        <span class="cn">建设小计，与贵司测算完全一致</span></td>
+        <td class="num"></td><td class="num"></td><td class="num big">49,600</td></tr>
+    <tr><td>Operations and SLA, 12 months at 2,950 per month
+        <span class="cn">运维与 SLA，12 个月 × 2,950</span></td>
+        <td class="num">2,950</td><td class="num">12</td><td class="num">35,400</td></tr>
   </tbody>
 </table>
 
-<table style="margin-top:12px;">
-  <thead><tr>
-    <th style="width:84%">Recurring 经常性</th>
-    <th class="num" style="width:16%">USD / month 月费</th>
-  </tr></thead>
-  <tbody><tr class="tot">
-    <td style="font-weight:400;color:var(--ink2);background:var(--band);">
-      Operations and SLA from full go-live: 99.99% availability, daily backup with 1h RTO,
-      48h policy updates (24h urgent), 48h error closure, monthly full data review, quarterly
-      bidirectional sampling
-      <span class="cn">全量上线后运维与 SLA：99.99% 可用性、每日备份及 1 小时 RTO、48 小时政策更新（紧急 24 小时）、48 小时问题闭环、月度全量复核、季度双向抽样</span></td>
-    <td class="num big">5,200</td>
-  </tr></tbody>
-</table>
-
 <div class="yr">
-  <div class="lbl">Year one total, Phase 1 plus 12 months of operations
-    <span class="cn">第一年合计（一期 + 12 个月运维）</span></div>
-  <div class="v">USD 150,400</div>
+  <div class="lbl">Year one total, build plus 12 months of operations
+    <span class="cn">第一年合计（建设 + 12 个月运维）</span></div>
+  <div class="v">USD 85,000</div>
+</div>
+
+<div class="note">
+  From year two, operations only: <b>USD 35,400 per year</b>. The build is not charged again and the asset remains yours.
+  <span class="cn">第二年起仅收运维费：每年 35,400 美元。建设费不重复收取，资产归贵司所有。</span>
 </div>
 
 <h2>3 · Payment <span>付款</span></h2>
 <table class="kv">
   <tbody>
-    <tr><td style="width:12%" class="lead">30%</td><td>Stage 2 functional acceptance <span class="cn">第二阶段 功能验收</span></td></tr>
-    <tr><td class="lead">30%</td><td>Stage 3 grey release. Hong Kong and the United States are at depth now <span class="cn">第三阶段 灰度验收。中国香港与美国已达深度</span></td></tr>
-    <tr><td class="lead">40%</td><td>Stage 4 full acceptance, all 18 stations <span class="cn">第四阶段 全量验收（18 个站点）</span></td></tr>
+    <tr><td style="width:13%" class="lead">30%</td><td>Stage 2 functional acceptance <span class="cn">第二阶段 功能验收</span></td></tr>
+    <tr><td class="lead">30%</td><td>Stage 3 grey release. Hong Kong and the United States, your two designated test sites, are at depth now <span class="cn">第三阶段 灰度验收。贵司指定的两个测试站点（中国香港、美国）已达深度</span></td></tr>
+    <tr><td class="lead">40%</td><td>Stage 4 full acceptance, all 18 sites on the PLUS version <span class="cn">第四阶段 全量验收（18 个站点，PLUS 版本）</span></td></tr>
     <tr><td class="lead">Monthly</td><td>Operations billed from full go-live <span class="cn">运维费自全量上线起按月结算</span></td></tr>
   </tbody>
 </table>
@@ -173,69 +155,69 @@
   <div class="meta">How the price was set <b>定价依据</b></div>
 </div>
 
-<h2>4 · Benchmarked against China's national software cost standard
-  <span>对照《2025 年中国软件行业基准数据》</span></h2>
-<div class="note" style="margin:0 0 8px;">
-  Priced bottom-up on CSBMK-202510, the official benchmark drawn from 33,069 project datasets and used in Chinese procurement and bid evaluation.
-  <span class="cn">按 CSBMK-202510 自下而上测算。该基准源自 33,069 个项目数据，用于国内采购与投标评审。</span>
-</div>
-
-<div class="split">
-  <div>
-    <table class="kv">
-      <thead><tr><th>Build 建设</th><th class="num">Value 数值</th></tr></thead>
-      <tbody>
-        <tr><td>Scope <span class="cn">规模</span></td><td class="num">~600 FP 功能点</td></tr>
-        <tr><td>Productivity P50 <span class="cn">生产率</span></td><td class="num">6.72 h / FP</td></tr>
-        <tr><td>Effort <span class="cn">工作量</span></td><td class="num">23.2 person-months 人月</td></tr>
-        <tr><td>Shanghai rate P50 <span class="cn">上海人月费率</span></td><td class="num">¥31,309</td></tr>
-        <tr><td>Development <span class="cn">开发</span></td><td class="num">¥726,369</td></tr>
-        <tr><td>Bid-stage scope factor <span class="cn">招标阶段规模因素</span></td><td class="num">× 1.21</td></tr>
-        <tr><td>Development total <span class="cn">开发合计</span></td><td class="num">¥878,906<br><span class="cn">≈ US$123,800</span></td></tr>
-        <tr><td>Data resource construction, 1,125 verified records <span class="cn">数据资源建设费</span></td><td class="num">¥250,000–400,000<br><span class="cn">≈ US$35,000–56,000</span></td></tr>
-        <tr class="hl"><td>In-house benchmark <span class="cn">自建基准</span></td><td class="num">US$159,000–180,000</td></tr>
-        <tr class="hl"><td>This quotation <span class="cn">本报价</span></td><td class="num">US$88,000 <span class="pct">(49–55%)</span></td></tr>
-      </tbody>
-    </table>
-  </div>
-  <div>
-    <table class="kv">
-      <thead><tr><th>Monthly obligation §4.3 每月义务</th><th class="num">Person-days 人天</th></tr></thead>
-      <tbody>
-        <tr><td>Full data review, 1,125 records at 5–8 min each <span class="cn">全量复核</span></td><td class="num">11.7–18.8</td></tr>
-        <tr><td>48h policy monitoring across 187 destinations, plus the dispute desk <span class="cn">政策监控与问题处理</span></td><td class="num">5–8</td></tr>
-        <tr><td>Quarterly bidirectional sampling, amortised <span class="cn">季度双向抽样摊销</span></td><td class="num">2–3</td></tr>
-        <tr><td>Total <span class="cn">合计</span></td><td class="num">19–30</td></tr>
-        <tr><td>× ¥1,400 per person-day <span class="cn">× 数据资源建设人天费率</span></td><td class="num">¥26,600–42,000<br><span class="cn">≈ US$3,750–5,900</span></td></tr>
-        <tr class="hl"><td>This quotation <span class="cn">本报价月费</span></td><td class="num">US$5,200</td></tr>
-      </tbody>
-    </table>
-    <div class="note">The monthly fee is data labour, not software maintenance, so it is priced on the data-resource rate rather than the 9.02% maintenance ratio.
-      <span class="cn">月费为数据人工成本而非软件运维，故按数据资源建设人天费率计价，不适用 9.02% 运维占比。</span></div>
-  </div>
-</div>
-
-<h2>5 · Commercial alternative <span>外部商用方案对照</span></h2>
+<h2>4 · Your estimate, accepted line by line
+  <span>贵司成本测算，逐项接受</span></h2>
 <table class="kv">
+  <thead><tr>
+    <th style="width:52%">Line 项目</th>
+    <th class="num" style="width:24%">Your estimate 贵司测算</th>
+    <th class="num" style="width:24%">This quotation 本报价</th>
+  </tr></thead>
   <tbody>
-    <tr><td style="width:56%">Sherpa, the closest licensed equivalent, published list price
-        <span class="cn">Sherpa（最接近的商用授权方案）公开报价</span></td>
-      <td class="num">US$3,000–5,000 / month<br><span class="cn">≈ US$36,000–60,000 / year 年</span></td></tr>
-    <tr class="hl"><td>Ellis from year two, and the asset is owned outright
-        <span class="cn">Ellis 第二年起，且资产完全归属贵司</span></td>
-      <td class="num">US$62,400 / year 年</td></tr>
+    <tr><td>Base setup and storage <span class="cn">基础搭建与存储</span></td>
+        <td class="num yours">9,000</td><td class="num">9,000 <span class="ok">=</span></td></tr>
+    <tr><td>Version rollout, base <span class="cn">版本上线基础费用</span></td>
+        <td class="num yours">10,000</td><td class="num">10,000 <span class="ok">=</span></td></tr>
+    <tr><td>PLUS version, 18 sites at 1,700 <span class="cn">PLUS 版本，18 站点 × 1,700</span></td>
+        <td class="num yours">30,600</td><td class="num">30,600 <span class="ok">=</span></td></tr>
+    <tr class="hl"><td>Build <span class="cn">建设合计</span></td>
+        <td class="num">49,600</td><td class="num">49,600 <span class="ok">=</span></td></tr>
   </tbody>
 </table>
+<div class="note">
+  We are not asking for more than you costed for the build. Every one of the 18 sites is delivered at the qualified PLUS version, not the simplified one.
+  <span class="cn">建设部分我们未在贵司测算之上加价。18 个站点全部按合格 PLUS 版本交付，而非简化版。</span>
+</div>
+
+<h2>5 · What the build estimate does not cover
+  <span>建设测算未涵盖的部分：验收标准 §4.3 的经常性义务</span></h2>
+<div class="note" style="margin:0 0 7px;">
+  The estimate prices building the database once. Section 4.3 of the Acceptance and Delivery Standard also requires it to be kept true every month, indefinitely. That is what the operations line pays for.
+  <span class="cn">该测算仅覆盖一次性建设。验收交付标准 §4.3 还要求长期逐月保持数据准确，这正是运维费所对应的工作。</span>
+</div>
+<table class="kv">
+  <thead><tr>
+    <th style="width:64%">Recurring obligation §4.3 每月义务</th>
+    <th class="num" style="width:36%">Person-days / month 人天每月</th>
+  </tr></thead>
+  <tbody>
+    <tr><td>Monthly full data review of every record <span class="cn">每月全量数据复核</span></td><td class="num">11.7–18.8</td></tr>
+    <tr><td>Policy updates within 48h (24h urgent) monitored across 187 destinations, plus the error-feedback desk closing within 48h <span class="cn">48 小时政策更新（紧急 24 小时）、187 个目的地监控、48 小时问题闭环</span></td><td class="num">5–8</td></tr>
+    <tr><td>Quarterly bidirectional sampling, amortised <span class="cn">季度双向抽样（摊销）</span></td><td class="num">2–3</td></tr>
+    <tr><td>Total <span class="cn">合计</span></td><td class="num">19–30</td></tr>
+    <tr><td>At ¥1,400 per person-day, China's published data-resource rate
+            <span class="cn">按国内公布的数据资源建设人天费率 ¥1,400 计</span></td>
+        <td class="num">¥26,600–42,000<br><span class="cn">≈ US$3,750–5,900 每月</span></td></tr>
+    <tr class="hl"><td>This quotation <span class="cn">本报价月费</span></td>
+        <td class="num">US$2,950 每月</td></tr>
+  </tbody>
+</table>
+<div class="note">
+  The monthly fee sits <b>21% below the benchmark cost</b> of the obligation it covers, and it also carries hosting at 99.99% availability, daily backup with 1 hour RTO, and external monitoring. It is priced on the data-resource rate rather than the 9.02% software-maintenance ratio because this is data labour, not software upkeep.
+  <span class="cn">该月费低于其所覆盖义务的基准成本 21%，且已包含 99.99% 可用性托管、每日备份及 1 小时 RTO、外部监控。因其性质为数据人工而非软件运维，故按数据资源建设人天费率计价，不适用 9.02% 运维占比。</span>
+</div>
 
 <h2>6 · Sources <span>资料来源</span></h2>
 <ol class="src">
-  <li>《2025 年中国软件行业基准数据》CSBMK-202510, published 2025-10-30, effective 2025-10-01. Person-month rates, function-point productivity, bid-stage scope factor, maintenance ratio.<br>
-    <a href="http://www.bscea.org/uploads/soft/251029/%E3%80%8A2025%E5%B9%B4%E4%B8%AD%E5%9B%BD%E8%BD%AF%E4%BB%B6%E8%A1%8C%E4%B8%9A%E5%9F%BA%E5%87%86%E6%95%B0%E6%8D%AE%E3%80%8B.pdf">http://www.bscea.org/uploads/soft/251029/《2025年中国软件行业基准数据》.pdf</a></li>
-  <li>中基数联 数据资源建设费 methodology. Baseline ¥1,400 per person-day for data acquisition, governance and quality assessment.<br>
-    <a href="https://www.csbmk.com/html/zjyc/2026/0723/791.html">https://www.csbmk.com/html/zjyc/2026/0723/791.html</a></li>
-  <li>Sherpa travel-requirements pricing, published tiers.<br>
-    <a href="https://www.joinsherpa.com/pricing/travel-restrictions-pricing">https://www.joinsherpa.com/pricing/travel-restrictions-pricing</a></li>
-  <li>Live test environment, all figures re-computable from the Excel export.<br>
+  <li>Trip.com Group cost breakdown, section 2.1, supplied by email: base setup and storage USD 9,000; rollout base USD 10,000; PLUS version approximately USD 1,700 per site across approximately 18 sites.
+    <span class="cn">携程集团邮件提供的 2.1 节成本测算口径。</span></li>
+  <li>《2025 年中国软件行业基准数据》CSBMK-202510, published 2025-10-30, effective 2025-10-01, and the 中基数联 data-resource costing methodology (¥1,400 per person-day baseline for data acquisition, governance and quality assessment).<br>
+    <a href="http://www.bscea.org/uploads/soft/251029/%E3%80%8A2025%E5%B9%B4%E4%B8%AD%E5%9B%BD%E8%BD%AF%E4%BB%B6%E8%A1%8C%E4%B8%9A%E5%9F%BA%E5%87%86%E6%95%B0%E6%8D%AE%E3%80%8B.pdf">bscea.org 《2025年中国软件行业基准数据》.pdf</a>
+    &nbsp;·&nbsp;
+    <a href="https://www.csbmk.com/html/zjyc/2026/0723/791.html">csbmk.com/html/zjyc/2026/0723/791.html</a></li>
+  <li>T-Site Visa Information Base Acceptance and Delivery Standard, section 4.3 (timeliness and periodic review) and section 6.1 (quantified metrics).
+    <span class="cn">《T站签证信息库建设项目验收交付标准》§4.3、§6.1。</span></li>
+  <li>Live test environment. Every figure is re-computable from the Excel export.<br>
     <a href="https://ellis-visa.com">https://ellis-visa.com</a> &nbsp;·&nbsp; Quality control backend (P0): <a href="https://ellis-visa.com/ops">https://ellis-visa.com/ops</a></li>
 </ol>
 

@@ -44002,5 +44002,1524 @@
     "Paid employment is not permitted on a visa-free short stay"
    ]
   }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "AUT",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "BEL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "HRV",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "CZE",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "DNK",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "EST",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "FIN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "DEU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "GRC",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "HUN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "ISL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "LVA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "LIE",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "LTU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "LUX",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "MLT",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "NLD",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "NOR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "POL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "PRT",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "SVK",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "SVN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "SWE",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "FRA",
+   "destination": "CHE",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "AUT",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "BEL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "HRV",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "CZE",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "DNK",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "EST",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "FIN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "DEU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "GRC",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "HUN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "ISL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "ITA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "LVA",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "LIE",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "LTU",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "LUX",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "MLT",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "NLD",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "NOR",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "POL",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "PRT",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "SVK",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "SVN",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "SWE",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
+ },
+ {
+  "route": {
+   "nationality": "ESP",
+   "destination": "CHE",
+   "travel_purpose": "tourism"
+  },
+  "verified_at": "2026-08-30",
+  "verified_by": "Ellis source audit (EU free movement)",
+  "source_url": "https://publications.europa.eu/resource/celex/32004L0038",
+  "note": "Verified 2026-08-30 against Directive 2004/38/EC on the right of Union citizens to move and reside freely. Article 6(1): \"Union citizens shall have the right of residence on the territory of another Member State for a period of up to three months without any conditions or any formalities other than the requirement to hold a valid identity card or passport.\" This is free movement, not a visa exemption: the Schengen 90/180 rule for third-country nationals does not apply, and a stay beyond three months remains lawful under Article 7 subject to registration in the host state. Confirmed on the Commission's Your Europe guidance.",
+  "fields": {
+   "disposition": "VISA_EXEMPT",
+   "requirement_detail": "unconditional_visa_free",
+   "visa_category": "EU free movement (no visa)",
+   "application_channel": "not_required",
+   "application_channel_detail": "No visa and no travel authorisation. Travel on a valid national identity card or passport.",
+   "government_fee": {
+    "amount": 0,
+    "currency": null
+   },
+   "permitted_stay": "Three months unconditionally; longer stays remain lawful subject to registration in the host state",
+   "permitted_stay_days": 90,
+   "visa_products": [],
+   "exceptions": [
+    "This is the right of free movement under Directive 2004/38/EC, not a Schengen visa exemption; the 90 days in any 180 rule for third-country nationals does not apply",
+    "Beyond three months the right continues under Article 7, subject to registration in the host state",
+    "ETIAS and the Entry/Exit System do not apply to Union citizens"
+   ],
+   "official_portal_url": "https://europa.eu/youreurope/citizens/travel/entry-exit/eu-citizen/index_en.htm"
+  }
  }
 ]
