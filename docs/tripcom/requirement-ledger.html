@@ -100,7 +100,7 @@
   system rather than against intent. Read from the source PDFs, not from memory: the
   Requirements Document, the Requirements Specification with its 25-field dictionary,
   and the Acceptance &amp; Delivery Standard. Where a bar is not cleared it says so.</p>
-  <p class="stamp">Measured 2026-08-30 against ellis-visa.com &middot; 1,123 records &middot; 187 destinations</p>
+  <p class="stamp">Measured 2026-08-30 against ellis-visa.com &middot; 1,126 records &middot; 187 destinations</p>
 
   <div class="verdictbar">
     <b>Ellis does not pass &sect;6.2 today.</b>
@@ -345,10 +345,14 @@
         <td class="ev">Stopovers enter the cache key, so a transit query is never served
           the non-transit answer.</td></tr>
       <tr><td class="req">Deep link shows the route it names<span class="zh">链接与结果一致</span></td>
-        <td><span class="v no">NOT MET</span></td>
-        <td class="ev">The page reads the address only on first load, so navigating from
-          one route to another leaves the previous answer on screen under the new address
-          until a full reload.</td></tr>
+        <td><span class="v met">MET</span></td>
+        <td class="ev">Fixed today. The page read the address only on first load, so moving
+          between two routes' links left the first answer on screen under the second
+          address, and the browser's back button did the same. Every address change is
+          followed now, verified in a browser. Testing it surfaced an older race as well:
+          two lookups could be in flight at once and the slower one won whichever order
+          they were asked in, putting the heading of one route above the answer of
+          another. Only the newest request may write the page.</td></tr>
       <tr><td class="req">No internal commentary in customer text<span class="zh">对客文案无内部批注</span></td>
         <td><span class="v met">MET</span></td>
         <td class="ev">Fixed today. Eleven routes including China to Thailand opened their
@@ -389,10 +393,13 @@
           nothing to apply for. All now zero, and the reconciliation sits on the one path
           every record takes rather than on the override branch.</td></tr>
       <tr><td class="req">Held route stays usable<span class="zh">暂扣页面可用性</span></td>
-        <td><span class="v no">NOT MET</span></td>
-        <td class="ev">A held combination hides both switchers, so a reader cannot move to
-          a purpose that is published, and the hold message names the country pair when
-          the hold is per purpose.</td></tr>
+        <td><span class="v met">MET</span></td>
+        <td class="ev">Fixed today. The switchers lived inside the answer block and a held
+          route has no answer block, so the only control offered was a fresh search back to
+          an empty form. They are one shared element now and the held card carries them,
+          which matters because the hold is per purpose. The message names the purpose it
+          is holding rather than telling a customer we cannot answer a country pair we
+          answer fine.</td></tr>
       <tr><td class="req">Fee is the consular fee<span class="zh">官方费用不含代办服务费</span></td>
         <td><span class="v met">MET</span></td>
         <td class="ev">Appendix defect 6. The headline fee is the consular fee and the
