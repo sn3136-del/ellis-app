@@ -65,7 +65,9 @@ FIELD_DESCRIPTIONS = {
     "data_source": "Information source website / organization",
     "source_url": "Specific page link",
     "collected_at": "Data collection date",
-    "info_validity": "Policy validity period until",
+    "info_validity": "Policy validity period until. Where the policy carries no "
+                     "published end date, this is the date Ellis warrants the row "
+                     "to and rechecks it against its official page",
     "confidence_level": "High / Medium / Low",
 }
 
