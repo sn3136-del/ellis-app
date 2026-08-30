@@ -289,6 +289,35 @@ def _clean_text(v):
     return out
 
 
+# Fields whose verification means the override established what this record
+# fundamentally IS. An override that sets one of these has earned the record's
+# headline source link; one that only corrects a processing time or names a
+# consular district has not, and letting it take the link over is how a record
+# about a US visitor visa ends up citing an appointment-wait page.
+_RECORD_DEFINING = frozenset({
+    "disposition", "requirement_detail", "visa_products", "government_fee",
+    "visa_category", "permitted_stay", "permitted_stay_days",
+})
+
+
+def _headline_source(guidance: dict, provenance: dict | None) -> str | None:
+    """The page a reviewer should land on when they click through the record.
+
+    It has to back the record's main facts. A narrow field correction keeps
+    its own citation in the change log and in its note, but it does not get to
+    relabel the other twenty-four fields.
+    """
+    g = guidance or {}
+    own = g.get("source_url") or g.get("official_portal_url")
+    if not provenance:
+        return own
+    raw = provenance.get("fields") or []
+    fields = set(raw.keys()) if isinstance(raw, dict) else set(raw)
+    if fields and not (fields & _RECORD_DEFINING):
+        return own or provenance.get("source_url")
+    return provenance.get("source_url") or own
+
+
 def _entry_requirements(g: dict) -> str | None:
     """Their field 附加信息 "other entry requirements besides the visa",
     marked provide-if-available.
@@ -301,11 +330,29 @@ def _entry_requirements(g: dict) -> str | None:
     route with none of them still returns None rather than filler.
     """
     parts: list[str] = []
+    # On a visa-free route this field is the whole answer to "so what DO I
+    # need?". Lead with the filing that decides whether they board, and when
+    # there is none, say so outright rather than leaving a reader to infer it
+    # from an absence.
+    if str(g.get("disposition") or "").upper() == "VISA_EXEMPT":
+        ac = g.get("arrival_card")
+        if isinstance(ac, dict) and ac.get("required"):
+            nm = str(ac.get("name") or "arrival card").strip()
+            when = str(ac.get("submission_window") or "").strip()
+            parts.append(f"No visa. You must still file the {nm} before travel"
+                         + (f", {when}" if when else ""))
+        elif _files_something_online(g):
+            parts.append("No visa. You must still hold an approved travel "
+                         "authorisation before boarding")
+        else:
+            parts.append("No visa and no travel authorisation. Travel on a "
+                         "valid passport")
     pv = g.get("passport_validity")
     if isinstance(pv, str) and pv.strip():
         parts.append(f"Passport: {pv.strip().rstrip('.')}")
     ac = g.get("arrival_card")
-    if isinstance(ac, dict) and ac.get("required"):
+    if isinstance(ac, dict) and ac.get("required") and not any(
+            "must still file" in p for p in parts):
         name = str(ac.get("name") or "arrival card").strip()
         when = str(ac.get("submission_window") or "").strip()
         parts.append(f"{name} required" + (f" ({when})" if when else ""))
@@ -407,8 +454,7 @@ def records_for_route(route: dict, guidance: dict,
         "special_conditions": exceptions if isinstance(exceptions, str) else None,
         "data_source": (provenance or {}).get("verified_by")
                        or ("Ellis verified route engine" if g else None),
-        "source_url": (provenance or {}).get("source_url")
-                      or g.get("source_url") or g.get("official_portal_url"),
+        "source_url": _headline_source(g, provenance),
         "collected_at": ((provenance or {}).get("verified_at")
                          or (collected_at or "")[:10]) or None,
         # The date until which the pipeline actively stands behind this

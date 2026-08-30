@@ -52,6 +52,10 @@ OVERRIDABLE = frozenset({
     # the difference between boarding and not boarding, so a verified fact
     # must be able to correct it.
     "arrival_card",
+    # Which mission handles this applicant. Verified jurisdiction rules were
+    # being written and then silently dropped here, which is why that column
+    # stayed empty on every record while the facts sat in the seed.
+    "consular_jurisdiction",
 })
 
 
