@@ -84,6 +84,43 @@ _DISPOSITION_TO_REQUIREMENT = {
     "NOT_ADMITTED": "Not admitted",
 }
 
+def _files_something_online(g: dict) -> bool:
+    """Whether a visa-exempt traveller must still submit a form before travel.
+
+    A mandatory arrival card or electronic authorisation IS an online
+    application, and it is the difference between boarding and being turned
+    away, so the channel has to say so.
+    """
+    ac = g.get("arrival_card")
+    if isinstance(ac, dict) and ac.get("required"):
+        return True
+    hay = " ".join(str(x) for x in (
+        [g.get("application_channel_detail"), g.get("requirement_detail")]
+        + list(g.get("exceptions") or []))).lower()
+    return any(k in hay for k in (
+        "esta", "e-ta", "eta ", "k-eta", "keta", "arrival card",
+        "electronic travel authoris", "electronic travel authoriz",
+        "travel authorisation is mandatory", "must be obtained online"))
+
+
+def _method_from_product(g: dict) -> str | None:
+    """Last resort: read the channel off the visa product's own name. Only
+    unambiguous words count, so a route stays "Other" rather than guessing."""
+    names = " ".join(str((p or {}).get("type") or "")
+                     for p in (g.get("visa_products") or []))
+    names = f"{names} {g.get('visa_category') or ''}".lower()
+    if not names.strip():
+        return None
+    if any(k in names for k in ("e-visa", "evisa", "electronic travel",
+                                "eta-", "e-ta", "online")):
+        return "Online Application"
+    if any(k in names for k in ("on arrival", "on-arrival", "voa")):
+        return "On-arrival Processing"
+    if any(k in names for k in ("consular sticker", "consulate", "embassy")):
+        return "Embassy Submission"
+    return None
+
+
 def _method_for_channel(channel: str) -> str | None:
     """The engine's channel vocabulary (lowercase, many variants) mapped to
     their five application_method values. Substring rules, because a live
@@ -227,6 +264,31 @@ def _confidence(guidance: dict, provenance: dict | None,
     return "Medium"
 
 
+# House style for everything a reader sees: no em dashes and no semicolons.
+# A semicolon joins two clauses a reader has to hold at once, and an em dash
+# hides a pause that a full stop states plainly, so both are rewritten rather
+# than banned at the source, which would only push the problem into whichever
+# page the next fact is quoted from.
+_DASHES = ("\u2014", "\u2013", " -- ")
+
+
+def _clean_text(v):
+    """Rewrite one served string into house style, leaving the facts alone."""
+    if not isinstance(v, str) or not v:
+        return v
+    out = v
+    for d in _DASHES:
+        out = out.replace(f" {d} ", ", ").replace(d, ", ")
+    # A semicolon separating clauses becomes a sentence; one inside a list of
+    # short items becomes a comma, which is what it was standing in for.
+    out = re.sub(r";\s+(?=[A-Z\u4e00-\u9fff])", ". ", out)
+    out = out.replace("; ", ", ").replace(";", ",")
+    out = re.sub(r",\s*,", ",", out)
+    out = re.sub(r"\s{2,}", " ", out).strip()
+    out = re.sub(r"[,\.]+$", "", out)
+    return out
+
+
 def _entry_requirements(g: dict) -> str | None:
     """Their field 附加信息 "other entry requirements besides the visa",
     marked provide-if-available.
@@ -262,7 +324,7 @@ def _entry_requirements(g: dict) -> str | None:
             nm = str(h.get("name") or "").strip()
             if nm:
                 parts.append(f"Health: {nm}")
-    return "; ".join(parts) or None
+    return ". ".join(parts) or None
 
 
 def _consulate_district(g: dict, route: dict) -> str | None:
@@ -304,14 +366,25 @@ def records_for_route(route: dict, guidance: dict,
     docs = ", ".join(str(d) for d in docs if d) if isinstance(docs, list) else (
         str(docs) if docs else None)
     method = _method_for_channel(g.get("application_channel"))
+    if method is None and disposition != "VISA_EXEMPT":
+        # The engine left the channel blank but the product names it: a thing
+        # called an e-Visa is applied for online, a consular sticker at a
+        # mission. "Other" on a route that needs a visa tells an applicant
+        # nothing about where to go.
+        method = _method_from_product(g)
     if disposition == "VISA_EXEMPT":
-        method = "Other"
+        # A visa-free traveller often still files something before boarding:
+        # an arrival card, an ESTA, an eTA. Collapsing all of them to "Other"
+        # buried the one instruction that decides whether they are let on the
+        # plane. Only a route with genuinely nothing to file falls through to
+        # "Other", which is their enum's own value for no channel applying.
+        method = "Online Application" if _files_something_online(g) else "Other"
     entry_req = g.get("entry_requirements")
     if isinstance(entry_req, list):
-        entry_req = "; ".join(str(x) for x in entry_req if x) or None
+        entry_req = ". ".join(str(x) for x in entry_req if x) or None
     exceptions = g.get("exceptions")
     if isinstance(exceptions, list):
-        exceptions = "; ".join(str(x) for x in exceptions if x) or None
+        exceptions = ". ".join(str(x) for x in exceptions if x) or None
     proc_n, proc_unit = _processing(g)
     base = {
         "travel_document_type": route.get("travel_document_type")
@@ -371,7 +444,7 @@ def records_for_route(route: dict, guidance: dict,
             row["max_stay_duration"], row["max_stay_unit"] = n, unit
             amt, cur = _fee({}, g)
             row["visa_fee_amount"], row["visa_fee_currency"] = amt, cur
-        return [row]
+        return [{k: _clean_text(v) for k, v in row.items()}]
     rows = []
     for p in products:
         row = dict(base)
@@ -405,8 +478,8 @@ def records_for_route(route: dict, guidance: dict,
         note = p.get("notes")
         if note:
             row["special_conditions"] = (str(note) if not row["special_conditions"]
-                                         else f"{row['special_conditions']}; {note}")
-        rows.append(row)
+                                         else f"{row['special_conditions']}. {note}")
+        rows.append({k: _clean_text(v) for k, v in row.items()})
     return rows
 
 
