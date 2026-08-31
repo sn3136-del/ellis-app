@@ -1831,9 +1831,9 @@ export default function QualityConsole() {
                              targetLabel={`${t('ops.stat.target')} 99%`}
                              valueTitle={`${t('ops.stat.recordComplete')
                                .replace('{p}', Math.round((s.record_completeness || 0) * 100))} · ${t('ops.stat.recordCompleteTip')}`} />
-                      {/* The arithmetic in full, so the headline can be checked
-                          rather than taken on trust. */}
-                      <div style={{ marginTop: 7, fontSize: 11, lineHeight: 1.5,
+                      {/* Two short lines: the fraction, then what sits outside
+                          it and why — checkable without being a paragraph. */}
+                      <div style={{ marginTop: 7, fontSize: 11, lineHeight: 1.55,
                                     color: GRAY, fontVariantNumeric: 'tabular-nums' }}>
                         {s.filledCells.toLocaleString()} / {(s.filledCells + s.gaps).toLocaleString()}
                         {' '}{t('ops.stat.fillable')}
@@ -1841,10 +1841,6 @@ export default function QualityConsole() {
                         {t('ops.stat.excluded')
                           .replace('{na}', s.na.toLocaleString())
                           .replace('{unpub}', s.unpub.toLocaleString())}
-                        <br />
-                        {t('ops.stat.ofAllCells')
-                          .replace('{p}', ((s.completeness_literal || 0) * 100).toFixed(2))
-                          .replace('{n}', s.cells.toLocaleString())}
                       </div>
                     </div>
                   </BandCell>
@@ -1853,6 +1849,13 @@ export default function QualityConsole() {
                     <div style={{ marginTop: 8 }}>
                       <Meter pct={(s.source_coverage || 0) * 100} target={100}
                              targetLabel={`${t('ops.stat.target')} 100%`} />
+                      {/* One line: what the 100% is a count of. */}
+                      <div style={{ marginTop: 7, fontSize: 11, lineHeight: 1.55,
+                                    color: GRAY, fontVariantNumeric: 'tabular-nums' }}>
+                        {t('ops.stat.srcLine')
+                          .replace('{n}', s.sourced.toLocaleString())
+                          .replace('{total}', s.total.toLocaleString())}
+                      </div>
                     </div>
                   </BandCell>
                   <BandCell delay={240}>
