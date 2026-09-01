@@ -67,5 +67,44 @@ def record(db, cache_key: str, route: dict, old: dict | None, new: dict | None,
                 "passport_nationality", "destination_country",
                 "travel_purpose", "travel_document_type")},
             action=action, origin=origin, changes=changes, note=note[:900]))
+        _notify(action, origin, route, changes, note)
     except Exception:  # noqa: BLE001 — the log must never break the answer
         pass
+
+
+def _notify(action: str, origin: str, route: dict | None, changes: dict,
+            note: str) -> None:
+    """Trip.com's operations team asked for a system reminder on every
+    change (evaluation VI.4). When ELLIS_CHANGE_WEBHOOK_URL is set, each
+    add, modify and delete is pushed there as compact JSON the moment it is
+    written, in a fire-and-forget thread that can never slow or break the
+    answer path. Point it at a Slack, Teams or Feishu incoming webhook, or
+    any collector."""
+    import os
+    url = os.getenv("ELLIS_CHANGE_WEBHOOK_URL", "").strip()
+    if not url:
+        return
+    import json as _json
+    import threading
+    import urllib.request
+
+    r = route or {}
+    payload = _json.dumps({
+        "event": "database_change", "action": action, "origin": origin,
+        "route": f"{r.get('passport_nationality', '')}->"
+                 f"{r.get('destination_country', '')} "
+                 f"{r.get('travel_purpose', '')}",
+        "fields_changed": sorted(changes.keys()),
+        "note": (note or "")[:300],
+    }, ensure_ascii=False).encode("utf-8")
+
+    def _post():
+        try:
+            req = urllib.request.Request(
+                url, data=payload,
+                headers={"Content-Type": "application/json"})
+            urllib.request.urlopen(req, timeout=4)
+        except Exception:  # noqa: BLE001 — a dead webhook is not our outage
+            pass
+    threading.Thread(target=_post, daemon=True,
+                     name="ellis-change-webhook").start()

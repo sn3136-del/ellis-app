@@ -129,6 +129,7 @@ import { createVisaClient } from '../lib/visaBackend.js'
 import { newSession } from '../lib/visaSession.js'
 import { useLocale } from '../lib/locale.jsx'
 import { useLocalizedCountries } from '../lib/countryNames.js'
+import { matchCountry, matchCountryStrict } from '../lib/countryMatch.js'
 
 const NAVY = '#0f294d'
 const BLUE = '#287dfa'
@@ -341,12 +342,8 @@ function CountryFilter({ value, placeholder, onCommit, countries }) {
     const clean = String(raw || '').replace(/^[^\p{L}\p{N}]+/u, '').trim()
     if (!clean) return { kind: 'empty' }
     const lc = clean.toLowerCase()
-    const codeHit = clean === clean.toUpperCase() &&
-      countries.find((c) => c.value === clean.toUpperCase())
-    const nameHit = countries.find((c) =>
-      c.label.replace(/^[^\p{L}\p{N}]+/u, '').trim().toLowerCase() === lc)
     const pool = countries.filter((c) => c.search.includes(lc))
-    const pick = codeHit || nameHit || (pool.length === 1 ? pool[0] : null)
+    const pick = matchCountryStrict(countries, clean)
     if (pick) return { kind: 'pick', pick }
     // Unknown text long enough to be a real name goes to the server\'s
     // resolver, but only as a FINAL act (blur/Enter) — never mid-word.
@@ -688,254 +685,471 @@ function FlagForm({ rec, onFlag, t }) {
   )
 }
 
-function RecordsTable({ records, total, onFlag, onRelease, t, flagOf, typeNames = {}, tvv = (x) => x }) {
-  const [sort, setSort] = useState({ key: 'route', dir: 1 })
-  const [open, setOpen] = useState(null)
-  const onSort = (k) => setSort((s0) => ({ key: k, dir: s0.key === k ? -s0.dir : 1 }))
-  const val = (r, k) => {
-    if (k === 'route') return `${r.travel_document_country}${r.destination_country}`
-    if (k === 'confidence') return CONF_RANK[r.confidence_level] || 0
-    if (k === 'check') return CHECK_RANK[r.source_check] ?? 0
-    if (k === 'stay') return r.max_stay_duration ?? -1
-    if (k === 'fee') return r.visa_fee_amount ?? -1
-    if (k === 'complete') return r.completeness
-    if (k === 'requirement') return r.visa_requirement || ''
-    if (k === 'type') return r.visa_type_name || ''
-    return ''
-  }
-  const sorted = useMemo(() => [...records].sort((a, b) => {
-    const x = val(a, sort.key), y = val(b, sort.key)
-    return (x < y ? -1 : x > y ? 1 : 0) * sort.dir
-  }), [records, sort])
-  const REQ = {
-    'Visa-free': [t('ops.req.free'), GREEN],
-    'Visa on Arrival': [t('ops.req.voa'), AMBER],
-    'Visa Required in Advance': [t('ops.req.advance'), NAVY],
-    Conditional: [t('ops.req.conditional'), AMBER],
-  }
-  const CHECKS = {
-    'human-quote': [t('ops.check.quoted'), GREEN, t('ops.tip.quoted')],
-    'grounded-consistent': [t('ops.check.grounded'), BLUE, t('ops.tip.grounded')],
-    reference: [t('ops.check.reference'), GRAY, t('ops.tip.reference')],
-    unchecked: [t('ops.check.none'), RED, t('ops.tip.none')],
+const FieldLabel = ({ label, children }) => (
+  <label style={{ display: 'grid', gap: 5, minWidth: 0 }}>
+    <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 0.4,
+                   color: GRAY, textTransform: 'uppercase',
+                   paddingLeft: 2 }}>{label}</span>
+    {children}
+  </label>
+)
+
+function AddRouteCard({ countries, t, onAdd, onManualAdd, adding, addMsg }) {
+  // Trip.com adds a route themselves: pick the pair, press one button, and
+  // the engine answers it on the spot. The result lands in the record list
+  // with the filters already set to show it.
+  const [nat, setNat] = useState('')
+  const [dest, setDest] = useState('')
+  const [purpose, setPurpose] = useState('tourism')
+  const [doc, setDoc] = useState('ordinary_passport')
+  const [manual, setManual] = useState(false)
+  const [mv, setMv] = useState({})
+  const [srcUrl, setSrcUrl] = useState('')
+  const [note, setNote] = useState('')
+  const [mState, setMState] = useState(null)
+  const setM = (k) => (e) => setMv((v) => ({ ...v, [k]: e.target.value }))
+  const ready = nat && dest && !adding
+  const manualDirty = Object.values(mv).some((v) => String(v || '').trim())
+  const manualReady = ready && manualDirty && srcUrl.trim() && note.trim()
+    && mState !== 'saving'
+  const sel = { ...input, width: '100%', boxSizing: 'border-box' }
+  async function saveManual() {
+    const g = (k) => String(mv[k] || '').trim()
+    const fields = {}
+    if (g('requirement')) fields.disposition = g('requirement')
+    if (g('visa_type')) fields.visa_category = g('visa_type')
+    if (g('fee_amount') || g('fee_currency')) fields.government_fee = {
+      amount: g('fee_amount') ? Number(g('fee_amount')) : null,
+      currency: g('fee_currency') ? g('fee_currency').toUpperCase() : null }
+    if (g('permitted_stay')) fields.permitted_stay = g('permitted_stay')
+    if (g('stay_days')) fields.permitted_stay_days = Number(g('stay_days'))
+    if (g('processing_time')) fields.processing_time = g('processing_time')
+    if (g('official_portal_url')) fields.official_portal_url =
+      g('official_portal_url')
+    if (g('channel_detail')) fields.application_channel_detail =
+      g('channel_detail')
+    if (g('required_documents')) fields.required_documents =
+      g('required_documents').split(',').map((x) => x.trim()).filter(Boolean)
+    if (g('exceptions')) fields.exceptions =
+      g('exceptions').split('\n').map((x) => x.trim()).filter(Boolean)
+    if (g('visa_type') && (g('validity') || g('entries_sel'))) {
+      fields.visa_products = [{
+        type: g('visa_type'),
+        entry: g('entries_sel') || 'single',
+        validity: g('validity') || 'As issued',
+        max_stay_days: g('stay_days') ? Number(g('stay_days')) : null,
+        fee: fields.government_fee
+          || { amount: null, currency: null },
+        notes: null }]
+    }
+    setMState('saving')
+    try {
+      await onManualAdd(nat, dest, purpose, doc, fields,
+                        srcUrl.trim(), note.trim())
+      setMState('saved'); setMv({}); setSrcUrl(''); setNote('')
+    } catch (e) {
+      setMState({ err: String(e?.detail || e?.message || e) })
+    }
   }
   return (
-    <div style={{ ...card, overflow: 'hidden' }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 10,
-                    padding: '12px 16px', flexWrap: 'wrap',
-                    borderBottom: `1px solid ${BORDER}` }}>
-        <strong style={{ color: NAVY, fontSize: 13 }}>
-          {(total ?? records.length).toLocaleString()} {t('ops.items')}
-        </strong>
-        <span style={{ color: GRAY, fontSize: 12 }}>{t('ops.rowsHint')}</span>
+    <div style={{ background: '#fff', border: `1px solid ${BORDER}`,
+                  borderRadius: 14, padding: '16px 20px' }}
+         data-testid="ops-add-route">
+      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1,
+                    color: GRAY, textTransform: 'uppercase',
+                    marginBottom: 4 }}>{t('ops.add.title')}</div>
+      <div style={{ fontSize: 12.5, color: GRAY, marginBottom: 12 }}>
+        {t('ops.add.hint')}
       </div>
-      <div style={{ overflowX: 'auto' }}>
-        <table className="ops-rt"
-               style={{ width: '100%', borderCollapse: 'collapse',
-                        tableLayout: 'fixed', fontSize: 13 }}>
-          <thead>
-            <tr>
-              <SortHeader label={t('ops.col.route')} k="route" sort={sort} onSort={onSort} width="15%" />
-              <SortHeader label={t('ops.col.requirement')} k="requirement" sort={sort} onSort={onSort} width="11%" />
-              <SortHeader label={t('ops.col.type')} k="type" sort={sort} onSort={onSort} width="24%" />
-              <SortHeader label={t('ops.col.stay')} k="stay" sort={sort} onSort={onSort} align="right" width="9%" />
-              <SortHeader label={t('ops.col.fee')} k="fee" sort={sort} onSort={onSort} align="right" width="11%" />
-              <SortHeader label={t('ops.col.quality')} k="check" sort={sort} onSort={onSort} width="14%" />
-              <th style={{ position: 'sticky', top: 0, background: '#fff',
-                           zIndex: 5, borderBottom: `2px solid ${BORDER}`,
-                           padding: '10px 12px', fontSize: 10.5,
-                           fontWeight: 800, letterSpacing: 0.8,
-                           textTransform: 'uppercase', color: GRAY,
-                           whiteSpace: 'nowrap', width: '16%',
-                           textAlign: 'left' }}>
-                {t('ops.col.site')}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.map((rec, i) => {
-              const id = rec.cache_key + (rec.visa_type_name || '') + i
-              const [reqLabel, reqColor] = REQ[rec.visa_requirement] || ['·', GRAY]
-              const [checkLabel, checkColor, checkTip] = CHECKS[rec.source_check] || CHECKS.reference
-              const missing = Object.entries(rec.field_status)
-                .filter(([, v]) => v === 'missing').map(([k]) => k)
-              const opened = open === id
-              const confKey = 'ops.conf.' + String(rec.confidence_level || '').toLowerCase()
-              const confLabel = t(confKey) !== confKey ? t(confKey) : rec.confidence_level
-              const pctDone = Math.round(rec.completeness * 100)
-              const held = rec.confidence_level === 'Low' && !rec.operator_released
-              return [
-                <tr key={id} onClick={() => setOpen(opened ? null : id)}
-                    style={{ cursor: 'pointer',
-                             background: opened ? '#f4f8ff'
-                               : i % 2 ? '#fbfcfe' : '#fff' }}>
-                  {/* The pair itself never wraps; the purpose line under it
-                      does. Held together, a long document type ("Tourism ·
-                      Refugee travel document") burst the column. */}
-                  <td className="ops-cell ops-route"
-                      style={{ padding: '10px 12px' }}>
-                    <span style={{ display: 'inline-block', color: '#9aa8bd',
-                                   fontSize: 10, marginRight: 7,
-                                   transition: 'transform .15s ease',
-                                   transform: opened ? 'rotate(90deg)' : 'none' }}>
-                      ▶
-                    </span>
-                    <strong style={{ color: NAVY, whiteSpace: 'nowrap' }}>
-                      {flagOf(rec.travel_document_country)} {rec.travel_document_country}
-                      {' → '}
-                      {flagOf(rec.destination_country)} {rec.destination_country}
-                    </strong>
-                    <div style={{ color: GRAY, fontSize: 11, paddingLeft: 17,
-                                  lineHeight: 1.45, overflowWrap: 'anywhere' }}>
-                      {t(PURPOSE_KEY[rec.travel_purpose] || '') || rec.travel_purpose}
-                      {rec.travel_document_type !== 'ordinary_passport'
-                        ? ' · ' + ((t('db.doc.' + rec.travel_document_type)
-                            !== 'db.doc.' + rec.travel_document_type)
-                            ? t('db.doc.' + rec.travel_document_type)
-                            : rec.travel_document_type.replace(/_/g, ' '))
-                        : ''}
-                    </div>
-                  </td>
-                  <td className="ops-cell" data-label={t('ops.col.requirement')}
-                      style={{ padding: '10px 12px' }}>
-                    <Chip color={reqColor} filled={false}>{reqLabel}</Chip>
-                  </td>
-                  <td className="ops-cell" data-label={t('ops.col.type')}
-                      style={{ padding: '10px 12px', color: NAVY, fontWeight: 600,
-                               lineHeight: 1.45, overflowWrap: 'anywhere' }}>
-                    {typeNames[rec.visa_type_name] || rec.visa_type_name || '·'}
-                  </td>
-                  <td className="ops-cell" data-label={t('ops.col.stay')}
-                      style={{ padding: '10px 12px', textAlign: 'right',
-                               color: NAVY, whiteSpace: 'nowrap',
-                               fontVariantNumeric: 'tabular-nums' }}>
-                    {rec.max_stay_duration != null
-                      ? `${rec.max_stay_duration} ${rec.max_stay_unit === 'Hour'
-                          ? t('ops.u.hour') : t('ops.u.day')}`
-                      : '·'}
-                  </td>
-                  <td className="ops-cell" data-label={t('ops.col.fee')}
-                      style={{ padding: '10px 12px', textAlign: 'right',
-                               color: NAVY, whiteSpace: 'nowrap',
-                               fontVariantNumeric: 'tabular-nums' }}>
-                    {rec.visa_fee_amount != null
-                      ? `${rec.visa_fee_amount} ${rec.visa_fee_currency || ''}`
-                      : '·'}
-                  </td>
-                  <td className="ops-cell" data-label={t('ops.col.quality')}
-                      style={{ padding: '10px 12px' }}>
-                    <span title={checkTip} style={{ cursor: 'help' }}>
-                      <Chip color={checkColor} filled={false}>{checkLabel}</Chip>
-                    </span>
-                    {/* The sub-line appears only when it says something: a
-                        confidence below High, or an incomplete record. A row
-                        that is High and 100% needs no extra annotation. */}
-                    {(rec.confidence_level !== 'High' || pctDone < 100) && (
-                      <div style={{ display: 'flex', alignItems: 'center',
-                                    gap: 5, marginTop: 4, fontSize: 10.5,
-                                    color: GRAY }}>
-                        {rec.confidence_level !== 'High' && (
-                          <span>{t('ops.col.confidence')} {confLabel}</span>
-                        )}
-                        {rec.confidence_level !== 'High' && pctDone < 100 && (
-                          <span style={{ color: '#c3cddd' }}>·</span>
-                        )}
-                        {pctDone < 100 && (
-                          <span style={{ fontWeight: 700, color: AMBER }}>
-                            {pctDone}%
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </td>
-                  {/* One column, one question: is this record in front of
-                      customers? A held record answers no and offers the one
-                      control that changes it. The source link sits under the
-                      answer rather than beside it, which is what jammed the
-                      link, the chip and the button onto the same short line. */}
-                  <td className="ops-cell" data-label={t('ops.col.site')}
-                      style={{ padding: '10px 12px', verticalAlign: 'top' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column',
-                                  alignItems: 'flex-start', gap: 6 }}>
-                      {held ? (
-                        <>
-                          <span title={t('ops.heldTip')}
-                                style={{ display: 'inline-flex', gap: 5,
-                                         alignItems: 'center',
-                                         fontSize: 11, fontWeight: 700,
-                                         color: '#9a5b00',
-                                         background: '#fdf3e2',
-                                         borderRadius: 999,
-                                         padding: '3px 10px',
-                                         whiteSpace: 'nowrap',
-                                         cursor: 'help' }}>
-                            <span style={{ width: 6, height: 6, borderRadius: 3,
-                                           background: AMBER, flexShrink: 0 }} />
-                            {t('ops.heldChip')}
-                          </span>
-                          <button onClick={(e) => { e.stopPropagation(); onRelease(rec) }}
-                                  data-testid="ops-release"
-                                  title={t('ops.heldTip')}
-                                  style={{ border: `1px solid ${GREEN}`,
-                                           background: '#fff', color: GREEN,
-                                           borderRadius: 8, fontSize: 11,
-                                           fontWeight: 700, padding: '4px 12px',
-                                           whiteSpace: 'nowrap',
-                                           cursor: 'pointer' }}>
-                            {t('ops.releaseAction')}
-                          </button>
-                        </>
-                      ) : (
-                        <span style={{ display: 'inline-flex', gap: 5,
-                                       alignItems: 'center', fontSize: 11,
-                                       fontWeight: 700, color: '#1c6b45',
-                                       whiteSpace: 'nowrap' }}>
-                          <span style={{ width: 6, height: 6, borderRadius: 3,
-                                         background: GREEN, flexShrink: 0 }} />
-                          {t('ops.liveChip')}
-                        </span>
-                      )}
-                      {rec.source_url && (
-                        <a href={rec.source_url} target="_blank" rel="noreferrer"
-                           onClick={(e) => e.stopPropagation()}
-                           style={{ fontSize: 11.5, color: BLUE,
-                                    fontWeight: 700, whiteSpace: 'nowrap' }}>
-                          {t('ops.source')} ↗
-                        </a>
-                      )}
-                    </div>
-                  </td>
-                </tr>,
-                opened && (
-                  <tr key={id + ':detail'}>
-                    <td colSpan={7} style={{ background: '#fbfcfe',
-                        borderBottom: `1px solid ${BORDER}`,
-                        padding: '14px 18px' }}>
-                      {/* Pinned to the viewport: without this the 25-field
-                          card and the flag form span the table's full
-                          scroll width and a phone only ever sees a third. */}
-                      <div className="ops-rowdetail">
-                        <FieldGrid rec={rec} t={t} typeNames={typeNames}
-                                   tvv={tvv} />
-                        {missing.length > 0 && (
-                          <MissingLine missing={missing} t={t} />
-                        )}
-                        <FlagForm rec={rec} onFlag={onFlag} t={t} />
-                      </div>
-                    </td>
-                  </tr>
-                ),
-              ]
-            })}
-          </tbody>
-        </table>
+      <div style={{ display: 'grid', gap: 10,
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))' }}>
+        <FieldLabel label={t('ops.flt.passport')}>
+          <CountryFilter value={nat} countries={countries}
+                         placeholder={t('ops.passport')}
+                         onCommit={setNat} />
+        </FieldLabel>
+        <FieldLabel label={t('ops.flt.destination')}>
+          <CountryFilter value={dest} countries={countries}
+                         placeholder={t('ops.destination')}
+                         onCommit={setDest} />
+        </FieldLabel>
+        <FieldLabel label={t('ops.flt.purpose')}>
+          <select value={purpose} onChange={(e) => setPurpose(e.target.value)}
+                  className="ops-in" style={sel}>
+            {['tourism', 'business', 'family_visit', 'study', 'work',
+              'transit', 'other'].map((v) => (
+              <option key={v} value={v}>{t('purpose.' + v)}</option>
+            ))}
+          </select>
+        </FieldLabel>
+        <FieldLabel label={t('ops.flt.document')}>
+          <select value={doc} onChange={(e) => setDoc(e.target.value)}
+                  className="ops-in" style={sel}>
+            {['ordinary_passport', 'diplomatic_passport', 'service_passport',
+              'official_ordinary_passport', 'child_passport',
+              'temporary_passport', 'emergency_passport'].map((v) => (
+              <option key={v} value={v}>{t('db.doc.' + v)}</option>
+            ))}
+          </select>
+        </FieldLabel>
+      </div>
+      {manual && (
+        <div style={{ marginTop: 12, borderTop: `1px dashed ${BORDER}`,
+                      paddingTop: 12 }}>
+          <div style={{ fontSize: 12, color: GRAY, marginBottom: 10 }}>
+            {t('ops.add.manualHint')}
+          </div>
+          <div style={{ display: 'grid', gap: 10,
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))' }}>
+            <FieldLabel label={t('ops.add.requirement')}>
+              <select value={mv.requirement || ''} onChange={setM('requirement')}
+                      className="ops-in" style={sel}>
+                <option value="">{t('ops.add.engineDecides')}</option>
+                <option value="VISA_EXEMPT">{t('db.verdict.exempt')}</option>
+                <option value="VISA_ON_ARRIVAL">{t('db.verdict.voa')}</option>
+                <option value="VISA_REQUIRED">{t('db.verdict.required')}</option>
+                <option value="ELECTRONIC_AUTHORIZATION_REQUIRED">{t('db.verdict.eta')}</option>
+                <option value="CONDITIONAL">{t('db.verdict.conditional')}</option>
+              </select>
+            </FieldLabel>
+            <FieldLabel label={t('ops.add.visaType')}>
+              <input value={mv.visa_type || ''} onChange={setM('visa_type')}
+                     placeholder="C-3-9, Visitor 600, eVisa"
+                     className="ops-in" style={sel} />
+            </FieldLabel>
+            <FieldLabel label={t('ops.edit.feeAmount')}>
+              <input value={mv.fee_amount || ''} onChange={setM('fee_amount')}
+                     className="ops-in" style={sel} />
+            </FieldLabel>
+            <FieldLabel label={t('ops.edit.feeCurrency')}>
+              <input value={mv.fee_currency || ''} onChange={setM('fee_currency')}
+                     placeholder="CNY, USD" className="ops-in" style={sel} />
+            </FieldLabel>
+            <FieldLabel label={t('db.stay')}>
+              <input value={mv.permitted_stay || ''} onChange={setM('permitted_stay')}
+                     placeholder={t('ops.add.stayPh')}
+                     className="ops-in" style={sel} />
+            </FieldLabel>
+            <FieldLabel label={t('ops.edit.stayDays')}>
+              <input value={mv.stay_days || ''} onChange={setM('stay_days')}
+                     className="ops-in" style={sel} />
+            </FieldLabel>
+            <FieldLabel label={t('ops.add.validity')}>
+              <input value={mv.validity || ''} onChange={setM('validity')}
+                     placeholder={t('ops.add.validityPh')}
+                     className="ops-in" style={sel} />
+            </FieldLabel>
+            <FieldLabel label={t('ops.add.entries')}>
+              <select value={mv.entries_sel || ''} onChange={setM('entries_sel')}
+                      className="ops-in" style={sel}>
+                <option value="">{t('ops.add.engineDecides')}</option>
+                <option value="single">{t('ops.add.entrySingle')}</option>
+                <option value="multiple">{t('ops.add.entryMultiple')}</option>
+                <option value="unlimited">{t('ops.add.entryUnlimited')}</option>
+              </select>
+            </FieldLabel>
+            <FieldLabel label={t('db.processing')}>
+              <input value={mv.processing_time || ''} onChange={setM('processing_time')}
+                     className="ops-in" style={sel} />
+            </FieldLabel>
+            <FieldLabel label={t('ops.edit.portal')}>
+              <input value={mv.official_portal_url || ''}
+                     onChange={setM('official_portal_url')}
+                     placeholder="https://..." className="ops-in" style={sel} />
+            </FieldLabel>
+            <FieldLabel label={t('ops.edit.documents')}>
+              <input value={mv.required_documents || ''}
+                     onChange={setM('required_documents')}
+                     className="ops-in" style={sel} />
+            </FieldLabel>
+            <FieldLabel label={t('ops.edit.channelDetail')}>
+              <input value={mv.channel_detail || ''} onChange={setM('channel_detail')}
+                     className="ops-in" style={sel} />
+            </FieldLabel>
+          </div>
+          <div style={{ display: 'grid', gap: 10, marginTop: 10 }}>
+            <FieldLabel label={t('ops.edit.exceptions')}>
+              <textarea value={mv.exceptions || ''} onChange={setM('exceptions')}
+                        rows={2} className="ops-in"
+                        style={{ ...sel, resize: 'vertical' }} />
+            </FieldLabel>
+            <FieldLabel label={t('ops.edit.source')}>
+              <input value={srcUrl} onChange={(e) => setSrcUrl(e.target.value)}
+                     placeholder="https://..." className="ops-in" style={sel}
+                     data-testid="ops-add-manual-source" />
+            </FieldLabel>
+            <FieldLabel label={t('ops.edit.note')}>
+              <input value={note} onChange={(e) => setNote(e.target.value)}
+                     placeholder={t('ops.edit.notePh')}
+                     className="ops-in" style={sel} />
+            </FieldLabel>
+          </div>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center',
+                        marginTop: 12, flexWrap: 'wrap' }}>
+            <button disabled={!manualReady} data-testid="ops-add-manual-save"
+                    onClick={saveManual}
+                    style={{ borderRadius: 999, fontSize: 13, fontWeight: 700,
+                             border: 'none',
+                             cursor: manualReady ? 'pointer' : 'default',
+                             padding: '11px 22px', background: GREEN,
+                             color: '#fff',
+                             opacity: manualReady ? 1 : 0.5 }}>
+              {mState === 'saving' ? t('ops.edit.saving')
+                : t('ops.add.saveManual')}
+            </button>
+            {mState === 'saved' && (
+              <span style={{ fontSize: 12.5, fontWeight: 600, color: GREEN }}>
+                {t('ops.add.savedManual')}
+              </span>
+            )}
+            {mState && mState.err && (
+              <span style={{ fontSize: 12.5, fontWeight: 600, color: RED }}>
+                {mState.err}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center',
+                    marginTop: 12, flexWrap: 'wrap' }}>
+        <button disabled={!ready} data-testid="ops-add-route-btn"
+                onClick={() => onAdd(nat, dest, purpose, doc)}
+                style={{ borderRadius: 999, fontSize: 13, fontWeight: 700,
+                         border: 'none', cursor: ready ? 'pointer' : 'default',
+                         padding: '11px 22px', background: BLUE, color: '#fff',
+                         opacity: ready ? 1 : 0.5 }}>
+          {adding ? t('ops.add.busy') : t('ops.add.btn')}
+        </button>
+        <button disabled={!ready} data-testid="ops-add-research-btn"
+                onClick={() => onAdd(nat, dest, purpose, doc, true)}
+                style={{ borderRadius: 999, fontSize: 13, fontWeight: 700,
+                         border: 'none', cursor: ready ? 'pointer' : 'default',
+                         padding: '11px 22px', background: GREEN, color: '#fff',
+                         opacity: ready ? 1 : 0.5 }}>
+          {adding ? t('ops.add.busy') : t('ops.add.researchBtn')}
+        </button>
+        <button onClick={() => setManual((m) => !m)}
+                data-testid="ops-add-manual-toggle"
+                style={{ borderRadius: 999, fontSize: 13, fontWeight: 700,
+                         border: `1px solid ${BLUE}`, cursor: 'pointer',
+                         padding: '10px 20px', background: '#fff',
+                         color: BLUE }}>
+          {manual ? t('ops.add.manualClose') : t('ops.add.manualBtn')}
+        </button>
+        {adding && (
+          <span style={{ fontSize: 12.5, color: GRAY }}>
+            {t('ops.add.wait')}
+          </span>
+        )}
+        {addMsg && addMsg.ok && (
+          <span style={{ fontSize: 12.5, fontWeight: 600, color: GREEN }}>
+            {addMsg.researched
+              ? (addMsg.researched.consistent
+                  ? t('ops.add.researchOk')
+                  : addMsg.researched.outcome === 'checked'
+                    ? t('ops.add.researchDispute')
+                    : t('ops.add.researchNoRead'))
+              : addMsg.held ? t('ops.add.held') : t('ops.add.done')}
+          </span>
+        )}
+        {addMsg && !addMsg.ok && (
+          <span style={{ fontSize: 12.5, fontWeight: 600, color: RED }}>
+            {addMsg.err}
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function EditForm({ rec, onEdit, t }) {
+  // Trip.com edits a route directly. The form opens with the current
+  // values already in place: change what is wrong, leave the rest, and
+  // only the changed fields are written. Every edit needs the official
+  // page that backs it and reaches the next reader immediately.
+  const [open, setOpen] = useState(false)
+  const init = {
+    permitted_stay: '',
+    permitted_stay_days: rec.max_stay_unit === 'Day'
+      ? String(rec.max_stay_duration ?? '') : '',
+    fee_amount: String(rec.visa_fee_amount ?? ''),
+    fee_currency: String(rec.visa_fee_currency ?? ''),
+    processing_time: rec.processing_min_days
+      ? `${rec.processing_min_days} ${rec.processing_unit || ''}`.trim() : '',
+    official_portal_url: '',
+    required_documents: String(rec.required_documents ?? ''),
+    application_channel_detail: '',
+    exceptions: '',
+  }
+  const [vals, setVals] = useState(init)
+  const [srcUrl, setSrcUrl] = useState('')
+  const [note, setNote] = useState('')
+  const [state, setState] = useState(null)
+  const set = (k) => (e) => setVals((v) => ({ ...v, [k]: e.target.value }))
+  const dirtyKeys = Object.keys(vals).filter(
+    (k) => String(vals[k] || '').trim() !== String(init[k] || '').trim())
+  const ready = dirtyKeys.length > 0 && srcUrl.trim() && note.trim()
+    && state !== 'saving'
+  const mark = (k) => dirtyKeys.includes(k)
+    ? { border: `1.5px solid ${BLUE}`, background: '#f5f9ff' } : {}
+  const inp = (k, ph = '') => (
+    <input value={vals[k]} onChange={set(k)} placeholder={ph}
+           className="ops-in"
+           style={{ ...input, width: '100%', boxSizing: 'border-box',
+                    ...mark(k) }} />
+  )
+  const SectionTitle = ({ children }) => (
+    <div style={{ gridColumn: '1 / -1', fontSize: 10.5, fontWeight: 800,
+                  letterSpacing: 1, color: GRAY, textTransform: 'uppercase',
+                  marginTop: 4 }}>{children}</div>
+  )
+  async function save() {
+    const g = (k) => String(vals[k] || '').trim()
+    const fields = {}
+    if (dirtyKeys.includes('permitted_stay') && g('permitted_stay'))
+      fields.permitted_stay = g('permitted_stay')
+    if (dirtyKeys.includes('permitted_stay_days') && g('permitted_stay_days'))
+      fields.permitted_stay_days = Number(g('permitted_stay_days'))
+    if (dirtyKeys.includes('fee_amount') || dirtyKeys.includes('fee_currency')) {
+      fields.government_fee = {
+        amount: g('fee_amount') ? Number(g('fee_amount')) : null,
+        currency: g('fee_currency') ? g('fee_currency').toUpperCase() : null }
+    }
+    if (dirtyKeys.includes('processing_time') && g('processing_time'))
+      fields.processing_time = g('processing_time')
+    if (dirtyKeys.includes('official_portal_url') && g('official_portal_url'))
+      fields.official_portal_url = g('official_portal_url')
+    if (dirtyKeys.includes('required_documents') && g('required_documents'))
+      fields.required_documents = g('required_documents')
+        .split(',').map((x) => x.trim()).filter(Boolean)
+    if (dirtyKeys.includes('application_channel_detail')
+        && g('application_channel_detail'))
+      fields.application_channel_detail = g('application_channel_detail')
+    if (dirtyKeys.includes('exceptions') && g('exceptions'))
+      fields.exceptions = g('exceptions')
+        .split('\n').map((x) => x.trim()).filter(Boolean)
+    setState('saving')
+    try {
+      await onEdit(rec, fields, srcUrl.trim(), note.trim())
+      setState('saved')
+    } catch (e) {
+      setState({ err: String(e?.detail || e?.message || e) })
+    }
+  }
+  if (!open) {
+    return (
+      <button onClick={() => setOpen(true)} data-testid="ops-edit-open"
+              style={{ borderRadius: 999, fontSize: 12.5, fontWeight: 700,
+                       border: `1px solid ${BLUE}`, cursor: 'pointer',
+                       padding: '9px 18px', background: '#fff', color: BLUE,
+                       marginTop: 10, alignSelf: 'start' }}>
+        {t('ops.edit.open')}
+      </button>
+    )
+  }
+  return (
+    <div style={{ marginTop: 12, border: `1px solid ${BORDER}`,
+                  borderRadius: 12, padding: '14px 16px', background: '#fff' }}
+         data-testid="ops-edit-form">
+      <div style={{ fontSize: 13, fontWeight: 700, color: NAVY,
+                    marginBottom: 2 }}>{t('ops.edit.title')}</div>
+      <div style={{ fontSize: 12, color: GRAY, marginBottom: 12 }}>
+        {t('ops.edit.hint2')}
+      </div>
+      <div style={{ display: 'grid', gap: 10,
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+        <SectionTitle>{t('ops.edit.secMoney')}</SectionTitle>
+        <FieldLabel label={t('ops.edit.feeAmount')}>{inp('fee_amount')}</FieldLabel>
+        <FieldLabel label={t('ops.edit.feeCurrency')}>{inp('fee_currency', 'CNY, USD')}</FieldLabel>
+        <FieldLabel label={t('db.processing')}>{inp('processing_time')}</FieldLabel>
+        <SectionTitle>{t('ops.edit.secStay')}</SectionTitle>
+        <FieldLabel label={t('db.stay')}>{inp('permitted_stay', t('ops.add.stayPh'))}</FieldLabel>
+        <FieldLabel label={t('ops.edit.stayDays')}>{inp('permitted_stay_days')}</FieldLabel>
+        <SectionTitle>{t('ops.edit.secApply')}</SectionTitle>
+        <FieldLabel label={t('ops.edit.portal')}>{inp('official_portal_url', 'https://...')}</FieldLabel>
+        <FieldLabel label={t('ops.edit.documents')}>{inp('required_documents')}</FieldLabel>
+        <FieldLabel label={t('ops.edit.channelDetail')}>{inp('application_channel_detail')}</FieldLabel>
+      </div>
+      <div style={{ display: 'grid', gap: 10, marginTop: 10 }}>
+        <FieldLabel label={t('ops.edit.exceptions')}>
+          <textarea value={vals.exceptions} onChange={set('exceptions')} rows={2}
+                    className="ops-in"
+                    style={{ ...input, width: '100%', boxSizing: 'border-box',
+                             resize: 'vertical', ...mark('exceptions') }} />
+        </FieldLabel>
+        <FieldLabel label={t('ops.edit.source')}>
+          <input value={srcUrl} onChange={(e) => setSrcUrl(e.target.value)}
+                 placeholder="https://..." className="ops-in"
+                 data-testid="ops-edit-source"
+                 style={{ ...input, width: '100%', boxSizing: 'border-box' }} />
+        </FieldLabel>
+        <FieldLabel label={t('ops.edit.note')}>
+          <input value={note} onChange={(e) => setNote(e.target.value)}
+                 placeholder={t('ops.edit.notePh')} className="ops-in"
+                 style={{ ...input, width: '100%', boxSizing: 'border-box' }} />
+        </FieldLabel>
+      </div>
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center',
+                    marginTop: 12, flexWrap: 'wrap' }}>
+        <button disabled={!ready} data-testid="ops-edit-save"
+                onClick={save}
+                style={{ borderRadius: 999, fontSize: 12.5, fontWeight: 700,
+                         border: 'none', cursor: ready ? 'pointer' : 'default',
+                         padding: '10px 20px', background: GREEN, color: '#fff',
+                         opacity: ready ? 1 : 0.5 }}>
+          {state === 'saving' ? t('ops.edit.saving')
+            : dirtyKeys.length > 0
+              ? t('ops.edit.saveN').replace('{n}', dirtyKeys.length)
+              : t('ops.edit.save')}
+        </button>
+        <button onClick={() => { setVals(init); setState(null) }}
+                style={{ border: 'none', background: 'none', color: GRAY,
+                         fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>
+          {t('ops.edit.reset')}
+        </button>
+        <button onClick={() => setOpen(false)}
+                style={{ border: 'none', background: 'none', color: GRAY,
+                         fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>
+          {t('ops.edit.close')}
+        </button>
+        {state === 'saved' && (
+          <span style={{ fontSize: 12.5, fontWeight: 600, color: GREEN }}>
+            {t('ops.edit.saved')}
+          </span>
+        )}
+        {state && state.err && (
+          <span style={{ fontSize: 12.5, fontWeight: 600, color: RED }}>
+            {String(state.err)}
+          </span>
+        )}
       </div>
     </div>
   )
 }
 
 function IssueActions({ issue, onResolve, t }) {
+  // The loop their standard names has five stages: flag, notify the
+  // provider, correct, review, go live. Every stage is a button here, in
+  // order, so the whole progression is operable from the console instead of
+  // only its middle (the API always enforced the order; the console used to
+  // offer just corrected and dismissed).
   const [res, setRes] = useState('')
+  const status = issue.status || 'open'
+  const pill = (bg, fg, border) => ({
+    borderRadius: 999, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+    padding: '11px 18px', background: bg, color: fg,
+    border: border ? `1px solid ${border}` : 'none' })
+  const needText = { corrected: true, dismissed: true }
+  const NEXT = {
+    open: ['acknowledged', t('ops.markAcknowledged'), t('ops.acknowledgedHint')],
+    acknowledged: ['corrected', t('ops.markCorrected'), t('ops.correctedHint')],
+    corrected: ['reviewed', t('ops.markReviewed'), t('ops.reviewedHint')],
+    reviewed: ['published', t('ops.markPublished'), t('ops.publishedHint')],
+  }
+  const step = NEXT[status]
+  if (!step) return null
+  const [nextStatus, label, hint] = step
+  const ready = needText[nextStatus] ? !!res.trim() : true
   return (
     <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
       <input value={res} placeholder={t('ops.resolutionPlaceholder')}
@@ -943,27 +1157,22 @@ function IssueActions({ issue, onResolve, t }) {
              className="ops-in"
              style={{ ...input, flex: 1, minWidth: 220 }}
              data-testid="ops-resolution" />
-      <button disabled={!res.trim()} data-testid="ops-corrected"
-              title={t('ops.correctedHint')}
-              onClick={() => onResolve(issue.id, 'corrected', res.trim())}
-              style={{ borderRadius: 999, fontSize: 12.5, fontWeight: 700,
-                       border: 'none', cursor: 'pointer', padding: '11px 18px',
-                       background: GREEN, color: '#fff',
-                       opacity: res.trim() ? 1 : 0.5 }}>
-        {t('ops.markCorrected')}
+      <button disabled={!ready} data-testid={`ops-${nextStatus}`}
+              title={hint}
+              onClick={() => onResolve(issue.id, nextStatus, res.trim())}
+              style={{ ...pill(GREEN, '#fff'), opacity: ready ? 1 : 0.5 }}>
+        {label}
       </button>
       <button disabled={!res.trim()} data-testid="ops-dismiss"
               title={t('ops.dismissHint')}
               onClick={() => onResolve(issue.id, 'dismissed', res.trim())}
-              style={{ borderRadius: 999, fontSize: 12.5, fontWeight: 700,
-                       border: `1px solid ${GRAY}`, cursor: 'pointer',
-                       padding: '11px 18px', background: '#fff', color: GRAY,
+              style={{ ...pill('#fff', GRAY, GRAY),
                        opacity: res.trim() ? 1 : 0.5 }}>
         {t('ops.dismiss')}
       </button>
       <div style={{ flexBasis: '100%', fontSize: 11, color: GRAY,
                     lineHeight: 1.5 }}>
-        {t('ops.correctedHint')} · {t('ops.dismissHint')}
+        {hint} · {t('ops.dismissHint')}
       </div>
     </div>
   )
@@ -1278,6 +1487,8 @@ export default function QualityConsole() {
   const [issues, setIssues] = useState(null)
   const [freshness, setFreshness] = useState(null)
   const [uptime, setUptime] = useState(null)
+  const [asks, setAsks] = useState(null)
+  const [askFilter, setAskFilter] = useState(false)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [shown, setShown] = useState(PAGE)
@@ -1370,7 +1581,7 @@ export default function QualityConsole() {
     Object.fromEntries(Object.entries(filters).filter(([, v]) => v))
   ).toString(), [filters])
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (attempt = 0) => {
     setBusy(true); setError('')
     try {
       if (tab === 'records') { setData(await client.get('/database/records')); setShown(PAGE) }
@@ -1388,6 +1599,9 @@ export default function QualityConsole() {
           client.get('/database/issues'), client.get('/database/records')])
         setIssues(iss); setData(recs)
       }
+      else if (tab === 'asks') {
+        setAsks(await client.get('/database/asks?limit=300'))
+      }
       else if (tab === 'freshness') {
         setFreshness(await client.get('/database/freshness'))
         try { setIssues(await client.get('/database/issues')) } catch { /* tile falls back */ }
@@ -1396,11 +1610,20 @@ export default function QualityConsole() {
         try { setUptime(await client.get('/health/uptime')) } catch { /* tile hides */ }
       }
     } catch (e) {
-      setError(String(e?.message || e))
+      // One transient network drop should not paint a dead console: retry
+      // once quietly, and only then say what happened in plain words. The
+      // last loaded data stays on screen either way.
+      const msg = String(e?.message || e)
+      if (attempt === 0 && /fetch|network|load failed/i.test(msg)) {
+        await new Promise((r) => setTimeout(r, 800))
+        return load(1)
+      }
+      setError(/fetch|network|load failed/i.test(msg)
+        ? t('ops.loadFailed') : msg)
     } finally {
       setBusy(false)
     }
-  }, [client, tab, qs])
+  }, [client, tab, qs, t])
   useEffect(() => { load() }, [load])
 
   async function flag(rec, note) {
@@ -1423,6 +1646,70 @@ export default function QualityConsole() {
         note: 'released from the quality console',
       })
       load()
+    } catch (e) { setError(String(e?.message || e)) }
+  }
+
+  const [adding, setAdding] = useState(false)
+  const [addMsg, setAddMsg] = useState(null)
+  async function addRoute(nat, dest, purpose, docType, research = false) {
+    setAdding(true); setAddMsg(null)
+    try {
+      let held = false
+      let researched = null
+      if (research) {
+        const out = await client.post('/database/routes/research', {
+          nationality: nat, destination: dest, travel_purpose: purpose,
+          travel_document_type: docType || 'ordinary_passport' })
+        held = !!out.held
+        researched = out.research || null
+      } else {
+        const out = await client.databaseLookup({
+          nationality: nat, destination: dest, travel_purpose: purpose,
+          travel_document_type: docType || 'ordinary_passport' })
+        held = !!out.held
+      }
+      setAddMsg({ ok: true, held, researched })
+      setFilters({ ...EMPTY_FILTERS, nationality: nat, destination: dest })
+      await load()
+    } catch (e) {
+      setAddMsg({ ok: false, err: String(e?.detail?.reason || e?.message || e) })
+    }
+    setAdding(false)
+  }
+
+  async function manualAddRoute(nat, dest, purpose, docType, fields,
+                                sourceUrl, note) {
+    // The operator's facts are written first as a sourced override, then
+    // the route is answered so a record exists. The override governs every
+    // field the operator entered from the very first serve.
+    await client.post('/database/records/edit', {
+      nationality: nat, destination: dest, travel_purpose: purpose,
+      travel_document_type:
+        docType === 'ordinary_passport' ? '' : (docType || ''),
+      fields, source_url: sourceUrl, note })
+    await client.databaseLookup({ nationality: nat, destination: dest,
+      travel_purpose: purpose,
+      travel_document_type: docType || 'ordinary_passport' })
+    setFilters({ ...EMPTY_FILTERS, nationality: nat, destination: dest })
+    await load()
+  }
+
+  async function editRecord(rec, fields, sourceUrl, note) {
+    await client.post('/database/records/edit', {
+      nationality: rec.travel_document_country,
+      destination: rec.destination_country,
+      travel_purpose: rec.travel_purpose,
+      travel_document_type:
+        rec.travel_document_type === 'ordinary_passport'
+          ? '' : (rec.travel_document_type || ''),
+      fields, source_url: sourceUrl, note })
+    await load()
+  }
+
+  async function reviewAsk(id, verdict, note) {
+    try {
+      await client.post(`/database/asks/${id}/review`, { verdict, note })
+      setAsks(await client.get('/database/asks?limit=300'))
     } catch (e) { setError(String(e?.message || e)) }
   }
 
@@ -1511,11 +1798,12 @@ export default function QualityConsole() {
   const filtered = useMemo(() => {
     const all = data?.records || []
     const term = (raw) => {
-      const q = String(raw || '').trim().toLowerCase()
+      // Exactness outranks list position: "KOR" must resolve to South
+      // Korea even though the DPRK's name contains it and sorts first.
+      const q = String(raw || '').trim()
       if (!q) return null
-      const hit = countries.find((c) => c.value.toLowerCase() === q
-        || c.search.includes(q))
-      return hit ? hit.value : String(raw).toUpperCase()
+      const hit = matchCountry(countries, q)
+      return hit ? hit.country.value : q.toUpperCase()
     }
     const natT = term(filters.nationality)
     const destT = term(filters.destination)
@@ -1604,7 +1892,8 @@ export default function QualityConsole() {
                       borderRadius: 999, padding: 4, width: 'fit-content',
                       maxWidth: '100%', overflowX: 'auto' }}>
           {[['records', t('ops.tab.records')], ['issues', t('ops.tab.issues')],
-            ['changes', t('ops.tab.changes')], ['freshness', t('ops.tab.freshness')]]
+            ['changes', t('ops.tab.changes')], ['asks', t('ops.tab.asks')],
+            ['freshness', t('ops.tab.freshness')]]
             .map(([id, label]) => (
             <button key={id} onClick={() => setTab(id)}
                     data-testid={`ops-tab-${id}`}
@@ -1879,7 +2168,10 @@ export default function QualityConsole() {
               )
             })()}
             {busy && <div style={{ color: GRAY, fontSize: 13 }}>{t('ops.loading')}</div>}
-            <RecordsTable records={records.slice(0, shown)} total={records.length} onFlag={flag} onRelease={release} t={t} flagOf={flagOf} typeNames={typeNames} tvv={tv} />
+            <AddRouteCard countries={countries} t={t} onAdd={addRoute}
+                          onManualAdd={manualAddRoute}
+                          adding={adding} addMsg={addMsg} />
+            <RecordsTable records={records.slice(0, shown)} total={records.length} onFlag={flag} onRelease={release} onEdit={editRecord} t={t} flagOf={flagOf} typeNames={typeNames} tvv={tv} />
             {records.length > shown && (
               <button className="btn btn--ghost"
                       style={{ borderRadius: 999, justifySelf: 'center' }}
@@ -2229,6 +2521,37 @@ export default function QualityConsole() {
                   </div>
                 </details>
               )}
+            </div>
+          )
+        })()}
+
+        {tab === 'asks' && (() => {
+          const rows = (asks?.asks || [])
+          const shownRows = askFilter ? rows.filter((a) => !a.verdict) : rows
+          const unrev = asks?.unreviewed ?? rows.filter((a) => !a.verdict).length
+          return (
+            <div className="ops-fade">
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center',
+                            marginBottom: 12, flexWrap: 'wrap' }}>
+                <Chip color={NAVY} filled>{rows.length}</Chip>
+                <Chip color={unrev ? AMBER : GREEN} filled={false}>
+                  {unrev} {t('ops.askUnreviewedOnly')}
+                </Chip>
+                <label style={{ fontSize: 12.5, color: GRAY, cursor: 'pointer',
+                                display: 'flex', gap: 6, alignItems: 'center' }}>
+                  <input type="checkbox" checked={askFilter}
+                         onChange={(e) => setAskFilter(e.target.checked)} />
+                  {t('ops.askUnreviewedOnly')}
+                </label>
+              </div>
+              {shownRows.length === 0 && (
+                <div style={{ fontSize: 13, color: GRAY }}>{t('ops.askEmpty')}</div>
+              )}
+              <div style={{ display: 'grid', gap: 10 }}>
+                {shownRows.map((a) => (
+                  <AskCard key={a.id} ask={a} onReview={reviewAsk} t={t} />
+                ))}
+              </div>
             </div>
           )
         })()}

@@ -488,6 +488,44 @@ function CityCombo({ value, onChange, placeholder, lang, countries, testid }) {
 
 // ---- result-page building blocks -----------------------------------------
 
+function PolicyNote({ sp, lang, t }) {
+  const zh = lang !== 'en'
+  const title = (zh && sp.title_zh) || sp.title
+  const summary = (zh && sp.summary_zh) || sp.summary
+  return (
+    <div style={{ background: '#faf7ff', border: '1px solid #e6ddf7',
+                  borderRadius: 12, padding: '12px 14px' }}>
+      <div style={{ fontSize: 13.5, fontWeight: 700, color: NAVY }}>
+        {title}
+      </div>
+      <div style={{ fontSize: 13, color: '#3d4657', marginTop: 4,
+                    lineHeight: 1.5 }}>{summary}</div>
+      {sp.applies_to_you === false && (
+        <div style={{ fontSize: 12.5, fontWeight: 700, color: '#b3261e',
+                      marginTop: 6 }}>{t('db.policy.notCovered')}</div>
+      )}
+      {sp.applies_to_you === true && (
+        <div style={{ fontSize: 12.5, fontWeight: 700, color: '#0f8a3d',
+                      marginTop: 6 }}>{t('db.policy.covered')}</div>
+      )}
+      {sp.beyond_verified_window && (
+        <div style={{ fontSize: 12.5, fontWeight: 700, color: '#9a6200',
+                      marginTop: 6 }}>
+          {t('db.policy.checkAgain').replace('{date}', sp.valid_until)}
+        </div>
+      )}
+      {sp.source_url && (
+        <a href={sp.source_url} target="_blank" rel="noreferrer"
+           style={{ fontSize: 12.5, color: '#7c3aed', fontWeight: 600,
+                    textDecoration: 'none', marginTop: 6,
+                    display: 'inline-block' }}>
+          {t('db.source')} ↗
+        </a>
+      )}
+    </div>
+  )
+}
+
 function Section({ title, accent, children }) {
   return (
     <div className="card" style={{ padding: '26px 30px', borderRadius: 20,
@@ -600,8 +638,13 @@ export default function TravelDatabase({ onBack }) {
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
   const [question, setQuestion] = useState('')
+  // A clarify's half-read route ("Australia, passport unknown") survives to
+  // the next ask, so answering "China" continues the SAME question instead
+  // of starting over with nothing.
+  const [askCtx, setAskCtx] = useState(null)
   const [askBusy, setAskBusy] = useState(false)
-  const [askMsg, setAskMsg] = useState('')
+  const [chat, setChat] = useState([])
+  const chatEndRef = useRef(null)
   const [askSlow, setAskSlow] = useState(false)   // a first-time route is being worked out
   // What the ANSWER on screen was asked for. The hero renders these, so an
   // in-flight switch can never show the old answer under a new heading.
@@ -774,25 +817,121 @@ export default function TravelDatabase({ onBack }) {
   }, [g, lang])
   const T = (s) => (s && tx[s]) || s
 
-  // AI Q&A: a plain-language question, answered by the same engine as the form.
-  async function askQuestion() {
-    const q = question.trim()
-    if (!q) return
-    setAskBusy(true); setAskMsg(''); setError(''); setResult(null); setAskSlow(false)
+  // AI Q&A as a conversation: every exchange is a turn in a thread, the
+  // half-read route survives a clarify, and each answer is summarised in one
+  // deterministic sentence built from the record itself. No model prose:
+  // the sentence can only say what the verified fields say.
+  const pushChat = (entry) =>
+    setChat((c) => [...c, entry].slice(-30))
+
+  function chatSummary(out) {
+    if (out.held) return { kind: 'held', text: t('db.chat.held'),
+                           policies: out.special_policies || [] }
+    const gg = out.guidance || {}
+    const parts = []
+    const dispo = String(gg.disposition || '').toUpperCase()
+    const dv = DISPOSITION_VIEW[dispo]
+    if (dv) parts.push(t(dv.key))
+    else if (dispo === 'VISA_ON_ARRIVAL') parts.push(t('db.verdict.voa'))
+    const fee = gg.government_fee
+    const prods = Array.isArray(gg.visa_products) ? gg.visa_products : []
+    const focusLine = {
+      fee: fee && fee.amount != null
+        ? `${t('db.fee')}: ${fee.amount} ${fee.currency || ''}`.trim() : null,
+      stay: gg.permitted_stay
+        ? `${t('db.stay')}: ${gg.permitted_stay}` : null,
+      processing: gg.processing_time
+        ? `${t('db.processing')}: ${gg.processing_time}` : null,
+      documents: Array.isArray(gg.required_documents)
+        && gg.required_documents.length
+        ? `${t('db.documents')}: ${gg.required_documents.slice(0, 4).join(', ')}`
+        : null,
+      validity: prods.length && prods[0].validity
+        ? `${t('db.chat.validity')}: ${prods.map((p) => p.validity)
+            .filter(Boolean).slice(0, 3).join(' / ')}` : null,
+      entries: prods.length && prods[0].entry
+        ? `${t('db.chat.entries')}: ${[...new Set(prods.map((p) => p.entry)
+            .filter(Boolean))].slice(0, 3).join(' / ')}` : null,
+      channel: gg.application_channel_detail
+        ? String(gg.application_channel_detail).slice(0, 140) : null,
+    }[out.focus]
+    if (focusLine) parts.push(focusLine)
+    const text = (parts.length ? parts.join('. ') + '. ' : '')
+      + t('db.chat.seeBelow')
+    return { kind: 'answer', text, policies: out.special_policies || [] }
+  }
+
+  async function askQuestion(preset) {
+    const sendText = (preset && preset.send) || question.trim()
+    const showText = (preset && preset.show) || sendText
+    if (!sendText) return
+    setAskBusy(true); setError(''); setResult(null); setAskSlow(false)
+    if (!preset) setQuestion('')
+    pushChat({ role: 'user', text: showText })
     // Warm routes answer in milliseconds. If nothing is back after two
     // seconds, this is a first-time route: say so instead of looking stuck.
     const slowTimer = setTimeout(() => setAskSlow(true), 2000)
     try {
       // The route on screen travels with a follow-up, so "what about
-      // business?" modifies it instead of being refused.
-      const out = await client.databaseAsk(q, result && g ? {
+      // business?" modifies it instead of being refused. When only a
+      // clarify is on screen, its half-read route is the context, so a
+      // bare "China" answers "which passport?" rather than restarting.
+      // A task the assistant performs itself: "this looks wrong" files a
+      // tracked report on the answer on screen, no form needed.
+      const REPORT_WORDS = ['looks wrong', 'is wrong', 'incorrect',
+        'report this', 'out of date', 'outdated', '报错', '報錯', '不对',
+        '不對', '有误', '有誤', '过时', '過時']
+      const lowQ = sendText.toLowerCase()
+      if (result && g && REPORT_WORDS.some((w) => lowQ.includes(w))) {
+        try {
+          await client.databaseReportIssue({
+            nationality: nat, destination: dest,
+            travel_purpose: shown.purpose,
+            travel_document_type: shown.doc || 'ordinary_passport',
+            field: '', note: sendText.slice(0, 400),
+            cache_key: result.cache_key || '' })
+          pushChat({ role: 'ellis', kind: 'info',
+                     text: t('db.chat.reported') })
+        } catch (e2) {
+          pushChat({ role: 'ellis', kind: 'error',
+                     text: String(e2?.message || e2) })
+        }
+        clearTimeout(slowTimer); setAskSlow(false); setAskBusy(false)
+        return
+      }
+      const hist = chat.slice(-10).map((m) => (
+        { role: m.role === 'user' ? 'user' : 'ellis', text: m.text }))
+      const out = await client.databaseAsk(sendText, result && g ? {
         nationality: nat, destination: dest, travel_purpose: shown.purpose,
         travel_document_type: shown.doc,
-      } : null)
+      } : askCtx, hist)
+      if (out.identity || out.off_topic) {
+        // Ellis answered for itself: no route changes, no card repaint.
+        pushChat({ role: 'ellis', kind: 'info', text: out.reply })
+        clearTimeout(slowTimer); setAskSlow(false); setAskBusy(false)
+        return
+      }
+      if (out.comparison) {
+        pushChat({ role: 'ellis', kind: 'comparison', text: out.reply,
+                   routes: out.routes || [] })
+        clearTimeout(slowTimer); setAskSlow(false); setAskBusy(false)
+        return
+      }
       if (out.understood === false) {
         // The server names the exact missing fact in the asker's language.
-        setAskMsg(out.clarify || t('db.askUnclear'))
+        if (out.route && (out.route.nationality || out.route.destination)) {
+          setAskCtx(out.route)
+        }
+        pushChat({ role: 'ellis', kind: 'clarify',
+                   text: out.clarify || t('db.askUnclear'),
+                   missingNat: !(out.route && out.route.nationality),
+                   policies: out.special_policies || [] })
       } else {
+        // The conversation keeps its route even if a later envelope comes
+        // back without guidance: a follow-up must never forget the trip.
+        if (out.route && out.route.nationality && out.route.destination) {
+          setAskCtx(out.route)
+        }
         if (out.route) {
           setNat(out.route.nationality); setDest(out.route.destination)
           if (out.route.travel_purpose) setPurpose(out.route.travel_purpose)
@@ -806,14 +945,26 @@ export default function TravelDatabase({ onBack }) {
           writeHash({ nat: out.route.nationality, dest: out.route.destination,
                       purpose: out.route.travel_purpose, doc: askedDoc })
         }
-        setResult(out)
+        const noAnswer = !out.guidance && !out.held
+        if (!noAnswer || !result) setResult(out)
+        const summ = chatSummary(out)
+        pushChat({ role: 'ellis',
+                   kind: noAnswer ? 'error' : summ.kind,
+                   policies: summ.policies,
+                   text: out.reply
+                     || (noAnswer ? t('db.chat.retry') : summ.text) })
       }
     } catch (e) {
-      setAskMsg(e?.detail?.reason || e?.message || t('db.error'))
+      pushChat({ role: 'ellis', kind: 'error',
+                 text: e?.detail?.reason || e?.message || t('db.error') })
     }
     clearTimeout(slowTimer); setAskSlow(false)
     setAskBusy(false)
   }
+
+  useEffect(() => {
+    try { chatEndRef.current?.scrollIntoView({ block: 'nearest' }) } catch { /* older browsers */ }
+  }, [chat])
 
   // Two-stage answers: a route nobody asked before paints its verdict first
   // and fills the detail sections in the background. Poll until they land
@@ -1009,43 +1160,166 @@ export default function TravelDatabase({ onBack }) {
             "那费用多少" carries the route on screen with it (the context
             travels in askQuestion), so nobody has to start over to ask a
             second question. */}
-        <div className="card anim-rise" style={{ padding: '20px 24px',
-                                                 borderRadius: 20,
-                                                 maxWidth: 560, marginLeft: 'auto',
+        <div className="card anim-rise" style={{ padding: 0,
+                                                 borderRadius: 18,
+                                                 overflow: 'hidden',
+                                                 maxWidth: 620, marginLeft: 'auto',
                                                  marginRight: 'auto',
-                                                 marginBottom: result ? 18 : 0 }}
+                                                 marginBottom: result ? 18 : 0,
+                                                 textAlign: 'left' }}
              data-testid="database-ask">
-          <div style={{ fontSize: 13, fontWeight: 700, color: NAVY,
-                        marginBottom: 8, textAlign: 'left' }}>{t('db.askTitle')}</div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <input className="input" value={question}
+          <style>{`@keyframes ellisdot{0%,80%,100%{opacity:.25}40%{opacity:1}}`}</style>
+          {chat.length > 0 && (
+            <div style={{ maxHeight: 380, overflowY: 'auto',
+                          display: 'grid', gap: 12,
+                          padding: '16px 18px' }}
+                 data-testid="database-chat">
+              {chat.map((m, i) => (
+                <div key={i} style={{ display: 'grid', gap: 7,
+                    justifyItems: m.role === 'user' ? 'end' : 'start' }}>
+                  {m.role === 'ellis' && (
+                    <span style={{ fontSize: 10, fontWeight: 800,
+                                   letterSpacing: 1.2, color: '#9aa3b5' }}>
+                      ELLIS
+                    </span>
+                  )}
+                  <div style={{
+                    maxWidth: '82%', fontSize: 13.5, lineHeight: 1.6,
+                    borderRadius: m.role === 'user'
+                      ? '16px 16px 4px 16px' : '4px 16px 16px 16px',
+                    padding: '10px 14px',
+                    whiteSpace: 'pre-wrap',
+                    background: m.role === 'user' ? NAVY
+                      : m.kind === 'error' ? '#fdeeed' : '#f5f7fb',
+                    color: m.role === 'user' ? '#fff'
+                      : m.kind === 'error' ? '#b3261e' : '#1e2a44' }}>
+                    {m.text}
+                  </div>
+                  {(m.policies || []).map((sp) => (
+                    <div key={sp.id} style={{ maxWidth: '92%' }}>
+                      <PolicyNote sp={sp} lang={lang} t={t} />
+                    </div>
+                  ))}
+                  {m.role === 'ellis' && m.kind === 'comparison'
+                    && Array.isArray(m.routes) && m.routes.length > 0 && (
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      {m.routes.map((r2) => {
+                        const nm = (c) => {
+                          const hit = (countries || []).find((x) => x.value === c)
+                          return hit
+                            ? hit.label.replace(/^[^A-Za-z\u4e00-\u9fff]*/, '')
+                            : c
+                        }
+                        return (
+                          <button key={r2.destination} className="ops-chip"
+                            onClick={() => askQuestion({
+                              send: `from ${nm(r2.nationality)} to ${nm(r2.destination)} for tourism`,
+                              show: `${nm(r2.nationality)} → ${nm(r2.destination)}` })}
+                            style={{ borderRadius: 999, fontSize: 12,
+                                     fontWeight: 600, cursor: 'pointer',
+                                     padding: '6px 12px', background: '#fff',
+                                     border: '1px solid #d8e0ec', color: NAVY }}>
+                            {nm(r2.nationality)} → {nm(r2.destination)}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+                  {m.role === 'ellis' && m.kind === 'clarify' && m.missingNat
+                    && i === chat.length - 1 && !askBusy && (
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      {[['China', '中国'], ['Hong Kong', '香港'],
+                        ['Taiwan', '台湾'], ['Japan', '日本'],
+                        ['South Korea', '韩国'], ['USA', '美国']]
+                        .map(([en, zh]) => (
+                        <button key={en} className="ops-chip"
+                          onClick={() => askQuestion({ send: en,
+                            show: lang === 'en' ? en : zh })}
+                          style={{ borderRadius: 999, fontSize: 12,
+                                   fontWeight: 600, cursor: 'pointer',
+                                   padding: '6px 12px', background: '#fff',
+                                   border: '1px solid #d8e0ec', color: NAVY }}>
+                          {lang === 'en' ? en : zh}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {m.role === 'ellis' && m.kind === 'answer'
+                    && i === chat.length - 1 && !askBusy && (
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      {[[t('db.fee'), 'how much is the fee?'],
+                        [t('db.stay'), 'how long can I stay?'],
+                        [t('db.chat.validity'), 'how long is the visa valid?'],
+                        [t('db.chat.entries'), 'single or multiple entry?'],
+                        [t('db.processing'), 'how long does processing take?'],
+                        [t('db.documents'), 'what documents do I need?'],
+                        [t('db.chat.howToApply'), 'how do I apply?']]
+                        .map(([label, send]) => (
+                        <button key={label} className="ops-chip"
+                          onClick={() => askQuestion({ send, show: label })}
+                          style={{ borderRadius: 999, fontSize: 12,
+                                   fontWeight: 600, cursor: 'pointer',
+                                   padding: '6px 12px', background: '#fff',
+                                   border: '1px solid #d8e0ec', color: NAVY }}>
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+              {askBusy && (
+                <div data-testid="database-ask-slow"
+                     style={{ display: 'flex', gap: 5, alignItems: 'center',
+                              padding: '4px 2px' }}>
+                  {[0, 1, 2].map((d) => (
+                    <span key={d} style={{ width: 7, height: 7,
+                      borderRadius: 4, background: '#9aa3b5',
+                      animation: `ellisdot 1.2s ${d * 0.2}s infinite` }} />
+                  ))}
+                </div>
+              )}
+              <div ref={chatEndRef} />
+              {!askBusy && (
+                <button onClick={() => { setChat([]); setAskCtx(null) }}
+                        style={{ border: 'none', background: 'none',
+                                 color: GRAY, fontSize: 11.5,
+                                 cursor: 'pointer', fontWeight: 600,
+                                 padding: 0, justifySelf: 'start' }}>
+                  {t('db.chat.newChat')}
+                </button>
+              )}
+            </div>
+          )}
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center',
+                        padding: '12px 14px',
+                        borderTop: chat.length > 0 ? '1px solid #eef1f6' : 'none' }}>
+            <input value={question}
                    data-testid="database-question"
                    placeholder={t('db.askPlaceholder')}
                    onChange={(e) => setQuestion(e.target.value)}
                    onKeyDown={(e) => { if (e.key === 'Enter') askQuestion() }}
-                   style={{ fontSize: 14, padding: '11px 14px', borderRadius: 12,
-                            flex: 1 }} />
-            <button className="btn btn--primary" onClick={askQuestion}
-                    data-testid="database-ask-btn" disabled={askBusy || !question.trim()}
-                    style={{ fontSize: 14, fontWeight: 800, borderRadius: 12,
-                             padding: '0 18px' }}>
-              {askBusy ? t('db.askBusy') : t('db.askBtn')}
+                   style={{ fontSize: 14, padding: '11px 16px',
+                            borderRadius: 999, flex: 1, border: 'none',
+                            outline: 'none', background: '#f5f7fb',
+                            color: NAVY, minWidth: 0 }} />
+            <button onClick={() => askQuestion()}
+                    data-testid="database-ask-btn"
+                    disabled={askBusy || !question.trim()}
+                    aria-label={t('db.askBtn')}
+                    style={{ width: 40, height: 40, borderRadius: 20,
+                             border: 'none', flexShrink: 0,
+                             cursor: askBusy || !question.trim()
+                               ? 'default' : 'pointer',
+                             background: NAVY, color: '#fff', fontSize: 17,
+                             fontWeight: 800, lineHeight: '40px',
+                             opacity: askBusy || !question.trim() ? 0.45 : 1 }}>
+              ↑
             </button>
           </div>
-          {askMsg && (
-            <div style={{ fontSize: 12.5, color: NAVY, marginTop: 8,
-                          textAlign: 'left' }}>{askMsg}</div>
-          )}
-          {/* While a first-time route is being worked out: the plane alone,
-              no sentence (owner decision). Warm routes answer before it
-              would appear. */}
-          {askBusy && askSlow && (
-            <div style={{ marginTop: 10 }} data-testid="database-ask-slow">
-              <Loading label="" />
-            </div>
-          )}
-          {!result && (
-            <div style={{ fontSize: 11.5, color: GRAY, marginTop: 10,
+          {!result && chat.length === 0 && (
+            <div style={{ fontSize: 11.5, color: GRAY,
+                          padding: '0 14px 12px',
                           textAlign: 'center' }}>{t('db.askOr')}</div>
           )}
         </div>
@@ -1339,6 +1613,22 @@ export default function TravelDatabase({ onBack }) {
               <Section title={t('db.goodToKnow')} accent="#9a6200">
                 <Bullets items={itemsOf(g.exceptions).map((x) => T(x))}
                          mark="•" markColor="#9a6200" />
+              </Section>
+            </div>
+          )}
+
+          {/* Verified regional and transit policies that cover this route
+              (Hainan entry, visa-free transit). Each note is a government
+              sourced fact with its own link, not engine prose. */}
+          {Array.isArray(result.special_policies) &&
+            result.special_policies.length > 0 && (
+            <div style={{ marginTop: 16 }}>
+              <Section title={t('db.specialPolicy')} accent="#7c3aed">
+                <div style={{ display: 'grid', gap: 10 }}>
+                  {result.special_policies.map((sp) => (
+                    <PolicyNote key={sp.id} sp={sp} lang={lang} t={t} />
+                  ))}
+                </div>
               </Section>
             </div>
           )}

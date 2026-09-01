@@ -5,6 +5,10 @@ import tempfile
 
 # Fresh SQLite file per test session; import app AFTER setting DATABASE_URL.
 _DB_FD, _DB_PATH = tempfile.mkstemp(suffix=".db")
+# Background renewal threads (grounded rechecks, detail pre-translation)
+# must never outlive a test and eat the next test's stubbed provider:
+# a real cross-file flake found 2026-09-01.
+os.environ.setdefault("ELLIS_BACKGROUND_RENEWAL", "0")
 os.environ["DATABASE_URL"] = f"sqlite:///{_DB_PATH}"
 os.environ["ELLIS_VAULT_PASSPHRASE"] = "test-passphrase"
 # Tests must NEVER write into the repo's data/ snapshots (research/export

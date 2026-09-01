@@ -99,6 +99,7 @@ export function createVisaClient(session) {
     baseUrl: BASE,
     // Generic GET for the ops quality console (records, changes, freshness).
     get: (path) => call('GET', path, session),
+    post: (path, payload = {}) => call('POST', path, session, payload),
     capabilities: () => call('GET', '/capabilities', session),
     listAdapters: () => call('GET', '/adapters', session),
     // Dynamic UI language: the backend translates the English catalog via
@@ -228,8 +229,8 @@ export function createVisaClient(session) {
     // its cache instantly on repeat lookups.
     databaseLookup: (body) => call('POST', '/database/lookup', session, body),
     // AI Q&A: a plain-language question, answered by the same decision engine.
-    databaseAsk: (question, context = null) =>
-      call('POST', '/database/ask', session, { question, context }),
+    databaseAsk: (question, context = null, history = null) =>
+      call('POST', '/database/ask', session, { question, context, history }),
     // Information-quality feedback: a reader flags a field that looks wrong.
     databaseReportIssue: (body) =>
       call('POST', '/database/report-issue', session, body),

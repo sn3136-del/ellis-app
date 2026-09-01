@@ -1,0 +1,129 @@
+<title>Ellis 后台操作手册</title>
+<style>
+  :root{
+    --paper:#FBFBF8; --ink:#1C2B4A; --muted:#5B6478; --line:#E5E4DC;
+    --card:#FFFFFF; --accent:#175CD3; --soft:#F0F4FA; --good:#0A8A4A;
+    --warn:#B26A00; --bad:#C62828;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#111726; --ink:#E8ECF5; --muted:#97A1B7; --line:#273250;
+      --card:#171F33; --soft:#1C2740;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#111726; --ink:#E8ECF5; --muted:#97A1B7; --line:#273250;
+    --card:#171F33; --soft:#1C2740;
+  }
+  body{background:var(--paper); color:var(--ink); margin:0;
+       font-family:-apple-system,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+       line-height:1.65;}
+  main{max-width:880px; margin:0 auto; padding:48px 22px 90px;}
+  h1{font-size:1.9rem; margin:0 0 6px; text-wrap:balance;}
+  .sub{color:var(--muted); margin:0 0 34px; font-size:.95rem;}
+  h2{font-size:1.25rem; margin:40px 0 4px; padding-top:18px;
+     border-top:1px solid var(--line);}
+  h2 .en{display:block; font-size:.85rem; color:var(--muted); font-weight:600;}
+  h3{font-size:1.02rem; margin:20px 0 4px;}
+  p{margin:8px 0; max-width:72ch;}
+  p.en{color:var(--muted); font-size:.92rem;}
+  table{border-collapse:collapse; width:100%; margin:12px 0; font-size:.9rem;}
+  th,td{border:1px solid var(--line); padding:7px 10px; text-align:left;
+        vertical-align:top;}
+  th{background:var(--soft); font-weight:700;}
+  .tablewrap{overflow-x:auto;}
+  code,.k{background:var(--soft); border-radius:6px; padding:1px 6px;
+     font-family:ui-monospace,Menlo,monospace; font-size:.85em;}
+  .step{display:flex; gap:10px; margin:6px 0;}
+  .step b{color:var(--accent); flex-shrink:0;}
+  .tag{display:inline-block; border-radius:999px; padding:1px 10px;
+       font-size:.78rem; font-weight:700; margin-right:6px;}
+  .tag.g{background:#e7f5ec; color:var(--good);}
+  .tag.a{background:#fbf1e2; color:var(--warn);}
+  .tag.r{background:#fdecec; color:var(--bad);}
+  .note{background:var(--soft); border-left:3px solid var(--accent);
+        border-radius:8px; padding:10px 14px; margin:12px 0; font-size:.92rem;}
+  footer{margin-top:50px; color:var(--muted); font-size:.8rem;
+         border-top:1px solid var(--line); padding-top:14px;}
+</style>
+<main>
+<h1>Ellis 信息质量管控后台 操作手册</h1>
+<p class="sub">Ellis Information Quality Control Backend, Operations Manual · 版本 2026-09-01 · 交付物清单第10项 Deliverable No. 10</p>
+
+<h2>1. 访问方式 <span class="en">Access</span></h2>
+<p>浏览器打开 <code>https://ellis-visa.com</code>，点击右上角「质控台」进入后台。无需安装，无需配置，无需申请账号。测试权限已预置。</p>
+<p class="en">Open <code>https://ellis-visa.com</code> in a browser and press "Quality console" in the header. No install, no setup, no account application. Test access is preconfigured.</p>
+<p>右上角地球图标可切换语言：English、简体中文、繁體中文。界面与数据说明同步切换。</p>
+<p class="en">The globe icon switches the language: English, Simplified Chinese, Traditional Chinese.</p>
+
+<h2>2. Records 记录抽查 <span class="en">Multi-dimensional spot check</span></h2>
+<p>Records 页承载全量抽查。筛选条件可任意组合：</p>
+<p class="en">The Records tab carries the full spot check. Filters combine freely:</p>
+<div class="tablewrap"><table>
+<tr><th>筛选 Filter</th><th>说明 What it does</th></tr>
+<tr><td>护照 Passport</td><td>站点维度。输入国名、中文名或代码，例如 China、中国、CHN、CN。<br>The station dimension. Type a name in either script or a code.</td></tr>
+<tr><td>目的地 Destination</td><td>同上。输入 KOR 或 South Korea 只会返回韩国记录。<br>Same input rules. Typing KOR or South Korea returns only South Korea records.</td></tr>
+<tr><td>目的 Purpose</td><td>旅游、商务、探亲、留学、工作、过境、其他。</td></tr>
+<tr><td>签证要求 Visa requirement</td><td>免签、落地签、需提前办理等一级分类。</td></tr>
+<tr><td>置信度 Confidence</td><td>高、中、低。</td></tr>
+<tr><td>签证类型 Visa type</td><td>按类型名称包含匹配，例如 tourist。</td></tr>
+<tr><td>证件类型 Passport type</td><td>普通护照、外交护照等13种。</td></tr>
+<tr><td>缺失字段 Missing field</td><td>只看某字段仍缺失的记录，用于补齐工作。</td></tr>
+</table></div>
+<p>四个指标卡实时反映当前筛选结果：记录数、完整度、信源覆盖率、置信度分布。完整度卡片同时给出两种口径：可填口径（分母剔除「不适用」与「官方未公布」）和字面口径（25必填字段的原始计数）。</p>
+<p class="en">The four tiles follow the current filter: record count, completeness, source coverage, confidence split. The completeness tile shows both calibers: fillable (excluding does-not-apply and not-published cells) and the literal count over required cells.</p>
+<p>点击任意行展开完整25字段记录。每个字段带状态标记：</p>
+<p class="en">Click a row to expand the full 25-field record. Every field carries a status:</p>
+<p><span class="tag g">已填 filled</span><span class="tag a">官方未公布 not published</span><span class="tag a">不适用 does not apply</span><span class="tag r">缺失 missing</span></p>
+<p>展开卡底部是「标记问题」表单：选择字段、写明疑点、提交。提交即进入纠错队列。</p>
+<p class="en">The flag form at the bottom of the card files a field-level issue straight into the correction queue.</p>
+
+<h2>2b. 新增线路与编辑字段 <span class="en">Adding routes and editing fields</span></h2>
+<p>Records 页的「新增线路」卡片让运营自行加入任意国家组合：选择护照、目的地、出行目的与证件类型，点一次按钮。已有线路即时返回，全新线路约一分钟内作答并进入记录列表，列表自动筛选到该线路。低置信度的新答案会先拦截，经核对官方来源后展示。</p>
+<p class="en">The Add a route card on the Records tab lets operations add any country pair themselves: pick the passport, destination, purpose and document, and press once. Known routes return instantly, brand new ones answer within about a minute and join the record list, already filtered into view. A low-confidence new answer is held until checked against the official source.</p>
+<p>展开任意记录，点「编辑字段」可直接修改该线路：只填想改的字段（停留、费用、办理时长、材料、注意事项等），并必须附上支持本次修改的官方页面网址与说明。保存即生效，下一位读者立刻看到修改后的值，修改人、日期与来源随记录展示，变更记录同步留痕。非官方域名的来源会被拒绝。</p>
+<p class="en">Expand any record and press Edit fields to change the route directly: fill only the fields to change, and attach the official page URL that backs the edit plus a note. Saving takes effect immediately for the next reader, with the editor, date and source shown on the record and an entry written to the change log. A non-government source URL is refused.</p>
+
+<h2>3. Correction queue 纠错队列 <span class="en">The five-stage loop</span></h2>
+<p>每条问题沿验收标准4.1.2的五个阶段推进，每个阶段一个按钮，顺序不可跳过：</p>
+<p class="en">Every issue walks the five stages of standard 4.1.2, one button per stage, no skipping:</p>
+<div class="step"><b>1</b><span>标记 open。读者或运营在记录上发起。<br>A reader or operator flags a field.</span></div>
+<div class="step"><b>2</b><span>已通知信息方 acknowledged。记录信息提供方已获知。<br>The information provider has been told.</span></div>
+<div class="step"><b>3</b><span>已修正 corrected。写明修正内容后提交。旧答案立即从服务中撤下。<br>The fix is written and the old answer is withdrawn at once.</span></div>
+<div class="step"><b>4</b><span>已复核 reviewed。必须由修正人以外的运营复核，系统强制。<br>A second operator reviews. The system enforces the separation.</span></div>
+<div class="step"><b>5</b><span>发布上线 published。修正后的答案对读者生效。<br>The corrected answer goes live.</span></div>
+<p>任一阶段可选择「不处理 dismissed」，但必须写明原因。整个闭环目标不超过48小时，每个阶段的时间戳都被记录，可导出核验。</p>
+<p class="en">Dismissal needs a written reason at any stage. The end-to-end target is 48 hours and every stage is timestamped.</p>
+
+<h2>4. Change log 变更记录 <span class="en">Add, modify, delete</span></h2>
+<p>每次影响读者可见内容的更新自动写入变更记录，区分新增、修改、删除三类，修改类带逐字段前后对照。答案因纠错被撤下时会写入删除记录。支持全文搜索，覆盖全部历史。</p>
+<p class="en">Every reader-visible update writes a change entry: add, modify or delete, with field-level diffs. Withdrawing an answer through the correction loop writes a delete entry. Search runs over the full history.</p>
+
+<h2>5. AI 问答抽查 <span class="en">Sampling the assistant</span></h2>
+<p>AI 问答页列出智能助手实际回答过的每一次交互：问题原文、读取的线路、给出的答案、引用来源。运营对每条可作裁定：</p>
+<p class="en">The AI Q&amp;A tab lists every exchange the assistant actually served: the question, the route it was read as, the answer and the cited source. Each exchange takes a ruling:</p>
+<p><span class="tag g">正确 correct</span> 记录复核人与时间。<br>
+<span class="tag r">有误 wrong</span> 必须写明问题所在，系统自动就该线路立一条纠错队列问题，走完整闭环。</p>
+<p class="en">Ruling an answer wrong requires a written reason and files a tracked issue on the answered route automatically.</p>
+
+<h2>6. Freshness 时效监控 <span class="en">The freshness monitor</span></h2>
+<p>系统定期重读官方页面。与记录一致则重新盖章。与人工核验事实不一致时不会自动改写，而是生成一条争议，附页面原文、当前记录值与引文，等待人工裁定。裁定后走纠错队列发布。页面上方的可用性卡片展示当月按分钟计的在线率。</p>
+<p class="en">Official pages are re-read on a schedule. Agreement restamps the record. Disagreement with a human-verified fact files a dispute with the page quote for a human ruling instead of overwriting. The availability tile shows the month's per-minute uptime.</p>
+
+<h2>7. 批量导出 <span class="en">Batch export</span></h2>
+<p>Records 页的「导出 Excel」按当前筛选条件导出 .xlsx。文件含两张工作表：数据表（25字段+来源+置信度）与字段说明表。字段说明表首行标注快照时间（UTC）。导出无行数上限，工作簿构建在12,000行实测1.2秒。</p>
+<p class="en">Export Excel follows the active filters. Two sheets: data (25 fields plus sources plus confidence) and field descriptions, stamped with the UTC snapshot time. No row cap exists in code. Workbook build measured 1.2 seconds at 12,000 rows.</p>
+
+<h2>8. 低置信度拦截与放行 <span class="en">Holds and release</span></h2>
+<p>按4.2.3分级为「低」的答案不对读者展示，读者只会看到「正在核对该线路」。放行有两条路：一是研究后写入经官方来源核验的事实（推荐），二是运营在核对官方页面后手动放行。两条路都会留下可审计的记录。</p>
+<p class="en">A Low-graded answer is withheld and the reader sees "We are checking this route". Release happens by writing source-verified facts (preferred) or by an audited manual release after checking the official page.</p>
+
+<h2>9. 深链 <span class="en">Deep links</span></h2>
+<p>数据库每条线路有稳定链接，形如 <code>#database/CHN/JPN/tourism</code>。链接可直接分享，打开即达对应记录页。</p>
+<p class="en">Every route has a stable deep link that opens the record page directly.</p>
+
+<div class="note">遇到与官方页面不一致的内容，请直接在记录上标记问题。这是最快的修正通道，全程可追踪，目标48小时内闭环。<br>
+If anything disagrees with an official page, flag it on the record. That is the fastest correction channel, fully tracked, with a 48 hour closure target.</div>
+
+<footer>Ellis · 后台操作手册 · 2026-09-01 · 本手册与线上版本同步维护</footer>
+</main>

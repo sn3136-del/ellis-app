@@ -91,3 +91,4 @@ ellis-app/
 deploy/.env*
 ._*
 tripcom-pdfs/
+data/database_seed/operator_overrides.json

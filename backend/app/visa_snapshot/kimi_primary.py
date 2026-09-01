@@ -1211,6 +1211,22 @@ def fill_detail(db, key: str, route: dict, user: str, *, after=None) -> None:
             pass
 
 
+# Live detail-stage threads, joinable so a test (or a shutdown) can drain
+# them instead of letting a stray thread consume the next test's stubbed
+# provider. Pruned on each spawn; entries are daemon threads.
+_DETAIL_THREADS: list = []
+
+
+def join_detail_stage(timeout: float = 5.0) -> None:
+    """Wait for any in-flight detail-stage threads to finish."""
+    for t in list(_DETAIL_THREADS):
+        try:
+            t.join(timeout)
+        except Exception:  # noqa: BLE001
+            pass
+    _DETAIL_THREADS[:] = [t for t in _DETAIL_THREADS if t.is_alive()]
+
+
 def _fill_detail_async(key: str, route: dict, user: str, *, after=None) -> None:
     import threading
     from ..db import SessionLocal
@@ -1229,7 +1245,10 @@ def _fill_detail_async(key: str, route: dict, user: str, *, after=None) -> None:
                 pass
         finally:
             s.close()
-    threading.Thread(target=_work, name="ellis-detail-stage", daemon=True).start()
+    _DETAIL_THREADS[:] = [t for t in _DETAIL_THREADS if t.is_alive()]
+    t = threading.Thread(target=_work, name="ellis-detail-stage", daemon=True)
+    _DETAIL_THREADS.append(t)
+    t.start()
 
 
 def nearest_cached_answer(db, route: dict) -> dict | None:
@@ -1719,13 +1738,27 @@ def _country_mentions(text: str) -> list:
 # What single fact is the question really after? Detected from plain words so
 # the answer page can lead with it.
 _FOCUS_WORDS = (
-    ("fee", ("how much", "cost", "price", "fee", "多少钱", "多少錢", "费用", "費用")),
+    ("fee", ("how much", "cost", "price", "fee", "cheapest", "cheaper",
+             "多少钱", "多少錢", "费用", "費用", "最便宜", "便宜")),
     ("stay", ("how long can", "how many days", "length of stay", "stay",
               "住多久", "待多久", "停留", "几天能待", "幾天")),
     ("documents", ("documents", "what do i need to bring", "materials",
                    "paperwork", "材料", "资料", "資料", "文件")),
     ("processing", ("how long does it take", "processing", "how fast",
-                    "几天出签", "幾天出簽", "办理时间", "辦理時間", "多久出")),
+                    "fastest", "quickest", "几天出签", "幾天出簽",
+                    "办理时间", "辦理時間", "多久出", "最快")),
+    # The three questions T-station's real query log asks that had no focus
+    # of their own (2026-09-01): how long the visa stays valid, how many
+    # entries it allows, and where the application actually happens.
+    ("validity", ("valid for", "validity", "how long is it valid",
+                  "visa valid", "expire", "有效期", "有效多久",
+                  "几年有效", "幾年有效")),
+    ("entries", ("single entry", "multiple entry", "how many entries",
+                 "re-enter", "reenter", "单次", "多次", "几次入境",
+                 "幾次入境", "能进几次", "能進幾次")),
+    ("channel", ("where do i apply", "where to apply", "how do i apply",
+                 "how to apply", "which website", "在哪申请", "在哪申請",
+                 "怎么申请", "怎麼申請", "去哪办", "去哪辦", "哪里办", "哪裡辦")),
 )
 
 _TRANSIT_MARKERS = ("via ", "through ", "layover in ", "stopover in ",
@@ -1950,6 +1983,46 @@ def parse_question_with_context(question: str, context: dict | None,
     q = str(question or "").strip()
     ctx = context or {}
     focus = _question_focus(q)
+    ctx_nat = str(ctx.get("nationality") or "").strip().upper()
+    ctx_dest = str(ctx.get("destination") or "").strip().upper()
+    if (ctx_nat or ctx_dest) and not (ctx_nat and ctx_dest):
+        # A clarify was answered. Ellis asked for exactly one missing fact
+        # ("Which country issued your passport?"), so a reply naming ONE
+        # country fills that slot and the pending slot survives. Without
+        # this, "Australia ETA?" -> "which passport?" -> "China" forgot
+        # Australia entirely and refused the asker a second time
+        # (Trip.com evaluation 2026-08-31, finding 4).
+        mentions = _country_mentions(q)
+        isos = []
+        for _pos, iso, _dem in mentions:
+            if iso not in isos:
+                isos.append(iso)
+        if len(isos) == 1:
+            one = isos[0]
+            known = ctx_nat or ctx_dest
+            if one != known:
+                nat = one if not ctx_nat else ctx_nat
+                dest = one if not ctx_dest else ctx_dest
+                low = q.lower()
+                purpose = None
+                for name, words in _PURPOSE_WORDS:
+                    if any(w in low or w in q for w in words):
+                        purpose = name
+                        break
+                doc = _doc_from_text(q, low)
+                return {"understood": True, "nationality": nat,
+                        "destination": dest,
+                        "travel_purpose": purpose
+                            or ctx.get("travel_purpose") or "tourism",
+                        "travel_document_type": doc
+                            or ctx.get("travel_document_type")
+                            or "ordinary_passport",
+                        "transit_countries": [str(t).upper() for t in
+                                              (ctx.get("transit_countries")
+                                               or []) if t][:5],
+                        "focus": focus, "read_by": "context-slot"}
+            # Restating the country already known keeps the same fact
+            # missing: fall through so the asker is asked for it again.
     if ctx.get("nationality") and ctx.get("destination"):
         low = q.lower()
         mentions = _country_mentions(q)
@@ -2075,7 +2148,8 @@ def parse_question(question: str, *, timeout: float = 20.0) -> dict:
            if _re.fullmatch(r"20\d\d-\d\d-\d\d", str(raw.get("arrival_date") or ""))
            else _extract_arrival(q),
            "focus": focus if focus in ("fee", "stay", "documents",
-                                       "processing") else _question_focus(q),
+                                       "processing", "validity", "entries",
+                                       "channel") else _question_focus(q),
            "read_by": "model"}
     if len(_PARSE_CACHE) > 500:
         _PARSE_CACHE.clear()

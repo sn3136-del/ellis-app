@@ -31,7 +31,53 @@ import { tripcomLogo } from './assets/logos.js'
 export default function App() {
   // LocaleProvider wraps everything so the language picker + t() work in the
   // shell, every view, and the simulated-portal banner alike.
-  return <LocaleProvider><AppInner /></LocaleProvider>
+  return <LocaleProvider><UpdateWatch /><AppInner /></LocaleProvider>
+}
+
+// A tab left open across a deploy keeps running the old bundle while the
+// API serves fresh data, which is how a fixed bug looked unfixed to a
+// tester (2026-09-01, the Korea filter). Every few minutes, and whenever
+// the tab regains focus, the served index page is compared with the bundle
+// this tab actually runs. A mismatch offers one thing: refresh.
+function UpdateWatch() {
+  const { t } = useLocale()
+  const [stale, setStale] = useState(false)
+  useEffect(() => {
+    if (window.location.hostname === 'localhost'
+        || window.location.hostname === '127.0.0.1') return undefined
+    const current = [...document.querySelectorAll('script')]
+      .map((el) => el.src.match(/index-[\w-]+\.js/)?.[0]).find(Boolean)
+    if (!current) return undefined
+    let live = true
+    const check = async () => {
+      try {
+        const html = await (await fetch('/', { cache: 'no-store' })).text()
+        const served = html.match(/index-[\w-]+\.js/)?.[0]
+        if (live && served && served !== current) setStale(true)
+      } catch { /* offline moments are not update signals */ }
+    }
+    const iv = setInterval(check, 5 * 60 * 1000)
+    const onFocus = () => check()
+    window.addEventListener('focus', onFocus)
+    return () => { live = false; clearInterval(iv)
+                   window.removeEventListener('focus', onFocus) }
+  }, [])
+  if (!stale) return null
+  return (
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
+                  background: '#14264a', color: '#fff', fontSize: 13,
+                  display: 'flex', gap: 14, alignItems: 'center',
+                  justifyContent: 'center', padding: '9px 16px' }}
+         data-testid="update-banner">
+      <span>{t('db.update.banner')}</span>
+      <button onClick={() => window.location.reload()}
+              style={{ border: 'none', borderRadius: 999, cursor: 'pointer',
+                       background: '#F2A61C', color: '#14264a',
+                       fontWeight: 800, fontSize: 12.5, padding: '5px 14px' }}>
+        {t('db.update.btn')}
+      </button>
+    </div>
+  )
 }
 
 // Permanent, non-dismissible banner shown on every view while the app runs

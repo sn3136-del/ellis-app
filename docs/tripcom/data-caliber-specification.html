@@ -1,0 +1,127 @@
+<title>Ellis 数据口径说明</title>
+<style>
+  :root{
+    --paper:#FBFBF8; --ink:#1C2B4A; --muted:#5B6478; --line:#E5E4DC;
+    --card:#FFFFFF; --accent:#175CD3; --soft:#F0F4FA; --good:#0A8A4A;
+    --warn:#B26A00; --bad:#C62828;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#111726; --ink:#E8ECF5; --muted:#97A1B7; --line:#273250;
+      --card:#171F33; --soft:#1C2740;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#111726; --ink:#E8ECF5; --muted:#97A1B7; --line:#273250;
+    --card:#171F33; --soft:#1C2740;
+  }
+  body{background:var(--paper); color:var(--ink); margin:0;
+       font-family:-apple-system,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+       line-height:1.65;}
+  main{max-width:920px; margin:0 auto; padding:48px 22px 90px;}
+  h1{font-size:1.9rem; margin:0 0 6px; text-wrap:balance;}
+  .sub{color:var(--muted); margin:0 0 34px; font-size:.95rem;}
+  h2{font-size:1.25rem; margin:40px 0 4px; padding-top:18px;
+     border-top:1px solid var(--line);}
+  h2 .en{display:block; font-size:.85rem; color:var(--muted); font-weight:600;}
+  p{margin:8px 0; max-width:74ch;}
+  p.en{color:var(--muted); font-size:.92rem;}
+  table{border-collapse:collapse; width:100%; margin:12px 0; font-size:.86rem;}
+  th,td{border:1px solid var(--line); padding:6px 9px; text-align:left;
+        vertical-align:top;}
+  th{background:var(--soft); font-weight:700;}
+  .tablewrap{overflow-x:auto;}
+  code{background:var(--soft); border-radius:6px; padding:1px 6px;
+     font-family:ui-monospace,Menlo,monospace; font-size:.85em;}
+  .req{color:var(--good); font-weight:700;}
+  .opt{color:var(--warn); font-weight:700;}
+  .note{background:var(--soft); border-left:3px solid var(--accent);
+        border-radius:8px; padding:10px 14px; margin:12px 0; font-size:.92rem;}
+  footer{margin-top:50px; color:var(--muted); font-size:.8rem;
+         border-top:1px solid var(--line); padding-top:14px;}
+</style>
+<main>
+<h1>Ellis 数据口径说明</h1>
+<p class="sub">Ellis Data Caliber Specification · 版本 2026-09-01 · 交付物清单第10项 Deliverable No. 10 · 与线上及导出口径一致</p>
+
+<h2>1. 字段字典 <span class="en">The 25 field dictionary</span></h2>
+<p>每条记录对应一个「护照 × 目的地 × 出行目的 × 证件类型」组合下的一个签证产品。同一线路有多个产品时输出多条记录。导出与在线展示使用同一字段集，另附一列一级分类的细化子类。必填字段20个，如有则提供5个，与需求规格一致。</p>
+<p class="en">One record is one visa product for one passport by destination by purpose by document combination. A route with several products yields several records. Twenty fields are required and five are provide-if-available, matching the requirements specification.</p>
+<div class="tablewrap"><table>
+<tr><th>#</th><th>字段 Field</th><th>必填</th><th>口径 Caliber</th></tr>
+<tr><td>1</td><td><code>travel_document_type</code></td><td class="req">必填</td><td>所持证件类型，13种枚举（普通护照、外交护照、公务护照、公务普通护照、旅行证、临时护照、紧急护照、儿童护照、外国人护照、无国籍人旅行证、联合国通行证、身份证明书、难民旅行证）。</td></tr>
+<tr><td>2</td><td><code>travel_document_country</code></td><td class="req">必填</td><td>证件签发国，ISO alpha-3。</td></tr>
+<tr><td>3</td><td><code>destination_country</code></td><td class="req">必填</td><td>目的地国家或地区，ISO alpha-3。</td></tr>
+<tr><td>4</td><td><code>travel_purpose</code></td><td class="req">必填</td><td>旅游、商务、探亲、留学、工作、过境、其他。</td></tr>
+<tr><td>5</td><td><code>visa_requirement</code></td><td class="req">必填</td><td>一级分类：免签、落地签、需提前办理。现另有约146条记录使用第四值 Conditional，见第5节待决口径。</td></tr>
+<tr><td>—</td><td><code>visa_requirement_detail</code></td><td class="opt">附加</td><td>细化子类，嵌套于一级分类之下：免签→无条件免签、有条件免签、过境免签。落地签→落地电子签、落地纸质签。需提前办理→eVisa电子签、纸质签证、ETA电子授权。系统保证子类必属其一级分类，有专项测试守护。</td></tr>
+<tr><td>6</td><td><code>visa_type_name</code></td><td class="req">必填</td><td>该目的地对该目的的签证产品名称，使用官方命名。</td></tr>
+<tr><td>7</td><td><code>validity_duration</code></td><td class="req">必填</td><td>获批后有效时长的数值。官方仅表述「由使领馆决定」时如实标注。</td></tr>
+<tr><td>8</td><td><code>validity_unit</code></td><td class="req">必填</td><td>天、月、年、长期有效。</td></tr>
+<tr><td>9</td><td><code>max_stay_duration</code></td><td class="req">必填</td><td>单次入境最长停留数值。</td></tr>
+<tr><td>10</td><td><code>max_stay_unit</code></td><td class="req">必填</td><td>小时、天。</td></tr>
+<tr><td>11</td><td><code>entries</code></td><td class="req">必填</td><td>单次、多次、不限。由签发机关按个案决定时如实标注。</td></tr>
+<tr><td>12</td><td><code>processing_min_days</code></td><td class="opt">如有</td><td>从递交到出签的最短时长数值。</td></tr>
+<tr><td>13</td><td><code>processing_unit</code></td><td class="opt">如有</td><td>工作日、自然日。</td></tr>
+<tr><td>14</td><td><code>visa_fee_amount</code></td><td class="req">必填</td><td>官方签证费，仅使领馆费用，不含代办服务费。代办费单独在申请渠道说明中披露。</td></tr>
+<tr><td>15</td><td><code>visa_fee_currency</code></td><td class="req">必填</td><td>ISO 4217 币种代码。</td></tr>
+<tr><td>16</td><td><code>application_method</code></td><td class="req">必填</td><td>使馆递交、在线申请、代理代办、落地办理。不使用「其他」。仅限指定代办时明确写出，例如中国公民赴日签证。</td></tr>
+<tr><td>17</td><td><code>required_documents</code></td><td class="req">必填</td><td>核心材料大类清单，英文逗号分隔。</td></tr>
+<tr><td>18</td><td><code>consulate_district</code></td><td class="opt">如有</td><td>目的地有领区划分时列出对应关系。</td></tr>
+<tr><td>19</td><td><code>entry_requirements</code></td><td class="opt">如有</td><td>签证之外的入境要求，例如回程机票、入境卡。</td></tr>
+<tr><td>20</td><td><code>special_conditions</code></td><td class="opt">如有</td><td>特殊政策或限制，例如区域性免签、过境免签、持第三国签证免签。</td></tr>
+<tr><td>21</td><td><code>data_source</code></td><td class="req">必填</td><td>信息来源机构名称。</td></tr>
+<tr><td>22</td><td><code>source_url</code></td><td class="req">必填</td><td>具体官方页面链接。系统在代码层强制政府域名，非官方链接无法写入。多源交叉验证时每条来源逐条绑定URL，随记录展示。</td></tr>
+<tr><td>23</td><td><code>collected_at</code></td><td class="req">必填</td><td>该答案生成或最近刷新的日期。</td></tr>
+<tr><td>24</td><td><code>info_validity</code></td><td class="req">必填</td><td>见第5节。当前口径为 Ellis 对该答案的担保日期。政策自带截止日的以政策为准。</td></tr>
+<tr><td>25</td><td><code>confidence_level</code></td><td class="req">必填</td><td>高、中、低，见第4节。</td></tr>
+</table></div>
+
+<h2>2. 三种空值 <span class="en">The three kinds of blank</span></h2>
+<p>空格不允许含糊。每个未填单元格必须属于以下三类之一，界面与导出都注明原因：</p>
+<p class="en">A blank cell always states its reason, on screen and in the export:</p>
+<div class="tablewrap"><table>
+<tr><th>类别</th><th>显示 Display</th><th>计入完整度分母</th></tr>
+<tr><td>官方未公布</td><td>Not publicly available。已核对官方页面，该项无公布值。</td><td>不计入可填口径 Excluded from fillable</td></tr>
+<tr><td>不适用</td><td>Does not apply to this route。例如免签线路没有签证有效期。</td><td>不计入可填口径 Excluded from fillable</td></tr>
+<tr><td>缺失</td><td>missing。尚未完成研究，属于待补工作。</td><td>计入，拉低完整度 Counted against completeness</td></tr>
+</table></div>
+
+<h2>3. 完整度口径 <span class="en">Completeness calibers</span></h2>
+<p>验收文件对完整度有两种表述，两者都被计算并展示：</p>
+<p class="en">The acceptance documents state completeness two ways. Both are computed and shown:</p>
+<p>其一，6.1节格计口径：已填单元格 ÷ 必填单元格。质控台完整度卡片以「可填」读数为主展示（分母剔除官方未公布与不适用，剔除数量同时展示，可审计），并同列字面读数。</p>
+<p>其二，4.2.2节条计口径：25字段全满记录数 ÷ 记录总数。该读数在质控台完整度卡片并列展示。</p>
+<p>两种口径的差异是结构性的：一条完全正确的免签记录永远填不满全部25字段，因为签证费、有效期等对它不适用，而4.2.1禁止编造官方未公布的值。以哪个口径为验收判据，留待双方会议确认。</p>
+<p class="en">The gap between the two is structural: a perfectly correct visa-free record can never fill all 25 fields, because fee and validity do not apply to it and 4.2.1 prohibits inventing what no government publishes. Which caliber governs acceptance is a decision for the joint meeting.</p>
+
+<h2>4. 置信度分级 <span class="en">The confidence ladder</span></h2>
+<div class="tablewrap"><table>
+<tr><th>等级</th><th>判定（与4.2.3一致）</th><th>处理</th></tr>
+<tr><td>高 High</td><td>人工对照指定官方页面核验且记录完整、无冲突。</td><td>直接展示</td></tr>
+<tr><td>中 Medium</td><td>有官方信源支撑但个别字段待补，或人工核验后仍有字段官方未公布。</td><td>展示并附来源</td></tr>
+<tr><td>低 Low</td><td>多源冲突，或仅非官方来源，或声称具体产品与费用但尚未对照官方页面读校。</td><td>拦截。读者看到「正在核对该线路」，经运营确认后展示</td></tr>
+</table></div>
+<p>分级由系统按上表自动标注。放行低置信度答案的唯一途径是写入经官方来源核验的事实或运营留痕放行，两者都可审计。</p>
+<p class="en">Grading is automatic. The only ways out of a hold are source-verified facts or an audited operator release.</p>
+
+<h2>5. 待决口径 <span class="en">Calibers awaiting a joint ruling</span></h2>
+<p>以下三项在数据中如实标注，最终判据请会议确认：</p>
+<p class="en">Three calibers are declared in the data and need the joint meeting's ruling:</p>
+<p>其一，<code>info_validity</code>。字典定义为「政策本身的有效期至」，但绝大多数国家不公布政策截止日。当前口径：政策公布截止日的用截止日（例如韩国团队免签至2026-12-31），其余为 Ellis 的担保日期，即时效监控要求重新核验的日期。导出中已声明。</p>
+<p>其二，<code>visa_requirement</code> 第四值 Conditional。约146条记录的要求确实取决于旅客个人条件（例如持有效第三国签证则免签）。可并入「免签→有条件免签」子类，迁移脚本已备好，等待确认后执行。</p>
+<p>其三，完整度判据，见第3节。</p>
+
+<h2>6. 特殊政策注记 <span class="en">Special policy notes</span></h2>
+<p>区域性免签与过境免签不属于单一线路判定，以独立注记承载：海南61国30天入境免签、中国240小时过境免签、韩国对中国团队游客免签及济州政策。注记逐条绑定官方来源URL并经交叉核验，在查询器、展示页与AI问答中随相关线路与提问出现，并对已知国籍明确说明是否适用。</p>
+<p class="en">Regional and transit policies live as standalone notes, each bound to an official source URL, surfacing beside relevant routes and questions with a decisive covered-or-not line for a known nationality.</p>
+
+<h2>7. 导出口径 <span class="en">Export caliber</span></h2>
+<p>导出文件为 .xlsx，两张工作表：数据表首行为字段名，字段说明表标注每字段口径与快照时间（UTC）。导出内容即在线内容，同一代码路径生成，无单独离线库。单次导出无行数上限。</p>
+<p class="en">The export is the online data through the same code path, two sheets, stamped with the UTC snapshot time, with no row cap.</p>
+
+<div class="note">本说明与线上行为同源维护。任何口径调整都会先更新本文件与导出内的字段说明表，再生效。<br>
+This specification is maintained alongside the code. A caliber change updates this document and the export's field description sheet before it takes effect.</div>
+
+<footer>Ellis · 数据口径说明 · 2026-09-01</footer>
+</main>

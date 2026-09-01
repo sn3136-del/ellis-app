@@ -42,6 +42,9 @@ def client():
     # portal queue stopped for every test file that runs afterwards.
     c = TestClient(app)
     yield c
+    # Drain in-flight detail-stage threads so no stray background call eats
+    # the NEXT test's stubbed provider (a real cross-file flake, 2026-09-01).
+    kimi_primary.join_detail_stage()
     kimi_primary.set_provider(None)
 
 
@@ -298,3 +301,266 @@ def test_lookup_echoes_the_transit_it_answered_for(client):
                     json={"nationality": "CHN", "destination": "USA",
                           "transit_countries": ["JPN"]})
     assert r.json()["transit_countries"] == ["JPN"]
+
+
+def test_ask_review_writes_verdict_and_wrong_files_a_tracked_issue(client):
+    """Their P0 backend samples AI Q&A output like any record. A verdict must
+    be writable against the logged exchange, and an answer ruled wrong must
+    enter the same tracked correction loop as every other error."""
+    _provide(ANSWER)
+    ask = client.post("/database/ask", headers=READER,
+                      json={"question": "from Iceland to Japan for tourism"})
+    assert ask.status_code == 200 and ask.json()["understood"]
+    log = client.get("/database/asks", headers=OTHER_ORG_ADMIN).json()["asks"]
+    assert log, "the exchange must be logged for sampling"
+    ask_id = log[0]["id"]
+    # A reader cannot rule on answers.
+    assert client.post(f"/database/asks/{ask_id}/review", headers=READER,
+                       json={"verdict": "correct"}).status_code == 403
+    # Wrong without a reason is refused; with one it files an issue.
+    assert client.post(f"/database/asks/{ask_id}/review",
+                       headers=OTHER_ORG_ADMIN,
+                       json={"verdict": "wrong"}).status_code == 422
+    ruled = client.post(f"/database/asks/{ask_id}/review",
+                        headers=OTHER_ORG_ADMIN,
+                        json={"verdict": "wrong",
+                              "note": "fee is out of date"}).json()
+    assert ruled["ok"] and ruled["issue_id"]
+    after = client.get("/database/asks", headers=OTHER_ORG_ADMIN).json()["asks"]
+    mine = next(a for a in after if a["id"] == ask_id)
+    assert mine["verdict"] == "wrong" and mine["reviewed_by"]
+    issues = client.get("/database/issues",
+                        headers=OTHER_ORG_ADMIN).json()["issues"]
+    assert any(i["id"] == ruled["issue_id"] and i["field"] == "ai_answer"
+               for i in issues)
+
+
+def test_expiring_a_ruled_answer_writes_a_delete_change_entry(client):
+    """4.1.2 change management distinguishes add, modify and DELETE. The one
+    path that removes a served answer (an issue ruled corrected) must write
+    the delete entry, or the log claims nothing was withdrawn."""
+    _provide(ANSWER)
+    look = client.post("/database/lookup", headers=READER,
+                       json={"nationality": "ISL", "destination": "PLW"}).json()
+    rep = client.post("/database/report-issue", headers=READER,
+                      json={"nationality": "ISL", "destination": "PLW",
+                            "field": "government_fee", "note": "stale fee",
+                            "cache_key": look["cache_key"]}).json()
+    for status, reason in (("acknowledged", "provider told"),
+                           ("corrected", "re-verified against the source")):
+        r = client.post(f"/database/issues/{rep['id']}",
+                        headers=OTHER_ORG_ADMIN,
+                        json={"status": status, "resolution": reason})
+        assert r.status_code == 200
+    changes = client.get("/database/changes?limit=50",
+                         headers=OTHER_ORG_ADMIN).json()["changes"]
+    dele = [c for c in changes if c.get("action") == "delete"
+            and c.get("cache_key") == look["cache_key"]]
+    assert dele, "withdrawing the answer must be logged as a delete"
+    assert "issue" in (dele[0].get("origin") or "")
+
+
+def test_ask_carries_policy_notes_and_continues_a_clarify(client):
+    """The three Q&A gaps from the 2026-08-31 evaluation, end to end: a
+    policy-only question gets the verified note beside the clarify, a route
+    question gets a decisive covered-or-not line, and a bare-country reply
+    continues the clarified question instead of restarting it."""
+    # The stub answers both roles the model plays: reading a question into
+    # a route, and answering a route. The ETA question reads to a lone
+    # destination, exactly what the live parser produced for the evaluator.
+    answer = dict(ANSWER, disposition="VISA_REQUIRED")
+
+    def model(system, user):
+        if '"question"' in str(user):
+            return {"nationality": "", "destination": "AUS",
+                    "travel_purpose": "tourism",
+                    "travel_document_type": "ordinary_passport"}
+        return dict(answer)
+    kimi_primary.set_provider(model)
+    # 1. "144-hour transit" names no route: clarify + the transit note.
+    r1 = client.post("/database/ask", headers=READER,
+                     json={"question": "144-hour transit visa-free policy"}).json()
+    assert r1["understood"] is False
+    ids = [p["id"] for p in r1.get("special_policies", [])]
+    assert "china-240h-transit-visa-free" in ids
+    # 2. India to Hainan: answered as IND->CHN, with the decisive line that
+    #    Indian passports are not on the eligible list.
+    r2 = client.post("/database/ask", headers=READER,
+                     json={"question":
+                           "Can I go to Hainan China from India without a visa?"}).json()
+    assert r2["understood"] is True
+    hainan = [p for p in r2.get("special_policies", [])
+              if p["id"] == "china-hainan-visa-free"]
+    assert hainan and hainan[0]["applies_to_you"] is False
+    # 3. The Australia ETA flow: clarify asks for the passport, "China"
+    #    answers it, and the pending destination survives.
+    r3 = client.post("/database/ask", headers=READER,
+                     json={"question": "How do I apply for an Australia ETA?"}).json()
+    assert r3["understood"] is False and r3["route"]["destination"] == "AUS"
+    r4 = client.post("/database/ask", headers=READER,
+                     json={"question": "China", "context": r3["route"]}).json()
+    assert r4["understood"] is True
+    assert (r4["route"]["nationality"], r4["route"]["destination"]) == \
+        ("CHN", "AUS")
+
+
+def test_operator_edit_writes_a_gated_override_that_readers_see(client,
+                                                                tmp_path,
+                                                                monkeypatch):
+    """Trip.com's console edit: gated exactly like every verified fact
+    (official source required, whitelisted fields only), applied at read
+    time, logged as a change, and refused to readers."""
+    import json as _json
+    monkeypatch.setenv("ELLIS_OPERATOR_OVERRIDES",
+                       str(tmp_path / "operator_overrides.json"))
+    from app.visa_snapshot import verified_overrides
+    verified_overrides.reload()
+    _provide(dict(ANSWER, visa_products=[]))
+    look = client.post("/database/lookup", headers=READER,
+                       json={"nationality": "ISL", "destination": "KIR"}).json()
+    assert look["guidance"]["government_fee"]["amount"] == 100
+    edit = {"nationality": "ISL", "destination": "KIR",
+            "travel_purpose": "tourism",
+            "fields": {"government_fee": {"amount": 120, "currency": "USD"}},
+            "source_url": "https://www.mofa.go.jp/fee-page",
+            "note": "fee updated per the official schedule"}
+    # A reader cannot edit; a commercial source is refused; unknown fields
+    # are refused by name.
+    assert client.post("/database/records/edit", headers=READER,
+                       json=edit).status_code == 403
+    bad_src = dict(edit, source_url="https://www.ivisa.com/fees")
+    assert client.post("/database/records/edit", headers=OTHER_ORG_ADMIN,
+                       json=bad_src).status_code == 422
+    bad_field = dict(edit, fields={"government_fee": {"amount": 120},
+                                   "hacked": True})
+    assert client.post("/database/records/edit", headers=OTHER_ORG_ADMIN,
+                       json=bad_field).status_code == 422
+    ok = client.post("/database/records/edit", headers=OTHER_ORG_ADMIN,
+                     json=edit).json()
+    assert ok["ok"] and ok["applied_to_served_answer"]
+    # The next reader sees the edited fee, with the operator's provenance.
+    again = client.post("/database/lookup", headers=READER,
+                        json={"nationality": "ISL", "destination": "KIR"}).json()
+    assert again["guidance"]["government_fee"]["amount"] == 120
+    assert "Trip.com operations" in _json.dumps(
+        again.get("source_verified") or {})
+    # The edit is in the change log with its field diff.
+    changes = client.get("/database/changes?limit=20",
+                         headers=OTHER_ORG_ADMIN).json()["changes"]
+    mine = [c for c in changes if c.get("origin") == "operator-edit"]
+    assert mine and "government_fee" in (mine[0].get("changes") or {})
+    verified_overrides.reload()
+
+
+def test_operator_edit_layers_onto_seed_overrides_not_over_them(client,
+                                                                tmp_path,
+                                                                monkeypatch):
+    """An operator correcting ONE field must not wipe the seed entry's other
+    verified facts. A console edit of processing_time once shadowed the
+    whole CHN->KOR entry and the verified fee vanished from the served
+    answer (2026-09-01). The layers merge per field."""
+    monkeypatch.setenv("ELLIS_OPERATOR_OVERRIDES",
+                       str(tmp_path / "operator_overrides.json"))
+    from app.visa_snapshot import verified_overrides
+    verified_overrides.reload()
+    _provide(dict(ANSWER, visa_products=[],
+                  government_fee={"amount": 40, "currency": "USD"}))
+    # CHN->KOR carries a seed override with the verified 280 CNY fee.
+    edit = {"nationality": "CHN", "destination": "KOR",
+            "travel_purpose": "tourism",
+            "fields": {"processing_time": "edited by the operator"},
+            "source_url": "https://overseas.mofa.go.kr/cn-zh/wpge/m_1199/contents.do",
+            "note": "processing time confirmed"}
+    assert client.post("/database/records/edit", headers=OTHER_ORG_ADMIN,
+                       json=edit).json()["ok"]
+    out = client.post("/database/lookup", headers=READER,
+                      json={"nationality": "CHN",
+                            "destination": "KOR"}).json()
+    g = out["guidance"]
+    assert g["processing_time"] == "edited by the operator"
+    assert g["government_fee"]["amount"] == 280, \
+        "the seed's verified fee must survive an unrelated operator edit"
+    verified_overrides.reload()
+
+
+def test_the_assistant_is_ellis_refuses_off_topic_and_grounds_replies(client):
+    """The conversation layer's three hard rules: identity questions answer
+    Ellis with no model call, non-immigration questions get the one-sentence
+    refusal, and a composed reply is built from the served facts through the
+    provider with a deterministic fallback when it fails."""
+    from app.visa_snapshot import kimi_primary
+    kimi_primary.set_provider(lambda system, user: (_ for _ in ()).throw(
+        AssertionError("identity and refusal must not call the model")))
+    # Identity, both scripts, and no model-name leakage.
+    for q in ("What AI are you?", "what's your name", "你是谁"):
+        r = client.post("/database/ask", headers=READER,
+                        json={"question": q}).json()
+        assert r.get("identity") and "Ellis" in r["reply"]
+        assert "kimi" not in r["reply"].lower()
+    # Off-topic, both scripts, the exact sentence.
+    r = client.post("/database/ask", headers=READER,
+                    json={"question": "what's the weather like today?"}).json()
+    assert r.get("off_topic")
+    assert r["reply"] == "Sorry, I can only help with immigration matters."
+    r = client.post("/database/ask", headers=READER,
+                    json={"question": "今天天气怎么样"}).json()
+    assert r["reply"] == "抱歉，我只能协助出入境相关事务。"
+    # A terse route question is never refused.
+    calls = {}
+
+    def model(system, user):
+        if "Compose one short reply" in str(system):
+            calls["facts"] = str(user)
+            return {"reply": "A visa is required. The fee is 100 USD. "
+                             "The full record below has the details."}
+        if '"question"' in str(user):
+            return {"nationality": "ISL", "destination": "JPN",
+                    "travel_purpose": "tourism",
+                    "travel_document_type": "ordinary_passport"}
+        return dict(ANSWER, visa_products=[])
+    kimi_primary.set_provider(model)
+    r = client.post("/database/ask", headers=READER,
+                    json={"question": "from Iceland to Japan for tourism",
+                          "history": [{"role": "user", "text": "hi"}]}).json()
+    assert r["understood"] is True
+    assert "100 USD" in (r.get("reply") or "")
+    assert '"government_fee"' in calls.get("facts", ""), \
+        "the composer must receive the served facts"
+    # Composer failure falls back silently: no reply key, answer intact.
+    def broken(system, user):
+        if "Compose one short reply" in str(system):
+            raise RuntimeError("model down")
+        return dict(ANSWER, visa_products=[])
+    kimi_primary.set_provider(broken)
+    r2 = client.post("/database/ask", headers=READER,
+                     json={"question": "from Iceland to Nauru for tourism"}).json()
+    assert r2["understood"] is True and "reply" not in r2
+    assert r2["guidance"]["government_fee"]["amount"] == 100
+
+
+def test_change_webhook_fires_when_configured(client, monkeypatch):
+    """Evaluation VI.4: a system reminder on every change. With the webhook
+    URL set, writing a change posts compact JSON. Without it, nothing
+    happens and nothing breaks."""
+    import json as _json
+    import time
+    hits = []
+    import urllib.request as _ur
+
+    def fake_open(req, timeout=0):
+        hits.append(_json.loads(req.data.decode("utf-8")))
+        class _R:  # noqa: N801
+            def read(self):
+                return b""
+        return _R()
+    monkeypatch.setattr(_ur, "urlopen", fake_open)
+    monkeypatch.setenv("ELLIS_CHANGE_WEBHOOK_URL", "https://example.com/hook")
+    _provide(dict(ANSWER, visa_products=[]))
+    client.post("/database/lookup", headers=READER,
+                json={"nationality": "ISL", "destination": "TUV"})
+    for _ in range(20):
+        if hits:
+            break
+        time.sleep(0.05)
+    assert hits and hits[0]["event"] == "database_change"
+    assert hits[0]["action"] == "add" and "ISL->TUV" in hits[0]["route"]

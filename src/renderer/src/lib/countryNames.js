@@ -70,7 +70,12 @@ export function useLocalizedCountries(client, reg, lang) {
     return () => { live = false }
   }, [client, reg, lang])
 
-  return useMemo(() => (reg?.countries || []).map((c) => {
+  return useMemo(() => countryRows(reg?.countries, zh), [reg, zh])
+}
+
+// Pure so tests can build the exact rows the pickers search over.
+export function countryRows(countries, zh) {
+  return (countries || []).map((c) => {
     const local = zh?.[c.alpha_3]
     return {
       value: c.alpha_3,
@@ -79,5 +84,5 @@ export function useLocalizedCountries(client, reg, lang) {
       // 中国 with the UI in English still deserves the match.
       search: `${c.name} ${local || ''} ${c.name_zh || ''} ${c.name_hant || ''} ${COMMON_ALIASES[c.alpha_3] || ''} ${c.alpha_2 || ''} ${c.alpha_3}`.toLowerCase(),
     }
-  }), [reg, zh])
+  })
 }

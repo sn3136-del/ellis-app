@@ -1054,6 +1054,36 @@ def test_ask_reads_transit_focus_and_context_followups():
         == ("USA", "FRA", "study")
 
 
+def test_a_clarified_ask_continues_with_a_bare_country_answer():
+    """Finding 4 of the 2026-08-31 Trip.com evaluation: "Australia ETA?" ->
+    "Which country issued your passport?" -> "China" was refused a second
+    time because the half-read route was dropped between turns. A reply
+    naming ONE country fills exactly the slot Ellis asked for, keeps the
+    slot it already had, and never needs the model."""
+    kimi_primary.set_provider(lambda system, user: (_ for _ in ()).throw(
+        AssertionError("a one-country clarify answer must not call the model")))
+    # Destination known, passport missing: the reply is the passport.
+    r = kimi_primary.parse_question_with_context(
+        "China", {"nationality": "", "destination": "AUS",
+                  "travel_purpose": "tourism"})
+    assert r["understood"] and r["read_by"] == "context-slot"
+    assert (r["nationality"], r["destination"]) == ("CHN", "AUS")
+    assert r["travel_purpose"] == "tourism"
+    # Passport known, destination missing, answered in Chinese.
+    r2 = kimi_primary.parse_question_with_context(
+        "日本", {"nationality": "CHN", "destination": ""})
+    assert (r2["nationality"], r2["destination"]) == ("CHN", "JPN")
+    # Restating the country Ellis already knew answers nothing: the missing
+    # fact stays missing and the asker is asked again, never answered with
+    # a route whose two ends are the same country.
+    kimi_primary.set_provider(lambda system, user: {
+        "nationality": "", "destination": "AUS",
+        "travel_purpose": "tourism"})
+    r3 = kimi_primary.parse_question_with_context(
+        "Australia", {"nationality": "", "destination": "AUS"})
+    assert not r3.get("understood")
+
+
 def test_clear_questions_never_touch_the_model_and_messy_ones_do():
     """Smart routing: a phrasing whose words mark the route is answered
     instantly with no model call; a phrasing with asides or extra countries

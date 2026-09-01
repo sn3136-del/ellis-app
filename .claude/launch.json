@@ -11,6 +11,18 @@
       "port": 5199
     },
     {
+      "name": "ellis-vite-only",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--config",
+        "vite.web.config.mjs",
+        "--port",
+        "5199"
+      ],
+      "port": 5199
+    },
+    {
       "name": "ellis-web-public",
       "runtimeExecutable": "npm",
       "runtimeArgs": [

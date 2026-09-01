@@ -32,14 +32,33 @@ RULES, all deliberate:
 from __future__ import annotations
 
 import json
+import os
 import pathlib
 import re
+import threading
 from functools import lru_cache
 
 from .authority import hostname, is_government_host
 
 OVERRIDES = pathlib.Path(__file__).resolve().parents[3] / "data" / \
     "database_seed" / "verified_overrides.json"
+
+# Operator-written overrides live OUTSIDE the deployable tree, so a deploy
+# rsync can never clobber what a Trip.com operator wrote through the console,
+# and the daily /var/lib/ellis backup carries them. Entries here pass exactly
+# the same gates as the seed file and are loaded AFTER it, so an operator
+# correction wins over the shipped fact for the fields it names.
+_OP_LOCK = threading.Lock()
+
+
+def operator_overrides_path() -> pathlib.Path:
+    env = os.environ.get("ELLIS_OPERATOR_OVERRIDES")
+    if env:
+        return pathlib.Path(env)
+    var = pathlib.Path("/var/lib/ellis")
+    if var.is_dir():
+        return var / "operator_overrides.json"
+    return OVERRIDES.parent / "operator_overrides.json"
 
 # Fields an override is allowed to correct. Anything else in the file is
 # ignored rather than trusted, so a malformed entry cannot reshape an answer.
@@ -148,12 +167,14 @@ _CACHE: dict = {"mtime": None, "table": {}}
 
 
 def _table() -> dict:
-    """route key -> override entry, rebuilt whenever the file changes on disk
-    so a newly verified fact reaches readers without a restart. Entries
+    """route key -> override entry, rebuilt whenever either file changes on
+    disk so a newly verified fact reaches readers without a restart. Entries
     missing a source or a date, or citing a non-government domain, are
     dropped with no effect."""
+    op = operator_overrides_path()
     try:
-        mtime = OVERRIDES.stat().st_mtime if OVERRIDES.is_file() else None
+        mtime = (OVERRIDES.stat().st_mtime if OVERRIDES.is_file() else None,
+                 op.stat().st_mtime if op.is_file() else None)
     except OSError:
         mtime = None
     if _CACHE["mtime"] == mtime and _CACHE["table"] is not None:
@@ -163,14 +184,43 @@ def _table() -> dict:
     return table
 
 
-def _load_table() -> dict:
-    if not OVERRIDES.is_file():
-        return {}
+def _read_rows(path: pathlib.Path) -> list:
+    if not path.is_file():
+        return []
     try:
-        rows = json.loads(OVERRIDES.read_text(encoding="utf-8"))
+        rows = json.loads(path.read_text(encoding="utf-8"))
     except Exception:  # noqa: BLE001 — a broken file must not break lookups
-        return {}
-    table = {}
+        return []
+    return rows if isinstance(rows, list) else []
+
+
+def _load_table() -> dict:
+    # Seed first, then operator entries MERGED per field on top. An operator
+    # who corrects one field must not wipe the seed's other verified facts:
+    # a console edit of processing_time once shadowed a route's entire
+    # verified entry and the flagship fee vanished from the served answer
+    # (2026-09-01). Entry-level provenance follows the newest editor; the
+    # seed's note is kept alongside so the trail stays readable.
+    table = _parse_rows(_read_rows(OVERRIDES), {})
+    ops = _parse_rows(_read_rows(operator_overrides_path()), {})
+    for k, op in ops.items():
+        base = table.get(k)
+        if base is None:
+            table[k] = op
+            continue
+        merged_fields = dict(base["fields"])
+        merged_fields.update(op["fields"])
+        table[k] = {"fields": merged_fields,
+                    "source_url": op["source_url"],
+                    "verified_at": op["verified_at"],
+                    "verified_by": op["verified_by"],
+                    "note": (base.get("note") or "").strip()}
+        if op.get("note"):
+            table[k]["note"] = (table[k]["note"] + " | " + op["note"]).strip(" |")[:400]
+    return table
+
+
+def _parse_rows(rows, table: dict) -> dict:
     for r in rows if isinstance(rows, list) else []:
         if not isinstance(r, dict):
             continue
@@ -213,6 +263,58 @@ def _load_table() -> dict:
 def reload() -> None:
     """Forget the cached table (tests swap the file path)."""
     _CACHE["mtime"], _CACHE["table"] = None, None
+
+
+def append_operator_entry(entry: dict) -> dict:
+    """Persist one operator-written override, applying the same gates the
+    loader applies, but LOUDLY: a rejected entry raises ValueError naming the
+    reason, so the console can tell the operator exactly what to fix instead
+    of silently dropping their work."""
+    route = entry.get("route") or {}
+    if not (route.get("nationality") and route.get("destination")):
+        raise ValueError("the route needs a nationality and a destination")
+    url = str(entry.get("source_url") or "").strip()
+    if not url or not is_government_host(hostname(url)):
+        raise ValueError("every edit must cite a page on an official "
+                         "government domain")
+    if not str(entry.get("note") or "").strip():
+        raise ValueError("say what was checked and why, in the note")
+    fields = entry.get("fields") or {}
+    unknown = [k for k in fields if k not in OVERRIDABLE]
+    if unknown:
+        raise ValueError(f"these fields cannot be edited: {sorted(unknown)}")
+    clean = {k: v for k, v in fields.items() if k in OVERRIDABLE}
+    for k in _URL_FIELDS:
+        v = str(clean.get(k) or "").strip()
+        if v and not is_government_host(hostname(v)):
+            raise ValueError(f"{k} must be a page on an official government "
+                             "domain")
+    for k in _CUSTOMER_TEXT:
+        if k in clean and _reads_like_review(clean[k]):
+            raise ValueError(f"{k} reads like a reviewer's argument, not a "
+                             "customer-facing fact. State the fact plainly")
+    if not clean:
+        raise ValueError("no editable fields were given")
+    entry = dict(entry, fields=clean)
+    path = operator_overrides_path()
+    with _OP_LOCK:
+        rows = _read_rows(path)
+        # One entry per route: a re-edit replaces the previous operator entry
+        # for the same route instead of stacking shadowed duplicates.
+        def _rk(r):
+            rr = r.get("route") or {}
+            return (rr.get("nationality"), rr.get("destination"),
+                    rr.get("travel_purpose", "tourism"),
+                    rr.get("travel_document_type", ""))
+        rows = [r for r in rows if _rk(r) != _rk(entry)]
+        rows.append(entry)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(".tmp")
+        tmp.write_text(json.dumps(rows, ensure_ascii=False, indent=1),
+                       encoding="utf-8")
+        tmp.replace(path)
+    reload()
+    return entry
 
 
 def find(route: dict) -> dict | None:

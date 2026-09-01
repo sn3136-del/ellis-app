@@ -130,6 +130,24 @@ GOV_SUFFIXES = (
     # Armenia MFA (evisa.mfa.am), Iran MFA (evisatraveller.mfa.ir), and the
     # Kyrgyz state e-government platform (www.evisa.e-gov.kg).
     "mfa.am", "mfa.ir", "e-gov.kg",
+    # Chile's Servicio Nacional de Migraciones runs on its own .cl domain,
+    # not gob.cl. Verified live in a browser 2026-09-01: the site is SERMIG
+    # itself (its permit pages cite Law No. 21.325 and its own resolutions).
+    "serviciomigraciones.cl",
+    # Ivory Coast's e-visa runs on the state-accredited operator's domain.
+    # The page itself states it is the only officially recognised channel
+    # ("le seul site officiellement reconnu et agréé par l'état de Côte
+    # d'Ivoire"). Verified live in a browser 2026-09-01.
+    "snedai.com",
+    # Official mission and border-system domains verified live in a browser
+    # 2026-09-01: Myanmar's Consulate General in Hong Kong (the competent
+    # mission for HKSAR applicants), the Seychelles Electronic Border System
+    # ("Official Government Website" on its own masthead), the St Kitts and
+    # Nevis Electronic Border Management System (government of St Kitts and
+    # Nevis, .kn), and Syria's announced state e-visa domain, referenced by
+    # the gated mofaex.gov.sy.
+    "myanmarconsulatehk.org", "seychelles.govtas.com", "knatravelform.kn",
+    "evisa.sy",
     # State-run systems verified 2026-08-22: Mongolia's e-visa, Lithuania's
     # MIGRIS (Migration Department), the Russian MFA consular department, and
     # France's state public-administration portal.

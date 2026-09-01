@@ -507,10 +507,21 @@ def travel_database_issue_update(issue_id: str, body: DatabaseIssueUpdateIn,
     # operator has just declared wrong.
     if status in ("corrected", "published") and row.cache_key:
         from sqlalchemy import select as _sel
+        from .visa_snapshot import change_log
         from .visa_snapshot.models import KimiRouteGuidanceCache
         cached = db.execute(_sel(KimiRouteGuidanceCache).where(
             KimiRouteGuidanceCache.cache_key == row.cache_key)).scalars().first()
         if cached is not None:
+            # The expiry IS a change readers can see: the served answer is
+            # withdrawn until the route re-warms. Their §4.1.2 asks change
+            # management to distinguish add/modify/DELETE, and this was the
+            # one path that removed an answer without writing the log.
+            change_log.record(db, row.cache_key, cached.route,
+                              cached.guidance, None,
+                              origin=f"issue-{status}",
+                              note=f"answer withdrawn while issue "
+                                   f"{row.id} ({row.field or 'record'}) "
+                                   f"is {status}")
             db.delete(cached)
     db.commit()
     audit.record(db, org_id=p.org_id, application_id="database",
@@ -1301,6 +1312,9 @@ class DatabaseAskIn(BaseModel):
     # The route currently on screen, so a follow-up like "what about
     # business?" or "to korea instead" modifies it instead of being refused.
     context: dict | None = None
+    # The visible conversation, newest last, so the composer keeps the
+    # thread ("and for my wife?" knows what came before). Capped server-side.
+    history: list | None = None
 
 
 @app.get("/database/asks")
@@ -1325,6 +1339,210 @@ def travel_database_asks(limit: int = 200, unreviewed: bool = False,
                       "at": r.created_at.isoformat() if r.created_at else None}
                      for r in rows],
             "unreviewed": sum(1 for r in rows if not r.verdict)}
+
+
+class DatabaseRecordEditIn(BaseModel):
+    """One operator edit: the route it names, the fields it corrects, and the
+    official page that backs the correction."""
+    model_config = {"extra": "forbid"}
+    nationality: str
+    destination: str
+    travel_purpose: str = "tourism"
+    travel_document_type: str = ""
+    fields: dict
+    source_url: str
+    note: str
+
+
+@app.post("/database/records/edit")
+def travel_database_record_edit(body: DatabaseRecordEditIn,
+                                db=Depends(get_session),
+                                p: Principal = Depends(get_principal)):
+    """Trip.com's operations team edits a route's fields directly from the
+    console. The edit is stored as an operator override: it wins over the
+    engine for exactly the fields it names, it must cite an official
+    government page, and it is applied at read time so the correction reaches
+    the next reader immediately with no deploy and no restart. The same
+    discipline as every verified fact: source, date, author, note."""
+    from datetime import date
+    from .visa_snapshot import change_log, kimi_primary, verified_overrides
+    from .visa_snapshot.registry import iso3
+    require_admin(p)
+    nat = iso3(body.nationality.strip(), default=None)
+    dest = iso3(body.destination.strip(), default=None)
+    if not nat or not dest:
+        raise HTTPException(422, "nationality and destination must be real "
+                                 "countries (name or ISO code)")
+    purpose = (body.travel_purpose or "tourism").strip().lower()
+    route = {"nationality": nat, "destination": dest,
+             "travel_purpose": purpose}
+    doc = (body.travel_document_type or "").strip()
+    if doc and doc != "ordinary_passport":
+        route["travel_document_type"] = doc
+    entry = {"route": route,
+             "verified_at": date.today().isoformat(),
+             "verified_by": f"Trip.com operations ({p.user_id})",
+             "source_url": body.source_url.strip(),
+             "note": body.note.strip()[:400],
+             "fields": body.fields or {}}
+    # What the reader sees now, for the change log's before side.
+    full_route = {"passport_nationality": nat, "passport_issuing_country": nat,
+                  "lawful_country_of_residence": nat,
+                  "travel_document_type": doc or "ordinary_passport",
+                  "destination_country": dest, "travel_purpose": purpose}
+    from sqlalchemy import select as _sel
+    from .visa_snapshot.models import KimiRouteGuidanceCache
+    cached = db.execute(_sel(KimiRouteGuidanceCache).where(
+        KimiRouteGuidanceCache.cache_key ==
+        kimi_primary.cache_key(full_route))).scalars().first()
+    before = None
+    if cached is not None:
+        before, _ = verified_overrides.apply(dict(cached.guidance or {}),
+                                             full_route)
+    try:
+        verified_overrides.append_operator_entry(entry)
+    except ValueError as e:
+        raise HTTPException(422, str(e))
+    after = None
+    if cached is not None:
+        after, _ = verified_overrides.apply(dict(cached.guidance or {}),
+                                            full_route)
+        change_log.record(db, cached.cache_key, full_route, before, after,
+                          origin="operator-edit",
+                          note=f"edited from the console by {p.user_id}: "
+                               f"{body.note.strip()[:200]}")
+        db.commit()
+    audit.record(db, org_id=p.org_id, application_id="database",
+                 action="database_record_edit",
+                 detail={"nationality": nat, "destination": dest,
+                         "travel_purpose": purpose,
+                         "fields": sorted((body.fields or {}).keys())},
+                 actor=p.user_id)
+    return {"ok": True, "route": route,
+            "fields": sorted(entry["fields"].keys()),
+            "applied_to_served_answer": cached is not None}
+
+
+class DatabaseRouteResearchIn(BaseModel):
+    model_config = {"extra": "forbid"}
+    nationality: str
+    destination: str
+    travel_purpose: str = "tourism"
+    travel_document_type: str = "ordinary_passport"
+
+
+@app.post("/database/routes/research")
+def travel_database_route_research(body: DatabaseRouteResearchIn,
+                                   db=Depends(get_session),
+                                   p: Principal = Depends(get_principal)):
+    """Add a route WITH research: the engine answers it, then the answer is
+    immediately read against its cited official page. The console gets an
+    honest research report: confirmed, corrected, or disputed for human
+    ruling. This is the AI-assisted half of Trip.com's add-a-route ask; the
+    manual half writes the operator's own sourced fields."""
+    from .visa_snapshot import freshness, kimi_primary
+    from .visa_snapshot.registry import iso3
+    require_admin(p)
+    nat = iso3(body.nationality.strip(), default=None)
+    dest = iso3(body.destination.strip(), default=None)
+    if not nat or not dest:
+        raise HTTPException(422, "nationality and destination must be real "
+                                 "countries (name or ISO code)")
+    purpose = (body.travel_purpose or "tourism").strip().lower()
+    doc = (body.travel_document_type or "ordinary_passport").strip().lower()
+    route = {"passport_nationality": nat, "passport_issuing_country": nat,
+             "lawful_country_of_residence": nat,
+             "travel_document_type": doc, "destination_country": dest,
+             "travel_purpose": purpose,
+             "visa_category": kimi_primary.category_for_purpose(purpose)}
+    try:
+        out = kimi_primary.get_route_guidance(db, route, stage="core",
+                                              after=None)
+    except (kimi_primary.GuidanceTimeout, kimi_primary.GuidanceUnavailable,
+            kimi_primary.GuidanceProviderError) as e:
+        out = _answer_anyway(db, route, e)
+    report = None
+    try:
+        report = freshness.recheck_route(db, route)
+    except Exception:  # noqa: BLE001 — a research failure is a report, not a 500
+        report = None
+    # Serve the post-research answer.
+    try:
+        out = kimi_primary.get_route_guidance(db, route, stage="core",
+                                              after=None)
+    except Exception:  # noqa: BLE001
+        pass
+    g = out.get("guidance") or {}
+    audit.record(db, org_id=p.org_id, application_id="database",
+                 action="database_route_research",
+                 detail={"nationality": nat, "destination": dest,
+                         "purpose": purpose,
+                         "outcome": (report or {}).get("outcome")},
+                 actor=p.user_id)
+    return {"ok": True,
+            "route": {"nationality": nat, "destination": dest,
+                      "travel_purpose": purpose},
+            "disposition": g.get("disposition"),
+            "held": bool(out.get("held")),
+            "source_url": g.get("source_url"),
+            "research": {k: (report or {}).get(k) for k in
+                         ("outcome", "consistent", "disputed_fields",
+                          "corrected_fields")} if report else None}
+
+
+class DatabaseAskReviewIn(BaseModel):
+    verdict: str            # correct | wrong
+    note: str = ""
+
+
+@app.post("/database/asks/{ask_id}/review")
+def travel_database_ask_review(ask_id: str, body: DatabaseAskReviewIn,
+                               db=Depends(get_session),
+                               p: Principal = Depends(get_principal)):
+    """A reviewer's ruling on one AI answer. Their P0 backend spot-checks
+    Q&A output the same way it checks records; the log existed but no
+    verdict could be written, so sampling the assistant left no trace. An
+    answer ruled wrong files an issue on the route it answered, so the
+    correction walks the same tracked loop every other error walks."""
+    from datetime import datetime, timezone
+    from .visa_snapshot.models import DatabaseAskLog, DatabaseIssueReport
+    require_admin(p)
+    verdict = (body.verdict or "").strip().lower()
+    if verdict not in ("correct", "wrong"):
+        raise HTTPException(422, "verdict must be correct or wrong")
+    if verdict == "wrong" and not (body.note or "").strip():
+        raise HTTPException(422, "say what is wrong with the answer")
+    row = db.get(DatabaseAskLog, ask_id)
+    if row is None:
+        raise HTTPException(404, "no such Q&A exchange")
+    row.verdict = verdict
+    row.reviewed_by = p.user_id
+    row.reviewed_at = datetime.now(timezone.utc)
+    issue_id = None
+    if verdict == "wrong":
+        r = row.route or {}
+        issue = DatabaseIssueReport(
+            org_id=p.org_id,
+            route={"passport_nationality": r.get("nationality") or "",
+                   "destination_country": r.get("destination") or "",
+                   "travel_purpose": r.get("travel_purpose") or "tourism",
+                   "travel_document_type":
+                       r.get("travel_document_type") or "ordinary_passport"},
+            field="ai_answer",
+            note=f"Q&A answer ruled wrong by review. Question: "
+                 f"{row.question[:300]} | {body.note[:400]}",
+            reported_by=p.user_id,
+            cache_key=str((row.answer or {}).get("cache_key") or ""))
+        db.add(issue)
+        db.flush()
+        issue_id = issue.id
+    db.commit()
+    audit.record(db, org_id=p.org_id, application_id="database",
+                 action="database_ask_review",
+                 detail={"ask_id": ask_id, "verdict": verdict,
+                         "issue_id": issue_id}, actor=p.user_id)
+    return {"ok": True, "id": row.id, "verdict": verdict,
+            "issue_id": issue_id}
 
 
 def _log_ask(db, p, question: str, parsed: dict, out: dict) -> None:
@@ -1364,10 +1582,89 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
     """AI Q&A: a natural-language question is read into a route, then answered
     by the same Kimi-primary decision the form uses — identical answer,
     sources and honesty. An unclear question is reported, never guessed."""
-    from .visa_snapshot import kimi_primary
+    from .visa_snapshot import assistant, kimi_primary
+    # The two deterministic conversation rules run before anything else:
+    # Ellis answers for its name without a model, and questions with no
+    # immigration content are declined in one sentence.
+    ident = assistant.identity_reply(body.question)
+    if ident:
+        return {"understood": True, "identity": True, "reply": ident,
+                "guidance": None, "held": False}
+    refusal = assistant.off_topic_reply(body.question)
+    if refusal:
+        return {"understood": True, "off_topic": True, "reply": refusal,
+                "guidance": None, "held": False}
     if not kimi_primary.is_available():
         raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
                                          "reason": "the route engine is not configured"})
+    # "Japan or Korea, which is easier?" compares served routes side by
+    # side: one grounded reply, one chip per route, from answers the
+    # database already holds. An uncached side is called unverified rather
+    # than generated cold and slow.
+    _nat_hint = str((body.context or {}).get("nationality") or "").upper()
+    _comp = assistant.comparison_destinations(body.question, _nat_hint)
+    _comp_nat = _nat_hint
+    if _comp and not _comp_nat:
+        _comp_nat, _comp = assistant.split_nationality(body.question, _comp)
+    if _comp_nat and len(_comp) >= 2:
+        from sqlalchemy import select as _sel
+        from .visa_snapshot import special_policies as _sp
+        from .visa_snapshot import verified_overrides as _vo
+        from .visa_snapshot.models import KimiRouteGuidanceCache as _KC
+        sides = []
+        for dch in _comp[:3]:
+            rte = {"passport_nationality": _comp_nat,
+                   "passport_issuing_country": _comp_nat,
+                   "lawful_country_of_residence": _comp_nat,
+                   "travel_document_type": "ordinary_passport",
+                   "destination_country": dch, "travel_purpose": "tourism",
+                   "visa_category": kimi_primary.category_for_purpose("tourism")}
+            row = db.execute(_sel(_KC).where(
+                _KC.cache_key == kimi_primary.cache_key(rte))).scalars().first()
+            side = {"nationality": _comp_nat, "destination": dch}
+            if row is None:
+                side["unverified"] = ("Ellis has not answered this route "
+                                      "yet. Ask it on its own for a full "
+                                      "answer.")
+            else:
+                g2, _prov2 = _vo.apply(dict(row.guidance or {}), rte)
+                side["facts"] = {k: g2.get(k) for k in
+                                 ("disposition", "permitted_stay",
+                                  "government_fee", "processing_time",
+                                  "application_channel_detail", "source_url")
+                                 if g2.get(k) is not None}
+                side["policies"] = [n.get("title") for n in
+                                    _sp.for_route(rte)][:3]
+            sides.append(side)
+        reply = assistant.compose_reply(
+            body.question, body.history,
+            {"guidance": None, "route": {"nationality": _comp_nat},
+             "comparison": sides})
+        if not reply:
+            cjk2 = any("一" <= c <= "鿿" for c in body.question or "")
+            words = {"VISA_REQUIRED": ("visa required", "需要签证"),
+                     "VISA_EXEMPT": ("no visa needed", "免签"),
+                     "VISA_ON_ARRIVAL": ("visa on arrival", "落地签"),
+                     "ELECTRONIC_AUTHORIZATION_REQUIRED":
+                         ("travel authorisation required", "需电子旅行许可"),
+                     "CONDITIONAL": ("depends on your details", "视情况而定")}
+            bits = []
+            for sd in sides:
+                if sd.get("unverified"):
+                    bits.append(f"{sd['destination']}: " +
+                                ("尚未收录，请单独提问" if cjk2
+                                 else "not answered yet, ask it on its own"))
+                else:
+                    dsp = (sd.get("facts") or {}).get("disposition", "")
+                    w = words.get(dsp, (dsp.lower().replace("_", " "), dsp))
+                    bits.append(f"{sd['destination']}: {w[1] if cjk2 else w[0]}")
+            reply = ("各线路结论：" if cjk2 else "Route by route: ") + \
+                ". ".join(bits) + "."
+        return {"understood": True, "comparison": True, "reply": reply,
+                "routes": [{"nationality": _comp_nat,
+                            "destination": s2["destination"]}
+                           for s2 in sides],
+                "guidance": None, "held": False}
     try:
         parsed = kimi_primary.parse_question_with_context(body.question,
                                                            body.context)
@@ -1377,11 +1674,57 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
     except kimi_primary.GuidanceUnavailable as e:
         raise HTTPException(503, detail={"status": kimi_primary.STATUS_UNAVAILABLE,
                                          "reason": str(e)})
+    # A region name is a destination, never a passport: "hainan" answers as
+    # China with the regional policy note, and a bare region reply to a
+    # clarify keeps the conversation moving instead of minting a guessed
+    # route (a tester got a no-answer card for exactly this, 2026-09-01).
+    _rh = assistant.region_destination(body.question)
+    if _rh:
+        if parsed.get("understood") and parsed.get("nationality") \
+                and parsed["nationality"] != _rh:
+            parsed = dict(parsed, destination=_rh)
+        elif not parsed.get("understood"):
+            _nat0 = str(parsed.get("nationality")
+                        or (body.context or {}).get("nationality") or "").upper()
+            if _nat0 and _nat0 != _rh:
+                parsed = {"understood": True, "nationality": _nat0,
+                          "destination": _rh,
+                          "travel_purpose": parsed.get("travel_purpose")
+                              or "tourism",
+                          "travel_document_type":
+                              parsed.get("travel_document_type")
+                              or "ordinary_passport",
+                          "transit_countries": [],
+                          "focus": parsed.get("focus")}
+            else:
+                parsed = dict(parsed, understood=False, nationality="",
+                              destination=_rh)
+    # A route whose two ends are the same country is a failed read, not an
+    # answer. Ask for the missing fact instead.
+    if parsed.get("understood") and \
+            parsed.get("nationality") == parsed.get("destination"):
+        parsed = {"understood": False, "nationality": "",
+                  "destination": parsed.get("destination") or "",
+                  "travel_purpose": parsed.get("travel_purpose") or "",
+                  "travel_document_type":
+                      parsed.get("travel_document_type") or ""}
     if not parsed.get("understood"):
         # A refusal keeps the documented shape (clients read route/held) and
         # says exactly which fact is missing, in the asker's language.
         nat = parsed.get("nationality") or ""
         dest = parsed.get("destination") or ""
+        if not nat and not dest:
+            # A lone country with nothing else known answers the FIRST thing
+            # the clarify asks for: the passport. "China" then leads to
+            # "Which country are you travelling to?" instead of the same
+            # both-missing prompt again (a tester hit that loop, 2026-09-01).
+            _lone = []
+            for _pos2, _iso2, _dem2 in kimi_primary._country_mentions(
+                    body.question):
+                if _iso2 not in _lone:
+                    _lone.append(_iso2)
+            if len(_lone) == 1:
+                nat = _lone[0]
         cjk = any("一" <= c <= "鿿" for c in body.question or "")
         if not nat and dest:
             clarify = "请告诉我您持哪国护照（国籍）？" if cjk else \
@@ -1392,14 +1735,19 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
         else:
             clarify = "请说明您的国籍（护照签发国）和目的地。" if cjk else \
                 "Please name your passport country and your destination."
-        return {"understood": False, "clarify": clarify,
-                "route": {"nationality": nat, "destination": dest,
-                          "travel_purpose": parsed.get("travel_purpose") or "",
-                          "travel_document_type":
-                              parsed.get("travel_document_type") or "",
-                          "transit_countries": [], "arrival_date": None},
-                "guidance": None, "held": False,
-                "nationality": nat, "destination": dest}
+        from .visa_snapshot import special_policies
+        # Even an unclear route can name a policy Ellis knows: the note
+        # answers what it can while the clarify asks for the rest.
+        return special_policies.attach(
+            {"understood": False, "clarify": clarify,
+             "route": {"nationality": nat, "destination": dest,
+                       "travel_purpose": parsed.get("travel_purpose") or "",
+                       "travel_document_type":
+                           parsed.get("travel_document_type") or "",
+                       "transit_countries": [], "arrival_date": None},
+             "guidance": None, "held": False,
+             "nationality": nat, "destination": dest},
+            question=body.question)
     route = {
         "passport_nationality": parsed["nationality"],
         "passport_issuing_country": parsed["nationality"],
@@ -1440,6 +1788,15 @@ def travel_database_ask(body: DatabaseAskIn, db=Depends(get_session),
                  detail={"nationality": parsed["nationality"],
                          "destination": parsed["destination"]}, actor=p.user_id)
     _log_ask(db, p, body.question, parsed, out)
+    # A question that names a regional or transit policy (Hainan, visa-free
+    # transit) carries the verified policy note with the route answer.
+    from .visa_snapshot import special_policies
+    out = special_policies.attach(out, question=body.question, route=route)
+    # The composer phrases the answer from the served facts. Any failure
+    # leaves the page's own deterministic summary in charge.
+    reply = assistant.compose_reply(body.question, body.history, out)
+    if reply:
+        out["reply"] = reply
     return out
 
 
@@ -1588,7 +1945,10 @@ def travel_database_lookup(body: DatabaseLookupIn, db=Depends(get_session),
                  detail={"nationality": nat, "destination": dest,
                          "cached": out.get("cached"),
                          "status": out.get("status")}, actor=p.user_id)
-    return out
+    # Verified regional and transit policy notes ride along for routes they
+    # cover (a held route included: the note is independently verified).
+    from .visa_snapshot import special_policies
+    return special_policies.attach(out, route=route)
 
 
 class RenewalRequest(BaseModel):

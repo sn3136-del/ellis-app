@@ -85,3 +85,7 @@ Two more cron jobs run alongside the probe:
 The quarterly bidirectional sampling of section 4.3 is a joint exercise:
 Party A samples records against sources and sources against records; the
 Excel export (with its snapshot timestamp) is the sampling frame.
+
+## Reported maintenance, September 2026
+
+- 2026-09-01: three planned deploy restarts of the backend service (evaluation response release: defect fixes, special policy store, held-route releases). Total service interruption about 25 seconds across the three restarts, reported here per section 4.4 (planned maintenance reported to Party A is excluded from the availability measure).

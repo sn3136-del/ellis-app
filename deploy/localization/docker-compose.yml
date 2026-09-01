@@ -1,0 +1,30 @@
+# Ellis localized deployment for offline acceptance.
+# From the repository root:
+#   npx vite build --config vite.web.config.mjs
+#   docker compose -f deploy/localization/docker-compose.yml up --build
+# Then open http://localhost:8080
+services:
+  backend:
+    build:
+      context: ../..
+      dockerfile: deploy/localization/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ellis-data:/var/lib/ellis
+    environment:
+      # Optional. Without a key the app serves every already answered route
+      # and the full quality console from the database snapshot. With a key
+      # it can also answer routes nobody asked before.
+      - MOONSHOT_API_KEY=${MOONSHOT_API_KEY:-}
+  web:
+    image: caddy:2
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ../../src/renderer/dist:/srv/dist:ro
+    depends_on:
+      - backend
+volumes:
+  ellis-data:
